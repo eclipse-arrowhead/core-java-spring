@@ -42,7 +42,7 @@ public class PingRequirementsVerifierTest {
 	private OrchestratorDriver orchestratorDriver;
 	
 	@Mock
-	private Map<Long,QoSIntraPingMeasurementResponseDTO> pingMeasurementCache;
+	private Map<Long,QoSIntraPingMeasurementResponseDTO> intraPingMeasurementCache;
 	
 	//=================================================================================================
 	// methods
@@ -56,26 +56,26 @@ public class PingRequirementsVerifierTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testVerifyParameterNull() {
-		verifier.verify(null);
+		verifier.verify(null, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testVerifyParameterProviderNull() {
-		verifier.verify(new QoSVerificationParameters(null, null, new HashMap<>(),  new HashMap<>(),  new HashMap<>(), new ArrayList<>()));
+		verifier.verify(new QoSVerificationParameters(null, null, false, new HashMap<>(),  new HashMap<>(),  new HashMap<>(), new ArrayList<>()), false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testVerifyParameterQosRequirementsNull() { // answer true
-		final boolean verified = verifier.verify(new QoSVerificationParameters(new SystemResponseDTO(), null, new HashMap<>(),  null,  new HashMap<>(), new ArrayList<>()));
+		final boolean verified = verifier.verify(new QoSVerificationParameters(new SystemResponseDTO(), null, false, new HashMap<>(),  null,  new HashMap<>(), new ArrayList<>()), false);
 		Assert.assertTrue(verified);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testVerifyParameterQosRequirementsEmpty() { // answer true
-		final boolean verified = verifier.verify(new QoSVerificationParameters(new SystemResponseDTO(), null, new HashMap<>(),  new HashMap<>(),  new HashMap<>(), new ArrayList<>()));
+		final boolean verified = verifier.verify(new QoSVerificationParameters(new SystemResponseDTO(), null, false, new HashMap<>(),  new HashMap<>(),  new HashMap<>(), new ArrayList<>()), false);
 		Assert.assertTrue(verified);
 	}
 	
@@ -85,15 +85,15 @@ public class PingRequirementsVerifierTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = BadPayloadException.class)
 	public void testVerifyParameterInvalidSystemId() {
-		when(pingMeasurementCache.get(anyLong())).thenReturn(null);
-		when(orchestratorDriver.getPingMeasurement(anyLong())).thenThrow(new BadPayloadException("test"));
+		when(intraPingMeasurementCache.get(anyLong())).thenReturn(null);
+		when(orchestratorDriver.getIntraPingMeasurement(anyLong())).thenThrow(new BadPayloadException("test"));
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(-1);
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RESPONSE_TIME_THRESHOLD, "500");
 		
-		verifier.verify(new QoSVerificationParameters(provider, null, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()));
+		verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -103,15 +103,15 @@ public class PingRequirementsVerifierTest {
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
 		measurement.setLastMeasurementAt(ZonedDateTime.now().minusHours(2));
 		response.setMeasurement(measurement);
-		when(pingMeasurementCache.get(anyLong())).thenReturn(response);
-		when(orchestratorDriver.getPingMeasurement(anyLong())).thenThrow(new ArrowheadException("just for finish the method execution"));
+		when(intraPingMeasurementCache.get(anyLong())).thenReturn(response);
+		when(orchestratorDriver.getIntraPingMeasurement(anyLong())).thenThrow(new ArrowheadException("just for finish the method execution"));
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RESPONSE_TIME_THRESHOLD, "500");
 		
-		verifier.verify(new QoSVerificationParameters(provider, null, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()));
+		verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -120,15 +120,15 @@ public class PingRequirementsVerifierTest {
 		ReflectionTestUtils.setField(verifier, "verifyNotMeasuredSystem", true);
 		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		Assert.assertFalse(response.hasRecord());
-		when(pingMeasurementCache.get(anyLong())).thenReturn(null);
-		when(orchestratorDriver.getPingMeasurement(anyLong())).thenReturn(response);
+		when(intraPingMeasurementCache.get(anyLong())).thenReturn(null);
+		when(orchestratorDriver.getIntraPingMeasurement(anyLong())).thenReturn(response);
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RESPONSE_TIME_THRESHOLD, "500");
 		
-		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()));
+		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 		Assert.assertTrue(verified);
 	}
 	
@@ -138,15 +138,15 @@ public class PingRequirementsVerifierTest {
 		ReflectionTestUtils.setField(verifier, "verifyNotMeasuredSystem", false);
 		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		Assert.assertFalse(response.hasRecord());
-		when(pingMeasurementCache.get(anyLong())).thenReturn(null);
-		when(orchestratorDriver.getPingMeasurement(anyLong())).thenReturn(response);
+		when(intraPingMeasurementCache.get(anyLong())).thenReturn(null);
+		when(orchestratorDriver.getIntraPingMeasurement(anyLong())).thenReturn(response);
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RESPONSE_TIME_THRESHOLD, "500");
 		
-		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()));
+		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 		Assert.assertFalse(verified);
 	}
 	
@@ -157,15 +157,15 @@ public class PingRequirementsVerifierTest {
 		response.setId(12L);
 		response.setAvailable(false);
 		Assert.assertTrue(response.hasRecord());
-		when(pingMeasurementCache.get(anyLong())).thenReturn(null);
-		when(orchestratorDriver.getPingMeasurement(anyLong())).thenReturn(response);
+		when(intraPingMeasurementCache.get(anyLong())).thenReturn(null);
+		when(orchestratorDriver.getIntraPingMeasurement(anyLong())).thenReturn(response);
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RESPONSE_TIME_THRESHOLD, "500");
 		
-		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()));
+		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 		Assert.assertFalse(verified);
 	}
 
@@ -180,9 +180,9 @@ public class PingRequirementsVerifierTest {
 		response.setAvailable(true);
 		response.setMaxResponseTime(32);
 		Assert.assertTrue(response.hasRecord());
-		when(pingMeasurementCache.get(anyLong())).thenReturn(null);
-		when(pingMeasurementCache.put(anyLong(), any())).thenReturn(response);
-		when(orchestratorDriver.getPingMeasurement(anyLong())).thenReturn(response);
+		when(intraPingMeasurementCache.get(anyLong())).thenReturn(null);
+		when(intraPingMeasurementCache.put(anyLong(), any())).thenReturn(response);
+		when(orchestratorDriver.getIntraPingMeasurement(anyLong())).thenReturn(response);
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
@@ -190,9 +190,9 @@ public class PingRequirementsVerifierTest {
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RESPONSE_TIME_THRESHOLD, "invalid");
 		
 		try {
-			verifier.verify(new QoSVerificationParameters(provider, null, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()));
+			verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 		} catch (final InvalidParameterException ex) { // catch exception to test the caching
-			verify(pingMeasurementCache, times(1)).put(anyLong(), any());
+			verify(intraPingMeasurementCache, times(1)).put(anyLong(), any());
 			throw ex;
 		}
 	}
@@ -208,14 +208,14 @@ public class PingRequirementsVerifierTest {
 		response.setAvailable(true);
 		response.setMaxResponseTime(32);
 		Assert.assertTrue(response.hasRecord());
-		when(pingMeasurementCache.get(2L)).thenReturn(response);
+		when(intraPingMeasurementCache.get(2L)).thenReturn(response);
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RESPONSE_TIME_THRESHOLD, "0");
 		
-		verifier.verify(new QoSVerificationParameters(provider, null, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()));
+		verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -229,14 +229,14 @@ public class PingRequirementsVerifierTest {
 		response.setAvailable(true);
 		response.setMaxResponseTime(32);
 		Assert.assertTrue(response.hasRecord());
-		when(pingMeasurementCache.get(2L)).thenReturn(response);
+		when(intraPingMeasurementCache.get(2L)).thenReturn(response);
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RESPONSE_TIME_THRESHOLD, "30");
 		
-		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()));
+		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 		Assert.assertFalse(verified);
 	}
 	
@@ -251,14 +251,14 @@ public class PingRequirementsVerifierTest {
 		response.setAvailable(true);
 		response.setMaxResponseTime(32);
 		Assert.assertTrue(response.hasRecord());
-		when(pingMeasurementCache.get(2L)).thenReturn(response);
+		when(intraPingMeasurementCache.get(2L)).thenReturn(response);
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RESPONSE_TIME_THRESHOLD, "300");
 		
-		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()));
+		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 		Assert.assertTrue(verified);
 	}
 	
@@ -273,14 +273,14 @@ public class PingRequirementsVerifierTest {
 		response.setAvailable(true);
 		response.setMeanResponseTimeWithTimeout(32);
 		Assert.assertTrue(response.hasRecord());
-		when(pingMeasurementCache.get(2L)).thenReturn(response);
+		when(intraPingMeasurementCache.get(2L)).thenReturn(response);
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_AVERAGE_RESPONSE_TIME_THRESHOLD, "invalid");
 		
-		verifier.verify(new QoSVerificationParameters(provider, null, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()));
+		verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -294,14 +294,14 @@ public class PingRequirementsVerifierTest {
 		response.setAvailable(true);
 		response.setMeanResponseTimeWithTimeout(32);
 		Assert.assertTrue(response.hasRecord());
-		when(pingMeasurementCache.get(2L)).thenReturn(response);
+		when(intraPingMeasurementCache.get(2L)).thenReturn(response);
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_AVERAGE_RESPONSE_TIME_THRESHOLD, "0");
 		
-		verifier.verify(new QoSVerificationParameters(provider, null, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()));
+		verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -315,14 +315,14 @@ public class PingRequirementsVerifierTest {
 		response.setAvailable(true);
 		response.setMeanResponseTimeWithoutTimeout(32);
 		Assert.assertTrue(response.hasRecord());
-		when(pingMeasurementCache.get(2L)).thenReturn(response);
+		when(intraPingMeasurementCache.get(2L)).thenReturn(response);
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_AVERAGE_RESPONSE_TIME_THRESHOLD, "30");
 		
-		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()));
+		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 		Assert.assertFalse(verified);
 	}
 	
@@ -337,14 +337,14 @@ public class PingRequirementsVerifierTest {
 		response.setAvailable(true);
 		response.setMeanResponseTimeWithoutTimeout(32);
 		Assert.assertTrue(response.hasRecord());
-		when(pingMeasurementCache.get(2L)).thenReturn(response);
+		when(intraPingMeasurementCache.get(2L)).thenReturn(response);
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_AVERAGE_RESPONSE_TIME_THRESHOLD, "300");
 		
-		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()));
+		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 		Assert.assertTrue(verified);
 	}
 	
@@ -359,14 +359,14 @@ public class PingRequirementsVerifierTest {
 		response.setAvailable(true);
 		response.setJitterWithoutTimeout(32);
 		Assert.assertTrue(response.hasRecord());
-		when(pingMeasurementCache.get(2L)).thenReturn(response);
+		when(intraPingMeasurementCache.get(2L)).thenReturn(response);
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_JITTER_THRESHOLD, "invalid");
 		
-		verifier.verify(new QoSVerificationParameters(provider, null, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()));
+		verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -380,14 +380,14 @@ public class PingRequirementsVerifierTest {
 		response.setAvailable(true);
 		response.setJitterWithoutTimeout(32);
 		Assert.assertTrue(response.hasRecord());
-		when(pingMeasurementCache.get(2L)).thenReturn(response);
+		when(intraPingMeasurementCache.get(2L)).thenReturn(response);
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_JITTER_THRESHOLD, "-2");
 		
-		verifier.verify(new QoSVerificationParameters(provider, null, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()));
+		verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -401,14 +401,14 @@ public class PingRequirementsVerifierTest {
 		response.setAvailable(true);
 		response.setJitterWithoutTimeout(32);
 		Assert.assertTrue(response.hasRecord());
-		when(pingMeasurementCache.get(2L)).thenReturn(response);
+		when(intraPingMeasurementCache.get(2L)).thenReturn(response);
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_JITTER_THRESHOLD, "30");
 		
-		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()));
+		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 		Assert.assertFalse(verified);
 	}
 	
@@ -423,14 +423,14 @@ public class PingRequirementsVerifierTest {
 		response.setAvailable(true);
 		response.setJitterWithoutTimeout(32);
 		Assert.assertTrue(response.hasRecord());
-		when(pingMeasurementCache.get(2L)).thenReturn(response);
+		when(intraPingMeasurementCache.get(2L)).thenReturn(response);
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_JITTER_THRESHOLD, "300");
 		
-		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()));
+		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 		Assert.assertTrue(verified);
 	}
 	
@@ -446,14 +446,14 @@ public class PingRequirementsVerifierTest {
 		response.setReceived(20);
 		response.setSent(100);
 		Assert.assertTrue(response.hasRecord());
-		when(pingMeasurementCache.get(2L)).thenReturn(response);
+		when(intraPingMeasurementCache.get(2L)).thenReturn(response);
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RECENT_PACKET_LOSS, "invalid");
 		
-		verifier.verify(new QoSVerificationParameters(provider, null, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()));
+		verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -468,14 +468,14 @@ public class PingRequirementsVerifierTest {
 		response.setReceived(20);
 		response.setSent(100);
 		Assert.assertTrue(response.hasRecord());
-		when(pingMeasurementCache.get(2L)).thenReturn(response);
+		when(intraPingMeasurementCache.get(2L)).thenReturn(response);
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RECENT_PACKET_LOSS, "-2");
 		
-		verifier.verify(new QoSVerificationParameters(provider, null, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()));
+		verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -490,14 +490,14 @@ public class PingRequirementsVerifierTest {
 		response.setReceived(20);
 		response.setSent(100);
 		Assert.assertTrue(response.hasRecord());
-		when(pingMeasurementCache.get(2L)).thenReturn(response);
+		when(intraPingMeasurementCache.get(2L)).thenReturn(response);
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RECENT_PACKET_LOSS, "10");
 		
-		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()));
+		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 		Assert.assertFalse(verified);
 	}
 	
@@ -513,14 +513,14 @@ public class PingRequirementsVerifierTest {
 		response.setReceived(20);
 		response.setSent(100);
 		Assert.assertTrue(response.hasRecord());
-		when(pingMeasurementCache.get(2L)).thenReturn(response);
+		when(intraPingMeasurementCache.get(2L)).thenReturn(response);
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RECENT_PACKET_LOSS, "85");
 		
-		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()));
+		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 		Assert.assertTrue(verified);
 	}
 	
@@ -536,14 +536,14 @@ public class PingRequirementsVerifierTest {
 		response.setReceivedAll(20);
 		response.setSentAll(100);
 		Assert.assertTrue(response.hasRecord());
-		when(pingMeasurementCache.get(2L)).thenReturn(response);
+		when(intraPingMeasurementCache.get(2L)).thenReturn(response);
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_PACKET_LOSS, "invalid");
 		
-		verifier.verify(new QoSVerificationParameters(provider, null, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()));
+		verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -558,14 +558,14 @@ public class PingRequirementsVerifierTest {
 		response.setReceivedAll(20);
 		response.setSentAll(100);
 		Assert.assertTrue(response.hasRecord());
-		when(pingMeasurementCache.get(2L)).thenReturn(response);
+		when(intraPingMeasurementCache.get(2L)).thenReturn(response);
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_PACKET_LOSS, "-2");
 		
-		verifier.verify(new QoSVerificationParameters(provider, null, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()));
+		verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -580,14 +580,14 @@ public class PingRequirementsVerifierTest {
 		response.setReceivedAll(20);
 		response.setSentAll(100);
 		Assert.assertTrue(response.hasRecord());
-		when(pingMeasurementCache.get(2L)).thenReturn(response);
+		when(intraPingMeasurementCache.get(2L)).thenReturn(response);
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_PACKET_LOSS, "10");
 		
-		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()));
+		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 		Assert.assertFalse(verified);
 	}
 	
@@ -603,14 +603,14 @@ public class PingRequirementsVerifierTest {
 		response.setReceivedAll(20);
 		response.setSentAll(100);
 		Assert.assertTrue(response.hasRecord());
-		when(pingMeasurementCache.get(2L)).thenReturn(response);
+		when(intraPingMeasurementCache.get(2L)).thenReturn(response);
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_PACKET_LOSS, "85");
 		
-		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()));
+		final boolean verified = verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 		Assert.assertTrue(verified);
 	}
 }

@@ -14,8 +14,10 @@ import org.springframework.util.Assert;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.QoSReservation;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSMeasurementAttributesFormDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.qos.database.service.QoSReservationDBService;
@@ -36,7 +38,7 @@ public class QoSManagerImpl implements QoSManager {
 	@Autowired
 	private ApplicationContext appContext;
 	
-	private List<QoSVerifier> verifiers = new ArrayList<>(2);
+	private final List<QoSVerifier> verifiers = new ArrayList<>(2);
 
 	//=================================================================================================
 	// methods
@@ -146,10 +148,10 @@ public class QoSManagerImpl implements QoSManager {
 		final List<OrchestrationResultDTO> result = new ArrayList<>();
 		for (final OrchestrationResultDTO dto : orList) {
 			boolean verified = true;
-			final QoSVerificationParameters verificationParameters = new QoSVerificationParameters(dto.getProvider(), null, dto.getMetadata(), request.getQosRequirements(),
+			final QoSVerificationParameters verificationParameters = new QoSVerificationParameters(dto.getProvider(), null, false, dto.getMetadata(), request.getQosRequirements(),
 																								   request.getCommands(), dto.getWarnings());
 			for (final QoSVerifier verifier : verifiers) {
-				verified = verifier.verify(verificationParameters);
+				verified = verifier.verify(verificationParameters, false);
 				dto.setWarnings(verificationParameters.getWarnings());
 				dto.setMetadata(verificationParameters.getMetadata());
 				if (!verified) {
@@ -171,13 +173,47 @@ public class QoSManagerImpl implements QoSManager {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Override
-	public List<GSDPollResponseDTO> verifyInterCloudServices(final List<GSDPollResponseDTO> gsdList, final OrchestrationFormRequestDTO request) {
+	public List<GSDPollResponseDTO> preVerifyInterCloudServices(final List<GSDPollResponseDTO> gsdList, final OrchestrationFormRequestDTO request) {
 		logger.debug("verifyInterCloudServices started ...");
 		
 		Assert.notNull(gsdList, "'orList' is null.");
 		Assert.notNull(request, "'request' is null.");
 		
-		// TODO bordi
+		final List<GSDPollResponseDTO> results = new ArrayList<>();
+		for (final GSDPollResponseDTO cloudResponse : gsdList) {
+			final GSDPollResponseDTO verifiedGSDResponse = new GSDPollResponseDTO(cloudResponse.getProviderCloud(), cloudResponse.getRequiredServiceDefinition(), new ArrayList<>(), 0,
+														   new ArrayList<>(), cloudResponse.getServiceMetadata(), cloudResponse.isGatewayIsMandatory());
+			
+			for (final QoSMeasurementAttributesFormDTO measurement : cloudResponse.getQosMeasurements()) {
+				final QoSVerificationParameters verificationParameters = new QoSVerificationParameters(measurement.getServiceRegistryEntry().getProvider(), cloudResponse.getProviderCloud(),
+																									   cloudResponse.isGatewayIsMandatory(), measurement.getServiceRegistryEntry().getMetadata(),
+																									   request.getQosRequirements(), request.getCommands(), new ArrayList<>());
+				boolean verified = true;
+				for (final QoSVerifier verifier : verifiers) {
+					verified = verifier.verify(verificationParameters, true);
+				}
+				if (verified) {
+					verifiedGSDResponse.setNumOfProviders(verifiedGSDResponse.getNumOfProviders() + 1);
+					verifiedGSDResponse.getQosMeasurements().add(measurement);
+					for (final ServiceInterfaceResponseDTO interf : measurement.getServiceRegistryEntry().getInterfaces()) {
+						if (!verifiedGSDResponse.getAvailableInterfaces().contains(interf.getInterfaceName())) {
+							verifiedGSDResponse.getAvailableInterfaces().add(interf.getInterfaceName());
+						}
+					}
+				}
+				if (verifiedGSDResponse.getNumOfProviders() > 0) {
+					results.add(verifiedGSDResponse);
+				}
+				
+			}
+		}
+		return results;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public List<OrchestrationResultDTO> verifyInterCloudServices(final List<OrchestrationResultDTO> orList, final OrchestrationFormRequestDTO request) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 	

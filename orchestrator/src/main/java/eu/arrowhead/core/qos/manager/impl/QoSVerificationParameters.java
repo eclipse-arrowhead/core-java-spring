@@ -16,6 +16,7 @@ public class QoSVerificationParameters {
 	
 	private final SystemResponseDTO providerSystem;
 	private final CloudResponseDTO providerCloud;
+	private final boolean gatewayIsMandatory;
 	private final Map<String,String> metadata;
 	private final Map<String,String> qosRequirements;
 	private final Map<String,String> commands;
@@ -25,12 +26,13 @@ public class QoSVerificationParameters {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public QoSVerificationParameters(final SystemResponseDTO providerSystem, final CloudResponseDTO providerCloud, final Map<String, String> metadata, final Map<String, String> qosRequirements,
-									 final Map<String, String> commands, final List<OrchestratorWarnings> warnings) {
+	public QoSVerificationParameters(final SystemResponseDTO providerSystem, final CloudResponseDTO providerCloud, final boolean gatewayIsMandatory, final Map<String, String> metadata,
+									 final Map<String, String> qosRequirements, final Map<String, String> commands, final List<OrchestratorWarnings> warnings) {
 		Assert.notNull(providerSystem, "providerSystem is null");
 		
 		this.providerSystem = providerSystem;
 		this.providerCloud = providerCloud;
+		this.gatewayIsMandatory = gatewayIsMandatory;
 		this.metadata = metadata;
 		this.qosRequirements = qosRequirements;
 		this.commands = commands;
@@ -40,6 +42,7 @@ public class QoSVerificationParameters {
 	//-------------------------------------------------------------------------------------------------
 	public SystemResponseDTO getProviderSystem() { return providerSystem; }
 	public CloudResponseDTO getProviderCloud() { return providerCloud; }
+	public boolean isGatewayIsMandatory() { return gatewayIsMandatory; }
 	public Map<String, String> getMetadata() { return metadata; }
 	public Map<String, String> getQosRequirements() { return qosRequirements; }
 	public Map<String, String> getCommands() { return commands; }

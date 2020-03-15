@@ -16,7 +16,8 @@ public interface QoSManager {
 	//-------------------------------------------------------------------------------------------------
 	// verification-related
 	public List<OrchestrationResultDTO> verifyIntraCloudServices(final List<OrchestrationResultDTO> orList, final OrchestrationFormRequestDTO request);
-	public List<GSDPollResponseDTO> verifyInterCloudServices(final List<GSDPollResponseDTO> gsdList, final OrchestrationFormRequestDTO request);
+	public List<GSDPollResponseDTO> preVerifyInterCloudServices(final List<GSDPollResponseDTO> gsdList, final OrchestrationFormRequestDTO request);
+	public List<OrchestrationResultDTO> verifyInterCloudServices(final List<OrchestrationResultDTO> orList, final OrchestrationFormRequestDTO request);
 	
 	//-------------------------------------------------------------------------------------------------
 	// reservation-related

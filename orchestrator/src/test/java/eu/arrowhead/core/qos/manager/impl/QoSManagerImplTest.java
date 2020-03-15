@@ -1,6 +1,7 @@
 package eu.arrowhead.core.qos.manager.impl;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -341,37 +342,37 @@ public class QoSManagerImplTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testVerifyIntraCloudServicesTrue() {
-		when(verifier.verify(any(QoSVerificationParameters.class))).thenReturn(true);
+		when(verifier.verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE))).thenReturn(true);
 
 		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
 		request.setCommands(Map.of());
 		final List<OrchestrationResultDTO> verifiedList = qosManager.verifyIntraCloudServices(getOrList(1), request);
-		verify(verifier, times(1)).verify(any(QoSVerificationParameters.class));
+		verify(verifier, times(1)).verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE));
 		Assert.assertEquals(1, verifiedList.size());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testVerifyIntraCloudServicesFalseNoExclusivity() {
-		when(verifier.verify(any(QoSVerificationParameters.class))).thenReturn(false);
+		when(verifier.verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE))).thenReturn(false);
 
 		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
 		request.setCommands(Map.of());
 		final List<OrchestrationResultDTO> verifiedList = qosManager.verifyIntraCloudServices(getOrList(1), request);
-		verify(verifier, times(1)).verify(any(QoSVerificationParameters.class));
+		verify(verifier, times(1)).verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE));
 		Assert.assertEquals(0, verifiedList.size());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testVerifyIntraCloudServicesFalseWithExclusivity() {
-		when(verifier.verify(any(QoSVerificationParameters.class))).thenReturn(false);
+		when(verifier.verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE))).thenReturn(false);
 		doNothing().when(qosReservationDBService).removeTemporaryLock(any(OrchestrationResultDTO.class));
 
 		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
 		request.setCommands(Map.of(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY, "100"));
 		final List<OrchestrationResultDTO> verifiedList = qosManager.verifyIntraCloudServices(getOrList(1), request);
-		verify(verifier, times(1)).verify(any(QoSVerificationParameters.class));
+		verify(verifier, times(1)).verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE));
 		verify(qosReservationDBService).removeTemporaryLock(any(OrchestrationResultDTO.class));
 		Assert.assertEquals(0, verifiedList.size());
 	}
@@ -382,12 +383,12 @@ public class QoSManagerImplTest {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		final List<QoSVerifier> verifiers	= (List) ReflectionTestUtils.getField(qosManager, "verifiers");
 		verifiers.clear();
-		when(verifier.verify(any(QoSVerificationParameters.class))).thenReturn(false);
+		when(verifier.verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE))).thenReturn(false);
 
 		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
 		request.setCommands(Map.of());
 		final List<OrchestrationResultDTO> verifiedList = qosManager.verifyIntraCloudServices(getOrList(1), request);
-		verify(verifier, never()).verify(any(QoSVerificationParameters.class));
+		verify(verifier, never()).verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE));
 		Assert.assertEquals(1, verifiedList.size());
 	}
 	
@@ -399,14 +400,14 @@ public class QoSManagerImplTest {
 		verifiers.clear();
 		verifiers.add(verifier);
 		verifiers.add(verifier2);
-		when(verifier.verify(any(QoSVerificationParameters.class))).thenReturn(false);
-		when(verifier2.verify(any(QoSVerificationParameters.class))).thenReturn(true);
+		when(verifier.verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE))).thenReturn(false);
+		when(verifier2.verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE))).thenReturn(true);
 
 		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
 		request.setCommands(Map.of());
 		final List<OrchestrationResultDTO> verifiedList = qosManager.verifyIntraCloudServices(getOrList(1), request);
-		verify(verifier, times(1)).verify(any(QoSVerificationParameters.class));
-		verify(verifier2, never()).verify(any(QoSVerificationParameters.class));
+		verify(verifier, times(1)).verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE));
+		verify(verifier2, never()).verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE));
 		Assert.assertEquals(0, verifiedList.size());
 	}
 

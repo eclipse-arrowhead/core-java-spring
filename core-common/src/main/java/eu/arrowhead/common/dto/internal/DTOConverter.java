@@ -777,7 +777,8 @@ public class DTOConverter {
 	public static QoSInterDirectMeasurementResponseDTO convertQoSInterDirectMeasurementToQoSInterDirectMeasurementResponseDTO(final QoSInterDirectMeasurement measurement) {
 		Assert.notNull(measurement, "measurement is null");
 
-		return new QoSInterDirectMeasurementResponseDTO(convertCloudToCloudResponseDTO(measurement.getCloud()),
+		return new QoSInterDirectMeasurementResponseDTO(measurement.getId(),
+														convertCloudToCloudResponseDTO(measurement.getCloud()),
 														measurement.getAddress(),
 														measurement.getMeasurementType(),
 														measurement.getLastMeasurementAt(),
@@ -865,7 +866,7 @@ public class DTOConverter {
 		Assert.notNull(entries, "QoSReservation list is null");
 		
 		final List<QoSReservationResponseDTO> data = new ArrayList<>();
-		for (QoSReservation entry : entries) {
+		for (final QoSReservation entry : entries) {
 			data.add(convertQoSReservationToQoSReservationResponseDTO(entry));
 		}
 		

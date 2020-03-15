@@ -8,5 +8,5 @@ public interface QoSVerifier {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public boolean verify(final QoSVerificationParameters parameters);
+	public boolean verify(final QoSVerificationParameters parameters, final boolean isPreVerification);
 }

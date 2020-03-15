@@ -26,12 +26,14 @@ import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudCheckResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudSystemFormDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.internal.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.internal.ICNResultDTO;
 import eu.arrowhead.common.dto.internal.IdIdListDTO;
+import eu.arrowhead.common.dto.internal.QoSInterDirectPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.TokenDataDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationProviderDTO;
@@ -59,7 +61,8 @@ public class OrchestratorDriver {
 	private static final String AUTH_INTRA_CHECK_URI_KEY = CoreSystemService.AUTH_CONTROL_INTRA_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEKEEPER_INIT_GSD_URI_KEY = CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEKEEPER_INIT_ICN_URI_KEY = CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATION.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
-	private static final String QOS_MONITOR_PING_MEASUREMENT_URI_KEY = CoreSystemService.QOS_MONITOR_INTRA_PING_MEASUREMENT_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String QOS_MONITOR_INTRA_PING_MEASUREMENT_URI_KEY = CoreSystemService.QOS_MONITOR_INTRA_PING_MEASUREMENT_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_URI_KEY = CoreSystemService.QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	
 	public static final String KEY_CALCULATED_SERVICE_TIME_FRAME = "QoSCalculatedServiceTimeFrame";
 	
@@ -194,7 +197,7 @@ public class OrchestratorDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public QoSIntraPingMeasurementResponseDTO getPingMeasurement(final long systemId) {
+	public QoSIntraPingMeasurementResponseDTO getIntraPingMeasurement(final long systemId) {
 		logger.debug("getPingMeasurement started...");
 		
 		final UriComponents pingUri = getQosMonitorPingMeasurementUri(systemId);
@@ -203,6 +206,17 @@ public class OrchestratorDriver {
 		return response.getBody();
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public QoSInterDirectPingMeasurementResponseDTO getInterDirectPingMeasurement(final CloudSystemFormDTO request) {
+		logger.debug("getInterDirectPingMeasurement started...");
+		Assert.notNull(request, "CloudSystemFormDTO is null.");
+		
+		final UriComponents uri = getQosMonitorInterDirectPingMeasurementUri();
+		final ResponseEntity<QoSInterDirectPingMeasurementResponseDTO> response = httpService.sendRequest(uri, HttpMethod.POST, QoSInterDirectPingMeasurementResponseDTO.class, request);
+		
+		return response.getBody();
+	}
+ 	
 	//=================================================================================================
 	// assistant methods
 	
@@ -315,16 +329,31 @@ public class OrchestratorDriver {
 	private UriComponents getQosMonitorPingMeasurementUri(final long id) {
 		logger.debug("getQosMonitorPingMeasurementUri started...");
 		
-		if (arrowheadContext.containsKey(QOS_MONITOR_PING_MEASUREMENT_URI_KEY)) {
+		if (arrowheadContext.containsKey(QOS_MONITOR_INTRA_PING_MEASUREMENT_URI_KEY)) {
 			try {
-				final UriComponents uri = (UriComponents) arrowheadContext.get(QOS_MONITOR_PING_MEASUREMENT_URI_KEY);
+				final UriComponents uri = (UriComponents) arrowheadContext.get(QOS_MONITOR_INTRA_PING_MEASUREMENT_URI_KEY);
 				return uri.expand(id);
 			} catch (final ClassCastException ex) {
 				throw new ArrowheadException("Orchestrator can't find QoS Monitor ping/measurement URI.");
 			}
 		}
 		
-		throw new ArrowheadException("Orchestrator can't find gatekeeper init_icn URI.");
+		throw new ArrowheadException("Orchestrator can't find QoS Monitor ping/measurement URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getQosMonitorInterDirectPingMeasurementUri() {
+		logger.debug("getQosMonitorInterDirectPingMeasurementUri started...");
+		
+		if (arrowheadContext.containsKey(QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_URI_KEY)) {
+			try {
+				return (UriComponents) arrowheadContext.get(QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_URI_KEY);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Orchestrator can't find QoS Monitor inter direct ping URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Orchestrator can't find QoS Monitor inter direct ping URI.");
 	}
 	
 	//-------------------------------------------------------------------------------------------------

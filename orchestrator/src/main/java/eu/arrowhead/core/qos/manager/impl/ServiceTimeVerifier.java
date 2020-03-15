@@ -27,7 +27,7 @@ public class ServiceTimeVerifier implements QoSVerifier {
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
-	public boolean verify(final QoSVerificationParameters parameters) {
+	public boolean verify(final QoSVerificationParameters parameters, final boolean isPreVerification) {
 		logger.debug("verify started...");
 		Assert.notNull(parameters, "'parameters' is null.");
 		Assert.notNull(parameters.getMetadata(), "'parameters.getMetadata()' is null.");
@@ -55,7 +55,7 @@ public class ServiceTimeVerifier implements QoSVerifier {
 			calculatedTime = exclusivityTime;
 		}
 		
-		if (calculatedTime > 0) {
+		if (calculatedTime > 0 && !isPreVerification) {
 			calculatedTime += extraSeconds; // give some extra seconds because of orchestration overhead
 			parameters.getMetadata().put(OrchestratorDriver.KEY_CALCULATED_SERVICE_TIME_FRAME, String.valueOf(calculatedTime));
 			

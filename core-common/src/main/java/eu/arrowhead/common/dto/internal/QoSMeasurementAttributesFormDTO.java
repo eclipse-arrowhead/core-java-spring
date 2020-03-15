@@ -5,8 +5,7 @@ import java.time.ZonedDateTime;
 
 import org.springframework.util.Assert;
 
-import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.shared.SystemResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 
 public class QoSMeasurementAttributesFormDTO implements Serializable {
 
@@ -15,7 +14,7 @@ public class QoSMeasurementAttributesFormDTO implements Serializable {
 	
 	private static final long serialVersionUID = -7212471265314450784L;
 	
-	private SystemResponseDTO system;
+	private ServiceRegistryResponseDTO serviceRegistryEntry;
 	private ZonedDateTime lastAccessAt;
 	private Integer minResponseTime;
 	private Integer maxResponseTime;
@@ -32,14 +31,12 @@ public class QoSMeasurementAttributesFormDTO implements Serializable {
 	public QoSMeasurementAttributesFormDTO() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public QoSMeasurementAttributesFormDTO(final SystemResponseDTO system, final ZonedDateTime lastAccessAt, final Integer minResponseTime, final Integer maxResponseTime,
+	public QoSMeasurementAttributesFormDTO(final ServiceRegistryResponseDTO serviceRegistryEntry, final ZonedDateTime lastAccessAt, final Integer minResponseTime, final Integer maxResponseTime,
 										   final Integer meanResponseTimeWithTimeout, final Integer meanResponseTimeWithoutTimeout, final Integer jitterWithTimeout,
 										   final Integer jitterWithoutTimeout, final Integer lostPerMeasurementPercent) {
-		Assert.notNull(system, "System is null");
-		Assert.isTrue(Utilities.isEmpty(system.getSystemName()), "System name is null or empty");
-		Assert.isTrue(Utilities.isEmpty(system.getAddress()), "System address is null or empty");
+		Assert.notNull(serviceRegistryEntry, "ServiceRegistryEntry is null");
 		
-		this.system = system;
+		this.serviceRegistryEntry = serviceRegistryEntry;
 		this.lastAccessAt = lastAccessAt;
 		this.minResponseTime = minResponseTime;
 		this.maxResponseTime = maxResponseTime;
@@ -51,7 +48,7 @@ public class QoSMeasurementAttributesFormDTO implements Serializable {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public SystemResponseDTO getSystem() { return system; }
+	public ServiceRegistryResponseDTO getServiceRegistryEntry() { return serviceRegistryEntry; }
 	public ZonedDateTime getLastAccessAt() { return lastAccessAt; }
 	public Integer getMinResponseTime() { return minResponseTime; }
 	public Integer getMaxResponseTime() { return maxResponseTime; }
@@ -62,7 +59,7 @@ public class QoSMeasurementAttributesFormDTO implements Serializable {
 	public Integer getLostPerMeasurementPercent() { return lostPerMeasurementPercent; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setSystem(final SystemResponseDTO system) { this.system = system; }
+	public void setServiceRegistryEntry(final ServiceRegistryResponseDTO serviceRegistryEntry) { this.serviceRegistryEntry = serviceRegistryEntry; }
 	public void setLastAccessAt(final ZonedDateTime lastAccessAt) { this.lastAccessAt = lastAccessAt; }
 	public void setMinResponseTime(final Integer minResponseTime) { this.minResponseTime = minResponseTime; }
 	public void setMaxResponseTime(final Integer maxResponseTime) { this.maxResponseTime = maxResponseTime; }

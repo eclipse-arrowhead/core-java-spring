@@ -160,32 +160,31 @@ public class OrchestratorService {
 		}
 
 		if (flags.getOrDefault(Flag.ENABLE_QOS, false)) {
-			
-			flags.put(Flag.ONLY_PREFERRED, true);
-			final List<GSDPollResponseDTO> verifiedResults = qosManager.verifyInterCloudServices(gsdResult.getResults(), request);
+			// Pre-verification in order to choose an appropriate cloud
+			final List<GSDPollResponseDTO> verifiedResults = qosManager.preVerifyInterCloudServices(gsdResult.getResults(), request);
 			final List<PreferredProviderDataDTO> verifiedProviders = new ArrayList<>();
 			for (final GSDPollResponseDTO result : verifiedResults) {
 				for (final QoSMeasurementAttributesFormDTO measurement : result.getQosMeasurements()) {
 					final PreferredProviderDataDTO preferredProviderData = new PreferredProviderDataDTO();
-					preferredProviderData.setProviderSystem(DTOConverter.convertSystemResponseDTOToSystemRequestDTO(measurement.getSystem()));
+					preferredProviderData.setProviderSystem(DTOConverter.convertSystemResponseDTOToSystemRequestDTO(measurement.getServiceRegistryEntry().getProvider()));
 					preferredProviderData.setProviderCloud(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(result.getProviderCloud()));
 					verifiedProviders.add(preferredProviderData);
 				}
 			}
 			gsdResult.setResults(verifiedResults);
 			request.setPreferredProviders(verifiedProviders);
+			flags.put(Flag.ONLY_PREFERRED, true);
 			request.setOrchestrationFlags(flags);
 		} 
+		
 		final CloudMatchmakingParameters iCCMparams = new CloudMatchmakingParameters(gsdResult, getPreferredClouds(request.getPreferredProviders()), flags.get(Flag.ONLY_PREFERRED));
-		
 		final CloudResponseDTO targetCloud = cloudMatchmaker.doMatchmaking(iCCMparams);
-		
         if (targetCloud == null || Utilities.isEmpty(targetCloud.getName())) {
         	// Return empty response
             return new OrchestrationResponseDTO();
  		}	
         
-        return callInterCloudNegotiation(request, targetCloud, flags);
+        return callInterCloudNegotiation(request, targetCloud, flags); // TODO bordi: Providers should be verified again on the other cloud due to metadata and warnings manipulations
 	}
 
 	//-------------------------------------------------------------------------------------------------	

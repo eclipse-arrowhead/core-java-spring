@@ -47,7 +47,13 @@ public class DummyQoSManager implements QoSManager {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Override
-	public List<GSDPollResponseDTO> verifyInterCloudServices(final List<GSDPollResponseDTO> gsdList, final OrchestrationFormRequestDTO request) {
+	public List<GSDPollResponseDTO> preVerifyInterCloudServices(final List<GSDPollResponseDTO> gsdList, final OrchestrationFormRequestDTO request) {
 		return gsdList;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public List<OrchestrationResultDTO> verifyInterCloudServices(final List<OrchestrationResultDTO> orList, final OrchestrationFormRequestDTO request) {
+		return orList;
 	}
 }
