@@ -15,6 +15,7 @@ public class QoSMeasurementAttributesFormDTO implements Serializable {
 	private static final long serialVersionUID = -7212471265314450784L;
 	
 	private ServiceRegistryResponseDTO serviceRegistryEntry;
+	private boolean isProviderAvailable = false;
 	private ZonedDateTime lastAccessAt;
 	private Integer minResponseTime;
 	private Integer maxResponseTime;
@@ -31,12 +32,13 @@ public class QoSMeasurementAttributesFormDTO implements Serializable {
 	public QoSMeasurementAttributesFormDTO() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public QoSMeasurementAttributesFormDTO(final ServiceRegistryResponseDTO serviceRegistryEntry, final ZonedDateTime lastAccessAt, final Integer minResponseTime, final Integer maxResponseTime,
-										   final Integer meanResponseTimeWithTimeout, final Integer meanResponseTimeWithoutTimeout, final Integer jitterWithTimeout,
+	public QoSMeasurementAttributesFormDTO(final ServiceRegistryResponseDTO serviceRegistryEntry,  boolean isProviderAvailable, final ZonedDateTime lastAccessAt, final Integer minResponseTime,
+										   final Integer maxResponseTime, final Integer meanResponseTimeWithTimeout, final Integer meanResponseTimeWithoutTimeout, final Integer jitterWithTimeout,
 										   final Integer jitterWithoutTimeout, final Integer lostPerMeasurementPercent) {
 		Assert.notNull(serviceRegistryEntry, "ServiceRegistryEntry is null");
 		
 		this.serviceRegistryEntry = serviceRegistryEntry;
+		this.isProviderAvailable = isProviderAvailable;
 		this.lastAccessAt = lastAccessAt;
 		this.minResponseTime = minResponseTime;
 		this.maxResponseTime = maxResponseTime;
@@ -48,7 +50,8 @@ public class QoSMeasurementAttributesFormDTO implements Serializable {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public ServiceRegistryResponseDTO getServiceRegistryEntry() { return serviceRegistryEntry; }
+	public ServiceRegistryResponseDTO getServiceRegistryEntry() { return serviceRegistryEntry; } 	
+	public boolean isProviderAvailable() { return isProviderAvailable; }
 	public ZonedDateTime getLastAccessAt() { return lastAccessAt; }
 	public Integer getMinResponseTime() { return minResponseTime; }
 	public Integer getMaxResponseTime() { return maxResponseTime; }
@@ -59,7 +62,8 @@ public class QoSMeasurementAttributesFormDTO implements Serializable {
 	public Integer getLostPerMeasurementPercent() { return lostPerMeasurementPercent; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setServiceRegistryEntry(final ServiceRegistryResponseDTO serviceRegistryEntry) { this.serviceRegistryEntry = serviceRegistryEntry; }
+	public void setServiceRegistryEntry(final ServiceRegistryResponseDTO serviceRegistryEntry) { this.serviceRegistryEntry = serviceRegistryEntry; }	
+	public void setProviderAvailable(boolean isProviderAvailable) { this.isProviderAvailable = isProviderAvailable; }
 	public void setLastAccessAt(final ZonedDateTime lastAccessAt) { this.lastAccessAt = lastAccessAt; }
 	public void setMinResponseTime(final Integer minResponseTime) { this.minResponseTime = minResponseTime; }
 	public void setMaxResponseTime(final Integer maxResponseTime) { this.maxResponseTime = maxResponseTime; }

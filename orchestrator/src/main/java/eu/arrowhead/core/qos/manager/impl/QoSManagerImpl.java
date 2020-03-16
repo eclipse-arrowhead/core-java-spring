@@ -14,6 +14,7 @@ import org.springframework.util.Assert;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.QoSReservation;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSMeasurementAttributesFormDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
@@ -185,26 +186,28 @@ public class QoSManagerImpl implements QoSManager {
 														   new ArrayList<>(), cloudResponse.getServiceMetadata(), cloudResponse.isGatewayIsMandatory());
 			
 			for (final QoSMeasurementAttributesFormDTO measurement : cloudResponse.getQosMeasurements()) {
-				final QoSVerificationParameters verificationParameters = new QoSVerificationParameters(measurement.getServiceRegistryEntry().getProvider(), cloudResponse.getProviderCloud(),
-																									   cloudResponse.isGatewayIsMandatory(), measurement.getServiceRegistryEntry().getMetadata(),
-																									   request.getQosRequirements(), request.getCommands(), new ArrayList<>());
-				boolean verified = true;
-				for (final QoSVerifier verifier : verifiers) {
-					verified = verifier.verify(verificationParameters, true);
-				}
-				if (verified) {
-					verifiedGSDResponse.setNumOfProviders(verifiedGSDResponse.getNumOfProviders() + 1);
-					verifiedGSDResponse.getQosMeasurements().add(measurement);
-					for (final ServiceInterfaceResponseDTO interf : measurement.getServiceRegistryEntry().getInterfaces()) {
-						if (!verifiedGSDResponse.getAvailableInterfaces().contains(interf.getInterfaceName())) {
-							verifiedGSDResponse.getAvailableInterfaces().add(interf.getInterfaceName());
+				if (measurement.isProviderAvailable()) {
+					final QoSVerificationParameters verificationParameters = new QoSVerificationParameters(measurement.getServiceRegistryEntry().getProvider(), cloudResponse.getProviderCloud(),
+																										   cloudResponse.isGatewayIsMandatory(), measurement.getServiceRegistryEntry().getMetadata(),
+																										   request.getQosRequirements(), request.getCommands(), new ArrayList<>());
+					verificationParameters.setLocalReferencePingMeasurement(getLocalReferencePingMeasurementWithMedianMaxResponseTime());
+					boolean verified = true;
+					for (final QoSVerifier verifier : verifiers) {
+						verified = verifier.verify(verificationParameters, true);
+					}
+					if (verified) {
+						verifiedGSDResponse.setNumOfProviders(verifiedGSDResponse.getNumOfProviders() + 1);
+						verifiedGSDResponse.getQosMeasurements().add(measurement);
+						for (final ServiceInterfaceResponseDTO interf : measurement.getServiceRegistryEntry().getInterfaces()) {
+							if (!verifiedGSDResponse.getAvailableInterfaces().contains(interf.getInterfaceName())) {
+								verifiedGSDResponse.getAvailableInterfaces().add(interf.getInterfaceName());
+							}
 						}
 					}
+					if (verifiedGSDResponse.getNumOfProviders() > 0) {
+						results.add(verifiedGSDResponse);
+					}					
 				}
-				if (verifiedGSDResponse.getNumOfProviders() > 0) {
-					results.add(verifiedGSDResponse);
-				}
-				
 			}
 		}
 		return results;
@@ -213,7 +216,7 @@ public class QoSManagerImpl implements QoSManager {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public List<OrchestrationResultDTO> verifyInterCloudServices(final List<OrchestrationResultDTO> orList, final OrchestrationFormRequestDTO request) {
-		// TODO Auto-generated method stub
+		// TODO bordi
 		return null;
 	}
 	
@@ -231,5 +234,11 @@ public class QoSManagerImpl implements QoSManager {
 		}
 		
 		return false;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private QoSIntraPingMeasurementResponseDTO getLocalReferencePingMeasurementWithMedianMaxResponseTime() {
+		//TODO bordi need such service from qos monitor
+		return null;
 	}
 }

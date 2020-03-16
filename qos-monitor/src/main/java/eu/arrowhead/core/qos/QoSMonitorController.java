@@ -362,7 +362,6 @@ public class QoSMonitorController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	//TODO
 	@ApiOperation(value = QUERY_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_RESULTS_BY_CLOUD_AND_SYSTEMT_DESCRIPTION, response = QoSInterRelayEchoMeasurementResultListDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = POST_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_RESULTS_BY_CLOUD_AND_SYSTEMT_HTTP_200_MESSAGE),

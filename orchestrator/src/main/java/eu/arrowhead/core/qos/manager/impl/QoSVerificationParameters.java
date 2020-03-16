@@ -1,11 +1,15 @@
 package eu.arrowhead.core.qos.manager.impl;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestratorWarnings;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 
@@ -21,6 +25,9 @@ public class QoSVerificationParameters {
 	private final Map<String,String> qosRequirements;
 	private final Map<String,String> commands;
 	private final List<OrchestratorWarnings> warnings;
+	
+	private QoSIntraPingMeasurementResponseDTO localReferencePingMeasurement;
+	private final Set<RelayResponseDTO> verifiedRelays = new HashSet<>(); //to be filled during the verification process
 	
 	//=================================================================================================
 	// methods
@@ -46,8 +53,13 @@ public class QoSVerificationParameters {
 	public Map<String, String> getMetadata() { return metadata; }
 	public Map<String, String> getQosRequirements() { return qosRequirements; }
 	public Map<String, String> getCommands() { return commands; }
-	public List<OrchestratorWarnings> getWarnings() { return warnings; }
-	
+	public List<OrchestratorWarnings> getWarnings() { return warnings; }	
+	public QoSIntraPingMeasurementResponseDTO getLocalReferencePingMeasurement() { return localReferencePingMeasurement; }
+	public Set<RelayResponseDTO> getVerifiedRelays() { return verifiedRelays; }
+
+	//-------------------------------------------------------------------------------------------------
+	public void setLocalReferencePingMeasurement(QoSIntraPingMeasurementResponseDTO localReferencePingMeasurement) { this.localReferencePingMeasurement = localReferencePingMeasurement; }
+
 	//-------------------------------------------------------------------------------------------------
 	public boolean isInterCloud() {
 		return providerCloud != null;

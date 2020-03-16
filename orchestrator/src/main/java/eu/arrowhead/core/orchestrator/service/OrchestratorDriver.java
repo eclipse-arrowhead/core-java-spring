@@ -34,7 +34,7 @@ import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.internal.ICNResultDTO;
 import eu.arrowhead.common.dto.internal.IdIdListDTO;
 import eu.arrowhead.common.dto.internal.QoSInterDirectPingMeasurementResponseDTO;
-import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.TokenDataDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationProviderDTO;
@@ -220,12 +220,12 @@ public class OrchestratorDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public QoSInterRelayEchoMeasurementResponseDTO getInterRelayEchoMeasurement(final CloudSystemFormDTO request) {
+	public QoSInterRelayEchoMeasurementListResponseDTO getInterRelayEchoMeasurement(final CloudSystemFormDTO request) {
 		logger.debug("getInterRelayEchoMeasurement started...");
 		Assert.notNull(request, "CloudSystemFormDTO is null.");
 		
 		final UriComponents uri = getQosMonitorInterRelayEchoMeasurementUri();
-		final ResponseEntity<QoSInterRelayEchoMeasurementResponseDTO> response = httpService.sendRequest(uri, HttpMethod.POST, QoSInterRelayEchoMeasurementResponseDTO.class, request);
+		final ResponseEntity<QoSInterRelayEchoMeasurementListResponseDTO> response = httpService.sendRequest(uri, HttpMethod.POST, QoSInterRelayEchoMeasurementListResponseDTO.class, request);
 		
 		return response.getBody();
 	}

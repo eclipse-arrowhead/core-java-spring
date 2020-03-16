@@ -214,6 +214,7 @@ public class GatekeeperService {
 					try {
 						final QoSIntraPingMeasurementResponseDTO pingMeasurement = gatekeeperDriver.getQoSIntraPingMeasurementsForLocalSystem(srEntryDTO.getProvider().getId());
 						qosMeasurements.add(new QoSMeasurementAttributesFormDTO(srEntryDTO,
+																				pingMeasurement.isAvailable(),
 																				pingMeasurement.getLastAccessAt(),
 																				pingMeasurement.getMinResponseTime(),
 																				pingMeasurement.getMaxResponseTime(),

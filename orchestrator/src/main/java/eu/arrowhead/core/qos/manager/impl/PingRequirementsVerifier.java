@@ -13,6 +13,7 @@ import org.springframework.util.Assert;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.dto.internal.CloudSystemFormDTO;
 import eu.arrowhead.common.dto.internal.QoSInterDirectPingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
@@ -36,9 +37,9 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	
 	private static final Logger logger = LogManager.getLogger(PingRequirementsVerifier.class);
 	
-	private Map<Long,QoSIntraPingMeasurementResponseDTO> intraPingMeasurementCache = new ConcurrentHashMap<>();
-	private Map<String,QoSInterDirectPingMeasurementResponseDTO> interDirectPingMeasurementCache = new ConcurrentHashMap<>();
-	private Map<String,QoSInterRelayEchoMeasurementResponseDTO> interRelayEchoMeasurementCache = new ConcurrentHashMap<>();
+	private final Map<Long,QoSIntraPingMeasurementResponseDTO> intraPingMeasurementCache = new ConcurrentHashMap<>();
+	private final Map<String,QoSInterDirectPingMeasurementResponseDTO> interDirectPingMeasurementCache = new ConcurrentHashMap<>();
+	private final Map<String,QoSInterRelayEchoMeasurementListResponseDTO> interRelayEchoMeasurementCache = new ConcurrentHashMap<>();
 
 	//=================================================================================================
 	// methods
@@ -54,11 +55,11 @@ public class PingRequirementsVerifier implements QoSVerifier {
 		}
 		
 		if (!parameters.isInterCloud()) {			
-			return verifyIntraCloudPingMeasurements(parameters, isPreVerification);
+			return verifyIntraCloudPingMeasurements(parameters);
 		} else if(!parameters.isGatewayIsMandatory()) {
-			return verifyInterCloudDirectPingMeasurements(parameters, isPreVerification);
+			return verifyInterCloudDirectPingMeasurements(parameters);
 		} else {
-			return verifyInterCloudRelayEchoAndPingMeasurements(parameters, isPreVerification);
+			return verifyInterCloudRelayEchoAndPingMeasurements(parameters);
 		}		
 	}
 	
@@ -74,7 +75,7 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private boolean verifyIntraCloudPingMeasurements(final QoSVerificationParameters parameters, final boolean isPreVerification) {
+	private boolean verifyIntraCloudPingMeasurements(final QoSVerificationParameters parameters) {
 		logger.debug("verifyIntraCloudPingMeasuerements started...");
 		
 		final QoSIntraPingMeasurementResponseDTO measurement = getIntraPingMeasurement(parameters.getProviderSystem().getId());
@@ -133,7 +134,7 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private boolean verifyInterCloudDirectPingMeasurements(final QoSVerificationParameters parameters, final boolean isPreVerification) {
+	private boolean verifyInterCloudDirectPingMeasurements(final QoSVerificationParameters parameters) {
 		logger.debug("verifyInterCloudDirectPingMeasurements started...");
 		
 		final QoSInterDirectPingMeasurementResponseDTO measurement = getInterDirectPingMeasurement(new CloudSystemFormDTO(parameters.getProviderCloud(), parameters.getProviderSystem()));
@@ -192,16 +193,75 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private boolean verifyInterCloudRelayEchoAndPingMeasurements(final QoSVerificationParameters parameters, final boolean isPreVerification) {
+	private boolean verifyInterCloudRelayEchoAndPingMeasurements(final QoSVerificationParameters parameters) {
 		logger.debug("verifyInterCloudRelayEchoAndPingMeasurements started...");
 		
-		final QoSInterRelayEchoMeasurementResponseDTO relayMeasurement = getInterRelayEchoMeasurement(new CloudSystemFormDTO(parameters.getProviderCloud(), parameters.getProviderSystem()));
+		final QoSInterRelayEchoMeasurementListResponseDTO relayMeasurement = getInterRelayEchoMeasurement(new CloudSystemFormDTO(parameters.getProviderCloud(), parameters.getProviderSystem()));
 		
-		if (!relayMeasurement.hasRecord()) { // no record => use related constant to determine output 
+		if (relayMeasurement.getData() == null || relayMeasurement.getData().isEmpty()) { // no record => use related constant to determine output 
 			return verifyNotMeasuredSystem;
 		}
 		
-		//TODO bordi
+		for (final QoSInterRelayEchoMeasurementResponseDTO measurement : relayMeasurement.getData()) {
+			boolean verified =  true;
+			
+			if (hasMaximumResponseTimeThreshold(parameters.getQosRequirements())) {
+				final int threshold = getMaximumResponseTimeThreshold(parameters.getQosRequirements());
+				final int measuredValue = measurement.getMaxResponseTime().intValue() + parameters.getLocalReferencePingMeasurement().getMaxResponseTime().intValue();
+				if (measuredValue > threshold) {
+					logger.debug("Provider '{}' (id: {}) removed because of maximum response time threshold", parameters.getProviderSystem().getSystemName(), parameters.getProviderSystem().getId());
+					verified = false;
+				}
+			}
+			
+			if (hasAverageResponseTimeThreshold(parameters.getQosRequirements())) {
+				final int threshold = getAverageResponseTimeThreshold(parameters.getQosRequirements());
+				final int measuredValue = measurement.getMeanResponseTimeWithoutTimeout().intValue() + parameters.getLocalReferencePingMeasurement().getMeanResponseTimeWithoutTimeout().intValue();
+				if (measuredValue > threshold) {
+					logger.debug("Provider '{}' (id: {}) removed because of average response time threshold", parameters.getProviderSystem().getSystemName(), parameters.getProviderSystem().getId());
+					verified = false;
+				}
+			}
+			
+			if (hasJitterThreshold(parameters.getQosRequirements())) {
+				final int threshold = getJitterThreshold(parameters.getQosRequirements());
+				final int measuredValue = measurement.getJitterWithoutTimeout().intValue() + parameters.getLocalReferencePingMeasurement().getJitterWithoutTimeout().intValue();
+				if (measuredValue > threshold) {
+					logger.debug("Provider '{}' (id: {}) removed because of jitter threshold", parameters.getProviderSystem().getSystemName(), parameters.getProviderSystem().getId());
+					verified = false;
+				}
+			}
+			
+			if (hasRecentPacketLossThreshold(parameters.getQosRequirements())) {
+				final double threshold = getRecentPacketLossThreshold(parameters.getQosRequirements());
+				final double recentPacketLoss = 1 - measurement.getReceived() - parameters.getLocalReferencePingMeasurement().getReceived()
+												/ (double) (measurement.getSent() + parameters.getLocalReferencePingMeasurement().getSent());
+				if (recentPacketLoss > threshold) {
+					logger.debug("Provider '{}' (id: {}) removed because of recent packet loss threshold", parameters.getProviderSystem().getSystemName(),parameters.getProviderSystem().getId());
+					verified = false;
+				}
+			}
+			
+			if (hasPacketLossThreshold(parameters.getQosRequirements())) {
+				final double threshold = getPacketLossThreshold(parameters.getQosRequirements());
+				final double packetLoss = 1 - measurement.getReceivedAll() - parameters.getLocalReferencePingMeasurement().getReceivedAll()
+										  / (double) (measurement.getSentAll() + parameters.getLocalReferencePingMeasurement().getSentAll());
+				if (packetLoss > threshold) {
+					logger.debug("Provider '{}' (id: {}) removed because of packet loss threshold", parameters.getProviderSystem().getSystemName(), parameters.getProviderSystem().getId());
+					verified =  false;
+				}
+			}
+			
+			if (verified) {
+				parameters.getVerifiedRelays().add(measurement.getMeasurement().getRelay());
+			}
+			
+		}
+		
+		if (parameters.getVerifiedRelays().isEmpty()) {
+			return false;
+		}
+		
 		return true;
 	}
 	
@@ -378,32 +438,34 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private QoSInterRelayEchoMeasurementResponseDTO getInterRelayEchoMeasurement(final CloudSystemFormDTO request) {
+	private QoSInterRelayEchoMeasurementListResponseDTO getInterRelayEchoMeasurement(final CloudSystemFormDTO request) {
 		logger.debug("getInterRelayEchoMeasurement started...");
 		
-		QoSInterRelayEchoMeasurementResponseDTO measurement = interRelayEchoMeasurementCache.get(getCloudSystemCacheKey(request));
+		final QoSInterRelayEchoMeasurementListResponseDTO measurement = interRelayEchoMeasurementCache.get(getCloudSystemCacheKey(request));
 		
 		if (measurement == null) {
-			return getInterRelayEchoMeasurement(request);
+			return getInterRelayEchoMeasurementFromQoSMonitor(request);
 		}
 		
-		if (measurement.getMeasurement().getLastMeasurementAt().plusSeconds(pingMeasurementCacheThreshold).isBefore(ZonedDateTime.now())) { // obsolete record
-			interRelayEchoMeasurementCache.remove(getCloudSystemCacheKey(request));
-			return getInterRelayEchoMeasurement(request);
+		for (final QoSInterRelayEchoMeasurementResponseDTO dto : measurement.getData()) {			
+			if (dto.getMeasurement().getLastMeasurementAt().plusSeconds(pingMeasurementCacheThreshold).isBefore(ZonedDateTime.now())) { // obsolete record
+				interRelayEchoMeasurementCache.remove(getCloudSystemCacheKey(request));
+				return getInterRelayEchoMeasurementFromQoSMonitor(request);
+			}
 		}
 		
 		return measurement;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private QoSInterRelayEchoMeasurementResponseDTO getInterRelayEchoMeasurementFromQoSMonitor(final CloudSystemFormDTO request) {
+	private QoSInterRelayEchoMeasurementListResponseDTO getInterRelayEchoMeasurementFromQoSMonitor(final CloudSystemFormDTO request) {
 		logger.debug("getInterRelayEchoMeasurementFromQoSMonitor started...");
 		
-		QoSInterRelayEchoMeasurementResponseDTO measurement = orchestrationDriver.getInterRelayEchoMeasurement(request);
+		final QoSInterRelayEchoMeasurementListResponseDTO measurement = orchestrationDriver.getInterRelayEchoMeasurement(request);
 		
-		if (measurement.hasRecord()) { // only caching when there are some data
+		if (measurement.getData() != null && !measurement.getData().isEmpty()) { // only caching when there are some data
 			interRelayEchoMeasurementCache.put(getCloudSystemCacheKey(request), measurement);
-		}
+		}			
 		
 		return measurement;
 	}
