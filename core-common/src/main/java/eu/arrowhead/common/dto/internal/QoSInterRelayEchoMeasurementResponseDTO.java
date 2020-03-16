@@ -3,6 +3,8 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class QoSInterRelayEchoMeasurementResponseDTO implements Serializable{
 
 	//=================================================================================================
@@ -10,7 +12,7 @@ public class QoSInterRelayEchoMeasurementResponseDTO implements Serializable{
 	
 	private static final long serialVersionUID = -4715714119067393281L;
 	
-	private long id;
+	private Long id;
 	private QoSInterRelayMeasurementResponseDTO measurement;
 	private ZonedDateTime lastAccessAt;
 	private Integer minResponseTime;
@@ -35,7 +37,7 @@ public class QoSInterRelayEchoMeasurementResponseDTO implements Serializable{
 	public QoSInterRelayEchoMeasurementResponseDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public QoSInterRelayEchoMeasurementResponseDTO(final long id, final QoSInterRelayMeasurementResponseDTO measurement, final ZonedDateTime lastAccessAt, final Integer minResponseTime,
+	public QoSInterRelayEchoMeasurementResponseDTO(final Long id, final QoSInterRelayMeasurementResponseDTO measurement, final ZonedDateTime lastAccessAt, final Integer minResponseTime,
 												   final Integer maxResponseTime, final Integer meanResponseTimeWithTimeout, final Integer meanResponseTimeWithoutTimeout,
 												   final Integer jitterWithTimeout, final Integer jitterWithoutTimeout, final Integer lostPerMeasurementPercent, final long sent, final long received,
 												   final ZonedDateTime countStartedAt, final long sentAll, final long receivedAll, final ZonedDateTime createdAt, final ZonedDateTime updatedAt) {
@@ -59,7 +61,7 @@ public class QoSInterRelayEchoMeasurementResponseDTO implements Serializable{
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public long getId() { return id; }
+	public Long getId() { return id; }
 	public QoSInterRelayMeasurementResponseDTO getMeasurement() { return measurement; }
 	public ZonedDateTime getLastAccessAt() { return lastAccessAt; }
 	public Integer getMinResponseTime() { return minResponseTime; }
@@ -76,9 +78,15 @@ public class QoSInterRelayEchoMeasurementResponseDTO implements Serializable{
 	public long getReceivedAll() { return receivedAll; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@JsonIgnore
+	public boolean hasRecord() {
+		return id != null;
+	}
 
 	//-------------------------------------------------------------------------------------------------
-	public void setId(final long id) { this.id = id; }
+	public void setId(final Long id) { this.id = id; }
 	public void setMeasurement(final QoSInterRelayMeasurementResponseDTO measurement) { this.measurement = measurement; }
 	public void setLastAccessAt(final ZonedDateTime lastAccessAt) { this.lastAccessAt = lastAccessAt; }
 	public void setMinResponseTime(final Integer minResponseTime) { this.minResponseTime = minResponseTime; }

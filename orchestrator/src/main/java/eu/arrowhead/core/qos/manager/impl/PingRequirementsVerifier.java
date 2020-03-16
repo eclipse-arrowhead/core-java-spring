@@ -58,7 +58,7 @@ public class PingRequirementsVerifier implements QoSVerifier {
 		} else if(!parameters.isGatewayIsMandatory()) {
 			return verifyInterCloudDirectPingMeasurements(parameters, isPreVerification);
 		} else {
-			return verifyInterCloudRelayEchoMeasurements(parameters, isPreVerification);
+			return verifyInterCloudRelayEchoAndPingMeasurements(parameters, isPreVerification);
 		}		
 	}
 	
@@ -192,7 +192,15 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private boolean verifyInterCloudRelayEchoMeasurements(final QoSVerificationParameters parameters, final boolean isPreVerification) {
+	private boolean verifyInterCloudRelayEchoAndPingMeasurements(final QoSVerificationParameters parameters, final boolean isPreVerification) {
+		logger.debug("verifyInterCloudRelayEchoAndPingMeasurements started...");
+		
+		final QoSInterRelayEchoMeasurementResponseDTO relayMeasurement = getInterRelayEchoMeasurement(new CloudSystemFormDTO(parameters.getProviderCloud(), parameters.getProviderSystem()));
+		
+		if (!relayMeasurement.hasRecord()) { // no record => use related constant to determine output 
+			return verifyNotMeasuredSystem;
+		}
+		
 		//TODO bordi
 		return true;
 	}
@@ -364,6 +372,37 @@ public class PingRequirementsVerifier implements QoSVerifier {
 		
 		if (measurement.hasRecord() && measurement.isAvailable()) { // only caching when there are some data
 			interDirectPingMeasurementCache.put(getCloudSystemCacheKey(request), measurement);
+		}
+		
+		return measurement;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private QoSInterRelayEchoMeasurementResponseDTO getInterRelayEchoMeasurement(final CloudSystemFormDTO request) {
+		logger.debug("getInterRelayEchoMeasurement started...");
+		
+		QoSInterRelayEchoMeasurementResponseDTO measurement = interRelayEchoMeasurementCache.get(getCloudSystemCacheKey(request));
+		
+		if (measurement == null) {
+			return getInterRelayEchoMeasurement(request);
+		}
+		
+		if (measurement.getMeasurement().getLastMeasurementAt().plusSeconds(pingMeasurementCacheThreshold).isBefore(ZonedDateTime.now())) { // obsolete record
+			interRelayEchoMeasurementCache.remove(getCloudSystemCacheKey(request));
+			return getInterRelayEchoMeasurement(request);
+		}
+		
+		return measurement;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private QoSInterRelayEchoMeasurementResponseDTO getInterRelayEchoMeasurementFromQoSMonitor(final CloudSystemFormDTO request) {
+		logger.debug("getInterRelayEchoMeasurementFromQoSMonitor started...");
+		
+		QoSInterRelayEchoMeasurementResponseDTO measurement = orchestrationDriver.getInterRelayEchoMeasurement(request);
+		
+		if (measurement.hasRecord()) { // only caching when there are some data
+			interRelayEchoMeasurementCache.put(getCloudSystemCacheKey(request), measurement);
 		}
 		
 		return measurement;
