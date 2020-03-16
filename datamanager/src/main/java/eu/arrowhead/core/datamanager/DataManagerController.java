@@ -209,6 +209,7 @@ public class DataManagerController {
 
 
 	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Interface to put sensor data from a service", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses (value = {
 		@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
 		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
