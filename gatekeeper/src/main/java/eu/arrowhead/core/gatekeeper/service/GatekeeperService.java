@@ -222,6 +222,10 @@ public class GatekeeperService {
 																				pingMeasurement.getMeanResponseTimeWithoutTimeout(),
 																				pingMeasurement.getJitterWithTimeout(),
 																				pingMeasurement.getJitterWithoutTimeout(),
+																				pingMeasurement.getSent(),
+																				pingMeasurement.getReceived(),
+																				pingMeasurement.getSentAll(),
+																				pingMeasurement.getReceivedAll(),
 																				pingMeasurement.getLostPerMeasurementPercent()));
 						availableInterfaces.addAll(providerInterfaces);
 						numOfProviders++;

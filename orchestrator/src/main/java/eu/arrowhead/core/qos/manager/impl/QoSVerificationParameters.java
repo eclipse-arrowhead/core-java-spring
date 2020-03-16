@@ -9,6 +9,7 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSMeasurementAttributesFormDTO;
 import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestratorWarnings;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
@@ -27,6 +28,7 @@ public class QoSVerificationParameters {
 	private final List<OrchestratorWarnings> warnings;
 	
 	private QoSIntraPingMeasurementResponseDTO localReferencePingMeasurement;
+	private QoSMeasurementAttributesFormDTO providerTargetCloudMeasurement;
 	private final Set<RelayResponseDTO> verifiedRelays = new HashSet<>(); //to be filled during the verification process
 	
 	//=================================================================================================
@@ -55,10 +57,12 @@ public class QoSVerificationParameters {
 	public Map<String, String> getCommands() { return commands; }
 	public List<OrchestratorWarnings> getWarnings() { return warnings; }	
 	public QoSIntraPingMeasurementResponseDTO getLocalReferencePingMeasurement() { return localReferencePingMeasurement; }
+	public QoSMeasurementAttributesFormDTO getProviderTargetCloudMeasurement() { return providerTargetCloudMeasurement; }
 	public Set<RelayResponseDTO> getVerifiedRelays() { return verifiedRelays; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setLocalReferencePingMeasurement(QoSIntraPingMeasurementResponseDTO localReferencePingMeasurement) { this.localReferencePingMeasurement = localReferencePingMeasurement; }
+	public void setLocalReferencePingMeasurement(final QoSIntraPingMeasurementResponseDTO localReferencePingMeasurement) { this.localReferencePingMeasurement = localReferencePingMeasurement; }
+	public void setProviderTargetCloudMeasurement(final QoSMeasurementAttributesFormDTO providerTargetCloudMeasurement) { this.providerTargetCloudMeasurement = providerTargetCloudMeasurement; }
 
 	//-------------------------------------------------------------------------------------------------
 	public boolean isInterCloud() {

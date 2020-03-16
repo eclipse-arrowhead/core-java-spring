@@ -33,7 +33,7 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	private int pingMeasurementCacheThreshold;
 	
 	@Autowired
-	private OrchestratorDriver orchestrationDriver;
+	private OrchestratorDriver orchestratorDriver;
 	
 	private static final Logger logger = LogManager.getLogger(PingRequirementsVerifier.class);
 	
@@ -75,10 +75,10 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private boolean verifyIntraCloudPingMeasurements(final QoSVerificationParameters parameters) {
+	private boolean verifyIntraCloudPingMeasurements(final QoSVerificationParameters params) {
 		logger.debug("verifyIntraCloudPingMeasuerements started...");
 		
-		final QoSIntraPingMeasurementResponseDTO measurement = getIntraPingMeasurement(parameters.getProviderSystem().getId());
+		final QoSIntraPingMeasurementResponseDTO measurement = getIntraPingMeasurement(params.getProviderSystem().getId());
 		
 		if (!measurement.hasRecord()) { // no record => use related constant to determine output 
 			return verifyNotMeasuredSystem;
@@ -88,44 +88,44 @@ public class PingRequirementsVerifier implements QoSVerifier {
 			return false;
 		}
 		
-		if (hasMaximumResponseTimeThreshold(parameters.getQosRequirements())) {
-			final int threshold = getMaximumResponseTimeThreshold(parameters.getQosRequirements());
+		if (hasMaximumResponseTimeThreshold(params.getQosRequirements())) {
+			final int threshold = getMaximumResponseTimeThreshold(params.getQosRequirements());
 			if (measurement.getMaxResponseTime().intValue() > threshold) {
-				logger.debug("Provider '{}' (id: {}) removed because of maximum response time threshold", parameters.getProviderSystem().getSystemName(), parameters.getProviderSystem().getId());
+				logger.debug("Provider '{}' (id: {}) removed because of maximum response time threshold", params.getProviderSystem().getSystemName(), params.getProviderSystem().getId());
 				return false;
 			}
 		}
 		
-		if (hasAverageResponseTimeThreshold(parameters.getQosRequirements())) {
-			final int threshold = getAverageResponseTimeThreshold(parameters.getQosRequirements());
+		if (hasAverageResponseTimeThreshold(params.getQosRequirements())) {
+			final int threshold = getAverageResponseTimeThreshold(params.getQosRequirements());
 			if (measurement.getMeanResponseTimeWithoutTimeout().intValue() > threshold) {
-				logger.debug("Provider '{}' (id: {}) removed because of average response time threshold", parameters.getProviderSystem().getSystemName(), parameters.getProviderSystem().getId());
+				logger.debug("Provider '{}' (id: {}) removed because of average response time threshold", params.getProviderSystem().getSystemName(), params.getProviderSystem().getId());
 				return false;
 			}
 		}
 		
-		if (hasJitterThreshold(parameters.getQosRequirements())) {
-			final int threshold = getJitterThreshold(parameters.getQosRequirements());
+		if (hasJitterThreshold(params.getQosRequirements())) {
+			final int threshold = getJitterThreshold(params.getQosRequirements());
 			if (measurement.getJitterWithoutTimeout().intValue() > threshold) {
-				logger.debug("Provider '{}' (id: {}) removed because of jitter threshold", parameters.getProviderSystem().getSystemName(), parameters.getProviderSystem().getId());
+				logger.debug("Provider '{}' (id: {}) removed because of jitter threshold", params.getProviderSystem().getSystemName(), params.getProviderSystem().getId());
 				return false;
 			}
 		}
 		
-		if (hasRecentPacketLossThreshold(parameters.getQosRequirements())) {
-			final double threshold = getRecentPacketLossThreshold(parameters.getQosRequirements());
+		if (hasRecentPacketLossThreshold(params.getQosRequirements())) {
+			final double threshold = getRecentPacketLossThreshold(params.getQosRequirements());
 			final double recentPacketLoss = 1 - measurement.getReceived() / (double) measurement.getSent();
 			if (recentPacketLoss > threshold) {
-				logger.debug("Provider '{}' (id: {}) removed because of recent packet loss threshold", parameters.getProviderSystem().getSystemName(),parameters.getProviderSystem().getId());
+				logger.debug("Provider '{}' (id: {}) removed because of recent packet loss threshold", params.getProviderSystem().getSystemName(),params.getProviderSystem().getId());
 				return false;
 			}
 		}
 		
-		if (hasPacketLossThreshold(parameters.getQosRequirements())) {
-			final double threshold = getPacketLossThreshold(parameters.getQosRequirements());
+		if (hasPacketLossThreshold(params.getQosRequirements())) {
+			final double threshold = getPacketLossThreshold(params.getQosRequirements());
 			final double packetLoss = 1 - measurement.getReceivedAll() / (double) measurement.getSentAll();
 			if (packetLoss > threshold) {
-				logger.debug("Provider '{}' (id: {}) removed because of packet loss threshold", parameters.getProviderSystem().getSystemName(), parameters.getProviderSystem().getId());
+				logger.debug("Provider '{}' (id: {}) removed because of packet loss threshold", params.getProviderSystem().getSystemName(), params.getProviderSystem().getId());
 				return false;
 			}
 		}
@@ -134,10 +134,10 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private boolean verifyInterCloudDirectPingMeasurements(final QoSVerificationParameters parameters) {
+	private boolean verifyInterCloudDirectPingMeasurements(final QoSVerificationParameters params) {
 		logger.debug("verifyInterCloudDirectPingMeasurements started...");
 		
-		final QoSInterDirectPingMeasurementResponseDTO measurement = getInterDirectPingMeasurement(new CloudSystemFormDTO(parameters.getProviderCloud(), parameters.getProviderSystem()));
+		final QoSInterDirectPingMeasurementResponseDTO measurement = getInterDirectPingMeasurement(new CloudSystemFormDTO(params.getProviderCloud(), params.getProviderSystem()));
 		
 		if (!measurement.hasRecord()) { // no record => use related constant to determine output 
 			return verifyNotMeasuredSystem;
@@ -147,44 +147,44 @@ public class PingRequirementsVerifier implements QoSVerifier {
 			return false;
 		}
 		
-		if (hasMaximumResponseTimeThreshold(parameters.getQosRequirements())) {
-			final int threshold = getMaximumResponseTimeThreshold(parameters.getQosRequirements());
+		if (hasMaximumResponseTimeThreshold(params.getQosRequirements())) {
+			final int threshold = getMaximumResponseTimeThreshold(params.getQosRequirements());
 			if (measurement.getMaxResponseTime().intValue() > threshold) {
-				logger.debug("Provider '{}' (id: {}) removed because of maximum response time threshold", parameters.getProviderSystem().getSystemName(), parameters.getProviderSystem().getId());
+				logger.debug("Provider '{}' (id: {}) removed because of maximum response time threshold", params.getProviderSystem().getSystemName(), params.getProviderSystem().getId());
 				return false;
 			}
 		}
 		
-		if (hasAverageResponseTimeThreshold(parameters.getQosRequirements())) {
-			final int threshold = getAverageResponseTimeThreshold(parameters.getQosRequirements());
+		if (hasAverageResponseTimeThreshold(params.getQosRequirements())) {
+			final int threshold = getAverageResponseTimeThreshold(params.getQosRequirements());
 			if (measurement.getMeanResponseTimeWithoutTimeout().intValue() > threshold) {
-				logger.debug("Provider '{}' (id: {}) removed because of average response time threshold", parameters.getProviderSystem().getSystemName(), parameters.getProviderSystem().getId());
+				logger.debug("Provider '{}' (id: {}) removed because of average response time threshold", params.getProviderSystem().getSystemName(), params.getProviderSystem().getId());
 				return false;
 			}
 		}
 		
-		if (hasJitterThreshold(parameters.getQosRequirements())) {
-			final int threshold = getJitterThreshold(parameters.getQosRequirements());
+		if (hasJitterThreshold(params.getQosRequirements())) {
+			final int threshold = getJitterThreshold(params.getQosRequirements());
 			if (measurement.getJitterWithoutTimeout().intValue() > threshold) {
-				logger.debug("Provider '{}' (id: {}) removed because of jitter threshold", parameters.getProviderSystem().getSystemName(), parameters.getProviderSystem().getId());
+				logger.debug("Provider '{}' (id: {}) removed because of jitter threshold", params.getProviderSystem().getSystemName(), params.getProviderSystem().getId());
 				return false;
 			}
 		}
 		
-		if (hasRecentPacketLossThreshold(parameters.getQosRequirements())) {
-			final double threshold = getRecentPacketLossThreshold(parameters.getQosRequirements());
+		if (hasRecentPacketLossThreshold(params.getQosRequirements())) {
+			final double threshold = getRecentPacketLossThreshold(params.getQosRequirements());
 			final double recentPacketLoss = 1 - measurement.getReceived() / (double) measurement.getSent();
 			if (recentPacketLoss > threshold) {
-				logger.debug("Provider '{}' (id: {}) removed because of recent packet loss threshold", parameters.getProviderSystem().getSystemName(),parameters.getProviderSystem().getId());
+				logger.debug("Provider '{}' (id: {}) removed because of recent packet loss threshold", params.getProviderSystem().getSystemName(),params.getProviderSystem().getId());
 				return false;
 			}
 		}
 		
-		if (hasPacketLossThreshold(parameters.getQosRequirements())) {
-			final double threshold = getPacketLossThreshold(parameters.getQosRequirements());
+		if (hasPacketLossThreshold(params.getQosRequirements())) {
+			final double threshold = getPacketLossThreshold(params.getQosRequirements());
 			final double packetLoss = 1 - measurement.getReceivedAll() / (double) measurement.getSentAll();
 			if (packetLoss > threshold) {
-				logger.debug("Provider '{}' (id: {}) removed because of packet loss threshold", parameters.getProviderSystem().getSystemName(), parameters.getProviderSystem().getId());
+				logger.debug("Provider '{}' (id: {}) removed because of packet loss threshold", params.getProviderSystem().getSystemName(), params.getProviderSystem().getId());
 				return false;
 			}
 		}
@@ -193,72 +193,79 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private boolean verifyInterCloudRelayEchoAndPingMeasurements(final QoSVerificationParameters parameters) {
+	private boolean verifyInterCloudRelayEchoAndPingMeasurements(final QoSVerificationParameters params) {
 		logger.debug("verifyInterCloudRelayEchoAndPingMeasurements started...");
 		
-		final QoSInterRelayEchoMeasurementListResponseDTO relayMeasurement = getInterRelayEchoMeasurement(new CloudSystemFormDTO(parameters.getProviderCloud(), parameters.getProviderSystem()));
+		final QoSInterRelayEchoMeasurementListResponseDTO relayMeasurementList = getInterRelayEchoMeasurement(new CloudSystemFormDTO(params.getProviderCloud(), params.getProviderSystem()));
 		
-		if (relayMeasurement.getData() == null || relayMeasurement.getData().isEmpty()) { // no record => use related constant to determine output 
+		if (relayMeasurementList.getData() == null || relayMeasurementList.getData().isEmpty()) { // no record => use related constant to determine output 
 			return verifyNotMeasuredSystem;
 		}
 		
-		for (final QoSInterRelayEchoMeasurementResponseDTO measurement : relayMeasurement.getData()) {
+		for (final QoSInterRelayEchoMeasurementResponseDTO relayMeasurement : relayMeasurementList.getData()) {
+			final String relayAddressPort = relayMeasurement.getMeasurement().getRelay().getAddress() + ":" + relayMeasurement.getMeasurement().getRelay().getPort();
 			boolean verified =  true;
 			
-			if (hasMaximumResponseTimeThreshold(parameters.getQosRequirements())) {
-				final int threshold = getMaximumResponseTimeThreshold(parameters.getQosRequirements());
-				final int measuredValue = measurement.getMaxResponseTime().intValue() + parameters.getLocalReferencePingMeasurement().getMaxResponseTime().intValue();
+			if (hasMaximumResponseTimeThreshold(params.getQosRequirements())) {
+				final int threshold = getMaximumResponseTimeThreshold(params.getQosRequirements());
+				final int measuredValue = relayMeasurement.getMaxResponseTime().intValue() +
+										  params.getLocalReferencePingMeasurement().getMaxResponseTime().intValue() +
+										  params.getProviderTargetCloudMeasurement().getMaxResponseTime().intValue();
 				if (measuredValue > threshold) {
-					logger.debug("Provider '{}' (id: {}) removed because of maximum response time threshold", parameters.getProviderSystem().getSystemName(), parameters.getProviderSystem().getId());
+					logger.debug("Provider '{}' (via Relay: {}) removed because of maximum response time threshold", params.getProviderSystem().getSystemName(), relayAddressPort);
 					verified = false;
 				}
 			}
 			
-			if (hasAverageResponseTimeThreshold(parameters.getQosRequirements())) {
-				final int threshold = getAverageResponseTimeThreshold(parameters.getQosRequirements());
-				final int measuredValue = measurement.getMeanResponseTimeWithoutTimeout().intValue() + parameters.getLocalReferencePingMeasurement().getMeanResponseTimeWithoutTimeout().intValue();
+			if (hasAverageResponseTimeThreshold(params.getQosRequirements())) {
+				final int threshold = getAverageResponseTimeThreshold(params.getQosRequirements());
+				final int measuredValue = relayMeasurement.getMeanResponseTimeWithoutTimeout().intValue() +
+										  params.getLocalReferencePingMeasurement().getMeanResponseTimeWithoutTimeout().intValue() + 
+										  params.getProviderTargetCloudMeasurement().getMeanResponseTimeWithoutTimeout().intValue();
 				if (measuredValue > threshold) {
-					logger.debug("Provider '{}' (id: {}) removed because of average response time threshold", parameters.getProviderSystem().getSystemName(), parameters.getProviderSystem().getId());
+					logger.debug("Provider '{}' (via Relay: {}) removed because of average response time threshold", params.getProviderSystem().getSystemName(), relayAddressPort);
 					verified = false;
 				}
 			}
 			
-			if (hasJitterThreshold(parameters.getQosRequirements())) {
-				final int threshold = getJitterThreshold(parameters.getQosRequirements());
-				final int measuredValue = measurement.getJitterWithoutTimeout().intValue() + parameters.getLocalReferencePingMeasurement().getJitterWithoutTimeout().intValue();
+			if (hasJitterThreshold(params.getQosRequirements())) {
+				final int threshold = getJitterThreshold(params.getQosRequirements());
+				final int measuredValue = relayMeasurement.getJitterWithoutTimeout().intValue() +
+										  params.getLocalReferencePingMeasurement().getJitterWithoutTimeout().intValue() +
+										  params.getProviderTargetCloudMeasurement().getJitterWithoutTimeout().intValue();
 				if (measuredValue > threshold) {
-					logger.debug("Provider '{}' (id: {}) removed because of jitter threshold", parameters.getProviderSystem().getSystemName(), parameters.getProviderSystem().getId());
+					logger.debug("Provider '{}' (via Relay: {}) removed because of jitter threshold", params.getProviderSystem().getSystemName(), relayAddressPort);
 					verified = false;
 				}
 			}
 			
-			if (hasRecentPacketLossThreshold(parameters.getQosRequirements())) {
-				final double threshold = getRecentPacketLossThreshold(parameters.getQosRequirements());
-				final double recentPacketLoss = 1 - measurement.getReceived() - parameters.getLocalReferencePingMeasurement().getReceived()
-												/ (double) (measurement.getSent() + parameters.getLocalReferencePingMeasurement().getSent());
+			if (hasRecentPacketLossThreshold(params.getQosRequirements())) {
+				final double threshold = getRecentPacketLossThreshold(params.getQosRequirements());
+				final double recentPacketLoss = 1 - relayMeasurement.getReceived() - params.getLocalReferencePingMeasurement().getReceived() - params.getProviderTargetCloudMeasurement().getReceived()
+												/ (double) (relayMeasurement.getSent() + params.getLocalReferencePingMeasurement().getSent() + params.getProviderTargetCloudMeasurement().getSent());
 				if (recentPacketLoss > threshold) {
-					logger.debug("Provider '{}' (id: {}) removed because of recent packet loss threshold", parameters.getProviderSystem().getSystemName(),parameters.getProviderSystem().getId());
+					logger.debug("Provider '{}' (via Relay: {}) removed because of recent packet loss threshold", params.getProviderSystem().getSystemName(), relayAddressPort);
 					verified = false;
 				}
 			}
 			
-			if (hasPacketLossThreshold(parameters.getQosRequirements())) {
-				final double threshold = getPacketLossThreshold(parameters.getQosRequirements());
-				final double packetLoss = 1 - measurement.getReceivedAll() - parameters.getLocalReferencePingMeasurement().getReceivedAll()
-										  / (double) (measurement.getSentAll() + parameters.getLocalReferencePingMeasurement().getSentAll());
+			if (hasPacketLossThreshold(params.getQosRequirements())) {
+				final double threshold = getPacketLossThreshold(params.getQosRequirements());
+				final double packetLoss = 1 - relayMeasurement.getReceivedAll() - params.getLocalReferencePingMeasurement().getReceivedAll() - params.getProviderTargetCloudMeasurement().getReceivedAll()
+										  / (double) (relayMeasurement.getSentAll() + params.getLocalReferencePingMeasurement().getSentAll()) - params.getProviderTargetCloudMeasurement().getSentAll();
 				if (packetLoss > threshold) {
-					logger.debug("Provider '{}' (id: {}) removed because of packet loss threshold", parameters.getProviderSystem().getSystemName(), parameters.getProviderSystem().getId());
+					logger.debug("Provider '{}' (via Relay: {}) removed because of packet loss threshold", params.getProviderSystem().getSystemName(), relayAddressPort);
 					verified =  false;
 				}
 			}
 			
 			if (verified) {
-				parameters.getVerifiedRelays().add(measurement.getMeasurement().getRelay());
+				params.getVerifiedRelays().add(relayMeasurement.getMeasurement().getRelay());
 			}
 			
 		}
 		
-		if (parameters.getVerifiedRelays().isEmpty()) {
+		if (params.getVerifiedRelays().isEmpty()) {
 			return false;
 		}
 		
@@ -397,7 +404,7 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	private QoSIntraPingMeasurementResponseDTO getIntraPingMeasurementFromQoSMonitor(final long systemId) {
 		logger.debug("getPIntraingMeasurementFromQoSMonitor started...");
 		
-		final QoSIntraPingMeasurementResponseDTO measurement = orchestrationDriver.getIntraPingMeasurement(systemId);
+		final QoSIntraPingMeasurementResponseDTO measurement = orchestratorDriver.getIntraPingMeasurement(systemId);
 		
 		if (measurement.hasRecord() && measurement.isAvailable()) { // only caching when there are some data
 			intraPingMeasurementCache.put(systemId, measurement);
@@ -428,7 +435,7 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	private QoSInterDirectPingMeasurementResponseDTO getInterDirectPingMeasurementFromQoSMonitor(final CloudSystemFormDTO request) {
 		logger.debug("getInterDirectPingMeasurementFromQoSMonitor started...");
 		
-		final QoSInterDirectPingMeasurementResponseDTO measurement = orchestrationDriver.getInterDirectPingMeasurement(request);
+		final QoSInterDirectPingMeasurementResponseDTO measurement = orchestratorDriver.getInterDirectPingMeasurement(request);
 		
 		if (measurement.hasRecord() && measurement.isAvailable()) { // only caching when there are some data
 			interDirectPingMeasurementCache.put(getCloudSystemCacheKey(request), measurement);
@@ -461,7 +468,7 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	private QoSInterRelayEchoMeasurementListResponseDTO getInterRelayEchoMeasurementFromQoSMonitor(final CloudSystemFormDTO request) {
 		logger.debug("getInterRelayEchoMeasurementFromQoSMonitor started...");
 		
-		final QoSInterRelayEchoMeasurementListResponseDTO measurement = orchestrationDriver.getInterRelayEchoMeasurement(request);
+		final QoSInterRelayEchoMeasurementListResponseDTO measurement = orchestratorDriver.getInterRelayEchoMeasurement(request);
 		
 		if (measurement.getData() != null && !measurement.getData().isEmpty()) { // only caching when there are some data
 			interRelayEchoMeasurementCache.put(getCloudSystemCacheKey(request), measurement);

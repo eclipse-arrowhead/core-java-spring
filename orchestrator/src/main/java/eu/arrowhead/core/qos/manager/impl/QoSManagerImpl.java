@@ -191,6 +191,7 @@ public class QoSManagerImpl implements QoSManager {
 																										   cloudResponse.isGatewayIsMandatory(), measurement.getServiceRegistryEntry().getMetadata(),
 																										   request.getQosRequirements(), request.getCommands(), new ArrayList<>());
 					verificationParameters.setLocalReferencePingMeasurement(getLocalReferencePingMeasurementWithMedianMaxResponseTime());
+					verificationParameters.setProviderTargetCloudMeasurement(measurement);
 					boolean verified = true;
 					for (final QoSVerifier verifier : verifiers) {
 						verified = verifier.verify(verificationParameters, true);

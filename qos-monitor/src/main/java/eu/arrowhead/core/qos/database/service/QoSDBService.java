@@ -1108,7 +1108,7 @@ public class QoSDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public List<QoSInterRelayMeasurement> getInterRelayEchoMeasurementByCloud(final CloudResponseDTO cloudResponseDTO) {
+	public List<QoSInterRelayMeasurement> getInterRelayMeasurementByCloud(final CloudResponseDTO cloudResponseDTO) {
 		logger.debug("getInterRelayEchoMeasurementByCloud started ...");
 		
 		validateCloudResponseDTO(cloudResponseDTO);
