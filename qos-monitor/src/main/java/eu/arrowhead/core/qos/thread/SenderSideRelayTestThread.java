@@ -284,7 +284,7 @@ public class SenderSideRelayTestThread extends Thread implements MessageListener
 			}
 			closeAndInterrupt();
 		} else { // SWITCH control message
-			// not supposed to recieve this kind of messages
+			// not supposed to receive this kind of messages
 			throw new ArrowheadException("Unexpected message on relay: SWITCH");
 		}
 	}
