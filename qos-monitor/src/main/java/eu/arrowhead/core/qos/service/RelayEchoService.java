@@ -16,6 +16,8 @@ import eu.arrowhead.common.database.entity.QoSInterRelayMeasurement;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementListResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
@@ -41,11 +43,11 @@ public class RelayEchoService {
 	public QoSInterRelayEchoMeasurementListResponseDTO getInterRelayEchoMeasurements(final CloudRequestDTO request) {
 		logger.debug("getInterRelayEchoMeasurements started...");
 		
-		List<QoSInterRelayMeasurement> measurements = qosDBService.getInterRelayMeasurementByCloud(validateAndGetCloud(request));
+		final List<QoSInterRelayMeasurement> measurements = qosDBService.getInterRelayMeasurementByCloud(validateAndGetCloud(request));
 		
-		List<QoSInterRelayEchoMeasurement> echoMeasurements = new ArrayList<>();
-		for (QoSInterRelayMeasurement measurement : measurements) {
-			Optional<QoSInterRelayEchoMeasurement> optional = qosDBService.getInterRelayEchoMeasurementByMeasurement(measurement);
+		final List<QoSInterRelayEchoMeasurement> echoMeasurements = new ArrayList<>();
+		for (final QoSInterRelayMeasurement measurement : measurements) {
+			final Optional<QoSInterRelayEchoMeasurement> optional = qosDBService.getInterRelayEchoMeasurementByMeasurement(measurement);
 			if (optional.isPresent()) {
 				echoMeasurements.add(optional.get());
 			}

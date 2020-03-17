@@ -14,13 +14,14 @@ import org.springframework.util.Assert;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.QoSReservation;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
-import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
 import eu.arrowhead.common.dto.internal.QoSMeasurementAttributesFormDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.core.orchestrator.service.OrchestratorDriver;
 import eu.arrowhead.core.qos.database.service.QoSReservationDBService;
 import eu.arrowhead.core.qos.manager.QoSManager;
 import eu.arrowhead.core.qos.manager.QoSVerifier;
@@ -35,6 +36,9 @@ public class QoSManagerImpl implements QoSManager {
 
 	@Autowired
 	private QoSReservationDBService qosReservationDBService;
+	
+	@Autowired
+	private OrchestratorDriver orchestratorDriver;
 	
 	@Autowired
 	private ApplicationContext appContext;
@@ -190,7 +194,7 @@ public class QoSManagerImpl implements QoSManager {
 					final QoSVerificationParameters verificationParameters = new QoSVerificationParameters(measurement.getServiceRegistryEntry().getProvider(), cloudResponse.getProviderCloud(),
 																										   cloudResponse.isGatewayIsMandatory(), measurement.getServiceRegistryEntry().getMetadata(),
 																										   request.getQosRequirements(), request.getCommands(), new ArrayList<>());
-					verificationParameters.setLocalReferencePingMeasurement(getLocalReferencePingMeasurementWithMedianMaxResponseTime());
+					verificationParameters.setLocalReferencePingMeasurement(orchestratorDriver.getIntraPingMedianMeasurement(QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT));
 					verificationParameters.setProviderTargetCloudMeasurement(measurement);
 					boolean verified = true;
 					for (final QoSVerifier verifier : verifiers) {
@@ -235,11 +239,5 @@ public class QoSManagerImpl implements QoSManager {
 		}
 		
 		return false;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private QoSIntraPingMeasurementResponseDTO getLocalReferencePingMeasurementWithMedianMaxResponseTime() {
-		//TODO bordi need such service from qos monitor
-		return null;
 	}
 }

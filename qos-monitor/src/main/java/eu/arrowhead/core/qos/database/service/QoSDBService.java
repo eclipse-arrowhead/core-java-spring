@@ -1190,10 +1190,10 @@ public class QoSDBService {
 			case MAX_RESPONSE_TIME:
 				best = echoMeasurement.getMaxResponseTime() < best.getMaxResponseTime() ? echoMeasurement : best;
 				break;
-			case MEAN_RESPONSE_TYPE_WITH_TIMEOUT:
+			case MEAN_RESPONSE_TIME_WITH_TIMEOUT:
 				best = echoMeasurement.getMeanResponseTimeWithTimeout() < best.getMeanResponseTimeWithTimeout() ? echoMeasurement : best;
 				break;
-			case MEAN_RESPONSE_TYPE_WITHOUT_TIMEOUT:
+			case MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT:
 				best = echoMeasurement.getMeanResponseTimeWithoutTimeout() < best.getMeanResponseTimeWithoutTimeout() ? echoMeasurement : best;
 				break;
 			case JITTER_WITH_TIMEOUT:

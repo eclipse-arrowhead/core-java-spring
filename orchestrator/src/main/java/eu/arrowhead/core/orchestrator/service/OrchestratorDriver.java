@@ -36,6 +36,7 @@ import eu.arrowhead.common.dto.internal.IdIdListDTO;
 import eu.arrowhead.common.dto.internal.QoSInterDirectPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
 import eu.arrowhead.common.dto.internal.TokenDataDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationProviderDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
@@ -63,6 +64,7 @@ public class OrchestratorDriver {
 	private static final String GATEKEEPER_INIT_GSD_URI_KEY = CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEKEEPER_INIT_ICN_URI_KEY = CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATION.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String QOS_MONITOR_INTRA_PING_MEASUREMENT_URI_KEY = CoreSystemService.QOS_MONITOR_INTRA_PING_MEASUREMENT_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT_URI_KEY = CoreSystemService.QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_URI_KEY = CoreSystemService.QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_URI_KEY = CoreSystemService.QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	
@@ -209,6 +211,16 @@ public class OrchestratorDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public QoSIntraPingMeasurementResponseDTO getIntraPingMedianMeasurement(final QoSMeasurementAttribute attribute) {
+		logger.debug("getIntraPingMedianMeasurement started...");
+		
+		final UriComponents uri = getQosMonitorIntraMedianPingMeasurementUri(attribute.name());
+		final ResponseEntity<QoSIntraPingMeasurementResponseDTO> response = httpService.sendRequest(uri, HttpMethod.GET, QoSIntraPingMeasurementResponseDTO.class);
+		
+		return response.getBody();		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public QoSInterDirectPingMeasurementResponseDTO getInterDirectPingMeasurement(final CloudSystemFormDTO request) {
 		logger.debug("getInterDirectPingMeasurement started...");
 		Assert.notNull(request, "CloudSystemFormDTO is null.");
@@ -352,6 +364,22 @@ public class OrchestratorDriver {
 		}
 		
 		throw new ArrowheadException("Orchestrator can't find QoS Monitor ping/measurement URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getQosMonitorIntraMedianPingMeasurementUri(final String attribute) {
+		logger.debug("getQosMonitorIntraMedianPingMeasurementUri started...");
+		
+		if (arrowheadContext.containsKey(QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT_URI_KEY)) {
+			try {
+				final UriComponents uri = (UriComponents) arrowheadContext.get(QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT_URI_KEY);
+				return uri.expand(attribute);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Orchestrator can't find QoS Monitor intra ping median URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Orchestrator can't find QoS Monitor intra ping median URI.");
 	}
 	
 	//-------------------------------------------------------------------------------------------------
