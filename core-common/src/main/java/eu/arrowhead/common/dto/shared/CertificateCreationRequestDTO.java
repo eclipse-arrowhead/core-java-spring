@@ -9,8 +9,8 @@ public class CertificateCreationRequestDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String commonName;
-    private byte[] publicKey;
-    private byte[] privateKey;
+    private String publicKey;
+    private String privateKey;
 
 
     //=================================================================================================
@@ -23,7 +23,7 @@ public class CertificateCreationRequestDTO implements Serializable {
         this.commonName = commonName;
     }
 
-    public CertificateCreationRequestDTO(final String commonName, final byte[] publicKey, final byte[] privateKey) {
+    public CertificateCreationRequestDTO(final String commonName, final String publicKey, final String privateKey) {
         this.commonName = commonName;
         this.publicKey = publicKey;
         this.privateKey = privateKey;
@@ -40,19 +40,19 @@ public class CertificateCreationRequestDTO implements Serializable {
         this.commonName = commonName;
     }
 
-    public byte[] getPublicKey() {
+    public String getPublicKey() {
         return publicKey;
     }
 
-    public void setPublicKey(byte[] publicKey) {
+    public void setPublicKey(String publicKey) {
         this.publicKey = publicKey;
     }
 
-    public byte[] getPrivateKey() {
+    public String getPrivateKey() {
         return privateKey;
     }
 
-    public void setPrivateKey(byte[] privateKey) {
+    public void setPrivateKey(String privateKey) {
         this.privateKey = privateKey;
     }
 }
