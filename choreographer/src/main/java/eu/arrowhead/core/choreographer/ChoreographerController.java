@@ -10,10 +10,11 @@ import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.database.entity.ChoreographerSession;
 import eu.arrowhead.common.dto.internal.ChoreographerPlanRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerRunPlanRequestDTO;
+import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
+import eu.arrowhead.common.dto.internal.ChoreographerSessionFinishedStepDataDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
-import eu.arrowhead.core.choreographer.run.RunPlanTask;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -26,6 +27,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
 
 import org.springframework.http.MediaType;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -47,8 +49,10 @@ public class ChoreographerController {
 
     private static final String PLAN_MGMT_URI = CoreCommonConstants.MGMT_URI + "/plan";
     private static final String PLAN_MGMT_BY_ID_URI = PLAN_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
+    private static final String SESSION_MGMT_URI = CoreCommonConstants.MGMT_URI + "/session";
 
-    private static final String START_PLAN_MGMT_URI = PLAN_MGMT_URI + "/start";
+    private static final String START_SESSION_MGMT_URI = SESSION_MGMT_URI + "/start";
+    private static final String STEP_FINISHED_MGMT_URI = SESSION_MGMT_URI + "/stepFinished";
 
     private static final String GET_PlAN_MGMT_HTTP_200_MESSAGE = "Step returned.";
     private static final String GET_PLAN_MGMT_HTTP_400_MESSAGE = "Could not retrieve Step.";
@@ -61,6 +65,10 @@ public class ChoreographerController {
 
     private static final String START_SESSION_HTTP_200_MESSAGE = "Initiated running plan with given id.";
     private static final String START_PLAN_HTTP_400_MESSAGE = "Could not start Plan with given ID.";
+
+    private static final String STEP_FINISHED_HTTP_200_MESSAGE = "Choreographer notified that the running step is done.";
+    private static final String STEP_FINISHED_HTTP_400_MESSAGE = "Could not notify Choreographer that the running step is done.";
+
 
     private final Logger logger = LogManager.getLogger(ChoreographerController.class);
 
@@ -180,14 +188,35 @@ public class ChoreographerController {
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @PostMapping(path = START_PLAN_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = START_SESSION_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
     @ResponseBody public void startPlan(@RequestBody final List<ChoreographerRunPlanRequestDTO> requests) {
         for (final ChoreographerRunPlanRequestDTO request : requests) {
             ChoreographerSession session = choreographerDBService.initiateSession(request.getId());
-            RunPlanTask task = new RunPlanTask(choreographerDBService.getPlanById(request.getId()), session);
-            applicationContext.getAutowireCapableBeanFactory().autowireBean(task);
-            task.start();
+            JmsTemplate jmsTemplate = applicationContext.getBean(JmsTemplate.class);
+
+            System.out.println("Sending a message to start-session.");
+            jmsTemplate.convertAndSend("start-session", new ChoreographerStartSessionDTO(session.getId(), request.getId()));
+        }
+    }
+
+    //=================================================================================================
+    @ApiOperation(value = "Notify the Choreographer that a step is done in a session.",
+        tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_CREATED, message = STEP_FINISHED_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = STEP_FINISHED_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+    })
+    @PostMapping(path = STEP_FINISHED_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(value = org.springframework.http.HttpStatus.OK)
+    @ResponseBody public void stepFinished(@RequestBody final List<ChoreographerSessionFinishedStepDataDTO> requests) {
+        for (final ChoreographerSessionFinishedStepDataDTO request : requests) {
+            JmsTemplate jmsTemplate = applicationContext.getBean(JmsTemplate.class);
+
+            System.out.println("Sending message to session-step-done.");
+            jmsTemplate.convertAndSend("session-step-done", request);
         }
     }
 

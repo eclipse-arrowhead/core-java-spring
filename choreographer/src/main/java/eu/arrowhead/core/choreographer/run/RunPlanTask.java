@@ -11,15 +11,11 @@ import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class RunPlanTask extends Thread {
 
@@ -47,7 +43,7 @@ public class RunPlanTask extends Thread {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @Override
+    /*@Override
     public void run() {
         logger.debug("RunPlanTask.run started...");
 
@@ -68,13 +64,13 @@ public class RunPlanTask extends Thread {
     // assistant methods
 
     //-------------------------------------------------------------------------------------------------
-    public void runAction(final ChoreographerAction action) throws InterruptedException {
+    /*public void runAction(final ChoreographerAction action) throws InterruptedException {
         Set<ChoreographerStep> currentSteps = new HashSet<>(action.getFirstStepEntries());
         /*for (ChoreographerStep firstStep : currentSteps) {
             for (int i = 0; i < firstStep.getQuantity(); i++) {
                 runFirstStep(firstStep);
             }
-        }*/
+        }
 
         currentSteps.parallelStream().forEach(firstStep -> {
             try {
@@ -103,10 +99,10 @@ public class RunPlanTask extends Thread {
                 }
             });
         }
-    }
+    }*/
 
     //-------------------------------------------------------------------------------------------------
-    public void runStep(ChoreographerStep step) throws InterruptedException {
+    /*public void runStep(ChoreographerStep step) throws InterruptedException {
         boolean allPreviousStepsDone = true;
         for (ChoreographerStepNextStepConnection conn : step.getSteps()) {
             System.out.println("Previous  step id: " + conn.getStepEntry().getId() + "   name: " + step.getName());
@@ -123,7 +119,7 @@ public class RunPlanTask extends Thread {
             Random rand = new Random();
             int randInt = rand.nextInt(15);
             Thread.sleep(new Random().nextInt(randInt * 1000 + 1000));
-            choreographerDBService.setRunningStepToDone(runningStep.getId());
+            choreographerDBService.setRunningStepStatus(runningStep.getId());
         }
     }
 
@@ -134,11 +130,11 @@ public class RunPlanTask extends Thread {
         Random rand = new Random();
         int randInt = rand.nextInt(15);
         Thread.sleep(new Random().nextInt(randInt * 1000 + 1000));
-        choreographerDBService.setRunningStepToDone(runningStep.getId());
+        choreographerDBService.setRunningStepStatus(runningStep.getId());
     }
 
     //-------------------------------------------------------------------------------------------------
     public ChoreographerRunningStep insertRunningStep(final long stepId, final long sessionId) {
         return choreographerDBService.registerRunningStep(stepId, sessionId, "Running", "Step is running.");
-    }
+    }*/
 }

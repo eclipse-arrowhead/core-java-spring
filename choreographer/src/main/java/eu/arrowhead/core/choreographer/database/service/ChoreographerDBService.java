@@ -26,6 +26,7 @@ import eu.arrowhead.common.exception.InvalidParameterException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.Core;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -408,14 +409,14 @@ public class ChoreographerDBService {
     }
 
     @Transactional(rollbackFor = ArrowheadException.class)
-    public ChoreographerRunningStep setRunningStepToDone(final long runningStepId) {
+    public ChoreographerRunningStep setRunningStepStatus(final long runningStepId, final String status, final String message) {
         try {
             final Optional<ChoreographerRunningStep> runningStepOptional = choreographerRunningStepRepository.findById(runningStepId);
 
             if (runningStepOptional.isPresent()) {
                 ChoreographerRunningStep runningStepToChange = runningStepOptional.get();
-                runningStepToChange.setStatus("Done");
-                runningStepToChange.setMessage("Step execution is done.");
+                runningStepToChange.setStatus(status);
+                runningStepToChange.setMessage(message);
                 return choreographerRunningStepRepository.saveAndFlush(runningStepToChange);
             } else {
                 throw new InvalidParameterException("Running step with given ID doesn't exist.");
@@ -477,6 +478,7 @@ public class ChoreographerDBService {
         }
     }
 
+    //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
     public ChoreographerSession finalizeSession(final long sessionId) {
         logger.debug("finalizeSession started...");
@@ -499,6 +501,30 @@ public class ChoreographerDBService {
         }
     }
 
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public ChoreographerSession setSessionStatus(final long sessionId, final String state) {
+        logger.debug("changeSessionState started...");
+
+        try {
+            Optional<ChoreographerSession> sessionOptional = choreographerSessionRepository.findById(sessionId);
+            if (sessionOptional.isPresent()) {
+                ChoreographerSession session = sessionOptional.get();
+                session.setStatus(state);
+                createWorklog("Session with ID of " + sessionId + " finished successfully.", "");
+                return choreographerSessionRepository.saveAndFlush(session);
+            } else {
+                throw new InvalidParameterException("Session with given ID doesn't exist.");
+            }
+        } catch (InvalidParameterException ex) {
+            throw ex;
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+    //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
     public ChoreographerWorklog createWorklog(final String message, final String exception) {
         logger.debug("createWorklog started...");
@@ -510,6 +536,61 @@ public class ChoreographerDBService {
 
             return choreographerWorklogRepository.saveAndFlush(new ChoreographerWorklog(message, exception));
         } catch (InvalidParameterException ex) {
+            throw ex;
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public ChoreographerRunningStep getRunningStepBySessionIdAndStepId(final long sessionId, final long stepId) {
+        logger.debug("getRunningStepBySessionIdAndStepId started...");
+
+        try {
+            final Optional<ChoreographerRunningStep> runningStepOpt = choreographerRunningStepRepository.findByStepIdAndSessionId(stepId, sessionId);
+            if (runningStepOpt.isPresent()) {
+                return runningStepOpt.get();
+            } else {
+                throw new InvalidParameterException("Running step with session id of '" + sessionId + "' and step id of '" + stepId + "' doesn't exist!");
+            }
+        } catch (final InvalidParameterException ex) {
+            throw ex;
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+    public ChoreographerRunningStep getRunningStepById(final long id) {
+        logger.debug("getRunningStepById started...");
+
+        try {
+            final Optional<ChoreographerRunningStep> runningStepOpt = choreographerRunningStepRepository.findById(id);
+            if (runningStepOpt.isPresent()) {
+                return runningStepOpt.get();
+            } else {
+                throw new InvalidParameterException("Running step with id of '" + id + "' doesn't exist!");
+            }
+        } catch (final InvalidParameterException ex) {
+            throw ex;
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+    public ChoreographerStep getStepById(final long id) {
+        logger.debug("getStepById started...");
+
+        try {
+            final Optional<ChoreographerStep> stepOpt = choreographerStepRepository.findById(id);
+            if (stepOpt.isPresent()) {
+                return stepOpt.get();
+            } else {
+                throw new InvalidParameterException("Step with id of '" + id + "' doesn't exist!");
+            }
+        } catch (final InvalidParameterException ex) {
             throw ex;
         } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
