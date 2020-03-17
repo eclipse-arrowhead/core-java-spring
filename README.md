@@ -74,14 +74,21 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 	       * [Client](#gateway_endpoints_client)
            * [Private](#gateway_endpoints_private)
            * [Management](#gateway_endpoints_mgmt)
-	7. [QoS Monitor (Quality of Service Monitor)](#qos_monitor)
+    7. [Certificate Authority](#ca)
+       * [System Design Description Overview](#ca_sdd)
+       * [Services and Use Cases](#ca_usecases)  
+       * [Endpoints](#ca_endpoints)
+	       * [Client](#ca_endpoints_client)
+           * [Private](#ca_endpoints_private)
+           * [Management](#ca_endpoints_mgmt)
+	  8. [QoS Monitor (Quality of Service Monitor)](#qos_monitor)
        * [System Design Description Overview](#qos_monitor_sdd)
        * [Services and Use Cases](#qos_monitor_usecases)  
        * [Endpoints](#qos_monitor_endpoints)
 	       * [Client](#qos_monitor_endpoints_client)
            * [Private](#qos_monitor_endpoints_private)
            * [Management](#qos_monitor_endpoints_mgmt)
-    8. [System Registry](#systenregistry)
+    9. [System Registry](#systenregistry)
        * [System Design Description Overview](#systemregistry_sdd)
        * [Services and Use Cases](#systemregistry_usecases)
        * [Security](#systemregistry_security)
@@ -6282,6 +6289,106 @@ __ActiveSession__ is the output.
 | `responseQueue` | response messaging queue through the the Relay |
 | `responseControlQueue` | control queue of response messaging through the the Relay |
 | `sessionStartedAt` | Time stamp of session start |
+
+<a name="ca" />
+
+# Certificate Authority
+
+<a name="ca_sdd" />
+
+## System Design Description Overview
+
+The purpose of the Certificate Authority supporting core system is issuing signed certificates to be used in the local cloud.
+
+<a name="ca_provided_services" />
+
+## Provided services
+
+The Certificate Authority provides the following services:
+* [Echo](#ca_endpoints_get_echo)
+* [Certificate signing](#ca_endpoints_sign)
+
+<a name="ca_usecases" />
+
+## Use cases
+
+The main use case of the Certificate Authority is to issue signed certificates to new consumers coming via the Onboarding Controller.
+
+<a name="ca_endpoints" />
+
+## Endpoints
+
+<a name="ca_endpoints_client" />
+
+### Client endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#ca_endpoints_get_echo) | /echo | GET    | -    | OK     |
+
+<a name="ca_endpoints_private" />
+
+### Private endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Sign CSR with the Cloud Certificate](#ca_endpoints_sign) | /sign | POST | CertificateSigningRequest | [CertificateSigningResponse](#ca_certificate_signing_response) |
+
+<a name="ca_endpoints_get_echo" />
+
+### Echo 
+```
+GET /certificate-authority/echo
+```
+
+Returns a "Got it" message with the purpose of testing the core service availability.
+
+<a name="ca_endpoints_sign" />
+
+### Sign CSR with the Cloud Certificate
+
+```
+POST /certificate-authority/sign
+```
+
+Returns the whole certificate chain beginning with the newly generated leaf certificate and ending with the root certificate.
+
+Each certificate's issuer is the same as the subject of the following one. The issuer of the root certificate is the same as the subject.
+
+__Sign CSR with the Cloud Certificate__ inputs:
+
+`https://ca_ip:ca_port/certificate-authority/sign`
+
+| __Sign CSR with the Cloud Certificate__ query parameters |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `encodedCSR` | PKCS #10 Certificate Signing Request | mandatory | Base64 encoded CSR |
+
+<a name="ca_certificate_signing_response" />
+
+__Sign CSR with the Cloud Certificate__ output :
+
+```json
+{
+  "certificateChain": [
+    "<generated client certificate>",
+    "<cloud certificate>",
+    "<root certificate>"
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `certificateChain` | The whole certificate chain in an array of PEM encoded strings |
+
+<a name="ca_endpoints_mgmt" />
+
+### Management endpoint description<br />
+
+The Certificate Authority does not have management endpoints.
 
 <a name="qos_monitor" />
 

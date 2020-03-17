@@ -4,6 +4,8 @@ import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
 import eu.arrowhead.common.dto.internal.CertificateSigningResponseDTO;
+import eu.arrowhead.common.exception.InvalidParameterException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
@@ -62,6 +64,8 @@ public class CertificateAuthorityService {
     }
 
     public CertificateSigningResponseDTO signCertificate(CertificateSigningRequestDTO request) {
+        verifyCertificateSigningRequest(request);
+
         final JcaPKCS10CertificationRequest csr = CertificateAuthorityUtils.decodePKCS10CSR(request);
         CertificateAuthorityUtils.checkCommonName(csr, cloudCommonName);
         CertificateAuthorityUtils.checkCsrSignature(csr);
@@ -85,6 +89,20 @@ public class CertificateAuthorityService {
             return keystore;
         } catch (KeyStoreException | IOException | CertificateException | NoSuchAlgorithmException e) {
             throw new ServiceConfigurationError("Cannot open keystore: " + e.getMessage());
+        }
+    }
+
+    private static void verifyCertificateSigningRequest(CertificateSigningRequestDTO request) {
+        if (request == null) {
+            logger.error("CertificateSigningRequest cannot be null");
+            throw new InvalidParameterException("CertificateSigningRequest cannot be null");
+        }
+
+        final String encodedCSR = request.getEncodedCSR();
+
+        if (encodedCSR == null || encodedCSR.isEmpty()) {
+            logger.error("CertificateSigningRequest cannot be empty");
+            throw new InvalidParameterException("CertificateSigningRequest cannot be empty");
         }
     }
 

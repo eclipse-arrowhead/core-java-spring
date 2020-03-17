@@ -158,6 +158,28 @@ public class CertificateAuthorityControllerTest {
     }
 
     @Test
+    public void testSignPostWithNullCSR() throws Exception {
+        mockMvc.perform(post("/certificate-authority/sign")
+                .secure(true)
+                .with(x509("certificates/valid.pem"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(asJsonString(new CertificateSigningRequestDTO(null))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testSignPostWithInvalidCSR() throws Exception {
+        mockMvc.perform(post("/certificate-authority/sign")
+                .secure(true)
+                .with(x509("certificates/valid.pem"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(asJsonString(new CertificateSigningRequestDTO("INVALID"))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     public void testSignPostWithValidCSR() throws Exception {
         mockMvc.perform(post("/certificate-authority/sign")
                 .secure(true)
