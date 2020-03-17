@@ -74,13 +74,23 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 	       * [Client](#gateway_endpoints_client)
            * [Private](#gateway_endpoints_private)
            * [Management](#gateway_endpoints_mgmt)
-	6. [QoS Monitor (Quality of Service Monitor)](#qos_monitor)
+	7. [QoS Monitor (Quality of Service Monitor)](#qos_monitor)
        * [System Design Description Overview](#qos_monitor_sdd)
        * [Services and Use Cases](#qos_monitor_usecases)  
        * [Endpoints](#qos_monitor_endpoints)
 	       * [Client](#qos_monitor_endpoints_client)
            * [Private](#qos_monitor_endpoints_private)
            * [Management](#qos_monitor_endpoints_mgmt)
+    8. [System Registry](#systenregistry)
+       * [System Design Description Overview](#systemregistry_sdd)
+       * [Services and Use Cases](#systemregistry_usecases)
+       * [Security](#systemregistry_security)
+       * [Endpoints](#systenregistry_endpoints)
+           * [Client](#systenregistry_endpoints_client)
+           * [Private](#systenregistry_endpoints_private)
+           * [Management](#systenregistry_endpoints_mgmt) 
+           * [Removed Endpoints](#systenregistry_removed)
+
 	
 <a name="quickstart" />
 
@@ -6554,3 +6564,103 @@ __Ping Measurment response by system id__ the output :
 ### Get ping measurements by system id 
 
 For private endpoints no detailed description available.
+
+<a name="systemregistry" />
+ 
+# System Registry 
+ 
+<a name="systemregistry_sdd" />
+ 
+## System Design Description Overview
+
+This System provides the database, which stores information related to the System of the currently actively offered Services within the Local Cloud.
+
+The purpose of this System is therefore to allow:
+-	Devices to register which Systems they offer at the moment, making this announcement available to other Application Systems on the network. 
+-	They are also allowed to remove or update their entries when it is necessary. 
+-   Generate a client certificate which can be used by the System to offer Services
+
+<a name="systemregistry_usecases" />
+
+## Services and Use Cases
+
+This System provides two Core Service the __system registration__ and __de-registration__
+
+The __register__ method is used to register a system. The system will contain various metadata as well as a physical endpoint. 
+The various parameters are representing the endpoint information that should be registered.
+
+The __unregister__ method is used to unregister system instances that were previously registered in the Registry. 
+The instance parameter is representing the endpoint information that should be removed.
+
+<a name="systemregistry_security" />
+
+## Security
+
+This System can be secured via the HTTPS protocol. If it is started in secure mode, it verifies whether the Application System possesses a proper X.509 identity certificate and whether that certificate is Arrowhead compliant in its making. This certificate structure and creation guidelines ensure:
+-	Application System is properly bootstrapped into the Local Cloud
+-	The Application System indeed belongs to this Local Cloud
+-	The Application System then automatically has the right to register its Services in the Registry.
+
+If these criteria are met, the Application System’s registration or removal message is processed. An Application System can only delete or alter entries that contain the Device as the System Provider in the entry. 
+
+<a name="systemregistry_endpoints" />
+
+## Endpoints
+
+The System Registry offers three types of endpoints. Client, Management and Private.
+
+Swagger API documentation is available on: `https://<host>:<port>` <br />
+The base URL for the requests: `http://<host>:<port>/systemregistry`
+
+<a name="systemregistry_endpoints_client" />
+
+### Client endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#systemregistry_endpoints_get_echo)     | /echo       | GET    | -     | OK     |
+| [Query](#systemregistry_endpoints_post_query)    | /query      | POST   | [SystemQueryForm](#datastructures_systemqueryform) | [SystemQueryList](#datastructures_systemquerylist) |
+| [Register](#systemregistry_endpoints_post_register) | /register   | POST   | [SystenRegistryEntry](#datastructures_systemregistryentry) | [SystenRegistryEntry](#datastructures_systemregistryentry) |
+| [Unregister](#systemregistry_delete_unregister) | /unregister | DELETE | System Name, Address and Port in query parameters| OK |
+
+<a name="systemregistry_endpoints_private" />
+
+### Private endpoint description<br />
+
+These services can only be used by other core services, therefore they are not part of the public API.
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Query System](#systemregistry_endpoints_post_query_system) | /query/system | POST | System | System |
+| [Query System By ID](#systemregistry_endpoints_get_query_system_id) | /query/system/{id} | GET | ID | System|
+
+<a name="systemregistry_endpoints_mgmt" />
+
+### Management endpoint description<br />
+
+These endpoints are mainly used by the Management Tool and Cloud Administrators.
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Get all entries](#systemregistry_endpoints_get_mgmt) | /mgmt/ | GET | - | [SystemRegistryEntryList](#datastructures_systemregistryentrylist) |
+| [Add an entry](#systemregistry_endpoints_post_mgmt) | /mgmt/ | POST | [SystemRegistryEntry](#datastructures_systemregistryentry) | [SystemRegistryEntry](#datastructures_systemregistry_entry) |
+| [Get an entry by ID](#systemregistry_endpoints_get_mgmt) | /mgmt/{id} | GET | SystemRegistryEntryID | [SystemRegistryEntry](#datastructures_systemregistryentry) |
+| [Replace an entry by ID](#systemregistry_endpoints_put_mgmt) | /mgmt/{id} | PUT | [SystemRegistryEntry](#datastructures_systemregistryentry) | [SystemRegistryEntry](#datastructures_systemregistryentry) |
+| [Modify an entry by ID](#systemregistry_endpoints_patch_mgmt) | /mgmt/{id} | PATCH | [SystemRegistryEntry](#datastructures_systemregistryentry) | [SystemRegistryEntry](#datastructures_systemregistryentry) |
+| [Delete and entry by ID](systemregistry_endpoints_delete_mgmt) | /mgmt/{id} | DELETE | SystemRegistryEntryID | - |
+| [Get all devices](#systemregistry_endpoints_get_devices) | /mgmt/devices | GET | - | [DeviceList](#datastructures_devicelist) |
+| [Add a device](#systemregistry_endpoints_post_devices) | /mgmt/devices | POST | [Device](#datastructure_device) | [Device](#datastructure_device) |
+| [Get a device by ID](#systemregistry_endpoints_get_device_id) | /mgmt/devices/{id} | GET | DeviceID | [Device](#datastructure_device) |
+| [Replace a device by ID](#systemregistry_endpoints_put_device_id) | /mgmt/devices/{id} | PUT | [Device](#datastructure_device) | [Device](#datastructure_device) |
+| [Modify a device by ID](#systemregistry_endpoints_patch_device_id) | /mgmt/devices/{id} | PATCH | [Device](#datastructure_device) | [Device](#datastructure_device) |
+| [Delete a device by ID](#systemregistry_endpoints_delete_device_id) | /mgmt/devices/{id} | DELETE | DeviceID | - |
+| [Get all systems](#systemregistry_endpoints_get_systems) | /mgmt/systems | GET | - | [SystemList](#datastructures_systemlist) |
+| [Add a system](#systemregistry_endpoints_post_system) | /mgmt/systems | POST | [System](#datastructures_system) | [System](#datastructures_system) |
+| [Get a system by ID](#systemregistry_endpoints_get_system_id) | /mgmt/systems/{id} | GET | SystemID | [System](#datastructures_system) |
+| [Replace a system by ID](#systemregistry_endpoints_put_system_id) | /mgmt/systems/(id} | PUT | [System](#datastructures_system) | [System](#datastructures_system) |
+| [Modify a system by ID](#systemregistry_endpoints_patch_system_id) | /mgmt/systems/{id} | PATCH | [System](#datastructures_system) | [System](#datastructures_system) |
+| [Delete a system by ID](#systemregistry_endpoints_delete_system_id) | /mgmt/systems/{id} | DELETE | SystemID | - |
+
+### Detailed description<br />
+
+A detailed description is available in the release notes.
