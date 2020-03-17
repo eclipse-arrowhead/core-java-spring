@@ -54,9 +54,11 @@ public class Receiver {
 
         System.out.println(currentStep.getName());
 
-        boolean allPreviousStepsDone = true;
         for (ChoreographerStepNextStepConnection nextStep : currentStep.getNextSteps()) {
+            boolean allPreviousStepsDone = true;
+
             System.out.println(nextStep.getNextStepEntry().getName() + " in for");
+            // Check if all previous steps of the next step are done.
             for (ChoreographerStepNextStepConnection prevStep : nextStep.getNextStepEntry().getSteps()) {
                 System.out.println(prevStep.getId() + "    " + prevStep.getStepEntry().getName());
                 ChoreographerRunningStep prevRunningStep = choreographerDBService.getRunningStepBySessionIdAndStepId(sessionId, prevStep.getId());
@@ -64,11 +66,14 @@ public class Receiver {
                     allPreviousStepsDone = false;
                 }
             }
+
+            if (allPreviousStepsDone) {
+                // Run next step
+                insertInitiatedRunningStep(nextStep.getNextStepEntry().getId(), sessionId);
+            }
         }
 
-        if (allPreviousStepsDone) {
-            
-        }
+
 
     }
 
