@@ -222,7 +222,7 @@ public class SenderSideRelayTestThread extends Thread implements MessageListener
 			} catch (final JMSException | ArrowheadException | InterruptedException ex) {
 				logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
 				logger.debug("Stacktrace:", ex);
-				relayTestDBService.logErrorIntoMeasurmentsTable(targetCloud, relay, b, null, ex);
+				relayTestDBService.logErrorIntoMeasurementsTable(targetCloud, relay, b, null, ex);
 				closeAndInterrupt();
 			}
 		}

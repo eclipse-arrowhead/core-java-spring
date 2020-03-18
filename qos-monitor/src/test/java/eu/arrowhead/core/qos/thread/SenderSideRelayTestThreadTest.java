@@ -1,7 +1,11 @@
 package eu.arrowhead.core.qos.thread;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -56,6 +60,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayResponseDTO;
+import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.core.qos.database.service.RelayTestDBService;
 import eu.arrowhead.relay.gateway.ConsumerSideRelayInfo;
 import eu.arrowhead.relay.gateway.ControlRelayInfo;
 import eu.arrowhead.relay.gateway.GatewayRelayClient;
@@ -69,6 +75,7 @@ public class SenderSideRelayTestThreadTest {
 	
 	private SenderSideRelayTestThread testingObject;
 	private GatewayRelayClient relayClient;
+	private RelayTestDBService relayTestDBService;
 	
 	//=================================================================================================
 	// methods
@@ -79,7 +86,8 @@ public class SenderSideRelayTestThreadTest {
 		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwms8AvBuIxqPjXmyGnqds1EIkvX/kjl+kW9a0SObsp1n/u567vbpYSa+ESZNg4KrxAHJjA8M1TvpGkq4LLrJkEUkC2WNxq3qbWQbseZrIDSpcn6C7gHObJOLjRSpGTSlRHZfncRs1h+MLApVhf6qf611mZNDgN5AqaMtBbB3UzArE3CgO0jiKzBgZGyT9RSKccjlsO6amBgZrLBY0+x6VXPJK71hwZ7/1Y2CHGsgSb20/g2P82qLYf91Eht33u01rcptsETsvGrsq6SqIKtHtmWkYMW1lWB7p2mwFpAft8llUpHewRRAU1qsKYAI6myc/sPmQuQul+4yESMSBu3KyQIDAQAB";
 		
 		relayClient = Mockito.mock(GatewayRelayClient.class);
-		testingObject = new SenderSideRelayTestThread(getTestApplicationContext(), relayClient, getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), publicKey, "queueId", (byte) 10, 2048, 30000);
+		relayTestDBService = Mockito.mock(RelayTestDBService.class);
+		testingObject = new SenderSideRelayTestThread(getTestApplicationContext(), relayClient, getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), publicKey, "queueId", (byte) 2, 2048, 1000);
 		final MessageProducer producer = getTestProducer();
 		testingObject.init(producer, producer);
 	}
@@ -238,6 +246,112 @@ public class SenderSideRelayTestThreadTest {
 		Assert.assertEquals(1, blockingQueue.size());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOnMessageSenderFlagFalseThenEcho() throws JMSException {
+		final byte[] someBytes = new byte[] { 1, 2 , 3};
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(someBytes);
+		doNothing().when(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		
+		ReflectionTestUtils.setField(testingObject, "senderFlag", false);
+		testingObject.onMessage(getTestTextMessage("does not matter", "blabla"));
+
+		verify(relayClient, times(1)).getBytesFromMessage(any(Message.class), any(PublicKey.class));
+		verify(relayClient, times(1)).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), eq(someBytes));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOnMessageSenderFlagTrue() throws JMSException {
+		final byte[] someBytes = new byte[] { 1, 2 , 3};
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(someBytes);
+		
+		ReflectionTestUtils.setField(testingObject, "senderFlag", true);
+		testingObject.onMessage(getTestTextMessage("does not matter", "blabla"));
+
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		final BlockingQueue<Object> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
+
+		verify(relayClient, times(1)).getBytesFromMessage(any(Message.class), any(PublicKey.class));
+		verify(relayClient, never()).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), eq(someBytes));
+		Assert.assertEquals(1, blockingQueue.size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalStateException.class)
+	public void testRunThreadNotInitialized() {
+		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwms8AvBuIxqPjXmyGnqds1EIkvX/kjl+kW9a0SObsp1n/u567vbpYSa+ESZNg4KrxAHJjA8M1TvpGkq4LLrJkEUkC2WNxq3qbWQbseZrIDSpcn6C7gHObJOLjRSpGTSlRHZfncRs1h+MLApVhf6qf611mZNDgN5AqaMtBbB3UzArE3CgO0jiKzBgZGyT9RSKccjlsO6amBgZrLBY0+x6VXPJK71hwZ7/1Y2CHGsgSb20/g2P82qLYf91Eht33u01rcptsETsvGrsq6SqIKtHtmWkYMW1lWB7p2mwFpAft8llUpHewRRAU1qsKYAI6myc/sPmQuQul+4yESMSBu3KyQIDAQAB";
+		
+		final SenderSideRelayTestThread thread = new SenderSideRelayTestThread(getTestApplicationContext(), getTestClient(false), getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), publicKey, "queueId",
+																			   (byte) 10, 2048, 30000);
+		thread.run();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRunNoTimeout() throws JMSException, InterruptedException {
+		doNothing().doThrow(ArrowheadException.class).when(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		doNothing().when(relayTestDBService).logErrorIntoMeasurementsTable(any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyInt(), anyString(), any(Throwable.class));
+
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		final BlockingQueue<Object> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
+		blockingQueue.put(new Object());
+
+		testingObject.run();
+		
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		final Map<Byte,long[]> testResults = (Map) ReflectionTestUtils.getField(testingObject, "testResults");
+		final long[] times = testResults.get((byte) 0);
+		Assert.assertTrue(times[1] - times[0] < 1001);
+		verify(relayClient, times(2)).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		verify(relayTestDBService, times(1)).logErrorIntoMeasurementsTable(any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyInt(), eq(null), any(Throwable.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRunTimeout() throws JMSException {
+		doNothing().doThrow(ArrowheadException.class).when(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		doNothing().when(relayTestDBService).logErrorIntoMeasurementsTable(any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyInt(), anyString(), any(Throwable.class));
+		
+		testingObject.run();
+		
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		final Map<Byte,long[]> testResults = (Map) ReflectionTestUtils.getField(testingObject, "testResults");
+		final long[] times = testResults.get((byte) 0);
+		Assert.assertEquals(1001, times[1] - times[0]);
+		verify(relayClient, times(2)).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		verify(relayTestDBService, times(1)).logErrorIntoMeasurementsTable(any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyInt(), eq(null), any(Throwable.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testRunOk() throws JMSException, InterruptedException {
+		doNothing().when(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		doNothing().when(relayTestDBService).storeMeasurements(any(CloudResponseDTO.class), any(RelayResponseDTO.class), any(Map.class));
+		doNothing().when(relayClient).sendSwitchControlMessage(any(Session.class),any(MessageProducer.class), anyString());
+
+		@SuppressWarnings({ "rawtypes" })
+		final BlockingQueue<Object> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
+		blockingQueue.put(new Object());
+		blockingQueue.put(new Object());
+		blockingQueue.put(new Object());
+		
+		boolean senderFlag = (boolean) ReflectionTestUtils.getField(testingObject, "senderFlag");
+		Assert.assertTrue(senderFlag);
+		
+		testingObject.run();
+		
+		senderFlag = (boolean) ReflectionTestUtils.getField(testingObject, "senderFlag");
+		Assert.assertFalse(senderFlag);
+		
+		verify(relayClient, times(2)).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		verify(relayTestDBService, times(1)).storeMeasurements(any(CloudResponseDTO.class), any(RelayResponseDTO.class), any(Map.class));
+		verify(relayClient, times(1)).sendSwitchControlMessage(any(Session.class),any(MessageProducer.class), anyString());
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -325,7 +439,7 @@ public class SenderSideRelayTestThreadTest {
 			public <T> T getBean(final Class<T> requiredType, final Object... args) throws BeansException { return null; }
 			public Object getBean(final String name, final Object... args) throws BeansException { return null;	}
 			public <T> T getBean(final String name, final Class<T> requiredType) throws BeansException { return null; }
-			public <T> T getBean(final Class<T> requiredType) throws BeansException { return null; }
+			@SuppressWarnings("unchecked") public <T> T getBean(final Class<T> requiredType) throws BeansException { return (T) relayTestDBService; }
 			public Object getBean(final String name) throws BeansException { return null; }
 			public String[] getAliases(final String name) { return null; }
 			public boolean containsBean(final String name) { return false; }
