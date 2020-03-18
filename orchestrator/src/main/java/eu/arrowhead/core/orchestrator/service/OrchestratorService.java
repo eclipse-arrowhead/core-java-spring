@@ -35,6 +35,8 @@ import eu.arrowhead.common.dto.internal.ICNResultDTO;
 import eu.arrowhead.common.dto.internal.OrchestratorStoreResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSMeasurementAttributesFormDTO;
 import eu.arrowhead.common.dto.internal.QoSReservationListResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSTemporaryLockRequestDTO;
+import eu.arrowhead.common.dto.internal.QoSTemporaryLockResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFlags;
 import eu.arrowhead.common.dto.shared.OrchestrationFlags.Flag;
@@ -416,6 +418,18 @@ public class OrchestratorService {
 	public QoSReservationListResponseDTO getAllQoSReservationResponse() {
 		return DTOConverter.convertQoSReservationListToQoSReservationListResponseDTO(qosManager.fetchAllReservation());
 	}
+
+	//-------------------------------------------------------------------------------------------------
+	public QoSTemporaryLockResponseDTO lockProvidersTemporarily(final QoSTemporaryLockRequestDTO request) {
+		logger.debug("lockProvidersTemporarily started ...");
+		
+		validateSystemRequestDTO(request.getRequester());
+		if (request.getOrList() == null || request.getOrList().isEmpty()) {
+			return new QoSTemporaryLockResponseDTO();
+		}
+		
+		return new QoSTemporaryLockResponseDTO(qosManager.reserveProvidersTemporarily(request.getOrList(), request.getRequester()));
+	}
 	
 	//=================================================================================================
 	// assistant methods
@@ -424,6 +438,7 @@ public class OrchestratorService {
 	private boolean isInterCloudOrchestrationPossible(final OrchestrationFlags flags) {
 		return gateKeeperIsPresent && flags.get(Flag.ENABLE_INTER_CLOUD);
 	}
+	
 	
 	//-------------------------------------------------------------------------------------------------
 	private void checkServiceRequestForm(final OrchestrationFormRequestDTO request, final boolean cloudCheckInProviders) {
@@ -927,15 +942,21 @@ public class OrchestratorService {
 															   final Map<String,String> commands) {
 		logger.debug("callInterCloudNegotiation with detailed parameters started ...");
 
-		final ICNRequestFormDTO icnRequest = new ICNRequestFormDTO(serviceQueryFormDTO,	cloudId, systemRequestDTO, preferredSystemsFromTargetCloud,	flags);
+		final ICNRequestFormDTO icnRequest = new ICNRequestFormDTO(serviceQueryFormDTO,	cloudId, systemRequestDTO, preferredSystemsFromTargetCloud,	flags, commands);
 		final ICNResultDTO icnResultDTO = orchestratorDriver.doInterCloudNegotiation(icnRequest);
         if (icnResultDTO == null || icnResultDTO.getResponse().isEmpty()) {
         	// Return empty response
            return new OrchestrationResponseDTO();
 		}
 		
-        final List<OrchestrationResultDTO> verifiedResults = qosManager.verifyInterCloudServices(icnResultDTO.getResponse(), qosRequirements, commands);
-        icnResultDTO.setResponse(verifiedResults);
+        if (flags.getOrDefault(Flag.ENABLE_QOS, false)) {
+        	final List<OrchestrationResultDTO> verifiedResults = qosManager.verifyInterCloudServices(icnResultDTO.getResponse(), qosRequirements, commands);
+        	if (commands.containsKey(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY) && verifiedResults.isEmpty()) {
+				// Means that the reserved provider not passed the final verification
+        		// TODO bordi release the reservation via gateway relay
+			}
+        	icnResultDTO.setResponse(verifiedResults);
+		}
         
         updateOrchestrationResultWarningWithForeignWarning(icnResultDTO.getResponse());
 		

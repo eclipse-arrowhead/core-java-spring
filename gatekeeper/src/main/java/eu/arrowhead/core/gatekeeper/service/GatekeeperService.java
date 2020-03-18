@@ -45,6 +45,8 @@ import eu.arrowhead.common.dto.internal.QoSMonitorSenderConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSReservationResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSTemporaryLockRequestDTO;
+import eu.arrowhead.common.dto.internal.QoSTemporaryLockResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
@@ -255,7 +257,7 @@ public class GatekeeperService {
 		final List<RelayRequestDTO> preferredRelays = getPreferredRelays(targetCloud);
 		final List<RelayRequestDTO> knownRelays = getKnownRelays();
 		final ICNProposalRequestDTO proposal = new ICNProposalRequestDTO(form.getRequestedService(), requesterCloud, form.getRequesterSystem(), form.getPreferredSystems(), preferredRelays,
-																		 knownRelays, form.getNegotiationFlags(), gatewayIsPresent);
+																		 knownRelays, form.getNegotiationFlags(), gatewayIsPresent, form.getCommands());
 		String consumerGWPublicKey = null;
 		if (gatewayIsPresent) {
 			consumerGWPublicKey = gatekeeperDriver.queryGatewayPublicKey();
@@ -329,11 +331,29 @@ public class GatekeeperService {
 			return new ICNProposalResponseDTO();
 		}
 		
-		orchestrationResponse = filterOutReservedProviders(orchestrationResponse);
-		if (orchestrationResponse.getResponse().isEmpty()) { // no usable results
-			return new ICNProposalResponseDTO();
+		final boolean needReservation = request.getNegotiationFlags().getOrDefault(Flag.ENABLE_QOS, false) && request.getCommands().containsKey(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY);
+		
+		if (needReservation) {
+			// filter out reserved providers and lock remained results temporary 
+			final QoSTemporaryLockResponseDTO lockedResults = gatekeeperDriver.sendQoSTemporaryLockRequest(new QoSTemporaryLockRequestDTO(request.getRequesterSystem(),
+																																		  orchestrationResponse.getResponse()));
+			orchestrationResponse.setResponse(lockedResults.getResponse());
+			if (orchestrationResponse.getResponse().isEmpty()) { // no usable results
+				return new ICNProposalResponseDTO();
+			}
+		} else {
+			// filter out reserved providers
+			orchestrationResponse = filterOutReservedProviders(orchestrationResponse);
+			if (orchestrationResponse.getResponse().isEmpty()) { // no usable results
+				return new ICNProposalResponseDTO();
+			}
 		}
 		
+		orchestrationResponse = gatekeeperDriver.queryAuthorizationBasedOnOrchestrationResponse(request.getRequesterCloud(), orchestrationResponse);
+		if (orchestrationResponse.getResponse().isEmpty()) { // no accessible results
+			return new ICNProposalResponseDTO();
+		}		
+
 		if (request.getNegotiationFlags().getOrDefault(Flag.ENABLE_QOS, false)) {
 			orchestrationResponse = fillOrchestrationResultsWithLocalQoSMeasurements(orchestrationResponse);
 			if (orchestrationResponse.getResponse().isEmpty()) { // no usable results
@@ -341,12 +361,14 @@ public class GatekeeperService {
 			}
 		}
 		
-		orchestrationResponse = gatekeeperDriver.queryAuthorizationBasedOnOchestrationResponse(request.getRequesterCloud(), orchestrationResponse);
-		if (orchestrationResponse.getResponse().isEmpty()) { // no accessible results
-			return new ICNProposalResponseDTO();
-		}		
-
 		if (!gatewayIsMandatory) {
+			if (needReservation) {
+				// If QoS enabled, then preferred systems defined in the request already contains only pre-verified systems by QoS Manager of requester cloud. If no preferred system remain after the filters,
+				// a 'not pre-verified' provider will be reserved and returned. (Final verification is proceed by the requester cloud in every case)
+				final OrchestrationResultDTO selectedResult = icnProviderMatchmaker.doMatchmaking(orchestrationResponse.getResponse(), new ICNProviderMatchmakingParameters(request.getPreferredSystems()));
+				// TODO bordi reserve provider finally
+				return new ICNProposalResponseDTO(List.of(selectedResult));
+			}
 			return new ICNProposalResponseDTO(orchestrationResponse.getResponse());
 		} 
 
@@ -357,7 +379,7 @@ public class GatekeeperService {
 		}
 		
 		// In gateway mode we have to select one provider even if matchmaking is not enabled because we have to build an expensive connection between the consumer and the provider.
-		// If QoS enabled, then preferred system defined in the request already contains only pre-verified systems by QoS Manager of requester cloud. If no preferred system remain after the filters, then
+		// If QoS enabled, then preferred systems defined in the request already contains only pre-verified systems by QoS Manager of requester cloud. If no preferred system remain after the filters, then
 		// gateway will connect to a 'not pre-verified' provider. (Final verification is proceed by the requester cloud in every case)
 		final OrchestrationResultDTO selectedResult = icnProviderMatchmaker.doMatchmaking(orchestrationResponse.getResponse(), new ICNProviderMatchmakingParameters(request.getPreferredSystems()));
 		
@@ -366,6 +388,10 @@ public class GatekeeperService {
 																											  providerSystem, request.getRequesterCloud(), getOwnCloud(),
 																											  request.getRequestedService().getServiceDefinitionRequirement(), 
 																											  request.getConsumerGatewayPublicKey());
+		if (needReservation) {			
+			//TODO confirm reservation
+		}
+
 		final GatewayProviderConnectionResponseDTO response = gatekeeperDriver.connectProvider(connectionRequest);
 		
 		return new ICNProposalResponseDTO(selectedResult, DTOConverter.convertRelayToRelayResponseDTO(selectedRelay), response);
