@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
-import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.security.CoreSystemAccessControlFilter;
 
 @Component
