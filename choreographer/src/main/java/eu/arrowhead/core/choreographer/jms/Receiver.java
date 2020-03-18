@@ -77,7 +77,7 @@ public class Receiver {
             }
 
             if (canGoToNextAction) {
-                @// TODO: 2020. 03. 18. Test what happens if there is multiple Actions in a plan. 
+                // TODO: 2020. 03. 18. Test what happens if there is multiple Actions in a plan.
                 System.out.println("If there is next Action then it should run now! Testing needed.");
                 ChoreographerAction nextAction = currentAction.getNextAction();
                 if (nextAction != null) {
@@ -85,7 +85,8 @@ public class Receiver {
 
                     firstStepsInNewAction.parallelStream().forEach(firstStepInNewAction -> {
                         try {
-                            runFirstStep(firstStepInNewAction, sessionId);
+                            //runFirstStep(firstStepInNewAction, sessionId);
+                            runStep(firstStepInNewAction, sessionId);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -101,7 +102,7 @@ public class Receiver {
             // Check if all previous steps of the next step are done.
             for (ChoreographerStepNextStepConnection prevStep : nextStep.getNextStepEntry().getSteps()) {
                 System.out.println(prevStep.getId() + "    " + prevStep.getStepEntry().getName());
-                ChoreographerRunningStep prevRunningStep = choreographerDBService.getRunningStepBySessionIdAndStepId(sessionId, prevStep.getId());
+                ChoreographerRunningStep prevRunningStep = choreographerDBService.getRunningStepBySessionIdAndStepId(sessionId, prevStep.getStepEntry().getId());
                 if (!prevRunningStep.getStatus().equals("Done")) {
                     allPreviousStepsDone = false;
                 }
@@ -109,7 +110,12 @@ public class Receiver {
 
             if (allPreviousStepsDone) {
                 // Run next step
-                insertInitiatedRunningStep(nextStep.getNextStepEntry().getId(), sessionId);
+                try {
+                    runStep(nextStep.getNextStepEntry(), sessionId);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                //insertInitiatedRunningStep(nextStep.getNextStepEntry().getId(), sessionId);
             }
         }
     }
@@ -118,6 +124,11 @@ public class Receiver {
     public void runFirstStep(ChoreographerStep firstStep, long sessionId) throws InterruptedException {
         System.out.println("Running " + firstStep.getId() + "     " + firstStep.getName() + "       sessionId: " + sessionId + "!");
         ChoreographerRunningStep runningStep = insertInitiatedRunningStep(firstStep.getId(), sessionId);
+    }
+
+    public void runStep(ChoreographerStep step, long sessionId) throws InterruptedException {
+        System.out.println("Running " + step.getId() + "     " + step.getName() + "       sessionId: " + sessionId + "!");
+        ChoreographerRunningStep runningStep = insertInitiatedRunningStep(step.getId(), sessionId);
     }
 
     //-------------------------------------------------------------------------------------------------

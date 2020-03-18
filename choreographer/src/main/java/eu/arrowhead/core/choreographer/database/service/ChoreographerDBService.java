@@ -139,7 +139,7 @@ public class ChoreographerDBService {
         final List<ChoreographerStep> nextSteps = new ArrayList<>(nextStepNames.size());
         try {
             for(final String nextStepName : nextStepNames) {
-                final Optional<ChoreographerStep> stepOptional = choreographerStepRepository.findByName(nextStepName);
+                final Optional<ChoreographerStep> stepOptional = choreographerStepRepository.findByNameAndActionId(nextStepName, actionId);
                 if (stepOptional.isPresent()) {
                     nextSteps.add(stepOptional.get());
                 } else {
