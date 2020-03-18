@@ -159,7 +159,7 @@ public class OrchestratorService {
 			return new OrchestrationResponseDTO();
 		}
 
-		if (flags.getOrDefault(Flag.ENABLE_QOS, false)) {
+		if (flags.get(Flag.ENABLE_QOS)) {
 			// Pre-verification in order to choose an appropriate cloud
 			final List<GSDPollResponseDTO> verifiedResults = qosManager.preVerifyInterCloudServices(gsdResult.getResults(), request);
 			final List<PreferredProviderDataDTO> verifiedProviders = new ArrayList<>();
@@ -173,18 +173,17 @@ public class OrchestratorService {
 			}
 			gsdResult.setResults(verifiedResults);
 			request.setPreferredProviders(verifiedProviders);
-			flags.put(Flag.ONLY_PREFERRED, true);
-			request.setOrchestrationFlags(flags);
-		} 
+		}
 		
-		final CloudMatchmakingParameters iCCMparams = new CloudMatchmakingParameters(gsdResult, getPreferredClouds(request.getPreferredProviders()), flags.get(Flag.ONLY_PREFERRED));
+		final boolean onlyPreferredMatchmakingParam = flags.get(Flag.ENABLE_QOS) ? true : flags.get(Flag.ONLY_PREFERRED);
+		final CloudMatchmakingParameters iCCMparams = new CloudMatchmakingParameters(gsdResult, getPreferredClouds(request.getPreferredProviders()), onlyPreferredMatchmakingParam);
 		final CloudResponseDTO targetCloud = cloudMatchmaker.doMatchmaking(iCCMparams);
         if (targetCloud == null || Utilities.isEmpty(targetCloud.getName())) {
         	// Return empty response
             return new OrchestrationResponseDTO();
  		}	
         
-        return callInterCloudNegotiation(request, targetCloud, flags); // TODO bordi: Providers should be verified again on the other cloud due to metadata and warnings manipulations
+        return callInterCloudNegotiation(request, targetCloud, flags);
 	}
 
 	//-------------------------------------------------------------------------------------------------	
@@ -894,7 +893,8 @@ public class OrchestratorService {
 		flags.put(Flag.MATCHMAKING, true);
 		request.setOrchestrationFlags(flags);
 		
-		return callInterCloudNegotiation(preferredSystemsFromTargetCloud, serviceQueryFormDTO, systemRequestDTO, cloudId, request.getOrchestrationFlags(), preferredProviderDataDTOList);
+		return callInterCloudNegotiation(preferredSystemsFromTargetCloud, serviceQueryFormDTO, systemRequestDTO, cloudId, request.getOrchestrationFlags(), preferredProviderDataDTOList,
+										 request.getQosRequirements(), request.getCommands());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -916,13 +916,15 @@ public class OrchestratorService {
 		final long cloudId = targetCloud.getId();
 		final List<PreferredProviderDataDTO> preferredProviderDataDTOList = request.getPreferredProviders();
 		
-		return callInterCloudNegotiation(preferredSystemsFromTargetCloud, serviceQueryFormDTO, systemRequestDTO, cloudId, flags, preferredProviderDataDTOList);
+		return callInterCloudNegotiation(preferredSystemsFromTargetCloud, serviceQueryFormDTO, systemRequestDTO, cloudId, flags, preferredProviderDataDTOList, request.getQosRequirements(),
+										 request.getCommands());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private OrchestrationResponseDTO callInterCloudNegotiation(final List<SystemRequestDTO> preferredSystemsFromTargetCloud, final ServiceQueryFormDTO serviceQueryFormDTO, 
 															   final SystemRequestDTO systemRequestDTO,	final long cloudId, final OrchestrationFlags flags, 
-															   final List<PreferredProviderDataDTO> preferredProviderDataDTOList) {
+															   final List<PreferredProviderDataDTO> preferredProviderDataDTOList, final Map<String,String> qosRequirements,
+															   final Map<String,String> commands) {
 		logger.debug("callInterCloudNegotiation with detailed parameters started ...");
 
 		final ICNRequestFormDTO icnRequest = new ICNRequestFormDTO(serviceQueryFormDTO,	cloudId, systemRequestDTO, preferredSystemsFromTargetCloud,	flags);
@@ -932,6 +934,9 @@ public class OrchestratorService {
            return new OrchestrationResponseDTO();
 		}
 		
+        final List<OrchestrationResultDTO> verifiedResults = qosManager.verifyInterCloudServices(icnResultDTO.getResponse(), qosRequirements, commands);
+        icnResultDTO.setResponse(verifiedResults);
+        
         updateOrchestrationResultWarningWithForeignWarning(icnResultDTO.getResponse());
 		
        if (flags.get(Flag.MATCHMAKING)) {

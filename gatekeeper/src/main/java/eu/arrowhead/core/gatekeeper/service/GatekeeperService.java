@@ -193,12 +193,12 @@ public class GatekeeperService {
 		final Set<String> availableInterfaces = new HashSet<>();
 		int numOfProviders = 0;
 		final List<QoSMeasurementAttributesFormDTO> qosMeasurements = new ArrayList<>();
-		final Set<String> reservedProviderIdAndSystemIdPairs = getReservedProviderIdAndSystemIdPairs();
+		final Set<String> reservedProviderIdAndServiceIdPairs = getReservedProviderIdAndServiceIdPairs();
 		
 		for (final ServiceRegistryResponseDTO srEntryDTO : srQueryResult.getServiceQueryData()) {
 			final long providerId = srEntryDTO.getProvider().getId();
 			if (authorizedProviderIdsWithInterfaceIdList.containsKey(providerId) 
-					&& !reservedProviderIdAndSystemIdPairs.contains(srEntryDTO.getProvider().getId() + "-" + srEntryDTO.getServiceDefinition().getId())) {
+					&& !reservedProviderIdAndServiceIdPairs.contains(srEntryDTO.getProvider().getId() + "-" + srEntryDTO.getServiceDefinition().getId())) {
 				
 				final Set<String> providerInterfaces = new HashSet<>();
 				for (final ServiceInterfaceResponseDTO interfaceDTO : srEntryDTO.getInterfaces()) {
@@ -306,6 +306,11 @@ public class GatekeeperService {
 		
 		validateICNProposalRequest(request);
 		
+		// Check whether need for QoS can be fulfilled or not
+		if (request.getNegotiationFlags().getOrDefault(Flag.ENABLE_QOS, false) && !gatekeeperDriver.checkQoSEnabled()) {
+			return new ICNProposalResponseDTO();
+		}
+		
 		final PreferredProviderDataDTO[] preferredProviders = getPreferredProviders(request.getPreferredSystems());
 		final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO.Builder(request.getRequesterSystem())
 																							 .requesterCloud(request.getRequesterCloud())
@@ -324,10 +329,22 @@ public class GatekeeperService {
 			return new ICNProposalResponseDTO();
 		}
 		
+		orchestrationResponse = filterOutReservedProviders(orchestrationResponse);
+		if (orchestrationResponse.getResponse().isEmpty()) { // no usable results
+			return new ICNProposalResponseDTO();
+		}
+		
+		if (request.getNegotiationFlags().getOrDefault(Flag.ENABLE_QOS, false)) {
+			orchestrationResponse = fillOrchestrationResultsWithLocalQoSMeasurements(orchestrationResponse);
+			if (orchestrationResponse.getResponse().isEmpty()) { // no usable results
+				return new ICNProposalResponseDTO();
+			}
+		}
+		
 		orchestrationResponse = gatekeeperDriver.queryAuthorizationBasedOnOchestrationResponse(request.getRequesterCloud(), orchestrationResponse);
 		if (orchestrationResponse.getResponse().isEmpty()) { // no accessible results
 			return new ICNProposalResponseDTO();
-		}
+		}		
 
 		if (!gatewayIsMandatory) {
 			return new ICNProposalResponseDTO(orchestrationResponse.getResponse());
@@ -339,7 +356,9 @@ public class GatekeeperService {
 			throw new AuthException("No common communication relay was found.");
 		}
 		
-		// in gateway mode we have to select one provider even if matchmaking is not enabled because we have to build an expensive connection between the consumer and the provider
+		// In gateway mode we have to select one provider even if matchmaking is not enabled because we have to build an expensive connection between the consumer and the provider.
+		// If QoS enabled, then preferred system defined in the request already contains only pre-verified systems by QoS Manager of requester cloud. If no preferred system remain after the filters, then
+		// gateway will connect to a 'not pre-verified' provider. (Final verification is proceed by the requester cloud in every case)
 		final OrchestrationResultDTO selectedResult = icnProviderMatchmaker.doMatchmaking(orchestrationResponse.getResponse(), new ICNProviderMatchmakingParameters(request.getPreferredSystems()));
 		
 		final SystemRequestDTO providerSystem = DTOConverter.convertSystemResponseDTOToSystemRequestDTO(selectedResult.getProvider());
@@ -738,7 +757,7 @@ public class GatekeeperService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Set<String> getReservedProviderIdAndSystemIdPairs() {
+	private Set<String> getReservedProviderIdAndServiceIdPairs() {
 		logger.debug("getReservedProviderIdAndSystemIdPairs started...");
 		
 		final Set<String> reservedProviderIdAndSystemIdPairs = new HashSet<>();
@@ -751,5 +770,51 @@ public class GatekeeperService {
 			}
 		}
 		return reservedProviderIdAndSystemIdPairs;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private OrchestrationResponseDTO filterOutReservedProviders(final OrchestrationResponseDTO response) {
+		logger.debug("filterOutReservedProviders started...");
+		
+		final Set<String> reservedProviderIdAndServiceIdPairs = getReservedProviderIdAndServiceIdPairs();
+		final List<OrchestrationResultDTO> filteredResults = new ArrayList<>();
+		for (OrchestrationResultDTO orchestrationResult : response.getResponse()) {
+			if (!reservedProviderIdAndServiceIdPairs.contains(orchestrationResult.getProvider().getId() + "-" + orchestrationResult.getService().getId())) {
+				filteredResults.add(orchestrationResult);
+			}
+		}
+		
+		return new OrchestrationResponseDTO(filteredResults);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private  OrchestrationResponseDTO fillOrchestrationResultsWithLocalQoSMeasurements(final OrchestrationResponseDTO response) {
+		logger.debug("fillOrchestrationResultWithLocalQoSMeasurements started...");
+		
+		final List<OrchestrationResultDTO> updatedResults = new ArrayList<>();
+		for (OrchestrationResultDTO orchestrationResult : response.getResponse()) {
+			try {				
+				final QoSIntraPingMeasurementResponseDTO pingMeasurement = gatekeeperDriver.getQoSIntraPingMeasurementsForLocalSystem(orchestrationResult.getProvider().getId());
+				orchestrationResult.setQosMeasurements(new QoSMeasurementAttributesFormDTO(null,
+																						   pingMeasurement.isAvailable(),
+																						   pingMeasurement.getLastAccessAt(),
+																						   pingMeasurement.getMinResponseTime(),
+																						   pingMeasurement.getMaxResponseTime(),
+																						   pingMeasurement.getMeanResponseTimeWithTimeout(),
+																						   pingMeasurement.getMeanResponseTimeWithoutTimeout(),
+																						   pingMeasurement.getJitterWithTimeout(),
+																						   pingMeasurement.getJitterWithoutTimeout(),
+																						   pingMeasurement.getSent(),
+																						   pingMeasurement.getReceived(),
+																						   pingMeasurement.getSentAll(),
+																						   pingMeasurement.getReceivedAll(),
+																						   pingMeasurement.getLostPerMeasurementPercent()));
+				updatedResults.add(orchestrationResult);
+			} catch (final ArrowheadException ex) {
+				logger.debug("Exception occured during doICN - QoS details request. Provider skipped.");
+				logger.debug(ex.getMessage());
+			}
+		}
+		return new OrchestrationResponseDTO(updatedResults);
 	}
 }

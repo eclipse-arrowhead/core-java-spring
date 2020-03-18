@@ -2,6 +2,7 @@ package eu.arrowhead.core.qos.manager.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -14,6 +15,7 @@ import org.springframework.util.Assert;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.QoSReservation;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
 import eu.arrowhead.common.dto.internal.QoSMeasurementAttributesFormDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
@@ -189,12 +191,13 @@ public class QoSManagerImpl implements QoSManager {
 			final GSDPollResponseDTO verifiedGSDResponse = new GSDPollResponseDTO(cloudResponse.getProviderCloud(), cloudResponse.getRequiredServiceDefinition(), new ArrayList<>(), 0,
 														   new ArrayList<>(), cloudResponse.getServiceMetadata(), cloudResponse.isGatewayIsMandatory());
 			
+			final QoSIntraPingMeasurementResponseDTO localMedianPingMeasurement = orchestratorDriver.getIntraPingMedianMeasurement(QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT);
 			for (final QoSMeasurementAttributesFormDTO measurement : cloudResponse.getQosMeasurements()) {
 				if (measurement.isProviderAvailable()) {
 					final QoSVerificationParameters verificationParameters = new QoSVerificationParameters(measurement.getServiceRegistryEntry().getProvider(), cloudResponse.getProviderCloud(),
 																										   cloudResponse.isGatewayIsMandatory(), measurement.getServiceRegistryEntry().getMetadata(),
 																										   request.getQosRequirements(), request.getCommands(), new ArrayList<>());
-					verificationParameters.setLocalReferencePingMeasurement(orchestratorDriver.getIntraPingMedianMeasurement(QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT));
+					verificationParameters.setLocalReferencePingMeasurement(localMedianPingMeasurement);
 					verificationParameters.setProviderTargetCloudMeasurement(measurement);
 					boolean verified = true;
 					for (final QoSVerifier verifier : verifiers) {
@@ -220,7 +223,7 @@ public class QoSManagerImpl implements QoSManager {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Override
-	public List<OrchestrationResultDTO> verifyInterCloudServices(final List<OrchestrationResultDTO> orList, final OrchestrationFormRequestDTO request) {
+	public List<OrchestrationResultDTO> verifyInterCloudServices(final List<OrchestrationResultDTO> orList, final Map<String,String> qosRequirements, final Map<String,String> commands) {
 		// TODO bordi
 		return null;
 	}

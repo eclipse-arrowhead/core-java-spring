@@ -3,8 +3,6 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 
-import org.springframework.util.Assert;
-
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 
 public class QoSMeasurementAttributesFormDTO implements Serializable {
@@ -39,8 +37,6 @@ public class QoSMeasurementAttributesFormDTO implements Serializable {
 	public QoSMeasurementAttributesFormDTO(final ServiceRegistryResponseDTO serviceRegistryEntry, final boolean isProviderAvailable, final ZonedDateTime lastAccessAt, final Integer minResponseTime,
 										   final Integer maxResponseTime, final Integer meanResponseTimeWithTimeout, final Integer meanResponseTimeWithoutTimeout, final Integer jitterWithTimeout,
 										   final Integer jitterWithoutTimeout, final long sent, final long received, final long sentAll, final long receivedAll, final Integer lostPerMeasurementPercent) {
-		Assert.notNull(serviceRegistryEntry, "ServiceRegistryEntry is null");
-		
 		this.serviceRegistryEntry = serviceRegistryEntry;
 		this.isProviderAvailable = isProviderAvailable;
 		this.lastAccessAt = lastAccessAt;
