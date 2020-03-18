@@ -13,6 +13,7 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Component
@@ -54,6 +55,45 @@ public class Receiver {
 
         System.out.println(currentStep.getName());
 
+        if (currentStep.getNextSteps().isEmpty()) {
+            boolean canGoToNextAction = true;
+            System.out.println("Step has no next steps therefore it should be checked if can go to next action.");
+            ChoreographerAction currentAction = currentStep.getAction();
+
+            List<ChoreographerRunningStep> currentRunningStepList = choreographerDBService.getAllRunningStepsBySessionId(sessionId);
+
+            for (ChoreographerRunningStep runningStepInstance : currentRunningStepList) {
+                System.out.println(runningStepInstance.getId());
+                if (!runningStepInstance.getStatus().equals("Done")) {
+                    System.out.println("canGoToNextStep should be set to false");
+                    canGoToNextAction = false;
+                    break;
+                }
+                if (runningStepInstance.getStep().getNextSteps().isEmpty() && !runningStep.getStatus().equals("Done")) {
+                    System.out.println("-------------------  canGoToNextAction should be set to false!!!! --------------------");
+                    canGoToNextAction = false;
+                    break;
+                }
+            }
+
+            if (canGoToNextAction) {
+                @// TODO: 2020. 03. 18. Test what happens if there is multiple Actions in a plan. 
+                System.out.println("If there is next Action then it should run now! Testing needed.");
+                ChoreographerAction nextAction = currentAction.getNextAction();
+                if (nextAction != null) {
+                    Set<ChoreographerStep> firstStepsInNewAction = new HashSet<>(nextAction.getFirstStepEntries());
+
+                    firstStepsInNewAction.parallelStream().forEach(firstStepInNewAction -> {
+                        try {
+                            runFirstStep(firstStepInNewAction, sessionId);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            }
+        }
+
         for (ChoreographerStepNextStepConnection nextStep : currentStep.getNextSteps()) {
             boolean allPreviousStepsDone = true;
 
@@ -72,9 +112,6 @@ public class Receiver {
                 insertInitiatedRunningStep(nextStep.getNextStepEntry().getId(), sessionId);
             }
         }
-
-
-
     }
 
     //-------------------------------------------------------------------------------------------------

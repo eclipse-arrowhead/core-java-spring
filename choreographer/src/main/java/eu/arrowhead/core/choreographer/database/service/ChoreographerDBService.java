@@ -30,6 +30,7 @@ import org.apache.logging.log4j.core.Core;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Sort.Direction;
@@ -589,6 +590,24 @@ public class ChoreographerDBService {
                 return stepOpt.get();
             } else {
                 throw new InvalidParameterException("Step with id of '" + id + "' doesn't exist!");
+            }
+        } catch (final InvalidParameterException ex) {
+            throw ex;
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+    public List<ChoreographerRunningStep> getAllRunningStepsBySessionId(final long sessionId) {
+        logger.debug("getAllRunningStepsBySessionId started...");
+
+        try {
+            final List<ChoreographerRunningStep> runningSteps = choreographerRunningStepRepository.findAllBySessionId(sessionId);
+            if (!runningSteps.isEmpty()) {
+                return  runningSteps;
+            } else {
+                throw new InvalidParameterException("There are no running steps associated with id of '" + sessionId + "'.");
             }
         } catch (final InvalidParameterException ex) {
             throw ex;
