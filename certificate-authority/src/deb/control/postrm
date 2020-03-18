@@ -35,7 +35,6 @@ case "$1" in
             ${SYSTEM_DIR}/application.properties \
             ${SYSTEM_DIR}/${SYSTEM_NAME}.p12 \
         rmdir ${SYSTEM_DIR} 2>/dev/null || true
-        rmdir ${AH_SYSTEMS_DIR}/sysop 2>/dev/null || true
         db_purge
     ;;
     remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
