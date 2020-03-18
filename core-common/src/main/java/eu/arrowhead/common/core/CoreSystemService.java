@@ -5,6 +5,8 @@ import org.springframework.util.Assert;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 
+import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_CHOREOGRAPHER_PROCESS;
+
 public enum CoreSystemService {
 
 	//=================================================================================================
@@ -33,8 +35,11 @@ public enum CoreSystemService {
 	EVENT_PUBLISH_SERVICE(CommonConstants.CORE_SERVICE_EVENT_HANDLER_PUBLISH, CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH),
 	EVENT_SUBSCRIBE_SERVICE(CommonConstants.CORE_SERVICE_EVENT_HANDLER_SUBSCRIBE, CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE),
 	EVENT_UNSUBSCRIBE_SERVICE(CommonConstants.CORE_SERVICE_EVENT_HANDLER_UNSUBSCRIBE, CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE),
-	EVENT_PUBLISH_AUTH_UPDATE_SERVICE(CommonConstants.CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE, CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE);
-	
+	EVENT_PUBLISH_AUTH_UPDATE_SERVICE(CommonConstants.CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE, CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE),
+
+	//Choreographer services
+	CHOREOGRAPHER_SERVICE(CommonConstants.CORE_SERVICE_CHOREOGRAPHER_PROCESS, CommonConstants.CHOREOGRAPHER_URI +  CommonConstants.CHOREOGRAPHER_CHOREOGRAPHY);
+
 	//TODO: additional services 
 	
 	//=================================================================================================

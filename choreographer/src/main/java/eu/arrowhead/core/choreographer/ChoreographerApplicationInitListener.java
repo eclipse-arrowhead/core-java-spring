@@ -1,6 +1,7 @@
 package eu.arrowhead.core.choreographer;
 
 import eu.arrowhead.common.ApplicationInitListener;
+import eu.arrowhead.common.core.CoreSystemService;
 import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
@@ -11,6 +12,7 @@ import org.springframework.jms.support.converter.MessageType;
 import org.springframework.stereotype.Component;
 
 import javax.jms.ConnectionFactory;
+import java.util.List;
 
 @Component
 public class ChoreographerApplicationInitListener extends ApplicationInitListener {
@@ -30,5 +32,10 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
         converter.setTargetType(MessageType.TEXT);
         converter.setTypeIdPropertyName("_type");
         return converter;
+    }
+
+    @Override
+    protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
+        return List.of(CoreSystemService.ORCHESTRATION_SERVICE);
     }
 }
