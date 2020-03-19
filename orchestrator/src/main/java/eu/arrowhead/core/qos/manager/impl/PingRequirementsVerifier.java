@@ -1,7 +1,6 @@
 package eu.arrowhead.core.qos.manager.impl;
 
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -206,15 +205,6 @@ public class PingRequirementsVerifier implements QoSVerifier {
 		
 		if (relayMeasurementList.getData() == null || relayMeasurementList.getData().isEmpty()) { // no record => use related constant to determine output 
 			return verifyNotMeasuredSystem;
-		}
-
-		if (params.isGatewayIsMandatory() && params.getTargetRelay() != null) {
-			for (final QoSInterRelayEchoMeasurementResponseDTO relayMeasurement : relayMeasurementList.getData()) {
-				if (relayMeasurement.getMeasurement().getRelay().getAddress().equalsIgnoreCase(params.getTargetRelay().getAddress()) &&
-					relayMeasurement.getMeasurement().getRelay().getPort() == params.getTargetRelay().getPort()) {
-					relayMeasurementList.setData(List.of(relayMeasurement));
-				}
-			}
 		}
 		
 		for (final QoSInterRelayEchoMeasurementResponseDTO relayMeasurement : relayMeasurementList.getData()) {

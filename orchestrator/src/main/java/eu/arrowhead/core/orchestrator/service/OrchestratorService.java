@@ -178,7 +178,11 @@ public class OrchestratorService {
 				}
 			}
 			gsdResult.setResults(verifiedResults);
-			request.setPreferredProviders(verifiedProviders);
+			if (flags.get(Flag.ONLY_PREFERRED)) {
+				request.getPreferredProviders().retainAll(verifiedProviders);
+			} else {
+				request.setPreferredProviders(verifiedProviders);				
+			}
 		}
 		
 		final boolean onlyPreferredMatchmakingParam = flags.get(Flag.ENABLE_QOS) ? true : flags.get(Flag.ONLY_PREFERRED);
@@ -954,22 +958,23 @@ public class OrchestratorService {
 		}
 		
         if (flags.getOrDefault(Flag.ENABLE_QOS, false)) {
-        	final List<OrchestrationResultDTO> verifiedResults = qosManager.verifyInterCloudServices(targetCloud, icnResultDTO.getResponse(), qosRequirements, commands);
-        	if (commands.containsKey(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY) && verifiedResults.isEmpty()) {
-				// Means that the reserved provider not passed the final verification
-        		// TODO bordi release the reservation via gatekeeper relay
-			}
-        	icnResultDTO.setResponse(verifiedResults);
+        	if (commands.containsKey(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY)) {
+        		Assert.isTrue(icnResultDTO.getResponse().size() == 1, "Reservation was requested, but there are more provider after ICN");
+        		// No need for QoS verification as the reserved provider can only come from the pre-verified preferred providers.
+        	} else {				
+				final List<OrchestrationResultDTO> verifiedResults = qosManager.verifyInterCloudServices(targetCloud, icnResultDTO.getResponse(), qosRequirements, commands);
+				icnResultDTO.setResponse(verifiedResults);				
+			}        	
 		}
         
         updateOrchestrationResultWarningWithForeignWarning(icnResultDTO.getResponse());
 		
-       if (flags.get(Flag.MATCHMAKING)) {
+        if (flags.get(Flag.MATCHMAKING)) {
     	    final InterCloudProviderMatchmakingParameters iCPMparams = new InterCloudProviderMatchmakingParameters(icnResultDTO, preferredProviderDataDTOList, flags.get(Flag.ONLY_PREFERRED));		
 	           
             return interCloudProviderMatchmaker.doMatchmaking(iCPMparams);
 		}	
 
-       return new OrchestrationResponseDTO(icnResultDTO.getResponse());
+        return new OrchestrationResponseDTO(icnResultDTO.getResponse());
 	}
 }

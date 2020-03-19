@@ -361,7 +361,7 @@ public class GatekeeperService {
 			return new ICNProposalResponseDTO();
 		}		
 
-		if (request.getNegotiationFlags().getOrDefault(Flag.ENABLE_QOS, false)) {
+		if (request.getNegotiationFlags().getOrDefault(Flag.ENABLE_QOS, false) && !needReservation) {
 			orchestrationResponse = fillOrchestrationResultsWithLocalQoSMeasurements(orchestrationResponse);
 			if (orchestrationResponse.getResponse().isEmpty()) { // no usable results
 				return new ICNProposalResponseDTO();
@@ -369,38 +369,54 @@ public class GatekeeperService {
 		}
 		
 		if (!gatewayIsMandatory) {
-			if (needReservation) {
-				// If QoS enabled, then preferred systems defined in the request already contains only pre-verified systems by QoS Manager of requester cloud. If no preferred system remain after the filters,
-				// a 'not pre-verified' provider will be reserved and returned. (Final verification is proceed by the requester cloud in every case)
-				final OrchestrationResultDTO selectedResult = icnProviderMatchmaker.doMatchmaking(orchestrationResponse.getResponse(), new ICNProviderMatchmakingParameters(request.getPreferredSystems()));
+			if (!needReservation) {
+				return new ICNProposalResponseDTO(orchestrationResponse.getResponse());
+			} else {
+				// If QoS enabled, then preferred systems defined in the request already contains only pre-verified systems by QoS Manager of requester cloud,
+				// therefore we have to pick and reserve one from there.
+				final OrchestrationResultDTO selectedResult = icnProviderMatchmaker.doMatchmaking(orchestrationResponse.getResponse(),
+																								  new ICNProviderMatchmakingParameters(request.getPreferredSystems(), true));
 				// TODO bordi reserve provider finally
-				return new ICNProposalResponseDTO(List.of(selectedResult));
+				return new ICNProposalResponseDTO(List.of(selectedResult));				
 			}
-			return new ICNProposalResponseDTO(orchestrationResponse.getResponse());
 		} 
 
 		// gateway is used so we need a relay
-		// if QoS enabled, then preferred relays defined in the request already contains only pre-verified relays by QoS Manager of requester cloud.
+		
+		if (request.getNegotiationFlags().getOrDefault(Flag.ENABLE_QOS, false)) {
+			// If QoS enabled, then preferred relays defined in the request already contains only pre-verified relays by QoS Manager of requester cloud.
+			// As the requester cloud couldn't have relay measurements aside from the ones already in the preferred gateway relay we can select a relay only from there.
+			request.setKnownGatewayRelays(request.getPreferredGatewayRelays());
+		}
 		final Relay selectedRelay = selectRelay(request);
 		if (selectedRelay == null) {
 			throw new AuthException("No common communication relay was found.");
 		}
 		
 		// In gateway mode we have to select one provider even if matchmaking is not enabled because we have to build an expensive connection between the consumer and the provider.
-		// If QoS enabled, then preferred systems defined in the request already contains only pre-verified systems by QoS Manager of requester cloud. If no preferred system remain after the filters, then
-		// gateway will connect to a 'not pre-verified' provider. (Final verification is proceed by the requester cloud in every case)
-		final OrchestrationResultDTO selectedResult = icnProviderMatchmaker.doMatchmaking(orchestrationResponse.getResponse(), new ICNProviderMatchmakingParameters(request.getPreferredSystems()));
+		final OrchestrationResultDTO selectedResult;
+		if (!request.getNegotiationFlags().getOrDefault(Flag.ENABLE_QOS, false)) {
+			selectedResult = icnProviderMatchmaker.doMatchmaking(orchestrationResponse.getResponse(), new ICNProviderMatchmakingParameters(request.getPreferredSystems(), false));			
+		} else {
+			// If QoS enabled, then preferred systems defined in the request already contains only pre-verified systems by QoS Manager of requester cloud. If no preferred system remain after the filters, then
+			// therefore we have to pick one from there.
+			selectedResult = icnProviderMatchmaker.doMatchmaking(orchestrationResponse.getResponse(), new ICNProviderMatchmakingParameters(request.getPreferredSystems(), true));
+		}
+		
+		if (selectedResult == null) {
+			return new ICNProposalResponseDTO();
+		}
 		
 		final SystemRequestDTO providerSystem = DTOConverter.convertSystemResponseDTOToSystemRequestDTO(selectedResult.getProvider());
 		final GatewayProviderConnectionRequestDTO connectionRequest	= new GatewayProviderConnectionRequestDTO(DTOConverter.convertRelayToRelayRequestDTO(selectedRelay), request.getRequesterSystem(),
 																											  providerSystem, request.getRequesterCloud(), getOwnCloud(),
 																											  request.getRequestedService().getServiceDefinitionRequirement(), 
 																											  request.getConsumerGatewayPublicKey());
-		if (needReservation) {			
-			//TODO confirm reservation
-		}
-
 		final GatewayProviderConnectionResponseDTO response = gatekeeperDriver.connectProvider(connectionRequest);
+		
+		if (needReservation) {			
+			// TODO bordi reserve provider finally
+		}
 		
 		return new ICNProposalResponseDTO(selectedResult, DTOConverter.convertRelayToRelayResponseDTO(selectedRelay), response);
 	}

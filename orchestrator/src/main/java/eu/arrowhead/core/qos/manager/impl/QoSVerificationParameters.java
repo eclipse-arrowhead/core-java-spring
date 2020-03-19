@@ -30,7 +30,6 @@ public class QoSVerificationParameters {
 	private QoSIntraPingMeasurementResponseDTO localReferencePingMeasurement;
 	private QoSMeasurementAttributesFormDTO providerTargetCloudMeasurement;
 	private final Set<RelayResponseDTO> verifiedRelays = new HashSet<>(); //to be filled during the pre-verification process
-	private RelayResponseDTO targetRelay; // Defined for final verification when gateway is mandatory
 	
 	//=================================================================================================
 	// methods
@@ -60,12 +59,10 @@ public class QoSVerificationParameters {
 	public QoSIntraPingMeasurementResponseDTO getLocalReferencePingMeasurement() { return localReferencePingMeasurement; }
 	public QoSMeasurementAttributesFormDTO getProviderTargetCloudMeasurement() { return providerTargetCloudMeasurement; }
 	public Set<RelayResponseDTO> getVerifiedRelays() { return verifiedRelays; }
-	public RelayResponseDTO getTargetRelay() { return targetRelay; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setLocalReferencePingMeasurement(final QoSIntraPingMeasurementResponseDTO localReferencePingMeasurement) { this.localReferencePingMeasurement = localReferencePingMeasurement; }
 	public void setProviderTargetCloudMeasurement(final QoSMeasurementAttributesFormDTO providerTargetCloudMeasurement) { this.providerTargetCloudMeasurement = providerTargetCloudMeasurement; }
-	public void setTargetRelay(final RelayResponseDTO targetRelay) { this.targetRelay = targetRelay; }
 
 	//-------------------------------------------------------------------------------------------------
 	public boolean isInterCloud() {
@@ -83,9 +80,6 @@ public class QoSVerificationParameters {
 			Assert.notNull(providerCloud, "Provider cloud is null while gateway is mandatory");
 			Assert.notNull(localReferencePingMeasurement, "Gateway is manadtory while localReferencePingMeasurement is null");
 			Assert.notNull(providerTargetCloudMeasurement, "Gateway is manadtory while providerTargetCloudMeasurement is null");			
-		}
-		if (targetRelay != null) {
-			Assert.isTrue(gatewayIsMandatory, "Target relay is defined while gateway is not mandatory");
 		}
 	}
 }
