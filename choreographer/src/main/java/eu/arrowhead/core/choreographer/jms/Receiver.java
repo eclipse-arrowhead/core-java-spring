@@ -202,13 +202,15 @@ public class Receiver {
 
         System.out.println(orchestrationResultList);
 
+        ChoreographerSessionRunningStepDataDTO runningStepDataDTO = new ChoreographerSessionRunningStepDataDTO(sessionId, runningStep.getId());
+
         if (!orchestrationResultList.isEmpty()) {
             OrchestrationResultDTO orchestrationResult = orchestrationResultList.get(0);
             UriComponents uri = Utilities.createURI(orchestrationResult.getProvider().getAuthenticationInfo(),
                     orchestrationResult.getProvider().getAddress(),
                     orchestrationResult.getProvider().getPort(),
                     orchestrationResult.getServiceUri());
-            httpService.sendRequest(uri, HttpMethod.POST, Void.class, ChoreographerSessionRunningStepDataDTO.class);
+            httpService.sendRequest(uri, HttpMethod.POST, Void.class, runningStepDataDTO);
         }
     }
 
