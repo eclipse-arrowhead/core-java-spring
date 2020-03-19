@@ -30,9 +30,7 @@ public class ServiceTimeVerifier implements QoSVerifier {
 	public boolean verify(final QoSVerificationParameters parameters, final boolean isPreVerification) {
 		logger.debug("verify started...");
 		Assert.notNull(parameters, "'parameters' is null.");
-		Assert.notNull(parameters.getMetadata(), "'parameters.getMetadata()' is null.");
-		Assert.notNull(parameters.getWarnings(), "'parameters.getWarnings()' is null.");
-		Assert.notNull(parameters.getCommands(), "'parameters.getCommands()' is null.");
+		parameters.validateParameters();
 		
 		
 		int recommendedTime = -1; // no restrictions

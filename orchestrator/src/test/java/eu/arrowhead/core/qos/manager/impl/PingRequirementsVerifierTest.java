@@ -2,9 +2,6 @@ package eu.arrowhead.core.qos.manager.impl;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.ZonedDateTime;
@@ -69,7 +66,7 @@ public class PingRequirementsVerifierTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testVerifyParameterQosRequirementsNull() { // answer true
-		final boolean verified = verifier.verify(new QoSVerificationParameters(new SystemResponseDTO(), null, false, new HashMap<>(),  null,  new HashMap<>(), new ArrayList<>()), false);
+		final boolean verified = verifier.verify(new QoSVerificationParameters(new SystemResponseDTO(), null, false, new HashMap<>(),  new HashMap<>(),  new HashMap<>(), new ArrayList<>()), false);
 		Assert.assertTrue(verified);
 	}
 	

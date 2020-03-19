@@ -72,13 +72,13 @@ public class PingRequirementsVerifier implements QoSVerifier {
 		logger.debug("validateInput started...");
 		
 		Assert.notNull(parameters, "'parameters' is null");
-		Assert.notNull(parameters.getProviderSystem(), "Provider is null");
+		parameters.validateParameters();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private boolean verifyIntraCloudPingMeasurements(final QoSVerificationParameters params) {
-		//TODO bordi validate params
 		logger.debug("verifyIntraCloudPingMeasuerements started...");
+		Assert.isTrue(!params.isInterCloud(), "QoSVerificationParameters is Inter-Cloud, but Intra-Cloud ping verification was requested");
 		
 		final QoSIntraPingMeasurementResponseDTO measurement = getIntraPingMeasurement(params.getProviderSystem().getId());
 		
@@ -138,7 +138,8 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	//-------------------------------------------------------------------------------------------------
 	private boolean verifyInterCloudDirectPingMeasurements(final QoSVerificationParameters params) {
 		logger.debug("verifyInterCloudDirectPingMeasurements started...");
-		//TODO bordi validate params
+		Assert.isTrue(params.isInterCloud(), "QoSVerificationParameters is not Inter-Cloud, but Inter-Cloud direct ping verification was requested");
+		Assert.isTrue(params.isGatewayIsMandatory(), "Gateway shouldn't be mandatory for Inter-Cloud direct ping verification");
 		
 		final QoSInterDirectPingMeasurementResponseDTO measurement = getInterDirectPingMeasurement(new CloudSystemFormDTO(params.getProviderCloud(), params.getProviderSystem()));
 		
@@ -198,7 +199,8 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	//-------------------------------------------------------------------------------------------------
 	private boolean verifyInterCloudRelayEchoAndPingMeasurements(final QoSVerificationParameters params) {
 		logger.debug("verifyInterCloudRelayEchoAndPingMeasurements started...");
-		//TODO bordi validate params
+		Assert.isTrue(params.isInterCloud(), "QoSVerificationParameters is not Inter-Cloud, but Inter-Cloud relay echo and ping verification was requested");
+		Assert.isTrue(params.isGatewayIsMandatory(), "Gateway should be mandatory for Inter-Cloud relay echo and ping verification");
 		
 		final QoSInterRelayEchoMeasurementListResponseDTO relayMeasurementList = getInterRelayEchoMeasurement(new CloudSystemFormDTO(params.getProviderCloud(), params.getProviderSystem()));
 		

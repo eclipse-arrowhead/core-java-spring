@@ -71,4 +71,21 @@ public class QoSVerificationParameters {
 	public boolean isInterCloud() {
 		return providerCloud != null;
 	}	
+	
+	//-------------------------------------------------------------------------------------------------
+	public void validateParameters() {
+		Assert.notNull(providerSystem, "Provider is null");
+		Assert.notNull(metadata, "Metadata is null");
+		Assert.notNull(qosRequirements, "QoS requirements is null");
+		Assert.notNull(commands, "Commands is null");
+		Assert.notNull(warnings, "Warnings is null");
+		if (gatewayIsMandatory) {
+			Assert.notNull(providerCloud, "Provider cloud is null while gateway is mandatory");
+			Assert.notNull(localReferencePingMeasurement, "Gateway is manadtory while localReferencePingMeasurement is null");
+			Assert.notNull(providerTargetCloudMeasurement, "Gateway is manadtory while providerTargetCloudMeasurement is null");			
+		}
+		if (targetRelay != null) {
+			Assert.isTrue(gatewayIsMandatory, "Target relay is defined while gateway is not mandatory");
+		}
+	}
 }
