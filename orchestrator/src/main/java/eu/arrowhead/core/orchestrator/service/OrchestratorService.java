@@ -961,6 +961,9 @@ public class OrchestratorService {
         	if (commands.containsKey(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY)) {
         		Assert.isTrue(icnResultDTO.getResponse().size() == 1, "Reservation was requested, but there are more provider after ICN");
         		// No need for QoS verification as the reserved provider can only come from the pre-verified preferred providers.
+        	} else if (icnResultDTO.getResponse().size() == 1 &&
+        			   icnResultDTO.getResponse().get(0).getWarnings().contains(OrchestratorWarnings.VIA_GATEWAY)) {
+        		// No need for QoS verification as the provider via gateway can only come from the pre-verified preferred providers.
         	} else {				
 				final List<OrchestrationResultDTO> verifiedResults = qosManager.verifyInterCloudServices(targetCloud, icnResultDTO.getResponse(), qosRequirements, commands);
 				icnResultDTO.setResponse(verifiedResults);				
