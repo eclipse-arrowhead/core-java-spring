@@ -1,7 +1,9 @@
 package eu.arrowhead.core.choreographer;
 
 import eu.arrowhead.common.ApplicationInitListener;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.core.CoreSystemService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
@@ -16,6 +18,7 @@ import java.util.List;
 
 @Component
 public class ChoreographerApplicationInitListener extends ApplicationInitListener {
+
     @Bean
     public JmsListenerContainerFactory<?> myFactory(ConnectionFactory connectionFactory,
                                                     DefaultJmsListenerContainerFactoryConfigurer configurer) {

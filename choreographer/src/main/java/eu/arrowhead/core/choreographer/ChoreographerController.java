@@ -11,7 +11,7 @@ import eu.arrowhead.common.database.entity.ChoreographerSession;
 import eu.arrowhead.common.dto.internal.ChoreographerPlanRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerRunPlanRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
-import eu.arrowhead.common.dto.internal.ChoreographerSessionFinishedStepDataDTO;
+import eu.arrowhead.common.dto.internal.ChoreographerSessionRunningStepDataDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
@@ -211,8 +211,8 @@ public class ChoreographerController {
     })
     @PostMapping(path = STEP_FINISHED_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = org.springframework.http.HttpStatus.OK)
-    @ResponseBody public void stepFinished(@RequestBody final List<ChoreographerSessionFinishedStepDataDTO> requests) {
-        for (final ChoreographerSessionFinishedStepDataDTO request : requests) {
+    @ResponseBody public void stepFinished(@RequestBody final List<ChoreographerSessionRunningStepDataDTO> requests) {
+        for (final ChoreographerSessionRunningStepDataDTO request : requests) {
             JmsTemplate jmsTemplate = applicationContext.getBean(JmsTemplate.class);
 
             System.out.println("Sending message to session-step-done.");

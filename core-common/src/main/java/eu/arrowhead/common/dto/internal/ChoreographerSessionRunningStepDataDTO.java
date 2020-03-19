@@ -1,14 +1,14 @@
 package eu.arrowhead.common.dto.internal;
 
-public class ChoreographerSessionFinishedStepDataDTO {
+public class ChoreographerSessionRunningStepDataDTO {
 
     private long sessionId;
 
     private long runningStepId;
 
-    public ChoreographerSessionFinishedStepDataDTO() {}
+    public ChoreographerSessionRunningStepDataDTO() {}
 
-    public ChoreographerSessionFinishedStepDataDTO(long sessionId, long runningStepId) {
+    public ChoreographerSessionRunningStepDataDTO(long sessionId, long runningStepId) {
         this.sessionId = sessionId;
         this.runningStepId = runningStepId;
     }

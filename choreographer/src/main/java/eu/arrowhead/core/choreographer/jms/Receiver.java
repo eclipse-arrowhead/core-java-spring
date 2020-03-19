@@ -1,27 +1,70 @@
 package eu.arrowhead.core.choreographer.jms;
 
+import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.CoreSystemRegistrationProperties;
+import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.database.entity.ChoreographerAction;
 import eu.arrowhead.common.database.entity.ChoreographerPlan;
 import eu.arrowhead.common.database.entity.ChoreographerRunningStep;
 import eu.arrowhead.common.database.entity.ChoreographerStep;
 import eu.arrowhead.common.database.entity.ChoreographerStepNextStepConnection;
-import eu.arrowhead.common.dto.internal.ChoreographerSessionFinishedStepDataDTO;
+import eu.arrowhead.common.dto.internal.ChoreographerSessionRunningStepDataDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationFlags;
+import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
+import org.springframework.web.util.UriComponents;
 
+import javax.annotation.Resource;
+import java.security.PublicKey;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Component
 public class Receiver {
 
+    //=================================================================================================
+    // members
+
+    private static final String ORCHESTRATION_PROCESS_URI_KEY = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+
     @Autowired
     private ChoreographerDBService choreographerDBService;
 
+    @Autowired
+    private HttpService httpService;
+
+    @Autowired
+    protected CoreSystemRegistrationProperties coreSystemRegistrationProperties;
+
+    @Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
+    private Map<String,Object> arrowheadContext;
+
+    private final Logger logger = LogManager.getLogger(Receiver.class);
+
+    //=================================================================================================
+    // methods
+
+    //-------------------------------------------------------------------------------------------------
     @JmsListener(destination = "start-session")
     public void receiveStartSessionMessage(ChoreographerStartSessionDTO startSessionDTO) {
         long sessionId = startSessionDTO.getSessionId();
@@ -34,15 +77,16 @@ public class Receiver {
 
         firstSteps.parallelStream().forEach(firstStep -> {
             try {
-                runFirstStep(firstStep, sessionId);
+                runStep(firstStep, sessionId);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         });
     }
 
+    //-------------------------------------------------------------------------------------------------
     @JmsListener(destination = "session-step-done")
-    public void receiveSessionStepDoneMessage(ChoreographerSessionFinishedStepDataDTO sessionFinishedStepDataDTO) {
+    public void receiveSessionStepDoneMessage(ChoreographerSessionRunningStepDataDTO sessionFinishedStepDataDTO) {
         long sessionId = sessionFinishedStepDataDTO.getSessionId();
         long runningStepId = sessionFinishedStepDataDTO.getRunningStepId();
 
@@ -120,19 +164,83 @@ public class Receiver {
         }
     }
 
+     /*
     //-------------------------------------------------------------------------------------------------
     public void runFirstStep(ChoreographerStep firstStep, long sessionId) throws InterruptedException {
         System.out.println("Running " + firstStep.getId() + "     " + firstStep.getName() + "       sessionId: " + sessionId + "!");
         ChoreographerRunningStep runningStep = insertInitiatedRunningStep(firstStep.getId(), sessionId);
     }
+     */
 
+    //-------------------------------------------------------------------------------------------------
     public void runStep(ChoreographerStep step, long sessionId) throws InterruptedException {
         System.out.println("Running " + step.getId() + "     " + step.getName() + "       sessionId: " + sessionId + "!");
         ChoreographerRunningStep runningStep = insertInitiatedRunningStep(step.getId(), sessionId);
+
+        ServiceQueryFormDTO serviceQuery = new ServiceQueryFormDTO();
+        serviceQuery.setServiceDefinitionRequirement(step.getServiceName().toLowerCase());
+
+        SystemRequestDTO requesterSystem = new SystemRequestDTO();
+        requesterSystem.setSystemName(coreSystemRegistrationProperties.getCoreSystemName().toLowerCase());
+        requesterSystem.setAddress(coreSystemRegistrationProperties.getCoreSystemDomainName());
+        requesterSystem.setPort(coreSystemRegistrationProperties.getCoreSystemDomainPort());
+
+        final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
+
+        requesterSystem.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+
+        final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO.Builder(requesterSystem)
+                                                                                             .requestedService(serviceQuery)
+                                                                                             .flag(OrchestrationFlags.Flag.MATCHMAKING, true)
+                                                                                             .flag(OrchestrationFlags.Flag.OVERRIDE_STORE, true)
+                                                                                             .flag(OrchestrationFlags.Flag.TRIGGER_INTER_CLOUD, false)
+                                                                                             .build();
+
+        final OrchestrationResponseDTO orchestrationResponse = queryOrchestrator(orchestrationForm);
+
+        List<OrchestrationResultDTO> orchestrationResultList = orchestrationResponse.getResponse();
+
+        System.out.println(orchestrationResultList);
+
+        if (!orchestrationResultList.isEmpty()) {
+            OrchestrationResultDTO orchestrationResult = orchestrationResultList.get(0);
+            UriComponents uri = Utilities.createURI(orchestrationResult.getProvider().getAuthenticationInfo(),
+                    orchestrationResult.getProvider().getAddress(),
+                    orchestrationResult.getProvider().getPort(),
+                    orchestrationResult.getServiceUri());
+            httpService.sendRequest(uri, HttpMethod.POST, Void.class, ChoreographerSessionRunningStepDataDTO.class);
+        }
     }
 
     //-------------------------------------------------------------------------------------------------
     public ChoreographerRunningStep insertInitiatedRunningStep(final long stepId, final long sessionId) {
         return choreographerDBService.registerRunningStep(stepId, sessionId, "Initiated", "Step running is initiated and search for provider started.");
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public OrchestrationResponseDTO queryOrchestrator(final OrchestrationFormRequestDTO form) {
+        logger.debug("queryOrchestrator started...");
+
+        Assert.notNull(form, "form is null.");
+
+        final UriComponents orchestrationProcessUri = getOrchestrationProcessUri();
+        final ResponseEntity<OrchestrationResponseDTO> response = httpService.sendRequest(orchestrationProcessUri, HttpMethod.POST, OrchestrationResponseDTO.class, form);
+
+        return response.getBody();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    private UriComponents getOrchestrationProcessUri() {
+        logger.debug("getOrchestrationProcessUri started...");
+
+        if (arrowheadContext.containsKey(ORCHESTRATION_PROCESS_URI_KEY)) {
+            try {
+                return (UriComponents) arrowheadContext.get(ORCHESTRATION_PROCESS_URI_KEY);
+            } catch (final ClassCastException ex) {
+                throw new ArrowheadException("Choreographer can't find orchestration process URI.");
+            }
+        }
+
+        throw new ArrowheadException("Choreographer can't find orchestration process URI.");
     }
 }
