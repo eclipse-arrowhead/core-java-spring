@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import eu.arrowhead.common.database.entity.QoSReservation;
+import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
@@ -18,7 +19,8 @@ public interface QoSManager {
 	// verification-related
 	public List<OrchestrationResultDTO> verifyIntraCloudServices(final List<OrchestrationResultDTO> orList, final OrchestrationFormRequestDTO request);
 	public List<GSDPollResponseDTO> preVerifyInterCloudServices(final List<GSDPollResponseDTO> gsdList, final OrchestrationFormRequestDTO request);
-	public List<OrchestrationResultDTO> verifyInterCloudServices(final List<OrchestrationResultDTO> orList, final Map<String,String> qosRequirements, final Map<String,String> commands);
+	public List<OrchestrationResultDTO> verifyInterCloudServices(final CloudResponseDTO targetCloud, final List<OrchestrationResultDTO> orList, final Map<String,String> qosRequirements,
+																 final Map<String,String> commands);
 	
 	//-------------------------------------------------------------------------------------------------
 	// reservation-related

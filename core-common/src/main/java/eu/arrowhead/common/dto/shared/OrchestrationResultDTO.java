@@ -7,6 +7,8 @@ import java.util.Map;
 
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import eu.arrowhead.common.dto.internal.QoSMeasurementAttributesFormDTO;
 
 public class OrchestrationResultDTO implements Serializable {
@@ -23,6 +25,8 @@ public class OrchestrationResultDTO implements Serializable {
 	private Map<String,String> metadata;
 	private List<ServiceInterfaceResponseDTO> interfaces;
 	private Integer version;
+	
+	@JsonIgnore
 	private QoSMeasurementAttributesFormDTO qosMeasurements;
 	
 	private Map<String,String> authorizationTokens;

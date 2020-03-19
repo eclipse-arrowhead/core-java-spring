@@ -29,7 +29,8 @@ public class QoSVerificationParameters {
 	
 	private QoSIntraPingMeasurementResponseDTO localReferencePingMeasurement;
 	private QoSMeasurementAttributesFormDTO providerTargetCloudMeasurement;
-	private final Set<RelayResponseDTO> verifiedRelays = new HashSet<>(); //to be filled during the verification process
+	private final Set<RelayResponseDTO> verifiedRelays = new HashSet<>(); //to be filled during the pre-verification process
+	private RelayResponseDTO targetRelay; // Defined for final verification when gateway is mandatory
 	
 	//=================================================================================================
 	// methods
@@ -59,10 +60,12 @@ public class QoSVerificationParameters {
 	public QoSIntraPingMeasurementResponseDTO getLocalReferencePingMeasurement() { return localReferencePingMeasurement; }
 	public QoSMeasurementAttributesFormDTO getProviderTargetCloudMeasurement() { return providerTargetCloudMeasurement; }
 	public Set<RelayResponseDTO> getVerifiedRelays() { return verifiedRelays; }
+	public RelayResponseDTO getTargetRelay() { return targetRelay; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setLocalReferencePingMeasurement(final QoSIntraPingMeasurementResponseDTO localReferencePingMeasurement) { this.localReferencePingMeasurement = localReferencePingMeasurement; }
 	public void setProviderTargetCloudMeasurement(final QoSMeasurementAttributesFormDTO providerTargetCloudMeasurement) { this.providerTargetCloudMeasurement = providerTargetCloudMeasurement; }
+	public void setTargetRelay(final RelayResponseDTO targetRelay) { this.targetRelay = targetRelay; }
 
 	//-------------------------------------------------------------------------------------------------
 	public boolean isInterCloud() {

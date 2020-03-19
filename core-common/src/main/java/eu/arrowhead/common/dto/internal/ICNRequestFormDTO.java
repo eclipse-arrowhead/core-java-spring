@@ -23,6 +23,7 @@ public class ICNRequestFormDTO implements Serializable {
 	private Long targetCloudId;
 	private SystemRequestDTO requesterSystem;
 	private List<SystemRequestDTO> preferredSystems = new ArrayList<>();
+	private List<RelayRequestDTO> preferredGatewayRelays = new ArrayList<>();
 	private OrchestrationFlags negotiationFlags = new OrchestrationFlags();
 	private Map<String,String> commands = new HashMap<>();
 	
@@ -34,7 +35,7 @@ public class ICNRequestFormDTO implements Serializable {
 	
 	//-------------------------------------------------------------------------------------------------
 	public ICNRequestFormDTO(final ServiceQueryFormDTO requestedService, final Long targetCloudId, final SystemRequestDTO requesterSystem, final List<SystemRequestDTO> preferredSystems,
-						     final OrchestrationFlags negotiationFlags,  final Map<String,String> commands) {
+						     final List<RelayRequestDTO> preferredGatewayRelays, final OrchestrationFlags negotiationFlags,  final Map<String,String> commands) {
 		Assert.notNull(requestedService, "Requested service is null.");
 		Assert.notNull(targetCloudId, "Target cloud id is null.");
 		Assert.notNull(requesterSystem, "Requester system is null.");
@@ -45,6 +46,10 @@ public class ICNRequestFormDTO implements Serializable {
 		
 		if (preferredSystems != null) {
 			this.preferredSystems = preferredSystems;
+		}
+		
+		if (preferredGatewayRelays != null) {
+			this.preferredGatewayRelays = preferredGatewayRelays;
 		}
 		
 		if (negotiationFlags != null) {
@@ -61,6 +66,7 @@ public class ICNRequestFormDTO implements Serializable {
 	public Long getTargetCloudId() { return targetCloudId; }
 	public SystemRequestDTO getRequesterSystem() { return requesterSystem; }
 	public List<SystemRequestDTO> getPreferredSystems() { return preferredSystems; }
+	public List<RelayRequestDTO> getPreferredGatewayRelays() { return preferredGatewayRelays; }
 	public OrchestrationFlags getNegotiationFlags() { return negotiationFlags; }	
 	public Map<String, String> getCommands() { return commands; }
 
@@ -73,6 +79,13 @@ public class ICNRequestFormDTO implements Serializable {
 	public void setPreferredSystems(final List<SystemRequestDTO> preferredSystems) {
 		if (preferredSystems != null) {
 			this.preferredSystems = preferredSystems;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public void setPreferredGatewayRelays(final List<RelayRequestDTO> preferredGatewayRelays) {
+		if (preferredGatewayRelays != null) {
+			this.preferredGatewayRelays = preferredGatewayRelays;
 		}
 	}
 	

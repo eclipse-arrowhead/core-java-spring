@@ -1,6 +1,7 @@
 package eu.arrowhead.common.dto.internal;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -599,6 +600,17 @@ public class DTOConverter {
 		}
 		
 		return new SubscriptionListResponseDTO(subscriptionEntries, entries.getTotalElements());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static List<RelayRequestDTO> convertRelayResponseDTOCollectionToRelayRequestDTOList(final Collection<RelayResponseDTO> responses) {
+		Assert.notNull(responses, "Collection<RelayResponseDTO> is null.");
+		
+		final List<RelayRequestDTO> relayRequests = new ArrayList<>();
+		for (RelayResponseDTO relayResponseDTO : responses) {
+			relayRequests.add(convertRelayResponseDTOToRelayRequestDTO(relayResponseDTO));
+		}
+		return relayRequests;
 	}
 	
 	//-------------------------------------------------------------------------------------------------

@@ -1,8 +1,10 @@
 package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -22,6 +24,8 @@ public class GSDPollResponseDTO implements Serializable, ErrorWrapperDTO {
 	private List<QoSMeasurementAttributesFormDTO> qosMeasurements;
 	private Map<String,String> serviceMetadata;
 	private boolean gatewayIsMandatory;
+	
+	private final Set<RelayResponseDTO> verifiedRelays = new HashSet<>(); //Filled up during Inter-Cloud QoS if necessary
 	
 	//=================================================================================================
 	// methods
@@ -50,6 +54,7 @@ public class GSDPollResponseDTO implements Serializable, ErrorWrapperDTO {
 	public List<QoSMeasurementAttributesFormDTO> getQosMeasurements() { return qosMeasurements; }
 	public Map<String,String> getServiceMetadata() { return serviceMetadata; }
 	public boolean isGatewayIsMandatory() { return gatewayIsMandatory; }
+	public Set<RelayResponseDTO> getVerifiedRelays() { return verifiedRelays; }
 
 	//-------------------------------------------------------------------------------------------------	
 	public void setProviderCloud(final CloudResponseDTO providerCloud) { this.providerCloud = providerCloud; }
@@ -59,6 +64,7 @@ public class GSDPollResponseDTO implements Serializable, ErrorWrapperDTO {
 	public void setQosMeasurements(final List<QoSMeasurementAttributesFormDTO> qosMeasurements) { this.qosMeasurements = qosMeasurements; }
 	public void setServiceMetadata(final Map<String,String> serviceMetadata) { this.serviceMetadata = serviceMetadata; }
 	public void setGatewayIsMandatory(final boolean gatewayIsMandatory) { this.gatewayIsMandatory = gatewayIsMandatory; }
+	
 
 	//-------------------------------------------------------------------------------------------------
 	@JsonIgnore

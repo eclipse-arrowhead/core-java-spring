@@ -58,6 +58,7 @@ import eu.arrowhead.common.dto.shared.OrchestrationFlags.Flag;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.OrchestratorWarnings;
 import eu.arrowhead.common.dto.shared.PreferredProviderDataDTO;
 import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
@@ -254,7 +255,12 @@ public class GatekeeperService {
 		
 		final Cloud targetCloud = gatekeeperDBService.getCloudById(form.getTargetCloudId());
 		final CloudRequestDTO requesterCloud = getOwnCloud();
-		final List<RelayRequestDTO> preferredRelays = getPreferredRelays(targetCloud);
+		final List<RelayRequestDTO> preferredRelays;
+		if (form.getNegotiationFlags().get(Flag.ENABLE_QOS)) {
+			preferredRelays = form.getPreferredGatewayRelays();
+		} else {
+			preferredRelays = getPreferredRelays(targetCloud);
+		}
 		final List<RelayRequestDTO> knownRelays = getKnownRelays();
 		final ICNProposalRequestDTO proposal = new ICNProposalRequestDTO(form.getRequestedService(), requesterCloud, form.getRequesterSystem(), form.getPreferredSystems(), preferredRelays,
 																		 knownRelays, form.getNegotiationFlags(), gatewayIsPresent, form.getCommands());
@@ -292,6 +298,7 @@ public class GatekeeperService {
 			result.getProvider().setAddress(gatekeeperDriver.getGatewayHost());
 			result.getProvider().setPort(serverPort);
 			result.getProvider().setAuthenticationInfo(consumerGWPublicKey);
+			result.getWarnings().add(OrchestratorWarnings.VIA_GATEWAY);
 			
 			return new ICNResultDTO(List.of(result));
 		} catch (final UnavailableServerException ex) {
@@ -373,6 +380,7 @@ public class GatekeeperService {
 		} 
 
 		// gateway is used so we need a relay
+		// if QoS enabled, then preferred relays defined in the request already contains only pre-verified relays by QoS Manager of requester cloud.
 		final Relay selectedRelay = selectRelay(request);
 		if (selectedRelay == null) {
 			throw new AuthException("No common communication relay was found.");

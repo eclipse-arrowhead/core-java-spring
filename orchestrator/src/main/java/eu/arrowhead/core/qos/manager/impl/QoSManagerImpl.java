@@ -14,12 +14,14 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.QoSReservation;
+import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
 import eu.arrowhead.common.dto.internal.QoSMeasurementAttributesFormDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.OrchestratorWarnings;
 import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -181,9 +183,9 @@ public class QoSManagerImpl implements QoSManager {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public List<GSDPollResponseDTO> preVerifyInterCloudServices(final List<GSDPollResponseDTO> gsdList, final OrchestrationFormRequestDTO request) {
-		logger.debug("verifyInterCloudServices started ...");
+		logger.debug("preVerifyInterCloudServices started ...");
 		
-		Assert.notNull(gsdList, "'orList' is null.");
+		Assert.notNull(gsdList, "'gsdList' is null.");
 		Assert.notNull(request, "'request' is null.");
 		
 		final List<GSDPollResponseDTO> results = new ArrayList<>();
@@ -211,6 +213,7 @@ public class QoSManagerImpl implements QoSManager {
 								verifiedGSDResponse.getAvailableInterfaces().add(interf.getInterfaceName());
 							}
 						}
+						verifiedGSDResponse.getVerifiedRelays().addAll(verificationParameters.getVerifiedRelays());
 					}
 					if (verifiedGSDResponse.getNumOfProviders() > 0) {
 						results.add(verifiedGSDResponse);
@@ -223,9 +226,34 @@ public class QoSManagerImpl implements QoSManager {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Override
-	public List<OrchestrationResultDTO> verifyInterCloudServices(final List<OrchestrationResultDTO> orList, final Map<String,String> qosRequirements, final Map<String,String> commands) {
-		// TODO bordi
-		return null;
+	public List<OrchestrationResultDTO> verifyInterCloudServices(final CloudResponseDTO targetCloud, final List<OrchestrationResultDTO> orList, final Map<String,String> qosRequirements,
+																 final Map<String,String> commands) {
+		logger.debug("verifyInterCloudServices started ...");
+		
+		Assert.notNull(orList, "'orList' is null.");
+		Assert.notNull(qosRequirements, "'qosRequirements' is null.");
+		Assert.notNull(commands, "'commands' is null.");
+		
+		final QoSIntraPingMeasurementResponseDTO localMedianPingMeasurement = orchestratorDriver.getIntraPingMedianMeasurement(QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT);
+		final List<OrchestrationResultDTO> verifiedResults = new ArrayList<>();
+		for (final OrchestrationResultDTO result : orList) {
+			final boolean gatewayIsMandatory = orList.get(0).getWarnings().contains(OrchestratorWarnings.VIA_GATEWAY);
+			final QoSVerificationParameters verificationParameters = new QoSVerificationParameters(result.getProvider(), targetCloud, gatewayIsMandatory, result.getMetadata(), qosRequirements,
+																								   commands, result.getWarnings());
+			verificationParameters.setLocalReferencePingMeasurement(localMedianPingMeasurement);
+			verificationParameters.setProviderTargetCloudMeasurement(result.getQosMeasurements());
+			
+			boolean verified = true;
+			for (final QoSVerifier verifier : verifiers) {
+				verified = verifier.verify(verificationParameters, false);
+			}
+			
+			if (verified) {
+				result.setWarnings(verificationParameters.getWarnings());
+				verifiedResults.add(result);
+			}
+		}
+		return verifiedResults;
 	}
 	
 	//=================================================================================================
