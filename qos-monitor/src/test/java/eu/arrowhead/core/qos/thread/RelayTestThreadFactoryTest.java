@@ -175,6 +175,81 @@ public class RelayTestThreadFactoryTest {
 		Assert.assertNotNull(thread);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testCreateReceiverSideThreadFactoryNotInitialized() {
+		threadFactory.createReceiverSideThread(null, null, null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateReceiverSideThreadRelaySessionNull() {
+		ReflectionTestUtils.setField(threadFactory, "initialized", true);
+		
+		threadFactory.createReceiverSideThread(null, null, null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateReceiverSideThreadRelaySessionClosed() {
+		ReflectionTestUtils.setField(threadFactory, "initialized", true);
+		ReflectionTestUtils.setField(threadFactory, "relayClient", getTestClient(true));
+		
+		threadFactory.createReceiverSideThread(getTestSession(), null, null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateReceiverSideThreadRequesterCloudNull() {
+		ReflectionTestUtils.setField(threadFactory, "initialized", true);
+		ReflectionTestUtils.setField(threadFactory, "relayClient", getTestClient(false));
+		
+		threadFactory.createReceiverSideThread(getTestSession(), null, null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateReceiverSideThreadRelayNull() {
+		ReflectionTestUtils.setField(threadFactory, "initialized", true);
+		ReflectionTestUtils.setField(threadFactory, "relayClient", getTestClient(false));
+		
+		threadFactory.createReceiverSideThread(getTestSession(), new CloudResponseDTO(), null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateReceiverSideThreadPublicKeyNull() {
+		ReflectionTestUtils.setField(threadFactory, "initialized", true);
+		ReflectionTestUtils.setField(threadFactory, "relayClient", getTestClient(false));
+		
+		threadFactory.createReceiverSideThread(getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateReceiverSideThreadPublicKeyEmpty() {
+		ReflectionTestUtils.setField(threadFactory, "initialized", true);
+		ReflectionTestUtils.setField(threadFactory, "relayClient", getTestClient(false));
+		
+		threadFactory.createReceiverSideThread(getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), " ");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCreateReceiverSideThreadOk() {
+		ReflectionTestUtils.setField(threadFactory, "appContext", getTestApplicationContext());
+		ReflectionTestUtils.setField(threadFactory, "initialized", true);
+		ReflectionTestUtils.setField(threadFactory, "relayClient", getTestClient(false));
+		ReflectionTestUtils.setField(threadFactory, "noIteration", (byte) 1);
+		ReflectionTestUtils.setField(threadFactory, "timeout", 1);
+		ReflectionTestUtils.setField(threadFactory, "testMessageSize", 1);
+
+		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwms8AvBuIxqPjXmyGnqds1EIkvX/kjl+kW9a0SObsp1n/u567vbpYSa+ESZNg4KrxAHJjA8M1TvpGkq4LLrJkEUkC2WNxq3qbWQbseZrIDSpcn6C7gHObJOLjRSpGTSlRHZfncRs1h+MLApVhf6qf611mZNDgN5AqaMtBbB3UzArE3CgO0jiKzBgZGyT9RSKccjlsO6amBgZrLBY0+x6VXPJK71hwZ7/1Y2CHGsgSb20/g2P82qLYf91Eht33u01rcptsETsvGrsq6SqIKtHtmWkYMW1lWB7p2mwFpAft8llUpHewRRAU1qsKYAI6myc/sPmQuQul+4yESMSBu3KyQIDAQAB";
+		final ReceiverSideRelayTestThread thread = threadFactory.createReceiverSideThread(getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), publicKey);
+		
+		Assert.assertNotNull(thread);
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
