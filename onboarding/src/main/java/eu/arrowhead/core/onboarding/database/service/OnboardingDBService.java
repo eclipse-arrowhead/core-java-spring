@@ -34,8 +34,10 @@ public class OnboardingDBService {
 
     //=================================================================================================
     // members
-    private final Logger logger = LogManager.getLogger(OnboardingDBService.class);
+    private final static String CERTIFICATE_TYPE = "X.509";
+
     private final OrchestrationDriver orchestration;
+    private final Logger logger = LogManager.getLogger(OnboardingDBService.class);
     private final HttpService httpService;
     private final SecurityUtilities securityUtilities;
 
@@ -67,7 +69,18 @@ public class OnboardingDBService {
         }
 
         final CertificateSigningResponseDTO signingResponseDTO = executeCertificateSigningRequest(certificateSigningRequest);
-        return enrichOnboardingResponse(new OnboardingWithNameResponseDTO(), signingResponseDTO);
+        final OnboardingWithNameResponseDTO responseDTO = enrichOnboardingResponse(new OnboardingWithNameResponseDTO(), signingResponseDTO);
+
+        final CertificateResponseDTO onboardingCertificate = responseDTO.getOnboardingCertificate();
+
+        onboardingCertificate.setKeyAlgorithm(keyPair.getPrivate().getAlgorithm());
+        onboardingCertificate.setKeyFormat(keyPair.getPrivate().getFormat());
+        onboardingCertificate.setPrivateKey(keyPair.getPrivate().getEncoded()); // TODO change to Base64?
+        onboardingCertificate.setPublicKey(keyPair.getPublic().getEncoded());
+
+        responseDTO.setCertificateType(CERTIFICATE_TYPE);
+
+        return responseDTO;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -84,9 +97,13 @@ public class OnboardingDBService {
     //-------------------------------------------------------------------------------------------------
     private CertificateSigningResponseDTO executeCertificateSigningRequest(final String certificateSigningRequest) {
 
+        logger.debug("Loading OrchestrationDriver ...");
         final ServiceRegistryResponseDTO orchService = getOrchestratorService();
+
+        logger.debug("Orchestrate CertificateAuthority ...");
         final OrchestrationResultDTO caOrchResult = contactOrchestrationService(orchService, CommonConstants.CORE_SERVICE_CERTIFICATE_AUTHORITY_SIGN);
 
+        logger.debug("Contact CertificateAuthority ...");
         final UriComponents caUri = orchestration.createUri(caOrchResult.getProvider(),
                                                             CommonConstants.CERTIFICATE_AUTHRORITY_URI + CommonConstants.OP_CA_SIGN_CERTIFICATE_URI);
 
@@ -107,6 +124,7 @@ public class OnboardingDBService {
                                                                          final CertificateSigningResponseDTO csrResult) {
         final ServiceRegistryResponseDTO orchService = getOrchestratorService();
 
+        logger.debug("Processing response from Certificate Authority ...");
         final CertificateResponseDTO certificateResponseDTO = new CertificateResponseDTO();
         certificateResponseDTO.setCertificate(csrResult.getCertificateChain().get(2));
 
@@ -114,9 +132,13 @@ public class OnboardingDBService {
         responseDTO.setIntermediateCertificate(csrResult.getCertificateChain().get(1));
         responseDTO.setOnboardingCertificate(certificateResponseDTO);
 
+        logger.debug("Orchestrating Device Registry ...");
         final OrchestrationResultDTO drOrchResult = contactOrchestrationService(orchService, CommonConstants.CORE_SERVICE_DEVICE_REGISTRY_REGISTER);
+        logger.debug("Orchestrating System Registry ...");
         final OrchestrationResultDTO sysrOrchResult = contactOrchestrationService(orchService, CommonConstants.CORE_SERVICE_SYSTEM_REGISTRY_REGISTER);
+        logger.debug("Orchestrating Service Registry ...");
         final OrchestrationResultDTO srOrchResult = contactOrchestrationService(orchService, CommonConstants.CORE_SERVICE_SERVICE_REGISTRY_REGISTER);
+        logger.debug("Orchestrating Orchestration Service ...");
         final OrchestrationResultDTO orchOrchResult = contactOrchestrationService(orchService, CommonConstants.CORE_SERVICE_ORCH_PROCESS);
 
         responseDTO.setDeviceRegistry(new ServiceEndpoint(CoreSystemService.DEVICE_REGISTRY_REGISTER_SERVICE, orchestration.createUri(drOrchResult).toUri()));

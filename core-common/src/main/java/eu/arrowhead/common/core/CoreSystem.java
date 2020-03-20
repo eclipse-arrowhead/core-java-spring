@@ -13,6 +13,8 @@ import static eu.arrowhead.common.core.CoreSystemService.ONBOARDING_WITH_CERTIFI
 import static eu.arrowhead.common.core.CoreSystemService.ONBOARDING_WITH_CERTIFICATE_AND_NAME;
 import static eu.arrowhead.common.core.CoreSystemService.ONBOARDING_WITH_SHARED_SECRET_AND_CSR;
 import static eu.arrowhead.common.core.CoreSystemService.ONBOARDING_WITH_SHARED_SECRET_AND_NAME;
+import static eu.arrowhead.common.core.CoreSystemService.SERVICE_REGISTRY_REGISTER_SERVICE;
+import static eu.arrowhead.common.core.CoreSystemService.SERVICE_REGISTRY_UNREGISTER_SERVICE;
 import static eu.arrowhead.common.core.CoreSystemService.SYSTEM_REGISTRY_REGISTER_SERVICE;
 import static eu.arrowhead.common.core.CoreSystemService.SYSTEM_REGISTRY_UNREGISTER_SERVICE;
 
@@ -21,7 +23,7 @@ public enum CoreSystem {
     //=================================================================================================
     // elements
 
-    SERVICE_REGISTRY(Defaults.DEFAULT_SERVICE_REGISTRY_PORT, null),
+    SERVICE_REGISTRY(Defaults.DEFAULT_SERVICE_REGISTRY_PORT, List.of(SERVICE_REGISTRY_REGISTER_SERVICE, SERVICE_REGISTRY_UNREGISTER_SERVICE)),
     SYSTEM_REGISTRY(Defaults.DEFAULT_SYSTEM_REGISTRY_PORT, List.of(SYSTEM_REGISTRY_REGISTER_SERVICE, SYSTEM_REGISTRY_UNREGISTER_SERVICE)),
     DEVICE_REGISTRY(Defaults.DEFAULT_DEVICE_REGISTRY_PORT, List.of(DEVICE_REGISTRY_REGISTER_SERVICE, DEVICE_REGISTRY_UNREGISTER_SERVICE)),
     ONBOARDING_CONTROLLER(Defaults.DEFAULT_ONBOARDING_PORT, List.of(ONBOARDING_WITH_CERTIFICATE_AND_NAME, ONBOARDING_WITH_SHARED_SECRET_AND_NAME,

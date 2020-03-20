@@ -9,7 +9,7 @@ public class CertificateCreationRequestDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String commonName;
-    private String publicKey;
+    private String publicKey; // TODO add KeyAlgorithm
     private String privateKey;
 
 

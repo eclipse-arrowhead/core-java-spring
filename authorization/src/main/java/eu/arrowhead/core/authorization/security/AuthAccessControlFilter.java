@@ -16,10 +16,11 @@ public class AuthAccessControlFilter extends CoreSystemAccessControlFilter {
 	
 	//=================================================================================================
 	// members
-	
+	private static final String AUTHORIZATION_INTRA_CLOUD_MGMT_URI = CoreCommonConstants.MGMT_URI + "/intracloud";
 	private static final CoreSystem[] allowedCoreSystemsForChecks = { CoreSystem.ORCHESTRATOR, CoreSystem.GATEKEEPER };
 	private static final CoreSystem[] allowedCoreSystemsForSubscriptionChecks = { CoreSystem.EVENT_HANDLER };
-	
+	private static final CoreSystem[] allowedCoreSystemsForRuleMgmt = { CoreSystem.ONBOARDING_CONTROLLER };
+
 	//=================================================================================================
 	// assistant methods
 
@@ -31,6 +32,11 @@ public class AuthAccessControlFilter extends CoreSystemAccessControlFilter {
 		final String cloudCN = getServerCloudCN();
 		if (requestTarget.endsWith(CommonConstants.OP_AUTH_KEY_URI) || requestTarget.endsWith(CommonConstants.ECHO_URI)) {
 			// Everybody in the local cloud can get the Authorization public key (because it is PUBLIC) or test the server => no further check is necessary
+		} else if (requestTarget.endsWith(AUTHORIZATION_INTRA_CLOUD_MGMT_URI)) {
+			// onboarding controller may use this method
+			if(!checkIfClientIsAnAllowedCoreSystemNoException(clientCN, cloudCN, allowedCoreSystemsForRuleMgmt, requestTarget)) {
+				checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
+			}
 		} else if (requestTarget.contains(CoreCommonConstants.MGMT_URI)) {
 			// Only the local System Operator can use these methods
 			checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);

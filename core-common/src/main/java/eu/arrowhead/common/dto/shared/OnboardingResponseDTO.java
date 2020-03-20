@@ -17,43 +17,38 @@ public abstract class OnboardingResponseDTO implements Serializable {
     private String intermediateCertificate;
     private String rootCertificate;
 
+    private String certificateType;
 
     //=================================================================================================
     // methods
 
     //-------------------------------------------------------------------------------------------------
-    public ServiceEndpoint getDeviceRegistry()
-    {
+    public ServiceEndpoint getDeviceRegistry() {
         return deviceRegistry;
     }
 
     //-------------------------------------------------------------------------------------------------
-    public void setDeviceRegistry(final ServiceEndpoint deviceRegistry)
-    {
+    public void setDeviceRegistry(final ServiceEndpoint deviceRegistry) {
         this.deviceRegistry = deviceRegistry;
     }
 
     //-------------------------------------------------------------------------------------------------
-    public ServiceEndpoint getSystemRegistry()
-    {
+    public ServiceEndpoint getSystemRegistry() {
         return systemRegistry;
     }
 
     //-------------------------------------------------------------------------------------------------
-    public void setSystemRegistry(final ServiceEndpoint systemRegistry)
-    {
+    public void setSystemRegistry(final ServiceEndpoint systemRegistry) {
         this.systemRegistry = systemRegistry;
     }
 
     //-------------------------------------------------------------------------------------------------
-    public ServiceEndpoint getServiceRegistry()
-    {
+    public ServiceEndpoint getServiceRegistry() {
         return serviceRegistry;
     }
 
     //-------------------------------------------------------------------------------------------------
-    public void setServiceRegistry(final ServiceEndpoint serviceRegistry)
-    {
+    public void setServiceRegistry(final ServiceEndpoint serviceRegistry) {
         this.serviceRegistry = serviceRegistry;
     }
 
@@ -68,39 +63,40 @@ public abstract class OnboardingResponseDTO implements Serializable {
     }
 
     //-------------------------------------------------------------------------------------------------
-    public CertificateResponseDTO getOnboardingCertificate()
-    {
+    public CertificateResponseDTO getOnboardingCertificate() {
         return onboardingCertificate;
     }
 
     //-------------------------------------------------------------------------------------------------
-    public void setOnboardingCertificate(final CertificateResponseDTO onboardingCertificate)
-    {
+    public void setOnboardingCertificate(final CertificateResponseDTO onboardingCertificate) {
         this.onboardingCertificate = onboardingCertificate;
     }
 
     //-------------------------------------------------------------------------------------------------
-    public String getIntermediateCertificate()
-    {
+    public String getIntermediateCertificate() {
         return intermediateCertificate;
     }
 
     //-------------------------------------------------------------------------------------------------
-    public void setIntermediateCertificate(final String intermediateCertificate)
-    {
+    public void setIntermediateCertificate(final String intermediateCertificate) {
         this.intermediateCertificate = intermediateCertificate;
     }
 
     //-------------------------------------------------------------------------------------------------
-    public String getRootCertificate()
-    {
+    public String getRootCertificate() {
         return rootCertificate;
     }
 
     //-------------------------------------------------------------------------------------------------
-    public void setRootCertificate(final String rootCertificate)
-    {
+    public void setRootCertificate(final String rootCertificate) {
         this.rootCertificate = rootCertificate;
     }
 
+    public String getCertificateType() {
+        return certificateType;
+    }
+
+    public void setCertificateType(final String certificateType) {
+        this.certificateType = certificateType;
+    }
 }

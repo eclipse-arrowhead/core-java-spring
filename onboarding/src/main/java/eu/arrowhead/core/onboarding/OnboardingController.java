@@ -39,6 +39,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -127,10 +128,10 @@ public class OnboardingController {
     @PostMapping(OP_ONBOARDING_WITH_SHARED_SECRET_AND_NAME)
     @ResponseBody
     public OnboardingWithNameResponseDTO onboardWithSharedSecretAndName(@RequestBody final OnboardingWithNameRequestDTO onboardingRequest,
-                                                                        @RequestHeader(HttpHeaders.AUTHORIZATION) final String authorization) {
+                                                                        @RequestHeader final HttpHeaders headers) {
         logger.debug("onboardWithSharedSecretAndName started ...");
 
-        authenticateSharedSecret(authorization);
+        authenticateSharedSecret(headers.getFirst(HttpHeaders.AUTHORIZATION));
         verifyRequest(onboardingRequest, CommonConstants.ONBOARDING_URI + OP_ONBOARDING_WITH_SHARED_SECRET_AND_NAME);
 
         return onboardingDBService.onboarding(onboardingRequest);
@@ -213,7 +214,7 @@ public class OnboardingController {
     //-------------------------------------------------------------------------------------------------
     private void authenticateSharedSecret(final String authorization) {
         if (sharedSecret.isEmpty()) {
-            throw new InvalidParameterException("Shared Secret is not accepted by this service");
+            throw new InvalidParameterException("Shared Secret is disabled by this service");
         }
 
         if (Utilities.isEmpty(authorization)) {

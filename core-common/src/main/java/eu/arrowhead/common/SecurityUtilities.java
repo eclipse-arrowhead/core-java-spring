@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -67,6 +68,7 @@ public class SecurityUtilities {
         Assert.notNull(sslProperties.getKeyStore(), "KeyStore property must not be null!");
         Assert.hasText(sslProperties.getKeyStorePassword(), "KeyStore password property must not be null or empty!");
 
+        logger.debug("Preparing Certificate Signing Request ...");
         // get cloud certificate for cloudName and operator
         final KeyStore keyStore = KeyStore.getInstance(sslProperties.getKeyStore().getFile(), sslProperties.getKeyStorePassword().toCharArray());
         final X509Certificate cloudCertFromKeyStore = Utilities.getCloudCertFromKeyStore(keyStore);
@@ -76,16 +78,17 @@ public class SecurityUtilities {
         final String operator = getOperatorName(cloudCertFromKeyStore.getSubjectDN());
         final String organization = getOrganization(cloudCertFromKeyStore.getSubjectDN());
         final String country = getCountry(cloudCertFromKeyStore.getSubjectDN());
-        final String commonName = String.format("CN=%s.%s.%s.%s.%s, OU=%s, O=%s, C=%s",
-                                                baseCommonName, cloudName, operator, organization, country,
-                                                operator, organization, country);
+        final String commonName = String.format("CN=%s.%s, OU=%s, O=%s, C=%s",
+                                                baseCommonName, cloudName,operator, organization, country);
         final X500Name x500Name = new X500Name(commonName);
 
+        logger.debug("Building and Signing Certificate Signing Request for {}", x500Name);
         // create certificate signing request
         final JcaPKCS10CertificationRequestBuilder builder = new JcaPKCS10CertificationRequestBuilder(x500Name, keyPair.getPublic());
         final JcaContentSignerBuilder contentSignerBuilder = new JcaContentSignerBuilder(SIGNATURE_ALGORITHM);
         final ContentSigner contentSigner = contentSignerBuilder.build(keyPair.getPrivate());
         final PKCS10CertificationRequest csr = builder.build(contentSigner);
+
         return Base64.getEncoder().encodeToString(csr.getEncoded());
     }
 
@@ -121,6 +124,17 @@ public class SecurityUtilities {
         return keyPair;
     }
 
+    //-------------------------------------------------------------------------------------------------
+    public static String getCertificateCNFromRequest(final HttpServletRequest request) {
+        final X509Certificate[] certificates = (X509Certificate[]) request.getAttribute(CommonConstants.ATTR_JAVAX_SERVLET_REQUEST_X509_CERTIFICATE);
+        if (certificates != null && certificates.length != 0) {
+            final X509Certificate cert = certificates[0];
+            return Utilities.getCertCNFromSubject(cert.getSubjectDN().getName());
+        }
+
+        return null;
+    }
+
     //=================================================================================================
     // assistant methods
 
@@ -142,7 +156,7 @@ public class SecurityUtilities {
 
     //-------------------------------------------------------------------------------------------------
     private String getCloudName(final Principal principal) {
-        return extractCNPart(principal, 3);
+        return Utilities.getCertCNFromSubject(principal.getName());
     }
 
     //-------------------------------------------------------------------------------------------------
