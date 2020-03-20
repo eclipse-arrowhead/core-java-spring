@@ -286,7 +286,12 @@ public class HistorianService {
 	    stmt.setString(3, m.getN());
 	    stmt.setDouble(4, t);
 	    stmt.setString(5, m.getU());
-	    stmt.setDouble(6, m.getV());
+	    //stmt.setDouble(6, m.getV());
+	    if (m.getV() == null) {
+	      stmt.setNull(6, java.sql.Types.DOUBLE);
+   	    } else {
+              stmt.setDouble(6, m.getV());
+            } 
 	    stmt.setString(7, m.getVs());
 	    if (m.getVb() != null)
 	    	stmt.setBoolean(8, m.getVb());
@@ -360,7 +365,12 @@ public class HistorianService {
 	msg.setT((double)rs.getLong("t"));
 	msg.setN(rs.getString("n"));
 	msg.setU(rs.getString("u"));
-	msg.setV(rs.getDouble("v"));
+	final double v = rs.getDouble("v");
+	 if (!rs.wasNull()) {
+	   msg.setV(v);
+	}
+
+	msg.setVs(rs.getString("vs"));
 	Boolean foo = rs.getBoolean("vb");
 	if (!rs.wasNull())
 	    msg.setVb(rs.getBoolean("vb"));

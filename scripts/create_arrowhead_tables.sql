@@ -298,7 +298,7 @@ CREATE TABLE IF NOT EXISTS `dmhist_entries` (
   `t` double NOT NULL,
   `u` varchar(64),
   `v`  double,
-  `sv` BLOB,
+  `vs` BLOB,
   `vb` BOOLEAN,
   PRIMARY KEY (`id`),
   CONSTRAINT `service_id_fk` FOREIGN KEY(`sid`) REFERENCES `dmhist_services`(`id`) ON DELETE CASCADE,
