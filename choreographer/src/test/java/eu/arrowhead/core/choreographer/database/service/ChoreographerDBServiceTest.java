@@ -1,14 +1,27 @@
 package eu.arrowhead.core.choreographer.database.service;
 
+import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.ChoreographerPlan;
+import eu.arrowhead.common.database.repository.ChoreographerActionRepository;
+import eu.arrowhead.common.database.repository.ChoreographerPlanRepository;
+import eu.arrowhead.common.database.repository.ChoreographerStepRepository;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
 
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.time.ZonedDateTime;
+import java.util.Optional;
 
 @RunWith(SpringRunner.class)
 public class ChoreographerDBServiceTest {
-    /*
+
 	
 	//=================================================================================================
 	// members
@@ -19,26 +32,13 @@ public class ChoreographerDBServiceTest {
     @Mock
     ChoreographerPlanRepository choreographerPlanRepository;
 
-    @Mock
-    ChoreographerActionPlanActionConnectionRepository choreographerActionPlanActionConnectionRepository;
 
     @Mock
     ChoreographerActionRepository choreographerActionRepository;
 
-    @Mock
-    ChoreographerActionActionStepConnectionRepository choreographerActionActionStepConnectionRepository;
 
     @Mock
     ChoreographerStepRepository choreographerStepRepository;
-
-    @Mock
-    ChoreographerStepServiceDefinitionConnectionRepository choreographerStepServiceDefinitionConnectionRepository;
-
-    @Mock
-    ChoreographerNextStepRepository choreographerNextStepRepository;
-
-    @Mock
-    ServiceDefinitionRepository serviceDefinitionRepository;
     
     //=================================================================================================
 	// methods
@@ -52,6 +52,7 @@ public class ChoreographerDBServiceTest {
         choreographerDBService.getPlanById(1);
     }
 
+    /*
     //-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
     public void getChoreographerActionPlanByIdTestWithNotExistingId() {
@@ -148,7 +149,7 @@ public class ChoreographerDBServiceTest {
         
         return new ChoreographerActionStepRequestDTO(actionStepName, usedServiceNames, nextStepNames);
     }
-
+    */
     //-------------------------------------------------------------------------------------------------
 	private ChoreographerPlan getChoreographerActionPlan() {
         final ChoreographerPlan actionPlan = new ChoreographerPlan("testactionplan0");
@@ -158,6 +159,8 @@ public class ChoreographerDBServiceTest {
 
         return actionPlan;
     }
+
+    /*
 
     //-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("unused")
@@ -176,7 +179,7 @@ public class ChoreographerDBServiceTest {
 
         return new PageImpl<>(choreographerPlanList);
     }
-
+*/
     //-------------------------------------------------------------------------------------------------
 	private long getIdForTest() {
         return 1L;
@@ -196,5 +199,4 @@ public class ChoreographerDBServiceTest {
 	private ZonedDateTime getCreatedAtForTest() {
         return Utilities.parseUTCStringToLocalZonedDateTime("2019-08-13 14:43:19");
     }
-     */
 }

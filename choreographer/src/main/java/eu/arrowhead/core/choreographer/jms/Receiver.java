@@ -10,7 +10,7 @@ import eu.arrowhead.common.database.entity.ChoreographerPlan;
 import eu.arrowhead.common.database.entity.ChoreographerRunningStep;
 import eu.arrowhead.common.database.entity.ChoreographerStep;
 import eu.arrowhead.common.database.entity.ChoreographerStepNextStepConnection;
-import eu.arrowhead.common.dto.internal.ChoreographerSessionRunningStepDataDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerSessionRunningStepDataDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFlags;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
@@ -185,9 +185,9 @@ public class Receiver {
         requesterSystem.setAddress(coreSystemRegistrationProperties.getCoreSystemDomainName());
         requesterSystem.setPort(coreSystemRegistrationProperties.getCoreSystemDomainPort());
 
-        final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
+        //final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
 
-        requesterSystem.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+        //requesterSystem.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
 
         final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO.Builder(requesterSystem)
                                                                                              .requestedService(serviceQuery)
@@ -210,6 +210,9 @@ public class Receiver {
                     orchestrationResult.getProvider().getAddress(),
                     orchestrationResult.getProvider().getPort(),
                     orchestrationResult.getServiceUri());
+
+            System.out.println("runningStepId: " + runningStepDataDTO.getRunningStepId());
+            System.out.println("sessionId: " + runningStepDataDTO.getSessionId());
             httpService.sendRequest(uri, HttpMethod.POST, Void.class, runningStepDataDTO);
         }
     }
