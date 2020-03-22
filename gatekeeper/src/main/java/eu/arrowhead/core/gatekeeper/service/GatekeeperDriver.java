@@ -51,6 +51,7 @@ import eu.arrowhead.common.dto.internal.QoSMonitorSenderConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSReservationListResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSReservationRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSReservationResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSTemporaryLockRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSTemporaryLockResponseDTO;
@@ -486,7 +487,17 @@ public class GatekeeperDriver {
 		final UriComponents uri = getOrchestratorQoSTemporaryLockUri();
 		final ResponseEntity<QoSTemporaryLockResponseDTO> response = httpService.sendRequest(uri, HttpMethod.POST, QoSTemporaryLockResponseDTO.class, request);
 		return response.getBody();
-	}	
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public void sendQoSConfirmReservationRequest(final QoSReservationRequestDTO request) {
+		logger.debug("sendQoSConfirmReservationRequest started...");
+
+		validateQoSReservationRequestDTO(request);
+		
+		final UriComponents uri = getOrchestratorQoSReservationsUri();
+		httpService.sendRequest(uri, HttpMethod.POST, Void.class, request);
+	}
 	
 	//=================================================================================================
 	// assistant methods
@@ -889,6 +900,21 @@ public class GatekeeperDriver {
 		
 		if (request.getRequester().getPort() == null) {
 			throw new InvalidParameterException("Requester system port is null");
+		}
+		
+		if (request instanceof QoSReservationRequestDTO) {
+			final QoSReservationRequestDTO req = (QoSReservationRequestDTO) request;
+			if (req.getSelected() == null) {
+				throw new InvalidParameterException("Selected ORCH result is null");
+			}
+			
+			if (req.getSelected().getProvider() == null) {
+				throw new InvalidParameterException("Selected provider is null");
+			}
+			
+			if (req.getSelected().getService() == null) {
+				throw new InvalidParameterException("Selected service is null");
+			}
 		}
 	}
 }

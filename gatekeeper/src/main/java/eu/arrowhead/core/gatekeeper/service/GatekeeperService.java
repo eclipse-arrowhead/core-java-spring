@@ -44,6 +44,7 @@ import eu.arrowhead.common.dto.internal.QoSMeasurementAttributesFormDTO;
 import eu.arrowhead.common.dto.internal.QoSMonitorSenderConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSReservationRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSReservationResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSTemporaryLockRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSTemporaryLockResponseDTO;
@@ -376,7 +377,8 @@ public class GatekeeperService {
 				// therefore we have to pick and reserve one from there.
 				final OrchestrationResultDTO selectedResult = icnProviderMatchmaker.doMatchmaking(orchestrationResponse.getResponse(),
 																								  new ICNProviderMatchmakingParameters(request.getPreferredSystems(), true));
-				// TODO bordi reserve provider finally
+				
+				gatekeeperDriver.sendQoSConfirmReservationRequest(new QoSReservationRequestDTO(selectedResult, orchestrationForm.getRequesterSystem(), orchestrationResponse.getResponse()));
 				return new ICNProposalResponseDTO(List.of(selectedResult));				
 			}
 		} 
@@ -414,8 +416,8 @@ public class GatekeeperService {
 																											  request.getConsumerGatewayPublicKey());
 		final GatewayProviderConnectionResponseDTO response = gatekeeperDriver.connectProvider(connectionRequest);
 		
-		if (needReservation) {			
-			// TODO bordi reserve provider finally
+		if (needReservation) {
+			gatekeeperDriver.sendQoSConfirmReservationRequest(new QoSReservationRequestDTO(selectedResult, orchestrationForm.getRequesterSystem(), orchestrationResponse.getResponse()));
 		}
 		
 		return new ICNProposalResponseDTO(selectedResult, DTOConverter.convertRelayToRelayResponseDTO(selectedRelay), response);

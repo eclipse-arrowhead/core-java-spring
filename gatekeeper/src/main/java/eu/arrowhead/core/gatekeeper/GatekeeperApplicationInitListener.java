@@ -88,7 +88,7 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 		
 		return List.of(CoreSystemService.AUTH_CONTROL_INTER_SERVICE, CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.ORCHESTRATION_QOS_ENABLED_SERVICE,
 					   CoreSystemService.ORCHESTRATION_QOS_RESERVATIONS_SERVICE, CoreSystemService.ORCHESTRATION_QOS_TEMPORARY_LOCK_SERVICE,
-					   CoreSystemService.QOS_MONITOR_INTRA_PING_MEASUREMENT_SERVICE); 
+					   CoreSystemService.QOS_MONITOR_INTRA_PING_MEASUREMENT_SERVICE, CoreSystemService.ORCHESTRATION_QOS_CONFIRM_RESERVATION_SERVICE); 
 	}
 		
 	//-------------------------------------------------------------------------------------------------

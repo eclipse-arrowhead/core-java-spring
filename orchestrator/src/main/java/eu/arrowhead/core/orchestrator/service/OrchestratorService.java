@@ -35,6 +35,7 @@ import eu.arrowhead.common.dto.internal.ICNResultDTO;
 import eu.arrowhead.common.dto.internal.OrchestratorStoreResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSMeasurementAttributesFormDTO;
 import eu.arrowhead.common.dto.internal.QoSReservationListResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSReservationRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSTemporaryLockRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSTemporaryLockResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
@@ -431,12 +432,20 @@ public class OrchestratorService {
 	public QoSTemporaryLockResponseDTO lockProvidersTemporarily(final QoSTemporaryLockRequestDTO request) {
 		logger.debug("lockProvidersTemporarily started ...");
 		
-		validateSystemRequestDTO(request.getRequester());
+		checkQoSReservationRequestDTO(request);
 		if (request.getOrList() == null || request.getOrList().isEmpty()) {
 			return new QoSTemporaryLockResponseDTO();
 		}
 		
 		return new QoSTemporaryLockResponseDTO(qosManager.reserveProvidersTemporarily(request.getOrList(), request.getRequester()));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public void confirmProviderReservation(final QoSReservationRequestDTO request) {
+		logger.debug("confirmProviderReservation started ...");
+		
+		checkQoSReservationRequestDTO(request);
+		qosManager.confirmReservation(request.getSelected(), request.getOrList(), request.getRequester());
 	}
 	
 	//=================================================================================================
@@ -541,6 +550,46 @@ public class OrchestratorService {
 		
 		if (Utilities.isEmpty(cloud.getName())) {
 			throw new InvalidParameterException("Cloud name" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkQoSReservationRequestDTO(final QoSTemporaryLockRequestDTO request) {
+		logger.debug("checkQoSReservationRequestDTO started...");
+		
+		if (request == null) {
+			throw new InvalidParameterException("QoSReservationRequestDTO is null");
+		}
+		
+		if (request.getRequester() == null) {
+			throw new InvalidParameterException("Requester system is null");
+		}
+		
+		if (Utilities.isEmpty(request.getRequester().getSystemName())) {
+			throw new InvalidParameterException("Requester system name is null or empty");
+		}
+		
+		if (Utilities.isEmpty(request.getRequester().getAddress())) {
+			throw new InvalidParameterException("Requester system address is null or empty");
+		}
+		
+		if (request.getRequester().getPort() == null) {
+			throw new InvalidParameterException("Requester system port is null");
+		}
+		
+		if (request instanceof QoSReservationRequestDTO) {
+			final QoSReservationRequestDTO req = (QoSReservationRequestDTO) request;
+			if (req.getSelected() == null) {
+				throw new InvalidParameterException("Selected ORCH result is null");
+			}
+			
+			if (req.getSelected().getProvider() == null) {
+				throw new InvalidParameterException("Selected provider is null");
+			}
+			
+			if (req.getSelected().getService() == null) {
+				throw new InvalidParameterException("Selected service is null");
+			}
 		}
 	}
 	

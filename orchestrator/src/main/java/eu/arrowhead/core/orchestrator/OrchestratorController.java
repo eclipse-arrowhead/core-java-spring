@@ -21,6 +21,7 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.QoSReservationListResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSReservationRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSTemporaryLockRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSTemporaryLockResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
@@ -55,10 +56,12 @@ public class OrchestratorController {
 	private static final String POST_ORCHESTRATIOR_DESCRIPTION = "Start Orchestration process.";
 	private static final String POST_ORCHESTRATOR_HTTP_200_MESSAGE = "Returns possible providers of the specified service.";
 	private static final String POST_ORCHESTRATOR_HTTP_400_MESSAGE = "Could not run the orchestration process";
-	private static final String GET_ORCHESTRATOR_QOS_ENABLED_HTTP_200_MESSAGE = "QoS Monitor flage returned";
+	private static final String GET_ORCHESTRATOR_QOS_ENABLED_HTTP_200_MESSAGE = "QoS Monitor flag returned";
 	private static final String GET_ORCHESTRATOR_QOS_RESERVATIONS_HTTP_200_MESSAGE = "QoS Reservations returned";
 	private static final String POST_ORCHESTRATOR_QOS_TEMPORARY_LOCK_HTTP_200_MESSAGE = "Locked Orchestration results (Provider-Service) returned";
 	private static final String POST_ORCHESTRATOR_QOS_TEMPORARY_LOCK_HTTP_400_MESSAGE = "Could not return locked Orchestration results (Provider-Service)";
+	private static final String POST_ORCHESTRATOR_QOS_CONFIRM_RESERVATION_HTTP_200_MESSAGE = "QoS Reservation request confirmed";
+	private static final String POST_ORCHESTRATOR_QOS_CONFIRM_RESERVATION_HTTP_400_MESSAGE = "Could not confirm QoS Reservation request";
 	
 	private static final String NULL_PARAMETER_ERROR_MESSAGE = " is null.";
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
@@ -173,19 +176,35 @@ public class OrchestratorController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return locked Orchestration results (Provider-Service).", response = QoSTemporaryLockResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiOperation(value = "Return locked Orchestration results (Provider-Service).", response = QoSTemporaryLockResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_ORCHESTRATOR_QOS_CONFIRM_RESERVATION_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_ORCHESTRATOR_QOS_CONFIRM_RESERVATION_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = CommonConstants.OP_ORCH_QOS_TEMPORARY_LOCK_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public QoSTemporaryLockResponseDTO lockProvidersTemporary(final QoSTemporaryLockRequestDTO request) {
+		logger.debug("lockProvidersTemporary started ...");
+		
+		checkQoSReservationRequestDTO(request, CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_TEMPORARY_LOCK_URI);
+		return orchestratorService.lockProvidersTemporarily(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Confirm reservation request (Provider-Service).", tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = POST_ORCHESTRATOR_QOS_TEMPORARY_LOCK_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_ORCHESTRATOR_QOS_TEMPORARY_LOCK_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(path = CommonConstants.OP_ORCH_QOS_RESERVATIONS_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public QoSTemporaryLockResponseDTO lockProvidersTemporary(final QoSTemporaryLockRequestDTO request) {
-		logger.debug("lockProvidersTemporary started ...");
+	@PostMapping(path = CommonConstants.OP_ORCH_QOS_RESERVATIONS_URI, consumes = MediaType.APPLICATION_JSON_VALUE)
+	public void confirmReservation(@RequestBody final QoSReservationRequestDTO request) {
+		logger.debug("confirmReservation started ...");
 		
-		//checkQoSReservationRequestDTO(request, origin);
-		return orchestratorService.lockProvidersTemporarily(request);
+		checkQoSReservationRequestDTO(request, CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_TEMPORARY_LOCK_URI);
+		orchestratorService.confirmProviderReservation(request);
 	}
 	
 	//=================================================================================================
@@ -289,6 +308,21 @@ public class OrchestratorController {
 		
 		if (request.getRequester().getPort() == null) {
 			throw new BadPayloadException("Requester system port is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (request instanceof QoSReservationRequestDTO) {
+			final QoSReservationRequestDTO req = (QoSReservationRequestDTO) request;
+			if (req.getSelected() == null) {
+				throw new BadPayloadException("Selected ORCH result is null", HttpStatus.SC_BAD_REQUEST, origin);
+			}
+			
+			if (req.getSelected().getProvider() == null) {
+				throw new BadPayloadException("Selected provider is null", HttpStatus.SC_BAD_REQUEST, origin);
+			}
+			
+			if (req.getSelected().getService() == null) {
+				throw new BadPayloadException("Selected service is null", HttpStatus.SC_BAD_REQUEST, origin);
+			}
 		}
 	}
 }
