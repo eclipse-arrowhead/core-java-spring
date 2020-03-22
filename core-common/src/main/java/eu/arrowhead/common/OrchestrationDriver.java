@@ -53,7 +53,7 @@ public class OrchestrationDriver {
 
         final UriComponents echoUri = createUri(system, uriPrefix + CommonConstants.ECHO_URI);
         httpService.sendRequest(echoUri, HttpMethod.GET, String.class);
-        logger.info("Service at {} is accessible...", echoUri);
+        logger.debug("Service at {} is accessible...", echoUri);
     }
 
     //-------------------------------------------------------------------------------------------------

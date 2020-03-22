@@ -667,7 +667,7 @@ public class DeviceRegistryDBService {
         try {
             final Optional<DeviceRegistry> find = deviceRegistryRepository.findByDevice(deviceDb);
             if (find.isPresent()) {
-                throw new InvalidParameterException("System Registry entry with provider: (" +
+                throw new InvalidParameterException("Device Registry entry with provider: (" +
                         deviceDb.getDeviceName() + ", " +
                         deviceDb.getMacAddress() +
                         ") already exists.");
