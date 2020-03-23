@@ -276,7 +276,7 @@ public class HistorianService {
 	    boolvalue = ""+m.getVb()+"";*/
 
 	  if (m.getN() != null) {
-	    sql = "INSERT INTO dmhist_entries(sid, mid, n, t, u, v, sv, vb) " + 
+	    sql = "INSERT INTO dmhist_entries(sid, mid, n, t, u, v, vs, vb) " + 
 		    //"VALUES("+sid+", "+mid+", '"+n+"', " + t +", "+unit+", "+value+", "+stringvalue+", "+boolvalue+");";
 		    "VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
 	    //stmt = conn.createStatement();
