@@ -385,6 +385,7 @@ public class Utilities {
 
 		try {
 		    // debian installation with new certificates have a different alias
+            // i.e. the format is {cloudname}." + AH_MASTER_NAME + "." + AH_MASTER_SUFFIX
 			final Enumeration<String> enumeration = keystore.aliases();
 			while (enumeration.hasMoreElements()) {
 				final String alias = enumeration.nextElement();
@@ -392,8 +393,10 @@ public class Utilities {
                 final String commonName = getCertCNFromSubject(certificate.getSubjectDN().getName());
                 Assert.notNull(commonName, "Certificate without commonName is not allowed");
                 final String[] cnParts = commonName.split("\\.");
-				if (cnParts.length == 4 && cnParts[2].equals(AH_MASTER_NAME) && cnParts[3].equals(AH_MASTER_SUFFIX)) {
+				if (cnParts.length == 3 && cnParts[1].equals(AH_MASTER_NAME) && cnParts[2].equals(AH_MASTER_SUFFIX)) {
 					return (X509Certificate) keystore.getCertificate(alias);
+                } else if (cnParts.length == 4 && cnParts[2].equals(AH_MASTER_NAME) && cnParts[3].equals(AH_MASTER_SUFFIX)) {
+                    return (X509Certificate) keystore.getCertificate(alias);
                 }
 			}
 
