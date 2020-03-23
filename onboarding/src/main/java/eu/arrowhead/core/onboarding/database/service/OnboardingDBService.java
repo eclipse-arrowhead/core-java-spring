@@ -126,10 +126,10 @@ public class OnboardingDBService {
 
         logger.debug("Processing response from Certificate Authority ...");
         final CertificateResponseDTO certificateResponseDTO = new CertificateResponseDTO();
-        certificateResponseDTO.setCertificate(csrResult.getCertificateChain().get(2));
-
-        responseDTO.setRootCertificate(csrResult.getCertificateChain().get(0));
+        certificateResponseDTO.setCertificate(csrResult.getCertificateChain().get(0));
         responseDTO.setIntermediateCertificate(csrResult.getCertificateChain().get(1));
+        responseDTO.setRootCertificate(csrResult.getCertificateChain().get(2));
+
         responseDTO.setOnboardingCertificate(certificateResponseDTO);
 
         logger.debug("Orchestrating Device Registry ...");
