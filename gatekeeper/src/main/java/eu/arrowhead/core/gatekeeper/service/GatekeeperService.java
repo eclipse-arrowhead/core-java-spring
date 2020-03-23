@@ -193,7 +193,7 @@ public class GatekeeperService {
 			return new GSDPollResponseDTO();
 		}
 		
-		// Cross checking Service Registry and Authorization results and add QoS Reservations
+		// Cross checking Service Registry and Authorization results and add QoS Measurements
 		final Set<String> availableInterfaces = new HashSet<>();
 		int numOfProviders = 0;
 		final List<QoSMeasurementAttributesFormDTO> qosMeasurements = new ArrayList<>();
@@ -201,8 +201,9 @@ public class GatekeeperService {
 		
 		for (final ServiceRegistryResponseDTO srEntryDTO : srQueryResult.getServiceQueryData()) {
 			final long providerId = srEntryDTO.getProvider().getId();
+			final long serviceId = srEntryDTO.getServiceDefinition().getId();
 			if (authorizedProviderIdsWithInterfaceIdList.containsKey(providerId) 
-					&& !reservedProviderIdAndServiceIdPairs.contains(srEntryDTO.getProvider().getId() + "-" + srEntryDTO.getServiceDefinition().getId())) {
+					&& !reservedProviderIdAndServiceIdPairs.contains(providerId + "-" + serviceId)) {
 				
 				final Set<String> providerInterfaces = new HashSet<>();
 				for (final ServiceInterfaceResponseDTO interfaceDTO : srEntryDTO.getInterfaces()) {
@@ -216,7 +217,7 @@ public class GatekeeperService {
 					numOfProviders++;
 				} else {
 					try {
-						final QoSIntraPingMeasurementResponseDTO pingMeasurement = gatekeeperDriver.getQoSIntraPingMeasurementsForLocalSystem(srEntryDTO.getProvider().getId());
+						final QoSIntraPingMeasurementResponseDTO pingMeasurement = gatekeeperDriver.getQoSIntraPingMeasurementsForLocalSystem(providerId);
 						qosMeasurements.add(new QoSMeasurementAttributesFormDTO(srEntryDTO,
 																				pingMeasurement.isAvailable(),
 																				pingMeasurement.getLastAccessAt(),

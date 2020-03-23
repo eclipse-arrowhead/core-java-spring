@@ -188,12 +188,12 @@ public class QoSManagerImpl implements QoSManager {
 		Assert.notNull(gsdList, "'gsdList' is null.");
 		Assert.notNull(request, "'request' is null.");
 		
+		final QoSIntraPingMeasurementResponseDTO localMedianPingMeasurement = orchestratorDriver.getIntraPingMedianMeasurement(QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT);
 		final List<GSDPollResponseDTO> results = new ArrayList<>();
 		for (final GSDPollResponseDTO cloudResponse : gsdList) {
 			final GSDPollResponseDTO verifiedGSDResponse = new GSDPollResponseDTO(cloudResponse.getProviderCloud(), cloudResponse.getRequiredServiceDefinition(), new ArrayList<>(), 0,
 														   new ArrayList<>(), cloudResponse.getServiceMetadata(), cloudResponse.isGatewayIsMandatory());
 			
-			final QoSIntraPingMeasurementResponseDTO localMedianPingMeasurement = orchestratorDriver.getIntraPingMedianMeasurement(QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT);
 			for (final QoSMeasurementAttributesFormDTO measurement : cloudResponse.getQosMeasurements()) {
 				if (measurement.isProviderAvailable()) {
 					final QoSVerificationParameters verificationParameters = new QoSVerificationParameters(measurement.getServiceRegistryEntry().getProvider(), cloudResponse.getProviderCloud(),
@@ -215,11 +215,11 @@ public class QoSManagerImpl implements QoSManager {
 						}
 						verifiedGSDResponse.getVerifiedRelays().addAll(verificationParameters.getVerifiedRelays());
 					}
-					if (verifiedGSDResponse.getNumOfProviders() > 0) {
-						results.add(verifiedGSDResponse);
-					}					
 				}
 			}
+			if (verifiedGSDResponse.getNumOfProviders() > 0) {
+				results.add(verifiedGSDResponse);
+			}					
 		}
 		return results;
 	}
