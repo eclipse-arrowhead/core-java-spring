@@ -471,11 +471,13 @@ public class Utilities {
 		Assert.notNull(keyPass, "Password is not defined.");
 
 		try {
-			PrivateKey privateKey = (PrivateKey) keystore.getKey(alias, keyPass.toCharArray());
-			if (privateKey != null) {
-				return privateKey;
-			} else {
-				throw new ServiceConfigurationError("Getting the private key failed, key store aliases do not identify a key.");
+            // TODO issue: the cloud common name is not the alias in debian installation with own certificates
+            PrivateKey privateKey = (PrivateKey) keystore.getKey(alias, keyPass.toCharArray());
+            if (privateKey != null) {
+                return privateKey;
+            } else {
+                return getPrivateKey(keystore, keyPass);
+				// throw new ServiceConfigurationError("Getting the private key failed, key store aliases do not identify a key.");
 			}
 		} catch (final KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException ex) {
 			logger.error("Getting the private key from key store failed...", ex);
