@@ -33,7 +33,7 @@ public class Defaults {
 
 	// CA defaults
 	public static final long DEFAULT_CA_CERT_VALIDITY_NEG_OFFSET_MILLIS = 5000;
-	public static final long DEFAULT_CA_CERT_VALIDITY_POS_OFFSET_MILLIS = 1000 * 3600 * 24 * 365;
+	public static final long DEFAULT_CA_CERT_VALIDITY_POS_OFFSET_MILLIS = 1000L * 3600 * 24 * 365;
 	//-------------------------------------------------------------------------------------------------
 	private Defaults() {
 		throw new UnsupportedOperationException();
