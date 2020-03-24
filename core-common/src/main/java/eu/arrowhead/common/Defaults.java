@@ -35,8 +35,8 @@ public class Defaults {
     public static final String CORS_ALLOW_CREDENTIALS = "true";
 
 	// CA defaults
-	public static final long DEFAULT_CA_CERT_VALIDITY_NEG_OFFSET_MILLIS = 5000;
-	public static final long DEFAULT_CA_CERT_VALIDITY_POS_OFFSET_MILLIS = 1000 * 3600 * 24 * 365;
+	public static final long DEFAULT_CA_CERT_VALIDITY_NEG_OFFSET_MINUTES = 5000;
+	public static final long DEFAULT_CA_CERT_VALIDITY_POS_OFFSET_MINUTES = 60 * 24 * 365;
 
     //-------------------------------------------------------------------------------------------------
     private Defaults() {

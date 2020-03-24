@@ -49,7 +49,7 @@ public class OrchestrationDriver {
 
     //-------------------------------------------------------------------------------------------------
     public void pingService(final SystemResponseDTO system, final String uriPrefix) {
-        logger.debug("getCertificateAuthorityService started...");
+        logger.debug("ping started...");
 
         final UriComponents echoUri = createUri(system, uriPrefix + CommonConstants.ECHO_URI);
         httpService.sendRequest(echoUri, HttpMethod.GET, String.class);
@@ -77,7 +77,7 @@ public class OrchestrationDriver {
         final ServiceQueryResultDTO srQueryResult = httpResponse.getBody();
 
         if (Objects.isNull(srQueryResult) || srQueryResult.getServiceQueryData().isEmpty()) {
-            throw new ArrowheadException("Unable to find service");
+            throw new ArrowheadException("Unable to find '" + service.getServiceDefinition() + "' on ServiceRegistry");
         }
 
         return srQueryResult;
@@ -119,7 +119,7 @@ public class OrchestrationDriver {
         final OrchestrationResponseDTO orchQueryResult = httpResponse.getBody();
 
         if (Objects.isNull(orchQueryResult) || orchQueryResult.getResponse().isEmpty()) {
-            throw new ArrowheadException("Unable to find " + serviceDefinition);
+            throw new ArrowheadException("Unable to find '" + serviceDefinition + "' on OrchestrationSystem");
         }
 
         return orchQueryResult;

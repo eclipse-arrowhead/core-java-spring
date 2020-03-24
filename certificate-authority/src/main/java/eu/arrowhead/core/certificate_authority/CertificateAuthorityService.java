@@ -22,8 +22,6 @@ import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -116,12 +114,13 @@ public class CertificateAuthorityService {
 
     private X509Certificate buildCertificate(JcaPKCS10CertificationRequest csr, PrivateKey cloudPrivateKey,
             X509Certificate cloudCertificate) {
-        final ZonedDateTime now = LocalDateTime.now().atZone(ZoneId.systemDefault());
+        final ZonedDateTime now = ZonedDateTime.now();
         final Date validFrom = Date.from(
-                now.minus(Duration.ofMillis(caProperties.getCertValidityPositiveOffsetMillis())).toInstant());
+                now.minusMinutes(caProperties.getCertValidityNegativeOffsetMinutes()).toInstant());
         final Date validUntil = Date.from(
-                now.plus(Duration.ofMillis(caProperties.getCertValidityPositiveOffsetMillis())).toInstant());
+                now.plusMinutes(caProperties.getCertValidityPositiveOffsetMinutes()).toInstant());
 
+        logger.debug("Setting validity from='{}' to='{}'", validFrom, validUntil);
         return CertificateAuthorityUtils.buildCertificate(csr, cloudPrivateKey, cloudCertificate, validFrom, validUntil,
                 random);
     }

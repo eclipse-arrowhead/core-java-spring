@@ -114,7 +114,9 @@ public class OnboardingController {
         authenticateCertificate(httpServletRequest);
         verifyRequest(onboardingRequest, CommonConstants.ONBOARDING_URI + OP_ONBOARDING_WITH_CERTIFICATE_AND_NAME);
 
-        return onboardingDBService.onboarding(onboardingRequest);
+        final String host = httpServletRequest.getRemoteHost();
+        final String address = httpServletRequest.getRemoteAddr();
+        return onboardingDBService.onboarding(onboardingRequest, host, address);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -127,14 +129,17 @@ public class OnboardingController {
     })
     @PostMapping(OP_ONBOARDING_WITH_SHARED_SECRET_AND_NAME)
     @ResponseBody
-    public OnboardingWithNameResponseDTO onboardWithSharedSecretAndName(@RequestBody final OnboardingWithNameRequestDTO onboardingRequest,
+    public OnboardingWithNameResponseDTO onboardWithSharedSecretAndName(final HttpServletRequest httpServletRequest,
+                                                                        @RequestBody final OnboardingWithNameRequestDTO onboardingRequest,
                                                                         @RequestHeader final HttpHeaders headers) {
         logger.debug("onboardWithSharedSecretAndName started ...");
 
         authenticateSharedSecret(headers.getFirst(HttpHeaders.AUTHORIZATION));
         verifyRequest(onboardingRequest, CommonConstants.ONBOARDING_URI + OP_ONBOARDING_WITH_SHARED_SECRET_AND_NAME);
 
-        return onboardingDBService.onboarding(onboardingRequest);
+        final String host = httpServletRequest.getRemoteHost();
+        final String address = httpServletRequest.getRemoteAddr();
+        return onboardingDBService.onboarding(onboardingRequest, host, address);
     }
 
     //-------------------------------------------------------------------------------------------------

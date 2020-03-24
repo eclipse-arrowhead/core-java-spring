@@ -9,16 +9,16 @@ import eu.arrowhead.common.CommonConstants;
 public class CAProperties {
 
     @Value(CommonConstants.$CA_CERT_VALIDITY_NEG_OFFSET_MILLIS)
-    private long certValidityNegativeOffsetMillis;
+    private long certValidityNegativeOffsetMinutes;
 
     @Value(CommonConstants.$CA_CERT_VALIDITY_POS_OFFSET_MILLIS)
-    private long certValidityPositiveOffsetMillis;
+    private long certValidityPositiveOffsetMinutes;
 
-    public long getCertValidityNegativeOffsetMillis() {
-        return certValidityNegativeOffsetMillis;
+    public long getCertValidityNegativeOffsetMinutes() {
+        return certValidityNegativeOffsetMinutes;
     }
 
-    public long getCertValidityPositiveOffsetMillis() {
-        return certValidityPositiveOffsetMillis;
+    public long getCertValidityPositiveOffsetMinutes() {
+        return certValidityPositiveOffsetMinutes;
     }    
 }

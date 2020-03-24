@@ -54,7 +54,7 @@ public class OnboardingDBService {
     // methods
 
     //-------------------------------------------------------------------------------------------------
-    public OnboardingWithNameResponseDTO onboarding(final OnboardingWithNameRequestDTO onboardingRequest) {
+    public OnboardingWithNameResponseDTO onboarding(final OnboardingWithNameRequestDTO onboardingRequest, final String host, final String address) {
         logger.debug("onboarding started...");
 
         final CertificateCreationRequestDTO creationRequestDTO = onboardingRequest.getCreationRequestDTO();
@@ -62,7 +62,7 @@ public class OnboardingDBService {
         final String certificateSigningRequest;
 
         try {
-            certificateSigningRequest = securityUtilities.createEncodedCSR(creationRequestDTO.getCommonName(), keyPair);
+            certificateSigningRequest = securityUtilities.createEncodedCSR(creationRequestDTO.getCommonName(), keyPair, host, address);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw new ArrowheadException("Unable to create certificate signing request: " + e.getMessage());

@@ -39,6 +39,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
@@ -371,9 +372,16 @@ public class Utilities {
         Assert.notNull(keystore, "Key store is not defined.");
 
         try {
+            // the first certificate is not always the end certificate. java does not guarantee the order
             final Enumeration<String> enumeration = keystore.aliases();
-            final String alias = enumeration.nextElement();
-            return (X509Certificate) keystore.getCertificate(alias);
+            while (enumeration.hasMoreElements()) {
+                final Certificate[] chain = keystore.getCertificateChain(enumeration.nextElement());
+
+                if(Objects.nonNull(chain) && chain.length >= 3) {
+                    return (X509Certificate) chain[0];
+                }
+            }
+            throw new ServiceConfigurationError("Getting the first cert from keystore failed...");
         } catch (final KeyStoreException | NoSuchElementException ex) {
             logger.error("Getting the first cert from key store failed...", ex);
             throw new ServiceConfigurationError("Getting the first cert from keystore failed...", ex);
@@ -393,9 +401,9 @@ public class Utilities {
                 final String commonName = getCertCNFromSubject(certificate.getSubjectDN().getName());
                 Assert.notNull(commonName, "Certificate without commonName is not allowed");
                 final String[] cnParts = commonName.split("\\.");
-				if (cnParts.length == 3 && cnParts[1].equals(AH_MASTER_NAME) && cnParts[2].equals(AH_MASTER_SUFFIX)) {
+                if (cnParts.length == 4 && cnParts[2].equals(AH_MASTER_NAME) && cnParts[3].equals(AH_MASTER_SUFFIX)) {
 					return (X509Certificate) keystore.getCertificate(alias);
-                } else if (cnParts.length == 4 && cnParts[2].equals(AH_MASTER_NAME) && cnParts[3].equals(AH_MASTER_SUFFIX)) {
+                } else if (cnParts.length == 3 && cnParts[1].equals(AH_MASTER_NAME) && cnParts[2].equals(AH_MASTER_SUFFIX)) {
                     return (X509Certificate) keystore.getCertificate(alias);
                 }
 			}

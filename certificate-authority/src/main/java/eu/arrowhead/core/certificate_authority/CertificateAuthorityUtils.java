@@ -56,7 +56,7 @@ class CertificateAuthorityUtils {
     private static final Logger logger = LogManager.getLogger(CertificateAuthorityService.class);
 
     private static final String PROVIDER = "BC";
-    private static final String SIGNATURE_ALGORITHM = "SHA512withRSA";
+    private static final String SIGNATURE_ALGORITHM = "SHA256withRSA";
 
     static JcaPKCS10CertificationRequest decodePKCS10CSR(CertificateSigningRequestDTO csr) {
         try {
@@ -128,9 +128,7 @@ class CertificateAuthorityUtils {
     static X509Certificate buildCertificate(JcaPKCS10CertificationRequest csr, PrivateKey cloudPrivateKey,
             X509Certificate cloudCertificate, Date validFrom, Date validUntil, SecureRandom random) {
 
-        final ZonedDateTime now = LocalDateTime.now().atZone(ZoneId.systemDefault());
-        final BigInteger serial = BigInteger.valueOf(now.toInstant().toEpochMilli())
-                .multiply(BigInteger.valueOf(random.nextLong()));
+        final BigInteger serial = new BigInteger(32, random);
 
         final PublicKey clientKey = getClientKey(csr);
 
@@ -168,19 +166,21 @@ class CertificateAuthorityUtils {
      */
     static void addCertificateExtensions(X509v3CertificateBuilder builder, JcaPKCS10CertificationRequest csr,
             PublicKey clientKey, X509Certificate cloudCertificate) {
+        return; // testing
+        /*
         try {
             JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
 
             final List<GeneralName> subjectAlternativeNames = getSubjectAlternativeNames(csr);
             builder.addExtension(Extension.subjectAlternativeName, false,
-                    new GeneralNames(subjectAlternativeNames.toArray(new GeneralName[] {})));
+                   new GeneralNames(subjectAlternativeNames.toArray(new GeneralName[] {})));
             builder.addExtension(Extension.subjectKeyIdentifier, false, extUtils.createSubjectKeyIdentifier(clientKey));
             builder.addExtension(Extension.authorityKeyIdentifier, false,
                     extUtils.createAuthorityKeyIdentifier(cloudCertificate));
-            builder.addExtension(Extension.basicConstraints, true, new BasicConstraints(false));
+            //builder.addExtension(Extension.basicConstraints, true, new BasicConstraints(false));
         } catch (NoSuchAlgorithmException | CertIOException | CertificateEncodingException | NullPointerException e) {
             throw new InvalidParameterException("Appending extensions to the certificate failed! (" + e.getMessage() + ")", e);
-        }
+        }*/
     }
 
     static List<GeneralName> getSubjectAlternativeNames(JcaPKCS10CertificationRequest csr) {

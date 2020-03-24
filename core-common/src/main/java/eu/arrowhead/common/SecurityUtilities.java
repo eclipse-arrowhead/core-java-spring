@@ -4,7 +4,13 @@ import eu.arrowhead.common.dto.shared.CertificateCreationRequestDTO;
 import eu.arrowhead.common.exception.AuthException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.Extensions;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNamesBuilder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
@@ -62,7 +68,18 @@ public class SecurityUtilities {
     // methods
 
     //-------------------------------------------------------------------------------------------------
-    public String createEncodedCSR(final String baseCommonName, final KeyPair keyPair)
+    public static String getCertificateCNFromRequest(final HttpServletRequest request) {
+        final X509Certificate[] certificates = (X509Certificate[]) request.getAttribute(CommonConstants.ATTR_JAVAX_SERVLET_REQUEST_X509_CERTIFICATE);
+        if (certificates != null && certificates.length != 0) {
+            final X509Certificate cert = certificates[0];
+            return Utilities.getCertCNFromSubject(cert.getSubjectDN().getName());
+        }
+
+        return null;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public String createEncodedCSR(final String baseCommonName, final KeyPair keyPair, final String host, final String address)
             throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, OperatorCreationException {
 
         Assert.notNull(sslProperties.getKeyStore(), "KeyStore property must not be null!");
@@ -78,13 +95,30 @@ public class SecurityUtilities {
         final String operator = getOperatorName(cloudCertFromKeyStore.getSubjectDN());
         final String organization = getOrganization(cloudCertFromKeyStore.getSubjectDN());
         final String country = getCountry(cloudCertFromKeyStore.getSubjectDN());
-        final String commonName = String.format("CN=%s.%s, OU=%s, O=%s, C=%s",
-                                                baseCommonName, cloudName,operator, organization, country);
+        //final String commonName = String.format("CN=%s.%s, OU=%s, O=%s, C=%s",
+        //                                        baseCommonName, cloudName, operator, organization, country);
+        final String commonName = String.format("CN=%s.%s", baseCommonName, cloudName);
         final X500Name x500Name = new X500Name(commonName);
 
         logger.debug("Building and Signing Certificate Signing Request for {}", x500Name);
         // create certificate signing request
         final JcaPKCS10CertificationRequestBuilder builder = new JcaPKCS10CertificationRequestBuilder(x500Name, keyPair.getPublic());
+        final GeneralNamesBuilder namesBuilder = new GeneralNamesBuilder();
+
+        namesBuilder.addName(new GeneralName(GeneralName.dNSName, "localhost"));
+        namesBuilder.addName(new GeneralName(GeneralName.dNSName, baseCommonName));
+        namesBuilder.addName(new GeneralName(GeneralName.iPAddress, "127.0.0.1"));
+
+        if (Objects.nonNull(host)) {
+            namesBuilder.addName(new GeneralName(GeneralName.dNSName, host));
+        }
+        if (Objects.nonNull(host)) {
+            namesBuilder.addName(new GeneralName(GeneralName.iPAddress, address));
+        }
+
+        final Extension extension = new Extension(Extension.subjectAlternativeName, false, new DEROctetString(namesBuilder.build()));
+        builder.addAttribute(PKCSObjectIdentifiers.pkcs_9_at_extensionRequest, new Extensions(extension));
+
         final JcaContentSignerBuilder contentSignerBuilder = new JcaContentSignerBuilder(SIGNATURE_ALGORITHM);
         final ContentSigner contentSigner = contentSignerBuilder.build(keyPair.getPrivate());
         final PKCS10CertificationRequest csr = builder.build(contentSigner);
@@ -122,17 +156,6 @@ public class SecurityUtilities {
         }
 
         return keyPair;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    public static String getCertificateCNFromRequest(final HttpServletRequest request) {
-        final X509Certificate[] certificates = (X509Certificate[]) request.getAttribute(CommonConstants.ATTR_JAVAX_SERVLET_REQUEST_X509_CERTIFICATE);
-        if (certificates != null && certificates.length != 0) {
-            final X509Certificate cert = certificates[0];
-            return Utilities.getCertCNFromSubject(cert.getSubjectDN().getName());
-        }
-
-        return null;
     }
 
     //=================================================================================================
