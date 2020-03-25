@@ -1,23 +1,11 @@
 package eu.arrowhead.core.certificate_authority;
 
-import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
-import java.util.ServiceConfigurationError;
-
+import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
+import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.exception.DataNotFoundException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.asn1.pkcs.Attribute;
@@ -44,12 +32,20 @@ import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.pkcs.PKCSException;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
 
-import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
-import eu.arrowhead.common.exception.AuthException;
-import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.exception.DataNotFoundException;
-import eu.arrowhead.common.exception.InvalidParameterException;
+import java.math.BigInteger;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Date;
+import java.util.List;
+import java.util.ServiceConfigurationError;
 
 class CertificateAuthorityUtils {
 
@@ -57,6 +53,9 @@ class CertificateAuthorityUtils {
 
     private static final String PROVIDER = "BC";
     private static final String SIGNATURE_ALGORITHM = "SHA256withRSA";
+
+    private CertificateAuthorityUtils() {
+    }
 
     static JcaPKCS10CertificationRequest decodePKCS10CSR(CertificateSigningRequestDTO csr) {
         try {
@@ -121,26 +120,26 @@ class CertificateAuthorityUtils {
         } catch (InvalidKeyException | NoSuchAlgorithmException | NullPointerException e) {
             // This should not be possible after a successful signature verification
             throw new DataNotFoundException("Extracting the public key from the CSR failed (" + e.getMessage() + ")",
-                    e);
+                                            e);
         }
     }
 
     static X509Certificate buildCertificate(JcaPKCS10CertificationRequest csr, PrivateKey cloudPrivateKey,
-            X509Certificate cloudCertificate, Date validFrom, Date validUntil, SecureRandom random) {
+                                            X509Certificate cloudCertificate, Date validFrom, Date validUntil, SecureRandom random) {
 
         final BigInteger serial = new BigInteger(32, random);
 
         final PublicKey clientKey = getClientKey(csr);
 
         X509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(cloudCertificate, serial, validFrom,
-                validUntil, csr.getSubject(), clientKey);
+                                                                           validUntil, csr.getSubject(), clientKey);
 
         addCertificateExtensions(builder, csr, clientKey, cloudCertificate);
 
         JcaContentSignerBuilder signerBuilder = new JcaContentSignerBuilder(SIGNATURE_ALGORITHM).setProvider(PROVIDER);
         try {
             return new JcaX509CertificateConverter().setProvider(PROVIDER)
-                    .getCertificate(builder.build(signerBuilder.build(cloudPrivateKey)));
+                                                    .getCertificate(builder.build(signerBuilder.build(cloudPrivateKey)));
         } catch (CertificateException e) {
             throw new BadPayloadException("Certificate encoding failed! (" + e.getMessage() + ")", e);
         } catch (OperatorCreationException e) {
@@ -153,34 +152,32 @@ class CertificateAuthorityUtils {
      * <ol>
      * <li>The subject alternative name makes possible to use the certificate for
      * accessing a host via IP address or hostname</li>
-     * 
+     *
      * <li>The subject key identifier provides a hashed value that should uniquely
      * identify the public key</li>
-     * 
+     *
      * <li>The authority key identifier provides a hashed value that should uniquely
      * identify the issuer of the certificate</li>
-     * 
+     *
      * <li>And this basic constraint is for forbidding issuing other certificates
      * under this certificate</li>
      * </ol>
      */
     static void addCertificateExtensions(X509v3CertificateBuilder builder, JcaPKCS10CertificationRequest csr,
-            PublicKey clientKey, X509Certificate cloudCertificate) {
-        return; // testing
-        /*
+                                         PublicKey clientKey, X509Certificate cloudCertificate) {
         try {
             JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
 
             final List<GeneralName> subjectAlternativeNames = getSubjectAlternativeNames(csr);
             builder.addExtension(Extension.subjectAlternativeName, false,
-                   new GeneralNames(subjectAlternativeNames.toArray(new GeneralName[] {})));
+                                 new GeneralNames(subjectAlternativeNames.toArray(new GeneralName[]{})));
             builder.addExtension(Extension.subjectKeyIdentifier, false, extUtils.createSubjectKeyIdentifier(clientKey));
             builder.addExtension(Extension.authorityKeyIdentifier, false,
-                    extUtils.createAuthorityKeyIdentifier(cloudCertificate));
-            //builder.addExtension(Extension.basicConstraints, true, new BasicConstraints(false));
+                                 extUtils.createAuthorityKeyIdentifier(cloudCertificate));
+            builder.addExtension(Extension.basicConstraints, true, new BasicConstraints(false));
         } catch (NoSuchAlgorithmException | CertIOException | CertificateEncodingException | NullPointerException e) {
             throw new InvalidParameterException("Appending extensions to the certificate failed! (" + e.getMessage() + ")", e);
-        }*/
+        }
     }
 
     static List<GeneralName> getSubjectAlternativeNames(JcaPKCS10CertificationRequest csr) {
@@ -196,7 +193,7 @@ class CertificateAuthorityUtils {
             if (attribute.getAttrType().equals(PKCSObjectIdentifiers.pkcs_9_at_extensionRequest)) {
                 final Extensions extensions = Extensions.getInstance(attribute.getAttrValues().getObjectAt(0));
                 final GeneralNames generalNames = GeneralNames.fromExtensions(extensions,
-                        Extension.subjectAlternativeName);
+                                                                              Extension.subjectAlternativeName);
                 if (generalNames != null && generalNames.getNames() != null && generalNames.getNames().length > 0) {
                     for (final GeneralName name : generalNames.getNames()) {
                         if (name.getTagNo() == GeneralName.dNSName || name.getTagNo() == GeneralName.iPAddress) {
@@ -208,8 +205,5 @@ class CertificateAuthorityUtils {
         }
 
         return alternativeNames;
-    }
-
-    private CertificateAuthorityUtils() {
     }
 }
