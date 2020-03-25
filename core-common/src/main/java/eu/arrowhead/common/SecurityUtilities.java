@@ -1,5 +1,6 @@
 package eu.arrowhead.common;
 
+import eu.arrowhead.common.dto.internal.CertificateType;
 import eu.arrowhead.common.dto.shared.CertificateCreationRequestDTO;
 import eu.arrowhead.common.exception.AuthException;
 import org.apache.logging.log4j.LogManager;
@@ -79,7 +80,7 @@ public class SecurityUtilities {
     }
 
     //-------------------------------------------------------------------------------------------------
-    public String createEncodedCSR(final String baseCommonName, final KeyPair keyPair, final String host, final String address)
+    public String createEncodedCSR(final String baseCommonName, final KeyPair keyPair, final String host, final String address, final CertificateType type)
             throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, OperatorCreationException {
 
         Assert.notNull(sslProperties.getKeyStore(), "KeyStore property must not be null!");
@@ -92,12 +93,12 @@ public class SecurityUtilities {
 
         // "CN=<commonName>.<cloudName>.<operator>.arrowhead.eu, OU=<operator>, O=arrowhead, C=eu"
         final String cloudName = getCloudName(cloudCertFromKeyStore.getSubjectDN());
-        final String operator = getOperatorName(cloudCertFromKeyStore.getSubjectDN());
-        final String organization = getOrganization(cloudCertFromKeyStore.getSubjectDN());
-        final String country = getCountry(cloudCertFromKeyStore.getSubjectDN());
+        //final String operator = getOperatorName(cloudCertFromKeyStore.getSubjectDN());
+        //final String organization = getOrganization(cloudCertFromKeyStore.getSubjectDN());
+        //final String country = getCountry(cloudCertFromKeyStore.getSubjectDN());
         //final String commonName = String.format("CN=%s.%s, OU=%s, O=%s, C=%s",
         //                                        baseCommonName, cloudName, operator, organization, country);
-        final String commonName = String.format("CN=%s.%s", baseCommonName, cloudName);
+        final String commonName = String.format("CN=%s.%s.%s", baseCommonName, type.getCommonNamePart(), cloudName);
         final X500Name x500Name = new X500Name(commonName);
 
         logger.debug("Building and Signing Certificate Signing Request for {}", x500Name);
@@ -116,8 +117,8 @@ public class SecurityUtilities {
             namesBuilder.addName(new GeneralName(GeneralName.iPAddress, address));
         }
 
-        final Extension extension = new Extension(Extension.subjectAlternativeName, false, new DEROctetString(namesBuilder.build()));
-        builder.addAttribute(PKCSObjectIdentifiers.pkcs_9_at_extensionRequest, new Extensions(extension));
+        final Extension extAlternativeNames = new Extension(Extension.subjectAlternativeName, false, new DEROctetString(namesBuilder.build()));
+        builder.addAttribute(PKCSObjectIdentifiers.pkcs_9_at_extensionRequest, new Extensions(extAlternativeNames));
 
         final JcaContentSignerBuilder contentSignerBuilder = new JcaContentSignerBuilder(SIGNATURE_ALGORITHM);
         final ContentSigner contentSigner = contentSignerBuilder.build(keyPair.getPrivate());
@@ -127,12 +128,12 @@ public class SecurityUtilities {
     }
 
     //-------------------------------------------------------------------------------------------------
-    public KeyPair generateKeyPair() {
+    private KeyPair generateKeyPair() {
         return keyPairGenerator.generateKeyPair();
     }
 
     //-------------------------------------------------------------------------------------------------
-    public KeyPair getKeyPairFromBase64EncodedStrings(final String encodedPublicKey,
+    private KeyPair getKeyPairFromBase64EncodedStrings(final String encodedPublicKey,
                                                       final String encodedPrivateKey) {
         final PublicKey publicKey = getPublicKeyFromBase64EncodedString(encodedPublicKey);
         final PrivateKey privateKey = getPrivateKeyFromBase64EncodedString(encodedPrivateKey);
