@@ -14,6 +14,7 @@ import eu.arrowhead.common.exception.TimeoutException;
 import eu.arrowhead.common.exception.UnavailableServerException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bouncycastle.jcajce.provider.asymmetric.X509;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -398,13 +399,10 @@ public class Utilities {
 			while (enumeration.hasMoreElements()) {
 				final String alias = enumeration.nextElement();
                 final X509Certificate certificate = (X509Certificate) keystore.getCertificate(alias);
-                final String commonName = getCertCNFromSubject(certificate.getSubjectDN().getName());
-                Assert.notNull(commonName, "Certificate without commonName is not allowed");
-                final String[] cnParts = commonName.split("\\.");
-                if (cnParts.length == 4 && cnParts[2].equals(AH_MASTER_NAME) && cnParts[3].equals(AH_MASTER_SUFFIX)) {
-					return (X509Certificate) keystore.getCertificate(alias);
-                } else if (cnParts.length == 3 && cnParts[1].equals(AH_MASTER_NAME) && cnParts[2].equals(AH_MASTER_SUFFIX)) {
-                    return (X509Certificate) keystore.getCertificate(alias);
+
+                if(isCloudCertificate(certificate))
+                {
+                    return certificate;
                 }
 			}
 
@@ -446,6 +444,38 @@ public class Utilities {
 		}
 	}
     //-------------------------------------------------------------------------------------------------
+    public static PrivateKey getCloudPrivateKey(final KeyStore keystore, final String keyPass) {
+        Assert.notNull(keystore, "Key store is not defined.");
+        Assert.notNull(keyPass, "Password is not defined.");
+
+        PrivateKey privateKey = null;
+        String element;
+        try {
+            final Enumeration<String> enumeration = keystore.aliases();
+            while (enumeration.hasMoreElements()) {
+                element = enumeration.nextElement();
+
+                final X509Certificate certificate = (X509Certificate) keystore.getCertificate(element);
+                if(isCloudCertificate(certificate))
+                {
+                    privateKey = (PrivateKey) keystore.getKey(element, keyPass.toCharArray());
+                    if (privateKey != null) {
+                        break;
+                    }
+                }
+            }
+        } catch (final KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException ex) {
+            logger.error("Getting the private key from key store failed...", ex);
+            throw new ServiceConfigurationError("Getting the private key from key store failed...", ex);
+        }
+
+        if (privateKey == null) {
+            throw new ServiceConfigurationError("Getting the private key failed, key store aliases do not identify a key.");
+        }
+
+        return privateKey;
+    }
+    //-------------------------------------------------------------------------------------------------
     public static PrivateKey getPrivateKey(final KeyStore keystore, final String keyPass) {
         Assert.notNull(keystore, "Key store is not defined.");
         Assert.notNull(keyPass, "Password is not defined.");
@@ -456,6 +486,7 @@ public class Utilities {
             final Enumeration<String> enumeration = keystore.aliases();
             while (enumeration.hasMoreElements()) {
                 element = enumeration.nextElement();
+
                 privateKey = (PrivateKey) keystore.getKey(element, keyPass.toCharArray());
                 if (privateKey != null) {
                     break;
@@ -472,9 +503,8 @@ public class Utilities {
 
         return privateKey;
     }
-
     //-------------------------------------------------------------------------------------------------
-    public static PrivateKey getPrivateKey(final KeyStore keystore, final String alias, final String keyPass) {
+    public static PrivateKey getCloudPrivateKey(final KeyStore keystore, final String alias, final String keyPass) {
 		Assert.notNull(keystore, "Key store is not defined.");
 		Assert.notNull(keyPass, "Password is not defined.");
 
@@ -484,7 +514,7 @@ public class Utilities {
             if (privateKey != null) {
                 return privateKey;
             } else {
-                return getPrivateKey(keystore, keyPass);
+                return getCloudPrivateKey(keystore, keyPass);
 				// throw new ServiceConfigurationError("Getting the private key failed, key store aliases do not identify a key.");
 			}
 		} catch (final KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException ex) {
@@ -626,5 +656,13 @@ public class Utilities {
             logger.error("getPublicKey: X509 keyspec could not be created from the decoded bytes.");
             throw new AuthException("Public key decoding failed due wrong input key", ex);
         }
+    }
+
+    private static boolean isCloudCertificate(final X509Certificate certificate)
+    {
+        final String commonName = getCertCNFromSubject(certificate.getSubjectDN().getName());
+        Assert.notNull(commonName, "Certificate without commonName is not allowed");
+        final String[] cnParts = commonName.split("\\.");
+        return (cnParts.length == 4 && cnParts[2].equals(AH_MASTER_NAME) && cnParts[3].equals(AH_MASTER_SUFFIX));
     }
 }
