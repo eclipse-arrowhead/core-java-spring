@@ -42,13 +42,7 @@ case "$1" in
             mkdir -p ${SYSTEM_DIR}
         fi
 
-        ah_cert_signed_system ${SYSTEM_NAME}
-		
-		# modify log config and application.properties
-		
-		ah_transform_log_file ${SYSTEM_DIR}
-		
-		db_get arrowhead-core-common/db_host; db_host=$RET || true
+        ah_ca_keystore ${SYSTEM_NAME}
 
 		mv ${SYSTEM_DIR}/application.properties ${SYSTEM_DIR}/application.properties.orig
 		cat ${SYSTEM_DIR}/application.properties.orig | \
