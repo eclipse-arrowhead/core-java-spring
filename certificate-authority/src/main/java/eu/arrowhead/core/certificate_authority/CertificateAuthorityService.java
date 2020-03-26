@@ -21,7 +21,6 @@ import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -70,8 +69,8 @@ public class CertificateAuthorityService {
 
         logger.info("Signing certificate for " + csr.getSubject().toString() + "...");
 
-        final PrivateKey cloudPrivateKey = Utilities.getPrivateKey(keyStore, cloudCommonName,
-                sslProperties.getKeyPassword());
+        final PrivateKey cloudPrivateKey = Utilities.getCloudPrivateKey(keyStore, cloudCommonName,
+                                                                        sslProperties.getKeyPassword());
 
         final X509Certificate clientCertificate = buildCertificate(csr, cloudPrivateKey, cloudCertificate);
         final List<String> encodedCertificateChain = buildEncodedCertificateChain(clientCertificate);

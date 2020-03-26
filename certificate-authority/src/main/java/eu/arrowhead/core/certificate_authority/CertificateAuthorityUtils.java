@@ -166,8 +166,7 @@ class CertificateAuthorityUtils {
      */
     static void addCertificateExtensions(X509v3CertificateBuilder builder, JcaPKCS10CertificationRequest csr,
             PublicKey clientKey, X509Certificate cloudCertificate) {
-        return; // testing
-        /*
+
         try {
             JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
 
@@ -177,10 +176,10 @@ class CertificateAuthorityUtils {
             builder.addExtension(Extension.subjectKeyIdentifier, false, extUtils.createSubjectKeyIdentifier(clientKey));
             builder.addExtension(Extension.authorityKeyIdentifier, false,
                     extUtils.createAuthorityKeyIdentifier(cloudCertificate));
-            //builder.addExtension(Extension.basicConstraints, true, new BasicConstraints(false));
+            builder.addExtension(Extension.basicConstraints, true, new BasicConstraints(false));
         } catch (NoSuchAlgorithmException | CertIOException | CertificateEncodingException | NullPointerException e) {
             throw new InvalidParameterException("Appending extensions to the certificate failed! (" + e.getMessage() + ")", e);
-        }*/
+        }
     }
 
     static List<GeneralName> getSubjectAlternativeNames(JcaPKCS10CertificationRequest csr) {
