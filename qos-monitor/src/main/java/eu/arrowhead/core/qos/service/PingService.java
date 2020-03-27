@@ -9,8 +9,10 @@ import org.icmp4j.IcmpPingRequest;
 import org.icmp4j.IcmpPingResponse;
 import org.icmp4j.IcmpPingUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
@@ -31,6 +33,27 @@ public class PingService {
 	
 	@Autowired
 	private QoSDBService qosDBService;
+	
+	@Value(CoreCommonConstants.$QOS_DEFAULT_REFERENCE_MIN_RESPONSE_TIME_WD)
+	private int defaultReferenceMinResponseTime;
+	
+	@Value(CoreCommonConstants.$QOS_DEFAULT_REFERENCE_MAX_RESPONSE_TIME_WD)
+	private int defaultReferenceMaxResponseTime;
+	
+	@Value(CoreCommonConstants.$QOS_DEFAULT_REFERENCE_MEAN_RESPONSE_TIME_WITH_TIMEOUT_WD)
+	private int defaultReferenceMeanResponseTimeWithTimeout;
+	
+	@Value(CoreCommonConstants.$QOS_DEFAULT_REFERENCE_MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT_WD)
+	private int defaultReferenceMeanResponseTimeWithoutTimeout;
+	
+	@Value(CoreCommonConstants.$QOS_DEFAULT_REFERENCE_JITTER_WITH_TIMEOUT_WD)
+	private int defaultReferenceJitterWithTimeout;
+	
+	@Value(CoreCommonConstants.$QOS_DEFAULT_REFERENCE_JITTER_WITHOUT_TIMEOUT_WD)
+	private int defaultReferenceJitterWithoutTimeout;
+	
+	@Value(CoreCommonConstants.$QOS_DEFAULT_REFERENCE_LOST_PET_MEASUREMENT_PERCENT_WD)
+	private int defaultReferenceLostPerMeasurementPercent;
 
 	protected Logger logger = LogManager.getLogger(PingMeasurementProperties.class);
 
@@ -87,6 +110,19 @@ public class PingService {
 		}
 		
 		final List<QoSIntraPingMeasurementResponseDTO> data = qosDBService.getIntraPingMeasurementResponse(-1, -1, null, null).getData();
+		if (data.isEmpty()) {
+			final QoSIntraPingMeasurementResponseDTO defaultReference = new QoSIntraPingMeasurementResponseDTO();
+			defaultReference.setAvailable(true);
+			defaultReference.setMinResponseTime(defaultReferenceMinResponseTime);
+			defaultReference.setMaxResponseTime(defaultReferenceMaxResponseTime);
+			defaultReference.setMeanResponseTimeWithTimeout(defaultReferenceMeanResponseTimeWithTimeout);
+			defaultReference.setMeanResponseTimeWithoutTimeout(defaultReferenceMeanResponseTimeWithoutTimeout);
+			defaultReference.setJitterWithTimeout(defaultReferenceJitterWithTimeout);
+			defaultReference.setJitterWithoutTimeout(defaultReferenceJitterWithoutTimeout);
+			defaultReference.setLostPerMeasurementPercent(defaultReferenceLostPerMeasurementPercent);
+			return defaultReference;
+		}
+		
 		switch (attribute) {
 		case MIN_RESPONSE_TIME:
 			data.sort((final QoSIntraPingMeasurementResponseDTO m1, final QoSIntraPingMeasurementResponseDTO m2) -> m1.getMinResponseTime() - m2.getMinResponseTime());
