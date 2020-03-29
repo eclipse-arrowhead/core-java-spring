@@ -1,6 +1,7 @@
 package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
+import java.util.StringJoiner;
 
 public abstract class OnboardingResponseDTO implements Serializable {
 
@@ -13,11 +14,25 @@ public abstract class OnboardingResponseDTO implements Serializable {
     private ServiceEndpoint serviceRegistry;
     private ServiceEndpoint orchestrationService;
 
-    private CertificateResponseDTO onboardingCertificate;
+    private CertificateCreationResponseDTO onboardingCertificate;
     private String intermediateCertificate;
     private String rootCertificate;
 
-    private String certificateType;
+
+    public OnboardingResponseDTO() {
+    }
+
+    public OnboardingResponseDTO(final ServiceEndpoint deviceRegistry, final ServiceEndpoint systemRegistry, final ServiceEndpoint serviceRegistry,
+                                 final ServiceEndpoint orchestrationService, final CertificateCreationResponseDTO onboardingCertificate,
+                                 final String intermediateCertificate, final String rootCertificate) {
+        this.deviceRegistry = deviceRegistry;
+        this.systemRegistry = systemRegistry;
+        this.serviceRegistry = serviceRegistry;
+        this.orchestrationService = orchestrationService;
+        this.onboardingCertificate = onboardingCertificate;
+        this.intermediateCertificate = intermediateCertificate;
+        this.rootCertificate = rootCertificate;
+    }
 
     //=================================================================================================
     // methods
@@ -63,12 +78,12 @@ public abstract class OnboardingResponseDTO implements Serializable {
     }
 
     //-------------------------------------------------------------------------------------------------
-    public CertificateResponseDTO getOnboardingCertificate() {
+    public CertificateCreationResponseDTO getOnboardingCertificate() {
         return onboardingCertificate;
     }
 
     //-------------------------------------------------------------------------------------------------
-    public void setOnboardingCertificate(final CertificateResponseDTO onboardingCertificate) {
+    public void setOnboardingCertificate(final CertificateCreationResponseDTO onboardingCertificate) {
         this.onboardingCertificate = onboardingCertificate;
     }
 
@@ -92,11 +107,17 @@ public abstract class OnboardingResponseDTO implements Serializable {
         this.rootCertificate = rootCertificate;
     }
 
-    public String getCertificateType() {
-        return certificateType;
-    }
 
-    public void setCertificateType(final String certificateType) {
-        this.certificateType = certificateType;
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", OnboardingResponseDTO.class.getSimpleName() + "[", "]")
+                .add("deviceRegistry=" + deviceRegistry)
+                .add("systemRegistry=" + systemRegistry)
+                .add("serviceRegistry=" + serviceRegistry)
+                .add("orchestrationService=" + orchestrationService)
+                .add("onboardingCertificate=" + onboardingCertificate)
+                .add("intermediateCertificate='" + intermediateCertificate + "'")
+                .add("rootCertificate='" + rootCertificate + "'")
+                .toString();
     }
 }

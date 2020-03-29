@@ -3,6 +3,7 @@ package eu.arrowhead.core.deviceregistry.database.service;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.CoreUtilities;
+import eu.arrowhead.common.SecurityUtilities;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Device;
 import eu.arrowhead.common.database.entity.DeviceRegistry;
@@ -10,18 +11,27 @@ import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.DeviceRegistryRepository;
 import eu.arrowhead.common.database.repository.DeviceRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
+import eu.arrowhead.common.drivers.CertificateAuthorityDriver;
+import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.DeviceListResponseDTO;
 import eu.arrowhead.common.dto.internal.DeviceRegistryListResponseDTO;
+import eu.arrowhead.common.dto.shared.CertificateCreationRequestDTO;
+import eu.arrowhead.common.dto.shared.CertificateCreationResponseDTO;
+import eu.arrowhead.common.dto.shared.CertificateType;
 import eu.arrowhead.common.dto.shared.DeviceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.DeviceQueryResultDTO;
+import eu.arrowhead.common.dto.shared.DeviceRegistryOnboardingWithCsrRequestDTO;
+import eu.arrowhead.common.dto.shared.DeviceRegistryOnboardingWithCsrResponseDTO;
+import eu.arrowhead.common.dto.shared.DeviceRegistryOnboardingWithNameRequestDTO;
+import eu.arrowhead.common.dto.shared.DeviceRegistryOnboardingWithNameResponseDTO;
 import eu.arrowhead.common.dto.shared.DeviceRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.DeviceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.DeviceRequestDTO;
 import eu.arrowhead.common.dto.shared.DeviceResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.core.deviceregistry.DeviceRegistryController;
+import eu.arrowhead.core.deviceregistry.Validation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +41,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.security.KeyPair;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -54,43 +65,27 @@ public class DeviceRegistryDBService {
     private final Logger logger = LogManager.getLogger(DeviceRegistryDBService.class);
 
     private final DeviceRegistryRepository deviceRegistryRepository;
-
     private final SystemRepository systemRepository;
-
     private final DeviceRepository deviceRepository;
+    private final SecurityUtilities securityUtilities;
+    private final CertificateAuthorityDriver caDriver;
 
     @Autowired
     public DeviceRegistryDBService(final DeviceRegistryRepository deviceRegistryRepository,
                                    final SystemRepository systemRepository,
-                                   final DeviceRepository deviceRepository) {
+                                   final DeviceRepository deviceRepository,
+                                   final SecurityUtilities securityUtilities,
+                                   final CertificateAuthorityDriver caDriver) {
         this.deviceRegistryRepository = deviceRegistryRepository;
         this.systemRepository = systemRepository;
         this.deviceRepository = deviceRepository;
+        this.securityUtilities = securityUtilities;
+        this.caDriver = caDriver;
     }
 
 
     //=================================================================================================
     // methods
-
-    //-------------------------------------------------------------------------------------------------
-    @Transactional(rollbackFor = ArrowheadException.class)
-    public void removeSystemById(final long id) {
-        logger.debug("removeSystemById started...");
-
-        try {
-            if (!systemRepository.existsById(id)) {
-                throw new InvalidParameterException(COULD_NOT_DELETE_SYSTEM_ERROR_MESSAGE);
-            }
-
-            systemRepository.deleteById(id);
-            systemRepository.flush();
-        } catch (final InvalidParameterException ex) {
-            throw ex;
-        } catch (final Exception ex) {
-            logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-        }
-    }
 
     //-------------------------------------------------------------------------------------------------
     public DeviceResponseDTO getDeviceById(long deviceId) {
@@ -112,6 +107,48 @@ public class DeviceRegistryDBService {
     }
 
     //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public DeviceRegistryOnboardingWithNameResponseDTO onboardAndRegisterDeviceRegistry(final DeviceRegistryOnboardingWithNameRequestDTO request,
+                                                                                        final String host, final String address) {
+        logger.debug("onboardAndRegisterDeviceRegistry started...");
+
+        final CertificateCreationRequestDTO creationRequestDTO = request.getCertificateCreationRequest();
+        final KeyPair keyPair = securityUtilities.extractOrGenerateKeyPair(creationRequestDTO);
+        final String certificateSigningRequest;
+
+        try {
+            certificateSigningRequest = securityUtilities
+                    .createCertificateSigningRequest(creationRequestDTO.getCommonName(), keyPair, host, address, CertificateType.AH_DEVICE);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            throw new ArrowheadException("Unable to create certificate signing request: " + e.getMessage());
+        }
+
+        final var signingResponse = signCertificate(certificateSigningRequest);
+        signingResponse.setKeyPairDTO(securityUtilities.encodeKeyPair(keyPair));
+
+        final var retValue = new DeviceRegistryOnboardingWithNameResponseDTO();
+        retValue.setCertificateResponse(signingResponse);
+        retValue.load(registerDeviceRegistry(request));
+        return retValue;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public DeviceRegistryOnboardingWithCsrResponseDTO onboardAndRegisterDeviceRegistry(final DeviceRegistryOnboardingWithCsrRequestDTO request) {
+
+        logger.debug("onboardAndRegisterDeviceRegistry started...");
+        final var signingResponse = signCertificate(request.getCertificateSigningRequest());
+        securityUtilities.extractAndSetPublicKey(signingResponse);
+
+        final var retValue = new DeviceRegistryOnboardingWithCsrResponseDTO();
+        retValue.setCertificateResponse(signingResponse);
+        retValue.load(registerDeviceRegistry(request));
+        return retValue;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
     public DeviceListResponseDTO getDeviceEntries(final CoreUtilities.ValidatedPageParams pageParams, final String sortField) {
         logger.debug("getDeviceList started...");
 
@@ -123,7 +160,7 @@ public class DeviceRegistryDBService {
 
         try {
             final Page<Device> devices = deviceRepository.findAll(PageRequest.of(pageParams.getValidatedPage(), pageParams.getValidatedSize(),
-                    pageParams.getValidatedDirection(), validatedSortField));
+                                                                                 pageParams.getValidatedDirection(), validatedSortField));
             return DTOConverter.convertDeviceEntryListToDeviceListResponseDTO(devices);
         } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
@@ -216,9 +253,9 @@ public class DeviceRegistryDBService {
 
         try {
             final PageRequest pageRequest = PageRequest.of(params.getValidatedPage(),
-                    params.getValidatedSize(),
-                    params.getValidatedDirection(),
-                    validatedSortField);
+                                                           params.getValidatedSize(),
+                                                           params.getValidatedDirection(),
+                                                           validatedSortField);
             final Page<DeviceRegistry> deviceRegistryPage = deviceRegistryRepository.findAll(pageRequest);
             return DTOConverter.convertDeviceRegistryListToDeviceRegistryListResponseDTO(deviceRegistryPage);
         } catch (final Exception ex) {
@@ -243,9 +280,9 @@ public class DeviceRegistryDBService {
             final List<Device> devices = deviceRepository.findByDeviceName(Utilities.lowerCaseTrim(deviceName));
 
             final PageRequest pageRequest = PageRequest.of(params.getValidatedPage(),
-                    params.getValidatedSize(),
-                    params.getValidatedDirection(),
-                    validatedSortField);
+                                                           params.getValidatedSize(),
+                                                           params.getValidatedDirection(),
+                                                           validatedSortField);
             final Page<DeviceRegistry> deviceRegistryPage = deviceRegistryRepository.findAllByDeviceIsIn(devices, pageRequest);
             return DTOConverter.convertDeviceRegistryListToDeviceRegistryListResponseDTO(deviceRegistryPage);
         } catch (final Exception ex) {
@@ -471,15 +508,15 @@ public class DeviceRegistryDBService {
             if (form.getMetadataRequirements() != null && !form.getMetadataRequirements().isEmpty()) {
                 final Map<String, String> requiredMetadata = normalizeMetadata(form.getMetadataRequirements());
                 registryList.removeIf(e ->
-                {
-                    final Map<String, String> metadata = Utilities.text2Map(e.getMetadata());
-                    if (Objects.isNull(metadata)) {
-                        // we have requirements but no metadata -> remove
-                        return true;
-                    }
+                                      {
+                                          final Map<String, String> metadata = Utilities.text2Map(e.getMetadata());
+                                          if (Objects.isNull(metadata)) {
+                                              // we have requirements but no metadata -> remove
+                                              return true;
+                                          }
 
-                    return !metadata.entrySet().containsAll(requiredMetadata.entrySet());
-                });
+                                          return !metadata.entrySet().containsAll(requiredMetadata.entrySet());
+                                      });
             }
 
             logger.debug("Potential system providers after filtering: {}", registryList.size());
@@ -511,11 +548,11 @@ public class DeviceRegistryDBService {
         final Map<String, String> map = new HashMap<>();
 
         metadata.forEach((k, v) ->
-        {
-            if (Objects.nonNull(v)) {
-                map.put(k.trim(), v.trim());
-            }
-        });
+                         {
+                             if (Objects.nonNull(v)) {
+                                 map.put(k.trim(), v.trim());
+                             }
+                         });
 
         return map;
     }
@@ -549,7 +586,7 @@ public class DeviceRegistryDBService {
         if (Utilities.isEmpty(macAddress)) {
             throw new InvalidParameterException("MAC address is null or empty");
         } else {
-            final Matcher matcher = DeviceRegistryController.MAC_ADDRESS_PATTERN.matcher(macAddress);
+            final Matcher matcher = Validation.MAC_ADDRESS_PATTERN.matcher(macAddress);
             if (!matcher.matches()) {
                 throw new InvalidParameterException("Unrecognized format of MAC Address");
             }
@@ -596,9 +633,9 @@ public class DeviceRegistryDBService {
     //-------------------------------------------------------------------------------------------------
     private Device findOrCreateDevice(DeviceRequestDTO requestDeviceDto) {
         return findOrCreateDevice(requestDeviceDto.getDeviceName(),
-                requestDeviceDto.getAddress(),
-                requestDeviceDto.getMacAddress(),
-                requestDeviceDto.getAuthenticationInfo());
+                                  requestDeviceDto.getAddress(),
+                                  requestDeviceDto.getMacAddress(),
+                                  requestDeviceDto.getAuthenticationInfo());
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -626,22 +663,17 @@ public class DeviceRegistryDBService {
     }
 
     //-------------------------------------------------------------------------------------------------
-    private void checkConstraintsOfSystemTable(final String validatedSystemName, final String validatedAddress, final int validatedPort) {
-        logger.debug("checkConstraintsOfSystemTable started...");
+    private CertificateCreationResponseDTO signCertificate(final String signingRequest) {
+        logger.debug("Contact CertificateAuthority ...");
+        final var csrDTO = new CertificateSigningRequestDTO(signingRequest);
+        final var signingResponse = caDriver.signCertificate(csrDTO);
 
-        try {
-            final Optional<System> find = systemRepository
-                    .findBySystemNameAndAddressAndPort(validatedSystemName.toLowerCase().trim(), validatedAddress.toLowerCase().trim(), validatedPort);
-            if (find.isPresent()) {
-                throw new InvalidParameterException(
-                        "System with name: " + validatedSystemName + ", address: " + validatedAddress + ", port: " + validatedPort + " already exists.");
-            }
-        } catch (final InvalidParameterException ex) {
-            throw ex;
-        } catch (final Exception ex) {
-            logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-        }
+        logger.debug("Processing response from Certificate Authority ...");
+        final CertificateCreationResponseDTO certificateResponseDTO = new CertificateCreationResponseDTO();
+        certificateResponseDTO.setCertificate(signingResponse.getCertificateChain().get(0));
+        certificateResponseDTO.setCertificateFormat(CoreCommonConstants.CERTIFICATE_FORMAT);
+        certificateResponseDTO.setCertificateType(CertificateType.AH_DEVICE);
+        return certificateResponseDTO;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -668,9 +700,9 @@ public class DeviceRegistryDBService {
             final Optional<DeviceRegistry> find = deviceRegistryRepository.findByDevice(deviceDb);
             if (find.isPresent()) {
                 throw new InvalidParameterException("Device Registry entry with provider: (" +
-                        deviceDb.getDeviceName() + ", " +
-                        deviceDb.getMacAddress() +
-                        ") already exists.");
+                                                            deviceDb.getDeviceName() + ", " +
+                                                            deviceDb.getMacAddress() +
+                                                            ") already exists.");
             }
         } catch (final InvalidParameterException ex) {
             throw ex;
@@ -748,4 +780,5 @@ public class DeviceRegistryDBService {
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
     }
+
 }

@@ -56,6 +56,7 @@ public class CoreCommonConstants {
 	public static final String SWAGGER_TAG_MGMT = "Management";
 	public static final String SWAGGER_TAG_CLIENT = "Client";
 	public static final String SWAGGER_TAG_PRIVATE = "Private";
+	public static final String SWAGGER_TAG_ONBOARDING = "Onboarding";
 	public static final String SWAGGER_TAG_ALL = "All";
 	
 	public static final String SERVER_ADDRESS = "server.address";
@@ -176,8 +177,9 @@ public class CoreCommonConstants {
 	
 	public static final String CLOUD_PING_TTL_INTERVAL = "cloud_ping_ttl_interval_minutes";
 	public static final String $CLOUD_PING_TTL_INTERVAL_WD = "${" + CLOUD_PING_TTL_INTERVAL + ":" + CoreDefaults.DEFAULT_CLOUD_PING_TTL_INTERVAL_MINUTES + "}";
+    public static final String CERTIFICATE_FORMAT = "X.509";
 
-	//=================================================================================================
+    //=================================================================================================
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------

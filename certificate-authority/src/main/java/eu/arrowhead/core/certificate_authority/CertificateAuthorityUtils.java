@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.ServiceConfigurationError;
 
 class CertificateAuthorityUtils {
@@ -93,8 +94,9 @@ class CertificateAuthorityUtils {
         if (cloudCN == null || cloudCN.isEmpty()) {
             throw new BadPayloadException("CloudCN cannot be null");
         }
-        final String clientCN = Utilities.getCertCNFromSubject(csr.getSubject().toString());
-        if (!Utilities.isKeyStoreCNArrowheadValid(clientCN, cloudCN)) {
+        final String clientCN = Objects.requireNonNull(Utilities.getCertCNFromSubject(csr.getSubject().toString()));
+
+        if (!clientCN.endsWith(cloudCN) || clientCN.split("\\.").length > 6) {
             throw new BadPayloadException(
                     "Certificate request does not have a valid common name! Valid common name: {systemName}."
                             + cloudCN);

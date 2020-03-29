@@ -1,52 +1,48 @@
 package eu.arrowhead.core.onboarding.database.service;
 
-import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.OrchestrationDriver;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SecurityUtilities;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.common.drivers.CertificateAuthorityDriver;
+import eu.arrowhead.common.drivers.DriverUtilities;
+import eu.arrowhead.common.drivers.OrchestrationDriver;
 import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
 import eu.arrowhead.common.dto.internal.CertificateSigningResponseDTO;
 import eu.arrowhead.common.dto.shared.CertificateCreationRequestDTO;
-import eu.arrowhead.common.dto.shared.CertificateResponseDTO;
+import eu.arrowhead.common.dto.shared.CertificateCreationResponseDTO;
+import eu.arrowhead.common.dto.shared.CertificateType;
 import eu.arrowhead.common.dto.shared.OnboardingResponseDTO;
 import eu.arrowhead.common.dto.shared.OnboardingWithCsrRequestDTO;
 import eu.arrowhead.common.dto.shared.OnboardingWithCsrResponseDTO;
 import eu.arrowhead.common.dto.shared.OnboardingWithNameRequestDTO;
 import eu.arrowhead.common.dto.shared.OnboardingWithNameResponseDTO;
-import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceEndpoint;
-import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.http.HttpService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponents;
 
 import java.security.KeyPair;
-import java.util.Objects;
+import java.util.function.Consumer;
 
 @Service
 public class OnboardingDBService {
 
     //=================================================================================================
     // members
-    private final static String CERTIFICATE_TYPE = "X.509";
-
-    private final OrchestrationDriver orchestration;
     private final Logger logger = LogManager.getLogger(OnboardingDBService.class);
-    private final HttpService httpService;
+    private final OrchestrationDriver orchestrationDriver;
+    private final CertificateAuthorityDriver caDriver;
     private final SecurityUtilities securityUtilities;
 
     @Autowired
-    public OnboardingDBService(final OrchestrationDriver orchestration,
-                               final HttpService httpService,
+    public OnboardingDBService(final OrchestrationDriver orchestrationDriver,
+                               final CertificateAuthorityDriver caDriver,
                                final SecurityUtilities securityUtilities) {
-        this.orchestration = orchestration;
-        this.httpService = httpService;
+        this.orchestrationDriver = orchestrationDriver;
+        this.caDriver = caDriver;
         this.securityUtilities = securityUtilities;
     }
 
@@ -54,108 +50,89 @@ public class OnboardingDBService {
     // methods
 
     //-------------------------------------------------------------------------------------------------
-    public OnboardingWithNameResponseDTO onboarding(final OnboardingWithNameRequestDTO onboardingRequest, final String host, final String address) {
+    public OnboardingWithNameResponseDTO onboarding(final OnboardingWithNameRequestDTO onboardingRequest, final String host, final String address)
+            throws DriverUtilities.DriverException {
         logger.debug("onboarding started...");
 
         final CertificateCreationRequestDTO creationRequestDTO = onboardingRequest.getCreationRequestDTO();
-        final KeyPair keyPair = securityUtilities.extractKeyPair(creationRequestDTO);
+        final KeyPair keyPair = securityUtilities.extractOrGenerateKeyPair(creationRequestDTO);
         final String certificateSigningRequest;
 
         try {
-            certificateSigningRequest = securityUtilities.createEncodedCSR(creationRequestDTO.getCommonName(), keyPair, host, address);
+            certificateSigningRequest = securityUtilities.createCertificateSigningRequest(creationRequestDTO.getCommonName(), keyPair,
+                                                                                          host, address, CertificateType.AH_ONBOARDING);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw new ArrowheadException("Unable to create certificate signing request: " + e.getMessage());
         }
 
-        final CertificateSigningResponseDTO signingResponseDTO = executeCertificateSigningRequest(certificateSigningRequest);
-        final OnboardingWithNameResponseDTO responseDTO = enrichOnboardingResponse(new OnboardingWithNameResponseDTO(), signingResponseDTO);
+        final var signingResponseDTO = executeCertificateSigningRequest(certificateSigningRequest);
+        final var responseDto = new OnboardingWithNameResponseDTO();
+        enrichCaResult(responseDto, signingResponseDTO);
+        enrichEndpoints(responseDto);
 
-        final CertificateResponseDTO onboardingCertificate = responseDTO.getOnboardingCertificate();
+        final CertificateCreationResponseDTO onboardingCertificate = responseDto.getOnboardingCertificate();
+        onboardingCertificate.setKeyPairDTO(securityUtilities.encodeKeyPair(keyPair));
 
-        onboardingCertificate.setKeyAlgorithm(keyPair.getPrivate().getAlgorithm());
-        onboardingCertificate.setKeyFormat(keyPair.getPrivate().getFormat());
-        onboardingCertificate.setPrivateKey(keyPair.getPrivate().getEncoded()); // TODO change to Base64?
-        onboardingCertificate.setPublicKey(keyPair.getPublic().getEncoded());
-
-        responseDTO.setCertificateType(CERTIFICATE_TYPE);
-
-        return responseDTO;
+        return responseDto;
     }
 
     //-------------------------------------------------------------------------------------------------
-    public OnboardingWithCsrResponseDTO onboarding(final OnboardingWithCsrRequestDTO onboardingRequest) {
+    public OnboardingWithCsrResponseDTO onboarding(final OnboardingWithCsrRequestDTO onboardingRequest)
+            throws DriverUtilities.DriverException {
         logger.debug("onboarding started...");
-        final CertificateSigningResponseDTO signingResponseDTO =
-                executeCertificateSigningRequest(onboardingRequest.getCertificateSigningRequest());
-        return enrichOnboardingResponse(new OnboardingWithCsrResponseDTO(), signingResponseDTO);
+
+        final var signingResponseDTO = executeCertificateSigningRequest(onboardingRequest.getCertificateSigningRequest());
+        final var responseDto = new OnboardingWithCsrResponseDTO();
+        enrichCaResult(responseDto, signingResponseDTO);
+        enrichEndpoints(responseDto);
+
+        final var onboardingCertificate = responseDto.getOnboardingCertificate();
+        securityUtilities.extractAndSetPublicKey(onboardingCertificate);
+
+        return responseDto;
     }
 
     //=================================================================================================
     // assistant methods
 
     //-------------------------------------------------------------------------------------------------
-    private CertificateSigningResponseDTO executeCertificateSigningRequest(final String certificateSigningRequest) {
-
-        logger.debug("Loading OrchestrationDriver ...");
-        final ServiceRegistryResponseDTO orchService = getOrchestratorService();
-
-        logger.debug("Orchestrate CertificateAuthority ...");
-        final OrchestrationResultDTO caOrchResult = contactOrchestrationService(orchService, CommonConstants.CORE_SERVICE_CERTIFICATE_AUTHORITY_SIGN);
-
+    private CertificateSigningResponseDTO executeCertificateSigningRequest(final String certificateSigningRequest) throws DriverUtilities.DriverException {
         logger.debug("Contact CertificateAuthority ...");
-        final UriComponents caUri = orchestration.createUri(caOrchResult.getProvider(),
-                                                            CommonConstants.CERTIFICATE_AUTHRORITY_URI + CommonConstants.OP_CA_SIGN_CERTIFICATE_URI);
-
-        final CertificateSigningRequestDTO csrDTO = new CertificateSigningRequestDTO(certificateSigningRequest);
-        final ResponseEntity<CertificateSigningResponseDTO> httpResponse = httpService
-                .sendRequest(caUri, HttpMethod.POST, CertificateSigningResponseDTO.class, csrDTO);
-
-        final CertificateSigningResponseDTO csrResult = httpResponse.getBody();
-
-        if (Objects.isNull(csrResult) || csrResult.getCertificateChain().isEmpty()) {
-            throw new ArrowheadException("Unable to contact Certificate Authority");
-        }
-
-        return csrResult;
+        final var csrDTO = new CertificateSigningRequestDTO(certificateSigningRequest);
+        return caDriver.signCertificate(csrDTO);
     }
 
-    private <T extends OnboardingResponseDTO> T enrichOnboardingResponse(final T responseDTO,
-                                                                         final CertificateSigningResponseDTO csrResult) {
-        final ServiceRegistryResponseDTO orchService = getOrchestratorService();
-
+    private <T extends OnboardingResponseDTO> void enrichCaResult(final T responseDTO, final CertificateSigningResponseDTO csrResult) {
         logger.debug("Processing response from Certificate Authority ...");
-        final CertificateResponseDTO certificateResponseDTO = new CertificateResponseDTO();
+        final CertificateCreationResponseDTO certificateResponseDTO = new CertificateCreationResponseDTO();
         certificateResponseDTO.setCertificate(csrResult.getCertificateChain().get(0));
-        responseDTO.setIntermediateCertificate(csrResult.getCertificateChain().get(1));
-        responseDTO.setRootCertificate(csrResult.getCertificateChain().get(2));
+        certificateResponseDTO.setCertificateFormat(CoreCommonConstants.CERTIFICATE_FORMAT);
+        certificateResponseDTO.setCertificateType(CertificateType.AH_ONBOARDING);
 
         responseDTO.setOnboardingCertificate(certificateResponseDTO);
-
-        logger.debug("Orchestrating Device Registry ...");
-        final OrchestrationResultDTO drOrchResult = contactOrchestrationService(orchService, CommonConstants.CORE_SERVICE_DEVICE_REGISTRY_REGISTER);
-        logger.debug("Orchestrating System Registry ...");
-        final OrchestrationResultDTO sysrOrchResult = contactOrchestrationService(orchService, CommonConstants.CORE_SERVICE_SYSTEM_REGISTRY_REGISTER);
-        logger.debug("Orchestrating Service Registry ...");
-        final OrchestrationResultDTO srOrchResult = contactOrchestrationService(orchService, CommonConstants.CORE_SERVICE_SERVICE_REGISTRY_REGISTER);
-        logger.debug("Orchestrating Orchestration Service ...");
-        final OrchestrationResultDTO orchOrchResult = contactOrchestrationService(orchService, CommonConstants.CORE_SERVICE_ORCH_PROCESS);
-
-        responseDTO.setDeviceRegistry(new ServiceEndpoint(CoreSystemService.DEVICE_REGISTRY_REGISTER_SERVICE, orchestration.createUri(drOrchResult).toUri()));
-        responseDTO.setSystemRegistry(new ServiceEndpoint(CoreSystemService.SYSTEM_REGISTRY_REGISTER_SERVICE, orchestration.createUri(sysrOrchResult).toUri()));
-        responseDTO.setServiceRegistry(new ServiceEndpoint(CoreSystemService.SERVICE_REGISTRY_REGISTER_SERVICE, orchestration.createUri(srOrchResult).toUri()));
-        responseDTO.setOrchestrationService(new ServiceEndpoint(CoreSystemService.ORCHESTRATION_SERVICE, orchestration.createUri(orchOrchResult).toUri()));
-
-        return responseDTO;
+        responseDTO.setIntermediateCertificate(csrResult.getCertificateChain().get(1));
+        responseDTO.setRootCertificate(csrResult.getCertificateChain().get(2));
     }
 
-    //-------------------------------------------------------------------------------------------------
-    private ServiceRegistryResponseDTO getOrchestratorService() {
-        return orchestration.getOrchestratorService().getServiceQueryData().get(0);
+    private void enrichEndpoints(final OnboardingWithNameResponseDTO responseDTO) throws DriverUtilities.DriverException {
+        orchestrateAndSet(responseDTO::setDeviceRegistry, CoreSystemService.DEVICE_REGISTRY_ONBOARDING_WITH_NAME_SERVICE);
+        orchestrateAndSet(responseDTO::setSystemRegistry, CoreSystemService.SYSTEM_REGISTRY_ONBOARDING_WITH_NAME_SERVICE);
+        orchestrateAndSet(responseDTO::setServiceRegistry, CoreSystemService.SERVICE_REGISTRY_REGISTER_SERVICE);
+        orchestrateAndSet(responseDTO::setOrchestrationService, CoreSystemService.ORCHESTRATION_SERVICE);
     }
 
-    //-------------------------------------------------------------------------------------------------
-    private OrchestrationResultDTO contactOrchestrationService(final ServiceRegistryResponseDTO orchService, final String serviceDefinition) {
-        return orchestration.contactOrchestrationService(orchService, serviceDefinition).getResponse().get(0);
+    private void enrichEndpoints(final OnboardingWithCsrResponseDTO responseDTO) throws DriverUtilities.DriverException {
+        orchestrateAndSet(responseDTO::setDeviceRegistry, CoreSystemService.DEVICE_REGISTRY_ONBOARDING_WITH_CSR_SERVICE);
+        orchestrateAndSet(responseDTO::setSystemRegistry, CoreSystemService.SYSTEM_REGISTRY_ONBOARDING_WITH_CSR_SERVICE);
+        orchestrateAndSet(responseDTO::setServiceRegistry, CoreSystemService.SERVICE_REGISTRY_REGISTER_SERVICE);
+        orchestrateAndSet(responseDTO::setOrchestrationService, CoreSystemService.ORCHESTRATION_SERVICE);
+    }
+
+    private void orchestrateAndSet(final Consumer<ServiceEndpoint> consumer,
+                                   final CoreSystemService coreSystemService) throws DriverUtilities.DriverException {
+        logger.debug("Orchestrating '{}' ...", coreSystemService.getServiceDefinition());
+        final UriComponents service = orchestrationDriver.findCoreSystemService(coreSystemService);
+        consumer.accept(new ServiceEndpoint(coreSystemService, service.toUri()));
     }
 }

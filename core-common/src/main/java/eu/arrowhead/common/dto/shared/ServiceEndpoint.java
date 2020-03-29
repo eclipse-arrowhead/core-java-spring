@@ -4,6 +4,7 @@ import eu.arrowhead.common.core.CoreSystemService;
 
 import java.io.Serializable;
 import java.net.URI;
+import java.util.StringJoiner;
 
 public class ServiceEndpoint implements Serializable {
 
@@ -32,4 +33,12 @@ public class ServiceEndpoint implements Serializable {
         return uri;
     }
     public void setUri(final URI uri) { this.uri = uri; }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ServiceEndpoint.class.getSimpleName() + "[", "]")
+                .add("system=" + system)
+                .add("uri=" + uri)
+                .toString();
+    }
 }

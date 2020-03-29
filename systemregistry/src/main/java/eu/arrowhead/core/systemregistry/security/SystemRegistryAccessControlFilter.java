@@ -27,13 +27,13 @@ public class SystemRegistryAccessControlFilter extends CoreSystemAccessControlFi
     //-------------------------------------------------------------------------------------------------
     @Override
     protected void checkClientAuthorized(final String clientCN, final String method, final String requestTarget, final String requestJSON, final Map<String, String[]> queryParams) {
-        super.checkClientAuthorized(clientCN, method, requestTarget, requestJSON, queryParams);
 
-        final String cloudCN = getServerCloudCN();
+        // certificates will be verified individually on each method
         if (requestTarget.contains(CoreCommonConstants.MGMT_URI)) {
             // Only the local System Operator can use these methods
+            final String cloudCN = getServerCloudCN();
+            super.checkClientAuthorized(clientCN, method, requestTarget, requestJSON, queryParams);
             checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
         }
     }
-
 }

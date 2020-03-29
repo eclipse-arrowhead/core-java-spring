@@ -39,7 +39,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -71,7 +70,7 @@ public class OnboardingController {
 
 
     @Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
-    private Map<String,Object> arrowheadContext;
+    private Map<String, Object> arrowheadContext;
 
     @Value(value = "${sharedSecret:#{null}}")
     private Optional<String> sharedSecret;
@@ -98,7 +97,8 @@ public class OnboardingController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Onboarding with certificate and device name", response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = "Onboarding with certificate and device name", response = DeviceResponseDTO.class,
+            tags = {CoreCommonConstants.SWAGGER_TAG_MGMT, CoreCommonConstants.SWAGGER_TAG_ONBOARDING})
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = ONBOARDING_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = ONBOARDING_HTTP_400_MESSAGE),
@@ -120,7 +120,8 @@ public class OnboardingController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Onboarding with shared secret and device name", response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = "Onboarding with shared secret and device name", response = DeviceResponseDTO.class,
+            tags = {CoreCommonConstants.SWAGGER_TAG_MGMT, CoreCommonConstants.SWAGGER_TAG_ONBOARDING})
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = ONBOARDING_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = ONBOARDING_HTTP_400_MESSAGE),
@@ -143,7 +144,8 @@ public class OnboardingController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Onboarding with certificate and certificate signing request", response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = "Onboarding with certificate and certificate signing request", response = DeviceResponseDTO.class,
+            tags = {CoreCommonConstants.SWAGGER_TAG_MGMT, CoreCommonConstants.SWAGGER_TAG_ONBOARDING})
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = ONBOARDING_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = ONBOARDING_HTTP_400_MESSAGE),
@@ -163,7 +165,8 @@ public class OnboardingController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Onboarding with certificate and certificate signing request", response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = "Onboarding with certificate and certificate signing request", response = DeviceResponseDTO.class,
+            tags = {CoreCommonConstants.SWAGGER_TAG_MGMT, CoreCommonConstants.SWAGGER_TAG_ONBOARDING})
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = ONBOARDING_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = ONBOARDING_HTTP_400_MESSAGE),
@@ -207,9 +210,7 @@ public class OnboardingController {
                     logger.debug("{} is unauthorized to access {}", clientCN, requestTarget);
                     throw new AuthException(clientCN + " is unauthorized to access " + requestTarget);
                 }
-            }
-            else
-            {
+            } else {
                 logger.debug("No client certificate given!");
                 throw new AuthException("Client certificate in needed!");
             }
@@ -282,5 +283,4 @@ public class OnboardingController {
 
         return serverFields[1];
     }
-
 }

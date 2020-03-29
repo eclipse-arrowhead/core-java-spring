@@ -1,6 +1,7 @@
 package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
+import java.util.StringJoiner;
 
 public class CertificateCreationRequestDTO implements Serializable {
 
@@ -9,8 +10,7 @@ public class CertificateCreationRequestDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String commonName;
-    private String publicKey; // TODO add KeyAlgorithm
-    private String privateKey;
+    private KeyPairDTO keyPairDTO;
 
 
     //=================================================================================================
@@ -23,10 +23,9 @@ public class CertificateCreationRequestDTO implements Serializable {
         this.commonName = commonName;
     }
 
-    public CertificateCreationRequestDTO(final String commonName, final String publicKey, final String privateKey) {
+    public CertificateCreationRequestDTO(final String commonName, final KeyPairDTO keyPairDTO) {
         this.commonName = commonName;
-        this.publicKey = publicKey;
-        this.privateKey = privateKey;
+        this.keyPairDTO = keyPairDTO;
     }
 
     //=================================================================================================
@@ -35,24 +34,23 @@ public class CertificateCreationRequestDTO implements Serializable {
     public String getCommonName() {
         return commonName;
     }
-
     public void setCommonName(String commonName) {
         this.commonName = commonName;
     }
 
-    public String getPublicKey() {
-        return publicKey;
+    public KeyPairDTO getKeyPairDTO() {
+        return keyPairDTO;
     }
 
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
+    public void setKeyPairDTO(final KeyPairDTO keyPairDTO) {
+        this.keyPairDTO = keyPairDTO;
     }
 
-    public String getPrivateKey() {
-        return privateKey;
-    }
-
-    public void setPrivateKey(String privateKey) {
-        this.privateKey = privateKey;
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", CertificateCreationRequestDTO.class.getSimpleName() + "[", "]")
+                .add("commonName='" + commonName + "'")
+                .add("keyPairDTO=" + keyPairDTO)
+                .toString();
     }
 }

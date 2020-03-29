@@ -58,9 +58,13 @@ public class CommonConstants {
 
 	public static final String CORE_SERVICE_SYSTEM_REGISTRY_REGISTER = "system-register";
 	public static final String CORE_SERVICE_SYSTEM_REGISTRY_UNREGISTER = "system-unregister";
+	public static final String CORE_SERVICE_SYSTEM_REGISTRY_ONBOARDING_WITH_NAME = "system-onboarding-with-name";
+	public static final String CORE_SERVICE_SYSTEM_REGISTRY_ONBOARDING_WITH_CSR = "system-onboarding-with-csr";
 
 	public static final String CORE_SERVICE_DEVICE_REGISTRY_REGISTER = "device-register";
 	public static final String CORE_SERVICE_DEVICE_REGISTRY_UNREGISTER = "device-unregister";
+	public static final String CORE_SERVICE_DEVICE_REGISTRY_ONBOARDING_WITH_NAME = "device-onboarding-with-name";
+	public static final String CORE_SERVICE_DEVICE_REGISTRY_ONBOARDING_WITH_CSR = "device-onboarding-with-csr";
 
 	public static final String CORE_SERVICE_ONBOARDING_WITH_CERTIFICATE_AND_NAME = "onboarding-with-certificate-and-name";
 	public static final String CORE_SERVICE_ONBOARDING_WITH_CERTIFICATE_AND_CSR = "onboarding-with-certificate-and-csr";
@@ -87,31 +91,6 @@ public class CommonConstants {
 	public static final String $SERVICE_REGISTRY_ADDRESS_WD = "${" + SERVICE_REGISTRY_ADDRESS + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_ADDRESS + "}";
 	public static final String SERVICE_REGISTRY_PORT = "sr_port";
 	public static final String $SERVICE_REGISTRY_PORT_WD = "${" + SERVICE_REGISTRY_PORT + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_PORT + "}";
-	
-	public static final String SERVICE_REGISTRY_URI = "/serviceregistry";
-	public static final String OP_SERVICE_REGISTRY_REGISTER_URI = "/register";
-	public static final String OP_SERVICE_REGISTRY_UNREGISTER_URI = "/unregister";
-	public static final String OP_SERVICE_REGISTRY_QUERY_URI = "/query";	
-	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME = "system_name";
-	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS = "address";
-	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT = "port";
-	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION = "service_definition";
-
-	public static final String SYSTEM_REGISTRY_URI = "/systemregistry";
-	public static final String OP_SYSTEM_REGISTRY_REGISTER_URI = "/register";
-	public static final String OP_SYSTEM_REGISTRY_UNREGISTER_URI = "/unregister";
-	public static final String OP_SYSTEM_REGISTRY_QUERY_URI = "/query";
-	public static final String OP_SYSTEM_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME = "system_name";
-	public static final String OP_SYSTEM_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS = "address";
-	public static final String OP_SYSTEM_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT = "port";
-
-	public static final String DEVICE_REGISTRY_URI = "/deviceregistry";
-	public static final String OP_DEVICE_REGISTRY_REGISTER_URI = "/register";
-	public static final String OP_DEVICE_REGISTRY_UNREGISTER_URI = "/unregister";
-	public static final String OP_DEVICE_REGISTRY_QUERY_URI = "/query";
-	public static final String OP_DEVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_DEVICE_NAME = "device_name";
-	public static final String OP_DEVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS = "address";
-	public static final String OP_DEVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_MAC_ADDRESS = "mac_address";
 
 	public static final String ONBOARDING_URI = "/onboarding";
 	public static final String ONBOARDING_AUTH_WITH_CERTIFICATE_URI = "/certificate";
@@ -122,6 +101,34 @@ public class CommonConstants {
 	public static final String OP_ONBOARDING_WITH_CERTIFICATE_AND_CSR = ONBOARDING_AUTH_WITH_CERTIFICATE_URI + ONBOARDING_WITH_CSR_URI;
 	public static final String OP_ONBOARDING_WITH_SHARED_SECRET_AND_NAME = ONBOARDING_AUTH_WITH_SHARED_SECRET_URI + ONBOARDING_WITH_NAME_URI;
 	public static final String OP_ONBOARDING_WITH_SHARED_SECRET_AND_CSR = ONBOARDING_AUTH_WITH_SHARED_SECRET_URI + ONBOARDING_WITH_CSR_URI;
+
+	public static final String SERVICE_REGISTRY_URI = "/serviceregistry";
+	public static final String OP_SERVICE_REGISTRY_REGISTER_URI = "/register";
+	public static final String OP_SERVICE_REGISTRY_UNREGISTER_URI = "/unregister";
+	public static final String OP_SERVICE_REGISTRY_QUERY_URI = "/query";
+	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME = "system_name";
+	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS = "address";
+	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT = "port";
+	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION = "service_definition";
+
+	public static final String SYSTEM_REGISTRY_URI = "/systemregistry";
+	public static final String OP_SYSTEM_REGISTRY_REGISTER_URI = "/register";
+	public static final String OP_SYSTEM_REGISTRY_UNREGISTER_URI = "/unregister";
+	public static final String OP_SYSTEM_REGISTRY_QUERY_URI = "/query";
+	public static final String OP_SYSTEM_REGISTRY_ONBOARDING_WITH_NAME_URI = ONBOARDING_WITH_NAME_URI;
+	public static final String OP_SYSTEM_REGISTRY_ONBOARDING_WITH_CSR_URI = ONBOARDING_WITH_CSR_URI;
+	public static final String OP_SYSTEM_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME = "system_name";
+	public static final String OP_SYSTEM_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS = "address";
+	public static final String OP_SYSTEM_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT = "port";
+
+	public static final String DEVICE_REGISTRY_URI = "/deviceregistry";
+	public static final String OP_DEVICE_REGISTRY_REGISTER_URI = "/register";
+	public static final String OP_DEVICE_REGISTRY_UNREGISTER_URI = "/unregister";
+	public static final String OP_DEVICE_REGISTRY_QUERY_URI = "/query";
+	public static final String OP_DEVICE_REGISTRY_ONBOARDING_WITH_NAME_URI = ONBOARDING_WITH_NAME_URI;
+	public static final String OP_DEVICE_REGISTRY_ONBOARDING_WITH_CSR_URI = ONBOARDING_WITH_CSR_URI;
+	public static final String OP_DEVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_DEVICE_NAME = "device_name";
+	public static final String OP_DEVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_MAC_ADDRESS = "mac_address";
 
 	public static final String AUTHORIZATION_URI = "/authorization";
 	public static final String OP_AUTH_TOKEN_URI = "/token";

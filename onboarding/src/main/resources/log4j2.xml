@@ -5,6 +5,7 @@
             %d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${hostName} --- [%15.15t] %-40.40c{1.} : %m%n%ex
         </Property>
 		<Property name="JDBC_LEVEL">INFO</Property>
+		<Property name="ARROWHEAD_CONSOLE_FILE_LEVEL">DEBUG</Property>
 		<Property name="CONSOLE_FILE_LEVEL">INFO</Property>
 		<Property name="LOG_DIR">.</Property>
     </Properties>
@@ -40,8 +41,8 @@
 		<AsyncLogger name="eu.arrowhead" level="${JDBC_LEVEL}" additivity="true">
             <AppenderRef ref="MySQLDatabase" />			
     	</AsyncLogger>
-		<Logger name="eu.arrowhead.common" level="${CONSOLE_FILE_LEVEL}" additivity="true"/>
-		<Logger name="eu.arrowhead.core" level="${CONSOLE_FILE_LEVEL}" additivity="true"/>
+		<Logger name="eu.arrowhead.common" level="${ARROWHEAD_CONSOLE_FILE_LEVEL}" additivity="true"/>
+		<Logger name="eu.arrowhead.core" level="${ARROWHEAD_CONSOLE_FILE_LEVEL}" additivity="true"/>
 		<Logger name="org.springframework.web" level="${CONSOLE_FILE_LEVEL}" additivity="true"/>
 		<Logger name="org.springframework.security" level="${CONSOLE_FILE_LEVEL}" additivity="true"/>
     </Loggers>

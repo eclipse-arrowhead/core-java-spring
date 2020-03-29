@@ -125,12 +125,6 @@ public abstract class ApplicationInitListener {
 		customDestroy();
 	}
 
-	//-------------------------------------------------------------------------------------------------
-	@Bean(CommonConstants.ARROWHEAD_CONTEXT)
-	public Map<String,Object> getArrowheadContext() {
-		return new ConcurrentHashMap<>();
-	}
-	
 	//=================================================================================================
 	// assistant methods
 	
