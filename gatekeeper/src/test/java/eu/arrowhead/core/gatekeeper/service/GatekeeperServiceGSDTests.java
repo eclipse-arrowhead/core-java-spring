@@ -80,7 +80,7 @@ public class GatekeeperServiceGSDTests {
 		when(gatekeeperDBService.getNeighborClouds()).thenReturn(List.of(cloud));
 		when(commonDBService.getOwnCloud(true)).thenReturn(ownCloud);
 		when(gatekeeperDriver.sendGSDPollRequest(any(), any())).thenReturn(List.of(new GSDPollResponseDTO(DTOConverter.convertCloudToCloudResponseDTO(cloud), "test-service",
-																		   								  List.of("HTTP-SECURE-JSON"), 2, null)));
+																		   								  List.of("HTTP-SECURE-JSON"), 2, null, null, false)));
 		when(gatekeeperDBService.getCloudByOperatorAndName(any(), any())).thenReturn(cloud);
 		
 		final GSDQueryResultDTO result = gatekeeperService.initGSDPoll(gsdQueryFormDTO);
@@ -155,7 +155,7 @@ public class GatekeeperServiceGSDTests {
 		cloudDTO.setNeighbor(true);
 		cloudDTO.setAuthenticationInfo("test-auth-info");
 		
-		gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false));
+		gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false, false));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -171,7 +171,7 @@ public class GatekeeperServiceGSDTests {
 		cloudDTO.setNeighbor(true);
 		cloudDTO.setAuthenticationInfo("test-auth-info");
 		
-		gatekeeperService.doGSDPoll(new GSDPollRequestDTO(null, cloudDTO, false));
+		gatekeeperService.doGSDPoll(new GSDPollRequestDTO(null, cloudDTO, false, false));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -190,7 +190,7 @@ public class GatekeeperServiceGSDTests {
 		cloudDTO.setNeighbor(true);
 		cloudDTO.setAuthenticationInfo("test-auth-info");
 		
-		gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false));
+		gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false, false));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -209,7 +209,7 @@ public class GatekeeperServiceGSDTests {
 		cloudDTO.setNeighbor(true);
 		cloudDTO.setAuthenticationInfo("test-auth-info");
 		
-		gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false));
+		gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false, false));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -221,7 +221,7 @@ public class GatekeeperServiceGSDTests {
 		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
 		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
 		
-		gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, null, false));
+		gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, null, false, false));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -240,7 +240,7 @@ public class GatekeeperServiceGSDTests {
 		cloudDTO.setNeighbor(true);
 		cloudDTO.setAuthenticationInfo("test-auth-info");
 		
-		gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false));
+		gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false, false));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -259,7 +259,7 @@ public class GatekeeperServiceGSDTests {
 		cloudDTO.setNeighbor(true);
 		cloudDTO.setAuthenticationInfo("test-auth-info");
 		
-		gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false));
+		gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false, false));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -278,7 +278,7 @@ public class GatekeeperServiceGSDTests {
 		cloudDTO.setNeighbor(true);
 		cloudDTO.setAuthenticationInfo("test-auth-info");
 		
-		gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false));
+		gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false, false));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -297,7 +297,7 @@ public class GatekeeperServiceGSDTests {
 		cloudDTO.setNeighbor(true);
 		cloudDTO.setAuthenticationInfo("test-auth-info");
 		
-		gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false));
+		gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false, false));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -319,7 +319,7 @@ public class GatekeeperServiceGSDTests {
 		final ServiceQueryResultDTO srQueryResult = new ServiceQueryResultDTO();
 		when(gatekeeperDriver.sendServiceRegistryQuery(any())).thenReturn(srQueryResult);
 		
-		final GSDPollResponseDTO doGSDPollResponse = gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false));
+		final GSDPollResponseDTO doGSDPollResponse = gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false, false));
 		
 		assertNull(doGSDPollResponse.getProviderCloud());
 		assertNull(doGSDPollResponse.getNumOfProviders());
@@ -352,7 +352,7 @@ public class GatekeeperServiceGSDTests {
 		when(gatekeeperDriver.sendServiceRegistryQuery(any())).thenReturn(srQueryResult);
 		when(gatekeeperDriver.sendInterCloudAuthorizationCheckQuery(any(), any(), any())).thenReturn(new HashMap<>());
 		
-		final GSDPollResponseDTO doGSDPollResponse = gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false));
+		final GSDPollResponseDTO doGSDPollResponse = gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false, false));
 		
 		assertNull(doGSDPollResponse.getProviderCloud());
 		assertNull(doGSDPollResponse.getNumOfProviders());
@@ -395,7 +395,7 @@ public class GatekeeperServiceGSDTests {
 		ownCloud.setUpdatedAt(ZonedDateTime.now());
 		when(commonDBService.getOwnCloud(true)).thenReturn(ownCloud);
 		
-		final GSDPollResponseDTO doGSDPollResponse = gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false));
+		final GSDPollResponseDTO doGSDPollResponse = gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false, false));
 		
 		assertEquals(1, (int) doGSDPollResponse.getNumOfProviders());
 		assertEquals(1, doGSDPollResponse.getAvailableInterfaces().size());

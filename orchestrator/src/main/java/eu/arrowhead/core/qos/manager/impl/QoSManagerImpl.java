@@ -2,6 +2,7 @@ package eu.arrowhead.core.qos.manager.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -13,10 +14,18 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.QoSReservation;
+import eu.arrowhead.common.dto.internal.CloudResponseDTO;
+import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
+import eu.arrowhead.common.dto.internal.QoSMeasurementAttributesFormDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.OrchestratorWarnings;
+import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.core.orchestrator.service.OrchestratorDriver;
 import eu.arrowhead.core.qos.database.service.QoSReservationDBService;
 import eu.arrowhead.core.qos.manager.QoSManager;
 import eu.arrowhead.core.qos.manager.QoSVerifier;
@@ -33,9 +42,12 @@ public class QoSManagerImpl implements QoSManager {
 	private QoSReservationDBService qosReservationDBService;
 	
 	@Autowired
+	private OrchestratorDriver orchestratorDriver;
+	
+	@Autowired
 	private ApplicationContext appContext;
 	
-	private List<QoSVerifier> verifiers = new ArrayList<>(2);
+	private final List<QoSVerifier> verifiers = new ArrayList<>(2);
 
 	//=================================================================================================
 	// methods
@@ -46,6 +58,12 @@ public class QoSManagerImpl implements QoSManager {
 		verifiers.add(appContext.getBean(QoSVerifiers.SERVICE_TIME_VERIFIER, QoSVerifier.class));
 		verifiers.add(appContext.getBean(QoSVerifiers.PING_REQUIREMENTS_VERIFIER, QoSVerifier.class));
 		//TODO: add further verifiers here
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public List<QoSReservation> fetchAllReservation() {
+		return qosReservationDBService.getAllReservation();
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -128,7 +146,7 @@ public class QoSManagerImpl implements QoSManager {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Override
-	public List<OrchestrationResultDTO> verifyServices(final List<OrchestrationResultDTO> orList, final OrchestrationFormRequestDTO request) {
+	public List<OrchestrationResultDTO> verifyIntraCloudServices(final List<OrchestrationResultDTO> orList, final OrchestrationFormRequestDTO request) {
 		logger.debug("verifyServices started ...");
 		
 		Assert.notNull(orList, "'orList' is null.");
@@ -139,8 +157,12 @@ public class QoSManagerImpl implements QoSManager {
 		final List<OrchestrationResultDTO> result = new ArrayList<>();
 		for (final OrchestrationResultDTO dto : orList) {
 			boolean verified = true;
+			final QoSVerificationParameters verificationParameters = new QoSVerificationParameters(dto.getProvider(), null, false, dto.getMetadata(), request.getQosRequirements(),
+																								   request.getCommands(), dto.getWarnings());
 			for (final QoSVerifier verifier : verifiers) {
-				verified = verifier.verify(dto, request.getQosRequirements(), request.getCommands());
+				verified = verifier.verify(verificationParameters, false);
+				dto.setWarnings(verificationParameters.getWarnings());
+				dto.setMetadata(verificationParameters.getMetadata());
 				if (!verified) {
 					if (needLockRelease) {
 						qosReservationDBService.removeTemporaryLock(dto);
@@ -156,6 +178,82 @@ public class QoSManagerImpl implements QoSManager {
 		}
 		
 		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public List<GSDPollResponseDTO> preVerifyInterCloudServices(final List<GSDPollResponseDTO> gsdList, final OrchestrationFormRequestDTO request) {
+		logger.debug("preVerifyInterCloudServices started ...");
+		
+		Assert.notNull(gsdList, "'gsdList' is null.");
+		Assert.notNull(request, "'request' is null.");
+		
+		final QoSIntraPingMeasurementResponseDTO localMedianPingMeasurement = orchestratorDriver.getIntraPingMedianMeasurement(QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT);
+		final List<GSDPollResponseDTO> results = new ArrayList<>();
+		for (final GSDPollResponseDTO cloudResponse : gsdList) {
+			final GSDPollResponseDTO verifiedGSDResponse = new GSDPollResponseDTO(cloudResponse.getProviderCloud(), cloudResponse.getRequiredServiceDefinition(), new ArrayList<>(), 0,
+														   new ArrayList<>(), cloudResponse.getServiceMetadata(), cloudResponse.isGatewayIsMandatory());
+			
+			for (final QoSMeasurementAttributesFormDTO measurement : cloudResponse.getQosMeasurements()) {
+				if (measurement.isProviderAvailable()) {
+					final QoSVerificationParameters verificationParameters = new QoSVerificationParameters(measurement.getServiceRegistryEntry().getProvider(), cloudResponse.getProviderCloud(),
+																										   cloudResponse.isGatewayIsMandatory(), measurement.getServiceRegistryEntry().getMetadata(),
+																										   request.getQosRequirements(), request.getCommands(), new ArrayList<>());
+					verificationParameters.setLocalReferencePingMeasurement(localMedianPingMeasurement);
+					verificationParameters.setProviderTargetCloudMeasurement(measurement);
+					boolean verified = true;
+					for (final QoSVerifier verifier : verifiers) {
+						verified = verifier.verify(verificationParameters, true);
+					}
+					if (verified) {
+						verifiedGSDResponse.setNumOfProviders(verifiedGSDResponse.getNumOfProviders() + 1);
+						verifiedGSDResponse.getQosMeasurements().add(measurement);
+						for (final ServiceInterfaceResponseDTO interf : measurement.getServiceRegistryEntry().getInterfaces()) {
+							if (!verifiedGSDResponse.getAvailableInterfaces().contains(interf.getInterfaceName())) {
+								verifiedGSDResponse.getAvailableInterfaces().add(interf.getInterfaceName());
+							}
+						}
+						verifiedGSDResponse.getVerifiedRelays().addAll(verificationParameters.getVerifiedRelays());
+					}
+				}
+			}
+			if (verifiedGSDResponse.getNumOfProviders() > 0) {
+				results.add(verifiedGSDResponse);
+			}					
+		}
+		return results;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public List<OrchestrationResultDTO> verifyInterCloudServices(final CloudResponseDTO targetCloud, final List<OrchestrationResultDTO> orList, final Map<String,String> qosRequirements,
+																 final Map<String,String> commands) {
+		logger.debug("verifyInterCloudServices started ...");
+		
+		Assert.notNull(orList, "'orList' is null.");
+		Assert.notNull(qosRequirements, "'qosRequirements' is null.");
+		Assert.notNull(commands, "'commands' is null.");
+		
+		final QoSIntraPingMeasurementResponseDTO localMedianPingMeasurement = orchestratorDriver.getIntraPingMedianMeasurement(QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT);
+		final List<OrchestrationResultDTO> verifiedResults = new ArrayList<>();
+		for (final OrchestrationResultDTO result : orList) {
+			final boolean gatewayIsMandatory = orList.get(0).getWarnings().contains(OrchestratorWarnings.VIA_GATEWAY);
+			final QoSVerificationParameters verificationParameters = new QoSVerificationParameters(result.getProvider(), targetCloud, gatewayIsMandatory, result.getMetadata(), qosRequirements,
+																								   commands, result.getWarnings());
+			verificationParameters.setLocalReferencePingMeasurement(localMedianPingMeasurement);
+			verificationParameters.setProviderTargetCloudMeasurement(result.getQosMeasurements());
+			
+			boolean verified = true;
+			for (final QoSVerifier verifier : verifiers) {
+				verified = verifier.verify(verificationParameters, false);
+			}
+			
+			if (verified) {
+				result.setWarnings(verificationParameters.getWarnings());
+				verifiedResults.add(result);
+			}
+		}
+		return verifiedResults;
 	}
 	
 	//=================================================================================================

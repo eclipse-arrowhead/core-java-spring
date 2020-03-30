@@ -60,6 +60,11 @@ public class QoSReservationDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public List<QoSReservation> getAllReservation() {
+		return qosReservationRepository.findAll();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public List<QoSReservation> getAllReservationsExceptMine(final String systemName, final String address, final int port) {
 		logger.debug("getAllReservationsExceptMine started ...");
 		

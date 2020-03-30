@@ -1,6 +1,7 @@
 package eu.arrowhead.common.dto.internal;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,6 +37,7 @@ import eu.arrowhead.common.database.entity.QoSInterRelayEchoMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterRelayMeasurement;
 import eu.arrowhead.common.database.entity.QoSIntraMeasurement;
 import eu.arrowhead.common.database.entity.QoSIntraPingMeasurement;
+import eu.arrowhead.common.database.entity.QoSReservation;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
@@ -601,6 +603,17 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public static List<RelayRequestDTO> convertRelayResponseDTOCollectionToRelayRequestDTOList(final Collection<RelayResponseDTO> responses) {
+		Assert.notNull(responses, "Collection<RelayResponseDTO> is null.");
+		
+		final List<RelayRequestDTO> relayRequests = new ArrayList<>();
+		for (RelayResponseDTO relayResponseDTO : responses) {
+			relayRequests.add(convertRelayResponseDTOToRelayRequestDTO(relayResponseDTO));
+		}
+		return relayRequests;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public static RelayRequestDTO convertRelayResponseDTOToRelayRequestDTO(final RelayResponseDTO response) {
 		Assert.notNull(response, "Relay response is null.");
 		
@@ -776,7 +789,8 @@ public class DTOConverter {
 	public static QoSInterDirectMeasurementResponseDTO convertQoSInterDirectMeasurementToQoSInterDirectMeasurementResponseDTO(final QoSInterDirectMeasurement measurement) {
 		Assert.notNull(measurement, "measurement is null");
 
-		return new QoSInterDirectMeasurementResponseDTO(convertCloudToCloudResponseDTO(measurement.getCloud()),
+		return new QoSInterDirectMeasurementResponseDTO(measurement.getId(),
+														convertCloudToCloudResponseDTO(measurement.getCloud()),
 														measurement.getAddress(),
 														measurement.getMeasurementType(),
 														measurement.getLastMeasurementAt(),
@@ -849,6 +863,26 @@ public class DTOConverter {
 		}
 		
 		return new QoSInterRelayEchoMeasurementListResponseDTO(data, entries.getTotalElements());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static QoSReservationResponseDTO convertQoSReservationToQoSReservationResponseDTO(final QoSReservation entry) {
+		Assert.notNull(entry, "QoSReservation is null");
+		
+		return new QoSReservationResponseDTO(entry.getId(), entry.getReservedProviderId(), entry.getReservedServiceId(), entry.getConsumerSystemName(), entry.getConsumerAddress(),
+											 entry.getConsumerPort(), entry.getReservedTo(), entry.isTemporaryLock(), entry.getCreatedAt(), entry.getUpdatedAt());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static QoSReservationListResponseDTO convertQoSReservationListToQoSReservationListResponseDTO(final List<QoSReservation> entries) {
+		Assert.notNull(entries, "QoSReservation list is null");
+		
+		final List<QoSReservationResponseDTO> data = new ArrayList<>();
+		for (final QoSReservation entry : entries) {
+			data.add(convertQoSReservationToQoSReservationResponseDTO(entry));
+		}
+		
+		return new QoSReservationListResponseDTO(data, data.size());
 	}
 	
 	//=================================================================================================

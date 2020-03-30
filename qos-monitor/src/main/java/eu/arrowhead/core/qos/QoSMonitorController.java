@@ -39,7 +39,6 @@ import eu.arrowhead.common.dto.internal.QoSInterDirectPingMeasurementListRespons
 import eu.arrowhead.common.dto.internal.QoSInterDirectPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementResponseDTO;
-import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementResultListDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSMonitorSenderConnectionRequestDTO;
@@ -54,6 +53,7 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
+import eu.arrowhead.core.qos.service.PingService;
 import eu.arrowhead.core.qos.service.RelayEchoService;
 import eu.arrowhead.core.qos.service.RelayTestService;
 import io.swagger.annotations.Api;
@@ -80,9 +80,9 @@ public class QoSMonitorController {
 	private static final String QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_MGMT_URI =  CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT;
 	private static final String QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_BY_CLOUD_AND_SYSTEM = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT + "/pair_results";
 	
-	private static final String QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_URI = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_MEASUREMENT;
-	private static final String QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_MEASUREMENT + "/pair_results";
-	private static final String QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_MEASUREMENT + "/best_relay";
+	private static final String QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_URI = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT;
+	private static final String QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT + "/pair_results";
+	private static final String QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT + "/best_relay";
 	
 	private static final String GET_QOS_MONITOR_INTRA_PING_MEASUREMENTS_MGMT_DESCRIPTION = "Return requested Ping-Measurements entries by the given parameters";
 	private static final String GET_QOS_MONITOR_INTRA_PING_MEASUREMENTS_MGMT_HTTP_200_MESSAGE = "Ping-Measurement entries returned";
@@ -95,6 +95,10 @@ public class QoSMonitorController {
 	private static final String OP_GET_QOS_MONITOR_INTRA_PING_MEASUREMENT_BY_SYSTEM_ID_DESCRIPTION = "Return requested Ping-Measurement entry by system id.";
 	private static final String OP_GET_QOS_MONITOR_INTRA_PING_MEASUREMENT_BY_SYSTEM_ID_HTTP_200_MESSAGE = "Ping-Measurement entry returned";
 	private static final String OP_GET_QOS_MONITOR_INTRA_PING_MEASUREMENT_BY_SYSTEM_ID_HTTP_400_MESSAGE = "Could not retrieve Ping-Measurement entry";
+	
+	private static final String OP_GET_QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT_BY_ATTRIBUTE = "Return median Ping-Measurement entry by defined attribute.";
+	private static final String OP_GET_QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT_BY_ATTRIBUTE_200_MESSAGE = "Ping-Measurement entry returned";
+	private static final String OP_GET_QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT_BY_ATTRIBUTE_HTTP_400_MESSAGE = "Could not retrieve Ping-Measurement entry";
 	
 	private static final String GET_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_MGMT_DESCRIPTION = "Return requested Inter-Cloud direct ping measurements entries by the given parameters";
 	private static final String GET_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_MGMT_HTTP_200_MESSAGE = "Ping-Measurement entries returned";
@@ -120,9 +124,9 @@ public class QoSMonitorController {
 	private static final String POST_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_HTTP_200_MESSAGE = "Relay-Echo measurement entry returned";
 	private static final String POST_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_HTTP_400_MESSAGE = "Could not retrieve Relay-Echo measurement entry";
 	
-	private static final String QUERY_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_RESULTS_BY_CLOUD_AND_SYSTEMT_DESCRIPTION = "Return requested Inter-Cloud Relay-Echo measurment results by cloud and system.";
-	private static final String POST_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_RESULTS_BY_CLOUD_AND_SYSTEMT_HTTP_200_MESSAGE = "Relay-Echo measurement results returned";
-	private static final String POST_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_RESULTS_BY_CLOUD_AND_SYSTEMT_HTTP_400_MESSAGE = "Could not retrieve Relay-Echo measurement results";
+	private static final String QUERY_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_RESULTS_BY_CLOUD_DESCRIPTION = "Return requested Inter-Cloud Relay-Echo measurment results by cloud.";
+	private static final String POST_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_RESULTS_BY_CLOUD_HTTP_200_MESSAGE = "Relay-Echo measurement results returned";
+	private static final String POST_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_RESULTS_BY_CLOUD_HTTP_400_MESSAGE = "Could not retrieve Relay-Echo measurement results";
 	
 	private static final String GET_PUBLIC_KEY_200_MESSAGE = "Public key returned";
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = " Id must be greater than 0. ";
@@ -133,6 +137,9 @@ public class QoSMonitorController {
 
 	@Autowired
 	private QoSDBService qosDBService;
+	
+	@Autowired
+	private PingService pingService;
 	
 	@Autowired
 	private RelayEchoService relayEchoService;
@@ -244,6 +251,24 @@ public class QoSMonitorController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = OP_GET_QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT_BY_ATTRIBUTE, response = QoSIntraPingMeasurementResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = OP_GET_QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT_BY_ATTRIBUTE_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = OP_GET_QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT_BY_ATTRIBUTE_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public QoSIntraPingMeasurementResponseDTO getIntraPingMedianMeasurement(@PathVariable final String attribute) {
+		logger.debug("New getIntraPingMedianMeasurement get request recieved with attribute: {}", attribute);
+		
+		final QoSIntraPingMeasurementResponseDTO response = pingService.getMedianIntraPingMeasurement(Utilities.convertStringToQoSMeasurementAttribute(attribute));
+		logger.debug("PingMeasurement entry successfully retrieved");
+		
+		return response;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = GET_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_MGMT_DESCRIPTION, response = QoSInterDirectPingMeasurementListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_MGMT_HTTP_200_MESSAGE),
@@ -284,7 +309,7 @@ public class QoSMonitorController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = QUERY_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_BY_CLOUD_AND_SYSTEM_DESCRIPTION, response = QoSInterDirectPingMeasurementResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = QUERY_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_BY_CLOUD_AND_SYSTEM_DESCRIPTION, response = QoSInterDirectPingMeasurementResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = POST_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_BY_CLOUD_AND_SYSTEM_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_BY_CLOUD_AND_SYSTEM_HTTP_400_MESSAGE),
@@ -362,20 +387,19 @@ public class QoSMonitorController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	//TODO
-	@ApiOperation(value = QUERY_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_RESULTS_BY_CLOUD_AND_SYSTEMT_DESCRIPTION, response = QoSInterRelayEchoMeasurementResultListDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = QUERY_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_RESULTS_BY_CLOUD_DESCRIPTION, response = QoSInterRelayEchoMeasurementListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = POST_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_RESULTS_BY_CLOUD_AND_SYSTEMT_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_RESULTS_BY_CLOUD_AND_SYSTEMT_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_RESULTS_BY_CLOUD_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_RESULTS_BY_CLOUD_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(path = CommonConstants.OP_QOS_MONITOR_INTER_RELAY_MEASUREMENT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public QoSInterRelayEchoMeasurementResultListDTO queryInterRelayEchoMeasurementByCloudAndSystem(@RequestBody final CloudSystemFormDTO request) {
-		logger.debug("New queryInterRelayEchoMeasurementByCloudAndSystem request recieved");
-		validateCloudSystemForm(request, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_MEASUREMENT);
+	@PostMapping(path = CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public QoSInterRelayEchoMeasurementListResponseDTO queryInterRelayEchoMeasurementByCloud(@RequestBody final CloudRequestDTO request) {
+		logger.debug("New queryInterRelayEchoMeasurementByCloud request recieved");
+		validateCloudRequest(request, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT);
 		
-		final QoSInterRelayEchoMeasurementResultListDTO response = relayEchoService.calculateInterRelayEchoMeasurements(request);
+		final QoSInterRelayEchoMeasurementListResponseDTO response = relayEchoService.getInterRelayEchoMeasurements(request);
 		logger.debug("Measurement retrieved successfully");
 		return response;
 	}

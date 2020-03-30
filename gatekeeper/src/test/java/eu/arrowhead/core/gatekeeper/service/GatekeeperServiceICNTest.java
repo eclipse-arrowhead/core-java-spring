@@ -37,6 +37,7 @@ import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
@@ -856,9 +857,12 @@ public class GatekeeperServiceICNTest {
 		final RelayRequestDTO relay = getTestRelayDTO();
 		request.setPreferredGatewayRelays(List.of(relay));
 		
-		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO()));
+		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
+		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null));
+		resultDTO.setService(new ServiceDefinitionResponseDTO(1, "test-service", null, null));
+		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(resultDTO));
 		when(gatekeeperDriver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(orchestrationResponse);
-		when(gatekeeperDriver.queryAuthorizationBasedOnOchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(new OrchestrationResponseDTO());
+		when(gatekeeperDriver.queryAuthorizationBasedOnOrchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(new OrchestrationResponseDTO());
 		
 		final ICNProposalResponseDTO response = testingObject.doICN(request);
 		
@@ -880,9 +884,13 @@ public class GatekeeperServiceICNTest {
 		final RelayRequestDTO relay = getTestRelayDTO();
 		request.setPreferredGatewayRelays(List.of(relay));
 		
-		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO()));
+		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
+		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null));
+		resultDTO.setService(new ServiceDefinitionResponseDTO(1, "test-service", null, null));
+		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(resultDTO));
 		when(gatekeeperDriver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(orchestrationResponse);
-		when(gatekeeperDriver.queryAuthorizationBasedOnOchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(orchestrationResponse);
+		when(gatekeeperDriver.queryAuthorizationBasedOnOrchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(orchestrationResponse);
+		when(gatekeeperDriver.getQoSReservationList()).thenReturn(new ArrayList<>());
 		
 		final ICNProposalResponseDTO response = testingObject.doICN(request);
 		
@@ -908,11 +916,15 @@ public class GatekeeperServiceICNTest {
 		request.setPreferredGatewayRelays(List.of(relay));
 		request.setConsumerGatewayPublicKey("consumerGWPublicKey");
 		
-		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO()));
+		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
+		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null));
+		resultDTO.setService(new ServiceDefinitionResponseDTO(1, "test-service", null, null));
+		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(resultDTO));
 		when(gatekeeperDriver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(orchestrationResponse);
-		when(gatekeeperDriver.queryAuthorizationBasedOnOchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(orchestrationResponse);
+		when(gatekeeperDriver.queryAuthorizationBasedOnOrchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(orchestrationResponse);
 		when(gatekeeperDBService.getCloudByOperatorAndName(any(String.class), any(String.class))).thenReturn(new Cloud());
 		when(gatewayMatchmaker.doMatchmaking(any(RelayMatchmakingParameters.class))).thenReturn(null);
+		when(gatekeeperDriver.getQoSReservationList()).thenReturn(new ArrayList<>());
 		
 		testingObject.doICN(request);
 	}
@@ -938,10 +950,15 @@ public class GatekeeperServiceICNTest {
 		request.setConsumerGatewayPublicKey("consumerGWPublicKey");
 		
 		final OrchestrationResultDTO selectedResult = new OrchestrationResultDTO();
-		selectedResult.setProvider(new SystemResponseDTO());
-		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(selectedResult, new OrchestrationResultDTO()));
+		selectedResult.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null));
+		selectedResult.setService(new ServiceDefinitionResponseDTO(1, "test-service", null, null));
+		final OrchestrationResultDTO otherResult = new OrchestrationResultDTO();
+		otherResult.setProvider(new SystemResponseDTO(2, "test-sys", "0.0.0.0", 78058, null, null, null));
+		otherResult.setService(new ServiceDefinitionResponseDTO(1, "test-service", null, null));
+		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(selectedResult, otherResult));
 		when(gatekeeperDriver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(orchestrationResponse);
-		when(gatekeeperDriver.queryAuthorizationBasedOnOchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(orchestrationResponse);
+		when(gatekeeperDriver.getQoSReservationList()).thenReturn(new ArrayList<>());
+		when(gatekeeperDriver.queryAuthorizationBasedOnOrchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(orchestrationResponse);
 		when(gatekeeperDBService.getCloudByOperatorAndName(any(String.class), any(String.class))).thenReturn(new Cloud());
 		final Relay selectedRelay = new Relay("localhost", 1234, false, false, RelayType.GATEWAY_RELAY);
 		selectedRelay.setCreatedAt(ZonedDateTime.now());

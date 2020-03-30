@@ -1,7 +1,12 @@
 package eu.arrowhead.core.qos.manager.impl;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import eu.arrowhead.common.database.entity.QoSReservation;
+import eu.arrowhead.common.dto.internal.CloudResponseDTO;
+import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
@@ -12,6 +17,12 @@ public class DummyQoSManager implements QoSManager {
 	//=================================================================================================
 	// methods
 
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public List<QoSReservation> fetchAllReservation() {
+		return new ArrayList<>();
+	}
+	
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public List<OrchestrationResultDTO> filterReservedProviders(final List<OrchestrationResultDTO> orList, final SystemRequestDTO requester) {
@@ -32,7 +43,20 @@ public class DummyQoSManager implements QoSManager {
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
-	public List<OrchestrationResultDTO> verifyServices(final List<OrchestrationResultDTO> orList, final OrchestrationFormRequestDTO request) {
+	public List<OrchestrationResultDTO> verifyIntraCloudServices(final List<OrchestrationResultDTO> orList, final OrchestrationFormRequestDTO request) {
+		return orList;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public List<GSDPollResponseDTO> preVerifyInterCloudServices(final List<GSDPollResponseDTO> gsdList, final OrchestrationFormRequestDTO request) {
+		return gsdList;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public List<OrchestrationResultDTO> verifyInterCloudServices(final CloudResponseDTO targetCloud, final List<OrchestrationResultDTO> orList, final Map<String,String> qosRequirements,
+																 final Map<String,String> commands) {
 		return orList;
 	}
 }

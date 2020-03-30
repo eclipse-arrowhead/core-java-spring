@@ -31,6 +31,11 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_AUTH_CONTROL_SUBSCRIPTION = "authorization-control-subscription";
 	
 	public static final String CORE_SERVICE_ORCH_PROCESS = "orchestration-service";
+	public static final String CORE_SERVICE_ORCH_QOS_ENABLED = "orchestration-qos-enabled";
+	public static final String CORE_SERVICE_ORCH_QOS_RESERVATIONS = "orchestration-qos-reservations";
+	public static final String CORE_SERVICE_ORCH_QOS_TEMPORARY_LOCK = "orchestration-qos-temporary-lock";
+	public static final String CORE_SERVICE_ORCH_QOS_CONFIRM_RESERVATION = "orchestration-qos-confirm-reservation";
+	
 	public static final String CORE_SERVICE_GATEKEEPER_GSD = "global-service-discovery";
 	public static final String CORE_SERVICE_GATEKEEPER_ICN = "inter-cloud-negotiations";
 	public static final String CORE_SERVICE_GATEKEEPER_PULL_CLOUDS = "pull-clouds";
@@ -49,6 +54,7 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "event-publish-auth-update";
 	
 	public static final String CORE_SERVICE_QOS_MONITOR_INTRA_PING_MEASUREMENT = "qos-monitor-intra-ping-measurement";
+	public static final String CORE_SERVICE_QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT = "qos-monitor-intra-ping-median-measurement";
 	public static final String CORE_SERVICE_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT = "qos-monitor-inter-direct-ping-measurement";
 	public static final String CORE_SERVICE_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT = "qos-monitor-inter-relay-echo-measurement";
 	public static final String CORE_SERVICE_QOS_MONITOR_PUBLIC_KEY = "qos-monitor-public-key";
@@ -92,7 +98,11 @@ public class CommonConstants {
 	public static final String OP_AUTH_SUBSCRIPTION_CHECK_URI = "/subscription/check";
 	
 	public static final String ORCHESTRATOR_URI = "/orchestrator";
-	public static final String OP_ORCH_PROCESS = "/orchestration";
+	public static final String OP_ORCH_PROCESS_URI = "/orchestration";
+	public static final String OP_ORCH_QOS_ENABLED_URI = "/qos_enabled";
+	public static final String OP_ORCH_QOS_RESERVATIONS_URI = "/qos_reservations";
+	public static final String OP_ORCH_QOS_TEMPORARY_LOCK_URI = "/qos_temporary_lock";
+	
 	public static final String ORCHESTRATON_FLAG_MATCHMAKING = "matchmaking";
 	public static final String ORCHESTRATON_FLAG_METADATA_SEARCH = "metadataSearch";
 	public static final String ORCHESTRATON_FLAG_ONLY_PREFERRED = "onlyPreferred";
@@ -130,8 +140,9 @@ public class CommonConstants {
 	public static final String QOS_MONITOR_URI = "/qosmonitor";
 	public static final String OP_QOS_MONITOR_INTRA_PING_MEASUREMENT = "/measurements/intracloud/ping";
 	public static final String OP_QOS_MONITOR_INTRA_PING_MEASUREMENT_SUFFIX = "/{" + COMMON_FIELD_NAME_ID + "}";
+	public static final String OP_QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT = "/measurements/intracloud/ping_median/{attribute}";
 	public static final String OP_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT = "/measurements/intercloud/ping";
-	public static final String OP_QOS_MONITOR_INTER_RELAY_MEASUREMENT = "/measurements/intercloud/relay_echo";
+	public static final String OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT = "/measurements/intercloud/relay_echo";
 	public static final String OP_QOS_MONITOR_KEY_URI = "/publickey";
 	public static final String OP_QOS_MONITOR_JOIN_RELAY_TEST_URI = "/join_relay_test";
 	public static final String OP_QOS_MONITOR_INIT_RELAY_TEST_URI = "/init_relay_test";

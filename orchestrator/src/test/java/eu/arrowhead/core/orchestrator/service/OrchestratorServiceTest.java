@@ -1954,7 +1954,7 @@ public class OrchestratorServiceTest {
 																					build();
 
 		final GSDPollResponseDTO gsdPollResponseDTO = new GSDPollResponseDTO(cloudResponseDTO, serviceDefinitionResponseDTO.getServiceDefinition(),	List.of(serviceInterface.getInterfaceName()), 
-																			 1,	Map.of());
+																			 1,	List.of(), Map.of(), false);
 		final GSDQueryResultDTO gsdResult = new GSDQueryResultDTO(List.of(gsdPollResponseDTO), 0);
 		
 		final System consumerSystem = new System();
@@ -2022,7 +2022,7 @@ public class OrchestratorServiceTest {
 																					build();
 
 		final GSDPollResponseDTO gsdPollResponseDTO = new GSDPollResponseDTO(cloudResponseDTO, serviceDefinitionResponseDTO.getServiceDefinition(),	List.of(serviceInterface.getInterfaceName()), 
-																			 1,	Map.of());
+																			 1,	List.of(), Map.of(), false);
 		final GSDQueryResultDTO gsdResult = new GSDQueryResultDTO(List.of(gsdPollResponseDTO), 0);
 		
 		final System consumerSystem = new System();
@@ -2082,7 +2082,7 @@ public class OrchestratorServiceTest {
 																					build();
 
 		final GSDPollResponseDTO gsdPollResponseDTO = new GSDPollResponseDTO(cloudResponseDTO, serviceDefinitionResponseDTO.getServiceDefinition(), List.of(serviceInterface.getInterfaceName()), 
-																			 1, Map.of());
+																			 1,	List.of(), Map.of(), false);
 		
 		final GSDQueryResultDTO gsdResult = new GSDQueryResultDTO(List.of(gsdPollResponseDTO), 0);
 		
@@ -2143,7 +2143,7 @@ public class OrchestratorServiceTest {
 																					build();
 
 		final GSDPollResponseDTO gsdPollResponseDTO = new GSDPollResponseDTO(cloudResponseDTO, serviceDefinitionResponseDTO.getServiceDefinition(),	List.of(serviceInterface.getInterfaceName()), 
-																			 1,	Map.of());
+																			 1,	List.of(), Map.of(), false);
 		final GSDQueryResultDTO gsdResult = new GSDQueryResultDTO(List.of(gsdPollResponseDTO), 0);
 		
 		final System consumerSystem = new System();
@@ -2204,7 +2204,7 @@ public class OrchestratorServiceTest {
 																					build();
 
 		final GSDPollResponseDTO gsdPollResponseDTO = new GSDPollResponseDTO(cloudResponseDTO, serviceDefinitionResponseDTO.getServiceDefinition(),	List.of(serviceInterface.getInterfaceName()), 
-																			 1,	Map.of());
+																			 1,	List.of(), Map.of(), false);
 		final GSDQueryResultDTO gsdResult = new GSDQueryResultDTO(List.of(gsdPollResponseDTO), 0);
 		
 		final System consumerSystem = new System();
@@ -2267,7 +2267,7 @@ public class OrchestratorServiceTest {
 																					build();
 
 		final GSDPollResponseDTO gsdPollResponseDTO = new GSDPollResponseDTO(cloudResponseDTO, serviceDefinitionResponseDTO.getServiceDefinition(), List.of(serviceInterface.getInterfaceName()), 
-																			 1, Map.of());
+																			 1,	List.of(), Map.of(), false);
 		final GSDQueryResultDTO gsdResult = new GSDQueryResultDTO(List.of(gsdPollResponseDTO), 0);
 		
 		final System consumerSystem = new System();
@@ -2329,7 +2329,7 @@ public class OrchestratorServiceTest {
 																					build();
 
 		final GSDPollResponseDTO gsdPollResponseDTO = new GSDPollResponseDTO(cloudResponseDTO, serviceDefinitionResponseDTO.getServiceDefinition(), List.of(serviceInterface.getInterfaceName()), 
-																			 1,	Map.of());
+																			 1,	List.of(), Map.of(), false);
 		final GSDQueryResultDTO gsdResult = new GSDQueryResultDTO(List.of(gsdPollResponseDTO), 0);
 		
 		final System consumerSystem = new System();
@@ -2390,7 +2390,7 @@ public class OrchestratorServiceTest {
 																					build();
 
 		final GSDPollResponseDTO gsdPollResponseDTO = new GSDPollResponseDTO(cloudResponseDTO, serviceDefinitionResponseDTO.getServiceDefinition(),	List.of(serviceInterface.getInterfaceName()), 
-																			 1,	Map.of());
+																			 1,	List.of(), Map.of(), false);
 		final GSDQueryResultDTO gsdResult = new GSDQueryResultDTO(List.of(gsdPollResponseDTO), 0);
 		
 		final System consumerSystem = new System();
@@ -2449,7 +2449,7 @@ public class OrchestratorServiceTest {
 																					build();
 
 		final GSDPollResponseDTO gsdPollResponseDTO = new GSDPollResponseDTO(cloudResponseDTO, serviceDefinitionResponseDTO.getServiceDefinition(), List.of(serviceInterface.getInterfaceName()), 
-																			 1, Map.of());
+																			 1,	List.of(), Map.of(), false);
 		final GSDQueryResultDTO gsdResult = new GSDQueryResultDTO(List.of(gsdPollResponseDTO), 0);
 		
 		final System consumerSystem = new System();

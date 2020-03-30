@@ -487,7 +487,7 @@ public class OrchestratorDriverTest {
 	public void testGetPingMeasurementUriNotFound() {
 		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false);
 		
-		orchestratorDriver.getPingMeasurement(1);
+		orchestratorDriver.getIntraPingMeasurement(1);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -496,7 +496,7 @@ public class OrchestratorDriverTest {
 		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
 		when(arrowheadContext.get(any(String.class))).thenReturn("invalid");
 		
-		orchestratorDriver.getPingMeasurement(1);
+		orchestratorDriver.getIntraPingMeasurement(1);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -512,7 +512,7 @@ public class OrchestratorDriverTest {
 		when(arrowheadContext.get(any(String.class))).thenReturn(uri);
 		when(httpService.sendRequest(eq(uri), eq(HttpMethod.GET), eq(QoSIntraPingMeasurementResponseDTO.class))).thenReturn(new ResponseEntity<QoSIntraPingMeasurementResponseDTO>(responseDTO, HttpStatus.OK));
 		
-		final QoSIntraPingMeasurementResponseDTO result = orchestratorDriver.getPingMeasurement(systemId);
+		final QoSIntraPingMeasurementResponseDTO result = orchestratorDriver.getIntraPingMeasurement(systemId);
 		
 		Assert.assertNotNull(result);
 		Assert.assertFalse(result.hasRecord());

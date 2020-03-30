@@ -1,36 +1,39 @@
 package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
-public class CloudAccessListResponseDTO implements Serializable {
+import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+
+public class QoSTemporaryLockResponseDTO implements Serializable {
 	
 	//=================================================================================================
 	// members
-
-	private static final long serialVersionUID = 1493703097974010312L;
-
-	private List<CloudAccessResponseDTO> data;
-	private long count;
-
+	
+	private static final long serialVersionUID = 2279611306510520063L;
+	
+	protected List<OrchestrationResultDTO> response = new ArrayList<>();
+	
 	//=================================================================================================
 	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	public QoSTemporaryLockResponseDTO() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public CloudAccessListResponseDTO() {}
-
-	//-------------------------------------------------------------------------------------------------
-	public CloudAccessListResponseDTO(final List<CloudAccessResponseDTO> data, final long count) {
-		this.data = data;
-		this.count = count;
+	public QoSTemporaryLockResponseDTO(final List<OrchestrationResultDTO> response) {
+		this.response = response != null ? response : List.of();
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public List<CloudAccessResponseDTO> getData() { return data; }
-	public long getCount() { return count; }
+	public List<OrchestrationResultDTO> getResponse() { return response; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setData(final List<CloudAccessResponseDTO> data) { this.data = data; }
-	public void setCount(final long count) { this.count = count; }	
+	public void setResponse(final List<OrchestrationResultDTO> response) {
+		if (response != null) {
+			this.response = response;
+		}
+	}
 
 }

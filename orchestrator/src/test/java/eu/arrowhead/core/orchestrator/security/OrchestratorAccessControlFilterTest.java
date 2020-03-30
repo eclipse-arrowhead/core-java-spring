@@ -45,7 +45,7 @@ public class OrchestratorAccessControlFilterTest {
 	// members
 	
 	private static final String ORCH_ECHO = CommonConstants.ORCHESTRATOR_URI + CommonConstants.ECHO_URI;
-	private static final String ORCH_ORCHESTRATION = CommonConstants.ORCHESTRATOR_URI +CommonConstants.OP_ORCH_PROCESS;
+	private static final String ORCH_ORCHESTRATION = CommonConstants.ORCHESTRATOR_URI +CommonConstants.OP_ORCH_PROCESS_URI;
 	
 	@Autowired
 	private ApplicationContext appContext;

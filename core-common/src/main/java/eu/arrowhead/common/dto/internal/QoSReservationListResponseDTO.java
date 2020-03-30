@@ -3,33 +3,34 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.util.List;
 
-public class QoSInterRelayEchoMeasurementResultListDTO implements Serializable {
-
+public class QoSReservationListResponseDTO implements Serializable {
+	
 	//=================================================================================================
 	// members
-	
-	private static final long serialVersionUID = 8872059871518589197L;
-	
-	private List<QoSInterRelayEchoMeasurementResultDTO> data;
+
+	private static final long serialVersionUID = 4655717418817449554L;
+
+	private List<QoSReservationResponseDTO> data;
 	private long count;
 
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public QoSInterRelayEchoMeasurementResultListDTO() {}
+	public QoSReservationListResponseDTO() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public QoSInterRelayEchoMeasurementResultListDTO(final List<QoSInterRelayEchoMeasurementResultDTO> data, final long count) {
+	public QoSReservationListResponseDTO(final List<QoSReservationResponseDTO> data, final long count) {
 		this.data = data;
 		this.count = count;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public List<QoSInterRelayEchoMeasurementResultDTO> getData() { return data; }
+	public List<QoSReservationResponseDTO> getData() { return data; }
 	public long getCount() { return count; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setData(final List<QoSInterRelayEchoMeasurementResultDTO> data) { this.data = data; }
-	public void setCount(final long count) { this.count = count; }
+	public void setData(final List<QoSReservationResponseDTO> data) { this.data = data; }
+	public void setCount(final long count) { this.count = count; }	
+
 }

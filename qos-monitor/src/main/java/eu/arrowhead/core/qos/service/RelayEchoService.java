@@ -7,16 +7,18 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.QoSInterRelayEchoMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterRelayMeasurement;
-import eu.arrowhead.common.database.entity.QoSIntraPingMeasurement;
-import eu.arrowhead.common.dto.internal.CloudSystemFormDTO;
+import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
-import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementResultDTO;
-import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementResultListDTO;
+import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementListResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 
@@ -29,81 +31,50 @@ public class RelayEchoService {
 	@Autowired
 	private QoSDBService qosDBService;
 	
+	@Autowired
+	private QoSMonitorDriver gosMonitorDriver;
+	
 	private final Logger logger = LogManager.getLogger(RelayEchoService.class);
 
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public QoSInterRelayEchoMeasurementResultListDTO calculateInterRelayEchoMeasurements(final CloudSystemFormDTO request) {
-		logger.debug("calculateInterRelayEchoMeasurements started...");
-		validateCloudSystemForm(request);
+	public QoSInterRelayEchoMeasurementListResponseDTO getInterRelayEchoMeasurements(final CloudRequestDTO request) {
+		logger.debug("getInterRelayEchoMeasurements started...");
 		
-		final QoSIntraPingMeasurement systemPing = qosDBService.getIntraPingMeasurementBySystemId(request.getSystem().getId());
+		final List<QoSInterRelayMeasurement> measurements = qosDBService.getInterRelayMeasurementByCloud(validateAndGetCloud(request));
 		
-		final List<QoSInterRelayMeasurement> measurementList = qosDBService.getInterRelayEchoMeasurementByCloud(request.getCloud());
-		final List<QoSInterRelayEchoMeasurementResultDTO> responseData = new ArrayList<>();
-		for (final QoSInterRelayMeasurement relayMeasurement : measurementList) {
-			final Optional<QoSInterRelayEchoMeasurement> relayResultOpt = qosDBService.getInterRelayEchoMeasurementByMeasurement(relayMeasurement);
-			if (relayResultOpt.isEmpty()) {
-				continue;
+		final List<QoSInterRelayEchoMeasurement> echoMeasurements = new ArrayList<>();
+		for (final QoSInterRelayMeasurement measurement : measurements) {
+			final Optional<QoSInterRelayEchoMeasurement> optional = qosDBService.getInterRelayEchoMeasurementByMeasurement(measurement);
+			if (optional.isPresent()) {
+				echoMeasurements.add(optional.get());
 			}
-			final QoSInterRelayEchoMeasurement relayResult = relayResultOpt.get();
-			final QoSInterRelayEchoMeasurementResultDTO result = new QoSInterRelayEchoMeasurementResultDTO(request.getCloud(),
-																										   request.getSystem(),
-																										   DTOConverter.convertRelayToRelayResponseDTO(relayMeasurement.getRelay()),
-																										   relayMeasurement.getMeasurementType(),
-																										   systemPing.getLastAccessAt(),
-																										   relayResult.getMinResponseTime() + systemPing.getMinResponseTime(),
-																										   relayResult.getMaxResponseTime() + systemPing.getMaxResponseTime(),
-																										   relayResult.getMeanResponseTimeWithTimeout() + systemPing.getMeanResponseTimeWithTimeout(),
-																										   relayResult.getMeanResponseTimeWithoutTimeout() + systemPing.getMeanResponseTimeWithoutTimeout(),
-																										   relayResult.getJitterWithTimeout() + systemPing.getJitterWithTimeout(),
-																										   relayResult.getJitterWithoutTimeout() + systemPing.getJitterWithoutTimeout(),
-																										   relayResult.getLostPerMeasurementPercent() + systemPing.getLostPerMeasurementPercent());
-			responseData.add(result);
 		}
 		
-		return new QoSInterRelayEchoMeasurementResultListDTO(responseData, responseData.size());
+		return DTOConverter.convertQoSInterRelayEchoMeasurementPageToQoSInterRelayEchoMeasurementListResponseDTO(new PageImpl<>(echoMeasurements));
 	}
 	
 	//=================================================================================================
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
-	private void validateCloudSystemForm(final CloudSystemFormDTO request) {
-		logger.debug("validateCloudSystemForm started...");
+	private CloudResponseDTO validateAndGetCloud(final CloudRequestDTO request) {
+		logger.debug("validateAndGetCloud started...");
 		
 		if (request == null) {
-			throw new InvalidParameterException("CloudRelayFormDTO is null.");
+			throw new InvalidParameterException("CloudRequestDTO is null.");
 		}		
 		
-		if (request.getCloud() == null) {
-			throw new InvalidParameterException("Cloud is null");
-		}
-		
-		if (Utilities.isEmpty(request.getCloud().getOperator())) {
+		if (Utilities.isEmpty(request.getOperator())) {
 			throw new InvalidParameterException("Cloud operator is null or blank");
 		}
 		
-		if (Utilities.isEmpty(request.getCloud().getName())) {
+		if (Utilities.isEmpty(request.getName())) {
 			throw new InvalidParameterException("Cloud name is null or empty");
 		}
 		
-		if (request.getSystem() == null) {
-			throw new InvalidParameterException("System is null");
-		}
-		
-		if (request.getSystem().getId() < 1) {
-			throw new InvalidParameterException("System id less than 1");
-		}
-		
-		if (Utilities.isEmpty(request.getSystem().getSystemName())) {
-			throw new InvalidParameterException("System name is null or blank");
-		}
-		
-		if (Utilities.isEmpty(request.getSystem().getAddress())) {
-			throw new InvalidParameterException("System address is null or empty");
-		}
+		return gosMonitorDriver.queryGatekeeperCloudInfo(request.getOperator(), request.getName());
 	}
 }

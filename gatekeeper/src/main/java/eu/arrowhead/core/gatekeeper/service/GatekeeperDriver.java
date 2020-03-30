@@ -46,9 +46,15 @@ import eu.arrowhead.common.dto.internal.GeneralRelayRequestDTO;
 import eu.arrowhead.common.dto.internal.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.ICNProposalResponseDTO;
 import eu.arrowhead.common.dto.internal.IdIdListDTO;
+import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSMonitorSenderConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSReservationListResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSReservationRequestDTO;
+import eu.arrowhead.common.dto.internal.QoSReservationResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSTemporaryLockRequestDTO;
+import eu.arrowhead.common.dto.internal.QoSTemporaryLockResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
@@ -82,12 +88,16 @@ public class GatekeeperDriver {
 	
 	private static final String AUTH_INTER_CHECK_URI_KEY = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String ORCHESTRATION_PROCESS_URI_KEY = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String ORCHESTRATOR_QOS_ENABLED_URI_KEY = CoreSystemService.ORCHESTRATION_QOS_ENABLED_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String ORCHESTRATOR_QOS_RESERVATIONS_URI_KEY = CoreSystemService.ORCHESTRATION_QOS_RESERVATIONS_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String ORCHESTRATOR_QOS_TEMPORARY_LOCK_URI_KEY = CoreSystemService.ORCHESTRATION_QOS_TEMPORARY_LOCK_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEWAY_PUBLIC_KEY_URI_KEY = CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEWAY_CONNECT_PROVIDER_URI_KEY = CoreSystemService.GATEWAY_PROVIDER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEWAY_CONNECT_CONSUMER_URI_KEY = CoreSystemService.GATEWAY_CONSUMER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String QOS_MONITOR_PUBLIC_KEY_URI_KEY = CoreSystemService.QOS_MONITOR_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String QOS_MONITOR_JOIN_RELAY_TEST_URI_KEY = CoreSystemService.QOS_MONITOR_JOIN_RELAY_TEST_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String QOS_MONITOR_INIT_RELAY_TEST_URI_KEY = CoreSystemService.QOS_MONITOR_INIT_RELAY_TEST_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String QOS_MONITOR_INTRA_PING_MEASUREMENTS_URI_KEY = CoreSystemService.QOS_MONITOR_INTRA_PING_MEASUREMENT_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	
 	@Resource(name = CoreCommonConstants.GATEKEEPER_MATCHMAKER)
 	private RelayMatchmakingAlgorithm gatekeeperMatchmaker;
@@ -252,7 +262,7 @@ public class GatekeeperDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public OrchestrationResponseDTO queryAuthorizationBasedOnOchestrationResponse(final CloudRequestDTO requesterCloud, final OrchestrationResponseDTO orchestrationResponse) {
+	public OrchestrationResponseDTO queryAuthorizationBasedOnOrchestrationResponse(final CloudRequestDTO requesterCloud, final OrchestrationResponseDTO orchestrationResponse) {
 		logger.debug("queryAuthorizationBasedOnOchestrationResponse started...");
 		
 		Assert.notNull(requesterCloud, "Requester cloud is null.");
@@ -328,14 +338,14 @@ public class GatekeeperDriver {
 	public List<ErrorWrapperDTO> sendAccessTypesCollectionRequest(final List<Cloud> clouds) throws InterruptedException {
 		logger.debug("sendAccessTypesCollectionRequest started...");
 		Assert.isTrue(clouds != null && !clouds.isEmpty(), "cloud list is null or empty");
-		for (Cloud cloud : clouds) {
+		for (final Cloud cloud : clouds) {
 			validateCloud(cloud);
 		}
 		
 		final int numOfCloudsToContact = clouds.size();
 		final BlockingQueue<ErrorWrapperDTO> queue = new LinkedBlockingQueue<>(numOfCloudsToContact);	
 		
-		AccessTypesCollectionRequestExecutor atcRequestExecutor = new AccessTypesCollectionRequestExecutor(queue, relayClient, getOneGatekeeperRelayPerCloud(clouds));
+		final AccessTypesCollectionRequestExecutor atcRequestExecutor = new AccessTypesCollectionRequestExecutor(queue, relayClient, getOneGatekeeperRelayPerCloud(clouds));
 		atcRequestExecutor.execute();
 		
 		final List<ErrorWrapperDTO> atcAnswers = new ArrayList<>();
@@ -438,6 +448,54 @@ public class GatekeeperDriver {
 		validateQosMonitorSenderConnectionRequestDTO(request);
 		
 		final UriComponents uri = getQoSMonitorInitRelayTestUri();
+		httpService.sendRequest(uri, HttpMethod.POST, Void.class, request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public boolean checkQoSEnabled() {
+		logger.debug("getQoSMeasurementsForLocalSystem started...");
+		
+		final UriComponents uri = getOrchestratorIsQoSEnabledUri();
+		final ResponseEntity<String> response = httpService.sendRequest(uri, HttpMethod.GET, String.class);
+		return Boolean.valueOf(response.getBody());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public QoSIntraPingMeasurementResponseDTO getQoSIntraPingMeasurementsForLocalSystem(final long systemId) {
+		logger.debug("getQoSMeasurementsForLocalSystem started...");
+		
+		final UriComponents uri = getQoSMonitorIntraPingMeasurementUri(systemId);
+		final ResponseEntity<QoSIntraPingMeasurementResponseDTO> response = httpService.sendRequest(uri, HttpMethod.GET, QoSIntraPingMeasurementResponseDTO.class);
+		return response.getBody();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<QoSReservationResponseDTO> getQoSReservationList() {
+		logger.debug("getQoSReservationList started...");
+		
+		final UriComponents uri = getOrchestratorQoSReservationsUri();
+		final ResponseEntity<QoSReservationListResponseDTO> response = httpService.sendRequest(uri, HttpMethod.GET, QoSReservationListResponseDTO.class);
+		return response.getBody().getData();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public QoSTemporaryLockResponseDTO sendQoSTemporaryLockRequest(final QoSTemporaryLockRequestDTO request) {
+		logger.debug("sendQoSTemporaryLockRequest started...");
+		
+		validateQoSReservationRequestDTO(request);
+		
+		final UriComponents uri = getOrchestratorQoSTemporaryLockUri();
+		final ResponseEntity<QoSTemporaryLockResponseDTO> response = httpService.sendRequest(uri, HttpMethod.POST, QoSTemporaryLockResponseDTO.class, request);
+		return response.getBody();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public void sendQoSConfirmReservationRequest(final QoSReservationRequestDTO request) {
+		logger.debug("sendQoSConfirmReservationRequest started...");
+
+		validateQoSReservationRequestDTO(request);
+		
+		final UriComponents uri = getOrchestratorQoSReservationsUri();
 		httpService.sendRequest(uri, HttpMethod.POST, Void.class, request);
 	}
 	
@@ -721,6 +779,67 @@ public class GatekeeperDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	private UriComponents getOrchestratorIsQoSEnabledUri() {
+		logger.debug("getOrchestratorIsQoSEnabledUri started...");
+		
+		if (arrowheadContext.containsKey(ORCHESTRATOR_QOS_ENABLED_URI_KEY)) {
+			try {
+				return (UriComponents) arrowheadContext.get(ORCHESTRATOR_QOS_ENABLED_URI_KEY);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Gatekeeper can't find Orchestrator QoS Enabled URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Gatekeeper can't find Orchestrator QoS Enabled URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getQoSMonitorIntraPingMeasurementUri(final long systemId) {
+		logger.debug("getQoSMonitorIntraPingMeasurementUri started...");
+		
+		if (arrowheadContext.containsKey(QOS_MONITOR_INTRA_PING_MEASUREMENTS_URI_KEY)) {
+			try {
+				final UriComponents uri = (UriComponents) arrowheadContext.get(QOS_MONITOR_INTRA_PING_MEASUREMENTS_URI_KEY);
+				return uri.expand(systemId);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Gatekeeper can't find QoS Monitor intra ping measurements URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Gatekeeper can't find QoS Monitor intra ping measurements URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getOrchestratorQoSReservationsUri() {
+		logger.debug("getOrchestratorQoSReservationsUri started...");
+		
+		if (arrowheadContext.containsKey(ORCHESTRATOR_QOS_RESERVATIONS_URI_KEY)) {
+			try {
+				return (UriComponents) arrowheadContext.get(ORCHESTRATOR_QOS_RESERVATIONS_URI_KEY);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Gatekeeper can't find Orchestrator QoS reservations URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Gatekeeper can't find Orchestrator QoS reservations URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getOrchestratorQoSTemporaryLockUri() {
+		logger.debug("getOrchestratorQoSReservationsUri started...");
+		
+		if (arrowheadContext.containsKey(ORCHESTRATOR_QOS_TEMPORARY_LOCK_URI_KEY)) {
+			try {
+				return (UriComponents) arrowheadContext.get(ORCHESTRATOR_QOS_TEMPORARY_LOCK_URI_KEY);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Gatekeeper can't find Orchestrator QoS temporary lock URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Gatekeeper can't find Orchestrator QoS temporary lock URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	private void validateQoSRelayTestProposalRequestDTO(final QoSRelayTestProposalRequestDTO request) {
 		logger.debug("validateQoSRelayTestProposalRequestDTO started...");
 		
@@ -756,6 +875,46 @@ public class GatekeeperDriver {
 		}
 		if (Utilities.isEmpty(request.getReceiverQoSMonitorPublicKey())) {
 			throw new InvalidParameterException("Receiver QoS Monitor's public key is null or blank.");
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateQoSReservationRequestDTO(final QoSTemporaryLockRequestDTO request) {
+		logger.debug("validateQoSReservationRequestDTO started...");
+		
+		if (request == null) {
+			throw new InvalidParameterException("QoSReservationRequestDTO is null");
+		}
+		
+		if (request.getRequester() == null) {
+			throw new InvalidParameterException("Requester system is null");
+		}
+		
+		if (Utilities.isEmpty(request.getRequester().getSystemName())) {
+			throw new InvalidParameterException("Requester system name is null or empty");
+		}
+		
+		if (Utilities.isEmpty(request.getRequester().getAddress())) {
+			throw new InvalidParameterException("Requester system address is null or empty");
+		}
+		
+		if (request.getRequester().getPort() == null) {
+			throw new InvalidParameterException("Requester system port is null");
+		}
+		
+		if (request instanceof QoSReservationRequestDTO) {
+			final QoSReservationRequestDTO req = (QoSReservationRequestDTO) request;
+			if (req.getSelected() == null) {
+				throw new InvalidParameterException("Selected ORCH result is null");
+			}
+			
+			if (req.getSelected().getProvider() == null) {
+				throw new InvalidParameterException("Selected provider is null");
+			}
+			
+			if (req.getSelected().getService() == null) {
+				throw new InvalidParameterException("Selected service is null");
+			}
 		}
 	}
 }

@@ -2,6 +2,8 @@ package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
 
+import java.util.Objects;
+
 public class RelayResponseDTO implements Serializable {
 
 	private static final long serialVersionUID = -8159263313404856979L;
@@ -52,4 +54,41 @@ public class RelayResponseDTO implements Serializable {
 	public void setType(final RelayType type) { this.type = type; }
 	public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, address, port);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final RelayResponseDTO other = (RelayResponseDTO) obj;
+		if (address == null) {
+			if (other.address != null) {
+				return false;
+			}
+		} else if (!address.equals(other.address)) {
+			return false;
+		}
+		if (id != other.id) {
+			return false;
+		}
+		if (port != other.port) {
+			return false;
+		}
+		return true;
+	}
+	
+	
 }
