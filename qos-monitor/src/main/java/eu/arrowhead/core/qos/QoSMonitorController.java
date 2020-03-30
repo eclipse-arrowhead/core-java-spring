@@ -259,8 +259,8 @@ public class QoSMonitorController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path = CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public QoSIntraPingMeasurementResponseDTO getIntraPingMeadianMeasurement(@PathVariable final String attribute) {
-		logger.debug("New getIntraPingMeadianMeasurement get request recieved with attribute: {}", attribute);
+	@ResponseBody public QoSIntraPingMeasurementResponseDTO getIntraPingMedianMeasurement(@PathVariable final String attribute) {
+		logger.debug("New getIntraPingMedianMeasurement get request recieved with attribute: {}", attribute);
 		
 		final QoSIntraPingMeasurementResponseDTO response = pingService.getMedianIntraPingMeasurement(Utilities.convertStringToQoSMeasurementAttribute(attribute));
 		logger.debug("PingMeasurement entry successfully retrieved");
