@@ -32,7 +32,7 @@ public class OrchestratorAccessControlFilter extends CoreSystemAccessControlFilt
 			// Only the local System Operator can use these methods
 			checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
 		} else if (requestTarget.contains(CommonConstants.OP_ORCH_QOS_ENABLED_URI) || requestTarget.contains(CommonConstants.OP_ORCH_QOS_RESERVATIONS_URI) ||
-				   requestTarget.contains(CommonConstants.OP_ORCH_QOS_TEMPORARY_LOCK_URI) || requestTarget.contains(CommonConstants.OP_ORCH_QOS_RESERVATIONS_URI)) {
+				   requestTarget.contains(CommonConstants.OP_ORCH_QOS_TEMPORARY_LOCK_URI)) {
 			// Only the local Gatekeeper can use these methods
 			final CoreSystem[] allowedCoreSystems = { CoreSystem.GATEKEEPER };
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystems, requestTarget);
