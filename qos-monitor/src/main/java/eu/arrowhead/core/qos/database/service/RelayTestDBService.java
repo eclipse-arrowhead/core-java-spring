@@ -84,7 +84,7 @@ public class RelayTestDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public void logErrorIntoMeasurmentsTable(final CloudResponseDTO cloud, final RelayResponseDTO relay, final int index, final String errorMessage, final Throwable throwable) {
+	public void logErrorIntoMeasurementsTable(final CloudResponseDTO cloud, final RelayResponseDTO relay, final int index, final String errorMessage, final Throwable throwable) {
 		logger.debug("storeMeasurements started...");
 		
 		Assert.notNull(cloud, "'cloud' is null.");

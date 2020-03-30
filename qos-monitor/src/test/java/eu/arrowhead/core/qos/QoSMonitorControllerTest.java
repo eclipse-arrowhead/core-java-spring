@@ -50,6 +50,8 @@ import eu.arrowhead.common.dto.internal.QoSIntraMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSMonitorSenderConnectionRequestDTO;
+import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
+import eu.arrowhead.common.dto.internal.QoSRelayTestProposalResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
@@ -75,6 +77,7 @@ public class QoSMonitorControllerTest {
 	private static final String GET_QOS_MONITOR_PING_MEASUREMENTS_BY_SYSTEM_ID_URI = CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT + "/{" + PATH_VARIABLE_ID + "}";
 	private static final String QOS_MONITOR_PUBLIC_KEY_URI = CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_KEY_URI;
 	private static final String QOS_MONITOR_INIT_RELAY_TEST_URI = CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INIT_RELAY_TEST_URI;
+	private static final String QOS_MONITOR_JOIN_RELAY_TEST_URI = CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_JOIN_RELAY_TEST_URI;
 
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = " Id must be greater than 0. ";
 	private static final String PAGE_OR_SIZE_ERROR_MESSAGE = "Defined page or size could not be with undefined size or page.";
@@ -848,6 +851,86 @@ public class QoSMonitorControllerTest {
 		verify(relayTestService, times(1)).initRelayTest(any(QoSMonitorSenderConnectionRequestDTO.class));
 	}
 	
+	// skip cloud test because joinRelayTest() uses the same method for that than initRelayTest() does
+	// skip relay test because joinRelayTest() uses the same method for that than initRelayTest() does
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testJoinRelayTestSenderPublicKeyNull() throws Exception {
+		final CloudRequestDTO requesterCloud = new CloudRequestDTO();
+		requesterCloud.setOperator("aitia");
+		requesterCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(1234);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setRequesterCloud(requesterCloud);
+		request.setRelay(relay);
+		
+		final MvcResult result = postJoinTestRelayTest(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(QOS_MONITOR_JOIN_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals("Sender QoS Monitor's public key is null or blank.", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testJoinRelayTestSenderPublicKeyEmpty() throws Exception {
+		final CloudRequestDTO requesterCloud = new CloudRequestDTO();
+		requesterCloud.setOperator("aitia");
+		requesterCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(1234);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setRequesterCloud(requesterCloud);
+		request.setRelay(relay);
+		request.setSenderQoSMonitorPublicKey("");
+		
+		final MvcResult result = postJoinTestRelayTest(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(QOS_MONITOR_JOIN_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals("Sender QoS Monitor's public key is null or blank.", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testJoinRelayTestOk() throws Exception {
+		final CloudRequestDTO requesterCloud = new CloudRequestDTO();
+		requesterCloud.setOperator("aitia");
+		requesterCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(1234);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setRequesterCloud(requesterCloud);
+		request.setRelay(relay);
+		request.setSenderQoSMonitorPublicKey("valid key");
+		
+		when(relayTestService.joinRelayTest(any(QoSRelayTestProposalRequestDTO.class))).thenReturn(new QoSRelayTestProposalResponseDTO("queueId", "peerName", "receiverKey"));
+		
+		final MvcResult result = postJoinTestRelayTest(request, status().isCreated());
+		final QoSRelayTestProposalResponseDTO response = objectMapper.readValue(result.getResponse().getContentAsByteArray(), QoSRelayTestProposalResponseDTO.class);
+		
+		verify(relayTestService, times(1)).joinRelayTest(any(QoSRelayTestProposalRequestDTO.class));
+		Assert.assertEquals("queueId", response.getQueueId());
+		Assert.assertEquals("peerName", response.getPeerName());
+		Assert.assertEquals("receiverKey", response.getReceiverQoSMonitorPublicKey());
+	}
+	
 	//=================================================================================================
 	// assistant methods
 
@@ -943,6 +1026,16 @@ public class QoSMonitorControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	private MvcResult postInitTestRelayTest(final QoSMonitorSenderConnectionRequestDTO request, final ResultMatcher matcher) throws Exception {
 		return this.mockMvc.perform(post(QOS_MONITOR_INIT_RELAY_TEST_URI)
+						   .contentType(MediaType.APPLICATION_JSON)
+						   .content(objectMapper.writeValueAsBytes(request)))
+						   .andExpect(matcher)
+						   .andReturn();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MvcResult postJoinTestRelayTest(final QoSRelayTestProposalRequestDTO request, final ResultMatcher matcher) throws Exception {
+		return this.mockMvc.perform(post(QOS_MONITOR_JOIN_RELAY_TEST_URI)
+						   .accept(MediaType.APPLICATION_JSON)
 						   .contentType(MediaType.APPLICATION_JSON)
 						   .content(objectMapper.writeValueAsBytes(request)))
 						   .andExpect(matcher)

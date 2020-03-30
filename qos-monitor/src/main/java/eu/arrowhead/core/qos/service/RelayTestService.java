@@ -91,7 +91,8 @@ public class RelayTestService {
 		}
 		final PrivateKey privateKey = (PrivateKey) arrowheadContext.get(CommonConstants.SERVER_PRIVATE_KEY);
 	
-		relayClient = GatewayRelayClientFactory.createGatewayRelayClient(serverCN, privateKey, sslProps);	
+		relayClient = GatewayRelayClientFactory.createGatewayRelayClient(serverCN, privateKey, sslProps);
+		threadFactory.init(relayClient);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -109,7 +110,7 @@ public class RelayTestService {
 
 		ReceiverSideRelayTestThread thread = null;
 		try {
-			thread = threadFactory.createReceiverSideThread(relayClient, session, requesterCloud, relay, request.getSenderQoSMonitorPublicKey()); 
+			thread = threadFactory.createReceiverSideThread(session, requesterCloud, relay, request.getSenderQoSMonitorPublicKey()); 
 			final ProviderSideRelayInfo info = relayClient.initializeProviderSideRelay(session, thread);
 			thread.init(info.getQueueId(), info.getMessageSender(), info.getControlMessageSender());
 			thread.start();
@@ -142,7 +143,7 @@ public class RelayTestService {
 		
 		SenderSideRelayTestThread thread = null;
 		try {
-			thread = threadFactory.createSenderSideThread(relayClient, session, targetCloud, relay, request.getReceiverQoSMonitorPublicKey(), request.getQueueId()); 
+			thread = threadFactory.createSenderSideThread(session, targetCloud, relay, request.getReceiverQoSMonitorPublicKey(), request.getQueueId()); 
 			final ConsumerSideRelayInfo info = relayClient.initializeConsumerSideRelay(session, thread, request.getPeerName(), request.getQueueId());
 			thread.init(info.getMessageSender(), info.getControlResponseMessageSender());
 			thread.start();

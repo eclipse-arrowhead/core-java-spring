@@ -220,7 +220,7 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 			} catch (final JMSException | ArrowheadException | InterruptedException ex) {
 				logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
 				logger.debug("Stacktrace:", ex);
-				relayTestDBService.logErrorIntoMeasurmentsTable(requesterCloud, relay, b, null, ex);
+				relayTestDBService.logErrorIntoMeasurementsTable(requesterCloud, relay, b, null, ex);
 				closeAndInterrupt();
 			}
 		}

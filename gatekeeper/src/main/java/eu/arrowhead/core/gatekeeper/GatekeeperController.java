@@ -575,7 +575,7 @@ public class GatekeeperController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = GET_GET_CLOUD_DESCRIPTION, response = CloudWithRelaysResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = GET_GET_CLOUD_DESCRIPTION, response = CloudWithRelaysResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_GET_CLOUD_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_GET_CLOUD_HTTP_400_MESSAGE),
