@@ -10,6 +10,7 @@ FOR /F "tokens=1" %%p in ('"jps -v | find "gatekeeper""') DO taskkill /pid %%p >
 FOR /F "tokens=1" %%p in ('"jps -v | find "eventhandler""') DO taskkill /pid %%p > NUL 2>&1
 FOR /F "tokens=1" %%p in ('"jps -v | find "gateway""') DO taskkill /pid %%p > NUL 2>&1
 FOR /F "tokens=1" %%p in ('"jps -v | find "authorization""') DO taskkill /pid %%p > NUL 2>&1
+FOR /F "tokens=1" %%p in ('"jps -v | find "certificate""') DO taskkill /pid %%p > NUL 2>&1
 timeout /t %time_to_sleep% /nobreak > NUL
 FOR /F "tokens=1" %%p in ('"jps -v | find "serviceregistry""') DO taskkill /pid %%p > NUL 2>&1
 
@@ -27,6 +28,7 @@ IF "%STILL_THERE%"=="""" (
   FOR /F "tokens=1" %%p in ('"jps -v | find "eventhandler""') DO taskkill /F /pid %%p
   FOR /F "tokens=1" %%p in ('"jps -v | find "gateway""') DO taskkill /F /pid %%p
   FOR /F "tokens=1" %%p in ('"jps -v | find "authorization""') DO taskkill /F /pid %%p
+  FOR /F "tokens=1" %%p in ('"jps -v | find "certificate""') DO taskkill /F /pid %%p
   FOR /F "tokens=1" %%p in ('"jps -v | find "serviceregistry""') DO taskkill /F /pid %%p
   echo Core systems forcefully killed
 )
