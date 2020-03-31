@@ -184,7 +184,7 @@ public class OrchestratorController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PostMapping(path = CommonConstants.OP_ORCH_QOS_TEMPORARY_LOCK_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public QoSTemporaryLockResponseDTO lockProvidersTemporary(final QoSTemporaryLockRequestDTO request) {
+	@ResponseBody public QoSTemporaryLockResponseDTO lockProvidersTemporary(@RequestBody final QoSTemporaryLockRequestDTO request) {
 		logger.debug("lockProvidersTemporary started ...");
 		
 		checkQoSReservationRequestDTO(request, CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_TEMPORARY_LOCK_URI);
@@ -203,7 +203,7 @@ public class OrchestratorController {
 	public void confirmReservation(@RequestBody final QoSReservationRequestDTO request) {
 		logger.debug("confirmReservation started ...");
 		
-		checkQoSReservationRequestDTO(request, CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_TEMPORARY_LOCK_URI);
+		checkQoSReservationRequestDTO(request, CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_RESERVATIONS_URI);
 		orchestratorService.confirmProviderReservation(request);
 	}
 	
