@@ -25,14 +25,15 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 6. [How to Contribute](#howtocontribute)
 7. [Documentation](#documentation) 
     1. [Service Registry](#serviceregistry)
-       * [System Design Description Overview](#serviceregistry_sdd)
-       * [Services and Use Cases](#serviceregistry_usecases)
-       * [Security](#serviceregistry_security)
-       * [Endpoints](#serviceregistry_endpoints)
-           * [Client](#serviceregistry_endpoints_client)
-           * [Private](#serviceregistry_endpoints_private)
-           * [Management](#serviceregistry_endpoints_mgmt) 
-           * [Removed Endpoints](#serviceregistry_removed)
+        * [System Design Description Overview](#serviceregistry_sdd)
+            * [Services and Use Cases](#serviceregistry_usecases)
+       * [Interface Design Description](#serviceregistry_endpoints)
+            * [Security](#serviceregistry_security)
+            * [Communication Profile](#service-registry_cp)
+                * [Client](#serviceregistry_endpoints_client)
+                * [Private](#serviceregistry_endpoints_private)
+                * [Management](#serviceregistry_endpoints_mgmt) 
+                * [Removed](#serviceregistry_removed)
     2. [Authorization](#authorization)
        * [System Design Description Overview](#authorization_sdd)
        * [Services and Use Cases](#authorization_usecases)
@@ -533,50 +534,70 @@ However, the lookup of other Application Systems and Services directly is not wi
 
 ## Services and Use Cases
 
-This System only provides one Core Service the __Service Discovery__
+This System three types of services:
+- Client
+- Management
+- Private 
 
-There are two use case scenarios connected to the Service Registry. 
+Client services are used by clients (consumers and providers):
+
+These client services are:
+- Echo
+- Register
+- Unregister
+- Query (Service Discovery)
+
+There are three use case scenarios connected to the Service Registry client services. 
+-   Echo, checking the Core Systems availability 
 -	Service registration, de-registration
--	Service Registry querying (lookup)
+-	Service Registry querying (lookup, service discovery)
 
-The __register__ method is used to register services. The services will contain various metadata as well as a physical endpoint. 
+The __echo__ service is used to check the Core Systems availability. The service contains a simple response as well as a physical endpoint.
+
+The __register__ service is used to register other services. The services will contain various metadata as well as a physical endpoint. 
 The various parameters are representing the endpoint information that should be registered.
 
-The __unregister__ method is used to unregister service instances that were previously registered in the Registry. 
-The instance parameter is representing the endpoint information that should be removed.
+The __unregister__ service is used to unregister service instances that were previously registered in the Service Registry. 
+The various parameters are representing which service should be removed.
 
-The __query__ method is used to find and translate a symbolic service name into a physical endpoint, for example an IP address and a port.
+The __query__ service is used to find and translate a symbolic service name into a physical endpoint, for example an IP address and a port.
 The query parameter is used to request a subset of all the registered services fulfilling the demand of the user of the service.
 The returned listing contains service endpoints that have been fulfilling the query.
 
 
 There is another functionality that does not bound to any Services, just an internal part of the Service Registry. There are two optional cleanup tasks within the Service Registry, which can be used to remove old, inactive service offerings. The first task is based on pinging the service provider and if the provider does not respond to the ping, its offered services will be deleted. The second task is based on a feature, called “Time to Live”. Service providers upon registration can provide a timestamp called “end_of_validity” number, which specifies how long the service will be offered by the provider, making the service de-registrations unnecessary, if this task is active. The task is used to remove expired services. The third task is using a feature called "Heartbeat" (Not yet implemented), where the Service provider periodically signals to the Service Registry that it is still alive. When it misses it will be removed. All of these internal tasks can be configured in the application.properties file.
 
+<a name="serviceregistry_endpoints" />
+
+## Interface Design Description
+
 <a name="serviceregistry_security" />
 
-## Security
+### Security
 
-This System can be secured via the HTTPS protocol. If it is started in secure mode, it verifies whether the Application System possesses a proper X.509 identity certificate and whether that certificate is Arrowhead compliant in its making. This certificate structure and creation guidelines ensure:
+This System can be secured via HTTPS. If it is started in secure mode (default behaviour), it verifies whether the Application System possesses a proper X.509 identity certificate and whether that certificate is Arrowhead compliant in its making. This certificate structure and creation guidelines ensure:
 -	Application System is properly bootstrapped into the Local Cloud
 -	The Application System indeed belongs to this Local Cloud
 -	The Application System then automatically has the right to register its Services in the Registry.
 
 If these criteria are met, the Application System’s registration or removal message is processed. An Application System can only delete or alter entries that contain the Application System as the Service Provider in the entry. 
 
-<a name="serviceregistry_endpoints" />
+### Communication Profile
 
-## Endpoints
+- Transfer Protocol: HTTP
+- Security mechanism: TLS or none
+- Data format: JSON
 
-The Service Registry offers three types of endpoints. Client, Management and Private.
+The Service Registry offers three types of services. Client, Management and Private.
 
 Swagger API documentation is available on: `https://<host>:<port>` <br />
 The base URL for the requests: `http://<host>:<port>/serviceregistry`
 
 <a name="serviceregistry_endpoints_client" />
 
-### Client endpoint description<br />
+#### Client service description<br />
 
-| Function | URL subpath | Method | Input | Output |
+| Service | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Echo](#serviceregistry_endpoints_get_echo)     | /echo       | GET    | -     | OK     |
 | [Query](#serviceregistry_endpoints_post_query)    | /query      | POST   | [ServiceQueryForm](#datastructures_servicequeryform) | [ServiceQueryList](#datastructures_servicequerylist) |
@@ -585,22 +606,22 @@ The base URL for the requests: `http://<host>:<port>/serviceregistry`
 
 <a name="serviceregistry_endpoints_private" />
 
-### Private endpoint description<br />
+#### Private service description<br />
 
 These services can only be used by other core services, therefore they are not part of the public API.
 
-| Function | URL subpath | Method | Input | Output |
+| Service | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Query System](#serviceregistry_endpoints_post_query_system) | /query/system| POST | System | System |
 | [Query System By ID](#serviceregistry_endpoints_get_query_system_id) | /query/system/{id} | GET | ID | System|
 
 <a name="serviceregistry_endpoints_mgmt" />
 
-### Management endpoint description<br />
+#### Management service description<br />
 
-There endpoints are mainly used by the Management Tool and Cloud Administrators.
+These services are mainly used by the Management Tool and Cloud Administrators.
 
-| Function | URL subpath | Method | Input | Output |
+| Service | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Get all entries](#serviceregistry_endpoints_get_mgmt) | /mgmt/ | GET | - | [ServiceRegistryEntryList](#datastructures_serviceregistryentrylist) |
 | [Add an entry](#serviceregistry_endpoints_post_mgmt) | /mgmt/ | POST | [ServiceRegistryEntry](#datastructures_serviceregistryentry) | [ServiceRegistryEntry](#datastructures_serviceregistry_entry) |
@@ -625,7 +646,9 @@ There endpoints are mainly used by the Management Tool and Cloud Administrators.
 
 <a name="serviceregistry_removed" />
 
-### Removed Endpoints <br />
+#### Removed Endpoints <br />
+
+In 4.1.2 and before some services were listening on these URL subpath. They are no longer.
 
 The following endpoints no longer exist:
 * `PUT /mgmt/services`
