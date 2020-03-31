@@ -96,7 +96,19 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 		Assert.notNull(sender, "sender is null.");
 		
 		this.sender = sender;
-		this.initialized = true;
+		
+		final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(sslProperties);
+		final SSLServerSocketFactory serverSocketFactory = sslContext.getServerSocketFactory();
+		try {
+			sslServerSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(port);
+			sslServerSocket.setNeedClientAuth(true);
+			sslServerSocket.setSoTimeout(timeout);
+			this.initialized = true;
+		} catch (final IOException ex) {
+			logger.debug("Problem occurs in initializing gateway communication: {}", ex.getMessage());
+			logger.debug("Stacktrace:", ex);
+			close();
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -147,12 +159,6 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 		}
 
 		try {
-			final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(sslProperties);
-			final SSLServerSocketFactory serverSocketFactory = sslContext.getServerSocketFactory();
-			sslServerSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(port);
-			sslServerSocket.setNeedClientAuth(true);
-			sslServerSocket.setSoTimeout(timeout);
-			
 			sslConsumerSocket = (SSLSocket) sslServerSocket.accept();
 			final InputStream inConsumer = sslConsumerSocket.getInputStream();
 			outConsumer = sslConsumerSocket.getOutputStream();
