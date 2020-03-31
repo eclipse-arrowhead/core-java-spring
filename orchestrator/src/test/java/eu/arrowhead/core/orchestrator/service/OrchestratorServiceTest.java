@@ -1,8 +1,11 @@
 package eu.arrowhead.core.orchestrator.service;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -10,15 +13,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
@@ -31,6 +33,10 @@ import eu.arrowhead.common.dto.internal.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.internal.ICNResultDTO;
 import eu.arrowhead.common.dto.internal.OrchestratorStoreResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSMeasurementAttributesFormDTO;
+import eu.arrowhead.common.dto.internal.QoSReservationRequestDTO;
+import eu.arrowhead.common.dto.internal.QoSTemporaryLockRequestDTO;
+import eu.arrowhead.common.dto.internal.QoSTemporaryLockResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFlags;
 import eu.arrowhead.common.dto.shared.OrchestrationFlags.Flag;
@@ -56,6 +62,7 @@ import eu.arrowhead.core.orchestrator.matchmaking.InterCloudProviderMatchmakingA
 import eu.arrowhead.core.orchestrator.matchmaking.InterCloudProviderMatchmakingParameters;
 import eu.arrowhead.core.orchestrator.matchmaking.IntraCloudProviderMatchmakingAlgorithm;
 import eu.arrowhead.core.orchestrator.matchmaking.IntraCloudProviderMatchmakingParameters;
+import eu.arrowhead.core.qos.manager.QoSManager;
 import eu.arrowhead.core.qos.manager.impl.DummyQoSManager;
 
 @RunWith(SpringRunner.class)
@@ -82,14 +89,11 @@ public class OrchestratorServiceTest {
 	@Mock
 	private CloudMatchmakingAlgorithm cloudMatchmaker;
 	
+	@Spy
+	private final QoSManager qosManager = new DummyQoSManager();
+	
 	//=================================================================================================
 	// methods
-	
-	//-------------------------------------------------------------------------------------------------
-	@Before
-	public void setUp() {
-		ReflectionTestUtils.setField(testingObject, CoreCommonConstants.QOS_MANAGER, new DummyQoSManager());
-	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
@@ -2482,6 +2486,202 @@ public class OrchestratorServiceTest {
 		Assert.assertNotNull(orchestrationResult);
 		Assert.assertTrue(orchestrationResult.getResponse().isEmpty());
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testTriggerInterCloudQoSEnabled() {
+		final ServiceInterface serviceInterface = new ServiceInterface("HTTP-SECURE-JSON");
+		
+		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
+		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
+	
+		final ServiceQueryFormDTO serviceForm = new ServiceQueryFormDTO.Builder("service").build();
+		final SystemRequestDTO provider = new SystemRequestDTO();
+		provider.setSystemName("provider");
+		provider.setAddress("localhost");
+		provider.setPort(1234);
+		
+		final CloudRequestDTO providerCloud = new CloudRequestDTO();
+		providerCloud.setName("cloud2name");
+		providerCloud.setOperator("operator");
+		
+		final CloudResponseDTO cloudResponseDTO = new CloudResponseDTO(1L, "operator", "cloud2name", false, true, false, "", "", "");
+		
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
+																				    requestedService(serviceForm).
+																				    flag(Flag.TRIGGER_INTER_CLOUD, true).
+																				    flag(Flag.ENABLE_QOS, true).
+																				    build();
+		
+		final System consumerSystem = new System();
+		consumerSystem.setSystemName("consumerSystemName");
+		consumerSystem.setAddress("localhost");
+		consumerSystem.setPort(1234);
+		
+		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
+		srEntry.setInterfaces(interfaces);
+		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
+		srResult.getServiceQueryData().add(srEntry);
+		
+		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(consumerSystem);
+			
+		final OrchestrationResultDTO orchestrationResultDTO = new OrchestrationResultDTO(systemResponseDTO, serviceDefinitionResponseDTO, "serviceUri",	ServiceSecurityType.NOT_SECURE,	Map.of(),
+																						 interfaces, 1);
+		orchestrationResultDTO.setWarnings(new ArrayList<>());
+		
+		final QoSMeasurementAttributesFormDTO qoSMeasurement = new QoSMeasurementAttributesFormDTO();
+		qoSMeasurement.setServiceRegistryEntry(srEntry);
+		
+		final GSDPollResponseDTO gsdPollResponseDTO = new GSDPollResponseDTO(cloudResponseDTO, serviceDefinitionResponseDTO.getServiceDefinition(),	List.of(serviceInterface.getInterfaceName()), 
+																			 1,	List.of(qoSMeasurement), Map.of(), false);
+		final GSDQueryResultDTO gsdResult = new GSDQueryResultDTO(List.of(gsdPollResponseDTO), 0);
+		
+		final ICNResultDTO icnResultDTO = new ICNResultDTO(List.of(orchestrationResultDTO));
+		    
+		when(orchestratorDriver.doGlobalServiceDiscovery(any(GSDQueryFormDTO.class))).thenReturn(gsdResult);		
+		when(cloudMatchmaker.doMatchmaking(any(CloudMatchmakingParameters.class))).thenReturn(cloudResponseDTO);
+		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
+		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
+	
+		testingObject.triggerInterCloud(request);
+		
+		verify(qosManager, times(1)).preVerifyInterCloudServices(any(), any());
+		verify(qosManager, times(1)).verifyInterCloudServices(any(), any(), any(), any());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testTriggerInterCloudQoSEnabledWithReservation() {
+		final ServiceInterface serviceInterface = new ServiceInterface("HTTP-SECURE-JSON");
+		
+		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
+		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
+	
+		final ServiceQueryFormDTO serviceForm = new ServiceQueryFormDTO.Builder("service").build();
+		final SystemRequestDTO provider = new SystemRequestDTO();
+		provider.setSystemName("provider");
+		provider.setAddress("localhost");
+		provider.setPort(1234);
+		
+		final CloudRequestDTO providerCloud = new CloudRequestDTO();
+		providerCloud.setName("cloud2name");
+		providerCloud.setOperator("operator");
+		
+		final CloudResponseDTO cloudResponseDTO = new CloudResponseDTO(1L, "operator", "cloud2name", false, true, false, "", "", "");
+		
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
+																				    requestedService(serviceForm).
+																				    flag(Flag.TRIGGER_INTER_CLOUD, true).
+																				    flag(Flag.ENABLE_QOS, true).
+																				    flag(Flag.MATCHMAKING, true).
+																				    command(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY, "20").
+																					build();
+		
+		final System consumerSystem = new System();
+		consumerSystem.setSystemName("consumerSystemName");
+		consumerSystem.setAddress("localhost");
+		consumerSystem.setPort(1234);
+		
+		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
+		srEntry.setInterfaces(interfaces);
+		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
+		srResult.getServiceQueryData().add(srEntry);
+		
+		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(consumerSystem);
+			
+		final OrchestrationResultDTO orchestrationResultDTO = new OrchestrationResultDTO(systemResponseDTO, serviceDefinitionResponseDTO, "serviceUri",	ServiceSecurityType.NOT_SECURE,	Map.of(),
+																						 interfaces, 1);
+		orchestrationResultDTO.setWarnings(new ArrayList<>());
+		
+		final QoSMeasurementAttributesFormDTO qoSMeasurement = new QoSMeasurementAttributesFormDTO();
+		qoSMeasurement.setServiceRegistryEntry(srEntry);
+		
+		final GSDPollResponseDTO gsdPollResponseDTO = new GSDPollResponseDTO(cloudResponseDTO, serviceDefinitionResponseDTO.getServiceDefinition(),	List.of(serviceInterface.getInterfaceName()), 
+																			 1,	List.of(qoSMeasurement), Map.of(), false);
+		final GSDQueryResultDTO gsdResult = new GSDQueryResultDTO(List.of(gsdPollResponseDTO), 0);
+		
+		final ICNResultDTO icnResultDTO = new ICNResultDTO(List.of(orchestrationResultDTO));
+		    
+		when(orchestratorDriver.doGlobalServiceDiscovery(any(GSDQueryFormDTO.class))).thenReturn(gsdResult);		
+		when(cloudMatchmaker.doMatchmaking(any(CloudMatchmakingParameters.class))).thenReturn(cloudResponseDTO);
+		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
+		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
+	
+		testingObject.triggerInterCloud(request);
+		
+		verify(qosManager, times(1)).preVerifyInterCloudServices(any(), any());
+		verify(qosManager, times(0)).verifyInterCloudServices(any(), any(), any(), any());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testTriggerInterCloudQoSEnabledWithGatewayMandatory() {
+		final ServiceInterface serviceInterface = new ServiceInterface("HTTP-SECURE-JSON");
+		
+		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
+		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
+	
+		final ServiceQueryFormDTO serviceForm = new ServiceQueryFormDTO.Builder("service").build();
+		final SystemRequestDTO provider = new SystemRequestDTO();
+		provider.setSystemName("provider");
+		provider.setAddress("localhost");
+		provider.setPort(1234);
+		
+		final CloudRequestDTO providerCloud = new CloudRequestDTO();
+		providerCloud.setName("cloud2name");
+		providerCloud.setOperator("operator");
+		
+		final CloudResponseDTO cloudResponseDTO = new CloudResponseDTO(1L, "operator", "cloud2name", false, true, false, "", "", "");
+		
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
+																				    requestedService(serviceForm).
+																				    flag(Flag.TRIGGER_INTER_CLOUD, true).
+																				    flag(Flag.ENABLE_QOS, true).
+																				    build();
+		
+		final System consumerSystem = new System();
+		consumerSystem.setSystemName("consumerSystemName");
+		consumerSystem.setAddress("localhost");
+		consumerSystem.setPort(1234);
+		
+		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
+		srEntry.setInterfaces(interfaces);
+		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
+		srResult.getServiceQueryData().add(srEntry);
+		
+		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(consumerSystem);
+			
+		final OrchestrationResultDTO orchestrationResultDTO = new OrchestrationResultDTO(systemResponseDTO, serviceDefinitionResponseDTO, "serviceUri",	ServiceSecurityType.NOT_SECURE,	Map.of(),
+																						 interfaces, 1);
+		final List<OrchestratorWarnings> warnings = new ArrayList<>();
+		warnings.add(OrchestratorWarnings.VIA_GATEWAY);
+		orchestrationResultDTO.setWarnings(warnings);
+		
+		final QoSMeasurementAttributesFormDTO qoSMeasurement = new QoSMeasurementAttributesFormDTO();
+		qoSMeasurement.setServiceRegistryEntry(srEntry);
+		
+		final GSDPollResponseDTO gsdPollResponseDTO = new GSDPollResponseDTO(cloudResponseDTO, serviceDefinitionResponseDTO.getServiceDefinition(),	List.of(serviceInterface.getInterfaceName()), 
+																			 1,	List.of(qoSMeasurement), Map.of(), true);
+		final GSDQueryResultDTO gsdResult = new GSDQueryResultDTO(List.of(gsdPollResponseDTO), 0);
+		
+		final ICNResultDTO icnResultDTO = new ICNResultDTO(List.of(orchestrationResultDTO));
+		    
+		when(orchestratorDriver.doGlobalServiceDiscovery(any(GSDQueryFormDTO.class))).thenReturn(gsdResult);		
+		when(cloudMatchmaker.doMatchmaking(any(CloudMatchmakingParameters.class))).thenReturn(cloudResponseDTO);
+		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
+		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
+	
+		testingObject.triggerInterCloud(request);
+		
+		verify(qosManager, times(1)).preVerifyInterCloudServices(any(), any());
+		verify(qosManager, times(0)).verifyInterCloudServices(any(), any(), any(), any());
+	}
 		
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -2532,5 +2732,289 @@ public class OrchestratorServiceTest {
 	@Test(expected = InvalidParameterException.class)
 	public void testStoreOchestrationProcessInvalidId() {
 		testingObject.storeOchestrationProcessResponse(-1L);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testLockProvidersTemporarilyOk() {
+		final QoSTemporaryLockRequestDTO request = new QoSTemporaryLockRequestDTO();
+		
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester-system");
+		requesterSystem.setAddress("1.1.1.1");
+		requesterSystem.setPort(10000);
+		request.setRequester(requesterSystem);
+		request.setOrList(List.of(new OrchestrationResultDTO()));
+		
+		when(qosManager.reserveProvidersTemporarily(any(), any())).thenReturn(request.getOrList());
+		
+		QoSTemporaryLockResponseDTO result = testingObject.lockProvidersTemporarily(request);
+		
+		assertEquals(request.getOrList().size(), result.getResponse().size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testLockProvidersTemporarilyNullRequest() {
+		testingObject.lockProvidersTemporarily(null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testLockProvidersTemporarilyNullRequesterSystemName() {
+		final QoSTemporaryLockRequestDTO request = new QoSTemporaryLockRequestDTO();
+		
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName(null);
+		requesterSystem.setAddress("1.1.1.1");
+		requesterSystem.setPort(10000);
+		request.setRequester(requesterSystem);
+		request.setOrList(List.of(new OrchestrationResultDTO()));
+		
+		testingObject.lockProvidersTemporarily(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testLockProvidersTemporarilyBlankRequesterSystemName() {
+		final QoSTemporaryLockRequestDTO request = new QoSTemporaryLockRequestDTO();
+		
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("");
+		requesterSystem.setAddress("1.1.1.1");
+		requesterSystem.setPort(10000);
+		request.setRequester(requesterSystem);
+		request.setOrList(List.of(new OrchestrationResultDTO()));
+		
+		testingObject.lockProvidersTemporarily(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testLockProvidersTemporarilyNullRequesterSystemAddress() {
+		final QoSTemporaryLockRequestDTO request = new QoSTemporaryLockRequestDTO();
+		
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester-system");
+		requesterSystem.setAddress(null);
+		requesterSystem.setPort(10000);
+		request.setRequester(requesterSystem);
+		request.setOrList(List.of(new OrchestrationResultDTO()));
+		
+		testingObject.lockProvidersTemporarily(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testLockProvidersTemporarilyBlankRequesterSystemAddress() {
+		final QoSTemporaryLockRequestDTO request = new QoSTemporaryLockRequestDTO();
+		
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester-system");
+		requesterSystem.setAddress("");
+		requesterSystem.setPort(10000);
+		request.setRequester(requesterSystem);
+		request.setOrList(List.of(new OrchestrationResultDTO()));
+		
+		testingObject.lockProvidersTemporarily(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testLockProvidersTemporarilyNullRequesterSystemPort() {
+		final QoSTemporaryLockRequestDTO request = new QoSTemporaryLockRequestDTO();
+		
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester-system");
+		requesterSystem.setAddress("1.1.1.1");
+		requesterSystem.setPort(null);
+		request.setRequester(requesterSystem);
+		request.setOrList(List.of(new OrchestrationResultDTO()));
+		
+		testingObject.lockProvidersTemporarily(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void confirmProviderReservationOk() {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester-system");
+		requesterSystem.setAddress("1.1.1.1");
+		requesterSystem.setPort(10000);
+		
+		final SystemResponseDTO selectedSystem = new SystemResponseDTO();
+		selectedSystem.setId(1);
+		selectedSystem.setSystemName("selected-system");
+		selectedSystem.setAddress("2.2.2.2");
+		selectedSystem.setPort(20000);
+		final ServiceDefinitionResponseDTO requestedService = new ServiceDefinitionResponseDTO(1, "requested-service", null, null);
+		final OrchestrationResultDTO selectedResult = new OrchestrationResultDTO();
+		selectedResult.setProvider(selectedSystem);
+		selectedResult.setService(requestedService);
+		
+		final QoSReservationRequestDTO request = new QoSReservationRequestDTO(selectedResult, requesterSystem, List.of(new OrchestrationResultDTO()));
+		
+		testingObject.confirmProviderReservation(request);		
+		verify(qosManager, times(1)).confirmReservation(any(), any(), any());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void confirmProviderReservationNullRequesterSystemName() {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName(null);
+		requesterSystem.setAddress("1.1.1.1");
+		requesterSystem.setPort(10000);
+		
+		final SystemResponseDTO selectedSystem = new SystemResponseDTO();
+		selectedSystem.setId(1);
+		selectedSystem.setSystemName("selected-system");
+		selectedSystem.setAddress("2.2.2.2");
+		selectedSystem.setPort(20000);
+		final ServiceDefinitionResponseDTO requestedService = new ServiceDefinitionResponseDTO(1, "requested-service", null, null);
+		final OrchestrationResultDTO selectedResult = new OrchestrationResultDTO();
+		selectedResult.setProvider(selectedSystem);
+		selectedResult.setService(requestedService);
+		
+		final QoSReservationRequestDTO request = new QoSReservationRequestDTO(selectedResult, requesterSystem, List.of(new OrchestrationResultDTO()));		
+		testingObject.confirmProviderReservation(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void confirmProviderReservationBlankRequesterSystemName() {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("");
+		requesterSystem.setAddress("1.1.1.1");
+		requesterSystem.setPort(10000);
+		
+		final SystemResponseDTO selectedSystem = new SystemResponseDTO();
+		selectedSystem.setId(1);
+		selectedSystem.setSystemName("selected-system");
+		selectedSystem.setAddress("2.2.2.2");
+		selectedSystem.setPort(20000);
+		final ServiceDefinitionResponseDTO requestedService = new ServiceDefinitionResponseDTO(1, "requested-service", null, null);
+		final OrchestrationResultDTO selectedResult = new OrchestrationResultDTO();
+		selectedResult.setProvider(selectedSystem);
+		selectedResult.setService(requestedService);
+		
+		final QoSReservationRequestDTO request = new QoSReservationRequestDTO(selectedResult, requesterSystem, List.of(new OrchestrationResultDTO()));		
+		testingObject.confirmProviderReservation(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void confirmProviderReservationNullRequesterSystemAddress() {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("selected-system");
+		requesterSystem.setAddress(null);
+		requesterSystem.setPort(10000);
+		
+		final SystemResponseDTO selectedSystem = new SystemResponseDTO();
+		selectedSystem.setId(1);
+		selectedSystem.setSystemName("selected-system");
+		selectedSystem.setAddress("2.2.2.2");
+		selectedSystem.setPort(20000);
+		final ServiceDefinitionResponseDTO requestedService = new ServiceDefinitionResponseDTO(1, "requested-service", null, null);
+		final OrchestrationResultDTO selectedResult = new OrchestrationResultDTO();
+		selectedResult.setProvider(selectedSystem);
+		selectedResult.setService(requestedService);
+		
+		final QoSReservationRequestDTO request = new QoSReservationRequestDTO(selectedResult, requesterSystem, List.of(new OrchestrationResultDTO()));		
+		testingObject.confirmProviderReservation(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void confirmProviderReservationBlankRequesterSystemAddress() {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("selected-system");
+		requesterSystem.setAddress("");
+		requesterSystem.setPort(10000);
+		
+		final SystemResponseDTO selectedSystem = new SystemResponseDTO();
+		selectedSystem.setId(1);
+		selectedSystem.setSystemName("selected-system");
+		selectedSystem.setAddress("2.2.2.2");
+		selectedSystem.setPort(20000);
+		final ServiceDefinitionResponseDTO requestedService = new ServiceDefinitionResponseDTO(1, "requested-service", null, null);
+		final OrchestrationResultDTO selectedResult = new OrchestrationResultDTO();
+		selectedResult.setProvider(selectedSystem);
+		selectedResult.setService(requestedService);
+		
+		final QoSReservationRequestDTO request = new QoSReservationRequestDTO(selectedResult, requesterSystem, List.of(new OrchestrationResultDTO()));		
+		testingObject.confirmProviderReservation(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void confirmProviderReservationNullRequesterSystemPort() {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("selected-system");
+		requesterSystem.setAddress("1.1.1.1");
+		requesterSystem.setPort(null);
+		
+		final SystemResponseDTO selectedSystem = new SystemResponseDTO();
+		selectedSystem.setId(1);
+		selectedSystem.setSystemName("selected-system");
+		selectedSystem.setAddress("2.2.2.2");
+		selectedSystem.setPort(20000);
+		final ServiceDefinitionResponseDTO requestedService = new ServiceDefinitionResponseDTO(1, "requested-service", null, null);
+		final OrchestrationResultDTO selectedResult = new OrchestrationResultDTO();
+		selectedResult.setProvider(selectedSystem);
+		selectedResult.setService(requestedService);
+		
+		final QoSReservationRequestDTO request = new QoSReservationRequestDTO(selectedResult, requesterSystem, List.of(new OrchestrationResultDTO()));		
+		testingObject.confirmProviderReservation(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void confirmProviderReservationNullSelected() {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("selected-system");
+		requesterSystem.setAddress("1.1.1.1");
+		requesterSystem.setPort(10000);
+		
+		final QoSReservationRequestDTO request = new QoSReservationRequestDTO(null, requesterSystem, List.of(new OrchestrationResultDTO()));		
+		testingObject.confirmProviderReservation(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void confirmProviderReservationNullSelectedSystem() {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("selected-system");
+		requesterSystem.setAddress("1.1.1.1");
+		requesterSystem.setPort(10000);
+		
+		final ServiceDefinitionResponseDTO requestedService = new ServiceDefinitionResponseDTO(1, "requested-service", null, null);
+		final OrchestrationResultDTO selectedResult = new OrchestrationResultDTO();
+		selectedResult.setProvider(null);
+		selectedResult.setService(requestedService);
+		
+		final QoSReservationRequestDTO request = new QoSReservationRequestDTO(selectedResult, requesterSystem, List.of(new OrchestrationResultDTO()));		
+		testingObject.confirmProviderReservation(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void confirmProviderReservationNullRequestedService() {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("selected-system");
+		requesterSystem.setAddress("1.1.1.1");
+		requesterSystem.setPort(null);
+		
+		final SystemResponseDTO selectedSystem = new SystemResponseDTO();
+		selectedSystem.setId(1);
+		selectedSystem.setSystemName("selected-system");
+		selectedSystem.setAddress("2.2.2.2");
+		selectedSystem.setPort(20000);
+		final OrchestrationResultDTO selectedResult = new OrchestrationResultDTO();
+		selectedResult.setProvider(selectedSystem);
+		selectedResult.setService(null);
+		
+		final QoSReservationRequestDTO request = new QoSReservationRequestDTO(selectedResult, requesterSystem, List.of(new OrchestrationResultDTO()));		
+		testingObject.confirmProviderReservation(request);
 	}
 }

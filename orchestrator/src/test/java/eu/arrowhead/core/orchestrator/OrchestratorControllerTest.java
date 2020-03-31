@@ -718,7 +718,7 @@ public class OrchestratorControllerTest {
 		final ServiceDefinitionResponseDTO requestedService = new ServiceDefinitionResponseDTO(1, "requested-service", null, null);
 		final OrchestrationResultDTO selectedResult = new OrchestrationResultDTO();
 		selectedResult.setProvider(selectedSystem);
-		selectedResult.setService(requestedService);;
+		selectedResult.setService(requestedService);
 
 		final QoSReservationRequestDTO requestDTO = new QoSReservationRequestDTO(selectedResult, requesterSystem, List.of(new OrchestrationResultDTO()));
 		
