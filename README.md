@@ -597,7 +597,7 @@ The base URL for the requests: `http://<host>:<port>/serviceregistry`
 
 #### Client service description<br />
 
-| Service | URL subpath | Method | Input | Output |
+| Service | URL subpath | Method | Request | Response |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Echo](#serviceregistry_endpoints_get_echo)     | /echo       | GET    | -     | OK     |
 | [Query](#serviceregistry_endpoints_post_query)    | /query      | POST   | [ServiceQueryForm](#datastructures_servicequeryform) | [ServiceQueryList](#datastructures_servicequerylist) |
@@ -610,7 +610,7 @@ The base URL for the requests: `http://<host>:<port>/serviceregistry`
 
 These services can only be used by other core services, therefore they are not part of the public API.
 
-| Service | URL subpath | Method | Input | Output |
+| Service | URL subpath | Method | Request | Response |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Query System](#serviceregistry_endpoints_post_query_system) | /query/system| POST | System | System |
 | [Query System By ID](#serviceregistry_endpoints_get_query_system_id) | /query/system/{id} | GET | ID | System|
@@ -621,7 +621,7 @@ These services can only be used by other core services, therefore they are not p
 
 These services are mainly used by the Management Tool and Cloud Administrators.
 
-| Service | URL subpath | Method | Input | Output |
+| Service | URL subpath | Method | Request | Reponse |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Get all entries](#serviceregistry_endpoints_get_mgmt) | /mgmt/ | GET | - | [ServiceRegistryEntryList](#datastructures_serviceregistryentrylist) |
 | [Add an entry](#serviceregistry_endpoints_post_mgmt) | /mgmt/ | POST | [ServiceRegistryEntry](#datastructures_serviceregistryentry) | [ServiceRegistryEntry](#datastructures_serviceregistry_entry) |
