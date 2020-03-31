@@ -9,7 +9,6 @@ import eu.arrowhead.common.dto.shared.DeviceRegistryOnboardingWithCsrRequestDTO;
 import eu.arrowhead.common.dto.shared.DeviceRegistryOnboardingWithCsrResponseDTO;
 import eu.arrowhead.common.dto.shared.DeviceRegistryOnboardingWithNameRequestDTO;
 import eu.arrowhead.common.dto.shared.DeviceRegistryOnboardingWithNameResponseDTO;
-import eu.arrowhead.common.dto.shared.DeviceRegistryResponseDTO;
 import eu.arrowhead.core.deviceregistry.database.service.DeviceRegistryDBService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -48,23 +47,18 @@ public class DeviceRegistryOnboardingController {
     // members
     private final Logger logger = LogManager.getLogger(DeviceRegistryOnboardingController.class);
     private final DeviceRegistryDBService deviceRegistryDBService;
-    private final SecurityUtilities securityUtilities;
     private final Validation validation;
 
     @Autowired
-    public DeviceRegistryOnboardingController(final DeviceRegistryDBService deviceRegistryDBService,
-                                              final SecurityUtilities securityUtilities) {
+    public DeviceRegistryOnboardingController(final DeviceRegistryDBService deviceRegistryDBService) {
         this.deviceRegistryDBService = deviceRegistryDBService;
-        this.securityUtilities = securityUtilities;
         this.validation = new Validation();
     }
-
-    // TODO everything here
 
     //=================================================================================================
     // methods
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = DEVICE_REGISTRY_REGISTER_DESCRIPTION, response = DeviceRegistryResponseDTO.class, tags =
+    @ApiOperation(value = DEVICE_REGISTRY_REGISTER_DESCRIPTION, response = DeviceRegistryOnboardingWithNameResponseDTO.class, tags =
             {CoreCommonConstants.SWAGGER_TAG_CLIENT, CoreCommonConstants.SWAGGER_TAG_ONBOARDING})
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_CREATED, message = DEVICE_REGISTRY_REGISTER_201_MESSAGE),
@@ -79,7 +73,6 @@ public class DeviceRegistryOnboardingController {
     public DeviceRegistryOnboardingWithNameResponseDTO onboardDevice(final HttpServletRequest httpServletRequest,
                                                                      @RequestBody final DeviceRegistryOnboardingWithNameRequestDTO request) {
         logger.debug("New onboarding with name and device registration request received");
-        securityUtilities.authenticateCertificate(httpServletRequest, CertificateType.AH_ONBOARDING);
         validation.checkOnboardingRequest(request, getOrigin(CommonConstants.OP_DEVICE_REGISTRY_ONBOARDING_WITH_NAME_URI));
 
         final String host = httpServletRequest.getRemoteHost();
@@ -91,7 +84,7 @@ public class DeviceRegistryOnboardingController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = DEVICE_REGISTRY_REGISTER_DESCRIPTION, response = DeviceRegistryResponseDTO.class, tags =
+    @ApiOperation(value = DEVICE_REGISTRY_REGISTER_DESCRIPTION, response = DeviceRegistryOnboardingWithCsrResponseDTO.class, tags =
             {CoreCommonConstants.SWAGGER_TAG_CLIENT, CoreCommonConstants.SWAGGER_TAG_ONBOARDING})
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_CREATED, message = DEVICE_REGISTRY_REGISTER_201_MESSAGE),
@@ -106,7 +99,6 @@ public class DeviceRegistryOnboardingController {
     public DeviceRegistryOnboardingWithCsrResponseDTO onboardDevice(final HttpServletRequest httpServletRequest,
                                                                     @RequestBody final DeviceRegistryOnboardingWithCsrRequestDTO request) {
         logger.debug("New onboarding with csr and device registration request received");
-        securityUtilities.authenticateCertificate(httpServletRequest, CertificateType.AH_ONBOARDING);
         validation.checkOnboardingRequest(request, getOrigin(CommonConstants.OP_DEVICE_REGISTRY_ONBOARDING_WITH_CSR_URI));
 
         final var response = deviceRegistryDBService.onboardAndRegisterDeviceRegistry(request);

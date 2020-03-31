@@ -45,4 +45,16 @@ public abstract class SystemRegistryOnboardingResponseDTO extends SystemRegistry
                 .add("parent=" + super.toString())
                 .toString();
     }
+
+    public void load(final SystemRegistryResponseDTO dto)
+    {
+        this.setId(dto.getId());
+        this.setProvider(dto.getProvider());
+        this.setSystem(dto.getSystem());
+        this.setMetadata(dto.getMetadata());
+        this.setEndOfValidity(dto.getEndOfValidity());
+        this.setCreatedAt(dto.getCreatedAt());
+        this.setUpdatedAt(dto.getUpdatedAt());
+        this.setVersion(dto.getVersion());
+    }
 }

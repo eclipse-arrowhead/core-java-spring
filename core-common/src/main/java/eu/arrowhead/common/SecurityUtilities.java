@@ -133,22 +133,27 @@ public class SecurityUtilities {
                 final String clientCN = Utilities.getCertCNFromSubject(cert.getSubjectDN().getName());
                 final String requestTarget = Utilities.stripEndSlash(httpServletRequest.getRequestURL().toString());
 
-                if (Objects.isNull(clientCN)) {
-                    logger.debug("Unable to extract common name from client certificate: {}", cert.getSubjectDN());
-                    throw new AuthException("Client is unauthorized to access " + requestTarget);
-                }
-
-                final CertificateType type = CertificateType.getTypeFromCN(clientCN);
-                if (!type.hasMinimumStrength(minimumStrength)) {
-                    logger.debug("{} is not a valid common name, access denied!", clientCN);
-                    throw new AuthException(clientCN + " is unauthorized to access " + requestTarget);
-                }
-
-                // TODO verification by CA
-
+                authenticateCertificate(clientCN, requestTarget, minimumStrength);
             } else {
                 logger.debug("No client certificate given!");
                 throw new AuthException("Client certificate in needed!");
+            }
+        }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public void authenticateCertificate(final String clientCN, final String requestTarget, final CertificateType minimumStrength) {
+        if (sslProperties.isSslEnabled()) {
+
+            if (Objects.isNull(clientCN)) {
+                logger.debug("Unable to extract common name from client certificate: {}", clientCN);
+                throw new AuthException("Client is unauthorized to access " + requestTarget);
+            }
+
+            final CertificateType type = CertificateType.getTypeFromCN(clientCN);
+            if (!type.hasMinimumStrength(minimumStrength)) {
+                logger.debug("{} is not a valid common name, access denied!", clientCN);
+                throw new AuthException(clientCN + " is unauthorized to access " + requestTarget);
             }
         }
     }
@@ -174,9 +179,8 @@ public class SecurityUtilities {
         final String operator = getOperatorNameFromCloudCertificate(cloudCertFromKeyStore.getSubjectDN());
         final String organization = getOrganizationFromCloudCertificate(cloudCertFromKeyStore.getSubjectDN());
         final String country = getCountryFromCloudCertificate(cloudCertFromKeyStore.getSubjectDN());
-        final String commonName = String.format("CN=%s.%s.%s, OU=%s, O=%s, C=%s",
-                                                baseCommonName, type.getCommonNamePart(), cloudName, operator, organization, country);
-        //final String commonName = String.format("CN=%s.%s.%s", baseCommonName, type.getCommonNamePart(), cloudName);
+        final String commonName = String.format("CN=%s.%s, OU=%s, O=%s, C=%s", type.appendTypeToCN(baseCommonName), cloudName,
+                                                operator, organization, country);
         final X500Name x500Name = new X500Name(commonName);
 
         logger.debug("Building and Signing Certificate Signing Request for {}", x500Name);

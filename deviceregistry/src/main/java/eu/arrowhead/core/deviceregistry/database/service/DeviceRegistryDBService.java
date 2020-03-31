@@ -1,6 +1,5 @@
 package eu.arrowhead.core.deviceregistry.database.service;
 
-import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.SecurityUtilities;
@@ -58,26 +57,21 @@ public class DeviceRegistryDBService {
     //=================================================================================================
     // members
 
-    private static final String COULD_NOT_DELETE_SYSTEM_ERROR_MESSAGE = "Could not delete System, with given parameters";
     private static final String COULD_NOT_DELETE_DEVICE_ERROR_MESSAGE = "Could not delete Device, with given parameters";
-    private static final String PORT_RANGE_ERROR_MESSAGE = "Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".";
 
     private final Logger logger = LogManager.getLogger(DeviceRegistryDBService.class);
 
     private final DeviceRegistryRepository deviceRegistryRepository;
-    private final SystemRepository systemRepository;
     private final DeviceRepository deviceRepository;
     private final SecurityUtilities securityUtilities;
     private final CertificateAuthorityDriver caDriver;
 
     @Autowired
     public DeviceRegistryDBService(final DeviceRegistryRepository deviceRegistryRepository,
-                                   final SystemRepository systemRepository,
                                    final DeviceRepository deviceRepository,
                                    final SecurityUtilities securityUtilities,
                                    final CertificateAuthorityDriver caDriver) {
         this.deviceRegistryRepository = deviceRegistryRepository;
-        this.systemRepository = systemRepository;
         this.deviceRepository = deviceRepository;
         this.securityUtilities = securityUtilities;
         this.caDriver = caDriver;

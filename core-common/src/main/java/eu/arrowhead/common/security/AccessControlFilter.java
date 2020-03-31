@@ -12,6 +12,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
 import eu.arrowhead.common.SecurityUtilities;
+import org.apache.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -68,13 +69,13 @@ public abstract class AccessControlFilter extends ArrowheadFilter {
 	protected void checkClientAuthorized(final String clientCN, final String method, final String requestTarget, final String requestJSON, final Map<String,String[]> queryParams) {
 		if (!Utilities.isKeyStoreCNArrowheadValid(clientCN)) {
 			log.debug("{} is not a valid common name, access denied!", clientCN);
-	        throw new AuthException(clientCN + " is unauthorized to access " + requestTarget);
+	        throw new AuthException(clientCN + " is unauthorized to access " + requestTarget, HttpStatus.SC_UNAUTHORIZED, requestTarget);
 		}
 
 	    // All requests from the local cloud are allowed
 	    if (!Utilities.isKeyStoreCNArrowheadValid(clientCN, getServerCloudCN())) {
 	        log.debug("{} is unauthorized to access {}", clientCN, requestTarget);
-	        throw new AuthException(clientCN + " is unauthorized to access " + requestTarget);
+	        throw new AuthException(clientCN + " is unauthorized to access " + requestTarget, HttpStatus.SC_UNAUTHORIZED, requestTarget);
 	    }
 	}
 	

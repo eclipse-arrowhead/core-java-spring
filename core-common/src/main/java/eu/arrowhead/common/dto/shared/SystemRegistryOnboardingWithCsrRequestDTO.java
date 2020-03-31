@@ -35,11 +35,11 @@ public class SystemRegistryOnboardingWithCsrRequestDTO extends SystemRegistryReq
     }
 
     //-------------------------------------------------------------------------------------------------
-    public String getCertificateRequest() {
+    public String getCertificateSigningRequest() {
         return certificateSigningRequest;
     }
 
-    public void setCertificateRequest(final String certificateSigningRequest) {
+    public void setCertificateSigningRequest(final String certificateSigningRequest) {
         this.certificateSigningRequest = certificateSigningRequest;
     }
 
