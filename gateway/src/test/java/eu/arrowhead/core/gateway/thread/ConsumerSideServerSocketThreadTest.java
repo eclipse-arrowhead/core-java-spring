@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.security.PublicKey;
@@ -34,6 +35,7 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
@@ -44,6 +46,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -161,12 +164,24 @@ public class ConsumerSideServerSocketThreadTest {
 	public void testInitSenderNull() {
 		testingObject.init(null);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitSSLSocketInitializationFailed() {
+		Assert.assertFalse(testingObject.isInitialized());
+		
+		ReflectionTestUtils.setField(testingObject, "sslProperties", null);
+		testingObject.init(getTestMessageProducer());
+		
+		Assert.assertFalse(testingObject.isInitialized());
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testInitOk() {
 		Assert.assertTrue(!testingObject.isInitialized());
 		
+		ReflectionTestUtils.setField(testingObject, "port", 22004);
 		testingObject.init(getTestMessageProducer());
 		
 		Assert.assertTrue(testingObject.isInitialized());
@@ -235,16 +250,18 @@ public class ConsumerSideServerSocketThreadTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testRunWhenInternalExceptionThrown() {
-		final SSLProperties sslProps = getTestSSLPropertiesForThread();
-		ReflectionTestUtils.setField(sslProps, "keyStoreType", "invalid");
-		
-		when(appContext.getBean(SSLProperties.class)).thenReturn(sslProps);
-		
+	public void testRunWhenInternalExceptionThrown() throws IOException {
+		when(appContext.getBean(SSLProperties.class)).thenReturn(getTestSSLPropertiesForThread());
+
 		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq5Jq4tOeFoLqxOqtYcujbCNZina3iuV9+/o8D1R9D0HvgnmlgPlqWwjDSxV7m7SGJpuc/rRXJ85OzqV3rwRHO8A8YWXiabj8EdgEIyqg4SOgTN7oZ7MQUisTpwtWn9K14se4dHt/YE9mUW4en19p/yPUDwdw3ECMJHamy/O+Mh6rbw6AFhYvz6F5rXYB8svkenOuG8TSBFlRkcjdfqQqtl4xlHgmlDNWpHsQ3eFAO72mKQjm2ZhWI1H9CLrJf1NQs2GnKXgHBOM5ET61fEHWN8axGGoSKfvTed5vhhX7l5uwxM+AKQipLNNKjEaQYnyX3TL9zL8I7y+QkhzDa7/5kQIDAQAB";
-		final ConsumerSideServerSocketThread thread = new ConsumerSideServerSocketThread(appContext, 22003, relayClient, getTestSession(), publicKey, "queueId", 60000, "consumer", "test-service");
+		final ConsumerSideServerSocketThread thread = new ConsumerSideServerSocketThread(appContext, 22005, relayClient, getTestSession(), publicKey, "queueId", 60000, "consumer", "test-service");
 
 		thread.init(getTestMessageProducer());
+		
+		final SSLServerSocket sslServerSocket = Mockito.mock(SSLServerSocket.class);
+		when(sslServerSocket.accept()).thenThrow(IOException.class);
+		ReflectionTestUtils.setField(thread, "sslServerSocket", sslServerSocket);
+		
 		thread.run();
 
 		final boolean interrupted = (boolean) ReflectionTestUtils.getField(thread, "interrupted");
