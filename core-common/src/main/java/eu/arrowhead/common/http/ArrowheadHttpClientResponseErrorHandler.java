@@ -39,13 +39,13 @@ public class ArrowheadHttpClientResponseErrorHandler extends DefaultResponseErro
 			logger.debug("Unable to deserialize error message: {}", ex.getMessage());
 			logger.debug("Exception: ", ex);
 		    logger.error("Request failed at {}, response status code: {}", url, response.getRawStatusCode());
-		    throw new ArrowheadException("Unknown error occurred at " + url + ". Check log for possibly more information.", ex);
+		    throw new ArrowheadException("Unknown error occurred at " + url + ". Check log for possibly more information.", response.getRawStatusCode(), ex);
 		}
 		
 		if (dto.getExceptionType() == null) {
 			logger.error("Request failed at {}, response status code: {}", url, response.getRawStatusCode());
 			logger.error("Request failed, error message: {}", dto.getErrorMessage());
-		    throw new ArrowheadException("Unknown error occurred at " + url + ". Check log for possibly more information.");
+		    throw new ArrowheadException("Unknown error occurred at " + url + ". Check log for possibly more information.", response.getRawStatusCode());
 		}
 		
 		logger.debug("Error occured at {}. Returned with {}", url, response.getRawStatusCode());
