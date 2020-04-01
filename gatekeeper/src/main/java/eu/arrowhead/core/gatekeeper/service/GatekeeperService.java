@@ -860,23 +860,27 @@ public class GatekeeperService {
 		for (final OrchestrationResultDTO orchestrationResult : response.getResponse()) {
 			try {				
 				final QoSIntraPingMeasurementResponseDTO pingMeasurement = gatekeeperDriver.getQoSIntraPingMeasurementsForLocalSystem(orchestrationResult.getProvider().getId());
-				orchestrationResult.setQosMeasurements(new QoSMeasurementAttributesFormDTO(null,
-																						   pingMeasurement.isAvailable(),
-																						   pingMeasurement.getLastAccessAt(),
-																						   pingMeasurement.getMinResponseTime(),
-																						   pingMeasurement.getMaxResponseTime(),
-																						   pingMeasurement.getMeanResponseTimeWithTimeout(),
-																						   pingMeasurement.getMeanResponseTimeWithoutTimeout(),
-																						   pingMeasurement.getJitterWithTimeout(),
-																						   pingMeasurement.getJitterWithoutTimeout(),
-																						   pingMeasurement.getSent(),
-																						   pingMeasurement.getReceived(),
-																						   pingMeasurement.getSentAll(),
-																						   pingMeasurement.getReceivedAll(),
-																						   pingMeasurement.getLostPerMeasurementPercent()));
-				updatedResults.add(orchestrationResult);
+				if (pingMeasurement.hasRecord()) {
+					orchestrationResult.setQosMeasurements(new QoSMeasurementAttributesFormDTO(null,
+																							   pingMeasurement.isAvailable(),
+																							   pingMeasurement.getLastAccessAt(),
+																							   pingMeasurement.getMinResponseTime(),
+																							   pingMeasurement.getMaxResponseTime(),
+																							   pingMeasurement.getMeanResponseTimeWithTimeout(),
+																							   pingMeasurement.getMeanResponseTimeWithoutTimeout(),
+																							   pingMeasurement.getJitterWithTimeout(),
+																							   pingMeasurement.getJitterWithoutTimeout(),
+																							   pingMeasurement.getSent(),
+																							   pingMeasurement.getReceived(),
+																							   pingMeasurement.getSentAll(),
+																							   pingMeasurement.getReceivedAll(),
+																							   pingMeasurement.getLostPerMeasurementPercent()));
+					updatedResults.add(orchestrationResult);
+				} else {
+					logger.debug("No measurement available. Provider skipped with id:" + orchestrationResult.getProvider().getId());
+				}
 			} catch (final ArrowheadException ex) {
-				logger.debug("Exception occured during doICN - QoS details request. Provider skipped.");
+				logger.debug("Exception occured during doICN - QoS details request. Provider skipped with id:" + orchestrationResult.getProvider().getId());
 				logger.debug(ex.getMessage());
 			}
 		}
