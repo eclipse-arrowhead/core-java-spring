@@ -6,5 +6,4 @@ import eu.arrowhead.common.testhelper.StandaloneModeInTests;
 
 @Component
 public class StandaloneModeInAuthorizationTests extends StandaloneModeInTests {
-
 }

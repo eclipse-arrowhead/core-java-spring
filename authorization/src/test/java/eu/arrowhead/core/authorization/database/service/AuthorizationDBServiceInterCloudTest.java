@@ -73,7 +73,7 @@ public class AuthorizationDBServiceInterCloudTest {
 	// methods
 	
 	//=================================================================================================
-	//Tests of getAuthorizationInterCloudEntries
+	// Tests of getAuthorizationInterCloudEntries
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -90,7 +90,7 @@ public class AuthorizationDBServiceInterCloudTest {
 	}
 
 	//=================================================================================================
-	//Tests of getAuthorizationInterCloudEntryById
+	// Tests of getAuthorizationInterCloudEntryById
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
@@ -100,7 +100,7 @@ public class AuthorizationDBServiceInterCloudTest {
 	}
 	
 	//=================================================================================================
-	//Tests of removeAuthorizationInterCloudEntryById
+	// Tests of removeAuthorizationInterCloudEntryById
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
@@ -110,7 +110,7 @@ public class AuthorizationDBServiceInterCloudTest {
 	}
 
 	//=================================================================================================
-	//Tests of createBulkAuthorizationInterCloud
+	// Tests of createBulkAuthorizationInterCloud
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
@@ -224,7 +224,7 @@ public class AuthorizationDBServiceInterCloudTest {
 	}
 	
 	//=================================================================================================
-	//Tests of checkAuthorizationInterCloudResponse
+	// Tests of checkAuthorizationInterCloudResponse
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
