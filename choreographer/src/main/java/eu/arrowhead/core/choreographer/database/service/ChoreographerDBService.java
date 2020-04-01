@@ -1,6 +1,5 @@
 package eu.arrowhead.core.choreographer.database.service;
 
-import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerAction;
@@ -26,11 +25,9 @@ import eu.arrowhead.common.exception.InvalidParameterException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.Core;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Sort.Direction;
@@ -409,6 +406,7 @@ public class ChoreographerDBService {
         }
     }
 
+    //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
     public ChoreographerRunningStep setRunningStepStatus(final long runningStepId, final String status, final String message) {
         try {
@@ -563,6 +561,7 @@ public class ChoreographerDBService {
         }
     }
 
+    //-------------------------------------------------------------------------------------------------
     public ChoreographerRunningStep getRunningStepById(final long id) {
         logger.debug("getRunningStepById started...");
 
@@ -581,6 +580,7 @@ public class ChoreographerDBService {
         }
     }
 
+    //-------------------------------------------------------------------------------------------------
     public ChoreographerStep getStepById(final long id) {
         logger.debug("getStepById started...");
 
@@ -599,6 +599,7 @@ public class ChoreographerDBService {
         }
     }
 
+    //-------------------------------------------------------------------------------------------------
     public List<ChoreographerRunningStep> getAllRunningStepsBySessionId(final long sessionId) {
         logger.debug("getAllRunningStepsBySessionId started...");
 

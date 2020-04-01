@@ -181,7 +181,7 @@ public class ChoreographerController {
         return choreographerActionPlanEntriesResponse;
     }
 
-    //=================================================================================================
+    //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Initiate the start of one or more plans.",
             tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses(value = {
@@ -194,15 +194,16 @@ public class ChoreographerController {
     @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
     @ResponseBody public void startPlan(@RequestBody final List<ChoreographerRunPlanRequestDTO> requests) {
         for (final ChoreographerRunPlanRequestDTO request : requests) {
+            logger.debug("startPlan started...");
             ChoreographerSession session = choreographerDBService.initiateSession(request.getId());
             JmsTemplate jmsTemplate = applicationContext.getBean(JmsTemplate.class);
 
-            System.out.println("Sending a message to start-session.");
+            logger.debug("Sending a message to start-session.");
             jmsTemplate.convertAndSend("start-session", new ChoreographerStartSessionDTO(session.getId(), request.getId()));
         }
     }
 
-    //=================================================================================================
+    //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Notify the Choreographer that a step is done in a session.",
         tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses(value = {
@@ -215,13 +216,15 @@ public class ChoreographerController {
     @ResponseStatus(value = org.springframework.http.HttpStatus.OK)
     @ResponseBody public void stepFinished(@RequestBody final List<ChoreographerSessionRunningStepDataDTO> requests) {
         for (final ChoreographerSessionRunningStepDataDTO request : requests) {
+            logger.debug("notifyStepDone started...");
             JmsTemplate jmsTemplate = applicationContext.getBean(JmsTemplate.class);
 
-            System.out.println("Sending message to session-step-done.");
+            logger.debug("Sending message to session-step-done.");
             jmsTemplate.convertAndSend("session-step-done", request);
         }
     }
 
+    //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Notify the Choreographer that a step is done in a session.",
             tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
     @ApiResponses(value = {
@@ -233,18 +236,11 @@ public class ChoreographerController {
     @PostMapping(path = OP_CHOREOGRAPHER_NOTIFY_STEP_DONE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = org.springframework.http.HttpStatus.OK)
     @ResponseBody public void notifyStepDone(@RequestBody final ChoreographerSessionRunningStepDataDTO request) {
+        logger.debug("notifyStepDone started...");
         JmsTemplate jmsTemplate = applicationContext.getBean(JmsTemplate.class);
 
-        System.out.println("Sending message to session-step-done.");
+        logger.debug("Sending message to session-step-done.");
         jmsTemplate.convertAndSend("session-step-done", request);
-
-
-        /*for (final ChoreographerSessionRunningStepDataDTO request : requests) {
-            JmsTemplate jmsTemplate = applicationContext.getBean(JmsTemplate.class);
-
-            System.out.println("Sending message to session-step-done.");
-            jmsTemplate.convertAndSend("session-step-done", request);
-        }*/
     }
 
 
@@ -259,5 +255,4 @@ public class ChoreographerController {
             throw new BadPayloadException("Plan name is null or blank.", HttpStatus.SC_BAD_REQUEST, origin);
         }
     }
-
 }

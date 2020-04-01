@@ -24,6 +24,7 @@ import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jms.annotation.JmsListener;
@@ -58,6 +59,9 @@ public class Receiver {
 
     @Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
     private Map<String,Object> arrowheadContext;
+
+    @Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
+    private boolean sslEnabled;
 
     private final Logger logger = LogManager.getLogger(Receiver.class);
 
@@ -164,17 +168,10 @@ public class Receiver {
         }
     }
 
-     /*
-    //-------------------------------------------------------------------------------------------------
-    public void runFirstStep(ChoreographerStep firstStep, long sessionId) throws InterruptedException {
-        System.out.println("Running " + firstStep.getId() + "     " + firstStep.getName() + "       sessionId: " + sessionId + "!");
-        ChoreographerRunningStep runningStep = insertInitiatedRunningStep(firstStep.getId(), sessionId);
-    }
-     */
-
     //-------------------------------------------------------------------------------------------------
     public void runStep(ChoreographerStep step, long sessionId) throws InterruptedException {
-        System.out.println("Running " + step.getId() + "     " + step.getName() + "       sessionId: " + sessionId + "!");
+        logger.debug("Running " + step.getId() + "     " + step.getName() + "       sessionId: " + sessionId + "!");
+
         ChoreographerRunningStep runningStep = insertInitiatedRunningStep(step.getId(), sessionId);
 
         ServiceQueryFormDTO serviceQuery = new ServiceQueryFormDTO();
@@ -185,9 +182,10 @@ public class Receiver {
         requesterSystem.setAddress(coreSystemRegistrationProperties.getCoreSystemDomainName());
         requesterSystem.setPort(coreSystemRegistrationProperties.getCoreSystemDomainPort());
 
-        //final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
-
-        //requesterSystem.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+        if (sslEnabled) {
+            final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
+            requesterSystem.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+        }
 
         final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO.Builder(requesterSystem)
                                                                                              .requestedService(serviceQuery)
@@ -200,7 +198,7 @@ public class Receiver {
 
         List<OrchestrationResultDTO> orchestrationResultList = orchestrationResponse.getResponse();
 
-        System.out.println(orchestrationResultList);
+        logger.debug(orchestrationResultList);
 
         ChoreographerSessionRunningStepDataDTO runningStepDataDTO = new ChoreographerSessionRunningStepDataDTO(sessionId, runningStep.getId());
 
@@ -211,15 +209,13 @@ public class Receiver {
                     orchestrationResult.getProvider().getPort(),
                     orchestrationResult.getServiceUri());
 
-            System.out.println("runningStepId: " + runningStepDataDTO.getRunningStepId());
-            System.out.println("sessionId: " + runningStepDataDTO.getSessionId());
             httpService.sendRequest(uri, HttpMethod.POST, Void.class, runningStepDataDTO);
         }
     }
 
     //-------------------------------------------------------------------------------------------------
     public ChoreographerRunningStep insertInitiatedRunningStep(final long stepId, final long sessionId) {
-        return choreographerDBService.registerRunningStep(stepId, sessionId, "Initiated", "Step running is initiated and search for provider started.");
+        return choreographerDBService.registerRunningStep(stepId, sessionId, "Running", "Step running is initiated and search for provider started.");
     }
 
     //-------------------------------------------------------------------------------------------------
