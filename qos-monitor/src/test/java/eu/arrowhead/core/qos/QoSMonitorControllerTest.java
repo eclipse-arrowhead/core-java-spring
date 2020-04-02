@@ -47,11 +47,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.internal.CloudRelayFormDTO;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudSystemFormDTO;
+import eu.arrowhead.common.dto.internal.QoSBestRelayRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSInterDirectMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterDirectPingMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterDirectPingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementListResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSInterRelayMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
@@ -60,14 +65,18 @@ import eu.arrowhead.common.dto.internal.QoSMonitorSenderConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
+import eu.arrowhead.common.dto.internal.RelayResponseDTO;
+import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
+import eu.arrowhead.common.dto.shared.QoSMeasurementStatus;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.service.PingService;
+import eu.arrowhead.core.qos.service.RelayEchoService;
 import eu.arrowhead.core.qos.service.RelayTestService;
 
 @RunWith(SpringRunner.class)
@@ -84,6 +93,9 @@ public class QoSMonitorControllerTest {
 	private static final String GET_QOS_MONITOR_INTRA_PING_MEASUREMENTS_BY_SYSTEM_ID_URI = CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT + "/{" + PATH_VARIABLE_ID + "}";
 	private static final String QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_MGMT_URI = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT;
 	private static final String QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_BY_CLOUD_AND_SYSTEM_MGMT_URI = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT + "/pair_results";
+	private static final String QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_URI = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT;
+	private static final String QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT + "/pair_results";
+	private static final String QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT + "/best_relay";
 	private static final String QOS_MONITOR_PUBLIC_KEY_URI = CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_KEY_URI;
 	private static final String QOS_MONITOR_INIT_RELAY_TEST_URI = CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INIT_RELAY_TEST_URI;
 	private static final String QOS_MONITOR_JOIN_RELAY_TEST_URI = CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_JOIN_RELAY_TEST_URI;
@@ -105,6 +117,9 @@ public class QoSMonitorControllerTest {
 	
 	@MockBean(name = "mockPingService")
 	private PingService pingService;
+	
+	@MockBean(name = "mockRelayEchoService")
+	private RelayEchoService relayEchoService;
 	
 	@MockBean(name = "mockRelayTestService")
 	private RelayTestService relayTestService;
@@ -548,6 +563,372 @@ public class QoSMonitorControllerTest {
 	}
 	
 	// getInterDirectPingMeasurementByCloudAndSystem use the same methods as getMgmtInterDirectPingMeasurementByCloudAndSystem so we skip it
+	
+	//=================================================================================================
+	// Test of getMgmtInterRelayEchoMeasurements
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getMgmtInterRelayEchoMeasurementsWithoutParametersTest() throws Exception {
+		final QoSInterRelayEchoMeasurementListResponseDTO responseDTO = getInterRelayEchoMeasurementListResponseDTOForTest(3);
+
+		when(qoSDBService.getInterRelayEchoMeasurementsResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(responseDTO);
+
+		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_URI)
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
+
+		final QoSInterRelayEchoMeasurementListResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), QoSInterRelayEchoMeasurementListResponseDTO.class);
+		assertEquals(responseDTO.getData().size(), responseBody.getData().size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getMgmtInterRelayEchoMeasurementsWithPageAndSizeParametersTest() throws Exception {
+		final int responseSize = 3;
+		final QoSInterRelayEchoMeasurementListResponseDTO responseDTO = getInterRelayEchoMeasurementListResponseDTOForTest(responseSize);
+
+		when(qoSDBService.getInterRelayEchoMeasurementsResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(responseDTO);
+
+		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_URI)
+											   .param("page", "0")
+											   .param("item_per_page", String.valueOf(responseSize))
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
+
+		final QoSInterRelayEchoMeasurementListResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), QoSInterRelayEchoMeasurementListResponseDTO.class);
+		assertEquals(responseDTO.getData().size(), responseBody.getData().size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getMgmtInterRelayEchoMeasurementsWithNullPageButDefinedSizeParameterTest() throws Exception {
+		final int responseSize = 3;
+		final QoSInterRelayEchoMeasurementListResponseDTO responseDTO = getInterRelayEchoMeasurementListResponseDTOForTest(responseSize);
+
+		when(qoSDBService.getInterRelayEchoMeasurementsResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(responseDTO);
+
+		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_URI)
+									   .param("item_per_page", String.valueOf(responseSize))
+									   .accept(MediaType.APPLICATION_JSON))
+									   .andExpect(status().isBadRequest())
+									   .andReturn();
+
+		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+		assertTrue(responseBody.getErrorMessage().contains(PAGE_OR_SIZE_ERROR_MESSAGE));
+		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_URI, responseBody.getOrigin());
+	}
+	
+	//=================================================================================================
+	// Test of queryMgmtInterRelayEchoMeasurementByCloudAndRelay
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getMgmtInterRelayEchoMeasurementByCloudAndRelayTest() throws Exception {
+		final CloudResponseDTO cloud = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "fddddbvf", null, null);
+		final RelayResponseDTO relay = new RelayResponseDTO(1L, "2.2.2.2", 20000, true, false, RelayType.GATEWAY_RELAY, null, null);
+		final CloudRelayFormDTO requestDTO = new CloudRelayFormDTO(cloud, relay);
+		
+		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
+		when(qoSDBService.getInterRelayEchoMeasurementByCloudAndRealyResponse(any(), any())).thenReturn(responseDTO);
+		
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI)
+									     	   .contentType(MediaType.APPLICATION_JSON)
+									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
+									     	   .accept(MediaType.APPLICATION_JSON))
+									    	   .andExpect(status().isOk())
+									    	   .andReturn();
+		
+		final QoSInterRelayEchoMeasurementResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), QoSInterRelayEchoMeasurementResponseDTO.class);
+		assertEquals(responseDTO.getId(), responseBody.getId());
+		assertEquals(responseDTO.getMaxResponseTime(), responseBody.getMaxResponseTime());		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getMgmtInterRelayEchoMeasurementByCloudAndRelayWithNullCloudTest() throws Exception {
+		final RelayResponseDTO relay = new RelayResponseDTO(1L, "2.2.2.2", 20000, true, false, RelayType.GATEWAY_RELAY, null, null);
+		final CloudRelayFormDTO requestDTO = new CloudRelayFormDTO(null, relay);
+		
+		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
+		when(qoSDBService.getInterRelayEchoMeasurementByCloudAndRealyResponse(any(), any())).thenReturn(responseDTO);
+		
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI)
+									     	   .contentType(MediaType.APPLICATION_JSON)
+									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
+									     	   .accept(MediaType.APPLICATION_JSON))
+									    	   .andExpect(status().isBadRequest())
+									    	   .andReturn();
+		
+		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI, responseBody.getOrigin());		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getMgmtInterRelayEchoMeasurementByCloudAndRelayWithNullRelayTest() throws Exception {
+		final CloudResponseDTO cloud = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "fddddbvf", null, null);
+		final CloudRelayFormDTO requestDTO = new CloudRelayFormDTO(cloud, null);
+		
+		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
+		when(qoSDBService.getInterRelayEchoMeasurementByCloudAndRealyResponse(any(), any())).thenReturn(responseDTO);
+		
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI)
+									     	   .contentType(MediaType.APPLICATION_JSON)
+									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
+									     	   .accept(MediaType.APPLICATION_JSON))
+									    	   .andExpect(status().isBadRequest())
+									    	   .andReturn();
+		
+		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI, responseBody.getOrigin());		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getMgmtInterRelayEchoMeasurementByCloudAndRelayWithNullCloudOperatorTest() throws Exception {
+		final CloudResponseDTO cloud = new CloudResponseDTO(1L, null, "test-n", true, true, false, "fddddbvf", null, null);
+		final RelayResponseDTO relay = new RelayResponseDTO(1L, "2.2.2.2", 20000, true, false, RelayType.GATEWAY_RELAY, null, null);
+		final CloudRelayFormDTO requestDTO = new CloudRelayFormDTO(cloud, relay);
+		
+		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
+		when(qoSDBService.getInterRelayEchoMeasurementByCloudAndRealyResponse(any(), any())).thenReturn(responseDTO);
+		
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI)
+									     	   .contentType(MediaType.APPLICATION_JSON)
+									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
+									     	   .accept(MediaType.APPLICATION_JSON))
+									    	   .andExpect(status().isBadRequest())
+									    	   .andReturn();
+		
+		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI, responseBody.getOrigin());		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getMgmtInterRelayEchoMeasurementByCloudAndRelayWithNullCloudNameTest() throws Exception {
+		final CloudResponseDTO cloud = new CloudResponseDTO(1L, "test-op", null, true, true, false, "fddddbvf", null, null);
+		final RelayResponseDTO relay = new RelayResponseDTO(1L, "2.2.2.2", 20000, true, false, RelayType.GATEWAY_RELAY, null, null);
+		final CloudRelayFormDTO requestDTO = new CloudRelayFormDTO(cloud, relay);
+		
+		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
+		when(qoSDBService.getInterRelayEchoMeasurementByCloudAndRealyResponse(any(), any())).thenReturn(responseDTO);
+		
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI)
+									     	   .contentType(MediaType.APPLICATION_JSON)
+									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
+									     	   .accept(MediaType.APPLICATION_JSON))
+									    	   .andExpect(status().isBadRequest())
+									    	   .andReturn();
+		
+		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI, responseBody.getOrigin());		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getMgmtInterRelayEchoMeasurementByCloudAndRelayWithNullRelayAddressTest() throws Exception {
+		final CloudResponseDTO cloud = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "fddddbvf", null, null);
+		final RelayResponseDTO relay = new RelayResponseDTO(1L, null, 20000, true, false, RelayType.GATEWAY_RELAY, null, null);
+		final CloudRelayFormDTO requestDTO = new CloudRelayFormDTO(cloud, relay);
+		
+		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
+		when(qoSDBService.getInterRelayEchoMeasurementByCloudAndRealyResponse(any(), any())).thenReturn(responseDTO);
+		
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI)
+									     	   .contentType(MediaType.APPLICATION_JSON)
+									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
+									     	   .accept(MediaType.APPLICATION_JSON))
+									    	   .andExpect(status().isBadRequest())
+									    	   .andReturn();
+		
+		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI, responseBody.getOrigin());		
+	}
+	
+	//=================================================================================================
+	// Test of queryMgmtBestInterRelayEchoMeasurementByCloud
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void queryMgmtBestInterRelayEchoMeasurementByCloudTest() throws Exception {
+		final CloudResponseDTO cloud = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "fddddbvf", null, null);
+		final QoSBestRelayRequestDTO requestDTO = new QoSBestRelayRequestDTO(cloud, QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT.name());
+		
+		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
+		when(qoSDBService.getBestInterRelayEchoMeasurementByCloudAndAttributeResponse(any(), any())).thenReturn(responseDTO);
+		
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI)
+									     	   .contentType(MediaType.APPLICATION_JSON)
+									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
+									     	   .accept(MediaType.APPLICATION_JSON))
+									    	   .andExpect(status().isOk())
+									    	   .andReturn();
+		
+		final QoSInterRelayEchoMeasurementResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), QoSInterRelayEchoMeasurementResponseDTO.class);
+		assertEquals(responseDTO.getId(), responseBody.getId());
+		assertEquals(responseDTO.getMaxResponseTime(), responseBody.getMaxResponseTime());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void queryMgmtBestInterRelayEchoMeasurementByCloudWithNullCloudTest() throws Exception {
+		final QoSBestRelayRequestDTO requestDTO = new QoSBestRelayRequestDTO(null, QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT.name());
+		
+		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
+		when(qoSDBService.getBestInterRelayEchoMeasurementByCloudAndAttributeResponse(any(), any())).thenReturn(responseDTO);
+		
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI)
+									     	   .contentType(MediaType.APPLICATION_JSON)
+									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
+									     	   .accept(MediaType.APPLICATION_JSON))
+									    	   .andExpect(status().isBadRequest())
+									    	   .andReturn();
+		
+		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI, responseBody.getOrigin());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void queryMgmtBestInterRelayEchoMeasurementByCloudWithNullCloudOperatorTest() throws Exception {
+		final CloudResponseDTO cloud = new CloudResponseDTO(1L, null, "test-n", true, true, false, "fddddbvf", null, null);
+		final QoSBestRelayRequestDTO requestDTO = new QoSBestRelayRequestDTO(cloud, QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT.name());
+		
+		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
+		when(qoSDBService.getBestInterRelayEchoMeasurementByCloudAndAttributeResponse(any(), any())).thenReturn(responseDTO);
+		
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI)
+									     	   .contentType(MediaType.APPLICATION_JSON)
+									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
+									     	   .accept(MediaType.APPLICATION_JSON))
+									    	   .andExpect(status().isBadRequest())
+									    	   .andReturn();
+		
+		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI, responseBody.getOrigin());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void queryMgmtBestInterRelayEchoMeasurementByCloudWithNullCloudNameTest() throws Exception {
+		final CloudResponseDTO cloud = new CloudResponseDTO(1L, "test-op", null, true, true, false, "fddddbvf", null, null);
+		final QoSBestRelayRequestDTO requestDTO = new QoSBestRelayRequestDTO(cloud, QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT.name());
+		
+		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
+		when(qoSDBService.getBestInterRelayEchoMeasurementByCloudAndAttributeResponse(any(), any())).thenReturn(responseDTO);
+		
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI)
+									     	   .contentType(MediaType.APPLICATION_JSON)
+									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
+									     	   .accept(MediaType.APPLICATION_JSON))
+									    	   .andExpect(status().isBadRequest())
+									    	   .andReturn();
+		
+		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI, responseBody.getOrigin());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void queryMgmtBestInterRelayEchoMeasurementByCloudWithNullAttributeTest() throws Exception {
+		final CloudResponseDTO cloud = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "fddddbvf", null, null);
+		final QoSBestRelayRequestDTO requestDTO = new QoSBestRelayRequestDTO(cloud, null);
+		
+		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
+		when(qoSDBService.getBestInterRelayEchoMeasurementByCloudAndAttributeResponse(any(), any())).thenReturn(responseDTO);
+		
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI)
+									     	   .contentType(MediaType.APPLICATION_JSON)
+									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
+									     	   .accept(MediaType.APPLICATION_JSON))
+									    	   .andExpect(status().isBadRequest())
+									    	   .andReturn();
+		
+		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI, responseBody.getOrigin());
+	}
+	
+	//=================================================================================================
+	// Test of queryInterRelayEchoMeasurementByCloud
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void queryInterRelayEchoMeasurementByCloudTest() throws Exception {
+		final CloudRequestDTO requestDTO = new CloudRequestDTO();
+		requestDTO.setOperator("test-op");
+		requestDTO.setName("test-n");
+		
+		final QoSInterRelayEchoMeasurementListResponseDTO responseDTO = getInterRelayEchoMeasurementListResponseDTOForTest(3);
+		when(relayEchoService.getInterRelayEchoMeasurements(any())).thenReturn(responseDTO);
+		
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT)
+									     	   .contentType(MediaType.APPLICATION_JSON)
+									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
+									     	   .accept(MediaType.APPLICATION_JSON))
+									    	   .andExpect(status().isOk())
+									    	   .andReturn();
+		
+		final QoSInterRelayEchoMeasurementListResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), QoSInterRelayEchoMeasurementListResponseDTO.class);
+		assertEquals(responseDTO.getData().size(), responseBody.getData().size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void queryInterRelayEchoMeasurementByCloudWithNullCloudOperatorTest() throws Exception {
+		final CloudRequestDTO requestDTO = new CloudRequestDTO();
+		requestDTO.setOperator(null);
+		requestDTO.setName("test-n");
+		
+		final QoSInterRelayEchoMeasurementListResponseDTO responseDTO = getInterRelayEchoMeasurementListResponseDTOForTest(3);
+		when(relayEchoService.getInterRelayEchoMeasurements(any())).thenReturn(responseDTO);
+		
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT)
+									     	   .contentType(MediaType.APPLICATION_JSON)
+									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
+									     	   .accept(MediaType.APPLICATION_JSON))
+									    	   .andExpect(status().isBadRequest())
+									    	   .andReturn();
+		
+		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+		assertEquals(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT, responseBody.getOrigin());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void queryInterRelayEchoMeasurementByCloudWithNullCloudNameTest() throws Exception {
+		final CloudRequestDTO requestDTO = new CloudRequestDTO();
+		requestDTO.setOperator("test-op");
+		requestDTO.setName(null);
+		
+		final QoSInterRelayEchoMeasurementListResponseDTO responseDTO = getInterRelayEchoMeasurementListResponseDTOForTest(3);
+		when(relayEchoService.getInterRelayEchoMeasurements(any())).thenReturn(responseDTO);
+		
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT)
+									     	   .contentType(MediaType.APPLICATION_JSON)
+									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
+									     	   .accept(MediaType.APPLICATION_JSON))
+									    	   .andExpect(status().isBadRequest())
+									    	   .andReturn();
+		
+		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+		assertEquals(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT, responseBody.getOrigin());
+	}
 	
 	//=================================================================================================
 	// Test of getPublicKey
@@ -1274,6 +1655,55 @@ public class QoSMonitorControllerTest {
 														ZonedDateTime.now(),
 														ZonedDateTime.now(),
 														ZonedDateTime.now());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private QoSInterRelayEchoMeasurementListResponseDTO getInterRelayEchoMeasurementListResponseDTOForTest(final int responseSize) {
+		final List<QoSInterRelayEchoMeasurementResponseDTO> pingMeasurementList = new ArrayList<>(responseSize);
+
+		for (int i = 0; i < responseSize; i++) {
+			pingMeasurementList.add(getInterRelayEchoMeasurementResponseDTOForTest());
+		}
+
+		return new QoSInterRelayEchoMeasurementListResponseDTO(pingMeasurementList, responseSize);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private QoSInterRelayEchoMeasurementResponseDTO getInterRelayEchoMeasurementResponseDTOForTest() {
+		final QoSInterRelayMeasurementResponseDTO interRelayMeasurement = getQoSInterRelayMeasurementResponseDTOForTest(QoSMeasurementType.PING);
+
+		final QoSInterRelayEchoMeasurementResponseDTO relayMeasurementResponseDTO  = new QoSInterRelayEchoMeasurementResponseDTO();
+		relayMeasurementResponseDTO.setId(1L);
+		relayMeasurementResponseDTO.setMeasurement(interRelayMeasurement);
+		relayMeasurementResponseDTO.setLastAccessAt(ZonedDateTime.now());
+		relayMeasurementResponseDTO.setMinResponseTime(1);
+		relayMeasurementResponseDTO.setMaxResponseTime(1);
+		relayMeasurementResponseDTO.setMeanResponseTimeWithTimeout(1);
+		relayMeasurementResponseDTO.setMeanResponseTimeWithoutTimeout(1);
+		relayMeasurementResponseDTO.setJitterWithTimeout(0);
+		relayMeasurementResponseDTO.setJitterWithoutTimeout(0);
+		relayMeasurementResponseDTO.setLostPerMeasurementPercent(0);
+		relayMeasurementResponseDTO.setSent(35);
+		relayMeasurementResponseDTO.setReceived(35);
+		relayMeasurementResponseDTO.setCountStartedAt(ZonedDateTime.now());
+		relayMeasurementResponseDTO.setSentAll(35);
+		relayMeasurementResponseDTO.setReceivedAll(35);
+		relayMeasurementResponseDTO.setCreatedAt(ZonedDateTime.now());
+		relayMeasurementResponseDTO.setUpdatedAt(ZonedDateTime.now());
+
+		return relayMeasurementResponseDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private QoSInterRelayMeasurementResponseDTO getQoSInterRelayMeasurementResponseDTOForTest(final QoSMeasurementType type) {
+		return new QoSInterRelayMeasurementResponseDTO(1L,
+													   new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "fddddbvf", null, null),
+													   new RelayResponseDTO(1L, "2.2.2.2", 20000, true, false, RelayType.GATEWAY_RELAY, null, null),
+													   type,
+													   QoSMeasurementStatus.FINISHED,
+													   ZonedDateTime.now(),
+													   ZonedDateTime.now(),
+													   ZonedDateTime.now());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
