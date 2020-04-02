@@ -283,7 +283,7 @@ public class QoSMonitorController {
 																							   		     @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
 		logger.debug("New getInterDirectPingMeasurements request recieved with page: {} and item_per page: {}", page, size);
 
-		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTRA_PING_MEASUREMENTS_MGMT_URI);
+		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_MGMT_URI);
 		final QoSInterDirectPingMeasurementListResponseDTO measurementResponse = qosDBService.getInterDirectPingMeasurementsPageResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), 
 																												 						 validParameters.getValidatedDirecion(), sortField);
 		logger.debug("Measurements  with page: {} and item_per page: {} retrieved successfully", page, size);
