@@ -107,7 +107,7 @@ public class RelayEchoTask implements Job {
 		
 		ZonedDateTime latestMeasurementTime = ZonedDateTime.now().plusHours(1);
 		for (final CloudWithRelaysResponseDTO cloud : cloudsWithoutDirectAccess) {
-			for (final RelayResponseDTO relay : cloud.getGatewayRelays()) {
+			for (final RelayResponseDTO relay : cloud.getGatekeeperRelays()) {
 				final Optional<QoSInterRelayMeasurement> measurementOpt = qosDBService.getInterRelayMeasurement(cloud, relay, QoSMeasurementType.RELAY_ECHO);
 				if (measurementOpt.isEmpty() || measurementOpt.get().getStatus() == QoSMeasurementStatus.NEW) {
 					proposal.setTargetCloud(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloud));
