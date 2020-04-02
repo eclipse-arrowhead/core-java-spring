@@ -623,7 +623,7 @@ public class DTOConverter {
 	//-------------------------------------------------------------------------------------------------
 	public static Relay convertRelayResponseDTOToRelay(final RelayResponseDTO dto) {
 		Assert.notNull(dto, "RelayResponseDTO is null.");
-		Assert.isTrue(Utilities.isEmpty(dto.getAddress()), "RelayResponseDTO.address is null or empty.");
+		Assert.isTrue(!Utilities.isEmpty(dto.getAddress()), "RelayResponseDTO.address is null or empty.");
 		Assert.notNull(dto.getType(), "RelayResponseDTO.type is null.");
 		
 		final Relay relay = new Relay();
