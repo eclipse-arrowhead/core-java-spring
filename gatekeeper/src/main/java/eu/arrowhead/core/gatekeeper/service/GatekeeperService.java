@@ -105,6 +105,8 @@ public class GatekeeperService {
 	private RelayMatchmakingAlgorithm gatewayMatchmaker;
 	
 	private final long qosReservationPufferSeconds = 5;
+	
+	private final String CLOUD_HAS_NO_RELAY_WARNING_MESSAGE = "The following cloud do not have a relay: ";
 
 	//=================================================================================================
 	// methods
@@ -441,7 +443,14 @@ public class GatekeeperService {
 		final List<Cloud> cloudList = new ArrayList<>();
 		for (final CloudRequestDTO cloudRequestDTO : request) {
 			validateCloudRequest(cloudRequestDTO);
-			cloudList.add(gatekeeperDBService.getCloudByOperatorAndName(cloudRequestDTO.getOperator(), cloudRequestDTO.getName()));
+			final Cloud cloud = gatekeeperDBService.getCloudByOperatorAndName(cloudRequestDTO.getOperator(), cloudRequestDTO.getName());
+			if (!cloud.getOwnCloud() && cloud.getNeighbor()) {
+				if(cloud.getGatekeeperRelays().isEmpty()) {
+					logger.info(CLOUD_HAS_NO_RELAY_WARNING_MESSAGE + cloudRequestDTO.getName() + "." + cloudRequestDTO.getOperator());
+				}else {
+					cloudList.add(cloud);
+				}
+			}
 		}
 		
 		final List<ErrorWrapperDTO> atcAnswers = gatekeeperDriver.sendAccessTypesCollectionRequest(cloudList);
