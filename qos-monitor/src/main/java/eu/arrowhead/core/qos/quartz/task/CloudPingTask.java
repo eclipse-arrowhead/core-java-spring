@@ -274,8 +274,8 @@ public class CloudPingTask implements Job {
 
 			sumOfDiffsForJitterWithTimeout += Math.pow( (duration - meanResponseTimeWithTimeout), 2);
 		}
-		final double jitterWithTimeout = meanResponseTimeWithoutTimeoutMembersCount < 1 ? INVALID_CALCULATION_VALUE : Math.sqrt(sumOfDiffsForJitterWithTimeout / meanResponseTimeWithoutTimeoutMembersCount);
-		final double jitterWithoutTimeout = responseList.size() < 1 ? INVALID_CALCULATION_VALUE : Math.sqrt(sumOfDiffsForJitterWithoutTimeout / responseList.size());
+		final double jitterWithTimeout = responseList.size() < 1 ? INVALID_CALCULATION_VALUE : Math.sqrt(sumOfDiffsForJitterWithTimeout / responseList.size());
+		final double jitterWithoutTimeout =  meanResponseTimeWithoutTimeoutMembersCount < 1 ? INVALID_CALCULATION_VALUE : Math.sqrt(sumOfDiffsForJitterWithoutTimeout / meanResponseTimeWithoutTimeoutMembersCount );
 
 		final PingMeasurementCalculationsDTO calculations = new PingMeasurementCalculationsDTO();
 		calculations.setAvailable(available);
