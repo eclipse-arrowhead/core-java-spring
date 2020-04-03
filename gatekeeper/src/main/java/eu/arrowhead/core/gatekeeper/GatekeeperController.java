@@ -32,6 +32,7 @@ import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.dto.internal.CloudAccessListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudRelaysAssignmentRequestDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysAndPublicRelaysListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
@@ -501,8 +502,9 @@ public class GatekeeperController {
 		return result;
 	}
 	
+
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = GET_PULL_CLOUDS_DESCRIPTION, response = CloudWithRelaysListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiOperation(value = GET_PULL_CLOUDS_DESCRIPTION, response = CloudWithRelaysAndPublicRelaysListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_CLOUDS_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CLOUDS_HTTP_400_MESSAGE),
@@ -510,9 +512,9 @@ public class GatekeeperController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path = CommonConstants.OP_GATEKEEPER_PULL_CLOUDS_SERVICE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public CloudWithRelaysListResponseDTO pullClouds() {
+	@ResponseBody public CloudWithRelaysAndPublicRelaysListResponseDTO pullClouds() {
 		logger.debug("new pullClouds request received");
-		final CloudWithRelaysListResponseDTO cloudsResponse = gatekeeperDBService.getCloudsResponse(-1, -1, null, null);
+		final CloudWithRelaysAndPublicRelaysListResponseDTO cloudsResponse = gatekeeperDBService.getCloudsWithPublicRelaysResponse(-1, -1, null, null);
 		logger.debug("pullClouds request successfully finished");
 		return cloudsResponse;
 	}
