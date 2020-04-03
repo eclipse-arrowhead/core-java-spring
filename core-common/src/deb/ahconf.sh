@@ -194,7 +194,7 @@ ah_subject_alternative_names() {
     host=${1}
     ip=${2}
 
-    san="IP:127.0.0.1,DNS:localhost,DNS:${host},IP:${ip}"
+    local san="IP:127.0.0.1,DNS:localhost,DNS:${host},IP:${ip}"
     
     if [ ! -z ${AH_DOMAIN_NAME} ]; then
         if ah_ip_valid ${AH_DOMAIN_NAME}; then
@@ -204,7 +204,7 @@ ah_subject_alternative_names() {
         fi
     fi
 
-    return san
+    echo "${san}"
 }
 
 ah_cert_signed_system () {
@@ -235,7 +235,7 @@ ah_cert_signed_system () {
     src_file="${AH_CLOUDS_DIR}/${AH_CLOUD_NAME}.p12"
 
     if [ ! -f "${file}" ]; then
-		san=ah_subject_alternative_names ${host} ${ip}
+		san=$(ah_subject_alternative_names ${host} ${ip})
 		
 		ah_cert ${path} ${name} "${name}.${AH_CLOUD_NAME}.${AH_OPERATOR}.arrowhead.eu" ${passwd}
 
@@ -320,7 +320,7 @@ ah_ca_keystore () {
     ca_keystore="${ca_sys_dir}/${ca_sys_name}.p12"
 
     if [ ! -f "${ca_keystore}" ]; then
-        san=ah_subject_alternative_names ${host} ${ip}
+        san=$(ah_subject_alternative_names ${host} ${ip})
         
         # generate CA system keypair
         ah_cert ${ca_sys_dir} ${ca_sys_name} "${ca_sys_name}.${AH_CLOUD_NAME}.${AH_OPERATOR}.arrowhead.eu" ${ca_password}
