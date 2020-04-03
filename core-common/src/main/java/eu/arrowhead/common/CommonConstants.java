@@ -164,10 +164,10 @@ public class CommonConstants {
 	public static final String DISABLE_HOSTNAME_VERIFIER = "disable.hostname.verifier";
 	public static final String $DISABLE_HOSTNAME_VERIFIER_WD = "${" + DISABLE_HOSTNAME_VERIFIER + ":" + Defaults.DEFAULT_DISABLE_HOSTNAME_VERIFIER + "}";
 	
-	public static final String CA_CERT_VALIDITY_NEG_OFFSET_MILLIS = "ca.validity.negative-offest-millis";
-	public static final String $CA_CERT_VALIDITY_NEG_OFFSET_MILLIS = "${" + CA_CERT_VALIDITY_NEG_OFFSET_MILLIS + ":" + Defaults.DEFAULT_CA_CERT_VALIDITY_NEG_OFFSET_MILLIS + "}";
-	public static final String CA_CERT_VALIDITY_POS_OFFSET_MILLIS = "ca.validity.positive-offest-millis";
-	public static final String $CA_CERT_VALIDITY_POS_OFFSET_MILLIS = "${" + CA_CERT_VALIDITY_POS_OFFSET_MILLIS + ":" + Defaults.DEFAULT_CA_CERT_VALIDITY_POS_OFFSET_MILLIS + "}";
+	public static final String CA_CERT_VALIDITY_NEG_OFFSET_MINUTES = "ca.validity.negative-offest-minutes";
+	public static final String $CA_CERT_VALIDITY_NEG_OFFSET_MINUTES = "${" + CA_CERT_VALIDITY_NEG_OFFSET_MINUTES + ":" + Defaults.DEFAULT_CA_CERT_VALIDITY_NEG_OFFSET_MINUTES + "}";
+	public static final String CA_CERT_VALIDITY_POS_OFFSET_MINUTES = "ca.validity.positive-offest-minutes";
+	public static final String $CA_CERT_VALIDITY_POS_OFFSET_MINUTES = "${" + CA_CERT_VALIDITY_POS_OFFSET_MINUTES + ":" + Defaults.DEFAULT_CA_CERT_VALIDITY_POS_OFFSET_MINUTES + "}";
 
 	public static final String JWT_CLAIM_CONSUMER_ID = "cid";
 	public static final String JWT_CLAIM_SERVICE_ID = "sid";
