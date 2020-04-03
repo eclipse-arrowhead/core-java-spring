@@ -405,11 +405,15 @@ public class Utilities {
 		Assert.notNull(keystore, "Key store is not defined.");
 
 		try {
-			final Enumeration<String> enumeration = keystore.aliases();
+			// find root certificate based on "arrowhead.eu" common name
+			Enumeration<String> enumeration = keystore.aliases();
 			while (enumeration.hasMoreElements()) {
 				final String alias = enumeration.nextElement();
-				final String[] aliasParts = alias.split("\\.");
-				if (aliasParts.length == 2 && aliasParts[0].equals(AH_MASTER_NAME) && aliasParts[1].equals(AH_MASTER_SUFFIX)) {
+				final X509Certificate certificate = (X509Certificate) keystore.getCertificate(alias);
+				final String commonName = getCertCNFromSubject(certificate.getSubjectDN().getName());
+				Assert.notNull(commonName, "Certificate without commonName is not allowed");
+				final String[] cnParts = commonName.split("\\.");
+				if (cnParts.length == 2 && cnParts[0].equals(AH_MASTER_NAME) && cnParts[1].equals(AH_MASTER_SUFFIX)) {
 					return (X509Certificate) keystore.getCertificate(alias);
 				}
 			}
