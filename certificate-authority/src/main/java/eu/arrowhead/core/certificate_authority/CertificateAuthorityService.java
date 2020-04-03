@@ -48,7 +48,6 @@ public class CertificateAuthorityService {
     @PostConstruct
     private void init() {
         random = new SecureRandom();
-        random.reseed();
         keyStore = getKeyStore();
 
         rootCertificate = Utilities.getRootCertFromKeyStore(keyStore);
