@@ -69,7 +69,7 @@ public class CertificateAuthorityService {
 
         logger.info("Signing certificate for " + csr.getSubject().toString() + "...");
 
-        final PrivateKey cloudPrivateKey = Utilities.getPrivateKey(keyStore, cloudCommonName,
+        final PrivateKey cloudPrivateKey = Utilities.getCloudPrivateKey(keyStore, cloudCommonName,
                 sslProperties.getKeyPassword());
 
         final X509Certificate clientCertificate = buildCertificate(csr, cloudPrivateKey, cloudCertificate);
