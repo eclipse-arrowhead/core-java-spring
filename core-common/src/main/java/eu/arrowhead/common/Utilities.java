@@ -381,12 +381,14 @@ public class Utilities {
 		Assert.notNull(keystore, "Key store is not defined.");
 
 		try {
+			// find cloud certificate with {cloudname}.{operator}.arrowhead.eu common name
 			final Enumeration<String> enumeration = keystore.aliases();
 			while (enumeration.hasMoreElements()) {
 				final String alias = enumeration.nextElement();
-				final String[] aliasParts = alias.split("\\.");
-				if (aliasParts.length == 4 && aliasParts[2].equals(AH_MASTER_NAME) && aliasParts[3].equals(AH_MASTER_SUFFIX)) {
-					return (X509Certificate) keystore.getCertificate(alias);
+				final X509Certificate certificate = (X509Certificate) keystore.getCertificate(alias);
+
+				if (isCloudCertificate(certificate)) {
+					return certificate;
 				}
 			}
 
