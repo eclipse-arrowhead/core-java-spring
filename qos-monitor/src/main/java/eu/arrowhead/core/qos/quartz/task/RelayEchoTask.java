@@ -57,6 +57,8 @@ public class RelayEchoTask implements Job {
 	private Map<String,Object> arrowheadContext;
 	
 	private final Logger logger = LogManager.getLogger(RelayEchoTask.class);
+	
+	private final String CLOUD_HAS_NO_RELAY_WARNING_MESSAGE = "The following cloud do not have a relay: ";
 
 	//=================================================================================================
 	// methods
@@ -124,18 +126,22 @@ public class RelayEchoTask implements Job {
 					}
 				}
 			}else {
-				for (final RelayResponseDTO relay : cloud.getPublicRelays()) {
-					final Optional<QoSInterRelayMeasurement> measurementOpt = qosDBService.getInterRelayMeasurement(cloud, relay, QoSMeasurementType.RELAY_ECHO);
-					if (measurementOpt.isEmpty() || measurementOpt.get().getStatus() == QoSMeasurementStatus.NEW) {
-						proposal.setTargetCloud(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloud));
-						proposal.setRelay(DTOConverter.convertRelayResponseDTOToRelayRequestDTO(relay));
-						return proposal;
-					} else if (measurementOpt.isPresent() && measurementOpt.get().getStatus() != QoSMeasurementStatus.PENDING) {
-						final QoSInterRelayMeasurement echoMeasurement = measurementOpt.get();
-						if (echoMeasurement.getLastMeasurementAt().isBefore(latestMeasurementTime)) {
+				if (cloud.getPublicRelays() == null || cloud.getPublicRelays().isEmpty()) {
+					logger.info( CLOUD_HAS_NO_RELAY_WARNING_MESSAGE + cloud.getName() + "." + cloud.getOperator());
+				}else {
+					for (final RelayResponseDTO relay : cloud.getPublicRelays()) {
+						final Optional<QoSInterRelayMeasurement> measurementOpt = qosDBService.getInterRelayMeasurement(cloud, relay, QoSMeasurementType.RELAY_ECHO);
+						if (measurementOpt.isEmpty() || measurementOpt.get().getStatus() == QoSMeasurementStatus.NEW) {
 							proposal.setTargetCloud(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloud));
 							proposal.setRelay(DTOConverter.convertRelayResponseDTOToRelayRequestDTO(relay));
-							latestMeasurementTime = echoMeasurement.getLastMeasurementAt();
+							return proposal;
+						} else if (measurementOpt.isPresent() && measurementOpt.get().getStatus() != QoSMeasurementStatus.PENDING) {
+							final QoSInterRelayMeasurement echoMeasurement = measurementOpt.get();
+							if (echoMeasurement.getLastMeasurementAt().isBefore(latestMeasurementTime)) {
+								proposal.setTargetCloud(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloud));
+								proposal.setRelay(DTOConverter.convertRelayResponseDTOToRelayRequestDTO(relay));
+								latestMeasurementTime = echoMeasurement.getLastMeasurementAt();
+							}
 						}
 					}
 				}
