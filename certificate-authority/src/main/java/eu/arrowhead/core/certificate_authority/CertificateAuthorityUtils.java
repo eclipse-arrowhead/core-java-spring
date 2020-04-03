@@ -56,7 +56,7 @@ class CertificateAuthorityUtils {
     private static final Logger logger = LogManager.getLogger(CertificateAuthorityService.class);
 
     private static final String PROVIDER = "BC";
-    private static final String SIGNATURE_ALGORITHM = "SHA512withRSA";
+    private static final String SIGNATURE_ALGORITHM = "SHA256withRSA";
 
     static JcaPKCS10CertificationRequest decodePKCS10CSR(CertificateSigningRequestDTO csr) {
         try {
