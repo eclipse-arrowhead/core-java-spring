@@ -41,8 +41,8 @@ import eu.arrowhead.common.database.entity.QoSInterDirectPingMeasurementLog;
 import eu.arrowhead.common.dto.internal.CloudAccessListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudAccessResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
-import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
-import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysAndPublicRelaysListResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysAndPublicRelaysResponseDTO;
 import eu.arrowhead.common.dto.internal.SystemAddressSetRelayResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
@@ -103,7 +103,7 @@ public class CloudPingTaskTest {
 	@Test
 	public void testExecuteMeasurementIsInDB() {
 
-		final CloudWithRelaysListResponseDTO cloudWithRelaysListResponseDTO = getCloudWithRelaysListResponseDTOForTest(10);
+		final CloudWithRelaysAndPublicRelaysListResponseDTO cloudWithRelaysListResponseDTO = getCloudWithRelaysListResponseDTOForTest(10);
 		final CloudAccessListResponseDTO cloudAccessListResponseDTO = getCloudAccessListResponseDTOForTest(10);
 		final List<QoSInterDirectMeasurement> measurementList = getListOfQoSInterDirectMeasurementForTest(10);
 
@@ -288,15 +288,15 @@ public class CloudPingTaskTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private CloudWithRelaysListResponseDTO getCloudWithRelaysListResponseDTOForTest(final int count) {
+	private CloudWithRelaysAndPublicRelaysListResponseDTO getCloudWithRelaysListResponseDTOForTest(final int count) {
 
-		return new CloudWithRelaysListResponseDTO(getListOfCloudWithRelaysResponseDTOForTest(count), count);
+		return new CloudWithRelaysAndPublicRelaysListResponseDTO(getListOfCloudWithRelaysResponseDTOForTest(count), count);
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private List<CloudWithRelaysResponseDTO> getListOfCloudWithRelaysResponseDTOForTest(final int count) {
+	private List<CloudWithRelaysAndPublicRelaysResponseDTO> getListOfCloudWithRelaysResponseDTOForTest(final int count) {
 
-		final List<CloudWithRelaysResponseDTO> list = new ArrayList<CloudWithRelaysResponseDTO>(count);
+		final List<CloudWithRelaysAndPublicRelaysResponseDTO> list = new ArrayList<CloudWithRelaysAndPublicRelaysResponseDTO>(count);
 		for (int i = 0; i < count; i++) {
 			list .add(getCloudWithRelaysResponseDTOForTest());
 		}
@@ -305,9 +305,9 @@ public class CloudPingTaskTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private CloudWithRelaysResponseDTO getCloudWithRelaysResponseDTOForTest() {
+	private CloudWithRelaysAndPublicRelaysResponseDTO getCloudWithRelaysResponseDTOForTest() {
 
-		return new CloudWithRelaysResponseDTO(
+		return new CloudWithRelaysAndPublicRelaysResponseDTO(
 				1L, //id,
 				"sysop", //operator,
 				"testCloudxxx", //name,
@@ -318,7 +318,8 @@ public class CloudPingTaskTest {
 				Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()), //createdAt,
 				Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()), //updatedAt,
 				null, //List.of(new RelayResponseDTO()),//gatekeeperRelays,
-				null);//List.of(new RelayResponseDTO())); //gatewayRelays);
+				null, //List.of(new RelayResponseDTO())); //gatewayRelays);
+				null);
 	}
 
 	//-------------------------------------------------------------------------------------------------

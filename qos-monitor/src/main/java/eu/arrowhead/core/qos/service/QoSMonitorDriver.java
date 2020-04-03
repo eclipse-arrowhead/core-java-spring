@@ -19,6 +19,7 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.internal.CloudAccessListResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysAndPublicRelaysListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
@@ -69,12 +70,12 @@ public class QoSMonitorDriver {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public CloudWithRelaysListResponseDTO queryGatekeeperAllCloud() {
+	public CloudWithRelaysAndPublicRelaysListResponseDTO queryGatekeeperAllCloud() {
 		logger.debug("queryGatekeeperAllCloud started...");
 
 		try {
 			final UriComponents queryByAllCloudsUri = getGatekeeperAllCloudsUri();
-			final ResponseEntity<CloudWithRelaysListResponseDTO> response = httpService.sendRequest(queryByAllCloudsUri, HttpMethod.GET, CloudWithRelaysListResponseDTO.class);
+			final ResponseEntity<CloudWithRelaysAndPublicRelaysListResponseDTO> response = httpService.sendRequest(queryByAllCloudsUri, HttpMethod.GET, CloudWithRelaysAndPublicRelaysListResponseDTO.class);
 
 			return response.getBody();
 		} catch (final ArrowheadException ex) {

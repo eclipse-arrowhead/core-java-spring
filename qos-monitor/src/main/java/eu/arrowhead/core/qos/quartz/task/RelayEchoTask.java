@@ -25,8 +25,8 @@ import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.database.entity.QoSInterRelayMeasurement;
 import eu.arrowhead.common.dto.internal.CloudAccessListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudAccessResponseDTO;
-import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
-import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysAndPublicRelaysListResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysAndPublicRelaysResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayResponseDTO;
@@ -101,45 +101,64 @@ public class RelayEchoTask implements Job {
 		final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);		
 		proposal.setSenderQoSMonitorPublicKey(Base64.getEncoder().encodeToString(publicKey.getEncoded()));		
 		
-		final CloudWithRelaysListResponseDTO allCloud = qosMonitorDriver.queryGatekeeperAllCloud();
+		final CloudWithRelaysAndPublicRelaysListResponseDTO allCloud = qosMonitorDriver.queryGatekeeperAllCloud();
 		proposal.setRequesterCloud(getOwnCloud(allCloud.getData()));
-		final List<CloudWithRelaysResponseDTO> cloudsWithoutDirectAccess = filterOnCloudsWithoutDirectAccess(allCloud.getData());
+		final List<CloudWithRelaysAndPublicRelaysResponseDTO> cloudsWithoutDirectAccess = filterOnCloudsWithoutDirectAccess(allCloud.getData());
 		
 		ZonedDateTime latestMeasurementTime = ZonedDateTime.now().plusHours(1);
-		for (final CloudWithRelaysResponseDTO cloud : cloudsWithoutDirectAccess) {
-			for (final RelayResponseDTO relay : cloud.getGatekeeperRelays()) {
-				final Optional<QoSInterRelayMeasurement> measurementOpt = qosDBService.getInterRelayMeasurement(cloud, relay, QoSMeasurementType.RELAY_ECHO);
-				if (measurementOpt.isEmpty() || measurementOpt.get().getStatus() == QoSMeasurementStatus.NEW) {
-					proposal.setTargetCloud(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloud));
-					proposal.setRelay(DTOConverter.convertRelayResponseDTOToRelayRequestDTO(relay));
-					return proposal;
-				} else if (measurementOpt.isPresent() && measurementOpt.get().getStatus() != QoSMeasurementStatus.PENDING) {
-					final QoSInterRelayMeasurement echoMeasurement = measurementOpt.get();
-					if (echoMeasurement.getLastMeasurementAt().isBefore(latestMeasurementTime)) {
+		for (final CloudWithRelaysAndPublicRelaysResponseDTO cloud : cloudsWithoutDirectAccess) {
+			if(cloud.getGatekeeperRelays() != null && !cloud.getGatewayRelays().isEmpty()) {
+				for (final RelayResponseDTO relay : cloud.getGatekeeperRelays()) {
+					final Optional<QoSInterRelayMeasurement> measurementOpt = qosDBService.getInterRelayMeasurement(cloud, relay, QoSMeasurementType.RELAY_ECHO);
+					if (measurementOpt.isEmpty() || measurementOpt.get().getStatus() == QoSMeasurementStatus.NEW) {
 						proposal.setTargetCloud(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloud));
 						proposal.setRelay(DTOConverter.convertRelayResponseDTOToRelayRequestDTO(relay));
-						latestMeasurementTime = echoMeasurement.getLastMeasurementAt();
+						return proposal;
+					} else if (measurementOpt.isPresent() && measurementOpt.get().getStatus() != QoSMeasurementStatus.PENDING) {
+						final QoSInterRelayMeasurement echoMeasurement = measurementOpt.get();
+						if (echoMeasurement.getLastMeasurementAt().isBefore(latestMeasurementTime)) {
+							proposal.setTargetCloud(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloud));
+							proposal.setRelay(DTOConverter.convertRelayResponseDTOToRelayRequestDTO(relay));
+							latestMeasurementTime = echoMeasurement.getLastMeasurementAt();
+						}
+					}
+				}
+			}else {
+				for (final RelayResponseDTO relay : cloud.getPublicRelays()) {
+					final Optional<QoSInterRelayMeasurement> measurementOpt = qosDBService.getInterRelayMeasurement(cloud, relay, QoSMeasurementType.RELAY_ECHO);
+					if (measurementOpt.isEmpty() || measurementOpt.get().getStatus() == QoSMeasurementStatus.NEW) {
+						proposal.setTargetCloud(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloud));
+						proposal.setRelay(DTOConverter.convertRelayResponseDTOToRelayRequestDTO(relay));
+						return proposal;
+					} else if (measurementOpt.isPresent() && measurementOpt.get().getStatus() != QoSMeasurementStatus.PENDING) {
+						final QoSInterRelayMeasurement echoMeasurement = measurementOpt.get();
+						if (echoMeasurement.getLastMeasurementAt().isBefore(latestMeasurementTime)) {
+							proposal.setTargetCloud(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloud));
+							proposal.setRelay(DTOConverter.convertRelayResponseDTOToRelayRequestDTO(relay));
+							latestMeasurementTime = echoMeasurement.getLastMeasurementAt();
+						}
 					}
 				}
 			}
+
 		}
 		
 		return proposal;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<CloudWithRelaysResponseDTO> filterOnCloudsWithoutDirectAccess(final List<CloudWithRelaysResponseDTO> clouds) {
+	private List<CloudWithRelaysAndPublicRelaysResponseDTO> filterOnCloudsWithoutDirectAccess(final List<CloudWithRelaysAndPublicRelaysResponseDTO> clouds) {
 		logger.debug("filterOnCloudsWithoutDirectAccess started...");
 		
 		final List<CloudRequestDTO> cloudsToRequest = new ArrayList<>();
-		for (final CloudWithRelaysResponseDTO cloud : clouds) {
+		for (final CloudWithRelaysAndPublicRelaysResponseDTO cloud : clouds) {
 			cloudsToRequest.add(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloud));
 		}
 		
 		final CloudAccessListResponseDTO cloudsWithAccessTypes = qosMonitorDriver.queryGatekeeperCloudAccessTypes(cloudsToRequest);
 		
-		final List<CloudWithRelaysResponseDTO> cloudsWithoutDirectAccess = new ArrayList<>();
-		for (final CloudWithRelaysResponseDTO cloud : clouds) {
+		final List<CloudWithRelaysAndPublicRelaysResponseDTO> cloudsWithoutDirectAccess = new ArrayList<>();
+		for (final CloudWithRelaysAndPublicRelaysResponseDTO cloud : clouds) {
 			if (!cloud.getOwnCloud()) {
 				for (final CloudAccessResponseDTO cloudAccess : cloudsWithAccessTypes.getData()) {
 					if (!cloudAccess.isDirectAccess() && cloudAccess.getCloudOperator().equalsIgnoreCase(cloud.getOperator()) && cloudAccess.getCloudName().equalsIgnoreCase(cloud.getName())) {
@@ -153,10 +172,10 @@ public class RelayEchoTask implements Job {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private CloudRequestDTO getOwnCloud(final List<CloudWithRelaysResponseDTO> clouds) {
+	private CloudRequestDTO getOwnCloud(final List<CloudWithRelaysAndPublicRelaysResponseDTO> clouds) {
 		logger.debug("getOwnCloud started...");
 		
-		for (final CloudWithRelaysResponseDTO cloud : clouds) {
+		for (final CloudWithRelaysAndPublicRelaysResponseDTO cloud : clouds) {
 			if (cloud.getOwnCloud() && cloud.getSecure()) {
 				return DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloud);
 			}
