@@ -9,9 +9,6 @@ import java.security.SecureRandom;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
@@ -128,10 +125,7 @@ class CertificateAuthorityUtils {
     static X509Certificate buildCertificate(JcaPKCS10CertificationRequest csr, PrivateKey cloudPrivateKey,
             X509Certificate cloudCertificate, Date validFrom, Date validUntil, SecureRandom random) {
 
-        final ZonedDateTime now = LocalDateTime.now().atZone(ZoneId.systemDefault());
-        final BigInteger serial = BigInteger.valueOf(now.toInstant().toEpochMilli())
-                .multiply(BigInteger.valueOf(random.nextLong()));
-
+        final BigInteger serial = new BigInteger(32, random);
         final PublicKey clientKey = getClientKey(csr);
 
         X509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(cloudCertificate, serial, validFrom,
@@ -168,6 +162,7 @@ class CertificateAuthorityUtils {
      */
     static void addCertificateExtensions(X509v3CertificateBuilder builder, JcaPKCS10CertificationRequest csr,
             PublicKey clientKey, X509Certificate cloudCertificate) {
+
         try {
             JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
 
