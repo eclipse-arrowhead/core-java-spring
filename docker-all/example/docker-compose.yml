@@ -27,6 +27,7 @@ services:
       #- ./properties/eventhandler.properties:/opt/arrowhead-core/eventhandler/application.properties
       - ./properties/gatekeeper.properties:/opt/arrowhead-core/gatekeeper/application.properties
       - ./properties/gateway.properties:/opt/arrowhead-core/gateway/application.properties
+      - ./properties/certificateauthority.properties:/opt/arrowhead-core/certificate-authority/application.properties
     ports:
       - 8443:8443 # Service Registry
       - 8445:8445 # Authorization
@@ -34,6 +35,7 @@ services:
       #- 8455:8455 # Event Handler
       - 8449:8449 # Gatekeeper
       - 8453:8453 # Gateway
+      - 8448:8448 # Certificate Authority
 
 volumes:
   arrowhead_core_mysql:

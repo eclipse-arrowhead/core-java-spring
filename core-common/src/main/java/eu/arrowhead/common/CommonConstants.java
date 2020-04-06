@@ -16,6 +16,7 @@ public class CommonConstants {
 	public static final String BASE_PACKAGE = "eu.arrowhead";
 	
 	public static final String CORE_SYSTEM_AUTHORIZATION = "Authorization";
+	public static final String CORE_SYSTEM_CERTIFICATE_AUTHORITY = "Certificate Authority";
 	public static final String CORE_SYSTEM_CHOREOGRAPHER = "Choreographer";
 	public static final String CORE_SYSTEM_EVENT_HANDLER = "Event Handler";
 	public static final String CORE_SYSTEM_GATEKEEPER = "Gatekeeper";
@@ -46,6 +47,7 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_EVENT_HANDLER_SUBSCRIBE = "event-subscribe";
 	public static final String CORE_SERVICE_EVENT_HANDLER_UNSUBSCRIBE = "event-unsubscribe";
 	public static final String CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "event-publish-auth-update";
+    public static final String CORE_SERVICE_CERTIFICATE_AUTHORITY_SIGN = "ca-sign";
 
 	public static final String CORE_SERVICE_QOS_MONITOR_PING_MEASUREMENT = "qos-monitor-ping-measurement";
 
@@ -68,7 +70,8 @@ public class CommonConstants {
 	public static final String SERVER_COMMON_NAME = "server.common.name";
 	public static final String SERVER_PUBLIC_KEY = "server.public.key";
 	public static final String SERVER_PRIVATE_KEY = "server.private.key";
-	
+	public static final String SERVER_CERTIFICATE = "server.certificate";
+
 	public static final String HTTPS = "https";
 	public static final String HTTP = "http";
 	public static final String JSON = "JSON";
@@ -117,7 +120,11 @@ public class CommonConstants {
 	public static final String OP_AUTH_INTRA_CHECK_URI = "/intracloud/check";
 	public static final String OP_AUTH_INTER_CHECK_URI = "/intercloud/check";
 	public static final String OP_AUTH_SUBSCRIPTION_CHECK_URI = "/subscription/check";
-	
+
+	public static final String CERTIFICATE_AUTHRORITY_URI = "/certificate-authority";
+	public static final String OP_CA_CLOUD_COMMON_NAME_URI = "/name";
+	public static final String OP_CA_SIGN_CERTIFICATE_URI = "/sign";
+
 	public static final String ORCHESTRATOR_URI = "/orchestrator";
 	public static final String OP_ORCH_PROCESS = "/orchestration";
 	public static final String ORCHESTRATION_FLAG_MATCHMAKING = "matchmaking";
@@ -147,7 +154,7 @@ public class CommonConstants {
 
 	public static final String OP_EVENT_HANDLER_UNSUBSCRIBE = "/unsubscribe";
 	public static final String OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "/publish/authupdate";
-
+	
 	public static final String QOS_MONITOR_URI = "/qosmonitor";
 	public static final String OP_QOS_MONITOR_PING_MEASUREMENT = "/ping/measurement";
 	public static final String OP_QOS_MONITOR_PING_MEASUREMENT_SUFFIX = "/{" + COMMON_FIELD_NAME_ID + "}";
@@ -193,6 +200,11 @@ public class CommonConstants {
 	public static final String DISABLE_HOSTNAME_VERIFIER = "disable.hostname.verifier";
 	public static final String $DISABLE_HOSTNAME_VERIFIER_WD = "${" + DISABLE_HOSTNAME_VERIFIER + ":" + Defaults.DEFAULT_DISABLE_HOSTNAME_VERIFIER + "}";
 	
+	public static final String CA_CERT_VALIDITY_NEG_OFFSET_MILLIS = "ca.validity.negative-offest-millis";
+	public static final String $CA_CERT_VALIDITY_NEG_OFFSET_MILLIS = "${" + CA_CERT_VALIDITY_NEG_OFFSET_MILLIS + ":" + Defaults.DEFAULT_CA_CERT_VALIDITY_NEG_OFFSET_MILLIS + "}";
+	public static final String CA_CERT_VALIDITY_POS_OFFSET_MILLIS = "ca.validity.positive-offest-millis";
+	public static final String $CA_CERT_VALIDITY_POS_OFFSET_MILLIS = "${" + CA_CERT_VALIDITY_POS_OFFSET_MILLIS + ":" + Defaults.DEFAULT_CA_CERT_VALIDITY_POS_OFFSET_MILLIS + "}";
+
 	public static final String JWT_CLAIM_CONSUMER_ID = "cid";
 	public static final String JWT_CLAIM_SERVICE_ID = "sid";
 	public static final String JWT_CLAIM_INTERFACE_ID = "iid";
@@ -226,7 +238,7 @@ public class CommonConstants {
 		
 	public static final String EVENT_METADATA_FILTER = "metadataFilter";
 
-	public static final String LOCALHOST = "127.0.0.1";
+	public static final String LOCALHOST = "localhost";
 	public static final int HTTP_PORT = 8080;
 
 	public static final String OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_EVENT_TYPE = "event_type";

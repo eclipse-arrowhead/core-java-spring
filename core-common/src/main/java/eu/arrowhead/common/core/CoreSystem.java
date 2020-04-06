@@ -32,7 +32,7 @@ public enum CoreSystem {
 	GATEWAY(Defaults.DEFAULT_GATEWAY_PORT, List.of(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE, CoreSystemService.GATEWAY_PROVIDER_SERVICE,CoreSystemService.GATEWAY_CONSUMER_SERVICE)),
 	CHOREOGRAPHER(Defaults.DEFAULT_CHOREOGRAPHER_PORT, List.of()), // TODO: add services
 	QOS_MONITOR(Defaults.DEFAULT_QOS_MONITOR_PORT, List.of(CoreSystemService.QOS_MONITOR_PING_MEASUREMENT_SERVICE)),
-	CERTIFICATE_AUTHORITY(Defaults.DEFAULT_CERTIFICATE_AUTHORITY_PORT, List.of()); // TODO: add services
+	CERTIFICATE_AUTHORITY(Defaults.DEFAULT_CERTIFICATE_AUTHORITY_PORT, List.of(CoreSystemService.CERTIFICATE_AUTHORITY_SIGN_SERVICE));
 	
 	//=================================================================================================
 	// members
@@ -50,10 +50,10 @@ public enum CoreSystem {
 	//=================================================================================================
 	// assistant methods
 
-    //-------------------------------------------------------------------------------------------------
-    private CoreSystem(final int defaultPort, final List<CoreSystemService> services) {
-        Assert.isTrue(defaultPort > CommonConstants.SYSTEM_PORT_RANGE_MIN && defaultPort < CommonConstants.SYSTEM_PORT_RANGE_MAX, "Default port is invalid.");
-        this.services = services != null ? Collections.unmodifiableList(services) : List.of();
-        this.defaultPort = defaultPort;
-    }
+	//-------------------------------------------------------------------------------------------------
+	private CoreSystem(final int defaultPort, final List<CoreSystemService> services) {
+		Assert.isTrue(defaultPort > CommonConstants.SYSTEM_PORT_RANGE_MIN && defaultPort < CommonConstants.SYSTEM_PORT_RANGE_MAX, "Default port is invalid.");
+		this.services = services != null ? Collections.unmodifiableList(services) : List.of();
+		this.defaultPort = defaultPort;
+	}
 }
