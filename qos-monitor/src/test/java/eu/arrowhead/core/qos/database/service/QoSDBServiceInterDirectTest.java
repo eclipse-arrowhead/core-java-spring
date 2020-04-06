@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -22,9 +23,13 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.QoSInterDirectMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterDirectPingMeasurement;
@@ -529,6 +534,341 @@ public class QoSDBServiceInterDirectTest {
 
 			throw ex;
 		}
+	}
+	
+	//=================================================================================================
+	// Tests of updateInterDirectPingMeasurement
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateInterDirectPingMeasurementTest() {
+		final QoSInterDirectPingMeasurement pingMeasurement = getQosInterDirectPingMeasurementForTest();		
+		when(qoSInterDirectMeasurementPingRepository.saveAndFlush(any())).thenReturn(pingMeasurement);
+		
+		qoSDBService.updateInterDirectPingMeasurement(pingMeasurement.getMeasurement(), getCalculationsForTest(), pingMeasurement, ZonedDateTime.now());
+		verify(qoSInterDirectMeasurementPingRepository, times(1)).saveAndFlush(any());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void updateInterDirectPingMeasurementSaveAndFlushThrowDatabaseExceptionTest() {
+		final QoSInterDirectPingMeasurement pingMeasurement = getQosInterDirectPingMeasurementForTest();		
+		when(qoSInterDirectMeasurementPingRepository.saveAndFlush(any())).thenThrow(HibernateException.class);
+		
+		try {			
+			qoSDBService.updateInterDirectPingMeasurement(pingMeasurement.getMeasurement(), getCalculationsForTest(), pingMeasurement, ZonedDateTime.now());
+		} catch (final Exception ex) {
+			verify(qoSInterDirectMeasurementPingRepository, times(1)).saveAndFlush(any());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void updateInterDirectPingMeasurementNullMeasurementTest() {
+		final QoSInterDirectPingMeasurement pingMeasurement = getQosInterDirectPingMeasurementForTest();		
+		when(qoSInterDirectMeasurementPingRepository.saveAndFlush(any())).thenReturn(pingMeasurement);
+		
+		try {			
+			qoSDBService.updateInterDirectPingMeasurement(null, getCalculationsForTest(), pingMeasurement, ZonedDateTime.now());
+		} catch (final Exception ex) {
+			verify(qoSInterDirectMeasurementPingRepository, times(0)).saveAndFlush(any());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void updateInterDirectPingMeasurementNullCalculationsTest() {
+		final QoSInterDirectPingMeasurement pingMeasurement = getQosInterDirectPingMeasurementForTest();		
+		when(qoSInterDirectMeasurementPingRepository.saveAndFlush(any())).thenReturn(pingMeasurement);
+		
+		try {			
+			qoSDBService.updateInterDirectPingMeasurement(pingMeasurement.getMeasurement(), null, pingMeasurement, ZonedDateTime.now());
+		} catch (final Exception ex) {
+			verify(qoSInterDirectMeasurementPingRepository, times(0)).saveAndFlush(any());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void updateInterDirectPingMeasurementNullPingMeasurementsTest() {
+		final QoSInterDirectPingMeasurement pingMeasurement = getQosInterDirectPingMeasurementForTest();		
+		when(qoSInterDirectMeasurementPingRepository.saveAndFlush(any())).thenReturn(pingMeasurement);
+		
+		try {			
+			qoSDBService.updateInterDirectPingMeasurement(pingMeasurement.getMeasurement(), getCalculationsForTest(), null, ZonedDateTime.now());
+		} catch (final Exception ex) {
+			verify(qoSInterDirectMeasurementPingRepository, times(0)).saveAndFlush(any());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void updateInterDirectPingMeasurementNullAroundNowTest() {
+		final QoSInterDirectPingMeasurement pingMeasurement = getQosInterDirectPingMeasurementForTest();		
+		when(qoSInterDirectMeasurementPingRepository.saveAndFlush(any())).thenReturn(pingMeasurement);
+		
+		try {			
+			qoSDBService.updateInterDirectPingMeasurement(pingMeasurement.getMeasurement(), getCalculationsForTest(), pingMeasurement, null);
+		} catch (final Exception ex) {
+			verify(qoSInterDirectMeasurementPingRepository, times(0)).saveAndFlush(any());
+			throw ex;
+		}
+	}
+	
+	//=================================================================================================
+	// Tests of getOrCreateDirectInterMeasurement
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getOrCreateDirectInterMeasurementGetTest() {
+		final String nowStr = Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now());
+		final CloudResponseDTO cloudResp = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "dvgdafvgadsg", nowStr, nowStr);
+		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResp);
+		final String address = "1.1.1.1";
+		QoSInterDirectMeasurement interDirectMeasurement = getQoSInterDirectMeasurementForTest(QoSMeasurementType.PING);
+		interDirectMeasurement.setCloud(cloud);
+		
+		when(qoSInterDirectMeasurementRepository.findByCloudAndAddressAndMeasurementType(any(), any(), any())).thenReturn(Optional.of(interDirectMeasurement));
+		
+		QoSInterDirectMeasurement result = qoSDBService.getOrCreateDirectInterMeasurement(address, cloudResp, QoSMeasurementType.PING);
+		
+		verify(qoSInterDirectMeasurementRepository, times(1)).findByCloudAndAddressAndMeasurementType(eq(cloud), eq(address), eq(QoSMeasurementType.PING));
+		assertEquals(cloudResp.getAuthenticationInfo(), result.getCloud().getAuthenticationInfo());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getOrCreateDirectInterMeasurementCreateTest() {
+		final String nowStr = Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now());
+		final CloudResponseDTO cloudResp = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "dvgdafvgadsg", nowStr, nowStr);
+		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResp);
+		final String address = "1.1.1.1";
+		QoSInterDirectMeasurement interDirectMeasurement = getQoSInterDirectMeasurementForTest(QoSMeasurementType.PING);
+		interDirectMeasurement.setCloud(cloud);
+		
+		when(qoSInterDirectMeasurementRepository.findByCloudAndAddressAndMeasurementType(any(), any(), any())).thenReturn(Optional.empty());
+		when(qoSInterDirectMeasurementRepository.saveAndFlush(any())).thenReturn(interDirectMeasurement);
+		
+		QoSInterDirectMeasurement result = qoSDBService.getOrCreateDirectInterMeasurement(address, cloudResp, QoSMeasurementType.PING);
+		
+		verify(qoSInterDirectMeasurementRepository, times(1)).findByCloudAndAddressAndMeasurementType(eq(cloud), eq(address), eq(QoSMeasurementType.PING));
+		verify(qoSInterDirectMeasurementRepository, times(1)).saveAndFlush(any());
+		assertEquals(cloudResp.getAuthenticationInfo(), result.getCloud().getAuthenticationInfo());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void getOrCreateDirectInterMeasurementCreateButSaveAndFlushThrowDatabaseExceptionTest() {
+		final String nowStr = Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now());
+		final CloudResponseDTO cloudResp = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "dvgdafvgadsg", nowStr, nowStr);
+		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResp);
+		final String address = "1.1.1.1";
+		QoSInterDirectMeasurement interDirectMeasurement = getQoSInterDirectMeasurementForTest(QoSMeasurementType.PING);
+		interDirectMeasurement.setCloud(cloud);
+		
+		when(qoSInterDirectMeasurementRepository.findByCloudAndAddressAndMeasurementType(any(), any(), any())).thenReturn(Optional.empty());
+		when(qoSInterDirectMeasurementRepository.saveAndFlush(any())).thenThrow(HibernateException.class);
+		
+		try {
+			qoSDBService.getOrCreateDirectInterMeasurement(address, cloudResp, QoSMeasurementType.PING);			
+		} catch (Exception ex) {
+			verify(qoSInterDirectMeasurementRepository, times(1)).findByCloudAndAddressAndMeasurementType(eq(cloud), eq(address), eq(QoSMeasurementType.PING));
+			verify(qoSInterDirectMeasurementRepository, times(1)).saveAndFlush(any());
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void getOrCreateDirectInterMeasurementWithNullAddressTest() {
+		final CloudResponseDTO cloudResp = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "dvgdafvgadsg", "", "");
+		try {
+			qoSDBService.getOrCreateDirectInterMeasurement(null, cloudResp, QoSMeasurementType.PING);			
+		} catch (Exception ex) {
+			verify(qoSInterDirectMeasurementRepository, times(0)).findByCloudAndAddressAndMeasurementType(any(), any(), any());
+			verify(qoSInterDirectMeasurementRepository, times(0)).saveAndFlush(any());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void getOrCreateDirectInterMeasurementWithNullCloudTest() {
+		try {
+			qoSDBService.getOrCreateDirectInterMeasurement("1.1.1.1", null, QoSMeasurementType.PING);			
+		} catch (Exception ex) {
+			verify(qoSInterDirectMeasurementRepository, times(0)).findByCloudAndAddressAndMeasurementType(any(), any(), any());
+			verify(qoSInterDirectMeasurementRepository, times(0)).saveAndFlush(any());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void getOrCreateDirectInterMeasurementWithNullTypeTest() {
+		final CloudResponseDTO cloudResp = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "dvgdafvgadsg", "", "");
+		try {
+			qoSDBService.getOrCreateDirectInterMeasurement("1.1.1.1", cloudResp, null);			
+		} catch (Exception ex) {
+			verify(qoSInterDirectMeasurementRepository, times(0)).findByCloudAndAddressAndMeasurementType(any(), any(), any());
+			verify(qoSInterDirectMeasurementRepository, times(0)).saveAndFlush(any());
+			throw ex;
+		}
+	}
+	
+	//=================================================================================================
+	// Tests of updateInterDirectMeasurement
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateInterDirectMeasurementTest() {
+		final QoSInterDirectMeasurement measurement = getQoSInterDirectMeasurementForTest(QoSMeasurementType.PING);
+		when(qoSInterDirectMeasurementRepository.saveAndFlush(any())).thenReturn(measurement);
+		
+		qoSDBService.updateInterDirectMeasurement(ZonedDateTime.now(), measurement);
+		verify(qoSInterDirectMeasurementRepository, times(1)).saveAndFlush(eq(measurement));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void updateInterDirectMeasurementSaveAndFlushThrowDatabaseExceptionTest() {
+		final QoSInterDirectMeasurement measurement = getQoSInterDirectMeasurementForTest(QoSMeasurementType.PING);
+		when(qoSInterDirectMeasurementRepository.saveAndFlush(any())).thenThrow(HibernateException.class);
+	
+		try {
+			qoSDBService.updateInterDirectMeasurement(ZonedDateTime.now(), measurement);			
+		} catch (final Exception ex) {
+			verify(qoSInterDirectMeasurementRepository, times(1)).saveAndFlush(eq(measurement));
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void updateInterDirectMeasurementNullAroundNowTest() {
+		try {
+			qoSDBService.updateInterDirectMeasurement(null, getQoSInterDirectMeasurementForTest(QoSMeasurementType.PING));			
+		} catch (final Exception ex) {
+			verify(qoSInterDirectMeasurementRepository, times(0)).saveAndFlush(any());
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void updateInterDirectMeasurementNullMeasurementTest() {
+		try {
+			qoSDBService.updateInterDirectMeasurement(ZonedDateTime.now(), null);			
+		} catch (final Exception ex) {
+			verify(qoSInterDirectMeasurementRepository, times(0)).saveAndFlush(any());
+			throw ex;
+		}		
+	}
+	
+	//=================================================================================================
+	// Tests of getInterDirectPingMeasurementsPage
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getInterDirectPingMeasurementsPageTest() {
+		final int size = 3;
+		final List<QoSInterDirectPingMeasurement> measurementList = getQosInterDirectPingMeasurementListForTest(size);
+		when(qoSInterDirectMeasurementPingRepository.findAll(any(PageRequest.class))).thenReturn(new PageImpl<>(measurementList));
+		
+		Page<QoSInterDirectPingMeasurement> result = qoSDBService.getInterDirectPingMeasurementsPage(-1, -1, null, null);
+		
+		verify(qoSInterDirectMeasurementPingRepository, times(1)).findAll(any(PageRequest.class));
+		assertEquals(size, result.getContent().size());
+		assertEquals(measurementList.get(0).getMeasurement().getCloud().getName(), result.getContent().get(0).getMeasurement().getCloud().getName());		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void getInterDirectPingMeasurementsPageWithInvalidSortFieldTest() {
+		try {
+			qoSDBService.getInterDirectPingMeasurementsPage(-1, -1, null, "invalid");			
+		} catch (final Exception ex) {
+			verify(qoSInterDirectMeasurementPingRepository, times(0)).findAll(any(PageRequest.class));
+			throw ex;
+		}
+	}
+	
+	//=================================================================================================
+	// Test of getInterDirectPingMeasurementByCloudAndSystemAddress
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getInterDirectPingMeasurementByCloudAndSystemAddressTest() {
+		final String nowStr = Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now());
+		final CloudResponseDTO cloudResp = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "dvgdafvgadsg", nowStr, nowStr);
+		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResp);
+		final QoSInterDirectPingMeasurement pingMeasurement = getQosInterDirectPingMeasurementForTest();
+		pingMeasurement.getMeasurement().setCloud(cloud);
+		final String address = "1.1.1.1";
+		
+		when(qoSInterDirectMeasurementRepository.findByCloudAndAddressAndMeasurementType(any(), any(), any())).thenReturn(Optional.of(pingMeasurement.getMeasurement()));
+		when(qoSInterDirectMeasurementPingRepository.findByMeasurement(any())).thenReturn(Optional.of(pingMeasurement));
+		Optional<QoSInterDirectPingMeasurement> result = qoSDBService.getInterDirectPingMeasurementByCloudAndSystemAddress(cloudResp, address);
+		
+		verify(qoSInterDirectMeasurementRepository, times(1)).findByCloudAndAddressAndMeasurementType(eq(cloud), eq(address), eq(QoSMeasurementType.PING));
+		verify(qoSInterDirectMeasurementPingRepository, times(1)).findByMeasurement(eq(pingMeasurement.getMeasurement()));
+		assertTrue(result.isPresent());
+		assertEquals(result.get().getId(), pingMeasurement.getId());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getInterDirectPingMeasurementByCloudAndSystemAddressNoMeasurementInDBTest() {
+		final String nowStr = Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now());
+		final CloudResponseDTO cloudResp = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "dvgdafvgadsg", nowStr, nowStr);
+		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResp);
+		final QoSInterDirectPingMeasurement pingMeasurement = getQosInterDirectPingMeasurementForTest();
+		pingMeasurement.getMeasurement().setCloud(cloud);
+		final String address = "1.1.1.1";
+		
+		when(qoSInterDirectMeasurementRepository.findByCloudAndAddressAndMeasurementType(any(), any(), any())).thenReturn(Optional.empty());
+		Optional<QoSInterDirectPingMeasurement> result = qoSDBService.getInterDirectPingMeasurementByCloudAndSystemAddress(cloudResp, address);
+		
+		verify(qoSInterDirectMeasurementRepository, times(1)).findByCloudAndAddressAndMeasurementType(eq(cloud), eq(address), eq(QoSMeasurementType.PING));
+		verify(qoSInterDirectMeasurementPingRepository, times(0)).findByMeasurement(any());
+		assertTrue(result.isEmpty());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void getInterDirectPingMeasurementByCloudAndSystemAddressNullAddressTest() {
+		final String nowStr = Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now());
+		final CloudResponseDTO cloudResp = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "dvgdafvgadsg", nowStr, nowStr);
+		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResp);
+		final QoSInterDirectPingMeasurement pingMeasurement = getQosInterDirectPingMeasurementForTest();
+		pingMeasurement.getMeasurement().setCloud(cloud);
+		final String address = null;
+		
+		try {
+			qoSDBService.getInterDirectPingMeasurementByCloudAndSystemAddress(cloudResp, address);
+		} catch (final Exception ex) {
+			verify(qoSInterDirectMeasurementRepository, times(0)).findByCloudAndAddressAndMeasurementType(any(), any(), any());
+			verify(qoSInterDirectMeasurementPingRepository, times(0)).findByMeasurement(any());
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void getInterDirectPingMeasurementByCloudAndSystemAddressNullCloudTest() {
+		final String address = "1.1.1.1";
+		
+		try {
+			qoSDBService.getInterDirectPingMeasurementByCloudAndSystemAddress(null, address);
+		} catch (final Exception ex) {
+			verify(qoSInterDirectMeasurementRepository, times(0)).findByCloudAndAddressAndMeasurementType(any(), any(), any());
+			verify(qoSInterDirectMeasurementPingRepository, times(0)).findByMeasurement(any());
+			throw ex;
+		}		
 	}
 	
 	//=================================================================================================

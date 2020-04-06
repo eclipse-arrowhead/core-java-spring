@@ -716,6 +716,10 @@ public class QoSDBService {
 		if (cloudResponseDTO == null) {
 			throw new InvalidParameterException("CloudResponseDTO" + NULL_ERROR_MESSAGE);
 		}
+		
+		if (type == null) {
+			throw new InvalidParameterException("QoSMeasurementType" + NULL_ERROR_MESSAGE);
+		}
 
 		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResponseDTO);
 		final QoSInterDirectMeasurement measurement;
