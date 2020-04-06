@@ -141,6 +141,8 @@ public class CoreCommonConstants {
 	public static final String $QOS_DEFAULT_REFERENCE_JITTER_WITH_TIMEOUT_WD = "${default.jitter_with_timeout:" + CoreDefaults.DEFAULT_QOS_DEFAULT_REFERENCE_JITTER_WITHOUT_TIMEOUT + "}";
 	public static final String $QOS_DEFAULT_REFERENCE_JITTER_WITHOUT_TIMEOUT_WD = "${default.jitter_without_timeout:" + CoreDefaults.DEFAULT_QOS_DEFAULT_REFERENCE_JITTER_WITHOUT_TIMEOUT + "}";
 	public static final String $QOS_DEFAULT_REFERENCE_LOST_PET_MEASUREMENT_PERCENT_WD = "${default.lost_per_measurement_percent:" + CoreDefaults.DEFAULT_QOS_DEFAULT_REFERENCE_LOST_PER_MEASUREMENT_PERCENT + "}";
+	public static final String QOS_ENABLED_RELAY_TASK = "enable_qos_relay_task";
+	public static final String $QOS_ENABLED_RELAY_TASK_WD =  "${" + QOS_ENABLED_RELAY_TASK + ":" + CoreDefaults.DEFAULT_QOS_ENABLED_RELAY_TASK + "}";
 	
 	public static final String NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS = "no_gatekeeper_relay_request_handler_workers";
 	public static final String $NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS_WD = "${" + NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + ":" + 

@@ -61,11 +61,13 @@ public class CoreDefaults {
 	public static final int DEFAULT_QOS_DEFAULT_REFERENCE_MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT = 32;
 	public static final int DEFAULT_QOS_DEFAULT_REFERENCE_JITTER_WITHOUT_TIMEOUT = 2;
 	public static final int DEFAULT_QOS_DEFAULT_REFERENCE_LOST_PER_MEASUREMENT_PERCENT = 0;
+	public static final boolean DEFAULT_QOS_ENABLED_RELAY_TASK = false;
 	
 	public static final byte DEFAULT_RELAY_TEST_TIME_TO_REPEAT = 35;
 	public static final int DEFAULT_RELAY_TEST_TIMEOUT = 5000; // in milliseconds
 	public static final int DEFAULT_RELAY_TEST_MESSAGE_SIZE = 2048; // in bytes
 	public static final boolean DEFAULT_RELAY_TEST_LOG_MEASUREMENTS_IN_DB = true;
+
 	
 	//=================================================================================================
 	// assistant methods
