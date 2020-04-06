@@ -1,24 +1,25 @@
-package eu.arrowhead.core.onboarding.swagger;
+package eu.arrowhead.core.certificate_authority.swagger;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.swagger.DefaultSwaggerConfig;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableSwagger2
 @Configuration
-public class SRSwaggerConfig extends DefaultSwaggerConfig {
-	
+public class CASwaggerConfig extends DefaultSwaggerConfig {
+
 	//=================================================================================================
 	// methods
-	
+
 	//-------------------------------------------------------------------------------------------------
-	public SRSwaggerConfig() {
-		super(CommonConstants.CORE_SYSTEM_ONBOARDING);
+	public CASwaggerConfig() {
+		super(CommonConstants.CORE_SYSTEM_CERTIFICATE_AUTHORITY);
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Bean
 	public Docket customizeSwagger() {

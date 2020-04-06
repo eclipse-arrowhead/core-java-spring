@@ -1,6 +1,6 @@
 [Unit]
 Description=arrowhead-systemregistry
-After=network.target mysql.target
+After=network.target mysql.target arrowhead-serviceregistry
 
 [Service]
 WorkingDirectory=/etc/arrowhead/systems/system_registry
