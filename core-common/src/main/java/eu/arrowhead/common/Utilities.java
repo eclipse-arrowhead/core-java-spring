@@ -13,6 +13,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
@@ -31,6 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.ServiceConfigurationError;
 import java.util.regex.Pattern;
 
@@ -363,19 +365,27 @@ public class Utilities {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static X509Certificate getFirstCertFromKeyStore(final KeyStore keystore) {
+	public static X509Certificate getSystemCertFromKeyStore(final KeyStore keystore) {
 		Assert.notNull(keystore, "Key store is not defined.");
-		
-        try {
-            final Enumeration<String> enumeration = keystore.aliases();
-            final String alias = enumeration.nextElement();
-            return (X509Certificate) keystore.getCertificate(alias);
-        } catch (final KeyStoreException | NoSuchElementException ex) {
-        	logger.error("Getting the first cert from key store failed...", ex);
-            throw new ServiceConfigurationError("Getting the first cert from keystore failed...", ex);
-        }
-    }
-	
+
+		try {
+			// the first certificate is not always the end certificate. java does not
+			// guarantee the order
+			final Enumeration<String> enumeration = keystore.aliases();
+			while (enumeration.hasMoreElements()) {
+				final Certificate[] chain = keystore.getCertificateChain(enumeration.nextElement());
+
+				if (Objects.nonNull(chain) && chain.length >= 3) {
+					return (X509Certificate) chain[0];
+				}
+			}
+			throw new ServiceConfigurationError("Getting the first cert from keystore failed...");
+		} catch (final KeyStoreException | NoSuchElementException ex) {
+			logger.error("Getting the first cert from key store failed...", ex);
+			throw new ServiceConfigurationError("Getting the first cert from keystore failed...", ex);
+		}
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	public static X509Certificate getCloudCertFromKeyStore(final KeyStore keystore) {
 		Assert.notNull(keystore, "Key store is not defined.");
