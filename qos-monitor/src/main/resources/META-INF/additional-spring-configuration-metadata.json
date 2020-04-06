@@ -133,5 +133,10 @@
     "name": "interping.logMeasurementsDetailsToDB",
     "type": "java.lang.String",
     "description": "A description for 'interping.logMeasurementsDetailsToDB'"
+  },
+  {
+    "name": "enable_qos_relay_task",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'enable_qos_relay_task'"
   }
 ]}
