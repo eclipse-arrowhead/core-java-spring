@@ -17,6 +17,7 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.CommonConstants;
@@ -56,6 +57,9 @@ public class RelayEchoTask implements Job {
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
 	
+	@Value(CoreCommonConstants.$QOS_ENABLED_RELAY_TASK_WD)
+	private boolean relayTaskEnabled;
+	
 	private final Logger logger = LogManager.getLogger(RelayEchoTask.class);
 	
 	private final String CLOUD_HAS_NO_RELAY_WARNING_MESSAGE = "The following cloud do not have a relay: ";
@@ -75,6 +79,11 @@ public class RelayEchoTask implements Job {
 		
 		if (!sslProperties.isSslEnabled()) {
 			logger.debug("Finished: relay echo task can not run if server is not in secure mode");
+			return;
+		}
+		
+		if (!relayTaskEnabled) {
+			logger.debug("Finished: relay echo task disabled");
 			return;
 		}
 		
