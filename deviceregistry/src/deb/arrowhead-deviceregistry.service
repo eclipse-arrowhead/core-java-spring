@@ -1,6 +1,6 @@
 [Unit]
 Description=arrowhead-deviceregistry
-After=network.target mysql.target
+After=network.target mysql.target arrowhead-serviceregistry
 
 [Service]
 WorkingDirectory=/etc/arrowhead/systems/device_registry

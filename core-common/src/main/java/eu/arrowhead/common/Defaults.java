@@ -33,7 +33,8 @@ public class Defaults {
     // CORS defaults
     public static final long CORS_MAX_AGE = 600;
     public static final String CORS_ALLOW_CREDENTIALS = "true";
-// CA defaults
+
+    // CA defaults
 	public static final long DEFAULT_CA_CERT_VALIDITY_NEG_OFFSET_MILLIS = 5000;
 	public static final long DEFAULT_CA_CERT_VALIDITY_POS_OFFSET_MILLIS = 1000L * 3600 * 24 * 365;
     //-------------------------------------------------------------------------------------------------

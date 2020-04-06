@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 public class SystemQueryFormDTO implements Serializable {
 
@@ -24,13 +25,14 @@ public class SystemQueryFormDTO implements Serializable {
 
 	private boolean pingProviders = false;
 
+
 	//=================================================================================================
 	// methods
-
 	//-------------------------------------------------------------------------------------------------
+
 	public SystemQueryFormDTO() {}
-
 	//-------------------------------------------------------------------------------------------------
+
 	public String getSystemNameRequirements() { return systemNameRequirements; }
 	public String getDeviceNameRequirements() { return deviceNameRequirements; }
 	public Map<String,String> getMetadataRequirements() { return metadataRequirements; }
@@ -38,8 +40,8 @@ public class SystemQueryFormDTO implements Serializable {
 	public Integer getMinVersionRequirement() { return minVersionRequirement; }
 	public Integer getMaxVersionRequirement() { return maxVersionRequirement; }
 	public boolean getPingProviders() { return pingProviders; }
-
 	//-------------------------------------------------------------------------------------------------
+
 	public void setSystemNameRequirements(final String systemNameRequirements) { this.systemNameRequirements = systemNameRequirements; }
 	public void setDeviceNameRequirements(final String deviceNameRequirements) { this.deviceNameRequirements = deviceNameRequirements; }
 	public void setMetadataRequirements(final Map<String,String> metadataRequirements) { this.metadataRequirements = metadataRequirements; }
@@ -48,10 +50,23 @@ public class SystemQueryFormDTO implements Serializable {
 	public void setMaxVersionRequirement(final Integer maxVersionRequirement) { this.maxVersionRequirement = maxVersionRequirement; }
 	public void setPingProviders(final boolean pingProviders) { this.pingProviders = pingProviders; }
 
+	@Override
+	public String toString() {
+		return new StringJoiner(", ", SystemQueryFormDTO.class.getSimpleName() + "[", "]")
+				.add("systemNameRequirements='" + systemNameRequirements + "'")
+				.add("deviceNameRequirements='" + deviceNameRequirements + "'")
+				.add("metadataRequirements=" + metadataRequirements)
+				.add("versionRequirement=" + versionRequirement)
+				.add("minVersionRequirement=" + minVersionRequirement)
+				.add("maxVersionRequirement=" + maxVersionRequirement)
+				.add("pingProviders=" + pingProviders)
+				.toString();
+	}
 	//=================================================================================================
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
+
 	private SystemQueryFormDTO(final Builder builder) {
 		this.systemNameRequirements = builder.systemNameRequirements;
 		this.deviceNameRequirements = builder.deiceNameRequirements;
@@ -61,13 +76,12 @@ public class SystemQueryFormDTO implements Serializable {
 		this.maxVersionRequirement = builder.maxVersionRequirement;
 		this.pingProviders = builder.pingProviders;
 	}
-	
 	//=================================================================================================
 	// nested classes
-	
 	//-------------------------------------------------------------------------------------------------
 	public static class Builder {
-		
+
+
 		//=================================================================================================
 		// members
 

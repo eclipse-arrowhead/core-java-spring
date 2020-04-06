@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 @JsonInclude(Include.NON_NULL)
 public class DeviceRegistryResponseDTO implements Serializable {
@@ -77,5 +78,18 @@ public class DeviceRegistryResponseDTO implements Serializable {
 	@Override
 	public int hashCode() {
 		return Objects.hash(id, device, endOfValidity, metadata, version, createdAt, updatedAt);
+	}
+
+	@Override
+	public String toString() {
+		return new StringJoiner(", ", DeviceRegistryResponseDTO.class.getSimpleName() + "[", "]")
+				.add("id=" + id)
+				.add("device=" + device)
+				.add("endOfValidity='" + endOfValidity + "'")
+				.add("metadata=" + metadata)
+				.add("version=" + version)
+				.add("createdAt='" + createdAt + "'")
+				.add("updatedAt='" + updatedAt + "'")
+				.toString();
 	}
 }

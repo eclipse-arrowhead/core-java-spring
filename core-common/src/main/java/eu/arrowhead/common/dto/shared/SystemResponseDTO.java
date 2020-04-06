@@ -2,6 +2,7 @@ package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -81,5 +82,18 @@ public class SystemResponseDTO implements Serializable {
 		final SystemResponseDTO other = (SystemResponseDTO) obj;
 		
 		return Objects.equals(address, other.address) && Objects.equals(port, other.port) && Objects.equals(systemName, other.systemName);
+	}
+
+	@Override
+	public String toString() {
+		return new StringJoiner(", ", SystemResponseDTO.class.getSimpleName() + "[", "]")
+				.add("id=" + id)
+				.add("systemName='" + systemName + "'")
+				.add("address='" + address + "'")
+				.add("port=" + port)
+				.add("authenticationInfo='" + authenticationInfo + "'")
+				.add("createdAt='" + createdAt + "'")
+				.add("updatedAt='" + updatedAt + "'")
+				.toString();
 	}
 }

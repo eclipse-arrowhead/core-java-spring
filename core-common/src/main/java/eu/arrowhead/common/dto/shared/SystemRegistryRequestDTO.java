@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.StringJoiner;
 
 @JsonInclude(Include.NON_NULL)
 public class SystemRegistryRequestDTO implements Serializable {
@@ -24,6 +25,12 @@ public class SystemRegistryRequestDTO implements Serializable {
 	// methods
 
 	public SystemRegistryRequestDTO() {
+	}
+
+	public SystemRegistryRequestDTO(final SystemRequestDTO system, final DeviceRequestDTO provider, final String endOfValidity) {
+		this.system = system;
+		this.provider = provider;
+		this.endOfValidity = endOfValidity;
 	}
 
 	public SystemRegistryRequestDTO(final SystemRequestDTO system, final DeviceRequestDTO provider, final String endOfValidity,
@@ -48,4 +55,15 @@ public class SystemRegistryRequestDTO implements Serializable {
 	public void setEndOfValidity(final String endOfValidity) { this.endOfValidity = endOfValidity; }
 	public void setMetadata(final Map<String,String> metadata) { this.metadata = metadata; }
 	public void setVersion(final Integer version) { this.version = version; }
+
+	@Override
+	public String toString() {
+		return new StringJoiner(", ", SystemRegistryRequestDTO.class.getSimpleName() + "[", "]")
+				.add("system=" + system)
+				.add("provider=" + provider)
+				.add("endOfValidity='" + endOfValidity + "'")
+				.add("metadata=" + metadata)
+				.add("version=" + version)
+				.toString();
+	}
 }

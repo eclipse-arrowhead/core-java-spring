@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 @JsonInclude(Include.NON_NULL)
 public class SystemRegistryResponseDTO implements Serializable {
@@ -80,5 +81,19 @@ public class SystemRegistryResponseDTO implements Serializable {
 	@Override
 	public int hashCode() {
 		return Objects.hash(id, system, provider, endOfValidity, metadata, version, createdAt, updatedAt);
+	}
+
+	@Override
+	public String toString() {
+		return new StringJoiner(", ", SystemRegistryResponseDTO.class.getSimpleName() + "[", "]")
+				.add("id=" + id)
+				.add("system=" + system)
+				.add("provider=" + provider)
+				.add("endOfValidity='" + endOfValidity + "'")
+				.add("metadata=" + metadata)
+				.add("version=" + version)
+				.add("createdAt='" + createdAt + "'")
+				.add("updatedAt='" + updatedAt + "'")
+				.toString();
 	}
 }

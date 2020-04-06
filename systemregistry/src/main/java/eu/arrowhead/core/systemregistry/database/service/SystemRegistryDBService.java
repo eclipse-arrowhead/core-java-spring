@@ -3,7 +3,7 @@ package eu.arrowhead.core.systemregistry.database.service;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.CoreUtilities;
-import eu.arrowhead.common.SSLProperties;
+import eu.arrowhead.common.SecurityUtilities;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Device;
 import eu.arrowhead.common.database.entity.System;
@@ -11,14 +11,23 @@ import eu.arrowhead.common.database.entity.SystemRegistry;
 import eu.arrowhead.common.database.repository.DeviceRepository;
 import eu.arrowhead.common.database.repository.SystemRegistryRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
+import eu.arrowhead.common.drivers.CertificateAuthorityDriver;
+import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.DeviceListResponseDTO;
 import eu.arrowhead.common.dto.internal.SystemListResponseDTO;
 import eu.arrowhead.common.dto.internal.SystemRegistryListResponseDTO;
+import eu.arrowhead.common.dto.shared.CertificateCreationRequestDTO;
+import eu.arrowhead.common.dto.shared.CertificateCreationResponseDTO;
+import eu.arrowhead.common.dto.shared.CertificateType;
 import eu.arrowhead.common.dto.shared.DeviceRequestDTO;
 import eu.arrowhead.common.dto.shared.DeviceResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemQueryFormDTO;
 import eu.arrowhead.common.dto.shared.SystemQueryResultDTO;
+import eu.arrowhead.common.dto.shared.SystemRegistryOnboardingWithCsrRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemRegistryOnboardingWithCsrResponseDTO;
+import eu.arrowhead.common.dto.shared.SystemRegistryOnboardingWithNameRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemRegistryOnboardingWithNameResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
@@ -39,6 +48,7 @@ import org.springframework.util.Assert;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.security.KeyPair;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Collections;
@@ -61,12 +71,10 @@ public class SystemRegistryDBService {
     private final Logger logger = LogManager.getLogger(SystemRegistryDBService.class);
 
     private final SystemRegistryRepository systemRegistryRepository;
-
     private final SystemRepository systemRepository;
-
     private final DeviceRepository deviceRepository;
-
-    private final SSLProperties sslProperties;
+    private final SecurityUtilities securityUtilities;
+    private final CertificateAuthorityDriver caDriver;
 
     @Value(CoreCommonConstants.$SYSTEM_REGISTRY_PING_TIMEOUT_WD)
     private int pingTimeout;
@@ -75,11 +83,13 @@ public class SystemRegistryDBService {
     public SystemRegistryDBService(final SystemRegistryRepository systemRegistryRepository,
                                    final SystemRepository systemRepository,
                                    final DeviceRepository deviceRepository,
-                                   final SSLProperties sslProperties) {
+                                   final SecurityUtilities securityUtilities,
+                                   final CertificateAuthorityDriver caDriver) {
         this.systemRegistryRepository = systemRegistryRepository;
         this.systemRepository = systemRepository;
         this.deviceRepository = deviceRepository;
-        this.sslProperties = sslProperties;
+        this.securityUtilities = securityUtilities;
+        this.caDriver = caDriver;
     }
 
 
@@ -236,8 +246,8 @@ public class SystemRegistryDBService {
 
             if (checkSystemIfUniqueValidationNeeded(system, validatedSystemName, validatedAddress, validatedPort)) {
                 checkConstraintsOfSystemTable(validatedSystemName != null ? validatedSystemName : system.getSystemName(),
-                        validatedAddress != null ? validatedAddress : system.getAddress(),
-                        validatedPort != null ? validatedPort : system.getPort());
+                                              validatedAddress != null ? validatedAddress : system.getAddress(),
+                                              validatedPort != null ? validatedPort : system.getPort());
             }
 
             if (Utilities.notEmpty(validatedSystemName)) {
@@ -297,7 +307,7 @@ public class SystemRegistryDBService {
 
         try {
             final Page<Device> devices = deviceRepository.findAll(PageRequest.of(pageParams.getValidatedPage(), pageParams.getValidatedSize(),
-                    pageParams.getValidatedDirection(), validatedSortField));
+                                                                                 pageParams.getValidatedDirection(), validatedSortField));
             return DTOConverter.convertDeviceEntryListToDeviceListResponseDTO(devices);
         } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
@@ -372,9 +382,9 @@ public class SystemRegistryDBService {
 
         try {
             final PageRequest pageRequest = PageRequest.of(params.getValidatedPage(),
-                    params.getValidatedSize(),
-                    params.getValidatedDirection(),
-                    validatedSortField);
+                                                           params.getValidatedSize(),
+                                                           params.getValidatedDirection(),
+                                                           validatedSortField);
             final Page<SystemRegistry> systemRegistryPage = systemRegistryRepository.findAll(pageRequest);
             return DTOConverter.convertSystemRegistryListToSystemRegistryListResponseDTO(systemRegistryPage);
         } catch (final Exception ex) {
@@ -411,7 +421,6 @@ public class SystemRegistryDBService {
         }
     }
 
-
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
     public SystemRegistryResponseDTO registerSystemRegistry(final SystemRegistryRequestDTO request) {
@@ -419,14 +428,14 @@ public class SystemRegistryDBService {
         checkSystemRegistryRequest(request);
 
         try {
-            final System systemDb = findOrCreateSystem(request.getSystem());
-            final Device deviceDb = findOrCreateDevice(request.getProvider());
 
             final ZonedDateTime endOfValidity = getZonedDateTime(request);
             final String metadataStr = Utilities.map2Text(request.getMetadata());
             final int version = (request.getVersion() != null) ? request.getVersion() : 1;
-            final SystemRegistry srEntry = createSystemRegistry(systemDb, deviceDb, endOfValidity, metadataStr, version);
+            final System systemDb = findOrCreateSystem(request.getSystem());
+            final Device deviceDb = findOrCreateDevice(request.getProvider());
 
+            final SystemRegistry srEntry = createSystemRegistry(systemDb, deviceDb, endOfValidity, metadataStr, version);
             return DTOConverter.convertSystemRegistryToSystemRegistryResponseDTO(srEntry);
         } catch (final DateTimeParseException ex) {
             logger.debug(ex.getMessage(), ex);
@@ -457,10 +466,10 @@ public class SystemRegistryDBService {
 
             final System systemDb = findOrCreateSystem(request.getSystem());
             final Device deviceDb = findOrCreateDevice(request.getProvider());
-
             final ZonedDateTime endOfValidity = getZonedDateTime(request);
             final String metadataStr = Utilities.map2Text(request.getMetadata());
             final int version = (request.getVersion() != null) ? request.getVersion() : 1;
+
             updateSrEntry = updateSystemRegistry(srEntry, systemDb, deviceDb, endOfValidity, metadataStr, version);
 
             return DTOConverter.convertSystemRegistryToSystemRegistryResponseDTO(updateSrEntry);
@@ -532,7 +541,7 @@ public class SystemRegistryDBService {
 
         final List<System> systemList = systemRepository.findBySystemName(systemName);
         final PageRequest pageRequest = PageRequest.of(pageParameters.getValidatedPage(), pageParameters.getValidatedSize(),
-                pageParameters.getValidatedDirection(), sortField);
+                                                       pageParameters.getValidatedDirection(), sortField);
 
         final Page<SystemRegistry> systemRegistries = systemRegistryRepository.findAllBySystemIsIn(systemList, pageRequest);
         return DTOConverter.convertSystemRegistryListToSystemRegistryListResponseDTO(systemRegistries);
@@ -610,15 +619,15 @@ public class SystemRegistryDBService {
             if (form.getMetadataRequirements() != null && !form.getMetadataRequirements().isEmpty()) {
                 final Map<String, String> requiredMetadata = normalizeMetadata(form.getMetadataRequirements());
                 registryList.removeIf(e ->
-                {
-                    final Map<String, String> metadata = Utilities.text2Map(e.getMetadata());
-                    if (Objects.isNull(metadata)) {
-                        // we have requirements but no metadata -> remove
-                        return true;
-                    }
+                                      {
+                                          final Map<String, String> metadata = Utilities.text2Map(e.getMetadata());
+                                          if (Objects.isNull(metadata)) {
+                                              // we have requirements but no metadata -> remove
+                                              return true;
+                                          }
 
-                    return !metadata.entrySet().containsAll(requiredMetadata.entrySet());
-                });
+                                          return !metadata.entrySet().containsAll(requiredMetadata.entrySet());
+                                      });
             }
 
             // filter on ping
@@ -656,6 +665,43 @@ public class SystemRegistryDBService {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
+    }
+
+    public SystemRegistryOnboardingWithNameResponseDTO onboardAndRegisterSystemRegistry(final SystemRegistryOnboardingWithNameRequestDTO request,
+                                                                                        final String host, final String address) {
+        logger.debug("onboardAndRegisterSystemRegistry started...");
+
+        final CertificateCreationRequestDTO creationRequestDTO = request.getCertificateCreationRequest();
+        final KeyPair keyPair = securityUtilities.extractOrGenerateKeyPair(creationRequestDTO);
+        final String certificateSigningRequest;
+
+        try {
+            certificateSigningRequest = securityUtilities
+                    .createCertificateSigningRequest(creationRequestDTO.getCommonName(), keyPair, host, address, CertificateType.AH_SYSTEM);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            throw new ArrowheadException("Unable to create certificate signing request: " + e.getMessage());
+        }
+
+        final var signingResponse = signCertificate(certificateSigningRequest);
+        signingResponse.setKeyPairDTO(securityUtilities.encodeKeyPair(keyPair));
+
+        final var retValue = new SystemRegistryOnboardingWithNameResponseDTO();
+        retValue.setCertificateResponse(signingResponse);
+        retValue.load(registerSystemRegistry(request));
+        return retValue;
+    }
+
+    public SystemRegistryOnboardingWithCsrResponseDTO onboardAndRegisterSystemRegistry(final SystemRegistryOnboardingWithCsrRequestDTO request) {
+
+        logger.debug("onboardAndRegisterDeviceRegistry started...");
+        final var signingResponse = signCertificate(request.getCertificateSigningRequest());
+        securityUtilities.extractAndSetPublicKey(signingResponse);
+
+        final var retValue = new SystemRegistryOnboardingWithCsrResponseDTO();
+        retValue.setCertificateResponse(signingResponse);
+        retValue.load(registerSystemRegistry(request));
+        return retValue;
     }
 
     //=================================================================================================
@@ -717,11 +763,11 @@ public class SystemRegistryDBService {
         final Map<String, String> map = new HashMap<>();
 
         metadata.forEach((k, v) ->
-        {
-            if (Objects.nonNull(v)) {
-                map.put(k.trim(), v.trim());
-            }
-        });
+                         {
+                             if (Objects.nonNull(v)) {
+                                 map.put(k.trim(), v.trim());
+                             }
+                         });
 
         return map;
     }
@@ -890,9 +936,9 @@ public class SystemRegistryDBService {
     //-------------------------------------------------------------------------------------------------
     private System findOrCreateSystem(SystemRequestDTO requestSystemDto) {
         return findOrCreateSystem(requestSystemDto.getSystemName(),
-                requestSystemDto.getAddress(),
-                requestSystemDto.getPort(),
-                requestSystemDto.getAuthenticationInfo());
+                                  requestSystemDto.getAddress(),
+                                  requestSystemDto.getPort(),
+                                  requestSystemDto.getAuthenticationInfo());
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -921,9 +967,9 @@ public class SystemRegistryDBService {
     //-------------------------------------------------------------------------------------------------
     private Device findOrCreateDevice(DeviceRequestDTO requestDeviceDto) {
         return findOrCreateDevice(requestDeviceDto.getDeviceName(),
-                requestDeviceDto.getAddress(),
-                requestDeviceDto.getMacAddress(),
-                requestDeviceDto.getAuthenticationInfo());
+                                  requestDeviceDto.getAddress(),
+                                  requestDeviceDto.getMacAddress(),
+                                  requestDeviceDto.getAuthenticationInfo());
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -980,7 +1026,7 @@ public class SystemRegistryDBService {
             final Optional<SystemRegistry> find = systemRegistryRepository.findBySystemAndDevice(systemDb, deviceDb);
             if (find.isPresent()) {
                 throw new InvalidParameterException("System Registry entry with provider: (" + deviceDb.getDeviceName() + ", " + deviceDb.getMacAddress() +
-                        ") and system : " + systemDb.getSystemName() + " already exists.");
+                                                            ") and system : " + systemDb.getSystemName() + " already exists.");
             }
         } catch (final InvalidParameterException ex) {
             throw ex;
@@ -1049,6 +1095,20 @@ public class SystemRegistryDBService {
     //-------------------------------------------------------------------------------------------------
     private ZonedDateTime getZonedDateTime(SystemRegistryRequestDTO request) {
         return Utilities.isEmpty(request.getEndOfValidity()) ? null : Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    private CertificateCreationResponseDTO signCertificate(final String signingRequest) {
+        logger.debug("Contact CertificateAuthority ...");
+        final var csrDTO = new CertificateSigningRequestDTO(signingRequest);
+        final var signingResponse = caDriver.signCertificate(csrDTO);
+
+        logger.debug("Processing response from Certificate Authority ...");
+        final CertificateCreationResponseDTO certificateResponseDTO = new CertificateCreationResponseDTO();
+        certificateResponseDTO.setCertificate(signingResponse.getCertificateChain().get(0));
+        certificateResponseDTO.setCertificateFormat(CoreCommonConstants.CERTIFICATE_FORMAT);
+        certificateResponseDTO.setCertificateType(CertificateType.AH_DEVICE);
+        return certificateResponseDTO;
     }
 
     //-------------------------------------------------------------------------------------------------

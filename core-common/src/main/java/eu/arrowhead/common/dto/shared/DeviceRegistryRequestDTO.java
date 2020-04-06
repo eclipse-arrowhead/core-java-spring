@@ -2,9 +2,11 @@ package eu.arrowhead.common.dto.shared;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import org.springframework.util.Assert;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.StringJoiner;
 
 @JsonInclude(Include.NON_NULL)
 public class DeviceRegistryRequestDTO implements Serializable {
@@ -23,6 +25,10 @@ public class DeviceRegistryRequestDTO implements Serializable {
 	// methods
 
 	public DeviceRegistryRequestDTO() {
+	}
+
+	public DeviceRegistryRequestDTO(final DeviceRequestDTO device, final String endOfValidity) {this.device = device;
+		this.endOfValidity = endOfValidity;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -44,4 +50,14 @@ public class DeviceRegistryRequestDTO implements Serializable {
 	public void setEndOfValidity(final String endOfValidity) { this.endOfValidity = endOfValidity; }
 	public void setMetadata(final Map<String,String> metadata) { this.metadata = metadata; }
 	public void setVersion(final Integer version) { this.version = version; }
+
+	@Override
+	public String toString() {
+		return new StringJoiner(", ", DeviceRegistryRequestDTO.class.getSimpleName() + "[", "]")
+				.add("device=" + device)
+				.add("endOfValidity='" + endOfValidity + "'")
+				.add("metadata=" + metadata)
+				.add("version=" + version)
+				.toString();
+	}
 }

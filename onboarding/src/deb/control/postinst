@@ -56,6 +56,12 @@ case "$1" in
 		
 		ah_transform_log_file ${SYSTEM_DIR}
 
+		db_get arrowhead-core-common/sr_host; sr_host=$RET || true
+
+		if [ -z ${sr_host} ]; then
+			sr_host=${OWN_IP}
+		fi
+
 		db_get arrowhead-core-common/db_host; db_host=$RET || true
 
 		mv ${SYSTEM_DIR}/application.properties ${SYSTEM_DIR}/application.properties.orig
@@ -63,6 +69,8 @@ case "$1" in
 		sed -r -e "\#^.*spring\.datasource\.url=#s#.*\$#spring.datasource.url=jdbc:mysql://"${db_host}":3306/arrowhead?serverTimezone=Europe/Budapest#"  \
 			   -e "\#^.*spring\.datasource\.password=#s#.*\$#spring.datasource.password=${system_passwd}#" \
 			   -e "\#^.*domain\.name=#s#.*\$#domain.name=${domain_name}#" \
+			   -e "\#^.*server\.address=#s#.*\$#server.address=${OWN_IP}#" \
+			   -e "\#^.*sr_address=#s#.*\$#sr_address=${sr_host}#" \
 			   -e "\#^.*server\.ssl\.key-store=#s#.*\$#server.ssl.key-store=file:${SYSTEM_DIR}/${SYSTEM_NAME}.p12#" \
 			   -e "\#^.*server\.ssl\.key-store-password=#s#.*\$#server.ssl.key-store-password=${AH_PASS_CERT}#" \
 			   -e "\#^.*server\.ssl\.key-password=#s#.*\$#server.ssl.key-password=${AH_PASS_CERT}#" \

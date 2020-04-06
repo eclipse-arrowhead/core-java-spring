@@ -114,7 +114,12 @@ Description: MySQL password for Device Registry system (leave empty for random).
 Template: arrowhead-core-common/mysql_password_onboarding
 Type: password
 Default:
-Description: MySQL password for Onboarding controller system (leave empty for random).
+Description: MySQL password for Onboarding Controller system (leave empty for random).
+
+Template: arrowhead-core-common/mysql_password_ca
+Type: password
+Default:
+Description: MySQL password for Certificate Authority system (leave empty for random).
 
 Template: arrowhead-core-common/sr_host
 Type: string
