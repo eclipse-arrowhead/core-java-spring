@@ -81,22 +81,33 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 	       * [Client](#ca_endpoints_client)
            * [Private](#ca_endpoints_private)
            * [Management](#ca_endpoints_mgmt)
-	  8. [QoS Monitor (Quality of Service Monitor)](#qos_monitor)
+	8. [QoS Monitor (Quality of Service Monitor)](#qos_monitor)
        * [System Design Description Overview](#qos_monitor_sdd)
        * [Services and Use Cases](#qos_monitor_usecases)  
        * [Endpoints](#qos_monitor_endpoints)
 	       * [Client](#qos_monitor_endpoints_client)
            * [Private](#qos_monitor_endpoints_private)
            * [Management](#qos_monitor_endpoints_mgmt)
-    9. [System Registry](#systenregistry)
+    9. [Onboarding Controller](#onboardingcontroller)
+       * [System Design Description Overview](#onboardingcontroller_sdd)
+       * [Services and Use Cases](#onboardingcontroller_usecases)
+       * [Security](#onboardingcontroller_security)
+       * [Endpoints](#onboardingcontroller_endpoints)
+           * [Onboarding](#onboardingcontroller_endpoints_onboarding)
+    9. [Device Registry](#deviceregistry)
+       * [System Design Description Overview](#deviceregistry_sdd)
+       * [Services and Use Cases](#deviceregistry_usecases)
+       * [Security](#deviceregistry_security)
+       * [Endpoints](#deviceregistry_endpoints)
+           * [Onboarding](#deviceregistry_endpoints_onboarding)
+           * [Client](#deviceregistry_endpoints_client)
+    9. [System Registry](#systemregistry)
        * [System Design Description Overview](#systemregistry_sdd)
        * [Services and Use Cases](#systemregistry_usecases)
        * [Security](#systemregistry_security)
-       * [Endpoints](#systenregistry_endpoints)
-           * [Client](#systenregistry_endpoints_client)
-           * [Private](#systenregistry_endpoints_private)
-           * [Management](#systenregistry_endpoints_mgmt) 
-           * [Removed Endpoints](#systenregistry_removed)
+       * [Endpoints](#systemregistry_endpoints)
+           * [Onboarding](#systemregistry_endpoints_onboarding)
+           * [Client](#systemregistry_endpoints_client)
 
 	
 <a name="quickstart" />
@@ -6672,13 +6683,504 @@ __Ping Measurment response by system id__ the output :
 
 For private endpoints no detailed description available.
 
-<a name="systemregistry" />
- 
-# System Registry 
- 
-<a name="systemregistry_sdd" />
+
+# Onboarding Controller
+<a name="onboardingcontroller" /><br /
+
+## System Design Description Overview
+<a name="onboardingcontroller_sdd" /><br />
+
+The purpose of this System is to be the entry board for the onboarding procedure. The onboarding controller sits at the edge of the Arrowhead local cloud. 
+It is not only reachable from within the cloud by authorized systems, but also from the public through its "accept all" interfaces. 
+Any client may authenticate itself through an Arrowhead certificate, through an authorized manufacturer certificate, or simply through a shared secret.
+
+![onboarding_controller](./documentation/onboarding/onboarding_controller.png)
+
+## Services and Use Cases
+<a name="onboardingcontroller_usecases" />
+
+The only use case is the onboarding procedure. 
+
+The onboarding procedure is needed when a new device produced by any vendor (e.g. Siemens, Infineon, Bosch, etc.), containing a security controller (e.g. TPM), 
+wants to interact with the Arrowhead local cloud. To assure that the cloud is not compromised upon the arrival of this new device, it is important to establish 
+a chain of trust from the new hardware device, to its hosted application systems and their services. Thus, the onboarding procedure makes possible that 
+the device, systems and services are authenticated and authorized to connect to the Arrowhead local cloud.
+
+The use cases in which the external actor interacts with the Arrowhead local cloud during onboarding include:
+* Initialize Device Onboarding (via the Onboarding Controller system)
+* Register a Device in the DeviceRegistry (via the DeviceRegistry system)
+* Register a System in the SystemRegistry (via the SystemRegistry system)
+* Register a Service in the ServiceRegistry (via the ServiceRegistry system)
+* Start normal operation (e.g., service lookup, service consumption, etc.)
+
+The onboarding controller can either relay a ![PKCS #10 Certificate Signing Request](https://tools.ietf.org/html/rfc2986) or generate one on behalf of the client.
+
+
+## Security
+<a name="onboardingcontroller_security" />
+
+This System can be secured via the HTTPS protocol. If it is started in secure mode, it verifies whether the Application System 
+- possesses a proper X.509 identity certificate and whether that certificate is Arrowhead compliant
+- possesses a proper X.509 identity certificate and whether that certificate is trusted by the CA
+- provides a shared secret through ![HTTP Basic Authentication](https://tools.ietf.org/html/rfc7617)
+
+## Endpoints
+<a name="onboardingcontroller_endpoints" />
+
+The Onboarding Controller offers two types of authentication (certificate or HTTP Basic) and two types operation (provide CSR or generate CSR), thus having four different endpoint. 
+No management or private endpoint exists.
+
+Swagger API documentation is available on: `https://<host>:<port>` <br />
+The base URL for the requests: `https://<host>:<port>/onboarding`
+
+The general scheme of the URLs is `https://<host>:<port>/onboarding/<authentication_type>/<operation_type>`
+
+### Client endpoint description<br />
+<a name="onboardingcontroller_endpoints" />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#onboardingcontroller_endpoints_get_echo)     | /echo       | GET    | -     | OK     |
+| [Onboard with Name](#onboardingcontroller_endpoints_name) | /certificate/name   | POST   | [OnboardingWithNameRequest](#datastructures_onboarding_name_request) | [OnboardingWithNameResponse](#datastructures_onboarding_name_response) |
+| [Onboard with Name](#onboardingcontroller_endpoints_name) | /sharedsecret/name | POST   | [OnboardingWithNameRequest](#datastructures_onboarding_name_request) | [OnboardingWithNameResponse](#datastructures_onboarding_name_response) |
+| [Onboard with CSR](#onboardingcontroller_endpoints_csr)    | /certificate/csr      | POST   | [OnboardingWithCsrRequest](#datastructures_onboarding_csr_request) | [OnboardingWithCsrResponse](#datastructures_onboarding_csr_response) |
+| [Onboard with CSR](#onboardingcontroller_endpoints_csr)    | /sharedsecret/csr      | POST   | [OnboardingWithCsrRequest](#datastructures_onboarding_csr_request) | [OnboardingWithCsrResponse](#datastructures_onboarding_csr_response) |
+
+           
+### Onboard with Name
+<a name="onboardingcontroller_endpoints_name" />
+
+```
+POST /certificate/name
+POST /sharedsecret/name
+```                       
+
+Creates a CSR on behalf of the client and eventually returns an onboarding certificate which may be used in the next step of the onboarding controller.
+
+#### Request
+<a name="datastructures_onboarding_name_request" />
+
+```json
+{
+  "creationRequestDTO": {
+    "commonName": "string",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  }
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `commonName` | The common name field for the new certificate |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys | 
+| `privateKey` | Base64 encoded private key |
+| `publicKey` | Base64 encoded public key |
+
+#### Response
+<a name="datastructures_onboarding_name_response" />
+
+```json
+{
+  "rootCertificate": "string",
+  "intermediateCertificate": "string",
+  "onboardingCertificate": {
+    "certificate": "string",
+    "certificateFormat": "string",
+    "certificateType": "AH_ONBOARDING",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  },
+  "deviceRegistry": {
+    "service": "DEVICE_REGISTRY_ONBOARDING_WITH_NAME_SERVICE",
+    "uri": "string"
+  },
+  "systemRegistry": {
+    "service": "SYSTEM_REGISTRY_ONBOARDING_WITH_NAME_SERVICE",
+    "uri": "string"
+  },
+  "serviceRegistry": {
+    "service": "SERVICE_REGISTRY_REGISTER_SERVICE",
+        "uri": "string"
+  },
+  "orchestrationService": {
+    "service": "ORCHESTRATION_SERVICE",
+    "uri": "string"
+  }
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `rootCertificate` | The Arrowhead master certificate |
+| `intermediateCertificate` | The Arrowhead local cloud certificate |
+| `onboardingCertificate` | The onboarding certificate for the next step |
+| `certificateFormat` | The certificate format (usually X.509) |
+| `certificateType` | The certificate type. Always AH_ONBOARDING for this operation |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys | 
+| `privateKey` | Base64 encoded private key |
+| `publicKey` | Base64 encoded public key |
+| `service` | The service which is reachable under `uri` |
+| `uri` | The uri under which the depicted `service` is reachable |
+
+          
+### Onboard with CSR
+<a name="onboardingcontroller_endpoints_csr" />
+
+```
+POST /certificate/csr
+POST /sharedsecret/csr
+```                       
+
+Creates a CSR on behalf of the client and eventually returns an onboarding certificate which may be used in the next step of the onboarding controller.
+
+#### Request
+<a name="datastructures_onboarding_csr_request" />
+
+```json
+{
+  "certificateSigningRequest": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `certificateSigningRequest` | Base64 encoded certificate signing request |
+
+#### Response
+<a name="datastructures_onboarding_csr_response" />
+
+```json
+{
+  "rootCertificate": "string",
+  "intermediateCertificate": "string",
+  "onboardingCertificate": {
+    "certificate": "string",
+    "certificateFormat": "string",
+    "certificateType": "AH_ONBOARDING",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  },
+  "deviceRegistry": {
+    "service": "DEVICE_REGISTRY_ONBOARDING_WITH_CSR_SERVICE",
+    "uri": "string"
+  },
+  "systemRegistry": {
+    "service": "SYSTEM_REGISTRY_ONBOARDING_WITH_CSR_SERVICE",
+    "uri": "string"
+  },
+  "serviceRegistry": {
+    "service": "SERVICE_REGISTRY_REGISTER_SERVICE",
+        "uri": "string"
+  },
+  "orchestrationService": {
+    "service": "ORCHESTRATION_SERVICE",
+    "uri": "string"
+  }
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `rootCertificate` | The Arrowhead master certificate |
+| `intermediateCertificate` | The Arrowhead local cloud certificate |
+| `onboardingCertificate` | The onboarding certificate for the next step |
+| `certificateFormat` | The certificate format (usually X.509) |
+| `certificateType` | The certificate type. Always AH_ONBOARDING for this operation |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys | 
+| `privateKey` | Base64 encoded private key. Always empty for this operation |
+| `publicKey` | Base64 encoded public key |
+| `service` | The service which is reachable under `uri` |
+| `uri` | The uri under which the depicted `service` is reachable |
+
+
+# Device Registry 
+<a name="deviceregistry"/><br />
  
 ## System Design Description Overview
+<a name="deviceregistry_sdd" /><br />
+
+This System provides the database, which stores information related to the Devices within the Local Cloud.
+
+The purpose of this System is therefore to allow:
+-	Devices to register themselves, making this announcement available to other Application Systems on the network. 
+-	They are also allowed to remove or update their entries when it is necessary. 
+-   Generate a client certificate which can be used by the Device to register its Systems
+
+## Services and Use Cases
+<a name="deviceregistry_usecases" />
+
+This System provides two Core Service: the __device registration__ and __de-registration__.
+Further it provides two Onboarding Services: the __onboarding with name__ and __onboarding with CSR__.
+
+The __register__ method is used to register a device. The device will contain various metadata as well as a physical endpoint. 
+The various parameters are representing the endpoint information that should be registered.
+
+The __unregister__ method is used to unregister device instances that were previously registered in the Registry. 
+The instance parameter is representing the endpoint information that should be removed.
+
+The __onboarding__ methods are used to register a device and to retrieve a device certificate which must be used on the next step of the onboarding procedure.
+
+## Security
+<a name="deviceregistry_security" />
+
+This System can be secured via the HTTPS protocol. If it is started in secure mode, it verifies whether the Application System possesses a proper X.509 identity certificate and whether that certificate is Arrowhead compliant in its making. This certificate structure and creation guidelines ensure:
+-	Application System is properly bootstrapped into the Local Cloud
+-	The Application System indeed belongs to this Local Cloud
+-	The Application System then automatically has the right to register its Systems in the Registry.
+
+If these criteria are met, the Application System’s registration or removal message is processed. An Application System can only delete or alter entries that contain the Device as the System Provider in the entry. 
+
+
+## Endpoints
+<a name="deviceregistry_endpoints" />
+
+The System Registry offers four types of endpoints. Onboarding, Client, Management and Private.
+
+Swagger API documentation is available on: `https://<host>:<port>` <br />
+The base URL for the requests: `http://<host>:<port>/deviceregistry`
+
+### Onboarding endpoint description<br />
+<a name="deviceregistry_endpoints_onboarding" />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Onboard with Name](#deviceregistry_endpoints_onboarding_name)    | /onboarding/name      | POST   | [DeviceOnboardingWithNameRequest](#datastructures_deviceregistry_onboarding_with_name_request) | [DeviceOnboardingWithNameResponse](#datastructures_deviceregistry_onboarding_with_name_response) |
+| [Onboard with CSR](#deviceregistry_endpoints_onboarding_csr) | /onboarding/csr   | POST   | [DeviceOnboardingWithCsrRequest](#datastructures_deviceregistry_onboarding_with_csr_request) | [DeviceOnboardingWithCsrResponse](#datastructures_deviceregistry_onboarding_with_csr_response) |
+
+
+### Client endpoint description<br />
+<a name="deviceregistry_endpoints_onboarding" />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#deviceregistry_endpoints_get_echo)     | /echo       | GET    | -     | OK     |
+| [Query](#deviceregistry_endpoints_post_query)    | /query      | POST   | [DeviceQueryForm](#datastructures_systemqueryform) | [DeviceQueryList](#datastructures_devicequerylist) |
+| [Register](#deviceregistry_endpoints_post_register) | /register   | POST   | [DeviceRegistryEntry](#datastructures_deviceregistryentry) | [DeviceRegistryEntry](#datastructures_deviceregistryentry) |
+| [Unregister](#deviceregistry_delete_unregister) | /unregister | DELETE | Device Name and Mac Address in query parameters| OK |
+
+### Detailed description<br />
+
+A detailed description of management and private endpoints is available in the release notes.
+   
+### Onboard with Name
+<a name="deviceregistry_endpoints_onboarding_name" />
+
+```
+POST /onboarding/name
+```                       
+
+Creates a CSR on behalf of the client, registers the device and eventually returns a device certificate which may be used in the next step of the onboarding controller.
+
+#### Request
+<a name="datastructures_deviceregistry_onboarding_with_name_request" />
+
+```json
+{
+  "certificateCreationRequest": {
+    "commonName": "string",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  },
+  "device": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "deviceName": "string",
+    "macAddress": "string"
+  },
+  "endOfValidity": "string",
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "version": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `commonName` | The common name field for the new certificate |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys | 
+| `privateKey` | Base64 encoded private key |
+| `publicKey` | Base64 encoded public key |
+| `address` | The optional IP address of the device |
+| `authenticationInfo` | Base64 encoded public key of the certificate this device |
+| `deviceName` | The device name |
+| `macAddress` | The MAC address of the device |
+| `endOfValidity` | The validity of this entry |
+| `metadata` | Various meta information as map |
+| `version` | The version of this entry |
+
+#### Response
+<a name="datastructures_deviceregistry_onboarding_with_name_response" />
+
+```json
+{
+  "certificateResponse": {
+    "certificate": "string",
+    "certificateFormat": "string",
+    "certificateType": "AH_DEVICE",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  },
+  "createdAt": "string",
+  "device": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "createdAt": "string",
+    "deviceName": "string",
+    "id": 0,
+    "macAddress": "string",
+    "updatedAt": "string"
+  },
+  "endOfValidity": "string",
+  "id": 0,
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "updatedAt": "string",
+  "version": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `certificate` | The Base64 device certificate for the next step |
+| `certificateFormat` | The certificate format (usually X.509) |
+| `certificateType` | The certificate type. Always AH_DEVICE for this operation |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys | 
+| `privateKey` | Base64 encoded private key |
+| `publicKey` | Base64 encoded public key |
+
+Additionally all fields from [DeviceRegistryEntry](#datastructures_deviceregistryentry) are returned. 
+
+### Onboard with CSR
+<a name="deviceregistry_endpoints_onboarding_csr" />
+
+```
+POST /onboarding/csr
+```                       
+
+Signs the CSR, registers the device and eventually returns a device certificate which may be used in the next step of the onboarding controller.
+
+#### Request
+<a name="datastructures_deviceregistry_onboarding_with_csr_request" />
+
+```json
+{
+  "certificateSigningRequest": "string",
+  "device": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "deviceName": "string",
+    "macAddress": "string"
+  },
+  "endOfValidity": "string",
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "version": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `certificateSigningRequest` | Base64 encoded certificate signing request |
+| `address` | The optional IP address of the device |
+| `authenticationInfo` | Base64 encoded public key of the certificate this device |
+| `deviceName` | The device name |
+| `macAddress` | The MAC address of the device |
+| `endOfValidity` | The validity of this entry |
+| `metadata` | Various meta information as map |
+| `version` | The version of this entry |
+
+#### Response
+<a name="datastructures_deviceregistry_onboarding_with_csr_response" />
+
+```json
+{
+  "certificateResponse": {
+    "certificate": "string",
+    "certificateFormat": "string",
+    "certificateType": "AH_DEVICE",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  },
+  "createdAt": "string",
+  "device": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "createdAt": "string",
+    "deviceName": "string",
+    "id": 0,
+    "macAddress": "string",
+    "updatedAt": "string"
+  },
+  "endOfValidity": "string",
+  "id": 0,
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "updatedAt": "string",
+  "version": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `certificate` | The Base64 device certificate for the next step |
+| `certificateFormat` | The certificate format (usually X.509) |
+| `certificateType` | The certificate type. Always AH_DEVICE for this operation |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys | 
+| `privateKey` | Base64 encoded private key. Always empty for this operation |
+| `publicKey` | Base64 encoded public key |
+
+Additionally all fields from [DeviceRegistryEntry](#datastructures_deviceregistryentry) are returned. 
+
+ 
+# System Registry 
+<a name="systemregistry" />
+ 
+ 
+## System Design Description Overview
+<a name="systemregistry_sdd" />
 
 This System provides the database, which stores information related to the System of the currently actively offered Services within the Local Cloud.
 
@@ -6687,9 +7189,9 @@ The purpose of this System is therefore to allow:
 -	They are also allowed to remove or update their entries when it is necessary. 
 -   Generate a client certificate which can be used by the System to offer Services
 
-<a name="systemregistry_usecases" />
 
 ## Services and Use Cases
+<a name="systemregistry_usecases" />
 
 This System provides two Core Service the __system registration__ and __de-registration__
 
@@ -6699,9 +7201,9 @@ The various parameters are representing the endpoint information that should be 
 The __unregister__ method is used to unregister system instances that were previously registered in the Registry. 
 The instance parameter is representing the endpoint information that should be removed.
 
-<a name="systemregistry_security" />
 
 ## Security
+<a name="systemregistry_security" />
 
 This System can be secured via the HTTPS protocol. If it is started in secure mode, it verifies whether the Application System possesses a proper X.509 identity certificate and whether that certificate is Arrowhead compliant in its making. This certificate structure and creation guidelines ensure:
 -	Application System is properly bootstrapped into the Local Cloud
@@ -6710,18 +7212,26 @@ This System can be secured via the HTTPS protocol. If it is started in secure mo
 
 If these criteria are met, the Application System’s registration or removal message is processed. An Application System can only delete or alter entries that contain the Device as the System Provider in the entry. 
 
-<a name="systemregistry_endpoints" />
 
 ## Endpoints
+<a name="systemregistry_endpoints" />
 
 The System Registry offers three types of endpoints. Client, Management and Private.
 
 Swagger API documentation is available on: `https://<host>:<port>` <br />
 The base URL for the requests: `http://<host>:<port>/systemregistry`
 
-<a name="systemregistry_endpoints_client" />
+### Onboarding endpoint description<br />
+<a name="systemregistry_endpoints_onboarding" />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Onboard with Name](#systemregistry_endpoints_onboarding_name)    | /onboarding/name      | POST   | [SystemOnboardingWithNameRequest](#datastructures_systemregistry_onboarding_with_name_request) | [SystemOnboardingWithNameResponse](#datastructures_systemregistry_onboarding_with_name_response) |
+| [Onboard with CSR](#systemregistry_endpoints_onboarding_csr) | /onboarding/csr   | POST   | [SystemOnboardingWithCsrRequest](#datastructures_systemregistry_onboarding_with_csr_request) | [SystemOnboardingWithCsrResponse](#datastructures_systemregistry_onboarding_with_csr_response) |
+
 
 ### Client endpoint description<br />
+<a name="systemregistry_endpoints_client" />
 
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
@@ -6730,44 +7240,237 @@ The base URL for the requests: `http://<host>:<port>/systemregistry`
 | [Register](#systemregistry_endpoints_post_register) | /register   | POST   | [SystenRegistryEntry](#datastructures_systemregistryentry) | [SystenRegistryEntry](#datastructures_systemregistryentry) |
 | [Unregister](#systemregistry_delete_unregister) | /unregister | DELETE | System Name, Address and Port in query parameters| OK |
 
-<a name="systemregistry_endpoints_private" />
-
-### Private endpoint description<br />
-
-These services can only be used by other core services, therefore they are not part of the public API.
-
-| Function | URL subpath | Method | Input | Output |
-| -------- | ----------- | ------ | ----- | ------ |
-| [Query System](#systemregistry_endpoints_post_query_system) | /query/system | POST | System | System |
-| [Query System By ID](#systemregistry_endpoints_get_query_system_id) | /query/system/{id} | GET | ID | System|
-
-<a name="systemregistry_endpoints_mgmt" />
-
-### Management endpoint description<br />
-
-These endpoints are mainly used by the Management Tool and Cloud Administrators.
-
-| Function | URL subpath | Method | Input | Output |
-| -------- | ----------- | ------ | ----- | ------ |
-| [Get all entries](#systemregistry_endpoints_get_mgmt) | /mgmt/ | GET | - | [SystemRegistryEntryList](#datastructures_systemregistryentrylist) |
-| [Add an entry](#systemregistry_endpoints_post_mgmt) | /mgmt/ | POST | [SystemRegistryEntry](#datastructures_systemregistryentry) | [SystemRegistryEntry](#datastructures_systemregistry_entry) |
-| [Get an entry by ID](#systemregistry_endpoints_get_mgmt) | /mgmt/{id} | GET | SystemRegistryEntryID | [SystemRegistryEntry](#datastructures_systemregistryentry) |
-| [Replace an entry by ID](#systemregistry_endpoints_put_mgmt) | /mgmt/{id} | PUT | [SystemRegistryEntry](#datastructures_systemregistryentry) | [SystemRegistryEntry](#datastructures_systemregistryentry) |
-| [Modify an entry by ID](#systemregistry_endpoints_patch_mgmt) | /mgmt/{id} | PATCH | [SystemRegistryEntry](#datastructures_systemregistryentry) | [SystemRegistryEntry](#datastructures_systemregistryentry) |
-| [Delete and entry by ID](systemregistry_endpoints_delete_mgmt) | /mgmt/{id} | DELETE | SystemRegistryEntryID | - |
-| [Get all devices](#systemregistry_endpoints_get_devices) | /mgmt/devices | GET | - | [DeviceList](#datastructures_devicelist) |
-| [Add a device](#systemregistry_endpoints_post_devices) | /mgmt/devices | POST | [Device](#datastructure_device) | [Device](#datastructure_device) |
-| [Get a device by ID](#systemregistry_endpoints_get_device_id) | /mgmt/devices/{id} | GET | DeviceID | [Device](#datastructure_device) |
-| [Replace a device by ID](#systemregistry_endpoints_put_device_id) | /mgmt/devices/{id} | PUT | [Device](#datastructure_device) | [Device](#datastructure_device) |
-| [Modify a device by ID](#systemregistry_endpoints_patch_device_id) | /mgmt/devices/{id} | PATCH | [Device](#datastructure_device) | [Device](#datastructure_device) |
-| [Delete a device by ID](#systemregistry_endpoints_delete_device_id) | /mgmt/devices/{id} | DELETE | DeviceID | - |
-| [Get all systems](#systemregistry_endpoints_get_systems) | /mgmt/systems | GET | - | [SystemList](#datastructures_systemlist) |
-| [Add a system](#systemregistry_endpoints_post_system) | /mgmt/systems | POST | [System](#datastructures_system) | [System](#datastructures_system) |
-| [Get a system by ID](#systemregistry_endpoints_get_system_id) | /mgmt/systems/{id} | GET | SystemID | [System](#datastructures_system) |
-| [Replace a system by ID](#systemregistry_endpoints_put_system_id) | /mgmt/systems/(id} | PUT | [System](#datastructures_system) | [System](#datastructures_system) |
-| [Modify a system by ID](#systemregistry_endpoints_patch_system_id) | /mgmt/systems/{id} | PATCH | [System](#datastructures_system) | [System](#datastructures_system) |
-| [Delete a system by ID](#systemregistry_endpoints_delete_system_id) | /mgmt/systems/{id} | DELETE | SystemID | - |
-
 ### Detailed description<br />
 
-A detailed description is available in the release notes.
+A detailed description of public, management and private endpoints is available in the release notes.
+   
+### Onboard with Name
+<a name="systemregistry_endpoints_onboarding_name" />
+
+```
+POST /onboarding/name
+```                       
+
+Creates a CSR on behalf of the client, registers the system and eventually returns a system certificate which is valid in the Arrowhead local cloud.
+
+#### Request
+<a name="datastructures_systemeregistry_onboarding_with_name_request" />
+
+```json
+{
+  "certificateCreationRequest": {
+    "commonName": "string",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  },
+  "provider": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "deviceName": "string",
+    "macAddress": "string"
+  },
+  "system": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "port": 0,
+    "systemName": "string"
+  },
+  "endOfValidity": "string",
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "version": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `commonName` | The common name field for the new certificate |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys | 
+| `privateKey` | Base64 encoded private key |
+| `publicKey` | Base64 encoded public key |
+| `address` | The IP address of the device/system |
+| `authenticationInfo` | Base64 encoded public key of the certificate this device/system |
+| `deviceName` | The device name |
+| `macAddress` | The MAC address of the device |
+| `systemName` | The system name |
+| `port` | The port under which this system's services are available |
+| `endOfValidity` | The validity of this entry |
+| `metadata` | Various meta information as map |
+| `version` | The version of this entry |
+
+#### Response
+<a name="datastructures_systemregistry_onboarding_with_name_response" />
+
+```json
+{
+  "certificateResponse": {
+    "certificate": "string",
+    "certificateFormat": "string",
+    "certificateType": "AH_SYSTEM",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  },
+  "createdAt": "string",
+    "provider": {
+      "address": "string",
+      "authenticationInfo": "string",
+      "createdAt": "string",
+      "deviceName": "string",
+      "id": 0,
+      "macAddress": "string",
+      "updatedAt": "string"
+    },
+    "system": {
+      "address": "string",
+      "authenticationInfo": "string",
+      "createdAt": "string",
+      "id": 0,
+      "port": 0,
+      "systemName": "string",
+      "updatedAt": "string"
+    },
+  "endOfValidity": "string",
+  "id": 0,
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "updatedAt": "string",
+  "version": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `certificate` | The Base64 device certificate for the next step |
+| `certificateFormat` | The certificate format (usually X.509) |
+| `certificateType` | The certificate type. Always AH_SYSTEM for this operation |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys | 
+| `privateKey` | Base64 encoded private key |
+| `publicKey` | Base64 encoded public key |
+
+Additionally all fields from [SystemRegistryEntry](#datastructures_systemregistryentry) are returned. 
+
+### Onboard with CSR
+<a name="systemregistry_endpoints_onboarding_csr" />
+
+```
+POST /onboarding/csr
+```                       
+
+Signs the CSR, registers the device and eventually returns a device certificate which may be used in the next step of the onboarding controller.
+
+#### Request
+<a name="datastructures_systemregistry_onboarding_with_csr_request" />
+
+```json
+{
+  "certificateSigningRequest": "string",
+  "provider": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "deviceName": "string",
+    "macAddress": "string"
+  },
+  "system": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "port": 0,
+    "systemName": "string"
+  },
+  "endOfValidity": "string",
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "version": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `certificateSigningRequest` | Base64 encoded certificate signing request |
+| `address` | The IP address of the device/system |
+| `authenticationInfo` | Base64 encoded public key of the certificate this device/system |
+| `deviceName` | The device name |
+| `macAddress` | The MAC address of the device |
+| `systemName` | The system name |
+| `port` | The port under which this system's services are available |
+| `endOfValidity` | The validity of this entry |
+| `metadata` | Various meta information as map |
+| `version` | The version of this entry |
+
+#### Response
+<a name="datastructures_systemregistry_onboarding_with_csr_response" />
+
+```json
+{
+  "certificateResponse": {
+    "certificate": "string",
+    "certificateFormat": "string",
+    "certificateType": "AH_SYSTEM",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  },
+  "createdAt": "string",
+    "provider": {
+      "address": "string",
+      "authenticationInfo": "string",
+      "createdAt": "string",
+      "deviceName": "string",
+      "id": 0,
+      "macAddress": "string",
+      "updatedAt": "string"
+    },
+    "system": {
+      "address": "string",
+      "authenticationInfo": "string",
+      "createdAt": "string",
+      "id": 0,
+      "port": 0,
+      "systemName": "string",
+      "updatedAt": "string"
+    },
+  "endOfValidity": "string",
+  "id": 0,
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "updatedAt": "string",
+  "version": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `certificate` | The Base64 device certificate for the next step |
+| `certificateFormat` | The certificate format (usually X.509) |
+| `certificateType` | The certificate type. Always AH_DEVICE for this operation |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys | 
+| `privateKey` | Base64 encoded private key. Always empty for this operation |
+| `publicKey` | Base64 encoded public key |
+
+Additionally all fields from [SystemRegistryEntry](#datastructures_systemregistryentry) are returned. 
+

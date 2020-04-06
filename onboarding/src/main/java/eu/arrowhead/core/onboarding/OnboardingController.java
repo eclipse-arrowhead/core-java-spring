@@ -48,7 +48,7 @@ import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_CERTIFICATE
 import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_SHARED_SECRET_AND_CSR;
 import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_SHARED_SECRET_AND_NAME;
 
-@Api(tags = {CoreCommonConstants.SWAGGER_TAG_ALL})
+@Api(tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT, CoreCommonConstants.SWAGGER_TAG_ONBOARDING})
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS,
         allowedHeaders = {HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION}
 )
@@ -97,8 +97,8 @@ public class OnboardingController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Onboarding with certificate and device name", response = DeviceResponseDTO.class,
-            tags = {CoreCommonConstants.SWAGGER_TAG_MGMT, CoreCommonConstants.SWAGGER_TAG_ONBOARDING})
+    @ApiOperation(value = "Onboarding with certificate and device name", response = OnboardingWithNameResponseDTO.class,
+            tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT, CoreCommonConstants.SWAGGER_TAG_ONBOARDING})
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = ONBOARDING_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = ONBOARDING_HTTP_400_MESSAGE),
@@ -120,8 +120,8 @@ public class OnboardingController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Onboarding with shared secret and device name", response = DeviceResponseDTO.class,
-            tags = {CoreCommonConstants.SWAGGER_TAG_MGMT, CoreCommonConstants.SWAGGER_TAG_ONBOARDING})
+    @ApiOperation(value = "Onboarding with shared secret and device name", response = OnboardingWithNameResponseDTO.class,
+            tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT, CoreCommonConstants.SWAGGER_TAG_ONBOARDING})
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = ONBOARDING_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = ONBOARDING_HTTP_400_MESSAGE),
@@ -144,8 +144,8 @@ public class OnboardingController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Onboarding with certificate and certificate signing request", response = DeviceResponseDTO.class,
-            tags = {CoreCommonConstants.SWAGGER_TAG_MGMT, CoreCommonConstants.SWAGGER_TAG_ONBOARDING})
+    @ApiOperation(value = "Onboarding with certificate and certificate signing request", response = OnboardingWithCsrResponseDTO.class,
+            tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT, CoreCommonConstants.SWAGGER_TAG_ONBOARDING})
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = ONBOARDING_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = ONBOARDING_HTTP_400_MESSAGE),
@@ -165,8 +165,8 @@ public class OnboardingController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Onboarding with certificate and certificate signing request", response = DeviceResponseDTO.class,
-            tags = {CoreCommonConstants.SWAGGER_TAG_MGMT, CoreCommonConstants.SWAGGER_TAG_ONBOARDING})
+    @ApiOperation(value = "Onboarding with certificate and certificate signing request", response = OnboardingWithCsrResponseDTO.class,
+            tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT, CoreCommonConstants.SWAGGER_TAG_ONBOARDING})
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = ONBOARDING_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = ONBOARDING_HTTP_400_MESSAGE),
