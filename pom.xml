@@ -12,7 +12,7 @@
 	<version>${revision}</version>
 	<packaging>pom</packaging>
 	<name>core-java-spring</name>
-	<description>Arrowhead Core Sevices using Spring Boot</description>
+	<description>Arrowhead Core Services using Spring Boot</description>
 
 	<url>https://github.com/arrowhead-f/core-java-spring</url>
 	<licenses>
@@ -26,6 +26,7 @@
 	    <module>core-common</module>
 	    <module>serviceregistry</module>
 	    <module>authorization</module>
+	    <module>certificate-authority</module>
 	    <module>orchestrator</module>
 	    <module>eventhandler</module>
 	    <module>gatekeeper</module>
@@ -55,6 +56,7 @@
   		<apache.commons.lang3.version>3.9</apache.commons.lang3.version>
   		<jms.api.version>2.0.1</jms.api.version>
   		<activemq.client.version>5.15.9</activemq.client.version>
+		  <bouncy.castle.version>1.64</bouncy.castle.version>
   		<icmp4j.version>1.2</icmp4j.version>
   		<jna.version>5.5.0</jna.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

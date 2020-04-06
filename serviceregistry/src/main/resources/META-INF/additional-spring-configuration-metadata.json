@@ -1,28 +1,13 @@
 {"properties": [
   {
-    "name": "ping_scheduled",
-    "type": "java.lang.Boolean",
-    "description": "A description for 'ping_scheduled'"
-  },
-  {
-    "name": "ping_timeout",
+    "name": "ca.validity.negative-offest-millis",
     "type": "java.lang.Long",
-    "description": "A description for 'ping_timeout'"
+    "description": "The negative offset in milliseconds from the current time for the beginning of the validity of the generated certificates"
   },
   {
-    "name": "ping_interval",
+    "name": "ca.validity.positive-offest-millis",
     "type": "java.lang.Long",
-    "description": "A description for 'ping_interval'"
-  },
-  {
-    "name": "ttl_scheduled",
-    "type": "java.lang.Boolean",
-    "description": "A description for 'ttl_scheduled'"
-  },
-  {
-    "name": "ttl_interval",
-    "type": "java.lang.Long",
-    "description": "A description for 'ttl_interval'"
+    "description": "The offset in milliseconds from the current time for the end of the validity of the generated certificates"
   },
   {
     "name": "disable.hostname.verifier",
@@ -33,11 +18,6 @@
     "name": "log_all_request_and_response",
     "type": "java.lang.Boolean",
     "description": "A description for 'log_all_request_and_response'"
-  },
-  {
-    "name": "use_strict_service_intf_name_verifier",
-    "type": "java.lang.Boolean",
-    "description": "A description for 'use_strict_service_intf_name_verifier'"
   },
   {
     "name": "core_system_name",

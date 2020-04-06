@@ -42,6 +42,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -74,7 +76,7 @@ public class GatewayServiceTest {
 	@Mock
 	private Map<String,Object> arrowheadContext;
 	
-	@Spy
+	@Mock
 	private ApplicationContext appContext;
 	
 	@Mock
@@ -624,6 +626,7 @@ public class GatewayServiceTest {
 		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenReturn(getTestSession());
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
 		when(relayClient.initializeConsumerSideRelay(any(Session.class), any(MessageListener.class), any(String.class), any(String.class))).thenReturn(new ConsumerSideRelayInfo(producer, producer));
+		when(appContext.getBean(SSLProperties.class)).thenReturn(getTestSSLPropertiesForThread());
 		
 		final int serverPort = testingObject.connectConsumer(request);
 		
@@ -920,5 +923,20 @@ public class GatewayServiceTest {
 		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq5Jq4tOeFoLqxOqtYcujbCNZina3iuV9+/o8D1R9D0HvgnmlgPlqWwjDSxV7m7SGJpuc/rRXJ85OzqV3rwRHO8A8YWXiabj8EdgEIyqg4SOgTN7oZ7MQUisTpwtWn9K14se4dHt/YE9mUW4en19p/yPUDwdw3ECMJHamy/O+Mh6rbw6AFhYvz6F5rXYB8svkenOuG8TSBFlRkcjdfqQqtl4xlHgmlDNWpHsQ3eFAO72mKQjm2ZhWI1H9CLrJf1NQs2GnKXgHBOM5ET61fEHWN8axGGoSKfvTed5vhhX7l5uwxM+AKQipLNNKjEaQYnyX3TL9zL8I7y+QkhzDa7/5kQIDAQAB";
 		
 		return new GatewayConsumerConnectionRequestDTO(relay, "queueId", "peerName", publicKey, consumer, provider, consumerCloud, providerCloud, "test-service");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private SSLProperties getTestSSLPropertiesForThread() {
+		final SSLProperties sslProps = new SSLProperties();
+		ReflectionTestUtils.setField(sslProps, "sslEnabled", true);
+		ReflectionTestUtils.setField(sslProps, "keyStoreType", "PKCS12");
+		final Resource keystore = new ClassPathResource("certificates/gateway.p12");
+		ReflectionTestUtils.setField(sslProps, "keyStore", keystore);
+		ReflectionTestUtils.setField(sslProps, "keyStorePassword", "123456");
+		final Resource truststore = new ClassPathResource("certificates/truststore.p12");
+		ReflectionTestUtils.setField(sslProps, "trustStore", truststore);
+		ReflectionTestUtils.setField(sslProps, "trustStorePassword", "123456");
+		
+		return sslProps;
 	}
 }
