@@ -842,6 +842,9 @@ public class QoSDBService {
 		
 		validateCloudResponseDTO(cloudResponseDTO);
 		validateRelayResponseDTO(relayResponseDTO);
+		if (type == null) {
+			throw new InvalidParameterException("QoSMeasurementType" + NULL_ERROR_MESSAGE);
+		}
 
 		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResponseDTO);
 		final Relay relay = DTOConverter.convertRelayResponseDTOToRelay(relayResponseDTO);
@@ -861,6 +864,15 @@ public class QoSDBService {
 	public QoSInterRelayMeasurement createInterRelayMeasurement(final Cloud cloud, final Relay relay, final QoSMeasurementType type, final ZonedDateTime aroundNow) {
 		logger.debug("createInterRelayMeasurement started...");
 
+		validateCloud(cloud);
+		validateRelay(relay);
+		if (type == null) {
+			throw new InvalidParameterException("QoSMeasurementType" + NULL_ERROR_MESSAGE);
+		}
+		if (aroundNow == null) {
+			throw new InvalidParameterException("AroundNow" + NULL_ERROR_MESSAGE);
+		}
+		
 		final QoSInterRelayMeasurement measurement = new QoSInterRelayMeasurement(cloud, relay, type, aroundNow);
 
 		try {
@@ -1264,8 +1276,42 @@ public class QoSDBService {
 			throw new InvalidParameterException("Relay address" + EMPTY_OR_NULL_ERROR_MESSAGE);
 		}
 		
-		if (dto.getType() == RelayType.GATEWAY_RELAY) {
+		if (dto.getType() == RelayType.GATEKEEPER_RELAY) {
 			throw new InvalidParameterException(dto.getType().name() + NOT_APPLICABLE_RELAY_TYPE);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateCloud (final Cloud cloud) {
+		logger.debug("validateCloudResponseDTO started...");
+
+		if (cloud == null) {
+			throw new InvalidParameterException("Cloud" + NULL_ERROR_MESSAGE);
+		}
+		
+		if (Utilities.isEmpty(cloud.getName())) {
+			throw new InvalidParameterException("Cloud name" + EMPTY_OR_NULL_ERROR_MESSAGE);
+		}
+		
+		if (Utilities.isEmpty(cloud.getOperator())) {
+			throw new InvalidParameterException("Cloud operator" + EMPTY_OR_NULL_ERROR_MESSAGE);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateRelay (final Relay relay) {
+		logger.debug("validateRelayResponseDTO started...");
+
+		if (relay == null) {
+			throw new InvalidParameterException("Relay" + NULL_ERROR_MESSAGE);
+		}
+		
+		if (Utilities.isEmpty(relay.getAddress())) {
+			throw new InvalidParameterException("Relay address" + EMPTY_OR_NULL_ERROR_MESSAGE);
+		}
+		
+		if (relay.getType() == RelayType.GATEKEEPER_RELAY) {
+			throw new InvalidParameterException(relay.getType().name() + NOT_APPLICABLE_RELAY_TYPE);
 		}
 	}
 }
