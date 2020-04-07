@@ -1,9 +1,9 @@
 package eu.arrowhead.core.qos.thread;
 
 import java.security.PublicKey;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -54,7 +54,7 @@ public class SenderSideRelayTestThread extends Thread implements MessageListener
 	private final long timeout; // in milliseconds
 	
 	private boolean senderFlag = true;
-	private final Map<Byte,long[]> testResults = new HashMap<>();
+	private final Map<Byte,long[]> testResults = new ConcurrentHashMap<>();
 	
 	private final String queueId;
 	private MessageProducer sender;
