@@ -16,7 +16,7 @@ public class SystemRegistryApplicationInitListener extends ApplicationInitListen
     @Override
     protected void customInit(final ContextRefreshedEvent event) {
         if (sslProperties.isSslEnabled()) {
-            logger.debug("AuthInfo: {}" + Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+            logger.debug("AuthInfo: {}", Base64.getEncoder().encodeToString(publicKey.getEncoded()));
         }
     }
 }

@@ -44,7 +44,7 @@ public class OnboardingApplicationInitListener extends ApplicationInitListener {
     protected void customInit(final ContextRefreshedEvent event) {
 
         if (sslProperties.isSslEnabled()) {
-            logger.debug("AuthInfo: {}" + Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+            logger.debug("AuthInfo: {}", Base64.getEncoder().encodeToString(publicKey.getEncoded()));
         }
 
         logger.info("Searching for authorization system");
