@@ -51,6 +51,7 @@ public class QoSDBServiceInterDirectTest {
 	
 	//=================================================================================================
 	// members
+	
 	@InjectMocks
 	private QoSDBService qoSDBService;
 	

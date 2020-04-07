@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.eq;
 
 import java.util.List;
 import java.util.Set;
@@ -155,22 +156,28 @@ public class GatekeeperServiceQoSTest {
 		final CloudRequestDTO requestDTO1 = new CloudRequestDTO();
 		requestDTO1.setName("test-name1");
 		requestDTO1.setOperator("test-operator1");
+		requestDTO1.setNeighbor(true);
 		final CloudRequestDTO requestDTO2 = new CloudRequestDTO();
 		requestDTO2.setName("test-name2");
 		requestDTO2.setOperator("test-operator2");
+		requestDTO2.setNeighbor(true);
 		
 		final Cloud cloudEntity1 = new Cloud();
 		cloudEntity1.setName(requestDTO1.getName());
 		cloudEntity1.setOperator(requestDTO1.getOperator());
+		cloudEntity1.setNeighbor(requestDTO1.getNeighbor());
+		cloudEntity1.setOwnCloud(false);
 		final Cloud cloudEntity2 = new Cloud();
 		cloudEntity2.setName(requestDTO2.getName());
 		cloudEntity2.setOperator(requestDTO2.getOperator());
+		cloudEntity2.setNeighbor(requestDTO2.getNeighbor());
+		cloudEntity2.setOwnCloud(false);
 		
 		final CloudAccessResponseDTO responseDTO1 = new CloudAccessResponseDTO(requestDTO1.getName(), requestDTO1.getOperator(), true);
 		final ErrorMessageDTO responseDTO2 = new ErrorMessageDTO();
 		
-		when(gatekeeperDBService.getCloudByOperatorAndName(requestDTO1.getName(), requestDTO1.getOperator())).thenReturn(cloudEntity1);
-		when(gatekeeperDBService.getCloudByOperatorAndName(requestDTO2.getName(), requestDTO2.getOperator())).thenReturn(cloudEntity2);
+		when(gatekeeperDBService.getCloudByOperatorAndName(eq(requestDTO1.getOperator()), eq(requestDTO1.getName()))).thenReturn(cloudEntity1);
+		when(gatekeeperDBService.getCloudByOperatorAndName(eq(requestDTO2.getOperator()), eq(requestDTO2.getName()))).thenReturn(cloudEntity2);
 		when(gatekeeperDriver.sendAccessTypesCollectionRequest(any())).thenReturn(List.of(responseDTO1, responseDTO2));
 		
 		final CloudAccessListResponseDTO result = gatekeeperService.initAccessTypesCollection(List.of(requestDTO1, requestDTO2));

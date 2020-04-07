@@ -1715,8 +1715,8 @@ public class PingTaskTest {
 
 		final PingMeasurementCalculationsDTO calculations = calculationsValueCapture.getValue();
 		assertNotNull(calculations);
-		assertTrue(1567 == calculations.getJitterWithTimeout());
-		assertTrue(25 == calculations.getJitterWithoutTimeout());
+		assertTrue(1487 == calculations.getJitterWithTimeout());
+		assertTrue(26 == calculations.getJitterWithoutTimeout());
 
 		verify(logger, atLeastOnce()).debug(any(String.class));
 		final List<String> debugMessages = debugValueCapture.getAllValues();
