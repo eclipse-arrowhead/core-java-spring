@@ -235,6 +235,7 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 	private void close() {
 		logger.debug("close started...");
 		
+		relayTestDBService.finishMeasurements(requesterCloud, relay);
 		relayClient.closeConnection(relaySession);
 	}
 	

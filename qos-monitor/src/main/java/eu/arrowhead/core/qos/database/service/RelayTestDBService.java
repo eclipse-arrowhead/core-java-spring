@@ -2,6 +2,7 @@ package eu.arrowhead.core.qos.database.service;
 
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ import eu.arrowhead.common.database.entity.QoSInterRelayEchoMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterRelayMeasurement;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayResponseDTO;
+import eu.arrowhead.common.dto.shared.QoSMeasurementStatus;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.qos.dto.RelayEchoMeasurementCalculationsDTO;
@@ -74,12 +76,29 @@ public class RelayTestDBService {
 		} else {
 			qosDBService.updateInterRelayEchoMeasurement(measurementHead, calculatedResult, measurementOpt.get(), measurementStart);
 		}
+		
+		measurementHead.setStatus(QoSMeasurementStatus.FINISHED);
 		qosDBService.updateInterRelayMeasurement(measurementStart, measurementHead);
 		
 		if (logMeasurements) {
 			final List<RelayEchoMeasurementDetailsDTO> measurementDetails = convertRawResultsToMeasurementDetails(rawResults);
 			qosDBService.logInterRelayEchoMeasurementToDB(measurementHead, measurementDetails, measurementStart);
 		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public void finishMeasurements(final CloudResponseDTO cloud, final RelayResponseDTO relay) {
+		logger.debug("storeMeasurements started...");
+		
+		Assert.notNull(cloud, "'cloud' is null.");
+		Assert.notNull(relay, "'relay' is null.");
+		
+		final QoSInterRelayMeasurement measurementHead = qosDBService.getOrCreateInterRelayMeasurement(cloud, relay, QoSMeasurementType.RELAY_ECHO);
+		
+		measurementHead.setStatus(QoSMeasurementStatus.FINISHED);
+		qosDBService.updateInterRelayMeasurement( ZonedDateTime.now(), measurementHead);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

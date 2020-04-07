@@ -19,7 +19,7 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.internal.CloudAccessListResponseDTO;
-import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysAndPublicRelaysListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
@@ -38,7 +38,7 @@ public class QoSMonitorDriver {
 	private static final String GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_URI_KEY = CoreSystemService.GATEKEEPER_COLLECT_SYSTEM_ADDRESSES.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEKEEPER_COLLECT_ACCESS_TYPES_URI_KEY = CoreSystemService.GATEKEEPER_COLLECT_ACCESS_TYPES.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEKEEPER_GET_CLOUD_URI_KEY = CoreSystemService.GATEKEEPER_GET_CLOUD_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
-	private static final String GATEKEEPER_INIT_RELAY_TEST_URI_KEY = CoreSystemService.GATEKEEPER_RELAY_TEST_SERVICE.getServiceDefinition();
+	private static final String GATEKEEPER_INIT_RELAY_TEST_URI_KEY = CoreSystemService.GATEKEEPER_RELAY_TEST_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	
 	public static final String KEY_CALCULATED_SERVICE_TIME_FRAME = "QoSCalculatedServiceTimeFrame";
 
@@ -69,12 +69,12 @@ public class QoSMonitorDriver {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public CloudWithRelaysListResponseDTO queryGatekeeperAllCloud() {
+	public CloudWithRelaysAndPublicRelaysListResponseDTO queryGatekeeperAllCloud() {
 		logger.debug("queryGatekeeperAllCloud started...");
 
 		try {
 			final UriComponents queryByAllCloudsUri = getGatekeeperAllCloudsUri();
-			final ResponseEntity<CloudWithRelaysListResponseDTO> response = httpService.sendRequest(queryByAllCloudsUri, HttpMethod.GET, CloudWithRelaysListResponseDTO.class);
+			final ResponseEntity<CloudWithRelaysAndPublicRelaysListResponseDTO> response = httpService.sendRequest(queryByAllCloudsUri, HttpMethod.GET, CloudWithRelaysAndPublicRelaysListResponseDTO.class);
 
 			return response.getBody();
 		} catch (final ArrowheadException ex) {
