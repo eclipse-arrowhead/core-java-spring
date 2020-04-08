@@ -1,6 +1,7 @@
 package eu.arrowhead.core.qos.database.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -21,11 +22,15 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.QoSInterRelayEchoMeasurement;
+import eu.arrowhead.common.database.entity.QoSInterRelayEchoMeasurementLog;
 import eu.arrowhead.common.database.entity.QoSInterRelayMeasurement;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.database.repository.QoSInterRelayEchoMeasurementLogRepository;
@@ -33,14 +38,15 @@ import eu.arrowhead.common.database.repository.QoSInterRelayEchoMeasurementRepos
 import eu.arrowhead.common.database.repository.QoSInterRelayMeasurementRepository;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
 import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.QoSMeasurementStatus;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.core.qos.dto.PingMeasurementCalculationsDTO;
 import eu.arrowhead.core.qos.dto.RelayEchoMeasurementCalculationsDTO;
+import eu.arrowhead.core.qos.dto.RelayEchoMeasurementDetailsDTO;
 
 @RunWith(SpringRunner.class)
 public class QoSDBServiceInterRelayTest {
@@ -188,7 +194,7 @@ public class QoSDBServiceInterRelayTest {
 		final RelayResponseDTO relayDTO = DTOConverter.convertRelayToRelayResponseDTO(measurement.getRelay());
 		
 		when(qosInterRelayMeasurementRepository.findByCloudAndRelayAndMeasurementType(any(), any(), any())).thenReturn(Optional.of(measurement));
-		Optional<QoSInterRelayMeasurement> result = qosDBService.getInterRelayMeasurement(cloudDTO, relayDTO, QoSMeasurementType.RELAY_ECHO);
+		final Optional<QoSInterRelayMeasurement> result = qosDBService.getInterRelayMeasurement(cloudDTO, relayDTO, QoSMeasurementType.RELAY_ECHO);
 		
 		verify(qosInterRelayMeasurementRepository, times(1)).findByCloudAndRelayAndMeasurementType(any(), any(), any());
 		assertTrue(result.isPresent());
@@ -665,13 +671,503 @@ public class QoSDBServiceInterRelayTest {
 			throw ex;
 		}		
 	}
+	
+	//=================================================================================================
+	// Tests of logInterRelayEchoMeasurementToDB
  	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Test
+	public void logInterRelayEchoMeasurementToDBTest() {
+		final QoSInterRelayMeasurement measurement = getQoSInterRelayMeasurementForTest(QoSMeasurementType.RELAY_ECHO, QoSMeasurementStatus.FINISHED);
+		final RelayEchoMeasurementDetailsDTO measurementDetails = getRelayEchoMeasurementDetailsDTOForTest();
+		
+		final ArgumentCaptor<List> valueCapture = ArgumentCaptor.forClass(List.class);
+		when(qosInterRelayEchoMeasurementLogRepository.saveAll(valueCapture.capture())).thenReturn(List.of());
+		doNothing().when(qosInterRelayEchoMeasurementLogRepository).flush();
+		
+		qosDBService.logInterRelayEchoMeasurementToDB(measurement, List.of(measurementDetails), ZonedDateTime.now());
+		
+		verify(qosInterRelayEchoMeasurementLogRepository, times(1)).saveAll(any());
+		verify(qosInterRelayEchoMeasurementLogRepository, times(1)).flush();
+		
+		final List<QoSInterRelayEchoMeasurementLog> capturedValue = valueCapture.getValue();
+		assertEquals(1, capturedValue.size());
+		assertEquals(measurementDetails.getSize(), capturedValue.get(0).getSize());
+		assertEquals(measurement.getCloud().getName(), capturedValue.get(0).getMeasurement().getCloud().getName());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Test(expected = ArrowheadException.class)
+	public void logInterRelayEchoMeasurementToDBSaveAllThrowDatabaseExceptionTest() {
+		final QoSInterRelayMeasurement measurement = getQoSInterRelayMeasurementForTest(QoSMeasurementType.RELAY_ECHO, QoSMeasurementStatus.FINISHED);
+		final RelayEchoMeasurementDetailsDTO measurementDetails = getRelayEchoMeasurementDetailsDTOForTest();
+		
+		final ArgumentCaptor<List> valueCapture = ArgumentCaptor.forClass(List.class);
+		when(qosInterRelayEchoMeasurementLogRepository.saveAll(valueCapture.capture())).thenThrow(HibernateException.class);
+		doNothing().when(qosInterRelayEchoMeasurementLogRepository).flush();
+		
+		try {
+			qosDBService.logInterRelayEchoMeasurementToDB(measurement, List.of(measurementDetails), ZonedDateTime.now());			
+		} catch (final Exception ex) {
+			verify(qosInterRelayEchoMeasurementLogRepository, times(1)).saveAll(any());
+			verify(qosInterRelayEchoMeasurementLogRepository, times(0)).flush();
+			
+			final List<QoSInterRelayEchoMeasurementLog> capturedValue = valueCapture.getValue();
+			assertEquals(1, capturedValue.size());
+			assertEquals(measurementDetails.getSize(), capturedValue.get(0).getSize());
+			assertEquals(measurement.getCloud().getName(), capturedValue.get(0).getMeasurement().getCloud().getName());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Test(expected = ArrowheadException.class)
+	public void logInterRelayEchoMeasurementToDBFlushThrowDatabaseExceptionTest() {
+		final QoSInterRelayMeasurement measurement = getQoSInterRelayMeasurementForTest(QoSMeasurementType.RELAY_ECHO, QoSMeasurementStatus.FINISHED);
+		final RelayEchoMeasurementDetailsDTO measurementDetails = getRelayEchoMeasurementDetailsDTOForTest();
+		
+		final ArgumentCaptor<List> valueCapture = ArgumentCaptor.forClass(List.class);
+		when(qosInterRelayEchoMeasurementLogRepository.saveAll(valueCapture.capture())).thenReturn(List.of());
+		doThrow(HibernateException.class).when(qosInterRelayEchoMeasurementLogRepository).flush();
+		
+		try {
+			qosDBService.logInterRelayEchoMeasurementToDB(measurement, List.of(measurementDetails), ZonedDateTime.now());			
+		} catch (final Exception ex) {
+			verify(qosInterRelayEchoMeasurementLogRepository, times(1)).saveAll(any());
+			verify(qosInterRelayEchoMeasurementLogRepository, times(1)).flush();
+			
+			final List<QoSInterRelayEchoMeasurementLog> capturedValue = valueCapture.getValue();
+			assertEquals(1, capturedValue.size());
+			assertEquals(measurementDetails.getSize(), capturedValue.get(0).getSize());
+			assertEquals(measurement.getCloud().getName(), capturedValue.get(0).getMeasurement().getCloud().getName());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void logInterRelayEchoMeasurementToDBNullMeasurmentTest() {
+		final RelayEchoMeasurementDetailsDTO measurementDetails = getRelayEchoMeasurementDetailsDTOForTest();
+		
+		try {
+			qosDBService.logInterRelayEchoMeasurementToDB(null, List.of(measurementDetails), ZonedDateTime.now());			
+		} catch (final Exception ex) {
+			verify(qosInterRelayEchoMeasurementLogRepository, times(0)).saveAll(any());
+			verify(qosInterRelayEchoMeasurementLogRepository, times(0)).flush();
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void logInterRelayEchoMeasurementToDBNullMeasurmentDetailsTest() {
+		final QoSInterRelayMeasurement measurement = getQoSInterRelayMeasurementForTest(QoSMeasurementType.RELAY_ECHO, QoSMeasurementStatus.FINISHED);
+		
+		try {
+			qosDBService.logInterRelayEchoMeasurementToDB(measurement, null, ZonedDateTime.now());			
+		} catch (final Exception ex) {
+			verify(qosInterRelayEchoMeasurementLogRepository, times(0)).saveAll(any());
+			verify(qosInterRelayEchoMeasurementLogRepository, times(0)).flush();
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void logInterRelayEchoMeasurementToDBNullAroundNowTest() {
+		final QoSInterRelayMeasurement measurement = getQoSInterRelayMeasurementForTest(QoSMeasurementType.RELAY_ECHO, QoSMeasurementStatus.FINISHED);
+		final RelayEchoMeasurementDetailsDTO measurementDetails = getRelayEchoMeasurementDetailsDTOForTest();
+		
+		try {
+			qosDBService.logInterRelayEchoMeasurementToDB(measurement, List.of(measurementDetails), null);			
+		} catch (final Exception ex) {
+			verify(qosInterRelayEchoMeasurementLogRepository, times(0)).saveAll(any());
+			verify(qosInterRelayEchoMeasurementLogRepository, times(0)).flush();
+			throw ex;
+		}
+	}
+	
+	//=================================================================================================
+	// Tests of updateInterRelayEchoMeasurement
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateInterRelayEchoMeasurementTest() {
+		final QoSInterRelayEchoMeasurement echoMeasurement = getQoSInterRelayEchoMeasurementforTest();
+		final RelayEchoMeasurementCalculationsDTO calculations = getCalculationsForTest();
+		final ArgumentCaptor<QoSInterRelayEchoMeasurement> valueCapture = ArgumentCaptor.forClass(QoSInterRelayEchoMeasurement.class);
+		when(qosInterRelayEchoMeasurementRepository.saveAndFlush(valueCapture.capture())).thenReturn(any());
+		
+		qosDBService.updateInterRelayEchoMeasurement(echoMeasurement.getMeasurement(), calculations, echoMeasurement, ZonedDateTime.now());
+		
+		verify(qosInterRelayEchoMeasurementRepository, times(1)).saveAndFlush(eq(echoMeasurement));
+		final QoSInterRelayEchoMeasurement capturedValue = valueCapture.getValue();
+		assertEquals(echoMeasurement.getMeasurement().getCloud().getName(), capturedValue.getMeasurement().getCloud().getName());
+		assertEquals(calculations.getMaxResponseTime(), capturedValue.getMaxResponseTime());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void updateInterRelayEchoMeasurementSaveAndFlushThrowDatabaseExceptionTest() {
+		final QoSInterRelayEchoMeasurement echoMeasurement = getQoSInterRelayEchoMeasurementforTest();
+		final RelayEchoMeasurementCalculationsDTO calculations = getCalculationsForTest();
+		final ArgumentCaptor<QoSInterRelayEchoMeasurement> valueCapture = ArgumentCaptor.forClass(QoSInterRelayEchoMeasurement.class);
+		when(qosInterRelayEchoMeasurementRepository.saveAndFlush(valueCapture.capture())).thenThrow(HibernateException.class);
+		
+		try {
+			qosDBService.updateInterRelayEchoMeasurement(echoMeasurement.getMeasurement(), calculations, echoMeasurement, ZonedDateTime.now());			
+		} catch (final Exception ex) {
+			verify(qosInterRelayEchoMeasurementRepository, times(1)).saveAndFlush(eq(echoMeasurement));
+			final QoSInterRelayEchoMeasurement capturedValue = valueCapture.getValue();
+			assertEquals(echoMeasurement.getMeasurement().getCloud().getName(), capturedValue.getMeasurement().getCloud().getName());
+			assertEquals(calculations.getMaxResponseTime(), capturedValue.getMaxResponseTime());
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void updateInterRelayEchoMeasurementNullMeasurementTest() {
+		final QoSInterRelayEchoMeasurement echoMeasurement = getQoSInterRelayEchoMeasurementforTest();
+		final RelayEchoMeasurementCalculationsDTO calculations = getCalculationsForTest();
+		
+		try {
+			qosDBService.updateInterRelayEchoMeasurement(null, calculations, echoMeasurement, ZonedDateTime.now());			
+		} catch (final Exception ex) {
+			verify(qosInterRelayEchoMeasurementRepository, times(0)).saveAndFlush(any());
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void updateInterRelayEchoMeasurementNullCalculationsTest() {
+		final QoSInterRelayEchoMeasurement echoMeasurement = getQoSInterRelayEchoMeasurementforTest();
+		
+		try {
+			qosDBService.updateInterRelayEchoMeasurement(echoMeasurement.getMeasurement(), null, echoMeasurement, ZonedDateTime.now());			
+		} catch (final Exception ex) {
+			verify(qosInterRelayEchoMeasurementRepository, times(0)).saveAndFlush(any());
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void updateInterRelayEchoMeasurementNullEchoMeasurementTest() {
+		final QoSInterRelayEchoMeasurement echoMeasurement = getQoSInterRelayEchoMeasurementforTest();
+		final RelayEchoMeasurementCalculationsDTO calculations = getCalculationsForTest();
+		
+		try {
+			qosDBService.updateInterRelayEchoMeasurement(echoMeasurement.getMeasurement(), calculations, null, ZonedDateTime.now());			
+		} catch (final Exception ex) {
+			verify(qosInterRelayEchoMeasurementRepository, times(0)).saveAndFlush(any());
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void updateInterRelayEchoMeasurementNullAroundNowTest() {
+		final QoSInterRelayEchoMeasurement echoMeasurement = getQoSInterRelayEchoMeasurementforTest();
+		final RelayEchoMeasurementCalculationsDTO calculations = getCalculationsForTest();
+		
+		try {
+			qosDBService.updateInterRelayEchoMeasurement(echoMeasurement.getMeasurement(), calculations, echoMeasurement, null);			
+		} catch (final Exception ex) {
+			verify(qosInterRelayEchoMeasurementRepository, times(0)).saveAndFlush(any());
+			throw ex;
+		}		
+	}
+	
+	//=================================================================================================
+	// Tests of updateInterRelayMeasurement
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateInterRelayMeasurementTest() {
+		final QoSInterRelayMeasurement measurement = getQoSInterRelayMeasurementForTest(QoSMeasurementType.RELAY_ECHO, QoSMeasurementStatus.FINISHED);
+		final ArgumentCaptor<QoSInterRelayMeasurement> valueCapture = ArgumentCaptor.forClass(QoSInterRelayMeasurement.class);
+		when(qosInterRelayMeasurementRepository.saveAndFlush(valueCapture.capture())).thenReturn(any());
+		
+		qosDBService.updateInterRelayMeasurement(ZonedDateTime.now(), measurement);
+		verify(qosInterRelayMeasurementRepository, times(1)).saveAndFlush(eq(measurement));
+		final QoSInterRelayMeasurement capturedValue = valueCapture.getValue();
+		assertEquals(measurement.getCloud().getName(), capturedValue.getCloud().getName());
+		assertEquals(measurement.getStatus(), capturedValue.getStatus());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void updateInterRelayMeasurementSaveAndFlushThrowDBExceptionTest() {
+		final QoSInterRelayMeasurement measurement = getQoSInterRelayMeasurementForTest(QoSMeasurementType.RELAY_ECHO, QoSMeasurementStatus.FINISHED);
+		final ArgumentCaptor<QoSInterRelayMeasurement> valueCapture = ArgumentCaptor.forClass(QoSInterRelayMeasurement.class);
+		when(qosInterRelayMeasurementRepository.saveAndFlush(valueCapture.capture())).thenThrow(HibernateException.class);
+		
+		try {
+			qosDBService.updateInterRelayMeasurement(ZonedDateTime.now(), measurement);			
+		} catch (final Exception ex) {
+			verify(qosInterRelayMeasurementRepository, times(1)).saveAndFlush(eq(measurement));
+			final QoSInterRelayMeasurement capturedValue = valueCapture.getValue();
+			assertEquals(measurement.getCloud().getName(), capturedValue.getCloud().getName());
+			assertEquals(measurement.getStatus(), capturedValue.getStatus());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void updateInterRelayMeasurementNullAroundNowTest() {
+		final QoSInterRelayMeasurement measurement = getQoSInterRelayMeasurementForTest(QoSMeasurementType.RELAY_ECHO, QoSMeasurementStatus.FINISHED);
+		try {
+			qosDBService.updateInterRelayMeasurement(null, measurement);			
+		} catch (final Exception ex) {
+			verify(qosInterRelayMeasurementRepository, times(0)).saveAndFlush(any());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void updateInterRelayMeasurementNullMeasurementTest() {
+		try {
+			qosDBService.updateInterRelayMeasurement(ZonedDateTime.now(), null);			
+		} catch (final Exception ex) {
+			verify(qosInterRelayMeasurementRepository, times(0)).saveAndFlush(any());
+			throw ex;
+		}
+	}
+	
+	//=================================================================================================
+	// Tests of getInterRelayEchoMeasurementsPage
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getInterRelayEchoMeasurementsPageTest() {
+		final int size = 3;
+		final List<QoSInterRelayEchoMeasurement> measurementList = getQoSInterRelayEchoMeasurementListForTest(size);
+		when(qosInterRelayEchoMeasurementRepository.findAll(any(PageRequest.class))).thenReturn(new PageImpl<>(measurementList));
+		final Page<QoSInterRelayEchoMeasurement> result = qosDBService.getInterRelayEchoMeasurementsPage(-1, -1, null, null);
+		verify(qosInterRelayEchoMeasurementRepository, times(1)).findAll(any(PageRequest.class));
+		assertEquals(size, result.getContent().size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void getInterRelayEchoMeasurementsPageWithInvalidSortFieldTest() {
+		try {
+			qosDBService.getInterRelayEchoMeasurementsPage(-1, -1, null, "invalid");			
+		} catch (final Exception ex) {
+			verify(qosInterRelayEchoMeasurementRepository, times(0)).findAll(any(PageRequest.class));
+			throw ex;
+		}
+	}
+	
+	
+	//=================================================================================================
+	// Tests of getInterRelayMeasurementByCloud
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getInterRelayMeasurementByCloudTest() {
+		final QoSInterRelayMeasurement measurement = getQoSInterRelayMeasurementForTest(QoSMeasurementType.RELAY_ECHO, QoSMeasurementStatus.FINISHED);
+		final CloudResponseDTO cloudResp = DTOConverter.convertCloudToCloudResponseDTO(measurement.getCloud());
+		when(qosInterRelayMeasurementRepository.findByCloudAndMeasurementType(any(), eq(QoSMeasurementType.RELAY_ECHO))).thenReturn(List.of(measurement));
+		
+		qosDBService.getInterRelayMeasurementByCloud(cloudResp);
+		verify(qosInterRelayMeasurementRepository, times(1)).findByCloudAndMeasurementType(eq(measurement.getCloud()), eq(QoSMeasurementType.RELAY_ECHO));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void getInterRelayMeasurementByCloudNullCloudTest() {
+		try {
+			qosDBService.getInterRelayMeasurementByCloud(null);			
+		} catch (final Exception ex) {
+			verify(qosInterRelayMeasurementRepository, times(0)).findByCloudAndMeasurementType(any(), any());
+			throw ex;
+		}
+	}
+	
+	//=================================================================================================
+	// Tests of getInterRelayEchoMeasurementByCloudAndRealy
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getInterRelayEchoMeasurementByCloudAndRealyTest() {
+		final QoSInterRelayEchoMeasurement echoMeasurement = getQoSInterRelayEchoMeasurementforTest();
+		final CloudResponseDTO cloudResp = DTOConverter.convertCloudToCloudResponseDTO(echoMeasurement.getMeasurement().getCloud());
+		final RelayResponseDTO relayResp = DTOConverter.convertRelayToRelayResponseDTO(echoMeasurement.getMeasurement().getRelay());
+		when(qosInterRelayMeasurementRepository.findByCloudAndRelayAndMeasurementType(any(), any(), any())).thenReturn(Optional.of(echoMeasurement.getMeasurement()));
+		when(qosInterRelayEchoMeasurementRepository.findByMeasurement(eq(echoMeasurement.getMeasurement()))).thenReturn(Optional.of(echoMeasurement));
+		
+		final Optional<QoSInterRelayEchoMeasurement> result = qosDBService.getInterRelayEchoMeasurementByCloudAndRealy(cloudResp, relayResp);
+		
+		verify(qosInterRelayMeasurementRepository, times(1)).findByCloudAndRelayAndMeasurementType(any(), any(), any());
+		verify(qosInterRelayEchoMeasurementRepository, times(1)).findByMeasurement(eq(echoMeasurement.getMeasurement()));
+		assertTrue(result.isPresent());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getInterRelayEchoMeasurementByCloudAndRealyNoMeasurementInDBTest() {
+		final QoSInterRelayEchoMeasurement echoMeasurement = getQoSInterRelayEchoMeasurementforTest();
+		final CloudResponseDTO cloudResp = DTOConverter.convertCloudToCloudResponseDTO(echoMeasurement.getMeasurement().getCloud());
+		final RelayResponseDTO relayResp = DTOConverter.convertRelayToRelayResponseDTO(echoMeasurement.getMeasurement().getRelay());
+		when(qosInterRelayMeasurementRepository.findByCloudAndRelayAndMeasurementType(any(), any(), any())).thenReturn(Optional.empty());
+		
+		final Optional<QoSInterRelayEchoMeasurement> result = qosDBService.getInterRelayEchoMeasurementByCloudAndRealy(cloudResp, relayResp);
+		
+		verify(qosInterRelayMeasurementRepository, times(1)).findByCloudAndRelayAndMeasurementType(any(), any(), any());
+		verify(qosInterRelayEchoMeasurementRepository, times(0)).findByMeasurement(any());
+		assertTrue(result.isEmpty());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void getInterRelayEchoMeasurementByCloudAndRealyNullCloudTest() {
+		final QoSInterRelayEchoMeasurement echoMeasurement = getQoSInterRelayEchoMeasurementforTest();
+		final RelayResponseDTO relayResp = DTOConverter.convertRelayToRelayResponseDTO(echoMeasurement.getMeasurement().getRelay());
+		
+		try {
+			qosDBService.getInterRelayEchoMeasurementByCloudAndRealy(null, relayResp);			
+		} catch (final Exception ex) {
+			verify(qosInterRelayMeasurementRepository, times(0)).findByCloudAndRelayAndMeasurementType(any(), any(), any());
+			verify(qosInterRelayEchoMeasurementRepository, times(0)).findByMeasurement(any());
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void getInterRelayEchoMeasurementByCloudAndRealyNullRelayTest() {
+		final QoSInterRelayEchoMeasurement echoMeasurement = getQoSInterRelayEchoMeasurementforTest();
+		final CloudResponseDTO cloudResp = DTOConverter.convertCloudToCloudResponseDTO(echoMeasurement.getMeasurement().getCloud());
+		
+		try {
+			qosDBService.getInterRelayEchoMeasurementByCloudAndRealy(cloudResp, null);			
+		} catch (final Exception ex) {
+			verify(qosInterRelayMeasurementRepository, times(0)).findByCloudAndRelayAndMeasurementType(any(), any(), any());
+			verify(qosInterRelayEchoMeasurementRepository, times(0)).findByMeasurement(any());
+			throw ex;
+		}		
+	}
+	
+	//=================================================================================================
+	// Tests of getBestInterRelayEchoMeasurementByCloudAndAttribute
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getBestInterRelayEchoMeasurementByCloudAndAttributeTest() {
+		final List<QoSInterRelayEchoMeasurement> echoMeasurementList = getQoSInterRelayEchoMeasurementListForTest(2);
+		echoMeasurementList.get(0).setId(1L);
+		echoMeasurementList.get(0).setMeanResponseTimeWithoutTimeout(35);
+		echoMeasurementList.get(1).setId(2L);
+		echoMeasurementList.get(1).setMeanResponseTimeWithoutTimeout(30);
+		final CloudResponseDTO cloudResp = DTOConverter.convertCloudToCloudResponseDTO(echoMeasurementList.get(0).getMeasurement().getCloud());
+		
+		when(qosInterRelayMeasurementRepository.findByCloudAndMeasurementType(any(), any())).thenReturn(List.of(echoMeasurementList.get(0).getMeasurement(), echoMeasurementList.get(1).getMeasurement()));
+		when(qosInterRelayEchoMeasurementRepository.findByMeasurement(eq(echoMeasurementList.get(0).getMeasurement()))).thenReturn(Optional.of(echoMeasurementList.get(0)));
+		when(qosInterRelayEchoMeasurementRepository.findByMeasurement(eq(echoMeasurementList.get(1).getMeasurement()))).thenReturn(Optional.of(echoMeasurementList.get(1)));
+		
+		final QoSInterRelayEchoMeasurement result = qosDBService.getBestInterRelayEchoMeasurementByCloudAndAttribute(cloudResp, QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT);
+		
+		verify(qosInterRelayMeasurementRepository, times(1)).findByCloudAndMeasurementType(any(), any());
+		verify(qosInterRelayEchoMeasurementRepository, times(1)).findByMeasurement(eq(echoMeasurementList.get(0).getMeasurement()));
+		verify(qosInterRelayEchoMeasurementRepository, times(1)).findByMeasurement(eq(echoMeasurementList.get(1).getMeasurement()));
+		assertEquals(echoMeasurementList.get(1).getId(), result.getId());
+		assertEquals(echoMeasurementList.get(1).getMeanResponseTimeWithoutTimeout(), result.getMeanResponseTimeWithoutTimeout());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getBestInterRelayEchoMeasurementByCloudAndAttributeNoMeasurementsTest1() {
+		final List<QoSInterRelayEchoMeasurement> echoMeasurementList = getQoSInterRelayEchoMeasurementListForTest(2);
+		echoMeasurementList.get(0).setId(1L);
+		echoMeasurementList.get(0).setMeanResponseTimeWithoutTimeout(35);
+		echoMeasurementList.get(1).setId(2L);
+		echoMeasurementList.get(1).setMeanResponseTimeWithoutTimeout(30);
+		final CloudResponseDTO cloudResp = DTOConverter.convertCloudToCloudResponseDTO(echoMeasurementList.get(0).getMeasurement().getCloud());
+		
+		when(qosInterRelayMeasurementRepository.findByCloudAndMeasurementType(any(), any())).thenReturn(List.of());
+		
+		final QoSInterRelayEchoMeasurement result = qosDBService.getBestInterRelayEchoMeasurementByCloudAndAttribute(cloudResp, QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT);
+		
+		verify(qosInterRelayMeasurementRepository, times(1)).findByCloudAndMeasurementType(any(), any());
+		verify(qosInterRelayEchoMeasurementRepository, times(0)).findByMeasurement(eq(echoMeasurementList.get(0).getMeasurement()));
+		verify(qosInterRelayEchoMeasurementRepository, times(0)).findByMeasurement(eq(echoMeasurementList.get(1).getMeasurement()));
+		assertNull(result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getBestInterRelayEchoMeasurementByCloudAndAttributeNoMeasurementsTest2() {
+		final List<QoSInterRelayEchoMeasurement> echoMeasurementList = getQoSInterRelayEchoMeasurementListForTest(2);
+		echoMeasurementList.get(0).setId(1L);
+		echoMeasurementList.get(0).setMeanResponseTimeWithoutTimeout(35);
+		echoMeasurementList.get(1).setId(2L);
+		echoMeasurementList.get(1).setMeanResponseTimeWithoutTimeout(30);
+		final CloudResponseDTO cloudResp = DTOConverter.convertCloudToCloudResponseDTO(echoMeasurementList.get(0).getMeasurement().getCloud());
+		
+		when(qosInterRelayMeasurementRepository.findByCloudAndMeasurementType(any(), any())).thenReturn(List.of(echoMeasurementList.get(0).getMeasurement(), echoMeasurementList.get(1).getMeasurement()));
+		when(qosInterRelayEchoMeasurementRepository.findByMeasurement(eq(echoMeasurementList.get(0).getMeasurement()))).thenReturn(Optional.empty());
+		when(qosInterRelayEchoMeasurementRepository.findByMeasurement(eq(echoMeasurementList.get(1).getMeasurement()))).thenReturn(Optional.empty());
+		
+		final QoSInterRelayEchoMeasurement result = qosDBService.getBestInterRelayEchoMeasurementByCloudAndAttribute(cloudResp, QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT);
+		
+		verify(qosInterRelayMeasurementRepository, times(1)).findByCloudAndMeasurementType(any(), any());
+		verify(qosInterRelayEchoMeasurementRepository, times(1)).findByMeasurement(eq(echoMeasurementList.get(0).getMeasurement()));
+		verify(qosInterRelayEchoMeasurementRepository, times(1)).findByMeasurement(eq(echoMeasurementList.get(1).getMeasurement()));
+		assertNull(result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void getBestInterRelayEchoMeasurementByCloudAndAttributeNullCloudTest() {
+		final List<QoSInterRelayEchoMeasurement> echoMeasurementList = getQoSInterRelayEchoMeasurementListForTest(2);
+		echoMeasurementList.get(0).setId(1L);
+		echoMeasurementList.get(0).setMeanResponseTimeWithoutTimeout(35);
+		echoMeasurementList.get(1).setId(2L);
+		echoMeasurementList.get(1).setMeanResponseTimeWithoutTimeout(30);
+		final CloudResponseDTO cloudResp = DTOConverter.convertCloudToCloudResponseDTO(echoMeasurementList.get(0).getMeasurement().getCloud());
+		
+		try {
+			qosDBService.getBestInterRelayEchoMeasurementByCloudAndAttribute(null, QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT);			
+		} catch (final Exception ex) {
+			verify(qosInterRelayMeasurementRepository, times(0)).findByCloudAndMeasurementType(any(), any());
+			verify(qosInterRelayEchoMeasurementRepository, times(0)).findByMeasurement(any());
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void getBestInterRelayEchoMeasurementByCloudAndAttributeNullAttributeTest() {
+		final List<QoSInterRelayEchoMeasurement> echoMeasurementList = getQoSInterRelayEchoMeasurementListForTest(2);
+		echoMeasurementList.get(0).setId(1L);
+		echoMeasurementList.get(0).setMeanResponseTimeWithoutTimeout(35);
+		echoMeasurementList.get(1).setId(2L);
+		echoMeasurementList.get(1).setMeanResponseTimeWithoutTimeout(30);
+		final CloudResponseDTO cloudResp = DTOConverter.convertCloudToCloudResponseDTO(echoMeasurementList.get(0).getMeasurement().getCloud());
+		
+		try {
+			qosDBService.getBestInterRelayEchoMeasurementByCloudAndAttribute(cloudResp, null);			
+		} catch (final Exception ex) {
+			verify(qosInterRelayMeasurementRepository, times(0)).findByCloudAndMeasurementType(any(), any());
+			verify(qosInterRelayEchoMeasurementRepository, times(0)).findByMeasurement(any());
+			throw ex;
+		}		
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
 	private List<QoSInterRelayEchoMeasurement> getQoSInterRelayEchoMeasurementListForTest(final int size) {
-		List<QoSInterRelayEchoMeasurement> list = new ArrayList<>(size);
+		final List<QoSInterRelayEchoMeasurement> list = new ArrayList<>(size);
 		for (int i = 0; i < size; ++i) {
 			list.add(getQoSInterRelayEchoMeasurementforTest());
 		}
@@ -713,6 +1209,11 @@ public class QoSDBServiceInterRelayTest {
 		final QoSInterRelayMeasurement measurement = new QoSInterRelayMeasurement(cloud, relay, type, ZonedDateTime.now());
 		measurement.setStatus(status);
 		return measurement;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private RelayEchoMeasurementDetailsDTO getRelayEchoMeasurementDetailsDTOForTest() {
+		return new RelayEchoMeasurementDetailsDTO(1, false, null, null, 1, 1, ZonedDateTime.now());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
