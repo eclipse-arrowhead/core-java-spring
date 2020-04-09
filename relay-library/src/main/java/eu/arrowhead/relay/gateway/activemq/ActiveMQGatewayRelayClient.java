@@ -98,6 +98,10 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 		if (session != null) {
 			try {
 				session.close();
+				if (session instanceof ActiveMQSession) {
+					ActiveMQSession amqs = (ActiveMQSession) session;
+					amqs.getConnection().close();
+				}
 			} catch (final JMSException ex) {
 				logger.debug(ex.getMessage());
 				logger.trace("Stacktrace:", ex);
