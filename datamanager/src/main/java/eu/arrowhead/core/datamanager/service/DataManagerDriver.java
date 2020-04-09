@@ -1,7 +1,5 @@
 package eu.arrowhead.core.datamanager.service;
 
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,13 +19,6 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
-import eu.arrowhead.common.database.entity.Subscription;
-import eu.arrowhead.common.dto.internal.AuthorizationSubscriptionCheckRequestDTO;
-import eu.arrowhead.common.dto.internal.AuthorizationSubscriptionCheckResponseDTO;
-import eu.arrowhead.common.dto.internal.EventPublishStartDTO;
-import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
-import eu.arrowhead.common.dto.shared.SystemRequestDTO;
-import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.http.HttpService;

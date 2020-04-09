@@ -12,15 +12,15 @@ public class ProxyElement {
 
 
   public ProxyElement(String systemName, String serviceName) {
-    this.systemName = new String(systemName);
-    this.serviceName = new String(serviceName);
+    this.systemName = systemName;
+    this.serviceName = serviceName;
     this.msg = null;
   }
 
 
   public ProxyElement(String systemName, String serviceName, Vector<SenML> senml) {
-    this.systemName = new String(systemName);
-    this.serviceName = new String(serviceName);
+    this.systemName = systemName;
+    this.serviceName = serviceName;
     this.msg = senml;
   }
 
