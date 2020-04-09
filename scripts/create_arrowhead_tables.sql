@@ -269,6 +269,7 @@ CREATE TABLE IF NOT EXISTS `subscription_publisher_connection` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- DataManager
+
 CREATE TABLE IF NOT EXISTS `dmhist_services` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `system_name` varchar(255) NOT NULL,
