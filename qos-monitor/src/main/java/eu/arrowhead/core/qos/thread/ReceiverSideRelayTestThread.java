@@ -185,6 +185,7 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 		
 		try {
 			relayClient.sendCloseControlMessage(relaySession, controlSender, queueId);
+			close();
 		} catch (final JMSException ex) {
 			logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
 			logger.debug("Stacktrace:", ex);

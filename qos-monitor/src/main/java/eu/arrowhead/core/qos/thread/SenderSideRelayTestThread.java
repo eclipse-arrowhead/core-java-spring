@@ -187,6 +187,7 @@ public class SenderSideRelayTestThread extends Thread implements MessageListener
 		
 		try {
 			blockingQueue.take(); // waiting for the other side to finish test run
+			close();
 		} catch (final InterruptedException ex) {
 			logger.debug(ex.getMessage());
 			logger.debug("Stacktrace:", ex);
