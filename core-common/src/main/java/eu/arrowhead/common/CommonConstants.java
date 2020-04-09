@@ -14,8 +14,9 @@ public class CommonConstants {
 	// members
 	
 	public static final String BASE_PACKAGE = "eu.arrowhead";
-	
+
 	public static final String CORE_SYSTEM_AUTHORIZATION = "Authorization";
+	public static final String CORE_SYSTEM_CERTIFICATE_AUTHORITY = "Certificate Authority";
 	public static final String CORE_SYSTEM_CHOREOGRAPHER = "Choreographer";
 	public static final String CORE_SYSTEM_EVENT_HANDLER = "Event Handler";
 	public static final String CORE_SYSTEM_DATAMANAGER  = "DataManager";
@@ -23,6 +24,7 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_GATEWAY = "Gateway";
 	public static final String CORE_SYSTEM_ORCHESTRATOR = "Orchestrator";
 	public static final String CORE_SYSTEM_SERVICE_REGISTRY = "Service Registry";
+	public static final String CORE_SYSTEM_QOS_MONITOR = "Quality of Service Monitor";
 	
 	public static final String CORE_SERVICE_AUTH_TOKEN_GENERATION = "token-generation";
 	public static final String CORE_SERVICE_AUTH_PUBLIC_KEY = "auth-public-key";
@@ -42,6 +44,10 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_EVENT_HANDLER_SUBSCRIBE = "event-subscribe";
 	public static final String CORE_SERVICE_EVENT_HANDLER_UNSUBSCRIBE = "event-unsubscribe";
 	public static final String CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "event-publish-auth-update";
+
+	public static final String CORE_SERVICE_CERTIFICATE_AUTHORITY_SIGN = "ca-sign";
+	
+	public static final String CORE_SERVICE_QOS_MONITOR_PING_MEASUREMENT = "qos-monitor-ping-measurement";
 	
 	public static final String CORE_SERVICE_DATAMANAGER_PROXY = "proxy";
 	public static final String CORE_SERVICE_DATAMANAGER_HISTORIAN = "historian";
@@ -52,6 +58,7 @@ public class CommonConstants {
 	public static final String SERVER_COMMON_NAME = "server.common.name";
 	public static final String SERVER_PUBLIC_KEY = "server.public.key";
 	public static final String SERVER_PRIVATE_KEY = "server.private.key";
+	public static final String SERVER_CERTIFICATE = "server.certificate";
 	
 	public static final String HTTPS = "https";
 	public static final String HTTP = "http";
@@ -81,7 +88,11 @@ public class CommonConstants {
 	public static final String OP_AUTH_INTRA_CHECK_URI = "/intracloud/check";
 	public static final String OP_AUTH_INTER_CHECK_URI = "/intercloud/check";
 	public static final String OP_AUTH_SUBSCRIPTION_CHECK_URI = "/subscription/check";
-	
+
+	public static final String CERTIFICATE_AUTHRORITY_URI = "/certificate-authority";
+	public static final String OP_CA_CLOUD_COMMON_NAME_URI = "/name";
+	public static final String OP_CA_SIGN_CERTIFICATE_URI = "/sign";
+
 	public static final String ORCHESTRATOR_URI = "/orchestrator";
 	public static final String OP_ORCH_PROCESS = "/orchestration";
 	public static final String ORCHESTRATON_FLAG_MATCHMAKING = "matchmaking";
@@ -99,7 +110,7 @@ public class CommonConstants {
 	public static final String OP_GATEKEEPER_ICN_SERVICE = "/init_icn";
 
 	public static final String CHOREOGRAPHER_URI = "/choreographer";
-
+	
 	public static final String GATEWAY_URI = "/gateway";
 	public static final String OP_GATEWAY_KEY_URI = "/publickey";
 	public static final String OP_GATEWAY_CONNECT_PROVIDER_URI = "/connect_provider";
@@ -111,6 +122,10 @@ public class CommonConstants {
 
 	public static final String OP_EVENT_HANDLER_UNSUBSCRIBE = "/unsubscribe";
 	public static final String OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "/publish/authupdate";
+	
+	public static final String QOS_MONITOR_URI = "/qosmonitor";
+	public static final String OP_QOS_MONITOR_PING_MEASUREMENT = "/ping/measurement";
+	public static final String OP_QOS_MONITOR_PING_MEASUREMENT_SUFFIX = "/{" + COMMON_FIELD_NAME_ID + "}";
 
 	public static final String DATAMANAGER_URI = "/datamanager";
 	public static final String OP_DATAMANAGER_PROXY = "/proxy";
@@ -160,6 +175,11 @@ public class CommonConstants {
 	public static final String DISABLE_HOSTNAME_VERIFIER = "disable.hostname.verifier";
 	public static final String $DISABLE_HOSTNAME_VERIFIER_WD = "${" + DISABLE_HOSTNAME_VERIFIER + ":" + Defaults.DEFAULT_DISABLE_HOSTNAME_VERIFIER + "}";
 	
+	public static final String CA_CERT_VALIDITY_NEG_OFFSET_MILLIS = "ca.validity.negative-offest-millis";
+	public static final String $CA_CERT_VALIDITY_NEG_OFFSET_MILLIS = "${" + CA_CERT_VALIDITY_NEG_OFFSET_MILLIS + ":" + Defaults.DEFAULT_CA_CERT_VALIDITY_NEG_OFFSET_MILLIS + "}";
+	public static final String CA_CERT_VALIDITY_POS_OFFSET_MILLIS = "ca.validity.positive-offest-millis";
+	public static final String $CA_CERT_VALIDITY_POS_OFFSET_MILLIS = "${" + CA_CERT_VALIDITY_POS_OFFSET_MILLIS + ":" + Defaults.DEFAULT_CA_CERT_VALIDITY_POS_OFFSET_MILLIS + "}";
+
 	public static final String JWT_CLAIM_CONSUMER_ID = "cid";
 	public static final String JWT_CLAIM_SERVICE_ID = "sid";
 	public static final String JWT_CLAIM_INTERFACE_ID = "iid";
@@ -175,6 +195,7 @@ public class CommonConstants {
 	
 	public static final long CONVERSION_MILLISECOND_TO_SECOND = 1000;
 	public static final long CONVERSION_MILLISECOND_TO_MINUTE = 60000;
+	public static final long CONVERSION_SECOND_TO_MINUTE = 60;
 
 	public static final String SORT_ORDER_ASCENDING = "ASC";
 	public static final String SORT_ORDER_DESCENDING = "DESC";

@@ -13,6 +13,7 @@ public class CoreDefaults {
 	public static final boolean DEFAULT_USE_STRICT_SERVICE_INTF_NAME_VERIFIER = false;
 	public static final int DEFAULT_URI_CRAWLER_INTERVAL = 30;
 	public static final int DEFAULT_AUTH_TOKEN_TTL_IN_MINUTES = -1; // never expires
+	public static final int DEFAULT_AUTH_TOKEN_TTL_IN_MINUTES_WITH_QOS_ENABLED = 60; // when QoS enabled, we want to make sure that tokens expires eventually
 	
 	public static final boolean DEFAULT_SERVICE_REGISTRY_PING_SCHEDULED = false;
 	public static final int DEFAULT_SERVICE_REGISTRY_PING_INTERVAL_MINUTES = 60;
@@ -44,6 +45,17 @@ public class CoreDefaults {
 	
 	public static final long DEFAULT_TIME_STAMP_TOLERANCE_SECONDS = 120;
 	public static final int DEFAULT_EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS = 10;
+	
+	public static final int DEFAULT_PING_TTL_INTERVAL_MINUTES = 10;
+	
+	public static final int DEFAULT_CLOUD_PING_TTL_INTERVAL_MINUTES = 10;
+	
+	public static final boolean DEFAULT_QOS_ENABLED = false;
+	public static final int DEFAULT_QOS_RESERVATION_CHECK_INTERVAL = 60; // in seconds
+	public static final int DEFAULT_QOS_TEMPORARY_LOCK_DURATION = 60; // in seconds
+	public static final int DEFAULT_QOS_MAX_RESERVATION_DURATION = 3600; // in seconds
+	public static final int DEFAULT_QOS_PING_MEASUREMENT_CACHE_THRESHOLD = 600; // in seconds
+	public static final boolean DEFAULT_QOS_NOT_MEASURED_SYSTEM_VERIFY_RESULT = true; 
 	
 	//=================================================================================================
 	// assistant methods

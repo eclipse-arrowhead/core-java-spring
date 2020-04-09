@@ -1,3 +1,4 @@
+
 # Arrowhead Framework 4.1.3
 
 [Arrowhead](http://www.arrowhead.eu/) (and its continuation, [Productive4.0](https://productive40.eu/)) is an ambitious holistic innovation project,
@@ -10,7 +11,10 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 ## Table of Contents
 1. [Quick Start Guide](#quickstart)
     1. [Docker](#quickstart_docker)
-        * [Handy Docker Commands](#quickstart_dockercommands)
+        * [System Requirements](#quickstart_dockersysreqs)
+        * [Examples](#quickstart_examples)
+        * [Guide](#quickstart_dockerguide)
+        * [Cheat-Sheet](#quickstart_dockercommands)
         * [Troubleshooting](#quickstart_dockertroubleshooting)
 	2. [Debian Installer](#quickstart_debian)
     3. [Compile Code](#quickstart_compile)
@@ -74,6 +78,20 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
        * [System Design Description Overview](#datamanager_sdd)
        * [Services and Use Cases](#datamanager_usecases)  
        * [Service Description Overview](#datamanager_provided_services)
+    8. [Certificate Authority](#ca)
+       * [System Design Description Overview](#ca_sdd)
+       * [Services and Use Cases](#ca_usecases)  
+       * [Endpoints](#ca_endpoints)
+	       * [Client](#ca_endpoints_client)
+           * [Private](#ca_endpoints_private)
+           * [Management](#ca_endpoints_mgmt)
+    9. [QoS Monitor (Quality of Service Monitor)](#qos_monitor)
+       * [System Design Description Overview](#qos_monitor_sdd)
+       * [Services and Use Cases](#qos_monitor_usecases)  
+       * [Endpoints](#qos_monitor_endpoints)
+	       * [Client](#qos_monitor_endpoints_client)
+           * [Private](#qos_monitor_endpoints_private)
+           * [Management](#qos_monitor_endpoints_mgmt)
 	
 <a name="quickstart" />
 
@@ -83,7 +101,13 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 
 ### Docker
 
-#### Requirements
+[Docker](https://docs.docker.com/) is a container platform that can be used to package and deploy applications in server environments, among other.
+In particular, the [`docker-compose`](https://docs.docker.com/compose/) utility may with advantage be used during application development to test integration with the Arrowhead Core systems.
+Here, we provide brief instructions on how to install and run both Docker and container images for the Arrowhead Core systems.
+
+<a name="quickstart_dockersysreqs" />
+
+#### System Requirements
 
 > **Note:** A system with 4GB of RAM is advised. 
 
@@ -94,6 +118,8 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
   * [Windows](https://docs.docker.com/docker-for-windows/install/)
 * [Docker Compose](https://docs.docker.com/compose/install/)
 
+<a name="quickstart_examples" />
+
 Don't forget to create a volume for mysql: `docker volume create --name=mysql` <br />
 Don't forget to copy the `initSQL.sh` script next to the docker-compose file and execute it! On the first run it initializes the Database!<br />
 Example copy command which does this for you, execute from the project root directory.
@@ -103,17 +129,21 @@ cd docker
 ./initSQL.sh
 ```
 
-Inside the `docker` folder an example is provided. 
+#### Examples
 
-##### Core System Config
+We provide two examples of how Docker containers can be used to host Arrowhead Core systems in this repository.
+The first one is located in the [`docker`](docker) folder and the second one in the [`docker-all`](docker-all) folder.
+The former example shows how some prebuilt Docker images can be used to bring up networks, while the second describes how a Docker image can be constructed that contains all Arrowhead Core systems.
+Please refer to those folders for more information.
+In particular, each folder contains its own `README.md` file with more instructions.
 
-Example Core System Configuration files are available in this folder. 
+<a name="quickstart_dockerguide" />
+
+#### Docker Guide
 
 > **Note:** Don't forget to set `domain.name` and `domain.port` properties!
 
-##### Docker Compose
-
-Example Docker Compose file is located here. The interesting part is the volumes section. 
+Example Docker Compose file is located [here](docker/docker-compose.yml). The interesting part is the volumes section. 
 Format is /path/on/your/local/machine:/path/inside/docker/container
 
 You may want to copy the config files elsewhere with the compose file too. If you copy them, please don't forget to change the volume mounting point, but DON'T change the volume mounting point inside the container, otherwise it will start up with default config.
@@ -133,9 +163,9 @@ If you change your config you have to restart the appropriate container
 
 `docker restart <containerName>`
 
-<a name="quickstart_dockercommands" />`
+<a name="quickstart_cheatsheet" />
 
-##### Handy Docker Commands
+#### Docker Cheat-Sheet
  
 | Command | Description |
 | ------- | ----------- |
@@ -143,6 +173,7 @@ If you change your config you have to restart the appropriate container
 | `docker images` | List all images |
 | `docker-compose up -d` | Starts the Docker containers |
 | `docker-compose down` | Destroys the Docker containers |
+| `docker restart <containerName>` | Restarts a container, making it re-read its configuration files |
 | `docker logs <containerName>` | Shows logs for the container |
 | `docker volume create --name=<volumeName>` | Creates a named volume |
 | `docker volume rm <volumeName>` | Removes the specified named volume |
@@ -153,7 +184,6 @@ If you change your config you have to restart the appropriate container
 
 Q: MySQL won't start. What did went wrong? <br />
 A: Probably you missed to copy the init SQL script next to the compose file, or you have a typo in its name. Solution: [https://github.com/arrowhead-f/core-java-spring/issues/105](https://github.com/arrowhead-f/core-java-spring/issues/105)
-
 
 <a name="quickstart_debian" />
 
@@ -405,7 +435,7 @@ Arrowhead Framework's security is relying on SSL Certificate Trust Chains. The A
 1) Master certificate: `arrowhead.eu`
 2) Cloud certificate: `my_cloud.my_company.arrowhead.eu`
 3) Client certificate: `my_client.my_cloud.my_company.arrowhead.eu`
-The certificate naming convetion have strict rules:
+The certificate naming convention have strict rules:
 * The different parts are delimited by dots, therefore parts are not allowed to contain any of them.
 * A cloud certificate name has to consist of four part and the last two part have to be 'arrowhead' and 'eu'.
 * A client certificate name has to consist of five part and the last two part have to be 'arrowhead' and 'eu'. 
@@ -428,6 +458,14 @@ Currently Arrowhead community have the possibility to create only "self signed" 
 * [Create Arrowhead Client Self Signed Certificate](documentation/certificates/create_client_certificate.pdf)
 * [Create Trust Store](documentation/certificates/create_trust_store.pdf)
 
+If you wish to generate all Certificates by a script, you can use the scripts in the [scripts/certificate_generation](scripts/certificate_generation) folder.
+
+> **Note:** Basic scripting knowledge is required!
+
+* lib_certs.sh - Certificate generation code
+* mk_certs.sh - Usage example
+* rm_certs.sh - Delete generated certs 
+
 ### System Operator Certificate
 
 The System Operator Certificate is a special client certificate with the naming convention of `sysop.my_cloud.my_company.arrowhead.eu`.
@@ -435,6 +473,14 @@ SysOp certificate allows the client to use the management endpoints of the Arrow
 * [Import SysOp Certificate (Windows 10)](documentation/certificates/import_sysop_certificate_win10.pdf)
 * [Import SysOp Certificate (macOS)](documentation/certificates/import_sysop_certificate_macos.pdf)
 * [Import SysOp Certificate (Linux)](documentation/certificates/import_sysop_certificate_linux.pdf)
+
+### Include certificate in Docker container
+
+The following guide describes step by step, how to include your own certificates into a Docker container.
+
+* [How to include certificate in Docker](documentation/certificates/docker_certificate_guide.md)
+
+
 
 <a name="setupgatekeeper_and_gateway" /> 
 
@@ -6239,6 +6285,7 @@ __ActiveSession__ is the output.
 | `responseControlQueue` | control queue of response messaging through the the Relay |
 | `sessionStartedAt` | Time stamp of session start |
 
+<<<<<<< HEAD
 
 # DataManager
 
@@ -6268,8 +6315,386 @@ Text...
 ### Echo 
 ```
 GET /datamanager/echo
+=======
+<a name="ca" />
+
+# Certificate Authority
+
+<a name="ca_sdd" />
+
+## System Design Description Overview
+
+The purpose of the Certificate Authority supporting core system is issuing signed certificates to be used in the local cloud.
+
+<a name="ca_provided_services" />
+
+## Provided services
+
+The Certificate Authority provides the following services:
+* [Echo](#ca_endpoints_get_echo)
+* [Certificate signing](#ca_endpoints_sign)
+
+<a name="ca_usecases" />
+
+## Use cases
+
+The main use case of the Certificate Authority is to issue signed certificates to new consumers coming via the Onboarding Controller.
+
+<a name="ca_endpoints" />
+
+## Endpoints
+
+<a name="ca_endpoints_client" />
+
+### Client endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#ca_endpoints_get_echo) | /echo | GET    | -    | OK     |
+
+<a name="ca_endpoints_private" />
+
+### Private endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Sign CSR with the Cloud Certificate](#ca_endpoints_sign) | /sign | POST | CertificateSigningRequest | [CertificateSigningResponse](#ca_certificate_signing_response) |
+
+<a name="ca_endpoints_get_echo" />
+
+### Echo 
+```
+GET /certificate-authority/echo
+```
+
+Returns a "Got it" message with the purpose of testing the core service availability.
+
+<a name="ca_endpoints_sign" />
+
+### Sign CSR with the Cloud Certificate
+
+```
+POST /certificate-authority/sign
+```
+
+Returns the whole certificate chain beginning with the newly generated leaf certificate and ending with the root certificate.
+
+Each certificate's issuer is the same as the subject of the following one. The issuer of the root certificate is the same as the subject.
+
+__Sign CSR with the Cloud Certificate__ inputs:
+
+`https://ca_ip:ca_port/certificate-authority/sign`
+
+| __Sign CSR with the Cloud Certificate__ query parameters |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `encodedCSR` | PKCS #10 Certificate Signing Request | mandatory | Base64 encoded CSR |
+
+<a name="ca_certificate_signing_response" />
+
+__Sign CSR with the Cloud Certificate__ output :
+
+```json
+{
+  "certificateChain": [
+    "<generated client certificate>",
+    "<cloud certificate>",
+    "<root certificate>"
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `certificateChain` | The whole certificate chain in an array of PEM encoded strings |
+
+<a name="ca_endpoints_mgmt" />
+
+### Management endpoint description<br />
+
+The Certificate Authority does not have management endpoints.
+
+<a name="qos_monitor" />
+
+# QOS MONITOR (QUALITY OF SERVICE MONITOR)
+
+<a name="qos_monitor_sdd" />
+
+## System Design Description Overview
+
+The purpose of QoS Monitor supporting core system is providing QoS (Quality of Service) measurements to the QoS Manager (which is part of the Orchestrator core system).
+
+![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `AH Service Registry`
+![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `AH Authorization` 
+![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `AH Orchestrator / QoS Manager`
+![#ffcc44](https://placehold.it/15/a33c00/000000?text=+) `AH QoS Monitor`
+![Alt text](/documentation/qos_monitor/sdd/overview.png)
+
+<a name="qos_monitor_sysd" />
+
+## System Design Overview
+![Alt text](/documentation/qos_monitor/sysd/qos_monitor_sys_d.jpg)
+
+<a name="qos_monitor_provided_services" />
+
+## Provided services
+
+The QoS Monitor provides the following services:
+* [Echo](#qos_monitor_endpoints_get_echo)
+* [Ping Measurement](#qos_monitor_endpoints_ping_measurement_by_system_id)
+
+<a name="qos_monitor_consumed_services" />
+
+## Consumed services
+
+The QoS Monitor consumes the following service:
+* QueryAll private service from the ServiceRegistry core system
+
+<a name="qos_monitor_usecases" />
+
+## Use cases
+
+The QoS Monitor has the following use cases:
+* [Ping Measurement](documentation/qos_monitor/use_cases/QoSMonitor_use_case_1.md)
+![Alt text](/documentation/qos_monitor/use_cases/PingMeasurement.png)
+* [Reset Counter](documentation/qos_monitor/use_cases/QoSMonitor_use_case_2.md)
+![Alt text](/documentation/qos_monitor/use_cases/Reset_Counter.png)
+* [Get Measurements](documentation/qos_monitor/use_cases/QoSMonitor_use_case_3.md)
+![Alt text](/documentation/qos_monitor/use_cases/GetMeaurements.png)
+
+<a name="qos_monitor_endpoints" />
+
+## Endpoints
+
+<a name="qos_monitor_endpoints_client" />
+
+### Client endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#qos_monitor_endpoints_get_echo) | /echo | GET    | -    | OK     |
+
+<a name="qos_monitor_endpoints_mgmt" />
+
+### Management endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Get ping measurements mgmt](#qos_monitor_endpoints_get_ping_measurements_list) | /mgmt/ping/measurements | GET | direction && item_per_page && page && sort_field | [PingMeasurement list response](#qos_monitor_ping_measurement_list_response) |
+| [Get ping measurements by system id mgmt](#qos_monitor_mgmt_endpoints_get_ping_measurement_by_system_id) | /mgmt/ping/measurements/{id} | GET | id | [Ping Measurment response](#qos_monitor_ping_measurement_response) |
+
+<a name="qos_monitor_endpoints_private" />
+
+### Private endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Get ping measurements by system id](#qos_monitor_endpoints_get_ping_measurement_by_system_id) | /ping/measurements/{id} | GET | id | [Ping Measurment response](#qos_monitor_ping_measurement_response) |
+
+<a name="qos_monitor_endpoints_get_echo" />
+
+### Echo 
+```
+GET /qos_monitor/echo
 ```
 
 Returns a "Got it" message with the purpose of testing the core service availability.
 
 
+### Get ping measurements mgmt
+
+```
+GET /mgmt/ping/measurements
+```
+
+__Get subscriptions query parameters__ the input :
+
+`https://qos_monitor_ip:qos_monitor_port/qos_monitor/mgmt/ping/measurements?dirction=`ASC`&item_per_page=`100`&page=`0`&sort_field=`id
+
+| __Get ping measurements mgmt__  query parameters |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `direction` |  Direction of sorting. | optional | valid values: "ASC", "DESC" - default: "ASC"|
+| `item_per_page` | Maximum number of items returned. | optional (mandatory, if page is defined)| integer |
+| `page` | Zero based page index. | optional (mandatory, if item_per_page is defined)| integer |
+| `sort_field` | The field to sort the results by. | optional | valid values: "id", "updatedAt", "createdAt" - default: "id" |
+
+<a name="qos_monitor_ping_measurement_list_response" />
+
+__PingMeasurement list response__ the output :
+
+```json
+{
+	"data": [
+		{
+			"id": 1,
+			"measurement": {
+				"id": 1,
+				"system": {
+					"id": 5,
+					"systemName": "testsystem",
+					"address": "testsystem.ai",
+					"port": 12345,
+					"createdAt": "2020-02-04 09:38:56",
+					"updatedAt": "2020-02-04 09:38:56"
+				},
+				"measurementType": "PING",
+				"lastMeasurementAt": "2020-02-14T10:48:10+01:00",
+				"createdAt": "2020-02-04T10:42:04+01:00",
+				"updatedAt": "2020-02-14T10:48:47+01:00"
+			},
+			"available": true,
+			"lastAccessAt": "2020-02-14T10:48:10+01:00",
+			"minResponseTime": 15,
+			"maxResponseTime": 26,
+			"meanResponseTimeWithTimeout": 18,
+			"meanResponseTimeWithoutTimeout": 18,
+			"jitterWithTimeout": 3,
+			"jitterWithoutTimeout": 3,
+			"lostPerMeasurementPercent": 0,
+			"sent": 12075,
+			"received": 12070,
+			"countStartedAt": "2020-02-07T00:00:00+01:00",
+			"sentAll": 63175,
+			"receivedAll": 56721,
+			"createdAt": "2020-02-14T10:48:47+01:00",
+			"updatedAt": "2020-02-14T10:48:47+01:00"
+		}
+	],
+	"count": 1
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `count` | Number of record found |
+| `data` | Array of data |
+| `id` | ID of the ping measurement |
+| `measurement.id` | ID of the measurement |
+| `measurement.system.id` | ID of the measured system |
+| `measurement.system.systemName` | Name of the measured system |
+| `measurement.system.address` | Address of the measured system |
+| `measurement.system.port` | Port of the measured system |
+| `measurement.system.createdAt` | Date of creation of the measured system |
+| `measurement.system.updatedAt` | Date of update of the measured system |
+| `measurement.measurementType` | Type of the measurement |
+| `measurement.lastMeasurementAt` | Time of the last measurement |
+| `measurement.createdAt` | Date of creation of the measurement |
+| `measurement.updatedAt` | Date of update of the measurement |
+| `available` | Boolean value of the systems calculated availability|
+| `lastAccessAt` | TimeStamp value of the systems last known availability|
+| `minResponseTime` | Integer value of milliseconds of the fastest returned ping|
+| `maxResponseTime` | Integer value of milliseconds of the slowest returned ping|
+| `meanResponseTimeWithTimeout` | Integer value of milliseconds of the calculated average of pings including timeouts|
+| `meanResponseTimeWithoutTimeout` | Integer value of milliseconds of the calculated average of pings not including timeouts|
+| `jitterWithTimeout` | Integer value of milliseconds of the calculated standard deviation of pings including timeouts|
+| `jitterWithoutTimeout` | Integer value of milliseconds of the calculated standard deviation of pings not including timeouts|
+| `lostPerMeasurementPercent` | Integer value of calculated lost ping percentage|
+| `sent` | Integer value of sent pings in measurement|
+| `received` | Integer value of received pings in measurement|
+| `countStartedAt` | TimeSatmp value of the last reset of sent and received fields|
+| `sentAll` | Integer value of sent pings since ping measurement created|
+| `receivedAll` | Integer value of received pings since ping measurement created|
+| `createdAt` | Date of creation of the ping measurement |
+| `updatedAt` | Date of update of the ping measurement |
+
+<a name="qos_monitor_mgmt_endpoints_get_ping_measurement_by_system_id" />
+
+### Get ping measurements by system id mgmt
+
+```
+GET /mgmt/ping/measurements/{id}
+```
+
+__Get ping measurements by system id mgmt path parameter__ the input :
+
+`https://qos_monitor_ip:qos_monitor_port/qos_monitor/mgmt/ping/measurements/`1
+
+| __Get ping measurement by system id__ path parameter |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `id` |  Id of measured system | mandatory | integer |
+
+<a name="qos_monitor_ping_measurement_response" />
+
+__Ping Measurment response by system id__ the output :
+
+```json
+{
+	"id": 1,
+	"measurement": {
+		"id": 1,
+		"system": {
+			"id": 5,
+			"systemName": "testsystem",
+			"address": "testsystem.ai",
+			"port": 12345,
+			"createdAt": "2020-02-04 09:38:56",
+			"updatedAt": "2020-02-04 09:38:56"
+		},
+		"measurementType": "PING",
+		"lastMeasurementAt": "2020-02-14T10:48:10+01:00",
+		"createdAt": "2020-02-04T10:42:04+01:00",
+		"updatedAt": "2020-02-14T10:48:47+01:00"
+	},
+	"available": true,
+	"lastAccessAt": "2020-02-14T10:48:10+01:00",
+	"minResponseTime": 15,
+	"maxResponseTime": 26,
+	"meanResponseTimeWithTimeout": 18,
+	"meanResponseTimeWithoutTimeout": 18,
+	"jitterWithTimeout": 3,
+	"jitterWithoutTimeout": 3,
+	"lostPerMeasurementPercent": 0,
+	"sent": 12075,
+	"received": 12070,
+	"countStartedAt": "2020-02-07T00:00:00+01:00",
+	"sentAll": 63175,
+	"receivedAll": 56721,
+	"createdAt": "2020-02-14T10:48:47+01:00",
+	"updatedAt": "2020-02-14T10:48:47+01:00"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of the ping measurement |
+| `measurement.id` | ID of the measurement |
+| `measurement.system.id` | ID of the measured system |
+| `measurement.system.systemName` | Name of the measured system |
+| `measurement.system.address` | Address of the measured system |
+| `measurement.system.port` | Port of the measured system |
+| `measurement.system.createdAt` | Date of creation of the measured system |
+| `measurement.system.updatedAt` | Date of update of the measured system |
+| `measurement.measurementType` | Type of the measurement |
+| `measurement.lastMeasurementAt` | Time of the last measurement |
+| `measurement.createdAt` | Date of creation of the measurement |
+| `measurement.updatedAt` | Date of update of the measurement |
+| `available` | Boolean value of the systems calculated availability|
+| `lastAccessAt` | TimeStamp value of the systems last known availability|
+| `minResponseTime` | Integer value of milliseconds of the fastest returned ping|
+| `maxResponseTime` | Integer value of milliseconds of the slowest returned ping|
+| `meanResponseTimeWithTimeout` | Integer value of milliseconds of the calculated average of pings including timeouts|
+| `meanResponseTimeWithoutTimeout` | Integer value of milliseconds of the calculated average of pings not including timeouts|
+| `jitterWithTimeout` | Integer value of milliseconds of the calculated standard deviation of pings including timeouts|
+| `jitterWithoutTimeout` | Integer value of milliseconds of the calculated standard deviation of pings not including timeouts|
+| `lostPerMeasurementPercent` | Integer value of calculated lost ping percentage|
+| `sent` | Integer value of sent pings in measurement|
+| `received` | Integer value of received pings in measurement|
+| `countStartedAt` | TimeSatmp value of the last reset of sent and received fields|
+| `sentAll` | Integer value of sent pings since ping measurement created|
+| `receivedAll` | Integer value of received pings since ping measurement created|
+| `createdAt` | Date of creation of the ping measurement |
+| `updatedAt` | Date of update of the ping measurement |
+
+<a name="qos_monitor_endpoints_get_ping_measurement_by_system_id" />
+
+### Get ping measurements by system id 
+
+For private endpoints no detailed description available.

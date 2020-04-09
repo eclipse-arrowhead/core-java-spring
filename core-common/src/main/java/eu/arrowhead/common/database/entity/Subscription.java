@@ -71,7 +71,6 @@ public class Subscription {
 	@OneToMany(mappedBy = "subscriptionEntry", fetch = FetchType.EAGER, orphanRemoval = true)
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Set<SubscriptionPublisherConnection> publisherConnections = new HashSet<>();
-
 	
 	//=================================================================================================
 	// methods
@@ -126,7 +125,7 @@ public class Subscription {
 	public void setFilterMetaData(final String filterMetaData) { this.filterMetaData = filterMetaData; }
 	public void setNotifyUri(final String notifyUri) { this.notifyUri = notifyUri; }
 	public void setMatchMetaData(final boolean matchMetaData) { this.matchMetaData = matchMetaData; }
-	public void setOnlyPredefinedPublishers( final boolean onlyPredefinedPublishers) { this.onlyPredefinedPublishers = onlyPredefinedPublishers; }
+	public void setOnlyPredefinedPublishers(final boolean onlyPredefinedPublishers) { this.onlyPredefinedPublishers = onlyPredefinedPublishers; }
 	public void setStartDate(final ZonedDateTime startDate) { this.startDate = startDate; }
 	public void setEndDate(final ZonedDateTime endDate) { this.endDate = endDate; }
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
