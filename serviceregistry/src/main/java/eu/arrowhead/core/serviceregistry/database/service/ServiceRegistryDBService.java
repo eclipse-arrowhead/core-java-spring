@@ -9,6 +9,15 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import eu.arrowhead.common.CoreEventHandlerConstants;
+import eu.arrowhead.common.database.entity.DeviceRegistry;
+import eu.arrowhead.common.drivers.DriverUtilities;
+import eu.arrowhead.common.drivers.EventDriver;
+import eu.arrowhead.common.dto.internal.ServiceDefinitionRequestDTO;
+import eu.arrowhead.common.dto.shared.DeviceRegistryRequestDTO;
+import eu.arrowhead.common.dto.shared.DeviceRequestDTO;
+import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +85,12 @@ public class ServiceRegistryDBService {
 	
 	@Autowired
 	private SSLProperties sslProperties;
+
+	@Autowired
+	private DriverUtilities driverUtilities;
+
+	@Autowired
+	private EventDriver eventDriver;
 	
 	@Value(CoreCommonConstants.$SERVICE_REGISTRY_PING_TIMEOUT_WD)
 	private int pingTimeout;
@@ -714,8 +729,11 @@ public class ServiceRegistryDBService {
 				srEntry.getInterfaceConnections().add(connection);
 			}
 			serviceRegistryInterfaceConnectionRepository.saveAll(srEntry.getInterfaceConnections());
-			
-			return serviceRegistryRepository.saveAndFlush(srEntry);
+
+			final ServiceRegistry serviceRegistry = serviceRegistryRepository.saveAndFlush(srEntry);
+			publishRegister(serviceRegistry);
+
+			return serviceRegistry;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -860,9 +878,12 @@ public class ServiceRegistryDBService {
 			if (!serviceRegistryRepository.existsById(id)) {
 				throw new InvalidParameterException("Service Registry entry with id '" + id + "' does not exist");
 			}
-			
+			final Optional<ServiceRegistry> serviceRegistry = serviceRegistryRepository.findById(id);
+
 			serviceRegistryRepository.deleteById(id);
 			serviceRegistryRepository.flush();
+			serviceRegistry.ifPresent(this::publishUnregister);
+
 		} catch (final InvalidParameterException ex) {
 			throw ex;
 		} catch (final Exception ex) {
@@ -879,6 +900,9 @@ public class ServiceRegistryDBService {
 		try {
 			serviceRegistryRepository.deleteInBatch(entities);
 			serviceRegistryRepository.flush();
+
+			entities.forEach(this::publishUnregister);
+
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -923,6 +947,64 @@ public class ServiceRegistryDBService {
 	
 	//=================================================================================================
 	// assistant methods
+
+	//-------------------------------------------------------------------------------------------------
+	private void publishRegister(final ServiceRegistry serviceRegistry) {
+		try {
+			final var requestDTO = convertRequest(serviceRegistry);
+			eventDriver.publish(
+					new EventPublishRequestDTO(CoreEventHandlerConstants.REGISTER_SERVICE_EVENT,
+											   driverUtilities.getCoreSystemRequestDTO(),
+											   null,
+											   eventDriver.convert(requestDTO),
+											   Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now())
+					)
+			);
+		} catch (final Exception e) {
+			logger.warn("Unable to publish register event: {}", e.getMessage());
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private ServiceRegistryRequestDTO convertRequest(final ServiceRegistry serviceRegistry) {
+		final var system = serviceRegistry.getSystem();
+		final var service = serviceRegistry.getServiceDefinition();
+
+		final var systemRequestDTO = new SystemRequestDTO(system.getSystemName(),
+														  system.getAddress(),
+														  system.getPort(),
+														  system.getAuthenticationInfo());
+
+		final List<String> interfaces = new ArrayList<>();
+		for (ServiceRegistryInterfaceConnection connection : serviceRegistry.getInterfaceConnections()) {
+			interfaces.add(connection.getServiceInterface().getInterfaceName());
+		}
+
+
+		return new ServiceRegistryRequestDTO(service.getServiceDefinition(),
+											 systemRequestDTO,
+											 serviceRegistry.getServiceUri(),
+											 Utilities.convertZonedDateTimeToUTCString(serviceRegistry.getEndOfValidity()),
+											 serviceRegistry.getSecure().name(),
+											 interfaces);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void publishUnregister(final ServiceRegistry serviceRegistry) {
+		try {
+			final var requestDTO = convertRequest(serviceRegistry);
+			eventDriver.publish(
+					new EventPublishRequestDTO(CoreEventHandlerConstants.UNREGISTER_SERVICE_EVENT,
+											   driverUtilities.getCoreSystemRequestDTO(),
+											   null,
+											   eventDriver.convert(requestDTO),
+											   Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now())
+					)
+			);
+		} catch (final Exception e) {
+			logger.warn("Unable to publish unregister event: {}", e.getMessage());
+		}
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S1126")

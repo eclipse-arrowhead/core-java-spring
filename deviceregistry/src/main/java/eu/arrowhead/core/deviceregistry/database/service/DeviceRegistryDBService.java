@@ -1,6 +1,7 @@
 package eu.arrowhead.core.deviceregistry.database.service;
 
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.CoreEventHandlerConstants;
 import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.SecurityUtilities;
 import eu.arrowhead.common.Utilities;
@@ -9,8 +10,9 @@ import eu.arrowhead.common.database.entity.DeviceRegistry;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.DeviceRegistryRepository;
 import eu.arrowhead.common.database.repository.DeviceRepository;
-import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.drivers.CertificateAuthorityDriver;
+import eu.arrowhead.common.drivers.DriverUtilities;
+import eu.arrowhead.common.drivers.EventDriver;
 import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.DeviceListResponseDTO;
@@ -28,6 +30,7 @@ import eu.arrowhead.common.dto.shared.DeviceRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.DeviceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.DeviceRequestDTO;
 import eu.arrowhead.common.dto.shared.DeviceResponseDTO;
+import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.deviceregistry.Validation;
@@ -65,16 +68,22 @@ public class DeviceRegistryDBService {
     private final DeviceRepository deviceRepository;
     private final SecurityUtilities securityUtilities;
     private final CertificateAuthorityDriver caDriver;
+    private final EventDriver eventHandlerDriver;
+    private final DriverUtilities driverUtilities;
 
     @Autowired
     public DeviceRegistryDBService(final DeviceRegistryRepository deviceRegistryRepository,
                                    final DeviceRepository deviceRepository,
                                    final SecurityUtilities securityUtilities,
-                                   final CertificateAuthorityDriver caDriver) {
+                                   final CertificateAuthorityDriver caDriver,
+                                   final EventDriver eventHandlerDriver,
+                                   final DriverUtilities driverUtilities) {
         this.deviceRegistryRepository = deviceRegistryRepository;
         this.deviceRepository = deviceRepository;
         this.securityUtilities = securityUtilities;
         this.caDriver = caDriver;
+        this.eventHandlerDriver = eventHandlerDriver;
+        this.driverUtilities = driverUtilities;
     }
 
 
@@ -303,8 +312,12 @@ public class DeviceRegistryDBService {
                 throw new InvalidParameterException("Device Registry entry with id '" + id + "' does not exist");
             }
 
+            final Optional<DeviceRegistry> optionalDeviceRegistry = deviceRegistryRepository.findById(id);
             deviceRegistryRepository.deleteById(id);
             deviceRegistryRepository.flush();
+
+            optionalDeviceRegistry.ifPresent(this::publishUnregister);
+
         } catch (final InvalidParameterException ex) {
             throw ex;
         } catch (final Exception ex) {
@@ -327,6 +340,8 @@ public class DeviceRegistryDBService {
             final String metadataStr = Utilities.map2Text(request.getMetadata());
             final int version = (request.getVersion() != null) ? request.getVersion() : 1;
             final DeviceRegistry drEntry = createDeviceRegistry(deviceDb, endOfValidity, metadataStr, version);
+
+            publishRegister(request);
 
             return DTOConverter.convertDeviceRegistryToDeviceRegistryResponseDTO(drEntry);
         } catch (final DateTimeParseException ex) {
@@ -439,6 +454,8 @@ public class DeviceRegistryDBService {
 
         deviceRegistryRepository.delete(deviceRegistry);
         deviceRegistryRepository.flush();
+
+        publishUnregister(deviceRegistry);
     }
 
 
@@ -752,8 +769,51 @@ public class DeviceRegistryDBService {
     }
 
     //-------------------------------------------------------------------------------------------------
-    private ZonedDateTime getZonedDateTime(DeviceRegistryRequestDTO request) {
+    private ZonedDateTime getZonedDateTime(final DeviceRegistryRequestDTO request) {
         return Utilities.isEmpty(request.getEndOfValidity()) ? null : Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    private void publishRegister(final DeviceRegistryRequestDTO requestDTO) {
+        try {
+            eventHandlerDriver.publish(
+                    new EventPublishRequestDTO(CoreEventHandlerConstants.REGISTER_DEVICE_EVENT,
+                                               driverUtilities.getCoreSystemRequestDTO(),
+                                               null,
+                                               eventHandlerDriver.convert(requestDTO),
+                                               Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now())
+                    )
+            );
+        } catch (final Exception e) {
+            logger.warn("Unable to publish register event: {}", e.getMessage());
+        }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    private void publishUnregister(final DeviceRegistry deviceRegistry) {
+        try {
+            final var device = deviceRegistry.getDevice();
+
+            final var deviceRequestDTO = new DeviceRequestDTO(device.getDeviceName(),
+                                                              device.getAddress(),
+                                                              device.getMacAddress(),
+                                                              device.getAuthenticationInfo());
+
+            final var requestDTO = new DeviceRegistryRequestDTO(deviceRequestDTO,
+                                                             Utilities.convertZonedDateTimeToUTCString(deviceRegistry.getEndOfValidity()),
+                                                             Utilities.text2Map(deviceRegistry.getMetadata()),
+                                                             deviceRegistry.getVersion());
+            eventHandlerDriver.publish(
+                    new EventPublishRequestDTO(CoreEventHandlerConstants.UNREGISTER_DEVICE_EVENT,
+                                               driverUtilities.getCoreSystemRequestDTO(),
+                                               null,
+                                               eventHandlerDriver.convert(requestDTO),
+                                               Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now())
+                    )
+            );
+        } catch (final Exception e) {
+            logger.warn("Unable to publish unregister event: {}", e.getMessage());
+        }
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -774,5 +834,4 @@ public class DeviceRegistryDBService {
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
     }
-
 }

@@ -1,5 +1,7 @@
 package eu.arrowhead.common.drivers;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
 import eu.arrowhead.common.dto.shared.SubscriptionRequestDTO;
@@ -12,22 +14,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.IOException;
+
 import static eu.arrowhead.common.CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_EVENT_TYPE;
 import static eu.arrowhead.common.CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_ADDRESS;
 import static eu.arrowhead.common.CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_PORT;
 import static eu.arrowhead.common.CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_SYSTEM_NAME;
 
 @Service
-public class EventHandlerDriver {
+public class EventDriver {
 
     //=================================================================================================
     // members
-    private final Logger logger = LogManager.getLogger(EventHandlerDriver.class);
+    private final ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    private final Logger logger = LogManager.getLogger(EventDriver.class);
     private final DriverUtilities driverUtilities;
     private final HttpService httpService;
 
     @Autowired
-    public EventHandlerDriver(final DriverUtilities driverUtilities, final HttpService httpService) {
+    public EventDriver(final DriverUtilities driverUtilities, final HttpService httpService) {
         this.driverUtilities = driverUtilities;
         this.httpService = httpService;
     }
@@ -62,5 +67,13 @@ public class EventHandlerDriver {
         logger.traceEntry("publishSubscriberAuthorizationUpdate: {}", request);
         final UriComponents uri = driverUtilities.findUriByOrchestrator(CoreSystemService.EVENT_PUBLISH_AUTH_UPDATE_SERVICE);
         httpService.sendRequest(uri, HttpMethod.POST, Void.class, request);
+    }
+
+    public String convert(final Object obj) throws IOException {
+        return mapper.writeValueAsString(obj);
+    }
+
+    public <T> T convert(final String string, final Class<T> clz) throws IOException {
+        return mapper.readValue(string, clz);
     }
 }

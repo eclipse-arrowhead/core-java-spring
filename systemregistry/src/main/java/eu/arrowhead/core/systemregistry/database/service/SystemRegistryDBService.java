@@ -2,6 +2,7 @@ package eu.arrowhead.core.systemregistry.database.service;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.CoreEventHandlerConstants;
 import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.SecurityUtilities;
 import eu.arrowhead.common.Utilities;
@@ -12,6 +13,8 @@ import eu.arrowhead.common.database.repository.DeviceRepository;
 import eu.arrowhead.common.database.repository.SystemRegistryRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.drivers.CertificateAuthorityDriver;
+import eu.arrowhead.common.drivers.DriverUtilities;
+import eu.arrowhead.common.drivers.EventDriver;
 import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.DeviceListResponseDTO;
@@ -22,6 +25,7 @@ import eu.arrowhead.common.dto.shared.CertificateCreationResponseDTO;
 import eu.arrowhead.common.dto.shared.CertificateType;
 import eu.arrowhead.common.dto.shared.DeviceRequestDTO;
 import eu.arrowhead.common.dto.shared.DeviceResponseDTO;
+import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemQueryFormDTO;
 import eu.arrowhead.common.dto.shared.SystemQueryResultDTO;
 import eu.arrowhead.common.dto.shared.SystemRegistryOnboardingWithCsrRequestDTO;
@@ -75,6 +79,8 @@ public class SystemRegistryDBService {
     private final DeviceRepository deviceRepository;
     private final SecurityUtilities securityUtilities;
     private final CertificateAuthorityDriver caDriver;
+    private final DriverUtilities driverUtilities;
+    private final EventDriver eventDriver;
 
     @Value(CoreCommonConstants.$SYSTEM_REGISTRY_PING_TIMEOUT_WD)
     private int pingTimeout;
@@ -84,12 +90,16 @@ public class SystemRegistryDBService {
                                    final SystemRepository systemRepository,
                                    final DeviceRepository deviceRepository,
                                    final SecurityUtilities securityUtilities,
-                                   final CertificateAuthorityDriver caDriver) {
+                                   final CertificateAuthorityDriver caDriver,
+                                   final DriverUtilities driverUtilities,
+                                   final EventDriver eventDriver) {
         this.systemRegistryRepository = systemRegistryRepository;
         this.systemRepository = systemRepository;
         this.deviceRepository = deviceRepository;
         this.securityUtilities = securityUtilities;
         this.caDriver = caDriver;
+        this.driverUtilities = driverUtilities;
+        this.eventDriver = eventDriver;
     }
 
 
@@ -204,8 +214,13 @@ public class SystemRegistryDBService {
                 throw new InvalidParameterException(COULD_NOT_DELETE_SYSTEM_ERROR_MESSAGE);
             }
 
+            final Optional<SystemRegistry> optional = systemRegistryRepository.findById(id);
+
             systemRepository.deleteById(id);
             systemRepository.flush();
+
+            optional.ifPresent(this::publishUnregister);
+
         } catch (final InvalidParameterException ex) {
             throw ex;
         } catch (final Exception ex) {
@@ -436,6 +451,9 @@ public class SystemRegistryDBService {
             final Device deviceDb = findOrCreateDevice(request.getProvider());
 
             final SystemRegistry srEntry = createSystemRegistry(systemDb, deviceDb, endOfValidity, metadataStr, version);
+
+            publishRegister(request);
+
             return DTOConverter.convertSystemRegistryToSystemRegistryResponseDTO(srEntry);
         } catch (final DateTimeParseException ex) {
             logger.debug(ex.getMessage(), ex);
@@ -561,6 +579,8 @@ public class SystemRegistryDBService {
 
         systemRegistryRepository.delete(systemRegistry);
         systemRegistryRepository.flush();
+
+        publishUnregister(systemRegistry);
     }
 
 
@@ -706,6 +726,57 @@ public class SystemRegistryDBService {
 
     //=================================================================================================
     // assistant methods
+
+    //-------------------------------------------------------------------------------------------------
+    private void publishRegister(final SystemRegistryRequestDTO requestDTO) {
+        try {
+            eventDriver.publish(
+                    new EventPublishRequestDTO(CoreEventHandlerConstants.REGISTER_SYSTEM_EVENT,
+                                               driverUtilities.getCoreSystemRequestDTO(),
+                                               null,
+                                               eventDriver.convert(requestDTO),
+                                               Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now())
+                    )
+            );
+        } catch (final Exception e) {
+            logger.warn("Unable to publish register event: {}", e.getMessage());
+        }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    private void publishUnregister(final SystemRegistry systemRegistry) {
+        try {
+            final var device = systemRegistry.getDevice();
+            final var system = systemRegistry.getSystem();
+
+            final var deviceRequestDTO = new DeviceRequestDTO(device.getDeviceName(),
+                                                              device.getAddress(),
+                                                              device.getMacAddress(),
+                                                              device.getAuthenticationInfo());
+
+            final var systemRequestDTO = new SystemRequestDTO(system.getSystemName(),
+                                                              system.getAddress(),
+                                                              system.getPort(),
+                                                              system.getAuthenticationInfo());
+
+            final var requestDTO = new SystemRegistryRequestDTO(systemRequestDTO,
+                                                                deviceRequestDTO,
+                                                                Utilities.convertZonedDateTimeToUTCString(systemRegistry.getEndOfValidity()),
+                                                                Utilities.text2Map(systemRegistry.getMetadata()),
+                                                                systemRegistry.getVersion());
+            eventDriver.publish(
+                    new EventPublishRequestDTO(CoreEventHandlerConstants.UNREGISTER_SYSTEM_EVENT,
+                                               driverUtilities.getCoreSystemRequestDTO(),
+                                               null,
+                                               eventDriver.convert(requestDTO),
+                                               Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now())
+                    )
+            );
+        } catch (final Exception e) {
+            logger.warn("Unable to publish unregister event: {}", e.getMessage());
+        }
+    }
+
     //-------------------------------------------------------------------------------------------------
     private System getSystemByNameAndAddressAndPort(final String systemName, final String address, final int port) {
         final Optional<System> optionalSystem = systemRepository.findBySystemNameAndAddressAndPort(systemName, address, port);
