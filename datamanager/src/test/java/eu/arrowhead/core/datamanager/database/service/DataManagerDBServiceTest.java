@@ -41,8 +41,8 @@ public class DataManagerDBServiceTest {
     //=================================================================================================
     // members
 
-    //@InjectMocks
-    //private DataManagerDBService datamanagerDBService = new DataManagerDBService();
+    @InjectMocks
+    private DataManagerDBService datamanagerDBService = new DataManagerDBService();
 
     @Mock
     private DataManagerService dataManagerService;
@@ -55,10 +55,10 @@ public class DataManagerDBServiceTest {
     
     @Test
     public void getServicesFromFakeSystem() {
-	/*final ArrayList<String> response = datamanagerDBService.getServicesFromSystem("nonExistingFakeTestOnlySystem");
-	
-	assertNotNull(response);
-	assertTrue(response.size() == 0);*/
+	//final ArrayList<String> response = datamanagerDBService.getServicesFromSystem("nonExistingFakeTestOnlySystem");
+	//
+	//assertNotNull(response);
+	//assertTrue(response.size() == 0);
     }
 }
 
