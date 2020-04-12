@@ -10,8 +10,8 @@ public interface VerificationRunView {
     @Value("#{target.execution.executionDate}")
     String getExecutionDate();
 
-    @Value("#{target.mip}")
-    MipView geMeasurableIndicatorPoint();
+    @Value("#{target.verificationEntry.mip}")
+    MipView getMip();
 
     @Value("#{target.execution.verificationList.name}")
     String getVerificationSet();

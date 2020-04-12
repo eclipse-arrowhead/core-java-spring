@@ -18,7 +18,7 @@ import java.util.StringJoiner;
 
 @Entity
 @Table(name = "msvc_verification_detail",
-        uniqueConstraints = @UniqueConstraint(name = "u_detail_execution_mip", columnNames = {"executionId", "mipId"}))
+        uniqueConstraints = @UniqueConstraint(name = "u_detail_execution_mip", columnNames = {"executionId", "verificationEntryId"}))
 public class VerificationExecutionDetail {
 
     @Id
@@ -30,9 +30,14 @@ public class VerificationExecutionDetail {
     private VerificationExecution execution;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "mipId", referencedColumnName = "id", nullable = false,
-            foreignKey = @ForeignKey(name = "fk_detail_mip", value = ConstraintMode.CONSTRAINT))
-    private Mip mip;
+    @JoinColumn(name = "verificationEntryId", referencedColumnName = "id", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_detail_verification_entry", value = ConstraintMode.CONSTRAINT))
+    private VerificationEntry verificationEntry;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "scriptId", referencedColumnName = "id", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_detail_script", value = ConstraintMode.CONSTRAINT))
+    private Script script;
 
     @Column(nullable = false, length = 16)
     @Enumerated(EnumType.STRING)
@@ -45,19 +50,27 @@ public class VerificationExecutionDetail {
         super();
     }
 
-    public VerificationExecutionDetail(final VerificationExecution execution, final Mip mip,
-                                       final VerificationRunDetailResult result, final String details) {
+    public VerificationExecutionDetail(final VerificationExecution execution,
+                                       final VerificationEntry verificationEntry,
+                                       final Script script,
+                                       final VerificationRunDetailResult result,
+                                       final String details) {
         this.execution = execution;
-        this.mip = mip;
+        this.verificationEntry = verificationEntry;
+        this.script = script;
         this.result = result;
         this.details = details;
     }
 
-    public VerificationExecutionDetail(final Long id, final VerificationExecution execution, final Mip mip,
-                                       final VerificationRunDetailResult result, final String details) {
+    public VerificationExecutionDetail(final Long id, final VerificationExecution execution,
+                                       final VerificationEntry verificationEntry,
+                                       final Script script,
+                                       final VerificationRunDetailResult result,
+                                       final String details) {
         this.id = id;
         this.execution = execution;
-        this.mip = mip;
+        this.verificationEntry = verificationEntry;
+        this.script = script;
         this.result = result;
         this.details = details;
     }
@@ -78,12 +91,12 @@ public class VerificationExecutionDetail {
         this.execution = execution;
     }
 
-    public Mip getMip() {
-        return mip;
+    public VerificationEntry getVerificationEntry() {
+        return verificationEntry;
     }
 
-    public void setMip(final Mip mip) {
-        this.mip = mip;
+    public void setVerificationEntry(final VerificationEntry verificationEntry) {
+        this.verificationEntry = verificationEntry;
     }
 
     public VerificationRunDetailResult getResult() {
@@ -92,6 +105,14 @@ public class VerificationExecutionDetail {
 
     public void setResult(final VerificationRunDetailResult result) {
         this.result = result;
+    }
+
+    public Script getScript() {
+        return script;
+    }
+
+    public void setScript(final Script script) {
+        this.script = script;
     }
 
     public String getDetails() {
@@ -109,21 +130,28 @@ public class VerificationExecutionDetail {
         final VerificationExecutionDetail that = (VerificationExecutionDetail) o;
         return Objects.equals(id, that.id) &&
                 Objects.equals(execution, that.execution) &&
-                Objects.equals(mip, that.mip);
+                Objects.equals(verificationEntry, that.verificationEntry) &&
+                Objects.equals(script, that.script) &&
+                result == that.result &&
+                Objects.equals(details, that.details);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, execution, mip);
+        return Objects.hash(id, execution, verificationEntry, script, result, details);
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", VerificationExecutionDetail.class.getSimpleName() + "[", "]")
-                .add("id=" + id)
-                .add("verificationRun=" + execution)
-                .add("indicatorPoint=" + mip)
-                .add("result=" + result)
-                .toString();
+        final var sj = new StringJoiner(", ", VerificationExecutionDetail.class.getSimpleName() + "[", "]");
+
+        sj.add("id=" + id);
+        if (Objects.nonNull(execution)) { sj.add("execution=" + execution.getExecutionDate()); }
+        sj.add("verificationEntry=" + verificationEntry)
+          .add("script=" + script)
+          .add("result=" + result)
+          .add("details=" + details);
+
+        return sj.toString();
     }
 }

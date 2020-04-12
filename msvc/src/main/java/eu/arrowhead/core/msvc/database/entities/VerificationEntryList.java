@@ -24,7 +24,7 @@ public class VerificationEntryList {
     @Column
     private String description;
 
-    @OneToMany(mappedBy = "verificationList",fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "verificationList", fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<VerificationEntry> entries = new HashSet<>();
 
     public VerificationEntryList() {

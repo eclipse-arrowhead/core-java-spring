@@ -20,14 +20,14 @@ import java.util.StringJoiner;
 @Entity
 @Table(name = "msvc_verification_execution",
         uniqueConstraints = @UniqueConstraint(name = "u_verification_list_target_date",
-                columnNames = {"verificationTargetId", "verificationListId", "executionDate"}))
+                columnNames = {"targetId", "verificationListId", "executionDate"}))
 public class VerificationExecution {
 
     @Id
     private Long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "verificationTargetId", referencedColumnName = "id", nullable = false,
+    @JoinColumn(name = "targetId", referencedColumnName = "id", nullable = false,
             foreignKey = @ForeignKey(name = "fk_target", value = ConstraintMode.CONSTRAINT))
     private Target target;
 

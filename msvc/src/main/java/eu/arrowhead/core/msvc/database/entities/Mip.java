@@ -22,7 +22,7 @@ public class Mip {
     @Id
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 11)
     private Integer extId;
 
     @Column(nullable = false, unique = true, length = 32)
@@ -62,6 +62,11 @@ public class Mip {
         this.domain = domain;
         this.category = category;
         this.standard = standard;
+    }
+
+    public String getIdentifier() {
+        if(Objects.nonNull(category)) return category.getAbbreviation() + "-" + extId;
+        else return name;
     }
 
     public Long getId() {

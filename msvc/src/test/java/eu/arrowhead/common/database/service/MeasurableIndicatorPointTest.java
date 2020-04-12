@@ -14,8 +14,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Optional;
-
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @TestPropertySource(properties = {
@@ -43,10 +41,7 @@ public class MeasurableIndicatorPointTest {
 
     @Test
     public void mipView() {
-        Optional<MipView> viewOptional = measurableIndicatorPointRepository.findViewById(1L);
-        Assert.assertTrue(viewOptional.isPresent());
-
-        MipView mip = viewOptional.get();
+        MipView mip = measurableIndicatorPointRepository.findViewById(1L);
         Assert.assertEquals("IAC-1", mip.getIdentifier());
         Assert.assertEquals("SafIAC", mip.getName());
         Assert.assertEquals("Description SafIAC", mip.getDescription());
@@ -56,10 +51,7 @@ public class MeasurableIndicatorPointTest {
         Assert.assertEquals("name", mip.getStandard());
         Assert.assertEquals("uri", mip.getReferenceUri());
 
-        viewOptional = measurableIndicatorPointRepository.findViewById(2L);
-        Assert.assertTrue(viewOptional.isPresent());
-
-        mip = viewOptional.get();
+        mip = measurableIndicatorPointRepository.findViewById(2L);
         Assert.assertEquals("IAC-2", mip.getIdentifier());
         Assert.assertEquals("SecIAC", mip.getName());
         Assert.assertEquals("Description SecIAC", mip.getDescription());
@@ -69,5 +61,4 @@ public class MeasurableIndicatorPointTest {
         Assert.assertEquals("name", mip.getStandard());
         Assert.assertEquals("uri", mip.getReferenceUri());
     }
-
 }

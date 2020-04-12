@@ -4,8 +4,10 @@ use arrowhead;
 CREATE TABLE IF NOT EXISTS `msvc_target`
 (
     `id`   bigint(20) PRIMARY KEY AUTO_INCREMENT,
-    `name` varchar(32) UNIQUE NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+    `name` varchar(32) UNIQUE NOT NULL,
+    `os`   varchar(16)        NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
 
 CREATE TABLE IF NOT EXISTS `msvc_ssh_target`
 (
@@ -14,20 +16,23 @@ CREATE TABLE IF NOT EXISTS `msvc_ssh_target`
     `port`    integer      NOT NULL,
     CONSTRAINT `fk_parent_target` FOREIGN KEY (`id`) REFERENCES `msvc_target` (`id`) ON DELETE CASCADE,
     UNIQUE KEY `u_address_port` (`address`, `port`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
 
 CREATE TABLE IF NOT EXISTS `msvc_mip_category`
 (
     `id`           bigint(20) PRIMARY KEY AUTO_INCREMENT,
     `name`         varchar(32) UNIQUE NOT NULL,
     `abbreviation` varchar(5) UNIQUE  NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
 
 CREATE TABLE IF NOT EXISTS `msvc_mip_domain`
 (
     `id`   bigint(20) PRIMARY KEY AUTO_INCREMENT,
     `name` varchar(32) UNIQUE NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
 
 CREATE TABLE IF NOT EXISTS `msvc_standard`
 (
@@ -42,7 +47,7 @@ CREATE TABLE IF NOT EXISTS `msvc_standard`
 CREATE TABLE IF NOT EXISTS `msvc_mip`
 (
     `id`          bigint(20) PRIMARY KEY AUTO_INCREMENT,
-    `extId`       smallint(11) NOT NULL,
+    `ext_id`      integer(11)        NOT NULL,
     `name`        varchar(32) UNIQUE NOT NULL,
     `description` varchar(255)       NOT NULL,
     `standard_id` bigint             NOT NULL,
@@ -50,15 +55,18 @@ CREATE TABLE IF NOT EXISTS `msvc_mip`
     `domain_id`   bigint             NOT NULL,
     CONSTRAINT `fk_standard` FOREIGN KEY (`standard_id`) REFERENCES `msvc_standard` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_category` FOREIGN KEY (`category_id`) REFERENCES `msvc_mip_category` (`id`) ON DELETE CASCADE,
-    CONSTRAINT `fk_domain` FOREIGN KEY (`domain_id`) REFERENCES `msvc_mip_domain` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+    CONSTRAINT `fk_domain` FOREIGN KEY (`domain_id`) REFERENCES `msvc_mip_domain` (`id`) ON DELETE CASCADE,
+    UNIQUE KEY `u_mip_category_ext_id` (`ext_id`, `category_id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
 
 CREATE TABLE IF NOT EXISTS `msvc_mip_verification_list`
 (
     `id`          bigint(20) PRIMARY KEY AUTO_INCREMENT,
     `name`        varchar(32) UNIQUE NOT NULL,
     `description` varchar(255)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
 
 CREATE TABLE IF NOT EXISTS `msvc_mip_verification_entry`
 (
@@ -69,7 +77,20 @@ CREATE TABLE IF NOT EXISTS `msvc_mip_verification_entry`
     CONSTRAINT `fk_entry_mip` FOREIGN KEY (`mip_id`) REFERENCES `msvc_mip` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_entry_verification_list` FOREIGN KEY (`verification_list_id`) REFERENCES `msvc_mip_verification_list` (`id`) ON DELETE CASCADE,
     UNIQUE KEY `u_indicator_point_set` (`mip_id`, `verification_list_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `msvc_script`
+(
+    `id`     bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `layer`  varchar(16)  NOT NULL,
+    `os`     varchar(16)  NOT NULL,
+    `path`   varchar(255) NOT NULL,
+    `mip_id` bigint       NOT NULL,
+    CONSTRAINT `fk_script_mip` FOREIGN KEY (`mip_id`) REFERENCES `msvc_mip` (`id`) ON DELETE CASCADE,
+    UNIQUE KEY `u_script_layer_os_mip` (`layer`, `os`, `mip_id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
 
 CREATE TABLE IF NOT EXISTS `msvc_verification_execution`
 (
@@ -81,19 +102,23 @@ CREATE TABLE IF NOT EXISTS `msvc_verification_execution`
     CONSTRAINT `fk_execution_verification_list` FOREIGN KEY (`verification_list_id`) REFERENCES `msvc_mip_verification_list` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_execution_target` FOREIGN KEY (`verification_target_id`) REFERENCES `msvc_target` (`id`) ON DELETE CASCADE,
     UNIQUE KEY `u_verification_set_target_date` (`verification_list_id`, `verification_target_id`, `execution_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
 
 CREATE TABLE IF NOT EXISTS `msvc_verification_detail`
 (
-    `id`           bigint(20) PRIMARY KEY AUTO_INCREMENT,
-    `result`       varchar(16) NOT NULL,
-    `details`      varchar(255),
-    `mip_entry_id` bigint      NOT NULL,
-    `execution_id` bigint      NOT NULL,
-    CONSTRAINT `fk_details_mip_entry` FOREIGN KEY (`mip_entry_id`) REFERENCES `msvc_mip_verification_entry` (`id`) ON DELETE CASCADE,
+    `id`                    bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `result`                varchar(16) NOT NULL,
+    `details`               varchar(255),
+    `verification_entry_id` bigint      NOT NULL,
+    `execution_id`          bigint      NOT NULL,
+    `script_id`             bigint      NOT NULL,
+    CONSTRAINT `fk_details_mip_entry` FOREIGN KEY (`verification_entry_id`) REFERENCES `msvc_mip_verification_entry` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_details_execution` FOREIGN KEY (`execution_id`) REFERENCES `msvc_verification_execution` (`id`) ON DELETE CASCADE,
-    UNIQUE KEY `u_details_execution_mip` (`mip_entry_id`, `execution_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+    CONSTRAINT `fk_details_script` FOREIGN KEY (`script_id`) REFERENCES `msvc_script` (`id`) ON DELETE CASCADE,
+    UNIQUE KEY `u_details_execution_mip` (`verification_entry_id`, `execution_id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
 
 
 

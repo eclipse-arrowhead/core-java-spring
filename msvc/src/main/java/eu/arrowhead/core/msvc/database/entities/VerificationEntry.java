@@ -38,12 +38,12 @@ public class VerificationEntry {
         super();
     }
 
-    public VerificationEntry(final Mip mip, final Short weight) {
+    public VerificationEntry(final Mip mip, final Short weight, final VerificationEntryList entryList) {
         this.mip = mip;
         this.weight = weight;
     }
 
-    public VerificationEntry(final Long id, final Mip mip, final Short weight) {
+    public VerificationEntry(final Long id, final Mip mip, final Short weight, final VerificationEntryList entryList) {
         this.id = id;
         this.mip = mip;
         this.weight = weight;
@@ -101,7 +101,7 @@ public class VerificationEntry {
         final var sj = new StringJoiner(", ", VerificationEntry.class.getSimpleName() + "[", "]");
 
         sj.add("id=" + id);
-        if (Objects.nonNull(mip)) { sj.add("indicatorPoint=" + mip.getName()); }
+        if (Objects.nonNull(mip)) { sj.add("mip=" + mip.getName()); }
         sj.add("weight=" + weight);
 
         return sj.toString();
