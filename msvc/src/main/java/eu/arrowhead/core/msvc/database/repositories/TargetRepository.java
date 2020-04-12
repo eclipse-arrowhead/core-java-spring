@@ -1,15 +1,17 @@
 package eu.arrowhead.core.msvc.database.repositories;
 
 import eu.arrowhead.common.database.repository.RefreshableRepository;
+import eu.arrowhead.core.msvc.database.OS;
 import eu.arrowhead.core.msvc.database.entities.Target;
+import eu.arrowhead.core.msvc.database.view.TargetView;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface TargetRepository<I> extends RefreshableRepository<Target, Long> {
+public interface TargetRepository extends RefreshableRepository<Target, Long> {
 
-    Optional<I> findById(final Long id, final Class<I> clz);
-
-    Optional<I> findByName(final String name, final Class<I> clz);
+    <S extends Target> Optional<S> findByName(final String name);
+    TargetView findOneByName(final String name);
+    TargetView findOneByNameAndOs(final String name, final OS os);
 }

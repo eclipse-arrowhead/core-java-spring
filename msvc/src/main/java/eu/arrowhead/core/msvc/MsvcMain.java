@@ -1,7 +1,6 @@
 package eu.arrowhead.core.msvc;
 
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.database.repository.RefreshableRepositoryImpl;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,11 +9,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication(scanBasePackages = CommonConstants.BASE_PACKAGE)
-@EntityScan(CoreCommonConstants.DATABASE_ENTITY_PACKAGE)
-@EnableJpaRepositories(basePackages = CoreCommonConstants.DATABASE_REPOSITORY_PACKAGE, repositoryBaseClass = RefreshableRepositoryImpl.class)
+@EntityScan(CommonConstants.BASE_PACKAGE)
+@EnableJpaRepositories(basePackages = CommonConstants.BASE_PACKAGE, repositoryBaseClass = RefreshableRepositoryImpl.class)
 @EnableSwagger2
-public class MsvcMain
-{
+public class MsvcMain {
 
     //=================================================================================================
     // methods

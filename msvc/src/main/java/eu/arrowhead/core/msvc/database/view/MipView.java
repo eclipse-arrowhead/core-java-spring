@@ -22,8 +22,11 @@ public interface MipView {
     @Value("#{target.category.abbreviation}")
     String getCategoryAbbreviation();
 
-    @Value("#{target.standard.name}")
+    @Value("#{target.standard.identification}")
     String getStandard();
+
+    @Value("#{target.standard.name}")
+    String getStandardName();
 
     @Value("#{target.standard.referenceUri}")
     String getReferenceUri();

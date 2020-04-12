@@ -9,6 +9,5 @@ import eu.arrowhead.core.msvc.database.entities.Script;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface MipCategoryRepository extends RefreshableRepository<Script, Long> {
-    Script findScriptByMipAndOsAndLayer(final Mip mip, final OS os, final Layer layer);
+public interface MipCategoryRepository extends RefreshableRepository<MipCategory, Long> {
 }

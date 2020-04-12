@@ -4,14 +4,14 @@ import eu.arrowhead.common.database.repository.RefreshableRepository;
 import eu.arrowhead.core.msvc.database.entities.VerificationEntry;
 import eu.arrowhead.core.msvc.database.entities.VerificationExecution;
 import eu.arrowhead.core.msvc.database.entities.VerificationExecutionDetail;
-import eu.arrowhead.core.msvc.database.view.VerificationRunView;
+import eu.arrowhead.core.msvc.database.view.VerificationExecutionDetailView;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface VerificationExecutionDetailRepository extends RefreshableRepository<VerificationExecutionDetail, Long> {
 
-    VerificationRunView findViewById(final Long id);
+    VerificationExecutionDetailView findViewById(final Long id);
 
-    VerificationRunView findViewByExecutionAndVerificationEntry(final VerificationExecution execution,
-                                                                final VerificationEntry entry);
+    VerificationExecutionDetailView findViewByExecutionAndVerificationEntry(final VerificationExecution execution,
+                                                                            final VerificationEntry entry);
 }

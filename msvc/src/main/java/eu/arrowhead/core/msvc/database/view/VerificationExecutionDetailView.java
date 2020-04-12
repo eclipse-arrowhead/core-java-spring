@@ -1,8 +1,9 @@
 package eu.arrowhead.core.msvc.database.view;
 
+import eu.arrowhead.core.msvc.database.VerificationRunDetailResult;
 import org.springframework.beans.factory.annotation.Value;
 
-public interface VerificationRunView {
+public interface VerificationExecutionDetailView {
 
     @Value("#{target.execution.target.name}")
     String getTarget();
@@ -16,6 +17,9 @@ public interface VerificationRunView {
     @Value("#{target.execution.verificationList.name}")
     String getVerificationSet();
 
+    @Value("#{target.verificationEntry.weight}")
+    Integer getResultWeight();
+
     @Value("#{target.result}")
-    Integer getResult();
+    VerificationRunDetailResult getResult();
 }

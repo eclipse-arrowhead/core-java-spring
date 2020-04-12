@@ -1,5 +1,7 @@
 package eu.arrowhead.core.msvc.database.entities;
 
+import eu.arrowhead.core.msvc.database.OS;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -19,14 +21,14 @@ public class SshTarget extends Target {
 
     public SshTarget() { super(); }
 
-    public SshTarget(final String name, final String address, final Integer port) {
-        super(name);
+    public SshTarget(final String name, final OS os, final String address, final Integer port) {
+        super(name, os);
         this.address = address;
         this.port = port;
     }
 
-    public SshTarget(final Long id, final String name, final String address, final Integer port) {
-        super(id, name);
+    public SshTarget(final Long id, final String name, final OS os, final String address, final Integer port) {
+        super(id, name, os);
         this.address = address;
         this.port = port;
     }

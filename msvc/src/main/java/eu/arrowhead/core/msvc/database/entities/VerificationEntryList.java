@@ -93,9 +93,11 @@ public class VerificationEntryList {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", VerificationEntryList.class.getSimpleName() + "[", "]")
-                .add("id=" + id)
-                .add("name='" + name + "'")
-                .toString();
+        final var sj = new StringJoiner(", ", VerificationEntryList.class.getSimpleName() + "[", "]");
+        sj.add("id=" + id)
+          .add("name='" + name + "'")
+          .add("description='" + description + "'");
+        if (Objects.nonNull(entries)) { sj.add("entries=" + entries.size()); }
+        return sj.toString();
     }
 }

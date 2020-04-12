@@ -33,13 +33,15 @@ public abstract class Target {
         super();
     }
 
-    public Target(final String name) {
+    public Target(final String name, final OS os) {
         this.name = name;
+        this.os = os;
     }
 
-    public Target(final Long id, final String name) {
+    public Target(final Long id, final String name, final OS os) {
         this.id = id;
         this.name = name;
+        this.os = os;
     }
 
     public Long getId() {
