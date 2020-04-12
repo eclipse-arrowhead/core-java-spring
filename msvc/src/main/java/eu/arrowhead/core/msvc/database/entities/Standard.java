@@ -24,7 +24,7 @@ public class Standard {
     @Column(nullable = false, unique = true, length = 16)
     private String identification;
 
-    @Column(nullable = false, unique = true, length = 32)
+    @Column(nullable = false, unique = true, length = 64)
     private String name;
 
     @Column

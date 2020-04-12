@@ -14,7 +14,7 @@ import java.util.StringJoiner;
 
 @Entity
 @Table(name = "msvc_mip_verification_entry",
-        uniqueConstraints = @UniqueConstraint(name = "u_indicator_point_set", columnNames = {"mipId", "verificationListId"}))
+        uniqueConstraints = @UniqueConstraint(name = "u_entry_mip_list", columnNames = {"mipId", "verificationListId"}))
 public class VerificationEntry {
 
     @Id

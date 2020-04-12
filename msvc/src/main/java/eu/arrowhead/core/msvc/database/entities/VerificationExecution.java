@@ -39,7 +39,7 @@ public class VerificationExecution {
     @Column(nullable = false)
     private ZonedDateTime executionDate;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 16)
     @Enumerated(EnumType.STRING)
     private VerificationRunResult result;
 

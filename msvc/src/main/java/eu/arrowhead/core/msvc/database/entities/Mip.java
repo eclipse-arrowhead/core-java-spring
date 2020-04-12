@@ -25,10 +25,10 @@ public class Mip {
     @Column(nullable = false, length = 11)
     private Integer extId;
 
-    @Column(nullable = false, unique = true, length = 32)
+    @Column(nullable = false, unique = true, length = 64)
     private String name;
 
-    @Column(nullable = false)
+    @Column
     private String description;
 
     @ManyToOne(fetch = FetchType.EAGER)

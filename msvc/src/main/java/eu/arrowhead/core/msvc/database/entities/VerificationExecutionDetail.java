@@ -43,7 +43,7 @@ public class VerificationExecutionDetail {
     @Enumerated(EnumType.STRING)
     private VerificationRunDetailResult result;
 
-    @Column
+    @Column(length = 255)
     private String details;
 
     public VerificationExecutionDetail() {

@@ -4,7 +4,7 @@ use arrowhead;
 CREATE TABLE IF NOT EXISTS `msvc_target`
 (
     `id`   bigint(20) PRIMARY KEY AUTO_INCREMENT,
-    `name` varchar(32) UNIQUE NOT NULL,
+    `name` varchar(64) UNIQUE NOT NULL,
     `os`   varchar(16)        NOT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS `msvc_ssh_target`
 CREATE TABLE IF NOT EXISTS `msvc_mip_category`
 (
     `id`           bigint(20) PRIMARY KEY AUTO_INCREMENT,
-    `name`         varchar(32) UNIQUE NOT NULL,
+    `name`         varchar(64) UNIQUE NOT NULL,
     `abbreviation` varchar(5) UNIQUE  NOT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS `msvc_mip_category`
 CREATE TABLE IF NOT EXISTS `msvc_mip_domain`
 (
     `id`   bigint(20) PRIMARY KEY AUTO_INCREMENT,
-    `name` varchar(32) UNIQUE NOT NULL
+    `name` varchar(64) UNIQUE NOT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
@@ -38,8 +38,8 @@ CREATE TABLE IF NOT EXISTS `msvc_standard`
 (
     `id`             bigint(20) PRIMARY KEY AUTO_INCREMENT,
     `identification` varchar(16) UNIQUE NOT NULL,
-    `name`           varchar(32) UNIQUE NOT NULL,
-    `description`    varchar(255),
+    `name`           varchar(64) UNIQUE NOT NULL,
+    `description`    text,
     `reference_uri`  varchar(255)       NOT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
@@ -48,8 +48,8 @@ CREATE TABLE IF NOT EXISTS `msvc_mip`
 (
     `id`          bigint(20) PRIMARY KEY AUTO_INCREMENT,
     `ext_id`      integer(11)        NOT NULL,
-    `name`        varchar(32) UNIQUE NOT NULL,
-    `description` varchar(255)       NOT NULL,
+    `name`        varchar(64) UNIQUE NOT NULL,
+    `description` text,
     `standard_id` bigint             NOT NULL,
     `category_id` bigint             NOT NULL,
     `domain_id`   bigint             NOT NULL,
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS `msvc_mip`
 CREATE TABLE IF NOT EXISTS `msvc_mip_verification_list`
 (
     `id`          bigint(20) PRIMARY KEY AUTO_INCREMENT,
-    `name`        varchar(32) UNIQUE NOT NULL,
+    `name`        varchar(64) UNIQUE NOT NULL,
     `description` varchar(255)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS `msvc_mip_verification_entry`
     `verification_list_id` bigint   NOT NULL,
     CONSTRAINT `fk_entry_mip` FOREIGN KEY (`mip_id`) REFERENCES `msvc_mip` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_entry_verification_list` FOREIGN KEY (`verification_list_id`) REFERENCES `msvc_mip_verification_list` (`id`) ON DELETE CASCADE,
-    UNIQUE KEY `u_indicator_point_set` (`mip_id`, `verification_list_id`)
+    UNIQUE KEY `u_entry_mip_list` (`mip_id`, `verification_list_id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
