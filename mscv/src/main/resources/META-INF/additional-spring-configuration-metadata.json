@@ -33,7 +33,17 @@
     {
       "name": "sr_port",
       "type": "java.lang.String",
-      "description": "Description for sr_port."
+      "description": "Service Registry port."
+    },
+    {
+      "name": "mscv.defaultList",
+      "type": "java.lang.String",
+      "description": "The name of the default verification list, which will be executed unless otherwise defined."
+    },
+    {
+      "name": "mscv.defaultMipWeight",
+      "type": "java.lang.Short",
+      "description": "The weight of all MIPs in the compliance algorithm."
     }
   ]
 }

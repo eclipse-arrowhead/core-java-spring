@@ -4,7 +4,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.Defaults;
-import eu.arrowhead.common.dto.shared.mscv.DomainDto;
+import eu.arrowhead.common.dto.shared.mscv.MipDto;
 import eu.arrowhead.core.mscv.database.service.MscvCrudService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -28,6 +28,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_ADDRESS_PATH;
+import static eu.arrowhead.core.mscv.Constants.PARAMETER_MIP_ID;
+import static eu.arrowhead.core.mscv.Constants.PARAMETER_MIP_ID_PATH;
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_NAME;
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_NAME_PATH;
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_PORT_PATH;
@@ -40,41 +42,41 @@ import static eu.arrowhead.core.mscv.Constants.PATH_PORT;
 )
 @RestController
 @RequestMapping(CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI)
-public class DomainMgmtController {
+public class MipMgmtController {
 
-    private static final String DOMAIN_URI = "/domain";
-    private static final String QUALIFY_DOMAIN_URI = DOMAIN_URI + PARAMETER_NAME_PATH;
+    private static final String MIP_URI = "/mip";
+    private static final String QUALIFY_MIP_URI = MIP_URI + PARAMETER_MIP_ID_PATH;
 
-    private static final String CREATE_DOMAIN_URI = DOMAIN_URI;
-    private static final String CREATE_DOMAIN_DESCRIPTION = "Create new MSCV domain";
-    private static final String CREATE_DOMAIN_SUCCESS = "New MSCV domain created";
-    private static final String CREATE_DOMAIN_BAD_REQUEST = "Unable to create new MSCV domain";
+    private static final String CREATE_MIP_URI = MIP_URI;
+    private static final String CREATE_MIP_DESCRIPTION = "Create new MSCV mip";
+    private static final String CREATE_MIP_SUCCESS = "New MSCV mip created";
+    private static final String CREATE_MIP_BAD_REQUEST = "Unable to create new MSCV mip";
 
-    private static final String READ_DOMAIN_URI = QUALIFY_DOMAIN_URI;
-    private static final String READ_DOMAIN_DESCRIPTION = "Get MSCV domain by name";
-    private static final String READ_DOMAIN_SUCCESS = "MSCV domain returned";
-    private static final String READ_DOMAIN_BAD_REQUEST = "Unable to return MSCV domain";
+    private static final String READ_MIP_URI = QUALIFY_MIP_URI;
+    private static final String READ_MIP_DESCRIPTION = "Get MSCV mip by name";
+    private static final String READ_MIP_SUCCESS = "MSCV mip returned";
+    private static final String READ_MIP_BAD_REQUEST = "Unable to return MSCV mip";
 
-    private static final String READ_ALL_DOMAIN_URI = DOMAIN_URI;
-    private static final String READ_ALL_DOMAIN_DESCRIPTION = "Get all MSCV domains";
-    private static final String READ_ALL_DOMAIN_SUCCESS = "All MSCV domains returned";
-    private static final String READ_ALL_DOMAIN_BAD_REQUEST = "Unable to return MSCV domains";
+    private static final String READ_ALL_MIP_URI = MIP_URI;
+    private static final String READ_ALL_MIP_DESCRIPTION = "Get all MSCV mips";
+    private static final String READ_ALL_MIP_SUCCESS = "All MSCV mips returned";
+    private static final String READ_ALL_MIP_BAD_REQUEST = "Unable to return MSCV mips";
 
-    private static final String UPDATE_DOMAIN_URI = QUALIFY_DOMAIN_URI;
-    private static final String UPDATE_DOMAIN_DESCRIPTION = "Update MSCV domain";
-    private static final String UPDATE_DOMAIN_SUCCESS = "MSCV domain updated";
-    private static final String UPDATE_DOMAIN_BAD_REQUEST = "Unable to update MSCV domain";
+    private static final String UPDATE_MIP_URI = QUALIFY_MIP_URI;
+    private static final String UPDATE_MIP_DESCRIPTION = "Update MSCV mip";
+    private static final String UPDATE_MIP_SUCCESS = "MSCV mip updated";
+    private static final String UPDATE_MIP_BAD_REQUEST = "Unable to update MSCV mip";
 
-    private static final String DELETE_DOMAIN_URI = QUALIFY_DOMAIN_URI;
-    private static final String DELETE_DOMAIN_DESCRIPTION = "Delete MSCV domain";
-    private static final String DELETE_DOMAIN_SUCCESS = "MSCV domain deleted";
-    private static final String DELETE_DOMAIN_BAD_REQUEST = "Unable to delete MSCV domain";
+    private static final String DELETE_MIP_URI = QUALIFY_MIP_URI;
+    private static final String DELETE_MIP_DESCRIPTION = "Delete MSCV mip";
+    private static final String DELETE_MIP_SUCCESS = "MSCV mip deleted";
+    private static final String DELETE_MIP_BAD_REQUEST = "Unable to delete MSCV mip";
 
     private final Logger logger = LogManager.getLogger();
     private final MscvCrudService crudService;
 
     @Autowired
-    public DomainMgmtController(final MscvCrudService crudService) {
+    public MipMgmtController(final MscvCrudService crudService) {
         super();
         this.crudService = crudService;
     }
@@ -82,46 +84,46 @@ public class DomainMgmtController {
     //=================================================================================================
     // methods
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = CREATE_DOMAIN_DESCRIPTION, response = DomainDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = CREATE_MIP_DESCRIPTION, response = MipDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = CREATE_DOMAIN_SUCCESS),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CREATE_DOMAIN_BAD_REQUEST),
+            @ApiResponse(code = HttpStatus.SC_OK, message = CREATE_MIP_SUCCESS),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CREATE_MIP_BAD_REQUEST),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @PostMapping(CREATE_DOMAIN_URI)
+    @PostMapping(CREATE_MIP_URI)
     @ResponseBody
-    public DomainDto create(@RequestBody final DomainDto dto) {
+    public MipDto create(@RequestBody final MipDto dto) {
         logger.debug("create started ...");
         // TODO implement
         return null;
     }
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = READ_DOMAIN_DESCRIPTION, response = DomainDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = READ_MIP_DESCRIPTION, response = MipDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = READ_DOMAIN_SUCCESS),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = READ_DOMAIN_BAD_REQUEST),
+            @ApiResponse(code = HttpStatus.SC_OK, message = READ_MIP_SUCCESS),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = READ_MIP_BAD_REQUEST),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @GetMapping(READ_DOMAIN_URI)
+    @GetMapping(READ_MIP_URI)
     @ResponseBody
-    public DomainDto read(@PathVariable(PARAMETER_NAME) final String name) {
+    public MipDto read(@PathVariable(PARAMETER_MIP_ID) final Long mipId) {
         logger.debug("read started ...");
         // TODO implement
         return null;
     }
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = READ_ALL_DOMAIN_DESCRIPTION, response = DomainDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = READ_ALL_MIP_DESCRIPTION, response = MipDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = READ_ALL_DOMAIN_SUCCESS),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = READ_ALL_DOMAIN_BAD_REQUEST),
+            @ApiResponse(code = HttpStatus.SC_OK, message = READ_ALL_MIP_SUCCESS),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = READ_ALL_MIP_BAD_REQUEST),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @GetMapping(READ_ALL_DOMAIN_URI)
+    @GetMapping(READ_ALL_MIP_URI)
     @ResponseBody
-    public DomainDto readAll(
+    public MipDto readAll(
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
@@ -131,31 +133,31 @@ public class DomainMgmtController {
         return null;
     }
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = UPDATE_DOMAIN_DESCRIPTION, response = DomainDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = UPDATE_MIP_DESCRIPTION, response = MipDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = UPDATE_DOMAIN_SUCCESS),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = UPDATE_DOMAIN_BAD_REQUEST),
+            @ApiResponse(code = HttpStatus.SC_OK, message = UPDATE_MIP_SUCCESS),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = UPDATE_MIP_BAD_REQUEST),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @PutMapping(UPDATE_DOMAIN_URI)
+    @PutMapping(UPDATE_MIP_URI)
     @ResponseBody
-    public DomainDto update(@PathVariable(PARAMETER_NAME) final String name, @RequestBody final DomainDto dto) {
+    public MipDto update(@PathVariable(PARAMETER_MIP_ID) final Long mipId, @RequestBody final MipDto dto) {
         logger.debug("update started ...");
         // TODO implement
         return null;
     }
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = DELETE_DOMAIN_DESCRIPTION, response = DomainDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = DELETE_MIP_DESCRIPTION, response = MipDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_DOMAIN_SUCCESS),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_DOMAIN_BAD_REQUEST),
+            @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_MIP_SUCCESS),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_MIP_BAD_REQUEST),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @DeleteMapping(DELETE_DOMAIN_URI)
+    @DeleteMapping(DELETE_MIP_URI)
     @ResponseBody
-    public void delete(@PathVariable(PARAMETER_NAME) final String name) {
+    public void delete(@PathVariable(PARAMETER_MIP_ID) final Long mipId) {
         logger.debug("delete started ...");
         // TODO implement
     }

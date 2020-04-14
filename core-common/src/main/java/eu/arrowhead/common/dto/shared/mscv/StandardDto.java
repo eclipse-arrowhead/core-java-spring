@@ -1,23 +1,24 @@
 package eu.arrowhead.common.dto.shared.mscv;
 
 
-public class MscvStandard {
+import java.util.StringJoiner;
 
-  private long id;
+public class StandardDto {
+
   private String identification;
   private String name;
   private String description;
   private String referenceUri;
 
-
-  public long getId() {
-    return id;
+  public StandardDto() {
+    super();
   }
 
-  public void setId(long id) {
-    this.id = id;
+  public StandardDto(final String identification, final String name, final String referenceUri) {
+    this.identification = identification;
+    this.name = name;
+    this.referenceUri = referenceUri;
   }
-
 
   public String getIdentification() {
     return identification;
@@ -36,7 +37,6 @@ public class MscvStandard {
     this.name = name;
   }
 
-
   public String getDescription() {
     return description;
   }
@@ -44,7 +44,6 @@ public class MscvStandard {
   public void setDescription(String description) {
     this.description = description;
   }
-
 
   public String getReferenceUri() {
     return referenceUri;
@@ -54,4 +53,13 @@ public class MscvStandard {
     this.referenceUri = referenceUri;
   }
 
+  @Override
+  public String toString() {
+    return new StringJoiner(", ", StandardDto.class.getSimpleName() + "[", "]")
+            .add("identification='" + identification + "'")
+            .add("name='" + name + "'")
+            .add("description='" + description + "'")
+            .add("referenceUri='" + referenceUri + "'")
+            .toString();
+  }
 }
