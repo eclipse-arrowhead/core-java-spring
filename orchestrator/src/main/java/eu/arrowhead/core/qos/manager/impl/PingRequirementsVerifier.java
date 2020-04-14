@@ -138,7 +138,7 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	private boolean verifyInterCloudDirectPingMeasurements(final QoSVerificationParameters params) {
 		logger.debug("verifyInterCloudDirectPingMeasurements started...");
 		Assert.isTrue(params.isInterCloud(), "QoSVerificationParameters is not Inter-Cloud, but Inter-Cloud direct ping verification was requested");
-		Assert.isTrue(params.isGatewayIsMandatory(), "Gateway shouldn't be mandatory for Inter-Cloud direct ping verification");
+		Assert.isTrue(!params.isGatewayIsMandatory(), "Gateway shouldn't be mandatory for Inter-Cloud direct ping verification");
 		
 		final QoSInterDirectPingMeasurementResponseDTO measurement = getInterDirectPingMeasurement(new CloudSystemFormDTO(params.getProviderCloud(), params.getProviderSystem()));
 		
