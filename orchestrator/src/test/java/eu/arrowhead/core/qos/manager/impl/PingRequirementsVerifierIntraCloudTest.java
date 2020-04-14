@@ -3,6 +3,8 @@ package eu.arrowhead.core.qos.manager.impl;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -28,7 +30,7 @@ import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.orchestrator.service.OrchestratorDriver;
 
 @RunWith(SpringRunner.class)
-public class PingRequirementsVerifierTest {
+public class PingRequirementsVerifierIntraCloudTest {
 
 	//=================================================================================================
 	// members
@@ -49,6 +51,7 @@ public class PingRequirementsVerifierTest {
 	@Before
 	public void setUp() {
 		ReflectionTestUtils.setField(verifier, "pingMeasurementCacheThreshold", 120);
+		ReflectionTestUtils.setField(verifier, "intraPingMeasurementCache", intraPingMeasurementCache);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -64,16 +67,16 @@ public class PingRequirementsVerifierTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testVerifyParameterQosRequirementsNull() { // answer true
-		final boolean verified = verifier.verify(new QoSVerificationParameters(new SystemResponseDTO(), null, false, new HashMap<>(),  new HashMap<>(),  new HashMap<>(), new ArrayList<>()), false);
+	@Test(expected = IllegalArgumentException.class)
+	public void testVerifyParameterQosRequirementsNull() {
+		final boolean verified = verifier.verify(new QoSVerificationParameters(new SystemResponseDTO(), null, false, new HashMap<>(), null, new HashMap<>(), new ArrayList<>()), false);
 		Assert.assertTrue(verified);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testVerifyParameterQosRequirementsEmpty() { // answer true
-		final boolean verified = verifier.verify(new QoSVerificationParameters(new SystemResponseDTO(), null, false, new HashMap<>(),  new HashMap<>(),  new HashMap<>(), new ArrayList<>()), false);
+		final boolean verified = verifier.verify(new QoSVerificationParameters(new SystemResponseDTO(), null, false, new HashMap<>(), new HashMap<>(),  new HashMap<>(), new ArrayList<>()), false);
 		Assert.assertTrue(verified);
 	}
 	
@@ -190,7 +193,7 @@ public class PingRequirementsVerifierTest {
 		try {
 			verifier.verify(new QoSVerificationParameters(provider, null, false, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>()), false);
 		} catch (final InvalidParameterException ex) { // catch exception to test the caching
-//			verify(intraPingMeasurementCache, times(1)).put(anyLong(), any());
+			verify(intraPingMeasurementCache, times(1)).put(any(), any());
 			//TODO bordi verify not working and have no idea why 
 			throw ex;
 		}
