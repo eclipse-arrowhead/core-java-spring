@@ -554,12 +554,14 @@ public class SystemRegistryDBService {
         logger.debug("removeSystemRegistryByNameAndAddressAndPort is started...");
         final System system = getSystemByNameAndAddressAndPort(systemName, address, port);
 
-        final Optional<SystemRegistry> optionalSystemRegistry = systemRegistryRepository.findBySystem(system);
-        final SystemRegistry systemRegistry = optionalSystemRegistry.orElseThrow(
-                () -> new InvalidParameterException(
-                        "System Registry entry for System with name '" + systemName + "', address '" + address + "' and port '" + port + "' does not exist"));
+        final List<SystemRegistry> entries = systemRegistryRepository.findBySystem(system);
+        if (entries.isEmpty()) {
+            throw new InvalidParameterException("System Registry entry for System with name '" + systemName +
+                                                        "', address '" + address +
+                                                        "' and port '" + port + "' does not exist");
+        }
 
-        systemRegistryRepository.delete(systemRegistry);
+        systemRegistryRepository.deleteInBatch(entries);
         systemRegistryRepository.flush();
     }
 
