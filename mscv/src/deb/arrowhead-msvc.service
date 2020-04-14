@@ -1,0 +1,15 @@
+[Unit]
+Description=msvc
+After=network.target mysql.target arrowhead-serviceregistry arrowhead-eventhandler
+
+[Service]
+WorkingDirectory=/etc/arrowhead/systems/msvc
+ExecStart=/usr/bin/java -Dlog4j.configurationFile=file:/etc/arrowhead/systems/msvc/log4j2.xml -jar /usr/share/arrowhead/msvc/msvc.jar
+ExecStartPost=/bin/bash -c 'sleep 10'
+TimeoutStopSec=5
+Type=simple
+User=arrowhead
+Group=arrowhead
+
+[Install]
+WantedBy=default.target

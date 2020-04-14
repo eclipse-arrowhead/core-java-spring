@@ -27,6 +27,7 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_SYSTEM_REGISTRY = "System Registry";
 	public static final String CORE_SYSTEM_DEVICE_REGISTRY = "Device Registry";
 	public static final String CORE_SYSTEM_ONBOARDING = "Onboarding Controller";
+	public static final String CORE_SYSTEM_MSCV = "Monitoring and Standard Compliance Verification";
 
 	public static final String CORE_SERVICE_AUTH_TOKEN_GENERATION = "token-generation";
 	public static final String CORE_SERVICE_AUTH_PUBLIC_KEY = "auth-public-key";
@@ -175,6 +176,9 @@ public class CommonConstants {
 	public static final String OP_QOS_MONITOR_PING_MEASUREMENT = "/ping/measurement";
 	public static final String OP_QOS_MONITOR_PING_MEASUREMENT_SUFFIX = "/{" + COMMON_FIELD_NAME_ID + "}";
 
+	public static final String MSCV_URI = "/mscv";
+	public static final String OP_MSCV_EXECUTE = "/execute";
+
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
 	public static final String SWAGGER_HTTP_200_MESSAGE = "Core service is available";
@@ -261,8 +265,9 @@ public class CommonConstants {
 	public static final String OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_SYSTEM_NAME = "system_name";
 	public static final String OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_ADDRESS = "address";
 	public static final String OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_PORT = "port";
-	
-	//=================================================================================================
+
+
+    //=================================================================================================
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------

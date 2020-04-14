@@ -35,6 +35,7 @@
 		<module>systemregistry</module>
 		<module>deviceregistry</module>
 		<module>onboarding</module>
+		<module>mscv</module>
 	    <module>qos-monitor</module>
 	    <module>deb-installer</module>
 	    <module>docker-all</module>
