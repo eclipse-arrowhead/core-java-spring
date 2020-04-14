@@ -502,6 +502,76 @@ public class QoSManagerImplTest {
 		Assert.assertEquals(0, verifiedList.size());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testVerifyInterCloudServicesResultListNull() {
+		qosManager.verifyInterCloudServices(new CloudResponseDTO(), null, new HashMap<>(), new HashMap<>());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testVerifyInterCloudServicesQoSRequirementsNull() {
+		qosManager.verifyInterCloudServices(new CloudResponseDTO(), List.of(), null, new HashMap<>());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testVerifyInterCloudServicesCommandsNull() {
+		qosManager.verifyInterCloudServices(new CloudResponseDTO(), List.of(), new HashMap<>(), null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void tesVerifyInterCloudServicesTrue() {
+		when(verifier.verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE))).thenReturn(true);
+		when(orchestratorDriver.getIntraPingMedianMeasurement(any(QoSMeasurementAttribute.class))).thenReturn(getQosIntraPingMeasurementForTest());
+		
+		final List<OrchestrationResultDTO> verifiedList = qosManager.verifyInterCloudServices(new CloudResponseDTO(), getOrList(1), new HashMap<>(), new HashMap<>());
+		verify(verifier, times(1)).verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE));
+		Assert.assertEquals(1, verifiedList.size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void tesVerifyInterCloudServicesFalse() {
+		when(verifier.verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE))).thenReturn(false);
+		when(orchestratorDriver.getIntraPingMedianMeasurement(any(QoSMeasurementAttribute.class))).thenReturn(getQosIntraPingMeasurementForTest());
+		
+		final List<OrchestrationResultDTO> verifiedList = qosManager.verifyInterCloudServices(new CloudResponseDTO(), getOrList(1), new HashMap<>(), new HashMap<>());
+		verify(verifier, times(1)).verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE));
+		Assert.assertEquals(0, verifiedList.size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testVerifyInterCloudServicesNoVerifiers() {
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		final List<QoSVerifier> verifiers	= (List) ReflectionTestUtils.getField(qosManager, "verifiers");
+		verifiers.clear();
+		when(verifier.verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE))).thenReturn(false);
+
+		final List<OrchestrationResultDTO> verifiedList = qosManager.verifyInterCloudServices(new CloudResponseDTO(), getOrList(1), new HashMap<>(), new HashMap<>());
+		verify(verifier, never()).verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE));
+		Assert.assertEquals(1, verifiedList.size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testVerifyInterCloudServicesFirstVerifierFalse() {
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		final List<QoSVerifier> verifiers	= (List) ReflectionTestUtils.getField(qosManager, "verifiers");
+		verifiers.clear();
+		verifiers.add(verifier);
+		verifiers.add(verifier2);
+		when(verifier.verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE))).thenReturn(false);
+		when(verifier2.verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE))).thenReturn(true);
+
+		final List<OrchestrationResultDTO> verifiedList = qosManager.verifyInterCloudServices(new CloudResponseDTO(), getOrList(1), new HashMap<>(), new HashMap<>());
+		verify(verifier, times(1)).verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE));
+		verify(verifier2, never()).verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE));
+		Assert.assertEquals(0, verifiedList.size());
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
