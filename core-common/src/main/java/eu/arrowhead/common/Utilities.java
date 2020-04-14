@@ -13,6 +13,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
@@ -31,6 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.ServiceConfigurationError;
 import java.util.regex.Pattern;
 
@@ -363,30 +365,40 @@ public class Utilities {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static X509Certificate getFirstCertFromKeyStore(final KeyStore keystore) {
+	public static X509Certificate getSystemCertFromKeyStore(final KeyStore keystore) {
 		Assert.notNull(keystore, "Key store is not defined.");
-		
-        try {
-            final Enumeration<String> enumeration = keystore.aliases();
-            final String alias = enumeration.nextElement();
-            return (X509Certificate) keystore.getCertificate(alias);
-        } catch (final KeyStoreException | NoSuchElementException ex) {
-        	logger.error("Getting the first cert from key store failed...", ex);
-            throw new ServiceConfigurationError("Getting the first cert from keystore failed...", ex);
-        }
-    }
-	
+
+		try {
+			// the first certificate is not always the end certificate. java does not
+			// guarantee the order
+			final Enumeration<String> enumeration = keystore.aliases();
+			while (enumeration.hasMoreElements()) {
+				final Certificate[] chain = keystore.getCertificateChain(enumeration.nextElement());
+
+				if (Objects.nonNull(chain) && chain.length >= 3) {
+					return (X509Certificate) chain[0];
+				}
+			}
+			throw new ServiceConfigurationError("Getting the first cert from keystore failed...");
+		} catch (final KeyStoreException | NoSuchElementException ex) {
+			logger.error("Getting the first cert from key store failed...", ex);
+			throw new ServiceConfigurationError("Getting the first cert from keystore failed...", ex);
+		}
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	public static X509Certificate getCloudCertFromKeyStore(final KeyStore keystore) {
 		Assert.notNull(keystore, "Key store is not defined.");
 
 		try {
+			// find cloud certificate with {cloudname}.{operator}.arrowhead.eu common name
 			final Enumeration<String> enumeration = keystore.aliases();
 			while (enumeration.hasMoreElements()) {
 				final String alias = enumeration.nextElement();
-				final String[] aliasParts = alias.split("\\.");
-				if (aliasParts.length == 4 && aliasParts[2].equals(AH_MASTER_NAME) && aliasParts[3].equals(AH_MASTER_SUFFIX)) {
-					return (X509Certificate) keystore.getCertificate(alias);
+				final X509Certificate certificate = (X509Certificate) keystore.getCertificate(alias);
+
+				if (isCloudCertificate(certificate)) {
+					return certificate;
 				}
 			}
 
@@ -405,11 +417,15 @@ public class Utilities {
 		Assert.notNull(keystore, "Key store is not defined.");
 
 		try {
-			final Enumeration<String> enumeration = keystore.aliases();
+			// find root certificate based on "arrowhead.eu" common name
+			Enumeration<String> enumeration = keystore.aliases();
 			while (enumeration.hasMoreElements()) {
 				final String alias = enumeration.nextElement();
-				final String[] aliasParts = alias.split("\\.");
-				if (aliasParts.length == 2 && aliasParts[0].equals(AH_MASTER_NAME) && aliasParts[1].equals(AH_MASTER_SUFFIX)) {
+				final X509Certificate certificate = (X509Certificate) keystore.getCertificate(alias);
+				final String commonName = getCertCNFromSubject(certificate.getSubjectDN().getName());
+				Assert.notNull(commonName, "Certificate without commonName is not allowed");
+				final String[] cnParts = commonName.split("\\.");
+				if (cnParts.length == 2 && cnParts[0].equals(AH_MASTER_NAME) && cnParts[1].equals(AH_MASTER_SUFFIX)) {
 					return (X509Certificate) keystore.getCertificate(alias);
 				}
 			}
@@ -453,20 +469,62 @@ public class Utilities {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static PrivateKey getPrivateKey(final KeyStore keystore, final String alias, final String keyPass) {
+	public static PrivateKey getCloudPrivateKey(final KeyStore keystore, final String keyPass) {
 		Assert.notNull(keystore, "Key store is not defined.");
 		Assert.notNull(keyPass, "Password is not defined.");
 
 		try {
-			PrivateKey privateKey = (PrivateKey) keystore.getKey(alias, keyPass.toCharArray());
-			if (privateKey != null) {
-				return privateKey;
-			} else {
-				throw new ServiceConfigurationError("Getting the private key failed, key store aliases do not identify a key.");
+			final Enumeration<String> storedAliases = keystore.aliases();
+			while (storedAliases.hasMoreElements()) {
+				final String alias = storedAliases.nextElement();
+				final X509Certificate certificate = (X509Certificate) keystore.getCertificate(alias);
+				if (isCloudCertificate(certificate)) {
+					final PrivateKey privateKey = (PrivateKey) keystore.getKey(alias, keyPass.toCharArray());
+					if (privateKey != null) {
+						logger.debug("Found cloud private key with alias: " + alias);
+						return privateKey;
+					}
+				}
 			}
 		} catch (final KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException ex) {
 			logger.error("Getting the private key from key store failed...", ex);
 			throw new ServiceConfigurationError("Getting the private key from key store failed...", ex);
+		}
+
+		logger.error("Getting the private key failed, key store aliases do not identify a key.");
+		throw new ServiceConfigurationError("Getting the private key failed, key store aliases do not identify a key.");
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static PrivateKey getCloudPrivateKey(final KeyStore keystore, final String cloudCommonName, final String keyPass) {
+		Assert.notNull(keystore, "Key store is not defined.");
+		Assert.notNull(cloudCommonName, "CloudCommonName is not defined.");
+		Assert.notNull(keyPass, "Password is not defined.");
+
+		try {
+			// Try to find private key with common name as the alias
+			PrivateKey privateKey = (PrivateKey) keystore.getKey(cloudCommonName, keyPass.toCharArray());
+			if (privateKey != null) {
+				return privateKey;
+			}
+			
+			// The cloud common name is not the alias in debian installation with own certificates
+			final String[] cnParts = cloudCommonName.split("\\.");
+			if (cnParts.length == 4 && cnParts[2].equals(AH_MASTER_NAME) && cnParts[3].equals(AH_MASTER_SUFFIX)) {
+				final String cloudName = cnParts[0];
+				privateKey = (PrivateKey) keystore.getKey(cloudName, keyPass.toCharArray());
+				if (privateKey != null) {
+					return privateKey;
+				}
+			}
+			
+			// Try to find the private key based on the common name
+			logger.warn("Cannot find cloud private key based on alias. Trying to find based on common name...");
+			return getCloudPrivateKey(keystore, keyPass);
+
+		} catch (final KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException ex) {
+			logger.error("Getting the cloud private key from key store failed...", ex);
+			throw new ServiceConfigurationError("Getting the cloud private key from key store failed...", ex);
 		}
 	}
 
@@ -520,6 +578,20 @@ public class Utilities {
 	    return clientFields.length >= 2 && cloudCN.equalsIgnoreCase(clientFields[1]);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	private static boolean isCloudCommonName(final String commonName) {
+		Assert.notNull(commonName, "Empty commonName is not allowed");
+		final String[] cnParts = commonName.split("\\.");
+		return (cnParts.length == 4 && cnParts[2].equals(AH_MASTER_NAME) && cnParts[3].equals(AH_MASTER_SUFFIX));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private static boolean isCloudCertificate(final X509Certificate certificate) {
+		final String commonName = getCertCNFromSubject(certificate.getSubjectDN().getName());
+		Assert.notNull(commonName, "Certificate without commonName is not allowed");
+		return isCloudCommonName(commonName);
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	public static String getDatetimePattern() { return dateTimePattern; }
 	
