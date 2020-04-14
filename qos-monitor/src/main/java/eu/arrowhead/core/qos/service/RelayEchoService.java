@@ -16,8 +16,6 @@ import eu.arrowhead.common.database.entity.QoSInterRelayMeasurement;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementListResponseDTO;
-import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
-import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.database.service.QoSDBService;

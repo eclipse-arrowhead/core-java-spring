@@ -111,27 +111,32 @@
   },
   {
     "name": "interping.time_to_repeat",
-    "type": "java.lang.String",
+    "type": "java.lang.Integer",
     "description": "A description for 'interping.time_to_repeat'"
   },
   {
     "name": "interping.packet_size",
-    "type": "java.lang.String",
+    "type": "java.lang.Integer",
     "description": "A description for 'interping.packet_size'"
   },
   {
     "name": "interping.available_from_success_percent",
-    "type": "java.lang.String",
+    "type": "java.lang.Integer",
     "description": "A description for 'interping.available_from_success_percent'"
   },
   {
     "name": "interping.logMeasurementsToDB",
-    "type": "java.lang.String",
+    "type": "java.lang.Boolean",
     "description": "A description for 'interping.logMeasurementsToDB'"
   },
   {
     "name": "interping.logMeasurementsDetailsToDB",
-    "type": "java.lang.String",
+    "type": "java.lang.Boolean",
     "description": "A description for 'interping.logMeasurementsDetailsToDB'"
+  },
+  {
+    "name": "relay_echo_ttl_interval_minutes",
+    "type": "java.lang.Integer",
+    "description": "A description for 'relay_echo_ttl_interval_minutes'"
   }
 ]}
