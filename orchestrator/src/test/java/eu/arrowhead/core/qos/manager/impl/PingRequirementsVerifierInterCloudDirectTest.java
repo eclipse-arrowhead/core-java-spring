@@ -22,8 +22,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterDirectMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterDirectPingMeasurementResponseDTO;
-import eu.arrowhead.common.dto.internal.QoSIntraMeasurementResponseDTO;
-import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
