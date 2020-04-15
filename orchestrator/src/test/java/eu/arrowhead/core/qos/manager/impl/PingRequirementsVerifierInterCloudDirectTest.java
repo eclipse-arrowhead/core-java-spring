@@ -191,7 +191,7 @@ public class PingRequirementsVerifierInterCloudDirectTest {
 		}
 	}
 	
-	///-------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testVerifyMaximumThresholdResponseRequirementNotPositive() { // measurement comes from qos monitor
 		final QoSInterDirectPingMeasurementResponseDTO response = new QoSInterDirectPingMeasurementResponseDTO();

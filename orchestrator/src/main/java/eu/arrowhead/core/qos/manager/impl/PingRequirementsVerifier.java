@@ -250,7 +250,7 @@ public class PingRequirementsVerifier implements QoSVerifier {
 			
 			if (hasRecentPacketLossThreshold(params.getQosRequirements())) {
 				final double threshold = getRecentPacketLossThreshold(params.getQosRequirements());
-				final double recentPacketLoss = 1 - relayMeasurement.getReceived() - params.getLocalReferencePingMeasurement().getReceived() - params.getProviderTargetCloudMeasurement().getReceived()
+				final double recentPacketLoss = 1 - (relayMeasurement.getReceived() + params.getLocalReferencePingMeasurement().getReceived() + params.getProviderTargetCloudMeasurement().getReceived())
 												/ (double) (relayMeasurement.getSent() + params.getLocalReferencePingMeasurement().getSent() + params.getProviderTargetCloudMeasurement().getSent());
 				if (recentPacketLoss > threshold) {
 					logger.debug("Provider '{}' (via Relay: {}) removed because of recent packet loss threshold", params.getProviderSystem().getSystemName(), relayAddressPort);
@@ -260,8 +260,8 @@ public class PingRequirementsVerifier implements QoSVerifier {
 			
 			if (hasPacketLossThreshold(params.getQosRequirements())) {
 				final double threshold = getPacketLossThreshold(params.getQosRequirements());
-				final double packetLoss = 1 - relayMeasurement.getReceivedAll() - params.getLocalReferencePingMeasurement().getReceivedAll() - params.getProviderTargetCloudMeasurement().getReceivedAll()
-										  / (double) (relayMeasurement.getSentAll() + params.getLocalReferencePingMeasurement().getSentAll()) - params.getProviderTargetCloudMeasurement().getSentAll();
+				final double packetLoss = 1 - (relayMeasurement.getReceivedAll() + params.getLocalReferencePingMeasurement().getReceivedAll() + params.getProviderTargetCloudMeasurement().getReceivedAll())
+										  / (double) (relayMeasurement.getSentAll() + params.getLocalReferencePingMeasurement().getSentAll() + params.getProviderTargetCloudMeasurement().getSentAll());
 				if (packetLoss > threshold) {
 					logger.debug("Provider '{}' (via Relay: {}) removed because of packet loss threshold", params.getProviderSystem().getSystemName(), relayAddressPort);
 					verified =  false;
