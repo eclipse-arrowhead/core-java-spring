@@ -1,9 +1,9 @@
 package eu.arrowhead.core.qos.thread;
 
 import java.security.PublicKey;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -54,7 +54,7 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 	private final long timeout; // in milliseconds
 	
 	private boolean receiver = true;
-	private final Map<Byte,long[]> testResults = new HashMap<>();
+	private final Map<Byte,long[]> testResults = new ConcurrentHashMap<>();
 	
 	private String queueId;
 	private MessageProducer sender;
@@ -185,6 +185,7 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 		
 		try {
 			relayClient.sendCloseControlMessage(relaySession, controlSender, queueId);
+			close();
 		} catch (final JMSException ex) {
 			logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
 			logger.debug("Stacktrace:", ex);

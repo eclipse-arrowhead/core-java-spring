@@ -2,7 +2,6 @@ package eu.arrowhead.core.qos.database.service;
 
 import java.time.Instant;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;

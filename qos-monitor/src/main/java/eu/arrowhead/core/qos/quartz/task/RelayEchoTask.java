@@ -118,27 +118,9 @@ public class RelayEchoTask implements Job {
 		
 		ZonedDateTime latestMeasurementTime = ZonedDateTime.now().plusHours(1);
 		for (final CloudWithRelaysAndPublicRelaysResponseDTO cloud : cloudsWithoutDirectAccess) {
-			if(cloud.getGatekeeperRelays() != null && !cloud.getGatewayRelays().isEmpty()) {
-				for (final RelayResponseDTO relay : cloud.getGatewayRelays()) {
-					final Optional<QoSInterRelayMeasurement> measurementOpt = qosDBService.getInterRelayMeasurement(cloud, relay, QoSMeasurementType.RELAY_ECHO);
-					if (measurementOpt.isEmpty() || measurementOpt.get().getStatus() == QoSMeasurementStatus.NEW) {
-						proposal.setTargetCloud(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloud));
-						proposal.setRelay(DTOConverter.convertRelayResponseDTOToRelayRequestDTO(relay));
-						return proposal;
-					} else if (measurementOpt.isPresent() && measurementOpt.get().getStatus() != QoSMeasurementStatus.PENDING) {
-						final QoSInterRelayMeasurement echoMeasurement = measurementOpt.get();
-						if (echoMeasurement.getLastMeasurementAt().isBefore(latestMeasurementTime)) {
-							proposal.setTargetCloud(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloud));
-							proposal.setRelay(DTOConverter.convertRelayResponseDTOToRelayRequestDTO(relay));
-							latestMeasurementTime = echoMeasurement.getLastMeasurementAt();
-						}
-					}
-				}
-			}else {
-				if (cloud.getPublicRelays() == null || cloud.getPublicRelays().isEmpty()) {
-					logger.info(CLOUD_HAS_NO_RELAY_WARNING_MESSAGE + cloud.getName() + "." + cloud.getOperator());
-				}else {
-					for (final RelayResponseDTO relay : cloud.getPublicRelays()) {
+			if (cloud.getGatekeeperRelays() != null && !cloud.getGatekeeperRelays().isEmpty()) {				
+				if(cloud.getGatewayRelays() != null && !cloud.getGatewayRelays().isEmpty()) {
+					for (final RelayResponseDTO relay : cloud.getGatewayRelays()) {
 						final Optional<QoSInterRelayMeasurement> measurementOpt = qosDBService.getInterRelayMeasurement(cloud, relay, QoSMeasurementType.RELAY_ECHO);
 						if (measurementOpt.isEmpty() || measurementOpt.get().getStatus() == QoSMeasurementStatus.NEW) {
 							proposal.setTargetCloud(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloud));
@@ -153,9 +135,28 @@ public class RelayEchoTask implements Job {
 							}
 						}
 					}
+				} else {
+					if (cloud.getPublicRelays() == null || cloud.getPublicRelays().isEmpty()) {
+						logger.info(CLOUD_HAS_NO_RELAY_WARNING_MESSAGE + cloud.getName() + "." + cloud.getOperator());
+					} else {
+						for (final RelayResponseDTO relay : cloud.getPublicRelays()) {
+							final Optional<QoSInterRelayMeasurement> measurementOpt = qosDBService.getInterRelayMeasurement(cloud, relay, QoSMeasurementType.RELAY_ECHO);
+							if (measurementOpt.isEmpty() || measurementOpt.get().getStatus() == QoSMeasurementStatus.NEW) {
+								proposal.setTargetCloud(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloud));
+								proposal.setRelay(DTOConverter.convertRelayResponseDTOToRelayRequestDTO(relay));
+								return proposal;
+							} else if (measurementOpt.isPresent() && measurementOpt.get().getStatus() != QoSMeasurementStatus.PENDING) {
+								final QoSInterRelayMeasurement echoMeasurement = measurementOpt.get();
+								if (echoMeasurement.getLastMeasurementAt().isBefore(latestMeasurementTime)) {
+									proposal.setTargetCloud(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloud));
+									proposal.setRelay(DTOConverter.convertRelayResponseDTOToRelayRequestDTO(relay));
+									latestMeasurementTime = echoMeasurement.getLastMeasurementAt();
+								}
+							}
+						}
+					}
 				}
 			}
-
 		}
 		
 		return proposal;
