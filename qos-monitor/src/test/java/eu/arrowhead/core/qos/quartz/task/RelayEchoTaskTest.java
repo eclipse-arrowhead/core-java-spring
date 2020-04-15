@@ -194,13 +194,42 @@ public class RelayEchoTaskTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testExecuteNeighborCloudHaveNoRelays() {
+	public void testExecuteNeighborCloudHaveNoGatekeeperRelays() {
 		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(false);
 		when(sslProperties.isSslEnabled()).thenReturn(Boolean.TRUE);
 		when(arrowheadContext.containsKey(CommonConstants.SERVER_PUBLIC_KEY)).thenReturn(true);
 		when(arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY)).thenReturn(publicKey);
 		final CloudWithRelaysAndPublicRelaysListResponseDTO allCloud = getOwnCloudInListDTO();
 		final CloudWithRelaysAndPublicRelaysResponseDTO neighborCloud = getNeighborCloud(0, 0, 0);
+		allCloud.getData().add(neighborCloud);
+		allCloud.setCount(allCloud.getData().size());
+		when(qosMonitorDriver.queryGatekeeperAllCloud()).thenReturn(allCloud);
+		when(qosMonitorDriver.queryGatekeeperCloudAccessTypes(any())).thenReturn(new CloudAccessListResponseDTO(List.of(new CloudAccessResponseDTO(neighborCloud.getName(),
+																																				   neighborCloud.getOperator(),
+																																				   false)), 1));
+		try {
+			relayEchoTask.execute(jobExecutionContext);
+		} catch (final JobExecutionException ex) {
+			fail();
+		}
+		
+		verify(logger, times(5)).debug(any(String.class));
+		verify(logger, times(1)).info(any(String.class));
+		verify(qosMonitorDriver, times(1)).queryGatekeeperAllCloud();
+		verify(qosMonitorDriver, times(1)).queryGatekeeperCloudAccessTypes(any());
+		verify(qosDBService, never()).getInterRelayMeasurement(any(), any(), any());
+		verify(qosMonitorDriver, never()).requestGatekeeperInitRelayTest(any());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testExecuteNeighborCloudHaveNoGatewayAndPublicRelays() {
+		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(false);
+		when(sslProperties.isSslEnabled()).thenReturn(Boolean.TRUE);
+		when(arrowheadContext.containsKey(CommonConstants.SERVER_PUBLIC_KEY)).thenReturn(true);
+		when(arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY)).thenReturn(publicKey);
+		final CloudWithRelaysAndPublicRelaysListResponseDTO allCloud = getOwnCloudInListDTO();
+		final CloudWithRelaysAndPublicRelaysResponseDTO neighborCloud = getNeighborCloud(1, 0, 0);
 		allCloud.getData().add(neighborCloud);
 		allCloud.setCount(allCloud.getData().size());
 		when(qosMonitorDriver.queryGatekeeperAllCloud()).thenReturn(allCloud);
