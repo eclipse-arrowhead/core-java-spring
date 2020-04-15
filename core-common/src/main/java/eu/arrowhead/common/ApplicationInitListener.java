@@ -169,7 +169,7 @@ public abstract class ApplicationInitListener {
 	//-------------------------------------------------------------------------------------------------
 	private void checkServerCertificate(final KeyStore keyStore, final ApplicationContext appContext) {
 		logger.debug("checkServerCertificate started...");
-		final X509Certificate serverCertificate = Utilities.getFirstCertFromKeyStore(keyStore);
+		final X509Certificate serverCertificate = Utilities.getSystemCertFromKeyStore(keyStore);
 		final String serverCN = Utilities.getCertCNFromSubject(serverCertificate.getSubjectDN().getName());
 		if (!Utilities.isKeyStoreCNArrowheadValid(serverCN)) {
 			logger.info("Server CN ({}) is not compliant with the Arrowhead certificate structure, since it does not have 5 parts, or does not end with \"arrowhead.eu\".", serverCN);
@@ -187,12 +187,15 @@ public abstract class ApplicationInitListener {
 		logger.debug("obtainKeys started...");
 		@SuppressWarnings("unchecked")
 		final Map<String,Object> context = appContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
-		
-		publicKey = Utilities.getFirstCertFromKeyStore(keyStore).getPublicKey();
+
+		final X509Certificate serverCertificate = Utilities.getSystemCertFromKeyStore(keyStore);
+		publicKey = serverCertificate.getPublicKey();
 		context.put(CommonConstants.SERVER_PUBLIC_KEY, publicKey);
-		
+
 		final PrivateKey privateKey = Utilities.getPrivateKey(keyStore, sslProperties.getKeyPassword());
 		context.put(CommonConstants.SERVER_PRIVATE_KEY, privateKey);
+
+		context.put(CommonConstants.SERVER_CERTIFICATE, serverCertificate);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -219,7 +222,7 @@ public abstract class ApplicationInitListener {
 			
 			final ServiceQueryFormDTO queryForm = new ServiceQueryFormDTO.Builder(coreService.getServiceDefinition()).build();
 			final ResponseEntity<ServiceQueryResultDTO> queryResponse = httpService.sendRequest(queryUri, HttpMethod.POST, ServiceQueryResultDTO.class, queryForm);
-			for (final ServiceRegistryResponseDTO result : queryResponse.getBody().getServiceQueryData()) { // stucked entries
+			for (final ServiceRegistryResponseDTO result : queryResponse.getBody().getServiceQueryData()) { // old, possibly obsolete entries
 				final UriComponents unregisterUri = createUnregisterUri(scheme, coreService, result.getProvider().getAddress(), result.getProvider().getPort());
 				httpService.sendRequest(unregisterUri, HttpMethod.DELETE, Void.class);
 			}

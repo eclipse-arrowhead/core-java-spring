@@ -18,6 +18,7 @@ import javax.persistence.UniqueConstraint;
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = { "subscriptionId", "systemId" }))
 public class SubscriptionPublisherConnection {
+	
 	//=================================================================================================
 	// members
 	
@@ -33,7 +34,7 @@ public class SubscriptionPublisherConnection {
 	@JoinColumn(name = "systemId", referencedColumnName = "id", nullable = false)
 	private System system;
 	
-	@Column(nullable = false )
+	@Column(nullable = false)
 	private boolean authorized = false;
 	
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")

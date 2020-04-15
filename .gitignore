@@ -31,6 +31,7 @@ wrapper
 /mvnw.cmd
 /orchestrator/target
 /serviceregistry/target
+/certificate-authority/target
 /.settings
 /authorization/.settings
 /core-common/.settings
@@ -59,3 +60,5 @@ authorization.log
 /deb-installer/.classpath
 /deb-installer/.project
 /deb-installer/.settings
+/qos-monitor/.settings
+/qos-monitor/target
