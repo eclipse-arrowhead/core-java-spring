@@ -231,7 +231,7 @@ public class SenderSideRelayTestThread extends Thread implements MessageListener
 					} else if (result.byteValue() == b) { // means the correct answer is arrived 
 						break;
 					} else if (result.byteValue() < 0) {
-						// means an awake message is arrived, which is not expected in this point => put back just to finish the thread
+						// means an awake message is arrived, which is not expected at this point => put back just to finish the thread
 						logger.debug("Unexpected awake message arrived while waiting for message " + b);
 						blockingQueue.put(AWAKE_MESSAGE_ID);
 						break;
