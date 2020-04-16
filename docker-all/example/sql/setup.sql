@@ -537,4 +537,13 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'gateway'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_inter_cloud` TO 'gateway'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'gateway'@'%';
 
+-- Certificate Authority
+DROP USER IF EXISTS 'certificate_authority'@'localhost';
+CREATE USER IF NOT EXISTS 'certificate_authority'@'localhost' IDENTIFIED BY 'FsdG6Kgf9QpPfv2';
+GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'certificate_authority'@'localhost';
+
+DROP USER IF EXISTS 'certificate_authority'@'%';
+CREATE USER IF NOT EXISTS 'certificate_authority'@'%' IDENTIFIED BY 'FsdG6Kgf9QpPfv2';
+GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'certificate_authority'@'%';
+
 FLUSH PRIVILEGES;

@@ -31,7 +31,7 @@ public enum CoreSystem {
 	QOS_MONITOR(Defaults.DEFAULT_QOS_MONITOR_PORT, List.of(CoreSystemService.QOS_MONITOR_INTRA_PING_MEASUREMENT_SERVICE, CoreSystemService.QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_SERVICE,
 														   CoreSystemService.QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_SERVICE, CoreSystemService.QOS_MONITOR_PUBLIC_KEY_SERVICE,
 														   CoreSystemService.QOS_MONITOR_JOIN_RELAY_TEST_SERVICE, CoreSystemService.QOS_MONITOR_INIT_RELAY_TEST_SERVICE)),
-	CERTIFICATE_AUTHORITY(Defaults.DEFAULT_CERTIFICATE_AUTHORITY_PORT, List.of()); // TODO: add services		
+	CERTIFICATE_AUTHORITY(Defaults.DEFAULT_CERTIFICATE_AUTHORITY_PORT, List.of(CoreSystemService.CERTIFICATE_AUTHORITY_SIGN_SERVICE));
 	
 	//=================================================================================================
 	// members
