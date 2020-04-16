@@ -14,7 +14,6 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
-@Component
 public class QuartzUtilities {
 
     private static final Logger LOGGER = LogManager.getLogger();

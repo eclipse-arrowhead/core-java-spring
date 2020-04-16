@@ -2,8 +2,11 @@ package eu.arrowhead.core.mscv.quartz;
 
 import eu.arrowhead.common.database.entity.mscv.Target;
 import eu.arrowhead.common.database.entity.mscv.VerificationEntryList;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
+import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
@@ -17,6 +20,7 @@ import static eu.arrowhead.common.CoreCommonConstants.$VERIFICATION_INTERVAL_WD;
 @Component
 public class VerificationJobFactory {
 
+    private final Logger logger = LogManager.getLogger();
     private final Scheduler scheduler;
     private final Integer scheduleInterval;
 
@@ -41,7 +45,20 @@ public class VerificationJobFactory {
                                               .withIdentity(identity)
                                               .withSchedule(SimpleScheduleBuilder.repeatSecondlyForever(scheduleInterval))
                                               .build();
-        scheduler.scheduleJob(trigger);
+        logger.info("Scheduling a new job with entryList '{}' for target '{}' with identity '{}'",
+                    entryList, target, identity);
+        scheduler.scheduleJob(jobDetail, trigger);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public void removeVerificationJob(final VerificationEntryList entryList, final Target target) {
+        final String identity = createIdentity(entryList, target);
+        final JobKey jobKey = JobKey.jobKey(identity);
+        try {
+            scheduler.deleteJob(jobKey);
+        } catch (SchedulerException e) {
+            logger.warn("Unable to delete Job {}: {}", jobKey, e.getMessage());
+        }
     }
 
     //-------------------------------------------------------------------------------------------------

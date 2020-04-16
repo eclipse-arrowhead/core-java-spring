@@ -21,16 +21,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.util.List;
 
 @Service
-public class ServiceRegistryDriver {
+public class ServiceRegistryDriver extends AbstractDriver {
 
     private final Logger logger = LogManager.getLogger(ServiceRegistryDriver.class);
-    private final DriverUtilities driverUtilities;
-    private final HttpService httpService;
 
     @Autowired
     public ServiceRegistryDriver(final DriverUtilities driverUtilities, final HttpService httpService) {
-        this.driverUtilities = driverUtilities;
-        this.httpService = httpService;
+        super(driverUtilities, httpService);
     }
 
     public UriComponents findCoreSystemService(final CoreSystemService service) throws DriverUtilities.DriverException {

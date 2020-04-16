@@ -3,7 +3,7 @@ package eu.arrowhead.core.mscv.controller;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
-import eu.arrowhead.core.mscv.database.service.MscvExecutionService;
+import eu.arrowhead.core.mscv.service.MscvExecutionService;
 import eu.arrowhead.common.database.view.mscv.VerificationExecutionView;
 import eu.arrowhead.core.mscv.http.ExecutionRequest;
 import eu.arrowhead.core.mscv.http.ExecutionResponse;

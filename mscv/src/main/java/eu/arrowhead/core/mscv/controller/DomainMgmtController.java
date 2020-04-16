@@ -5,7 +5,7 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.dto.shared.mscv.DomainDto;
-import eu.arrowhead.core.mscv.database.service.MscvCrudService;
+import eu.arrowhead.core.mscv.service.MscvCrudService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -27,12 +27,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import static eu.arrowhead.core.mscv.Constants.PARAMETER_ADDRESS_PATH;
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_NAME;
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_NAME_PATH;
-import static eu.arrowhead.core.mscv.Constants.PARAMETER_PORT_PATH;
-import static eu.arrowhead.core.mscv.Constants.PATH_ADDRESS;
-import static eu.arrowhead.core.mscv.Constants.PATH_PORT;
 
 @Api(tags = {CoreCommonConstants.SWAGGER_TAG_ALL})
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS,

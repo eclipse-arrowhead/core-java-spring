@@ -2,7 +2,7 @@ package eu.arrowhead.core.mscv;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.database.service.CommonDBService;
-import eu.arrowhead.core.mscv.database.service.MscvCrudService;
+import eu.arrowhead.core.mscv.service.MscvCrudService;
 import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;

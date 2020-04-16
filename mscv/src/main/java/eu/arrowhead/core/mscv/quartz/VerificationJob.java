@@ -1,7 +1,6 @@
 package eu.arrowhead.core.mscv.quartz;
 
-import eu.arrowhead.common.database.entity.mscv.VerificationExecution;
-import eu.arrowhead.core.mscv.database.service.MscvExecutionService;
+import eu.arrowhead.core.mscv.service.MscvExecutionService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.quartz.DisallowConcurrentExecution;

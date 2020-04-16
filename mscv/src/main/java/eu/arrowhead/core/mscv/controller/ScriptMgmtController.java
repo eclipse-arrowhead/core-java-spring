@@ -7,7 +7,7 @@ import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.dto.shared.mscv.Layer;
 import eu.arrowhead.common.dto.shared.mscv.OS;
 import eu.arrowhead.common.dto.shared.mscv.ScriptDto;
-import eu.arrowhead.core.mscv.database.service.MscvCrudService;
+import eu.arrowhead.core.mscv.service.MscvCrudService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;

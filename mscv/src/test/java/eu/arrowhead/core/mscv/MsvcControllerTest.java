@@ -11,7 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.database.service.CommonDBService;
-import eu.arrowhead.core.mscv.database.service.MscvCrudService;
+import eu.arrowhead.core.mscv.service.MscvCrudService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

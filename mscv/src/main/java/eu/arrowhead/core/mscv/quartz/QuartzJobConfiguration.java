@@ -11,24 +11,29 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class QuartzConfiguration {
+public class QuartzJobConfiguration {
 
     private final int schedulerInterval;
 
-    public QuartzConfiguration(@Value(CoreCommonConstants.$URI_CRAWLER_INTERVAL_WD) final int schedulerInterval) {
+    public QuartzJobConfiguration(@Value(CoreCommonConstants.$URI_CRAWLER_INTERVAL_WD) final int schedulerInterval) {
         this.schedulerInterval = schedulerInterval;
     }
 
     //-------------------------------------------------------------------------------------------------
     @Bean
     public Trigger uriCrawlerTaskTrigger() {
-        final JobDetail jobDetail = JobBuilder.newJob(UriCrawlerTask.class)
-                                              .withIdentity(UriCrawlerTask.class.getSimpleName())
-                                              .build();
         return TriggerBuilder.newTrigger()
-                             .forJob(jobDetail)
+                             .forJob(uriCrawlerTaskJob())
                              .withIdentity(UriCrawlerTask.class.getSimpleName())
                              .withSchedule(SimpleScheduleBuilder.repeatSecondlyForever(schedulerInterval))
                              .build();
+    }
+
+    @Bean
+    public JobDetail uriCrawlerTaskJob() {
+        return JobBuilder.newJob(UriCrawlerTask.class)
+                         .withIdentity(UriCrawlerTask.class.getSimpleName())
+                         .storeDurably()
+                         .build();
     }
 }

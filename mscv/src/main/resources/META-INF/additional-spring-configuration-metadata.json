@@ -36,19 +36,28 @@
       "description": "Service Registry port."
     },
     {
-      "name": "mscv.defaultList",
+      "name": "mscv.defaults.listName",
       "type": "java.lang.String",
       "description": "The name of the default verification list, which will be executed unless otherwise defined."
     },
     {
-      "name": "mscv.defaultMipWeight",
+      "name": "mscv.defaults.mipWeight",
       "type": "java.lang.Short",
       "description": "The weight of all MIPs in the compliance algorithm."
     },
     {
-      "name": "mscv.defaultVerificationInterval",
+      "name": "mscv.defaults.verificationInterval",
       "type": "java.lang.Integer",
       "description": "The verification interval of a specific List in minutes."
+    },{
+      "name": "mscv.defaults.os",
+      "type": "eu.arrowhead.common.dto.shared.mscv.OS",
+      "description": "Assumed Operating System."
+    },
+    {
+      "name": "mscv.defaults.sshPort",
+      "type": "java.lang.Integer",
+      "description": "Default SSH port."
     }
   ]
 }

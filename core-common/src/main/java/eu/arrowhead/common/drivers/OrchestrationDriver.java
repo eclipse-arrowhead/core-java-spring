@@ -13,18 +13,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponents;
 
 @Service
-public class OrchestrationDriver {
+public class OrchestrationDriver extends AbstractDriver {
 
     //=================================================================================================
     // members
     private final Logger logger = LogManager.getLogger(OrchestrationDriver.class);
-    private final DriverUtilities driverUtilities;
-    private final HttpService httpService;
 
     @Autowired
     public OrchestrationDriver(final DriverUtilities driverUtilities, final HttpService httpService) {
-        this.driverUtilities = driverUtilities;
-        this.httpService = httpService;
+        super(driverUtilities, httpService);
     }
 
     public UriComponents findCoreSystemService(final CoreSystemService service) throws DriverUtilities.DriverException {

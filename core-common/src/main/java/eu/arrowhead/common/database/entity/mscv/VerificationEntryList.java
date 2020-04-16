@@ -27,6 +27,8 @@ public class VerificationEntryList {
     @Column
     private Long verificationInterval;
 
+    // TODO add layer here instead of having it in ???
+
     @OneToMany(mappedBy = "verificationList", fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<VerificationEntry> entries = new HashSet<>();
 

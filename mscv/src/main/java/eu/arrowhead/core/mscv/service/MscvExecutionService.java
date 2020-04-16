@@ -1,6 +1,7 @@
-package eu.arrowhead.core.mscv.database.service;
+package eu.arrowhead.core.mscv.service;
 
 import eu.arrowhead.common.database.entity.mscv.SshTarget;
+import eu.arrowhead.common.database.entity.mscv.Target;
 import eu.arrowhead.common.database.entity.mscv.VerificationEntryList;
 import eu.arrowhead.common.database.entity.mscv.VerificationExecution;
 import eu.arrowhead.common.database.repository.mscv.ScriptRepository;
@@ -10,6 +11,7 @@ import eu.arrowhead.common.database.repository.mscv.VerificationExecutionReposit
 import eu.arrowhead.common.database.view.mscv.VerificationExecutionView;
 import eu.arrowhead.common.database.view.mscv.VerificationListView;
 import eu.arrowhead.common.dto.shared.mscv.VerificationRunResult;
+import eu.arrowhead.core.mscv.MscvDefaults;
 import eu.arrowhead.core.mscv.MscvDtoConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,21 +32,23 @@ import static eu.arrowhead.core.mscv.MscvUtilities.notFoundException;
 @Service
 public class MscvExecutionService {
 
-
     private final Logger logger = LogManager.getLogger();
-    private final VerificationEntryListRepository verificationListRepo;
-    private final ScriptRepository scriptRepo;
-    private final VerificationExecutionRepository executionRepo;
+    private final MscvDefaults defaults;
     private final VerificationExecutionDetailRepository executionDetailRepos;
+    private final VerificationEntryListRepository verificationListRepo;
+    private final VerificationExecutionRepository executionRepo;
     private final MscvTargetService targetService;
+    private final ScriptRepository scriptRepo;
 
     @Autowired
-    public MscvExecutionService(final VerificationEntryListRepository verificationListRepo,
+    public MscvExecutionService(final MscvDefaults defaults,
+                                final VerificationEntryListRepository verificationListRepo,
                                 final ScriptRepository scriptRepo,
                                 final VerificationExecutionRepository executionRepo,
                                 final VerificationExecutionDetailRepository executionDetailRepos,
                                 final MscvTargetService targetService) {
         super();
+        this.defaults = defaults;
         this.verificationListRepo = verificationListRepo;
         this.scriptRepo = scriptRepo;
         this.executionRepo = executionRepo;
@@ -54,6 +58,7 @@ public class MscvExecutionService {
 
     @Transactional(rollbackOn = Exception.class)
     public VerificationExecutionView executeByIdAndTarget(final Long entryListId, final Long targetId) {
+        logger.debug("executeByIdAndTarget({}, {}) started", entryListId, targetId);
         Assert.notNull(entryListId, LIST_NOT_NULL);
         Assert.notNull(targetId, TARGET_NOT_NULL);
         final Optional<VerificationEntryList> optionalList = verificationListRepo.findById(entryListId);
@@ -68,6 +73,7 @@ public class MscvExecutionService {
 
     @Transactional(rollbackOn = Exception.class)
     public VerificationListView getListById(final Long id) {
+        logger.debug("getListById({}) started", id);
         Assert.notNull(id, ID_NOT_NULL);
         final Optional<VerificationEntryList> optional = verificationListRepo.findById(id);
         return MscvDtoConverter.convert(optional.orElseThrow(notFoundException("id")));
@@ -75,9 +81,17 @@ public class MscvExecutionService {
 
     @Transactional(rollbackOn = Exception.class)
     public VerificationListView getListByName(final String name) {
+        logger.debug("getListByName({}) started", name);
         Assert.notNull(name, NAME_NOT_NULL);
         final Optional<VerificationEntryList> optional = verificationListRepo.findOneByName(name);
         return MscvDtoConverter.convert(optional.orElseThrow(notFoundException("name")));
     }
 
+    public VerificationEntryList findSuitableList(final Target target) throws MscvException {
+        logger.debug("findSuitableList({}) started", target);
+
+        // no strategy exists yet. using default list
+        Optional<VerificationEntryList> defaultList = verificationListRepo.findOneByName(defaults.getDefaultList());
+        return defaultList.orElseThrow(() -> new MscvException("No suitable list found"));
+    }
 }

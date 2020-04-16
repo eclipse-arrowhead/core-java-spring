@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.security.PublicKey;
 import java.util.Base64;
@@ -89,6 +90,17 @@ public class DriverUtilities {
         return pingService(echoUri);
     }
 
+    public UriComponents findUri(final CoreSystemService service) throws DriverException {
+        try {
+            return findUriByOrchestrator(service);
+        } catch (final Exception e) {
+            // silently ignored
+        }
+
+        return findUriByServiceRegistry(service);
+    }
+
+    //-------------------------------------------------------------------------------------------------
     public UriComponents findUriByContext(final CoreSystemService service) throws DriverException {
         logger.debug("Searching for '{}' uri in context ...", service.getServiceDefinition());
         final String key = getCoreSystemServiceKey(service);
@@ -156,10 +168,7 @@ public class DriverUtilities {
 
         logger.debug("findUriByOrchestrator started...");
         final UriComponents queryUri = getOrchestrationQueryUri();
-        final SystemRequestDTO requester = new SystemRequestDTO();
-        requester.setAddress(coreSystemProps.getCoreSystemDomainName());
-        requester.setPort(coreSystemProps.getCoreSystemDomainPort());
-        requester.setSystemName(coreSystemProps.getCoreSystemName());
+        final SystemRequestDTO requester = getCoreSystemRequestDTO();
 
         final ServiceQueryFormDTO serviceQueryForm = new ServiceQueryFormDTO.Builder(service.getServiceDefinition())
                 .interfaces(getInterface())

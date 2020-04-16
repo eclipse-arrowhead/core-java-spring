@@ -22,37 +22,34 @@ import static eu.arrowhead.common.CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_R
 import static eu.arrowhead.common.CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_SYSTEM_NAME;
 
 @Service
-public class EventDriver {
+public class EventDriver extends AbstractDriver {
 
     //=================================================================================================
     // members
     private final ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     private final Logger logger = LogManager.getLogger(EventDriver.class);
-    private final DriverUtilities driverUtilities;
-    private final HttpService httpService;
 
     @Autowired
     public EventDriver(final DriverUtilities driverUtilities, final HttpService httpService) {
-        this.driverUtilities = driverUtilities;
-        this.httpService = httpService;
+        super(driverUtilities, httpService);
     }
 
     public void publish(final EventPublishRequestDTO request) throws DriverUtilities.DriverException {
         logger.traceEntry("publish: {}", request);
-        final UriComponents uri = driverUtilities.findUriByOrchestrator(CoreSystemService.EVENT_PUBLISH_SERVICE);
+        final UriComponents uri = driverUtilities.findUri(CoreSystemService.EVENT_PUBLISH_SERVICE);
         httpService.sendRequest(uri, HttpMethod.POST, Void.class, request);
     }
 
     public void subscribe(final SubscriptionRequestDTO request) throws DriverUtilities.DriverException {
         logger.traceEntry("subscribe: {}", request);
-        final UriComponents uri = driverUtilities.findUriByOrchestrator(CoreSystemService.EVENT_SUBSCRIBE_SERVICE);
+        final UriComponents uri = driverUtilities.findUri(CoreSystemService.EVENT_SUBSCRIBE_SERVICE);
         httpService.sendRequest(uri, HttpMethod.POST, Void.class, request);
     }
 
     public void unsubscribe(final String eventType, final String subscriberName,
                             final String subscriberAddress, final int subscriberPort) throws DriverUtilities.DriverException {
         logger.traceEntry("unsubscribe: ({},{},{},{})", eventType, subscriberName, subscriberAddress, subscriberPort);
-        final UriComponents uri = driverUtilities.findUriByOrchestrator(CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE);
+        final UriComponents uri = driverUtilities.findUri(CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE);
         final UriComponents uriParams = UriComponentsBuilder.newInstance()
                                                             .uriComponents(uri)
                                                             .queryParam(OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_EVENT_TYPE, eventType)
@@ -65,7 +62,7 @@ public class EventDriver {
 
     public void publishSubscriberAuthorizationUpdate(final EventPublishRequestDTO request) throws DriverUtilities.DriverException {
         logger.traceEntry("publishSubscriberAuthorizationUpdate: {}", request);
-        final UriComponents uri = driverUtilities.findUriByOrchestrator(CoreSystemService.EVENT_PUBLISH_AUTH_UPDATE_SERVICE);
+        final UriComponents uri = driverUtilities.findUri(CoreSystemService.EVENT_PUBLISH_AUTH_UPDATE_SERVICE);
         httpService.sendRequest(uri, HttpMethod.POST, Void.class, request);
     }
 
