@@ -24,6 +24,9 @@ public class VerificationEntryList {
     @Column
     private String description;
 
+    @Column
+    private Long verificationInterval;
+
     @OneToMany(mappedBy = "verificationList", fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<VerificationEntry> entries = new HashSet<>();
 
@@ -31,17 +34,19 @@ public class VerificationEntryList {
         super();
     }
 
-    public VerificationEntryList(final String name, final String description, final Set<VerificationEntry> entries) {
+    public VerificationEntryList(final String name, final String description, final Long verificationInterval, final Set<VerificationEntry> entries) {
         this.name = name;
         this.description = description;
+        this.verificationInterval = verificationInterval;
         this.entries = entries;
     }
 
     public VerificationEntryList(final Long id, final String name, final String description,
-                                 final Set<VerificationEntry> entries) {
+                                 final Long verificationInterval, final Set<VerificationEntry> entries) {
         this.id = id;
         this.name = name;
         this.description = description;
+        this.verificationInterval = verificationInterval;
         this.entries = entries;
     }
 
@@ -67,6 +72,14 @@ public class VerificationEntryList {
 
     public void setDescription(final String description) {
         this.description = description;
+    }
+
+    public Long getVerificationInterval() {
+        return verificationInterval;
+    }
+
+    public void setVerificationInterval(final Long verificationInterval) {
+        this.verificationInterval = verificationInterval;
     }
 
     public Set<VerificationEntry> getEntries() {
@@ -98,6 +111,7 @@ public class VerificationEntryList {
           .add("name='" + name + "'")
           .add("description='" + description + "'");
         if (Objects.nonNull(entries)) { sj.add("entries=" + entries.size()); }
+        sj.add("verificationInterval='" + verificationInterval + "'");
         return sj.toString();
     }
 }

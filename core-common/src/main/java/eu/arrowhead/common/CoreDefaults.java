@@ -58,9 +58,10 @@ public class CoreDefaults {
 	public static final int DEFAULT_QOS_TEMPORARY_LOCK_DURATION = 60; // in seconds
 	public static final int DEFAULT_QOS_MAX_RESERVATION_DURATION = 3600; // in seconds
 	public static final int DEFAULT_QOS_PING_MEASUREMENT_CACHE_THRESHOLD = 600; // in seconds
-	public static final boolean DEFAULT_QOS_NOT_MEASURED_SYSTEM_VERIFY_RESULT = true; 
-	
-	//=================================================================================================
+	public static final boolean DEFAULT_QOS_NOT_MEASURED_SYSTEM_VERIFY_RESULT = true;
+    public static final int DEFAULT_VERIFICATION_INTERVAL = 3600; // in seconds
+
+    //=================================================================================================
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------

@@ -34,6 +34,11 @@ public class VerificationListViewImpl implements VerificationListView {
     }
 
     @Override
+    public Long getVerificationInterval() {
+        return target.getVerificationInterval();
+    }
+
+    @Override
     public Set<VerificationEntryView> getEntries() {
         final var set = new HashSet<VerificationEntryView>();
         for (VerificationEntry entry : target.getEntries()) {

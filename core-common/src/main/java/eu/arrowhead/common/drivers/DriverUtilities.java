@@ -298,16 +298,8 @@ public class DriverUtilities {
 
     public static class DriverException extends UnavailableServerException {
 
-        protected DriverException(final String message) {
-            super(message);
-        }
-
         protected DriverException(final String message, final HttpStatus httpStatus) {
             super(message, httpStatus.value());
-        }
-
-        protected DriverException(final String message, final Throwable cause) {
-            super(message, cause);
         }
 
         protected DriverException(final String msg, final int errorCode, final String origin, final Throwable cause) {

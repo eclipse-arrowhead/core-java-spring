@@ -22,8 +22,9 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 	//=================================================================================================
 	// members
 	
-	private static final CoreSystem[] allowedCoreSystemsForQuery = { CoreSystem.ORCHESTRATOR, CoreSystem.GATEKEEPER, CoreSystem.CERTIFICATE_AUTHORITY, CoreSystem.EVENT_HANDLER,
-																	 CoreSystem.AUTHORIZATION, CoreSystem.ONBOARDING_CONTROLLER, CoreSystem.DEVICE_REGISTRY, CoreSystem.SYSTEM_REGISTRY };
+	private static final CoreSystem[] allowedCoreSystemsForQuery = { CoreSystem.ORCHESTRATOR, CoreSystem.GATEKEEPER, CoreSystem.CERTIFICATE_AUTHORITY,
+			CoreSystem.EVENT_HANDLER, CoreSystem.MSCV, CoreSystem.AUTHORIZATION, CoreSystem.ONBOARDING_CONTROLLER, CoreSystem.DEVICE_REGISTRY,
+			CoreSystem.SYSTEM_REGISTRY };
 	private static final CoreSystem[] allowedCoreSystemsForQueryBySystemId = { CoreSystem.ORCHESTRATOR };
 	private static final CoreSystem[] allowedCoreSystemsForQueryBySystemDTO = { CoreSystem.ORCHESTRATOR };
 	private static final CoreSystem[] allowedCoreSystemsForQueryAll = { CoreSystem.QOS_MONITOR };
@@ -50,11 +51,11 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI)) {
 			if (isClientACoreSystem(clientCN, cloudCN)) {
 				// Only dedicated core systems can use this service without limitation but every core system can query info about its own services
-				checkIfClientAnAllowedCoreSystemOrQueryingOwnSystems(clientCN, cloudCN, requestJSON, requestTarget); 
+				checkIfClientAnAllowedCoreSystemOrQueryingOwnSystems(clientCN, cloudCN, requestJSON, requestTarget);
 			} else {
 				// Public core system services are allowed to query directly by the local systems
 				checkIfRequestedServiceIsAPublicCoreSystemService(requestJSON);
-			}			
+			}
 		} else if (requestTarget.endsWith(CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI)) {
 			// Only dedicated core systems can use this service
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForQueryBySystemId, requestTarget);

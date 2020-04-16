@@ -78,6 +78,9 @@ public class CoreCommonConstants {
 	public static final String AUTH_TOKEN_TTL_IN_MINUTES = "auth_token_ttl_in_minutes";
 	public static final String $AUTH_TOKEN_TTL_IN_MINUTES_WD = "${" + AUTH_TOKEN_TTL_IN_MINUTES + ":" + CoreDefaults.DEFAULT_AUTH_TOKEN_TTL_IN_MINUTES + "}";
 
+	public static final String PARAM_VERIFICATION_INTERVAL = "mscv.defaultVerificationInterval"; // in seconds
+	public static final String $VERIFICATION_INTERVAL_WD = "${" + PARAM_VERIFICATION_INTERVAL + ":" + CoreDefaults.DEFAULT_VERIFICATION_INTERVAL + "}";
+
 	public static final String REQUEST_PARAM_PAGE = "page";
 	public static final String REQUEST_PARAM_ITEM_PER_PAGE = "item_per_page";
 	public static final String REQUEST_PARAM_DIRECTION = "direction";

@@ -45,5 +45,6 @@
 		<Logger name="eu.arrowhead.core" level="${ARROWHEAD_CONSOLE_FILE_LEVEL}" additivity="true"/>
 		<Logger name="org.springframework.web" level="${CONSOLE_FILE_LEVEL}" additivity="true"/>
 		<Logger name="org.springframework.security" level="${CONSOLE_FILE_LEVEL}" additivity="true"/>
+		<Logger name="org.quartz" level="${CONSOLE_FILE_LEVEL}" additivity="true"/>
     </Loggers>
 </Configuration>

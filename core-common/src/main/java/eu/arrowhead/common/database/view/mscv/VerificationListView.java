@@ -15,6 +15,9 @@ public interface VerificationListView {
     @Value("#{target.description}")
     String getDescription();
 
+    @Value("#{target.verificationInterval}")
+    Long getVerificationInterval();
+
     @Value("#{target.entries}")
     Set<VerificationEntryView> getEntries();
 }

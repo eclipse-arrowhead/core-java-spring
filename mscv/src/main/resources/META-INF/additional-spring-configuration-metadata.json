@@ -44,6 +44,11 @@
       "name": "mscv.defaultMipWeight",
       "type": "java.lang.Short",
       "description": "The weight of all MIPs in the compliance algorithm."
+    },
+    {
+      "name": "mscv.defaultVerificationInterval",
+      "type": "java.lang.Integer",
+      "description": "The verification interval of a specific List in minutes."
     }
   ]
 }
