@@ -29,6 +29,7 @@
 	    <module>certificate-authority</module>
 	    <module>orchestrator</module>
 	    <module>eventhandler</module>
+	    <module>relay-library</module>
 	    <module>gatekeeper</module>
 	    <module>gateway</module>
 	    <module>choreographer</module>
