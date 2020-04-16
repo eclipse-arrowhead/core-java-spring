@@ -1,4 +1,4 @@
-package eu.arrowhead.core.mscv;
+package eu.arrowhead.core.mscv.controller;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;

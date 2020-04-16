@@ -1,10 +1,10 @@
-package eu.arrowhead.core.mscv;
+package eu.arrowhead.core.mscv.controller;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.Defaults;
-import eu.arrowhead.common.dto.shared.mscv.SshTargetDto;
+import eu.arrowhead.common.dto.shared.mscv.StandardDto;
 import eu.arrowhead.core.mscv.database.service.MscvCrudService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,11 +27,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import static eu.arrowhead.core.mscv.Constants.PARAMETER_ADDRESS;
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_ADDRESS_PATH;
+import static eu.arrowhead.core.mscv.Constants.PARAMETER_IDENTIFICATION;
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_NAME;
-import static eu.arrowhead.core.mscv.Constants.PARAMETER_NAME_PATH;
-import static eu.arrowhead.core.mscv.Constants.PARAMETER_PORT;
+import static eu.arrowhead.core.mscv.Constants.PARAMETER_IDENTIFICATION_PATH;
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_PORT_PATH;
 import static eu.arrowhead.core.mscv.Constants.PATH_ADDRESS;
 import static eu.arrowhead.core.mscv.Constants.PATH_PORT;
@@ -42,43 +41,41 @@ import static eu.arrowhead.core.mscv.Constants.PATH_PORT;
 )
 @RestController
 @RequestMapping(CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI)
-public class TargetMgmtController {
+public class StandardMgmtController {
 
-    private static final String TARGET_URI = "/target";
-    private static final String QUALIFY_TARGET_URI = TARGET_URI +
-            PATH_ADDRESS + PARAMETER_ADDRESS_PATH +
-            PATH_PORT + PARAMETER_PORT_PATH;
+    private static final String STANDARD_URI = "/standard";
+    private static final String QUALIFY_STANDARD_URI = STANDARD_URI + PARAMETER_IDENTIFICATION_PATH;
 
-    private static final String CREATE_TARGET_URI = TARGET_URI;
-    private static final String CREATE_TARGET_DESCRIPTION = "Create new MSCV target";
-    private static final String CREATE_TARGET_SUCCESS = "New MSCV target created";
-    private static final String CREATE_TARGET_BAD_REQUEST = "Unable to create new MSCV target";
+    private static final String CREATE_STANDARD_URI = STANDARD_URI;
+    private static final String CREATE_STANDARD_DESCRIPTION = "Create new MSCV standard";
+    private static final String CREATE_STANDARD_SUCCESS = "New MSCV standard created";
+    private static final String CREATE_STANDARD_BAD_REQUEST = "Unable to create new MSCV standard";
 
-    private static final String READ_TARGET_URI = QUALIFY_TARGET_URI;
-    private static final String READ_TARGET_DESCRIPTION = "Get MSCV target by name";
-    private static final String READ_TARGET_SUCCESS = "MSCV target returned";
-    private static final String READ_TARGET_BAD_REQUEST = "Unable to return MSCV target";
+    private static final String READ_STANDARD_URI = QUALIFY_STANDARD_URI;
+    private static final String READ_STANDARD_DESCRIPTION = "Get MSCV standard by identification";
+    private static final String READ_STANDARD_SUCCESS = "MSCV standard returned";
+    private static final String READ_STANDARD_BAD_REQUEST = "Unable to return MSCV standard";
 
-    private static final String READ_ALL_TARGET_URI = TARGET_URI;
-    private static final String READ_ALL_TARGET_DESCRIPTION = "Get all MSCV targets";
-    private static final String READ_ALL_TARGET_SUCCESS = "All MSCV targets returned";
-    private static final String READ_ALL_TARGET_BAD_REQUEST = "Unable to return MSCV targets";
+    private static final String READ_ALL_STANDARD_URI = STANDARD_URI;
+    private static final String READ_ALL_STANDARD_DESCRIPTION = "Get all MSCV standards";
+    private static final String READ_ALL_STANDARD_SUCCESS = "All MSCV standards returned";
+    private static final String READ_ALL_STANDARD_BAD_REQUEST = "Unable to return MSCV standards";
 
-    private static final String UPDATE_TARGET_URI = QUALIFY_TARGET_URI;
-    private static final String UPDATE_TARGET_DESCRIPTION = "Update MSCV target";
-    private static final String UPDATE_TARGET_SUCCESS = "MSCV target updated";
-    private static final String UPDATE_TARGET_BAD_REQUEST = "Unable to update MSCV target";
+    private static final String UPDATE_STANDARD_URI = QUALIFY_STANDARD_URI;
+    private static final String UPDATE_STANDARD_DESCRIPTION = "Update MSCV standard by identification";
+    private static final String UPDATE_STANDARD_SUCCESS = "MSCV standard updated";
+    private static final String UPDATE_STANDARD_BAD_REQUEST = "Unable to update MSCV standard";
 
-    private static final String DELETE_TARGET_URI = QUALIFY_TARGET_URI;
-    private static final String DELETE_TARGET_DESCRIPTION = "Delete MSCV target";
-    private static final String DELETE_TARGET_SUCCESS = "MSCV target deleted";
-    private static final String DELETE_TARGET_BAD_REQUEST = "Unable to delete MSCV target";
+    private static final String DELETE_STANDARD_URI = QUALIFY_STANDARD_URI;
+    private static final String DELETE_STANDARD_DESCRIPTION = "Delete MSCV standard by identification";
+    private static final String DELETE_STANDARD_SUCCESS = "MSCV standard deleted";
+    private static final String DELETE_STANDARD_BAD_REQUEST = "Unable to delete MSCV standard";
 
     private final Logger logger = LogManager.getLogger();
     private final MscvCrudService crudService;
 
     @Autowired
-    public TargetMgmtController(final MscvCrudService crudService) {
+    public StandardMgmtController(final MscvCrudService crudService) {
         super();
         this.crudService = crudService;
     }
@@ -86,49 +83,46 @@ public class TargetMgmtController {
     //=================================================================================================
     // methods
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = CREATE_TARGET_DESCRIPTION, response = SshTargetDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = CREATE_STANDARD_DESCRIPTION, response = StandardDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = CREATE_TARGET_SUCCESS),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CREATE_TARGET_BAD_REQUEST),
+            @ApiResponse(code = HttpStatus.SC_OK, message = CREATE_STANDARD_SUCCESS),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CREATE_STANDARD_BAD_REQUEST),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @PostMapping(CREATE_TARGET_URI)
+    @PostMapping(CREATE_STANDARD_URI)
     @ResponseBody
-    public SshTargetDto create(@RequestBody final SshTargetDto dto) {
+    public StandardDto create(@RequestBody final StandardDto dto) {
         logger.debug("create started ...");
         // TODO implement
         return null;
     }
-
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = READ_TARGET_DESCRIPTION, response = SshTargetDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = READ_STANDARD_DESCRIPTION, response = StandardDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = READ_TARGET_SUCCESS),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = READ_TARGET_BAD_REQUEST),
+            @ApiResponse(code = HttpStatus.SC_OK, message = READ_STANDARD_SUCCESS),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = READ_STANDARD_BAD_REQUEST),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @GetMapping(READ_TARGET_URI)
+    @GetMapping(READ_STANDARD_URI)
     @ResponseBody
-    public SshTargetDto read(@PathVariable(PARAMETER_ADDRESS) final String address,
-                             @PathVariable(PARAMETER_PORT) final String port) {
+    public StandardDto read(@PathVariable(PARAMETER_IDENTIFICATION) final String identification) {
         logger.debug("read started ...");
         // TODO implement
         return null;
     }
-
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = READ_ALL_TARGET_DESCRIPTION, response = SshTargetDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = READ_ALL_STANDARD_DESCRIPTION, response = StandardDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = READ_ALL_TARGET_SUCCESS),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = READ_ALL_TARGET_BAD_REQUEST),
+            @ApiResponse(code = HttpStatus.SC_OK, message = READ_ALL_STANDARD_SUCCESS),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = READ_ALL_STANDARD_BAD_REQUEST),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @GetMapping(READ_ALL_TARGET_URI)
+    @GetMapping(READ_ALL_STANDARD_URI)
     @ResponseBody
-    public SshTargetDto readAll(
+    public StandardDto readAll(
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
@@ -137,37 +131,32 @@ public class TargetMgmtController {
         // TODO implement
         return null;
     }
-
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = UPDATE_TARGET_DESCRIPTION, response = SshTargetDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = UPDATE_STANDARD_DESCRIPTION, response = StandardDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = UPDATE_TARGET_SUCCESS),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = UPDATE_TARGET_BAD_REQUEST),
+            @ApiResponse(code = HttpStatus.SC_OK, message = UPDATE_STANDARD_SUCCESS),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = UPDATE_STANDARD_BAD_REQUEST),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @PutMapping(UPDATE_TARGET_URI)
+    @PutMapping(UPDATE_STANDARD_URI)
     @ResponseBody
-    public SshTargetDto update(@PathVariable(PARAMETER_ADDRESS) final String address,
-                               @PathVariable(PARAMETER_PORT) final String port,
-                               @RequestBody final SshTargetDto dto) {
+    public StandardDto update(@PathVariable(PARAMETER_IDENTIFICATION) final String identification, @RequestBody final StandardDto dto) {
         logger.debug("update started ...");
         // TODO implement
         return null;
     }
-
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = DELETE_TARGET_DESCRIPTION, response = SshTargetDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = DELETE_STANDARD_DESCRIPTION, response = StandardDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_TARGET_SUCCESS),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_TARGET_BAD_REQUEST),
+            @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_STANDARD_SUCCESS),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_STANDARD_BAD_REQUEST),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @DeleteMapping(DELETE_TARGET_URI)
+    @DeleteMapping(DELETE_STANDARD_URI)
     @ResponseBody
-    public void delete(@PathVariable(PARAMETER_ADDRESS) final String address,
-                       @PathVariable(PARAMETER_PORT) final String port) {
+    public void delete(@PathVariable(PARAMETER_IDENTIFICATION) final String identification) {
         logger.debug("delete started ...");
         // TODO implement
     }

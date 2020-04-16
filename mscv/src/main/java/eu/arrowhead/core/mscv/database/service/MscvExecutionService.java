@@ -1,17 +1,16 @@
 package eu.arrowhead.core.mscv.database.service;
 
-import eu.arrowhead.core.mscv.MscvDtoConverter;
-import eu.arrowhead.common.dto.shared.mscv.VerificationRunResult;
-import eu.arrowhead.common.database.entity.mscv.Target;
+import eu.arrowhead.common.database.entity.mscv.SshTarget;
 import eu.arrowhead.common.database.entity.mscv.VerificationEntryList;
 import eu.arrowhead.common.database.entity.mscv.VerificationExecution;
 import eu.arrowhead.common.database.repository.mscv.ScriptRepository;
 import eu.arrowhead.common.database.repository.mscv.VerificationEntryListRepository;
 import eu.arrowhead.common.database.repository.mscv.VerificationExecutionDetailRepository;
 import eu.arrowhead.common.database.repository.mscv.VerificationExecutionRepository;
-import eu.arrowhead.common.database.view.mscv.TargetView;
 import eu.arrowhead.common.database.view.mscv.VerificationExecutionView;
 import eu.arrowhead.common.database.view.mscv.VerificationListView;
+import eu.arrowhead.common.dto.shared.mscv.VerificationRunResult;
+import eu.arrowhead.core.mscv.MscvDtoConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +20,16 @@ import org.springframework.util.Assert;
 import javax.transaction.Transactional;
 import java.time.ZonedDateTime;
 import java.util.Optional;
-import java.util.function.Supplier;
+
+import static eu.arrowhead.core.mscv.MscvUtilities.ID_NOT_NULL;
+import static eu.arrowhead.core.mscv.MscvUtilities.LIST_NOT_NULL;
+import static eu.arrowhead.core.mscv.MscvUtilities.NAME_NOT_NULL;
+import static eu.arrowhead.core.mscv.MscvUtilities.TARGET_NOT_NULL;
+import static eu.arrowhead.core.mscv.MscvUtilities.notFoundException;
 
 @Service
 public class MscvExecutionService {
 
-    private static final String NULL_ERROR = " must not be null";
-    private static final String NOT_FOUND_ERROR = " not found";
 
     private final Logger logger = LogManager.getLogger();
     private final VerificationEntryListRepository verificationListRepo;
@@ -51,36 +53,31 @@ public class MscvExecutionService {
     }
 
     @Transactional(rollbackOn = Exception.class)
-    public VerificationExecutionView executeByIdAndTarget(final Long id, final TargetView targetView) {
-        Assert.notNull(id, "id" + NULL_ERROR);
-        Assert.notNull(targetView, "targetView" + NULL_ERROR);
-        final Optional<VerificationEntryList> optional = verificationListRepo.findById(id);
-        final VerificationEntryList entryList = optional.orElseThrow(notFoundException("id"));
+    public VerificationExecutionView executeByIdAndTarget(final Long entryListId, final Long targetId) {
+        Assert.notNull(entryListId, LIST_NOT_NULL);
+        Assert.notNull(targetId, TARGET_NOT_NULL);
+        final Optional<VerificationEntryList> optionalList = verificationListRepo.findById(entryListId);
+        final VerificationEntryList entryList = optionalList.orElseThrow(notFoundException("Verification list"));
 
-        final Target target = targetService.findOrCreateTarget(targetView);
+        final SshTarget target = targetService.getTargetById(targetId);
 
         // TODO actually start the execution
         final var execution = new VerificationExecution(target, entryList, ZonedDateTime.now(), VerificationRunResult.IN_PROGRESS);
-
         return MscvDtoConverter.convert(executionRepo.saveAndFlush(execution));
     }
 
     @Transactional(rollbackOn = Exception.class)
     public VerificationListView getListById(final Long id) {
-        Assert.notNull(id, "id" + NULL_ERROR);
+        Assert.notNull(id, ID_NOT_NULL);
         final Optional<VerificationEntryList> optional = verificationListRepo.findById(id);
         return MscvDtoConverter.convert(optional.orElseThrow(notFoundException("id")));
     }
 
     @Transactional(rollbackOn = Exception.class)
     public VerificationListView getListByName(final String name) {
-        Assert.notNull(name, "name" + NULL_ERROR);
+        Assert.notNull(name, NAME_NOT_NULL);
         final Optional<VerificationEntryList> optional = verificationListRepo.findOneByName(name);
         return MscvDtoConverter.convert(optional.orElseThrow(notFoundException("name")));
-    }
-
-    private Supplier<IllegalArgumentException> notFoundException(final String variable) {
-        return () -> new IllegalArgumentException(variable + NOT_FOUND_ERROR);
     }
 
 }

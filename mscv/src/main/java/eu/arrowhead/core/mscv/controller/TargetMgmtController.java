@@ -1,10 +1,10 @@
-package eu.arrowhead.core.mscv;
+package eu.arrowhead.core.mscv.controller;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.Defaults;
-import eu.arrowhead.common.dto.shared.mscv.MipDto;
+import eu.arrowhead.common.dto.shared.mscv.SshTargetDto;
 import eu.arrowhead.core.mscv.database.service.MscvCrudService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,11 +27,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import static eu.arrowhead.core.mscv.Constants.PARAMETER_ADDRESS;
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_ADDRESS_PATH;
-import static eu.arrowhead.core.mscv.Constants.PARAMETER_MIP_ID;
-import static eu.arrowhead.core.mscv.Constants.PARAMETER_MIP_ID_PATH;
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_NAME;
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_NAME_PATH;
+import static eu.arrowhead.core.mscv.Constants.PARAMETER_PORT;
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_PORT_PATH;
 import static eu.arrowhead.core.mscv.Constants.PATH_ADDRESS;
 import static eu.arrowhead.core.mscv.Constants.PATH_PORT;
@@ -42,41 +42,43 @@ import static eu.arrowhead.core.mscv.Constants.PATH_PORT;
 )
 @RestController
 @RequestMapping(CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI)
-public class MipMgmtController {
+public class TargetMgmtController {
 
-    private static final String MIP_URI = "/mip";
-    private static final String QUALIFY_MIP_URI = MIP_URI + PARAMETER_MIP_ID_PATH;
+    private static final String TARGET_URI = "/target";
+    private static final String QUALIFY_TARGET_URI = TARGET_URI +
+            PATH_ADDRESS + PARAMETER_ADDRESS_PATH +
+            PATH_PORT + PARAMETER_PORT_PATH;
 
-    private static final String CREATE_MIP_URI = MIP_URI;
-    private static final String CREATE_MIP_DESCRIPTION = "Create new MSCV mip";
-    private static final String CREATE_MIP_SUCCESS = "New MSCV mip created";
-    private static final String CREATE_MIP_BAD_REQUEST = "Unable to create new MSCV mip";
+    private static final String CREATE_TARGET_URI = TARGET_URI;
+    private static final String CREATE_TARGET_DESCRIPTION = "Create new MSCV target";
+    private static final String CREATE_TARGET_SUCCESS = "New MSCV target created";
+    private static final String CREATE_TARGET_BAD_REQUEST = "Unable to create new MSCV target";
 
-    private static final String READ_MIP_URI = QUALIFY_MIP_URI;
-    private static final String READ_MIP_DESCRIPTION = "Get MSCV mip by name";
-    private static final String READ_MIP_SUCCESS = "MSCV mip returned";
-    private static final String READ_MIP_BAD_REQUEST = "Unable to return MSCV mip";
+    private static final String READ_TARGET_URI = QUALIFY_TARGET_URI;
+    private static final String READ_TARGET_DESCRIPTION = "Get MSCV target by name";
+    private static final String READ_TARGET_SUCCESS = "MSCV target returned";
+    private static final String READ_TARGET_BAD_REQUEST = "Unable to return MSCV target";
 
-    private static final String READ_ALL_MIP_URI = MIP_URI;
-    private static final String READ_ALL_MIP_DESCRIPTION = "Get all MSCV mips";
-    private static final String READ_ALL_MIP_SUCCESS = "All MSCV mips returned";
-    private static final String READ_ALL_MIP_BAD_REQUEST = "Unable to return MSCV mips";
+    private static final String READ_ALL_TARGET_URI = TARGET_URI;
+    private static final String READ_ALL_TARGET_DESCRIPTION = "Get all MSCV targets";
+    private static final String READ_ALL_TARGET_SUCCESS = "All MSCV targets returned";
+    private static final String READ_ALL_TARGET_BAD_REQUEST = "Unable to return MSCV targets";
 
-    private static final String UPDATE_MIP_URI = QUALIFY_MIP_URI;
-    private static final String UPDATE_MIP_DESCRIPTION = "Update MSCV mip";
-    private static final String UPDATE_MIP_SUCCESS = "MSCV mip updated";
-    private static final String UPDATE_MIP_BAD_REQUEST = "Unable to update MSCV mip";
+    private static final String UPDATE_TARGET_URI = QUALIFY_TARGET_URI;
+    private static final String UPDATE_TARGET_DESCRIPTION = "Update MSCV target";
+    private static final String UPDATE_TARGET_SUCCESS = "MSCV target updated";
+    private static final String UPDATE_TARGET_BAD_REQUEST = "Unable to update MSCV target";
 
-    private static final String DELETE_MIP_URI = QUALIFY_MIP_URI;
-    private static final String DELETE_MIP_DESCRIPTION = "Delete MSCV mip";
-    private static final String DELETE_MIP_SUCCESS = "MSCV mip deleted";
-    private static final String DELETE_MIP_BAD_REQUEST = "Unable to delete MSCV mip";
+    private static final String DELETE_TARGET_URI = QUALIFY_TARGET_URI;
+    private static final String DELETE_TARGET_DESCRIPTION = "Delete MSCV target";
+    private static final String DELETE_TARGET_SUCCESS = "MSCV target deleted";
+    private static final String DELETE_TARGET_BAD_REQUEST = "Unable to delete MSCV target";
 
     private final Logger logger = LogManager.getLogger();
     private final MscvCrudService crudService;
 
     @Autowired
-    public MipMgmtController(final MscvCrudService crudService) {
+    public TargetMgmtController(final MscvCrudService crudService) {
         super();
         this.crudService = crudService;
     }
@@ -84,46 +86,49 @@ public class MipMgmtController {
     //=================================================================================================
     // methods
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = CREATE_MIP_DESCRIPTION, response = MipDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = CREATE_TARGET_DESCRIPTION, response = SshTargetDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = CREATE_MIP_SUCCESS),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CREATE_MIP_BAD_REQUEST),
+            @ApiResponse(code = HttpStatus.SC_OK, message = CREATE_TARGET_SUCCESS),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CREATE_TARGET_BAD_REQUEST),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @PostMapping(CREATE_MIP_URI)
+    @PostMapping(CREATE_TARGET_URI)
     @ResponseBody
-    public MipDto create(@RequestBody final MipDto dto) {
+    public SshTargetDto create(@RequestBody final SshTargetDto dto) {
         logger.debug("create started ...");
         // TODO implement
         return null;
     }
+
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = READ_MIP_DESCRIPTION, response = MipDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = READ_TARGET_DESCRIPTION, response = SshTargetDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = READ_MIP_SUCCESS),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = READ_MIP_BAD_REQUEST),
+            @ApiResponse(code = HttpStatus.SC_OK, message = READ_TARGET_SUCCESS),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = READ_TARGET_BAD_REQUEST),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @GetMapping(READ_MIP_URI)
+    @GetMapping(READ_TARGET_URI)
     @ResponseBody
-    public MipDto read(@PathVariable(PARAMETER_MIP_ID) final Long mipId) {
+    public SshTargetDto read(@PathVariable(PARAMETER_ADDRESS) final String address,
+                             @PathVariable(PARAMETER_PORT) final String port) {
         logger.debug("read started ...");
         // TODO implement
         return null;
     }
+
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = READ_ALL_MIP_DESCRIPTION, response = MipDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = READ_ALL_TARGET_DESCRIPTION, response = SshTargetDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = READ_ALL_MIP_SUCCESS),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = READ_ALL_MIP_BAD_REQUEST),
+            @ApiResponse(code = HttpStatus.SC_OK, message = READ_ALL_TARGET_SUCCESS),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = READ_ALL_TARGET_BAD_REQUEST),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @GetMapping(READ_ALL_MIP_URI)
+    @GetMapping(READ_ALL_TARGET_URI)
     @ResponseBody
-    public MipDto readAll(
+    public SshTargetDto readAll(
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
@@ -132,32 +137,37 @@ public class MipMgmtController {
         // TODO implement
         return null;
     }
+
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = UPDATE_MIP_DESCRIPTION, response = MipDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = UPDATE_TARGET_DESCRIPTION, response = SshTargetDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = UPDATE_MIP_SUCCESS),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = UPDATE_MIP_BAD_REQUEST),
+            @ApiResponse(code = HttpStatus.SC_OK, message = UPDATE_TARGET_SUCCESS),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = UPDATE_TARGET_BAD_REQUEST),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @PutMapping(UPDATE_MIP_URI)
+    @PutMapping(UPDATE_TARGET_URI)
     @ResponseBody
-    public MipDto update(@PathVariable(PARAMETER_MIP_ID) final Long mipId, @RequestBody final MipDto dto) {
+    public SshTargetDto update(@PathVariable(PARAMETER_ADDRESS) final String address,
+                               @PathVariable(PARAMETER_PORT) final String port,
+                               @RequestBody final SshTargetDto dto) {
         logger.debug("update started ...");
         // TODO implement
         return null;
     }
+
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = DELETE_MIP_DESCRIPTION, response = MipDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = DELETE_TARGET_DESCRIPTION, response = SshTargetDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_MIP_SUCCESS),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_MIP_BAD_REQUEST),
+            @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_TARGET_SUCCESS),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_TARGET_BAD_REQUEST),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @DeleteMapping(DELETE_MIP_URI)
+    @DeleteMapping(DELETE_TARGET_URI)
     @ResponseBody
-    public void delete(@PathVariable(PARAMETER_MIP_ID) final Long mipId) {
+    public void delete(@PathVariable(PARAMETER_ADDRESS) final String address,
+                       @PathVariable(PARAMETER_PORT) final String port) {
         logger.debug("delete started ...");
         // TODO implement
     }
