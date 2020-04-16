@@ -1469,6 +1469,7 @@ public class EventHandlerDBServiceTest {
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		final Set<SubscriptionPublisherConnection> involvedPublisherSystems = Set.of();
 
+		when(subscriptionRepository.findById(anyLong())).thenReturn(Optional.of(subscription));
 		when(subscriptionPublisherConnectionRepository.findBySubscriptionEntry(any())).thenReturn(involvedPublisherSystems);
 		doNothing().when(subscriptionPublisherConnectionRepository).deleteInBatch(any());
 		doNothing().when(subscriptionRepository).refresh(any());
@@ -1494,6 +1495,7 @@ public class EventHandlerDBServiceTest {
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		final Set<SubscriptionPublisherConnection> involvedPublisherSystems = Set.of();
 
+		when(subscriptionRepository.findById(anyLong())).thenReturn(Optional.of(subscription));
 		when(subscriptionPublisherConnectionRepository.findBySubscriptionEntry(any())).thenReturn(involvedPublisherSystems);
 		doNothing().when(subscriptionPublisherConnectionRepository).deleteInBatch(any());
 		doNothing().when(subscriptionRepository).refresh(any());
