@@ -135,6 +135,17 @@
     		<artifactId>commons-lang3</artifactId>
     		<version>${apache.commons.lang3.version}</version>
 		</dependency>
+	    <dependency>
+    		<groupId>javax.jms</groupId>
+    		<artifactId>javax.jms-api</artifactId>
+    		<version>${jms.api.version}</version>
+		</dependency>
+	    <dependency>
+    		<groupId>org.apache.activemq</groupId>
+    		<artifactId>activemq-client</artifactId>
+    		<version>${activemq.client.version}</version>
+		</dependency>
+	    
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger2</artifactId>

@@ -57,7 +57,7 @@ public enum CoreSystemService {
 	QOS_MONITOR_PUBLIC_KEY_SERVICE(CommonConstants.CORE_SERVICE_QOS_MONITOR_PUBLIC_KEY, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_KEY_URI),
 	QOS_MONITOR_JOIN_RELAY_TEST_SERVICE(CommonConstants.CORE_SERVICE_QOS_MONITOR_JOIN_RELAY_TEST, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_JOIN_RELAY_TEST_URI),
 	QOS_MONITOR_INIT_RELAY_TEST_SERVICE(CommonConstants.CORE_SERVICE_QOS_MONITOR_INIT_RELAY_TEST, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INIT_RELAY_TEST_URI);
-  
+
 	//TODO: additional services 
 	
 	//=================================================================================================
