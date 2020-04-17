@@ -14,6 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 
 import java.time.ZonedDateTime;
 import java.util.HashSet;
@@ -38,6 +39,9 @@ public class ChoreographerSession {
 
     @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private ZonedDateTime startedAt;
+
+    @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+    private ZonedDateTime updatedAt;
 
     @OneToMany(mappedBy = "session", fetch = FetchType.LAZY, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -71,5 +75,14 @@ public class ChoreographerSession {
 
     //-------------------------------------------------------------------------------------------------
     @PrePersist
-    public void onCreate() { this.startedAt = ZonedDateTime.now(); }
+    public void onCreate() {
+        this.startedAt = ZonedDateTime.now();
+        this.updatedAt = this.startedAt;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @PreUpdate
+    public void onUpdate() {
+        this.updatedAt = ZonedDateTime.now();
+    }
 }

@@ -276,8 +276,7 @@ CREATE TABLE IF NOT EXISTS `choreographer_plan` (
   `first_action_id` bigint(20),
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  CONSTRAINT `action` FOREIGN KEY (`first_action_id`) REFERENCES `choreographer_action`(`id`) ON DELETE CASCADE
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `choreographer_action` (
@@ -292,6 +291,8 @@ CREATE TABLE IF NOT EXISTS `choreographer_action` (
   CONSTRAINT `next_action` FOREIGN KEY (`next_action_id`) REFERENCES `choreographer_action` (`id`) ON DELETE CASCADE,
   CONSTRAINT `plan` FOREIGN KEY (`plan_id`) REFERENCES `choreographer_plan` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+ALTER TABLE `choreographer_plan` ADD FOREIGN KEY (`first_action_id`) references `choreographer_action`(`id`);
 
 CREATE TABLE IF NOT EXISTS `choreographer_step` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -325,6 +326,7 @@ CREATE TABLE IF NOT EXISTS `choreographer_session` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `plan_id` bigint(20) NOT NULL,
   `started_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `status` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `session_plan` FOREIGN KEY (`plan_id`) REFERENCES `choreographer_plan` (`id`)
@@ -337,6 +339,7 @@ CREATE TABLE IF NOT EXISTS `choreographer_running_step` (
   `status` varchar(255) NOT NULL,
   `message` text,
   `started_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   CONSTRAINT `running_step` FOREIGN KEY (`step_id`) REFERENCES `choreographer_step` (`id`),
   CONSTRAINT `running_step_session` FOREIGN KEY (`session_id`) REFERENCES `choreographer_session`(`id`)

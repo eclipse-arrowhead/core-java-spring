@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.security.PublicKey;
 import java.util.Base64;
@@ -68,11 +69,27 @@ public class Receiver {
     private enum StepStatus {
         INITIATED,
         RUNNING,
+        ABORTED,
         DONE
     }
 
+    private SystemRequestDTO requesterSystem;
+
     //=================================================================================================
     // methods
+
+    @PostConstruct
+    public void init() {
+        requesterSystem = new SystemRequestDTO();
+        requesterSystem.setSystemName(coreSystemRegistrationProperties.getCoreSystemName().toLowerCase());
+        requesterSystem.setAddress(coreSystemRegistrationProperties.getCoreSystemDomainName());
+        requesterSystem.setPort(coreSystemRegistrationProperties.getCoreSystemDomainPort());
+
+        //if (sslEnabled) {
+        //    final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
+        //    requesterSystem.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+        //}
+    }
 
     //-------------------------------------------------------------------------------------------------
     @JmsListener(destination = "start-session")
@@ -177,22 +194,11 @@ public class Receiver {
     //-------------------------------------------------------------------------------------------------
     public void runStep(ChoreographerStep step, long sessionId) throws InterruptedException {
         logger.debug("Running " + step.getId() + "     " + step.getName() + "       sessionId: " + sessionId + "!");
-        System.out.println("got message with autowire tooo....");
 
         ChoreographerRunningStep runningStep = insertInitiatedRunningStep(step.getId(), sessionId);
 
         ServiceQueryFormDTO serviceQuery = new ServiceQueryFormDTO();
         serviceQuery.setServiceDefinitionRequirement(step.getServiceName().toLowerCase());
-
-        SystemRequestDTO requesterSystem = new SystemRequestDTO();
-        requesterSystem.setSystemName(coreSystemRegistrationProperties.getCoreSystemName().toLowerCase());
-        requesterSystem.setAddress(coreSystemRegistrationProperties.getCoreSystemDomainName());
-        requesterSystem.setPort(coreSystemRegistrationProperties.getCoreSystemDomainPort());
-
-        if (sslEnabled) {
-            final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
-            requesterSystem.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
-        }
 
         final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO.Builder(requesterSystem)
                                                                                              .requestedService(serviceQuery)
@@ -217,6 +223,10 @@ public class Receiver {
                     orchestrationResult.getServiceUri());
 
             httpService.sendRequest(uri, HttpMethod.POST, Void.class, runningStepDataDTO);
+        } else {
+            choreographerDBService.setRunningStepStatus(runningStep.getId(), StepStatus.ABORTED.toString(),
+                    "Step aborted because the Orchestrator couldn't find any suitable providers. Rerun the plan when there are suitable providers for all steps!");
+            choreographerDBService.setSessionStatus(sessionId, StepStatus.ABORTED.toString());
         }
     }
 
