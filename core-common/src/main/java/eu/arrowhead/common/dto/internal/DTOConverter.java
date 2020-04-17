@@ -746,13 +746,17 @@ public class DTOConverter {
 
 	//-------------------------------------------------------------------------------------------------
 	private static List<ChoreographerNextStepResponseDTO> collectNextStepsFromStep(final Set<ChoreographerStepNextStepConnection> nextSteps) {
-		final List<ChoreographerNextStepResponseDTO> result = new ArrayList<>(nextSteps.size());
-		for (final ChoreographerStepNextStepConnection nextStep : nextSteps) {
-			result.add(convertNextStepToNextStepResponseDTO(nextStep.getNextStepEntry()));
-		}
+		if (nextSteps != null) {
+			final List<ChoreographerNextStepResponseDTO> result = new ArrayList<>(nextSteps.size());
+			for (final ChoreographerStepNextStepConnection nextStep : nextSteps) {
+				result.add(convertNextStepToNextStepResponseDTO(nextStep.getNextStepEntry()));
+			}
 
-		result.sort(Comparator.comparing(ChoreographerNextStepResponseDTO::getId));
-		return result;
+			result.sort(Comparator.comparing(ChoreographerNextStepResponseDTO::getId));
+			return result;
+		} else {
+			return new ArrayList<>();
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------

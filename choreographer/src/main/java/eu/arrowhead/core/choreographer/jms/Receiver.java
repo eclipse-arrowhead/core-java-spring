@@ -65,6 +65,12 @@ public class Receiver {
 
     private final Logger logger = LogManager.getLogger(Receiver.class);
 
+    private enum StepStatus {
+        INITIATED,
+        RUNNING,
+        DONE
+    }
+
     //=================================================================================================
     // methods
 
@@ -77,13 +83,13 @@ public class Receiver {
         ChoreographerAction firstAction = plan.getFirstAction();
         Set<ChoreographerStep> firstSteps = new HashSet<>(firstAction.getFirstStepEntries());
 
-        choreographerDBService.setSessionStatus(sessionId, "Running");
+        choreographerDBService.setSessionStatus(sessionId, StepStatus.RUNNING.toString());
 
         firstSteps.parallelStream().forEach(firstStep -> {
             try {
                 runStep(firstStep, sessionId);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.debug(e.getMessage(), e);
             }
         });
     }
@@ -96,7 +102,7 @@ public class Receiver {
 
         System.out.println(sessionFinishedStepDataDTO.getSessionId() + " " + sessionFinishedStepDataDTO.getRunningStepId());
 
-        choreographerDBService.setRunningStepStatus(runningStepId, "Done", "Step execution is done.");
+        choreographerDBService.setRunningStepStatus(runningStepId, StepStatus.DONE.toString(), "Step execution is done.");
 
         ChoreographerRunningStep runningStep = choreographerDBService.getRunningStepById(runningStepId);
         ChoreographerStep currentStep = choreographerDBService.getStepById(runningStep.getStep().getId());
@@ -105,20 +111,20 @@ public class Receiver {
 
         if (currentStep.getNextSteps().isEmpty()) {
             boolean canGoToNextAction = true;
-            System.out.println("Step has no next steps therefore it should be checked if can go to next action.");
+            logger.debug("Step has no next steps therefore it should be checked if can go to next action.");
             ChoreographerAction currentAction = currentStep.getAction();
 
             List<ChoreographerRunningStep> currentRunningStepList = choreographerDBService.getAllRunningStepsBySessionId(sessionId);
 
             for (ChoreographerRunningStep runningStepInstance : currentRunningStepList) {
-                System.out.println(runningStepInstance.getId());
-                if (!runningStepInstance.getStatus().equals("Done")) {
-                    System.out.println("canGoToNextStep should be set to false");
+                //System.out.println(runningStepInstance.getId());
+                if (!runningStepInstance.getStatus().equals(StepStatus.DONE.toString())) {
+                    //System.out.println("canGoToNextStep should be set to false");
                     canGoToNextAction = false;
                     break;
                 }
-                if (runningStepInstance.getStep().getNextSteps().isEmpty() && !runningStep.getStatus().equals("Done")) {
-                    System.out.println("-------------------  canGoToNextAction should be set to false!!!! --------------------");
+                if (runningStepInstance.getStep().getNextSteps().isEmpty() && !runningStep.getStatus().equals(StepStatus.DONE.toString())) {
+                    //System.out.println("-------------------  canGoToNextAction should be set to false!!!! --------------------");
                     canGoToNextAction = false;
                     break;
                 }
@@ -126,7 +132,7 @@ public class Receiver {
 
             if (canGoToNextAction) {
                 // TODO: 2020. 03. 18. Test what happens if there is multiple Actions in a plan.
-                System.out.println("If there is next Action then it should run now! Testing needed.");
+                // System.out.println("If there is next Action then it should run now! Testing needed.");
                 ChoreographerAction nextAction = currentAction.getNextAction();
                 if (nextAction != null) {
                     Set<ChoreographerStep> firstStepsInNewAction = new HashSet<>(nextAction.getFirstStepEntries());
@@ -151,7 +157,7 @@ public class Receiver {
             for (ChoreographerStepNextStepConnection prevStep : nextStep.getNextStepEntry().getSteps()) {
                 System.out.println(prevStep.getId() + "    " + prevStep.getStepEntry().getName());
                 ChoreographerRunningStep prevRunningStep = choreographerDBService.getRunningStepBySessionIdAndStepId(sessionId, prevStep.getStepEntry().getId());
-                if (!prevRunningStep.getStatus().equals("Done")) {
+                if (!prevRunningStep.getStatus().equals(StepStatus.DONE.toString())) {
                     allPreviousStepsDone = false;
                 }
             }
@@ -171,6 +177,7 @@ public class Receiver {
     //-------------------------------------------------------------------------------------------------
     public void runStep(ChoreographerStep step, long sessionId) throws InterruptedException {
         logger.debug("Running " + step.getId() + "     " + step.getName() + "       sessionId: " + sessionId + "!");
+        System.out.println("got message with autowire tooo....");
 
         ChoreographerRunningStep runningStep = insertInitiatedRunningStep(step.getId(), sessionId);
 
@@ -215,7 +222,7 @@ public class Receiver {
 
     //-------------------------------------------------------------------------------------------------
     public ChoreographerRunningStep insertInitiatedRunningStep(final long stepId, final long sessionId) {
-        return choreographerDBService.registerRunningStep(stepId, sessionId, "Running", "Step running is initiated and search for provider started.");
+        return choreographerDBService.registerRunningStep(stepId, sessionId, StepStatus.RUNNING.toString(), "Step running is initiated and search for provider started.");
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -241,7 +248,6 @@ public class Receiver {
                 throw new ArrowheadException("Choreographer can't find orchestration process URI.");
             }
         }
-
         throw new ArrowheadException("Choreographer can't find orchestration process URI.");
     }
 }

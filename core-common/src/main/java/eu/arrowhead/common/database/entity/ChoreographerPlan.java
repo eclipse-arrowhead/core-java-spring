@@ -5,7 +5,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 
 import eu.arrowhead.common.CoreDefaults;
 import org.hibernate.annotations.OnDelete;
@@ -17,7 +27,7 @@ public class ChoreographerPlan {
 	//=================================================================================================
 	// members
 
-    public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt");
+    public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt", "name");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

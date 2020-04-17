@@ -28,7 +28,17 @@ import org.springframework.http.HttpHeaders;
 
 import org.springframework.http.MediaType;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -79,6 +89,9 @@ public class ChoreographerController {
 
     @Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired
+    private JmsTemplate jmsTemplate;
     
     //=================================================================================================
 	// methods
@@ -196,7 +209,6 @@ public class ChoreographerController {
         for (final ChoreographerRunPlanRequestDTO request : requests) {
             logger.debug("startPlan started...");
             ChoreographerSession session = choreographerDBService.initiateSession(request.getId());
-            JmsTemplate jmsTemplate = applicationContext.getBean(JmsTemplate.class);
 
             logger.debug("Sending a message to start-session.");
             jmsTemplate.convertAndSend("start-session", new ChoreographerStartSessionDTO(session.getId(), request.getId()));
@@ -217,8 +229,6 @@ public class ChoreographerController {
     @ResponseBody public void stepFinished(@RequestBody final List<ChoreographerSessionRunningStepDataDTO> requests) {
         for (final ChoreographerSessionRunningStepDataDTO request : requests) {
             logger.debug("notifyStepDone started...");
-            JmsTemplate jmsTemplate = applicationContext.getBean(JmsTemplate.class);
-
             logger.debug("Sending message to session-step-done.");
             jmsTemplate.convertAndSend("session-step-done", request);
         }
@@ -237,8 +247,6 @@ public class ChoreographerController {
     @ResponseStatus(value = org.springframework.http.HttpStatus.OK)
     @ResponseBody public void notifyStepDone(@RequestBody final ChoreographerSessionRunningStepDataDTO request) {
         logger.debug("notifyStepDone started...");
-        JmsTemplate jmsTemplate = applicationContext.getBean(JmsTemplate.class);
-
         logger.debug("Sending message to session-step-done.");
         jmsTemplate.convertAndSend("session-step-done", request);
     }

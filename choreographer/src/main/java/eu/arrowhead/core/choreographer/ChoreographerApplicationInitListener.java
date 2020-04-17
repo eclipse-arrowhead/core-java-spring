@@ -18,7 +18,7 @@ import java.util.List;
 public class ChoreographerApplicationInitListener extends ApplicationInitListener {
 
     @Bean
-    public JmsListenerContainerFactory<?> myFactory(ConnectionFactory connectionFactory,
+    public JmsListenerContainerFactory<?> getFactory(ConnectionFactory connectionFactory,
                                                     DefaultJmsListenerContainerFactoryConfigurer configurer) {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         configurer.configure(factory, connectionFactory);

@@ -18,7 +18,7 @@ public class ChoreographerWorklog {
     @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private ZonedDateTime entryDate;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String message;
 
     @Column(columnDefinition = "TEXT")

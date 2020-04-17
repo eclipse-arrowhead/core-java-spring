@@ -1,10 +1,5 @@
 package eu.arrowhead.common.dto.internal;
 
-import eu.arrowhead.common.database.entity.ChoreographerPlan;
-import eu.arrowhead.common.database.entity.ChoreographerSession;
-
-import javax.jms.Session;
-
 public class ChoreographerStartSessionDTO {
 
     private long sessionId;

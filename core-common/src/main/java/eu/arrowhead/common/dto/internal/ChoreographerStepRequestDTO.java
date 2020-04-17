@@ -25,10 +25,7 @@ public class ChoreographerStepRequestDTO implements Serializable {
 
     //-------------------------------------------------------------------------------------------------
 	public ChoreographerStepRequestDTO(final String name, final String serviceName, final List<String> nextStepNames, final int quantity) {
-        this.name = name;
-        this.serviceName = serviceName;
-        this.nextStepNames = nextStepNames;
-        this.quantity = quantity;
+        this(name, serviceName, null, null, nextStepNames, quantity);
     }
 
     //-------------------------------------------------------------------------------------------------
