@@ -1,6 +1,9 @@
 package eu.arrowhead.common.dto.shared;
 
 import eu.arrowhead.common.Utilities;
+import org.springframework.util.Assert;
+
+import java.util.Objects;
 
 public enum CertificateType {
 
@@ -18,6 +21,8 @@ public enum CertificateType {
     }
 
     public static CertificateType getTypeFromCN(final String commonName) {
+        if (Objects.isNull(commonName)) { return CertificateType.UNKNOWN; }
+
         final String[] split = commonName.split("\\.");
 
         if (Utilities.isKeyStoreCNArrowheadValid(commonName)) {
@@ -39,6 +44,7 @@ public enum CertificateType {
     }
 
     public boolean hasMinimumStrength(final CertificateType minimumStrengthType) {
+        Assert.notNull(minimumStrengthType, "CertificateType must not be null");
         return this.strength >= minimumStrengthType.strength;
     }
 

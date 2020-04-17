@@ -1,4 +1,4 @@
-package eu.arrowhead.core.onboarding.database.service;
+package eu.arrowhead.core.onboarding.service;
 
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SecurityUtilities;
@@ -22,25 +22,26 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
 
 import java.security.KeyPair;
 import java.util.function.Consumer;
 
 @Service
-public class OnboardingDBService {
+public class OnboardingService {
 
     //=================================================================================================
     // members
-    private final Logger logger = LogManager.getLogger(OnboardingDBService.class);
+    private final Logger logger = LogManager.getLogger(OnboardingService.class);
     private final OrchestrationDriver orchestrationDriver;
     private final CertificateAuthorityDriver caDriver;
     private final SecurityUtilities securityUtilities;
 
     @Autowired
-    public OnboardingDBService(final OrchestrationDriver orchestrationDriver,
-                               final CertificateAuthorityDriver caDriver,
-                               final SecurityUtilities securityUtilities) {
+    public OnboardingService(final OrchestrationDriver orchestrationDriver,
+                             final CertificateAuthorityDriver caDriver,
+                             final SecurityUtilities securityUtilities) {
         this.orchestrationDriver = orchestrationDriver;
         this.caDriver = caDriver;
         this.securityUtilities = securityUtilities;
@@ -53,6 +54,8 @@ public class OnboardingDBService {
     public OnboardingWithNameResponseDTO onboarding(final OnboardingWithNameRequestDTO onboardingRequest, final String host, final String address)
             throws DriverUtilities.DriverException {
         logger.debug("onboarding started...");
+        Assert.notNull(onboardingRequest, "OnboardingWithNameRequestDTO must not be null");
+        Assert.notNull(onboardingRequest.getCreationRequestDTO(), "CreationRequestDTO must not be null");
 
         final CertificateCreationRequestDTO creationRequestDTO = onboardingRequest.getCreationRequestDTO();
         final KeyPair keyPair = securityUtilities.extractOrGenerateKeyPair(creationRequestDTO);
@@ -81,6 +84,8 @@ public class OnboardingDBService {
     public OnboardingWithCsrResponseDTO onboarding(final OnboardingWithCsrRequestDTO onboardingRequest)
             throws DriverUtilities.DriverException {
         logger.debug("onboarding started...");
+        Assert.notNull(onboardingRequest, "OnboardingWithCsrRequestDTO must not be null");
+        Assert.notNull(onboardingRequest.getCertificateSigningRequest(), "CertificateSigningRequest must not be null");
 
         final var signingResponseDTO = executeCertificateSigningRequest(onboardingRequest.getCertificateSigningRequest());
         final var responseDto = new OnboardingWithCsrResponseDTO();

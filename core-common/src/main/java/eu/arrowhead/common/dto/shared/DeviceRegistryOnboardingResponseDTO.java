@@ -2,6 +2,7 @@ package eu.arrowhead.common.dto.shared;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import org.springframework.util.Assert;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -30,6 +31,8 @@ public abstract class DeviceRegistryOnboardingResponseDTO extends DeviceRegistry
     }
 
     public void load(final DeviceRegistryResponseDTO dto) {
+        Assert.notNull(dto, "DeviceRegistryResponseDTO must not be null");
+
         setId(dto.getId());
         setDevice(dto.getDevice());
         setEndOfValidity(dto.getEndOfValidity());

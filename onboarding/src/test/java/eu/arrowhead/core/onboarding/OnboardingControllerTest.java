@@ -11,7 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.database.service.CommonDBService;
-import eu.arrowhead.core.onboarding.database.service.OnboardingDBService;
+import eu.arrowhead.core.onboarding.service.OnboardingService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,7 +44,7 @@ public class OnboardingControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean(name = "mockOnboardingDBService")
-    private OnboardingDBService onboardingDBService;
+    private OnboardingService onboardingDBService;
 
     @MockBean(name = "mockCommonDBService")
     private CommonDBService commonDBService;

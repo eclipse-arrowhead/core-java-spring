@@ -14,6 +14,7 @@ import eu.arrowhead.common.drivers.CertificateAuthorityDriver;
 import eu.arrowhead.common.drivers.DriverUtilities;
 import eu.arrowhead.common.drivers.EventDriver;
 import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
+import eu.arrowhead.common.dto.internal.CertificateSigningResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.DeviceListResponseDTO;
 import eu.arrowhead.common.dto.internal.DeviceRegistryListResponseDTO;
@@ -112,6 +113,7 @@ public class DeviceRegistryDBService {
     public DeviceRegistryOnboardingWithNameResponseDTO onboardAndRegisterDeviceRegistry(final DeviceRegistryOnboardingWithNameRequestDTO request,
                                                                                         final String host, final String address) {
         logger.debug("onboardAndRegisterDeviceRegistry started...");
+        Assert.notNull(request, "DeviceRegistryOnboardingWithNameRequestDTO must not be null");
 
         final CertificateCreationRequestDTO creationRequestDTO = request.getCertificateCreationRequest();
         final KeyPair keyPair = securityUtilities.extractOrGenerateKeyPair(creationRequestDTO);
@@ -120,15 +122,15 @@ public class DeviceRegistryDBService {
         try {
             certificateSigningRequest = securityUtilities
                     .createCertificateSigningRequest(creationRequestDTO.getCommonName(), keyPair, CertificateType.AH_DEVICE, host, address);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.error(e.getMessage(), e);
             throw new ArrowheadException("Unable to create certificate signing request: " + e.getMessage());
         }
 
-        final var signingResponse = signCertificate(certificateSigningRequest);
+        final CertificateCreationResponseDTO signingResponse = signCertificate(certificateSigningRequest);
         signingResponse.setKeyPairDTO(securityUtilities.encodeKeyPair(keyPair));
 
-        final var retValue = new DeviceRegistryOnboardingWithNameResponseDTO();
+        final DeviceRegistryOnboardingWithNameResponseDTO retValue = new DeviceRegistryOnboardingWithNameResponseDTO();
         retValue.setCertificateResponse(signingResponse);
         retValue.load(registerDeviceRegistry(request));
         return retValue;
@@ -139,10 +141,12 @@ public class DeviceRegistryDBService {
     public DeviceRegistryOnboardingWithCsrResponseDTO onboardAndRegisterDeviceRegistry(final DeviceRegistryOnboardingWithCsrRequestDTO request) {
 
         logger.debug("onboardAndRegisterDeviceRegistry started...");
-        final var signingResponse = signCertificate(request.getCertificateSigningRequest());
+        Assert.notNull(request, "DeviceRegistryOnboardingWithCsrRequestDTO must not be null");
+
+        final CertificateCreationResponseDTO signingResponse = signCertificate(request.getCertificateSigningRequest());
         securityUtilities.extractAndSetPublicKey(signingResponse);
 
-        final var retValue = new DeviceRegistryOnboardingWithCsrResponseDTO();
+        final DeviceRegistryOnboardingWithCsrResponseDTO retValue = new DeviceRegistryOnboardingWithCsrResponseDTO();
         retValue.setCertificateResponse(signingResponse);
         retValue.load(registerDeviceRegistry(request));
         return retValue;
@@ -152,6 +156,7 @@ public class DeviceRegistryDBService {
     @Transactional(rollbackFor = ArrowheadException.class)
     public DeviceListResponseDTO getDeviceEntries(final CoreUtilities.ValidatedPageParams pageParams, final String sortField) {
         logger.debug("getDeviceList started...");
+        Assert.notNull(pageParams, "ValidatedPageParams must not be null");
 
         final String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 
@@ -228,6 +233,7 @@ public class DeviceRegistryDBService {
     @Transactional(rollbackFor = ArrowheadException.class)
     public DeviceResponseDTO mergeDevice(final long deviceId, final DeviceRequestDTO request) {
         logger.debug("mergeDevice started...");
+        Assert.notNull(request, "DeviceRequestDTO must not be null");
 
         try {
             final Optional<Device> deviceOptional = deviceRepository.findById(deviceId);
@@ -246,6 +252,8 @@ public class DeviceRegistryDBService {
     @Transactional(rollbackFor = ArrowheadException.class)
     public DeviceRegistryListResponseDTO getDeviceRegistryEntries(final CoreUtilities.ValidatedPageParams params, final String sortField) {
         logger.debug("getDeviceRegistryEntries started...");
+        Assert.notNull(params, "ValidatedPageParams must not be null");
+
         final String validatedSortField = sortField == null ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 
         if (!DeviceRegistry.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
@@ -271,6 +279,8 @@ public class DeviceRegistryDBService {
                                                                               final CoreUtilities.ValidatedPageParams params,
                                                                               final String sortField) {
         logger.debug("getDeviceRegistryEntriesByDeviceName started...");
+        Assert.notNull(params, "ValidatedPageParams must not be null");
+
         final String validatedSortField = sortField == null ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 
         if (!DeviceRegistry.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
@@ -489,7 +499,6 @@ public class DeviceRegistryDBService {
                 devices = deviceRepository.findByDeviceName(deviceName);
 
                 if (devices.isEmpty()) {
-                    // no service definition found
                     logger.debug("Device not found: {}", deviceName);
                     return DTOConverter.convertDeviceRegistryListToDeviceQueryResultDTO(List.of());
                 }
@@ -528,7 +537,7 @@ public class DeviceRegistryDBService {
                                       });
             }
 
-            logger.debug("Potential system providers after filtering: {}", registryList.size());
+            logger.debug("Potential devices after filtering: {}", registryList.size());
             return DTOConverter.convertListOfDeviceRegistryEntriesToDeviceQueryResultDTO(registryList, unfilteredHits);
         } catch (final IllegalStateException e) {
             throw new InvalidParameterException("Invalid keys in the metadata requirements (whitespace only differences)");
@@ -628,8 +637,8 @@ public class DeviceRegistryDBService {
     private DeviceRegistry getDeviceRegistryEntryById(final long id) {
         logger.debug("getDeviceRegistryEntryById started...");
         try {
-            final Optional<DeviceRegistry> systemRegistry = deviceRegistryRepository.findById(id);
-            return systemRegistry.orElseThrow(() -> new InvalidParameterException("System Registry with id of '" + id + "' does not exist"));
+            final Optional<DeviceRegistry> deviceRegistry = deviceRegistryRepository.findById(id);
+            return deviceRegistry.orElseThrow(() -> new InvalidParameterException("Device Registry with id of '" + id + "' does not exist"));
         } catch (final InvalidParameterException ex) {
             throw ex;
         } catch (final Exception ex) {
@@ -653,28 +662,28 @@ public class DeviceRegistryDBService {
         final String validateAddress = Utilities.lowerCaseTrim(address);
         final String validatedMacAddress = Utilities.lowerCaseTrim(macAddress);
 
-        final Optional<Device> optProvider = deviceRepository.findByDeviceNameAndMacAddress(validateName, validatedMacAddress);
-        Device provider;
+        final Optional<Device> optDevice = deviceRepository.findByDeviceNameAndMacAddress(validateName, validatedMacAddress);
+        Device device;
 
-        if (optProvider.isPresent()) {
-            provider = optProvider.get();
-            if (!Objects.equals(authenticationInfo, provider.getAuthenticationInfo()) ||
-                    !Objects.equals(validateAddress, provider.getAddress())) { // authentication info or provider has changed
-                provider.setAuthenticationInfo(authenticationInfo);
-                provider.setAddress(validateAddress);
-                provider = deviceRepository.saveAndFlush(provider);
+        if (optDevice.isPresent()) {
+            device = optDevice.get();
+            if (!Objects.equals(authenticationInfo, device.getAuthenticationInfo()) ||
+                    !Objects.equals(validateAddress, device.getAddress())) { // authentication info or device has changed
+                device.setAuthenticationInfo(authenticationInfo);
+                device.setAddress(validateAddress);
+                device = deviceRepository.saveAndFlush(device);
             }
         } else {
-            provider = createDevice(validateName, validateAddress, validatedMacAddress, authenticationInfo);
+            device = createDevice(validateName, validateAddress, validatedMacAddress, authenticationInfo);
         }
-        return provider;
+        return device;
     }
 
     //-------------------------------------------------------------------------------------------------
     private CertificateCreationResponseDTO signCertificate(final String signingRequest) {
         logger.debug("Contact CertificateAuthority ...");
-        final var csrDTO = new CertificateSigningRequestDTO(signingRequest);
-        final var signingResponse = caDriver.signCertificate(csrDTO);
+        final CertificateSigningRequestDTO csrDTO = new CertificateSigningRequestDTO(signingRequest);
+        final CertificateSigningResponseDTO signingResponse = caDriver.signCertificate(csrDTO);
 
         logger.debug("Processing response from Certificate Authority ...");
         final CertificateCreationResponseDTO certificateResponseDTO = new CertificateCreationResponseDTO();

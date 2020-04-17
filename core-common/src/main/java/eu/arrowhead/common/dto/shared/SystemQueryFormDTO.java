@@ -3,9 +3,7 @@ package eu.arrowhead.common.dto.shared;
 import org.springframework.util.Assert;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
@@ -69,7 +67,7 @@ public class SystemQueryFormDTO implements Serializable {
 
 	private SystemQueryFormDTO(final Builder builder) {
 		this.systemNameRequirements = builder.systemNameRequirements;
-		this.deviceNameRequirements = builder.deiceNameRequirements;
+		this.deviceNameRequirements = builder.deviceNameRequirements;
 		this.metadataRequirements = builder.metadataRequirements;
 		this.versionRequirement = builder.versionRequirement;
 		this.minVersionRequirement = builder.minVersionRequirement;
@@ -86,7 +84,7 @@ public class SystemQueryFormDTO implements Serializable {
 		// members
 
 		private final String systemNameRequirements;
-		private String deiceNameRequirements;
+		private String deviceNameRequirements;
 		private Map<String,String> metadataRequirements;
 		private Integer versionRequirement; 
 		private Integer minVersionRequirement; 
@@ -105,8 +103,8 @@ public class SystemQueryFormDTO implements Serializable {
 
 
 		//-------------------------------------------------------------------------------------------------
-		public Builder deviceName(final String deiceNameRequirements) {
-			this.deiceNameRequirements = deiceNameRequirements;
+		public Builder deviceName(final String deviceNameRequirements) {
+			this.deviceNameRequirements = deviceNameRequirements;
 			return this;
 		}
 

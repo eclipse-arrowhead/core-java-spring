@@ -5,7 +5,6 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.shared.DeviceResponseDTO;
 import eu.arrowhead.common.dto.shared.OnboardingWithCsrRequestDTO;
 import eu.arrowhead.common.dto.shared.OnboardingWithCsrResponseDTO;
 import eu.arrowhead.common.dto.shared.OnboardingWithNameRequestDTO;
@@ -14,7 +13,7 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.core.onboarding.database.service.OnboardingDBService;
+import eu.arrowhead.core.onboarding.service.OnboardingService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -65,7 +64,7 @@ public class OnboardingController {
     private static final String CSR_NULL_ERROR_MESSAGE = " CertificateSigningRequest must have value ";
 
     private final Logger logger = LogManager.getLogger(OnboardingController.class);
-    private final OnboardingDBService onboardingDBService;
+    private final OnboardingService onboardingDBService;
     private final SSLProperties sslProperties;
 
 
@@ -76,7 +75,7 @@ public class OnboardingController {
     private Optional<String> sharedSecret;
 
     @Autowired
-    public OnboardingController(final OnboardingDBService onboardingDBService, final SSLProperties sslProperties) {
+    public OnboardingController(final OnboardingService onboardingDBService, final SSLProperties sslProperties) {
         this.onboardingDBService = onboardingDBService;
         this.sslProperties = sslProperties;
     }

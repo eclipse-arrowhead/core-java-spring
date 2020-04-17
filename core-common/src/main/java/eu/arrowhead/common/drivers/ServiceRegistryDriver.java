@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
@@ -32,11 +33,14 @@ public class ServiceRegistryDriver extends AbstractDriver {
 
     public UriComponents findCoreSystemService(final CoreSystemService service) throws DriverUtilities.DriverException {
         logger.traceEntry("findCoreSystemService:{}", service);
+        Assert.notNull(service, "CoreSystemService must not be null");
         return logger.traceExit(driverUtilities.findUriByServiceRegistry(service));
     }
 
     public ServiceQueryResultDTO queryRegistry(final ServiceQueryFormDTO form) {
         logger.traceEntry("queryRegistry: {}", form);
+        Assert.notNull(form, "ServiceQueryFormDTO must not be null");
+
         final UriComponents uri = driverUtilities.getServiceRegistryQueryUri();
         final ResponseEntity<ServiceQueryResultDTO> httpEntity = httpService
                 .sendRequest(uri, HttpMethod.POST, ServiceQueryResultDTO.class, form);
@@ -45,6 +49,8 @@ public class ServiceRegistryDriver extends AbstractDriver {
 
     public ServiceRegistryResponseDTO registerService(final ServiceRegistryRequestDTO request) throws DriverUtilities.DriverException {
         logger.traceEntry("registerService: {}", request);
+        Assert.notNull(request, "ServiceRegistryRequestDTO must not be null");
+
         final UriComponents uri = driverUtilities.findUriByOrchestrator(CoreSystemService.SERVICE_REGISTRY_REGISTER_SERVICE);
         final ResponseEntity<ServiceRegistryResponseDTO> httpEntity = httpService
                 .sendRequest(uri, HttpMethod.POST, ServiceRegistryResponseDTO.class, request);

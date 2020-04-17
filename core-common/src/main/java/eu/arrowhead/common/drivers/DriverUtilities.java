@@ -25,6 +25,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -102,6 +103,7 @@ public class DriverUtilities {
 
     //-------------------------------------------------------------------------------------------------
     public UriComponents findUriByContext(final CoreSystemService service) throws DriverException {
+        Assert.notNull(service, "CoreSystemService must not be null");
         logger.debug("Searching for '{}' uri in context ...", service.getServiceDefinition());
         final String key = getCoreSystemServiceKey(service);
         if (containsContext(key)) {
@@ -116,6 +118,7 @@ public class DriverUtilities {
     }
 
     public ServiceRegistryResponseDTO findByServiceRegistry(final CoreSystemService service, final boolean pingTarget) throws DriverException {
+        Assert.notNull(service, "CoreSystemService must not be null");
         logger.debug("findByServiceRegistry started...");
         final UriComponents queryUri = getServiceRegistryQueryUri();
         final ServiceQueryFormDTO form = new ServiceQueryFormDTO.Builder(service.getServiceDefinition())
@@ -159,6 +162,7 @@ public class DriverUtilities {
     }
 
     public UriComponents findUriByOrchestrator(final CoreSystemService service) throws DriverException {
+        Assert.notNull(service, "CoreSystemService must not be null");
 
         try {
             return findUriByContext(service);
@@ -167,6 +171,7 @@ public class DriverUtilities {
         }
 
         logger.debug("findUriByOrchestrator started...");
+
         final UriComponents queryUri = getOrchestrationQueryUri();
         final SystemRequestDTO requester = getCoreSystemRequestDTO();
 
@@ -203,14 +208,17 @@ public class DriverUtilities {
     }
 
     public UriComponents createUri(final ServiceRegistryResponseDTO entry) {
+        Assert.notNull(entry, "ServiceRegistryResponseDTO must not be null");
         return createUri(entry.getSecure(), entry.getProvider(), entry.getServiceUri());
     }
 
     public UriComponents createUri(final OrchestrationResultDTO entry) {
+        Assert.notNull(entry, "OrchestrationResultDTO must not be null");
         return createUri(entry.getSecure(), entry.getProvider(), entry.getServiceUri());
     }
 
     public UriComponents createUri(final ServiceSecurityType securityType, final SystemResponseDTO system, final String serviceUri) {
+        Assert.notNull(system, "SystemResponseDTO must not be null");
         return Utilities.createURI(getScheme(securityType),
                                    system.getAddress(),
                                    system.getPort(),
@@ -218,6 +226,7 @@ public class DriverUtilities {
     }
 
     public UriComponents createEchoUri(final UriComponents serviceUri) {
+        Assert.notNull(serviceUri, "UriComponents must not be null");
         return UriComponentsBuilder.newInstance()
                                    .scheme(serviceUri.getScheme())
                                    .host(serviceUri.getHost())
@@ -229,6 +238,7 @@ public class DriverUtilities {
 
     //-------------------------------------------------------------------------------------------------
     public UriComponents createCustomUri(final UriComponents serviceUri, final String systemUri, final String postfix) {
+        Assert.notNull(serviceUri, "UriComponents must not be null");
         return UriComponentsBuilder.newInstance()
                                    .uriComponents(serviceUri)
                                    .replacePath(systemUri)
@@ -238,6 +248,7 @@ public class DriverUtilities {
 
     //-------------------------------------------------------------------------------------------------
     public UriComponents createCustomUri(final UriComponents serviceUri, final String postfix) {
+        Assert.notNull(serviceUri, "UriComponents must not be null");
         return UriComponentsBuilder.newInstance()
                                    .uriComponents(serviceUri)
                                    .path(extractSystemUriPath(serviceUri))
@@ -247,6 +258,7 @@ public class DriverUtilities {
 
     //-------------------------------------------------------------------------------------------------
     public String getCoreSystemServiceKey(final CoreSystemService service) {
+        Assert.notNull(service, "CoreSystemService must not be null");
         return service.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
     }
 
