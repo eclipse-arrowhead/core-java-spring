@@ -242,12 +242,14 @@ public class SecurityUtilities {
             creationResponseDTO.setKeyPairDTO(encodePublicKey(publicKey));
 
         } catch (final IOException e) {
-            logger.fatal("ByteArrayInputStream should never throw an IOException, but it just did ..");
+            logger.fatal("ByteArrayInputStream should never throw an IOException, but it just did : {}", e.getMessage());
+            throw new ArrowheadException(e.getMessage());
         }
     }
 
     //-------------------------------------------------------------------------------------------------
     public KeyPair extractOrGenerateKeyPair(final CertificateCreationRequestDTO creationRequestDTO) {
+        Assert.notNull(creationRequestDTO, "creationRequestDTO must not be null");
 
         final String commonName = creationRequestDTO.getCommonName();
         Assert.isTrue(Utilities.notEmpty(commonName), "CommonName is null or blank");

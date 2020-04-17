@@ -7,7 +7,7 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`system_registry` TO 'system_registry'@'loca
 GRANT ALL PRIVILEGES ON `arrowhead`.`device` TO 'system_registry'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'system_registry'@'localhost';
 
-REVOKE ALL, GRANT OPTION FROM 'service_registry'@'%';
+REVOKE ALL, GRANT OPTION FROM 'system_registry'@'%';
 
 GRANT ALL PRIVILEGES ON `arrowhead`.`system_` TO 'system_registry'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`system_registry` TO 'system_registry'@'%';

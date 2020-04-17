@@ -2,7 +2,7 @@ package eu.arrowhead.core.onboarding;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.database.service.CommonDBService;
-import eu.arrowhead.core.onboarding.database.service.OnboardingDBService;
+import eu.arrowhead.core.onboarding.service.OnboardingService;
 import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -29,8 +29,8 @@ public class OnboardingTestContext {
     //-------------------------------------------------------------------------------------------------
     @Bean
     @Primary // This bean is primary only in test context
-    public OnboardingDBService mockOnboardingDBService() {
-        return Mockito.mock(OnboardingDBService.class);
+    public OnboardingService mockOnboardingDBService() {
+        return Mockito.mock(OnboardingService.class);
     }
 
     //-------------------------------------------------------------------------------------------------
