@@ -60,6 +60,7 @@ import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.ServiceConfigurationError;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Utilities {
@@ -79,6 +80,9 @@ public class Utilities {
 	private static final String KEY_FACTORY_ALGORHITM_NAME = "RSA";
 	private static final KeyFactory keyFactory;
 	private static final Pattern PEM_PATTERN = Pattern.compile("(?m)(?s)^---*BEGIN.*---*$(.*)^---*END.*---*$.*");
+
+	private static final String MAC_ADDRESS_PATTERN_STRING = "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$";
+	public static final Pattern MAC_ADDRESS_PATTERN = Pattern.compile(MAC_ADDRESS_PATTERN_STRING);
 
 	private static final Logger logger = LogManager.getLogger(Utilities.class);
 	private static final ObjectMapper mapper = new ObjectMapper();
@@ -663,4 +667,10 @@ public class Utilities {
         final String[] cnParts = commonName.split("\\.");
         return (cnParts.length == 4 && cnParts[2].equals(AH_MASTER_NAME) && cnParts[3].equals(AH_MASTER_SUFFIX));
     }
+
+	public static boolean isValidMacAddress(final String macAddress) {
+		Assert.notNull(macAddress, "MAC address must not be null");
+		final Matcher matcher = MAC_ADDRESS_PATTERN.matcher(macAddress);
+		return matcher.matches();
+	}
 }

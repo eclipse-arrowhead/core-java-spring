@@ -60,7 +60,7 @@ public class OnboardingDBService {
 
         try {
             certificateSigningRequest = securityUtilities.createCertificateSigningRequest(creationRequestDTO.getCommonName(), keyPair,
-                                                                                          host, address, CertificateType.AH_ONBOARDING);
+                                                                                          CertificateType.AH_ONBOARDING, host, address);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw new ArrowheadException("Unable to create certificate signing request: " + e.getMessage());

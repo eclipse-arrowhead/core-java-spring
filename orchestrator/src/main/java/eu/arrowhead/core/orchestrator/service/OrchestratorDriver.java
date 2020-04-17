@@ -432,9 +432,6 @@ public class OrchestratorDriver {
 	private void filterProviderListUsingAuthorizationResult(final List<ServiceRegistryResponseDTO> providers, final AuthorizationIntraCloudCheckResponseDTO authResult) {
 		logger.debug("filterProviderListUsingAuthorizationResult started...");
 
-		// disabled for demo purposes
-
-		/*
 		if (authResult.getAuthorizedProviderIdsWithInterfaceIds().isEmpty()) {
 			// consumer has no access to any of the specified providers
 			providers.clear();
@@ -450,7 +447,6 @@ public class OrchestratorDriver {
 				}
 			}
 		}
-		*/
 	}
 	
 	//-------------------------------------------------------------------------------------------------

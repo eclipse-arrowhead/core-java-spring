@@ -9,7 +9,6 @@ import eu.arrowhead.common.database.entity.DeviceRegistry;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.DeviceRegistryRepository;
 import eu.arrowhead.common.database.repository.DeviceRepository;
-import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.drivers.CertificateAuthorityDriver;
 import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
@@ -30,7 +29,6 @@ import eu.arrowhead.common.dto.shared.DeviceRequestDTO;
 import eu.arrowhead.common.dto.shared.DeviceResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.core.deviceregistry.Validation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +47,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.regex.Matcher;
 
 @Service
 public class DeviceRegistryDBService {
@@ -112,7 +109,7 @@ public class DeviceRegistryDBService {
 
         try {
             certificateSigningRequest = securityUtilities
-                    .createCertificateSigningRequest(creationRequestDTO.getCommonName(), keyPair, host, address, CertificateType.AH_DEVICE);
+                    .createCertificateSigningRequest(creationRequestDTO.getCommonName(), keyPair, CertificateType.AH_DEVICE, host, address);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw new ArrowheadException("Unable to create certificate signing request: " + e.getMessage());
@@ -580,8 +577,7 @@ public class DeviceRegistryDBService {
         if (Utilities.isEmpty(macAddress)) {
             throw new InvalidParameterException("MAC address is null or empty");
         } else {
-            final Matcher matcher = Validation.MAC_ADDRESS_PATTERN.matcher(macAddress);
-            if (!matcher.matches()) {
+            if (!Utilities.isValidMacAddress(macAddress)) {
                 throw new InvalidParameterException("Unrecognized format of MAC Address");
             }
         }

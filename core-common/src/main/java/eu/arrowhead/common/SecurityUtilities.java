@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.Base64Utils;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
@@ -67,6 +68,9 @@ public class SecurityUtilities {
     public SecurityUtilities(@Value("${security.key.algorithm:RSA}") final String keyFactoryAlgorithm,
                              @Value("${security.key.size:2048}") final Integer keySize,
                              final SSLProperties sslProperties) throws NoSuchAlgorithmException {
+        Assert.hasText(keyFactoryAlgorithm,"keyFactoryAlgorithm must not be null");
+        Assert.notNull(keySize,"keyFactoryAlgorithm keySize not be null");
+        Assert.notNull(sslProperties,"sslProperties must not be null");
         this.sslProperties = sslProperties;
         keyFactory = KeyFactory.getInstance(keyFactoryAlgorithm);
         keyPairGenerator = KeyPairGenerator.getInstance(keyFactoryAlgorithm);
@@ -78,6 +82,7 @@ public class SecurityUtilities {
 
     //-------------------------------------------------------------------------------------------------
     public static String getCertificateCNFromRequest(final HttpServletRequest request) {
+        Assert.notNull(request,"request must not be null");
         final X509Certificate[] certificates = (X509Certificate[]) request.getAttribute(CommonConstants.ATTR_JAVAX_SERVLET_REQUEST_X509_CERTIFICATE);
         if (certificates != null && certificates.length != 0) {
             final X509Certificate cert = certificates[0];
@@ -89,6 +94,7 @@ public class SecurityUtilities {
 
     //-------------------------------------------------------------------------------------------------
     private static String getCommonNameFromCloudCertificate(final Principal principal) {
+        Assert.notNull(principal, "Principal must not be null");
         return Utilities.getCertCNFromSubject(principal.getName());
     }
 
@@ -110,6 +116,7 @@ public class SecurityUtilities {
     //-------------------------------------------------------------------------------------------------
     private static String extractCNPart(final Principal principal, final int tailIndex) {
         Assert.notNull(principal, "Principal must not be null");
+        Assert.isTrue(tailIndex >= 0, "tailIndex must not be negative");
         final String fullCN = principal.getName();
         Assert.hasText(fullCN, "Empty common name is not allowed");
 
@@ -124,6 +131,9 @@ public class SecurityUtilities {
 
     //-------------------------------------------------------------------------------------------------
     public void authenticateCertificate(final HttpServletRequest httpServletRequest, final CertificateType minimumStrength) {
+        Assert.notNull(httpServletRequest,"httpServletRequest must not be null");
+        Assert.notNull(minimumStrength,"minimumStrength must not be null");
+
         final X509Certificate[] certificates = (X509Certificate[]) httpServletRequest.getAttribute(CommonConstants.ATTR_JAVAX_SERVLET_REQUEST_X509_CERTIFICATE);
 
         if (sslProperties.isSslEnabled()) {
@@ -143,12 +153,11 @@ public class SecurityUtilities {
 
     //-------------------------------------------------------------------------------------------------
     public void authenticateCertificate(final String clientCN, final String requestTarget, final CertificateType minimumStrength) {
-        if (sslProperties.isSslEnabled()) {
+        Assert.notNull(clientCN,"clientCN must not be null");
+        Assert.notNull(requestTarget,"requestTarget must not be null");
+        Assert.notNull(minimumStrength,"minimumStrength must not be null");
 
-            if (Objects.isNull(clientCN)) {
-                logger.debug("Unable to extract common name from client certificate: {}", clientCN);
-                throw new AuthException("Client is unauthorized to access " + requestTarget);
-            }
+        if (sslProperties.isSslEnabled()) {
 
             final CertificateType type = CertificateType.getTypeFromCN(clientCN);
             if (!type.hasMinimumStrength(minimumStrength)) {
@@ -162,12 +171,15 @@ public class SecurityUtilities {
     // assistant methods
 
     //-------------------------------------------------------------------------------------------------
-    public String createCertificateSigningRequest(final String baseCommonName, final KeyPair keyPair, final String host, final String address,
-                                                  final CertificateType type)
+    public String createCertificateSigningRequest(final String baseCommonName, final KeyPair keyPair, final CertificateType type,
+                                                  final String host, final String address)
             throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, OperatorCreationException {
-
+        Assert.hasText(baseCommonName, "baseCommonName must not be null or empty!");
+        Assert.notNull(keyPair, "keyPair must not be null");
         Assert.notNull(sslProperties.getKeyStore(), "KeyStore property must not be null!");
         Assert.hasText(sslProperties.getKeyStorePassword(), "KeyStore password property must not be null or empty!");
+        Assert.notNull(type, "type must not be null");
+        // host and address are optional
 
         logger.debug("Preparing Certificate Signing Request ...");
         // get cloud certificate for cloudName and operator
@@ -192,10 +204,10 @@ public class SecurityUtilities {
         namesBuilder.addName(new GeneralName(GeneralName.dNSName, baseCommonName));
         namesBuilder.addName(new GeneralName(GeneralName.iPAddress, "127.0.0.1"));
 
-        if (Objects.nonNull(host)) {
+        if (StringUtils.hasText(host)) {
             namesBuilder.addName(new GeneralName(GeneralName.dNSName, host));
         }
-        if (Objects.nonNull(host)) {
+        if (StringUtils.hasText(address)) {
             namesBuilder.addName(new GeneralName(GeneralName.iPAddress, address));
         }
 
@@ -211,6 +223,8 @@ public class SecurityUtilities {
 
     //-------------------------------------------------------------------------------------------------
     public void extractAndSetPublicKey(final CertificateCreationResponseDTO creationResponseDTO) {
+        Assert.notNull(creationResponseDTO, "creationResponseDTO must not be null");
+
         try {
             final byte[] certificateBytes = Base64Utils.decodeFromString(creationResponseDTO.getCertificate());
 

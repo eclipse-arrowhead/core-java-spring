@@ -188,6 +188,10 @@ public class Validation {
         if (Utilities.isEmpty(request.getMacAddress())) {
             throw new BadPayloadException(DEVICE_MAC_ADDRESS_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
+
+        if (!Utilities.isValidMacAddress(request.getMacAddress())) {
+            throw new BadPayloadException("Unrecognized format of MAC Address", HttpStatus.SC_BAD_REQUEST, origin);
+        }
     }
 
     //-------------------------------------------------------------------------------------------------
