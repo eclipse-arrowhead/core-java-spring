@@ -37,7 +37,9 @@ import eu.arrowhead.common.dto.shared.SystemRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -572,12 +574,14 @@ public class SystemRegistryDBService {
         logger.debug("removeSystemRegistryByNameAndAddressAndPort is started...");
         final System system = getSystemByNameAndAddressAndPort(systemName, address, port);
 
-        final Optional<SystemRegistry> optionalSystemRegistry = systemRegistryRepository.findBySystem(system);
-        final SystemRegistry systemRegistry = optionalSystemRegistry.orElseThrow(
-                () -> new InvalidParameterException(
-                        "System Registry entry for System with name '" + systemName + "', address '" + address + "' and port '" + port + "' does not exist"));
+        final List<SystemRegistry> entries = systemRegistryRepository.findBySystem(system);
+        if (entries.isEmpty()) {
+            throw new InvalidParameterException("System Registry entry for System with name '" + systemName +
+                                                        "', address '" + address +
+                                                        "' and port '" + port + "' does not exist");
+        }
 
-        systemRegistryRepository.delete(systemRegistry);
+        systemRegistryRepository.deleteInBatch(entries);
         systemRegistryRepository.flush();
 
         publishUnregister(systemRegistry);
@@ -697,7 +701,7 @@ public class SystemRegistryDBService {
 
         try {
             certificateSigningRequest = securityUtilities
-                    .createCertificateSigningRequest(creationRequestDTO.getCommonName(), keyPair, host, address, CertificateType.AH_SYSTEM);
+                    .createCertificateSigningRequest(creationRequestDTO.getCommonName(), keyPair, CertificateType.AH_SYSTEM, host, address);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw new ArrowheadException("Unable to create certificate signing request: " + e.getMessage());
@@ -779,9 +783,11 @@ public class SystemRegistryDBService {
 
     //-------------------------------------------------------------------------------------------------
     private System getSystemByNameAndAddressAndPort(final String systemName, final String address, final int port) {
-        final Optional<System> optionalSystem = systemRepository.findBySystemNameAndAddressAndPort(systemName, address, port);
+        final String dbSystemName = Utilities.lowerCaseTrim(systemName);
+        final String dbAddress = Utilities.lowerCaseTrim(address);
+        final Optional<System> optionalSystem = systemRepository.findBySystemNameAndAddressAndPort(dbSystemName, dbAddress, port);
         return optionalSystem.orElseThrow(() -> new InvalidParameterException(
-                "System entry with name '" + systemName + "', address '" + address + "' and port '" + port + "' does not exist"));
+                "System entry with name '" + dbSystemName + "', address '" + dbAddress + "' and port '" + port + "' does not exist"));
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -911,6 +917,10 @@ public class SystemRegistryDBService {
         final String validatedDeviceName = Utilities.lowerCaseTrim(deviceName);
         final String validatedAddress = Utilities.lowerCaseTrim(address);
         final String validatedMacAddress = Utilities.lowerCaseTrim(macAddress);
+
+        if (!Utilities.isValidMacAddress(validatedMacAddress)) {
+            throw new BadPayloadException("Unrecognized format of MAC Address", HttpStatus.SC_BAD_REQUEST);
+        }
 
         checkConstraintsOfDeviceTable(validatedDeviceName, validatedMacAddress);
 
@@ -1049,6 +1059,10 @@ public class SystemRegistryDBService {
         final String validateName = Utilities.lowerCaseTrim(deviceName);
         final String validateAddress = Utilities.lowerCaseTrim(address);
         final String validatedMacAddress = Utilities.lowerCaseTrim(macAddress);
+
+        if (!Utilities.isValidMacAddress(validatedMacAddress)) {
+            throw new BadPayloadException("Unrecognized format of MAC Address", HttpStatus.SC_BAD_REQUEST);
+        }
 
         final Optional<Device> optProvider = deviceRepository.findByDeviceNameAndMacAddress(validateName, validatedMacAddress);
         Device provider;

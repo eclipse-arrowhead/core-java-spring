@@ -17,7 +17,7 @@ public interface SystemRegistryRepository extends RefreshableRepository<SystemRe
     // methods
 
     //-------------------------------------------------------------------------------------------------
-    Optional<SystemRegistry> findBySystem(final System system);
+    List<SystemRegistry> findBySystem(final System system);
 
     List<SystemRegistry> findByDevice(final Device device);
 

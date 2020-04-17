@@ -2,25 +2,18 @@ package eu.arrowhead.core.deviceregistry;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
-import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.shared.CertificateType;
 import eu.arrowhead.common.dto.shared.DeviceRegistryOnboardingWithCsrRequestDTO;
 import eu.arrowhead.common.dto.shared.DeviceRegistryOnboardingWithNameRequestDTO;
 import eu.arrowhead.common.dto.shared.DeviceRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.DeviceRequestDTO;
-import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.servlet.http.HttpServletRequest;
-import java.security.cert.X509Certificate;
 import java.time.format.DateTimeParseException;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Validation {
 
@@ -28,9 +21,6 @@ public class Validation {
     private static final String DEVICE_NAME_NULL_ERROR_MESSAGE = " Device name must have value ";
     private static final String DEVICE_ADDRESS_NULL_ERROR_MESSAGE = " Device address must have value ";
     private static final String DEVICE_MAC_ADDRESS_NULL_ERROR_MESSAGE = " Device MAC address must have value ";
-
-    private static final String MAC_ADDRESS_PATTERN_STRING = "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$";
-    public static final Pattern MAC_ADDRESS_PATTERN = Pattern.compile(MAC_ADDRESS_PATTERN_STRING);
 
     private final Logger logger = LogManager.getLogger();
 
@@ -65,8 +55,7 @@ public class Validation {
             throw new BadPayloadException("MAC Address of the device is blank", HttpStatus.SC_BAD_REQUEST, origin);
         }
 
-        final Matcher matcher = MAC_ADDRESS_PATTERN.matcher(macAddress);
-        if (!matcher.matches()) {
+        if (!Utilities.isValidMacAddress(macAddress)) {
             throw new BadPayloadException("Unrecognized format of MAC Address", HttpStatus.SC_BAD_REQUEST, origin);
         }
     }
@@ -192,14 +181,11 @@ public class Validation {
 
             if (Utilities.notEmpty(device.getDeviceName())) {
                 needChange = true;
-            }
-            else if (Utilities.notEmpty(device.getAddress())) {
+            } else if (Utilities.notEmpty(device.getAddress())) {
                 needChange = true;
-            }
-            else if (Utilities.notEmpty(device.getMacAddress())) {
+            } else if (Utilities.notEmpty(device.getMacAddress())) {
                 needChange = true;
-            }
-            else if (Utilities.notEmpty(device.getAuthenticationInfo())) {
+            } else if (Utilities.notEmpty(device.getAuthenticationInfo())) {
                 needChange = true;
             }
         }

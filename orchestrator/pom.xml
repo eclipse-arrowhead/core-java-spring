@@ -10,15 +10,7 @@
   	<packaging>jar</packaging>
   	<name>Arrowhead Orchestrator</name>
   	<description>Arrowhead Orchestrator core service</description>
-  	
-  	<dependencies>
-	    <dependency>
-	      	<groupId>eu.arrowhead</groupId>
-	      	<artifactId>arrowhead-core-common</artifactId>
-	      	<version>${revision}</version>
-	    </dependency>
-  	</dependencies>
-  	
+
   	<build>
 	 	<plugins>
 	   		<plugin>
