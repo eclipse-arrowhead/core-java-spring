@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
 
 @Service
@@ -29,6 +30,7 @@ public class CertificateAuthorityDriver {
 
     public CertificateSigningResponseDTO signCertificate(final CertificateSigningRequestDTO request) throws DriverUtilities.DriverException {
         logger.traceEntry("signCertificate: {}", request);
+        Assert.notNull(request,"CertificateSigningRequestDTO must not be null");
         final UriComponents uri = driverUtilities.findUriByOrchestrator(CoreSystemService.CERTIFICATE_AUTHORITY_SIGN_SERVICE);
         final ResponseEntity<CertificateSigningResponseDTO> httpResponse = httpService
                 .sendRequest(uri, HttpMethod.POST, CertificateSigningResponseDTO.class, request);
