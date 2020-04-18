@@ -62,9 +62,12 @@ CREATE TABLE IF NOT EXISTS `mscv_mip`
 
 CREATE TABLE IF NOT EXISTS `mscv_mip_verification_list`
 (
-    `id`          bigint(20) PRIMARY KEY AUTO_INCREMENT,
-    `name`        varchar(64) UNIQUE NOT NULL,
-    `description` varchar(255)
+    `id`                    bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `name`                  varchar(64) NOT NULL,
+    `description`           varchar(255),
+    `verification_interval` bigint(20)  NOT NULL,
+    `layer`                 varchar(16) NOT NULL,
+    UNIQUE KEY `u_verification_list_name_layer` (`name`, `layer`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 

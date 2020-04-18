@@ -53,9 +53,10 @@ public class CommonConstants {
 
 	public static final String CORE_SERVICE_QOS_MONITOR_PING_MEASUREMENT = "qos-monitor-ping-measurement";
 
-
 	public static final String CORE_SERVICE_SERVICE_REGISTRY_REGISTER = "service-register";
 	public static final String CORE_SERVICE_SERVICE_REGISTRY_UNREGISTER = "service-unregister";
+
+	public static final String CORE_SERVICE_MSCV_VERIFICATION = "standard-verification";
 
 	public static final String CORE_SERVICE_SYSTEM_REGISTRY_REGISTER = "system-register";
 	public static final String CORE_SERVICE_SYSTEM_REGISTRY_UNREGISTER = "system-unregister";
@@ -177,7 +178,8 @@ public class CommonConstants {
 	public static final String OP_QOS_MONITOR_PING_MEASUREMENT_SUFFIX = "/{" + COMMON_FIELD_NAME_ID + "}";
 
 	public static final String MSCV_URI = "/mscv";
-	public static final String OP_MSCV_EXECUTE = "/execute";
+	public static final String OP_MSCV_EXECUTE_URI = "/execute";
+	public static final String OP_MSCV_PUBLISH_URI = "/publish";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";

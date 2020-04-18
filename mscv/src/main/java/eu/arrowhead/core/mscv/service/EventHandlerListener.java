@@ -8,11 +8,14 @@ import eu.arrowhead.common.database.entity.mscv.Target;
 import eu.arrowhead.common.database.entity.mscv.VerificationEntryList;
 import eu.arrowhead.common.database.view.mscv.SshTargetView;
 import eu.arrowhead.common.drivers.EventDriver;
+import eu.arrowhead.common.dto.shared.DeviceRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.DeviceRequestDTO;
 import eu.arrowhead.common.dto.shared.EventDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.SubscriptionRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.mscv.Layer;
 import eu.arrowhead.common.dto.shared.mscv.OS;
 import eu.arrowhead.core.mscv.MscvDefaults;
 import eu.arrowhead.core.mscv.quartz.VerificationJobFactory;
@@ -25,28 +28,34 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
+import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
+
+import static eu.arrowhead.common.CommonConstants.OP_MSCV_PUBLISH_URI;
 
 @Service
 @Api(tags = {CoreCommonConstants.SWAGGER_TAG_ALL})
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS,
         allowedHeaders = {HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT}
 )
-@RestController(CommonConstants.MSCV_URI)
+@RestController
+@RequestMapping(CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI)
 public class EventHandlerListener {
 
-    private static final String PUBLISH_URI = "/publish";
     private static final int MAX_ATTEMPTS = 5;
     private final Logger logger = LogManager.getLogger();
 
@@ -78,42 +87,48 @@ public class EventHandlerListener {
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @PostMapping(PUBLISH_URI)
+    @PostMapping(OP_MSCV_PUBLISH_URI)
     @ResponseBody
     public void publish(@RequestBody final EventDTO event) throws IOException, MscvException, SchedulerException {
         logger.debug("publish started ...");
 
         switch (event.getEventType()) {
             case CoreEventHandlerConstants.REGISTER_DEVICE_EVENT:
-                final var registerDevice = eventDriver.convert(event.getPayload(), DeviceRequestDTO.class);
-                createJob(convert(registerDevice));
+                final var registerDevice = eventDriver.convert(event.getPayload(), DeviceRegistryRequestDTO.class);
+                createJob(new SshTargetViewDto(registerDevice.getDevice()), Layer.DEVICE);
                 break;
             case CoreEventHandlerConstants.UNREGISTER_DEVICE_EVENT:
-                final var unregisterDevice = eventDriver.convert(event.getPayload(), DeviceRequestDTO.class);
-                deleteJob(convert(unregisterDevice));
+                final var unregisterDevice = eventDriver.convert(event.getPayload(), DeviceRegistryRequestDTO.class);
+                deleteJob(new SshTargetViewDto(unregisterDevice.getDevice()), Layer.DEVICE);
                 break;
             case CoreEventHandlerConstants.REGISTER_SYSTEM_EVENT:
-                final var registerSystem = eventDriver.convert(event.getPayload(), SystemRequestDTO.class);
-                createJob(convert(registerSystem));
+                final var registerSystem = eventDriver.convert(event.getPayload(), SystemRegistryRequestDTO.class);
+                createJob(new SshTargetViewDto(registerSystem.getSystem()), Layer.SYSTEM);
                 break;
             case CoreEventHandlerConstants.UNREGISTER_SYSTEM_EVENT:
-                final var unregisterSystem = eventDriver.convert(event.getPayload(), SystemRequestDTO.class);
-                deleteJob(convert(unregisterSystem));
+                final var unregisterSystem = eventDriver.convert(event.getPayload(), SystemRegistryRequestDTO.class);
+                deleteJob(new SshTargetViewDto(unregisterSystem.getSystem()), Layer.SYSTEM);
                 break;
             case CoreEventHandlerConstants.REGISTER_SERVICE_EVENT:
                 final var registerService = eventDriver.convert(event.getPayload(), ServiceRegistryRequestDTO.class);
-                createJob(convert(registerService));
+                createJob(new SshTargetViewDto(registerService.getProviderSystem()), Layer.SERVICE);
                 break;
             case CoreEventHandlerConstants.UNREGISTER_SERVICE_EVENT:
                 final var unregisterService = eventDriver.convert(event.getPayload(), ServiceRegistryRequestDTO.class);
-                deleteJob(convert(unregisterService));
+                deleteJob(new SshTargetViewDto(unregisterService.getProviderSystem()), Layer.SERVICE);
                 break;
             default:
                 logger.warn("Unknown event type {} with payload: {}", event.getEventType(), event.getPayload());
         }
     }
 
-    @PostConstruct
+    @EventListener
+    @Order(99) // can't use @PostConstruct because authorization rules are done be ApplicationInitListener
+    public void onApplicationEvent(final ContextRefreshedEvent event) {
+        unsubscribe();
+        subscribe();
+    }
+
     public void subscribe() {
         boolean success = false;
         int count = 0;
@@ -151,96 +166,25 @@ public class EventHandlerListener {
         }
     }
 
-    private void createJob(final SshTargetView targetView) throws MscvException, SchedulerException {
+    private void createJob(final SshTargetView targetView, final Layer layer) throws MscvException, SchedulerException {
         final Target target = targetService.findOrCreateTarget(targetView);
-        final VerificationEntryList entryList = executionService.findSuitableList(target);
+        final VerificationEntryList entryList = executionService.findSuitableList(target, layer);
         jobFactory.createVerificationJob(entryList, target);
     }
 
-    private void deleteJob(final SshTargetView targetView) throws MscvException {
+    private void deleteJob(final SshTargetView targetView, final Layer layer) throws MscvException {
         final Target target = targetService.findOrCreateTarget(targetView);
-        final VerificationEntryList entryList = executionService.findSuitableList(target);
+        final VerificationEntryList entryList = executionService.findSuitableList(target, layer);
         jobFactory.removeVerificationJob(entryList, target);
     }
 
-    private SshTargetView convert(final DeviceRequestDTO dto) {
-        return new SshTargetView() {
-            @Override
-            public String getAddress() {
-                return dto.getAddress();
-            }
-
-            @Override
-            public Integer getPort() {
-                return mscvDefaults.getSshPort();
-            }
-
-            @Override
-            public String getName() {
-                return dto.getDeviceName();
-            }
-
-            @Override
-            public OS getOs() {
-                return mscvDefaults.getOs();
-            }
-        };
-    }
-
-    private SshTargetView convert(final SystemRequestDTO dto) {
-        return new SshTargetView() {
-            @Override
-            public String getAddress() {
-                return dto.getAddress();
-            }
-
-            @Override
-            public Integer getPort() {
-                return mscvDefaults.getSshPort();
-            }
-
-            @Override
-            public String getName() {
-                return dto.getSystemName();
-            }
-
-            @Override
-            public OS getOs() {
-                return mscvDefaults.getOs();
-            }
-        };
-    }
-
-    private SshTargetView convert(final ServiceRegistryRequestDTO dto) {
-        return new SshTargetView() {
-            @Override
-            public String getAddress() {
-                return dto.getProviderSystem().getAddress();
-            }
-
-            @Override
-            public Integer getPort() {
-                return mscvDefaults.getSshPort();
-            }
-
-            @Override
-            public String getName() {
-                return dto.getProviderSystem().getSystemName();
-            }
-
-            @Override
-            public OS getOs() {
-                return mscvDefaults.getOs();
-            }
-        };
-    }
 
     private SubscriptionRequestDTO createSubscriptionRequest(final String eventType) {
         final SubscriptionRequestDTO dto = new SubscriptionRequestDTO();
         dto.setSubscriberSystem(eventDriver.getRequesterSystem());
         dto.setEventType(eventType);
         dto.setMatchMetaData(false);
-        dto.setNotifyUri(CommonConstants.MSCV_URI + PUBLISH_URI);
+        dto.setNotifyUri(CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI + OP_MSCV_PUBLISH_URI);
         return dto;
     }
 
@@ -250,6 +194,55 @@ public class EventHandlerListener {
             Thread.sleep(sleepTime);
         } catch (InterruptedException e) {
             logger.warn(e.getMessage(), e);
+        }
+    }
+
+
+    private class SshTargetViewDto implements SshTargetView {
+
+        private final String name;
+        private final OS os = mscvDefaults.getOs();
+        private final String address;
+        private final Integer port = mscvDefaults.getSshPort();
+
+        SshTargetViewDto(final DeviceRequestDTO dto) {
+            this.name = dto.getDeviceName();
+            this.address = dto.getAddress();
+        }
+
+        SshTargetViewDto(final SystemRequestDTO dto) {
+            this.name = dto.getSystemName();
+            this.address = dto.getAddress();
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public OS getOs() {
+            return os;
+        }
+
+        @Override
+        public String getAddress() {
+            return address;
+        }
+
+        @Override
+        public Integer getPort() {
+            return port;
+        }
+
+        @Override
+        public String toString() {
+            return new StringJoiner(", ", SshTargetViewDto.class.getSimpleName() + "[", "]")
+                    .add("name='" + name + "'")
+                    .add("os=" + os)
+                    .add("address='" + address + "'")
+                    .add("port=" + port)
+                    .toString();
         }
     }
 }

@@ -4,6 +4,8 @@ import eu.arrowhead.common.dto.shared.mscv.OS;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import java.util.StringJoiner;
@@ -11,6 +13,7 @@ import java.util.StringJoiner;
 @Entity
 @Table(name = "mscv_ssh_target",
         uniqueConstraints = @UniqueConstraint(name = "u_address_port", columnNames = {"address", "port"}))
+@PrimaryKeyJoinColumn(name = "id", referencedColumnName = "id")
 public class SshTarget extends Target {
 
     @Column(nullable = false, length = 32)

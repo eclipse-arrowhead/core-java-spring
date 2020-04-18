@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import static eu.arrowhead.common.CommonConstants.OP_MSCV_EXECUTE;
+import static eu.arrowhead.common.CommonConstants.OP_MSCV_EXECUTE_URI;
 
 @Api(tags = {CoreCommonConstants.SWAGGER_TAG_ALL})
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS,
@@ -73,7 +73,7 @@ public class MscvExecutionController {
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @PostMapping(OP_MSCV_EXECUTE)
+    @PostMapping(OP_MSCV_EXECUTE_URI)
     @ResponseBody
     public VerificationExecutionView execute(@RequestBody final ExecutionRequest executionRequest) {
         logger.debug("execute started ...");

@@ -29,7 +29,6 @@ import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.security.PublicKey;
 import java.util.Base64;

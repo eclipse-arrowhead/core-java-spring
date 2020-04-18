@@ -4,11 +4,13 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SecurityUtilities;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.filter.thirdparty.MultiReadRequestWrapper;
 import eu.arrowhead.common.security.CoreSystemAccessControlFilter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -33,12 +35,17 @@ public class MscvAccessControlFilter extends CoreSystemAccessControlFilter {
             try {
                 final MultiReadRequestWrapper requestWrapper = new MultiReadRequestWrapper((HttpServletRequest) request);
                 final String requestTarget = Utilities.stripEndSlash(requestWrapper.getRequestURL().toString());
+                final String cloudCN = getServerCloudCN();
+                final String clientCN = SecurityUtilities.getCertificateCNFromRequest(requestWrapper);
 
-                if (requestTarget.contains(CoreCommonConstants.MGMT_URI)) {
+                Assert.notNull(requestTarget, "Unable to determine request target");
+                Assert.notNull(clientCN, "Unable to extract common name from request");
+
+                if (requestTarget.endsWith(CommonConstants.OP_MSCV_PUBLISH_URI)) {
+                    // Only event handler can use these methods
+                    checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, new CoreSystem[]{CoreSystem.EVENT_HANDLER}, requestTarget);
+                } else if (requestTarget.contains(CoreCommonConstants.MGMT_URI)) {
                     // Only the local System Operator can use these methods
-                    final String cloudCN = getServerCloudCN();
-                    final String clientCN = SecurityUtilities.getCertificateCNFromRequest(requestWrapper);
-
                     checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
                 }
 

@@ -10,6 +10,7 @@ import eu.arrowhead.common.database.repository.mscv.VerificationExecutionDetailR
 import eu.arrowhead.common.database.repository.mscv.VerificationExecutionRepository;
 import eu.arrowhead.common.database.view.mscv.VerificationExecutionView;
 import eu.arrowhead.common.database.view.mscv.VerificationListView;
+import eu.arrowhead.common.dto.shared.mscv.Layer;
 import eu.arrowhead.common.dto.shared.mscv.VerificationRunResult;
 import eu.arrowhead.core.mscv.MscvDefaults;
 import eu.arrowhead.core.mscv.MscvDtoConverter;
@@ -80,18 +81,18 @@ public class MscvExecutionService {
     }
 
     @Transactional(rollbackOn = Exception.class)
-    public VerificationListView getListByName(final String name) {
+    public VerificationListView getListByNameAndLayer(final String name, final Layer layer) {
         logger.debug("getListByName({}) started", name);
         Assert.notNull(name, NAME_NOT_NULL);
-        final Optional<VerificationEntryList> optional = verificationListRepo.findOneByName(name);
+        final Optional<VerificationEntryList> optional = verificationListRepo.findOneByNameAndLayer(name, layer);
         return MscvDtoConverter.convert(optional.orElseThrow(notFoundException("name")));
     }
 
-    public VerificationEntryList findSuitableList(final Target target) throws MscvException {
+    public VerificationEntryList findSuitableList(final Target target, final Layer layer) throws MscvException {
         logger.debug("findSuitableList({}) started", target);
 
         // no strategy exists yet. using default list
-        Optional<VerificationEntryList> defaultList = verificationListRepo.findOneByName(defaults.getDefaultList());
+        Optional<VerificationEntryList> defaultList = verificationListRepo.findOneByNameAndLayer(defaults.getDefaultList(), layer);
         return defaultList.orElseThrow(() -> new MscvException("No suitable list found"));
     }
 }

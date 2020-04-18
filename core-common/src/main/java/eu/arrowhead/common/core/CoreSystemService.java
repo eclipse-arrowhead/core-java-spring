@@ -3,80 +3,7 @@ package eu.arrowhead.common.core;
 import eu.arrowhead.common.Utilities;
 import org.springframework.util.Assert;
 
-import static eu.arrowhead.common.CommonConstants.AUTHORIZATION_URI;
-import static eu.arrowhead.common.CommonConstants.CERTIFICATE_AUTHRORITY_URI;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_AUTH_CONTROL_INTER;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_AUTH_CONTROL_INTRA;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_AUTH_CONTROL_SUBSCRIPTION;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_AUTH_PUBLIC_KEY;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_AUTH_TOKEN_GENERATION;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_CERTIFICATE_AUTHORITY_SIGN;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_DEVICE_REGISTRY_ONBOARDING_WITH_CSR;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_DEVICE_REGISTRY_ONBOARDING_WITH_NAME;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_DEVICE_REGISTRY_REGISTER;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_DEVICE_REGISTRY_UNREGISTER;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_EVENT_HANDLER_PUBLISH;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_EVENT_HANDLER_SUBSCRIBE;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_EVENT_HANDLER_UNSUBSCRIBE;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_GATEKEEPER_GSD;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_GATEKEEPER_ICN;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_GATEWAY_CONNECT_CONSUMER;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_GATEWAY_CONNECT_PROVIDER;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_GATEWAY_PUBLIC_KEY;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_ONBOARDING_WITH_CERTIFICATE_AND_CSR;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_ONBOARDING_WITH_CERTIFICATE_AND_NAME;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_ONBOARDING_WITH_SHARED_SECRET_AND_CSR;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_ONBOARDING_WITH_SHARED_SECRET_AND_NAME;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_ORCH_PROCESS;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_QOS_MONITOR_PING_MEASUREMENT;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_SERVICE_REGISTRY_REGISTER;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_SERVICE_REGISTRY_UNREGISTER;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_SYSTEM_REGISTRY_ONBOARDING_WITH_CSR;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_SYSTEM_REGISTRY_ONBOARDING_WITH_NAME;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_SYSTEM_REGISTRY_REGISTER;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_SYSTEM_REGISTRY_UNREGISTER;
-import static eu.arrowhead.common.CommonConstants.DEVICE_REGISTRY_URI;
-import static eu.arrowhead.common.CommonConstants.EVENT_HANDLER_URI;
-import static eu.arrowhead.common.CommonConstants.GATEKEEPER_URI;
-import static eu.arrowhead.common.CommonConstants.GATEWAY_URI;
-import static eu.arrowhead.common.CommonConstants.ONBOARDING_URI;
-import static eu.arrowhead.common.CommonConstants.OP_AUTH_INTER_CHECK_URI;
-import static eu.arrowhead.common.CommonConstants.OP_AUTH_INTRA_CHECK_URI;
-import static eu.arrowhead.common.CommonConstants.OP_AUTH_KEY_URI;
-import static eu.arrowhead.common.CommonConstants.OP_AUTH_SUBSCRIPTION_CHECK_URI;
-import static eu.arrowhead.common.CommonConstants.OP_AUTH_TOKEN_URI;
-import static eu.arrowhead.common.CommonConstants.OP_CA_SIGN_CERTIFICATE_URI;
-import static eu.arrowhead.common.CommonConstants.OP_DEVICE_REGISTRY_ONBOARDING_WITH_CSR_URI;
-import static eu.arrowhead.common.CommonConstants.OP_DEVICE_REGISTRY_ONBOARDING_WITH_NAME_URI;
-import static eu.arrowhead.common.CommonConstants.OP_DEVICE_REGISTRY_REGISTER_URI;
-import static eu.arrowhead.common.CommonConstants.OP_DEVICE_REGISTRY_UNREGISTER_URI;
-import static eu.arrowhead.common.CommonConstants.OP_EVENT_HANDLER_PUBLISH;
-import static eu.arrowhead.common.CommonConstants.OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE;
-import static eu.arrowhead.common.CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE;
-import static eu.arrowhead.common.CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE;
-import static eu.arrowhead.common.CommonConstants.OP_GATEKEEPER_GSD_SERVICE;
-import static eu.arrowhead.common.CommonConstants.OP_GATEKEEPER_ICN_SERVICE;
-import static eu.arrowhead.common.CommonConstants.OP_GATEWAY_CONNECT_CONSUMER_URI;
-import static eu.arrowhead.common.CommonConstants.OP_GATEWAY_CONNECT_PROVIDER_URI;
-import static eu.arrowhead.common.CommonConstants.OP_GATEWAY_KEY_URI;
-import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_CERTIFICATE_AND_CSR;
-import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_CERTIFICATE_AND_NAME;
-import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_SHARED_SECRET_AND_CSR;
-import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_SHARED_SECRET_AND_NAME;
-import static eu.arrowhead.common.CommonConstants.OP_ORCH_PROCESS;
-import static eu.arrowhead.common.CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT;
-import static eu.arrowhead.common.CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT_SUFFIX;
-import static eu.arrowhead.common.CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI;
-import static eu.arrowhead.common.CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI;
-import static eu.arrowhead.common.CommonConstants.OP_SYSTEM_REGISTRY_ONBOARDING_WITH_CSR_URI;
-import static eu.arrowhead.common.CommonConstants.OP_SYSTEM_REGISTRY_ONBOARDING_WITH_NAME_URI;
-import static eu.arrowhead.common.CommonConstants.OP_SYSTEM_REGISTRY_REGISTER_URI;
-import static eu.arrowhead.common.CommonConstants.OP_SYSTEM_REGISTRY_UNREGISTER_URI;
-import static eu.arrowhead.common.CommonConstants.ORCHESTRATOR_URI;
-import static eu.arrowhead.common.CommonConstants.QOS_MONITOR_URI;
-import static eu.arrowhead.common.CommonConstants.SERVICE_REGISTRY_URI;
-import static eu.arrowhead.common.CommonConstants.SYSTEM_REGISTRY_URI;
+import static eu.arrowhead.common.CommonConstants.*;
 
 public enum CoreSystemService {
 
@@ -139,7 +66,10 @@ public enum CoreSystemService {
 
     // Service Registry services
     SERVICE_REGISTRY_REGISTER_SERVICE(CORE_SERVICE_SERVICE_REGISTRY_REGISTER, SERVICE_REGISTRY_URI + OP_SERVICE_REGISTRY_REGISTER_URI),
-    SERVICE_REGISTRY_UNREGISTER_SERVICE(CORE_SERVICE_SERVICE_REGISTRY_UNREGISTER, SERVICE_REGISTRY_URI + OP_SERVICE_REGISTRY_UNREGISTER_URI);
+    SERVICE_REGISTRY_UNREGISTER_SERVICE(CORE_SERVICE_SERVICE_REGISTRY_UNREGISTER, SERVICE_REGISTRY_URI + OP_SERVICE_REGISTRY_UNREGISTER_URI),
+
+    // Monitoring and Standard Verification Services
+    MSCV_VERIFICATION_SERVICE(CORE_SERVICE_MSCV_VERIFICATION, MSCV_URI + OP_MSCV_EXECUTE_URI);
 
     //TODO: additional services
 

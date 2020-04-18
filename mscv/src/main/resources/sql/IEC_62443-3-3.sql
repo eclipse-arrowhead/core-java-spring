@@ -26,11 +26,11 @@ VALUES (1, 'Human user identification and authentication',
         (SELECT id FROM mscv_standard WHERE identification = 'IEC 62443-3-3'),
         (SELECT id FROM mscv_mip_domain WHERE name = 'SECURITY'));
 
-INSERT INTO `mscv_mip_verification_list` (`name`, `description`)
-VALUES ('Default verification list', null);
+INSERT INTO `mscv_mip_verification_list` (`name`, `layer`, `verification_interval`)
+VALUES ('default', 'DEVICE', 300);
 
 INSERT INTO `mscv_mip_verification_entry` (`mip_id`, `weight`, `verification_list_id`)
 VALUES ((SELECT id FROM mscv_mip WHERE name = 'Human user identification and authentication'),
         100,
-        (SELECT id FROM mscv_mip_verification_list WHERE name = 'Default verification list'));
+        (SELECT id FROM mscv_mip_verification_list WHERE name = 'default' AND layer = 'DEVICE'));
 

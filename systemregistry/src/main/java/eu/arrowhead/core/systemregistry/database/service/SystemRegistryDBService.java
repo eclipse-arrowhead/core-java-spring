@@ -584,7 +584,7 @@ public class SystemRegistryDBService {
         systemRegistryRepository.deleteInBatch(entries);
         systemRegistryRepository.flush();
 
-        publishUnregister(systemRegistry);
+        entries.forEach(this::publishUnregister);
     }
 
 

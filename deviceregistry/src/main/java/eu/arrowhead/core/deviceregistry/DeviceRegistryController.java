@@ -103,7 +103,7 @@ public class DeviceRegistryController {
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-    @PostMapping(path = {CommonConstants.OP_DEVICE_REGISTRY_REGISTER_URI, CoreCommonConstants.MGMT_URI},
+    @PostMapping(path = {CommonConstants.OP_DEVICE_REGISTRY_REGISTER_URI},
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public DeviceRegistryResponseDTO registerDevice(final HttpServletRequest httpServletRequest,

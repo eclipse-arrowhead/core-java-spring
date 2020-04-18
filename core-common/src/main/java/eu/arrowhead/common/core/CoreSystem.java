@@ -47,7 +47,7 @@ public enum CoreSystem {
     CHOREOGRAPHER(Defaults.DEFAULT_CHOREOGRAPHER_PORT, List.of()), // TODO: add services
     QOS_MONITOR(Defaults.DEFAULT_QOS_MONITOR_PORT, List.of(CoreSystemService.QOS_MONITOR_PING_MEASUREMENT_SERVICE)),
     CERTIFICATE_AUTHORITY(Defaults.DEFAULT_CERTIFICATE_AUTHORITY_PORT, List.of(CoreSystemService.CERTIFICATE_AUTHORITY_SIGN_SERVICE)),
-    MSCV(Defaults.DEFAULT_MSCV_PORT, List.of()); // TODO: add services
+    MSCV(Defaults.DEFAULT_MSCV_PORT, List.of(CoreSystemService.MSCV_VERIFICATION_SERVICE));
 
     //=================================================================================================
     // members

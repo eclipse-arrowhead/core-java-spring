@@ -1,33 +1,44 @@
 package eu.arrowhead.common.database.entity.mscv;
 
+import eu.arrowhead.common.dto.shared.mscv.Layer;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
 
 @Entity
-@Table(name = "mscv_mip_verification_list")
+@Table(name = "mscv_mip_verification_list",
+        uniqueConstraints = @UniqueConstraint(name = "u_verification_list_name_layer", columnNames = {"name", "layer"}))
 public class VerificationEntryList {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 64)
+    @Column(nullable = false, length = 64)
     private String name;
 
     @Column
     private String description;
 
-    @Column
+    @Column(nullable = false)
     private Long verificationInterval;
 
-    // TODO add layer here instead of having it in ???
+    @Column(nullable = false, length = 16)
+    @Enumerated(EnumType.STRING)
+    private Layer layer;
 
     @OneToMany(mappedBy = "verificationList", fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<VerificationEntry> entries = new HashSet<>();
@@ -84,6 +95,14 @@ public class VerificationEntryList {
         this.verificationInterval = verificationInterval;
     }
 
+    public Layer getLayer() {
+        return layer;
+    }
+
+    public void setLayer(final Layer layer) {
+        this.layer = layer;
+    }
+
     public Set<VerificationEntry> getEntries() {
         return entries;
     }
@@ -111,9 +130,10 @@ public class VerificationEntryList {
         final var sj = new StringJoiner(", ", VerificationEntryList.class.getSimpleName() + "[", "]");
         sj.add("id=" + id)
           .add("name='" + name + "'")
-          .add("description='" + description + "'");
+          .add("description='" + description + "'")
+          .add("verificationInterval='" + verificationInterval + "'")
+          .add("layer='" + layer + "'");
         if (Objects.nonNull(entries)) { sj.add("entries=" + entries.size()); }
-        sj.add("verificationInterval='" + verificationInterval + "'");
         return sj.toString();
     }
 }
