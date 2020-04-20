@@ -17,6 +17,7 @@ import eu.arrowhead.common.database.repository.ChoreographerPlanRepository;
 import eu.arrowhead.common.database.repository.ChoreographerStepRepository;
 import eu.arrowhead.common.database.repository.ChoreographerWorklogRepository;
 import eu.arrowhead.common.dto.internal.ChoreographerActionRequestDTO;
+import eu.arrowhead.common.dto.internal.ChoreographerStatusType;
 import eu.arrowhead.common.dto.internal.ChoreographerStepRequestDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
@@ -361,9 +362,9 @@ public class ChoreographerDBService {
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public ChoreographerRunningStep registerRunningStep(final long stepId, final long sessionId, final String status, final String message) {
+    public ChoreographerRunningStep registerRunningStep(final long stepId, final long sessionId, final ChoreographerStatusType status, final String message) {
         try {
-            if (Utilities.isEmpty(status)) {
+            if (status == null) {
                 throw new InvalidParameterException("Status is null or blank.");
             }
 
@@ -389,9 +390,9 @@ public class ChoreographerDBService {
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public ChoreographerRunningStep setRunningStepStatus(final long runningStepId, final String status, final String message) {
+    public ChoreographerRunningStep setRunningStepStatus(final long runningStepId, final ChoreographerStatusType status, final String message) {
         try {
-            if (Utilities.isEmpty(status)) {
+            if (status == null) {
                 throw new InvalidParameterException("Status is null or blank.");
             }
 
@@ -451,7 +452,7 @@ public class ChoreographerDBService {
         try {
             final Optional<ChoreographerPlan> planOptional = choreographerPlanRepository.findById(planId);
             if (planOptional.isPresent()) {
-                ChoreographerSession sessionEntry = choreographerSessionRepository.saveAndFlush(new ChoreographerSession(planOptional.get(), StepStatus.INITIATED.toString()));
+                ChoreographerSession sessionEntry = choreographerSessionRepository.saveAndFlush(new ChoreographerSession(planOptional.get(), ChoreographerStatusType.INITIATED));
                 String worklogMessage = "Plan with ID of " + planId + " started running with session ID of " + sessionEntry.getId() + ".";
                 createWorklog(worklogMessage, "");
                 return sessionEntry;
@@ -475,7 +476,7 @@ public class ChoreographerDBService {
             Optional<ChoreographerSession> sessionOptional = choreographerSessionRepository.findById(sessionId);
             if (sessionOptional.isPresent()) {
                 ChoreographerSession session = sessionOptional.get();
-                session.setStatus(StepStatus.DONE.toString());
+                session.setStatus(ChoreographerStatusType.DONE);
                 createWorklog("Session with ID of " + sessionId + " finished successfully.", "");
                 return choreographerSessionRepository.saveAndFlush(session);
             } else {
@@ -491,10 +492,10 @@ public class ChoreographerDBService {
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public ChoreographerSession setSessionStatus(final long sessionId, final String state) {
+    public ChoreographerSession setSessionStatus(final long sessionId, final ChoreographerStatusType state) {
         logger.debug("changeSessionState started...");
 
-        if (Utilities.isEmpty(state)) {
+        if (state == null) {
             throw new InvalidParameterException("State is null or blank.");
         }
 

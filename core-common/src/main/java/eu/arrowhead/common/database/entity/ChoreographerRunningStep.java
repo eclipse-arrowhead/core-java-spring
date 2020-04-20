@@ -1,9 +1,12 @@
 package eu.arrowhead.common.database.entity;
 
 import eu.arrowhead.common.CoreDefaults;
+import eu.arrowhead.common.dto.internal.ChoreographerStatusType;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -25,8 +28,9 @@ public class ChoreographerRunningStep {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(length = CoreDefaults.VARCHAR_BASIC, nullable = false)
-    private String status;
+    @Column(nullable = false, columnDefinition = "varchar(" + CoreDefaults.VARCHAR_BASIC + ")")
+    @Enumerated(EnumType.STRING)
+    private ChoreographerStatusType status;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String message;
@@ -52,7 +56,7 @@ public class ChoreographerRunningStep {
     public ChoreographerRunningStep() {}
 
     //=================================================================================================
-    public ChoreographerRunningStep(String status, String message, ChoreographerStep step, ChoreographerSession session) {
+    public ChoreographerRunningStep(ChoreographerStatusType status, String message, ChoreographerStep step, ChoreographerSession session) {
         this.status = status;
         this.message = message;
         this.step = step;
@@ -61,7 +65,7 @@ public class ChoreographerRunningStep {
 
     //=================================================================================================
     public long getId() { return id; }
-    public String getStatus() { return status; }
+    public ChoreographerStatusType getStatus() { return status; }
     public String getMessage() { return message; }
     public ZonedDateTime getStartedAt() { return startedAt; }
     public ChoreographerStep getStep() { return step; }
@@ -70,7 +74,7 @@ public class ChoreographerRunningStep {
     //=================================================================================================
 
     public void setId(long id) { this.id = id; }
-    public void setStatus(String status) { this.status = status; }
+    public void setStatus(ChoreographerStatusType status) { this.status = status; }
     public void setMessage(String message) { this.message = message; }
     public void setStartedAt(ZonedDateTime startedAt) { this.startedAt = startedAt; }
     public void setStep(ChoreographerStep step) { this.step = step; }

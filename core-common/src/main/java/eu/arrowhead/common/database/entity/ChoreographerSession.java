@@ -1,11 +1,14 @@
 package eu.arrowhead.common.database.entity;
 
 import eu.arrowhead.common.CoreDefaults;
+import eu.arrowhead.common.dto.internal.ChoreographerStatusType;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -34,8 +37,9 @@ public class ChoreographerSession {
     @JoinColumn(name = "planId", referencedColumnName = "id", nullable = false)
     private ChoreographerPlan plan;
 
-    @Column(length = CoreDefaults.VARCHAR_BASIC, nullable = false)
-    private String status;
+    @Column(nullable = false, columnDefinition = "varchar(" + CoreDefaults.VARCHAR_BASIC + ")")
+    @Enumerated(EnumType.STRING)
+    private ChoreographerStatusType status;
 
     @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private ZonedDateTime startedAt;
@@ -54,7 +58,7 @@ public class ChoreographerSession {
     public ChoreographerSession() {}
 
     //=================================================================================================
-    public ChoreographerSession(ChoreographerPlan plan, String status) {
+    public ChoreographerSession(ChoreographerPlan plan, ChoreographerStatusType status) {
         this.plan = plan;
         this.status = status;
     }
@@ -62,14 +66,14 @@ public class ChoreographerSession {
     //=================================================================================================
     public long getId() { return id; }
     public ChoreographerPlan getPlan() { return plan; }
-    public String getStatus() { return status; }
+    public ChoreographerStatusType getStatus() { return status; }
     public ZonedDateTime getStartedAt() { return startedAt; }
     public Set<ChoreographerRunningStep> getRunningSteps() { return runningSteps; }
 
     //=================================================================================================
     public void setId(long id) { this.id = id; }
     public void setPlan(ChoreographerPlan plan) { this.plan = plan; }
-    public void setStatus(String status) { this.status = status; }
+    public void setStatus(ChoreographerStatusType status) { this.status = status; }
     public void setStartedAt(ZonedDateTime startedAt) { this.startedAt = startedAt; }
     public void setRunningSteps(Set<ChoreographerRunningStep> runningSteps) { this.runningSteps = runningSteps; }
 
