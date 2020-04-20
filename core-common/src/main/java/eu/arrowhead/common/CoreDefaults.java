@@ -29,7 +29,7 @@ public class CoreDefaults {
 	public static final boolean DEFAULT_AUTHORIZATION_IS_EVENTHANDLER_PRESENT = false;
 	
 	public static final boolean DEFAULT_ORCHESTRATOR_IS_GATEKEEPER_PRESENT = false;
-	
+
 	public static final int DEFAULT_RELAY_CHECK_INTERVAL = 9;
 	public static final int DEFAULT_NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS = 50;
 	
