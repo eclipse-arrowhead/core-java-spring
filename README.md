@@ -6369,14 +6369,14 @@ __CertificateCheckRequest__ is the input:
 ```json
 {
   "version": "integer",
-  "certificatePEM": "string"
+  "certificate": "string"
 }
 ```
 
 | Parameter        | Description                   | Necessity | Format/Limitations              |
 | ---------------- | ----------------------------- | --------- | ------------------------------- |
 | `version`        | Version of the check protocol | mandatory | integer, currently must be `1`  |
-| `certificatePEM` | The certificate to check      | mandatory | Base64 encoded X509 certificate |
+| `certificate`    | The certificate to check      | mandatory | Base64 encoded X509 certificate (PEM without headers) |
 
 <a name="ca_certificate_check_response" />
 
@@ -6454,7 +6454,7 @@ Returns __CertificateSigningResponse__:
 | Field | Description |
 | ----- | ----------- |
 | `id`               | ID of the newly generated Certificate in the database          |
-| `certificateChain` | The whole certificate chain in an array of PEM encoded strings |
+| `certificateChain` | The whole certificate chain in an array of Base64 encoded DER strings (PEM without headers) |
 
 
 <a name="ca_endpoints_check_trusted_key" />
@@ -6473,13 +6473,13 @@ __TrustedKeyCheckRequest__ is the input:
 
 ```json
 {
-  "publicKeyPEM": "string"
+  "publicKey": "string"
 }
 ```
 
-| Field          | Description             | Necessity | Format/Limitations              |
-| -------------- | ----------------------- | --------- | ------------------------------- |
-| `publicKeyPEM` | The public key to check | mandatory | Base64 encoded PEM public key   |
+| Field          | Description             | Necessity | Format/Limitations                                   |
+| -------------- | ----------------------- | --------- | ---------------------------------------------------- |
+| `publicKey`    | The public key to check | mandatory | Base64 encoded DER public key (PEM without headers)  |
 
 <a name="ca_trusted_key_check_response" />
 
@@ -6656,19 +6656,19 @@ __AddTrustedKeyRequest__  is the input:
 
 ```json
 {
-  "publicKeyPEM": "string",
+  "publicKey": "string",
   "description": "string",
   "validAfter": "string",
   "validBefore": "string"
 }
 ```
 
-| Field          | Description                                    | Necessity | Format/Limitations            |
-| -------------- | ---------------------------------------------- | --------- | ----------------------------- |
-| `publicKeyPEM` | The public key to add as trusted               | mandatory | Base64 encoded PEM public key |
-| `description`  | Description of the key; e.g. device identifier | mandatory | string                        |
-| `validAfter`   | Beginning of validity                          | optional  | ISO 8601 date/time string     |
-| `validBefore`  | End of validity                                | optional  | ISO 8601 date/time string     |
+| Field          | Description                                    | Necessity | Format/Limitations                                  |
+| -------------- | ---------------------------------------------- | --------- | --------------------------------------------------- |
+| `publicKey`    | The public key to add as trusted               | mandatory | Base64 encoded DER public key (PEM without headers) |
+| `description`  | Description of the key; e.g. device identifier | mandatory | string                                              |
+| `validAfter`   | Beginning of validity                          | optional  | ISO 8601 date/time string                           |
+| `validBefore`  | End of validity                                | optional  | ISO 8601 date/time string                           |
 
 Returns HTTP `201 Created` on success.
 
