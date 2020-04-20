@@ -66,12 +66,6 @@ public class ChoreographerDBService {
     private ChoreographerRunningStepRepository choreographerRunningStepRepository;
 
     private final Logger logger = LogManager.getLogger(ChoreographerDBService.class);
-
-    private enum StepStatus {
-        INITIATED,
-        RUNNING,
-        DONE
-    }
     
     //=================================================================================================
 	// methods
