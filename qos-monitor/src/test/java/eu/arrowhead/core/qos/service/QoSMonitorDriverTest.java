@@ -7,6 +7,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
@@ -21,7 +22,13 @@ import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.internal.CloudAccessListResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysAndPublicRelaysListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
+import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
+import eu.arrowhead.common.dto.internal.SystemAddressSetRelayResponseDTO;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.http.HttpService;
 
@@ -42,6 +49,94 @@ public class QoSMonitorDriverTest {
 
 	//=================================================================================================
 	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testQueryServiceRegistryAllUriNotFound() {
+		when(arrowheadContext.containsKey(anyString())).thenReturn(false);
+		testingObject.queryServiceRegistryAll();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testQueryServiceRegistryAllOk() {
+		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "not_important");
+		when(arrowheadContext.get(anyString())).thenReturn(uri);
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.GET), eq(ServiceRegistryListResponseDTO.class))).thenReturn(new ResponseEntity<>(new ServiceRegistryListResponseDTO(), HttpStatus.OK));
+		
+		testingObject.queryServiceRegistryAll();
+		verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.GET), eq(ServiceRegistryListResponseDTO.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testQueryGatekeeperAllCloudUriNotFound() {
+		when(arrowheadContext.containsKey(anyString())).thenReturn(false);
+		testingObject.queryGatekeeperAllCloud();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testQueryGatekeeperAllCloudOk() {
+		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "not_important");
+		when(arrowheadContext.get(anyString())).thenReturn(uri);
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.GET), eq(CloudWithRelaysAndPublicRelaysListResponseDTO.class))).thenReturn(new ResponseEntity<>(new CloudWithRelaysAndPublicRelaysListResponseDTO(), HttpStatus.OK));
+		
+		testingObject.queryGatekeeperAllCloud();
+		verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.GET), eq(CloudWithRelaysAndPublicRelaysListResponseDTO.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testQueryGatekeeperAllSystemAddressesUriNotFound() {
+		when(arrowheadContext.containsKey(anyString())).thenReturn(false);
+		testingObject.queryGatekeeperAllSystemAddresses(new CloudRequestDTO());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testQueryGatekeeperAllSystemAddressesNullCloud() {
+		testingObject.queryGatekeeperAllSystemAddresses(null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testQueryGatekeeperAllSystemAddressesOk() {
+		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "not_important");
+		when(arrowheadContext.get(anyString())).thenReturn(uri);
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(SystemAddressSetRelayResponseDTO.class), any(CloudRequestDTO.class))).thenReturn(new ResponseEntity<>(new SystemAddressSetRelayResponseDTO(), HttpStatus.OK));
+		
+		testingObject.queryGatekeeperAllSystemAddresses(new CloudRequestDTO());
+		verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(SystemAddressSetRelayResponseDTO.class), any(CloudRequestDTO.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testQueryGatekeeperCloudAccessTypesUriNotFound() {
+		when(arrowheadContext.containsKey(anyString())).thenReturn(false);
+		testingObject.queryGatekeeperCloudAccessTypes(List.of(new CloudRequestDTO()));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testQueryGatekeeperCloudAccessTypesNullCloudList() {
+		testingObject.queryGatekeeperCloudAccessTypes(null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testQueryGatekeeperCloudAccessTypesOk() {
+		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "not_important");
+		when(arrowheadContext.get(anyString())).thenReturn(uri);
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(CloudAccessListResponseDTO.class), any(List.class))).thenReturn(new ResponseEntity<>(new CloudAccessListResponseDTO(), HttpStatus.OK));
+		
+		testingObject.queryGatekeeperCloudAccessTypes(List.of(new CloudRequestDTO()));
+		verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(CloudAccessListResponseDTO.class), any(List.class));
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
@@ -95,5 +190,30 @@ public class QoSMonitorDriverTest {
 		testingObject.queryGatekeeperCloudInfo("aitia", "testcloud");
 		
 		verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.GET), eq(CloudWithRelaysResponseDTO.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testRequestGatekeeperInitRelayTestUriNotFound() {
+		when(arrowheadContext.containsKey(anyString())).thenReturn(false);
+		testingObject.requestGatekeeperInitRelayTest(new QoSRelayTestProposalRequestDTO());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testRequestGatekeeperInitRelayTestNullRequest() {
+		testingObject.requestGatekeeperInitRelayTest(null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRequestGatekeeperInitRelayTestNullRequestOk() {
+		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "not_important");
+		when(arrowheadContext.get(anyString())).thenReturn(uri);
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(Void.class), any(QoSRelayTestProposalRequestDTO.class))).thenReturn(new ResponseEntity<>(HttpStatus.OK));
+		
+		testingObject.requestGatekeeperInitRelayTest(new QoSRelayTestProposalRequestDTO());
+		verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(Void.class), any(QoSRelayTestProposalRequestDTO.class));
 	}
 }

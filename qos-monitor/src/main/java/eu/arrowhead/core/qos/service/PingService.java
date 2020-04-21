@@ -78,7 +78,7 @@ public class PingService {
 			for (int count = 0; count < pingMeasurementProperties.getTimeToRepeat(); count ++) {
 				IcmpPingResponse response;
 				try {
-					response = IcmpPingUtil.executePingRequest (request);
+					response = IcmpPingUtil.executePingRequest(request);
 					final String formattedResponse = IcmpPingUtil.formatResponse(response);
 					logger.debug(formattedResponse);
 

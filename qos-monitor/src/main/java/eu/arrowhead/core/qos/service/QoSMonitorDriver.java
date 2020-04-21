@@ -87,6 +87,8 @@ public class QoSMonitorDriver {
 	public CloudAccessListResponseDTO queryGatekeeperCloudAccessTypes(final List<CloudRequestDTO> cloudList) {
 		logger.debug("queryGatekeeperCloudAccessTypes started...");
 
+		Assert.notNull(cloudList, "CloudRequestDTO list is null.");
+		
 		try {
 			final UriComponents cloudAccessTypesUri = getGatekeeperCloudAccessTypesURI();
 			final ResponseEntity<CloudAccessListResponseDTO> response = httpService.sendRequest(cloudAccessTypesUri, HttpMethod.POST, CloudAccessListResponseDTO.class, cloudList);
@@ -102,6 +104,8 @@ public class QoSMonitorDriver {
 	public SystemAddressSetRelayResponseDTO queryGatekeeperAllSystemAddresses(final CloudRequestDTO cloud) {
 		logger.debug("queryGatekeeperAllSystemAddresses started...");
 
+		Assert.notNull(cloud, "CloudRequestDTO is null.");
+		
 		try {
 			final UriComponents queryByAllSystemsUri = getGatekeeperAllSystemsUri();
 			final ResponseEntity<SystemAddressSetRelayResponseDTO> response = httpService.sendRequest(queryByAllSystemsUri, HttpMethod.POST, SystemAddressSetRelayResponseDTO.class, cloud);

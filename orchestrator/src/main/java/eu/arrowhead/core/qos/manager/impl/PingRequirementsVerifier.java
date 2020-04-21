@@ -206,10 +206,14 @@ public class PingRequirementsVerifier implements QoSVerifier {
 		if (relayMeasurementList.getData() == null || relayMeasurementList.getData().isEmpty()) { // no record => use related constant to determine output 
 			return verifyNotMeasuredSystem;
 		}
+
+		if (!params.getProviderTargetCloudMeasurement().isProviderAvailable()) {
+			return false;
+		}
 		
 		for (final QoSInterRelayEchoMeasurementResponseDTO relayMeasurement : relayMeasurementList.getData()) {
 			final String relayAddressPort = relayMeasurement.getMeasurement().getRelay().getAddress() + ":" + relayMeasurement.getMeasurement().getRelay().getPort();
-			boolean verified =  true;
+			boolean verified =  true;			
 			
 			if (hasMaximumResponseTimeThreshold(params.getQosRequirements())) {
 				final int threshold = getMaximumResponseTimeThreshold(params.getQosRequirements());

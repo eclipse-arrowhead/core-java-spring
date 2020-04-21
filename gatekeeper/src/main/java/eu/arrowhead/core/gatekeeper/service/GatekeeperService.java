@@ -884,7 +884,7 @@ public class GatekeeperService {
 																							   pingMeasurement.getSentAll(),
 																							   pingMeasurement.getReceivedAll(),
 																							   pingMeasurement.getLostPerMeasurementPercent()));
-					updatedResults.add(orchestrationResult);					
+					updatedResults.add(orchestrationResult);
 				} else {
 					logger.debug("No measurement available. Provider skipped with id:" + orchestrationResult.getProvider().getId());
 				}

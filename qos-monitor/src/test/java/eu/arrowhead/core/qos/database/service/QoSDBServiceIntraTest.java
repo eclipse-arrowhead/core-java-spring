@@ -52,7 +52,7 @@ import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.dto.PingMeasurementCalculationsDTO;
 
 @RunWith(SpringRunner.class)
-public class QoSDBServiceTest {
+public class QoSDBServiceIntraTest {
 
 	//=================================================================================================
 	// members
@@ -1689,7 +1689,7 @@ public class QoSDBServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	private PingMeasurementCalculationsDTO getCalculationsForTest() {
 
-		final PingMeasurementCalculationsDTO calculatiions = new PingMeasurementCalculationsDTO(
+		final PingMeasurementCalculationsDTO calculations = new PingMeasurementCalculationsDTO(
 				true,//available,
 				1,//maxResponseTime,
 				1,//minResponseTime,
@@ -1702,7 +1702,7 @@ public class QoSDBServiceTest {
 				0,
 				ZonedDateTime.now());//lostPerMeasurementPercent);
 
-		return calculatiions;
+		return calculations;
 	}
 
 	//-------------------------------------------------------------------------------------------------

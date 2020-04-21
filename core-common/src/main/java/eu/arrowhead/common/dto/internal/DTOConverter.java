@@ -572,6 +572,7 @@ public class DTOConverter {
 		cloud.setId(cloudResponseDTO.getId());
 		cloud.setOperator(cloudResponseDTO.getOperator());
 		cloud.setName(cloudResponseDTO.getName());
+		cloud.setAuthenticationInfo(cloudResponseDTO.getAuthenticationInfo());
 		
 		return cloud;
 	}
