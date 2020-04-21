@@ -88,6 +88,12 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 	       * [Client](#qos_monitor_endpoints_client)
            * [Private](#qos_monitor_endpoints_private)
            * [Management](#qos_monitor_endpoints_mgmt)
+	9. [Choreographer](#choreographer)
+       * [System Design Description Overview](#choreographer_sdd)
+       * [Services and Use Cases](#choreographer_usecases)  
+       * [Endpoints](#choreographer_endpoints)
+	       * [Client](#choreographer_endpoints_client)
+           * [Management](#choreographer_endpoints_mgmt)
 	
 <a name="quickstart" />
 
@@ -6660,4 +6666,187 @@ __Ping Measurment response by system id__ the output :
 
 ### Get ping measurements by system id 
 
-For private endpoints no detailed description available.
+For private endpoints no detailed description are available.
+
+<a name="choreographer" />
+ 
+# Choreographer
+ 
+<a name="choreographer_sdd" />
+
+## System Design Description Overview
+
+This supporting core system makes it possible to execute pre-defined workflows through orchestration and consumption.
+
+Each workflow can be divided into three segments: plans, actions and steps. Plans define the whole workflow by name and they contain Actions which group coherent Steps together for greater transparency and enabling sequentialization of these step groups.
+
+Workflow execution in this generation can only be accomplished if the requested providers in each step are all available (they are registered with the same name in the service registry as in the plan description) and the requested services call back (notify) to the Choreographer through the Choreography service that the execution on their end is done. Only this way can the Choreographer continue the execution of the plan.
+
+<a name="choreographer_usecases" />
+
+## Services and Use Cases
+
+This System provides the Choreogher Service which only has one use-case scenario: notifying the Choreographer from the providers' side that the executed step is done.
+
+<a name="choreographer_endpoints" />
+
+## Endpoints
+
+The Choreographer offers two types of endpoints: Client and Management.
+
+Swagger API documentation is available on: `https://<host>:<port>` <br />
+The base URL for the requests: `http://<host>:<port>/choreographer`
+
+<a name="choreographer_endpoints_client" />
+
+### Client endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#choreographer_endpoints_get_echo) | /echo | GET | - | OK |
+| [Notify that a step is done](#choreographer_endpoints_post_nofity) | /notifyStepDone | POST | [SessionRunningStepData](#datastructures_choreographer_session_running_step_data) | OK |
+
+<a name="choreographer_endpoints_mgmt" />
+
+###  Management endpoint description<br />
+
+There endpoints are mainly used by the Management Tool and Cloud Administrators.
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Get all plan entries](#choreographer_endpoints_get_mgmt_plan) | /mgmt/plan | GET | - | [ChoreographerPlanEntryList](#datastructures_choreographerplanentrylist) |
+| [Add a plan entry](#choreographer_endpoints_post_mgmt_plan) | /mgmt/plan | POST | [ChoreographerPlanEntry](#datastructures_choreographer_addplanentry) | CREATED |
+| [Get a plan entry by ID](#choreographer_endpoints_get_mgmt_plan_id) | /mgmt/plan/{id} | GET | ChoreographerPlanID | [ChoreographerPlanEntry](#datastructures_choreographerplanentry)
+| [Delete a plan entry by ID](#choreographer_endpoints_delete_plan_id) | /mgmt/plan/{id} | DELETE | ChoreographerPlanID | NO CONTENT |
+| [Start one or more sessions executing a plan](#choreographer_endpoints_start_session_id) | /mgmt/session/start | POST | ChoreographerPlanIDList | CREATED |
+| [Notify that a step is done](#choreographer_endpoints_post_nofity) | /notifyStepDone | POST | [SessionRunningStepData](#datastructures_choreographer_session_running_step_data) | OK |
+
+
+<a name="choreographer_endpoints_get_echo" />
+
+### Echo
+```
+GET /choreographer/echo
+```
+
+Returns a "Got it" message with the purpose of testing the core service availability.
+
+<a name="choreographer_endpoints_post_nofity" />
+
+### Notify that a step is done
+```
+POST /choreographer/notifyStepDone
+```
+
+Returns HTTP 200 - OK if the notification of the Choreographer is successful.
+
+<a name="datastructures_choreographer_session_running_step_data" />
+
+__SessionRunningStepData__ is the input
+```json
+{
+  "runningStepId": 0,
+  "sessionId": 0
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `runningStepId` | The id of the running step which the provider gets from the Choreographer | yes |
+| `sessionId` | The id of the session in which the step is running | yes |
+
+<a name="choreographer_endpoints_get_mgmt_plan" />
+
+### Get all plan entries
+```
+GET /choreographer/mgmt/plan
+```
+
+Returns a list of Choreographer Plan records. If `page` and `item_per_page` are not defined, returns all records.
+
+Query params:
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `page` | zero based page index | no |
+| `item_per_page` | maximum number of items returned | no |
+| `sort_field` | sorts by the given column | no |
+| `direction` | direction of sorting | no |
+
+> **Note:** Default value for `sort_field` is `id`. All possible values are: 
+> * `id`
+> * `createdAt`
+> * `updatedAt`
+> * `name`
+
+> **Note:** Default value for `direction` is `ASC`. All possible values are:
+> * `ASC`
+> * `DESC` 
+
+<a name="datastructures_choreographerplanentrylist" />
+
+Returns a __ChoreographerPlanEntryList__
+```json
+[
+  { 
+    "id": 0,
+    "name": "string",
+	"firstActionName": "string",
+    "createdAt": "string", 
+    "updatedAt": "string",
+    "actions": [
+      {
+	    "id": 0,
+        "name": "string",
+        "createdAt": "string",
+		"updatedAt": "string",
+        "firstStepNames": [
+          "string"
+        ],
+        "nextActionName": "string",
+        "steps": [
+          {
+		    "id": 0,
+			"name": "string",
+			"serviceName": "string",
+            "metadata": "string",
+			"parameters": "string",
+            "quantity": 0,
+			"createdAt": "string",
+            "updatedAt": "string",
+            "nextSteps": [
+              {
+                "id": 0,
+                "stepName": "string"
+              }
+            ]
+          }
+        ],
+      }
+    ],
+  }
+]
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of the PlanEntry |
+| `name` | Name of the PlanEntry |
+| `firstActionName` | Name of the First Action |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+| `actions` | Array of the Actions in the plan |
+
+<a name="choreographer_endpoints_post_mgmt_plan" />
+
+### Add a plan entry
+```
+POST choreographer/mgmt/plan
+```
+
+Creates a plan record and returns HTTP 201 - CREATED if the addition is successful.
+
+
+
+
+
