@@ -3,6 +3,7 @@ package eu.arrowhead.core.qos.quartz.task;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
@@ -34,6 +35,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.QoSInterDirectMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterDirectPingMeasurement;
@@ -81,6 +83,9 @@ public class CloudPingTaskTest {
 	private Logger logger;
 
 	final static int TIME_TO_REPEAT_PING = 3;
+	
+	private static final List<CoreSystemService> REQUIRED_CORE_SERVICES = List.of(CoreSystemService.GATEKEEPER_PULL_CLOUDS, CoreSystemService.GATEKEEPER_COLLECT_ACCESS_TYPES,
+			  																	  CoreSystemService.GATEKEEPER_COLLECT_SYSTEM_ADDRESSES);
 
 	//=================================================================================================
 	// methods
@@ -127,6 +132,10 @@ public class CloudPingTaskTest {
 		final ArgumentCaptor<ZonedDateTime> aroundNowValueCaptor = ArgumentCaptor.forClass(ZonedDateTime.class);
 
 		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(false);
+		for (CoreSystemService coreSystemService : REQUIRED_CORE_SERVICES) {
+			final String key = coreSystemService.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+			when(arrowheadContext.containsKey(eq(key))).thenReturn(true);
+		}
 
 		when(qoSMonitorDriver.queryGatekeeperAllCloud()).thenReturn(cloudWithRelaysListResponseDTO);
 		when(qoSMonitorDriver.queryGatekeeperCloudAccessTypes(cloudRequestListDTOValueCaptor.capture())).thenReturn(cloudAccessListResponseDTO);
@@ -168,6 +177,7 @@ public class CloudPingTaskTest {
 		assertNotNull(debugMessages);
 
 		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
+		verify(arrowheadContext, times(REQUIRED_CORE_SERVICES.size() + 1)).containsKey(anyString());
 		verify(qoSMonitorDriver, times(1)).queryGatekeeperAllCloud();
 		verify(qoSMonitorDriver, times(1)).queryGatekeeperCloudAccessTypes(any());
 		verify(qoSDBService, times(1)).getInterDirectMeasurementByCloud(any(), any());

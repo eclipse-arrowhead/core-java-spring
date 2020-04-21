@@ -28,6 +28,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -35,6 +37,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.database.entity.QoSInterRelayMeasurement;
 import eu.arrowhead.common.dto.internal.CloudAccessListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudAccessResponseDTO;
@@ -45,7 +48,6 @@ import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
-import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.service.QoSMonitorDriver;
 
@@ -69,12 +71,18 @@ public class RelayEchoTaskTest {
 	@Mock
 	private Map<String,Object> arrowheadContext;
 	
+	@Mock(name = "relayEchoScheduler")
+	private Scheduler relayEchoScheduler;
+	
 	@Mock
 	private JobExecutionContext jobExecutionContext;
 	
 	private final boolean relayTaskEnabled = true;
 	
 	private PublicKey publicKey;
+	
+	private static final List<CoreSystemService> REQUIRED_CORE_SERVICES = List.of(CoreSystemService.GATEKEEPER_PULL_CLOUDS, CoreSystemService.GATEKEEPER_COLLECT_ACCESS_TYPES,
+			  																	  CoreSystemService.GATEKEEPER_COLLECT_SYSTEM_ADDRESSES, CoreSystemService.GATEKEEPER_RELAY_TEST_SERVICE);
 
 	private Logger logger;
 	
@@ -90,11 +98,17 @@ public class RelayEchoTaskTest {
 		ReflectionTestUtils.setField(relayEchoTask, "logger", logger);
 		ReflectionTestUtils.setField(relayEchoTask, "relayTaskEnabled", relayTaskEnabled);
 		publicKey = getPublicKey();
+		
+		for (CoreSystemService coreSystemService : REQUIRED_CORE_SERVICES) {
+			final String key = coreSystemService.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+			when(arrowheadContext.containsKey(eq(key))).thenReturn(true);
+		}
+		doNothing().when(relayEchoScheduler).shutdown();
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testExecuteServerStandAloneMode() {
+	public void testExecuteServerStandAloneMode() throws SchedulerException {
 		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(true);
 		
 		try {
@@ -103,16 +117,17 @@ public class RelayEchoTaskTest {
 			fail();
 		}
 
-		verify(logger, times(2)).debug(any(String.class));		
+		verify(logger, times(4)).debug(any(String.class));		
 		verify(qosMonitorDriver, never()).queryGatekeeperAllCloud();
 		verify(qosMonitorDriver, never()).queryGatekeeperCloudAccessTypes(any());
 		verify(qosDBService, never()).getInterRelayMeasurement(any(), any(), any());
 		verify(qosMonitorDriver, never()).requestGatekeeperInitRelayTest(any());
+		verify(relayEchoScheduler, times(1)).shutdown();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testExecuteSSLDisabled() {
+	public void testExecuteSSLDisabled() throws SchedulerException {
 		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(false);
 		when(sslProperties.isSslEnabled()).thenReturn(Boolean.FALSE);
 		
@@ -122,16 +137,17 @@ public class RelayEchoTaskTest {
 			fail();
 		}
 
-		verify(logger, times(2)).debug(any(String.class));		
+		verify(logger, times(4)).debug(any(String.class));		
 		verify(qosMonitorDriver, never()).queryGatekeeperAllCloud();
 		verify(qosMonitorDriver, never()).queryGatekeeperCloudAccessTypes(any());
 		verify(qosDBService, never()).getInterRelayMeasurement(any(), any(), any());
 		verify(qosMonitorDriver, never()).requestGatekeeperInitRelayTest(any());
+		verify(relayEchoScheduler, times(1)).shutdown();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testExecuteTaskDisabled() {
+	public void testExecuteTaskDisabled() throws SchedulerException {
 		ReflectionTestUtils.setField(relayEchoTask, "relayTaskEnabled", false);
 		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(false);
 		when(sslProperties.isSslEnabled()).thenReturn(Boolean.TRUE);
@@ -142,15 +158,16 @@ public class RelayEchoTaskTest {
 			fail();
 		}
 
-		verify(logger, times(2)).debug(any(String.class));		
+		verify(logger, times(4)).debug(any(String.class));		
 		verify(qosMonitorDriver, never()).queryGatekeeperAllCloud();
 		verify(qosMonitorDriver, never()).queryGatekeeperCloudAccessTypes(any());
 		verify(qosDBService, never()).getInterRelayMeasurement(any(), any(), any());
 		verify(qosMonitorDriver, never()).requestGatekeeperInitRelayTest(any());
+		verify(relayEchoScheduler, times(1)).shutdown();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Test(expected = ArrowheadException.class)
+	@Test
 	public void testExecutePublicKeyNotAvailable() {
 		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(false);
 		when(sslProperties.isSslEnabled()).thenReturn(Boolean.TRUE);
@@ -160,14 +177,13 @@ public class RelayEchoTaskTest {
 			relayEchoTask.execute(jobExecutionContext);
 		} catch (final JobExecutionException ex) {
 			fail();
-		} catch (final Exception ex) {
-			verify(logger, times(2)).debug(any(String.class));		
-			verify(qosMonitorDriver, never()).queryGatekeeperAllCloud();
-			verify(qosMonitorDriver, never()).queryGatekeeperCloudAccessTypes(any());
-			verify(qosDBService, never()).getInterRelayMeasurement(any(), any(), any());
-			verify(qosMonitorDriver, never()).requestGatekeeperInitRelayTest(any());
-			throw ex;
-		}		
+		} 
+		
+		verify(logger, times(4)).debug(any(String.class));		
+		verify(qosMonitorDriver, never()).queryGatekeeperAllCloud();
+		verify(qosMonitorDriver, never()).queryGatekeeperCloudAccessTypes(any());
+		verify(qosDBService, never()).getInterRelayMeasurement(any(), any(), any());
+		verify(qosMonitorDriver, never()).requestGatekeeperInitRelayTest(any());	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -185,7 +201,7 @@ public class RelayEchoTaskTest {
 			fail();
 		}
 		
-		verify(logger, times(5)).debug(any(String.class));		
+		verify(logger, times(6)).debug(any(String.class));		
 		verify(qosMonitorDriver, times(1)).queryGatekeeperAllCloud();
 		verify(qosMonitorDriver, times(1)).queryGatekeeperCloudAccessTypes(any());
 		verify(qosDBService, never()).getInterRelayMeasurement(any(), any(), any());
@@ -213,7 +229,7 @@ public class RelayEchoTaskTest {
 			fail();
 		}
 		
-		verify(logger, times(5)).debug(any(String.class));
+		verify(logger, times(6)).debug(any(String.class));
 		verify(logger, times(1)).info(any(String.class));
 		verify(qosMonitorDriver, times(1)).queryGatekeeperAllCloud();
 		verify(qosMonitorDriver, times(1)).queryGatekeeperCloudAccessTypes(any());
@@ -242,7 +258,7 @@ public class RelayEchoTaskTest {
 			fail();
 		}
 		
-		verify(logger, times(5)).debug(any(String.class));
+		verify(logger, times(6)).debug(any(String.class));
 		verify(logger, times(1)).info(any(String.class));
 		verify(qosMonitorDriver, times(1)).queryGatekeeperAllCloud();
 		verify(qosMonitorDriver, times(1)).queryGatekeeperCloudAccessTypes(any());
@@ -287,7 +303,7 @@ public class RelayEchoTaskTest {
 			fail();
 		}
 		
-		verify(logger, times(5)).debug(any(String.class));
+		verify(logger, times(6)).debug(any(String.class));
 		verify(qosMonitorDriver, times(1)).queryGatekeeperAllCloud();
 		verify(qosMonitorDriver, times(1)).queryGatekeeperCloudAccessTypes(any());
 		verify(qosDBService, times(2)).getInterRelayMeasurement(any(), any(), any());
@@ -339,7 +355,7 @@ public class RelayEchoTaskTest {
 			fail();
 		}
 		
-		verify(logger, times(5)).debug(any(String.class));
+		verify(logger, times(6)).debug(any(String.class));
 		verify(qosMonitorDriver, times(1)).queryGatekeeperAllCloud();
 		verify(qosMonitorDriver, times(1)).queryGatekeeperCloudAccessTypes(any());
 		verify(qosDBService, times(2)).getInterRelayMeasurement(any(), any(), any());
@@ -389,7 +405,7 @@ public class RelayEchoTaskTest {
 			fail();
 		}
 		
-		verify(logger, times(5)).debug(any(String.class));
+		verify(logger, times(6)).debug(any(String.class));
 		verify(qosMonitorDriver, times(1)).queryGatekeeperAllCloud();
 		verify(qosMonitorDriver, times(1)).queryGatekeeperCloudAccessTypes(any());
 		verify(qosDBService, times(2)).getInterRelayMeasurement(any(), any(), any());
@@ -441,7 +457,7 @@ public class RelayEchoTaskTest {
 			fail();
 		}
 		
-		verify(logger, times(5)).debug(any(String.class));
+		verify(logger, times(6)).debug(any(String.class));
 		verify(qosMonitorDriver, times(1)).queryGatekeeperAllCloud();
 		verify(qosMonitorDriver, times(1)).queryGatekeeperCloudAccessTypes(any());
 		verify(qosDBService, times(2)).getInterRelayMeasurement(any(), any(), any());
