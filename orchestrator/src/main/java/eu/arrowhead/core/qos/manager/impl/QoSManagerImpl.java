@@ -204,6 +204,9 @@ public class QoSManagerImpl implements QoSManager {
 					boolean verified = true;
 					for (final QoSVerifier verifier : verifiers) {
 						verified = verifier.verify(verificationParameters, true);
+						if(!verified) {
+							break;
+						}
 					}
 					if (verified) {
 						verifiedGSDResponse.setNumOfProviders(verifiedGSDResponse.getNumOfProviders() + 1);
@@ -246,6 +249,9 @@ public class QoSManagerImpl implements QoSManager {
 			boolean verified = true;
 			for (final QoSVerifier verifier : verifiers) {
 				verified = verifier.verify(verificationParameters, false);
+				if(!verified) {
+					break;
+				}
 			}
 			
 			if (verified) {
