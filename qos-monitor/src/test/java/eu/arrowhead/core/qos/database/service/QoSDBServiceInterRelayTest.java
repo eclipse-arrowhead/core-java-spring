@@ -66,9 +66,6 @@ public class QoSDBServiceInterRelayTest {
 	@Mock
 	private QoSInterRelayEchoMeasurementLogRepository qosInterRelayEchoMeasurementLogRepository;
 	
-	private static final String EMPTY_OR_NULL_ERROR_MESSAGE = " is empty or null";
-	private static final String NULL_ERROR_MESSAGE = " is null";
-	
 	//=================================================================================================
 	// methods
 	
@@ -559,9 +556,9 @@ public class QoSDBServiceInterRelayTest {
 	@Test(expected = InvalidParameterException.class)
 	public void changeInterRelayMeasurementStatusByIdMeasurementNotExistsTest() {
 		final long id = 6L;
-		final QoSMeasurementStatus originalStatus = QoSMeasurementStatus.FINISHED;
+//		final QoSMeasurementStatus originalStatus = QoSMeasurementStatus.FINISHED;
 		final QoSMeasurementStatus changedStatus = QoSMeasurementStatus.PENDING;
-		final QoSInterRelayMeasurement measurement = getQoSInterRelayMeasurementForTest(QoSMeasurementType.RELAY_ECHO, originalStatus);
+//		final QoSInterRelayMeasurement measurement = getQoSInterRelayMeasurementForTest(QoSMeasurementType.RELAY_ECHO, originalStatus);
 		
 		when(qosInterRelayMeasurementRepository.findById(eq(id))).thenReturn(Optional.empty());
 		
@@ -1132,7 +1129,7 @@ public class QoSDBServiceInterRelayTest {
 		echoMeasurementList.get(0).setMeanResponseTimeWithoutTimeout(35);
 		echoMeasurementList.get(1).setId(2L);
 		echoMeasurementList.get(1).setMeanResponseTimeWithoutTimeout(30);
-		final CloudResponseDTO cloudResp = DTOConverter.convertCloudToCloudResponseDTO(echoMeasurementList.get(0).getMeasurement().getCloud());
+//		final CloudResponseDTO cloudResp = DTOConverter.convertCloudToCloudResponseDTO(echoMeasurementList.get(0).getMeasurement().getCloud());
 		
 		try {
 			qosDBService.getBestInterRelayEchoMeasurementByCloudAndAttribute(null, QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT);			

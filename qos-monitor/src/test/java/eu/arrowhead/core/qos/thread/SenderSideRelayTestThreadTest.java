@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -44,6 +45,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -262,21 +265,81 @@ public class SenderSideRelayTestThreadTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("unchecked")
 	@Test
-	public void testOnMessageSenderFlagTrue() throws JMSException {
-		final byte[] someBytes = new byte[] { 1, 2 , 3};
+	public void testOnMessageSenderFlagTrueNormal() throws JMSException {
+		final byte[] someBytes = new byte[] { 0, 1 , 2};
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
 		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(someBytes);
 		
 		ReflectionTestUtils.setField(testingObject, "senderFlag", true);
+		@SuppressWarnings("rawtypes")
+		final Map<Byte,long[]> testResults = (Map) ReflectionTestUtils.getField(testingObject, "testResults");
+		testResults.put((byte)0, new long[] { System.currentTimeMillis(), 0 });
+		
 		testingObject.onMessage(getTestTextMessage("does not matter", "blabla"));
 
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		final BlockingQueue<Object> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
+		@SuppressWarnings("rawtypes")
+		final BlockingQueue<Byte> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
 
 		verify(relayClient, times(1)).getBytesFromMessage(any(Message.class), any(PublicKey.class));
 		verify(relayClient, never()).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), eq(someBytes));
+		verify(relayTestDBService, never()).storeMeasurements(any(CloudResponseDTO.class), any(RelayResponseDTO.class), any(Map.class));
+		Assert.assertTrue(testResults.get((byte)0)[1] > 0);
 		Assert.assertEquals(1, blockingQueue.size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testOnMessageSenderFlagTrueTimeout() throws JMSException {
+		final byte[] someBytes = new byte[] { 0, 1 , 2};
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(someBytes);
+		
+		ReflectionTestUtils.setField(testingObject, "senderFlag", true);
+		@SuppressWarnings("rawtypes")
+		final Map<Byte,long[]> testResults = (Map) ReflectionTestUtils.getField(testingObject, "testResults");
+		testResults.put((byte)0, new long[] { 10, 0 });
+		
+		testingObject.onMessage(getTestTextMessage("does not matter", "blabla"));
+
+		@SuppressWarnings("rawtypes")
+		final BlockingQueue<Byte> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
+
+		verify(relayClient, times(1)).getBytesFromMessage(any(Message.class), any(PublicKey.class));
+		verify(relayClient, never()).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), eq(someBytes));
+		verify(relayTestDBService, never()).storeMeasurements(any(CloudResponseDTO.class), any(RelayResponseDTO.class), any(Map.class));
+		Assert.assertEquals(0, blockingQueue.size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testOnMessageSenderFlagTrueLastIteration() throws JMSException {
+		final byte[] someBytes = new byte[] { 1, 2 , 3};
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(someBytes);
+		doNothing().when(relayClient).sendSwitchControlMessage(any(Session.class), any(MessageProducer.class), anyString());
+		doNothing().when(relayTestDBService).storeMeasurements(any(CloudResponseDTO.class), any(RelayResponseDTO.class), any(Map.class));
+		
+		ReflectionTestUtils.setField(testingObject, "senderFlag", true);
+		@SuppressWarnings("rawtypes")
+		final Map<Byte,long[]> testResults = (Map) ReflectionTestUtils.getField(testingObject, "testResults");
+		testResults.put((byte)1, new long[] { System.currentTimeMillis(), 0 });
+		
+		testingObject.onMessage(getTestTextMessage("does not matter", "blabla"));
+
+		@SuppressWarnings("rawtypes")
+		final BlockingQueue<Byte> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
+
+		verify(relayClient, times(1)).getBytesFromMessage(any(Message.class), any(PublicKey.class));
+		verify(relayClient, never()).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), eq(someBytes));
+		verify(relayClient, times(1)).sendSwitchControlMessage(any(Session.class), any(MessageProducer.class), anyString());
+		verify(relayTestDBService, times(1)).storeMeasurements(any(CloudResponseDTO.class), any(RelayResponseDTO.class), any(Map.class));
+		Assert.assertEquals(1, blockingQueue.size());
+		Assert.assertEquals(false, (boolean) ReflectionTestUtils.getField(testingObject, "senderFlag"));
+		Assert.assertEquals(true, (boolean) ReflectionTestUtils.getField(testingObject, "resultsSaved"));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -296,8 +359,30 @@ public class SenderSideRelayTestThreadTest {
 		doNothing().when(relayTestDBService).logErrorIntoMeasurementsTable(any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyInt(), anyString(), any(Throwable.class));
 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		final BlockingQueue<Object> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
-		blockingQueue.put(new Object());
+		final BlockingQueue<Byte> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
+		blockingQueue.put((byte)0);
+
+
+		testingObject.run();
+		
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		final Map<Byte,long[]> testResults = (Map) ReflectionTestUtils.getField(testingObject, "testResults");
+		final long[] times = testResults.get((byte) 0);
+		Assert.assertTrue(times[1] - times[0] < 1001);
+		verify(relayClient, times(2)).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		verify(relayTestDBService, times(1)).logErrorIntoMeasurementsTable(any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyInt(), eq(null), any(Throwable.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRunNoTimeoutButNotWaitedMessage() throws JMSException, InterruptedException {
+		doNothing().doThrow(ArrowheadException.class).when(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		doNothing().when(relayTestDBService).logErrorIntoMeasurementsTable(any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyInt(), anyString(), any(Throwable.class));
+
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		final BlockingQueue<Byte> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
+		blockingQueue.put((byte)2); // this one skipped
+		blockingQueue.put((byte)0); 
 
 		testingObject.run();
 		
@@ -328,28 +413,49 @@ public class SenderSideRelayTestThreadTest {
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testRunOk() throws JMSException, InterruptedException {
+	public void testRunTimeoutLastMessage() throws JMSException, InterruptedException {
 		doNothing().when(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
-		doNothing().when(relayTestDBService).storeMeasurements(any(CloudResponseDTO.class), any(RelayResponseDTO.class), any(Map.class));
-		doNothing().when(relayClient).sendSwitchControlMessage(any(Session.class),any(MessageProducer.class), anyString());
-
-		@SuppressWarnings({ "rawtypes" })
-		final BlockingQueue<Object> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
-		blockingQueue.put(new Object());
-		blockingQueue.put(new Object());
-		blockingQueue.put(new Object());
+		doNothing().when(relayClient).sendSwitchControlMessage(any(Session.class), any(MessageProducer.class), anyString());
 		
-		boolean senderFlag = (boolean) ReflectionTestUtils.getField(testingObject, "senderFlag");
-		Assert.assertTrue(senderFlag);
+		@SuppressWarnings("rawtypes")
+		final BlockingQueue<Byte> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
+		blockingQueue.put((byte)0); 
+		
+		doAnswer(new Answer<Object>() {
+			public Object answer(final InvocationOnMock invocation) throws InterruptedException {
+				blockingQueue.put((byte)-1);
+				return null;
+			}
+		}).when(relayTestDBService).storeMeasurements(any(CloudResponseDTO.class), any(RelayResponseDTO.class), any(Map.class)); // to make sure the last element of the blocking queue appears AFTER the timeout
 		
 		testingObject.run();
 		
-		senderFlag = (boolean) ReflectionTestUtils.getField(testingObject, "senderFlag");
-		Assert.assertFalse(senderFlag);
+		@SuppressWarnings("rawtypes")
+		final Map<Byte,long[]> testResults = (Map) ReflectionTestUtils.getField(testingObject, "testResults");
+		final long[] times = testResults.get((byte) 1);
+		Assert.assertEquals(1001, times[1] - times[0]);
+		verify(relayClient, times(2)).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		verify(relayClient, times(1)).sendSwitchControlMessage(any(Session.class), any(MessageProducer.class), anyString());
+		verify(relayTestDBService, times(1)).storeMeasurements(any(CloudResponseDTO.class), any(RelayResponseDTO.class), any(Map.class));
+		Assert.assertEquals(false, (boolean) ReflectionTestUtils.getField(testingObject, "senderFlag"));
+		Assert.assertEquals(true, (boolean) ReflectionTestUtils.getField(testingObject, "resultsSaved"));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testRunOk() throws JMSException, InterruptedException {
+		doNothing().when(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+
+		@SuppressWarnings({ "rawtypes" })
+		final BlockingQueue<Byte> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
+		blockingQueue.put((byte)0);
+		blockingQueue.put((byte)1);
+		blockingQueue.put((byte)-1);
+		
+		testingObject.run();
 		
 		verify(relayClient, times(2)).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
-		verify(relayTestDBService, times(1)).storeMeasurements(any(CloudResponseDTO.class), any(RelayResponseDTO.class), any(Map.class));
-		verify(relayClient, times(1)).sendSwitchControlMessage(any(Session.class),any(MessageProducer.class), anyString());
 	}
 	
 	//=================================================================================================
