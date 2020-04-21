@@ -56,7 +56,8 @@ public class CloudPingTask implements Job {
 	@Resource(name = "cloudPingSheduler")
 	private Scheduler cloudPingTaskScheduler;
 
-	private static final List<CoreSystemService> REQUIRED_CORE_SERVICES = List.of(CoreSystemService.GATEKEEPER_PULL_CLOUDS, CoreSystemService.GATEKEEPER_COLLECT_SYSTEM_ADDRESSES);
+	private static final List<CoreSystemService> REQUIRED_CORE_SERVICES = List.of(CoreSystemService.GATEKEEPER_PULL_CLOUDS, CoreSystemService.GATEKEEPER_COLLECT_ACCESS_TYPES,
+																				  CoreSystemService.GATEKEEPER_COLLECT_SYSTEM_ADDRESSES);
 	
 	private static final int INVALID_CALCULATION_VALUE = -1;
 
@@ -85,18 +86,18 @@ public class CloudPingTask implements Job {
 	public void execute(final JobExecutionContext context) throws JobExecutionException {
 		logger.debug("STARTED: Cloud Ping task");
 
+		if (arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)) {			
+			logger.debug("Finished: Cloud Ping task can not run if server is in standalon mode");
+			shutdown();
+			return;
+		}
+		
+		if (!checkRequiredCoreSystemServiceUrisAvailable()) {
+			logger.debug("FINISHED: Cloud Ping task. Reqired Core System Sevice URIs aren't available");
+			return;
+		}
+			
 		try {
-			if (arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)) {			
-				logger.debug("Finished: cloud ping task can not run if server is in standalon mode");
-				shutdown();
-				return;
-			}
-			
-			if (!checkRequiredCoreSystemServiceUrisAvailable()) {
-				logger.debug("FINISHED: Cloud Ping task. Reqired Core System Sevice URIs aren't available");
-				return;
-			}
-			
 			final CloudWithRelaysAndPublicRelaysListResponseDTO responseDTO = qoSMonitorDriver.queryGatekeeperAllCloud();
 			final Set<CloudResponseDTO> clouds = getCloudsFromResponse(responseDTO);
 			if (clouds == null || clouds.isEmpty()) {
@@ -107,7 +108,7 @@ public class CloudPingTask implements Job {
 			final CloudResponseDTO cloudResponseDTO = chooseCloudToMeasure(clouds);
 			final Set<String> systemAddressSet = qoSMonitorDriver.queryGatekeeperAllSystemAddresses(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloudResponseDTO)).getAddresses();
 			if (systemAddressSet == null || systemAddressSet.isEmpty()) {
-				logger.debug("FINISHED: Cloud Ping task. Have no intercloud provider witd direct access.");
+				logger.debug("FINISHED: Cloud Ping task. Have no intercloud provider with direct access.");
 				return;
 			}
 			
@@ -131,7 +132,7 @@ public class CloudPingTask implements Job {
 		logger.debug("shutdown started...");
 		try {
 			cloudPingTaskScheduler.shutdown();
-			logger.debug("SHUTDOWN: CloudPingTask");
+			logger.debug("SHUTDOWN: Cloud Ping task");
 		} catch (final SchedulerException ex) {
 			logger.error(ex.getMessage());
 			logger.debug("Stacktrace:", ex);
