@@ -87,7 +87,7 @@ public class CloudPingTask implements Job {
 		logger.debug("STARTED: Cloud Ping task");
 
 		if (arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)) {			
-			logger.debug("Finished: Cloud Ping task can not run if server is in standalon mode");
+			logger.debug("FINISHED: Cloud Ping task can not run if server is in standalon mode");
 			shutdown();
 			return;
 		}

@@ -60,13 +60,15 @@ public class UriCrawlerTask implements Job {
 		logger.debug("STARTED: URI crawler task");
 		
 		if (arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)) {
-			cancelJob();
+			logger.debug("FINISHED: URI crawler task can not run if server is in standalon mode");
+			shutdown();
 			return;
 		}
 		
 		final List<CoreSystemService> requiredServices = getRequiredServices();
 		if (requiredServices.isEmpty()) {
-			cancelJob();
+			logger.debug("FINISHED: URI crawler task. Have no required core services");
+			shutdown();
 			return;
 		}
 		
@@ -82,7 +84,7 @@ public class UriCrawlerTask implements Job {
 		logger.debug("FINISHED: URI crawler task. Number of acquired URI: {}/{}", count, requiredServices.size());
 		
 		if (count == requiredServices.size()) {
-			cancelJob();
+			shutdown();
 		}
 	}
 	
@@ -90,12 +92,11 @@ public class UriCrawlerTask implements Job {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private void cancelJob() {
-		logger.debug("cancelJob started...");
-		
+	private void shutdown() {
+		logger.debug("shutdown started...");
 		try {
-			uriCrawlerTaskScheduler.unscheduleJob(new TriggerKey(UriCrawlerTaskConfig.NAME_OF_TRIGGER));
-			logger.debug("STOPPED: URI crawler task.");
+			uriCrawlerTaskScheduler.shutdown();
+			logger.debug("SHUTDOWN: URI crawler task.");
 		} catch (final SchedulerException ex) {
 			logger.error(ex.getMessage());
 			logger.debug("Stacktrace:", ex);
