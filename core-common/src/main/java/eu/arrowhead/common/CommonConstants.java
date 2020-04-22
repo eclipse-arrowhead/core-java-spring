@@ -1,12 +1,11 @@
 package eu.arrowhead.common;
 
-import java.util.List;
-
+import eu.arrowhead.common.core.CoreSystemService;
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
 import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
 import org.jose4j.jws.AlgorithmIdentifiers;
 
-import eu.arrowhead.common.core.CoreSystemService;
+import java.util.List;
 
 public class CommonConstants {
 
@@ -14,15 +13,21 @@ public class CommonConstants {
 	// members
 	
 	public static final String BASE_PACKAGE = "eu.arrowhead";
-	
+
 	public static final String CORE_SYSTEM_AUTHORIZATION = "Authorization";
+	public static final String CORE_SYSTEM_CERTIFICATE_AUTHORITY = "Certificate Authority";
 	public static final String CORE_SYSTEM_CHOREOGRAPHER = "Choreographer";
 	public static final String CORE_SYSTEM_EVENT_HANDLER = "Event Handler";
 	public static final String CORE_SYSTEM_GATEKEEPER = "Gatekeeper";
 	public static final String CORE_SYSTEM_GATEWAY = "Gateway";
 	public static final String CORE_SYSTEM_ORCHESTRATOR = "Orchestrator";
 	public static final String CORE_SYSTEM_SERVICE_REGISTRY = "Service Registry";
-	
+	public static final String CORE_SYSTEM_QOS_MONITOR = "Quality of Service Monitor";
+
+	public static final String CORE_SYSTEM_SYSTEM_REGISTRY = "System Registry";
+	public static final String CORE_SYSTEM_DEVICE_REGISTRY = "Device Registry";
+	public static final String CORE_SYSTEM_ONBOARDING = "Onboarding Controller";
+
 	public static final String CORE_SERVICE_AUTH_TOKEN_GENERATION = "token-generation";
 	public static final String CORE_SERVICE_AUTH_PUBLIC_KEY = "auth-public-key";
 	public static final String CORE_SERVICE_AUTH_CONTROL_INTRA = "authorization-control-intra";
@@ -41,14 +46,39 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_EVENT_HANDLER_SUBSCRIBE = "event-subscribe";
 	public static final String CORE_SERVICE_EVENT_HANDLER_UNSUBSCRIBE = "event-unsubscribe";
 	public static final String CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "event-publish-auth-update";
-	
+
+
+	public static final String CORE_SERVICE_CERTIFICATE_AUTHORITY_SIGN = "ca-sign";
+
+	public static final String CORE_SERVICE_QOS_MONITOR_PING_MEASUREMENT = "qos-monitor-ping-measurement";
+
+
+	public static final String CORE_SERVICE_SERVICE_REGISTRY_REGISTER = "service-register";
+	public static final String CORE_SERVICE_SERVICE_REGISTRY_UNREGISTER = "service-unregister";
+
+	public static final String CORE_SERVICE_SYSTEM_REGISTRY_REGISTER = "system-register";
+	public static final String CORE_SERVICE_SYSTEM_REGISTRY_UNREGISTER = "system-unregister";
+	public static final String CORE_SERVICE_SYSTEM_REGISTRY_ONBOARDING_WITH_NAME = "system-onboarding-with-name";
+	public static final String CORE_SERVICE_SYSTEM_REGISTRY_ONBOARDING_WITH_CSR = "system-onboarding-with-csr";
+
+	public static final String CORE_SERVICE_DEVICE_REGISTRY_REGISTER = "device-register";
+	public static final String CORE_SERVICE_DEVICE_REGISTRY_UNREGISTER = "device-unregister";
+	public static final String CORE_SERVICE_DEVICE_REGISTRY_ONBOARDING_WITH_NAME = "device-onboarding-with-name";
+	public static final String CORE_SERVICE_DEVICE_REGISTRY_ONBOARDING_WITH_CSR = "device-onboarding-with-csr";
+
+	public static final String CORE_SERVICE_ONBOARDING_WITH_CERTIFICATE_AND_NAME = "onboarding-with-certificate-and-name";
+	public static final String CORE_SERVICE_ONBOARDING_WITH_CERTIFICATE_AND_CSR = "onboarding-with-certificate-and-csr";
+	public static final String CORE_SERVICE_ONBOARDING_WITH_SHARED_SECRET_AND_NAME = "onboarding-with-shared-secret-and-name";
+	public static final String CORE_SERVICE_ONBOARDING_WITH_SHARED_SECRET_AND_CSR = "onboarding-with-shared-secret-and-csr";
+
 	public static final String COMMON_FIELD_NAME_ID = "id";
 	
 	public static final String ARROWHEAD_CONTEXT = "arrowheadContext";
 	public static final String SERVER_COMMON_NAME = "server.common.name";
 	public static final String SERVER_PUBLIC_KEY = "server.public.key";
 	public static final String SERVER_PRIVATE_KEY = "server.private.key";
-	
+	public static final String SERVER_CERTIFICATE = "server.certificate";
+
 	public static final String HTTPS = "https";
 	public static final String HTTP = "http";
 	public static final String JSON = "JSON";
@@ -62,6 +92,16 @@ public class CommonConstants {
 	public static final String SERVICE_REGISTRY_PORT = "sr_port";
 	public static final String $SERVICE_REGISTRY_PORT_WD = "${" + SERVICE_REGISTRY_PORT + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_PORT + "}";
 	
+	public static final String ONBOARDING_URI = "/onboarding";
+	public static final String ONBOARDING_AUTH_WITH_CERTIFICATE_URI = "/certificate";
+	public static final String ONBOARDING_AUTH_WITH_SHARED_SECRET_URI = "/sharedsecret";
+	public static final String ONBOARDING_WITH_NAME_URI = "/name";
+	public static final String ONBOARDING_WITH_CSR_URI = "/csr";
+	public static final String OP_ONBOARDING_WITH_CERTIFICATE_AND_NAME = ONBOARDING_AUTH_WITH_CERTIFICATE_URI + ONBOARDING_WITH_NAME_URI;
+	public static final String OP_ONBOARDING_WITH_CERTIFICATE_AND_CSR = ONBOARDING_AUTH_WITH_CERTIFICATE_URI + ONBOARDING_WITH_CSR_URI;
+	public static final String OP_ONBOARDING_WITH_SHARED_SECRET_AND_NAME = ONBOARDING_AUTH_WITH_SHARED_SECRET_URI + ONBOARDING_WITH_NAME_URI;
+	public static final String OP_ONBOARDING_WITH_SHARED_SECRET_AND_CSR = ONBOARDING_AUTH_WITH_SHARED_SECRET_URI + ONBOARDING_WITH_CSR_URI;
+
 	public static final String SERVICE_REGISTRY_URI = "/serviceregistry";
 	public static final String OP_SERVICE_REGISTRY_REGISTER_URI = "/register";
 	public static final String OP_SERVICE_REGISTRY_UNREGISTER_URI = "/unregister";
@@ -70,25 +110,48 @@ public class CommonConstants {
 	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS = "address";
 	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT = "port";
 	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION = "service_definition";
-	
+
+	public static final String SYSTEM_REGISTRY_URI = "/systemregistry";
+	public static final String OP_SYSTEM_REGISTRY_REGISTER_URI = "/register";
+	public static final String OP_SYSTEM_REGISTRY_UNREGISTER_URI = "/unregister";
+	public static final String OP_SYSTEM_REGISTRY_QUERY_URI = "/query";
+	public static final String OP_SYSTEM_REGISTRY_ONBOARDING_WITH_NAME_URI = ONBOARDING_WITH_NAME_URI;
+	public static final String OP_SYSTEM_REGISTRY_ONBOARDING_WITH_CSR_URI = ONBOARDING_WITH_CSR_URI;
+	public static final String OP_SYSTEM_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME = "system_name";
+	public static final String OP_SYSTEM_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS = "address";
+	public static final String OP_SYSTEM_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT = "port";
+
+	public static final String DEVICE_REGISTRY_URI = "/deviceregistry";
+	public static final String OP_DEVICE_REGISTRY_REGISTER_URI = "/register";
+	public static final String OP_DEVICE_REGISTRY_UNREGISTER_URI = "/unregister";
+	public static final String OP_DEVICE_REGISTRY_QUERY_URI = "/query";
+	public static final String OP_DEVICE_REGISTRY_ONBOARDING_WITH_NAME_URI = ONBOARDING_WITH_NAME_URI;
+	public static final String OP_DEVICE_REGISTRY_ONBOARDING_WITH_CSR_URI = ONBOARDING_WITH_CSR_URI;
+	public static final String OP_DEVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_DEVICE_NAME = "device_name";
+	public static final String OP_DEVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_MAC_ADDRESS = "mac_address";
+
 	public static final String AUTHORIZATION_URI = "/authorization";
 	public static final String OP_AUTH_TOKEN_URI = "/token";
 	public static final String OP_AUTH_KEY_URI = "/publickey";
 	public static final String OP_AUTH_INTRA_CHECK_URI = "/intracloud/check";
 	public static final String OP_AUTH_INTER_CHECK_URI = "/intercloud/check";
 	public static final String OP_AUTH_SUBSCRIPTION_CHECK_URI = "/subscription/check";
-	
+
+	public static final String CERTIFICATE_AUTHRORITY_URI = "/certificate-authority";
+	public static final String OP_CA_CLOUD_COMMON_NAME_URI = "/name";
+	public static final String OP_CA_SIGN_CERTIFICATE_URI = "/sign";
+
 	public static final String ORCHESTRATOR_URI = "/orchestrator";
 	public static final String OP_ORCH_PROCESS = "/orchestration";
-	public static final String ORCHESTRATON_FLAG_MATCHMAKING = "matchmaking";
-	public static final String ORCHESTRATON_FLAG_METADATA_SEARCH = "metadataSearch";
-	public static final String ORCHESTRATON_FLAG_ONLY_PREFERRED = "onlyPreferred";
-	public static final String ORCHESTRATON_FLAG_PING_PROVIDERS = "pingProviders";
-	public static final String ORCHESTRATON_FLAG_OVERRIDE_STORE = "overrideStore";
-	public static final String ORCHESTRATON_FLAG_TRIGGER_INTER_CLOUD = "triggerInterCloud";
-	public static final String ORCHESTRATON_FLAG_EXTERNAL_SERVICE_REQUEST = "externalServiceRequest";
-	public static final String ORCHESTRATON_FLAG_ENABLE_INTER_CLOUD = "enableInterCloud";
-	public static final String ORCHESTRATON_FLAG_ENABLE_QOS = "enableQoS";
+	public static final String ORCHESTRATION_FLAG_MATCHMAKING = "matchmaking";
+	public static final String ORCHESTRATION_FLAG_METADATA_SEARCH = "metadataSearch";
+	public static final String ORCHESTRATION_FLAG_ONLY_PREFERRED = "onlyPreferred";
+	public static final String ORCHESTRATION_FLAG_PING_PROVIDERS = "pingProviders";
+	public static final String ORCHESTRATION_FLAG_OVERRIDE_STORE = "overrideStore";
+	public static final String ORCHESTRATION_FLAG_TRIGGER_INTER_CLOUD = "triggerInterCloud";
+	public static final String ORCHESTRATION_FLAG_EXTERNAL_SERVICE_REQUEST = "externalServiceRequest";
+	public static final String ORCHESTRATION_FLAG_ENABLE_INTER_CLOUD = "enableInterCloud";
+	public static final String ORCHESTRATION_FLAG_ENABLE_QOS = "enableQoS";
 	
 	public static final String GATEKEEPER_URI = "/gatekeeper";
 	public static final String OP_GATEKEEPER_GSD_SERVICE = "/init_gsd";
@@ -107,6 +170,10 @@ public class CommonConstants {
 
 	public static final String OP_EVENT_HANDLER_UNSUBSCRIBE = "/unsubscribe";
 	public static final String OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "/publish/authupdate";
+
+	public static final String QOS_MONITOR_URI = "/qosmonitor";
+	public static final String OP_QOS_MONITOR_PING_MEASUREMENT = "/ping/measurement";
+	public static final String OP_QOS_MONITOR_PING_MEASUREMENT_SUFFIX = "/{" + COMMON_FIELD_NAME_ID + "}";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
@@ -149,6 +216,11 @@ public class CommonConstants {
 	public static final String DISABLE_HOSTNAME_VERIFIER = "disable.hostname.verifier";
 	public static final String $DISABLE_HOSTNAME_VERIFIER_WD = "${" + DISABLE_HOSTNAME_VERIFIER + ":" + Defaults.DEFAULT_DISABLE_HOSTNAME_VERIFIER + "}";
 	
+	public static final String CA_CERT_VALIDITY_NEG_OFFSET_MILLIS = "ca.validity.negative-offest-millis";
+	public static final String $CA_CERT_VALIDITY_NEG_OFFSET_MILLIS = "${" + CA_CERT_VALIDITY_NEG_OFFSET_MILLIS + ":" + Defaults.DEFAULT_CA_CERT_VALIDITY_NEG_OFFSET_MILLIS + "}";
+	public static final String CA_CERT_VALIDITY_POS_OFFSET_MILLIS = "ca.validity.positive-offest-millis";
+	public static final String $CA_CERT_VALIDITY_POS_OFFSET_MILLIS = "${" + CA_CERT_VALIDITY_POS_OFFSET_MILLIS + ":" + Defaults.DEFAULT_CA_CERT_VALIDITY_POS_OFFSET_MILLIS + "}";
+
 	public static final String JWT_CLAIM_CONSUMER_ID = "cid";
 	public static final String JWT_CLAIM_SERVICE_ID = "sid";
 	public static final String JWT_CLAIM_INTERFACE_ID = "iid";
@@ -164,6 +236,7 @@ public class CommonConstants {
 	
 	public static final long CONVERSION_MILLISECOND_TO_SECOND = 1000;
 	public static final long CONVERSION_MILLISECOND_TO_MINUTE = 60000;
+	public static final long CONVERSION_SECOND_TO_MINUTE = 60;
 
 	public static final String SORT_ORDER_ASCENDING = "ASC";
 	public static final String SORT_ORDER_DESCENDING = "DESC";

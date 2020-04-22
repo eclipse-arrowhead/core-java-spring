@@ -168,7 +168,7 @@ public class UriCrawlerTask implements Job {
 			final ResponseEntity<ServiceQueryResultDTO> response = httpService.sendRequest(queryUri, HttpMethod.POST, ServiceQueryResultDTO.class, form);
 			final ServiceQueryResultDTO result = response.getBody();
 			if (!result.getServiceQueryData().isEmpty()) {
-				final int lastIdx = result.getServiceQueryData().size() - 1; // to make sure we use the newest one if some entries stucked in the DB
+				final int lastIdx = result.getServiceQueryData().size() - 1; // to make sure we use the newest one if some old entries are in the DB
 				final ServiceRegistryResponseDTO entry = result.getServiceQueryData().get(lastIdx);
 				final String scheme = entry.getSecure() == ServiceSecurityType.NOT_SECURE ? CommonConstants.HTTP : CommonConstants.HTTPS;
 				final UriComponents uri = Utilities.createURI(scheme, entry.getProvider().getAddress(), entry.getProvider().getPort(), entry.getServiceUri());

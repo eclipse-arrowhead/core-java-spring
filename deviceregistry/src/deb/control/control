@@ -1,0 +1,10 @@
+Package: arrowhead-device-registry
+Version: [[version]]
+Section: contrib/java
+Priority: optional
+Architecture: all
+Maintainer: Mario Zsilak <mario.zsilak@forschung-burgenland.at>
+Homepage: http://www.arrowhead.eu
+Description: Arrowhead Device Registry
+Distribution: development
+Depends: java-runtime-headless, openssl, virtual-mysql-server, arrowhead-core-common

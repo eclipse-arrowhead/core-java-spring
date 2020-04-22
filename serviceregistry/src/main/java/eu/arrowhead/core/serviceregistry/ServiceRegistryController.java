@@ -257,7 +257,7 @@ public class ServiceRegistryController {
 	})
 	@DeleteMapping(path = SYSTEMS_BY_ID_URI)
 	public void removeSystem(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
-		logger.debug("New System delete request recieved with id: {}", id);
+		logger.debug("New System delete request received with id: {}", id);
 		
 		if (id < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI);
@@ -281,7 +281,7 @@ public class ServiceRegistryController {
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
-		logger.debug("New Service Definition get request recieved with page: {} and item_per page: {}", page, size);
+		logger.debug("New Service Definition get request received with page: {} and item_per page: {}", page, size);
 		
 		int validatedPage;
 		int validatedSize;
@@ -314,7 +314,7 @@ public class ServiceRegistryController {
 	})
 	@GetMapping(path = SERVICES_BY_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public ServiceDefinitionResponseDTO  getServiceDefinitionById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
-		logger.debug("New Service Definition get request recieved with id: {}", id);
+		logger.debug("New Service Definition get request received with id: {}", id);
 		
 		if (id < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_BY_ID_URI);
@@ -338,7 +338,7 @@ public class ServiceRegistryController {
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
 	@ResponseBody public ServiceDefinitionResponseDTO addServiceDefinition(@RequestBody final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
 		final String serviceDefinition = serviceDefinitionRequestDTO.getServiceDefinition();
-		logger.debug("New Service Definition registration request recieved with definition: {}", serviceDefinition);
+		logger.debug("New Service Definition registration request received with definition: {}", serviceDefinition);
 		
 		if (Utilities.isEmpty(serviceDefinition)) {
 			throw new BadPayloadException("Service definition is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_URI);
@@ -368,7 +368,7 @@ public class ServiceRegistryController {
 	@ResponseBody public ServiceDefinitionResponseDTO putUpdateServiceDefinition(@PathVariable(value = PATH_VARIABLE_ID) final long id,
 																				 @RequestBody final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
 		final String serviceDefinition = serviceDefinitionRequestDTO.getServiceDefinition();
-		logger.debug("New Service Definition update request recieved with id: {}, definition: {}", id, serviceDefinition);
+		logger.debug("New Service Definition update request received with id: {}, definition: {}", id, serviceDefinition);
 		
 		if (id < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_BY_ID_URI);
@@ -401,7 +401,7 @@ public class ServiceRegistryController {
 	@PatchMapping(path = SERVICES_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = "application/json")
 	@ResponseBody public ServiceDefinitionResponseDTO patchUpdateServiceDefinition(@PathVariable(value = PATH_VARIABLE_ID) final long id,
 																				   @RequestBody final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
-		// Currently ServiceDefinition has only one updateable field, therefore PUT and PATCH do the same
+		// Currently ServiceDefinition has only one updatable field, therefore PUT and PATCH do the same
 		return putUpdateServiceDefinition(id, serviceDefinitionRequestDTO);
 	}
 	
@@ -415,7 +415,7 @@ public class ServiceRegistryController {
 	})
 	@DeleteMapping(path = SERVICES_BY_ID_URI)
 	public void removeServiceDefinition(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
-		logger.debug("New Service Definition delete request recieved with id: {}", id);
+		logger.debug("New Service Definition delete request received with id: {}", id);
 		
 		if (id < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_BY_ID_URI);
@@ -439,7 +439,7 @@ public class ServiceRegistryController {
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
-		logger.debug("New Service Registry get request recieved with page: {} and item_per page: {}", page, size);
+		logger.debug("New Service Registry get request received with page: {} and item_per page: {}", page, size);
 		
 		int validatedPage;
 		int validatedSize;
@@ -473,7 +473,7 @@ public class ServiceRegistryController {
 	})
 	@GetMapping(path =  SERVICE_REGISTRY_MGMT_BY_ID_URI)
 	@ResponseBody public ServiceRegistryResponseDTO getServiceRegistryEntryById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
-		logger.debug("New Service Registry get request recieved with id: {}", id);
+		logger.debug("New Service Registry get request received with id: {}", id);
 		
 		if (id < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_REGISTRY_MGMT_BY_ID_URI);
@@ -500,7 +500,7 @@ public class ServiceRegistryController {
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
-		logger.debug("New Service Registry get by Service Definition request recieved with page: {} and item_per page: {}", page, size);
+		logger.debug("New Service Registry get by Service Definition request received with page: {} and item_per page: {}", page, size);
 		
 		if (Utilities.isEmpty(serviceDefinition)) {
 			throw new BadPayloadException("Service definition cannot be empty.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI);
@@ -557,7 +557,7 @@ public class ServiceRegistryController {
 	})
 	@DeleteMapping(path = SERVICE_REGISTRY_MGMT_BY_ID_URI)
 	public void removeServiceRegistryEntryById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
-		logger.debug("New Service Registry delete request recieved with id: {}", id);
+		logger.debug("New Service Registry delete request received with id: {}", id);
 		
 		if (id < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_REGISTRY_MGMT_BY_ID_URI);
@@ -578,7 +578,7 @@ public class ServiceRegistryController {
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
 	@PostMapping(path = CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public ServiceRegistryResponseDTO registerService(@RequestBody final ServiceRegistryRequestDTO request) {
-		logger.debug("New service registration request recieved");
+		logger.debug("New service registration request received");
 		checkServiceRegistryRequest(request, false);
 		
 		final ServiceRegistryResponseDTO response = serviceRegistryDBService.registerServiceResponse(request);
@@ -598,7 +598,7 @@ public class ServiceRegistryController {
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
 	@PostMapping(path = CoreCommonConstants.MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody ServiceRegistryResponseDTO addServiceRegistry(@RequestBody final ServiceRegistryRequestDTO request) {
-		logger.debug("New service registration request recieved");
+		logger.debug("New service registration request received");
 		checkServiceRegistryRequest(request, CoreCommonConstants.MGMT_URI, true);
 		
 		final ServiceRegistryResponseDTO response = serviceRegistryDBService.registerServiceResponse(request);
@@ -617,7 +617,7 @@ public class ServiceRegistryController {
 	})
 	@PutMapping(path = SERVICE_REGISTRY_MGMT_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody ServiceRegistryResponseDTO updateServiceRegistry(@PathVariable(value = PATH_VARIABLE_ID) final long id, @RequestBody final ServiceRegistryRequestDTO request) { 
-		logger.debug("New service registry update request recieved");
+		logger.debug("New service registry update request received");
 		checkServiceRegistryUpdateRequest(id, request, CoreCommonConstants.MGMT_URI);
 		
 		final ServiceRegistryResponseDTO response = serviceRegistryDBService.updateServiceByIdResponse(id, request);
@@ -637,7 +637,7 @@ public class ServiceRegistryController {
 	})
 	@PatchMapping(path = SERVICE_REGISTRY_MGMT_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody ServiceRegistryResponseDTO mergeServiceRegistry(@PathVariable(value = PATH_VARIABLE_ID) final long id, @RequestBody final ServiceRegistryRequestDTO request) { 
-		logger.debug("New service registry merge request recieved");
+		logger.debug("New service registry merge request received");
 		checkServiceRegistryMergeRequest(id, request, CoreCommonConstants.MGMT_URI);
 		
 		final ServiceRegistryResponseDTO response = serviceRegistryDBService.mergeServiceByIdResponse(id, request);
@@ -735,6 +735,29 @@ public class ServiceRegistryController {
 		logger.debug("Return system by name: {}, address: {}, port: {}", systemName, address, port);
 		return result;
 	}
+
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return all service registry entries", response = ServiceRegistryListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICE_REGISTRY_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SERVICE_REGISTRY_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_ALL_URI)
+	@ResponseBody public ServiceRegistryListResponseDTO getServiceRegistryEntries() {
+		logger.debug("New Service Registry get request recieved");
+
+		final int page = 0;
+		final int size = Integer.MAX_VALUE;
+		final Direction direction = Direction.ASC;
+		final String sortField = CommonConstants.COMMON_FIELD_NAME_ID;
+		
+		final ServiceRegistryListResponseDTO serviceRegistryEntriesResponse = serviceRegistryDBService.getServiceRegistryEntriesResponse(page, size, direction, sortField);
+		logger.debug("Service Registry entries with page: {} and item_per page: {} successfully retrieved", page, size);
+		
+		return serviceRegistryEntriesResponse;
+	}
 		
 	//=================================================================================================
 	// assistant methods
@@ -805,7 +828,7 @@ public class ServiceRegistryController {
 		}
 		
 		if (request.getPort() != null) {
-			final int validatedPort = request.getPort().intValue();
+			final int validatedPort = request.getPort();
 			if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
 				throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX +".", HttpStatus.SC_BAD_REQUEST,
 											  CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI);
@@ -862,7 +885,7 @@ public class ServiceRegistryController {
 			throw new BadPayloadException(SYSTEM_PORT_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		final int validatedPort = request.getPort().intValue();
+		final int validatedPort = request.getPort();
 		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
 			throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
 		}
@@ -981,7 +1004,7 @@ public class ServiceRegistryController {
 		}
 		
 		if (request.getProviderSystem() != null && request.getProviderSystem().getPort() != null) {
-			final int validatedPort = request.getProviderSystem().getPort().intValue();
+			final int validatedPort = request.getProviderSystem().getPort();
 			if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
 				throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX +".", HttpStatus.SC_BAD_REQUEST,
 											  origin);
