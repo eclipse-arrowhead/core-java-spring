@@ -16,13 +16,17 @@ import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
+import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.database.entity.QoSInterRelayMeasurement;
 import eu.arrowhead.common.dto.internal.CloudAccessListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudAccessResponseDTO;
@@ -57,8 +61,14 @@ public class RelayEchoTask implements Job {
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
 	
+	@Resource(name = "relayEchoScheduler")
+	private Scheduler relayEchoScheduler;
+	
 	@Value(CoreCommonConstants.$QOS_ENABLED_RELAY_TASK_WD)
 	private boolean relayTaskEnabled;
+	
+	private static final List<CoreSystemService> REQUIRED_CORE_SERVICES = List.of(CoreSystemService.GATEKEEPER_PULL_CLOUDS, CoreSystemService.GATEKEEPER_COLLECT_ACCESS_TYPES,
+			  																	  CoreSystemService.GATEKEEPER_COLLECT_SYSTEM_ADDRESSES, CoreSystemService.GATEKEEPER_RELAY_TEST_SERVICE);
 	
 	private final Logger logger = LogManager.getLogger(RelayEchoTask.class);
 	
@@ -70,36 +80,73 @@ public class RelayEchoTask implements Job {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public void execute(final JobExecutionContext context) throws JobExecutionException {
-		logger.debug("STARTED: relay echo task");
+		logger.debug("STARTED: Relay Echo task");
+		
+		if (!relayTaskEnabled) {
+			logger.debug("FINISHED: Relay Echo task disabled");
+			shutdown();
+			return;
+		}
 		
 		if (arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)) {
-			logger.debug("Finished: relay echo task can not run if server is in standalon mode");
+			logger.debug("FINISHED: Relay Echo task can not run if server is in standalon mode");
+			shutdown();
 			return;
 		}
 		
 		if (!sslProperties.isSslEnabled()) {
-			logger.debug("Finished: relay echo task can not run if server is not in secure mode");
+			logger.debug("FINISHED: Relay Echo task can not run if server is not in secure mode");
+			shutdown();
+			return;
+		}		
+		
+		if (!checkRequiredCoreSystemServiceUrisAvailable()) {
+			logger.debug("FINISHED: Relay Echo task. Reqired Core System Sevice URIs aren't available");
 			return;
 		}
 		
-		if (!relayTaskEnabled) {
-			logger.debug("Finished: relay echo task disabled");
-			return;
+		try {
+			final QoSRelayTestProposalRequestDTO testProposal = findCloudRelayPairToTest();
+			if (testProposal.getTargetCloud() == null || testProposal.getRelay() == null) {
+				logger.debug("FINISHED: Relay Echo task. Have no cloud-relay pair to run relay echo test");
+				return;
+			}
+			
+			qosMonitorDriver.requestGatekeeperInitRelayTest(testProposal);	
+			
+			logger.debug("FINISHED: Relay Echo task success");			
+		} catch (final ArrowheadException ex) {
+			logger.debug("FAILED: Relay Echo task: " + ex.getMessage());
 		}
-		
-		final QoSRelayTestProposalRequestDTO testProposal = findCloudRelayPairToTest();
-		if (testProposal.getTargetCloud() == null || testProposal.getRelay() == null) {
-			logger.debug("Finished: have no cloud-relay pair to run relay echo test");
-			return;
-		}
-		
-		qosMonitorDriver.requestGatekeeperInitRelayTest(testProposal);	
-		
-		logger.debug("Finished: relay echo task success");
 	}
 
 	//=================================================================================================
 	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
+	private void shutdown() {
+		logger.debug("shutdown started...");
+		try {
+			relayEchoScheduler.shutdown();
+			logger.debug("SHUTDOWN: Relay Echo task");
+		} catch (final SchedulerException ex) {
+			logger.error(ex.getMessage());
+			logger.debug("Stacktrace:", ex);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("unchecked")
+	private boolean checkRequiredCoreSystemServiceUrisAvailable() {
+		logger.debug("checkRequiredCoreSystemServiceUrisAvailable started...");
+		for (final CoreSystemService coreSystemService : REQUIRED_CORE_SERVICES) {
+			final String key = coreSystemService.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+			if (!arrowheadContext.containsKey(key) && !(arrowheadContext.get(key) instanceof UriComponents)) {
+				return false;
+			}
+		}
+		return true;
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private QoSRelayTestProposalRequestDTO findCloudRelayPairToTest() {
@@ -119,7 +166,7 @@ public class RelayEchoTask implements Job {
 		ZonedDateTime latestMeasurementTime = ZonedDateTime.now().plusHours(1);
 		for (final CloudWithRelaysAndPublicRelaysResponseDTO cloud : cloudsWithoutDirectAccess) {
 			if (cloud.getGatekeeperRelays() == null && cloud.getGatekeeperRelays().isEmpty()) {
-				logger.info(CLOUD_HAS_NO_GATEWAY_OR_PUBLIC_RELAY_WARNING_MESSAGE + cloud.getName() + "." + cloud.getOperator());
+				logger.info(CLOUD_HAS_NO_GATEKEEPER_RELAY_WARNING_MESSAGE + cloud.getName() + "." + cloud.getOperator());
 			} else {
 				if(cloud.getGatewayRelays() != null && !cloud.getGatewayRelays().isEmpty()) {
 					for (final RelayResponseDTO relay : cloud.getGatewayRelays()) {

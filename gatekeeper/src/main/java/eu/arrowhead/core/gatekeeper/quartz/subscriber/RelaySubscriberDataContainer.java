@@ -103,6 +103,20 @@ public class RelaySubscriberDataContainer {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public void shutdown() {
+		logger.debug("shutdown started...");
+		
+		try {
+			relaySubsriberTaskScheduler.shutdown();
+			canceled = true;
+			logger.debug("SHUTDOWN: Relay Subscriber task.");
+		} catch (final SchedulerException ex) {
+			logger.error(ex.getMessage());
+			logger.debug("Stacktrace:", ex);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public GatekeeperRelayClient getGatekeeperRelayClient(final boolean cached) {
 		return cached ? gatekeeperRelayClientWithCache : gatekeeperRelayClient;
 	}

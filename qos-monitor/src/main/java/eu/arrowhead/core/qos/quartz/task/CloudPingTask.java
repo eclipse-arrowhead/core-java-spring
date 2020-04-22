@@ -18,13 +18,17 @@ import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.database.entity.QoSInterDirectMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterDirectPingMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterDirectPingMeasurementLog;
@@ -35,6 +39,7 @@ import eu.arrowhead.common.dto.internal.CloudWithRelaysAndPublicRelaysResponseDT
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.dto.PingMeasurementCalculationsDTO;
 import eu.arrowhead.core.qos.measurement.properties.InterPingMeasurementProperties;
@@ -47,7 +52,13 @@ public class CloudPingTask implements Job {
 
 	//=================================================================================================
 	// members
+	
+	@Resource(name = "cloudPingSheduler")
+	private Scheduler cloudPingTaskScheduler;
 
+	private static final List<CoreSystemService> REQUIRED_CORE_SERVICES = List.of(CoreSystemService.GATEKEEPER_PULL_CLOUDS, CoreSystemService.GATEKEEPER_COLLECT_ACCESS_TYPES,
+																				  CoreSystemService.GATEKEEPER_COLLECT_SYSTEM_ADDRESSES);
+	
 	private static final int INVALID_CALCULATION_VALUE = -1;
 
 	protected Logger logger = LogManager.getLogger(CloudPingTask.class);
@@ -73,41 +84,73 @@ public class CloudPingTask implements Job {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public void execute(final JobExecutionContext context) throws JobExecutionException {
-		logger.debug("STARTED: cloud ping task");
+		logger.debug("STARTED: Cloud Ping task");
 
-		if (arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)) {
-
-			logger.debug("Finished: cloud ping task can not run if server is in standalon mode");
+		if (arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)) {			
+			logger.debug("FINISHED: Cloud Ping task can not run if server is in standalon mode");
+			shutdown();
 			return;
 		}
-
-		final CloudWithRelaysAndPublicRelaysListResponseDTO responseDTO = qoSMonitorDriver.queryGatekeeperAllCloud();
-		final Set<CloudResponseDTO> clouds = getCloudsFromResponse(responseDTO);
-		if (clouds == null || clouds.isEmpty()) {
-
+		
+		if (!checkRequiredCoreSystemServiceUrisAvailable()) {
+			logger.debug("FINISHED: Cloud Ping task. Reqired Core System Sevice URIs aren't available");
 			return;
 		}
-
-		final CloudResponseDTO cloudResponseDTO = chooseCloudToMeasure(clouds);
-		final Set<String> systemAddressSet = qoSMonitorDriver.queryGatekeeperAllSystemAddresses(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloudResponseDTO)).getAddresses();
-		if (systemAddressSet == null || systemAddressSet.isEmpty()) {
-
-			return;
-		}
-
-		for (final String address : systemAddressSet) {
-
-			if (!Utilities.isEmpty(address)) {
-				pingSystem(address, cloudResponseDTO);
+			
+		try {
+			final CloudWithRelaysAndPublicRelaysListResponseDTO responseDTO = qoSMonitorDriver.queryGatekeeperAllCloud();
+			final Set<CloudResponseDTO> clouds = getCloudsFromResponse(responseDTO);
+			if (clouds == null || clouds.isEmpty()) {
+				logger.debug("FINISHED: Cloud Ping task. Have no neighbor cloud registered");
+				return;
 			}
-
+			
+			final CloudResponseDTO cloudResponseDTO = chooseCloudToMeasure(clouds);
+			final Set<String> systemAddressSet = qoSMonitorDriver.queryGatekeeperAllSystemAddresses(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloudResponseDTO)).getAddresses();
+			if (systemAddressSet == null || systemAddressSet.isEmpty()) {
+				logger.debug("FINISHED: Cloud Ping task. Have no intercloud provider with direct access.");
+				return;
+			}
+			
+			for (final String address : systemAddressSet) {
+				if (!Utilities.isEmpty(address)) {
+					pingSystem(address, cloudResponseDTO);
+				}
+			}
+			
+			logger.debug("FINISHED: Cloud Ping task success");			
+		} catch (final ArrowheadException ex) {
+			logger.debug("FAILED: Cloud Ping task: " + ex.getMessage());
 		}
-
-		logger.debug("Finished: ping task success");
 	}
 
 	//=================================================================================================
 	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
+	private void shutdown() {
+		logger.debug("shutdown started...");
+		try {
+			cloudPingTaskScheduler.shutdown();
+			logger.debug("SHUTDOWN: Cloud Ping task");
+		} catch (final SchedulerException ex) {
+			logger.error(ex.getMessage());
+			logger.debug("Stacktrace:", ex);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("unchecked")
+	private boolean checkRequiredCoreSystemServiceUrisAvailable() {
+		logger.debug("checkRequiredCoreSystemServiceUrisAvailable started...");
+		for (final CoreSystemService coreSystemService : REQUIRED_CORE_SERVICES) {
+			final String key = coreSystemService.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+			if (!arrowheadContext.containsKey(key) && !(arrowheadContext.get(key) instanceof UriComponents)) {
+				return false;
+			}
+		}
+		return true;
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	private Set<CloudResponseDTO> getCloudsFromResponse(final CloudWithRelaysAndPublicRelaysListResponseDTO responseDTO) {

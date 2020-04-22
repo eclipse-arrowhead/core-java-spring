@@ -6,6 +6,7 @@ public class CoreCommonConstants {
 	// members
 	
 	public static final String APPLICATION_PROPERTIES = "application.properties";
+	public static final String QUARTZ_THREAD_PROPERTY = "org.quartz.threadPool.threadCount";
 	
 	public static final String DATABASE_URL = "spring.datasource.url";
 	public static final String DATABASE_USER = "spring.datasource.username";

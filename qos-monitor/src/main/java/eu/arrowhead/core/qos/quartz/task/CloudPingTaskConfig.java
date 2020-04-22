@@ -1,5 +1,7 @@
 package eu.arrowhead.core.qos.quartz.task;
 
+import java.util.Properties;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.quartz.SimpleTrigger;
@@ -31,6 +33,7 @@ public class CloudPingTaskConfig {
 	private int ttlInterval;
 
 	private static final int SCHEDULER_DELAY = 5;
+	private static final String NUM_OF_THREADS = "1";
 
 	private static final String NAME_OF_TRIGGER = "Cloud_Ping_Task_Trigger";
 	private static final String NAME_OF_TASK = "Cloud_Ping_Task_Detail";
@@ -45,6 +48,9 @@ public class CloudPingTaskConfig {
 		jobFactory.setApplicationContext(applicationContext);
 		
 		final SchedulerFactoryBean schedulerFactory = new SchedulerFactoryBean();
+		final Properties schedulerProperties = new Properties();     
+		schedulerProperties.put(CoreCommonConstants.QUARTZ_THREAD_PROPERTY, NUM_OF_THREADS);
+	    schedulerFactory.setQuartzProperties(schedulerProperties);
 
 		schedulerFactory.setJobFactory(jobFactory);
 		schedulerFactory.setJobDetails(cloudPingTaskDetails().getObject());
