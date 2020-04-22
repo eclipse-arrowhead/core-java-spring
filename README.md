@@ -6666,7 +6666,7 @@ __Ping Measurment response by system id__ the output :
 
 ### Get ping measurements by system id 
 
-For private endpoints no detailed description are available.
+For private endpoints no detailed description is available.
 
 <a name="choreographer" />
  
