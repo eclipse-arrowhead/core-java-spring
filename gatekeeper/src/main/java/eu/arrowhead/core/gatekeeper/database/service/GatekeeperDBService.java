@@ -29,6 +29,7 @@ import eu.arrowhead.common.database.repository.CloudGatekeeperRelayRepository;
 import eu.arrowhead.common.database.repository.CloudGatewayRelayRepository;
 import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.database.repository.RelayRepository;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysAndPublicRelaysListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
@@ -66,8 +67,18 @@ public class GatekeeperDBService {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------	
+	public CloudWithRelaysAndPublicRelaysListResponseDTO getCloudsWithPublicRelaysResponse(final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getCloudsWithPublicRelaysResponse started...");
+		
+		final Page<Cloud> entries = getClouds(page, size, direction, sortField);
+		final List<Relay> publicRelays = getPublicGatewayRelays();
+		
+		return DTOConverter.convertCloudToCloudWithRelaysAndPublicRelaysListResponseDTO(entries, publicRelays);
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
 	public CloudWithRelaysListResponseDTO getCloudsResponse(final int page, final int size, final Direction direction, final String sortField) {
-		logger.debug("getClouds getCloudsResponse...");
+		logger.debug("getCloudsResponse started...");
 		
 		final Page<Cloud> entries = getClouds(page, size, direction, sortField);
 		

@@ -204,7 +204,7 @@ public class QoSManagerImpl implements QoSManager {
 					boolean verified = true;
 					for (final QoSVerifier verifier : verifiers) {
 						verified = verifier.verify(verificationParameters, true);
-						if(!verified) {
+						if (!verified) {
 							break;
 						}
 					}
@@ -249,7 +249,7 @@ public class QoSManagerImpl implements QoSManager {
 			boolean verified = true;
 			for (final QoSVerifier verifier : verifiers) {
 				verified = verifier.verify(verificationParameters, false);
-				if(!verified) {
+				if (!verified) {
 					break;
 				}
 			}

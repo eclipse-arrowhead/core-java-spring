@@ -36,6 +36,8 @@ import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.dto.internal.CloudAccessListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudAccessResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysAndPublicRelaysListResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysAndPublicRelaysResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
@@ -86,9 +88,9 @@ public class GatekeeperControllerQoSTest {
 	@Test
 	public void testPullCloudsOk() throws Exception {
 		final int amountOfClouds = 5;
-		final CloudWithRelaysListResponseDTO dto = createCloudWithRelaysListResponseDTOForDBMocking(amountOfClouds, RelayType.GATEKEEPER_RELAY, RelayType.GATEWAY_RELAY, false);
+		final CloudWithRelaysAndPublicRelaysListResponseDTO dto = createCloudWithRelaysAndPublicRelaysListResponseDTOForDBMocking(amountOfClouds, RelayType.GATEKEEPER_RELAY, RelayType.GATEWAY_RELAY, false);
 		
-		when(gatekeeperDBService.getCloudsResponse(anyInt(), anyInt(), any(), any())).thenReturn(dto);
+		when(gatekeeperDBService.getCloudsWithPublicRelaysResponse(anyInt(), anyInt(), any(), any())).thenReturn(dto);
 		
 		final MvcResult response = this.mockMvc.perform(get(PULL_CLOUDS_URI)
 				   							   .accept(MediaType.APPLICATION_JSON))
@@ -318,8 +320,57 @@ public class GatekeeperControllerQoSTest {
 			
 			cloudDTOList.add(DTOConverter.convertCloudToCloudWithRelaysResponseDTO(cloud));
 		}
-		
 		return new CloudWithRelaysListResponseDTO(cloudDTOList, cloudDTOList.size());
+	}
+		
+	//-------------------------------------------------------------------------------------------------
+	private CloudWithRelaysAndPublicRelaysListResponseDTO createCloudWithRelaysAndPublicRelaysListResponseDTOForDBMocking(final int amountOfClouds, final RelayType gatekeeperRelayType, final RelayType gatewayRelayType, 
+																										   				  final boolean gatewayRelayExclusive) {
+		final List<CloudWithRelaysAndPublicRelaysResponseDTO> cloudDTOList = new ArrayList<>();
+		
+		for (int i = 1; i <= amountOfClouds; ++i) {
+			final Cloud cloud = new Cloud();
+			cloud.setId(i);
+			cloud.setOperator("testOperator" + i);
+			cloud.setName("testName" + i);
+			cloud.setSecure(true);
+			cloud.setNeighbor(true);
+			cloud.setOwnCloud(false);
+			cloud.setAuthenticationInfo("testAuthenticationInfo" + i);
+			cloud.setCreatedAt(ZonedDateTime.now());
+			cloud.setUpdatedAt(ZonedDateTime.now());
+			
+			final Relay gatekeeperRelay = new Relay();
+			gatekeeperRelay.setId(i);
+			gatekeeperRelay.setAddress("testAddress" + i);
+			gatekeeperRelay.setPort(i * 1000);
+			gatekeeperRelay.setSecure(true);
+			gatekeeperRelay.setExclusive(false);
+			gatekeeperRelay.setType(gatekeeperRelayType);
+			gatekeeperRelay.setCreatedAt(ZonedDateTime.now());
+			gatekeeperRelay.setUpdatedAt(ZonedDateTime.now());
+			
+			final Relay gatewayRelay = new Relay();
+			gatewayRelay.setId(i);
+			gatewayRelay.setAddress("testAddress" + i);
+			gatewayRelay.setPort(i * 1000);
+			gatewayRelay.setSecure(true);
+			gatewayRelay.setExclusive(gatewayRelayExclusive);
+			gatewayRelay.setType(gatewayRelayType);
+			gatewayRelay.setCreatedAt(ZonedDateTime.now());
+			gatewayRelay.setUpdatedAt(ZonedDateTime.now());
+			
+			final Relay publicRelay = new Relay("test-public-addr", 64000, true, false, RelayType.GENERAL_RELAY);
+			publicRelay.setCreatedAt(ZonedDateTime.now());
+			publicRelay.setUpdatedAt(ZonedDateTime.now());
+			
+			cloud.getGatekeeperRelays().add(new CloudGatekeeperRelay(cloud, gatekeeperRelay));
+			cloud.getGatewayRelays().add(new CloudGatewayRelay(cloud, gatewayRelay));
+			
+			cloudDTOList.add(DTOConverter.convertCloudToCloudWithRelaysAndPublicRelaysResponseDTO(cloud, List.of(publicRelay)));
+		}
+		
+		return new CloudWithRelaysAndPublicRelaysListResponseDTO(cloudDTOList, cloudDTOList.size());
 	}
 
 }

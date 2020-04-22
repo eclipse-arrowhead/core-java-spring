@@ -2,7 +2,9 @@ package eu.arrowhead.core.gatekeeper.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.time.ZonedDateTime;
@@ -25,12 +27,14 @@ import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.internal.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.internal.GSDQueryResultDTO;
-import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSReservationResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -400,5 +404,188 @@ public class GatekeeperServiceGSDTests {
 		assertEquals(1, (int) doGSDPollResponse.getNumOfProviders());
 		assertEquals(1, doGSDPollResponse.getAvailableInterfaces().size());
 		assertEquals("XML", doGSDPollResponse.getAvailableInterfaces().get(0));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDoGSDPollWithQoSRequiredButNotEnabled() {
+		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
+		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
+		
+		final CloudRequestDTO cloudDTO = new CloudRequestDTO();
+		cloudDTO.setOperator("test-operator");
+		cloudDTO.setName("test-name");
+		cloudDTO.setSecure(true);
+		cloudDTO.setNeighbor(true);
+		cloudDTO.setAuthenticationInfo("test-auth-info");
+		
+		when(gatekeeperDriver.checkQoSEnabled()).thenReturn(false);
+		
+		final GSDPollResponseDTO doGSDPollResponse = gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false, true));
+		
+		assertNull(doGSDPollResponse.getProviderCloud());
+		assertNull(doGSDPollResponse.getRequiredServiceDefinition());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDoGSDPollWithReservedProvidersCrossCheckWithQoSNotRequired() {
+		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
+		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
+		
+		final CloudRequestDTO cloudDTO = new CloudRequestDTO();
+		cloudDTO.setOperator("test-operator");
+		cloudDTO.setName("test-name");
+		cloudDTO.setSecure(true);
+		cloudDTO.setNeighbor(true);
+		cloudDTO.setAuthenticationInfo("test-auth-info");
+		
+		final ServiceRegistryResponseDTO serviceRegistryResponseDTO1 = new ServiceRegistryResponseDTO();
+		serviceRegistryResponseDTO1.setId(1);
+		serviceRegistryResponseDTO1.setServiceDefinition(new ServiceDefinitionResponseDTO(1L, "test-service", "", ""));
+		serviceRegistryResponseDTO1.setProvider(new SystemResponseDTO(1L, "test-provider-operator-1", "1.1.1.1", 1000, "test-provider-auth-info-2", "", ""));
+		serviceRegistryResponseDTO1.setInterfaces(List.of(new ServiceInterfaceResponseDTO(1L, "HTTP-SECURE-JSON", "", "")));
+		
+		final ServiceRegistryResponseDTO serviceRegistryResponseDTO2 = new ServiceRegistryResponseDTO();
+		serviceRegistryResponseDTO2.setId(2);
+		serviceRegistryResponseDTO2.setServiceDefinition(new ServiceDefinitionResponseDTO(1L, "test-service", "", ""));
+		serviceRegistryResponseDTO2.setProvider(new SystemResponseDTO(2L, "test-provider-operator-2", "2.2.2.2", 2000, "test-provider-auth-info-2", "", ""));
+		serviceRegistryResponseDTO2.setInterfaces(List.of(new ServiceInterfaceResponseDTO(1L, "HTTP-SECURE-JSON", "", ""), new ServiceInterfaceResponseDTO(2L, "XML", "", "")));
+		
+		final QoSReservationResponseDTO reservationResponseDTO = new QoSReservationResponseDTO();
+		reservationResponseDTO.setReservedProviderId(serviceRegistryResponseDTO1.getId());
+		reservationResponseDTO.setReservedServiceId(serviceRegistryResponseDTO1.getServiceDefinition().getId());
+		reservationResponseDTO.setReservedTo(ZonedDateTime.now().plusMinutes(15));
+		
+		final ServiceQueryResultDTO srQueryResult = new ServiceQueryResultDTO();
+		srQueryResult.setServiceQueryData(List.of(serviceRegistryResponseDTO1, serviceRegistryResponseDTO2));
+		when(gatekeeperDriver.sendServiceRegistryQuery(any())).thenReturn(srQueryResult);
+		when(gatekeeperDriver.sendInterCloudAuthorizationCheckQuery(any(), any(), any())).thenReturn(Map.of(1L,List.of(1L), 2L,List.of(1L, 2L)));
+		when(gatekeeperDriver.getQoSReservationList()).thenReturn(List.of(reservationResponseDTO));
+		final Cloud ownCloud = new Cloud("own-c-operator", "own-c-name", true, true, true, "own-c-auth-info");
+		ownCloud.setCreatedAt(ZonedDateTime.now());
+		ownCloud.setUpdatedAt(ZonedDateTime.now());
+		when(commonDBService.getOwnCloud(true)).thenReturn(ownCloud);
+		
+		when(gatekeeperDriver.checkQoSEnabled()).thenReturn(true);
+		
+		final GSDPollResponseDTO doGSDPollResponse = gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false, false));
+		
+		assertEquals(1, (int) doGSDPollResponse.getNumOfProviders());
+		assertEquals(2, doGSDPollResponse.getAvailableInterfaces().size());
+		assertTrue(doGSDPollResponse.getAvailableInterfaces().contains("HTTP-SECURE-JSON"));
+		assertTrue(doGSDPollResponse.getAvailableInterfaces().contains("XML"));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDoGSDPollWithReservedProvidersCrossCheckWithQoSRequired() {
+		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
+		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
+		
+		final CloudRequestDTO cloudDTO = new CloudRequestDTO();
+		cloudDTO.setOperator("test-operator");
+		cloudDTO.setName("test-name");
+		cloudDTO.setSecure(true);
+		cloudDTO.setNeighbor(true);
+		cloudDTO.setAuthenticationInfo("test-auth-info");
+		
+		final ServiceRegistryResponseDTO serviceRegistryResponseDTO1 = new ServiceRegistryResponseDTO();
+		serviceRegistryResponseDTO1.setId(1);
+		serviceRegistryResponseDTO1.setServiceDefinition(new ServiceDefinitionResponseDTO(1L, "test-service", "", ""));
+		serviceRegistryResponseDTO1.setProvider(new SystemResponseDTO(1L, "test-provider-operator-1", "1.1.1.1", 1000, "test-provider-auth-info-2", "", ""));
+		serviceRegistryResponseDTO1.setInterfaces(List.of(new ServiceInterfaceResponseDTO(1L, "HTTP-SECURE-JSON", "", "")));
+		
+		final ServiceRegistryResponseDTO serviceRegistryResponseDTO2 = new ServiceRegistryResponseDTO();
+		serviceRegistryResponseDTO2.setId(2);
+		serviceRegistryResponseDTO2.setServiceDefinition(new ServiceDefinitionResponseDTO(1L, "test-service", "", ""));
+		serviceRegistryResponseDTO2.setProvider(new SystemResponseDTO(2L, "test-provider-operator-2", "2.2.2.2", 2000, "test-provider-auth-info-2", "", ""));
+		serviceRegistryResponseDTO2.setInterfaces(List.of(new ServiceInterfaceResponseDTO(1L, "HTTP-SECURE-JSON", "", ""), new ServiceInterfaceResponseDTO(2L, "XML", "", "")));
+		
+		final QoSReservationResponseDTO reservationResponseDTO = new QoSReservationResponseDTO();
+		reservationResponseDTO.setReservedProviderId(serviceRegistryResponseDTO1.getId());
+		reservationResponseDTO.setReservedServiceId(serviceRegistryResponseDTO1.getServiceDefinition().getId());
+		reservationResponseDTO.setReservedTo(ZonedDateTime.now().plusMinutes(15));
+		
+		final QoSIntraPingMeasurementResponseDTO measurementResponseDTO = new QoSIntraPingMeasurementResponseDTO();
+		measurementResponseDTO.setId(1L);
+		measurementResponseDTO.setAvailable(true);
+		
+		final ServiceQueryResultDTO srQueryResult = new ServiceQueryResultDTO();
+		srQueryResult.setServiceQueryData(List.of(serviceRegistryResponseDTO1, serviceRegistryResponseDTO2));
+		when(gatekeeperDriver.sendServiceRegistryQuery(any())).thenReturn(srQueryResult);
+		when(gatekeeperDriver.sendInterCloudAuthorizationCheckQuery(any(), any(), any())).thenReturn(Map.of(1L,List.of(1L), 2L,List.of(1L, 2L)));
+		when(gatekeeperDriver.getQoSReservationList()).thenReturn(List.of(reservationResponseDTO));
+		when(gatekeeperDriver.getQoSIntraPingMeasurementsForLocalSystem(eq(serviceRegistryResponseDTO2.getId()))).thenReturn(measurementResponseDTO);
+		final Cloud ownCloud = new Cloud("own-c-operator", "own-c-name", true, true, true, "own-c-auth-info");
+		ownCloud.setCreatedAt(ZonedDateTime.now());
+		ownCloud.setUpdatedAt(ZonedDateTime.now());
+		when(commonDBService.getOwnCloud(true)).thenReturn(ownCloud);
+		
+		when(gatekeeperDriver.checkQoSEnabled()).thenReturn(true);
+		
+		final GSDPollResponseDTO doGSDPollResponse = gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false, true));
+		
+		assertEquals(1, (int) doGSDPollResponse.getNumOfProviders());
+		assertEquals(2, doGSDPollResponse.getAvailableInterfaces().size());
+		assertTrue(doGSDPollResponse.getAvailableInterfaces().contains("HTTP-SECURE-JSON"));
+		assertTrue(doGSDPollResponse.getAvailableInterfaces().contains("XML"));
+		assertEquals(1, doGSDPollResponse.getQosMeasurements().size());
+		assertEquals(serviceRegistryResponseDTO2.getProvider().getSystemName(), doGSDPollResponse.getQosMeasurements().get(0).getServiceRegistryEntry().getProvider().getSystemName());
+		assertTrue(doGSDPollResponse.getQosMeasurements().get(0).isProviderAvailable());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDoGSDPollWithQoSRequiredButNoMeasurementAvailable() {
+		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
+		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
+		
+		final CloudRequestDTO cloudDTO = new CloudRequestDTO();
+		cloudDTO.setOperator("test-operator");
+		cloudDTO.setName("test-name");
+		cloudDTO.setSecure(true);
+		cloudDTO.setNeighbor(true);
+		cloudDTO.setAuthenticationInfo("test-auth-info");
+		
+		final ServiceRegistryResponseDTO serviceRegistryResponseDTO1 = new ServiceRegistryResponseDTO();
+		serviceRegistryResponseDTO1.setId(1);
+		serviceRegistryResponseDTO1.setServiceDefinition(new ServiceDefinitionResponseDTO(1L, "test-service", "", ""));
+		serviceRegistryResponseDTO1.setProvider(new SystemResponseDTO(1L, "test-provider-operator-1", "1.1.1.1", 1000, "test-provider-auth-info-2", "", ""));
+		serviceRegistryResponseDTO1.setInterfaces(List.of(new ServiceInterfaceResponseDTO(1L, "HTTP-SECURE-JSON", "", "")));
+		
+		final ServiceRegistryResponseDTO serviceRegistryResponseDTO2 = new ServiceRegistryResponseDTO();
+		serviceRegistryResponseDTO2.setId(2);
+		serviceRegistryResponseDTO2.setServiceDefinition(new ServiceDefinitionResponseDTO(1L, "test-service", "", ""));
+		serviceRegistryResponseDTO2.setProvider(new SystemResponseDTO(2L, "test-provider-operator-2", "2.2.2.2", 2000, "test-provider-auth-info-2", "", ""));
+		serviceRegistryResponseDTO2.setInterfaces(List.of(new ServiceInterfaceResponseDTO(1L, "HTTP-SECURE-JSON", "", ""), new ServiceInterfaceResponseDTO(2L, "XML", "", "")));
+		
+		final QoSIntraPingMeasurementResponseDTO measurementResponseDTO = new QoSIntraPingMeasurementResponseDTO();
+		measurementResponseDTO.setId(1L);
+		measurementResponseDTO.setAvailable(true);
+		
+		final ServiceQueryResultDTO srQueryResult = new ServiceQueryResultDTO();
+		srQueryResult.setServiceQueryData(List.of(serviceRegistryResponseDTO1, serviceRegistryResponseDTO2));
+		when(gatekeeperDriver.sendServiceRegistryQuery(any())).thenReturn(srQueryResult);
+		when(gatekeeperDriver.sendInterCloudAuthorizationCheckQuery(any(), any(), any())).thenReturn(Map.of(1L,List.of(1L), 2L,List.of(1L, 2L)));
+		when(gatekeeperDriver.getQoSReservationList()).thenReturn(List.of());
+		when(gatekeeperDriver.getQoSIntraPingMeasurementsForLocalSystem(eq(serviceRegistryResponseDTO1.getId()))).thenReturn(new QoSIntraPingMeasurementResponseDTO());
+		when(gatekeeperDriver.getQoSIntraPingMeasurementsForLocalSystem(eq(serviceRegistryResponseDTO2.getId()))).thenReturn(measurementResponseDTO);
+		final Cloud ownCloud = new Cloud("own-c-operator", "own-c-name", true, true, true, "own-c-auth-info");
+		ownCloud.setCreatedAt(ZonedDateTime.now());
+		ownCloud.setUpdatedAt(ZonedDateTime.now());
+		when(commonDBService.getOwnCloud(true)).thenReturn(ownCloud);
+		
+		when(gatekeeperDriver.checkQoSEnabled()).thenReturn(true);
+		
+		final GSDPollResponseDTO doGSDPollResponse = gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false, true));
+		
+		assertEquals(1, (int) doGSDPollResponse.getNumOfProviders());
+		assertEquals(2, doGSDPollResponse.getAvailableInterfaces().size());
+		assertTrue(doGSDPollResponse.getAvailableInterfaces().contains("HTTP-SECURE-JSON"));
+		assertTrue(doGSDPollResponse.getAvailableInterfaces().contains("XML"));
+		assertEquals(1, doGSDPollResponse.getQosMeasurements().size());
+		assertEquals(serviceRegistryResponseDTO2.getProvider().getSystemName(), doGSDPollResponse.getQosMeasurements().get(0).getServiceRegistryEntry().getProvider().getSystemName());
+		assertTrue(doGSDPollResponse.getQosMeasurements().get(0).isProviderAvailable());
 	}
 }

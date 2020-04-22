@@ -1,7 +1,9 @@
 package eu.arrowhead.core.orchestrator;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -30,6 +32,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.dto.internal.QoSReservationRequestDTO;
+import eu.arrowhead.common.dto.internal.QoSTemporaryLockRequestDTO;
+import eu.arrowhead.common.dto.internal.QoSTemporaryLockResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFlags;
@@ -37,8 +42,10 @@ import eu.arrowhead.common.dto.shared.OrchestrationFlags.Flag;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.core.orchestrator.service.OrchestratorService;
 
@@ -566,6 +573,343 @@ public class OrchestratorControllerTest {
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS_URI + "/{" + CoreCommonConstants.COMMON_FIELD_NAME_ID + "}", error.getOrigin());
 		Assert.assertEquals("Consumer system :  Id must be greater than 0. ", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void isQoSEnabledOkTest() throws Exception {
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_ENABLED_URI)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getAllQoSReservationOkTest() throws Exception {
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_RESERVATIONS_URI)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void lockProvidersTemporaryOkTest() throws Exception {
+		final QoSTemporaryLockResponseDTO responseDTO = new QoSTemporaryLockResponseDTO(List.of(new OrchestrationResultDTO()));
+		when(orchestratorService.lockProvidersTemporarily(any())).thenReturn(responseDTO);
+		
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester-system");
+		requesterSystem.setAddress("1.1.1.1");
+		requesterSystem.setPort(10000);
+
+		final QoSTemporaryLockRequestDTO requestDTO = new QoSTemporaryLockRequestDTO(requesterSystem, List.of(new OrchestrationResultDTO()));
+		
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_TEMPORARY_LOCK_URI)
+				   							 .contentType(MediaType.APPLICATION_JSON)
+				   							 .content(objectMapper.writeValueAsBytes(requestDTO))
+				   							 .accept(MediaType.APPLICATION_JSON))
+				   							 .andExpect(status().isOk())
+				   							 .andReturn();
+		final QoSTemporaryLockResponseDTO response = objectMapper.readValue(result.getResponse().getContentAsByteArray(), QoSTemporaryLockResponseDTO.class);
+		
+		assertEquals(responseDTO.getResponse().size(), response.getResponse().size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void lockProvidersTemporaryBlankSystemNameTest() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("");
+		requesterSystem.setAddress("1.1.1.1");
+		requesterSystem.setPort(10000);
+
+		final QoSTemporaryLockRequestDTO requestDTO = new QoSTemporaryLockRequestDTO(requesterSystem, List.of(new OrchestrationResultDTO()));
+		
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_TEMPORARY_LOCK_URI)
+				   							 .contentType(MediaType.APPLICATION_JSON)
+				   							 .content(objectMapper.writeValueAsBytes(requestDTO))
+				   							 .accept(MediaType.APPLICATION_JSON))
+				   							 .andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void lockProvidersTemporaryNullSystemNameTest() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName(null);
+		requesterSystem.setAddress("1.1.1.1");
+		requesterSystem.setPort(10000);
+
+		final QoSTemporaryLockRequestDTO requestDTO = new QoSTemporaryLockRequestDTO(requesterSystem, List.of(new OrchestrationResultDTO()));
+		
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_TEMPORARY_LOCK_URI)
+				   							 .contentType(MediaType.APPLICATION_JSON)
+				   							 .content(objectMapper.writeValueAsBytes(requestDTO))
+				   							 .accept(MediaType.APPLICATION_JSON))
+				   							 .andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void lockProvidersTemporaryBlankSystemAddressTest() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester-system");
+		requesterSystem.setAddress("");
+		requesterSystem.setPort(10000);
+
+		final QoSTemporaryLockRequestDTO requestDTO = new QoSTemporaryLockRequestDTO(requesterSystem, List.of(new OrchestrationResultDTO()));
+		
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_TEMPORARY_LOCK_URI)
+				   	.contentType(MediaType.APPLICATION_JSON)
+				   	.content(objectMapper.writeValueAsBytes(requestDTO))
+				   	.accept(MediaType.APPLICATION_JSON))
+				   	.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void lockProvidersTemporaryNullSystemAddressTest() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester-system");
+		requesterSystem.setAddress(null);
+		requesterSystem.setPort(10000);
+
+		final QoSTemporaryLockRequestDTO requestDTO = new QoSTemporaryLockRequestDTO(requesterSystem, List.of(new OrchestrationResultDTO()));
+		
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_TEMPORARY_LOCK_URI)
+				   	.contentType(MediaType.APPLICATION_JSON)
+				   	.content(objectMapper.writeValueAsBytes(requestDTO))
+				   	.accept(MediaType.APPLICATION_JSON))
+				   	.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void lockProvidersTemporaryNullSystemPortTest() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester-system");
+		requesterSystem.setAddress("1.1.1.1");
+		requesterSystem.setPort(null);
+
+		final QoSTemporaryLockRequestDTO requestDTO = new QoSTemporaryLockRequestDTO(requesterSystem, List.of(new OrchestrationResultDTO()));
+		
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_TEMPORARY_LOCK_URI)
+				   	.contentType(MediaType.APPLICATION_JSON)
+				   	.content(objectMapper.writeValueAsBytes(requestDTO))
+				   	.accept(MediaType.APPLICATION_JSON))
+				   	.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void confirmReservationOkTest() throws Exception {
+		doNothing().when(orchestratorService).confirmProviderReservation(any());
+		
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester-system");
+		requesterSystem.setAddress("1.1.1.1");
+		requesterSystem.setPort(10000);
+		
+		final SystemResponseDTO selectedSystem = new SystemResponseDTO();
+		selectedSystem.setId(1);
+		selectedSystem.setSystemName("selected-system");
+		selectedSystem.setAddress("2.2.2.2");
+		selectedSystem.setPort(20000);
+		final ServiceDefinitionResponseDTO requestedService = new ServiceDefinitionResponseDTO(1, "requested-service", null, null);
+		final OrchestrationResultDTO selectedResult = new OrchestrationResultDTO();
+		selectedResult.setProvider(selectedSystem);
+		selectedResult.setService(requestedService);
+
+		final QoSReservationRequestDTO requestDTO = new QoSReservationRequestDTO(selectedResult, requesterSystem, List.of(new OrchestrationResultDTO()));
+		
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_RESERVATIONS_URI)
+				   	.contentType(MediaType.APPLICATION_JSON)
+				   	.content(objectMapper.writeValueAsBytes(requestDTO))
+				   	.accept(MediaType.APPLICATION_JSON))
+				   	.andExpect(status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void confirmReservationBlankRequesterSystemNameTest() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("");
+		requesterSystem.setAddress("1.1.1.1");
+		requesterSystem.setPort(10000);
+		
+		final SystemResponseDTO selectedSystem = new SystemResponseDTO();
+		selectedSystem.setId(1);
+		selectedSystem.setSystemName("selected-system");
+		selectedSystem.setAddress("2.2.2.2");
+		selectedSystem.setPort(20000);
+		final ServiceDefinitionResponseDTO requestedService = new ServiceDefinitionResponseDTO(1, "requested-service", null, null);
+		final OrchestrationResultDTO selectedResult = new OrchestrationResultDTO();
+		selectedResult.setProvider(selectedSystem);
+		selectedResult.setService(requestedService);;
+
+		final QoSReservationRequestDTO requestDTO = new QoSReservationRequestDTO(selectedResult, requesterSystem, List.of(new OrchestrationResultDTO()));
+		
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_RESERVATIONS_URI)
+				   	.contentType(MediaType.APPLICATION_JSON)
+				   	.content(objectMapper.writeValueAsBytes(requestDTO))
+				   	.accept(MediaType.APPLICATION_JSON))
+				   	.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void confirmReservationNullRequesterSystemNameTest() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName(null);
+		requesterSystem.setAddress("1.1.1.1");
+		requesterSystem.setPort(10000);
+		
+		final SystemResponseDTO selectedSystem = new SystemResponseDTO();
+		selectedSystem.setId(1);
+		selectedSystem.setSystemName("selected-system");
+		selectedSystem.setAddress("2.2.2.2");
+		selectedSystem.setPort(20000);
+		final ServiceDefinitionResponseDTO requestedService = new ServiceDefinitionResponseDTO(1, "requested-service", null, null);
+		final OrchestrationResultDTO selectedResult = new OrchestrationResultDTO();
+		selectedResult.setProvider(selectedSystem);
+		selectedResult.setService(requestedService);;
+
+		final QoSReservationRequestDTO requestDTO = new QoSReservationRequestDTO(selectedResult, requesterSystem, List.of(new OrchestrationResultDTO()));
+		
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_RESERVATIONS_URI)
+				   	.contentType(MediaType.APPLICATION_JSON)
+				   	.content(objectMapper.writeValueAsBytes(requestDTO))
+				   	.accept(MediaType.APPLICATION_JSON))
+				   	.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void confirmReservationBlankRequesterSystemAddressTest() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester-system");
+		requesterSystem.setAddress("");
+		requesterSystem.setPort(10000);
+		
+		final SystemResponseDTO selectedSystem = new SystemResponseDTO();
+		selectedSystem.setId(1);
+		selectedSystem.setSystemName("selected-system");
+		selectedSystem.setAddress("2.2.2.2");
+		selectedSystem.setPort(20000);
+		final ServiceDefinitionResponseDTO requestedService = new ServiceDefinitionResponseDTO(1, "requested-service", null, null);
+		final OrchestrationResultDTO selectedResult = new OrchestrationResultDTO();
+		selectedResult.setProvider(selectedSystem);
+		selectedResult.setService(requestedService);;
+
+		final QoSReservationRequestDTO requestDTO = new QoSReservationRequestDTO(selectedResult, requesterSystem, List.of(new OrchestrationResultDTO()));
+		
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_RESERVATIONS_URI)
+				   	.contentType(MediaType.APPLICATION_JSON)
+				   	.content(objectMapper.writeValueAsBytes(requestDTO))
+				   	.accept(MediaType.APPLICATION_JSON))
+				   	.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void confirmReservationNullRequesterSystemAddressTest() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester-system");
+		requesterSystem.setAddress(null);
+		requesterSystem.setPort(10000);
+		
+		final SystemResponseDTO selectedSystem = new SystemResponseDTO();
+		selectedSystem.setId(1);
+		selectedSystem.setSystemName("selected-system");
+		selectedSystem.setAddress("2.2.2.2");
+		selectedSystem.setPort(20000);
+		final ServiceDefinitionResponseDTO requestedService = new ServiceDefinitionResponseDTO(1, "requested-service", null, null);
+		final OrchestrationResultDTO selectedResult = new OrchestrationResultDTO();
+		selectedResult.setProvider(selectedSystem);
+		selectedResult.setService(requestedService);;
+
+		final QoSReservationRequestDTO requestDTO = new QoSReservationRequestDTO(selectedResult, requesterSystem, List.of(new OrchestrationResultDTO()));
+		
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_RESERVATIONS_URI)
+				   	.contentType(MediaType.APPLICATION_JSON)
+				   	.content(objectMapper.writeValueAsBytes(requestDTO))
+				   	.accept(MediaType.APPLICATION_JSON))
+				   	.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void confirmReservationNullRequesterSystemPortTest() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester-system");
+		requesterSystem.setAddress("1.1.1.1");
+		requesterSystem.setPort(null);
+		
+		final SystemResponseDTO selectedSystem = new SystemResponseDTO();
+		selectedSystem.setId(1);
+		selectedSystem.setSystemName("selected-system");
+		selectedSystem.setAddress("2.2.2.2");
+		selectedSystem.setPort(20000);
+		final ServiceDefinitionResponseDTO requestedService = new ServiceDefinitionResponseDTO(1, "requested-service", null, null);
+		final OrchestrationResultDTO selectedResult = new OrchestrationResultDTO();
+		selectedResult.setProvider(selectedSystem);
+		selectedResult.setService(requestedService);;
+
+		final QoSReservationRequestDTO requestDTO = new QoSReservationRequestDTO(selectedResult, requesterSystem, List.of(new OrchestrationResultDTO()));
+		
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_RESERVATIONS_URI)
+				   	.contentType(MediaType.APPLICATION_JSON)
+				   	.content(objectMapper.writeValueAsBytes(requestDTO))
+				   	.accept(MediaType.APPLICATION_JSON))
+				   	.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void confirmReservationNullSelectedSystemTest() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester-system");
+		requesterSystem.setAddress("1.1.1.1");
+		requesterSystem.setPort(10000);
+		
+		final ServiceDefinitionResponseDTO requestedService = new ServiceDefinitionResponseDTO(1, "requested-service", null, null);
+		final OrchestrationResultDTO selectedResult = new OrchestrationResultDTO();
+		selectedResult.setProvider(null);
+		selectedResult.setService(requestedService);;
+
+		final QoSReservationRequestDTO requestDTO = new QoSReservationRequestDTO(selectedResult, requesterSystem, List.of(new OrchestrationResultDTO()));
+		
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_RESERVATIONS_URI)
+				   	.contentType(MediaType.APPLICATION_JSON)
+				   	.content(objectMapper.writeValueAsBytes(requestDTO))
+				   	.accept(MediaType.APPLICATION_JSON))
+				   	.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void confirmReservationNullRequestedServiceTest() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester-system");
+		requesterSystem.setAddress("1.1.1.1");
+		requesterSystem.setPort(10000);
+		
+		final SystemResponseDTO selectedSystem = new SystemResponseDTO();
+		selectedSystem.setId(1);
+		selectedSystem.setSystemName("");
+		selectedSystem.setAddress("2.2.2.2");
+		selectedSystem.setPort(20000);
+		final OrchestrationResultDTO selectedResult = new OrchestrationResultDTO();
+		selectedResult.setProvider(selectedSystem);
+		selectedResult.setService(null);;
+
+		final QoSReservationRequestDTO requestDTO = new QoSReservationRequestDTO(selectedResult, requesterSystem, List.of(new OrchestrationResultDTO()));
+		
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_RESERVATIONS_URI)
+				   	.contentType(MediaType.APPLICATION_JSON)
+				   	.content(objectMapper.writeValueAsBytes(requestDTO))
+				   	.accept(MediaType.APPLICATION_JSON))
+				   	.andExpect(status().isBadRequest());
 	}
 	
 	//=================================================================================================

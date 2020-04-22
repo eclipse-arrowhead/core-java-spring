@@ -8,6 +8,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import eu.arrowhead.common.dto.internal.CloudResponseDTO;
+import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 
@@ -44,14 +46,34 @@ public class DummyQoSManagerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testVerifyServicesDoNothing() {
+	public void testVerifyIntraCloudServicesDoNothing() {
 		final List<OrchestrationResultDTO> verified = qosManager.verifyIntraCloudServices(getTestOrchestrationResults(), null);
 		Assert.assertEquals(3, verified.size());
 		for (int i = 0; i < 3; ++i) {
 			Assert.assertEquals(i, verified.get(i).getProvider().getId());
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testPreVerifyInterCloudServicesDoNothing() {
+		final List<GSDPollResponseDTO> verified = qosManager.preVerifyInterCloudServices(getTestGSDResponses(), null);
+		Assert.assertEquals(3, verified.size());
+		for (int i = 0; i < 3; ++i) {
+			Assert.assertEquals(i, verified.get(i).getProviderCloud().getId());
+		}
+	}
 
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testVerifyInterCloudServicesDoNothing() {
+		final List<OrchestrationResultDTO> verified = qosManager.verifyInterCloudServices(null, getTestOrchestrationResults(), null, null);
+		Assert.assertEquals(3, verified.size());
+		for (int i = 0; i < 3; ++i) {
+			Assert.assertEquals(i, verified.get(i).getProvider().getId());
+		}
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -66,6 +88,17 @@ public class DummyQoSManagerTest {
 		}
 		
 		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<GSDPollResponseDTO> getTestGSDResponses() {
+		final List<GSDPollResponseDTO> response = new ArrayList<>();
+		for (int i = 0; i < 3; ++i) {
+			GSDPollResponseDTO dto = new GSDPollResponseDTO();
+			dto.setProviderCloud(new CloudResponseDTO(i, "test-op", "test-n", true, true, false, "sdfhbs", null, null));
+			response.add(dto);
+		}
+		return response;
 	}
 
 }

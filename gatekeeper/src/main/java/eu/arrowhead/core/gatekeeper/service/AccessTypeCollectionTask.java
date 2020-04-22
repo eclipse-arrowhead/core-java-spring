@@ -14,6 +14,7 @@ import eu.arrowhead.common.dto.internal.CloudAccessResponseDTO;
 import eu.arrowhead.common.dto.internal.GeneralRelayRequestDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.ErrorWrapperDTO;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.exception.TimeoutException;
@@ -88,8 +89,11 @@ public class AccessTypeCollectionTask implements Runnable {
 			// Must catch all throwable, otherwise the blocking queue would block the whole process
 			logger.debug("Exception: {}", ex.getMessage());
 			
-			// adding empty responseDTO into the blocking queue in order to having exactly as many response as request was sent
-			queue.add(new CloudAccessResponseDTO()); 			
+			if (ex instanceof ArrowheadException) {
+				queue.add(new ErrorMessageDTO((ArrowheadException) ex));
+			} else {
+				queue.add(new ErrorMessageDTO(new ArrowheadException("Exception in AccessTypeCollectionTask", ex)));
+			} 			
 		}		
 	}
 }

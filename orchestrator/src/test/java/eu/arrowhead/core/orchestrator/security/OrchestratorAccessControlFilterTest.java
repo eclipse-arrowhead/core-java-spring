@@ -28,6 +28,8 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.dto.internal.QoSReservationRequestDTO;
+import eu.arrowhead.common.dto.internal.QoSTemporaryLockRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 
@@ -45,7 +47,11 @@ public class OrchestratorAccessControlFilterTest {
 	// members
 	
 	private static final String ORCH_ECHO = CommonConstants.ORCHESTRATOR_URI + CommonConstants.ECHO_URI;
-	private static final String ORCH_ORCHESTRATION = CommonConstants.ORCHESTRATOR_URI +CommonConstants.OP_ORCH_PROCESS_URI;
+	private static final String ORCH_ORCHESTRATION = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS_URI;
+	private static final String ORCH_QOS_ENABLED = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_ENABLED_URI;
+	private static final String ORCH_QOS_TEMPORARY_LOCK = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_TEMPORARY_LOCK_URI;
+	private static final String ORCH_QOS_RESERVATION = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_RESERVATIONS_URI;
+	
 	
 	@Autowired
 	private ApplicationContext appContext;
@@ -153,6 +159,94 @@ public class OrchestratorAccessControlFilterTest {
 					.with(x509("certificates/provider.pem"))
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(requestDTO))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testQoSEnabledWithGatekeeper() throws Exception {
+		this.mockMvc.perform(get(ORCH_QOS_ENABLED)
+				    .secure(true)
+					.with(x509("certificates/gatekeeper.pem"))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testQoSEnabledWithNotGatekeeper() throws Exception {
+		this.mockMvc.perform(get(ORCH_QOS_ENABLED)
+				    .secure(true)
+					.with(x509("certificates/provider.pem"))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetQoSReservationWithGatekeeper() throws Exception {
+		this.mockMvc.perform(get(ORCH_QOS_RESERVATION)
+			    	.secure(true)
+			    	.with(x509("certificates/gatekeeper.pem"))
+			    	.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetQoSReservationWithNotGatekeeper() throws Exception {
+		this.mockMvc.perform(get(ORCH_QOS_RESERVATION)
+			    	.secure(true)
+			    	.with(x509("certificates/provider.pem"))
+			    	.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testTemporaryLockWithGatekeeper() throws Exception {
+		this.mockMvc.perform(post(ORCH_QOS_TEMPORARY_LOCK)
+				    .secure(true)
+					.with(x509("certificates/gatekeeper.pem"))
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(new QoSTemporaryLockRequestDTO()))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest()); //Bad request result means that the request gone through the filter
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testTemporaryLockWithNotGatekeeper() throws Exception {
+		this.mockMvc.perform(post(ORCH_QOS_TEMPORARY_LOCK)
+				    .secure(true)
+					.with(x509("certificates/provider.pem"))
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(new QoSTemporaryLockRequestDTO()))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConfirmReservationWithGatekeeper() throws Exception {
+		this.mockMvc.perform(post(ORCH_QOS_RESERVATION)
+				    .secure(true)
+					.with(x509("certificates/gatekeeper.pem"))
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(new QoSReservationRequestDTO(null, null, null)))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest()); //Bad request result means that the request gone through the filter
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConfirmReservationWithNotGatekeeper() throws Exception {
+		this.mockMvc.perform(post(ORCH_QOS_RESERVATION)
+				    .secure(true)
+					.with(x509("certificates/provider.pem"))
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(new QoSReservationRequestDTO(null, null, null)))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isUnauthorized());
 	}

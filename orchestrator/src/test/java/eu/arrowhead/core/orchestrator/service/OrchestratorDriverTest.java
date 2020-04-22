@@ -27,6 +27,7 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudCheckResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudSystemFormDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.internal.GSDQueryFormDTO;
@@ -34,7 +35,11 @@ import eu.arrowhead.common.dto.internal.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.internal.ICNResultDTO;
 import eu.arrowhead.common.dto.internal.IdIdListDTO;
+import eu.arrowhead.common.dto.internal.QoSInterDirectPingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementListResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
 import eu.arrowhead.common.dto.internal.TokenDataDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationResponseDTO;
@@ -484,7 +489,7 @@ public class OrchestratorDriverTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ArrowheadException.class)
-	public void testGetPingMeasurementUriNotFound() {
+	public void testGetIntraPingMeasurementUriNotFound() {
 		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false);
 		
 		orchestratorDriver.getIntraPingMeasurement(1);
@@ -492,7 +497,7 @@ public class OrchestratorDriverTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ArrowheadException.class)
-	public void testGetPingMeasurementUriWrongType() {
+	public void testGetIntraPingMeasurementUriWrongType() {
 		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
 		when(arrowheadContext.get(any(String.class))).thenReturn("invalid");
 		
@@ -501,7 +506,7 @@ public class OrchestratorDriverTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testGetPingMeasurementOk() {
+	public void testGetIntraPingMeasurementOk() {
 		final int systemId = 23;
 		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT + 
 				 									  CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT_SUFFIX).expand(systemId);
@@ -516,6 +521,113 @@ public class OrchestratorDriverTest {
 		
 		Assert.assertNotNull(result);
 		Assert.assertFalse(result.hasRecord());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetIntraPingMedianMeasurementUriNotFound() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false);
+		
+		orchestratorDriver.getIntraPingMedianMeasurement(QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetIntraPingMedianMeasurementUriWrongType() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn("invalid");
+		
+		orchestratorDriver.getIntraPingMedianMeasurement(QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetIntraPingMedianMeasurementOk() {
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT)
+										   .expand(QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT.name());
+		Assert.assertTrue(uri.toString().contains("/measurements/intracloud/ping_median"));
+		
+		final QoSIntraPingMeasurementResponseDTO responseDTO = new QoSIntraPingMeasurementResponseDTO();
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(uri);
+		when(httpService.sendRequest(eq(uri), eq(HttpMethod.GET), eq(QoSIntraPingMeasurementResponseDTO.class))).thenReturn(new ResponseEntity<QoSIntraPingMeasurementResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		final QoSIntraPingMeasurementResponseDTO result = orchestratorDriver.getIntraPingMedianMeasurement(QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT);
+		
+		Assert.assertNotNull(result);
+		Assert.assertFalse(result.hasRecord());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetInterDirectPingMeasurementUriNotFound() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false);
+		
+		orchestratorDriver.getInterDirectPingMeasurement(new CloudSystemFormDTO());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetInterDirectPingMeasurementUriWrongType() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn("invalid");
+		
+		orchestratorDriver.getInterDirectPingMeasurement(new CloudSystemFormDTO());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetInterDirectPingMeasurementOk() {
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT);
+		Assert.assertTrue(uri.toString().contains("/measurements/intercloud/ping"));
+		
+		final CloudSystemFormDTO requestDTO = new CloudSystemFormDTO();
+		
+		final QoSInterDirectPingMeasurementResponseDTO responseDTO = new QoSInterDirectPingMeasurementResponseDTO();
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(uri);
+		when(httpService.sendRequest(eq(uri), eq(HttpMethod.POST), eq(QoSInterDirectPingMeasurementResponseDTO.class), eq(requestDTO))).thenReturn(new ResponseEntity<QoSInterDirectPingMeasurementResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		final QoSInterDirectPingMeasurementResponseDTO result = orchestratorDriver.getInterDirectPingMeasurement(requestDTO);
+		
+		Assert.assertNotNull(result);
+		Assert.assertFalse(result.hasRecord());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetInterRelayEchoMeasurementUriNotFound() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false);
+		
+		orchestratorDriver.getInterRelayEchoMeasurement(new CloudSystemFormDTO());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetInterRelayEchoMeasurementUriWrongType() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn("invalid");
+		
+		orchestratorDriver.getInterRelayEchoMeasurement(new CloudSystemFormDTO());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetInterRelayEchoMeasurementOk() {
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT);
+		Assert.assertTrue(uri.toString().contains("/measurements/intercloud/relay_echo"));
+		
+		final CloudSystemFormDTO requestDTO = new CloudSystemFormDTO();
+		
+		final QoSInterRelayEchoMeasurementListResponseDTO  responseDTO = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(new QoSInterRelayEchoMeasurementResponseDTO()), 1);
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(uri);
+		when(httpService.sendRequest(eq(uri), eq(HttpMethod.POST), eq(QoSInterRelayEchoMeasurementListResponseDTO.class), eq(requestDTO))).thenReturn(new ResponseEntity<QoSInterRelayEchoMeasurementListResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		final QoSInterRelayEchoMeasurementListResponseDTO result = orchestratorDriver.getInterRelayEchoMeasurement(requestDTO);
+		
+		Assert.assertNotNull(result);
+		Assert.assertTrue(result.getCount() == 1);
 	}
 	
 	//=================================================================================================

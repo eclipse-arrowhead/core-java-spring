@@ -30,8 +30,8 @@ import eu.arrowhead.common.database.entity.QoSInterDirectPingMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterDirectPingMeasurementLog;
 import eu.arrowhead.common.dto.internal.CloudAccessResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
-import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
-import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysAndPublicRelaysListResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysAndPublicRelaysResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
@@ -81,7 +81,7 @@ public class CloudPingTask implements Job {
 			return;
 		}
 
-		final CloudWithRelaysListResponseDTO responseDTO = qoSMonitorDriver.queryGatekeeperAllCloud();
+		final CloudWithRelaysAndPublicRelaysListResponseDTO responseDTO = qoSMonitorDriver.queryGatekeeperAllCloud();
 		final Set<CloudResponseDTO> clouds = getCloudsFromResponse(responseDTO);
 		if (clouds == null || clouds.isEmpty()) {
 
@@ -110,11 +110,11 @@ public class CloudPingTask implements Job {
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
-	private Set<CloudResponseDTO> getCloudsFromResponse(final CloudWithRelaysListResponseDTO responseDTO) {
+	private Set<CloudResponseDTO> getCloudsFromResponse(final CloudWithRelaysAndPublicRelaysListResponseDTO responseDTO) {
 		logger.debug("getCloudsFromResponse started...");
 
 		final List<CloudRequestDTO> cloudsToRequest = new ArrayList<>();
-		for (final CloudWithRelaysResponseDTO cloudWithRelay : responseDTO.getData()) {
+		for (final CloudWithRelaysAndPublicRelaysResponseDTO cloudWithRelay : responseDTO.getData()) {
 
 			if (cloudWithRelay != null && !cloudWithRelay.getOwnCloud()) {
 				cloudsToRequest.add(DTOConverter.convertCloudWithRelaysResponseDTOToCloudRequestDTO(cloudWithRelay));
@@ -126,7 +126,7 @@ public class CloudPingTask implements Job {
 
 	//-------------------------------------------------------------------------------------------------
 	private Set<CloudResponseDTO> filterCloudsByAccessType(final List<CloudRequestDTO> cloudsToRequest,
-			final CloudWithRelaysListResponseDTO responseDTO) {
+			final CloudWithRelaysAndPublicRelaysListResponseDTO responseDTO) {
 		logger.debug("filterCloudsByAccessType started...");
 
 		final List<CloudAccessResponseDTO> cloudAccessResponseDTOList = qoSMonitorDriver.queryGatekeeperCloudAccessTypes(cloudsToRequest).getData();
@@ -135,7 +135,7 @@ public class CloudPingTask implements Job {
 		}
 
 		final Set<CloudResponseDTO> clouds = new HashSet<>();
-		for (final CloudWithRelaysResponseDTO cloudWithRelay : responseDTO.getData()) {
+		for (final CloudWithRelaysAndPublicRelaysResponseDTO cloudWithRelay : responseDTO.getData()) {
 
 			if (cloudWithRelay != null && !cloudWithRelay.getOwnCloud()) {
 				if( cloudIsDirectlyAccessable(cloudWithRelay, cloudAccessResponseDTOList)) {
@@ -149,7 +149,7 @@ public class CloudPingTask implements Job {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private boolean cloudIsDirectlyAccessable(final CloudWithRelaysResponseDTO cloudWithRelay,
+	private boolean cloudIsDirectlyAccessable(final CloudWithRelaysAndPublicRelaysResponseDTO cloudWithRelay,
 			final List<CloudAccessResponseDTO> cloudAccessResponseDTOList) {
 		logger.debug("cloudIsDirectlyAccessable started...");
 
@@ -274,8 +274,8 @@ public class CloudPingTask implements Job {
 
 			sumOfDiffsForJitterWithTimeout += Math.pow( (duration - meanResponseTimeWithTimeout), 2);
 		}
-		final double jitterWithTimeout = meanResponseTimeWithoutTimeoutMembersCount < 1 ? INVALID_CALCULATION_VALUE : Math.sqrt(sumOfDiffsForJitterWithTimeout / meanResponseTimeWithoutTimeoutMembersCount);
-		final double jitterWithoutTimeout = responseList.size() < 1 ? INVALID_CALCULATION_VALUE : Math.sqrt(sumOfDiffsForJitterWithoutTimeout / responseList.size());
+		final double jitterWithTimeout = responseList.size() < 1 ? INVALID_CALCULATION_VALUE : Math.sqrt(sumOfDiffsForJitterWithTimeout / responseList.size());
+		final double jitterWithoutTimeout =  meanResponseTimeWithoutTimeoutMembersCount < 1 ? INVALID_CALCULATION_VALUE : Math.sqrt(sumOfDiffsForJitterWithoutTimeout / meanResponseTimeWithoutTimeoutMembersCount );
 
 		final PingMeasurementCalculationsDTO calculations = new PingMeasurementCalculationsDTO();
 		calculations.setAvailable(available);

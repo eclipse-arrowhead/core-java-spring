@@ -71,9 +71,8 @@ public class AccessTypeCollectionTaskTest {
 		
 		testingObject.run();
 		
-		final CloudAccessResponseDTO cloudAccessResponseDTO = (CloudAccessResponseDTO) queue.take();
-		assertNull(cloudAccessResponseDTO.getCloudName());
-		assertNull(cloudAccessResponseDTO.getCloudOperator());
+		final ErrorMessageDTO cloudAccessResponseDTO = (ErrorMessageDTO) queue.take();
+		assertTrue(cloudAccessResponseDTO.isError());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -84,9 +83,8 @@ public class AccessTypeCollectionTaskTest {
 		
 		testingObject.run();
 		
-		final CloudAccessResponseDTO cloudAccessResponseDTO = (CloudAccessResponseDTO) queue.take();
-		assertNull(cloudAccessResponseDTO.getCloudName());
-		assertNull(cloudAccessResponseDTO.getCloudOperator());
+		final ErrorMessageDTO cloudAccessResponseDTO = (ErrorMessageDTO) queue.take();
+		assertTrue(cloudAccessResponseDTO.isError());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -96,9 +94,8 @@ public class AccessTypeCollectionTaskTest {
 		
 		testingObject.run();
 		
-		final CloudAccessResponseDTO cloudAccessResponseDTO = (CloudAccessResponseDTO) queue.take();
-		assertNull(cloudAccessResponseDTO.getCloudName());
-		assertNull(cloudAccessResponseDTO.getCloudOperator());
+		final ErrorMessageDTO cloudAccessResponseDTO = (ErrorMessageDTO) queue.take();
+		assertTrue(cloudAccessResponseDTO.isError());
 	}
 	
 	
@@ -110,9 +107,8 @@ public class AccessTypeCollectionTaskTest {
 		
 		testingObject.run();
 		
-		final CloudAccessResponseDTO cloudAccessResponseDTO = (CloudAccessResponseDTO) queue.take();
-		assertNull(cloudAccessResponseDTO.getCloudName());
-		assertNull(cloudAccessResponseDTO.getCloudOperator());
+		final ErrorMessageDTO cloudAccessResponseDTO = (ErrorMessageDTO) queue.take();
+		assertTrue(cloudAccessResponseDTO.isError());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
