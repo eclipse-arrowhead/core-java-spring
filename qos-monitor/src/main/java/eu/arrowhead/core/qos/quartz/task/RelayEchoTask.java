@@ -140,7 +140,7 @@ public class RelayEchoTask implements Job {
 	@SuppressWarnings("unchecked")
 	private boolean checkRequiredCoreSystemServiceUrisAvailable() {
 		logger.debug("checkRequiredCoreSystemServiceUrisAvailable started...");
-		for (CoreSystemService coreSystemService : REQUIRED_CORE_SERVICES) {
+		for (final CoreSystemService coreSystemService : REQUIRED_CORE_SERVICES) {
 			final String key = coreSystemService.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 			if (!arrowheadContext.containsKey(key) && !(arrowheadContext.get(key) instanceof UriComponents)) {
 				return false;
