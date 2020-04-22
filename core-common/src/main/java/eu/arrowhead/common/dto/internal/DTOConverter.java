@@ -5,6 +5,10 @@ import eu.arrowhead.common.database.entity.AuthorizationInterCloud;
 import eu.arrowhead.common.database.entity.AuthorizationInterCloudInterfaceConnection;
 import eu.arrowhead.common.database.entity.AuthorizationIntraCloud;
 import eu.arrowhead.common.database.entity.AuthorizationIntraCloudInterfaceConnection;
+import eu.arrowhead.common.database.entity.ChoreographerAction;
+import eu.arrowhead.common.database.entity.ChoreographerPlan;
+import eu.arrowhead.common.database.entity.ChoreographerStep;
+import eu.arrowhead.common.database.entity.ChoreographerStepNextStepConnection;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
@@ -24,10 +28,10 @@ import eu.arrowhead.common.database.entity.Subscription;
 import eu.arrowhead.common.database.entity.SubscriptionPublisherConnection;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.entity.SystemRegistry;
-import eu.arrowhead.common.dto.shared.ChoreographerActionPlanResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerActionResponseDTO;
-import eu.arrowhead.common.dto.shared.ChoreographerActionStepResponseDTO;
-import eu.arrowhead.common.dto.shared.ChoreographerNextActionStepResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerNextStepResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerStepResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.DeviceQueryResultDTO;
 import eu.arrowhead.common.dto.shared.DeviceRegistryResponseDTO;
@@ -57,16 +61,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import com.fasterxml.jackson.databind.jsontype.impl.AsExistingPropertyTypeSerializer;
-import eu.arrowhead.common.database.entity.ChoreographerAction;
-import eu.arrowhead.common.database.entity.ChoreographerPlan;
-import eu.arrowhead.common.database.entity.ChoreographerStep;
-import eu.arrowhead.common.database.entity.ChoreographerStepNextStepConnection;
-import eu.arrowhead.common.database.entity.System;
-import eu.arrowhead.common.dto.shared.ChoreographerActionResponseDTO;
-import eu.arrowhead.common.dto.shared.ChoreographerNextStepResponseDTO;
-import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
-import eu.arrowhead.common.dto.shared.ChoreographerStepResponseDTO;
 
 public class DTOConverter {
 
@@ -690,21 +684,21 @@ public class DTOConverter {
             final ChoreographerStep step) {
         Assert.notNull(step, "Step is null.");
 
-		return new ChoreographerStepResponseDTO(step.getId(),
-				step.getName(),
-				step.getServiceName(),
-				step.getMetadata(),
-				step.getParameters(),
-				collectNextStepsFromStep(step.getNextSteps()),
-				step.getQuantity(),
-				Utilities.convertZonedDateTimeToUTCString(step.getCreatedAt()),
-				Utilities.convertZonedDateTimeToUTCString(step.getUpdatedAt()));
-	}
+        return new ChoreographerStepResponseDTO(step.getId(),
+                                                step.getName(),
+                                                step.getServiceName(),
+                                                step.getMetadata(),
+                                                step.getParameters(),
+                                                collectNextStepsFromStep(step.getNextSteps()),
+                                                step.getQuantity(),
+                                                Utilities.convertZonedDateTimeToUTCString(step.getCreatedAt()),
+                                                Utilities.convertZonedDateTimeToUTCString(step.getUpdatedAt()));
+    }
 
-        public static ChoreographerNextStepResponseDTO convertNextStepToNextStepResponseDTO(final ChoreographerStep nextStep) {
-		Assert.notNull(nextStep, "Next step is null.");
+    public static ChoreographerNextStepResponseDTO convertNextStepToNextStepResponseDTO(final ChoreographerStep nextStep) {
+        Assert.notNull(nextStep, "Next step is null.");
 
-		return new ChoreographerNextStepResponseDTO(nextStep.getId(), nextStep.getName());
+        return new ChoreographerNextStepResponseDTO(nextStep.getId(), nextStep.getName());
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -713,12 +707,11 @@ public class DTOConverter {
         Assert.notNull(actionEntry, "Action entry is null.");
 
 
-
-		return new ChoreographerActionResponseDTO(actionEntry.getId(),
-				actionEntry.getName(),
-				collectNextActionNameFromAction(actionEntry.getNextAction()),
-				collectStepsFromAction(actionEntry.getStepEntries()),
-				collectFirstStepNamesFromAction(actionEntry.getFirstStepEntries()),
+        return new ChoreographerActionResponseDTO(actionEntry.getId(),
+                                                  actionEntry.getName(),
+                                                  collectNextActionNameFromAction(actionEntry.getNextAction()),
+                                                  collectStepsFromAction(actionEntry.getStepEntries()),
+                                                  collectFirstStepNamesFromAction(actionEntry.getFirstStepEntries()),
                                                   Utilities.convertZonedDateTimeToUTCString(actionEntry.getCreatedAt()),
                                                   Utilities.convertZonedDateTimeToUTCString(actionEntry.getUpdatedAt()));
     }
@@ -729,12 +722,12 @@ public class DTOConverter {
         Assert.notNull(planEntry, "Plan entry is null.");
 
         return new ChoreographerPlanResponseDTO(planEntry.getId(),
-        planEntry.getName(),
+                                                planEntry.getName(),
 
-        planEntry.getFirstAction().getName(),
-                                                      collectActionsFromPlan(planEntry.getActions()),
-                                                      Utilities.convertZonedDateTimeToUTCString(planEntry.getCreatedAt()),
-                                                      Utilities.convertZonedDateTimeToUTCString(planEntry.getUpdatedAt()));
+                                                planEntry.getFirstAction().getName(),
+                                                collectActionsFromPlan(planEntry.getActions()),
+                                                Utilities.convertZonedDateTimeToUTCString(planEntry.getCreatedAt()),
+                                                Utilities.convertZonedDateTimeToUTCString(planEntry.getUpdatedAt()));
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -762,7 +755,7 @@ public class DTOConverter {
 
     //-------------------------------------------------------------------------------------------------
     public static SystemRegistryListResponseDTO convertSystemRegistryListToSystemRegistryListResponseDTO(final Iterable<SystemRegistry> page) {
-		Assert.notNull(page, "Iterable must not be null");
+        Assert.notNull(page, "Iterable must not be null");
         final List<SystemRegistryResponseDTO> list = new ArrayList<>();
         for (final SystemRegistry entry : page) {
             list.add(convertSystemRegistryToSystemRegistryResponseDTO(entry));
@@ -772,8 +765,8 @@ public class DTOConverter {
 
     //-------------------------------------------------------------------------------------------------
     public static SystemQueryResultDTO convertSystemRegistryListToSystemQueryResultDTO(final Iterable<SystemRegistry> page) {
-		Assert.notNull(page, "Iterable must not be null");
-		final List<SystemRegistryResponseDTO> list = new ArrayList<>();
+        Assert.notNull(page, "Iterable must not be null");
+        final List<SystemRegistryResponseDTO> list = new ArrayList<>();
         for (final SystemRegistry entry : page) {
             list.add(convertSystemRegistryToSystemRegistryResponseDTO(entry));
         }
@@ -802,7 +795,7 @@ public class DTOConverter {
 
     //-------------------------------------------------------------------------------------------------
     public static DeviceRegistryListResponseDTO convertDeviceRegistryListToDeviceRegistryListResponseDTO(final Iterable<DeviceRegistry> page) {
-		Assert.notNull(page, "Iterable must not be null");
+        Assert.notNull(page, "Iterable must not be null");
         final List<DeviceRegistryResponseDTO> list = new ArrayList<>();
         for (final DeviceRegistry entry : page) {
             list.add(convertDeviceRegistryToDeviceRegistryResponseDTO(entry));
@@ -812,8 +805,8 @@ public class DTOConverter {
 
     //-------------------------------------------------------------------------------------------------
     public static DeviceQueryResultDTO convertDeviceRegistryListToDeviceQueryResultDTO(final Iterable<DeviceRegistry> page) {
-		Assert.notNull(page, "Iterable must not be null");
-		final List<DeviceRegistryResponseDTO> list = new ArrayList<>();
+        Assert.notNull(page, "Iterable must not be null");
+        final List<DeviceRegistryResponseDTO> list = new ArrayList<>();
         for (final DeviceRegistry entry : page) {
             list.add(convertDeviceRegistryToDeviceRegistryResponseDTO(entry));
         }
@@ -944,37 +937,37 @@ public class DTOConverter {
 
     //-------------------------------------------------------------------------------------------------
     private static List<ChoreographerNextStepResponseDTO> collectNextStepsFromStep(final Set<ChoreographerStepNextStepConnection> nextSteps) {
-		if (nextSteps != null) {
-			final List<ChoreographerNextStepResponseDTO> result = new ArrayList<>(nextSteps.size());
-			for (final ChoreographerStepNextStepConnection nextStep : nextSteps) {
-				result.add(convertNextStepToNextStepResponseDTO(nextStep.getNextStepEntry()));
-			}
+        if (nextSteps != null) {
+            final List<ChoreographerNextStepResponseDTO> result = new ArrayList<>(nextSteps.size());
+            for (final ChoreographerStepNextStepConnection nextStep : nextSteps) {
+                result.add(convertNextStepToNextStepResponseDTO(nextStep.getNextStepEntry()));
+            }
 
-			result.sort(Comparator.comparing(ChoreographerNextStepResponseDTO::getId));
-			return result;
-		} else {
-			return new ArrayList<>();
-		}
-	}
+            result.sort(Comparator.comparing(ChoreographerNextStepResponseDTO::getId));
+            return result;
+        } else {
+            return new ArrayList<>();
+        }
+    }
 
-	//-------------------------------------------------------------------------------------------------
-	public static List<ChoreographerStepResponseDTO> collectStepsFromAction(
+    //-------------------------------------------------------------------------------------------------
+    public static List<ChoreographerStepResponseDTO> collectStepsFromAction(
             final Set<ChoreographerStep> steps) {
-		Assert.notNull(steps, "Steps list is null.");
+        Assert.notNull(steps, "Steps list is null.");
 
         final List<ChoreographerStepResponseDTO> result = new ArrayList<>(steps.size());
         for (final ChoreographerStep step : steps) {
             result.add(convertStepToStepResponseDTO(step));
         }
 
-		result.sort(Comparator.comparing(ChoreographerStepResponseDTO::getId));
+        result.sort(Comparator.comparing(ChoreographerStepResponseDTO::getId));
         return result;
     }
 
     //-------------------------------------------------------------------------------------------------
     public static List<String> collectFirstStepNamesFromAction(
             final Set<ChoreographerStep> steps) {
-		Assert.notNull(steps, "Steps list is null.");
+        Assert.notNull(steps, "Steps list is null.");
         final List<String> result = new ArrayList<>(steps.size());
         for (final ChoreographerStep step : steps) {
             result.add(step.getName());
@@ -986,22 +979,22 @@ public class DTOConverter {
     //-------------------------------------------------------------------------------------------------
     public static List<ChoreographerActionResponseDTO> collectActionsFromPlan(
             final Set<ChoreographerAction> actions) {
-		Assert.notNull(actions, "Action list is null.");
+        Assert.notNull(actions, "Action list is null.");
         final List<ChoreographerActionResponseDTO> result = new ArrayList<>(actions.size());
-		for (final ChoreographerAction action : actions) {
-			result.add(convertActionToActionResponseDTO(action));
-		}
+        for (final ChoreographerAction action : actions) {
+            result.add(convertActionToActionResponseDTO(action));
+        }
 
-		result.sort(Comparator.comparing(ChoreographerActionResponseDTO::getId));
-		return result;
-	}
+        result.sort(Comparator.comparing(ChoreographerActionResponseDTO::getId));
+        return result;
+    }
 
-	public static String collectNextActionNameFromAction(final ChoreographerAction nextAction) {
-		if (nextAction != null) {
-			return nextAction.getName();
-		}
+    public static String collectNextActionNameFromAction(final ChoreographerAction nextAction) {
+        if (nextAction != null) {
+            return nextAction.getName();
+        }
 
-		return null;
+        return null;
     }
 
     //-------------------------------------------------------------------------------------------------
