@@ -4,12 +4,14 @@ import java.security.PublicKey;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import javax.annotation.Resource;
 
+import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.quartz.DisallowConcurrentExecution;
@@ -34,6 +36,7 @@ import eu.arrowhead.common.dto.internal.CloudWithRelaysAndPublicRelaysListRespon
 import eu.arrowhead.common.dto.internal.CloudWithRelaysAndPublicRelaysResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
+import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.QoSMeasurementStatus;
@@ -67,8 +70,13 @@ public class RelayEchoTask implements Job {
 	@Value(CoreCommonConstants.$QOS_ENABLED_RELAY_TASK_WD)
 	private boolean relayTaskEnabled;
 	
+	@Value(CoreCommonConstants.$RELAY_TEST_BAD_GATEWAY_RETRY_MIN_WD)
+	private int badGatewayRetryMin;
+	
 	private static final List<CoreSystemService> REQUIRED_CORE_SERVICES = List.of(CoreSystemService.GATEKEEPER_PULL_CLOUDS, CoreSystemService.GATEKEEPER_COLLECT_ACCESS_TYPES,
 			  																	  CoreSystemService.GATEKEEPER_COLLECT_SYSTEM_ADDRESSES, CoreSystemService.GATEKEEPER_RELAY_TEST_SERVICE);
+	
+	private static final Map<String, ZonedDateTime> BAD_GATEWAY_CACHE = new HashMap<>();
 	
 	private final Logger logger = LogManager.getLogger(RelayEchoTask.class);
 	
@@ -106,8 +114,9 @@ public class RelayEchoTask implements Job {
 			return;
 		}
 		
+		QoSRelayTestProposalRequestDTO testProposal = null;
 		try {
-			final QoSRelayTestProposalRequestDTO testProposal = findCloudRelayPairToTest();
+			testProposal = findCloudRelayPairToTest();
 			if (testProposal.getTargetCloud() == null || testProposal.getRelay() == null) {
 				logger.debug("FINISHED: Relay Echo task. Have no cloud-relay pair to run relay echo test");
 				return;
@@ -117,6 +126,9 @@ public class RelayEchoTask implements Job {
 			
 			logger.debug("FINISHED: Relay Echo task success");			
 		} catch (final ArrowheadException ex) {
+			if (testProposal != null && ex.getErrorCode() == HttpStatus.SC_BAD_GATEWAY) {
+				BAD_GATEWAY_CACHE.put(getRelayCacheKey(testProposal.getRelay()) , ZonedDateTime.now());
+			}
 			logger.debug("FAILED: Relay Echo task: " + ex.getMessage());
 		}
 	}
@@ -248,5 +260,10 @@ public class RelayEchoTask implements Job {
 		}
 		
 		throw new ArrowheadException("Secure own cloud was not found.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private String getRelayCacheKey(final RelayRequestDTO relay) {
+		return relay.getAddress() + ":" + relay.getPort();
 	}
 }
