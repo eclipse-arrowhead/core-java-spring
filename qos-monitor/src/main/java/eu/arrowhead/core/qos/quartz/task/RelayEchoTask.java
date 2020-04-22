@@ -79,7 +79,7 @@ public class RelayEchoTask implements Job {
 	private static final List<CoreSystemService> REQUIRED_CORE_SERVICES = List.of(CoreSystemService.GATEKEEPER_PULL_CLOUDS, CoreSystemService.GATEKEEPER_COLLECT_ACCESS_TYPES,
 			  																	  CoreSystemService.GATEKEEPER_COLLECT_SYSTEM_ADDRESSES, CoreSystemService.GATEKEEPER_RELAY_TEST_SERVICE);
 	
-	private static final Map<String, ZonedDateTime> BAD_GATEWAY_CACHE = new HashMap<>();
+	private final Map<String, ZonedDateTime> badGatewayCash = new HashMap<>();
 	private ZonedDateTime taskStartedAt;
 	private ZonedDateTime latestMeasurementTimeKnown;
 	
@@ -136,7 +136,7 @@ public class RelayEchoTask implements Job {
 			if (testProposal != null && ex.getErrorCode() == HttpStatus.SC_BAD_GATEWAY) {
 				final String relayCacheKey = getRelayCacheKey(testProposal.getTargetCloud().getOperator(), testProposal.getTargetCloud().getName(),
 						   									  testProposal.getRelay().getAddress(), testProposal.getRelay().getPort());
-				BAD_GATEWAY_CACHE.put(relayCacheKey, latestMeasurementTimeKnown);
+				badGatewayCash.put(relayCacheKey, latestMeasurementTimeKnown);
 			}
 		}
 	}
@@ -283,10 +283,10 @@ public class RelayEchoTask implements Job {
 	//-------------------------------------------------------------------------------------------------
 	private boolean isRelayLockedFromTesting(final CloudResponseDTO cloud, final RelayResponseDTO relay, final ZonedDateTime lastMeasurementAt) {
 		final String cacheKey = getRelayCacheKey(cloud.getOperator(), cloud.getName(), relay.getAddress(), relay.getPort());
-		if (!BAD_GATEWAY_CACHE.containsKey(cacheKey)) {
+		if (!badGatewayCash.containsKey(cacheKey)) {
 			return false;
 		} else if (lastMeasurementAt.plusMinutes(badGatewayRetryMin).isBefore(taskStartedAt)) {
-			BAD_GATEWAY_CACHE.remove(cacheKey);
+			badGatewayCash.remove(cacheKey);
 			return false;
 		} else {
 			return true;
@@ -296,10 +296,14 @@ public class RelayEchoTask implements Job {
 	//-------------------------------------------------------------------------------------------------
 	private QoSRelayTestProposalRequestDTO findCloudRelayPairToTestFromBadGatewayCache(final List<CloudWithRelaysAndPublicRelaysResponseDTO> cloudsWithoutDirectAccess,
 																					   final QoSRelayTestProposalRequestDTO proposal) {
+		if (badGatewayCash.isEmpty()) {
+			return proposal;
+		}
+		
 		if (cloudsWithoutDirectAccess != null && !cloudsWithoutDirectAccess.isEmpty()) {
 			String latestRelayCaheKey = "";
 			ZonedDateTime latestMeasurmentTimeInRelayCache = ZonedDateTime.now().plusHours(1);
-			for (final Entry<String, ZonedDateTime> entry : BAD_GATEWAY_CACHE.entrySet()) {
+			for (final Entry<String, ZonedDateTime> entry : badGatewayCash.entrySet()) {
 				if (entry.getValue().isBefore(latestMeasurmentTimeInRelayCache)) {
 					latestRelayCaheKey = entry.getKey();
 					latestMeasurmentTimeInRelayCache = entry.getValue();
@@ -307,22 +311,27 @@ public class RelayEchoTask implements Job {
 			}
 			
 			for (final CloudWithRelaysAndPublicRelaysResponseDTO cloud : cloudsWithoutDirectAccess) {
-				final String cloudKey = latestRelayCaheKey.split("-")[0];
+				final String[] cacheKeyParts = latestRelayCaheKey.split("\\.");
+				final String cloudKey = cacheKeyParts[0] + "." + cacheKeyParts[1];
 				if (cloudKey.equalsIgnoreCase(cloud.getOperator() + "." + cloud.getName())) {
 					if (cloud.getGatekeeperRelays() == null && cloud.getGatekeeperRelays().isEmpty()) {
 						logger.info(CLOUD_HAS_NO_GATEKEEPER_RELAY_WARNING_MESSAGE + cloud.getName() + "." + cloud.getOperator());
 					} else {
 						for (final RelayResponseDTO gwRelay : cloud.getGatewayRelays()) {
-							if (latestRelayCaheKey.equalsIgnoreCase(getRelayCacheKey(cloud.getOperator(), cloud.getName(), gwRelay.getAddress(), gwRelay.getPort()))) {
+							final String cacheKey = getRelayCacheKey(cloud.getOperator(), cloud.getName(), gwRelay.getAddress(), gwRelay.getPort());
+							if (latestRelayCaheKey.equalsIgnoreCase(cacheKey)) {
 								proposal.setTargetCloud(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloud));
 								proposal.setRelay(DTOConverter.convertRelayResponseDTOToRelayRequestDTO(gwRelay));
+								badGatewayCash.remove(cacheKey);
 								return proposal;
 							}
 						}
 						for (final RelayResponseDTO pRelay : cloud.getPublicRelays()) {
-							if (latestRelayCaheKey.equalsIgnoreCase(getRelayCacheKey(cloud.getOperator(), cloud.getName(), pRelay.getAddress(), pRelay.getPort()))) {
+							final String cacheKey = getRelayCacheKey(cloud.getOperator(), cloud.getName(), pRelay.getAddress(), pRelay.getPort());
+							if (latestRelayCaheKey.equalsIgnoreCase(cacheKey)) {
 								proposal.setTargetCloud(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloud));
 								proposal.setRelay(DTOConverter.convertRelayResponseDTOToRelayRequestDTO(pRelay));
+								badGatewayCash.remove(cacheKey);
 								return proposal;
 							}
 						}
@@ -337,7 +346,7 @@ public class RelayEchoTask implements Job {
 	private void removeCloudRelayPairsFromBadGatewayCacheIfNotTestable(final List<CloudWithRelaysAndPublicRelaysResponseDTO> cloudsWithoutDirectAccess) {
 		final Set<String> toBeRemoved = new HashSet<>();
 		
-		for (final Entry<String, ZonedDateTime> entry : BAD_GATEWAY_CACHE.entrySet()) {
+		for (final Entry<String, ZonedDateTime> entry : badGatewayCash.entrySet()) {
 			final String relayCacheKey = entry.getKey();
 			boolean stillExist = false;
 			
@@ -371,12 +380,12 @@ public class RelayEchoTask implements Job {
 		}
 		
 		for (final String key : toBeRemoved) {
-			BAD_GATEWAY_CACHE.remove(key);
+			badGatewayCash.remove(key);
 		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private String getRelayCacheKey(final String cloudOperator, final String cloudName, final String relayAddress, final int relayPort) {
-		return cloudOperator + "." + cloudName + "-" + relayAddress + ":" + relayPort;
+		return cloudOperator.replace("\\.", "") + "." + cloudName.replace("\\.", "") + "." + relayAddress.replace("\\.", "") + "." + relayPort;
 	}
 }
