@@ -7025,7 +7025,7 @@ Returns a ChoreographerPlanEntry
 
 <a name="choreographer_endpoints_delete_plan_id" />
 
-###Delete a plan entry by id
+### Delete a plan entry by id
 ```
 DELETE /choreographer/plan/{id}
 ```
@@ -7034,7 +7034,7 @@ Remove the Choreographer Plan record specified by the id path parameter.
 
 <a name="choreographer_endpoints_start_session_id" />
 
-###Start one or more sessions executing a plan
+### Start one or more sessions executing a plan
 ```
 POST /choreographer/mgmt/session/start
 ```
@@ -7058,7 +7058,7 @@ ChoreographerPlanIDList is the input
 
 <a name="choreographer_endpoints_post_stepfinished" />
 
-###Change a running step to finished
+### Change a running step to finished
 ```
 POST /choreographer/mgmt/session/stepFinished
 ```
