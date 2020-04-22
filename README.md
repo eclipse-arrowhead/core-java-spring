@@ -6718,8 +6718,8 @@ There endpoints are mainly used by the Management Tool and Cloud Administrators.
 | [Add a plan entry](#choreographer_endpoints_post_mgmt_plan) | /mgmt/plan | POST | [ChoreographerPlanEntry](#datastructures_choreographer_addplanentry) | CREATED |
 | [Get a plan entry by ID](#choreographer_endpoints_get_mgmt_plan_id) | /mgmt/plan/{id} | GET | ChoreographerPlanID | [ChoreographerPlanEntry](#datastructures_choreographerplanentry)
 | [Delete a plan entry by ID](#choreographer_endpoints_delete_plan_id) | /mgmt/plan/{id} | DELETE | ChoreographerPlanID | NO CONTENT |
-| [Start one or more sessions executing a plan](#choreographer_endpoints_start_session_id) | /mgmt/session/start | POST | ChoreographerPlanIDList | CREATED |
-| [Notify that a step is done](#choreographer_endpoints_post_nofity) | /notifyStepDone | POST | [SessionRunningStepData](#datastructures_choreographer_session_running_step_data) | OK |
+| [Start one or more sessions executing a plan](#choreographer_endpoints_start_session_id) | /mgmt/session/start | POST | [ChoreographerPlanIDList](#datastructures_choreographerplanidlist) | CREATED |
+| [Change a running step to finished](#choreographer_endpoints_post_stepfinished) | /mgmt/session/stepFinished | POST | [SessionRunningStepData](#datastructures_choreographer_session_running_step_data_mgmt) | OK |
 
 
 <a name="choreographer_endpoints_get_echo" />
@@ -6821,9 +6821,9 @@ Returns a __ChoreographerPlanEntryList__
               }
             ]
           }
-        ],
+        ]
       }
-    ],
+    ]
   }
 ]
 ```
@@ -6835,7 +6835,88 @@ Returns a __ChoreographerPlanEntryList__
 | `firstActionName` | Name of the First Action |
 | `createdAt` | Creation date of the entry |
 | `updatedAt` | When the entry was last updated |
-| `actions` | Array of the Actions in the plan |
+| `actions` | Array of the [ActionEntries](#datasturctures_choreographer_actionentry) in a Plan |
+
+<a name="datasturctures_choreographer_actionentry" />
+
+Contains a list of __ActionEntires__.
+```json
+{
+  "id": 0,
+  "name": "string",
+  "createdAt": "string",
+  "updatedAt": "string",
+  "firstStepNames": [
+    "string"
+  ],
+  "nextActionName": "string",
+  "steps": [
+    {
+      "id": 0,
+      "name": "string",
+      "serviceName": "string",
+      "metadata": "string",
+      "parameters": "string",
+      "quantity": 0,
+      "createdAt": "string",
+      "updatedAt": "string",
+      "nextSteps": [
+        {
+          "id": 0,
+          "stepName": "string"
+        }
+      ]
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of an Action entry |
+| `name` | Name of an Action entry |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+| `firstStepNames` | The names of the first steps within this Action |
+| `nextActionName` | The name of the Action which follows the current Action |
+| `steps` | Array of [StepEntries](#datasturctures_choreographer_stepentry) in an Action |
+
+<a name="datasturctures_choreographer_stepentry" />
+
+Contains a list of __StepEntries__.
+
+```json
+{
+  "id": 0,
+  "name": "string",
+  "serviceName": "string",
+  "metadata": "string",
+  "parameters": "string",
+  "quantity": 0,
+  "createdAt": "string",
+  "updatedAt": "string",
+  "nextSteps": [
+    {
+      "id": 0,
+      "stepName": "string"
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of a Step entry |
+| `name` | Name of a Step entry |
+| `serviceName` | Name of the service which the step uses |
+| `metadata` | Additional metadata needed for step execution |
+| `parameters` | Parameters needed by the device to run this step |
+| `quantity` |  How many times should the step run in its current position |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+| `nextSteps` | Array of next steps following the Step entry |
+
+> **Note:**  In the current version the `parameters`, the `metadata` and the `quantity` fields cannot be used when executing plans. These will be implemented in future versions.
 
 <a name="choreographer_endpoints_post_mgmt_plan" />
 
@@ -6844,9 +6925,152 @@ Returns a __ChoreographerPlanEntryList__
 POST choreographer/mgmt/plan
 ```
 
-Creates a plan record and returns HTTP 201 - CREATED if the addition is successful.
+Creates a plan record and returns HTTP 201 - CREATED if the addition is successful or the proper error message if the addition failed.
 
+<a name="datastructures_choreographer_addplanentry" />
 
+__ChoreographerPlanEntry__ is the input
+```json
+{
+  "actions": [
+    {
+      "firstStepNames": [
+        "string"
+      ],
+      "name": "string",
+      "nextActionName": "string",
+      "steps": [
+        {
+          "metadata": "string",
+          "name": "string",
+          "nextStepNames": [
+            "string"
+          ],
+          "parameters": "string",
+          "quantity": 0,
+          "serviceName": "string"
+        }
+      ]
+    }
+  ],
+  "firstActionName": "string",
+  "name": "string"
+}
+```
 
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `name` | Name of the PlanEntry | yes |
+| `firstActionName` | Name of the First Action | yes |
+| `actions` | Array of the [ActionEntries](#datasturctures_choreographer_actionentry) in a Plan | yes |
 
+<a name="choreographer_endpoints_get_mgmt_plan_id" />
 
+### Get a plan entry by ID
+```
+GET /choreographer/mgmt/plan/{id}
+```
+
+Returns the Choreographer Plan Entry specified by the ID path parameter.
+
+Returns a ChoreographerPlanEntry
+```json
+{
+  "actions": [
+    {
+      "createdAt": "string",
+      "firstStepNames": [
+        "string"
+      ],
+      "id": 0,
+      "name": "string",
+      "nextActionName": "string",
+      "steps": [
+        {
+          "createdAt": "string",
+          "id": 0,
+          "metadata": "string",
+          "name": "string",
+          "nextSteps": [
+            {
+              "id": 0,
+              "stepName": "string"
+            }
+          ],
+          "parameters": "string",
+          "quantity": 0,
+          "serviceName": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "updatedAt": "string"
+    }
+  ],
+  "createdAt": "string",
+  "firstActionName": "string",
+  "id": 0,
+  "name": "string",
+  "updatedAt": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of the PlanEntry |
+| `name` | Name of the PlanEntry |
+| `firstActionName` | Name of the First Action |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+| `actions` | Array of the [ActionEntries](#datasturctures_choreographer_actionentry) in a Plan |
+
+<a name="choreographer_endpoints_delete_plan_id" />
+
+###Delete a plan entry by id
+```
+DELETE /choreographer/plan/{id}
+```
+
+Remove the Choreographer Plan record specified by the id path parameter.
+
+<a name="choreographer_endpoints_start_session_id" />
+
+###Start one or more sessions executing a plan
+```
+POST /choreographer/mgmt/session/start
+```
+
+Starts one or more plans in sessions.
+
+<a name="datastructures_choreographerplanidlist" />
+
+ChoreographerPlanIDList is the input
+```json
+[
+  {
+    "id": 0
+  }
+]
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| id | ID of a plan to be executed | yes |
+
+<a name="choreographer_endpoints_post_stepfinished" />
+
+###Change a running step to finished
+```
+POST /choreographer/mgmt/session/stepFinished
+```
+
+Returns HTTP 200 - OK if the notification of the Choreographer is successful.
+
+<a name="datastructures_choreographer_session_running_step_data_mgmt" />
+
+__SessionRunningStepData__ is the input
+```json
+{
+  "runningStepId": 0,
+  "sessionId": 0
+}
+```
