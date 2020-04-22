@@ -115,9 +115,9 @@ public class RelayEchoTask implements Job {
 			
 			qosMonitorDriver.requestGatekeeperInitRelayTest(testProposal);	
 			
-			logger.debug("FINISHED: relay echo task success");			
+			logger.debug("FINISHED: Relay Echo task success");			
 		} catch (final ArrowheadException ex) {
-			logger.debug("FAILED: Cloud Ping task: " + ex.getMessage());
+			logger.debug("FAILED: Relay Echo task: " + ex.getMessage());
 		}
 	}
 
