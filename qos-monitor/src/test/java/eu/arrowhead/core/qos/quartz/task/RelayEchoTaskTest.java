@@ -303,7 +303,7 @@ public class RelayEchoTaskTest {
 			fail();
 		}
 		
-		verify(logger, times(6)).debug(any(String.class));
+		verify(logger, times(8)).debug(any(String.class));
 		verify(qosMonitorDriver, times(1)).queryGatekeeperAllCloud();
 		verify(qosMonitorDriver, times(1)).queryGatekeeperCloudAccessTypes(any());
 		verify(qosDBService, times(2)).getInterRelayMeasurement(any(), any(), any());
@@ -355,7 +355,7 @@ public class RelayEchoTaskTest {
 			fail();
 		}
 		
-		verify(logger, times(6)).debug(any(String.class));
+		verify(logger, times(8)).debug(any(String.class));
 		verify(qosMonitorDriver, times(1)).queryGatekeeperAllCloud();
 		verify(qosMonitorDriver, times(1)).queryGatekeeperCloudAccessTypes(any());
 		verify(qosDBService, times(2)).getInterRelayMeasurement(any(), any(), any());
@@ -405,7 +405,7 @@ public class RelayEchoTaskTest {
 			fail();
 		}
 		
-		verify(logger, times(6)).debug(any(String.class));
+		verify(logger, times(8)).debug(any(String.class));
 		verify(qosMonitorDriver, times(1)).queryGatekeeperAllCloud();
 		verify(qosMonitorDriver, times(1)).queryGatekeeperCloudAccessTypes(any());
 		verify(qosDBService, times(2)).getInterRelayMeasurement(any(), any(), any());
@@ -457,7 +457,7 @@ public class RelayEchoTaskTest {
 			fail();
 		}
 		
-		verify(logger, times(6)).debug(any(String.class));
+		verify(logger, times(8)).debug(any(String.class));
 		verify(qosMonitorDriver, times(1)).queryGatekeeperAllCloud();
 		verify(qosMonitorDriver, times(1)).queryGatekeeperCloudAccessTypes(any());
 		verify(qosDBService, times(2)).getInterRelayMeasurement(any(), any(), any());
