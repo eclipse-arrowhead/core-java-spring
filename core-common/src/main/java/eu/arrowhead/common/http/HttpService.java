@@ -245,7 +245,7 @@ public class HttpService {
 		final KeyStore keystore = KeyStore.getInstance(sslProperties.getKeyStoreType());
 		keystore.load(sslProperties.getKeyStore().getInputStream(), sslProperties.getKeyStorePassword().toCharArray());
 		
-		final X509Certificate certFromKeyStore = Utilities.getFirstCertFromKeyStore(keystore);
+		final X509Certificate certFromKeyStore = Utilities.getSystemCertFromKeyStore(keystore);
 		clientName = certFromKeyStore.getSubjectDN().getName();
 		
 		return new SSLContextBuilder().loadTrustMaterial(sslProperties.getTrustStore().getURL(), sslProperties.getTrustStorePassword().toCharArray())

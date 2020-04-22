@@ -47,6 +47,7 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_EVENT_HANDLER_UNSUBSCRIBE = "event-unsubscribe";
 	public static final String CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "event-publish-auth-update";
 
+	public static final String CORE_SERVICE_CHOREOGRAPHER_PROCESS = "choreographer-service";
 
 	public static final String CORE_SERVICE_CERTIFICATE_AUTHORITY_SIGN = "ca-sign";
 
@@ -158,6 +159,7 @@ public class CommonConstants {
 	public static final String OP_GATEKEEPER_ICN_SERVICE = "/init_icn";
 
 	public static final String CHOREOGRAPHER_URI = "/choreographer";
+	public static final String OP_CHOREOGRAPHER_NOTIFY_STEP_DONE = "/notifyStepDone";
 
 	public static final String GATEWAY_URI = "/gateway";
 	public static final String OP_GATEWAY_KEY_URI = "/publickey";
@@ -187,7 +189,7 @@ public class CommonConstants {
 	
 	public static final List<CoreSystemService> PUBLIC_CORE_SYSTEM_SERVICES = List.of(CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.AUTH_PUBLIC_KEY_SERVICE,
   			  																		  CoreSystemService.EVENT_PUBLISH_SERVICE, CoreSystemService.EVENT_SUBSCRIBE_SERVICE,
-  			  																		  CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE);
+  			  																		  CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE, CoreSystemService.CHOREOGRAPHER_SERVICE);
 	
 	public static final String HTTP_CLIENT_CONNECTION_TIMEOUT = "http.client.connection.timeout";
 	public static final String $HTTP_CLIENT_CONNECTION_TIMEOUT_WD = "${" + HTTP_CLIENT_CONNECTION_TIMEOUT + ":" + Defaults.DEFAULT_CONNECTION_TIMEOUT + "}";
@@ -216,10 +218,10 @@ public class CommonConstants {
 	public static final String DISABLE_HOSTNAME_VERIFIER = "disable.hostname.verifier";
 	public static final String $DISABLE_HOSTNAME_VERIFIER_WD = "${" + DISABLE_HOSTNAME_VERIFIER + ":" + Defaults.DEFAULT_DISABLE_HOSTNAME_VERIFIER + "}";
 	
-	public static final String CA_CERT_VALIDITY_NEG_OFFSET_MILLIS = "ca.validity.negative-offest-millis";
-	public static final String $CA_CERT_VALIDITY_NEG_OFFSET_MILLIS = "${" + CA_CERT_VALIDITY_NEG_OFFSET_MILLIS + ":" + Defaults.DEFAULT_CA_CERT_VALIDITY_NEG_OFFSET_MILLIS + "}";
-	public static final String CA_CERT_VALIDITY_POS_OFFSET_MILLIS = "ca.validity.positive-offest-millis";
-	public static final String $CA_CERT_VALIDITY_POS_OFFSET_MILLIS = "${" + CA_CERT_VALIDITY_POS_OFFSET_MILLIS + ":" + Defaults.DEFAULT_CA_CERT_VALIDITY_POS_OFFSET_MILLIS + "}";
+	public static final String CA_CERT_VALIDITY_NEG_OFFSET_MINUTES = "ca.validity.negative-offest-minutes";
+	public static final String $CA_CERT_VALIDITY_NEG_OFFSET_MINUTES = "${" + CA_CERT_VALIDITY_NEG_OFFSET_MINUTES + ":" + Defaults.DEFAULT_CA_CERT_VALIDITY_NEG_OFFSET_MINUTES + "}";
+	public static final String CA_CERT_VALIDITY_POS_OFFSET_MINUTES = "ca.validity.positive-offest-minutes";
+	public static final String $CA_CERT_VALIDITY_POS_OFFSET_MINUTES = "${" + CA_CERT_VALIDITY_POS_OFFSET_MINUTES + ":" + Defaults.DEFAULT_CA_CERT_VALIDITY_POS_OFFSET_MINUTES + "}";
 
 	public static final String JWT_CLAIM_CONSUMER_ID = "cid";
 	public static final String JWT_CLAIM_SERVICE_ID = "sid";

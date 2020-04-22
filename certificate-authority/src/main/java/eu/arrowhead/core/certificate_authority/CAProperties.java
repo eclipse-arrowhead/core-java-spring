@@ -8,10 +8,10 @@ import eu.arrowhead.common.CommonConstants;
 @Component
 public class CAProperties {
 
-    @Value(CommonConstants.$CA_CERT_VALIDITY_NEG_OFFSET_MILLIS)
+    @Value(CommonConstants.$CA_CERT_VALIDITY_NEG_OFFSET_MINUTES)
     private long certValidityNegativeOffsetMinutes;
 
-    @Value(CommonConstants.$CA_CERT_VALIDITY_POS_OFFSET_MILLIS)
+    @Value(CommonConstants.$CA_CERT_VALIDITY_POS_OFFSET_MINUTES)
     private long certValidityPositiveOffsetMinutes;
 
     public long getCertValidityNegativeOffsetMinutes() {

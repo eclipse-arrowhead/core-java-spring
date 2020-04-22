@@ -10,9 +10,10 @@ public class ChoreographerActionRequestDTO implements Serializable {
 
 	private static final long serialVersionUID = 305775285238451287L;
 
-	private String actionName;
+	private String name;
     private String nextActionName;
-    private List<ChoreographerActionStepRequestDTO> actionSteps;
+    private List<String> firstStepNames;
+    private List<ChoreographerStepRequestDTO> steps;
 
     //=================================================================================================
 	// methods
@@ -21,19 +22,23 @@ public class ChoreographerActionRequestDTO implements Serializable {
     public ChoreographerActionRequestDTO() {}
 
     //-------------------------------------------------------------------------------------------------
-	public ChoreographerActionRequestDTO(final String actionName, final String nextActionName, final List<ChoreographerActionStepRequestDTO> actionSteps) {
-        this.actionName = actionName;
+
+    public ChoreographerActionRequestDTO(String name, String nextActionName, List<String> firstStepNames, List<ChoreographerStepRequestDTO> steps) {
+        this.name = name;
         this.nextActionName = nextActionName;
-        this.actionSteps = actionSteps;
+        this.firstStepNames = firstStepNames;
+        this.steps = steps;
     }
 
     //-------------------------------------------------------------------------------------------------
-	public String getActionName() { return actionName; }
+	public String getName() { return name; }
 	public String getNextActionName() { return nextActionName; }
-	public List<ChoreographerActionStepRequestDTO> getActionSteps() { return actionSteps; }
+	public List<ChoreographerStepRequestDTO> getSteps() { return steps; }
+    public List<String> getFirstStepNames() { return firstStepNames; }
 
     //-------------------------------------------------------------------------------------------------
-	public void setActionName(final String actionName) { this.actionName = actionName; }
+	public void setName(final String name) { this.name = name; }
     public void setNextActionName(final String nextActionName) { this.nextActionName = nextActionName; }
-    public void setActionSteps(final List<ChoreographerActionStepRequestDTO> actionSteps) { this.actionSteps = actionSteps; }
+    public void setSteps(final List<ChoreographerStepRequestDTO> steps) { this.steps = steps; }
+    public void setFirstStepNames(List<String> firstStepNames) { this.firstStepNames = firstStepNames; }
 }

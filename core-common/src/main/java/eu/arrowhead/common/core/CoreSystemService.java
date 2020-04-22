@@ -5,12 +5,14 @@ import org.springframework.util.Assert;
 
 import static eu.arrowhead.common.CommonConstants.AUTHORIZATION_URI;
 import static eu.arrowhead.common.CommonConstants.CERTIFICATE_AUTHRORITY_URI;
+import static eu.arrowhead.common.CommonConstants.CHOREOGRAPHER_URI;
 import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_AUTH_CONTROL_INTER;
 import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_AUTH_CONTROL_INTRA;
 import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_AUTH_CONTROL_SUBSCRIPTION;
 import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_AUTH_PUBLIC_KEY;
 import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_AUTH_TOKEN_GENERATION;
 import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_CERTIFICATE_AUTHORITY_SIGN;
+import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_CHOREOGRAPHER_PROCESS;
 import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_DEVICE_REGISTRY_ONBOARDING_WITH_CSR;
 import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_DEVICE_REGISTRY_ONBOARDING_WITH_NAME;
 import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_DEVICE_REGISTRY_REGISTER;
@@ -47,6 +49,7 @@ import static eu.arrowhead.common.CommonConstants.OP_AUTH_KEY_URI;
 import static eu.arrowhead.common.CommonConstants.OP_AUTH_SUBSCRIPTION_CHECK_URI;
 import static eu.arrowhead.common.CommonConstants.OP_AUTH_TOKEN_URI;
 import static eu.arrowhead.common.CommonConstants.OP_CA_SIGN_CERTIFICATE_URI;
+import static eu.arrowhead.common.CommonConstants.OP_CHOREOGRAPHER_NOTIFY_STEP_DONE;
 import static eu.arrowhead.common.CommonConstants.OP_DEVICE_REGISTRY_ONBOARDING_WITH_CSR_URI;
 import static eu.arrowhead.common.CommonConstants.OP_DEVICE_REGISTRY_ONBOARDING_WITH_NAME_URI;
 import static eu.arrowhead.common.CommonConstants.OP_DEVICE_REGISTRY_REGISTER_URI;
@@ -108,6 +111,9 @@ public enum CoreSystemService {
     EVENT_SUBSCRIBE_SERVICE(CORE_SERVICE_EVENT_HANDLER_SUBSCRIBE, EVENT_HANDLER_URI + OP_EVENT_HANDLER_SUBSCRIBE),
     EVENT_UNSUBSCRIBE_SERVICE(CORE_SERVICE_EVENT_HANDLER_UNSUBSCRIBE, EVENT_HANDLER_URI + OP_EVENT_HANDLER_UNSUBSCRIBE),
     EVENT_PUBLISH_AUTH_UPDATE_SERVICE(CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE, EVENT_HANDLER_URI + OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE),
+
+	//Choreographer services
+	CHOREOGRAPHER_SERVICE(CORE_SERVICE_CHOREOGRAPHER_PROCESS, CHOREOGRAPHER_URI +  OP_CHOREOGRAPHER_NOTIFY_STEP_DONE),
 
 	// CA services
 	CERTIFICATE_AUTHORITY_SIGN_SERVICE(CORE_SERVICE_CERTIFICATE_AUTHORITY_SIGN, CERTIFICATE_AUTHRORITY_URI + OP_CA_SIGN_CERTIFICATE_URI),

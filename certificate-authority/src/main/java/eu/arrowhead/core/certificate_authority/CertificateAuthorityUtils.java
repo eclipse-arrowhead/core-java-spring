@@ -55,9 +55,6 @@ class CertificateAuthorityUtils {
     private static final String PROVIDER = "BC";
     private static final String SIGNATURE_ALGORITHM = "SHA256withRSA";
 
-    private CertificateAuthorityUtils() {
-    }
-
     static JcaPKCS10CertificationRequest decodePKCS10CSR(CertificateSigningRequestDTO csr) {
         try {
             final byte[] csrBytes = Base64.getDecoder().decode(csr.getEncodedCSR());
@@ -130,7 +127,6 @@ class CertificateAuthorityUtils {
                                             X509Certificate cloudCertificate, Date validFrom, Date validUntil, SecureRandom random) {
 
         final BigInteger serial = new BigInteger(32, random);
-
         final PublicKey clientKey = getClientKey(csr);
 
         X509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(cloudCertificate, serial, validFrom,
@@ -167,6 +163,7 @@ class CertificateAuthorityUtils {
      */
     static void addCertificateExtensions(X509v3CertificateBuilder builder, JcaPKCS10CertificationRequest csr,
                                          PublicKey clientKey, X509Certificate cloudCertificate) {
+
         try {
             JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
 

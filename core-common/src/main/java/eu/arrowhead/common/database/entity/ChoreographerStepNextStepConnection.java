@@ -1,31 +1,42 @@
 package eu.arrowhead.common.database.entity;
 
+import java.time.ZonedDateTime;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import javax.persistence.*;
-import java.time.ZonedDateTime;
-
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"actionId", "actionStepId"}))
-public class ChoreographerActionActionStepConnection {
-	
-	//=================================================================================================
-	// members
+@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"stepId", "nextStepId"}))
+public class ChoreographerStepNextStepConnection {
 
-    @Id
+    //=================================================================================================
+	// members
+	
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @ManyToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn (name = "actionStepId", referencedColumnName = "id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private ChoreographerActionStep actionStepEntry;
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn (name = "stepId", referencedColumnName = "id", nullable = false)
+    private ChoreographerStep stepEntry;
 
     @ManyToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn (name = "actionId", referencedColumnName = "id", nullable = false)
-    @OnDelete (action = OnDeleteAction.CASCADE)
-    private ChoreographerAction actionEntry;
+    @JoinColumn (name = "nextStepId", referencedColumnName = "id", nullable = false)
+    private ChoreographerStep nextStepEntry;
 
     @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private ZonedDateTime createdAt;
@@ -37,25 +48,25 @@ public class ChoreographerActionActionStepConnection {
 	// methods
     
     //-------------------------------------------------------------------------------------------------
-	public ChoreographerActionActionStepConnection() {}
+	public ChoreographerStepNextStepConnection() {}
 
     //-------------------------------------------------------------------------------------------------
-	public ChoreographerActionActionStepConnection(final ChoreographerActionStep actionStepEntry, final ChoreographerAction actionEntry) {
-        this.actionStepEntry = actionStepEntry;
-        this.actionEntry = actionEntry;
+	public ChoreographerStepNextStepConnection(final ChoreographerStep stepEntry, final ChoreographerStep nextStepEntry) {
+        this.stepEntry = stepEntry;
+        this.nextStepEntry = nextStepEntry;
     }
 
     //-------------------------------------------------------------------------------------------------
 	public long getId() { return id; }
-	public ChoreographerActionStep getActionStepEntry() { return actionStepEntry; }
-	public ChoreographerAction getActionEntry() { return actionEntry; }
+	public ChoreographerStep getStepEntry() { return stepEntry; }
+	public ChoreographerStep getNextStepEntry() { return nextStepEntry; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
     //-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
-    public void setActionStepEntry(final ChoreographerActionStep actionStepEntry) { this.actionStepEntry = actionStepEntry; }
-    public void setActionEntry(final ChoreographerAction actionEntry) { this.actionEntry = actionEntry; }
+    public void setStepEntry(final ChoreographerStep stepEntry) { this.stepEntry = stepEntry; }
+    public void setNextActionStepEntry(final ChoreographerStep nextStepEntry) { this.nextStepEntry = nextStepEntry; }
     public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
     public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 
