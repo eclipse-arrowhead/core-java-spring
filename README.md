@@ -6676,17 +6676,22 @@ For private endpoints no detailed description is available.
 
 ## System Design Description Overview
 
-This supporting core system makes it possible to execute pre-defined workflows through orchestration and consumption.
+This supporting core system makes it possible to execute pre-defined workflows through orchestration and service consumption.
 
-Each workflow can be divided into three segments: plans, actions and steps. Plans define the whole workflow by name and they contain Actions which group coherent Steps together for greater transparency and enabling sequentialization of these step groups.
+Each workflow can be divided into three segments:
+* Plans,
+* Actions,
+* and Steps.
 
-Workflow execution in this generation can only be accomplished if the requested providers in each step are all available (they are registered with the same name in the service registry as in the plan description) and the requested services call back (notify) to the Choreographer through the Choreography service that the execution on their end is done. Only this way can the Choreographer continue the execution of the plan.
+_Plans_ define the whole workflow by name and they contain _Actions_ which group coherent _Steps_ together for greater transparency and enabling sequentialization of these _Step_ groups.
+
+Workflow execution in this generation can only be accomplished if the requested providers in each _Step_ are all available (they are registered with the same name in the service registry as in the plan description) and the requested services call back (notify) to the Choreographer through the Choreography service that the execution on their end is done. Only this way can the Choreographer continue the execution of the _Plan_.
 
 <a name="choreographer_usecases" />
 
 ## Services and Use Cases
 
-This System provides the Choreogher Service which only has one use-case scenario: notifying the Choreographer from the providers' side that the executed step is done.
+This Supporting Core System provides the Choreographer Service which only has one use-case scenario: notifying the Choreographer from the providers' side that the executed _Step_ is done.
 
 <a name="choreographer_endpoints" />
 
@@ -6710,7 +6715,7 @@ The base URL for the requests: `http://<host>:<port>/choreographer`
 
 ###  Management endpoint description<br />
 
-There endpoints are mainly used by the Management Tool and Cloud Administrators.
+These endpoints are mainly used by the Management Tool and Cloud Administrators.
 
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
@@ -6925,7 +6930,7 @@ Contains a list of __StepEntries__.
 POST choreographer/mgmt/plan
 ```
 
-Creates a plan record and returns HTTP 201 - CREATED if the addition is successful or the proper error message if the addition failed.
+Creates a plan record and returns HTTP 201 - CREATED if the entry creation is successful or the proper error message if the entry creation failed.
 
 <a name="datastructures_choreographer_addplanentry" />
 
@@ -6972,6 +6977,8 @@ GET /choreographer/mgmt/plan/{id}
 ```
 
 Returns the Choreographer Plan Entry specified by the ID path parameter.
+
+<a name="datastructures_choreographerplanentry" />
 
 Returns a ChoreographerPlanEntry
 ```json
