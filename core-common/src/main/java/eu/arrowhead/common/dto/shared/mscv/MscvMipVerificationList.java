@@ -1,7 +1,9 @@
 package eu.arrowhead.common.dto.shared.mscv;
 
 
-public class MscvMipVerificationList {
+import java.io.Serializable;
+
+public class MscvMipVerificationList implements Serializable {
 
   private long id;
   private String name;

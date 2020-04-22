@@ -17,10 +17,10 @@ import java.util.Objects;
 
 public class Validation {
 
-    private static final String ID_NOT_VALID_ERROR_MESSAGE = "Id must be greater than 0. ";
-    private static final String DEVICE_NAME_NULL_ERROR_MESSAGE = " Device name must have value ";
-    private static final String DEVICE_ADDRESS_NULL_ERROR_MESSAGE = " Device address must have value ";
-    private static final String DEVICE_MAC_ADDRESS_NULL_ERROR_MESSAGE = " Device MAC address must have value ";
+    private static final String ID_NOT_VALID_ERROR_MESSAGE = "Id must be greater than 0.";
+    private static final String DEVICE_NAME_NULL_ERROR_MESSAGE = "Device name must have value";
+    private static final String DEVICE_ADDRESS_NULL_ERROR_MESSAGE = "Device address must have value";
+    private static final String DEVICE_MAC_ADDRESS_NULL_ERROR_MESSAGE = "Device MAC address must have value";
 
     private final Logger logger = LogManager.getLogger();
 

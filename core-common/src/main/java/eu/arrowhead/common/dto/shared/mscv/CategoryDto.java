@@ -1,9 +1,10 @@
 package eu.arrowhead.common.dto.shared.mscv;
 
 
+import java.io.Serializable;
 import java.util.StringJoiner;
 
-public class CategoryDto {
+public class CategoryDto implements Serializable {
 
     private String name;
     private String abbreviation;

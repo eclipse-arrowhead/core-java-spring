@@ -1,5 +1,7 @@
 package eu.arrowhead.core.mscv;
 
+import eu.arrowhead.common.CoreCommonConstants;
+
 public class Constants {
 
 
@@ -28,6 +30,13 @@ public class Constants {
     public static final String PARAMETER_LAYER = "layer";
     public static final String PATH_LAYER = "/" + PARAMETER_LAYER;
     public static final String PARAMETER_LAYER_PATH = "/{" + PARAMETER_LAYER + "}";
+
+    public static final String SWAGGER_TAG_CATEGORY = CoreCommonConstants.SWAGGER_TAG_MGMT + " of Categories";
+    public static final String SWAGGER_TAG_DOMAIN = CoreCommonConstants.SWAGGER_TAG_MGMT + " of Domains";
+    public static final String SWAGGER_TAG_MIP = CoreCommonConstants.SWAGGER_TAG_MGMT + " of Measurable Indicator Points";
+    public static final String SWAGGER_TAG_SCRIPT = CoreCommonConstants.SWAGGER_TAG_MGMT + " of Scripts";
+    public static final String SWAGGER_TAG_STANDARD = CoreCommonConstants.SWAGGER_TAG_MGMT + " of Standards";
+    public static final String SWAGGER_TAG_TARGET = CoreCommonConstants.SWAGGER_TAG_MGMT + " of Targets";
 
     private Constants() { throw new IllegalAccessError(); }
 }

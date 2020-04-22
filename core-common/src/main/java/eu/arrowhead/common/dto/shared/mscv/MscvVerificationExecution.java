@@ -1,57 +1,53 @@
 package eu.arrowhead.common.dto.shared.mscv;
 
 
-public class MscvVerificationExecution {
+import java.io.Serializable;
 
-  private long id;
-  private java.sql.Timestamp executionDate;
-  private String result;
-  private long verificationListId;
-  private long verificationTargetId;
+public class MscvVerificationExecution implements Serializable {
 
+    private Long id;
+    private String executionDate;
+    private String result;
+    private Long verificationListId;
+    private Long verificationTargetId;
 
-  public long getId() {
-    return id;
-  }
+    public Long getId() {
+        return id;
+    }
 
-  public void setId(long id) {
-    this.id = id;
-  }
+    public void setId(final Long id) {
+        this.id = id;
+    }
 
+    public String getExecutionDate() {
+        return executionDate;
+    }
 
-  public java.sql.Timestamp getExecutionDate() {
-    return executionDate;
-  }
+    public void setExecutionDate(final String executionDate) {
+        this.executionDate = executionDate;
+    }
 
-  public void setExecutionDate(java.sql.Timestamp executionDate) {
-    this.executionDate = executionDate;
-  }
+    public String getResult() {
+        return result;
+    }
 
+    public void setResult(final String result) {
+        this.result = result;
+    }
 
-  public String getResult() {
-    return result;
-  }
+    public Long getVerificationListId() {
+        return verificationListId;
+    }
 
-  public void setResult(String result) {
-    this.result = result;
-  }
+    public void setVerificationListId(final Long verificationListId) {
+        this.verificationListId = verificationListId;
+    }
 
+    public Long getVerificationTargetId() {
+        return verificationTargetId;
+    }
 
-  public long getVerificationListId() {
-    return verificationListId;
-  }
-
-  public void setVerificationListId(long verificationListId) {
-    this.verificationListId = verificationListId;
-  }
-
-
-  public long getVerificationTargetId() {
-    return verificationTargetId;
-  }
-
-  public void setVerificationTargetId(long verificationTargetId) {
-    this.verificationTargetId = verificationTargetId;
-  }
-
+    public void setVerificationTargetId(final Long verificationTargetId) {
+        this.verificationTargetId = verificationTargetId;
+    }
 }

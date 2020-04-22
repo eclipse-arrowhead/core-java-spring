@@ -1,11 +1,12 @@
 package eu.arrowhead.common.dto.shared.mscv;
 
 
+import java.io.Serializable;
 import java.util.StringJoiner;
 
-public class MipDto {
+public class MipDto implements Serializable {
 
-    private long extId;
+    private Long extId;
     private String name;
     private String description;
     private StandardDto standard;
@@ -16,7 +17,7 @@ public class MipDto {
         super();
     }
 
-    public MipDto(final long extId, final String name, final StandardDto standard, final CategoryDto category, final DomainDto domain) {
+    public MipDto(final Long extId, final String name, final StandardDto standard, final CategoryDto category, final DomainDto domain) {
         this.extId = extId;
         this.name = name;
         this.standard = standard;
@@ -24,29 +25,27 @@ public class MipDto {
         this.domain = domain;
     }
 
-    public long getExtId() {
+    public Long getExtId() {
         return extId;
     }
 
-    public void setExtId(long extId) {
+    public void setExtId(final Long extId) {
         this.extId = extId;
     }
-
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
-
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public void setDescription(final String description) {
         this.description = description;
     }
 

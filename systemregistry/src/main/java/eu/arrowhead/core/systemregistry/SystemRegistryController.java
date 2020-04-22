@@ -3,7 +3,6 @@ package eu.arrowhead.core.systemregistry;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
-import eu.arrowhead.common.dto.shared.CertificateType;
 import eu.arrowhead.common.dto.shared.SystemQueryFormDTO;
 import eu.arrowhead.common.dto.shared.SystemQueryResultDTO;
 import eu.arrowhead.common.dto.shared.SystemRegistryRequestDTO;

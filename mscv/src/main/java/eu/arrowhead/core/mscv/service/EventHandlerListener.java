@@ -4,9 +4,9 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.CoreEventHandlerConstants;
 import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.database.entity.mscv.SshTarget;
 import eu.arrowhead.common.database.entity.mscv.Target;
 import eu.arrowhead.common.database.entity.mscv.VerificationEntryList;
-import eu.arrowhead.common.database.view.mscv.SshTargetView;
 import eu.arrowhead.common.drivers.EventDriver;
 import eu.arrowhead.common.dto.shared.DeviceRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.DeviceRequestDTO;
@@ -16,7 +16,6 @@ import eu.arrowhead.common.dto.shared.SubscriptionRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.mscv.Layer;
-import eu.arrowhead.common.dto.shared.mscv.OS;
 import eu.arrowhead.core.mscv.MscvDefaults;
 import eu.arrowhead.core.mscv.quartz.VerificationJobFactory;
 import io.swagger.annotations.Api;
@@ -42,7 +41,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
-import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
 
 import static eu.arrowhead.common.CommonConstants.OP_MSCV_PUBLISH_URI;
@@ -95,27 +93,27 @@ public class EventHandlerListener {
         switch (event.getEventType()) {
             case CoreEventHandlerConstants.REGISTER_DEVICE_EVENT:
                 final var registerDevice = eventDriver.convert(event.getPayload(), DeviceRegistryRequestDTO.class);
-                createJob(new SshTargetViewDto(registerDevice.getDevice()), Layer.DEVICE);
+                createJob(convert(registerDevice.getDevice()), Layer.DEVICE);
                 break;
             case CoreEventHandlerConstants.UNREGISTER_DEVICE_EVENT:
                 final var unregisterDevice = eventDriver.convert(event.getPayload(), DeviceRegistryRequestDTO.class);
-                deleteJob(new SshTargetViewDto(unregisterDevice.getDevice()), Layer.DEVICE);
+                deleteJob(convert(unregisterDevice.getDevice()), Layer.DEVICE);
                 break;
             case CoreEventHandlerConstants.REGISTER_SYSTEM_EVENT:
                 final var registerSystem = eventDriver.convert(event.getPayload(), SystemRegistryRequestDTO.class);
-                createJob(new SshTargetViewDto(registerSystem.getSystem()), Layer.SYSTEM);
+                createJob(convert(registerSystem.getSystem()), Layer.SYSTEM);
                 break;
             case CoreEventHandlerConstants.UNREGISTER_SYSTEM_EVENT:
                 final var unregisterSystem = eventDriver.convert(event.getPayload(), SystemRegistryRequestDTO.class);
-                deleteJob(new SshTargetViewDto(unregisterSystem.getSystem()), Layer.SYSTEM);
+                deleteJob(convert(unregisterSystem.getSystem()), Layer.SYSTEM);
                 break;
             case CoreEventHandlerConstants.REGISTER_SERVICE_EVENT:
                 final var registerService = eventDriver.convert(event.getPayload(), ServiceRegistryRequestDTO.class);
-                createJob(new SshTargetViewDto(registerService.getProviderSystem()), Layer.SERVICE);
+                createJob(convert(registerService.getProviderSystem()), Layer.SERVICE);
                 break;
             case CoreEventHandlerConstants.UNREGISTER_SERVICE_EVENT:
                 final var unregisterService = eventDriver.convert(event.getPayload(), ServiceRegistryRequestDTO.class);
-                deleteJob(new SshTargetViewDto(unregisterService.getProviderSystem()), Layer.SERVICE);
+                deleteJob(convert(unregisterService.getProviderSystem()), Layer.SERVICE);
                 break;
             default:
                 logger.warn("Unknown event type {} with payload: {}", event.getEventType(), event.getPayload());
@@ -166,14 +164,14 @@ public class EventHandlerListener {
         }
     }
 
-    private void createJob(final SshTargetView targetView, final Layer layer) throws MscvException, SchedulerException {
-        final Target target = targetService.findOrCreateTarget(targetView);
+    private void createJob(final SshTarget sshTarget, final Layer layer) throws MscvException, SchedulerException {
+        final Target target = targetService.findOrCreate(sshTarget);
         final VerificationEntryList entryList = executionService.findSuitableList(target, layer);
         jobFactory.createVerificationJob(entryList, target);
     }
 
-    private void deleteJob(final SshTargetView targetView, final Layer layer) throws MscvException {
-        final Target target = targetService.findOrCreateTarget(targetView);
+    private void deleteJob(final SshTarget sshTarget, final Layer layer) throws MscvException {
+        final Target target = targetService.findOrCreate(sshTarget);
         final VerificationEntryList entryList = executionService.findSuitableList(target, layer);
         jobFactory.removeVerificationJob(entryList, target);
     }
@@ -197,52 +195,11 @@ public class EventHandlerListener {
         }
     }
 
+    private SshTarget convert(final DeviceRequestDTO dto) {
+        return new SshTarget(dto.getDeviceName(), mscvDefaults.getOs(), dto.getAddress(), mscvDefaults.getSshPort());
+    }
 
-    private class SshTargetViewDto implements SshTargetView {
-
-        private final String name;
-        private final OS os = mscvDefaults.getOs();
-        private final String address;
-        private final Integer port = mscvDefaults.getSshPort();
-
-        SshTargetViewDto(final DeviceRequestDTO dto) {
-            this.name = dto.getDeviceName();
-            this.address = dto.getAddress();
-        }
-
-        SshTargetViewDto(final SystemRequestDTO dto) {
-            this.name = dto.getSystemName();
-            this.address = dto.getAddress();
-        }
-
-        @Override
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public OS getOs() {
-            return os;
-        }
-
-        @Override
-        public String getAddress() {
-            return address;
-        }
-
-        @Override
-        public Integer getPort() {
-            return port;
-        }
-
-        @Override
-        public String toString() {
-            return new StringJoiner(", ", SshTargetViewDto.class.getSimpleName() + "[", "]")
-                    .add("name='" + name + "'")
-                    .add("os=" + os)
-                    .add("address='" + address + "'")
-                    .add("port=" + port)
-                    .toString();
-        }
+    private SshTarget convert(final SystemRequestDTO dto) {
+        return new SshTarget(dto.getSystemName(), mscvDefaults.getOs(), dto.getAddress(), mscvDefaults.getSshPort());
     }
 }

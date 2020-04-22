@@ -4,6 +4,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.mscv.StandardDto;
 import eu.arrowhead.core.mscv.service.MscvCrudService;
 import io.swagger.annotations.Api;
@@ -81,9 +82,9 @@ public class StandardMgmtController {
     @ApiOperation(value = CREATE_STANDARD_DESCRIPTION, response = StandardDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = CREATE_STANDARD_SUCCESS),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CREATE_STANDARD_BAD_REQUEST),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CREATE_STANDARD_BAD_REQUEST, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response = ErrorMessageDTO.class)
     })
     @PostMapping(CREATE_STANDARD_URI)
     @ResponseBody
@@ -96,9 +97,9 @@ public class StandardMgmtController {
     @ApiOperation(value = READ_STANDARD_DESCRIPTION, response = StandardDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = READ_STANDARD_SUCCESS),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = READ_STANDARD_BAD_REQUEST),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = READ_STANDARD_BAD_REQUEST, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response = ErrorMessageDTO.class)
     })
     @GetMapping(READ_STANDARD_URI)
     @ResponseBody
@@ -111,9 +112,9 @@ public class StandardMgmtController {
     @ApiOperation(value = READ_ALL_STANDARD_DESCRIPTION, response = StandardDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = READ_ALL_STANDARD_SUCCESS),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = READ_ALL_STANDARD_BAD_REQUEST),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = READ_ALL_STANDARD_BAD_REQUEST, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response = ErrorMessageDTO.class)
     })
     @GetMapping(READ_ALL_STANDARD_URI)
     @ResponseBody
@@ -130,9 +131,9 @@ public class StandardMgmtController {
     @ApiOperation(value = UPDATE_STANDARD_DESCRIPTION, response = StandardDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = UPDATE_STANDARD_SUCCESS),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = UPDATE_STANDARD_BAD_REQUEST),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = UPDATE_STANDARD_BAD_REQUEST, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response = ErrorMessageDTO.class)
     })
     @PutMapping(UPDATE_STANDARD_URI)
     @ResponseBody
@@ -142,12 +143,12 @@ public class StandardMgmtController {
         return null;
     }
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = DELETE_STANDARD_DESCRIPTION, response = StandardDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = DELETE_STANDARD_DESCRIPTION, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_STANDARD_SUCCESS),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_STANDARD_BAD_REQUEST),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_STANDARD_BAD_REQUEST, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response = ErrorMessageDTO.class)
     })
     @DeleteMapping(DELETE_STANDARD_URI)
     @ResponseBody

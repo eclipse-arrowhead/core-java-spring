@@ -1,9 +1,10 @@
 package eu.arrowhead.common.dto.shared.mscv;
 
 
+import java.io.Serializable;
 import java.util.StringJoiner;
 
-public class StandardDto {
+public class StandardDto implements Serializable {
 
   private String identification;
   private String name;

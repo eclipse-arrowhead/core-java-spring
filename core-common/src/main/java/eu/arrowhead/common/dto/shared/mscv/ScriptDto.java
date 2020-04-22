@@ -1,9 +1,10 @@
 package eu.arrowhead.common.dto.shared.mscv;
 
 
+import java.io.Serializable;
 import java.util.StringJoiner;
 
-public class ScriptDto {
+public class ScriptDto implements Serializable {
 
   private String layer;
   private String os;

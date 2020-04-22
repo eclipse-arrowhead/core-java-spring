@@ -1,5 +1,6 @@
 package eu.arrowhead.common.database.view.mscv;
 
+import eu.arrowhead.common.database.entity.mscv.Target;
 import eu.arrowhead.common.dto.shared.mscv.VerificationRunResult;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -11,7 +12,7 @@ public interface VerificationExecutionView {
     Long getId();
 
     @Value("#{target.target}")
-    TargetView getTarget();
+    Target getTarget();
 
     @Value("#{target.verificationList}")
     VerificationListView getVerificationList();

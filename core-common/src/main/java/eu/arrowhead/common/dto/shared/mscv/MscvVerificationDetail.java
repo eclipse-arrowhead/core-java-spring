@@ -1,7 +1,9 @@
 package eu.arrowhead.common.dto.shared.mscv;
 
 
-public class MscvVerificationDetail {
+import java.io.Serializable;
+
+public class MscvVerificationDetail implements Serializable {
 
   private long id;
   private String result;
