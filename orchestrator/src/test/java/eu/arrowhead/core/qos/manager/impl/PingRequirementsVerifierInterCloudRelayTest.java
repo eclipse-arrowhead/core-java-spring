@@ -198,7 +198,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RESPONSE_TIME_THRESHOLD, "500");
 		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
 		parameters.setLocalReferencePingMeasurement(new QoSIntraPingMeasurementResponseDTO());
-		QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
+		final QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
 		providerMeasurement.setProviderAvailable(false);
 		parameters.setProviderTargetCloudMeasurement(providerMeasurement);
 		
@@ -227,7 +227,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RESPONSE_TIME_THRESHOLD, "Invalid");
 		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
 		parameters.setLocalReferencePingMeasurement(new QoSIntraPingMeasurementResponseDTO());
-		QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
+		final QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
 		providerMeasurement.setProviderAvailable(true);
 		parameters.setProviderTargetCloudMeasurement(providerMeasurement);
 		
@@ -237,7 +237,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
-		QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
+		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
 		when(interRelayEchoMeasurementCache.get(any())).thenReturn(null);
 		when(interRelayEchoMeasurementCache.put(any(), any())).thenReturn(responseList);
 		when(orchestratorDriver.getInterRelayEchoMeasurement(any())).thenReturn(responseList);
@@ -264,7 +264,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RESPONSE_TIME_THRESHOLD, "0");
 		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
 		parameters.setLocalReferencePingMeasurement(new QoSIntraPingMeasurementResponseDTO());
-		QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
+		final QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
 		providerMeasurement.setProviderAvailable(true);
 		parameters.setProviderTargetCloudMeasurement(providerMeasurement);
 		
@@ -274,7 +274,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
-		QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
+		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
 		when(orchestratorDriver.getInterRelayEchoMeasurement(any())).thenReturn(responseList);
 		
 		verifier.verify(parameters, false);
@@ -298,10 +298,10 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RESPONSE_TIME_THRESHOLD, requirementTestValue);
 		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
-		QoSIntraPingMeasurementResponseDTO referenceMeasurement = new QoSIntraPingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO referenceMeasurement = new QoSIntraPingMeasurementResponseDTO();
 		referenceMeasurement.setMaxResponseTime(referenceTestValue);
 		parameters.setLocalReferencePingMeasurement(referenceMeasurement);
-		QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
+		final QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
 		providerMeasurement.setProviderAvailable(true);
 		providerMeasurement.setMaxResponseTime(providerTestValue);
 		parameters.setProviderTargetCloudMeasurement(providerMeasurement);
@@ -313,10 +313,10 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		response.setMaxResponseTime(relayTestValue);
-		QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
+		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
 		when(orchestratorDriver.getInterRelayEchoMeasurement(any())).thenReturn(responseList);
 		
-		boolean verified = verifier.verify(parameters, false);
+		final boolean verified = verifier.verify(parameters, false);
 		Assert.assertFalse(verified);
 	}
 	
@@ -338,10 +338,10 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RESPONSE_TIME_THRESHOLD, requirementTestValue);
 		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
-		QoSIntraPingMeasurementResponseDTO referenceMeasurement = new QoSIntraPingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO referenceMeasurement = new QoSIntraPingMeasurementResponseDTO();
 		referenceMeasurement.setMaxResponseTime(referenceTestValue);
 		parameters.setLocalReferencePingMeasurement(referenceMeasurement);
-		QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
+		final QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
 		providerMeasurement.setProviderAvailable(true);
 		providerMeasurement.setMaxResponseTime(providerTestValue);
 		parameters.setProviderTargetCloudMeasurement(providerMeasurement);
@@ -353,10 +353,10 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		response.setMaxResponseTime(relayTestValue);
-		QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
+		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
 		when(orchestratorDriver.getInterRelayEchoMeasurement(any())).thenReturn(responseList);
 		
-		boolean verified = verifier.verify(parameters, false);
+		final boolean verified = verifier.verify(parameters, false);
 		Assert.assertTrue(verified);
 	}
 	
@@ -374,7 +374,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_AVERAGE_RESPONSE_TIME_THRESHOLD, "Invalid");
 		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
 		parameters.setLocalReferencePingMeasurement(new QoSIntraPingMeasurementResponseDTO());
-		QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
+		final QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
 		providerMeasurement.setProviderAvailable(true);
 		parameters.setProviderTargetCloudMeasurement(providerMeasurement);
 		
@@ -384,7 +384,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
-		QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
+		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
 		when(orchestratorDriver.getInterRelayEchoMeasurement(any())).thenReturn(responseList);
 		
 		verifier.verify(parameters, false);
@@ -404,7 +404,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_AVERAGE_RESPONSE_TIME_THRESHOLD, "0");
 		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
 		parameters.setLocalReferencePingMeasurement(new QoSIntraPingMeasurementResponseDTO());
-		QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
+		final QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
 		providerMeasurement.setProviderAvailable(true);
 		parameters.setProviderTargetCloudMeasurement(providerMeasurement);
 		
@@ -414,7 +414,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
-		QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
+		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
 		when(orchestratorDriver.getInterRelayEchoMeasurement(any())).thenReturn(responseList);
 		
 		verifier.verify(parameters, false);
@@ -438,10 +438,10 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_AVERAGE_RESPONSE_TIME_THRESHOLD, requirementTestValue);
 		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
-		QoSIntraPingMeasurementResponseDTO referenceMeasurement = new QoSIntraPingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO referenceMeasurement = new QoSIntraPingMeasurementResponseDTO();
 		referenceMeasurement.setMeanResponseTimeWithoutTimeout(referenceTestValue);
 		parameters.setLocalReferencePingMeasurement(referenceMeasurement);
-		QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
+		final QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
 		providerMeasurement.setProviderAvailable(true);
 		providerMeasurement.setMeanResponseTimeWithoutTimeout(providerTestValue);
 		parameters.setProviderTargetCloudMeasurement(providerMeasurement);
@@ -453,10 +453,10 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		response.setMeanResponseTimeWithoutTimeout(relayTestValue);
-		QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
+		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
 		when(orchestratorDriver.getInterRelayEchoMeasurement(any())).thenReturn(responseList);
 		
-		boolean verified = verifier.verify(parameters, false);
+		final boolean verified = verifier.verify(parameters, false);
 		Assert.assertFalse(verified);
 	}
 	
@@ -478,10 +478,10 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_AVERAGE_RESPONSE_TIME_THRESHOLD, requirementTestValue);
 		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
-		QoSIntraPingMeasurementResponseDTO referenceMeasurement = new QoSIntraPingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO referenceMeasurement = new QoSIntraPingMeasurementResponseDTO();
 		referenceMeasurement.setMeanResponseTimeWithoutTimeout(referenceTestValue);
 		parameters.setLocalReferencePingMeasurement(referenceMeasurement);
-		QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
+		final QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
 		providerMeasurement.setProviderAvailable(true);
 		providerMeasurement.setMeanResponseTimeWithoutTimeout(providerTestValue);
 		parameters.setProviderTargetCloudMeasurement(providerMeasurement);
@@ -493,10 +493,10 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		response.setMeanResponseTimeWithoutTimeout(relayTestValue);
-		QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
+		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
 		when(orchestratorDriver.getInterRelayEchoMeasurement(any())).thenReturn(responseList);
 		
-		boolean verified = verifier.verify(parameters, false);
+		final boolean verified = verifier.verify(parameters, false);
 		Assert.assertTrue(verified);
 	}
 	
@@ -514,7 +514,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_JITTER_THRESHOLD, "Invalid");
 		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
 		parameters.setLocalReferencePingMeasurement(new QoSIntraPingMeasurementResponseDTO());
-		QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
+		final QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
 		providerMeasurement.setProviderAvailable(true);
 		parameters.setProviderTargetCloudMeasurement(providerMeasurement);
 		
@@ -524,7 +524,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
-		QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
+		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
 		when(orchestratorDriver.getInterRelayEchoMeasurement(any())).thenReturn(responseList);
 		
 		verifier.verify(parameters, false);
@@ -544,7 +544,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_JITTER_THRESHOLD, "-2");
 		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
 		parameters.setLocalReferencePingMeasurement(new QoSIntraPingMeasurementResponseDTO());
-		QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
+		final QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
 		providerMeasurement.setProviderAvailable(true);
 		parameters.setProviderTargetCloudMeasurement(providerMeasurement);
 		
@@ -554,7 +554,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
-		QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
+		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
 		when(orchestratorDriver.getInterRelayEchoMeasurement(any())).thenReturn(responseList);
 		
 		verifier.verify(parameters, false);
@@ -578,10 +578,10 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_JITTER_THRESHOLD, requirementTestValue);
 		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
-		QoSIntraPingMeasurementResponseDTO referenceMeasurement = new QoSIntraPingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO referenceMeasurement = new QoSIntraPingMeasurementResponseDTO();
 		referenceMeasurement.setJitterWithoutTimeout(referenceTestValue);
 		parameters.setLocalReferencePingMeasurement(referenceMeasurement);
-		QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
+		final QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
 		providerMeasurement.setProviderAvailable(true);
 		providerMeasurement.setJitterWithoutTimeout(providerTestValue);
 		parameters.setProviderTargetCloudMeasurement(providerMeasurement);
@@ -593,10 +593,10 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		response.setJitterWithoutTimeout(relayTestValue);
-		QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
+		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
 		when(orchestratorDriver.getInterRelayEchoMeasurement(any())).thenReturn(responseList);
 		
-		boolean verified = verifier.verify(parameters, false);
+		final boolean verified = verifier.verify(parameters, false);
 		Assert.assertFalse(verified);
 	}
 	
@@ -618,10 +618,10 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_JITTER_THRESHOLD, requirementTestValue);
 		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
-		QoSIntraPingMeasurementResponseDTO referenceMeasurement = new QoSIntraPingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO referenceMeasurement = new QoSIntraPingMeasurementResponseDTO();
 		referenceMeasurement.setJitterWithoutTimeout(referenceTestValue);
 		parameters.setLocalReferencePingMeasurement(referenceMeasurement);
-		QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
+		final QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
 		providerMeasurement.setProviderAvailable(true);
 		providerMeasurement.setJitterWithoutTimeout(providerTestValue);
 		parameters.setProviderTargetCloudMeasurement(providerMeasurement);
@@ -633,10 +633,10 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		response.setJitterWithoutTimeout(relayTestValue);
-		QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
+		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
 		when(orchestratorDriver.getInterRelayEchoMeasurement(any())).thenReturn(responseList);
 		
-		boolean verified = verifier.verify(parameters, false);
+		final boolean verified = verifier.verify(parameters, false);
 		Assert.assertTrue(verified);
 	}
 	
@@ -654,7 +654,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RECENT_PACKET_LOSS, "Invalid");
 		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
 		parameters.setLocalReferencePingMeasurement(new QoSIntraPingMeasurementResponseDTO());
-		QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
+		final QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
 		providerMeasurement.setProviderAvailable(true);
 		parameters.setProviderTargetCloudMeasurement(providerMeasurement);
 		
@@ -664,7 +664,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
-		QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
+		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
 		when(orchestratorDriver.getInterRelayEchoMeasurement(any())).thenReturn(responseList);
 		
 		verifier.verify(parameters, false);
@@ -684,7 +684,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RECENT_PACKET_LOSS, "-2");
 		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
 		parameters.setLocalReferencePingMeasurement(new QoSIntraPingMeasurementResponseDTO());
-		QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
+		final QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
 		providerMeasurement.setProviderAvailable(true);
 		parameters.setProviderTargetCloudMeasurement(providerMeasurement);
 		
@@ -694,7 +694,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
-		QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
+		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
 		when(orchestratorDriver.getInterRelayEchoMeasurement(any())).thenReturn(responseList);
 		
 		verifier.verify(parameters, false);
@@ -721,11 +721,11 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RECENT_PACKET_LOSS, requirementTestValue);
 		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
-		QoSIntraPingMeasurementResponseDTO referenceMeasurement = new QoSIntraPingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO referenceMeasurement = new QoSIntraPingMeasurementResponseDTO();
 		referenceMeasurement.setReceived(referenceReceivedTestValue);
 		referenceMeasurement.setSent(referenceSentTestValue);
 		parameters.setLocalReferencePingMeasurement(referenceMeasurement);
-		QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
+		final QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
 		providerMeasurement.setProviderAvailable(true);
 		providerMeasurement.setReceived(providerReceivedTestValue);
 		providerMeasurement.setSent(providerSentTestValue);		
@@ -739,10 +739,10 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		response.setId(1L);
 		response.setReceived(relayReceivedTestValue);
 		response.setSent(relaySentTestValue);
-		QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
+		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
 		when(orchestratorDriver.getInterRelayEchoMeasurement(any())).thenReturn(responseList);
 		
-		boolean verified = verifier.verify(parameters, false);
+		final boolean verified = verifier.verify(parameters, false);
 		Assert.assertFalse(verified);
 	}
 	
@@ -767,11 +767,11 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RECENT_PACKET_LOSS, requirementTestValue);
 		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
-		QoSIntraPingMeasurementResponseDTO referenceMeasurement = new QoSIntraPingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO referenceMeasurement = new QoSIntraPingMeasurementResponseDTO();
 		referenceMeasurement.setReceived(referenceReceivedTestValue);
 		referenceMeasurement.setSent(referenceSentTestValue);
 		parameters.setLocalReferencePingMeasurement(referenceMeasurement);
-		QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
+		final QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
 		providerMeasurement.setProviderAvailable(true);
 		providerMeasurement.setReceived(providerReceivedTestValue);
 		providerMeasurement.setSent(providerSentTestValue);		
@@ -785,10 +785,10 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		response.setId(1L);
 		response.setReceived(relayReceivedTestValue);
 		response.setSent(relaySentTestValue);
-		QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
+		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
 		when(orchestratorDriver.getInterRelayEchoMeasurement(any())).thenReturn(responseList);
 		
-		boolean verified = verifier.verify(parameters, false);
+		final boolean verified = verifier.verify(parameters, false);
 		Assert.assertTrue(verified);
 	}
 	
@@ -806,7 +806,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_PACKET_LOSS, "Invalid");
 		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
 		parameters.setLocalReferencePingMeasurement(new QoSIntraPingMeasurementResponseDTO());
-		QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
+		final QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
 		providerMeasurement.setProviderAvailable(true);
 		parameters.setProviderTargetCloudMeasurement(providerMeasurement);
 		
@@ -816,7 +816,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
-		QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
+		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
 		when(orchestratorDriver.getInterRelayEchoMeasurement(any())).thenReturn(responseList);
 		
 		verifier.verify(parameters, false);
@@ -836,7 +836,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_PACKET_LOSS, "-2");
 		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
 		parameters.setLocalReferencePingMeasurement(new QoSIntraPingMeasurementResponseDTO());
-		QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
+		final QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
 		providerMeasurement.setProviderAvailable(true);
 		parameters.setProviderTargetCloudMeasurement(providerMeasurement);
 		
@@ -846,7 +846,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
-		QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
+		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
 		when(orchestratorDriver.getInterRelayEchoMeasurement(any())).thenReturn(responseList);
 		
 		verifier.verify(parameters, false);
@@ -873,11 +873,11 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_PACKET_LOSS, requirementTestValue);
 		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
-		QoSIntraPingMeasurementResponseDTO referenceMeasurement = new QoSIntraPingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO referenceMeasurement = new QoSIntraPingMeasurementResponseDTO();
 		referenceMeasurement.setReceivedAll(referenceReceivedTestValue);
 		referenceMeasurement.setSentAll(referenceSentTestValue);
 		parameters.setLocalReferencePingMeasurement(referenceMeasurement);
-		QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
+		final QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
 		providerMeasurement.setProviderAvailable(true);
 		providerMeasurement.setReceivedAll(providerReceivedTestValue);
 		providerMeasurement.setSentAll(providerSentTestValue);		
@@ -891,10 +891,10 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		response.setId(1L);
 		response.setReceivedAll(relayReceivedTestValue);
 		response.setSentAll(relaySentTestValue);
-		QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
+		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
 		when(orchestratorDriver.getInterRelayEchoMeasurement(any())).thenReturn(responseList);
 		
-		boolean verified = verifier.verify(parameters, false);
+		final boolean verified = verifier.verify(parameters, false);
 		Assert.assertFalse(verified);
 	}
 	
@@ -919,11 +919,11 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_PACKET_LOSS, requirementTestValue);
 		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
-		QoSIntraPingMeasurementResponseDTO referenceMeasurement = new QoSIntraPingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO referenceMeasurement = new QoSIntraPingMeasurementResponseDTO();
 		referenceMeasurement.setReceivedAll(referenceReceivedTestValue);
 		referenceMeasurement.setSentAll(referenceSentTestValue);
 		parameters.setLocalReferencePingMeasurement(referenceMeasurement);
-		QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
+		final QoSMeasurementAttributesFormDTO providerMeasurement = new QoSMeasurementAttributesFormDTO();
 		providerMeasurement.setProviderAvailable(true);
 		providerMeasurement.setReceivedAll(providerReceivedTestValue);
 		providerMeasurement.setSentAll(providerSentTestValue);		
@@ -937,10 +937,10 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		response.setId(1L);
 		response.setReceivedAll(relayReceivedTestValue);
 		response.setSentAll(relaySentTestValue);
-		QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
+		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
 		when(orchestratorDriver.getInterRelayEchoMeasurement(any())).thenReturn(responseList);
 		
-		boolean verified = verifier.verify(parameters, false);
+		final boolean verified = verifier.verify(parameters, false);
 		Assert.assertTrue(verified);
 	}
 }
