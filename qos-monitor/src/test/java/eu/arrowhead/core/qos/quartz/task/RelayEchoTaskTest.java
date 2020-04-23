@@ -478,8 +478,8 @@ public class RelayEchoTaskTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testExecuteInitRelayTestThrowsBadGatewayError() {
-		final Map<String, ZonedDateTime> badGatewayCash = new HashMap<>();
-		ReflectionTestUtils.setField(relayEchoTask, "badGatewayCash", badGatewayCash);
+		final Map<String, ZonedDateTime> badGatewayCache = new HashMap<>();
+		ReflectionTestUtils.setField(relayEchoTask, "badGatewayCache", badGatewayCache);
 		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(false);
 		when(sslProperties.isSslEnabled()).thenReturn(Boolean.TRUE);
 		when(arrowheadContext.containsKey(CommonConstants.SERVER_PUBLIC_KEY)).thenReturn(true);
@@ -521,8 +521,8 @@ public class RelayEchoTaskTest {
 		assertEquals(neighborCloudWithMeasuerment.getGatewayRelays().get(0).getPort(), valueCaptured.getRelay().getPort().intValue());
 		final String cacheKey = getRelayCacheKey(valueCaptured.getTargetCloud().getOperator(), valueCaptured.getTargetCloud().getName(),
 												 valueCaptured.getRelay().getAddress(),valueCaptured.getRelay().getPort());
-		assertTrue(badGatewayCash.containsKey(cacheKey));
-		assertEquals(lastMeasurementAt.toEpochSecond(), badGatewayCash.get(cacheKey).toEpochSecond());
+		assertTrue(badGatewayCache.containsKey(cacheKey));
+		assertEquals(lastMeasurementAt.toEpochSecond(), badGatewayCache.get(cacheKey).toEpochSecond());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -538,11 +538,11 @@ public class RelayEchoTaskTest {
 		allCloud.getData().add(neighborCloudWithMeasuerment);
 		final CloudWithRelaysAndPublicRelaysResponseDTO neighborCloudWithOldestMeasuermentButCached = getNeighborCloud(1, 0, 1);
 		final ZonedDateTime cachedRelayLastMeasurement = ZonedDateTime.now().minusHours(20);
-		final Map<String, ZonedDateTime> badGatewayCash = new HashMap<>();
-		badGatewayCash.put(getRelayCacheKey(neighborCloudWithOldestMeasuermentButCached.getOperator(), neighborCloudWithOldestMeasuermentButCached.getName(),
+		final Map<String, ZonedDateTime> badGatewayCache = new HashMap<>();
+		badGatewayCache.put(getRelayCacheKey(neighborCloudWithOldestMeasuermentButCached.getOperator(), neighborCloudWithOldestMeasuermentButCached.getName(),
 											neighborCloudWithOldestMeasuermentButCached.getPublicRelays().get(0).getAddress(),
 											neighborCloudWithOldestMeasuermentButCached.getPublicRelays().get(0).getPort()), cachedRelayLastMeasurement);
-		ReflectionTestUtils.setField(relayEchoTask, "badGatewayCash", badGatewayCash);
+		ReflectionTestUtils.setField(relayEchoTask, "badGatewayCache", badGatewayCache);
 		allCloud.getData().add(neighborCloudWithOldestMeasuermentButCached);
 		allCloud.setCount(allCloud.getData().size());
 		when(qosMonitorDriver.queryGatekeeperAllCloud()).thenReturn(allCloud);
@@ -581,7 +581,7 @@ public class RelayEchoTaskTest {
 		assertEquals(neighborCloudWithOldestMeasuermentButCached.getName(), valueCaptured.getTargetCloud().getName());
 		assertEquals(neighborCloudWithOldestMeasuermentButCached.getPublicRelays().get(0).getAddress(), valueCaptured.getRelay().getAddress());
 		assertEquals(neighborCloudWithOldestMeasuermentButCached.getPublicRelays().get(0).getPort(), valueCaptured.getRelay().getPort().intValue());
-		assertTrue(badGatewayCash.isEmpty());
+		assertTrue(badGatewayCache.isEmpty());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -595,21 +595,21 @@ public class RelayEchoTaskTest {
 		when(arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY)).thenReturn(publicKey);
 		
 		final CloudWithRelaysAndPublicRelaysListResponseDTO allCloud = getOwnCloudInListDTO();
-		final Map<String, ZonedDateTime> badGatewayCash = new HashMap<>();
+		final Map<String, ZonedDateTime> badGatewayCache = new HashMap<>();
 		final CloudWithRelaysAndPublicRelaysResponseDTO neighborCloudWithMeasuerment = getNeighborCloud(1, 0, 1);
 		final ZonedDateTime youngestRelayMeasurementTime = ZonedDateTime.now().minusMinutes(5);
 		final String youngestRelayMeasurementCacheKey = getRelayCacheKey(neighborCloudWithMeasuerment.getOperator(), neighborCloudWithMeasuerment.getName(),
 																   neighborCloudWithMeasuerment.getPublicRelays().get(0).getAddress(),
 																   neighborCloudWithMeasuerment.getPublicRelays().get(0).getPort());
-		badGatewayCash.put(youngestRelayMeasurementCacheKey, youngestRelayMeasurementTime);
+		badGatewayCache.put(youngestRelayMeasurementCacheKey, youngestRelayMeasurementTime);
 		allCloud.getData().add(neighborCloudWithMeasuerment);
 		final CloudWithRelaysAndPublicRelaysResponseDTO neighborCloudWithOldestMeasuerment = getNeighborCloud(1, 0, 1);
 		final ZonedDateTime oldestRelayMeasurementTime = ZonedDateTime.now().minusMinutes(10);
-		badGatewayCash.put(getRelayCacheKey(neighborCloudWithOldestMeasuerment.getOperator(), neighborCloudWithOldestMeasuerment.getName(),
+		badGatewayCache.put(getRelayCacheKey(neighborCloudWithOldestMeasuerment.getOperator(), neighborCloudWithOldestMeasuerment.getName(),
 											neighborCloudWithOldestMeasuerment.getPublicRelays().get(0).getAddress(),
 											neighborCloudWithOldestMeasuerment.getPublicRelays().get(0).getPort()), oldestRelayMeasurementTime);
-		badGatewayCash.put("not testable anymore", ZonedDateTime.now().minusHours(6));
-		ReflectionTestUtils.setField(relayEchoTask, "badGatewayCash", badGatewayCash);
+		badGatewayCache.put("not testable anymore", ZonedDateTime.now().minusHours(6));
+		ReflectionTestUtils.setField(relayEchoTask, "badGatewayCache", badGatewayCache);
 		allCloud.getData().add(neighborCloudWithOldestMeasuerment);
 		allCloud.setCount(allCloud.getData().size());
 		when(qosMonitorDriver.queryGatekeeperAllCloud()).thenReturn(allCloud);
@@ -648,8 +648,8 @@ public class RelayEchoTaskTest {
 		assertEquals(neighborCloudWithOldestMeasuerment.getName(), valueCaptured.getTargetCloud().getName());
 		assertEquals(neighborCloudWithOldestMeasuerment.getPublicRelays().get(0).getAddress(), valueCaptured.getRelay().getAddress());
 		assertEquals(neighborCloudWithOldestMeasuerment.getPublicRelays().get(0).getPort(), valueCaptured.getRelay().getPort().intValue());
-		assertEquals(1, badGatewayCash.size());
-		assertEquals(youngestRelayMeasurementCacheKey, badGatewayCash.entrySet().iterator().next().getKey());
+		assertEquals(1, badGatewayCache.size());
+		assertEquals(youngestRelayMeasurementCacheKey, badGatewayCache.entrySet().iterator().next().getKey());
 	}
 	
 	//=================================================================================================
@@ -700,6 +700,6 @@ public class RelayEchoTaskTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private String getRelayCacheKey(final String cloudOperator, final String cloudName, final String relayAddress, final int relayPort) {
-		return cloudOperator.replace("\\.", "") + "." + cloudName.replace("\\.", "") + "." + relayAddress.replace("\\.", "") + "." + relayPort;
+		return cloudOperator.replace("|", "") + "|" + cloudName.replace("|", "") + "|" + relayAddress.replace("|", "") + "|" + relayPort;
 	}
 }
