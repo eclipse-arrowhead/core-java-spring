@@ -101,7 +101,7 @@ public class OrchestratorAccessControlFilterTest {
 	@Test
 	public void testExternalOrchestrationWithGatekeeper() throws Exception {
 		final Map<String,Boolean> flags = new HashMap<>();
-		flags.put(CommonConstants.ORCHESTRATON_FLAG_EXTERNAL_SERVICE_REQUEST, true);
+		flags.put(CommonConstants.ORCHESTRATION_FLAG_EXTERNAL_SERVICE_REQUEST, true);
 		final OrchestrationFormRequestDTO requestDTO = createOrchestrationFromRequestDTO("", flags);
 		
 		this.mockMvc.perform(post(ORCH_ORCHESTRATION)
@@ -117,7 +117,7 @@ public class OrchestratorAccessControlFilterTest {
 	@Test
 	public void testExternalOrchestrationWithoutGatekeeper() throws Exception {
 		final Map<String,Boolean> flags = new HashMap<>();
-		flags.put(CommonConstants.ORCHESTRATON_FLAG_EXTERNAL_SERVICE_REQUEST, true);
+		flags.put(CommonConstants.ORCHESTRATION_FLAG_EXTERNAL_SERVICE_REQUEST, true);
 		final OrchestrationFormRequestDTO requestDTO = createOrchestrationFromRequestDTO("", flags);
 		
 		this.mockMvc.perform(post(ORCH_ORCHESTRATION)

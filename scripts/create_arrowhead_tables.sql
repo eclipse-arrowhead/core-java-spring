@@ -66,6 +66,18 @@ CREATE TABLE IF NOT EXISTS `system_` (
   UNIQUE KEY `triple` (`system_name`,`address`,`port`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE IF NOT EXISTS `device` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `device_name` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `mac_address` varchar(255) NOT NULL,
+  `authentication_info` varchar(2047) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `double` (`device_name`,`mac_address`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 CREATE TABLE IF NOT EXISTS `service_definition` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `service_definition` varchar(255) NOT NULL,
@@ -87,6 +99,39 @@ CREATE TABLE IF NOT EXISTS `service_interface` (
 INSERT IGNORE INTO `service_interface` (interface_name) VALUES ('HTTP-SECURE-JSON');
 INSERT IGNORE INTO `service_interface` (interface_name) VALUES ('HTTP-INSECURE-JSON');
 
+-- Device Registry
+
+CREATE TABLE IF NOT EXISTS `device_registry` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `device_id` bigint(20) NOT NULL,
+  `end_of_validity` timestamp NULL DEFAULT NULL,
+  `metadata` text,
+  `version` int(11) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `device_registry_device` (`device_id`),
+  CONSTRAINT `device_registry_device` FOREIGN KEY (`device_id`) REFERENCES `device` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- System Registry
+
+CREATE TABLE IF NOT EXISTS `system_registry` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `system_id` bigint(20) NOT NULL,
+  `device_id` bigint(20) NOT NULL,
+  `end_of_validity` timestamp NULL DEFAULT NULL,
+  `metadata` text,
+  `version` int(11) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `system_registry_pair` (`system_id`,`device_id`),
+  KEY `system_registry_device` (`device_id`),
+  CONSTRAINT `system_registry_system` FOREIGN KEY (`system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `system_registry_device` FOREIGN KEY (`device_id`) REFERENCES `device` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 -- Service Registry
 
 CREATE TABLE IF NOT EXISTS `service_registry` (
@@ -101,10 +146,10 @@ CREATE TABLE IF NOT EXISTS `service_registry` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `pair` (`service_id`,`system_id`),
-  KEY `system` (`system_id`),
-  CONSTRAINT `service` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `system` FOREIGN KEY (`system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE
+  UNIQUE KEY `service_registry_pair` (`service_id`,`system_id`),
+  KEY `service_registry_system` (`system_id`),
+  CONSTRAINT `service_registry_service` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `service_registry_system` FOREIGN KEY (`system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `service_registry_interface_connection` (

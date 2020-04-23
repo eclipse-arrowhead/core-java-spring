@@ -32,6 +32,9 @@
 	    <module>gatekeeper</module>
 	    <module>gateway</module>
 	    <module>choreographer</module>
+		<module>systemregistry</module>
+		<module>deviceregistry</module>
+		<module>onboarding</module>
 	    <module>qos-monitor</module>
 	    <module>deb-installer</module>
 	    <module>docker-all</module>
@@ -61,7 +64,7 @@
   		<jna.version>5.5.0</jna.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-	
+
 	<repositories>
         <repository>
             <id>spring-repo</id>
@@ -170,7 +173,7 @@
 			<version>${mysql.jdbc.driver}</version>
 			<scope>runtime</scope>
 		</dependency>
-		
+
 		<dependency>
         	<groupId>sheltekio.javalibs</groupId>
         	<artifactId>icmp4j</artifactId>
@@ -185,8 +188,8 @@
 	        <groupId>net.java.dev.jna</groupId>
         	<artifactId>jna-platform</artifactId>
         	<version>${jna.version}</version>
-    	</dependency> 
-		
+    	</dependency>
+
 <!--
 		<dependency>
 			<groupId>org.mariadb.jdbc</groupId>

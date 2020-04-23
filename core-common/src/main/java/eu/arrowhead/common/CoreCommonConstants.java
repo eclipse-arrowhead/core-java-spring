@@ -34,7 +34,13 @@ public class CoreCommonConstants {
 	
 	public static final String SERVER_ERROR_URI = "/error";
 	public static final String MGMT_URI = "/mgmt";
-	
+
+	public static final String OP_DEVICE_REGISTRY_QUERY_BY_DEVICE_ID_URI = "/query/device/{" + COMMON_FIELD_NAME_ID + "}";
+	public static final String OP_DEVICE_REGISTRY_QUERY_BY_DEVICE_DTO_URI = "/query/device";
+
+	public static final String OP_SYSTEM_REGISTRY_QUERY_BY_SYSTEM_ID_URI = "/query/system/{" + COMMON_FIELD_NAME_ID + "}";
+	public static final String OP_SYSTEM_REGISTRY_QUERY_BY_SYSTEM_DTO_URI = "/query/system";
+
 	public static final String OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI = "/query/system/{" + COMMON_FIELD_NAME_ID + "}";
 	public static final String OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI = "/query/system";
 	public static final String OP_SERVICE_REGISTRY_QUERY_ALL_URI = "/query/all";
@@ -50,6 +56,7 @@ public class CoreCommonConstants {
 	public static final String SWAGGER_TAG_MGMT = "Management";
 	public static final String SWAGGER_TAG_CLIENT = "Client";
 	public static final String SWAGGER_TAG_PRIVATE = "Private";
+	public static final String SWAGGER_TAG_ONBOARDING = "Onboarding";
 	public static final String SWAGGER_TAG_ALL = "All";
 	
 	public static final String SERVER_ADDRESS = "server.address";
@@ -90,12 +97,16 @@ public class CoreCommonConstants {
 	public static final String SERVICE_REGISTRY_PING_INTERVAL = "ping_interval";
 	public static final String $SERVICE_REGISTRY_PING_INTERVAL_WD = "${" + SERVICE_REGISTRY_PING_INTERVAL + ":" + CoreDefaults.DEFAULT_SERVICE_REGISTRY_PING_INTERVAL_MINUTES + "}";
 	public static final String SERVICE_REGISTRY_PING_TIMEOUT = "ping_timeout";
-	public static final String $SERVICE_REGISTRY_PING_TIMEOUT_WD = "${" + SERVICE_REGISTRY_PING_TIMEOUT + ":" + CoreDefaults.DEFAULT_SERVICE_REGISTRY_PING_TIMEOUT_MILISECONDS + "}";
+	public static final String $SERVICE_REGISTRY_PING_TIMEOUT_WD = "${" + SERVICE_REGISTRY_PING_TIMEOUT + ":" + CoreDefaults.DEFAULT_SERVICE_REGISTRY_PING_TIMEOUT_MILLISECONDS + "}";
 	public static final String SERVICE_REGISTRY_TTL_SCHEDULED = "ttl_scheduled";
 	public static final String $SERVICE_REGISTRY_TTL_SCHEDULED_WD = "${" + SERVICE_REGISTRY_TTL_SCHEDULED + ":" + CoreDefaults.DEFAULT_SERVICE_REGISTRY_TTL_SCHEDULED + "}";
 	public static final String SERVICE_REGISTRY_TTL_INTERVAL = "ttl_interval";
 	public static final String $SERVICE_REGISTRY_TTL_INTERVAL_WD = "${" + SERVICE_REGISTRY_TTL_INTERVAL + ":" + CoreDefaults.DEFAULT_SERVICE_REGISTRY_TTL_INTERVAL_MINUTES + "}";
-	
+
+	public static final String SYSTEM_REGISTRY_PING_TIMEOUT = "ping_timeout";
+	public static final String $SYSTEM_REGISTRY_PING_TIMEOUT_WD =
+			"${" + SYSTEM_REGISTRY_PING_TIMEOUT + ":" + CoreDefaults.DEFAULT_SYSTEM_REGISTRY_PING_TIMEOUT_MILLISECONDS + "}";
+
     public static final String AUTHORIZATION_IS_EVENTHANDLER_PRESENT = "eventhandler_is_present";
     public static final String $AUTHORIZATION_IS_EVENTHANDLER_PRESENT_WD = "${" + AUTHORIZATION_IS_EVENTHANDLER_PRESENT + ":" + CoreDefaults.DEFAULT_AUTHORIZATION_IS_EVENTHANDLER_PRESENT + "}";
 	
@@ -171,8 +182,9 @@ public class CoreCommonConstants {
 	
 	public static final String CLOUD_PING_TTL_INTERVAL = "cloud_ping_ttl_interval_minutes";
 	public static final String $CLOUD_PING_TTL_INTERVAL_WD = "${" + CLOUD_PING_TTL_INTERVAL + ":" + CoreDefaults.DEFAULT_CLOUD_PING_TTL_INTERVAL_MINUTES + "}";
+    public static final String CERTIFICATE_FORMAT = "X.509";
 
-	//=================================================================================================
+    //=================================================================================================
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
