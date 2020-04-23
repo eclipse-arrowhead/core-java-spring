@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
@@ -66,7 +67,6 @@ public class DataManagerController {
 	// members
 	
 	//private static final String DATAMANAGER_T_URI = CoreCommonConstants.MGMT_URI + "/subscriptions";
-
 
 	private static final String OP_NOT_VALID_ERROR_MESSAGE = " Illegal operation. ";
 	private static final String NOT_FOUND_ERROR_MESSAGE = " Resource not found. ";
@@ -225,6 +225,7 @@ public class DataManagerController {
 	@ApiOperation(value = "Interface to put sensor data from a service", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses (value = {
 		@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+		@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CoreCommonConstants.SWAGGER_HTTP_400_MESSAGE),
 		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
@@ -236,9 +237,7 @@ public class DataManagerController {
 	) {
 		logger.debug("historianServiceGet for "+systemName + "/"+serviceName);
 
-		if (validateSenML(sml) == false) {
-			throw new ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST);
-		}
+		validateSenMLMessage(systemName, serviceName, sml);
 
 		historianService.createEndpoint(systemName, serviceName);
 
@@ -246,6 +245,8 @@ public class DataManagerController {
 		if(head.getBt() == null) {
 			head.setBt((double)System.currentTimeMillis() / 1000);
 		}
+
+		validateSenMLContent(sml);
 
 		final boolean statusCode = historianService.updateEndpoint(systemName, serviceName, sml);
 		if (statusCode == false) {
@@ -398,13 +399,18 @@ public class DataManagerController {
 			) {
 			logger.debug("proxyServicePut for " + systemName + "/"+serviceName);
 
-			if (validateSenML(sml) == false) {
-				throw new ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST);
+			validateSenMLMessage(systemName, serviceName, sml);
+
+			SenML head = sml.firstElement();
+			if(head.getBt() == null) {
+				head.setBt((double)System.currentTimeMillis() / 1000);
 			}
+
+			validateSenMLContent(sml);
 
 			final ProxyElement pe = proxyService.getEndpointFromService(systemName, serviceName);
 			if (pe == null) {
-				boolean ret = proxyService.addEndpointForService(new ProxyElement(systemName, serviceName));
+				final boolean ret = proxyService.addEndpointForService(new ProxyElement(systemName, serviceName));
 				if (ret==true){
 					proxyService.updateEndpointFromService(systemName, serviceName, sml);
 					throw new ResponseStatusException(org.springframework.http.HttpStatus.CREATED);
@@ -419,9 +425,21 @@ public class DataManagerController {
 
 	//=================================================================================================
 	// assistant methods
+	
+	
+	//=================================================================================================
+        private void validateSenMLMessage(String systemName, String serviceName, Vector<SenML> message) {
+                Assert.notNull(systemName, "systemName is null.");
+                Assert.notNull(serviceName, "serviceName is null.");
+                Assert.notNull(message, "message is null.");
+                Assert.isTrue(!message.isEmpty(), "message is empty");
+
+                SenML head = (SenML)message.get(0);
+                Assert.notNull(head.getBn(), "bn is null.");
+        }
 
 	//-------------------------------------------------------------------------------------------------
-	public boolean validateSenML(final Vector<SenML> sml){
+	public void validateSenMLContent(final Vector<SenML> sml) {
 
 	  /* check that bn, bt and bu are included only once, and in the first object */
 	  Iterator entry = sml.iterator();
@@ -439,27 +457,22 @@ public class DataManagerController {
 	    }
 	  }
 
-
 	  /* bu can only exist once. bt can only exist one, bu can exist 0 or 1 times */
-	  if (bnc != 1 || btc != 1 || buc > 1) {
-		  return false;
-	  }
+	  Assert.isTrue(!(bnc != 1 || btc != 1 || buc > 1), "invalid bn/bt/bu");
 
 	  /* bn must exist in [0] */
 	  SenML element = (SenML)sml.get(0);
-	  if (element.getBn() == null) {
-		  return false;
-	  }
+	  Assert.notNull(element.getBn(), "bn is missing");
 
 	  /* bt must exist in [0] */
-	  if (element.getBt() == null) {
-		  return false;
-	  }
+	  Assert.notNull(element.getBt(), "bt is missing");
+
+	  System.err.println("bt: "+ element.getBt());
+	  /* bt cannot be negative */
+	  Assert.isTrue(element.getBt() >= 0.0, "a negative base time is not allowed");
 
 	  /* bu must exist in [0], if it exists */
-	  if (element.getBu() == null && buc == 1) {
-		  return false;
-	  }
+	  Assert.isTrue(!(element.getBu() == null && buc == 1), "invalid use of bu");
 
 	  /* check that v, bv, sv, etc are included only once per object */
 	  entry = sml.iterator();
@@ -480,12 +493,9 @@ public class DataManagerController {
 	      valueCount++;
 	    }
 
-	    if(valueCount > 1 && element.getS() == null) {
-	      return false;
-	    }
+	    Assert.isTrue(!(valueCount > 1 && element.getS() == null), "too many value tags");
 	  } 
 
-	  return true;
 	}	
 }
 
