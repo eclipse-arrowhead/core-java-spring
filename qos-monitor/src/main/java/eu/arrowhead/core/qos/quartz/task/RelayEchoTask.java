@@ -137,7 +137,6 @@ public class RelayEchoTask implements Job {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@SuppressWarnings("unchecked")
 	private boolean checkRequiredCoreSystemServiceUrisAvailable() {
 		logger.debug("checkRequiredCoreSystemServiceUrisAvailable started...");
 		for (final CoreSystemService coreSystemService : REQUIRED_CORE_SERVICES) {
