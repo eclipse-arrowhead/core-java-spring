@@ -263,7 +263,7 @@ public class RelayTestService {
 			logger.debug("Exception message: {}:", ex.getMessage());
 			logger.debug("Stacktrace:", ex);
 			
-			throw new ArrowheadException("Error while trying to connect relay at " + relay.getAddress() + ":" + relay.getPort(), ex);
+			throw new ArrowheadException("Error while trying to connect relay at " + relay.getAddress() + ":" + relay.getPort(), HttpStatus.SC_BAD_GATEWAY, ex);
 		}
 	}
 	

@@ -188,6 +188,8 @@ public class CoreCommonConstants {
 	public static final String RELAY_ECHO_TTL_INTERVAL = "relay_echo_ttl_interval_minutes";
 	public static final String $RELAY_ECHO_TTL_INTERVAL_WD = "${" + RELAY_ECHO_TTL_INTERVAL + ":" + CoreDefaults.DEFAULT_RELAY_ECHO_TTL_INTERVAL_MINUTES + "}";
 	
+	public static final String RELAY_TEST_BAD_GATEWAY_RETRY_MIN = "relay.test.bad_gateway_retry_min";
+	public static final String $RELAY_TEST_BAD_GATEWAY_RETRY_MIN_WD = "${" + RELAY_TEST_BAD_GATEWAY_RETRY_MIN + ":" + CoreDefaults.DEFAULT_RELAY_TEST_BAD_GATEWAY_RETRY_MIN + "}";
 	public static final String RELAY_TEST_TIME_TO_REPEAT = "relay.test.time_to_repeat";
 	public static final String $RELAY_TEST_TIME_TO_REPEAT_WD = "${" + RELAY_TEST_TIME_TO_REPEAT + ":" + CoreDefaults.DEFAULT_RELAY_TEST_TIME_TO_REPEAT + "}";
 	public static final String RELAY_TEST_TIMEOUT = "rely.test.timeout"; 
