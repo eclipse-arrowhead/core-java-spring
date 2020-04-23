@@ -37,7 +37,7 @@ public class OrchestratorAccessControlFilter extends CoreSystemAccessControlFilt
 			final OrchestrationFormRequestDTO orchestrationFormRequestDTO = Utilities.fromJson(requestJSON, OrchestrationFormRequestDTO.class);
 			final OrchestrationFlags orchestrationFlags = orchestrationFormRequestDTO.getOrchestrationFlags();
 			
-			if (orchestrationFlags.getOrDefault(CommonConstants.ORCHESTRATON_FLAG_EXTERNAL_SERVICE_REQUEST, false)) {
+			if (orchestrationFlags.getOrDefault(CommonConstants.ORCHESTRATION_FLAG_EXTERNAL_SERVICE_REQUEST, false)) {
 				// If this is an external service request, only the local Gatekeeper can use these methods
 				final CoreSystem[] allowedCoreSystems = { CoreSystem.GATEKEEPER };
 				checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystems, requestTarget);				

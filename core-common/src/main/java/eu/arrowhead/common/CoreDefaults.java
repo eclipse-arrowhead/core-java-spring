@@ -17,10 +17,13 @@ public class CoreDefaults {
 	
 	public static final boolean DEFAULT_SERVICE_REGISTRY_PING_SCHEDULED = false;
 	public static final int DEFAULT_SERVICE_REGISTRY_PING_INTERVAL_MINUTES = 60;
-	public static final int DEFAULT_SERVICE_REGISTRY_PING_TIMEOUT_MILISECONDS = 5000;
+	public static final int DEFAULT_SERVICE_REGISTRY_PING_TIMEOUT_MILLISECONDS = 5000;
 	public static final boolean DEFAULT_SERVICE_REGISTRY_TTL_SCHEDULED = false;
 	public static final int DEFAULT_SERVICE_REGISTRY_TTL_INTERVAL_MINUTES = 13;
-	
+
+	public static final int DEFAULT_SYSTEM_REGISTRY_PING_INTERVAL_MINUTES = 60;
+	public static final int DEFAULT_SYSTEM_REGISTRY_PING_TIMEOUT_MILLISECONDS = 5000;
+
 	public static final String DEFAULT_OWN_CLOUD_OPERATOR = "default_operator";
 	public static final String DEFAULT_OWN_CLOUD_NAME = "default_insecure_cloud";
 	
@@ -29,7 +32,7 @@ public class CoreDefaults {
 	public static final boolean DEFAULT_AUTHORIZATION_IS_EVENTHANDLER_PRESENT = false;
 	
 	public static final boolean DEFAULT_ORCHESTRATOR_IS_GATEKEEPER_PRESENT = false;
-	
+
 	public static final int DEFAULT_RELAY_CHECK_INTERVAL = 9;
 	public static final int DEFAULT_NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS = 50;
 	
@@ -42,6 +45,8 @@ public class CoreDefaults {
 	
 	public static final boolean DEFAULT_EVENT_HANDLER_TTL_SCHEDULED = false;
 	public static final int DEFAULT_EVENT_HANDLER_TTL_INTERVAL_MINUTES = 17;
+	public static final int DEFAULT_EVENT_HANDLER_MAX_RETRY_CONNECT_AUTH = 3;
+	public static final int DEFAULT_EVENT_HANDLER_RETRY_CONNECT_AUTH_INTERVAL_SEC = 10;
 	
 	public static final long DEFAULT_TIME_STAMP_TOLERANCE_SECONDS = 120;
 	public static final int DEFAULT_EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS = 10;
