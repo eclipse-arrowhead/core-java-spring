@@ -51,8 +51,8 @@ public class CoreUtilitiesTest {
 	@Test
 	public void testValidatePageParametersPageAndSizeNull() {
 		final ValidatedPageParams vpp = CoreUtilities.validatePageParameters(null, null, "ASC", "origin");
-		Assert.assertEquals(-1, vpp.getValidatedPage());
-		Assert.assertEquals(-1, vpp.getValidatedSize());
+		Assert.assertEquals(0, vpp.getValidatedPage());
+		Assert.assertEquals(Integer.MAX_VALUE, vpp.getValidatedSize());
 	}
 	
 	//-------------------------------------------------------------------------------------------------

@@ -32,11 +32,4 @@ public class OnboardingTestContext {
     public OnboardingService mockOnboardingDBService() {
         return Mockito.mock(OnboardingService.class);
     }
-
-    //-------------------------------------------------------------------------------------------------
-    @Bean
-    @Primary // This bean is primary only in test context
-    public CommonDBService mockCommonDBService() {
-        return Mockito.mock(CommonDBService.class);
-    }
 }
