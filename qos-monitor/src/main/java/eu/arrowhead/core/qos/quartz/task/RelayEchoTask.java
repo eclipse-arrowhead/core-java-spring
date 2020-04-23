@@ -72,6 +72,7 @@ public class RelayEchoTask implements Job {
 	
 	private final Logger logger = LogManager.getLogger(RelayEchoTask.class);
 	
+	private final String CLOUD_HAS_NO_GATEKEEPER_RELAY_WARNING_MESSAGE = "The following cloud do not have GATEKEEPER relay: ";
 	private final String CLOUD_HAS_NO_GATEWAY_OR_PUBLIC_RELAY_WARNING_MESSAGE = "The following cloud do not have GATEWAY or PUBLIC relay: ";
 
 	//=================================================================================================
