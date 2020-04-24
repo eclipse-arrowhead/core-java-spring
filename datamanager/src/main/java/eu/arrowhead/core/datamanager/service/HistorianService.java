@@ -31,7 +31,7 @@ public class HistorianService {
   // members
   //
  
-  private final Logger logger = LogManager.getLogger(DataManagerDriver.class);
+  private final Logger logger = LogManager.getLogger(HistorianService.class);
 
   @Autowired
   private DataManagerDriver dataManagerDriver;
@@ -105,20 +105,19 @@ public class HistorianService {
   
   //-------------------------------------------------------------------------------------------------
   public Vector<SenML> fetchEndpoint(String systemName, String serviceName, double from, double to, int count, Vector<String> signals) {
-    logger.debug("fetchEndpoint started ...");
+    logger.debug("fetchEndpoint2 started ...");
 
     if (systemName == null || serviceName == null) {
-      return null;
-    }
-    if (from < 0 || to < 0) {
-      return null;
-    }
-    if (count < 0) {
+      logger.debug("systemName or serviceName is null");
       return null;
     }
 
-    return dataManagerDBService.fetchEndpoint(systemName, serviceName, from, to, count, signals);
-  
+    logger.debug("fetchEndpoint2: getting data from database");
+    if (signals != null) {
+	    return dataManagerDBService.fetchSignalsFromEndpoint(systemName, serviceName, from, to, count, signals);
+    } else {
+	    return dataManagerDBService.fetchMessagesFromEndpoint(systemName, serviceName, from, to, count);
+    }
   }
 
   

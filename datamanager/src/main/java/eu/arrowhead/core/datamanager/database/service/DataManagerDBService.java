@@ -1,7 +1,6 @@
 package eu.arrowhead.core.datamanager.database.service;
 
 import java.util.Optional;
-//import java.util.Set;
 import java.util.List;
 import java.util.ArrayList; 
 import java.util.Iterator; 
@@ -18,8 +17,6 @@ import org.springframework.stereotype.Service;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
-//import eu.arrowhead.common.database.entity.System;
-import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.dto.shared.SenML;
@@ -30,6 +27,7 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Array;
 import java.sql.SQLException;
 
 
@@ -49,9 +47,6 @@ public class DataManagerDBService {
 
 	private static final Logger logger = LogManager.getLogger(DataManagerDBService.class);
 	
-        @Autowired
-        private SystemRepository systemRepository;
-
 	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
 	private boolean secure;
 
@@ -321,44 +316,33 @@ public class DataManagerDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public Vector<SenML> fetchEndpoint(String systemName, String serviceName, double from, double to, int count, Vector<String> signals) {
+	public Vector<SenML> fetchMessagesFromEndpoint(String systemName, String serviceName, double from, double to, int count) {
+	  logger.debug("fetchMessagesFromEndpoint for "+ systemName + "/"+serviceName);
 	  Connection conn = null;
+
 	  try {
 	    conn = getConnection();
-	    int id = serviceToID(systemName, serviceName, conn);
-	    if (id == -1)
+	    int serviceId = serviceToID(systemName, serviceName, conn);
+	    if (serviceId == -1) {
+	      logger.debug("fetchMessagesFromEndpoint: service doesn't exist");
 	      return null;
-
-	    String signalss = "";
-	    if (signals != null) {
-	      signalss = String.join(", ", signals);
-	      signalss = signalss.substring(0, signalss.length()-1); 
 	    }
 
-	    if (from == -1) {
-	      from = 0;                                       //1970-01-01
+	    if (from < 0.0) {
+	      from = 0.0;                                       //1970-01-01
 	    }
-	    if (to == -1) {
-	      to = 1000 + (long)(System.currentTimeMillis() / 1000.0); // current timestamp - not ok to insert data that we created in the future
+	    if (to <= 0.0) {
+	      to = 1000 + (long)(System.currentTimeMillis() / 1000.0); // current timestamp - not ok to insert data that is created in the future (excl. minor clock drift)
 	    }
 
 	    String sql = "";
-	    PreparedStatement stmt = conn.prepareStatement(sql);
-	    if (signals != null) {
-	      sql = "SELECT * FROM dmhist_entries WHERE sid=? AND n IN (?) AND t>=? AND t<=? ORDER BY t DESC;";
-	      stmt.setInt(1, id);
-	      stmt.setString(2, signalss);
-	      stmt.setDouble(3, from);
-	      stmt.setDouble(4, to);
-	    } else {
-	      sql = "SELECT * FROM dmhist_entries WHERE sid=? AND t>=? AND t <=? ORDER BY t DESC;";
-	      stmt.setString(1, systemName);
-	      stmt.setInt(1, id);
-	      stmt.setDouble(2, from);
-	      stmt.setDouble(3, to);
-	    }
-
-	    ResultSet rs = stmt.executeQuery();
+	    PreparedStatement stmt = null;
+	    sql = "SELECT id FROM dmhist_messages WHERE sid=? AND bt >=? AND bt <=? ORDER BY bt DESC LIMIT ?;";
+	    stmt = conn.prepareStatement(sql);
+	    stmt.setInt(1, serviceId);
+	    stmt.setDouble(2, from);
+	    stmt.setDouble(3, to);
+	    stmt.setInt(4, count);
 
 	    Vector<SenML> messages = new Vector<SenML>();
 	    SenML hdr = new SenML();
@@ -366,30 +350,43 @@ public class DataManagerDBService {
 	    messages.add(hdr);
 	    double bt = 0;
 	    String bu = null;
-	    while(rs.next() == true && count > 0) {
-	      SenML msg = new SenML();
-	      msg.setT((double)rs.getLong("t"));
-	      msg.setN(rs.getString("n"));
-	      msg.setU(rs.getString("u"));
-	      final double v = rs.getDouble("v");
-	      if (!rs.wasNull()) {
-		msg.setV(v);
-	      }
+	    ResultSet messageListRs = stmt.executeQuery();
+	    while(messageListRs.next() == true) {
+		    int mid = messageListRs.getInt("id");
 
-	      msg.setVs(rs.getString("vs"));
-	      Boolean foo = rs.getBoolean("vb");
-	      if (!rs.wasNull())
-		msg.setVb(rs.getBoolean("vb"));
+		    String sql2 = "SELECT * FROM dmhist_entries WHERE sid=? AND mid=? AND t>=? AND t <=? ORDER BY t DESC;";
+		    PreparedStatement stmt2 = conn.prepareStatement(sql2);
+		    stmt2.setInt(1, serviceId);
+		    stmt2.setInt(2, mid);
+		    stmt2.setDouble(3, from);
+		    stmt2.setDouble(4, to);
 
-	      messages.add(msg);
-	      count--;
+		    ResultSet rs2 = stmt2.executeQuery();
+		    while(rs2.next() == true ) {
+			    //logger.debug("\t-> "+ rs2.getString("n") + ", " + rs2.getInt("t"));
+			    SenML msg = new SenML();
+			    msg.setT((double)rs2.getLong("t"));
+			    msg.setN(rs2.getString("n"));
+			    msg.setU(rs2.getString("u"));
+			    double v = rs2.getDouble("v");
+			    if (!rs2.wasNull()) {
+				    msg.setV(v);
+			    }
+
+			    msg.setVs(rs2.getString("vs"));
+			    Boolean foo = rs2.getBoolean("vb");
+			    if (!rs2.wasNull()) {
+				    msg.setVb(rs2.getBoolean("vb"));
+			    }
+
+			    messages.add(msg);
+		    }
+		    rs2.close();
 	    }
-
-	    rs.close();
 	    stmt.close();
-
-	    if (messages.size() == 1)
+	    if (messages.size() == 1) {
 	      return messages;
+	    }
 
 	    //recalculate a bt time and update all relative timestamps
 	    double startbt = ((SenML)messages.get(1)).getT();
@@ -398,14 +395,111 @@ public class DataManagerDBService {
 	    ((SenML)messages.get(1)).setT(null);
 	    for (SenML m : messages) {
 	      if (m.getT() != null) {
-		m.setT(m.getT()-startbt);
+          m.setT(m.getT() - startbt);
 	      }
 	    }
 
 	    return messages;
 
 	  } catch (SQLException e) {
-	    logger.debug(e.toString());
+		  logger.debug(e.toString());
+	  } finally {
+		  try {
+			  closeConnection(conn);
+		  } catch(Exception e){
+		  }
+	  }
+
+	  logger.debug("fetchMessagesFromEndpoint: no data");
+	  return null;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public Vector<SenML> fetchSignalsFromEndpoint(String systemName, String serviceName, double from, double to, int count, Vector<String> signals) {
+		logger.debug("fetchSignalsFromEndpoint for "+ systemName + "/"+serviceName);
+		Connection conn = null;
+
+	  try {
+	    conn = getConnection();
+	    int serviceId = serviceToID(systemName, serviceName, conn);
+	    if (serviceId == -1) {
+	      logger.debug("fetchEndpoint: service doesn't exist");
+	      return null;
+	    }
+
+	    String signalsList = "";
+	    signalsList = String.join(", ", signals);
+
+	    if (from < 0.0) {
+	      from = 0.0;                                       // not before 1970-01-01
+	    }
+	    if (to <= 0.0) {
+	      to = 1000 + (long)(System.currentTimeMillis() / 1000.0); // current timestamp - not ok to insert data that is created in the future (excl. minor clock drift)
+	    }
+
+      Vector<SenML> messages = new Vector<SenML>();
+      SenML hdr = new SenML();
+      hdr.setBn(serviceName);
+      messages.add(hdr);
+	    for (String signalName: signals) {
+        PreparedStatement stmt = null;
+        String sql = "SELECT * FROM dmhist_entries WHERE sid=? AND n=? AND t>=? AND t<=? ORDER BY t DESC LIMIT ?;";
+        stmt = conn.prepareStatement(sql);
+        stmt.setInt(1, serviceId);
+        stmt.setString(2, signalName);
+        stmt.setDouble(3, from);
+        stmt.setDouble(4, to);
+        stmt.setInt(5, count);
+        //logger.debug("SQL: " + stmt.toString());
+
+        ResultSet rs = stmt.executeQuery();
+
+        double bt = 0;
+        String bu = null;
+        int dataLeft = count;
+        while(rs.next() == true && dataLeft > 0) {
+          SenML msg = new SenML();
+          msg.setT((double)rs.getLong("t"));
+          msg.setN(rs.getString("n"));
+          msg.setU(rs.getString("u"));
+          double v = rs.getDouble("v");
+	      if (!rs.wasNull()) {
+          msg.setV(v);
+	      }
+
+	      msg.setVs(rs.getString("vs"));
+	      Boolean foo = rs.getBoolean("vb");
+	      if (!rs.wasNull()) {
+          msg.setVb(rs.getBoolean("vb"));
+	      }
+
+	      messages.add(msg);
+	      dataLeft--;
+	    }
+
+	    rs.close();
+      stmt.close();
+      }
+
+	    if (messages.size() == 1) {
+	      return messages;
+	    }
+
+	    //recalculate a bt time and update all relative timestamps
+	    double startbt = ((SenML)messages.get(1)).getT();
+	    ((SenML)messages.firstElement()).setBt(startbt);
+	    ((SenML)messages.firstElement()).setT(null);
+	    ((SenML)messages.get(1)).setT(null);
+	    for (SenML m : messages) {
+	      if (m.getT() != null) {
+          m.setT(m.getT()-startbt);
+	      }
+	    }
+
+	    return messages;
+
+	  } catch (SQLException e) {
+	    //logger.debug("SHOULD NOT HAPPEN" + e.toString());
 	  } finally {
 	    try {
 	      closeConnection(conn);
@@ -414,6 +508,7 @@ public class DataManagerDBService {
 
 	  }
 
+	  logger.debug("fetchEndpoint: no data");
 	  return null;
 	}
 

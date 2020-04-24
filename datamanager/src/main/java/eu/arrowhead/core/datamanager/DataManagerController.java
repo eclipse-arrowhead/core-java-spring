@@ -188,6 +188,7 @@ public class DataManagerController {
 		int count = 1;
 
 		Vector<String> signals = new Vector<String>();
+		//Vector<Int> signalCount = new Vector<Int>();
 		Iterator<String> it = params.keySet().iterator();
 		int sigCnt = 0;
 		while(it.hasNext()){
@@ -203,7 +204,10 @@ public class DataManagerController {
 				to = Long.parseLong(params.getFirst(par));
 			}
 		}
-		//logger.info("getData requested with count: " + count);
+		logger.info("getData requested with count: " + count);
+		if (count <= 0) {
+			throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, "/historian/"+systemName+"/"+serviceName);
+		}
 
 		Vector<SenML> ret = null;
 
