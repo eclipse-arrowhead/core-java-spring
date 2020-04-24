@@ -1,5 +1,6 @@
 package eu.arrowhead.core.qos.service;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -38,6 +39,7 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
 
+import org.apache.http.HttpStatus;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,8 +75,6 @@ import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
-import eu.arrowhead.core.qos.service.QoSMonitorDriver;
-import eu.arrowhead.core.qos.service.RelayTestService;
 import eu.arrowhead.core.qos.thread.ReceiverSideRelayTestThread;
 import eu.arrowhead.core.qos.thread.RelayTestThreadFactory;
 import eu.arrowhead.core.qos.thread.SenderSideRelayTestThread;
@@ -654,10 +654,14 @@ public class RelayTestServiceTest {
 		when(qosMonitorDriver.queryGatekeeperCloudInfo(anyString(), anyString())).thenReturn(cloudResponse);
 		when(relayClient.createConnection(anyString(), anyInt(), anyBoolean())).thenThrow(JMSException.class);
 		
-		relayTestService.initRelayTest(request);
-		
-		verify(qosMonitorDriver, times(1)).queryGatekeeperCloudInfo(anyString(), anyString());
-		verify(relayClient, times(1)).createConnection(anyString(), anyInt(), anyBoolean());
+		try {
+			relayTestService.initRelayTest(request);			
+		} catch (final ArrowheadException ex) {
+			verify(qosMonitorDriver, times(1)).queryGatekeeperCloudInfo(anyString(), anyString());
+			verify(relayClient, times(1)).createConnection(anyString(), anyInt(), anyBoolean());
+			assertEquals(HttpStatus.SC_BAD_GATEWAY, ex.getErrorCode());
+			throw ex;
+		}		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -688,13 +692,17 @@ public class RelayTestServiceTest {
 		when(threadFactory.createSenderSideThread(any(Session.class), any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyString(), anyString())).thenReturn(testThreadDoNothing);  
 		when(relayClient.initializeConsumerSideRelay(any(Session.class), any(MessageListener.class), anyString(), anyString())).thenThrow(JMSException.class);
 		
-		relayTestService.initRelayTest(request);
-		
-		verify(qosMonitorDriver, times(1)).queryGatekeeperCloudInfo(anyString(), anyString());
-		verify(relayClient, times(1)).createConnection(anyString(), anyInt(), anyBoolean());
-		verify(threadFactory, times(1)).createSenderSideThread(any(Session.class), any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyString(), anyString());
-		verify(relayClient, times(1)).initializeConsumerSideRelay(any(Session.class), any(MessageListener.class), anyString(), anyString());
-		verify(relayClient, times(1)).closeConnection(any(Session.class));
+		try {
+			relayTestService.initRelayTest(request);
+		} catch (final ArrowheadException ex) {
+			verify(qosMonitorDriver, times(1)).queryGatekeeperCloudInfo(anyString(), anyString());
+			verify(relayClient, times(1)).createConnection(anyString(), anyInt(), anyBoolean());
+			verify(threadFactory, times(1)).createSenderSideThread(any(Session.class), any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyString(), anyString());
+			verify(relayClient, times(1)).initializeConsumerSideRelay(any(Session.class), any(MessageListener.class), anyString(), anyString());
+			verify(relayClient, times(1)).closeConnection(any(Session.class));
+			assertEquals(HttpStatus.SC_BAD_GATEWAY, ex.getErrorCode());
+			throw ex;
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -913,11 +921,15 @@ public class RelayTestServiceTest {
 		when(qosDBService.getOrCreateInterRelayMeasurement(any(CloudResponseDTO.class), any(RelayResponseDTO.class), any(QoSMeasurementType.class))).thenReturn(new QoSInterRelayMeasurement());
 		when(relayClient.createConnection(anyString(), anyInt(), anyBoolean())).thenThrow(JMSException.class);
 		
-		relayTestService.joinRelayTest(request);
-		
-		verify(qosMonitorDriver, times(1)).queryGatekeeperCloudInfo(anyString(), anyString());
-		verify(qosDBService, times(1)).getOrCreateInterRelayMeasurement(any(CloudResponseDTO.class), any(RelayResponseDTO.class), any(QoSMeasurementType.class));
-		verify(relayClient, times(1)).createConnection(anyString(), anyInt(), anyBoolean());
+		try {
+			relayTestService.joinRelayTest(request);			
+		} catch (final ArrowheadException ex) {
+			verify(qosMonitorDriver, times(1)).queryGatekeeperCloudInfo(anyString(), anyString());
+			verify(qosDBService, times(1)).getOrCreateInterRelayMeasurement(any(CloudResponseDTO.class), any(RelayResponseDTO.class), any(QoSMeasurementType.class));
+			verify(relayClient, times(1)).createConnection(anyString(), anyInt(), anyBoolean());
+			assertEquals(HttpStatus.SC_BAD_GATEWAY, ex.getErrorCode());
+			throw ex;
+		}		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -947,14 +959,18 @@ public class RelayTestServiceTest {
 		when(threadFactory.createReceiverSideThread(any(Session.class), any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyString())).thenReturn(testThreadDoNothing);  
 		when(relayClient.initializeProviderSideRelay(any(Session.class), any(MessageListener.class))).thenThrow(JMSException.class);
 		
-		relayTestService.joinRelayTest(request);
-		
-		verify(qosMonitorDriver, times(1)).queryGatekeeperCloudInfo(anyString(), anyString());
-		verify(qosDBService, times(1)).getOrCreateInterRelayMeasurement(any(CloudResponseDTO.class), any(RelayResponseDTO.class), any(QoSMeasurementType.class));
-		verify(relayClient, times(1)).createConnection(anyString(), anyInt(), anyBoolean());
-		verify(threadFactory, times(1)).createReceiverSideThread(any(Session.class), any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyString());
-		verify(relayClient, times(1)).initializeProviderSideRelay(any(Session.class), any(MessageListener.class));
-		verify(relayClient, times(1)).closeConnection(any(Session.class));
+		try {
+			relayTestService.joinRelayTest(request);			
+		} catch (final ArrowheadException ex) {
+			verify(qosMonitorDriver, times(1)).queryGatekeeperCloudInfo(anyString(), anyString());
+			verify(qosDBService, times(1)).getOrCreateInterRelayMeasurement(any(CloudResponseDTO.class), any(RelayResponseDTO.class), any(QoSMeasurementType.class));
+			verify(relayClient, times(1)).createConnection(anyString(), anyInt(), anyBoolean());
+			verify(threadFactory, times(1)).createReceiverSideThread(any(Session.class), any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyString());
+			verify(relayClient, times(1)).initializeProviderSideRelay(any(Session.class), any(MessageListener.class));
+			verify(relayClient, times(1)).closeConnection(any(Session.class));
+			assertEquals(HttpStatus.SC_BAD_GATEWAY, ex.getErrorCode());
+			throw ex;
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1174,20 +1190,20 @@ public class RelayTestServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	private MessageProducer getTestProducer() {
 		return new MessageProducer() {
-			public void setTimeToLive(long timeToLive) throws JMSException {}
-			public void setPriority(int defaultPriority) throws JMSException {}
-			public void setDisableMessageTimestamp(boolean value) throws JMSException {}
-			public void setDisableMessageID(boolean value) throws JMSException {}
-			public void setDeliveryMode(int deliveryMode) throws JMSException {}
-			public void setDeliveryDelay(long deliveryDelay) throws JMSException {}
-			public void send(Destination destination, Message message, int deliveryMode, int priority, long timeToLive, CompletionListener completionListener) throws JMSException {}
-			public void send(Message message, int deliveryMode, int priority, long timeToLive, CompletionListener completionListener) throws JMSException {}
-			public void send(Destination destination, Message message, int deliveryMode, int priority, long timeToLive) throws JMSException {}
-			public void send(Message message, int deliveryMode, int priority, long timeToLive) throws JMSException {}
-			public void send(Destination destination, Message message, CompletionListener completionListener) throws JMSException {}
-			public void send(Message message, CompletionListener completionListener) throws JMSException {}
-			public void send(Destination destination, Message message) throws JMSException {}
-			public void send(Message message) throws JMSException {}
+			public void setTimeToLive(final long timeToLive) throws JMSException {}
+			public void setPriority(final int defaultPriority) throws JMSException {}
+			public void setDisableMessageTimestamp(final boolean value) throws JMSException {}
+			public void setDisableMessageID(final boolean value) throws JMSException {}
+			public void setDeliveryMode(final int deliveryMode) throws JMSException {}
+			public void setDeliveryDelay(final long deliveryDelay) throws JMSException {}
+			public void send(final Destination destination, final Message message, final int deliveryMode, final int priority, final long timeToLive, final CompletionListener completionListener) throws JMSException {}
+			public void send(final Message message, final int deliveryMode, final int priority, final long timeToLive, final CompletionListener completionListener) throws JMSException {}
+			public void send(final Destination destination, final Message message, final int deliveryMode, final int priority, final long timeToLive) throws JMSException {}
+			public void send(final Message message, final int deliveryMode, final int priority, final long timeToLive) throws JMSException {}
+			public void send(final Destination destination, final Message message, final CompletionListener completionListener) throws JMSException {}
+			public void send(final Message message, final CompletionListener completionListener) throws JMSException {}
+			public void send(final Destination destination, final Message message) throws JMSException {}
+			public void send(final Message message) throws JMSException {}
 			public long getTimeToLive() throws JMSException { return 0;	}
 			public int getPriority() throws JMSException { return 0; }
 			public boolean getDisableMessageTimestamp() throws JMSException { return false; }
