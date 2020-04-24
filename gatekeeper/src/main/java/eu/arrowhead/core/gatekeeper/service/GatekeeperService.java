@@ -139,7 +139,7 @@ public class GatekeeperService {
 			}
 		}
 		
-		final GSDPollRequestDTO gsdPollRequestDTO = new GSDPollRequestDTO(gsdForm.getRequestedService(), getOwnCloud(), gatewayIsPresent, gsdForm.needQoSMeasurements());
+		final GSDPollRequestDTO gsdPollRequestDTO = new GSDPollRequestDTO(gsdForm.getRequestedService(), getOwnCloud(), gatewayIsPresent, gsdForm.getNeedQoSMeasurements());
 		final List<ErrorWrapperDTO> gsdPollAnswers = gatekeeperDriver.sendGSDPollRequest(cloudsToContact, gsdPollRequestDTO);
 		
 		final List<GSDPollResponseDTO> successfulResponses = new ArrayList<>();
@@ -177,7 +177,7 @@ public class GatekeeperService {
 		validateGSDPollRequestDTO(request);
 		
 		// Check whether need for QoS can be fulfilled or not
-		if (request.needQoSMeasurements() && !gatekeeperDriver.checkQoSEnabled()) {
+		if (request.getNeedQoSMeasurements() && !gatekeeperDriver.checkQoSEnabled()) {
 			return new GSDPollResponseDTO();
 		}
 				
@@ -214,7 +214,7 @@ public class GatekeeperService {
 					}
 				}
 				
-				if (!request.needQoSMeasurements()) {
+				if (!request.getNeedQoSMeasurements()) {
 					availableInterfaces.addAll(providerInterfaces);
 					numOfProviders++;
 				} else {
