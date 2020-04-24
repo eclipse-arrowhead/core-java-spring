@@ -130,21 +130,20 @@ public class SenderSideRelayTestThread extends Thread implements MessageListener
 					final byte id = bytes[0];
 					if (testResults.containsKey(id) && testResults.get(id)[1] <= 0) {
 						testResults.get(id)[1] = end;
-					}
-					
-					if (end - testResults.get(id)[0] < timeout) {
-						try {
-							blockingQueue.put(id);
-						} catch (final InterruptedException ex) {
-							// never happens
-							logger.debug(ex.getMessage());
-							logger.debug("Stacktrace:", ex);
-							closeAndInterrupt();
-						}
-
-						final boolean lastMessage = id == noIteration - 1;
-						if (lastMessage) {
-							saveResultsAndSwitchRoles();
+						if (end - testResults.get(id)[0] < timeout) {
+							try {
+								blockingQueue.put(id);
+							} catch (final InterruptedException ex) {
+								// never happens
+								logger.debug(ex.getMessage());
+								logger.debug("Stacktrace:", ex);
+								closeAndInterrupt();
+							}
+							
+							final boolean lastMessage = id == noIteration - 1;
+							if (lastMessage) {
+								saveResultsAndSwitchRoles();
+							}
 						}
 					}
 				} else {
