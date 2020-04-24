@@ -34,7 +34,7 @@ public class GSDQueryFormDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public ServiceQueryFormDTO getRequestedService() { return requestedService; }
 	public List<CloudRequestDTO> getPreferredClouds() { return preferredClouds; }
-	public boolean needQoSMeasurements() { return needQoSMeasurements; }
+	public boolean getNeedQoSMeasurements() { return needQoSMeasurements; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setRequestedService(final ServiceQueryFormDTO requestedService) { this.requestedService = requestedService; }

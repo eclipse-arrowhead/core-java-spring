@@ -36,7 +36,7 @@ public class GSDPollRequestDTO implements Serializable {
 	public ServiceQueryFormDTO getRequestedService() { return requestedService; }
 	public CloudRequestDTO getRequesterCloud() { return requesterCloud; } 
 	public boolean isGatewayIsPresent() { return gatewayIsPresent; }
-	public boolean needQoSMeasurements() { return needQoSMeasurements; }
+	public boolean getNeedQoSMeasurements() { return needQoSMeasurements; }
 
 	//-------------------------------------------------------------------------------------------------	
 	public void setRequestedService(final ServiceQueryFormDTO requestedService) { this.requestedService = requestedService; }
