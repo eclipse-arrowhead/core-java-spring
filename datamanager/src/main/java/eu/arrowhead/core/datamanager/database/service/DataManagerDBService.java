@@ -415,7 +415,7 @@ public class DataManagerDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public Vector<SenML> fetchSignalsFromEndpoint(String systemName, String serviceName, double from, double to, int count, Vector<String> signals) {
+	public Vector<SenML> fetchSignalsFromEndpoint(String systemName, String serviceName, double from, double to, Vector<Integer> counts, Vector<String> signals) {
 		logger.debug("fetchSignalsFromEndpoint for "+ systemName + "/"+serviceName);
 		Connection conn = null;
 
@@ -441,7 +441,10 @@ public class DataManagerDBService {
       SenML hdr = new SenML();
       hdr.setBn(serviceName);
       messages.add(hdr);
-	    for (String signalName: signals) {
+	    //for (String signalName: signals) {
+      for (int index = 0; index < signals.size(); index++) {
+        String signalName = signals.get(index);
+        int signalCount = counts.get(index);
         PreparedStatement stmt = null;
         String sql = "SELECT * FROM dmhist_entries WHERE sid=? AND n=? AND t>=? AND t<=? ORDER BY t DESC LIMIT ?;";
         stmt = conn.prepareStatement(sql);
@@ -449,14 +452,14 @@ public class DataManagerDBService {
         stmt.setString(2, signalName);
         stmt.setDouble(3, from);
         stmt.setDouble(4, to);
-        stmt.setInt(5, count);
-        //logger.debug("SQL: " + stmt.toString());
+        stmt.setInt(5, signalCount);
+        logger.debug("SQL: " + stmt.toString());
 
         ResultSet rs = stmt.executeQuery();
 
         double bt = 0;
         String bu = null;
-        int dataLeft = count;
+        int dataLeft = signalCount;
         while(rs.next() == true && dataLeft > 0) {
           SenML msg = new SenML();
           msg.setT((double)rs.getLong("t"));

@@ -104,20 +104,27 @@ public class HistorianService {
   }
   
   //-------------------------------------------------------------------------------------------------
-  public Vector<SenML> fetchEndpoint(String systemName, String serviceName, double from, double to, int count, Vector<String> signals) {
-    logger.debug("fetchEndpoint2 started ...");
+  public Vector<SenML> fetchEndpoint(String systemName, String serviceName, double from, double to, int count) {
+    logger.debug("fetchEndpoint started ...");
 
     if (systemName == null || serviceName == null) {
       logger.debug("systemName or serviceName is null");
       return null;
     }
 
-    logger.debug("fetchEndpoint2: getting data from database");
-    if (signals != null) {
-	    return dataManagerDBService.fetchSignalsFromEndpoint(systemName, serviceName, from, to, count, signals);
-    } else {
-	    return dataManagerDBService.fetchMessagesFromEndpoint(systemName, serviceName, from, to, count);
+    return dataManagerDBService.fetchMessagesFromEndpoint(systemName, serviceName, from, to, count);
+  }
+
+  //-------------------------------------------------------------------------------------------------
+  public Vector<SenML> fetchEndpoint(String systemName, String serviceName, double from, double to, Vector<Integer> counts, Vector<String> signals) {
+    logger.debug("fetchEndpoint started ...");
+
+    if (systemName == null || serviceName == null) {
+      logger.debug("systemName or serviceName is null");
+      return null;
     }
+
+    return dataManagerDBService.fetchSignalsFromEndpoint(systemName, serviceName, from, to, counts, signals);
   }
 
   

@@ -188,23 +188,35 @@ public class DataManagerController {
 		int count = 1;
 
 		Vector<String> signals = new Vector<String>();
-		//Vector<Int> signalCount = new Vector<Int>();
+		Vector<Integer> signalCounts = new Vector<Integer>();
 		Iterator<String> it = params.keySet().iterator();
-		int sigCnt = 0;
+		int signalCountId = 0;
 		while(it.hasNext()){
 			String par = (String)it.next();
 			if (par.equals("count")) {
 				count = Integer.parseInt(params.getFirst(par));
-			} else if (par.equals("sig"+sigCnt)) {
+			} else if (par.equals("sig"+signalCountId)) {
 				signals.add(params.getFirst(par));
-				sigCnt++;
+        int signalXCount = 1;
+        if (params.getFirst("sig"+signalCountId+"count") != null) {
+          try {
+            signalXCount = Integer.parseInt(params.getFirst("sig"+signalCountId+"count"));
+          } catch(NumberFormatException nfe) {
+            throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, "/historian/"+systemName+"/"+serviceName);
+          }
+        }
+        if (signalXCount <= 0) {
+            throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, "/historian/"+systemName+"/"+serviceName);
+        }
+				signalCounts.add(signalXCount);
+				signalCountId++;
 			} else if (par.equals("from")) {
 				from = Long.parseLong(params.getFirst(par));
 			} else if (par.equals("to")) {
 				to = Long.parseLong(params.getFirst(par));
 			}
 		}
-		logger.info("getData requested with count: " + count);
+
 		if (count <= 0) {
 			throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, "/historian/"+systemName+"/"+serviceName);
 		}
@@ -212,9 +224,9 @@ public class DataManagerController {
 		Vector<SenML> ret = null;
 
 		if(signals.size() == 0) {
-			ret = historianService.fetchEndpoint(systemName, serviceName, from, to, count, null);
+			ret = historianService.fetchEndpoint(systemName, serviceName, from, to, count);
 		} else {
-			ret = historianService.fetchEndpoint(systemName, serviceName, from, to, count, signals);
+			ret = historianService.fetchEndpoint(systemName, serviceName, from, to, signalCounts, signals);
 		}
 
 		if (ret == null) {
