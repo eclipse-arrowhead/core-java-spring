@@ -64,11 +64,12 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = BadPayloadException.class)
-	public void testVerifyInvalidCloudSystemForm() {
+	public void testVerifyInvalidCloudRequest() {
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
 		final CloudResponseDTO cloud = new CloudResponseDTO();
-		cloud.setId(-2); //Invalid id
+		cloud.setOperator("  "); //Invalid operator
+		cloud.setName("  "); //Invalid name
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RESPONSE_TIME_THRESHOLD, "500");
 		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
@@ -119,6 +120,8 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		provider.setId(2);
 		final CloudResponseDTO cloud = new CloudResponseDTO();
 		cloud.setId(1);
+		cloud.setOperator("test-op");
+		cloud.setName("test-n");
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RESPONSE_TIME_THRESHOLD, "500");
 		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());

@@ -43,6 +43,7 @@ import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
 import eu.arrowhead.common.dto.internal.TokenDataDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationResponseDTO;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
@@ -599,7 +600,7 @@ public class OrchestratorDriverTest {
 	public void testGetInterRelayEchoMeasurementUriNotFound() {
 		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false);
 		
-		orchestratorDriver.getInterRelayEchoMeasurement(new CloudSystemFormDTO());
+		orchestratorDriver.getInterRelayEchoMeasurement(new CloudRequestDTO());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -608,7 +609,7 @@ public class OrchestratorDriverTest {
 		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
 		when(arrowheadContext.get(any(String.class))).thenReturn("invalid");
 		
-		orchestratorDriver.getInterRelayEchoMeasurement(new CloudSystemFormDTO());
+		orchestratorDriver.getInterRelayEchoMeasurement(new CloudRequestDTO());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -617,7 +618,7 @@ public class OrchestratorDriverTest {
 		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT);
 		Assert.assertTrue(uri.toString().contains("/measurements/intercloud/relay_echo"));
 		
-		final CloudSystemFormDTO requestDTO = new CloudSystemFormDTO();
+		final CloudRequestDTO requestDTO = new CloudRequestDTO();
 		
 		final QoSInterRelayEchoMeasurementListResponseDTO  responseDTO = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(new QoSInterRelayEchoMeasurementResponseDTO()), 1);
 		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);

@@ -12,10 +12,12 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.dto.internal.CloudSystemFormDTO;
+import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.QoSInterDirectPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.orchestrator.service.OrchestratorDriver;
@@ -201,7 +203,7 @@ public class PingRequirementsVerifier implements QoSVerifier {
 		Assert.isTrue(params.isInterCloud(), "QoSVerificationParameters is not Inter-Cloud, but Inter-Cloud relay echo and ping verification was requested");
 		Assert.isTrue(params.isGatewayIsMandatory(), "Gateway should be mandatory for Inter-Cloud relay echo and ping verification");
 		
-		final QoSInterRelayEchoMeasurementListResponseDTO relayMeasurementList = getInterRelayEchoMeasurement(new CloudSystemFormDTO(params.getProviderCloud(), params.getProviderSystem()));
+		final QoSInterRelayEchoMeasurementListResponseDTO relayMeasurementList = getInterRelayEchoMeasurement(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(params.getProviderCloud()));
 		
 		if (relayMeasurementList.getData() == null || relayMeasurementList.getData().isEmpty()) { // no record => use related constant to determine output 
 			return verifyNotMeasuredSystem;
@@ -454,10 +456,10 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private QoSInterRelayEchoMeasurementListResponseDTO getInterRelayEchoMeasurement(final CloudSystemFormDTO request) {
+	private QoSInterRelayEchoMeasurementListResponseDTO getInterRelayEchoMeasurement(final CloudRequestDTO request) {
 		logger.debug("getInterRelayEchoMeasurement started...");
 		
-		final QoSInterRelayEchoMeasurementListResponseDTO measurement = interRelayEchoMeasurementCache.get(getCloudSystemCacheKey(request));
+		final QoSInterRelayEchoMeasurementListResponseDTO measurement = interRelayEchoMeasurementCache.get(getCloudCacheKey(request));
 		
 		if (measurement == null) {
 			return getInterRelayEchoMeasurementFromQoSMonitor(request);
@@ -465,7 +467,7 @@ public class PingRequirementsVerifier implements QoSVerifier {
 		
 		for (final QoSInterRelayEchoMeasurementResponseDTO dto : measurement.getData()) {			
 			if (dto.getMeasurement().getLastMeasurementAt().plusSeconds(pingMeasurementCacheThreshold).isBefore(ZonedDateTime.now())) { // obsolete record
-				interRelayEchoMeasurementCache.remove(getCloudSystemCacheKey(request));
+				interRelayEchoMeasurementCache.remove(getCloudCacheKey(request));
 				return getInterRelayEchoMeasurementFromQoSMonitor(request);
 			}
 		}
@@ -474,13 +476,13 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private QoSInterRelayEchoMeasurementListResponseDTO getInterRelayEchoMeasurementFromQoSMonitor(final CloudSystemFormDTO request) {
+	private QoSInterRelayEchoMeasurementListResponseDTO getInterRelayEchoMeasurementFromQoSMonitor(final CloudRequestDTO request) {
 		logger.debug("getInterRelayEchoMeasurementFromQoSMonitor started...");
 		
 		final QoSInterRelayEchoMeasurementListResponseDTO measurement = orchestratorDriver.getInterRelayEchoMeasurement(request);
 		
 		if (measurement.getData() != null && !measurement.getData().isEmpty()) { // only caching when there are some data
-			interRelayEchoMeasurementCache.put(getCloudSystemCacheKey(request), measurement);
+			interRelayEchoMeasurementCache.put(getCloudCacheKey(request), measurement);
 		}			
 		
 		return measurement;
@@ -489,5 +491,10 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	//-------------------------------------------------------------------------------------------------
 	private String getCloudSystemCacheKey(final CloudSystemFormDTO request) {
 		return request.getSystem().getSystemName() + "." + request.getCloud().getName() + "." + request.getCloud().getOperator();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private String getCloudCacheKey(final CloudRequestDTO request) {
+		return request.getName() + "." + request.getOperator();
 	}
 }
