@@ -25,7 +25,7 @@ public class GSDPollResponseDTO implements Serializable, ErrorWrapperDTO {
 	private Map<String,String> serviceMetadata;
 	private boolean gatewayIsMandatory;
 	
-	private final Set<RelayResponseDTO> verifiedRelays = new HashSet<>(); //Filled up during Inter-Cloud QoS if necessary
+	private Set<RelayResponseDTO> verifiedRelays = new HashSet<>(); //Filled up during Inter-Cloud QoS if necessary
 	
 	//=================================================================================================
 	// methods
@@ -64,7 +64,7 @@ public class GSDPollResponseDTO implements Serializable, ErrorWrapperDTO {
 	public void setQosMeasurements(final List<QoSMeasurementAttributesFormDTO> qosMeasurements) { this.qosMeasurements = qosMeasurements; }
 	public void setServiceMetadata(final Map<String,String> serviceMetadata) { this.serviceMetadata = serviceMetadata; }
 	public void setGatewayIsMandatory(final boolean gatewayIsMandatory) { this.gatewayIsMandatory = gatewayIsMandatory; }
-	
+	public void setVerifiedRelays(final HashSet<RelayResponseDTO> verifiedRelays ) { this.verifiedRelays = verifiedRelays; }
 
 	//-------------------------------------------------------------------------------------------------
 	@JsonIgnore
