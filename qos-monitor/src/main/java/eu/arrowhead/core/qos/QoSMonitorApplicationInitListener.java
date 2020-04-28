@@ -22,7 +22,7 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 	//=================================================================================================
 	// members
 	
-	@Value(CoreCommonConstants.$GATEKEEPER_IS_GATEWAY_PRESENT_WD)
+	@Value(CoreCommonConstants.$QOS_IS_GATEKEEPER_PRESENT_WD)
 	private boolean gatekeeperIsPresent;
 
 	//=================================================================================================
