@@ -407,8 +407,12 @@ public class GatekeeperService {
 		
 		// In gateway mode we have to select one provider even if matchmaking is not enabled because we have to build an expensive connection between the consumer and the provider.
 		final OrchestrationResultDTO selectedResult;
-		// filter out reserved providers
-		orchestrationResponse = filterOutReservedProviders(orchestrationResponse);
+		
+		if (!needReservation) {
+			// filter out reserved providers
+			orchestrationResponse = filterOutReservedProviders(orchestrationResponse);
+		}
+		
 		if (orchestrationResponse.getResponse().isEmpty()) { // no usable results
 			return new ICNProposalResponseDTO();
 		}
