@@ -28,6 +28,7 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudCheckResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudSystemFormDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.internal.GSDQueryFormDTO;
@@ -486,6 +487,37 @@ public class OrchestratorDriverTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testDoInterCloudNegotiationsNullRequest() {
 		orchestratorDriver.doInterCloudNegotiation(null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetCloudsWithExclusiveGatewayAndPublicRelaysOk() {
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8449, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_GET_CLOUD_SERVICE + 
+																								"/test-op/test-n");
+		final CloudWithRelaysResponseDTO responseDTO = new CloudWithRelaysResponseDTO();
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(uri);
+		when(httpService.sendRequest(eq(uri), eq(HttpMethod.GET), eq(CloudWithRelaysResponseDTO.class))).thenReturn(new ResponseEntity<CloudWithRelaysResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		final CloudWithRelaysResponseDTO result = orchestratorDriver.getCloudsWithExclusiveGatewayAndPublicRelays("test-op", "test-n");
+		Assert.assertNotNull(result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetCloudsWithExclusiveGatewayAndPublicRelaysUriNotFound() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false);
+		orchestratorDriver.getCloudsWithExclusiveGatewayAndPublicRelays("test-op", "test-n");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetCloudsWithExclusiveGatewayAndPublicRelaysUriWrongType() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn("invalid");
+		
+		orchestratorDriver.getCloudsWithExclusiveGatewayAndPublicRelays("test-op", "test-n");
 	}
 	
 	//-------------------------------------------------------------------------------------------------

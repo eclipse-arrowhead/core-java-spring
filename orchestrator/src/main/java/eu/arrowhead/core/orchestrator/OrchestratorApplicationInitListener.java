@@ -78,6 +78,7 @@ public class OrchestratorApplicationInitListener extends ApplicationInitListener
 		if (gatekeeperIsPresent) {
 			result.add(CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY);
 			result.add(CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATION);
+			result.add(CoreSystemService.GATEKEEPER_GET_CLOUD_SERVICE);
 		}
 		
 		if (qosEnabled) {

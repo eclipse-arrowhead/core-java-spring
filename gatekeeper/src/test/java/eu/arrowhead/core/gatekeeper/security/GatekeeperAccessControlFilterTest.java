@@ -54,6 +54,7 @@ public class GatekeeperAccessControlFilterTest {
 	private static final String GATEKEEPER_PULL_CLOUDS_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_PULL_CLOUDS_SERVICE;
 	private static final String GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_SERVICE;
 	private static final String GATEKEEPER_COLLECT_ACCESS_TYPES_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_COLLECT_ACCESS_TYPES_SERVICE;
+	private static final String GATEKEEPER_GET_CLOUD_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_GET_CLOUD_SERVICE;
 	
 	@Autowired
 	private ApplicationContext appContext;
@@ -236,6 +237,36 @@ public class GatekeeperAccessControlFilterTest {
 					.with(x509("certificates/provider.pem"))
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(List.of(getCloudRequestDTO())))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetCloudTypesCertificateQoSMonitor() throws Exception {
+		this.mockMvc.perform(get(GATEKEEPER_GET_CLOUD_URI + "/operator/  ")
+				    .secure(true)
+					.with(x509("certificates/qos_monitor.pem"))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest()); //BadRequest means that request gone through on the filter
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetCloudTypesCertificateOrchestrator() throws Exception {
+		this.mockMvc.perform(get(GATEKEEPER_GET_CLOUD_URI + "/operator/  ")
+				    .secure(true)
+					.with(x509("certificates/orchestrator.pem"))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest()); //BadRequest means that request gone through on the filter
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetCloudTypesCertificateProvider() throws Exception {
+		this.mockMvc.perform(get(GATEKEEPER_GET_CLOUD_URI + "/operator/name")
+				    .secure(true)
+					.with(x509("certificates/provider.pem"))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isUnauthorized());
 	}

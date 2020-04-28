@@ -19,6 +19,7 @@ public class GatekeeperAccessControlFilter extends CoreSystemAccessControlFilter
 	
 	private static final CoreSystem[] allowedCoreSystemsForOrchestrationTasks = { CoreSystem.ORCHESTRATOR };
 	private static final CoreSystem[] allowedCoreSystemsForQoSTasks = { CoreSystem.QOS_MONITOR };
+	private static final CoreSystem[] allowedCoreSystemsForGeneralTasks = { CoreSystem.ORCHESTRATOR, CoreSystem.QOS_MONITOR };
 	
 	//=================================================================================================
 	// assistant methods
@@ -39,9 +40,10 @@ public class GatekeeperAccessControlFilter extends CoreSystemAccessControlFilter
 		} else if (requestTarget.endsWith(CommonConstants.OP_GATEKEEPER_PULL_CLOUDS_SERVICE) || 
 				   requestTarget.endsWith(CommonConstants.OP_GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_SERVICE) ||
 				   requestTarget.endsWith(CommonConstants.OP_GATEKEEPER_COLLECT_ACCESS_TYPES_SERVICE) ||
-				   requestTarget.endsWith(CommonConstants.OP_GATEKEEPER_RELAY_TEST_SERVICE) ||
-				   requestTarget.contains(CommonConstants.OP_GATEKEEPER_GET_CLOUD_SERVICE)) {
+				   requestTarget.endsWith(CommonConstants.OP_GATEKEEPER_RELAY_TEST_SERVICE)) {
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForQoSTasks, requestTarget);
+		} else if (requestTarget.contains(CommonConstants.OP_GATEKEEPER_GET_CLOUD_SERVICE)) {
+			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForGeneralTasks, requestTarget);
 		}
 	}
 }
