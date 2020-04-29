@@ -1,5 +1,7 @@
 package eu.arrowhead.core.mscv.controller;
 
+import java.util.Optional;
+
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.CoreDefaults;
@@ -11,7 +13,7 @@ import eu.arrowhead.common.dto.shared.mscv.OS;
 import eu.arrowhead.common.dto.shared.mscv.SshTargetDto;
 import eu.arrowhead.common.dto.shared.mscv.TargetListResponseDTO;
 import eu.arrowhead.core.mscv.Validation;
-import eu.arrowhead.core.mscv.service.MscvTargetService;
+import eu.arrowhead.core.mscv.service.TargetService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -36,8 +38,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Optional;
 
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_ADDRESS;
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_ADDRESS_PATH;
@@ -92,10 +92,10 @@ public class TargetMgmtController {
     private final Logger logger = LogManager.getLogger();
     private final Validation validation = new Validation();
 
-    private final MscvTargetService targetService;
+    private final TargetService targetService;
 
     @Autowired
-    public TargetMgmtController(final MscvTargetService targetService) {
+    public TargetMgmtController(final TargetService targetService) {
         super();
         this.targetService = targetService;
     }
@@ -178,7 +178,7 @@ public class TargetMgmtController {
         final var probe = new SshTarget(name, os, address, port);
         final Example<SshTarget> example = Example.of(probe, validation.exampleMatcher(mode));
 
-        final Page<SshTarget> targets = targetService.getPageByExample(example, pageParameters.createPageable(sortField));
+        final Page<SshTarget> targets = targetService.pageByExample(example, pageParameters.createPageable(sortField));
         return new TargetListResponseDTO(targets.map((x) -> new SshTargetDto(x.getName(), x.getOs(), x.getAddress(), x.getPort())));
     }
 

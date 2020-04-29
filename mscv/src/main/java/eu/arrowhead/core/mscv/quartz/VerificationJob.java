@@ -1,6 +1,6 @@
 package eu.arrowhead.core.mscv.quartz;
 
-import eu.arrowhead.core.mscv.service.MscvExecutionService;
+import eu.arrowhead.core.mscv.service.ExecutionService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.quartz.DisallowConcurrentExecution;
@@ -17,7 +17,7 @@ public class VerificationJob implements Job {
     public static final String TARGET_ID = "TARGET_ID";
     private final Logger logger = LogManager.getLogger();
 
-    private MscvExecutionService executionService;
+    private ExecutionService executionService;
 
     public VerificationJob() { super(); }
 

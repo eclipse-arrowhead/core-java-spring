@@ -3,11 +3,14 @@ package eu.arrowhead.core.mscv.controller;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
-import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
-import eu.arrowhead.core.mscv.service.MscvExecutionService;
 import eu.arrowhead.common.database.view.mscv.VerificationExecutionView;
+import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
+import eu.arrowhead.core.mscv.Validation;
+import eu.arrowhead.core.mscv.http.ClientExecutionRequest;
+import eu.arrowhead.core.mscv.http.ClientExecutionResponse;
 import eu.arrowhead.core.mscv.http.ExecutionRequest;
 import eu.arrowhead.core.mscv.http.ExecutionResponse;
+import eu.arrowhead.core.mscv.service.ExecutionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -42,11 +45,13 @@ public class MscvExecutionController {
     private static final String EXECUTION_HTTP_400_MESSAGE = "Request parameter missing";
 
     private final Logger logger = LogManager.getLogger(MscvExecutionController.class);
-    private final MscvExecutionService executionService;
+    private final ExecutionService executionService;
+    private final Validation validation;
 
     @Autowired
-    public MscvExecutionController(final MscvExecutionService executionService) {
+    public MscvExecutionController(final ExecutionService executionService) {
         this.executionService = executionService;
+        this.validation = new Validation();
     }
 
     //=================================================================================================
@@ -66,18 +71,43 @@ public class MscvExecutionController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Execute verification list against target", response = ExecutionResponse.class,
+    @ApiOperation(value = "Request verification of client", response = ClientExecutionResponse.class,
             tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_CREATED, message = EXECUTION_HTTP_201_MESSAGE, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_CREATED, message = EXECUTION_HTTP_201_MESSAGE, response = ClientExecutionResponse.class),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = EXECUTION_HTTP_400_MESSAGE, response = ErrorMessageDTO.class),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response = ErrorMessageDTO.class),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response = ErrorMessageDTO.class)
     })
     @PostMapping(OP_MSCV_EXECUTE_URI)
     @ResponseBody
+    public VerificationExecutionView execute(@RequestBody final ClientExecutionRequest executionRequest) {
+        logger.debug("execute started ...");
+        validation.verify(executionRequest, createOrigin(OP_MSCV_EXECUTE_URI));
+        return executionService.executeWithDefaultList(executionRequest.getTarget(), executionRequest.getLayer());
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = "Execute verification list against target", response = ExecutionResponse.class,
+            tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_CREATED, message = EXECUTION_HTTP_201_MESSAGE, response = ExecutionResponse.class),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = EXECUTION_HTTP_400_MESSAGE, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response = ErrorMessageDTO.class)
+    })
+    @PostMapping(CoreCommonConstants.MGMT_URI + OP_MSCV_EXECUTE_URI)
+    @ResponseBody
     public VerificationExecutionView execute(@RequestBody final ExecutionRequest executionRequest) {
         logger.debug("execute started ...");
         return executionService.executeByIdAndTarget(executionRequest.getExecutionListId(), null);
+    }
+
+    private String createOrigin(final String path) {
+        return CommonConstants.MSCV_URI + path;
+    }
+
+    private String createMgmtOrigin(final String path) {
+        return CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI + path;
     }
 }

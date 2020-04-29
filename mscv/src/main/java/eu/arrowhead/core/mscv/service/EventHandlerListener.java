@@ -1,5 +1,9 @@
 package eu.arrowhead.core.mscv.service;
 
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+import javax.annotation.PreDestroy;
+
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.CoreEventHandlerConstants;
@@ -39,10 +43,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.PreDestroy;
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
-
 import static eu.arrowhead.common.CommonConstants.OP_MSCV_PUBLISH_URI;
 
 @Service
@@ -58,20 +58,20 @@ public class EventHandlerListener {
     private final Logger logger = LogManager.getLogger();
 
     private final MscvDefaults mscvDefaults;
-    private final MscvExecutionService executionService;
-    private final MscvTargetService targetService;
+    private final VerificationService verificationService;
+    private final TargetService targetService;
     private final VerificationJobFactory jobFactory;
     private final EventDriver eventDriver;
 
     @Autowired
     public EventHandlerListener(final MscvDefaults mscvDefaults,
-                                final MscvExecutionService executionService,
-                                final MscvTargetService targetService,
+                                final VerificationService verificationService,
+                                final TargetService targetService,
                                 final VerificationJobFactory jobFactory,
                                 final EventDriver eventDriver) {
         super();
         this.mscvDefaults = mscvDefaults;
-        this.executionService = executionService;
+        this.verificationService = verificationService;
         this.targetService = targetService;
         this.jobFactory = jobFactory;
         this.eventDriver = eventDriver;
@@ -87,7 +87,7 @@ public class EventHandlerListener {
     })
     @PostMapping(OP_MSCV_PUBLISH_URI)
     @ResponseBody
-    public void publish(@RequestBody final EventDTO event) throws IOException, MscvException, SchedulerException {
+    public void publish(@RequestBody final EventDTO event) throws IOException, SchedulerException {
         logger.debug("publish started ...");
 
         switch (event.getEventType()) {
@@ -120,6 +120,7 @@ public class EventHandlerListener {
         }
     }
 
+    // TODO make a lazy subscribe, assuming that device registry, system registry or event handler are not available (yet)
     @EventListener
     @Order(99) // can't use @PostConstruct because authorization rules are done be ApplicationInitListener
     public void onApplicationEvent(final ContextRefreshedEvent event) {
@@ -164,15 +165,15 @@ public class EventHandlerListener {
         }
     }
 
-    private void createJob(final SshTarget sshTarget, final Layer layer) throws MscvException, SchedulerException {
+    private void createJob(final SshTarget sshTarget, final Layer layer) throws SchedulerException {
         final Target target = targetService.findOrCreate(sshTarget);
-        final VerificationEntryList entryList = executionService.findSuitableList(target, layer);
+        final VerificationEntryList entryList = verificationService.findOrCreateSuitableList(target, layer);
         jobFactory.createVerificationJob(entryList, target);
     }
 
-    private void deleteJob(final SshTarget sshTarget, final Layer layer) throws MscvException {
+    private void deleteJob(final SshTarget sshTarget, final Layer layer) {
         final Target target = targetService.findOrCreate(sshTarget);
-        final VerificationEntryList entryList = executionService.findSuitableList(target, layer);
+        final VerificationEntryList entryList = verificationService.findOrCreateSuitableList(target, layer);
         jobFactory.removeVerificationJob(entryList, target);
     }
 

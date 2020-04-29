@@ -1,5 +1,7 @@
 package eu.arrowhead.core.mscv;
 
+import java.util.concurrent.TimeUnit;
+
 import eu.arrowhead.common.dto.shared.mscv.OS;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -8,9 +10,9 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties("mscv.defaults")
 public class MscvDefaults {
 
-    private String defaultList = "default";
+    private String defaultList = "default list";
     private Short mipWeight = 100;
-    private Integer verificationInterval = 3600;
+    private Long verificationInterval = TimeUnit.HOURS.toMinutes(6L);
     private OS os = OS.LINUX;
     private Integer sshPort = 22;
 
@@ -32,11 +34,11 @@ public class MscvDefaults {
         this.mipWeight = mipWeight;
     }
 
-    public Integer getVerificationInterval() {
+    public Long getVerificationInterval() {
         return verificationInterval;
     }
 
-    public void setVerificationInterval(final Integer verificationInterval) {
+    public void setVerificationInterval(final Long verificationInterval) {
         this.verificationInterval = verificationInterval;
     }
 

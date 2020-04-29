@@ -47,7 +47,7 @@
     },
     {
       "name": "mscv.defaults.verificationInterval",
-      "type": "java.lang.Integer",
+      "type": "java.lang.Long",
       "description": "The verification interval of a specific List in minutes."
     },{
       "name": "mscv.defaults.os",

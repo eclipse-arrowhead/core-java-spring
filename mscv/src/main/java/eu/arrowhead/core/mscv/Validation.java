@@ -1,32 +1,69 @@
 package eu.arrowhead.core.mscv;
 
+import java.util.Objects;
+
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.mscv.SshTargetDto;
 import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.core.mscv.http.ClientExecutionRequest;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.ExampleMatcher;
 
-import java.util.Objects;
-
 public class Validation {
 
-    private static final String NAME_NULL_ERROR_MESSAGE = "Name must have value";
-    private static final String OS_NULL_ERROR_MESSAGE = "OS must have value";
-    private static final String ADDRESS_NULL_ERROR_MESSAGE = " Address must have value";
-    private static final String PORT_NULL_ERROR_MESSAGE = "Port must have value";
-    private static final String PORT_INVALID_ERROR_MESSAGE = "Port must be positive number between 1 - 65535";
+    public static final String ID_NULL_ERROR_MESSAGE = "Id must not be null";
+    public static final String PAYLOAD_NULL_ERROR_MESSAGE = "Payload must not be null";
+
+    public static final String TARGET_NULL_ERROR_MESSAGE = "Target must not be null";
+    public static final String TARGET_EMPTY_ERROR_MESSAGE = "Target must have value";
+
+    public static final String NAME_NULL_ERROR_MESSAGE = "Name must not be null";
+    public static final String NAME_EMPTY_ERROR_MESSAGE = "Name must have value";
+
+    public static final String OS_NULL_ERROR_MESSAGE = "OS must not be null";
+    public static final String OS_EMPTY_ERROR_MESSAGE = "OS must have value";
+
+    public static final String ADDRESS_NULL_ERROR_MESSAGE = "Address must not be null";
+    public static final String ADDRESS_EMPTY_ERROR_MESSAGE = " Address must have value";
+
+    public static final String PORT_NULL_ERROR_MESSAGE = "Port must not be null";
+    public static final String PORT_EMPTY_ERROR_MESSAGE = "Port must have value";
+    public static final String PORT_INVALID_ERROR_MESSAGE = "Port must be positive number between 1 - 65535";
+
+    public static final String LAYER_NULL_ERROR_MESSAGE = "Layer must not be null";
+
+    public static final String LIST_NULL_ERROR_MESSAGE = "List must not be null";
+    public static final String LIST_EMPTY_ERROR_MESSAGE = "List must not be empty";
+
+    public static final String PAGE_NULL_ERROR_MESSAGE = "Page must not be null";
+    public static final String EXAMPLE_NULL_ERROR_MESSAGE = "Example must not be null";
 
     private final Logger logger = LogManager.getLogger();
 
     public Validation() { super(); }
 
+
+    public void verify(final ClientExecutionRequest dto, final String origin) {
+        logger.debug("verify({},{}) started...", dto, origin);
+        if (Objects.isNull(dto)) {
+            throw new BadPayloadException(PAYLOAD_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+        if (Objects.isNull(dto.getLayer())) {
+            throw new BadPayloadException(LAYER_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+        verify(dto.getTarget(), origin);
+    }
+
     public void verify(final SshTargetDto dto, final String origin) {
         logger.debug("verify({},{}) started...", dto, origin);
+        if (Objects.isNull(dto)) {
+            throw new BadPayloadException(TARGET_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
         if (Utilities.isEmpty(dto.getName())) {
-            throw new BadPayloadException(NAME_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+            throw new BadPayloadException(NAME_EMPTY_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
         if (Objects.isNull(dto.getOs())) {
             throw new BadPayloadException(OS_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
@@ -37,7 +74,7 @@ public class Validation {
 
     public void verifyAddress(final String address, final String origin) {
         if (Utilities.isEmpty(address)) {
-            throw new BadPayloadException(ADDRESS_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+            throw new BadPayloadException(ADDRESS_EMPTY_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
     }
 
