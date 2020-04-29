@@ -21,7 +21,7 @@ _Client:_
 
 _Private:_
 
-* [Intra-Cloud Ping Measurement](todo)
+* [Intra-Cloud Ping Measurement](#intra_ping_service_use_case)
 * [Intra-Cloud Ping Median Measurement](todo)
 * [Inter-Cloud Direct Ping Measurement](todo)
 * [Inter-Cloud Relay Echo Measurement](todo)
@@ -47,16 +47,28 @@ _Gatekeeper Core System:_
 | Name | Description |
 | ---- | --------- |
 | Brief Description | Returns a short message if the system is alive. |
-| Primary Actors | QosMonitor |
+| Access Control | All system within the local cloud are allowed to access |
+| Primary Actors | QoS Monitor |
 | Preconditions | - |
-|Main Flow| * Request sent by client. <br/>* Request procced and response sent by QoSMonitor. |
+|Main Flow| * Request sent by client. <br/>* Request procced and response sent by QoS Monitor. |
 
 ### Use Case: Public Key Service <a name="public_key_service_use_case" />
 
 | Name | Description |
 | ---- | --------- |
 | Brief Description | Returns the Public Key of QoSMointor Core System as a Base64 encoded text. |
-| Primary Actors | QosMonitor |
+| Access Control | All system within the local cloud are allowed to access |
+| Primary Actors | QoS Monitor |
 | Preconditions | - |
-|Main Flow| * Request sent by client. <br/>* Request procced and response sent by QoSMonitor. |
+|Main Flow| * Request sent by client. <br/>* Request procced and response sent by QoS Monitor. |
 
+### Use Case: Intra-Cloud Ping Measurement Service <a name="intra_ping_service_use_case" />
+
+| Name | Description |
+| ---- | --------- |
+| Brief Description | Returns the ping related values measured by a scheduled task for systems within the local cloud. |
+| Access Control | Only Orchestrator and Gatekeeper Core Systems are allowed to access |
+| Primary Actors | QoS Monitor |
+| Secondary Actors | Service Registry |
+| Preconditions | Service Registry has to be availble. |
+| Main Flow | * Intra-Cloud Ping Measurement Task scheduled <br/>* Intra-Cloud Ping Measurement Task queries Service Reqistry for systems and select one to be measured <br/>* Stored measurement details is provided upon a request  |
