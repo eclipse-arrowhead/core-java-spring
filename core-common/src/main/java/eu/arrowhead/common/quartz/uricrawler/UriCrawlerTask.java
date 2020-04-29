@@ -13,7 +13,6 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.quartz.TriggerKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -60,7 +59,7 @@ public class UriCrawlerTask implements Job {
 		logger.debug("STARTED: URI crawler task");
 		
 		if (arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)) {
-			logger.debug("FINISHED: URI crawler task can not run if server is in standalon mode");
+			logger.debug("FINISHED: URI crawler task can not run if server is in standalone mode");
 			shutdown();
 			return;
 		}
@@ -116,7 +115,8 @@ public class UriCrawlerTask implements Job {
 			}
 		}
 		
-		throw new JobExecutionException("URI crawler task can't find required services list.");
+		waitBeforeRetry();
+		throw new JobExecutionException("URI crawler task can't find required services list.", true);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -131,9 +131,19 @@ public class UriCrawlerTask implements Job {
 			}
 		}
 		
-		throw new JobExecutionException("URI crawler task can't find Service Registry Query URI.");
+		waitBeforeRetry();
+		throw new JobExecutionException("URI crawler task can't find Service Registry Query URI.", true);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	private void waitBeforeRetry() {
+		try {
+			Thread.sleep(1000);
+		} catch (final InterruptedException ex) {
+			// intentionally blank
+		}
+	}
+ 	
 	//-------------------------------------------------------------------------------------------------
 	private void checkServiceRegistryConnection(final UriComponents queryUri) throws JobExecutionException {
 		logger.debug("checkServiceRegistryConnection started...");
@@ -142,7 +152,8 @@ public class UriCrawlerTask implements Job {
 		try {
 			httpService.sendRequest(echoUri, HttpMethod.GET, String.class);
 		} catch (final ArrowheadException ex) {
-			throw new JobExecutionException("URI crawler task can't access Service Registry.");
+			waitBeforeRetry();
+			throw new JobExecutionException("URI crawler task can't access Service Registry.", true);
 		}
 	}
 	
