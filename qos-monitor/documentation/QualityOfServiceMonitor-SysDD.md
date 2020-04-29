@@ -17,7 +17,7 @@ The QoS Monitor provides the following services:
 _Client:_
 
 * [Echo](#echo_service_use_case)
-* [Public Key](todo)
+* [Public Key](#public_key_service_use_case)
 
 _Private:_
 
@@ -46,8 +46,17 @@ _Gatekeeper Core System:_
 
 | Name | Description |
 | ---- | --------- |
-| Brief Description | Service is used to check system availability. |
+| Brief Description | Returns a short message if the system is alive. |
 | Primary Actors | QosMonitor |
 | Preconditions | - |
-|Main Flow| * Request sent by client. <br/>* Request procced and response sent by QoSMonitor |
+|Main Flow| * Request sent by client. <br/>* Request procced and response sent by QoSMonitor. |
+
+### Use Case: Public Key Service <a name="public_key_service_use_case" />
+
+| Name | Description |
+| ---- | --------- |
+| Brief Description | Returns the Public Key of QoSMointor Core System as a Base64 encoded text. |
+| Primary Actors | QosMonitor |
+| Preconditions | - |
+|Main Flow| * Request sent by client. <br/>* Request procced and response sent by QoSMonitor. |
 
