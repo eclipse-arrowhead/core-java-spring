@@ -8,3 +8,15 @@ The purpose of QoS Monitor supporting core system is providing QoS (Quality of S
 ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `AH Orchestrator / QoS Manager`
 ![#ffcc44](https://placehold.it/15/a33c00/000000?text=+) `AH QoS Monitor`
 ![Alt text](figures/overview.png)
+
+## Provided Services
+
+The QoS Monitor provides the following services:
+* [Echo](todo)
+* [Intra-Cloud Ping Measurement](todo)
+* [Intra-Cloud Ping Median Measurement](todo)
+* [Inter-Cloud Direct Ping Measurement](todo)
+* [Inter-Cloud Relay Echo Measurement](todo)
+* [Public Key](todo)
+* [Init Relay Test](todo)
+* [Join Relay Test](todo)
