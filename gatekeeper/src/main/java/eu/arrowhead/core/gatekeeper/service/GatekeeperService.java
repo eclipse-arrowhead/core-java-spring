@@ -330,11 +330,14 @@ public class GatekeeperService {
 		}
 		
 		final PreferredProviderDataDTO[] preferredProviders = getPreferredProviders(request.getPreferredSystems());
+		boolean needMatchmaking = request.getCommands().containsKey(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY) ?
+								  true : request.getNegotiationFlags().getOrDefault(Flag.MATCHMAKING, false);
 		final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO.Builder(request.getRequesterSystem())
 																							 .requesterCloud(request.getRequesterCloud())
 																							 .requestedService(request.getRequestedService())
 																							 .flags(request.getNegotiationFlags())
 																							 .flag(Flag.EXTERNAL_SERVICE_REQUEST, true)
+																							 .flag(Flag.MATCHMAKING, needMatchmaking)
 																							 .commands(request.getCommands())
 																							 .preferredProviders(preferredProviders)
 																							 .build();
