@@ -31,7 +31,7 @@ public class ServiceTimeVerifier implements QoSVerifier {
 		parameters.validateParameters();
 		
 		int calculatedTime = OrchestratorUtils.calculateServiceTime(parameters.getMetadata(), parameters.getCommands());
-		if (calculatedTime == 0) {
+		if (calculatedTime == 0 || parameters.getWarnings().contains(OrchestratorWarnings.TTL_EXPIRED)) {
 			return false;
 		}
 		
@@ -41,8 +41,7 @@ public class ServiceTimeVerifier implements QoSVerifier {
 			
 			// adjust TTL warnings
 			parameters.getWarnings().remove(OrchestratorWarnings.TTL_UNKNOWN);
-			if (!parameters.getWarnings().contains(OrchestratorWarnings.TTL_EXPIRED) && 
-				!parameters.getWarnings().contains(OrchestratorWarnings.TTL_EXPIRING) &&
+			if (!parameters.getWarnings().contains(OrchestratorWarnings.TTL_EXPIRING) &&
 				calculatedTime <= OrchestratorService.EXPIRING_TIME_IN_MINUTES * CommonConstants.CONVERSION_SECOND_TO_MINUTE) {
 				parameters.getWarnings().add(OrchestratorWarnings.TTL_EXPIRING);
 			}
