@@ -16,7 +16,7 @@ The QoS Monitor provides the following services:
 
 _Client:_
 
-* [Echo](todo)
+* [Echo](#echo_service_use_case)
 * [Public Key](todo)
 
 _Private:_
@@ -41,3 +41,13 @@ _Gatekeeper Core System:_
 * [Collect Access Types](todo)
 * [Collect System Addresses](todo)
 * [Relay Test](todo)
+
+### Use Case: Echo Service <a name="echo_service_use_case" />
+
+| Name | Description |
+| ---- | --------- |
+| Brief Description | Service is used to check system availability. |
+| Primary Actors | QosMonitor |
+| Preconditions | - |
+|Main Flow| * Request sent by client. <br/>* Request procced and response sent by QoSMonitor |
+
