@@ -335,6 +335,7 @@ public class GatekeeperService {
 																							 .requestedService(request.getRequestedService())
 																							 .flags(request.getNegotiationFlags())
 																							 .flag(Flag.EXTERNAL_SERVICE_REQUEST, true)
+																							 .commands(request.getCommands())
 																							 .preferredProviders(preferredProviders)
 																							 .build();
 		if (gatewayIsMandatory) {
