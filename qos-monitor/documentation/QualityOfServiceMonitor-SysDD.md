@@ -71,4 +71,11 @@ _Gatekeeper Core System:_
 | Primary Actors | QoS Monitor |
 | Secondary Actors | Service Registry |
 | Preconditions | Service Registry has to be availble. |
-| Main Flow | * Intra-Cloud Ping Measurement Task scheduled <br/>* Intra-Cloud Ping Measurement Task queries Service Reqistry for systems and select one to be measured <br/>* Stored measurement details is provided upon a request  |
+| Main Flow | * Intra-Cloud Ping Measurement Task scheduled <br/>* Task queries Service Reqistry for systems and select one to be measured <br/>* Stored or immediate measurement details are provided upon request  |
+
+_Activity diagram: Intra-Cloud Ping Measurement Service:_
+![Alt text](figures/IntraPingMeasurementService.png)
+
+_Activity diagram: Intra-Cloud Ping Measurement Task:_
+![Alt text](figures/IntraPingMeasurementTask.png)
+
