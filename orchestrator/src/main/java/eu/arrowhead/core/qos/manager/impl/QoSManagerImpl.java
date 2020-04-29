@@ -256,6 +256,7 @@ public class QoSManagerImpl implements QoSManager {
 			
 			if (verified) {
 				result.setWarnings(verificationParameters.getWarnings());
+				result.setMetadata(verificationParameters.getMetadata());
 				verifiedResults.add(result);
 			}
 		}
