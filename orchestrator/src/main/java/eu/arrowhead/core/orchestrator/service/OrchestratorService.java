@@ -33,7 +33,6 @@ import eu.arrowhead.common.dto.internal.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.internal.ICNResultDTO;
 import eu.arrowhead.common.dto.internal.OrchestratorStoreResponseDTO;
-import eu.arrowhead.common.dto.internal.QoSMeasurementAttributesFormDTO;
 import eu.arrowhead.common.dto.internal.QoSReservationListResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSReservationRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSTemporaryLockRequestDTO;
@@ -48,6 +47,7 @@ import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.OrchestratorWarnings;
 import eu.arrowhead.common.dto.shared.PreferredProviderDataDTO;
+import eu.arrowhead.common.dto.shared.QoSMeasurementAttributesFormDTO;
 import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
@@ -139,13 +139,13 @@ public class OrchestratorService {
 		orList = calculateAndFilterOnServiceTime(orList, request);
 		
 		// Generate the authorization tokens if it is requested based on the service security (modifies the orList)
-	    orList = orchestratorDriver.generateAuthTokens(request, orList);
+		List<OrchestrationResultDTO> orListWithTokens = orchestratorDriver.generateAuthTokens(request, orList);
 	    
-	    orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem()); // token generation can be slow, so we have to check for new reservations
+		orListWithTokens = qosManager.filterReservedProviders(orListWithTokens, request.getRequesterSystem()); // token generation can be slow, so we have to check for new reservations
 	    
 	    logger.debug("externalServiceRequest finished with {} service providers.", orList.size());
 
-	    return new OrchestrationResponseDTO(orList);
+	    return new OrchestrationResponseDTO(orListWithTokens);
 	}
 
 	//-------------------------------------------------------------------------------------------------	
@@ -656,10 +656,8 @@ public class OrchestratorService {
 			if(result.getMetadata() == null ) {
 				result.setMetadata( new HashMap<>());
 			}
-			if (request.getOrchestrationFlags().get(Flag.OVERRIDE_STORE)) {
-				final List<OrchestratorWarnings> warnings = calculateOrchestratorWarnings(entry);
-				result.setWarnings(warnings);
-			}
+			result.setWarnings(calculateOrchestratorWarnings(entry));
+			
 			orList.add(result);
 		}
 		
