@@ -9,6 +9,7 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import eu.arrowhead.common.dto.shared.ErrorWrapperDTO;
+import eu.arrowhead.common.dto.shared.QoSMeasurementAttributesFormDTO;
 
 public class GSDPollResponseDTO implements Serializable, ErrorWrapperDTO {
 

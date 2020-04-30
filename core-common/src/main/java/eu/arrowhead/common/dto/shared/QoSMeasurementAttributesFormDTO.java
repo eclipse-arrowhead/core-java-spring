@@ -1,8 +1,6 @@
-package eu.arrowhead.common.dto.internal;
+package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
-
-import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 
 public class QoSMeasurementAttributesFormDTO implements Serializable {
 
