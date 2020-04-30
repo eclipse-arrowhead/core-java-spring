@@ -1,14 +1,13 @@
 package eu.arrowhead.common.database.entity.mscv;
 
-import eu.arrowhead.common.dto.shared.mscv.OS;
-
+import java.util.StringJoiner;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import java.util.StringJoiner;
+
+import eu.arrowhead.common.dto.shared.mscv.OS;
 
 @Entity
 @Table(name = "mscv_ssh_target",
@@ -21,6 +20,9 @@ public class SshTarget extends Target {
 
     @Column(nullable = false)
     private Integer port;
+
+    @Column(nullable = true)
+    private String authInfo;
 
     public SshTarget() { super(); }
 
@@ -50,6 +52,14 @@ public class SshTarget extends Target {
 
     public void setPort(final Integer port) {
         this.port = port;
+    }
+
+    public String getAuthInfo() {
+        return authInfo;
+    }
+
+    public void setAuthInfo(final String authInfo) {
+        this.authInfo = authInfo;
     }
 
     @Override

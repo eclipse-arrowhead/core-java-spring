@@ -49,15 +49,26 @@
       "name": "mscv.defaults.verificationInterval",
       "type": "java.lang.Long",
       "description": "The verification interval of a specific List in minutes."
-    },{
+    },
+    {
       "name": "mscv.defaults.os",
       "type": "eu.arrowhead.common.dto.shared.mscv.OS",
       "description": "Assumed Operating System."
     },
     {
-      "name": "mscv.defaults.sshPort",
+      "name": "mscv.defaults.ssh.port",
       "type": "java.lang.Integer",
       "description": "Default SSH port."
+    },
+    {
+      "name": "mscv.defaults.ssh.connectTimeout",
+      "type": "java.lang.Long",
+      "description": "The timeout (in seconds) for connecting to SSH targets."
+    },
+    {
+      "name": "mscv.defaults.ssh.authTimeout",
+      "type": "java.lang.Long",
+      "description": "The timeout (in seconds) for authentication on SSH targets."
     }
   ]
 }

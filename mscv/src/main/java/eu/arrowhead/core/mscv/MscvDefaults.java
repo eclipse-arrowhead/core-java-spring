@@ -8,13 +8,15 @@ import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties("mscv.defaults")
+// @ConstructorBinding would allow using final fields. needs Spring Boot 2.2
 public class MscvDefaults {
 
     private String defaultList = "default list";
     private Short mipWeight = 100;
-    private Long verificationInterval = TimeUnit.HOURS.toMinutes(6L);
+    private Long verificationInterval = TimeUnit.HOURS.toMinutes(6L); // minutes
     private OS os = OS.LINUX;
-    private Integer sshPort = 22;
+
+    private SshDefaults ssh;
 
     public MscvDefaults() { super(); }
 
@@ -50,11 +52,41 @@ public class MscvDefaults {
         this.os = os;
     }
 
-    public Integer getSshPort() {
-        return sshPort;
+    public SshDefaults getSsh() {
+        return ssh;
     }
 
-    public void setSshPort(final Integer sshPort) {
-        this.sshPort = sshPort;
+    public void setSsh(final SshDefaults ssh) {
+        this.ssh = ssh;
+    }
+
+    public static class SshDefaults {
+        private Integer port = 22;
+        private Long connectTimeout = 10L; // seconds
+        private Long authTimeout = 10L; // seconds
+
+        public Integer getPort() {
+            return port;
+        }
+
+        public void setPort(final Integer port) {
+            this.port = port;
+        }
+
+        public Long getConnectTimeout() {
+            return connectTimeout;
+        }
+
+        public void setConnectTimeout(final Long connectTimeout) {
+            this.connectTimeout = connectTimeout;
+        }
+
+        public Long getAuthTimeout() {
+            return authTimeout;
+        }
+
+        public void setAuthTimeout(final Long authTimeout) {
+            this.authTimeout = authTimeout;
+        }
     }
 }

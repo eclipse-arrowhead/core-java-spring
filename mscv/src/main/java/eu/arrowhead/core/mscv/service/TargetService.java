@@ -7,6 +7,9 @@ import eu.arrowhead.common.database.entity.mscv.Target;
 import eu.arrowhead.common.database.repository.mscv.SshTargetRepository;
 import eu.arrowhead.common.dto.shared.mscv.OS;
 import eu.arrowhead.common.dto.shared.mscv.SshTargetDto;
+import eu.arrowhead.core.mscv.MscvDefaults;
+import eu.arrowhead.core.mscv.Validation;
+import eu.arrowhead.core.mscv.delegate.SshExecutionHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,17 +29,27 @@ import static eu.arrowhead.core.mscv.Validation.OS_NULL_ERROR_MESSAGE;
 import static eu.arrowhead.core.mscv.Validation.PAGE_NULL_ERROR_MESSAGE;
 import static eu.arrowhead.core.mscv.Validation.PORT_NULL_ERROR_MESSAGE;
 import static eu.arrowhead.core.mscv.Validation.TARGET_NULL_ERROR_MESSAGE;
+import static eu.arrowhead.core.mscv.Validation.USERNAME_NULL_ERROR_MESSAGE;
 
 @Service
 public class TargetService {
 
     private final Logger logger = LogManager.getLogger();
     private final SshTargetRepository targetRepo;
+    private final SshExecutionHandler sshTargetHandler;
+    private final MscvDefaults defaults;
+    private final Validation validation;
 
     @Autowired
-    public TargetService(final SshTargetRepository targetRepo) {
+    public TargetService(final SshTargetRepository targetRepo,
+                         final SshExecutionHandler sshTargetHandler,
+                         final MscvDefaults defaults) {
         super();
         this.targetRepo = targetRepo;
+        this.sshTargetHandler = sshTargetHandler;
+        this.defaults = defaults;
+
+        validation = new Validation();
     }
 
     public void checkSupported(final Class<?> cls) {
@@ -52,6 +65,7 @@ public class TargetService {
         Assert.notNull(cls, "Argument must not be null");
         return cls.isAssignableFrom(SshTargetDto.class) || cls.isAssignableFrom(SshTarget.class);
     }
+
     @Transactional
     public SshTarget findOrCreate(final Target target) {
         logger.debug("findOrCreateTarget({}) started", target);
@@ -66,8 +80,8 @@ public class TargetService {
         logger.debug("findOrCreateTarget({},{},{},{}) started", name, os, address, port);
         Assert.hasText(name, NAME_NULL_ERROR_MESSAGE);
         Assert.notNull(os, OS_NULL_ERROR_MESSAGE);
-        Assert.hasText(address, ADDRESS_NULL_ERROR_MESSAGE);
-        Assert.notNull(port, PORT_NULL_ERROR_MESSAGE);
+        validation.verifyAddress(address,"MSCV");
+        validation.verifyPort(port,"MSCV");
 
         final SshTarget returnValue;
         final Optional<SshTarget> existingTarget = find(address, port);
@@ -108,6 +122,15 @@ public class TargetService {
         oldTarget.setAddress(newValues.getAddress());
         oldTarget.setPort(newValues.getPort());
         return targetRepo.saveAndFlush(oldTarget);
+    }
+
+    public void login(final Target target, final String username, final String password) throws MscvException {
+        logger.debug("login({},{},{}) started", target, username, "(password)");
+        Assert.notNull(target, TARGET_NULL_ERROR_MESSAGE);
+        Assert.notNull(username, USERNAME_NULL_ERROR_MESSAGE);
+        // password may or may not be empty/null
+        checkSupported(target.getClass());
+        sshTargetHandler.login((SshTarget) target, username, password);
     }
 
     @Transactional

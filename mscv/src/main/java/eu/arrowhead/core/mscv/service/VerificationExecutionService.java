@@ -5,7 +5,6 @@ import java.time.ZonedDateTime;
 import eu.arrowhead.common.database.entity.mscv.SshTarget;
 import eu.arrowhead.common.database.entity.mscv.VerificationEntryList;
 import eu.arrowhead.common.database.entity.mscv.VerificationExecution;
-import eu.arrowhead.common.database.repository.mscv.ScriptRepository;
 import eu.arrowhead.common.database.repository.mscv.VerificationExecutionDetailRepository;
 import eu.arrowhead.common.database.repository.mscv.VerificationExecutionRepository;
 import eu.arrowhead.common.database.view.mscv.VerificationExecutionView;
@@ -17,6 +16,7 @@ import eu.arrowhead.core.mscv.MscvDtoConverter;
 import eu.arrowhead.core.mscv.Validation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.sshd.client.SshClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,29 +27,30 @@ import static eu.arrowhead.core.mscv.Validation.LIST_NULL_ERROR_MESSAGE;
 import static eu.arrowhead.core.mscv.Validation.TARGET_NULL_ERROR_MESSAGE;
 
 @Service
-public class ExecutionService {
+public class VerificationExecutionService {
 
     private final Logger logger = LogManager.getLogger();
+
     private final VerificationService verificationService;
     private final VerificationExecutionDetailRepository executionDetailRepo;
     private final VerificationExecutionRepository executionRepo;
     private final TargetService targetService;
-    private final ScriptRepository scriptRepo;
+    private final ScriptService scriptService;
     private final MscvDefaults defaults;
     private final Validation validation;
 
     @Autowired
-    public ExecutionService(final VerificationService verificationService,
-                            final VerificationExecutionDetailRepository executionDetailRepo,
-                            final VerificationExecutionRepository executionRepo,
-                            final ScriptRepository scriptRepo,
-                            final TargetService targetService,
-                            final MscvDefaults defaults) {
+    public VerificationExecutionService(final VerificationService verificationService,
+                                        final VerificationExecutionDetailRepository executionDetailRepo,
+                                        final VerificationExecutionRepository executionRepo,
+                                        final ScriptService scriptService,
+                                        final TargetService targetService,
+                                        final MscvDefaults defaults) {
         super();
         this.verificationService = verificationService;
         this.executionDetailRepo = executionDetailRepo;
         this.executionRepo = executionRepo;
-        this.scriptRepo = scriptRepo;
+        this.scriptService = scriptService;
         this.targetService = targetService;
         this.defaults = defaults;
 
@@ -81,6 +82,8 @@ public class ExecutionService {
 
     private VerificationExecution execute(final VerificationEntryList entryList, final SshTarget target) {
         final var execution = new VerificationExecution(target, entryList, ZonedDateTime.now(), VerificationRunResult.IN_PROGRESS);
+
+        SshClient client = new SshClient();
         // TODO get the script for each entry by mip, os, layer
         // TODO asynchronously execute the (physical) script
         // TODO record each result in mscv_verification_detail

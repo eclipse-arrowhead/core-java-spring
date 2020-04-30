@@ -10,7 +10,7 @@ import eu.arrowhead.core.mscv.http.ClientExecutionRequest;
 import eu.arrowhead.core.mscv.http.ClientExecutionResponse;
 import eu.arrowhead.core.mscv.http.ExecutionRequest;
 import eu.arrowhead.core.mscv.http.ExecutionResponse;
-import eu.arrowhead.core.mscv.service.ExecutionService;
+import eu.arrowhead.core.mscv.service.VerificationExecutionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -45,11 +45,11 @@ public class MscvExecutionController {
     private static final String EXECUTION_HTTP_400_MESSAGE = "Request parameter missing";
 
     private final Logger logger = LogManager.getLogger(MscvExecutionController.class);
-    private final ExecutionService executionService;
+    private final VerificationExecutionService executionService;
     private final Validation validation;
 
     @Autowired
-    public MscvExecutionController(final ExecutionService executionService) {
+    public MscvExecutionController(final VerificationExecutionService executionService) {
         this.executionService = executionService;
         this.validation = new Validation();
     }

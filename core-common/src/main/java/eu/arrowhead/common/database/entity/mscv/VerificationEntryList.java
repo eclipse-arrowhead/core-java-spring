@@ -1,7 +1,11 @@
 package eu.arrowhead.common.database.entity.mscv;
 
-import eu.arrowhead.common.dto.shared.mscv.Layer;
-
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.StringJoiner;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -13,10 +17,9 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.StringJoiner;
+
+import eu.arrowhead.common.dto.shared.mscv.Layer;
+import org.springframework.util.Assert;
 
 @Entity
 @Table(name = "mscv_mip_verification_list",
@@ -47,11 +50,13 @@ public class VerificationEntryList {
         super();
     }
 
-    public VerificationEntryList(final String name, final String description, final Long verificationInterval, final Set<VerificationEntry> entries) {
+    public VerificationEntryList(final String name, final String description,
+                                 final Long verificationInterval,
+                                 final VerificationEntry... entries) {
         this.name = name;
         this.description = description;
         this.verificationInterval = verificationInterval;
-        this.entries = entries;
+        this.entries = new HashSet<>(Arrays.asList(entries));
     }
 
     public VerificationEntryList(final Long id, final String name, final String description,
@@ -103,8 +108,22 @@ public class VerificationEntryList {
         this.layer = layer;
     }
 
+    public void addEntry(final VerificationEntry entry) {
+        Assert.notNull(entry,"Verification entry must not be mull");
+        if(Objects.isNull(entry.getVerificationList())) {
+            entry.setVerificationList(this);
+        }
+        entries.add(entry);
+    }
+
+    public void removeEntry(final VerificationEntry entry) {
+        Assert.notNull(entry,"Verification entry must not be mull");
+        entries.remove(entry);
+        entry.setVerificationList(null);
+    }
+
     public Set<VerificationEntry> getEntries() {
-        return entries;
+        return Collections.unmodifiableSet(entries);
     }
 
     public void setEntries(final Set<VerificationEntry> entries) {

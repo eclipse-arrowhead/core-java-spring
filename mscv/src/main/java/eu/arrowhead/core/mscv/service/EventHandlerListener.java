@@ -197,10 +197,10 @@ public class EventHandlerListener {
     }
 
     private SshTarget convert(final DeviceRequestDTO dto) {
-        return new SshTarget(dto.getDeviceName(), mscvDefaults.getOs(), dto.getAddress(), mscvDefaults.getSshPort());
+        return new SshTarget(dto.getDeviceName(), mscvDefaults.getOs(), dto.getAddress(), mscvDefaults.getSsh().getPort());
     }
 
     private SshTarget convert(final SystemRequestDTO dto) {
-        return new SshTarget(dto.getSystemName(), mscvDefaults.getOs(), dto.getAddress(), mscvDefaults.getSshPort());
+        return new SshTarget(dto.getSystemName(), mscvDefaults.getOs(), dto.getAddress(), mscvDefaults.getSsh().getPort());
     }
 }

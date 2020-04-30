@@ -1,5 +1,11 @@
 package eu.arrowhead.core.mscv;
 
+import java.security.Security;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import eu.arrowhead.common.ApplicationInitListener;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
@@ -13,15 +19,11 @@ import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponents;
-
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class MscvApplicationInitListener extends ApplicationInitListener {
@@ -39,6 +41,7 @@ public class MscvApplicationInitListener extends ApplicationInitListener {
     //-------------------------------------------------------------------------------------------------
     @Override
     protected void customInit(final ContextRefreshedEvent event) {
+        Security.addProvider(new BouncyCastleProvider());
 
         if (sslProperties.isSslEnabled()) {
             logger.debug("AuthInfo: {}", Base64.getEncoder().encodeToString(publicKey.getEncoded()));

@@ -5,6 +5,7 @@ import java.util.Objects;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.mscv.SshTargetDto;
+import eu.arrowhead.common.dto.shared.mscv.TargetDto;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.mscv.http.ClientExecutionRequest;
 import org.apache.http.HttpStatus;
@@ -16,12 +17,17 @@ public class Validation {
 
     public static final String ID_NULL_ERROR_MESSAGE = "Id must not be null";
     public static final String PAYLOAD_NULL_ERROR_MESSAGE = "Payload must not be null";
+    public static final String PAGE_NULL_ERROR_MESSAGE = "Page must not be null";
+    public static final String EXAMPLE_NULL_ERROR_MESSAGE = "Example must not be null";
 
     public static final String TARGET_NULL_ERROR_MESSAGE = "Target must not be null";
     public static final String TARGET_EMPTY_ERROR_MESSAGE = "Target must have value";
 
     public static final String NAME_NULL_ERROR_MESSAGE = "Name must not be null";
     public static final String NAME_EMPTY_ERROR_MESSAGE = "Name must have value";
+
+    public static final String USERNAME_NULL_ERROR_MESSAGE = "Username must not be null";
+    public static final String USERNAME_EMPTY_ERROR_MESSAGE = "Username must have value";
 
     public static final String OS_NULL_ERROR_MESSAGE = "OS must not be null";
     public static final String OS_EMPTY_ERROR_MESSAGE = "OS must have value";
@@ -38,8 +44,6 @@ public class Validation {
     public static final String LIST_NULL_ERROR_MESSAGE = "List must not be null";
     public static final String LIST_EMPTY_ERROR_MESSAGE = "List must not be empty";
 
-    public static final String PAGE_NULL_ERROR_MESSAGE = "Page must not be null";
-    public static final String EXAMPLE_NULL_ERROR_MESSAGE = "Example must not be null";
 
     private final Logger logger = LogManager.getLogger();
 
@@ -59,6 +63,13 @@ public class Validation {
 
     public void verify(final SshTargetDto dto, final String origin) {
         logger.debug("verify({},{}) started...", dto, origin);
+        verify((TargetDto) dto, origin);
+        verifyAddress(dto.getAddress(), origin);
+        verifyPort(dto.getPort(), origin);
+    }
+
+    public void verify(final TargetDto dto, final String origin) {
+        logger.debug("verify({},{}) started...", dto, origin);
         if (Objects.isNull(dto)) {
             throw new BadPayloadException(TARGET_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
@@ -68,8 +79,6 @@ public class Validation {
         if (Objects.isNull(dto.getOs())) {
             throw new BadPayloadException(OS_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
-        verifyAddress(dto.getAddress(), origin);
-        verifyPort(dto.getPort(), origin);
     }
 
     public void verifyAddress(final String address, final String origin) {
