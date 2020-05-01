@@ -32,11 +32,11 @@ public class SshExecutionHandler implements ExecutionHandler<SshTarget> {
     private final SshClient sshClient;
 
     @Autowired
-    public SshExecutionHandler(final MscvDefaults.SshDefaults sshDefaults,
+    public SshExecutionHandler(final MscvDefaults mscvDefaults,
                                final UpdatingAcceptAllKeyVerifier verifier,
                                final SshClient sshClient) {
         super();
-        this.sshDefaults = sshDefaults;
+        this.sshDefaults = mscvDefaults.getSsh();
         this.verifier = verifier;
         this.sshClient = sshClient;
     }
@@ -58,10 +58,10 @@ public class SshExecutionHandler implements ExecutionHandler<SshTarget> {
 
             final AuthFuture authentication = session.auth().verify(sshDefaults.getAuthTimeout());
 
-            if(!authentication.isDone()) {
+            if (!authentication.isDone()) {
                 authentication.cancel();
                 throw new AuthException("SSH login failure: timeout during ssh authentication!");
-            } else if(authentication.isFailure()) {
+            } else if (authentication.isFailure()) {
                 final Throwable t = authentication.getException();
                 throw new AuthException("SSH login failure: " + t.getClass().getSimpleName() + ": " + t.getMessage(), t);
             }

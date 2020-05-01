@@ -1,12 +1,32 @@
 package eu.arrowhead.core.mscv.security;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInput;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.math.BigInteger;
+import java.security.KeyFactory;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
+import java.security.interfaces.DSAParams;
+import java.security.interfaces.DSAPublicKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.DSAPublicKeySpec;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
+import java.security.spec.RSAPublicKeySpec;
+import java.util.Base64;
 import java.util.Objects;
 
 import org.apache.logging.log4j.LogManager;
@@ -37,29 +57,38 @@ import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
 import org.bouncycastle.pkcs.PKCSException;
 import org.bouncycastle.util.io.pem.PemObjectGenerator;
 import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 /* PVK and p12 not supported currently
  * see https://github.com/ebourg/jsign/blob/master/jsign-core/src/main/java/net/jsign/PVK.java for PVK.
  * p12 is a regular KeyStore.. see onboarding client.
  */
-public class MscvKeyPairHandler {
+@Component
+public class KeyPairFileUtilities {
 
     private static final String DEFAULT_ASN_ALGORITHM_IDENTIFIER = JceOpenSSLPKCS8EncryptorBuilder.AES_128_CBC;
     private static final String DEFAULT_ENCRYPTION_ALGORITHM = "AES-128-CBC";
+    private static final String OPENSSH_RSA_TYPE = "ssh-rsa";
+    private static final String OPENSSH_DSA_TYPE = "ssh-dss";
 
     static {
         Security.addProvider(new BouncyCastleProvider());
     }
 
     private final Logger logger = LogManager.getLogger();
-    private final JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
+    private final JcaPEMKeyConverter pemKeyConverter = new JcaPEMKeyConverter().setProvider("BC");
 
-    public MscvKeyPairHandler() { super(); }
+    public KeyPairFileUtilities() { super(); }
+
+    public PrivateKey readPrivateKeySSH(final String file) throws IOException, PKCSException, OperatorCreationException {
+        return readPrivateKey(file.trim(), null);
+    }
 
     /* best effort */
     public PrivateKey readPrivateKey(final String file, @Nullable final String password) throws IOException, OperatorCreationException, PKCSException {
 
-        final char[] passwd = Objects.nonNull(password) ? password.toCharArray() : new char[0];
+        final char[] passwd = Objects.nonNull(password) ? password.toCharArray() : null;
 
         final Object object = parsePEM(file);
         final PrivateKey privateKey;
@@ -83,7 +112,7 @@ public class MscvKeyPairHandler {
     /* best effort */
     public KeyPair readKeyPair(final String file, @Nullable final String password) throws IOException, PKCSException, OperatorCreationException {
 
-        final char[] passwd = Objects.nonNull(password) ? password.toCharArray() : new char[0];
+        final char[] passwd = Objects.nonNull(password) ? password.toCharArray() : null;
         final KeyPair keyPair;
 
         try (final FileReader reader = new FileReader(file)) {
@@ -110,21 +139,42 @@ public class MscvKeyPairHandler {
     }
 
     /* best effort */
-    public PublicKey readPublicKey(final String file) throws IOException {
-
+    public PublicKey readPublicKey(final String file) throws IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
         final Object object = parsePEM(file);
-        return parseUnknownObject(object, file);
+        if (Objects.nonNull(object)) { return parseUnknownObject(object, file); } else { return readOpenSshPublicKey(file); }
+    }
+
+    /* SSH private key */
+    public void writePrivateKeySSH(final PrivateKey privateKey, final String file) throws IOException {
+        writePrivateKeyPlain(privateKey, file);
+    }
+
+    /* SSH private key */
+    public void writePrivateKeySSH(final PrivateKey privateKey, final String file, final String password) throws IOException {
+        writePrivateKeyPEM(privateKey, file, password);
+    }
+
+    /* PEM plain */
+    public void writePrivateKeyPlain(final PrivateKey privateKey, final String file) throws IOException {
+
+        try (final FileWriter writer = new FileWriter(file)) {
+            final JcaPEMWriter pWrt = new JcaPEMWriter(writer);
+
+            final PemObjectGenerator pemObjectGenerator = new JcaMiscPEMGenerator(privateKey);
+            pWrt.writeObject(pemObjectGenerator);
+            pWrt.flush();
+        }
     }
 
     /* PEM encrypted */
-    public void writePrivateKeyPEM(final PrivateKey privateKey, final String file, @Nullable final String password) throws IOException {
+    public void writePrivateKeyPEM(final PrivateKey privateKey, final String file, final String password) throws IOException {
 
-        final char[] passwd = Objects.nonNull(password) ? password.toCharArray() : new char[0];
+        Assert.hasText(password, "Password must not be null");
         try (final FileWriter writer = new FileWriter(file)) {
             final JcaPEMWriter pWrt = new JcaPEMWriter(writer);
             final PEMEncryptor encryptor = new JcePEMEncryptorBuilder(DEFAULT_ENCRYPTION_ALGORITHM)
                     .setProvider("BC")
-                    .build(passwd);
+                    .build(password.toCharArray());
 
             final PemObjectGenerator pemObjectGenerator = new JcaMiscPEMGenerator(privateKey, encryptor);
             pWrt.writeObject(pemObjectGenerator);
@@ -133,16 +183,16 @@ public class MscvKeyPairHandler {
     }
 
     /* PKCS8 encrypted */
-    public void writePrivateKeyPKCS8(final PrivateKey privateKey, final String file, @Nullable final String password)
+    public void writePrivateKeyPKCS8(final PrivateKey privateKey, final String file, final String password)
             throws IOException, OperatorCreationException {
 
-        final char[] passwd = Objects.nonNull(password) ? password.toCharArray() : new char[0];
+        Assert.hasText(password, "Password must not be null");
         try (final FileWriter writer = new FileWriter(file)) {
             final JcaPEMWriter pWrt = new JcaPEMWriter(writer);
             final ASN1ObjectIdentifier algorithm = new ASN1ObjectIdentifier(DEFAULT_ASN_ALGORITHM_IDENTIFIER);
             final OutputEncryptor encryptor = new JceOpenSSLPKCS8EncryptorBuilder(algorithm)
                     .setProvider("BC")
-                    .setPasssword(passwd)
+                    .setPasssword(password.toCharArray())
                     .build();
 
             final PemObjectGenerator pemObjectGenerator = new JcaPKCS8Generator(privateKey, encryptor);
@@ -152,14 +202,114 @@ public class MscvKeyPairHandler {
     }
 
     /* plain PEM */
-    public void writePublicKey(final PublicKey publicKey, final String file)
-            throws IOException, OperatorCreationException {
+    public void writePublicKeyPEM(final PublicKey publicKey, final String file)
+            throws IOException {
 
         try (final FileWriter writer = new FileWriter(file)) {
             final JcaPEMWriter pWrt = new JcaPEMWriter(writer);
             pWrt.writeObject(publicKey);
             pWrt.flush();
         }
+    }
+
+    public void writePublicKeySSH(final PublicKey publicKey, final String file, final String user)
+            throws IOException, InvalidKeySpecException {
+
+        final String encodedKey;
+        if (publicKey.getAlgorithm().equals("RSA")) {
+            encodedKey = encodeRsaPublicKey((RSAPublicKey) publicKey, user);
+        } else if (publicKey.getAlgorithm().equals("DSA")) {
+            encodedKey = encodeDsaPublicKey((DSAPublicKey) publicKey, user);
+        } else {
+            throw new InvalidKeySpecException("Unknown public key encoding: " + publicKey.getAlgorithm());
+        }
+
+        try (final FileWriter writer = new FileWriter(file)) {
+            writer.write(encodedKey);
+            writer.flush();
+        }
+    }
+
+    private String encodeRsaPublicKey(final RSAPublicKey key, final String user) throws IOException {
+        final ByteArrayOutputStream byteOs = new ByteArrayOutputStream();
+        final DataOutputStream dos = new DataOutputStream(byteOs);
+        dos.writeInt(OPENSSH_RSA_TYPE.getBytes().length);
+        dos.write(OPENSSH_RSA_TYPE.getBytes());
+        dos.writeInt(key.getPublicExponent().toByteArray().length);
+        dos.write(key.getPublicExponent().toByteArray());
+        dos.writeInt(key.getModulus().toByteArray().length);
+        dos.write(key.getModulus().toByteArray());
+        final String encodedKey = Base64.getEncoder().encodeToString(byteOs.toByteArray());
+        return OPENSSH_RSA_TYPE + " " + encodedKey + " " + user;
+    }
+
+    private String encodeDsaPublicKey(final DSAPublicKey key, final String user) throws IOException {
+        final DSAParams params = key.getParams();
+        final ByteArrayOutputStream byteOs = new ByteArrayOutputStream();
+        final DataOutputStream dos = new DataOutputStream(byteOs);
+        dos.writeInt(OPENSSH_DSA_TYPE.getBytes().length);
+        dos.write(OPENSSH_DSA_TYPE.getBytes());
+        dos.writeInt(params.getP().toByteArray().length);
+        dos.write(params.getP().toByteArray());
+        dos.writeInt(params.getQ().toByteArray().length);
+        dos.write(params.getQ().toByteArray());
+        dos.writeInt(params.getG().toByteArray().length);
+        dos.write(params.getG().toByteArray());
+        dos.writeInt(key.getY().toByteArray().length);
+        dos.write(key.getY().toByteArray());
+        final String encodedKey = Base64.getEncoder().encodeToString(byteOs.toByteArray());
+        return OPENSSH_DSA_TYPE + " " + encodedKey + " " + user;
+    }
+
+    // can't find out how to do this with bouncy castle. OpenSSHPublicKeyUtil doesn't work
+    private PublicKey readOpenSshPublicKey(final String file) throws IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
+            // SSH keys only have a single line
+            final String line = reader.readLine();
+            final String[] split = line.split(" ", 3);
+
+            if (split.length < 2) {
+                throw new InvalidKeySpecException("The file does not contain a single valid SSH public key");
+            }
+
+            final String type = split[0];
+            final String base64Data = split[1];
+            final byte[] bytes = Base64.getDecoder().decode(base64Data);
+            final DataInputStream dis = new DataInputStream(new ByteArrayInputStream(bytes));
+
+            byte[] header = readElement(dis);
+            final String pubKeyFormat = new String(header);
+            if (!pubKeyFormat.equals(type)) {
+                throw new InvalidKeySpecException("Header type '" + type + "' does not match encoded format '" + pubKeyFormat + "'");
+            }
+
+            switch (type) {
+                case OPENSSH_RSA_TYPE:
+                    byte[] publicExponent = readElement(dis);
+                    byte[] modulus = readElement(dis);
+
+                    final KeySpec rsaKeySpec = new RSAPublicKeySpec(new BigInteger(modulus), new BigInteger(publicExponent));
+                    final KeyFactory rsaKeyFactory = KeyFactory.getInstance("RSA", "BC");
+                    return rsaKeyFactory.generatePublic(rsaKeySpec);
+                case OPENSSH_DSA_TYPE:
+                    byte[] p = readElement(dis);
+                    byte[] q = readElement(dis);
+                    byte[] g = readElement(dis);
+                    byte[] y = readElement(dis);
+                    final KeySpec dssKeySpec = new DSAPublicKeySpec(new BigInteger(p), new BigInteger(q), new BigInteger(g), new BigInteger(y));
+                    final KeyFactory dssKeyFactory = KeyFactory.getInstance("DSA", "BC");
+                    return dssKeyFactory.generatePublic(dssKeySpec);
+                default:
+                    throw new InvalidKeySpecException("Unsupported format: " + type);
+            }
+        }
+    }
+
+    private byte[] readElement(DataInput dis) throws IOException {
+        int len = dis.readInt();
+        byte[] buf = new byte[len];
+        dis.readFully(buf);
+        return buf;
     }
 
     private PublicKey parseUnknownObject(final Object object, final String file) throws IOException {
@@ -189,19 +339,19 @@ public class MscvKeyPairHandler {
 
     /* plain test */
     private KeyPair convertKeyPairPlain(final PEMKeyPair keyPair) throws PEMException {
-        return converter.getKeyPair(keyPair);
+        return pemKeyConverter.getKeyPair(keyPair);
     }
 
     /* plain test */
     private PublicKey convertPublicKeyInfo(final SubjectPublicKeyInfo publicKeyInfo) throws PEMException {
-        return converter.getPublicKey(publicKeyInfo);
+        return pemKeyConverter.getPublicKey(publicKeyInfo);
     }
 
     /* PEM encrypted */
     private KeyPair convertKeyPairPEM(final PEMEncryptedKeyPair keyPair, final char[] password) throws IOException {
         // Encrypted key - we will use provided password
         final PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder().build(password);
-        return converter.getKeyPair(keyPair.decryptKeyPair(decProv));
+        return pemKeyConverter.getKeyPair(keyPair.decryptKeyPair(decProv));
     }
 
     /* PKCS8 encrypted */
@@ -210,6 +360,6 @@ public class MscvKeyPairHandler {
         // Encrypted key - we will use provided password
         final InputDecryptorProvider decProv = new JceOpenSSLPKCS8DecryptorProviderBuilder().build(password);
         final PrivateKeyInfo privateKeyInfo = encryptedPrivateKeyInfo.decryptPrivateKeyInfo(decProv);
-        return converter.getPrivateKey(privateKeyInfo);
+        return pemKeyConverter.getPrivateKey(privateKeyInfo);
     }
 }

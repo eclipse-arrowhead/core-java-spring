@@ -74,7 +74,7 @@ public class MscvMain {
         // add any special configuration
         sshClient.setServerKeyVerifier(keyVerifier);
         sshClient.setScheduledExecutorService(executorService);
-        logger.info("Created MINA SshClient version {}", sshClient.getVersion());
+        logger.info("Created MINA SshClient: {}", sshClient.getVersion());
         return sshClient;
     }
 }

@@ -1,6 +1,7 @@
 package eu.arrowhead.core.mscv.service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -80,7 +81,7 @@ public class VerificationService {
         Assert.notNull(layer, LAYER_NULL_ERROR_MESSAGE);
 
         // no strategy exists yet. using default list
-        Optional<VerificationEntryList> defaultList = verListRepository.findOneByNameAndLayer(defaults.getDefaultList(), layer);
+        Optional<VerificationEntryList> defaultList = verListRepository.findOneByNameAndLayer(defaults.getListName(), layer);
         //return defaultList.orElseThrow(() -> new MscvException("No suitable list found"));
         return defaultList.orElseGet(() -> createDefaultList(layer));
     }
@@ -89,7 +90,7 @@ public class VerificationService {
         logger.debug("createDefaultList({}) started", layer);
         final Set<Script> allScriptsByLayer = scriptService.findAllByLayer(layer);
 
-        final var unsavedEntryList = new VerificationEntryList(defaults.getDefaultList(),
+        final var unsavedEntryList = new VerificationEntryList(defaults.getListName(),
                                                            DEFAULT_LIST_DESCRIPTION,
                                                            defaults.getVerificationInterval());
         final Set<VerificationEntry> unsavedEntries = new HashSet<>();
@@ -99,7 +100,8 @@ public class VerificationService {
             unsavedEntries.add(new VerificationEntry(script.getMip(), defaults.getMipWeight(), returnValue));
         }
 
-        returnValue.setEntries(verEntryRepository.saveAll(unsavedEntries));
+        final List<VerificationEntry> entries = verEntryRepository.saveAll(unsavedEntries);
+        returnValue.setEntries(new HashSet<>(entries));
         return returnValue;
     }
 }

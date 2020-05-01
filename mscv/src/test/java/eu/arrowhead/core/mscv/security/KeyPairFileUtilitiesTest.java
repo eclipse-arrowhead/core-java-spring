@@ -3,9 +3,13 @@ package eu.arrowhead.core.mscv.security;
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.pkcs.PKCSException;
 import org.junit.Assert;
@@ -16,32 +20,40 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
-public class MscvKeyPairHandlerTest {
+public class KeyPairFileUtilitiesTest {
 
     private static final String PASSWORD = "123456";
     private static final String KEYPAIR_P12 = "classpath:keys/mscv-keypair.p12"; // certificate key store
-    private static final String KEYPAIR_PEM = "classpath:keys/mscv-keypair.pem"; // private key + certificate
-    private static final String PRIVATE_KEY = "classpath:keys/mscv-private.key"; // key in encrypted pem format
-    private static final String PRIVATE_PKCS8 = "classpath:keys/mscv-private.pkcs8"; // key in encrypted pkcs8 format
+    private static final String KEYPAIR_PEM = "classpath:keys/mscv-keypair.pem"; // private key + certificate. "BEGIN ENCRYPTED PRIVATE KEY" and "BEGIN CERTIFICATE"
+    private static final String PRIVATE_KEY = "classpath:keys/mscv-private.key"; // key in encrypted pem format. "BEGIN RSA PRIVATE KEY"
+    private static final String PRIVATE_PKCS8 = "classpath:keys/mscv-private.pkcs8"; // key in encrypted pkcs8 format. "BEGIN ENCRYPTED PRIVATE KEY"
     private static final String PRIVATE_PVK = "classpath:keys/mscv-private.pvk"; // windows proprietary format
-    private static final String PRIVATE_PLAIN_KEY = "classpath:keys/mscv-private-plain.key"; // key in pem format
-    private static final String PUBLIC_PLAIN_PUB = "classpath:keys/mscv-public.pub"; // key in pem format
+    private static final String PRIVATE_SSH_KEY = "classpath:keys/mscv-ssh-private.key"; // key in encrypted pem format. "BEGIN RSA PRIVATE KEY"
+    private static final String PRIVATE_PLAIN_KEY = "classpath:keys/mscv-plain-private.key"; // key in pem format private key. "BEGIN RSA PRIVATE KEY"
+    private static final String PUBLIC_PEM = "classpath:keys/mscv-public.pem"; // key in pem format. "BEGIN PUBLIC KEY".
+    private static final String PUBLIC_SSH_PUB = "classpath:keys/mscv-ssh-public.pub"; // key in ?? ssh identity file format. "ssh-rsa AAAAB3Nz..."
 
-    private final MscvKeyPairHandler handler = new MscvKeyPairHandler();
-    private final ResourceLoader resourceLoader = new DefaultResourceLoader(MscvKeyPairHandler.class.getClassLoader());
+    private final KeyPairFileUtilities handler = new KeyPairFileUtilities();
+    private final ResourceLoader resourceLoader = new DefaultResourceLoader(KeyPairFileUtilities.class.getClassLoader());
 
     private PrivateKey plainPrivateKey;
     private PublicKey plainPublicKey;
 
     @Before
-    public void initKeys() throws IOException, PKCSException, OperatorCreationException {
+    public void initKeys()
+            throws IOException, PKCSException, OperatorCreationException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
         plainPrivateKey = handler.readPrivateKey(findResource(PRIVATE_PLAIN_KEY).getAbsolutePath(), null);
-        plainPublicKey = handler.readPublicKey(findResource(PUBLIC_PLAIN_PUB).getAbsolutePath());
+        plainPublicKey = handler.readPublicKey(findResource(PUBLIC_PEM).getAbsolutePath());
     }
 
     @Test
-    public void readPrivateKey_key() throws PKCSException, OperatorCreationException, IOException {
+    public void readPrivateKey_encrypted_pem() throws PKCSException, OperatorCreationException, IOException {
         readPrivateKeyAndVerify(PRIVATE_KEY);
+    }
+
+    @Test
+    public void readPrivateKey_encrypted_ssh_key() throws PKCSException, OperatorCreationException, IOException {
+        readPrivateKeyAndVerify(PRIVATE_SSH_KEY);
     }
 
     @Test
@@ -79,17 +91,47 @@ public class MscvKeyPairHandlerTest {
 
     @Test
     @Ignore
-    public void readPublicKey_p12() throws IOException {
+    public void readPublicKey_p12() throws IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
         readPublicKeyAndVerify(KEYPAIR_P12);
     }
 
     @Test
-    public void readPublicKey_pub() throws IOException {
-        readPublicKeyAndVerify(PUBLIC_PLAIN_PUB);
+    public void readPublicKey_pem() throws IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
+        readPublicKeyAndVerify(PUBLIC_PEM);
     }
 
     @Test
-    public void writePrivateKeyPEM() throws IOException, PKCSException, OperatorCreationException {
+    public void readPublicKey_ssh_pub() throws IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
+        readPublicKeyAndVerify(PUBLIC_SSH_PUB);
+    }
+
+    @Test
+    public void writePublicKey_ssh_pub() throws IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
+        final File file = File.createTempFile("public", ".pem.tmp");
+        try {
+            handler.writePublicKeySSH(plainPublicKey, file.getAbsolutePath(), "MSCV@" + SystemUtils.getHostName());
+            readPublicKeyAndVerify(file);
+        } finally {
+            Assert.assertTrue(file.delete());
+        }
+    }
+
+    @Test
+    public void writePrivateKey_plain_pem() throws IOException, PKCSException, OperatorCreationException {
+        final File file = File.createTempFile("public", ".pem.tmp");
+        try {
+            handler.writePrivateKeyPlain(plainPrivateKey, file.getAbsolutePath());
+            readPrivateKeyAndVerify(file, null);
+
+            // implementation detects unencrypted file and parses it w/o password
+            readPrivateKeyAndVerify(file, PASSWORD);
+        } finally {
+            Assert.assertTrue(file.delete());
+        }
+    }
+
+    @Test
+    public void writePrivateKey_encrypted_pem() throws IOException, PKCSException, OperatorCreationException {
         final File file = File.createTempFile("public", ".pem.tmp");
         try {
             handler.writePrivateKeyPEM(plainPrivateKey, file.getAbsolutePath(), "new password");
@@ -107,7 +149,7 @@ public class MscvKeyPairHandlerTest {
     }
 
     @Test
-    public void writePrivateKeyPKCS8() throws IOException, OperatorCreationException, PKCSException {
+    public void writePrivateKey_encrypted_PKCS8() throws IOException, OperatorCreationException, PKCSException {
         final File file = File.createTempFile("public", ".key.tmp");
         try {
             handler.writePrivateKeyPKCS8(plainPrivateKey, file.getAbsolutePath(), "new password");
@@ -125,10 +167,10 @@ public class MscvKeyPairHandlerTest {
     }
 
     @Test
-    public void writePublicKey_pub() throws IOException, OperatorCreationException, PKCSException {
+    public void writePublicKey_pub() throws IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
         final File file = File.createTempFile("public", ".pub.tmp");
         try {
-            handler.writePublicKey(plainPublicKey, file.getAbsolutePath());
+            handler.writePublicKeyPEM(plainPublicKey, file.getAbsolutePath());
             readPublicKeyAndVerify(file);
         } finally {
             Assert.assertTrue(file.delete());
@@ -137,7 +179,7 @@ public class MscvKeyPairHandlerTest {
 
     private File findResource(final String resourceLocation) throws IOException {
         final Resource resource = resourceLoader.getResource(resourceLocation);
-        return resource.getFile();
+        return resource.getFile().getAbsoluteFile();
     }
 
     private void readPrivateKeyAndVerify(final File file, final String password) throws PKCSException, OperatorCreationException, IOException {
@@ -150,13 +192,13 @@ public class MscvKeyPairHandlerTest {
         readPrivateKeyAndVerify(findResource(filename), PASSWORD);
     }
 
-    private void readPublicKeyAndVerify(final File file) throws IOException {
+    private void readPublicKeyAndVerify(final File file) throws IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
         final PublicKey publicKey = handler.readPublicKey(file.getAbsolutePath());
         Assert.assertNotNull(publicKey);
         Assert.assertArrayEquals(plainPublicKey.getEncoded(), publicKey.getEncoded());
     }
 
-    private void readPublicKeyAndVerify(final String filename) throws IOException {
+    private void readPublicKeyAndVerify(final String filename) throws IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
         readPublicKeyAndVerify(findResource(filename));
     }
 

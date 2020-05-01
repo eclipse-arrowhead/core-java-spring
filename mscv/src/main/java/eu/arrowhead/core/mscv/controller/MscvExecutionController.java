@@ -10,6 +10,7 @@ import eu.arrowhead.core.mscv.http.ClientExecutionRequest;
 import eu.arrowhead.core.mscv.http.ClientExecutionResponse;
 import eu.arrowhead.core.mscv.http.ExecutionRequest;
 import eu.arrowhead.core.mscv.http.ExecutionResponse;
+import eu.arrowhead.core.mscv.security.KeyPairFileStorage;
 import eu.arrowhead.core.mscv.service.VerificationExecutionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -46,11 +47,13 @@ public class MscvExecutionController {
 
     private final Logger logger = LogManager.getLogger(MscvExecutionController.class);
     private final VerificationExecutionService executionService;
+    private final KeyPairFileStorage keyPairStorage;
     private final Validation validation;
 
     @Autowired
-    public MscvExecutionController(final VerificationExecutionService executionService) {
+    public MscvExecutionController(final VerificationExecutionService executionService, final KeyPairFileStorage keyPairStorage) {
         this.executionService = executionService;
+        this.keyPairStorage = keyPairStorage;
         this.validation = new Validation();
     }
 
