@@ -1,16 +1,19 @@
 package eu.arrowhead.common.core;
 
+import java.util.Collections;
+import java.util.List;
+
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
 import org.springframework.util.Assert;
 
-import java.util.Collections;
-import java.util.List;
-
+import static eu.arrowhead.common.core.CoreSystemService.DEVICE_REGISTRY_ONBOARDING_WITH_CSR_SERVICE;
 import static eu.arrowhead.common.core.CoreSystemService.DEVICE_REGISTRY_ONBOARDING_WITH_NAME_SERVICE;
 import static eu.arrowhead.common.core.CoreSystemService.DEVICE_REGISTRY_REGISTER_SERVICE;
-import static eu.arrowhead.common.core.CoreSystemService.DEVICE_REGISTRY_ONBOARDING_WITH_CSR_SERVICE;
 import static eu.arrowhead.common.core.CoreSystemService.DEVICE_REGISTRY_UNREGISTER_SERVICE;
+import static eu.arrowhead.common.core.CoreSystemService.MSCV_LOGIN_SERVICE;
+import static eu.arrowhead.common.core.CoreSystemService.MSCV_PUBLIC_KEY_SERVICE;
+import static eu.arrowhead.common.core.CoreSystemService.MSCV_VERIFICATION_SERVICE;
 import static eu.arrowhead.common.core.CoreSystemService.ONBOARDING_WITH_CERTIFICATE_AND_CSR_SERVICE;
 import static eu.arrowhead.common.core.CoreSystemService.ONBOARDING_WITH_CERTIFICATE_AND_NAME_SERVICE;
 import static eu.arrowhead.common.core.CoreSystemService.ONBOARDING_WITH_SHARED_SECRET_AND_CSR_SERVICE;
@@ -47,7 +50,7 @@ public enum CoreSystem {
     CHOREOGRAPHER(Defaults.DEFAULT_CHOREOGRAPHER_PORT, List.of()), // TODO: add services
     QOS_MONITOR(Defaults.DEFAULT_QOS_MONITOR_PORT, List.of(CoreSystemService.QOS_MONITOR_PING_MEASUREMENT_SERVICE)),
     CERTIFICATE_AUTHORITY(Defaults.DEFAULT_CERTIFICATE_AUTHORITY_PORT, List.of(CoreSystemService.CERTIFICATE_AUTHORITY_SIGN_SERVICE)),
-    MSCV(Defaults.DEFAULT_MSCV_PORT, List.of(CoreSystemService.MSCV_VERIFICATION_SERVICE));
+    MSCV(Defaults.DEFAULT_MSCV_PORT, List.of(MSCV_VERIFICATION_SERVICE, MSCV_PUBLIC_KEY_SERVICE, MSCV_LOGIN_SERVICE));
 
     //=================================================================================================
     // members

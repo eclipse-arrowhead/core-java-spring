@@ -6,6 +6,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.mscv.SshTargetDto;
 import eu.arrowhead.common.dto.shared.mscv.TargetDto;
+import eu.arrowhead.common.dto.shared.mscv.TargetLoginRequest;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.mscv.http.ClientExecutionRequest;
 import org.apache.http.HttpStatus;
@@ -19,9 +20,14 @@ public class Validation {
     public static final String PAYLOAD_NULL_ERROR_MESSAGE = "Payload must not be null";
     public static final String PAGE_NULL_ERROR_MESSAGE = "Page must not be null";
     public static final String EXAMPLE_NULL_ERROR_MESSAGE = "Example must not be null";
+    public static final String LAYER_NULL_ERROR_MESSAGE = "Layer must not be null";
+
+    public static final String CREDENTIALS_NULL_ERROR_MESSAGE = "Credentials must not be null/empty";
+    public static final String CREDENTIALS_INVALID_ERROR_MESSAGE = "Credentials must be Base64 encoded in the form <user>:<password>";
 
     public static final String TARGET_NULL_ERROR_MESSAGE = "Target must not be null";
     public static final String TARGET_EMPTY_ERROR_MESSAGE = "Target must have value";
+    public static final String LOGIN_TARGET_NOT_FOUND = "Target not found";
 
     public static final String NAME_NULL_ERROR_MESSAGE = "Name must not be null";
     public static final String NAME_EMPTY_ERROR_MESSAGE = "Name must have value";
@@ -38,8 +44,6 @@ public class Validation {
     public static final String PORT_NULL_ERROR_MESSAGE = "Port must not be null";
     public static final String PORT_EMPTY_ERROR_MESSAGE = "Port must have value";
     public static final String PORT_INVALID_ERROR_MESSAGE = "Port must be positive number between 1 - 65535";
-
-    public static final String LAYER_NULL_ERROR_MESSAGE = "Layer must not be null";
 
     public static final String LIST_NULL_ERROR_MESSAGE = "List must not be null";
     public static final String LIST_EMPTY_ERROR_MESSAGE = "List must not be empty";
@@ -81,6 +85,14 @@ public class Validation {
         }
     }
 
+    public void verify(final TargetLoginRequest request, final String origin) {
+        logger.debug("verify({},{}) started...", request, origin);
+        verify(request.getTarget(), origin);
+        if(Utilities.isEmpty(request.getCredentials())) {
+            throw new BadPayloadException(CREDENTIALS_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+    }
+
     public void verifyAddress(final String address, final String origin) {
         if (Utilities.isEmpty(address)) {
             throw new BadPayloadException(ADDRESS_EMPTY_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
@@ -93,6 +105,15 @@ public class Validation {
         }
         if (port <= CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
             throw new BadPayloadException(PORT_INVALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+    }
+
+    public void verifyCredentials(final String[] credentials, final String origin) {
+        if(Objects.isNull(credentials)) {
+            throw new BadPayloadException(CREDENTIALS_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+        if(credentials.length != 2) {
+            throw new BadPayloadException(CREDENTIALS_INVALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
     }
 
@@ -114,4 +135,5 @@ public class Validation {
                        .withIgnoreCase()
                        .withIgnoreNullValues();
     }
+
 }

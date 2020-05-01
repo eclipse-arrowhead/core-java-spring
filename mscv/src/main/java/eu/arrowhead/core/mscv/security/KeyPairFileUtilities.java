@@ -212,9 +212,7 @@ public class KeyPairFileUtilities {
         }
     }
 
-    public void writePublicKeySSH(final PublicKey publicKey, final String file, final String user)
-            throws IOException, InvalidKeySpecException {
-
+    public String encodePublicKeySSH(final PublicKey publicKey, final String user) throws IOException, InvalidKeySpecException {
         final String encodedKey;
         if (publicKey.getAlgorithm().equals("RSA")) {
             encodedKey = encodeRsaPublicKey((RSAPublicKey) publicKey, user);
@@ -223,9 +221,14 @@ public class KeyPairFileUtilities {
         } else {
             throw new InvalidKeySpecException("Unknown public key encoding: " + publicKey.getAlgorithm());
         }
+        return encodedKey;
+    }
+
+    public void writePublicKeySSH(final PublicKey publicKey, final String file, final String user)
+            throws IOException, InvalidKeySpecException {
 
         try (final FileWriter writer = new FileWriter(file)) {
-            writer.write(encodedKey);
+            writer.write(encodePublicKeySSH(publicKey, user));
             writer.flush();
         }
     }

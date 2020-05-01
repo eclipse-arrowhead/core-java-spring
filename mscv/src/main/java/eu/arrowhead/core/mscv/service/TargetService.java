@@ -7,9 +7,11 @@ import eu.arrowhead.common.database.entity.mscv.Target;
 import eu.arrowhead.common.database.repository.mscv.SshTargetRepository;
 import eu.arrowhead.common.dto.shared.mscv.OS;
 import eu.arrowhead.common.dto.shared.mscv.SshTargetDto;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.mscv.MscvDefaults;
 import eu.arrowhead.core.mscv.Validation;
-import eu.arrowhead.core.mscv.delegate.SshExecutionHandler;
+import eu.arrowhead.core.mscv.delegate.ExecutionHandler;
+import eu.arrowhead.core.mscv.delegate.ExecutionHandlerFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,17 +38,17 @@ public class TargetService {
 
     private final Logger logger = LogManager.getLogger();
     private final SshTargetRepository targetRepo;
-    private final SshExecutionHandler sshTargetHandler;
+    private final ExecutionHandlerFactory executionHandlerFactory;
     private final MscvDefaults defaults;
     private final Validation validation;
 
     @Autowired
     public TargetService(final SshTargetRepository targetRepo,
-                         final SshExecutionHandler sshTargetHandler,
+                         final ExecutionHandlerFactory executionHandlerFactory,
                          final MscvDefaults defaults) {
         super();
         this.targetRepo = targetRepo;
-        this.sshTargetHandler = sshTargetHandler;
+        this.executionHandlerFactory = executionHandlerFactory;
         this.defaults = defaults;
 
         validation = new Validation();
@@ -104,6 +106,14 @@ public class TargetService {
     }
 
     @Transactional(readOnly = true)
+    public Optional<Target> find(final String name, final OS os) {
+        logger.debug("findTarget({},{}) started", name, os);
+        Assert.hasText(name, NAME_NULL_ERROR_MESSAGE);
+        Assert.notNull(os, OS_NULL_ERROR_MESSAGE);
+        return targetRepo.findByNameAndOs(name, os);
+    }
+
+    @Transactional(readOnly = true)
     public Page<SshTarget> pageByExample(final Example<SshTarget> example, final Pageable pageable) {
         logger.debug("getTargets({},{}) started", example, pageable);
         Assert.notNull(example, EXAMPLE_NULL_ERROR_MESSAGE);
@@ -130,7 +140,11 @@ public class TargetService {
         Assert.notNull(username, USERNAME_NULL_ERROR_MESSAGE);
         // password may or may not be empty/null
         checkSupported(target.getClass());
-        sshTargetHandler.login((SshTarget) target, username, password);
+        final Optional<ExecutionHandler> optionalHandler = executionHandlerFactory.find(target);
+        final ExecutionHandler handler = optionalHandler.orElseThrow(() -> new InvalidParameterException("The type of target is not supported"));
+        handler.login(target, username, password);
+        //final ExecutionHandler<SshTarget> executionHandler = executionHandlerFactory.find((SshTarget)target);
+        //sshTargetHandler.login((SshTarget) target, username, password);
     }
 
     @Transactional

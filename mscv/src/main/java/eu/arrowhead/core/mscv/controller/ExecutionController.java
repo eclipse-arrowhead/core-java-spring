@@ -1,16 +1,24 @@
 package eu.arrowhead.core.mscv.controller;
 
+import java.io.IOException;
+import java.security.spec.InvalidKeySpecException;
+
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.database.view.mscv.VerificationExecutionView;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
+import eu.arrowhead.common.dto.shared.mscv.PublicKeyResponse;
+import eu.arrowhead.common.dto.shared.mscv.TargetLoginRequest;
+import eu.arrowhead.core.mscv.MscvUtilities;
 import eu.arrowhead.core.mscv.Validation;
 import eu.arrowhead.core.mscv.http.ClientExecutionRequest;
 import eu.arrowhead.core.mscv.http.ClientExecutionResponse;
 import eu.arrowhead.core.mscv.http.ExecutionRequest;
 import eu.arrowhead.core.mscv.http.ExecutionResponse;
 import eu.arrowhead.core.mscv.security.KeyPairFileStorage;
+import eu.arrowhead.core.mscv.service.MscvException;
+import eu.arrowhead.core.mscv.service.TargetService;
 import eu.arrowhead.core.mscv.service.VerificationExecutionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,6 +38,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import static eu.arrowhead.common.CommonConstants.OP_MSCV_EXECUTE_URI;
+import static eu.arrowhead.common.CommonConstants.OP_MSCV_LOGIN_URI;
+import static eu.arrowhead.common.CommonConstants.OP_MSCV_PUBLIC_KEY_URI;
+import static eu.arrowhead.core.mscv.Validation.LOGIN_TARGET_NOT_FOUND;
 
 @Api(tags = {CoreCommonConstants.SWAGGER_TAG_ALL})
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS,
@@ -37,7 +48,7 @@ import static eu.arrowhead.common.CommonConstants.OP_MSCV_EXECUTE_URI;
 )
 @RestController
 @RequestMapping(CommonConstants.MSCV_URI)
-public class MscvExecutionController {
+public class ExecutionController {
 
     //=================================================================================================
     // members
@@ -45,14 +56,21 @@ public class MscvExecutionController {
     private static final String EXECUTION_HTTP_201_MESSAGE = "Execution started";
     private static final String EXECUTION_HTTP_400_MESSAGE = "Request parameter missing";
 
-    private final Logger logger = LogManager.getLogger(MscvExecutionController.class);
+    private static final String LOGIN_SUCCESS = "Execution started";
+    private static final String LOGIN_BAD_REQUEST = "Request parameter missing";
+
+    private final Logger logger = LogManager.getLogger(ExecutionController.class);
     private final VerificationExecutionService executionService;
+    private final TargetService targetService;
     private final KeyPairFileStorage keyPairStorage;
     private final Validation validation;
 
     @Autowired
-    public MscvExecutionController(final VerificationExecutionService executionService, final KeyPairFileStorage keyPairStorage) {
+    public ExecutionController(final VerificationExecutionService executionService,
+                               final TargetService targetService,
+                               final KeyPairFileStorage keyPairStorage) {
         this.executionService = executionService;
+        this.targetService = targetService;
         this.keyPairStorage = keyPairStorage;
         this.validation = new Validation();
     }
@@ -71,6 +89,36 @@ public class MscvExecutionController {
     @GetMapping(path = CommonConstants.ECHO_URI)
     public String echoOnboarding() {
         return "Got it!";
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = "Return the Base64 encoded public key of the server as well as the SSH identity line", response = String.class,
+            tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response = ErrorMessageDTO.class)
+    })
+    @GetMapping(OP_MSCV_PUBLIC_KEY_URI)
+    public PublicKeyResponse getPublicKey() throws IOException, InvalidKeySpecException {
+        return keyPairStorage.createPublicKeyResponse();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = "Request remote login to the client to setup key-based login", response = Void.class,
+            tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_OK, message = LOGIN_SUCCESS, response = Void.class),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = LOGIN_BAD_REQUEST, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = LOGIN_TARGET_NOT_FOUND, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response = ErrorMessageDTO.class)
+    })
+    @PostMapping(OP_MSCV_LOGIN_URI)
+    @ResponseBody
+    public void login(@RequestBody final TargetLoginRequest request) throws MscvException {
+        logger.debug("login started ...");
+        MscvUtilities.performLogin(targetService, request, createOrigin(OP_MSCV_LOGIN_URI));
     }
 
     //-------------------------------------------------------------------------------------------------

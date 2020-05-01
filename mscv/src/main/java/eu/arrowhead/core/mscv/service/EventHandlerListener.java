@@ -43,7 +43,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import static eu.arrowhead.common.CommonConstants.OP_MSCV_PUBLISH_URI;
+import static eu.arrowhead.common.CommonConstants.OP_MSCV_EVENT_CALLBACK_URI;
 
 @Service
 @Api(tags = {CoreCommonConstants.SWAGGER_TAG_ALL})
@@ -52,6 +52,7 @@ import static eu.arrowhead.common.CommonConstants.OP_MSCV_PUBLISH_URI;
 )
 @RestController
 @RequestMapping(CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI)
+// TODO create a service
 public class EventHandlerListener {
 
     private static final int MAX_ATTEMPTS = 5;
@@ -85,7 +86,7 @@ public class EventHandlerListener {
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @PostMapping(OP_MSCV_PUBLISH_URI)
+    @PostMapping(OP_MSCV_EVENT_CALLBACK_URI)
     @ResponseBody
     public void publish(@RequestBody final EventDTO event) throws IOException, SchedulerException {
         logger.debug("publish started ...");
@@ -183,7 +184,7 @@ public class EventHandlerListener {
         dto.setSubscriberSystem(eventDriver.getRequesterSystem());
         dto.setEventType(eventType);
         dto.setMatchMetaData(false);
-        dto.setNotifyUri(CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI + OP_MSCV_PUBLISH_URI);
+        dto.setNotifyUri(CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI + OP_MSCV_EVENT_CALLBACK_URI);
         return dto;
     }
 

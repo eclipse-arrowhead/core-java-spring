@@ -12,7 +12,10 @@ import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.mscv.OS;
 import eu.arrowhead.common.dto.shared.mscv.SshTargetDto;
 import eu.arrowhead.common.dto.shared.mscv.TargetListResponseDTO;
+import eu.arrowhead.common.dto.shared.mscv.TargetLoginRequest;
+import eu.arrowhead.core.mscv.MscvUtilities;
 import eu.arrowhead.core.mscv.Validation;
+import eu.arrowhead.core.mscv.service.MscvException;
 import eu.arrowhead.core.mscv.service.TargetService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -39,6 +42,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import static eu.arrowhead.common.CommonConstants.OP_MSCV_LOGIN_URI;
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_ADDRESS;
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_ADDRESS_PATH;
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_NAME;
@@ -49,6 +53,7 @@ import static eu.arrowhead.core.mscv.Constants.PATH_ADDRESS;
 import static eu.arrowhead.core.mscv.Constants.PATH_PORT;
 import static eu.arrowhead.core.mscv.Constants.SWAGGER_TAG_TARGET;
 import static eu.arrowhead.core.mscv.MscvUtilities.notFoundException;
+import static eu.arrowhead.core.mscv.Validation.LOGIN_TARGET_NOT_FOUND;
 
 @Api(tags = {CoreCommonConstants.SWAGGER_TAG_ALL})
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS,
@@ -88,6 +93,11 @@ public class TargetMgmtController {
     private static final String DELETE_TARGET_DESCRIPTION = "Delete MSCV target";
     private static final String DELETE_TARGET_SUCCESS = "MSCV target deleted";
     private static final String DELETE_TARGET_BAD_REQUEST = "Unable to delete MSCV target";
+
+    private static final String LOGIN_TARGET_URI = TARGET_URI + OP_MSCV_LOGIN_URI;
+    private static final String LOGIN_TARGET_DESCRIPTION = "Instruct MSCV to remote login to a target with a username and password";
+    private static final String LOGIN_TARGET_SUCCESS = "MSCV target login success";
+    private static final String LOGIN_TARGET_BAD_REQUEST = "Unable to login to MSCV target";
 
     private final Logger logger = LogManager.getLogger();
     private final Validation validation = new Validation();
@@ -226,6 +236,23 @@ public class TargetMgmtController {
         validation.verifyAddress(address, origin);
         validation.verifyPort(port, origin);
         targetService.delete(address, port);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = LOGIN_TARGET_DESCRIPTION, response = Void.class,
+            tags = {CoreCommonConstants.SWAGGER_TAG_MGMT, SWAGGER_TAG_TARGET})
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_OK, message = LOGIN_TARGET_SUCCESS, response = Void.class),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = LOGIN_TARGET_BAD_REQUEST, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = LOGIN_TARGET_NOT_FOUND, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response = ErrorMessageDTO.class)
+    })
+    @PostMapping(LOGIN_TARGET_URI)
+    @ResponseBody
+    public void login(@RequestBody final TargetLoginRequest request) throws MscvException {
+        logger.debug("login started ...");
+        MscvUtilities.performLogin(targetService, request, createOrigin(LOGIN_TARGET_URI));
     }
 
     private String createOrigin(final String path) {

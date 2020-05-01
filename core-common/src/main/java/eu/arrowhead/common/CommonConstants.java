@@ -1,11 +1,11 @@
 package eu.arrowhead.common;
 
+import java.util.List;
+
 import eu.arrowhead.common.core.CoreSystemService;
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
 import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
 import org.jose4j.jws.AlgorithmIdentifiers;
-
-import java.util.List;
 
 public class CommonConstants {
 
@@ -57,6 +57,8 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_SERVICE_REGISTRY_UNREGISTER = "service-unregister";
 
 	public static final String CORE_SERVICE_MSCV_VERIFICATION = "standard-verification";
+	public static final String CORE_SERVICE_MSCV_PUBLIC_KEY = "standard-verification-public-key";
+	public static final String CORE_SERVICE_MSCV_LOGIN = "standard-verification-remote-login";
 
 	public static final String CORE_SERVICE_SYSTEM_REGISTRY_REGISTER = "system-register";
 	public static final String CORE_SERVICE_SYSTEM_REGISTRY_UNREGISTER = "system-unregister";
@@ -179,7 +181,9 @@ public class CommonConstants {
 
 	public static final String MSCV_URI = "/mscv";
 	public static final String OP_MSCV_EXECUTE_URI = "/execute";
-	public static final String OP_MSCV_PUBLISH_URI = "/publish";
+	public static final String OP_MSCV_EVENT_CALLBACK_URI = "/event_callback";
+	public static final String OP_MSCV_LOGIN_URI = "/login";
+	public static final String OP_MSCV_PUBLIC_KEY_URI = "/publickey";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";

@@ -15,5 +15,4 @@ public interface VerificationEntryRepository extends RefreshableRepository<Verif
 
     Set<VerificationEntryView> findViewByVerificationList(final VerificationEntryList entryList);
 
-    Set<VerificationEntry> saveAll(final Set<VerificationEntry> entries);
 }

@@ -13,9 +13,12 @@ import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Base64;
 import java.util.Set;
 import javax.annotation.PostConstruct;
 
+import eu.arrowhead.common.CoreSystemRegistrationProperties;
+import eu.arrowhead.common.dto.shared.mscv.PublicKeyResponse;
 import eu.arrowhead.core.mscv.MscvDefaults;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.LogManager;
@@ -35,15 +38,19 @@ public class KeyPairFileStorage {
     private final Logger logger = LogManager.getLogger();
     private final KeyPairFileUtilities keyPairHandler;
     private final MscvDefaults.SshDefaults sshDefaults;
+    private final CoreSystemRegistrationProperties coreProperties;
 
     // properties can't be immutable yet, so this can't be immutable either
     private PublicKey publicKey;
     private PrivateKey privateKey;
 
     @Autowired
-    public KeyPairFileStorage(final KeyPairFileUtilities keyPairHandler, final MscvDefaults mscvDefaults) {
+    public KeyPairFileStorage(final KeyPairFileUtilities keyPairHandler,
+                              final MscvDefaults mscvDefaults,
+                              final CoreSystemRegistrationProperties coreProperties) {
         this.keyPairHandler = keyPairHandler;
         this.sshDefaults = mscvDefaults.getSsh();
+        this.coreProperties = coreProperties;
     }
 
     @PostConstruct
@@ -76,6 +83,26 @@ public class KeyPairFileStorage {
             final KeyPair keyPair = keyPairGenerator.generateKeyPair();
             setAndWriteKeyPair(keyPair, publicKeyPath, privateKeyPath, password);
         }
+    }
+
+    public PublicKeyResponse createPublicKeyResponse() throws IOException, InvalidKeySpecException {
+        return new PublicKeyResponse(getPublicKeyAsBase64(), getPublicKeyAsSshString(), getPublicKeyAlgorithm(), getPublicKeyFormat());
+    }
+
+    public String getPublicKeyAsSshString() throws IOException, InvalidKeySpecException {
+        return keyPairHandler.encodePublicKeySSH(publicKey, "mscv@" + coreProperties.getCoreSystemDomainName());
+    }
+
+    public String getPublicKeyAsBase64() {
+        return Base64.getEncoder().encodeToString(publicKey.getEncoded());
+    }
+
+    public String getPublicKeyAlgorithm() {
+        return publicKey.getAlgorithm();
+    }
+
+    public String getPublicKeyFormat() {
+        return publicKey.getFormat();
     }
 
     public PublicKey getPublicKey() {

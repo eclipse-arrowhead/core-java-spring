@@ -1,5 +1,13 @@
 package eu.arrowhead.core.mscv.security;
 
+import java.io.IOException;
+import java.util.Map;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SecurityUtilities;
@@ -11,14 +19,6 @@ import eu.arrowhead.common.security.CoreSystemAccessControlFilter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.util.Map;
 
 @Component
 @ConditionalOnProperty(name = CommonConstants.SERVER_SSL_ENABLED, matchIfMissing = true)
@@ -41,7 +41,7 @@ public class MscvAccessControlFilter extends CoreSystemAccessControlFilter {
                 Assert.notNull(requestTarget, "Unable to determine request target");
                 Assert.notNull(clientCN, "Unable to extract common name from request");
 
-                if (requestTarget.endsWith(CommonConstants.OP_MSCV_PUBLISH_URI)) {
+                if (requestTarget.endsWith(CommonConstants.OP_MSCV_EVENT_CALLBACK_URI)) {
                     // Only event handler can use these methods
                     checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, new CoreSystem[]{CoreSystem.EVENT_HANDLER}, requestTarget);
                 } else if (requestTarget.contains(CoreCommonConstants.MGMT_URI)) {
