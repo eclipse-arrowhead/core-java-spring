@@ -20,6 +20,7 @@ The base URL for the requests: `http://<host>:<port>/qos_monitor`.
 | [Get Public Key](#endpoint_get_publickey) | /publickey | GET | - | [String](#output_get_publickey) |
 | [Retrieve Intra-Cloud Ping Measurement](#endpoint_get_intra_ping) | /measurements/intracloud/ping/{id} | GET | [id](#input_get_intra_ping) | [Response DTO](#output_get_intra_ping) |
 | [Calculate Intra-Cloud Ping Median Measurement](#endpoint_get_intra_median_ping) | /measurements/intracloud/ping_median/{attribute} | GET | [attribute](#input_get_intra_median_ping) | [Response DTO](#output_get_intra_median_ping) |
+| [Retrieve Inter-Cloud Direct Ping Measurement](#endpoint_post_inter_direct_ping) | /measurements/intercloud/ping | POST | [Request DTO](#input_post_inter_direct_ping) | [Response DTO](#output_post_inter_direct_ping) |
 
 ## Management Endpoint Description
 
@@ -212,3 +213,80 @@ Attribute of the ping measurement as a path variable. Possible values are:
 | countStartedAt | TimeSatmp value of the last reset of sent and received fields|
 | createdAt | Date of creation of the ping measurement |
 | updatedAt | Date of update of the ping measurement |
+
+### Retrieve Inter-Cloud Direct Ping Measurement <a name="endpoint_post_inter_direct_ping"/>
+```
+GET /qos_monitor/measurements/intercloud/ping
+```
+
+Returns the requested Inter-Cloud Direct Ping Measurement entry by cloud and system.
+
+**Input:**  <a name="input_post_inter_direct_ping"/>
+
+```json
+{
+  "cloud": {    
+    "id": 0,
+	  "operator": "string",
+    "name": "string",        
+    "ownCloud": true,
+	  "neighbor": true,
+    "secure": true,
+	  "authenticationInfo": "string",
+	  "createdAt": "string",
+    "updatedAt": "string"
+  },
+  "system": {
+    "id": 0,
+	  "systemName": "string",
+    "address": "string",
+	  "port": 0,
+    "authenticationInfo": "string",
+    "createdAt": "string",    
+    "updatedAt": "string"
+  }
+}
+```
+
+**Output:** <a name="output_post_inter_direct_ping"/>
+
+```json
+{
+  "id": 0,
+  "measurement": {
+    "id": 0,
+	  "measurementType": "PING",
+    "address": "string",
+	  "cloud": {    
+	    "id": 0,
+	    "operator": "string",
+      "name": "string",        
+      "ownCloud": true,
+	    "neighbor": true,
+      "secure": true,
+	    "authenticationInfo": "string",
+	    "createdAt": "string",
+      "updatedAt": "string"
+    },
+	  "lastMeasurementAt": "2020-05-04T13:50:19.127Z",
+	  "createdAt": "2020-05-04T13:50:19.127Z",
+    "updatedAt": "2020-05-04T13:50:19.127Z"
+  },
+  "available": true,
+  "minResponseTime": 0,
+  "maxResponseTime": 0,
+  "meanResponseTimeWithTimeout": 0,
+  "meanResponseTimeWithoutTimeout": 0,
+  "jitterWithTimeout": 0,
+  "jitterWithoutTimeout": 0,  
+  "lostPerMeasurementPercent": 0,
+  "sent": 0,
+  "sentAll": 0,
+  "received": 0,
+  "receivedAll": 0,
+  "lastAccessAt": "2020-05-04T13:50:19.127Z",
+  "countStartedAt": "2020-05-04T13:50:19.127Z",
+  "createdAt": "2020-05-04T13:50:19.127Z",
+  "updatedAt": "2020-05-04T13:50:19.127Z"
+}
+```
