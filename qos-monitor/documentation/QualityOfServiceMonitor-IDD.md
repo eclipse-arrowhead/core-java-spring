@@ -248,6 +248,25 @@ Returns the requested Inter-Cloud Direct Ping Measurement entry by cloud and sys
 }
 ```
 
+| Field | Description | Necessity |
+| ----- | ----------- | --------- |
+| cloud.id | ID of the cloud | mandatory |
+| cloud.operator | Operator of the cloud | mandatory |
+| cloud.name | Name of the cloud | mandatory |
+| cloud.owncloud | Flag to indicate own cloud (meant to be false) | optional |
+| cloud.neighbor | Flag to indicate neighbor cloud | optional |
+| cloud.secure | Flag to indicate security | optional |
+| cloud.authenticationInfo | Base64 encoded public key of the cloud | optional |
+| cloud.createdAt | Date of creation of the cloud | optional |
+| cloud.updatedAt | Date of update of the cloud | optional |
+| system.id | ID of the system |  mandatory |
+| system.systemName | Name of the system |  mandatory |
+| system.address | Address of the system |  mandatory |
+| system.port | Port of the system | optional |
+| system.authenticationInfo | Base64 encoded public key of the system | optional |
+| system.createdAt | Date of creation of the system | optional |
+| system.updatedAt | Date of update of the system | optional |
+
 **Output:** <a name="output_post_inter_direct_ping"/>
 
 ```json
