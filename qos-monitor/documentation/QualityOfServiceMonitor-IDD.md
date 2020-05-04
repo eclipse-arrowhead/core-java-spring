@@ -17,7 +17,7 @@ The base URL for the requests: `http://<host>:<port>/qos_monitor`.
 
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
-| [Get Publickey](#endpoint_get_publickey) | /publickey | GET | - | [String](#output_get_publickey) |
+| [Get Public Key](#endpoint_get_publickey) | /publickey | GET | - | [String](#output_get_publickey) |
 | [Retrieve Intra-Cloud Ping Measurement](#endpoint_get_intra_ping) | /measurements/intracloud/ping/{id} | GET | [id](#input_get_intra_ping) | [Response DTO](#output_get_intra_ping) |
 | [Calculate Intra-Cloud Ping Median Measurement](#endpoint_get_intra_median_ping) | /measurements/intracloud/ping_median/{attribute} | GET | [attribute](#input_get_intra_median_ping) | [Response DTO](#output_get_intra_median_ping) |
 
@@ -34,7 +34,7 @@ GET /qos_monitor/echo
 
 Returns a "Got it" message with the purpose of testing the core service availability.
 
-### Get Publickey <a name="endpoint_get_publickey"/>
+### Get Public Key <a name="endpoint_get_publickey"/>
 ```
 GET /qos_monitor/publickey
 ```
