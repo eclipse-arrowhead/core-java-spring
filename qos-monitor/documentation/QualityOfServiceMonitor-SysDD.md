@@ -23,7 +23,7 @@ _Private:_
 * [Public Key](#public_key_service_use_case)
 * [Intra-Cloud Ping Measurement](#intra_ping_service_use_case)
 * [Intra-Cloud Ping Median Measurement](#intra_ping_median_service_use_case)
-* [Inter-Cloud Direct Ping Measurement](todo)
+* [Inter-Cloud Direct Ping Measurement](#inter_direct_ping_service_use_case)
 * [Inter-Cloud Relay Echo Measurement](todo)
 * [Init Relay Test](todo)
 * [Join Relay Test](todo)
@@ -90,3 +90,13 @@ _Activity diagram: Intra-Cloud Ping Measurement Task:_
 | Preconditions | - |
 | Main Flow | * Request sent by an allowed core system <br/>* Calculation performed and response sent by QoS Monitor. |
 
+### Use Case: Inter-Cloud Direct Ping Measurement Service <a name="inter_direct_ping_service_use_case" />
+
+| Name | Description |
+| ---- | --------- |
+| Brief Description | Returns the ping related values measured by a scheduled task for systems located within a neighbor cloud accessible without Gatekeeper Core System. |
+| Access Control | Only Orchestrator and Gatekeeper Core Systems are allowed to access |
+| Primary Actors | QoS Monitor |
+| Secondary Actors |Gatekeeper |
+| Preconditions | Gatekeeper has to be availble. |
+| Main Flow | * Inter-Cloud Direct Ping Measurement Task scheduled <br/>* Task queries Gatekeeper for clouds with direct access and select one to measure its systems <br/>* Stored measurement details are provided upon request  |
