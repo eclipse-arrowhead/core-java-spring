@@ -22,7 +22,7 @@ _Private:_
 
 * [Public Key](#public_key_service_use_case)
 * [Intra-Cloud Ping Measurement](#intra_ping_service_use_case)
-* [Intra-Cloud Ping Median Measurement](todo)
+* [Intra-Cloud Ping Median Measurement](#intra_ping_median_service_use_case)
 * [Inter-Cloud Direct Ping Measurement](todo)
 * [Inter-Cloud Relay Echo Measurement](todo)
 * [Init Relay Test](todo)
@@ -60,7 +60,7 @@ _Gatekeeper Core System:_
 | Access Control | All system within the local cloud are allowed to access |
 | Primary Actors | QoS Monitor |
 | Preconditions | - |
-|Main Flow| * Request sent by client. <br/>* Request procced and response sent by QoS Monitor. |
+|Main Flow| * Request sent by an allowed core system. <br/>* Request procced and response sent by QoS Monitor. |
 
 ### Use Case: Intra-Cloud Ping Measurement Service <a name="intra_ping_service_use_case" />
 
@@ -78,4 +78,15 @@ _Activity diagram: Intra-Cloud Ping Measurement Service:_
 
 _Activity diagram: Intra-Cloud Ping Measurement Task:_
 ![Alt text](figures/IntraPingMeasurementTask.png)
+
+### Use Case: Intra-Cloud Ping Median Measurement Service <a name="intra_ping_median_service_use_case" />
+
+| Name | Description |
+| ---- | --------- |
+| Brief Description | Calculates and returns the median ping related values based on the given attribute. |
+| Access Control | Only Orchestrator and Gatekeeper Core Systems are allowed to access |
+| Primary Actors | QoS Monitor |
+| Secondary Actors | - |
+| Preconditions | - |
+| Main Flow | * Request sent by an allowed core system <br/>* Calculation performed and response sent by QoS Monitor. |
 
