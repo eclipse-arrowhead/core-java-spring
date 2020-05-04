@@ -17,7 +17,8 @@ The base URL for the requests: `http://<host>:<port>/qos_monitor`.
 
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
-| [Retrieve Intra-Cloud Ping Measurement](#endpoint_get_intra_ping) | /measurements/intracloud/ping/{id} | GET | id | [Response DTO](#output_get_intra_ping) |
+| [Get Publickey](#endpoint_get_publickey) | /publickey | GET | - | [String](#output_get_publickey) |
+| [Retrieve Intra-Cloud Ping Measurement](#endpoint_get_intra_ping) | /measurements/intracloud/ping/{id} | GET | [id](#input_get_intra_ping) | [Response DTO](#output_get_intra_ping) |
 | [Calculate Intra-Cloud Ping Median Measurement](#endpoint_get_intra_median_ping) | /measurements/intracloud/ping_median/{attribute} | GET | [attribute](#input_get_intra_median_ping) | [Response DTO](#output_get_intra_median_ping) |
 
 ## Management Endpoint Description
@@ -33,6 +34,17 @@ GET /qos_monitor/echo
 
 Returns a "Got it" message with the purpose of testing the core service availability.
 
+### Get Publickey <a name="endpoint_get_publickey"/>
+```
+GET /qos_monitor/publickey
+```
+
+Returns the public key of the QoS Monitor Core System.
+
+**Output:** <a name="output_get_publickey"/>
+
+Base64 encoded text.
+
 ### Retrieve Intra-Cloud Ping Measurement <a name="endpoint_get_intra_ping"/>
 ```
 GET /qos_monitor/measurements/intracloud/ping/{id}
@@ -40,7 +52,7 @@ GET /qos_monitor/measurements/intracloud/ping/{id}
 
 Returns the requested Intra-Cloud Ping Measurement entry by system id.
 
-**Input:** 
+**Input:** <a name="input_get_intra_ping"/>
 
 ID of the intra-cloud ping measurement as a path variable.
 
