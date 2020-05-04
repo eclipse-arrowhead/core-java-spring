@@ -17,10 +17,10 @@ The QoS Monitor provides the following services:
 _Client:_
 
 * [Echo](#echo_service_use_case)
-* [Public Key](#public_key_service_use_case)
 
 _Private:_
 
+* [Public Key](#public_key_service_use_case)
 * [Intra-Cloud Ping Measurement](#intra_ping_service_use_case)
 * [Intra-Cloud Ping Median Measurement](todo)
 * [Inter-Cloud Direct Ping Measurement](todo)
