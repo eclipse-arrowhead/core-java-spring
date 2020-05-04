@@ -296,10 +296,14 @@ public class OrchestratorServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testExternalServiceRequestServiceTimeCalculation() {
+		ReflectionTestUtils.setField(testingObject, "qosEnabled", true);
+		ReflectionTestUtils.setField(testingObject, "maxReservationDuration", 3600);
 		final ServiceQueryFormDTO serviceForm = new ServiceQueryFormDTO.Builder("service").
 																  		build();
 		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
 																				    requestedService(serviceForm).
+																				    flag(Flag.ENABLE_QOS, true).
+																				    flag(Flag.MATCHMAKING, true).
 																				    command(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY, "10").
 																					build();
 		

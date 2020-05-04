@@ -136,7 +136,10 @@ public class OrchestratorService {
 		
 		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(queryData, request);
 		orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem()); // to reduce the number of results before token generation
-		orList = calculateAndFilterOnServiceTime(orList, request);
+		
+		if (qosEnabled && flags.get(Flag.ENABLE_QOS)) {
+			orList = calculateAndFilterOnServiceTime(orList, request);			
+		}
 		
 		// Generate the authorization tokens if it is requested based on the service security (modifies the orList)
 		List<OrchestrationResultDTO> orListWithTokens = orchestratorDriver.generateAuthTokens(request, orList);
