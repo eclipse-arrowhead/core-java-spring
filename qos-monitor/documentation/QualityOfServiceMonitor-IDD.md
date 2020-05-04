@@ -227,20 +227,20 @@ Returns the requested Inter-Cloud Direct Ping Measurement entry by cloud and sys
 {
   "cloud": {    
     "id": 0,
-	  "operator": "string",
+    "operator": "string",
     "name": "string",        
     "ownCloud": true,
-	  "neighbor": true,
+    "neighbor": true,
     "secure": true,
-	  "authenticationInfo": "string",
-	  "createdAt": "string",
+    "authenticationInfo": "string",
+    "createdAt": "string",
     "updatedAt": "string"
   },
   "system": {
     "id": 0,
-	  "systemName": "string",
+    "systemName": "string",
     "address": "string",
-	  "port": 0,
+    "port": 0,
     "authenticationInfo": "string",
     "createdAt": "string",    
     "updatedAt": "string"
@@ -255,21 +255,21 @@ Returns the requested Inter-Cloud Direct Ping Measurement entry by cloud and sys
   "id": 0,
   "measurement": {
     "id": 0,
-	  "measurementType": "PING",
+    "measurementType": "PING",
     "address": "string",
-	  "cloud": {    
-	    "id": 0,
-	    "operator": "string",
+    "cloud": {    
+      "id": 0,
+      "operator": "string",
       "name": "string",        
       "ownCloud": true,
-	    "neighbor": true,
+      "neighbor": true,
       "secure": true,
-	    "authenticationInfo": "string",
-	    "createdAt": "string",
+      "authenticationInfo": "string",
+      "createdAt": "string",
       "updatedAt": "string"
     },
-	  "lastMeasurementAt": "2020-05-04T13:50:19.127Z",
-	  "createdAt": "2020-05-04T13:50:19.127Z",
+    "lastMeasurementAt": "2020-05-04T13:50:19.127Z",
+    "createdAt": "2020-05-04T13:50:19.127Z",
     "updatedAt": "2020-05-04T13:50:19.127Z"
   },
   "available": true,
