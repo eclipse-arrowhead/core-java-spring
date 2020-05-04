@@ -94,7 +94,7 @@ _Activity diagram: Intra-Cloud Ping Measurement Task:_
 
 | Name | Description |
 | ---- | --------- |
-| Brief Description | Returns the ping related values measured by a scheduled task for systems located within a neighbor cloud accessible without Gatekeeper Core System. |
+| Brief Description | Returns the ping related values measured by a scheduled task for systems located within a neighbor cloud accessible without Gateway Core System. |
 | Access Control | Only Orchestrator and Gatekeeper Core Systems are allowed to access |
 | Primary Actors | QoS Monitor |
 | Secondary Actors |Gatekeeper |
