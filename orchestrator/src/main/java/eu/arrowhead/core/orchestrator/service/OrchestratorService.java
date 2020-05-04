@@ -629,6 +629,10 @@ public class OrchestratorService {
 		for (final OrchestrationResultDTO dto : orList) {
 			int calculatedServiceTime = OrchestratorUtils.calculateServiceTime(dto.getMetadata(), request.getCommands());
 			
+			if (calculatedServiceTime == 0 || dto.getWarnings().contains(OrchestratorWarnings.TTL_EXPIRED)) {
+				continue;
+			}
+			
 			if (calculatedServiceTime > 0 && !dto.getWarnings().contains(OrchestratorWarnings.TTL_EXPIRED)) {
 				calculatedServiceTime += extraServiceTimeSeconds; // give some extra seconds because of orchestration overhead
 				dto.getMetadata().put(OrchestratorDriver.KEY_CALCULATED_SERVICE_TIME_FRAME, String.valueOf(calculatedServiceTime));
@@ -638,10 +642,10 @@ public class OrchestratorService {
 				if (!dto.getWarnings().contains(OrchestratorWarnings.TTL_EXPIRING) &&
 					calculatedServiceTime <= EXPIRING_TIME_IN_MINUTES * CommonConstants.CONVERSION_SECOND_TO_MINUTE) {
 					dto.getWarnings().add(OrchestratorWarnings.TTL_EXPIRING);
-				}
-				
-				result.add(dto);
+				}				
 			}
+			
+			result.add(dto);
 		}		
 		return result;
 	}
