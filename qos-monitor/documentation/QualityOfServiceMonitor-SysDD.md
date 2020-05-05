@@ -26,7 +26,7 @@ _Private:_
 * [Inter-Cloud Direct Ping Measurement](#inter_direct_ping_service_use_case)
 * [Inter-Cloud Relay Echo Measurement](#inter_relay_echo_service_use_case)
 * [Init Relay Test](#init_relay_test_service_use_case)
-* [Join Relay Test](todo)
+* [Join Relay Test](#join_relay_test_service_use_case)
 
 ### Consumed Services
 
@@ -119,6 +119,17 @@ _Activity diagram: Intra-Cloud Ping Measurement Task:_
 | Brief Description | Launch an inter-cloud relay echo test session for the given cloud and via the given relay. |
 | Access Control | Only Gatekeeper Core Systems are allowed to access |
 | Primary Actors | QoS Monitor in both cloud |
-| Secondary Actors | Gatekeeper in both cloud, Relay |
+| Secondary Actors | Gatekeeper in both cloud, Relay(s) |
 | Preconditions | Gatekeepers and Relay(s) has to be available. |
 | Main Flow | * Inter-Cloud Relay Echo Measurement Task selects a cloud-relay pair <br/>* Task instruct the local cloud's Gatekeeper to create message queues for testing the connection between local cloud and target cloud through the given relay |
+
+### Use Case: Join Relay Test Service <a name="join_relay_test_service_use_case" />
+
+| Name | Description |
+| ---- | --------- |
+| Brief Description | Join to an inter-cloud relay echo test session requested by an other cloud. |
+| Access Control | Only Gatekeeper Core Systems are allowed to access |
+| Primary Actors | QoS Monitor in both cloud |
+| Secondary Actors | Gatekeeper in both cloud, Relay(s) |
+| Preconditions | Gatekeepers and Relay(s) has to be available. |
+| Main Flow | * Gatekeeper receives a test session proposal request via relay from the requester cloud's Gatekeeper <br/> * Requested cloud's Gatekeeper insturcts QoS monitor to join the established test session |
