@@ -312,8 +312,8 @@ Returns the requested Inter-Cloud Direct Ping Measurement entry by cloud and sys
 
 | Field | Description |
 | ----- | ----------- |
-| id | ID of the intra-cloud ping measurement |
-| measurement.id | ID of the intra-cloud measurement |
+| id | ID of the inter-cloud direct ping measurement |
+| measurement.id | ID of the inter-cloud measurement |
 | measurement.measurementType | Type of the measurement |
 | measurement.address | Address of neighbor system(s) pinged |
 | measurement.cloud.id | ID of the measured cloud |
@@ -438,3 +438,47 @@ Returns the requested Inter-Cloud Relay Echo Measurement entries by cloud.
   ]
 }
 ```
+
+| Field | Description |
+| ----- | ----------- |
+| count | Number of total elements |
+| id | ID of the inter-cloud relay echo measurement |
+| measurement.id | ID of the inter-cloud measurement |
+| measurement.measurementType | Type of the measurement |
+| measurement.status | Status of the measurement |
+| measurement.cloud.id | ID of the measured cloud |
+| measurement.cloud.operator | Operator of the measured cloud |
+| measurement.cloud.name | Name of the measured cloud |
+| measurement.cloud.owncloud | Flag to indicate own cloud (meant to be false) |
+| measurement.cloud.neighbor | Flag to indicate neighbor cloud |
+| measurement.cloud.secure | Flag to indicate security |
+| measurement.cloud.authenticationInfo | Base64 encoded public key of the measured cloud |
+| measurement.cloud.createdAt | Date of creation of the measured cloud |
+| measurement.cloud.updatedAt | Date of update of the measured cloud |
+| measurement.relay.id | ID of the measured relay |
+| measurement.relay.address | Address of the measured relay |
+| measurement.relay.port | Port of the measured relay |
+| measurement.relay.type | Type of the measured relay |
+| measurement.relay.exclusive | Flag to indicate exclusivity |
+| measurement.relay.secure | Flag to indicate security |
+| measurement.relay.createdAt | Date of creation of the measured relay |
+| measurement.relay.updatedAt | Date of update of the measured relay |
+| measurement.lastMeasurementAt | Time of the last measurement |
+| measurement.createdAt | Date of creation of the measurement |
+| measurement.updatedAt | Date of update of the measurement |
+| available | Boolean value of the systems calculated availability|
+| minResponseTime | Integer value of milliseconds of the fastest returned ping|
+| maxResponseTime | Integer value of milliseconds of the slowest returned ping|
+| meanResponseTimeWithTimeout | Integer value of milliseconds of the calculated average of pings including timeouts|
+| meanResponseTimeWithoutTimeout | Integer value of milliseconds of the calculated average of pings not including timeouts|
+| jitterWithTimeout | Integer value of milliseconds of the calculated standard deviation of pings including timeouts|
+| jitterWithoutTimeout | Integer value of milliseconds of the calculated standard deviation of pings not including timeouts|
+| lostPerMeasurementPercent | Integer value of calculated lost ping percentage|
+| sent | Integer value of sent pings in measurement|
+| sentAll | Integer value of sent pings since ping measurement created|
+| received | Integer value of received pings in measurement|
+| receivedAll | Integer value of received pings since ping measurement created|
+| lastAccessAt | TimeStamp value of the systems last known availability|
+| countStartedAt | TimeSatmp value of the last reset of sent and received fields|
+| createdAt | Date of creation of the ping measurement |
+| updatedAt | Date of update of the ping measurement |
