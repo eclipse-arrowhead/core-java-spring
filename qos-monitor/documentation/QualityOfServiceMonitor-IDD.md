@@ -21,7 +21,8 @@ The base URL for the requests: `http://<host>:<port>/qos_monitor`.
 | [Calculate Intra-Cloud Ping Median Measurement](#endpoint_get_intra_median_ping) | /measurements/intracloud/ping_median/{attribute} | GET | [attribute](#input_get_intra_median_ping) | [Response DTO](#output_get_intra_median_ping) |
 | [Retrieve Inter-Cloud Direct Ping Measurement](#endpoint_post_inter_direct_ping) | /measurements/intercloud/ping | POST | [Request DTO](#input_post_inter_direct_ping) | [Response DTO](#output_post_inter_direct_ping) |
 | [Retrieve Inter-Cloud Relay Echo Measurement](#endpoint_post_inter_relay_echo) | /measurements/intercloud/relay_echo | POST | [Request DTO](#input_post_inter_relay_echo) | [Response DTO](#output_post_inter_relay_echo) |
-| [Init Relay Test](#endpoint_post_init_relay_test) | /init_relay_test | POST | [Request DTO](#input_post_init_relay_test) | [Created status](#output_init_relay_test) |
+| [Init Relay Test](#endpoint_post_init_relay_test) | /init_relay_test | POST | [Request DTO](#input_post_init_relay_test) | [Created status](#output_post_init_relay_test) |
+| [Join Relay Test](#endpoint_post_join_relay_test) | /join_relay_test | POST | [Request DTO](#input_post_join_relay_test) | [Response DTO](#output_post_join_relay_test) |
 
 ## Management Endpoint Description
 
@@ -514,7 +515,7 @@ Creates message queues for testing the connection between this cloud and the tar
   "relay": {
     "address": "string",
     "port": 0,
-    "type": "string"
+    "type": "string",
     "exclusive": true,    
     "secure": true
   }
@@ -524,3 +525,61 @@ Creates message queues for testing the connection between this cloud and the tar
 **Output:**  <a name="output_post_init_relay_test"/>
 
 Http Created(201) status.
+
+### Join Relay Test <a name="endpoint_post_join_relay_test"/>
+```
+POST /qos_monitor/join_relay_test
+```
+
+Creates message queues for testing the connection between this cloud and the requester cloud through the given relay and return the necessary connection informations.
+
+**Input:**  <a name="input_post_join_relay_test"/>
+
+```json
+{
+  "senderQoSMonitorPublicKey": "string",
+  "requesterCloud": {
+    "operator": "string",
+    "name": "string",
+    "neighbor": true,    
+    "secure": true,
+    "authenticationInfo": "string",
+    "gatekeeperRelayIds": [
+      0
+    ],
+    "gatewayRelayIds": [
+      0
+    ]
+  },
+  "targetCloud": {
+    "operator": "string",
+    "name": "string",
+    "neighbor": true,    
+    "secure": true,
+    "authenticationInfo": "string",
+    "gatekeeperRelayIds": [
+      0
+    ],
+    "gatewayRelayIds": [
+      0
+    ]
+  },
+  "relay": {
+    "address": "string",
+    "port": 0,
+    "type": "string",
+    "exclusive": true,    
+    "secure": true
+  }
+}
+```
+
+**Output:**  <a name="output_post_join_relay_test"/>
+
+```json
+{
+  "queueId": "string",
+  "peerName": "string",
+  "receiverQoSMonitorPublicKey": "string"
+}
+```
