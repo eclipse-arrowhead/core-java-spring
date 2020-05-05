@@ -6,6 +6,8 @@ The purpose of QoS Monitor supporting core system is providing QoS (Quality of S
 ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `AH Service Registry`
 ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `AH Authorization` 
 ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `AH Orchestrator / QoS Manager`
+![#ffd33d](https://placehold.it/15/fd33d/000000?text=+) `AH Gatekeeper`
+![#24292e](https://placehold.it/15/24292e/000000?text=+) `AH Gateway`
 ![#ffcc44](https://placehold.it/15/a33c00/000000?text=+) `AH QoS Monitor`
 ![Alt text](figures/overview.png)
 
