@@ -381,3 +381,60 @@ Returns the requested Inter-Cloud Relay Echo Measurement entries by cloud.
 | authenticationInfo | Base64 encoded public key of the cloud | optional |
 | gatekeeperRelayIds | List of gatekeeper relay IDs belonged to the cloud | optional |
 | gatewayRelayIds | List of gateway relay IDs belonged to the cloud | optional |
+
+**Output:** <a name="output_post_inter_relay_echo"/>
+
+```json
+{
+  "count": 0,
+  "data": [
+    {
+      "id": 0,      
+      "measurement": {
+	      "id": 0,
+	      "measurementType": "RELAY_ECHO",
+	      "status": "NEW",
+        "cloud": {          
+          "id": 0,
+		      "operator": "string",
+          "name": "string",
+		      "ownCloud": false,
+          "neighbor": true,          
+          "secure": true,
+		      "authenticationInfo": "string",
+		      "createdAt": "string",
+          "updatedAt": "string"
+        },                
+        "relay": {
+		      "id": 0,
+          "address": "string",
+		      "port": 0,
+		      "type": "GATEWAY_RELAY",
+          "exclusive": true,          
+          "secure": true,          
+		      "createdAt": "string",
+          "updatedAt": "string"
+        },        
+		    "lastMeasurementAt": "2020-05-05T08:23:47.774Z",
+		    "createdAt": "2020-05-05T08:23:47.774Z",   
+        "updatedAt": "2020-05-05T08:23:47.774Z"
+      },
+      "minResponseTime": 0,
+	    "maxResponseTime": 0,
+	    "meanResponseTimeWithTimeout": 0,
+      "meanResponseTimeWithoutTimeout": 0,
+	    "jitterWithTimeout": 0,
+      "jitterWithoutTimeout": 0,      
+      "lostPerMeasurementPercent": 0, 
+      "received": 0,
+      "receivedAll": 0,
+      "sent": 0,
+      "sentAll": 0,
+	    "lastAccessAt": "2020-05-05T08:23:47.774Z",
+	    "countStartedAt": "2020-05-05T08:23:47.774Z",
+      "createdAt": "2020-05-05T08:23:47.774Z",
+      "updatedAt": "2020-05-05T08:23:47.774Z"
+    }
+  ]
+}
+```
