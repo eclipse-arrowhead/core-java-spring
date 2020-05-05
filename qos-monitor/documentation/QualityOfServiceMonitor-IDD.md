@@ -26,7 +26,9 @@ The base URL for the requests: `http://<host>:<port>/qos_monitor`.
 
 ## Management Endpoint Description
 
-todo
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Get Intra-Cloud Ping Measurements](#endpoint_mgmt_get_intra_ping) | /mgmt/measurements/intracloud/ping | GET | [Page params](#input_mgmt_get_intra_ping) | [Response DTO](#output_mgmt_get_intra_ping) |
 
 ---
 
@@ -630,3 +632,88 @@ Creates message queues for testing the connection between this cloud and the req
 | queueId | ID of the created message queue in the Relay |
 | peerName | Server Common Name of the target cloud's QoS Monitor |
 | receiverQoSMonitorPublicKey | Base64 encoded public key of the target cloud's QoS Monitor |
+
+### Get Intra-Cloud Ping Measurements <a name="endpoint_mgmt_get_intra_ping"/>
+```
+GET /qosmonitor/mgmt/measurements/intracloud/ping
+```
+
+Return requested Ping-Measurements entries by the given page parameters.
+
+**Output:**  <a name="output_mgmt_get_intra_ping"/>
+
+```json
+{
+  "count": 0,
+  "data": [
+    {
+      "id": 0,
+      "measurement": {
+        "id": 0,
+        "measurementType": "PING",
+        "system": {
+          "id": 0,
+          "systemName": "string",
+          "address": "string",      
+          "port": 0,
+          "authenticationInfo": "string",
+          "createdAt": "string",
+          "updatedAt": "string"
+        },
+        "lastMeasurementAt": "2020-05-04T13:50:19.127Z",
+        "createdAt": "2020-05-04T13:50:19.127Z",
+        "updatedAt": "2020-05-04T13:50:19.127Z"
+      },
+      "available": true,
+      "minResponseTime": 0,
+      "maxResponseTime": 0,
+      "meanResponseTimeWithTimeout": 0,
+      "meanResponseTimeWithoutTimeout": 0,
+      "jitterWithTimeout": 0,
+      "jitterWithoutTimeout": 0,  
+      "lostPerMeasurementPercent": 0,
+      "sent": 0,
+      "sentAll": 0,
+      "received": 0,
+      "receivedAll": 0,
+      "lastAccessAt": "2020-05-04T13:50:19.127Z",
+      "countStartedAt": "2020-05-04T13:50:19.127Z",
+      "createdAt": "2020-05-04T13:50:19.127Z",
+      "updatedAt": "2020-05-04T13:50:19.127Z"
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| count | Number of total elements |
+| id | ID of the intra-cloud ping measurement |
+| measurement.id | ID of the intra-cloud measurement |
+| measurement.measurementType | Type of the measurement |
+| measurement.system.id | ID of the measured system |
+| measurement.system.systemName | Name of the measured system |
+| measurement.system.address | Address of the measured system |
+| measurement.system.port | Port of the measured system |
+| measurement.system.authenticationInfo | Base64 encoded public key of the measured system |
+| measurement.system.createdAt | Date of creation of the measured system |
+| measurement.system.updatedAt | Date of update of the measured system |
+| measurement.lastMeasurementAt | Time of the last measurement |
+| measurement.createdAt | Date of creation of the measurement |
+| measurement.updatedAt | Date of update of the measurement |
+| available | Boolean value of the systems calculated availability|
+| minResponseTime | Integer value of milliseconds of the fastest returned ping|
+| maxResponseTime | Integer value of milliseconds of the slowest returned ping|
+| meanResponseTimeWithTimeout | Integer value of milliseconds of the calculated average of pings including timeouts|
+| meanResponseTimeWithoutTimeout | Integer value of milliseconds of the calculated average of pings not including timeouts|
+| jitterWithTimeout | Integer value of milliseconds of the calculated standard deviation of pings including timeouts|
+| jitterWithoutTimeout | Integer value of milliseconds of the calculated standard deviation of pings not including timeouts|
+| lostPerMeasurementPercent | Integer value of calculated lost ping percentage|
+| sent | Integer value of sent pings in measurement|
+| sentAll | Integer value of sent pings since ping measurement created|
+| received | Integer value of received pings in measurement|
+| receivedAll | Integer value of received pings since ping measurement created|
+| lastAccessAt | TimeStamp value of the systems last known availability|
+| countStartedAt | TimeSatmp value of the last reset of sent and received fields|
+| createdAt | Date of creation of the ping measurement |
+| updatedAt | Date of update of the ping measurement |
