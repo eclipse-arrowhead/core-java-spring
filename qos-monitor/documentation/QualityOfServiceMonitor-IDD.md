@@ -361,7 +361,7 @@ Returns the requested Inter-Cloud Relay Echo Measurement entries by cloud.
   "ownCloud": false,
   "neighbor": true,
   "secure": true,
-  "authenticationInfo": "string"
+  "authenticationInfo": "string",
   "gatekeeperRelayIds": [
     0
   ],
