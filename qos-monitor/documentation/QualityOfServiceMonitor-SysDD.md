@@ -132,4 +132,4 @@ _Activity diagram: Intra-Cloud Ping Measurement Task:_
 | Primary Actors | QoS Monitor in both cloud |
 | Secondary Actors | Gatekeeper in both cloud, Relay(s) |
 | Preconditions | Gatekeepers and Relay(s) has to be available. |
-| Main Flow | * Gatekeeper receives a test session negotiation message via relay from the requester cloud's Gatekeeper <br/> * Requested cloud's Gatekeeper insturcts QoS monitor to creates message queues for the relay being measured <br/>* Requested cloud's QoS Monitor returns the test session information to the Gatekeeper which forwards it to the requester cloud's Gatekeeper |
+| Main Flow | * Gatekeeper receives a test session negotiation message via relay from the requester cloud's Gatekeeper <br/> * Requested cloud's Gatekeeper insturcts QoS Monitor to create message queues for the relay being measured <br/>* Requested cloud's QoS Monitor returns the test session information to the Gatekeeper which forwards it to the requester cloud's Gatekeeper |
