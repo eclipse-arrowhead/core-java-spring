@@ -640,6 +640,26 @@ GET /qosmonitor/mgmt/measurements/intracloud/ping
 
 Return requested Ping-Measurements entries by the given page parameters.
 
+**Input:**  <a name="input_mgmt_get_intra_ping"/>
+
+Query params:
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| page | zero based page index | no |
+| item_per_page | maximum number of items returned | no |
+| sort_field | sorts by the given column | no |
+| direction | direction of sorting | no |
+
+> **Note:** Default value for `sort_field` is `id`. All possible values are: 
+> * `id`
+> * `createdAt`
+> * `updatedAt`
+
+> **Note:** Default value for `direction` is `ASC`. All possible values are:
+> * `ASC`
+> * `DESC` 
+
 **Output:**  <a name="output_mgmt_get_intra_ping"/>
 
 ```json
