@@ -25,22 +25,22 @@ _Private:_
 * [Intra-Cloud Ping Median Measurement](#intra_ping_median_service_use_case)
 * [Inter-Cloud Direct Ping Measurement](#inter_direct_ping_service_use_case)
 * [Inter-Cloud Relay Echo Measurement](#inter_relay_echo_service_use_case)
-* [Init Relay Test](todo)
+* [Init Relay Test](#init_relay_test_service_use_case)
 * [Join Relay Test](todo)
 
 ### Consumed Services
 
 _Service Registry Core System:_
 
-* [Query](todo)
+* Query
 
 _Gatekeeper Core System:_
 
-* [Pull Clouds](todo)
-* [Get Cloud](todo)
-* [Collect Access Types](todo)
-* [Collect System Addresses](todo)
-* [Relay Test](todo)
+* Pull Clouds
+* Get Cloud
+* Collect Access Types
+* Collect System Addresses
+* Relay Test
 
 ### Use Case: Echo Service <a name="echo_service_use_case" />
 
@@ -111,3 +111,14 @@ _Activity diagram: Intra-Cloud Ping Measurement Task:_
 | Secondary Actors | Gatekeeper, Relay |
 | Preconditions | Gatekeeper and Relay(s) has to be available. |
 | Main Flow | * Inter-Cloud Relay Echo Measurement Task scheduled <br/>* Task queries Gatekeeper for clouds without direct access and select one to measure it <br/>* Stored measurement details are provided upon request  |
+
+### Use Case: Init Relay Test Service <a name="init_relay_test_service_use_case" />
+
+| Name | Description |
+| ---- | --------- |
+| Brief Description | Launch an inter-cloud relay echo test session for the given cloud and via the given relay. |
+| Access Control | Only Gatekeeper Core Systems are allowed to access |
+| Primary Actors | QoS Monitor in both cloud |
+| Secondary Actors | Gatekeeper in both cloud, Relay |
+| Preconditions | Gatekeepers and Relay(s) has to be available. |
+| Main Flow | * Inter-Cloud Relay Echo Measurement Task selects a cloud-relay pair <br/>* Task instruct the local cloud's Gatekeeper to create message queues for testing the connection between local cloud and target cloud through the given relay |
