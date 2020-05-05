@@ -24,7 +24,7 @@ _Private:_
 * [Intra-Cloud Ping Measurement](#intra_ping_service_use_case)
 * [Intra-Cloud Ping Median Measurement](#intra_ping_median_service_use_case)
 * [Inter-Cloud Direct Ping Measurement](#inter_direct_ping_service_use_case)
-* [Inter-Cloud Relay Echo Measurement](todo)
+* [Inter-Cloud Relay Echo Measurement](#inter_relay_echo_service_use_case)
 * [Init Relay Test](todo)
 * [Join Relay Test](todo)
 
@@ -98,5 +98,16 @@ _Activity diagram: Intra-Cloud Ping Measurement Task:_
 | Access Control | Only Orchestrator and Gatekeeper Core Systems are allowed to access |
 | Primary Actors | QoS Monitor |
 | Secondary Actors |Gatekeeper |
-| Preconditions | Gatekeeper has to be availble. |
+| Preconditions | Gatekeeper has to be available. |
 | Main Flow | * Inter-Cloud Direct Ping Measurement Task scheduled <br/>* Task queries Gatekeeper for clouds with direct access and select one to measure its systems <br/>* Stored measurement details are provided upon request  |
+
+### Use Case: Inter-Cloud Relay Echo Measurement Service <a name="inter_relay_echo_service_use_case" />
+
+| Name | Description |
+| ---- | --------- |
+| Brief Description | Returns the measurement values processed by a scheduled task for neighbor clouds accessible only via Gateway Core System. |
+| Access Control | Only Orchestrator and Gatekeeper Core Systems are allowed to access |
+| Primary Actors | QoS Monitor in both cloud |
+| Secondary Actors | Gatekeeper, Relay |
+| Preconditions | Gatekeeper and Relay(s) has to be available. |
+| Main Flow | * Inter-Cloud Relay Echo Measurement Task scheduled <br/>* Task queries Gatekeeper for clouds without direct access and select one to measure it <br/>* Stored measurement details are provided upon request  |
