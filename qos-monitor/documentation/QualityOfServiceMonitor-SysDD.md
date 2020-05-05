@@ -121,7 +121,7 @@ _Activity diagram: Intra-Cloud Ping Measurement Task:_
 | Primary Actors | QoS Monitor in both cloud |
 | Secondary Actors | Gatekeeper in both cloud, Relay(s) |
 | Preconditions | Gatekeepers and Relay(s) has to be available. |
-| Main Flow | * Inter-Cloud Relay Echo Measurement Task selects a cloud-relay pair <br/>* Task instruct the local cloud's Gatekeeper to create message queues for testing the connection between local cloud and target cloud through the given relay |
+| Main Flow | * Inter-Cloud Relay Echo Measurement Task selects a cloud-relay pair <br/>* Task instruct the local cloud's Gatekeeper to negotiate the creation of test session <br/>* QoS Monitor creates message queues based on the negotiation for testing the connection between local cloud and target cloud through the given relay |
 
 ### Use Case: Join Relay Test Service <a name="join_relay_test_service_use_case" />
 
@@ -132,4 +132,4 @@ _Activity diagram: Intra-Cloud Ping Measurement Task:_
 | Primary Actors | QoS Monitor in both cloud |
 | Secondary Actors | Gatekeeper in both cloud, Relay(s) |
 | Preconditions | Gatekeepers and Relay(s) has to be available. |
-| Main Flow | * Gatekeeper receives a test session proposal request via relay from the requester cloud's Gatekeeper <br/> * Requested cloud's Gatekeeper insturcts QoS monitor to join the established test session |
+| Main Flow | * Gatekeeper receives a test session negotiation message via relay from the requester cloud's Gatekeeper <br/> * Requested cloud's Gatekeeper insturcts QoS monitor to creates message queues for the relay being measured <br/>* Requested cloud's QoS Monitor returns the test session information to the Gatekeeper which forwards it to the requester cloud's Gatekeeper |
