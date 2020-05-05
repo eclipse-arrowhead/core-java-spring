@@ -3,8 +3,7 @@
 
 QoS-Monitor offers three types of endpoints. Client, Management and Private.
 
-Swagger API documentation is available on: `https://<host>:<port>`.
-
+Swagger API documentation is available on: `https://<host>:<port>`.<br/>
 The base URL for the requests: `http://<host>:<port>/qos_monitor`.
 
 ## Client Endpoint Description
@@ -21,6 +20,7 @@ The base URL for the requests: `http://<host>:<port>/qos_monitor`.
 | [Retrieve Intra-Cloud Ping Measurement](#endpoint_get_intra_ping) | /measurements/intracloud/ping/{id} | GET | [id](#input_get_intra_ping) | [Response DTO](#output_get_intra_ping) |
 | [Calculate Intra-Cloud Ping Median Measurement](#endpoint_get_intra_median_ping) | /measurements/intracloud/ping_median/{attribute} | GET | [attribute](#input_get_intra_median_ping) | [Response DTO](#output_get_intra_median_ping) |
 | [Retrieve Inter-Cloud Direct Ping Measurement](#endpoint_post_inter_direct_ping) | /measurements/intercloud/ping | POST | [Request DTO](#input_post_inter_direct_ping) | [Response DTO](#output_post_inter_direct_ping) |
+| [Retrieve Inter-Cloud Relay Echo Measurement](#endpoint_post_inter_relay_echo) | /measurements/intercloud/relay_echo | POST | [Request DTO](#input_post_inter_relay_echo) | [Response DTO](#output_post_inter_relay_echo) |
 
 ## Management Endpoint Description
 
@@ -344,3 +344,40 @@ Returns the requested Inter-Cloud Direct Ping Measurement entry by cloud and sys
 | countStartedAt | TimeSatmp value of the last reset of sent and received fields|
 | createdAt | Date of creation of the ping measurement |
 | updatedAt | Date of update of the ping measurement |
+
+### Retrieve Inter-Cloud Relay Echo Measurement <a name="endpoint_post_inter_relay_echo"/>
+```
+GET /qos_monitor/measurements/intercloud/relay_echo
+```
+
+Returns the requested Inter-Cloud Relay Echo Measurement entries by cloud.
+
+**Input:**  <a name="input_post_inter_relay_echo"/>
+
+```json
+{
+  "operator": "string",
+  "name": "string",        
+  "ownCloud": false,
+  "neighbor": true,
+  "secure": true,
+  "authenticationInfo": "string"
+  "gatekeeperRelayIds": [
+    0
+  ],
+  "gatewayRelayIds": [
+    0
+  ]
+}
+```
+
+| Field | Description | Necessity |
+| ----- | ----------- | --------- |
+| operator | Operator of the cloud | mandatory |
+| name | Name of the cloud | mandatory |
+| owncloud | Flag to indicate own cloud (meant to be false) | optional |
+| neighbor | Flag to indicate neighbor cloud | optional |
+| secure | Flag to indicate security | optional |
+| authenticationInfo | Base64 encoded public key of the cloud | optional |
+| gatekeeperRelayIds | List of gatekeeper relay IDs belonged to the cloud | optional |
+| gatewayRelayIds | List of gateway relay IDs belonged to the cloud | optional |
