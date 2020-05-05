@@ -21,6 +21,7 @@ The base URL for the requests: `http://<host>:<port>/qos_monitor`.
 | [Calculate Intra-Cloud Ping Median Measurement](#endpoint_get_intra_median_ping) | /measurements/intracloud/ping_median/{attribute} | GET | [attribute](#input_get_intra_median_ping) | [Response DTO](#output_get_intra_median_ping) |
 | [Retrieve Inter-Cloud Direct Ping Measurement](#endpoint_post_inter_direct_ping) | /measurements/intercloud/ping | POST | [Request DTO](#input_post_inter_direct_ping) | [Response DTO](#output_post_inter_direct_ping) |
 | [Retrieve Inter-Cloud Relay Echo Measurement](#endpoint_post_inter_relay_echo) | /measurements/intercloud/relay_echo | POST | [Request DTO](#input_post_inter_relay_echo) | [Response DTO](#output_post_inter_relay_echo) |
+| [Init Relay Test](#endpoint_post_init_relay_test) | /init_relay_test | POST | [Request DTO](#input_post_init_relay_test) | [Created status](#output_init_relay_test) |
 
 ## Management Endpoint Description
 
@@ -216,7 +217,7 @@ Attribute of the ping measurement as a path variable. Possible values are:
 
 ### Retrieve Inter-Cloud Direct Ping Measurement <a name="endpoint_post_inter_direct_ping"/>
 ```
-GET /qos_monitor/measurements/intercloud/ping
+POST /qos_monitor/measurements/intercloud/ping
 ```
 
 Returns the requested Inter-Cloud Direct Ping Measurement entry by cloud and system.
@@ -347,7 +348,7 @@ Returns the requested Inter-Cloud Direct Ping Measurement entry by cloud and sys
 
 ### Retrieve Inter-Cloud Relay Echo Measurement <a name="endpoint_post_inter_relay_echo"/>
 ```
-GET /qos_monitor/measurements/intercloud/relay_echo
+POST /qos_monitor/measurements/intercloud/relay_echo
 ```
 
 Returns the requested Inter-Cloud Relay Echo Measurement entries by cloud.
@@ -482,3 +483,44 @@ Returns the requested Inter-Cloud Relay Echo Measurement entries by cloud.
 | countStartedAt | TimeSatmp value of the last reset of sent and received fields|
 | createdAt | Date of creation of the ping measurement |
 | updatedAt | Date of update of the ping measurement |
+
+### Init Relay Test <a name="endpoint_post_init_relay_test"/>
+```
+POST /qos_monitor/init_relay_test
+```
+
+Creates message queues for testing the connection between this cloud and the target cloud through the given relay.
+
+**Input:**  <a name="input_post_init_relay_test"/>
+
+```json
+{
+  "queueId": "string",
+  "peerName": "string",
+  "receiverQoSMonitorPublicKey": "string",
+  "targetCloud": {
+    "operator": "string",
+    "name": "string",
+    "neighbor": true,    
+    "secure": true,
+    "authenticationInfo": "string",
+    "gatekeeperRelayIds": [
+      0
+    ],
+    "gatewayRelayIds": [
+      0
+    ]
+  },
+  "relay": {
+    "address": "string",
+    "port": 0,
+    "type": "string"
+    "exclusive": true,    
+    "secure": true
+  }
+}
+```
+
+**Output:**  <a name="output_post_init_relay_test"/>
+
+Http Created(201) status.
