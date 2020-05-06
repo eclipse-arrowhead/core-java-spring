@@ -81,14 +81,16 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 	       * [Client](#ca_endpoints_client)
            * [Private](#ca_endpoints_private)
            * [Management](#ca_endpoints_mgmt)
-	8. [QoS Monitor (Quality of Service Monitor)](#qos_monitor)
-       * [System Design Description Overview](#qos_monitor_sdd)
-       * [Services and Use Cases](#qos_monitor_usecases)  
-       * [Endpoints](#qos_monitor_endpoints)
-	       * [Client](#qos_monitor_endpoints_client)
-           * [Private](#qos_monitor_endpoints_private)
-           * [Management](#qos_monitor_endpoints_mgmt)
-	
+    8. QoS Monitor (Quality of Service Monitor)
+       * [System Design Description Overview](qos-monitor/documentation/QualityOfServiceMonitor-SysDD.md)
+           * [Services and Use Cases](qos-monitor/documentation/QualityOfServiceMonitor-SysDD.md#services-and-use-cases)  
+       * [Interface Design Description](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md)
+           * [Security](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#security)
+           * [Communication Profile](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#communication-profile
+               * [Client](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#client-endpoint-description)
+               * [Private](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#private-endpoint-description
+               * [Management](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#management-endpoint-description)
+	 
 <a name="quickstart" />
 
 ## Quick Start Guide
