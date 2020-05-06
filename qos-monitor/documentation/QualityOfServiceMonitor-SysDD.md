@@ -47,6 +47,8 @@ _Gatekeeper Core System:_
 * Collect System Addresses
 * Relay Test
 
+---
+
 ### Use Case: Echo Service <a name="echo_service_use_case" />
 
 | Name | Description |
