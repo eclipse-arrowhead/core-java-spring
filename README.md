@@ -92,27 +92,27 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 	       * [Client](#qos_monitor_endpoints_client)
            * [Private](#qos_monitor_endpoints_private)
            * [Management](#qos_monitor_endpoints_mgmt)
-    9. [Onboarding Controller](#onboardingcontroller)
+    10. [Onboarding Controller](#onboardingcontroller)
        * [System Design Description Overview](#onboardingcontroller_sdd)
        * [Services and Use Cases](#onboardingcontroller_usecases)
        * [Security](#onboardingcontroller_security)
        * [Endpoints](#onboardingcontroller_endpoints)
            * [Onboarding](#onboardingcontroller_endpoints_onboarding)
-    10. [Device Registry](#deviceregistry)
+    11. [Device Registry](#deviceregistry)
         * [System Design Description Overview](#deviceregistry_sdd)
         * [Services and Use Cases](#deviceregistry_usecases)
         * [Security](#deviceregistry_security)
         * [Endpoints](#deviceregistry_endpoints)
            * [Onboarding](#deviceregistry_endpoints_onboarding)
            * [Client](#deviceregistry_endpoints_client)
-    11. [System Registry](#systemregistry)
+    12. [System Registry](#systemregistry)
         * [System Design Description Overview](#systemregistry_sdd)
         * [Services and Use Cases](#systemregistry_usecases)
         * [Security](#systemregistry_security)
         * [Endpoints](#systemregistry_endpoints)
            * [Onboarding](#systemregistry_endpoints_onboarding)
            * [Client](#systemregistry_endpoints_client)
-	12. [Choreographer](#choreographer)
+	13. [Choreographer](#choreographer)
         * [System Design Description Overview](#choreographer_sdd)
         * [Services and Use Cases](#choreographer_usecases)  
         * [Endpoints](#choreographer_endpoints)
@@ -4784,6 +4784,71 @@ __Delete subscription parameters__  the input :
         
 This service can only be used by other core services, therefore this is not part of the public API.    
 
+# DataManager
+
+<a name="datamanager_sdd" />
+
+## System Design Description Overview
+
+The purpose of DataManager supporting core system is to provide storage for sensor data.
+
+![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `AH Service Registry`
+![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `AH Authorization` 
+![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `AH Orchestrator`
+![Alt text](/documentation/datamanager/overview.png)
+
+<a name="datamanager_sysd" />
+
+## System Design Overview
+![Alt text](/documentation/datamanager/sysd/datamanager_controller.jpg)
+
+<a name="datamanager_provided_services" />
+
+## Provided services
+
+The DataManager provides the following services:
+* [Echo](#datamanager_endpoints_get_echo)
+* [Historian](#datamanager_endpoints_historian)
+* [Proxy](#datamanager_endpoints_proxy)
+
+<a name="datamanager_consumed_services" />
+
+## Consumed services
+
+The DataManager consumes the following services:
+
+<a name="datamanager_usecases" />
+
+## Use cases
+
+The DataManager has the following use cases:
+* [Update cache message](documentation/datamanager/use_cases/DM_use_case_1.md)
+![Alt text](/documentation/datamanager/use_cases/TemporaryStore.png)
+* [Fetch cache message](documentation/datamanager/use_cases/DM_use_case_2.md)
+![Alt text](/documentation/datamanager/use_cases/FetchTemporary.png)
+* [Update stored message](documentation/datamanager/use_cases/DM_use_case_3.md)
+![Alt text](/documentation/datamanager/use_cases/TemporaryStore.png)
+* [Fetch stored message](documentation/datamanager/use_cases/DM_use_case_4.md)
+![Alt text](/documentation/datamanager/use_cases/FetchTemporary.png)
+
+<a name="datamanager_endpoints" />
+
+## Endpoints
+
+<a name=datamanager_endpoints_client" />
+
+### Client endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#datamanager_endpoints_get_echo) | /echo | GET    | -    | OK     |
+| [Historian](#datamanager_endpoints_historian) | /historian | POST    | -    | OK     |
+| [Proxy](#eventhandler_endpoints_proxy) | /proxy | DELETE    | -    | OK     |
+
+
+<a name="datamanager_endpoints_management" />
+
+
 # Gatekeeper 
  
 <a name="gatekeeper_sdd" />
@@ -6311,37 +6376,6 @@ __ActiveSession__ is the output.
 | `responseControlQueue` | control queue of response messaging through the the Relay |
 | `sessionStartedAt` | Time stamp of session start |
 
-<<<<<<< HEAD
-
-# DataManager
-
-<a name="datamanager_sdd" />
-
-## System Design Description Overview
-
-This supporting core system has the purpose of providing data management features in the Arrowhead Framework by its following services:
-
-- Proxy
-- Historian
-
-<a name="datamanager_usecases" />
-
-These services can be used to store data temporary (Proxy) or an database (Historian). This enables sleepy devices (typically battery powered wireless sensors) to store data and for consumers to always be able to fetch the newest value (Proxy) or historical data (Historian).
-
-## Services and Use Cases
-
-Use case 1: *Proxy*
-Text...
-
-Use case 2: *Historian*
-Text...
-
-## Endpoints
-
-### Echo 
-```
-GET /datamanager/echo
-=======
 <a name="ca" />
 
 # Certificate Authority
@@ -6527,7 +6561,6 @@ GET /qos_monitor/echo
 ```
 
 Returns a "Got it" message with the purpose of testing the core service availability.
-
 
 ### Get ping measurements mgmt
 
