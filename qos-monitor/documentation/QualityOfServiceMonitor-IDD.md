@@ -1,5 +1,14 @@
-# QUALITY OF SERVICE MONITOR
-### Interface Design Description
+### QUALITY OF SERVICE MONITOR <br/>Interface Design Description
+
+---
+# Security
+
+This System can be secured via HTTPS. If it is started in secure mode (default behaviour), it verifies whether the Application System possesses a proper X.509 identity certificate and whether that certificate is Arrowhead compliant in its making. This certificate structure and creation guidelines ensure:
+-	Requester system is properly bootstrapped into the Local Cloud
+-	Requester system indeed belongs to this Local Cloud
+-	Requester system has right to access to the specific endpoint
+
+# Communication Profile
 
 QoS-Monitor offers three types of endpoints. Client, Management and Private.
 
