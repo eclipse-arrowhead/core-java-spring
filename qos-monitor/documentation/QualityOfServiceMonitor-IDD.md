@@ -31,6 +31,7 @@ The base URL for the requests: `http://<host>:<port>/qos_monitor`.
 | [Get Intra-Cloud Ping Measurements](#endpoint_mgmt_get_intra_ping) | /mgmt/measurements/intracloud/ping | GET | [Page params](#input_mgmt_get_intra_ping) | [Response DTO](#output_mgmt_get_intra_ping) |
 | [Get Intra-Cloud Ping Measurements By System ID](#endpoint_mgmt_get_intra_ping_by_system_id) | /mgmt/measurements/intracloud/ping/{id} | GET | [id](#input_mgmt_get_intra_ping_by_system_id) | [Response DTO](#output_mgmt_get_intra_ping_by_system_id) |
 | [Get Inter-Cloud Direct Ping Measurements](#endpoint_mgmt_get_inter_direct_ping) | /mgmt/measurements/intercloud/ping | GET | [Page params](#input_mgmt_get_inter_direct_ping) | [Response DTO](#output_mgmt_get_inter_direct_ping) |
+| [Get Inter-Cloud Direct Ping Measurements By Cloud-System Pair](#endpoint_mgmt_post_inter_direct_ping_by_cloud_system) | /mgmt/measurements/intercloud/ping/pair_results | POST | [Page params](#input_mgmt_post_inter_direct_ping_by_cloud_system) | [Response DTO](#output_mgmt_post_inter_direct_ping_by_cloud_system) |
 
 ---
 
@@ -828,7 +829,7 @@ System ID of the intra-cloud ping measurement as a path variable.
 GET /qosmonitor/mgmt/measurements/intercloud/ping
 ```
 
-Return requested Inter-Cloud direct ping measurements entries by the given page parameters.
+Returns requested Inter-Cloud direct ping measurements entries by the given page parameters.
 
 **Input:**  <a name="input_mgmt_get_inter_direct_ping"/>
 
@@ -901,6 +902,137 @@ Query params:
 | Field | Description |
 | ----- | ----------- |
 | count | Number of total elements |
+| id | ID of the inter-cloud direct ping measurement |
+| measurement.id | ID of the inter-cloud measurement |
+| measurement.measurementType | Type of the measurement |
+| measurement.address | Address of neighbor system(s) pinged |
+| measurement.cloud.id | ID of the measured cloud |
+| measurement.cloud.operator | Operator of the measured cloud |
+| measurement.cloud.name | Name of the measured cloud |
+| measurement.cloud.owncloud | Flag to indicate own cloud (meant to be false) |
+| measurement.cloud.neighbor | Flag to indicate neighbor cloud |
+| measurement.cloud.secure | Flag to indicate security |
+| measurement.cloud.authenticationInfo | Base64 encoded public key of the measured cloud |
+| measurement.cloud.createdAt | Date of creation of the measured cloud |
+| measurement.cloud.updatedAt | Date of update of the measured cloud |
+| measurement.lastMeasurementAt | Time of the last measurement |
+| measurement.createdAt | Date of creation of the measurement |
+| measurement.updatedAt | Date of update of the measurement |
+| available | Boolean value of the systems calculated availability|
+| minResponseTime | Integer value of milliseconds of the fastest returned ping|
+| maxResponseTime | Integer value of milliseconds of the slowest returned ping|
+| meanResponseTimeWithTimeout | Integer value of milliseconds of the calculated average of pings including timeouts|
+| meanResponseTimeWithoutTimeout | Integer value of milliseconds of the calculated average of pings not including timeouts|
+| jitterWithTimeout | Integer value of milliseconds of the calculated standard deviation of pings including timeouts|
+| jitterWithoutTimeout | Integer value of milliseconds of the calculated standard deviation of pings not including timeouts|
+| lostPerMeasurementPercent | Integer value of calculated lost ping percentage|
+| sent | Integer value of sent pings in measurement|
+| sentAll | Integer value of sent pings since ping measurement created|
+| received | Integer value of received pings in measurement|
+| receivedAll | Integer value of received pings since ping measurement created|
+| lastAccessAt | TimeStamp value of the systems last known availability|
+| countStartedAt | TimeSatmp value of the last reset of sent and received fields|
+| createdAt | Date of creation of the ping measurement |
+| updatedAt | Date of update of the ping measurement |
+
+### Get Inter-Cloud Direct Ping Measurements By Cloud-System Pair <a name="endpoint_mgmt_post_inter_direct_ping_by_cloud_system"/> 
+```
+POST /qosmonitor/mgmt/measurements/intercloud/ping/pair_results
+```
+
+Returns requested Inter-Cloud direct ping measurement entry by cloud and system.
+
+**Input:**  <a name="input_mgmt_post_inter_direct_ping_by_cloud_system"/>
+
+```json
+{
+  "cloud": {    
+    "id": 0,
+    "operator": "string",
+    "name": "string",        
+    "ownCloud": false,
+    "neighbor": true,
+    "secure": true,
+    "authenticationInfo": "string",
+    "createdAt": "string",
+    "updatedAt": "string"
+  },
+  "system": {
+    "id": 0,
+    "systemName": "string",
+    "address": "string",
+    "port": 0,
+    "authenticationInfo": "string",
+    "createdAt": "string",    
+    "updatedAt": "string"
+  }
+}
+```
+
+| Field | Description | Necessity |
+| ----- | ----------- | --------- |
+| cloud.id | ID of the cloud | mandatory |
+| cloud.operator | Operator of the cloud | mandatory |
+| cloud.name | Name of the cloud | mandatory |
+| cloud.owncloud | Flag to indicate own cloud (meant to be false) | optional |
+| cloud.neighbor | Flag to indicate neighbor cloud | optional |
+| cloud.secure | Flag to indicate security | optional |
+| cloud.authenticationInfo | Base64 encoded public key of the cloud | optional |
+| cloud.createdAt | Date of creation of the cloud | optional |
+| cloud.updatedAt | Date of update of the cloud | optional |
+| system.id | ID of the system |  mandatory |
+| system.systemName | Name of the system |  mandatory |
+| system.address | Address of the system |  mandatory |
+| system.port | Port of the system | optional |
+| system.authenticationInfo | Base64 encoded public key of the system | optional |
+| system.createdAt | Date of creation of the system | optional |
+| system.updatedAt | Date of update of the system | optional |
+
+**Output:** <a name="output_mgmt_post_inter_direct_ping_by_cloud_system"/>
+
+```json
+{
+  "id": 0,
+  "measurement": {
+    "id": 0,
+    "measurementType": "PING",
+    "address": "string",
+    "cloud": {    
+      "id": 0,
+      "operator": "string",
+      "name": "string",        
+      "ownCloud": false,
+      "neighbor": true,
+      "secure": true,
+      "authenticationInfo": "string",
+      "createdAt": "string",
+      "updatedAt": "string"
+    },
+    "lastMeasurementAt": "2020-05-04T13:50:19.127Z",
+    "createdAt": "2020-05-04T13:50:19.127Z",
+    "updatedAt": "2020-05-04T13:50:19.127Z"
+  },
+  "available": true,
+  "minResponseTime": 0,
+  "maxResponseTime": 0,
+  "meanResponseTimeWithTimeout": 0,
+  "meanResponseTimeWithoutTimeout": 0,
+  "jitterWithTimeout": 0,
+  "jitterWithoutTimeout": 0,  
+  "lostPerMeasurementPercent": 0,
+  "sent": 0,
+  "sentAll": 0,
+  "received": 0,
+  "receivedAll": 0,
+  "lastAccessAt": "2020-05-04T13:50:19.127Z",
+  "countStartedAt": "2020-05-04T13:50:19.127Z",
+  "createdAt": "2020-05-04T13:50:19.127Z",
+  "updatedAt": "2020-05-04T13:50:19.127Z"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
 | id | ID of the inter-cloud direct ping measurement |
 | measurement.id | ID of the inter-cloud measurement |
 | measurement.measurementType | Type of the measurement |
