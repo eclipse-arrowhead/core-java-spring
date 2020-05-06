@@ -34,6 +34,7 @@ The base URL for the requests: `http://<host>:<port>/qos_monitor`.
 | [Get Inter-Cloud Direct Ping Measurements By Cloud-System Pair](#endpoint_mgmt_post_inter_direct_ping_by_cloud_system) | /mgmt/measurements/intercloud/ping/pair_results | POST | [Request DTO](#input_mgmt_post_inter_direct_ping_by_cloud_system) | [Response DTO](#output_mgmt_post_inter_direct_ping_by_cloud_system) |
 | [Get Inter-Cloud Relay Echo Measurements](#endpoint_mgmt_get_inter_relay_echo) | /mgmt/measurements/intercloud/relay_echo | GET | [Page params](#input_mgmt_get_inter_relay_echo) | [Response DTO](#output_mgmt_get_inter_relay_echo) |
 | [Get Inter-Cloud Relay Echo Measurements By Cloud-Relay Pair](#endpoint_mgmt_post_inter_relay_echo_by_cloud_relay) | /mgmt/measurements/intercloud/relay_echo/pair_results | POST | [Request DTO](#input_mgmt_post_inter_relay_echo_by_cloud_relay) | [Response DTO](#output_mgmt_post_inter_relay_echo_by_cloud_relay) |
+| [Get Inter-Cloud Relay Echo Best Measurements By Cloud](#endpoint_mgmt_post_inter_relay_echo_best_by_cloud) | /mgmt/measurements/intercloud/relay_echo/best_relay | POST | [Request DTO](#input_mgmt_post_inter_relay_echo_best_by_cloud) | [Response DTO](#output_mgmt_post_inter_relay_echo_best_by_cloud) |
 
 ---
 
@@ -1252,6 +1253,130 @@ Returns requested Inter-Cloud Relay-Echo measurment entry by cloud and relay.
 | relay.updatedAt | Date of update of the relay | optional |
 
 **Output:** <a name="output_mgmt_post_inter_relay_echo_by_cloud_relay"/>
+
+```json
+{
+  "id": 0,      
+  "measurement": {
+    "id": 0,
+    "measurementType": "RELAY_ECHO",
+    "status": "NEW",
+    "cloud": {          
+      "id": 0,
+      "operator": "string",
+      "name": "string",
+      "ownCloud": false,
+      "neighbor": true,          
+      "secure": true,
+      "authenticationInfo": "string",
+      "createdAt": "string",
+      "updatedAt": "string"
+    },                
+    "relay": {
+      "id": 0,
+      "address": "string",
+      "port": 0,
+      "type": "GATEWAY_RELAY",
+      "exclusive": true,          
+      "secure": true,          
+      "createdAt": "string",
+      "updatedAt": "string"
+    },        
+    "lastMeasurementAt": "2020-05-05T08:23:47.774Z",
+    "createdAt": "2020-05-05T08:23:47.774Z",   
+    "updatedAt": "2020-05-05T08:23:47.774Z"
+  },
+  "minResponseTime": 0,
+  "maxResponseTime": 0,
+  "meanResponseTimeWithTimeout": 0,
+  "meanResponseTimeWithoutTimeout": 0,
+  "jitterWithTimeout": 0,
+  "jitterWithoutTimeout": 0,      
+  "lostPerMeasurementPercent": 0, 
+  "received": 0,
+  "receivedAll": 0,
+  "sent": 0,
+  "sentAll": 0,
+  "lastAccessAt": "2020-05-05T08:23:47.774Z",
+  "countStartedAt": "2020-05-05T08:23:47.774Z",
+  "createdAt": "2020-05-05T08:23:47.774Z",
+  "updatedAt": "2020-05-05T08:23:47.774Z"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| id | ID of the inter-cloud relay echo measurement |
+| measurement.id | ID of the inter-cloud measurement |
+| measurement.measurementType | Type of the measurement |
+| measurement.status | Status of the measurement |
+| measurement.cloud.id | ID of the measured cloud |
+| measurement.cloud.operator | Operator of the measured cloud |
+| measurement.cloud.name | Name of the measured cloud |
+| measurement.cloud.owncloud | Flag to indicate own cloud (meant to be false) |
+| measurement.cloud.neighbor | Flag to indicate neighbor cloud |
+| measurement.cloud.secure | Flag to indicate security |
+| measurement.cloud.authenticationInfo | Base64 encoded public key of the measured cloud |
+| measurement.cloud.createdAt | Date of creation of the measured cloud |
+| measurement.cloud.updatedAt | Date of update of the measured cloud |
+| measurement.relay.id | ID of the measured relay |
+| measurement.relay.address | Address of the measured relay |
+| measurement.relay.port | Port of the measured relay |
+| measurement.relay.type | Type of the measured relay |
+| measurement.relay.exclusive | Flag to indicate exclusivity |
+| measurement.relay.secure | Flag to indicate security |
+| measurement.relay.createdAt | Date of creation of the measured relay |
+| measurement.relay.updatedAt | Date of update of the measured relay |
+| measurement.lastMeasurementAt | Time of the last measurement |
+| measurement.createdAt | Date of creation of the measurement |
+| measurement.updatedAt | Date of update of the measurement |
+| available | Boolean value of the systems calculated availability|
+| minResponseTime | Integer value of milliseconds of the fastest returned ping|
+| maxResponseTime | Integer value of milliseconds of the slowest returned ping|
+| meanResponseTimeWithTimeout | Integer value of milliseconds of the calculated average of pings including timeouts|
+
+### Get Inter-Cloud Relay Echo Best Measurements By Cloud <a name="endpoint_mgmt_post_inter_relay_echo_best_by_cloud"/>
+```
+POST /qosmonitor/mgmt/measurements/intercloud/relay_echo/best_relay
+```
+
+Returns best Inter-Cloud Relay-Echo measurment entry by cloud and attribute.
+
+**Input:**  <a name="input_mgmt_post_inter_relay_echo_best_by_cloud"/>
+
+```json
+{
+  "attribute": "string",
+  "cloud" : {
+    "id": 0,
+    "operator": "string",
+    "name": "string",        
+    "ownCloud": false,
+    "neighbor": true,
+    "secure": true,
+    "authenticationInfo": "string",
+    "createdAt": "string",
+    "updatedAt": "string"
+  }
+}
+```
+
+| Field | Description | Necessity |
+| ----- | ----------- | --------- |
+| attribute | Attribute of the measurement for the ranking | mandatory |
+| cloud.id | ID of the cloud | mandatory |
+| cloud.operator | Operator of the cloud | mandatory |
+| cloud.name | Name of the cloud | mandatory |
+| cloud.owncloud | Flag to indicate own cloud (meant to be false) | optional |
+| cloud.neighbor | Flag to indicate neighbor cloud | optional |
+| cloud.secure | Flag to indicate security | optional |
+| cloud.authenticationInfo | Base64 encoded public key of the cloud | optional |
+| cloud.gatekeeperRelayIds | List of gatekeeper relay IDs belonged to the cloud | optional |
+| cloud.gatewayRelayIds | List of gateway relay IDs belonged to the cloud | optional |
+| cloud.createdAt | Date of creation of the cloud | optional |
+| cloud.updatedAt | Date of update of the cloud | optional |
+
+**Output:** <a name="output_mgmt_post_inter_relay_echo_best_by_cloud"/>
 
 ```json
 {
