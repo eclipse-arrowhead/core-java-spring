@@ -4851,10 +4851,10 @@ The base URL for the requests: `http://<host>:<port>/datamanager`
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Echo](#datamanager_endpoints_get_echo) | /echo | GET    | -    | OK     |
-| [Get system list](#datamanager_endpoints_getsystems) | /historian | GET    | -    | SenML     |
-| [Get service list](#datamanager_endpoints_getservices_from_system | /historian/{systemName} | GET    | -    | ServiceList     |
-| [Fetch data from db](#datamanager_endpoints_getdb) | /historian/{systemName}/{serviceName} | GET    | -    | SenML     |
-| [Store data in db](#datamanager_endpoints_storedb) | /historian/{systemName}/{serviceName} | PUT    | SenML   | -     |
+| [Get system list](#datamanager_endpoints_getsys) | /historian | GET    | -    | SenML     |
+| [Get service list](#datamanager_endpoints_getsrv_from_sys | /historian/{systemName} | GET    | -    | ServiceList |
+| [Fetch data from db](#datamanager_endpoints_getdb) | /historian/{systemName}/{serviceName} | GET    | -   | SenML |
+| [Store data in db](#datamanager_endpoints_storedb) | /historian/{systemName}/{serviceName} | PUT    | SenML   | - |
 
 
 <a name="datamanager_endpoints_get_echo" />
