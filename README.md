@@ -4844,18 +4844,17 @@ The DataManager has the following use cases:
 Swagger API documentation is available on: `https://<host>:<port>` <br />
 The base URL for the requests: `http://<host>:<port>/datamanager`
 
-<a name=datamanager_endpoints_client" />
+<a name="datamanager_endpoints_client" />
 
 ### Client endpoint description<br />
 
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Echo](#datamanager_endpoints_get_echo) | /echo | GET    | -    | OK     |
-| [Historian](#datamanager_endpoints_historian) | /historian | GET    | -    | SenML     |
-| [Historian](#datamanager_endpoints_historian) | /historian/{systemName} | GET    | -    | ServiceList     |
-| [Historian](#datamanager_endpoints_historian) | /historian/{systemName}/{serviceName} | GET    | -    | SenML     |
-| [Historian](#datamanager_endpoints_historian) | /historian/{systemName}/{serviceName} | PUT    | SenML   | -     |
-
+| [Get system list](#datamanager_endpoints_getsystems) | /historian | GET    | -    | SenML     |
+| [Get service list](#datamanager_endpoints_getservices_from_system | /historian/{systemName} | GET    | -    | ServiceList     |
+| [Fetch data from db](#datamanager_endpoints_getdb) | /historian/{systemName}/{serviceName} | GET    | -    | SenML     |
+| [Store data in db](#datamanager_endpoints_storedb) | /historian/{systemName}/{serviceName} | PUT    | SenML   | -     |
 
 
 <a name="datamanager_endpoints_get_echo" />
@@ -4867,6 +4866,12 @@ GET /datamanager/echo
 
 Returns a "Got it" message with the purpose of testing the service availability.
 
+### Get system list
+```
+GET /datamanager/historian
+```
+
+Returns a list of all systems that have at least ine service endpoint in the database.
 
 # Gatekeeper 
  
