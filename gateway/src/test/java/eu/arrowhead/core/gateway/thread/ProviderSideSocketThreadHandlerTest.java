@@ -60,7 +60,7 @@ import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.relay.gateway.GatewayRelayClient;
 
 @RunWith(SpringRunner.class)
-public class ProviderSideSocketThreadTest {
+public class ProviderSideSocketThreadHandlerTest {
 	
 	//=================================================================================================
 	// members
@@ -68,7 +68,7 @@ public class ProviderSideSocketThreadTest {
 	private ApplicationContext appContext;
 	private GatewayRelayClient relayClient;
 	
-	private ProviderSideSocketThread testingObject;
+	private ProviderSideSocketThreadHandler testingObject;
 	
 	//=================================================================================================
 	// methods
@@ -84,25 +84,25 @@ public class ProviderSideSocketThreadTest {
 		when(appContext.getBean(SSLProperties.class)).thenReturn(getTestSSLPropertiesForThread());
 		
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
-		testingObject = new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 60000);
+		testingObject = new ProviderSideSocketThreadHandler(appContext, relayClient, getTestSession(), connectionRequest, 60000);
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorAppContextNull() {
-		new ProviderSideSocketThread(null, null, null, null, 0);
+		new ProviderSideSocketThreadHandler(null, null, null, null, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorRelayClientNull() {
-		new ProviderSideSocketThread(appContext, null, null, null, 0);
+		new ProviderSideSocketThreadHandler(appContext, null, null, null, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorRelaySessionNull() {
-		new ProviderSideSocketThread(appContext, relayClient, null, null, 0);
+		new ProviderSideSocketThreadHandler(appContext, relayClient, null, null, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -110,7 +110,7 @@ public class ProviderSideSocketThreadTest {
 	public void testConstructorRelaySessionClosed() {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(true);
 
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), null, 0);
+		new ProviderSideSocketThreadHandler(appContext, relayClient, getTestSession(), null, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -118,7 +118,7 @@ public class ProviderSideSocketThreadTest {
 	public void testConstructorConnectionRequestNull() {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), null, 0);
+		new ProviderSideSocketThreadHandler(appContext, relayClient, getTestSession(), null, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -129,7 +129,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.setProvider(null);
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThreadHandler(appContext, relayClient, getTestSession(), connectionRequest, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -140,7 +140,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setSystemName(null);
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThreadHandler(appContext, relayClient, getTestSession(), connectionRequest, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -151,7 +151,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setSystemName(" ");
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThreadHandler(appContext, relayClient, getTestSession(), connectionRequest, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -162,7 +162,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setAddress(null);
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThreadHandler(appContext, relayClient, getTestSession(), connectionRequest, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -173,7 +173,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setAddress("\r\n");
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThreadHandler(appContext, relayClient, getTestSession(), connectionRequest, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -184,7 +184,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setPort(null);
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThreadHandler(appContext, relayClient, getTestSession(), connectionRequest, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -195,7 +195,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setPort(-2);
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThreadHandler(appContext, relayClient, getTestSession(), connectionRequest, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -206,7 +206,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setPort(1111111);
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThreadHandler(appContext, relayClient, getTestSession(), connectionRequest, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -217,7 +217,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setAuthenticationInfo(null);
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThreadHandler(appContext, relayClient, getTestSession(), connectionRequest, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -228,7 +228,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setAuthenticationInfo("");
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThreadHandler(appContext, relayClient, getTestSession(), connectionRequest, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -239,7 +239,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.setServiceDefinition(null);
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThreadHandler(appContext, relayClient, getTestSession(), connectionRequest, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -250,7 +250,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.setServiceDefinition("\t\t\t");
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThreadHandler(appContext, relayClient, getTestSession(), connectionRequest, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -261,7 +261,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.setConsumerGWPublicKey(null);
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThreadHandler(appContext, relayClient, getTestSession(), connectionRequest, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -272,7 +272,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.setConsumerGWPublicKey(" ");
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThreadHandler(appContext, relayClient, getTestSession(), connectionRequest, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -379,7 +379,7 @@ public class ProviderSideSocketThreadTest {
 		when(appContext.getBean(SSLProperties.class)).thenReturn(sslProps);
 
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
-		final ProviderSideSocketThread thread = new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 60000);
+		final ProviderSideSocketThreadHandler thread = new ProviderSideSocketThreadHandler(appContext, relayClient, getTestSession(), connectionRequest, 60000);
 		thread.init("queueId", getTestMessageProducer());
 		thread.run();
 

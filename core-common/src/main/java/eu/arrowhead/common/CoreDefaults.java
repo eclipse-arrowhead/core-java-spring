@@ -39,6 +39,7 @@ public class CoreDefaults {
 	public static final int DEFAULT_GATEWAY_SOCKET_TIMEOUT = 30000;
 	public static final int DEFAULT_GATEWAY_MIN_PORT = 8000;
 	public static final int DEFAULT_GATEWAY_MAX_PORT = 8100;
+	public static final int DEFAULT_GATEWAY_PROVIDER_SIDE_MAX_REQUEST_PER_SOCKET = 50;
 	
 	public static final boolean DEFAULT_EVENT_HANDLER_TTL_SCHEDULED = false;
 	public static final int DEFAULT_EVENT_HANDLER_TTL_INTERVAL_MINUTES = 17;

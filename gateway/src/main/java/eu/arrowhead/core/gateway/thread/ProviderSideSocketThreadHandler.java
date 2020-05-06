@@ -1,10 +1,7 @@
 package eu.arrowhead.core.gateway.thread;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.security.PublicKey;
-import java.util.ServiceConfigurationError;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -16,9 +13,9 @@ import javax.jms.MessageProducer;
 import javax.jms.Queue;
 import javax.jms.Session;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
@@ -33,28 +30,30 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.gateway.service.ActiveSessionDTO;
 import eu.arrowhead.relay.gateway.GatewayRelayClient;
 
-public class ProviderSideSocketThread extends Thread implements MessageListener {
+public class ProviderSideSocketThreadHandler implements MessageListener {
 	
 	//=================================================================================================
 	// members
 	
-	private static final int BUFFER_SIZE = 1024;
-	
-	private static final Logger logger = LogManager.getLogger(ProviderSideSocketThread.class);
+	private static final Logger logger = LogManager.getLogger(ProviderSideSocketThreadHandler.class);
 	
 	private final GatewayRelayClient relayClient;
 	private final Session relaySession;
 	private final GatewayProviderConnectionRequestDTO connectionRequest;
 	private final PublicKey consumerGatewayPublicKey;
 	private final int timeout;
+	private final int maxRequestPerSocket;
 	private final ConcurrentMap<String,ActiveSessionDTO> activeSessions;
 	private final SSLProperties sslProperties;
 	
 	private String queueId;
 	private MessageProducer sender;
-	private SSLSocket sslProviderSocket;
-	private OutputStream outProvider;
-	private boolean interrupted = false;
+	
+	private SSLSocketFactory socketFactory;
+	private ProviderSideSocketThread oldThread;
+	private ProviderSideSocketThread currentThread;
+	private int noRequest = 0;
+	
 	private boolean initialized = false;
 	
 	//=================================================================================================
@@ -62,9 +61,8 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("unchecked")
-	public ProviderSideSocketThread(final ApplicationContext appContext, final GatewayRelayClient relayClient, final Session relaySession, final GatewayProviderConnectionRequestDTO connectionRequest,
-									final int timeout) {
-		super();
+	public ProviderSideSocketThreadHandler(final ApplicationContext appContext, final GatewayRelayClient relayClient, final Session relaySession, final GatewayProviderConnectionRequestDTO connectionRequest,
+										   final int timeout, final int maxRequestPerSocket) {
 		Assert.notNull(appContext, "appContext is null.");
 		Assert.notNull(relayClient, "relayClient is null.");
 		Assert.notNull(relaySession, "relaySession is null.");
@@ -76,11 +74,10 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 		this.relaySession = relaySession;
 		this.connectionRequest = connectionRequest;
 		this.timeout = timeout;
+		this.maxRequestPerSocket = maxRequestPerSocket;
 		this.consumerGatewayPublicKey = Utilities.getPublicKeyFromBase64EncodedString(this.connectionRequest.getConsumerGWPublicKey());
 		this.activeSessions = appContext.getBean(CoreCommonConstants.GATEWAY_ACTIVE_SESSION_MAP, ConcurrentHashMap.class);
 		this.sslProperties = appContext.getBean(SSLProperties.class);
-		
-		setName(connectionRequest.getProvider().getSystemName() + "." + connectionRequest.getServiceDefinition());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -92,7 +89,21 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 		
 		this.queueId = queueId;
 		this.sender = sender;
-		this.initialized = true;
+		
+		final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(sslProperties);
+		socketFactory = sslContext.getSocketFactory();
+		currentThread = new ProviderSideSocketThread(relayClient, relaySession, socketFactory, connectionRequest, consumerGatewayPublicKey, timeout, sender);
+		try {
+			currentThread.init();
+			currentThread.start();
+
+			this.initialized = true;
+		} catch (final IOException ex) {
+			logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
+			logger.debug("Stacktrace:", ex);
+
+			throw new ArrowheadException("Error occured when initialize relay communication.", HttpStatus.SC_BAD_GATEWAY, ex);
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -105,75 +116,50 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 	public void onMessage(final Message message) {
 		logger.debug("onMessage started...");
 		
-		Assert.notNull(outProvider, "Output stream is null.");
+		if (!initialized) {
+			throw new IllegalStateException("Handler is not initialized.");
+		}
+		
 		try {
 			if (isControlMessage(message)) {
 				relayClient.handleCloseControlMessage(message, relaySession);
-				closeAndInterrupt();
+				close();
 			} else {
+				Assert.notNull(currentThread.getOutputStream(), "Output stream is null.");
+				noRequest++;
+				if (noRequest > maxRequestPerSocket) {
+					// new thread needed before transferring the message
+					replaceThread();
+				}
 				final byte[] bytes = relayClient.getBytesFromMessage(message, consumerGatewayPublicKey);
-				outProvider.write(bytes);
+				currentThread.getOutputStream().write(bytes);
 			}
 		} catch (final JMSException | ArrowheadException | IOException ex) {
 			logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
 			logger.debug("Stacktrace:", ex);
-			closeAndInterrupt();
+			close();
 		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Override
-	public void interrupt() {
-		logger.debug("interrupt started...");
+	public void close() {
+		logger.debug("close started...");
 		
-		super.interrupt();
-		interrupted = true;
+		if (activeSessions != null && queueId != null) {
+			activeSessions.remove(queueId);
+		}
+		
+		if (oldThread != null) {
+			oldThread.closeAndInterrupt();
+		}
+		
+		if (currentThread != null) {
+			currentThread.closeAndInterrupt();
+		}
+		
+		relayClient.closeConnection(relaySession);
 	}
-	
-	//-------------------------------------------------------------------------------------------------
-	public void setInterrupted(final boolean interrupted) { this.interrupted = interrupted; }
-	
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	public void run() {
-		logger.debug("run started...");
 
-		if (!initialized) {
-			throw new IllegalStateException("Thread is not initialized.");
-		}
-		
-		try {
-			final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(sslProperties);
-			final SSLSocketFactory socketFactory = sslContext.getSocketFactory();
-			sslProviderSocket = (SSLSocket) socketFactory.createSocket(connectionRequest.getProvider().getAddress(), connectionRequest.getProvider().getPort().intValue());
-			sslProviderSocket.setSoTimeout(timeout);
-			final InputStream inProvider = sslProviderSocket.getInputStream();
-			outProvider = sslProviderSocket.getOutputStream();
-			
-			while (true) {
-				if (interrupted) {
-					close();
-					return;
-				}
-				
-				final byte[] buffer = new byte[BUFFER_SIZE];
-				final int size = inProvider.read(buffer);
-				
-				if (size < 0) { // end of stream
-					closeAndInterrupt();
-				} else {
-					final byte[] data = new byte[size];
-					System.arraycopy(buffer, 0, data, 0, size);
-					relayClient.sendBytes(relaySession, sender, consumerGatewayPublicKey, data);
-				}
-			}
-		} catch (final IOException | JMSException | ArrowheadException | ServiceConfigurationError | IllegalArgumentException ex) {
-			logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
-			logger.debug("Stacktrace:", ex);
-			closeAndInterrupt();
-		}
-	}
-	
 	//=================================================================================================
 	// assistant methods
 	
@@ -204,28 +190,23 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void close() {
-		logger.debug("close started...");
-		
-		if (activeSessions != null && queueId != null) {
-			activeSessions.remove(queueId);
+	private void replaceThread() {
+		if (oldThread != null) {
+			oldThread.closeAndInterrupt();
 		}
 		
-		if (sslProviderSocket != null) {
-			try {
-				sslProviderSocket.close();
-			} catch (final IOException ex) {
-				logger.debug("Error while closing socket: {}", ex.getMessage());
-				logger.debug("Stacktrace:", ex);
-			}
+		oldThread = currentThread;
+		currentThread = new ProviderSideSocketThread(relayClient, relaySession, socketFactory, connectionRequest, consumerGatewayPublicKey, timeout, sender);
+		try {
+			currentThread.init();
+			currentThread.start();
+
+			noRequest = 0;
+		} catch (final IOException ex) {
+			logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
+			logger.debug("Stacktrace:", ex);
+
+			close();
 		}
-		
-		relayClient.closeConnection(relaySession);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private void closeAndInterrupt() {
-		close();
-		interrupt();
 	}
 }
