@@ -4851,8 +4851,8 @@ The base URL for the requests: `http://<host>:<port>/datamanager`
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Echo](#datamanager_endpoints_get_echo) | /echo | GET    | -    | OK     |
-| [Get system list](#datamanager_endpoints_getsys) | /historian | GET    | -    | SenML     |
-| [Get service list](#datamanager_endpoints_getsrv_from_sys | /historian/{systemName} | GET    | -    | ServiceList |
+| [Get system list](#datamanager_endpoints_getsys) | /historian | GET    | -    | SystemList     |
+| [Get service list](#datamanager_endpoints_getsrv_from_sys) | /historian/{systemName} | GET    | -    | ServiceList |
 | [Fetch data from db](#datamanager_endpoints_getdb) | /historian/{systemName}/{serviceName} | GET    | -   | SenML |
 | [Store data in db](#datamanager_endpoints_storedb) | /historian/{systemName}/{serviceName} | PUT    | SenML   | - |
 
@@ -4866,12 +4866,14 @@ GET /datamanager/echo
 
 Returns a "Got it" message with the purpose of testing the service availability.
 
+<a name="datamanager_endpoints_getsys" />
+
 ### Get system list
 ```
 GET /datamanager/historian
 ```
 
-Returns a list of all systems that have at least ine service endpoint in the database.
+Returns a list of all systems that have at least one service endpoint in the database.
 
 # Gatekeeper 
  
