@@ -4797,6 +4797,11 @@ The purpose of DataManager supporting core system is to provide storage for sens
 ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `AH Orchestrator`
 ![Alt text](/documentation/datamanager/overview.png)
 
+The DataManager provides features for producers and consumers to:
+* Store SenML sensor and actuator data,
+* Fetch cached data,
+* and perform database queries.
+
 <a name="datamanager_sysd" />
 
 ## System Design Overview
@@ -4835,6 +4840,9 @@ The DataManager has the following use cases:
 
 ## Endpoints
 
+Swagger API documentation is available on: `https://<host>:<port>` <br />
+The base URL for the requests: `http://<host>:<port>/datamanager`
+
 <a name=datamanager_endpoints_client" />
 
 ### Client endpoint description<br />
@@ -4842,8 +4850,11 @@ The DataManager has the following use cases:
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Echo](#datamanager_endpoints_get_echo) | /echo | GET    | -    | OK     |
-| [Historian](#datamanager_endpoints_historian) | /historian | POST    | -    | OK     |
-| [Proxy](#eventhandler_endpoints_proxy) | /proxy | DELETE    | -    | OK     |
+| [Historian](#datamanager_endpoints_historian) | /historian | GET    | -    | SenML     |
+| [Historian](#datamanager_endpoints_historian) | /historian/{systemName} | GET    | -    | ServiceList     |
+| [Historian](#datamanager_endpoints_historian) | /historian/{systemName}/{serviceName} | GET    | -    | SenML     |
+| [Historian](#datamanager_endpoints_historian) | /historian/{systemName}/{serviceName} | PUT    | SenML   | -     |
+
 
 
 <a name="datamanager_endpoints_management" />
