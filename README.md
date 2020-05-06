@@ -81,7 +81,7 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 	       * [Client](#ca_endpoints_client)
            * [Private](#ca_endpoints_private)
            * [Management](#ca_endpoints_mgmt)
-    8. QoS Monitor (Quality of Service Monitor)
+    8. **QoS Monitor (Quality of Service Monitor)**
        * [System Design Description Overview](qos-monitor/documentation/QualityOfServiceMonitor-SysDD.md)
            * [Services and Use Cases](qos-monitor/documentation/QualityOfServiceMonitor-SysDD.md#services-and-use-cases)  
        * [Interface Design Description](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md)
