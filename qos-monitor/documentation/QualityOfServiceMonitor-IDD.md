@@ -33,6 +33,7 @@ The base URL for the requests: `http://<host>:<port>/qos_monitor`.
 | [Get Inter-Cloud Direct Ping Measurements](#endpoint_mgmt_get_inter_direct_ping) | /mgmt/measurements/intercloud/ping | GET | [Page params](#input_mgmt_get_inter_direct_ping) | [Response DTO](#output_mgmt_get_inter_direct_ping) |
 | [Get Inter-Cloud Direct Ping Measurements By Cloud-System Pair](#endpoint_mgmt_post_inter_direct_ping_by_cloud_system) | /mgmt/measurements/intercloud/ping/pair_results | POST | [Request DTO](#input_mgmt_post_inter_direct_ping_by_cloud_system) | [Response DTO](#output_mgmt_post_inter_direct_ping_by_cloud_system) |
 | [Get Inter-Cloud Relay Echo Measurements](#endpoint_mgmt_get_inter_relay_echo) | /mgmt/measurements/intercloud/relay_echo | GET | [Page params](#input_mgmt_get_inter_relay_echo) | [Response DTO](#output_mgmt_get_inter_relay_echo) |
+| [Get Inter-Cloud Relay Echo Measurements By Cloud-Relay Pair](#endpoint_mgmt_post_inter_relay_echo_by_cloud_relay) | /mgmt/measurements/intercloud/relay_echo/pair_results | POST | [Request DTO](#input_mgmt_post_inter_relay_echo_by_cloud_relay) | [Response DTO](#output_mgmt_post_inter_relay_echo_by_cloud_relay) |
 
 ---
 
@@ -1194,3 +1195,62 @@ Query params:
 | countStartedAt | TimeSatmp value of the last reset of sent and received fields|
 | createdAt | Date of creation of the ping measurement |
 | updatedAt | Date of update of the ping measurement |
+
+### Get Inter-Cloud Relay Echo Measurements By Cloud-Relay Pair <a name="endpoint_mgmt_post_inter_relay_echo_by_cloud_relay"/>
+```
+POST /qosmonitor/mgmt/measurements/intercloud/relay_echo/pair_results
+```
+
+Returns requested Inter-Cloud Relay-Echo measurment entry by cloud and relay.
+
+**Input:**  <a name="input_mgmt_post_inter_relay_echo_by_cloud_relay"/>
+
+```json
+{
+  "cloud": {    
+    "id": 0,
+    "operator": "string",
+    "name": "string",        
+    "ownCloud": false,
+    "neighbor": true,
+    "secure": true,
+    "authenticationInfo": "string",
+    "createdAt": "string",
+    "updatedAt": "string"
+  },
+  "relay": {
+    "id": 0,
+    "address": "string",
+    "port": 0,
+    "type": "GATEWAY_RELAY",
+    "exclusive": true,    
+    "secure": true,
+    "createdAt": "string",
+    "updatedAt": "string"
+  }
+}
+```
+
+| Field | Description | Necessity |
+| ----- | ----------- | --------- |
+| cloud.id | ID of the cloud | mandatory |
+| cloud.operator | Operator of the cloud | mandatory |
+| cloud.name | Name of the cloud | mandatory |
+| cloud.owncloud | Flag to indicate own cloud (meant to be false) | optional |
+| cloud.neighbor | Flag to indicate neighbor cloud | optional |
+| cloud.secure | Flag to indicate security | optional |
+| cloud.authenticationInfo | Base64 encoded public key of the cloud | optional |
+| cloud.createdAt | Date of creation of the cloud | optional |
+| cloud.updatedAt | Date of update of the cloud | optional |
+| relay.id | ID of the relay | mandatory |
+| relay.address | Address of the relay | mandatory |
+| relay.port | Port of the relay | mandatory |
+| relay.type | Type of the relay | optional |
+| relay.exclusive | Flag to indicate exclusivity | optional |
+| relay.secure | Flag to indicate security | optional |
+| relay.createdAt | Date of creation of the relay | optional |
+| relay.updatedAt | Date of update of the relay | optional |
+
+**Output:** <a name="output_mgmt_post_inter_relay_echo_by_cloud_relay"/>
+
+
