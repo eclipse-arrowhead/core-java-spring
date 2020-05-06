@@ -78,6 +78,7 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
        * [System Design Description Overview](#datamanager_sdd)
        * [Services and Use Cases](#datamanager_usecases)  
        * [Service Description Overview](#datamanager_provided_services)
+         * [Endpoints](#datamanager_endpoints)
     8. [Certificate Authority](#ca)
        * [System Design Description Overview](#ca_sdd)
        * [Services and Use Cases](#ca_usecases)  
@@ -4857,7 +4858,14 @@ The base URL for the requests: `http://<host>:<port>/datamanager`
 
 
 
-<a name="datamanager_endpoints_management" />
+<a name="datamanager_endpoints_get_echo" />
+
+### Echo
+```
+GET /datamanager/echo
+```
+
+Returns a "Got it" message with the purpose of testing the service availability.
 
 
 # Gatekeeper 
