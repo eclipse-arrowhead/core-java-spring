@@ -1,5 +1,6 @@
-# QUALITY OF SERVICE MONITOR
-### System Design Description
+### QUALITY OF SERVICE MONITOR <br/>System Design Description
+
+---
 
 The purpose of QoS Monitor supporting core system is providing QoS (Quality of Service) measurements to the QoS Manager (which is part of the Orchestrator core system).
 
@@ -10,10 +11,11 @@ The purpose of QoS Monitor supporting core system is providing QoS (Quality of S
 ![#ffd33d](https://placehold.it/15/ffd33d/000000?text=+) `AH Gatekeeper`
 ![#24292e](https://placehold.it/15/24292e/000000?text=+) `AH Gateway`
 ![#ffcc44](https://placehold.it/15/a33c00/000000?text=+) `AH QoS Monitor`
+
 ![Alt text](figures/overview.png)
 
-## Services and Use Cases
-### Provided Services
+# Services and Use Cases
+## Provided Services
 
 The QoS Monitor provides the following services:
 
@@ -31,7 +33,7 @@ _Private:_
 * [Init Relay Test](#init_relay_test_service_use_case)
 * [Join Relay Test](#join_relay_test_service_use_case)
 
-### Consumed Services
+## Consumed Services
 
 _Service Registry Core System:_
 
