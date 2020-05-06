@@ -529,11 +529,11 @@ Creates message queues for testing the connection between this cloud and the tar
 }
 ```
 
-| Field | Description |
-| ----- | ----------- |
-| queueId | ID of the created message queue in the Relay |
-| peerName | Server Common Name of the target cloud's QoS Monitor |
-| receiverQoSMonitorPublicKey | Base64 encoded public key of the target cloud's QoS Monitor |
+| Field | Description | Necessity |
+| ----- | ----------- | --------- |
+| queueId | ID of the created message queue in the Relay | mandatory |
+| peerName | Server Common Name of the target cloud's QoS Monitor | mandatory |
+| receiverQoSMonitorPublicKey | Base64 encoded public key of the target cloud's QoS Monitor | mandatory |
 | targetCloud.operator | Operator of the cloud | mandatory |
 | targetCloud.name | Name of the cloud | mandatory |
 | targetCloud.neighbor | Flag to indicate neighbor cloud | optional |
@@ -541,11 +541,11 @@ Creates message queues for testing the connection between this cloud and the tar
 | targetCloud.authenticationInfo | Base64 encoded public key of the cloud | optional |
 | targetCloud.gatekeeperRelayIds | List of gatekeeper relay IDs belonged to the cloud | optional |
 | targetCloud.gatewayRelayIds | List of gateway relay IDs belonged to the cloud | optional |
-| relay.address | Address of the measured relay |
-| relay.port | Port of the relay being measured |
-| relay.type | Type of the relay being measured |
-| relay.exclusive | Flag to indicate exclusivity |
-| relay.secure | Flag to indicate security |
+| relay.address | Address of the measured relay | mandatory |
+| relay.port | Port of the relay being measured | mandatory |
+| relay.type | Type of the relay being measured | mandatory |
+| relay.exclusive | Flag to indicate exclusivity | optional |
+| relay.secure | Flag to indicate security | optional |
 
 **Output:**  <a name="output_post_init_relay_test"/>
 
@@ -599,9 +599,9 @@ Creates message queues for testing the connection between this cloud and the req
 }
 ```
 
-| Field | Description |
-| ----- | ----------- |
-| senderQoSMonitorPublicKey | Base64 encoded public key of the requester cloud's QoS Monitor |
+| Field | Description | Necessity |
+| ----- | ----------- | --------- |
+| senderQoSMonitorPublicKey | Base64 encoded public key of the requester cloud's QoS Monitor | mandatory |
 | requesterCloud.operator | Operator of the cloud | mandatory |
 | requesterCloud.name | Name of the cloud | mandatory |
 | requesterCloud.neighbor | Flag to indicate neighbor cloud | optional |
@@ -616,11 +616,11 @@ Creates message queues for testing the connection between this cloud and the req
 | targetCloud.authenticationInfo | Base64 encoded public key of the cloud | optional |
 | targetCloud.gatekeeperRelayIds | List of gatekeeper relay IDs belonged to the cloud | optional |
 | targetCloud.gatewayRelayIds | List of gateway relay IDs belonged to the cloud | optional |
-| relay.address | Address of the measured relay |
-| relay.port | Port of the relay being measured |
-| relay.type | Type of the relay being measured |
-| relay.exclusive | Flag to indicate exclusivity |
-| relay.secure | Flag to indicate security |
+| relay.address | Address of the measured relay | mandatory |
+| relay.port | Port of the relay being measured | mandatory |
+| relay.type | Type of the relay being measured | mandatory |
+| relay.exclusive | Flag to indicate exclusivity | optional |
+| relay.secure | Flag to indicate security | optional |
 
 **Output:**  <a name="output_post_join_relay_test"/>
 
