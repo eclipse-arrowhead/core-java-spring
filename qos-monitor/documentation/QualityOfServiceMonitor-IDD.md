@@ -1253,4 +1253,83 @@ Returns requested Inter-Cloud Relay-Echo measurment entry by cloud and relay.
 
 **Output:** <a name="output_mgmt_post_inter_relay_echo_by_cloud_relay"/>
 
+```json
+{
+  "id": 0,      
+  "measurement": {
+    "id": 0,
+    "measurementType": "RELAY_ECHO",
+    "status": "NEW",
+    "cloud": {          
+      "id": 0,
+      "operator": "string",
+      "name": "string",
+      "ownCloud": false,
+      "neighbor": true,          
+      "secure": true,
+      "authenticationInfo": "string",
+      "createdAt": "string",
+      "updatedAt": "string"
+    },                
+    "relay": {
+      "id": 0,
+      "address": "string",
+      "port": 0,
+      "type": "GATEWAY_RELAY",
+      "exclusive": true,          
+      "secure": true,          
+      "createdAt": "string",
+      "updatedAt": "string"
+    },        
+    "lastMeasurementAt": "2020-05-05T08:23:47.774Z",
+    "createdAt": "2020-05-05T08:23:47.774Z",   
+    "updatedAt": "2020-05-05T08:23:47.774Z"
+  },
+  "minResponseTime": 0,
+  "maxResponseTime": 0,
+  "meanResponseTimeWithTimeout": 0,
+  "meanResponseTimeWithoutTimeout": 0,
+  "jitterWithTimeout": 0,
+  "jitterWithoutTimeout": 0,      
+  "lostPerMeasurementPercent": 0, 
+  "received": 0,
+  "receivedAll": 0,
+  "sent": 0,
+  "sentAll": 0,
+  "lastAccessAt": "2020-05-05T08:23:47.774Z",
+  "countStartedAt": "2020-05-05T08:23:47.774Z",
+  "createdAt": "2020-05-05T08:23:47.774Z",
+  "updatedAt": "2020-05-05T08:23:47.774Z"
+}
+```
 
+| Field | Description |
+| ----- | ----------- |
+| id | ID of the inter-cloud relay echo measurement |
+| measurement.id | ID of the inter-cloud measurement |
+| measurement.measurementType | Type of the measurement |
+| measurement.status | Status of the measurement |
+| measurement.cloud.id | ID of the measured cloud |
+| measurement.cloud.operator | Operator of the measured cloud |
+| measurement.cloud.name | Name of the measured cloud |
+| measurement.cloud.owncloud | Flag to indicate own cloud (meant to be false) |
+| measurement.cloud.neighbor | Flag to indicate neighbor cloud |
+| measurement.cloud.secure | Flag to indicate security |
+| measurement.cloud.authenticationInfo | Base64 encoded public key of the measured cloud |
+| measurement.cloud.createdAt | Date of creation of the measured cloud |
+| measurement.cloud.updatedAt | Date of update of the measured cloud |
+| measurement.relay.id | ID of the measured relay |
+| measurement.relay.address | Address of the measured relay |
+| measurement.relay.port | Port of the measured relay |
+| measurement.relay.type | Type of the measured relay |
+| measurement.relay.exclusive | Flag to indicate exclusivity |
+| measurement.relay.secure | Flag to indicate security |
+| measurement.relay.createdAt | Date of creation of the measured relay |
+| measurement.relay.updatedAt | Date of update of the measured relay |
+| measurement.lastMeasurementAt | Time of the last measurement |
+| measurement.createdAt | Date of creation of the measurement |
+| measurement.updatedAt | Date of update of the measurement |
+| available | Boolean value of the systems calculated availability|
+| minResponseTime | Integer value of milliseconds of the fastest returned ping|
+| maxResponseTime | Integer value of milliseconds of the slowest returned ping|
+| meanResponseTimeWithTimeout | Integer value of milliseconds of the calculated average of pings including timeouts|
