@@ -86,9 +86,9 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
            * [Services and Use Cases](qos-monitor/documentation/QualityOfServiceMonitor-SysDD.md#services-and-use-cases)  
        * [Interface Design Description](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md)
            * [Security](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#security)
-           * [Communication Profile](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#communication-profile
+           * [Communication Profile](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#communication-profile)
                * [Client](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#client-endpoint-description)
-               * [Private](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#private-endpoint-description
+               * [Private](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#private-endpoint-description)
                * [Management](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#management-endpoint-description)
 	 
 <a name="quickstart" />
