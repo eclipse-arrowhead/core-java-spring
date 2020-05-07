@@ -272,9 +272,9 @@ Service Registry will be available on ```https://localhost:8443``` <br />
 Authorization will be available on ```https://localhost:8445``` <br />
 Orchestrator will be available on ```https://localhost:8441``` <br />
 Event Handler will be available on ```https://localhost:8455``` <br />
+DataManager will be available on ```https://localhost:8461``` <br />
 Gatekeeper will be available on ```https://localhost:8449``` <br />
 Gateway will be available on ```https://localhost:8453``` <br />
-DataManager will be available on ```https://localhost:8461``` <br />
 
 Swagger with API documentation is available in the root route.
 
@@ -4827,6 +4827,8 @@ The DataManager provides the following services:
 ## Consumed services
 
 The DataManager consumes the following services:
+
+None currently, but will consume Configuration later on.
 
 <a name="datamanager_usecases" />
 
