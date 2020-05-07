@@ -4937,16 +4937,16 @@ __GetServiceDatatResponse__ output:
 [
    {
         "bn": "string",
-	"bt": double,
+	"bt": 0.0,
 	"bu": "string",
-	"bver": int
+	"bver": 0
    }, 
         "n": "string",
-	"t": double,
+	"t": 0.0,
 	"u": "string",
-	"v"; double,
+	"v"; 0.0,
 	"vs": "string",
-	"vb"; boolean,
+	"vb"; false,
 	"vd": "string"
    }+        
 ]
@@ -4968,16 +4968,16 @@ __PutSServiceDataRequest__ input:
 [
    {
         "bn": "string",
-	"bt": double,
+	"bt": 0.0,
 	"bu": "string",
-	"bver": int
+	"bver": 0
    }, 
         "n": "string",
-	"t": double,
+	"t": 0.,0
 	"u": "string",
-	"v"; double,
+	"v"; 0.0,
 	"vs": "string",
-	"vb"; boolean,
+	"vb"; false,
 	"vd": "string"
    }+        
 ]
