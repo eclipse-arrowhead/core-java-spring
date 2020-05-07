@@ -4948,7 +4948,7 @@ __GetServiceDatatResponse__ output:
 	"vs": "string",
 	"vb"; false,
 	"vd": "string"
-   }+        
+   }
 ]
 ```
 
@@ -4973,13 +4973,13 @@ __PutSServiceDataRequest__ input:
 	"bver": 0
    }, 
         "n": "string",
-	"t": 0.,0
+	"t": 0.0,
 	"u": "string",
 	"v"; 0.0,
 	"vs": "string",
 	"vb"; false,
 	"vd": "string"
-   }+        
+   }
 ]
 ```
 
