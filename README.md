@@ -4811,7 +4811,6 @@ Type support data model is SenML https://tools.ietf.org/html/rfc8428
 <a name="datamanager_sysd" />
 
 ## System Design Overview
-![Alt text](/documentation/datamanager/sysd/datamanager_controller.jpg)
 
 <a name="datamanager_provided_services" />
 
