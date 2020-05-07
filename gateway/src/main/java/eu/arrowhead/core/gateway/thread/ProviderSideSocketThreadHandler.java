@@ -82,7 +82,7 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 	
 	//-------------------------------------------------------------------------------------------------
 	public void init(final String queueId, final MessageProducer sender) {
-		logger.debug("init started...");
+		logger.debug("Provider handler init started...");
 		
 		Assert.isTrue(!Utilities.isEmpty(queueId), "Queue id is null or blank.");
 		Assert.notNull(sender, "sender is null.");
@@ -127,10 +127,7 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 			} else {
 				Assert.notNull(currentThread.getOutputStream(), "Output stream is null.");
 				noRequest++;
-				if (noRequest > maxRequestPerSocket) {
-					// new thread needed before transferring the message
-					replaceThread();
-				}
+				replaceThreadIfNecessary();
 				final byte[] bytes = relayClient.getBytesFromMessage(message, consumerGatewayPublicKey);
 				currentThread.getOutputStream().write(bytes);
 			}
@@ -143,7 +140,7 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 	
 	//-------------------------------------------------------------------------------------------------
 	public void close() {
-		logger.debug("close started...");
+		logger.debug("Provider handler close started...");
 		
 		if (activeSessions != null && queueId != null) {
 			activeSessions.remove(queueId);
@@ -190,23 +187,37 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void replaceThread() {
-		if (oldThread != null) {
-			oldThread.closeAndInterrupt();
-		}
+	private void replaceThreadIfNecessary() {
+		logger.debug("Provider handler replaceThread started...");
 		
-		oldThread = currentThread;
-		currentThread = new ProviderSideSocketThread(relayClient, relaySession, socketFactory, connectionRequest, consumerGatewayPublicKey, timeout, sender);
-		try {
-			currentThread.init();
-			currentThread.start();
-
-			noRequest = 0;
-		} catch (final IOException ex) {
-			logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
-			logger.debug("Stacktrace:", ex);
-
-			close();
+		if (noRequest > maxRequestPerSocket || currentThread.isInterrupted()) {
+			// new thread needed because we reach the threshold or current thread is interrupted
+			
+			if (!currentThread.isInterrupted()) {
+				// threshold reached
+				
+				if (oldThread != null) {
+					logger.debug("Releasing thread: {}", oldThread.getName());
+					oldThread.closeAndInterrupt();
+				}
+				
+				oldThread = currentThread;
+			}
+			
+			currentThread = new ProviderSideSocketThread(relayClient, relaySession, socketFactory, connectionRequest, consumerGatewayPublicKey, timeout, sender);
+			logger.debug("Creating thread: {}", currentThread.getName());
+			try {
+				currentThread.init();
+				currentThread.start();
+				logger.debug("Thread started: {}", currentThread.getName());
+				
+				noRequest = 0;
+			} catch (final IOException ex) {
+				logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
+				logger.debug("Stacktrace:", ex);
+				
+				close();
+			}
 		}
 	}
 }
