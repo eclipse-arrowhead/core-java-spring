@@ -4806,6 +4806,8 @@ The DataManager provides features for producers and consumers to:
 * Fetch cached data,
 * and perform database queries.
 
+Type support data model is SenML https://tools.ietf.org/html/rfc8428
+
 <a name="datamanager_sysd" />
 
 ## System Design Overview
@@ -4945,7 +4947,7 @@ __GetServiceDatatResponse__ output:
         "n": "string",
 	"t": 0.0,
 	"u": "string",
-	"v"; 0.0,
+	"v": 0.0,
 	"vs": "string",
 	"vb"; false,
 	"vd": "string"
@@ -4976,7 +4978,7 @@ __PutSServiceDataRequest__ input:
         "n": "string",
 	"t": 0.0,
 	"u": "string",
-	"v"; 0.0,
+	"v": 0.0,
 	"vs": "string",
 	"vb"; false,
 	"vd": "string"
