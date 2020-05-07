@@ -4785,6 +4785,8 @@ __Delete subscription parameters__  the input :
         
 This service can only be used by other core services, therefore this is not part of the public API.    
 
+<a name="datamanager" />
+
 # DataManager
 
 <a name="datamanager_sdd" />
@@ -4796,6 +4798,7 @@ The purpose of DataManager supporting core system is to provide storage for sens
 ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `AH Service Registry`
 ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `AH Authorization` 
 ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `AH Orchestrator`
+![#ffcc44](https://placehold.it/15/ffcc44/000000?text=+) `AH DataManager`
 ![Alt text](/documentation/datamanager/overview.png)
 
 The DataManager provides features for producers and consumers to:
@@ -4855,7 +4858,9 @@ The base URL for the requests: `http://<host>:<port>/datamanager`
 | [Get service list](#datamanager_endpoints_getsrv_from_sys) | /historian/{systemName} | GET    | -    | ServiceList |
 | [Fetch data from db](#datamanager_endpoints_getdb) | /historian/{systemName}/{serviceName} | GET    | -   | SenML |
 | [Store data in db](#datamanager_endpoints_storedb) | /historian/{systemName}/{serviceName} | PUT    | SenML   | - |
-
+| [Get service list](#datamanager_endpoints_getsrv_from_sys) | /poxy/{systemName} | GET    | -    | ServiceList |
+| [Fetch data from cache(#datamanager_endpoints_getdb) | /proxy/{systemName}/{serviceName} | GET    | -   | SenML |
+| [Store data in cache](#datamanager_endpoints_storedb) | /proxy/{systemName}/{serviceName} | PUT    | SenML   | - |
 
 <a name="datamanager_endpoints_get_echo" />
 
@@ -4874,6 +4879,23 @@ GET /datamanager/historian
 ```
 
 Returns a list of all systems that have at least one service endpoint in the database.
+
+<a name="datamanager_getsyslist_response" />
+
+__SubscriptionRequest__ output:
+
+```json
+
+{
+      "systems": [
+        {
+         
+          "systemName": "string"
+        }
+      ]
+    }
+
+```
 
 # Gatekeeper 
  
