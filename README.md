@@ -4854,15 +4854,16 @@ The base URL for the requests: `http://<host>:<port>/datamanager`
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Echo](#datamanager_endpoints_get_echo) | /echo | GET    | -    | OK     |
-| [Get system list](#datamanager_endpoints_getsys) | /historian | GET    | -    | SystemList     |
-| [Get service list](#datamanager_endpoints_getsrv_from_sys) | /historian/{systemName} | GET    | -    | ServiceList |
-| [Fetch data from db](#datamanager_endpoints_getdb) | /historian/{systemName}/{serviceName} | GET    | -   | SenML |
-| [Store data in db](#datamanager_endpoints_storedb) | /historian/{systemName}/{serviceName} | PUT    | SenML   | - |
-| [Get service list](#datamanager_endpoints_getsrv_from_sys) | /poxy/{systemName} | GET    | -    | ServiceList |
-| [Fetch data from cache(#datamanager_endpoints_getdb) | /proxy/{systemName}/{serviceName} | GET    | -   | SenML |
-| [Store data in cache](#datamanager_endpoints_storedb) | /proxy/{systemName}/{serviceName} | PUT    | SenML   | - |
+| [Get system list](#datamanager_histendpoints_getsys) | /historian | GET    | -    | SystemList     |
+| [Get service list](#datamanager_histendpoints_getsrv_from_sys) | /historian/{systemName} | GET    | -    | ServiceList |
+| [Fetch data from db](#datamanager_histendpoints_getdb) | /historian/{systemName}/{serviceName} | GET    | -   | SenML |
+| [Store data in db](#datamanager_histendpoints_storedb) | /historian/{systemName}/{serviceName} | PUT    | SenML   | - |
+| [Get system list](#datamanager_proxyendpoints_getsys) | /proxy | GET    | -    | SystemList     |
+| [Get service list](#datamanager_proxyendpoints_getsrv_from_sys) | /poxy/{systemName} | GET    | -    | ServiceList |
+| [Fetch data from cache](#datamanager_proxyendpoints_getdb) | /proxy/{systemName}/{serviceName} | GET    | -   | SenML |
+| [Store data in cache](#datamanager_proxyendpoints_storedb) | /proxy/{systemName}/{serviceName} | PUT    | SenML   | - |
 
-<a name="datamanager_endpoints_get_echo" />
+<a name="datamanager_histendpoints_get_echo" />
 
 ### Echo
 ```
@@ -4871,7 +4872,7 @@ GET /datamanager/echo
 
 Returns a "Got it" message with the purpose of testing the service availability.
 
-<a name="datamanager_endpoints_getsys" />
+<a name="datamanager_histendpoints_getsys" />
 
 ### Get system list
 ```
@@ -4904,7 +4905,7 @@ GET /datamanager/historian/{systemName}
 
 Returns a list of all service enpoints that have data stored in the database.
 
-<a name="datamanager_getssrvlist_response" />
+<a name="datamanager_histgetssrvlist_response" />
 
 __GetServicestResponse__ output:
 
@@ -4928,7 +4929,7 @@ GET /datamanager/historian/{systemName}/{serviceName}
 
 Returns sensor data from a service endpoints from the database.
 
-<a name="datamanager_getsrvdata_response" />
+<a name="datamanager_histgetsrvdata_response" />
 
 __GetServiceDatatResponse__ output:
 
@@ -4940,7 +4941,7 @@ __GetServiceDatatResponse__ output:
 	"bt": 0.0,
 	"bu": "string",
 	"bver": 0
-   }, 
+   }, {
         "n": "string",
 	"t": 0.0,
 	"u": "string",
@@ -4971,7 +4972,7 @@ __PutSServiceDataRequest__ input:
 	"bt": 0.0,
 	"bu": "string",
 	"bver": 0
-   }, 
+   }, {
         "n": "string",
 	"t": 0.0,
 	"u": "string",
