@@ -4882,7 +4882,7 @@ Returns a list of all systems that have at least one service endpoint in the dat
 
 <a name="datamanager_getsyslist_response" />
 
-__SubscriptionRequest__ output:
+__GetSystemListResponse__ output:
 
 ```json
 
@@ -4895,6 +4895,92 @@ __SubscriptionRequest__ output:
       ]
     }
 
+```
+
+### Get service list
+```
+GET /datamanager/historian/{systemName}
+```
+
+Returns a list of all service enpoints that have data stored in the database.
+
+<a name="datamanager_getssrvlist_response" />
+
+__GetServicestResponse__ output:
+
+```json
+
+{
+      "services": [
+        {
+         
+          "serviceName": "string"
+        }
+      ]
+    }
+
+```
+
+### Fetch data from db
+```
+GET /datamanager/historian/{systemName}/{serviceName}
+```
+
+Returns sensor data from a service endpoints from the database.
+
+<a name="datamanager_getsrvdata_response" />
+
+__GetServiceDatatResponse__ output:
+
+```json
+
+[
+   {
+        "bn": "string",
+	"bt": double,
+	"bu": "string",
+	"bver": int
+   }, 
+        "n": "string",
+	"t": double,
+	"u": "string",
+	"v"; double,
+	"vs": "string",
+	"vb"; boolean,
+	"vd": "string"
+   }+        
+]
+```
+
+### Store data in db
+```
+PUT /datamanager/historian/{systemName}/{serviceName}
+```
+
+Stores sensor data in a service endpoints in the database.
+
+<a name="datamanager_putsrvdata_request" />
+
+__PutSServiceDataRequest__ input:
+
+```json
+
+[
+   {
+        "bn": "string",
+	"bt": double,
+	"bu": "string",
+	"bver": int
+   }, 
+        "n": "string",
+	"t": double,
+	"u": "string",
+	"v"; double,
+	"vs": "string",
+	"vb"; boolean,
+	"vd": "string"
+   }+        
+]
 ```
 
 # Gatekeeper 
