@@ -61,7 +61,8 @@ public class RelaySubscriberTask implements Job {
 		logger.debug("STARTED: Relay Subscriber task");
 		
 		if (arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)) {
-			dataContainer.cancelJob();
+			logger.debug("FINISHED: Relay Subscriber task can not run if server is in standalon mode");
+			dataContainer.shutdown();
 			return;
 		}
 		

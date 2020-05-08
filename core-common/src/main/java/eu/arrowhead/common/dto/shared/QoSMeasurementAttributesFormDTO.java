@@ -1,9 +1,6 @@
-package eu.arrowhead.common.dto.internal;
+package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
-import java.time.ZonedDateTime;
-
-import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 
 public class QoSMeasurementAttributesFormDTO implements Serializable {
 
@@ -14,7 +11,7 @@ public class QoSMeasurementAttributesFormDTO implements Serializable {
 	
 	private ServiceRegistryResponseDTO serviceRegistryEntry;
 	private boolean isProviderAvailable = false;
-	private ZonedDateTime lastAccessAt;
+	private String lastAccessAt;
 	private Integer minResponseTime;
 	private Integer maxResponseTime;
 	private Integer meanResponseTimeWithTimeout;
@@ -34,7 +31,7 @@ public class QoSMeasurementAttributesFormDTO implements Serializable {
 	public QoSMeasurementAttributesFormDTO() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public QoSMeasurementAttributesFormDTO(final ServiceRegistryResponseDTO serviceRegistryEntry, final boolean isProviderAvailable, final ZonedDateTime lastAccessAt, final Integer minResponseTime,
+	public QoSMeasurementAttributesFormDTO(final ServiceRegistryResponseDTO serviceRegistryEntry, final boolean isProviderAvailable, final String lastAccessAt, final Integer minResponseTime,
 										   final Integer maxResponseTime, final Integer meanResponseTimeWithTimeout, final Integer meanResponseTimeWithoutTimeout, final Integer jitterWithTimeout,
 										   final Integer jitterWithoutTimeout, final long sent, final long received, final long sentAll, final long receivedAll, final Integer lostPerMeasurementPercent) {
 		this.serviceRegistryEntry = serviceRegistryEntry;
@@ -56,7 +53,7 @@ public class QoSMeasurementAttributesFormDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public ServiceRegistryResponseDTO getServiceRegistryEntry() { return serviceRegistryEntry; } 	
 	public boolean isProviderAvailable() { return isProviderAvailable; }
-	public ZonedDateTime getLastAccessAt() { return lastAccessAt; }
+	public String getLastAccessAt() { return lastAccessAt; }
 	public Integer getMinResponseTime() { return minResponseTime; }
 	public Integer getMaxResponseTime() { return maxResponseTime; }
 	public Integer getMeanResponseTimeWithTimeout() { return meanResponseTimeWithTimeout; }
@@ -72,7 +69,7 @@ public class QoSMeasurementAttributesFormDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public void setServiceRegistryEntry(final ServiceRegistryResponseDTO serviceRegistryEntry) { this.serviceRegistryEntry = serviceRegistryEntry; }	
 	public void setProviderAvailable(final boolean isProviderAvailable) { this.isProviderAvailable = isProviderAvailable; }
-	public void setLastAccessAt(final ZonedDateTime lastAccessAt) { this.lastAccessAt = lastAccessAt; }
+	public void setLastAccessAt(final String lastAccessAt) { this.lastAccessAt = lastAccessAt; }
 	public void setMinResponseTime(final Integer minResponseTime) { this.minResponseTime = minResponseTime; }
 	public void setMaxResponseTime(final Integer maxResponseTime) { this.maxResponseTime = maxResponseTime; }
 	public void setMeanResponseTimeWithTimeout(final Integer meanResponseTimeWithTimeout) { this.meanResponseTimeWithTimeout = meanResponseTimeWithTimeout; }
@@ -80,8 +77,8 @@ public class QoSMeasurementAttributesFormDTO implements Serializable {
 	public void setJitterWithTimeout(final Integer jitterWithTimeout) { this.jitterWithTimeout = jitterWithTimeout; }
 	public void setJitterWithoutTimeout(final Integer jitterWithoutTimeout) { this.jitterWithoutTimeout = jitterWithoutTimeout; }
 	public void setLostPerMeasurementPercent(final Integer lostPerMeasurementPercent) { this.lostPerMeasurementPercent = lostPerMeasurementPercent; }
-	public void setSent(long sent) { this.sent = sent; }
-	public void setReceived(long received) { this.received = received; }
-	public void setSentAll(long sentAll) { this.sentAll = sentAll; }
-	public void setReceivedAll(long receivedAll) { this.receivedAll = receivedAll; }
+	public void setSent(final long sent) { this.sent = sent; }
+	public void setReceived(final long received) { this.received = received; }
+	public void setSentAll(final long sentAll) { this.sentAll = sentAll; }
+	public void setReceivedAll(final long receivedAll) { this.receivedAll = receivedAll; }
 }

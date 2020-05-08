@@ -9,8 +9,6 @@ import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import eu.arrowhead.common.dto.internal.QoSMeasurementAttributesFormDTO;
-
 public class OrchestrationResultDTO implements Serializable {
 
 	//=================================================================================================

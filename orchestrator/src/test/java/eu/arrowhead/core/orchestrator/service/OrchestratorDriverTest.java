@@ -28,6 +28,7 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudCheckResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudSystemFormDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.internal.GSDQueryFormDTO;
@@ -43,6 +44,7 @@ import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
 import eu.arrowhead.common.dto.internal.TokenDataDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationResponseDTO;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
@@ -488,6 +490,37 @@ public class OrchestratorDriverTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetCloudsWithExclusiveGatewayAndPublicRelaysOk() {
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8449, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_GET_CLOUD_SERVICE + 
+																								"/test-op/test-n");
+		final CloudWithRelaysResponseDTO responseDTO = new CloudWithRelaysResponseDTO();
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(uri);
+		when(httpService.sendRequest(eq(uri), eq(HttpMethod.GET), eq(CloudWithRelaysResponseDTO.class))).thenReturn(new ResponseEntity<CloudWithRelaysResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		final CloudWithRelaysResponseDTO result = orchestratorDriver.getCloudsWithExclusiveGatewayAndPublicRelays("test-op", "test-n");
+		Assert.assertNotNull(result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetCloudsWithExclusiveGatewayAndPublicRelaysUriNotFound() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false);
+		orchestratorDriver.getCloudsWithExclusiveGatewayAndPublicRelays("test-op", "test-n");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetCloudsWithExclusiveGatewayAndPublicRelaysUriWrongType() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn("invalid");
+		
+		orchestratorDriver.getCloudsWithExclusiveGatewayAndPublicRelays("test-op", "test-n");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ArrowheadException.class)
 	public void testGetIntraPingMeasurementUriNotFound() {
 		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false);
@@ -599,7 +632,7 @@ public class OrchestratorDriverTest {
 	public void testGetInterRelayEchoMeasurementUriNotFound() {
 		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false);
 		
-		orchestratorDriver.getInterRelayEchoMeasurement(new CloudSystemFormDTO());
+		orchestratorDriver.getInterRelayEchoMeasurement(new CloudRequestDTO());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -608,7 +641,7 @@ public class OrchestratorDriverTest {
 		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
 		when(arrowheadContext.get(any(String.class))).thenReturn("invalid");
 		
-		orchestratorDriver.getInterRelayEchoMeasurement(new CloudSystemFormDTO());
+		orchestratorDriver.getInterRelayEchoMeasurement(new CloudRequestDTO());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -617,7 +650,7 @@ public class OrchestratorDriverTest {
 		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT);
 		Assert.assertTrue(uri.toString().contains("/measurements/intercloud/relay_echo"));
 		
-		final CloudSystemFormDTO requestDTO = new CloudSystemFormDTO();
+		final CloudRequestDTO requestDTO = new CloudRequestDTO();
 		
 		final QoSInterRelayEchoMeasurementListResponseDTO  responseDTO = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(new QoSInterRelayEchoMeasurementResponseDTO()), 1);
 		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);

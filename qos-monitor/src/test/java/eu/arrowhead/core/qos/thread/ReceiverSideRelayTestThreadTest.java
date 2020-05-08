@@ -287,7 +287,7 @@ public class ReceiverSideRelayTestThreadTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testOnMessageReceiverFlagTrueThenEcho() throws JMSException {
-		final byte[] someBytes = new byte[] { 1, 2 , 3};
+		final byte[] someBytes = new byte[] { 1, 2 , 3 };
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
 		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(someBytes);
 		doNothing().when(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
@@ -301,20 +301,47 @@ public class ReceiverSideRelayTestThreadTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testOnMessageReceiverFlagFalse() throws JMSException {
-		final byte[] someBytes = new byte[] { 1, 2 , 3};
+	public void testOnMessageReceiverFlagFalseNormal() throws JMSException {
+		final byte[] someBytes = new byte[] { 0, 1 , 2 };
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
 		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(someBytes);
 		
 		ReflectionTestUtils.setField(testingObject, "receiver", false);
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		final Map<Byte,long[]> testResults = (Map) ReflectionTestUtils.getField(testingObject, "testResults");
+		testResults.put((byte)0, new long[] { System.currentTimeMillis(), 0 });
+
 		testingObject.onMessage(getTestTextMessage("does not matter", "blabla"));
 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		final BlockingQueue<Object> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
+		final BlockingQueue<Byte> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
 
 		verify(relayClient, times(1)).getBytesFromMessage(any(Message.class), any(PublicKey.class));
 		verify(relayClient, never()).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), eq(someBytes));
+		Assert.assertTrue(testResults.get((byte)0)[1] > 0);
 		Assert.assertEquals(1, blockingQueue.size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOnMessageReceiverFlagFalseTimeout() throws JMSException {
+		final byte[] someBytes = new byte[] { 0, 1 , 2 };
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(someBytes);
+		
+		ReflectionTestUtils.setField(testingObject, "receiver", false);
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		final Map<Byte,long[]> testResults = (Map) ReflectionTestUtils.getField(testingObject, "testResults");
+		testResults.put((byte)0, new long[] { 10, 0 });
+
+		testingObject.onMessage(getTestTextMessage("does not matter", "blabla"));
+
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		final BlockingQueue<Byte> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
+
+		verify(relayClient, times(1)).getBytesFromMessage(any(Message.class), any(PublicKey.class));
+		verify(relayClient, never()).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), eq(someBytes));
+		Assert.assertEquals(0, blockingQueue.size());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -333,9 +360,31 @@ public class ReceiverSideRelayTestThreadTest {
 		doNothing().when(relayTestDBService).logErrorIntoMeasurementsTable(any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyInt(), anyString(), any(Throwable.class));
 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		final BlockingQueue<Object> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
-		blockingQueue.put(new Object()); // this one is for starting the test
-		blockingQueue.put(new Object());
+		final BlockingQueue<Byte> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
+		blockingQueue.put((byte) -1); // this one is for starting the test
+		blockingQueue.put((byte) 0);
+
+		testingObject.run();
+		
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		final Map<Byte,long[]> testResults = (Map) ReflectionTestUtils.getField(testingObject, "testResults");
+		final long[] times = testResults.get((byte) 0);
+		Assert.assertTrue(times[1] - times[0] < 1001);
+		verify(relayClient, times(2)).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		verify(relayTestDBService, times(1)).logErrorIntoMeasurementsTable(any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyInt(), eq(null), any(Throwable.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRunNoTimeoutButNotWaitedMessage() throws JMSException, InterruptedException {
+		doNothing().doThrow(ArrowheadException.class).when(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		doNothing().when(relayTestDBService).logErrorIntoMeasurementsTable(any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyInt(), anyString(), any(Throwable.class));
+
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		final BlockingQueue<Byte> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
+		blockingQueue.put((byte) -1); // this one is for starting the test
+		blockingQueue.put((byte) 2); // this one is skipped
+		blockingQueue.put((byte) 0);
 
 		testingObject.run();
 		
@@ -354,8 +403,8 @@ public class ReceiverSideRelayTestThreadTest {
 		doNothing().when(relayTestDBService).logErrorIntoMeasurementsTable(any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyInt(), anyString(), any(Throwable.class));
 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		final BlockingQueue<Object> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
-		blockingQueue.put(new Object()); // this one is for starting the test
+		final BlockingQueue<Byte> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
+		blockingQueue.put((byte) -1); // this one is for starting the test
 		
 		testingObject.run();
 		
@@ -376,10 +425,10 @@ public class ReceiverSideRelayTestThreadTest {
 		doNothing().when(relayClient).sendCloseControlMessage(any(Session.class),any(MessageProducer.class), anyString());
 
 		@SuppressWarnings({ "rawtypes" })
-		final BlockingQueue<Object> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
-		blockingQueue.put(new Object()); // this one is for starting the test
-		blockingQueue.put(new Object());
-		blockingQueue.put(new Object());
+		final BlockingQueue<Byte> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
+		blockingQueue.put((byte) -1); // this one is for starting the test
+		blockingQueue.put((byte) 0);
+		blockingQueue.put((byte) 1);
 		
 		testingObject.run();
 		

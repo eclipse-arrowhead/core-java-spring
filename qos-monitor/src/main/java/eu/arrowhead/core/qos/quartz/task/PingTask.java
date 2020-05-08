@@ -147,7 +147,7 @@ public class PingTask implements Job {
 
 			if (successFlag) {
 				++receivedInThisPing;
-				final long duration = icmpPingResponse.getDuration();
+				final long duration = icmpPingResponse.getRtt();
 
 				if (duration > maxResponseTime) {
 					maxResponseTime = duration;

@@ -33,7 +33,6 @@ import eu.arrowhead.common.dto.internal.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.internal.ICNResultDTO;
 import eu.arrowhead.common.dto.internal.OrchestratorStoreResponseDTO;
-import eu.arrowhead.common.dto.internal.QoSMeasurementAttributesFormDTO;
 import eu.arrowhead.common.dto.internal.QoSReservationListResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSReservationRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSTemporaryLockRequestDTO;
@@ -48,6 +47,7 @@ import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.OrchestratorWarnings;
 import eu.arrowhead.common.dto.shared.PreferredProviderDataDTO;
+import eu.arrowhead.common.dto.shared.QoSMeasurementAttributesFormDTO;
 import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
@@ -76,6 +76,7 @@ public class OrchestratorService {
 	private static final String MORE_THAN_ONE_ERROR_MESSAGE= " must not have more than one element.";
 	
 	public static final int EXPIRING_TIME_IN_MINUTES = 2;
+	private static final int extraServiceTimeSeconds = 5; // due to orchestration overhead
 	
 	private static final Logger logger = LogManager.getLogger(OrchestratorService.class);
 	
@@ -135,15 +136,19 @@ public class OrchestratorService {
 		
 		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(queryData, request);
 		orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem()); // to reduce the number of results before token generation
-
+		
+		if (qosEnabled && flags.get(Flag.ENABLE_QOS)) {
+			orList = calculateAndFilterOnServiceTime(orList, request);			
+		}
+		
 		// Generate the authorization tokens if it is requested based on the service security (modifies the orList)
-	    orList = orchestratorDriver.generateAuthTokens(request, orList);
+		List<OrchestrationResultDTO> orListWithTokens = orchestratorDriver.generateAuthTokens(request, orList);
 	    
-	    orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem()); // token generation can be slow, so we have to check for new reservations
+		orListWithTokens = qosManager.filterReservedProviders(orListWithTokens, request.getRequesterSystem()); // token generation can be slow, so we have to check for new reservations
 	    
 	    logger.debug("externalServiceRequest finished with {} service providers.", orList.size());
 
-	    return new OrchestrationResponseDTO(orList);
+	    return new OrchestrationResponseDTO(orListWithTokens);
 	}
 
 	//-------------------------------------------------------------------------------------------------	
@@ -611,6 +616,40 @@ public class OrchestratorService {
 		return result;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	private List<OrchestrationResultDTO> calculateAndFilterOnServiceTime(final List<OrchestrationResultDTO> orList, final OrchestrationFormRequestDTO request) {
+		logger.debug("filterReservedProviders started ...");		
+		Assert.notNull(orList, "'orList' is null.");
+		
+		if (orList.isEmpty()) {
+			return orList;
+		}
+		
+		final List<OrchestrationResultDTO> result = new ArrayList<>();
+		for (final OrchestrationResultDTO dto : orList) {
+			int calculatedServiceTime = OrchestratorUtils.calculateServiceTime(dto.getMetadata(), request.getCommands());
+			
+			if (calculatedServiceTime == 0 || dto.getWarnings().contains(OrchestratorWarnings.TTL_EXPIRED)) {
+				continue;
+			}
+			
+			if (calculatedServiceTime > 0 && !dto.getWarnings().contains(OrchestratorWarnings.TTL_EXPIRED)) {
+				calculatedServiceTime += extraServiceTimeSeconds; // give some extra seconds because of orchestration overhead
+				dto.getMetadata().put(OrchestratorDriver.KEY_CALCULATED_SERVICE_TIME_FRAME, String.valueOf(calculatedServiceTime));
+				
+				// adjust TTL warnings
+				dto.getWarnings().remove(OrchestratorWarnings.TTL_UNKNOWN);
+				if (!dto.getWarnings().contains(OrchestratorWarnings.TTL_EXPIRING) &&
+					calculatedServiceTime <= EXPIRING_TIME_IN_MINUTES * CommonConstants.CONVERSION_SECOND_TO_MINUTE) {
+					dto.getWarnings().add(OrchestratorWarnings.TTL_EXPIRING);
+				}				
+			}
+			
+			result.add(dto);
+		}		
+		return result;
+	}
+	
 	
 	//-------------------------------------------------------------------------------------------------
 	private List<OrchestrationResultDTO> compileOrchestrationResponse(final List<ServiceRegistryResponseDTO> srList, final OrchestrationFormRequestDTO request) {
@@ -624,10 +663,8 @@ public class OrchestratorService {
 			if(result.getMetadata() == null ) {
 				result.setMetadata( new HashMap<>());
 			}
-			if (request.getOrchestrationFlags().get(Flag.OVERRIDE_STORE)) {
-				final List<OrchestratorWarnings> warnings = calculateOrchestratorWarnings(entry);
-				result.setWarnings(warnings);
-			}
+			result.setWarnings(calculateOrchestratorWarnings(entry));
+			
 			orList.add(result);
 		}
 		

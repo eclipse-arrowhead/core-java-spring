@@ -51,12 +51,12 @@
   },
   {
     "name": "cloud_ping_ttl_interval_minutes",
-    "type": "java.lang.String",
+    "type": "java.lang.Integer",
     "description": "A description for 'cloud_ping_ttl_interval_minutes'"
   },
   {
     "name": "ping_ttl_interval_minutes",
-    "type": "java.lang.String",
+    "type": "java.lang.Integer",
     "description": "A description for 'ping_ttl_interval_minutes'"
   },
   {
@@ -138,5 +138,10 @@
     "name": "enable_qos_relay_task",
     "type": "java.lang.Boolean",
     "description": "A description for 'enable_qos_relay_task'"
+  },
+  {
+    "name": "relay_ping_ttl_interval_minutes",
+    "type": "java.lang.Integer",
+    "description": "A description for 'relay_ping_ttl_interval_minutes'"
   }
 ]}

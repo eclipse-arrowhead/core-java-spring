@@ -18,10 +18,10 @@ import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
-import eu.arrowhead.common.dto.internal.QoSMeasurementAttributesFormDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.OrchestratorWarnings;
+import eu.arrowhead.common.dto.shared.QoSMeasurementAttributesFormDTO;
 import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -256,6 +256,7 @@ public class QoSManagerImpl implements QoSManager {
 			
 			if (verified) {
 				result.setWarnings(verificationParameters.getWarnings());
+				result.setMetadata(verificationParameters.getMetadata());
 				verifiedResults.add(result);
 			}
 		}

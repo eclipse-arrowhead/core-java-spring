@@ -15,6 +15,7 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -33,7 +34,6 @@ import eu.arrowhead.common.dto.internal.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.internal.ICNResultDTO;
 import eu.arrowhead.common.dto.internal.OrchestratorStoreResponseDTO;
-import eu.arrowhead.common.dto.internal.QoSMeasurementAttributesFormDTO;
 import eu.arrowhead.common.dto.internal.QoSReservationRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSTemporaryLockRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSTemporaryLockResponseDTO;
@@ -45,6 +45,7 @@ import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.OrchestratorWarnings;
 import eu.arrowhead.common.dto.shared.PreferredProviderDataDTO;
+import eu.arrowhead.common.dto.shared.QoSMeasurementAttributesFormDTO;
 import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
@@ -290,6 +291,133 @@ public class OrchestratorServiceTest {
 		final OrchestrationResponseDTO response = testingObject.externalServiceRequest(request);
 		
 		Assert.assertEquals(0, response.getResponse().size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testExternalServiceRequestServiceTimeCalculation() {
+		ReflectionTestUtils.setField(testingObject, "qosEnabled", true);
+		ReflectionTestUtils.setField(testingObject, "maxReservationDuration", 3600);
+		final ServiceQueryFormDTO serviceForm = new ServiceQueryFormDTO.Builder("service").
+																  		build();
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
+																				    requestedService(serviceForm).
+																				    flag(Flag.ENABLE_QOS, true).
+																				    flag(Flag.MATCHMAKING, true).
+																				    command(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY, "10").
+																					build();
+		
+		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
+		srEntry.setProvider(new SystemResponseDTO());
+		srEntry.setServiceDefinition(new ServiceDefinitionResponseDTO(1l, "test-service", null, null));
+		srEntry.setInterfaces(List.of(new ServiceInterfaceResponseDTO(1l, "test-interface", null, null)));
+		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
+		srResult.getServiceQueryData().add(srEntry);
+		
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		@SuppressWarnings("unchecked")
+		final ArgumentCaptor<List<OrchestrationResultDTO>> valueCapture = ArgumentCaptor.forClass(List.class);
+		when(orchestratorDriver.generateAuthTokens(any(), valueCapture.capture())).thenReturn(List.of());
+		
+		testingObject.externalServiceRequest(request);
+		
+		final List<OrchestrationResultDTO> captured = valueCapture.getValue();
+		Assert.assertEquals("15", captured.get(0).getMetadata().get(OrchestratorDriver.KEY_CALCULATED_SERVICE_TIME_FRAME)); // 15 due to 5 extra seconds are given
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testExternalServiceRequestServiceTimeCalculationQoSDisabled() {
+		ReflectionTestUtils.setField(testingObject, "qosEnabled", false);
+		ReflectionTestUtils.setField(testingObject, "maxReservationDuration", 3600);
+		final ServiceQueryFormDTO serviceForm = new ServiceQueryFormDTO.Builder("service").
+																  		build();
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
+																				    requestedService(serviceForm).
+																				    flag(Flag.ENABLE_QOS, true).
+																				    flag(Flag.MATCHMAKING, true).
+																				    command(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY, "10").
+																					build();
+		
+		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
+		srEntry.setProvider(new SystemResponseDTO());
+		srEntry.setServiceDefinition(new ServiceDefinitionResponseDTO(1l, "test-service", null, null));
+		srEntry.setInterfaces(List.of(new ServiceInterfaceResponseDTO(1l, "test-interface", null, null)));
+		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
+		srResult.getServiceQueryData().add(srEntry);
+		
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		@SuppressWarnings("unchecked")
+		final ArgumentCaptor<List<OrchestrationResultDTO>> valueCapture = ArgumentCaptor.forClass(List.class);
+		when(orchestratorDriver.generateAuthTokens(any(), valueCapture.capture())).thenReturn(List.of());
+		
+		testingObject.externalServiceRequest(request);
+		
+		final List<OrchestrationResultDTO> captured = valueCapture.getValue();
+		Assert.assertNull( captured.get(0).getMetadata().get(OrchestratorDriver.KEY_CALCULATED_SERVICE_TIME_FRAME));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testExternalServiceRequestServiceTimeCalculationQoSDisabledFlag() {
+		ReflectionTestUtils.setField(testingObject, "qosEnabled", true);
+		ReflectionTestUtils.setField(testingObject, "maxReservationDuration", 3600);
+		final ServiceQueryFormDTO serviceForm = new ServiceQueryFormDTO.Builder("service").
+																  		build();
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
+																				    requestedService(serviceForm).
+																				    flag(Flag.ENABLE_QOS, false).
+																				    flag(Flag.MATCHMAKING, true).
+																				    command(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY, "10").
+																					build();
+		
+		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
+		srEntry.setProvider(new SystemResponseDTO());
+		srEntry.setServiceDefinition(new ServiceDefinitionResponseDTO(1l, "test-service", null, null));
+		srEntry.setInterfaces(List.of(new ServiceInterfaceResponseDTO(1l, "test-interface", null, null)));
+		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
+		srResult.getServiceQueryData().add(srEntry);
+		
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		@SuppressWarnings("unchecked")
+		final ArgumentCaptor<List<OrchestrationResultDTO>> valueCapture = ArgumentCaptor.forClass(List.class);
+		when(orchestratorDriver.generateAuthTokens(any(), valueCapture.capture())).thenReturn(List.of());
+		
+		testingObject.externalServiceRequest(request);
+		
+		final List<OrchestrationResultDTO> captured = valueCapture.getValue();
+		Assert.assertNull( captured.get(0).getMetadata().get(OrchestratorDriver.KEY_CALCULATED_SERVICE_TIME_FRAME));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testExternalServiceRequestServiceTimeCalculationWihoutExcusivityRequest() {
+		ReflectionTestUtils.setField(testingObject, "qosEnabled", true);
+		ReflectionTestUtils.setField(testingObject, "maxReservationDuration", 3600);
+		final ServiceQueryFormDTO serviceForm = new ServiceQueryFormDTO.Builder("service").
+																  		build();
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
+																				    requestedService(serviceForm).
+																				    flag(Flag.ENABLE_QOS, true).
+																				    flag(Flag.MATCHMAKING, true).
+																					build();
+		
+		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
+		srEntry.setProvider(new SystemResponseDTO());
+		srEntry.setServiceDefinition(new ServiceDefinitionResponseDTO(1l, "test-service", null, null));
+		srEntry.setInterfaces(List.of(new ServiceInterfaceResponseDTO(1l, "test-interface", null, null)));
+		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
+		srResult.getServiceQueryData().add(srEntry);
+		
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		@SuppressWarnings("unchecked")
+		final ArgumentCaptor<List<OrchestrationResultDTO>> valueCapture = ArgumentCaptor.forClass(List.class);
+		when(orchestratorDriver.generateAuthTokens(any(), valueCapture.capture())).thenReturn(List.of());
+		
+		testingObject.externalServiceRequest(request);
+		
+		final List<OrchestrationResultDTO> captured = valueCapture.getValue();
+		Assert.assertNull( captured.get(0).getMetadata().get(OrchestratorDriver.KEY_CALCULATED_SERVICE_TIME_FRAME));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -2748,7 +2876,7 @@ public class OrchestratorServiceTest {
 		
 		when(qosManager.reserveProvidersTemporarily(any(), any())).thenReturn(request.getOrList());
 		
-		QoSTemporaryLockResponseDTO result = testingObject.lockProvidersTemporarily(request);
+		final QoSTemporaryLockResponseDTO result = testingObject.lockProvidersTemporarily(request);
 		
 		assertEquals(request.getOrList().size(), result.getResponse().size());
 	}

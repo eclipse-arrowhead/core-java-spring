@@ -37,6 +37,8 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 	private static final String CLOSE_MESSAGE_PREFIX = "CLOSE";
 
 	private static final Logger logger = LogManager.getLogger(ReceiverSideRelayTestThread.class);
+	private static final Byte AWAKE_MESSAGE_ID = -1;
+	private static final long MAX_WAITING_BEFORE_TERMINATE = 30; // in minutes
 	
 	private boolean interrupted = false;
 	private boolean initialized = false;
@@ -60,7 +62,7 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 	private MessageProducer sender;
 	private MessageProducer controlSender;
 	
-	private final BlockingQueue<Object> blockingQueue = new LinkedBlockingQueue<Object>();
+	private final BlockingQueue<Byte> blockingQueue = new LinkedBlockingQueue<>();
 
 	//=================================================================================================
 	// methods
@@ -125,16 +127,19 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 					relayClient.sendBytes(relaySession, sender, requesterQoSMonitorPublicKey, bytes);
 				} else {
 					final long end = System.currentTimeMillis();
-					if (testResults.containsKey(bytes[0]) && testResults.get(bytes[0])[1] <= 0) {
-						testResults.get(bytes[0])[1] = end;
-					}
-					try {
-						blockingQueue.put(new Object());
-					} catch (final InterruptedException ex) {
-						// never happens
-						logger.debug(ex.getMessage());
-						logger.debug("Stacktrace:", ex);
-						closeAndInterrupt();
+					final byte id = bytes[0];
+					if (testResults.containsKey(id) && testResults.get(id)[1] <= 0) {
+						testResults.get(id)[1] = end;
+						if (end - testResults.get(id)[0] < timeout) {
+							try {
+								blockingQueue.put(id);
+							} catch (final InterruptedException ex) {
+								// never happens
+								logger.debug(ex.getMessage());
+								logger.debug("Stacktrace:", ex);
+								closeAndInterrupt();
+							}
+						}
 					}
 				}
 			}
@@ -167,10 +172,16 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 		}
 		
 		try {
-			blockingQueue.take(); // waiting for the other side to finish test run
+			final Byte result = blockingQueue.poll(MAX_WAITING_BEFORE_TERMINATE, TimeUnit.MINUTES); // waiting for the other side to finish test run
+			if (result == null) {
+				logger.debug("Other side never send the switch message");
+				close();
+				return;
+			}
 		} catch (final InterruptedException ex) {
 			logger.debug(ex.getMessage());
 			logger.debug("Stacktrace:", ex);
+			close();
 			return;
 		}
 		
@@ -214,14 +225,24 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 			testResults.put(b, times);
 			try {
 				relayClient.sendBytes(relaySession, sender, requesterQoSMonitorPublicKey, testMessage);
-				final Object result = blockingQueue.poll(timeout, TimeUnit.MILLISECONDS); // wait for the echo before new iteration
-				if (result == null) { // means timeout
-					times[1] = start + timeout + 1;
+				
+				while (true) {
+					final Byte result = blockingQueue.poll(timeout, TimeUnit.MILLISECONDS); // wait for the echo before new iteration
+					if (result == null) { // means timeout
+						times[1] = start + timeout + 1;
+						break;
+					} else if (result.byteValue() == b) { // means the correct answer is arrived 
+						break;
+					} else if (result.byteValue() < 0) {
+						// means an awake message is arrived, which is not expected at this point
+						logger.debug("Unexpected awake message arrived while waiting for message " + b);
+						break;
+					}
 				}
 			} catch (final JMSException | ArrowheadException | InterruptedException ex) {
 				logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
 				logger.debug("Stacktrace:", ex);
-				relayTestDBService.logErrorIntoMeasurementsTable(requesterCloud, relay, b, null, ex);
+				relayTestDBService.logErrorIntoMeasurementsTable(requesterCloud, relay, b, ex.getMessage(), ex);
 				closeAndInterrupt();
 			}
 		}
@@ -279,8 +300,10 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 		} else { // SWITCH control message
 			relayClient.validateSwitchControlMessage(message);
 			try {
-				receiver = false;
-				blockingQueue.put(new Object()); // to start the reverse testing
+				if (receiver) {
+					receiver = false;
+					blockingQueue.put(AWAKE_MESSAGE_ID); // to start the reverse testing
+				}
 			} catch (final InterruptedException ex) {
 				// never happens
 				logger.debug(ex.getMessage());

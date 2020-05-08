@@ -23,10 +23,12 @@ import org.springframework.web.util.UriComponents;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.CoreDefaults;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudCheckResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudSystemFormDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.internal.GSDQueryResultDTO;
@@ -41,6 +43,7 @@ import eu.arrowhead.common.dto.internal.TokenDataDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationProviderDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationResponseDTO;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
@@ -63,6 +66,7 @@ public class OrchestratorDriver {
 	private static final String AUTH_INTRA_CHECK_URI_KEY = CoreSystemService.AUTH_CONTROL_INTRA_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEKEEPER_INIT_GSD_URI_KEY = CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEKEEPER_INIT_ICN_URI_KEY = CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATION.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String GATEKEEPER_GET_CLOUD_URI_KEY = CoreSystemService.GATEKEEPER_GET_CLOUD_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String QOS_MONITOR_INTRA_PING_MEASUREMENT_URI_KEY = CoreSystemService.QOS_MONITOR_INTRA_PING_MEASUREMENT_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT_URI_KEY = CoreSystemService.QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_URI_KEY = CoreSystemService.QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
@@ -201,6 +205,18 @@ public class OrchestratorDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public CloudWithRelaysResponseDTO getCloudsWithExclusiveGatewayAndPublicRelays(final String operator, final String name) {
+		logger.debug("getCloudsWithGatewayAndPublicRelays started...");
+		Assert.isTrue(!Utilities.isEmpty(operator), "operator is null or empty");
+		Assert.isTrue(!Utilities.isEmpty(name), "name is null or empty");
+		
+		final UriComponents uri = getGatekeeperGetCloudUri(operator, name);
+		final ResponseEntity<CloudWithRelaysResponseDTO> response = httpService.sendRequest(uri, HttpMethod.GET, CloudWithRelaysResponseDTO.class);
+		
+		return response.getBody();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public QoSIntraPingMeasurementResponseDTO getIntraPingMeasurement(final long systemId) {
 		logger.debug("getPingMeasurement started...");
 		
@@ -232,9 +248,9 @@ public class OrchestratorDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public QoSInterRelayEchoMeasurementListResponseDTO getInterRelayEchoMeasurement(final CloudSystemFormDTO request) {
+	public QoSInterRelayEchoMeasurementListResponseDTO getInterRelayEchoMeasurement(final CloudRequestDTO request) {
 		logger.debug("getInterRelayEchoMeasurement started...");
-		Assert.notNull(request, "CloudSystemFormDTO is null.");
+		Assert.notNull(request, "CloudRequestDTO is null.");
 		
 		final UriComponents uri = getQosMonitorInterRelayEchoMeasurementUri();
 		final ResponseEntity<QoSInterRelayEchoMeasurementListResponseDTO> response = httpService.sendRequest(uri, HttpMethod.POST, QoSInterRelayEchoMeasurementListResponseDTO.class, request);
@@ -348,6 +364,22 @@ public class OrchestratorDriver {
 		}
 		
 		throw new ArrowheadException("Orchestrator can't find gatekeeper init_icn URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getGatekeeperGetCloudUri(final String operator, final String name) {
+		logger.debug("getGatekeeperGetCloudUri started...");
+		
+		if (arrowheadContext.containsKey(GATEKEEPER_GET_CLOUD_URI_KEY)) {
+			try {
+				final UriComponents uri = (UriComponents) arrowheadContext.get(GATEKEEPER_GET_CLOUD_URI_KEY);
+				return uri.expand(operator, name);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Orchestrator can't find gatekeeper get_cloud URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Orchestrator can't find gatekeeper get_cloud URI.");		
 	}
 	
 	//-------------------------------------------------------------------------------------------------

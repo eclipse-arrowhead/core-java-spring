@@ -21,14 +21,15 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterRelayMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
-import eu.arrowhead.common.dto.internal.QoSMeasurementAttributesFormDTO;
 import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.shared.QoSMeasurementAttributesFormDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
@@ -64,11 +65,12 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = BadPayloadException.class)
-	public void testVerifyInvalidCloudSystemForm() {
+	public void testVerifyInvalidCloudRequest() {
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
 		final CloudResponseDTO cloud = new CloudResponseDTO();
-		cloud.setId(-2); //Invalid id
+		cloud.setOperator("  "); //Invalid operator
+		cloud.setName("  "); //Invalid name
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RESPONSE_TIME_THRESHOLD, "500");
 		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
@@ -119,6 +121,8 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		provider.setId(2);
 		final CloudResponseDTO cloud = new CloudResponseDTO();
 		cloud.setId(1);
+		cloud.setOperator("test-op");
+		cloud.setName("test-n");
 		final Map<String,String> qosRequirements = new HashMap<>();
 		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RESPONSE_TIME_THRESHOLD, "500");
 		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
@@ -138,6 +142,68 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void testVerifyNoRequirementsDefined() {
+		final SystemResponseDTO provider = new SystemResponseDTO();
+		provider.setId(2);
+		provider.setSystemName("test-sys");
+		final CloudResponseDTO cloud = new CloudResponseDTO();
+		cloud.setId(1);
+		cloud.setOperator("test-op");
+		cloud.setName("test-n");
+		final Map<String,String> qosRequirements = new HashMap<>();
+		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
+		parameters.setLocalReferencePingMeasurement(new QoSIntraPingMeasurementResponseDTO());
+		parameters.setProviderTargetCloudMeasurement(new QoSMeasurementAttributesFormDTO());
+		
+		final CloudWithRelaysResponseDTO cloudWithRelays = new CloudWithRelaysResponseDTO();
+		cloudWithRelays.setId(cloud.getId());
+		cloudWithRelays.setOperator(cloud.getOperator());
+		cloudWithRelays.setName(cloud.getName());
+		cloudWithRelays.setGatewayRelays(List.of(new RelayResponseDTO()));
+		
+		ReflectionTestUtils.setField(verifier, "verifyNotMeasuredSystem", true);
+		when(interRelayEchoMeasurementCache.get(any())).thenReturn(null);
+		when(orchestratorDriver.getInterRelayEchoMeasurement(any())).thenReturn(new QoSInterRelayEchoMeasurementListResponseDTO(List.of(), 0));
+		when(orchestratorDriver.getCloudsWithExclusiveGatewayAndPublicRelays(any(), any())).thenReturn(cloudWithRelays);
+		
+		final boolean verified = verifier.verify(parameters, false);
+		Assert.assertTrue(verified);
+		Assert.assertEquals(cloudWithRelays.getGatewayRelays().size(), parameters.getVerifiedRelays().size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testVerifyNoRequirementsDefinedAndHaveNoRelaysAtAll() {
+		final SystemResponseDTO provider = new SystemResponseDTO();
+		provider.setId(2);
+		provider.setSystemName("test-sys");
+		final CloudResponseDTO cloud = new CloudResponseDTO();
+		cloud.setId(1);
+		cloud.setOperator("test-op");
+		cloud.setName("test-n");
+		final Map<String,String> qosRequirements = new HashMap<>();
+		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
+		parameters.setLocalReferencePingMeasurement(new QoSIntraPingMeasurementResponseDTO());
+		parameters.setProviderTargetCloudMeasurement(new QoSMeasurementAttributesFormDTO());
+		
+		final CloudWithRelaysResponseDTO cloudWithRelays = new CloudWithRelaysResponseDTO();
+		cloudWithRelays.setId(cloud.getId());
+		cloudWithRelays.setOperator(cloud.getOperator());
+		cloudWithRelays.setName(cloud.getName());
+		cloudWithRelays.setGatewayRelays(List.of());
+		
+		ReflectionTestUtils.setField(verifier, "verifyNotMeasuredSystem", true);
+		when(interRelayEchoMeasurementCache.get(any())).thenReturn(null);
+		when(orchestratorDriver.getInterRelayEchoMeasurement(any())).thenReturn(new QoSInterRelayEchoMeasurementListResponseDTO(List.of(), 0));
+		when(orchestratorDriver.getCloudsWithExclusiveGatewayAndPublicRelays(any(), any())).thenReturn(cloudWithRelays);
+		
+		final boolean verified = verifier.verify(parameters, false);
+		Assert.assertFalse(verified);
+		Assert.assertTrue(parameters.getVerifiedRelays().isEmpty());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void testVerifyNoMeasurementRecordUsingDefaultTrue() {
 		final SystemResponseDTO provider = new SystemResponseDTO();
 		provider.setId(2);
@@ -152,12 +218,50 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		parameters.setLocalReferencePingMeasurement(new QoSIntraPingMeasurementResponseDTO());
 		parameters.setProviderTargetCloudMeasurement(new QoSMeasurementAttributesFormDTO());
 		
+		final CloudWithRelaysResponseDTO cloudWithRelays = new CloudWithRelaysResponseDTO();
+		cloudWithRelays.setId(cloud.getId());
+		cloudWithRelays.setOperator(cloud.getOperator());
+		cloudWithRelays.setName(cloud.getName());
+		cloudWithRelays.setGatewayRelays(List.of(new RelayResponseDTO()));
+		
 		ReflectionTestUtils.setField(verifier, "verifyNotMeasuredSystem", true);
 		when(interRelayEchoMeasurementCache.get(any())).thenReturn(null);
 		when(orchestratorDriver.getInterRelayEchoMeasurement(any())).thenReturn(new QoSInterRelayEchoMeasurementListResponseDTO(List.of(), 0));
+		when(orchestratorDriver.getCloudsWithExclusiveGatewayAndPublicRelays(any(), any())).thenReturn(cloudWithRelays);
 		
 		final boolean verified = verifier.verify(parameters, false);
 		Assert.assertTrue(verified);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testVerifyNoMeasurementRecordUsingDefaultTrueButHaveNoRelaysAtAll() {
+		final SystemResponseDTO provider = new SystemResponseDTO();
+		provider.setId(2);
+		provider.setSystemName("test-sys");
+		final CloudResponseDTO cloud = new CloudResponseDTO();
+		cloud.setId(1);
+		cloud.setOperator("test-op");
+		cloud.setName("test-n");
+		final Map<String,String> qosRequirements = new HashMap<>();
+		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RESPONSE_TIME_THRESHOLD, "500");
+		final QoSVerificationParameters parameters = new QoSVerificationParameters(provider, cloud, true, new HashMap<>(), qosRequirements, new HashMap<>(), new ArrayList<>());
+		parameters.setLocalReferencePingMeasurement(new QoSIntraPingMeasurementResponseDTO());
+		parameters.setProviderTargetCloudMeasurement(new QoSMeasurementAttributesFormDTO());
+		
+		final CloudWithRelaysResponseDTO cloudWithRelays = new CloudWithRelaysResponseDTO();
+		cloudWithRelays.setId(cloud.getId());
+		cloudWithRelays.setOperator(cloud.getOperator());
+		cloudWithRelays.setName(cloud.getName());
+		cloudWithRelays.setGatewayRelays(List.of());
+		
+		ReflectionTestUtils.setField(verifier, "verifyNotMeasuredSystem", true);
+		when(interRelayEchoMeasurementCache.get(any())).thenReturn(null);
+		when(orchestratorDriver.getInterRelayEchoMeasurement(any())).thenReturn(new QoSInterRelayEchoMeasurementListResponseDTO(List.of(), 0));
+		when(orchestratorDriver.getCloudsWithExclusiveGatewayAndPublicRelays(any(), any())).thenReturn(cloudWithRelays);
+		
+		final boolean verified = verifier.verify(parameters, false);
+		Assert.assertFalse(verified);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

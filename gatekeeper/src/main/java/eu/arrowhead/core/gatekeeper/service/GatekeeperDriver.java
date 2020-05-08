@@ -453,7 +453,7 @@ public class GatekeeperDriver {
 	
 	//-------------------------------------------------------------------------------------------------
 	public boolean checkQoSEnabled() {
-		logger.debug("getQoSMeasurementsForLocalSystem started...");
+		logger.debug("checkQoSEnabled started...");
 		
 		final UriComponents uri = getOrchestratorIsQoSEnabledUri();
 		final ResponseEntity<String> response = httpService.sendRequest(uri, HttpMethod.GET, String.class);
@@ -781,7 +781,7 @@ public class GatekeeperDriver {
 	//-------------------------------------------------------------------------------------------------
 	private UriComponents getOrchestratorIsQoSEnabledUri() {
 		logger.debug("getOrchestratorIsQoSEnabledUri started...");
-		
+
 		if (arrowheadContext.containsKey(ORCHESTRATOR_QOS_ENABLED_URI_KEY)) {
 			try {
 				return (UriComponents) arrowheadContext.get(ORCHESTRATOR_QOS_ENABLED_URI_KEY);

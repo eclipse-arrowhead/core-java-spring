@@ -37,6 +37,8 @@ public class SenderSideRelayTestThread extends Thread implements MessageListener
 	private static final String CLOSE_MESSAGE_PREFIX = "CLOSE";
 
 	private static final Logger logger = LogManager.getLogger(SenderSideRelayTestThread.class);
+	private static final Byte AWAKE_MESSAGE_ID = -1;
+	private static final long MAX_WAITING_BEFORE_TERMINATE = 30; // in minutes
 	
 	private boolean interrupted = false;
 	private boolean initialized = false;
@@ -55,12 +57,13 @@ public class SenderSideRelayTestThread extends Thread implements MessageListener
 	
 	private boolean senderFlag = true;
 	private final Map<Byte,long[]> testResults = new ConcurrentHashMap<>();
+	private boolean resultsSaved = false;
 	
 	private final String queueId;
 	private MessageProducer sender;
 	private MessageProducer controlSender;
 	
-	private final BlockingQueue<Object> blockingQueue = new LinkedBlockingQueue<Object>();
+	private final BlockingQueue<Byte> blockingQueue = new LinkedBlockingQueue<>();
 
 	//=================================================================================================
 	// methods
@@ -124,16 +127,24 @@ public class SenderSideRelayTestThread extends Thread implements MessageListener
 				final byte[] bytes = relayClient.getBytesFromMessage(message, receiverQoSMonitorPublicKey);
 				if (senderFlag) {
 					final long end = System.currentTimeMillis();
-					if (testResults.containsKey(bytes[0]) && testResults.get(bytes[0])[1] <= 0) {
-						testResults.get(bytes[0])[1] = end;
-					}
-					try {
-						blockingQueue.put(new Object());
-					} catch (final InterruptedException ex) {
-						// never happens
-						logger.debug(ex.getMessage());
-						logger.debug("Stacktrace:", ex);
-						closeAndInterrupt();
+					final byte id = bytes[0];
+					if (testResults.containsKey(id) && testResults.get(id)[1] <= 0) {
+						testResults.get(id)[1] = end;
+						if (end - testResults.get(id)[0] < timeout) {
+							try {
+								blockingQueue.put(id);
+							} catch (final InterruptedException ex) {
+								// never happens
+								logger.debug(ex.getMessage());
+								logger.debug("Stacktrace:", ex);
+								closeAndInterrupt();
+							}
+							
+							final boolean lastMessage = id == noIteration - 1;
+							if (lastMessage) {
+								saveResultsAndSwitchRoles();
+							}
+						}
 					}
 				} else {
 					relayClient.sendBytes(relaySession, sender, receiverQoSMonitorPublicKey, bytes);
@@ -174,24 +185,14 @@ public class SenderSideRelayTestThread extends Thread implements MessageListener
 			return;
 		}
 		
-		relayTestDBService.storeMeasurements(targetCloud, relay, testResults);
-		
 		try {
-			senderFlag = false;
-			relayClient.sendSwitchControlMessage(relaySession, controlSender, queueId);
-		} catch (final JMSException ex) {
-			logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
-			logger.debug("Stacktrace:", ex);
-			close();
-		}
-		
-		try {
-			blockingQueue.take(); // waiting for the other side to finish test run
-			close();
+			blockingQueue.poll(MAX_WAITING_BEFORE_TERMINATE, TimeUnit.MINUTES); // waiting for the other side to finish test run
 		} catch (final InterruptedException ex) {
 			logger.debug(ex.getMessage());
 			logger.debug("Stacktrace:", ex);
 			return;
+		} finally {
+			close();
 		}
 	}
 
@@ -215,15 +216,30 @@ public class SenderSideRelayTestThread extends Thread implements MessageListener
 			times[0] = start;
 			testResults.put(b, times);
 			try {
+				final boolean lastMessage = b == noIteration - 1;
 				relayClient.sendBytes(relaySession, sender, receiverQoSMonitorPublicKey, testMessage);
-				final Object result = blockingQueue.poll(timeout, TimeUnit.MILLISECONDS); // wait for the echo before new iteration
-				if (result == null) { // means timeout
-					times[1] = start + timeout + 1;
+				
+				while (true) {
+					final Byte result = blockingQueue.poll(timeout, TimeUnit.MILLISECONDS); // wait for the echo before new iteration
+					if (result == null) { // means timeout
+						times[1] = start + timeout + 1;
+						if (lastMessage) {
+							saveResultsAndSwitchRoles();
+						}
+						break;
+					} else if (result.byteValue() == b) { // means the correct answer is arrived 
+						break;
+					} else if (result.byteValue() < 0) {
+						// means an awake message is arrived, which is not expected at this point => put back just to finish the thread
+						logger.debug("Unexpected awake message arrived while waiting for message " + b);
+						blockingQueue.put(AWAKE_MESSAGE_ID);
+						break;
+					}
 				}
 			} catch (final JMSException | ArrowheadException | InterruptedException ex) {
 				logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
 				logger.debug("Stacktrace:", ex);
-				relayTestDBService.logErrorIntoMeasurementsTable(targetCloud, relay, b, null, ex);
+				relayTestDBService.logErrorIntoMeasurementsTable(targetCloud, relay, b, ex.getMessage(), ex);
 				closeAndInterrupt();
 			}
 		}
@@ -263,7 +279,6 @@ public class SenderSideRelayTestThread extends Thread implements MessageListener
 		
 		if (message instanceof TextMessage) {
 			final TextMessage textMessage = (TextMessage) message;
-			
 			return textMessage.getText().startsWith(CLOSE_MESSAGE_PREFIX);
 		}
 		
@@ -277,7 +292,7 @@ public class SenderSideRelayTestThread extends Thread implements MessageListener
 		if (isCloseMessage(message)) {
 			relayClient.handleCloseControlMessage(message, relaySession);
 			try {
-				blockingQueue.put(new Object());
+				blockingQueue.put(AWAKE_MESSAGE_ID);
 			} catch (final InterruptedException ex) {
 				// never happens
 				logger.debug(ex.getMessage());
@@ -287,6 +302,16 @@ public class SenderSideRelayTestThread extends Thread implements MessageListener
 		} else { // SWITCH control message
 			// not supposed to receive this kind of messages
 			throw new ArrowheadException("Unexpected message on relay: SWITCH");
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private synchronized void saveResultsAndSwitchRoles() throws JMSException {
+		if (!resultsSaved) {
+			relayTestDBService.storeMeasurements(targetCloud, relay, testResults);
+			resultsSaved = true;
+			senderFlag = false;
+			relayClient.sendSwitchControlMessage(relaySession, controlSender, queueId);
 		}
 	}
 }

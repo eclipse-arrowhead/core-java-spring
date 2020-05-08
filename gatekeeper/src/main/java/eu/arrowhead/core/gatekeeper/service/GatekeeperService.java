@@ -40,7 +40,6 @@ import eu.arrowhead.common.dto.internal.ICNProposalResponseDTO;
 import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.internal.ICNResultDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
-import eu.arrowhead.common.dto.internal.QoSMeasurementAttributesFormDTO;
 import eu.arrowhead.common.dto.internal.QoSMonitorSenderConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalResponseDTO;
@@ -61,6 +60,7 @@ import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.OrchestratorWarnings;
 import eu.arrowhead.common.dto.shared.PreferredProviderDataDTO;
+import eu.arrowhead.common.dto.shared.QoSMeasurementAttributesFormDTO;
 import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
@@ -139,7 +139,7 @@ public class GatekeeperService {
 			}
 		}
 		
-		final GSDPollRequestDTO gsdPollRequestDTO = new GSDPollRequestDTO(gsdForm.getRequestedService(), getOwnCloud(), gatewayIsPresent, gsdForm.needQoSMeasurements());
+		final GSDPollRequestDTO gsdPollRequestDTO = new GSDPollRequestDTO(gsdForm.getRequestedService(), getOwnCloud(), gatewayIsPresent, gsdForm.getNeedQoSMeasurements());
 		final List<ErrorWrapperDTO> gsdPollAnswers = gatekeeperDriver.sendGSDPollRequest(cloudsToContact, gsdPollRequestDTO);
 		
 		final List<GSDPollResponseDTO> successfulResponses = new ArrayList<>();
@@ -177,7 +177,7 @@ public class GatekeeperService {
 		validateGSDPollRequestDTO(request);
 		
 		// Check whether need for QoS can be fulfilled or not
-		if (request.needQoSMeasurements() && !gatekeeperDriver.checkQoSEnabled()) {
+		if (request.getNeedQoSMeasurements() && !gatekeeperDriver.checkQoSEnabled()) {
 			return new GSDPollResponseDTO();
 		}
 				
@@ -214,7 +214,7 @@ public class GatekeeperService {
 					}
 				}
 				
-				if (!request.needQoSMeasurements()) {
+				if (!request.getNeedQoSMeasurements()) {
 					availableInterfaces.addAll(providerInterfaces);
 					numOfProviders++;
 				} else {
@@ -225,7 +225,7 @@ public class GatekeeperService {
 						} else {
 							qosMeasurements.add(new QoSMeasurementAttributesFormDTO(srEntryDTO,
 																					pingMeasurement.isAvailable(),
-																					pingMeasurement.getLastAccessAt(),
+																					Utilities.convertZonedDateTimeToUTCString(pingMeasurement.getLastAccessAt()),
 																					pingMeasurement.getMinResponseTime(),
 																					pingMeasurement.getMaxResponseTime(),
 																					pingMeasurement.getMeanResponseTimeWithTimeout(),
@@ -330,11 +330,15 @@ public class GatekeeperService {
 		}
 		
 		final PreferredProviderDataDTO[] preferredProviders = getPreferredProviders(request.getPreferredSystems());
+		boolean needMatchmaking = request.getCommands().containsKey(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY) ?
+								  true : request.getNegotiationFlags().getOrDefault(Flag.MATCHMAKING, false);
 		final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO.Builder(request.getRequesterSystem())
 																							 .requesterCloud(request.getRequesterCloud())
 																							 .requestedService(request.getRequestedService())
 																							 .flags(request.getNegotiationFlags())
 																							 .flag(Flag.EXTERNAL_SERVICE_REQUEST, true)
+																							 .flag(Flag.MATCHMAKING, needMatchmaking)
+																							 .commands(request.getCommands())
 																							 .preferredProviders(preferredProviders)
 																							 .build();
 		if (gatewayIsMandatory) {
@@ -407,8 +411,12 @@ public class GatekeeperService {
 		
 		// In gateway mode we have to select one provider even if matchmaking is not enabled because we have to build an expensive connection between the consumer and the provider.
 		final OrchestrationResultDTO selectedResult;
-		// filter out reserved providers
-		orchestrationResponse = filterOutReservedProviders(orchestrationResponse);
+		
+		if (!needReservation) {
+			// filter out reserved providers
+			orchestrationResponse = filterOutReservedProviders(orchestrationResponse);
+		}
+		
 		if (orchestrationResponse.getResponse().isEmpty()) { // no usable results
 			return new ICNProposalResponseDTO();
 		}
@@ -872,7 +880,7 @@ public class GatekeeperService {
 				if (pingMeasurement.hasRecord()) {
 					orchestrationResult.setQosMeasurements(new QoSMeasurementAttributesFormDTO(null,
 																							   pingMeasurement.isAvailable(),
-																							   pingMeasurement.getLastAccessAt(),
+																							   Utilities.convertZonedDateTimeToUTCString(pingMeasurement.getLastAccessAt()),
 																							   pingMeasurement.getMinResponseTime(),
 																							   pingMeasurement.getMaxResponseTime(),
 																							   pingMeasurement.getMeanResponseTimeWithTimeout(),
