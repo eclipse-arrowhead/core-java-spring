@@ -98,7 +98,7 @@ class ProviderSideSocketThread extends Thread {
 		logger.debug("{}: run started...", getName());
 		
 		if (!initialized) {
-			throw new IllegalStateException("Handler is not initialized.");
+			throw new IllegalStateException("Thread is not initialized.");
 		}
 		
 		try {

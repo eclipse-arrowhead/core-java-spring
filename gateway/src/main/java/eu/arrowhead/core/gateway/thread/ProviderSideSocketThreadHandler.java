@@ -208,10 +208,9 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 			logger.debug("Creating thread: {}", currentThread.getName());
 			try {
 				currentThread.init();
+				noRequest = 0;
 				currentThread.start();
 				logger.debug("Thread started: {}", currentThread.getName());
-				
-				noRequest = 0;
 			} catch (final IOException ex) {
 				logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
 				logger.debug("Stacktrace:", ex);
