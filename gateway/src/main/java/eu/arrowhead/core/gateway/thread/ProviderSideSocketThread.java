@@ -76,6 +76,7 @@ class ProviderSideSocketThread extends Thread {
 		sslProviderSocket = (SSLSocket) socketFactory.createSocket(connectionRequest.getProvider().getAddress(), connectionRequest.getProvider().getPort().intValue());
 		sslProviderSocket.setSoTimeout(timeout);
 		outputStream = sslProviderSocket.getOutputStream();
+		initialized = true;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
