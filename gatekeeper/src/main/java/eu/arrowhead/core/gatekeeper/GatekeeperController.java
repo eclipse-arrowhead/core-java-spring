@@ -168,7 +168,7 @@ public class GatekeeperController {
 				
 		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.GATEKEEPER_URI + CLOUDS_MGMT_URI);
 		final CloudWithRelaysListResponseDTO cloudsResponse = gatekeeperDBService.getCloudsResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), 
-																									validParameters.getValidatedDirecion(), sortField);
+																									validParameters.getValidatedDirection(), sortField);
 		
 		logger.debug("Clouds  with page: {} and item_per page: {} retrieved successfully", page, size);
 		return cloudsResponse;
@@ -334,7 +334,7 @@ public class GatekeeperController {
 		
 		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.GATEKEEPER_URI + RELAYS_MGMT_URI);
 		final RelayListResponseDTO relaysResponse = gatekeeperDBService.getRelaysResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(),
-																					      validParameters.getValidatedDirecion(), sortField);
+																					      validParameters.getValidatedDirection(), sortField);
 		
 		logger.debug("Relays  with page: {} and item_per page: {} retrieved successfully", page, size);
 		return relaysResponse;

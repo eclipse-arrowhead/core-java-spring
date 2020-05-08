@@ -190,7 +190,7 @@ public class QoSMonitorController {
 
 		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTRA_PING_MEASUREMENTS_MGMT_URI);
 		final QoSIntraPingMeasurementListResponseDTO measurementResponse = qosDBService.getIntraPingMeasurementResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), 
-																												 validParameters.getValidatedDirecion(), sortField);
+																												 validParameters.getValidatedDirection(), sortField);
 
 		logger.debug("Measurements  with page: {} and item_per page: {} retrieved successfully", page, size);
 		return measurementResponse;
@@ -285,7 +285,7 @@ public class QoSMonitorController {
 
 		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_MGMT_URI);
 		final QoSInterDirectPingMeasurementListResponseDTO measurementResponse = qosDBService.getInterDirectPingMeasurementsPageResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), 
-																												 						 validParameters.getValidatedDirecion(), sortField);
+																												 						 validParameters.getValidatedDirection(), sortField);
 		logger.debug("Measurements  with page: {} and item_per page: {} retrieved successfully", page, size);
 		return measurementResponse;
 	}
@@ -344,7 +344,7 @@ public class QoSMonitorController {
 
 		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_URI);
 		final QoSInterRelayEchoMeasurementListResponseDTO response = qosDBService.getInterRelayEchoMeasurementsResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(),
-																												  		validParameters.getValidatedDirecion(), sortField);
+																												  		validParameters.getValidatedDirection(), sortField);
 		logger.debug("Measurements  with page: {} and item_per page: {} retrieved successfully", page, size);
 		return response;
 	}

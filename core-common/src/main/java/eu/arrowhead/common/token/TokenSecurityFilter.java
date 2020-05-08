@@ -11,6 +11,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
+import eu.arrowhead.common.SecurityUtilities;
 import org.springframework.lang.Nullable;
 
 import eu.arrowhead.common.CommonConstants;
@@ -82,12 +83,6 @@ public abstract class TokenSecurityFilter extends ArrowheadFilter {
 	//-------------------------------------------------------------------------------------------------
 	@Nullable
 	private String getCertificateCNFromRequest(final HttpServletRequest request) {
-		final X509Certificate[] certificates = (X509Certificate[]) request.getAttribute(CommonConstants.ATTR_JAVAX_SERVLET_REQUEST_X509_CERTIFICATE);
-		if (certificates != null && certificates.length != 0) {
-			final X509Certificate cert = certificates[0];
-			return Utilities.getCertCNFromSubject(cert.getSubjectDN().getName());
-		}
-		
-		return null;
+		return SecurityUtilities.getCertificateCNFromRequest(request);
 	}
 }
