@@ -1,11 +1,24 @@
 package eu.arrowhead.core.certificate_authority;
 
-import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
-import eu.arrowhead.common.exception.AuthException;
-import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.exception.DataNotFoundException;
-import eu.arrowhead.common.exception.InvalidParameterException;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.InvalidKeyException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Date;
+import java.util.List;
+import java.util.ServiceConfigurationError;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.asn1.pkcs.Attribute;
@@ -32,21 +45,13 @@ import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.pkcs.PKCSException;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
 
-import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.ServiceConfigurationError;
+import eu.arrowhead.common.SSLProperties;
+import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
+import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.exception.DataNotFoundException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 
 class CertificateAuthorityUtils {
 
@@ -54,6 +59,31 @@ class CertificateAuthorityUtils {
 
     private static final String PROVIDER = "BC";
     private static final String SIGNATURE_ALGORITHM = "SHA256withRSA";
+
+    static KeyStore getKeyStore(SSLProperties sslProperties) {
+        try {
+            final KeyStore keystore = KeyStore.getInstance(sslProperties.getKeyStoreType());
+            keystore.load(sslProperties.getKeyStore().getInputStream(),
+                    sslProperties.getKeyStorePassword().toCharArray());
+            return keystore;
+        } catch (KeyStoreException | IOException | CertificateException | NoSuchAlgorithmException e) {
+            throw new ServiceConfigurationError("Cannot open keystore: " + e.getMessage());
+        }
+    }
+
+    static void verifyCertificateSigningRequest(CertificateSigningRequestDTO request) {
+        if (request == null) {
+            logger.error("CertificateSigningRequest cannot be null");
+            throw new InvalidParameterException("CertificateSigningRequest cannot be null");
+        }
+
+        final String encodedCSR = request.getEncodedCSR();
+
+        if (encodedCSR == null || encodedCSR.isEmpty()) {
+            logger.error("CertificateSigningRequest cannot be empty");
+            throw new InvalidParameterException("CertificateSigningRequest cannot be empty");
+        }
+    }
 
     static JcaPKCS10CertificationRequest decodePKCS10CSR(CertificateSigningRequestDTO csr) {
         try {
@@ -124,7 +154,19 @@ class CertificateAuthorityUtils {
     }
 
     static X509Certificate buildCertificate(JcaPKCS10CertificationRequest csr, PrivateKey cloudPrivateKey,
-                                            X509Certificate cloudCertificate, Date validFrom, Date validUntil, SecureRandom random) {
+            X509Certificate cloudCertificate, CAProperties caProperties, SecureRandom random) {
+        final ZonedDateTime now = ZonedDateTime.now();
+        final Date validFrom = Date
+                .from(now.minusMinutes(caProperties.getCertValidityNegativeOffsetMinutes()).toInstant());
+        final Date validUntil = Date
+                .from(now.plusMinutes(caProperties.getCertValidityPositiveOffsetMinutes()).toInstant());
+
+        logger.debug("Setting validity from='{}' to='{}'", validFrom, validUntil);
+        return buildCertificate(csr, cloudPrivateKey, cloudCertificate, validFrom, validUntil, random);
+    }
+
+    static X509Certificate buildCertificate(JcaPKCS10CertificationRequest csr, PrivateKey cloudPrivateKey,
+            X509Certificate cloudCertificate, Date validFrom, Date validUntil, SecureRandom random) {
 
         final BigInteger serial = new BigInteger(32, random);
         final PublicKey clientKey = getClientKey(csr);
@@ -143,6 +185,15 @@ class CertificateAuthorityUtils {
         } catch (OperatorCreationException e) {
             throw new BadPayloadException("Certificate signing failed! (" + e.getMessage() + ")", e);
         }
+    }
+
+    static List<String> buildEncodedCertificateChain(X509Certificate clientCertificate,
+            X509Certificate cloudCertificate, X509Certificate rootCertificate) {
+        final ArrayList<String> encodedCertificateChain = new ArrayList<>();
+        encodedCertificateChain.add(CertificateAuthorityUtils.encodeCertificate(clientCertificate));
+        encodedCertificateChain.add(CertificateAuthorityUtils.encodeCertificate(cloudCertificate));
+        encodedCertificateChain.add(CertificateAuthorityUtils.encodeCertificate(rootCertificate));
+        return encodedCertificateChain;
     }
 
     /**
