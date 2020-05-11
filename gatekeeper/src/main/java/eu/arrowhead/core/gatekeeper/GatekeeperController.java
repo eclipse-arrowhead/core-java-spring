@@ -119,7 +119,7 @@ public class GatekeeperController {
 	private static final String POST_COLLECT_ACCESS_TYPES_DESCRIPTION = "Return access types of requested clouds for QoS Monitor Core System";
 	private static final String POST_COLLECT_ACCESS_TYPES_HTTP_200_MESSAGE = "Access types returned";
 	private static final String POST_COLLECT_ACCESS_TYPES_HTTP_400_MESSAGE = "Could not collect access types";
-	private static final String POST_INIT_RELAY_TEST_DESCRIPTION = "Starts a tests between this cloud and the target cloud using the specified relay.";
+	private static final String POST_INIT_RELAY_TEST_DESCRIPTION = "Starts a test between this cloud and the target cloud using the specified relay.";
 	private static final String POST_INIT_RELAY_TEST_HTTP_200_MESSAGE = "Test started";
 	private static final String POST_INIT_RELAY_TEST_HTTP_400_MESSAGE = "Could not start the test";
 	private static final String POST_INIT_RELAY_TEST_HTTP_504_MESSAGE = "Timeout occurs in the communication via relay.";
@@ -549,7 +549,7 @@ public class GatekeeperController {
 	@PostMapping(path = CommonConstants.OP_GATEKEEPER_COLLECT_ACCESS_TYPES_SERVICE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public CloudAccessListResponseDTO collectNeighborCloudAccessTypes(@RequestBody final List<CloudRequestDTO> dtos) throws InterruptedException {
 		logger.debug("new collectNeighborCloudAccessTypes request received");
-		for (CloudRequestDTO cloudRequestDTO : dtos) {
+		for (final CloudRequestDTO cloudRequestDTO : dtos) {
 			validateCloudRequestDTO(cloudRequestDTO, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_COLLECT_ACCESS_TYPES_SERVICE);
 		}
 		final CloudAccessListResponseDTO accessTypes = gatekeeperService.initAccessTypesCollection(dtos);

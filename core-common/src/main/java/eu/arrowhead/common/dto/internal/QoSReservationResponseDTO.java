@@ -2,7 +2,7 @@ package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
 
-public class QoSReservationResponseDTO implements Serializable{
+public class QoSReservationResponseDTO implements Serializable {
 
 	//=================================================================================================
 	// members

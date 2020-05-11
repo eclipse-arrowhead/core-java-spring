@@ -21,6 +21,7 @@ import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 
+import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
@@ -108,6 +109,8 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 			logger.debug("Problem occurs in initializing gateway communication: {}", ex.getMessage());
 			logger.debug("Stacktrace:", ex);
 			close();
+			
+			throw new ArrowheadException("Problem occurs in initializing gateway communication: " + ex.getMessage(), HttpStatus.SC_BAD_GATEWAY, ex);
 		}
 	}
 	

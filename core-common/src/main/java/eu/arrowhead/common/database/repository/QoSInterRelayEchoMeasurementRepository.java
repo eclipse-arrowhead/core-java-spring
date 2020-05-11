@@ -11,5 +11,8 @@ import eu.arrowhead.common.database.entity.QoSInterRelayEchoMeasurement;
 public interface QoSInterRelayEchoMeasurementRepository extends RefreshableRepository<QoSInterRelayEchoMeasurement,Long>  {
 
 	//=================================================================================================
+	// methods
+	
+	//-------------------------------------------------------------------------------------------------
 	public Optional<QoSInterRelayEchoMeasurement> findByMeasurement(final QoSInterRelayMeasurement measurement);
 }

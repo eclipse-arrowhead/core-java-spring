@@ -81,7 +81,7 @@ public class OrchestrationResultDTO implements Serializable {
 	public void setMetadata(final Map<String,String> metadata) { this.metadata = metadata; }
 	public void setInterfaces(final List<ServiceInterfaceResponseDTO> interfaces) { this.interfaces = interfaces; }
 	public void setVersion(final Integer version) { this.version = version; }
-	public void setQosMeasurements(QoSMeasurementAttributesFormDTO qosMeasurements) { this.qosMeasurements = qosMeasurements; }
+	public void setQosMeasurements(final QoSMeasurementAttributesFormDTO qosMeasurements) { this.qosMeasurements = qosMeasurements; }
 	public void setAuthorizationTokens(final Map<String,String> authorizationTokens) { this.authorizationTokens = authorizationTokens; }
 	public void setWarnings(final List<OrchestratorWarnings> warnings) { this.warnings = warnings; }
 }
