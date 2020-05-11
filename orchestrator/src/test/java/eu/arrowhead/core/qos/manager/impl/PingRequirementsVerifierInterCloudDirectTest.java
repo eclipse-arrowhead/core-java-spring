@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterDirectMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterDirectPingMeasurementResponseDTO;
@@ -85,7 +86,7 @@ public class PingRequirementsVerifierInterCloudDirectTest {
 		
 		final QoSInterDirectPingMeasurementResponseDTO response = new QoSInterDirectPingMeasurementResponseDTO();
 		final QoSInterDirectMeasurementResponseDTO measurement = new QoSInterDirectMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now().minusHours(2));
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now().minusHours(2)));
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		response.setAvailable(true);
@@ -165,7 +166,7 @@ public class PingRequirementsVerifierInterCloudDirectTest {
 	public void testVerifyMaximumThresholdResponseRequirementInvalid() { // also tests that cache is stored the measurement
 		final QoSInterDirectPingMeasurementResponseDTO response = new QoSInterDirectPingMeasurementResponseDTO();
 		final QoSInterDirectMeasurementResponseDTO measurement = new QoSInterDirectMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -196,7 +197,7 @@ public class PingRequirementsVerifierInterCloudDirectTest {
 	public void testVerifyMaximumThresholdResponseRequirementNotPositive() { // measurement comes from qos monitor
 		final QoSInterDirectPingMeasurementResponseDTO response = new QoSInterDirectPingMeasurementResponseDTO();
 		final QoSInterDirectMeasurementResponseDTO measurement = new QoSInterDirectMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -220,7 +221,7 @@ public class PingRequirementsVerifierInterCloudDirectTest {
 	public void testVerifyMaximumThresholdResponseRequirementNotVerified() { // measurement comes from qos monitor
 		final QoSInterDirectPingMeasurementResponseDTO response = new QoSInterDirectPingMeasurementResponseDTO();
 		final QoSInterDirectMeasurementResponseDTO measurement = new QoSInterDirectMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -245,7 +246,7 @@ public class PingRequirementsVerifierInterCloudDirectTest {
 	public void testVerifyMaximumThresholdResponseRequirementVerified() { // measurement comes from qos monitor
 		final QoSInterDirectPingMeasurementResponseDTO response = new QoSInterDirectPingMeasurementResponseDTO();
 		final QoSInterDirectMeasurementResponseDTO measurement = new QoSInterDirectMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -270,7 +271,7 @@ public class PingRequirementsVerifierInterCloudDirectTest {
 	public void testVerifyAverageThresholdResponseRequirementInvalid() { // measurement comes from qos monitor
 		final QoSInterDirectPingMeasurementResponseDTO response = new QoSInterDirectPingMeasurementResponseDTO();
 		final QoSInterDirectMeasurementResponseDTO measurement = new QoSInterDirectMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -294,7 +295,7 @@ public class PingRequirementsVerifierInterCloudDirectTest {
 	public void testVerifyAverageThresholdResponseRequirementNotPositive() { // measurement comes from qos monitor
 		final QoSInterDirectPingMeasurementResponseDTO response = new QoSInterDirectPingMeasurementResponseDTO();
 		final QoSInterDirectMeasurementResponseDTO measurement = new QoSInterDirectMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -318,7 +319,7 @@ public class PingRequirementsVerifierInterCloudDirectTest {
 	public void testVerifyAverageThresholdResponseRequirementNotVerified() { // measurement comes from qos monitor
 		final QoSInterDirectPingMeasurementResponseDTO response = new QoSInterDirectPingMeasurementResponseDTO();
 		final QoSInterDirectMeasurementResponseDTO measurement = new QoSInterDirectMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -344,7 +345,7 @@ public class PingRequirementsVerifierInterCloudDirectTest {
 	public void testVerifyAverageThresholdResponseRequirementVerified() { // measurement comes from qos monitor
 		final QoSInterDirectPingMeasurementResponseDTO response = new QoSInterDirectPingMeasurementResponseDTO();
 		final QoSInterDirectMeasurementResponseDTO measurement = new QoSInterDirectMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -370,7 +371,7 @@ public class PingRequirementsVerifierInterCloudDirectTest {
 	public void testVerifyJitterThresholdResponseRequirementInvalid() { // measurement comes from qos monitor
 		final QoSInterDirectPingMeasurementResponseDTO response = new QoSInterDirectPingMeasurementResponseDTO();
 		final QoSInterDirectMeasurementResponseDTO measurement = new QoSInterDirectMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -394,7 +395,7 @@ public class PingRequirementsVerifierInterCloudDirectTest {
 	public void testVerifyJitterThresholdResponseRequirementNegative() { // measurement comes from qos monitor
 		final QoSInterDirectPingMeasurementResponseDTO response = new QoSInterDirectPingMeasurementResponseDTO();
 		final QoSInterDirectMeasurementResponseDTO measurement = new QoSInterDirectMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -418,7 +419,7 @@ public class PingRequirementsVerifierInterCloudDirectTest {
 	public void testVerifyJitterThresholdResponseRequirementNotVerified() { // measurement comes from qos monitor
 		final QoSInterDirectPingMeasurementResponseDTO response = new QoSInterDirectPingMeasurementResponseDTO();
 		final QoSInterDirectMeasurementResponseDTO measurement = new QoSInterDirectMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -444,7 +445,7 @@ public class PingRequirementsVerifierInterCloudDirectTest {
 	public void testVerifyJitterThresholdResponseRequirementVerified() { // measurement comes from qos monitor
 		final QoSInterDirectPingMeasurementResponseDTO response = new QoSInterDirectPingMeasurementResponseDTO();
 		final QoSInterDirectMeasurementResponseDTO measurement = new QoSInterDirectMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -470,7 +471,7 @@ public class PingRequirementsVerifierInterCloudDirectTest {
 	public void testVerifyRecentPacketLossRequirementInvalid() { // measurement comes from qos monitor
 		final QoSInterDirectPingMeasurementResponseDTO response = new QoSInterDirectPingMeasurementResponseDTO();
 		final QoSInterDirectMeasurementResponseDTO measurement = new QoSInterDirectMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -495,7 +496,7 @@ public class PingRequirementsVerifierInterCloudDirectTest {
 	public void testVerifyRecentPacketLossRequirementNegative() { // measurement comes from qos monitor
 		final QoSInterDirectPingMeasurementResponseDTO response = new QoSInterDirectPingMeasurementResponseDTO();
 		final QoSInterDirectMeasurementResponseDTO measurement = new QoSInterDirectMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -520,7 +521,7 @@ public class PingRequirementsVerifierInterCloudDirectTest {
 	public void testVerifyRecentPacketLossRequirementNotVerified() { // measurement comes from qos monitor
 		final QoSInterDirectPingMeasurementResponseDTO response = new QoSInterDirectPingMeasurementResponseDTO();
 		final QoSInterDirectMeasurementResponseDTO measurement = new QoSInterDirectMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -547,7 +548,7 @@ public class PingRequirementsVerifierInterCloudDirectTest {
 	public void testVerifyRecentPacketLossRequirementVerified() { // measurement comes from qos monitor
 		final QoSInterDirectPingMeasurementResponseDTO response = new QoSInterDirectPingMeasurementResponseDTO();
 		final QoSInterDirectMeasurementResponseDTO measurement = new QoSInterDirectMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -574,7 +575,7 @@ public class PingRequirementsVerifierInterCloudDirectTest {
 	public void testVerifyPacketLossRequirementInvalid() { // measurement comes from qos monitor
 		final QoSInterDirectPingMeasurementResponseDTO response = new QoSInterDirectPingMeasurementResponseDTO();
 		final QoSInterDirectMeasurementResponseDTO measurement = new QoSInterDirectMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -599,7 +600,7 @@ public class PingRequirementsVerifierInterCloudDirectTest {
 	public void testVerifyPacketLossRequirementNegative() { // measurement comes from qos monitor
 		final QoSInterDirectPingMeasurementResponseDTO response = new QoSInterDirectPingMeasurementResponseDTO();
 		final QoSInterDirectMeasurementResponseDTO measurement = new QoSInterDirectMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -624,7 +625,7 @@ public class PingRequirementsVerifierInterCloudDirectTest {
 	public void testVerifyPacketLossRequirementNotVerified() { // measurement comes from qos monitor
 		final QoSInterDirectPingMeasurementResponseDTO response = new QoSInterDirectPingMeasurementResponseDTO();
 		final QoSInterDirectMeasurementResponseDTO measurement = new QoSInterDirectMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -651,7 +652,7 @@ public class PingRequirementsVerifierInterCloudDirectTest {
 	public void testVerifyPacketLossRequirementVerified() { // measurement comes from qos monitor
 		final QoSInterDirectPingMeasurementResponseDTO response = new QoSInterDirectPingMeasurementResponseDTO();
 		final QoSInterDirectMeasurementResponseDTO measurement = new QoSInterDirectMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);

@@ -669,7 +669,7 @@ public class DTOConverter {
 		Assert.notNull(responses, "Collection<RelayResponseDTO> is null.");
 		
 		final List<RelayRequestDTO> relayRequests = new ArrayList<>();
-		for (RelayResponseDTO relayResponseDTO : responses) {
+		for (final RelayResponseDTO relayResponseDTO : responses) {
 			relayRequests.add(convertRelayResponseDTOToRelayRequestDTO(relayResponseDTO));
 		}
 		return relayRequests;
@@ -746,7 +746,7 @@ public class DTOConverter {
 		pingMeasurementResponseDTO.setId(pingMeasurement.getId());
 		pingMeasurementResponseDTO.setMeasurement(measurementResponseDTO);
 		pingMeasurementResponseDTO.setAvailable(pingMeasurement.isAvailable());
-		pingMeasurementResponseDTO.setLastAccessAt(pingMeasurement.getLastAccessAt());
+		pingMeasurementResponseDTO.setLastAccessAt(Utilities.convertZonedDateTimeToUTCString(pingMeasurement.getLastAccessAt()));
 		pingMeasurementResponseDTO.setMinResponseTime(pingMeasurement.getMinResponseTime());
 		pingMeasurementResponseDTO.setMaxResponseTime(pingMeasurement.getMaxResponseTime());
 		pingMeasurementResponseDTO.setMeanResponseTimeWithTimeout(pingMeasurement.getMeanResponseTimeWithTimeout());
@@ -756,11 +756,11 @@ public class DTOConverter {
 		pingMeasurementResponseDTO.setLostPerMeasurementPercent(pingMeasurement.getLostPerMeasurementPercent());
 		pingMeasurementResponseDTO.setSent(pingMeasurement.getSent());
 		pingMeasurementResponseDTO.setReceived(pingMeasurement.getReceived());
-		pingMeasurementResponseDTO.setCountStartedAt(pingMeasurement.getCountStartedAt());
+		pingMeasurementResponseDTO.setCountStartedAt(Utilities.convertZonedDateTimeToUTCString(pingMeasurement.getCountStartedAt()));
 		pingMeasurementResponseDTO.setSentAll(pingMeasurement.getSentAll());
 		pingMeasurementResponseDTO.setReceivedAll(pingMeasurement.getReceivedAll());
-		pingMeasurementResponseDTO.setCreatedAt(pingMeasurement.getCreatedAt());
-		pingMeasurementResponseDTO.setUpdatedAt(pingMeasurement.getUpdatedAt());
+		pingMeasurementResponseDTO.setCreatedAt(Utilities.convertZonedDateTimeToUTCString(pingMeasurement.getCreatedAt()));
+		pingMeasurementResponseDTO.setUpdatedAt(Utilities.convertZonedDateTimeToUTCString(pingMeasurement.getUpdatedAt()));
 
 		return pingMeasurementResponseDTO;
 	}
@@ -788,9 +788,9 @@ public class DTOConverter {
 														convertCloudToCloudResponseDTO(measurement.getCloud()),
 														measurement.getAddress(),
 														measurement.getMeasurementType(),
-														measurement.getLastMeasurementAt(),
-														measurement.getCreatedAt(),
-														measurement.getUpdatedAt());
+														Utilities.convertZonedDateTimeToUTCString(measurement.getLastMeasurementAt()),
+														Utilities.convertZonedDateTimeToUTCString(measurement.getCreatedAt()),
+														Utilities.convertZonedDateTimeToUTCString(measurement.getUpdatedAt()));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -822,7 +822,8 @@ public class DTOConverter {
 		Assert.notNull(entry, "QoSInterRelayMeasurement is null");
 		
 		return new QoSInterRelayMeasurementResponseDTO(entry.getId(), convertCloudToCloudResponseDTO(entry.getCloud()), convertRelayToRelayResponseDTO(entry.getRelay()),
-													   entry.getMeasurementType(), entry.getStatus(), entry.getLastMeasurementAt(), entry.getCreatedAt(), entry.getUpdatedAt());
+													   entry.getMeasurementType(), entry.getStatus(), Utilities.convertZonedDateTimeToUTCString(entry.getLastMeasurementAt()),
+													   Utilities.convertZonedDateTimeToUTCString(entry.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -831,7 +832,7 @@ public class DTOConverter {
 		
 		return new QoSInterRelayEchoMeasurementResponseDTO(entry.getId(),
 														   convertQoSInterRelayMeasurementToQoSInterRelayMeasurementResponseDTO(entry.getMeasurement()),
-														   entry.getLastAccessAt(),
+														   Utilities.convertZonedDateTimeToUTCString(entry.getLastAccessAt()),
 														   entry.getMinResponseTime(),
 														   entry.getMaxResponseTime(),
 														   entry.getMeanResponseTimeWithTimeout(),
@@ -841,11 +842,11 @@ public class DTOConverter {
 														   entry.getLostPerMeasurementPercent(),
 														   entry.getSent(),
 														   entry.getReceived(),
-														   entry.getCountStartedAt(),
+														   Utilities.convertZonedDateTimeToUTCString(entry.getCountStartedAt()),
 														   entry.getSentAll(),
 														   entry.getReceivedAll(),
-														   entry.getCreatedAt(),
-														   entry.getUpdatedAt());
+														   Utilities.convertZonedDateTimeToUTCString(entry.getCreatedAt()),
+														   Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -865,7 +866,8 @@ public class DTOConverter {
 		Assert.notNull(entry, "QoSReservation is null");
 		
 		return new QoSReservationResponseDTO(entry.getId(), entry.getReservedProviderId(), entry.getReservedServiceId(), entry.getConsumerSystemName(), entry.getConsumerAddress(),
-											 entry.getConsumerPort(), entry.getReservedTo(), entry.isTemporaryLock(), entry.getCreatedAt(), entry.getUpdatedAt());
+											 entry.getConsumerPort(), Utilities.convertZonedDateTimeToUTCString(entry.getReservedTo()), entry.isTemporaryLock(),
+											 Utilities.convertZonedDateTimeToUTCString(entry.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));
 	}
 	
 	//-------------------------------------------------------------------------------------------------

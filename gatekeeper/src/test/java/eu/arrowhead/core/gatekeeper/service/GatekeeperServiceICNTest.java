@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.Relay;
@@ -1098,7 +1099,7 @@ public class GatekeeperServiceICNTest {
 		final QoSReservationResponseDTO reservationResponseDTO = new QoSReservationResponseDTO();
 		reservationResponseDTO.setReservedProviderId(resultDTO.getProvider().getId());
 		reservationResponseDTO.setReservedServiceId(resultDTO.getService().getId());
-		reservationResponseDTO.setReservedTo(ZonedDateTime.now().plusMinutes(15));
+		reservationResponseDTO.setReservedTo(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now().plusMinutes(15)));
 		
 		when(gatekeeperDriver.checkQoSEnabled()).thenReturn(true);
 		when(gatekeeperDriver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(orchestrationResponse);

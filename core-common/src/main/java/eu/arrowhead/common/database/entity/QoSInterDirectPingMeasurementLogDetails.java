@@ -85,6 +85,7 @@ public class QoSInterDirectPingMeasurementLogDetails {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	public long getId() { return id; }
 	public QoSInterDirectPingMeasurementLog getMeasurementLog() { return measurementLog; }
 	public int getMeasurementSequeneceNumber() { return measurementSequeneceNumber; }
 	public boolean isSuccessFlag() { return successFlag; }
@@ -96,8 +97,11 @@ public class QoSInterDirectPingMeasurementLogDetails {
 	public Integer getTtl() { return ttl; }
 	public Integer getDuration() { return duration; }
 	public ZonedDateTime getMeasuredAt() { return measuredAt; }
+	public ZonedDateTime getCreatedAt() { return createdAt; }
+	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
 	//-------------------------------------------------------------------------------------------------
+	public void setId(final long id) { this.id = id; }
 	public void setMeasurementLog(final QoSInterDirectPingMeasurementLog measurementLog) { this.measurementLog = measurementLog; }
 	public void setMeasurementSequeneceNumber(final int measurementSequeneceNumber) { this.measurementSequeneceNumber = measurementSequeneceNumber; }
 	public void setSuccessFlag(final boolean successFlag) { this.successFlag = successFlag; }
@@ -109,6 +113,7 @@ public class QoSInterDirectPingMeasurementLogDetails {
 	public void setTtl(final Integer ttl) { this.ttl = ttl; }
 	public void setDuration(final Integer duration) { this.duration = duration; }
 	public void setMeasuredAt(final ZonedDateTime measuredAt) { this.measuredAt = measuredAt; }
-
+	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
+	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 }
 

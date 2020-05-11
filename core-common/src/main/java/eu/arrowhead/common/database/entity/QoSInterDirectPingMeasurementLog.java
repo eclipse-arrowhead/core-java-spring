@@ -84,6 +84,7 @@ public class QoSInterDirectPingMeasurementLog {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	public long getId() { return id; }
 	public String getMeasuredSystemAddress() { return measuredSystemAddress; }
 	public boolean isAvailable() { return available; }
 	public Integer getMinResponseTime() { return minResponseTime; }
@@ -96,8 +97,11 @@ public class QoSInterDirectPingMeasurementLog {
 	public long getSent() { return sent; }
 	public long getReceived() { return received; }
 	public ZonedDateTime getMeasuredAt() { return measuredAt; }
+	public ZonedDateTime getCreatedAt() { return createdAt; }
+	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
 	//-------------------------------------------------------------------------------------------------
+	public void setId(final long id) { this.id = id; }
 	public void setMeasuredSystemAddress(final String measuredSystemAddress) { this.measuredSystemAddress = measuredSystemAddress; }
 	public void setAvailable(final boolean available) { this.available = available; }
 	public void setMinResponseTime(final Integer minResponseTime) { this.minResponseTime = minResponseTime; }
@@ -110,5 +114,6 @@ public class QoSInterDirectPingMeasurementLog {
 	public void setSent(final long sent) { this.sent = sent; }
 	public void setReceived(final long received) { this.received = received; }
 	public void setMeasuredAt(final ZonedDateTime measuredAt) { this.measuredAt = measuredAt; }
-
+	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
+	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }	
 }

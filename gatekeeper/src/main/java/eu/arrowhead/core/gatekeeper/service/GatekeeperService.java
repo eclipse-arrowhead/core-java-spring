@@ -847,7 +847,7 @@ public class GatekeeperService {
 		final ZonedDateTime now = ZonedDateTime.now();
 		
 		for (final QoSReservationResponseDTO reservation : qosReservations) {
-			if (reservation.getReservedTo().toEpochSecond() - now.toEpochSecond() > qosReservationPufferSeconds) {
+			if (Utilities.parseUTCStringToLocalZonedDateTime(reservation.getReservedTo()).toEpochSecond() - now.toEpochSecond() > qosReservationPufferSeconds) {
 				reservedProviderIdAndSystemIdPairs.add(reservation.getReservedProviderId() + "-" + reservation.getReservedServiceId());
 			}
 		}
