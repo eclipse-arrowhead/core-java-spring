@@ -46,7 +46,7 @@ public class RelayEchoMeasurementDetailsDTO implements Serializable {
 	public ZonedDateTime getMeasuredAt() { return measuredAt; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setMeasurementSequenceNumber(int measurementSequenceNumber) { this.measurementSequenceNumber = measurementSequenceNumber; }
+	public void setMeasurementSequenceNumber(final int measurementSequenceNumber) { this.measurementSequenceNumber = measurementSequenceNumber; }
 	public void setTimeoutFlag(final boolean timeoutFlag) { this.timeoutFlag = timeoutFlag; }	
 	public void setErrorMessage(final String errorMessage) { this.errorMessage = errorMessage; }
 	public void setThrowable(final String throwable) { this.throwable = throwable; }
