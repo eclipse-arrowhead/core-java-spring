@@ -30,9 +30,10 @@ public class MscvAccessControlFilter extends CoreSystemAccessControlFilter {
     //-------------------------------------------------------------------------------------------------
     @Override
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
-        if (request instanceof HttpServletRequest) {
-            log.debug("Checking access in MscvAccessControlFilter...");
-            try {
+        try {
+            if (request instanceof HttpServletRequest) {
+                log.debug("Checking access in MscvAccessControlFilter...");
+
                 final MultiReadRequestWrapper requestWrapper = new MultiReadRequestWrapper((HttpServletRequest) request);
                 final String requestTarget = Utilities.stripEndSlash(requestWrapper.getRequestURL().toString());
                 final String cloudCN = getServerCloudCN();
@@ -51,11 +52,12 @@ public class MscvAccessControlFilter extends CoreSystemAccessControlFilter {
 
                 log.debug("Using MultiReadRequestWrapper in the filter chain from now...");
                 chain.doFilter(requestWrapper, response);
-            } catch (final ArrowheadException ex) {
-                handleException(ex, response);
+
+            } else {
+                chain.doFilter(request, response);
             }
-        } else {
-            chain.doFilter(request, response);
+        } catch (final ArrowheadException ex) {
+            handleException(ex, response);
         }
     }
 

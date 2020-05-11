@@ -1,6 +1,12 @@
 package eu.arrowhead.core.mscv;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
 import eu.arrowhead.common.database.entity.mscv.Mip;
+import eu.arrowhead.common.database.entity.mscv.SshTarget;
 import eu.arrowhead.common.database.entity.mscv.VerificationEntry;
 import eu.arrowhead.common.database.entity.mscv.VerificationEntryList;
 import eu.arrowhead.common.database.entity.mscv.VerificationExecution;
@@ -11,11 +17,7 @@ import eu.arrowhead.common.database.view.mscv.VerificationExecutionView;
 import eu.arrowhead.common.database.view.mscv.VerificationExecutionViewImpl;
 import eu.arrowhead.common.database.view.mscv.VerificationListView;
 import eu.arrowhead.common.database.view.mscv.VerificationListViewImpl;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import eu.arrowhead.common.dto.shared.mscv.SshTargetDto;
 
 public class MscvDtoConverter {
     private MscvDtoConverter() { super(); }
@@ -44,5 +46,30 @@ public class MscvDtoConverter {
 
     public static VerificationExecutionView convert(final VerificationExecution execution) {
         return new VerificationExecutionViewImpl(execution);
+    }
+
+    public static SshTargetDto convert(SshTarget sshTarget) {
+        if (sshTarget == null) {
+            return null;
+        }
+        SshTargetDto sshTargetDto = new SshTargetDto();
+        sshTargetDto.setAddress(sshTarget.getAddress());
+        sshTargetDto.setPort(sshTarget.getPort());
+        sshTargetDto.setName(sshTarget.getName());
+        sshTargetDto.setOs(sshTarget.getOs());
+
+        return sshTargetDto;
+    }
+
+    public static SshTarget convert(SshTargetDto sshTargetDto) {
+        if (sshTargetDto == null) {
+            return null;
+        }
+        SshTarget sshTarget = new SshTarget();
+        sshTarget.setAddress(sshTargetDto.getAddress());
+        sshTarget.setPort(sshTargetDto.getPort());
+        sshTarget.setName(sshTargetDto.getName());
+        sshTarget.setOs(sshTargetDto.getOs());
+        return sshTarget;
     }
 }

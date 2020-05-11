@@ -1,4 +1,4 @@
-package eu.arrowhead.core.mscv.delegate;
+package eu.arrowhead.core.mscv.handlers;
 
 import java.net.SocketAddress;
 import java.security.KeyFactory;
@@ -39,7 +39,7 @@ public class DatabaseKeyVerifier extends AbstractHostKeyVerifier implements Serv
             final SshTarget target = findMatchingTarget(clientSession, remoteAddress);
 
             if (Objects.isNull(target.getAuthInfo())) {
-                logger.debug("{} was never verified ...", target);
+                logger.debug("SSH public key of {} was never verified ...", target);
                 return false;
             }
 
@@ -47,10 +47,10 @@ public class DatabaseKeyVerifier extends AbstractHostKeyVerifier implements Serv
             final PublicKey authInfo = keyFactory.generatePublic(keySpec);
 
             if (KeyUtils.compareKeys(authInfo, serverKey)) {
-                logger.debug("Successfully verified {}", target);
+                logger.debug("Successfully verified ssh public key of {}", target);
                 return true;
             } else {
-                logger.debug("Failed to verify {}", target);
+                logger.debug("Failed to verify ssh public key of {}", target);
                 return false;
             }
 

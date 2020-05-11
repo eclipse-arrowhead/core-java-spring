@@ -97,11 +97,11 @@ public class MscvDefaults {
 
         @Min(1)
         @Max(180)
-        private Long connectTimeout = 10L; // seconds
+        private Long connectTimeout = 30L; // seconds
 
         @Min(1)
         @Max(180)
-        private Long authTimeout = 10L; // seconds
+        private Long authTimeout = 30L; // seconds
 
         private String privateKeyFile = null;
         private String publicKeyFile = null;

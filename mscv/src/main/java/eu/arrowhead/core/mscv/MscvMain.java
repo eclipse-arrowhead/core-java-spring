@@ -10,9 +10,10 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.database.entity.mscv.Target;
 import eu.arrowhead.common.database.repository.RefreshableRepositoryImpl;
-import eu.arrowhead.core.mscv.delegate.UpdatingAcceptAllKeyVerifier;
-import eu.arrowhead.core.mscv.delegate.ExecutionHandler;
-import eu.arrowhead.core.mscv.delegate.ExecutionHandlerFactory;
+import eu.arrowhead.core.mscv.handlers.DatabaseKeyVerifier;
+import eu.arrowhead.core.mscv.handlers.ExecutionHandler;
+import eu.arrowhead.core.mscv.handlers.ExecutionHandlerFactory;
+import eu.arrowhead.core.mscv.security.MscvKeyPairProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.sshd.client.SshClient;
@@ -68,11 +69,13 @@ public class MscvMain {
     }
 
     @Bean(initMethod = "start", destroyMethod = "stop")
-    public SshClient sshClient(final UpdatingAcceptAllKeyVerifier keyVerifier,
+    public SshClient sshClient(final DatabaseKeyVerifier keyVerifier,
+                               final MscvKeyPairProvider keyPairProvider,
                                @Qualifier(MSCV_EXECUTOR_SERVICE) final ScheduledExecutorService executorService) {
         final SshClient sshClient = SshClient.setUpDefaultClient();
         // add any special configuration
         sshClient.setServerKeyVerifier(keyVerifier);
+        sshClient.setKeyIdentityProvider(keyPairProvider);
         sshClient.setScheduledExecutorService(executorService);
         logger.info("Created MINA SshClient: {}", sshClient.getVersion());
         return sshClient;

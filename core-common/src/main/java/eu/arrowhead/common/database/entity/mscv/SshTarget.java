@@ -21,7 +21,10 @@ public class SshTarget extends Target {
     @Column(nullable = false)
     private Integer port;
 
-    @Column(nullable = true)
+    @Column(nullable = false, length = 64)
+    private String username;
+
+    @Column(nullable = true, length = 512)
     private String authInfo;
 
     public SshTarget() { super(); }
@@ -32,10 +35,12 @@ public class SshTarget extends Target {
         this.port = port;
     }
 
-    public SshTarget(final Long id, final String name, final OS os, final String address, final Integer port) {
+    public SshTarget(final Long id, final String name, final OS os, final String address, final Integer port, final String username, final String authInfo) {
         super(id, name, os);
         this.address = address;
         this.port = port;
+        this.username = username;
+        this.authInfo = authInfo;
     }
 
     public String getAddress() {
@@ -60,6 +65,14 @@ public class SshTarget extends Target {
 
     public void setAuthInfo(final String authInfo) {
         this.authInfo = authInfo;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(final String username) {
+        this.username = username;
     }
 
     @Override

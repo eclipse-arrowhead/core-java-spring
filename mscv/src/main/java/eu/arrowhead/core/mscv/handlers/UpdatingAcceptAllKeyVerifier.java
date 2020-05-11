@@ -1,4 +1,4 @@
-package eu.arrowhead.core.mscv.delegate;
+package eu.arrowhead.core.mscv.handlers;
 
 import java.net.SocketAddress;
 import java.security.PublicKey;

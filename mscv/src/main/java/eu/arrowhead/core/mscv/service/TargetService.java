@@ -7,11 +7,12 @@ import eu.arrowhead.common.database.entity.mscv.Target;
 import eu.arrowhead.common.database.repository.mscv.SshTargetRepository;
 import eu.arrowhead.common.dto.shared.mscv.OS;
 import eu.arrowhead.common.dto.shared.mscv.SshTargetDto;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.mscv.MscvDefaults;
 import eu.arrowhead.core.mscv.Validation;
-import eu.arrowhead.core.mscv.delegate.ExecutionHandler;
-import eu.arrowhead.core.mscv.delegate.ExecutionHandlerFactory;
+import eu.arrowhead.core.mscv.handlers.ExecutionHandler;
+import eu.arrowhead.core.mscv.handlers.ExecutionHandlerFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +58,7 @@ public class TargetService {
     public void checkSupported(final Class<?> cls) {
         logger.debug("checkSupported({}) started", cls);
         Assert.notNull(cls, "Argument must not be null");
-        if (isSupported(cls)) {
+        if (!isSupported(cls)) {
             throw new IllegalArgumentException(cls + " is not supported");
         }
     }
@@ -65,7 +66,7 @@ public class TargetService {
     public boolean isSupported(final Class<?> cls) {
         logger.debug("isSupported({}) started", cls);
         Assert.notNull(cls, "Argument must not be null");
-        return cls.isAssignableFrom(SshTargetDto.class) || cls.isAssignableFrom(SshTarget.class);
+        return SshTargetDto.class.isAssignableFrom(cls) || SshTarget.class.isAssignableFrom(cls);
     }
 
     @Transactional
@@ -73,7 +74,13 @@ public class TargetService {
         logger.debug("findOrCreateTarget({}) started", target);
         Assert.notNull(target, "Argument must not be null");
         checkSupported(target.getClass());
-        final var sshTarget = (SshTarget) target;
+        return findOrCreate((SshTarget) target);
+    }
+
+    @Transactional
+    public SshTarget findOrCreate(final SshTarget sshTarget) {
+        logger.debug("findOrCreateTarget({}) started", sshTarget);
+        Assert.notNull(sshTarget, "Argument must not be null");
         return findOrCreate(sshTarget.getName(), sshTarget.getOs(), sshTarget.getAddress(), sshTarget.getPort());
     }
 
@@ -82,8 +89,8 @@ public class TargetService {
         logger.debug("findOrCreateTarget({},{},{},{}) started", name, os, address, port);
         Assert.hasText(name, NAME_NULL_ERROR_MESSAGE);
         Assert.notNull(os, OS_NULL_ERROR_MESSAGE);
-        validation.verifyAddress(address,"MSCV");
-        validation.verifyPort(port,"MSCV");
+        validation.verifyAddress(address, "MSCV");
+        validation.verifyPort(port, "MSCV");
 
         final SshTarget returnValue;
         final Optional<SshTarget> existingTarget = find(address, port);
@@ -134,7 +141,7 @@ public class TargetService {
         return targetRepo.saveAndFlush(oldTarget);
     }
 
-    public void login(final Target target, final String username, final String password) throws MscvException {
+    public void login(final Target target, final String username, final String password) throws MscvException, ArrowheadException {
         logger.debug("login({},{},{}) started", target, username, "(password)");
         Assert.notNull(target, TARGET_NULL_ERROR_MESSAGE);
         Assert.notNull(username, USERNAME_NULL_ERROR_MESSAGE);
@@ -142,9 +149,22 @@ public class TargetService {
         checkSupported(target.getClass());
         final Optional<ExecutionHandler> optionalHandler = executionHandlerFactory.find(target);
         final ExecutionHandler handler = optionalHandler.orElseThrow(() -> new InvalidParameterException("The type of target is not supported"));
-        handler.login(target, username, password);
-        //final ExecutionHandler<SshTarget> executionHandler = executionHandlerFactory.find((SshTarget)target);
-        //sshTargetHandler.login((SshTarget) target, username, password);
+
+        try {
+            handler.login(target, username, password);
+        } catch (final Exception e) {
+            throw new MscvException(e.getMessage(), e);
+        }
+    }
+
+    public boolean verifyLogin(final Target target) {
+        logger.debug("verifyLogin({}) started", target);
+        Assert.notNull(target, TARGET_NULL_ERROR_MESSAGE);
+
+        checkSupported(target.getClass());
+        final Optional<ExecutionHandler> optionalHandler = executionHandlerFactory.find(target);
+        final ExecutionHandler handler = optionalHandler.orElseThrow(() -> new InvalidParameterException("The type of target is not supported"));
+        return handler.verifyPasswordlessLogin(target);
     }
 
     @Transactional

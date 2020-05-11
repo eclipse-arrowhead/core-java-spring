@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS `mscv_ssh_target`
     `id`        bigint(20) PRIMARY KEY AUTO_INCREMENT,
     `address`   varchar(255) NOT NULL,
     `port`      integer      NOT NULL,
-    `authInfo`  varchar(255),
+    `username`   varchar(64),
+    `auth_info`  varchar(255),
     CONSTRAINT `fk_parent_target` FOREIGN KEY (`id`) REFERENCES `mscv_target` (`id`) ON DELETE CASCADE,
     UNIQUE KEY `u_address_port` (`address`, `port`)
 ) ENGINE = InnoDB

@@ -8,11 +8,15 @@ import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.database.entity.mscv.SshTarget;
+import eu.arrowhead.common.database.entity.mscv.Target;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.mscv.OS;
 import eu.arrowhead.common.dto.shared.mscv.SshTargetDto;
+import eu.arrowhead.common.dto.shared.mscv.TargetDto;
 import eu.arrowhead.common.dto.shared.mscv.TargetListResponseDTO;
 import eu.arrowhead.common.dto.shared.mscv.TargetLoginRequest;
+import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.core.mscv.MscvDtoConverter;
 import eu.arrowhead.core.mscv.MscvUtilities;
 import eu.arrowhead.core.mscv.Validation;
 import eu.arrowhead.core.mscv.service.MscvException;
@@ -96,8 +100,11 @@ public class TargetMgmtController {
 
     private static final String LOGIN_TARGET_URI = TARGET_URI + OP_MSCV_LOGIN_URI;
     private static final String LOGIN_TARGET_DESCRIPTION = "Instruct MSCV to remote login to a target with a username and password";
-    private static final String LOGIN_TARGET_SUCCESS = "MSCV target login success";
+     private static final String LOGIN_TARGET_SUCCESS = "MSCV target login success";
     private static final String LOGIN_TARGET_BAD_REQUEST = "Unable to login to MSCV target";
+
+    private static final String VERIFY_LOGIN_TARGET_URI = TARGET_URI + "/verify";
+    private static final String VERIFY_LOGIN_TARGET_DESCRIPTION = "Instruct MSCV to remote login to a target with a username and password";
 
     private final Logger logger = LogManager.getLogger();
     private final Validation validation = new Validation();
@@ -173,14 +180,15 @@ public class TargetMgmtController {
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField,
             @ApiParam(value = "Filter mode. Match all or any filter.")
             @RequestParam(name = "mode", defaultValue = "ANY") final ExampleMatcher.MatchMode mode,
-            @ApiParam(value = "Filter for name. Partial match ignoring case.")
+            @ApiParam(value = "Filter for name. Partial match ignoring case.", example = "Sensor Aggregator")
             @RequestParam(name = PARAMETER_NAME, required = false) final String name,
-            @ApiParam(value = "Filter for operating system.")
+            @ApiParam(value = "Filter for operating system.", example = "LINUX")
             @RequestParam(name = PARAMETER_OS, required = false) final OS os,
-            @ApiParam(value = "Filter for address. Partial match ignoring case.")
+            @ApiParam(value = "Filter for address. Partial match ignoring case.", example = "sensor-aggregator-")
             @RequestParam(name = PARAMETER_ADDRESS, required = false) final String address,
-            @ApiParam(value = "Filter for port.")
-            @RequestParam(name = PARAMETER_PORT, required = false) final Integer port) {
+            @ApiParam(value = "Filter for port.", example = "22")
+            @RequestParam(name = PARAMETER_PORT, required = false) final Integer port)
+    {
         logger.debug("readAll started ...");
         final CoreUtilities.ValidatedPageParams pageParameters = CoreUtilities
                 .validatePageParameters(page, size, direction, createOrigin(READ_ALL_TARGET_URI));
@@ -250,11 +258,40 @@ public class TargetMgmtController {
     })
     @PostMapping(LOGIN_TARGET_URI)
     @ResponseBody
-    public void login(@RequestBody final TargetLoginRequest request) throws MscvException {
+    public void login(@RequestBody final TargetLoginRequest request) throws MscvException, ArrowheadException {
         logger.debug("login started ...");
-        MscvUtilities.performLogin(targetService, request, createOrigin(LOGIN_TARGET_URI));
+        final String origin = createOrigin(LOGIN_TARGET_URI);
+        validation.verify(request, origin);
+
+        SshTarget sshTarget = MscvDtoConverter.convert(request.getTarget());
+        sshTarget = targetService.findOrCreate(sshTarget);
+
+        final MscvUtilities.Tuple2<String, String> credentials = MscvUtilities.decodeCredentials(request.getCredentials(), origin);
+        targetService.login(sshTarget, credentials.getT1(), credentials.getT2());
     }
 
+    //-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = VERIFY_LOGIN_TARGET_DESCRIPTION, response = Boolean.class,
+            tags = {CoreCommonConstants.SWAGGER_TAG_MGMT, SWAGGER_TAG_TARGET})
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_OK, message = LOGIN_TARGET_SUCCESS, response = Boolean.class),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = LOGIN_TARGET_BAD_REQUEST, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = LOGIN_TARGET_NOT_FOUND, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response = ErrorMessageDTO.class)
+    })
+    @PostMapping(VERIFY_LOGIN_TARGET_URI)
+    @ResponseBody
+    public boolean verifyLogin(@RequestBody final TargetDto dto) throws ArrowheadException {
+        logger.debug("verifyLogin started ...");
+        final String origin = createOrigin(VERIFY_LOGIN_TARGET_URI);
+        validation.verify(dto, origin);
+
+        final Optional<Target> optionalTarget = targetService.find(dto.getName(), dto.getOs());
+        final Target target = optionalTarget.orElseThrow(notFoundException(LOGIN_TARGET_NOT_FOUND, origin));
+
+        return targetService.verifyLogin(target);
+    }
     private String createOrigin(final String path) {
         return CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI + path;
     }

@@ -6,16 +6,16 @@ import java.util.StringJoiner;
 
 public class TargetLoginRequest implements Serializable {
 
-    private TargetDto target;
+    private SshTargetDto target;
     private String credentials;
 
     public TargetLoginRequest() { super(); }
 
-    public TargetDto getTarget() {
+    public SshTargetDto getTarget() {
         return target;
     }
 
-    public void setTarget(final TargetDto target) {
+    public void setTarget(final SshTargetDto target) {
         this.target = target;
     }
 

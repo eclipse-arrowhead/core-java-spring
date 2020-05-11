@@ -86,10 +86,10 @@ public class KeyPairFileStorage {
     }
 
     public PublicKeyResponse createPublicKeyResponse() throws IOException, InvalidKeySpecException {
-        return new PublicKeyResponse(getPublicKeyAsBase64(), getPublicKeyAsSshString(), getPublicKeyAlgorithm(), getPublicKeyFormat());
+        return new PublicKeyResponse(getPublicKeyAsBase64(), getPublicKeyAsSshIdentityString(), getPublicKeyAlgorithm(), getPublicKeyFormat());
     }
 
-    public String getPublicKeyAsSshString() throws IOException, InvalidKeySpecException {
+    public String getPublicKeyAsSshIdentityString() throws IOException, InvalidKeySpecException {
         return keyPairHandler.encodePublicKeySSH(publicKey, "mscv@" + coreProperties.getCoreSystemDomainName());
     }
 
@@ -111,6 +111,10 @@ public class KeyPairFileStorage {
 
     public PrivateKey getPrivateKey() {
         return privateKey;
+    }
+
+    protected KeyPair getKeyPair() {
+        return new KeyPair(publicKey, privateKey);
     }
 
     private void setAndWriteKeyPair(final KeyPair keyPair, final File publicKeyPath, final File privateKeyPath, final String password)

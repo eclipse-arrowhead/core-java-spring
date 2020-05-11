@@ -2,10 +2,12 @@ package eu.arrowhead.core.mscv.controller;
 
 import java.io.IOException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Optional;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.database.entity.mscv.Target;
 import eu.arrowhead.common.database.view.mscv.VerificationExecutionView;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.mscv.PublicKeyResponse;
@@ -40,6 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
 import static eu.arrowhead.common.CommonConstants.OP_MSCV_EXECUTE_URI;
 import static eu.arrowhead.common.CommonConstants.OP_MSCV_LOGIN_URI;
 import static eu.arrowhead.common.CommonConstants.OP_MSCV_PUBLIC_KEY_URI;
+import static eu.arrowhead.core.mscv.MscvUtilities.notFoundException;
 import static eu.arrowhead.core.mscv.Validation.LOGIN_TARGET_NOT_FOUND;
 
 @Api(tags = {CoreCommonConstants.SWAGGER_TAG_ALL})
@@ -118,7 +121,14 @@ public class ExecutionController {
     @ResponseBody
     public void login(@RequestBody final TargetLoginRequest request) throws MscvException {
         logger.debug("login started ...");
-        MscvUtilities.performLogin(targetService, request, createOrigin(OP_MSCV_LOGIN_URI));
+        final String origin = createOrigin(OP_MSCV_LOGIN_URI);
+        validation.verify(request, origin);
+
+        final MscvUtilities.Tuple2<String, String> credentials = MscvUtilities.decodeCredentials(request.getCredentials(), origin);
+
+        final Optional<Target> optionalSshTarget = targetService.find(request.getTarget().getName(), request.getTarget().getOs());
+        final Target target = optionalSshTarget.orElseThrow(notFoundException(LOGIN_TARGET_NOT_FOUND, origin));
+        targetService.login(target, credentials.getT1(), credentials.getT2());
     }
 
     //-------------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-package eu.arrowhead.core.mscv.delegate;
+package eu.arrowhead.core.mscv.handlers;
 
 import java.util.HashMap;
 import java.util.Map;
