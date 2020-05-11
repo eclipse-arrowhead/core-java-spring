@@ -76,7 +76,6 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.service.PingService;
-import eu.arrowhead.core.qos.service.RelayEchoService;
 import eu.arrowhead.core.qos.service.RelayTestService;
 
 @RunWith(SpringRunner.class)
@@ -117,9 +116,6 @@ public class QoSMonitorControllerTest {
 	
 	@MockBean(name = "mockPingService")
 	private PingService pingService;
-	
-	@MockBean(name = "mockRelayEchoService")
-	private RelayEchoService relayEchoService;
 	
 	@MockBean(name = "mockRelayTestService")
 	private RelayTestService relayTestService;
@@ -873,7 +869,7 @@ public class QoSMonitorControllerTest {
 		requestDTO.setName("test-n");
 		
 		final QoSInterRelayEchoMeasurementListResponseDTO responseDTO = getInterRelayEchoMeasurementListResponseDTOForTest(3);
-		when(relayEchoService.getInterRelayEchoMeasurements(any())).thenReturn(responseDTO);
+		when(relayTestService.getInterRelayEchoMeasurements(any())).thenReturn(responseDTO);
 		
 		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT)
 									     	   .contentType(MediaType.APPLICATION_JSON)
@@ -894,7 +890,7 @@ public class QoSMonitorControllerTest {
 		requestDTO.setName("test-n");
 		
 		final QoSInterRelayEchoMeasurementListResponseDTO responseDTO = getInterRelayEchoMeasurementListResponseDTOForTest(3);
-		when(relayEchoService.getInterRelayEchoMeasurements(any())).thenReturn(responseDTO);
+		when(relayTestService.getInterRelayEchoMeasurements(any())).thenReturn(responseDTO);
 		
 		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT)
 									     	   .contentType(MediaType.APPLICATION_JSON)
@@ -916,7 +912,7 @@ public class QoSMonitorControllerTest {
 		requestDTO.setName(null);
 		
 		final QoSInterRelayEchoMeasurementListResponseDTO responseDTO = getInterRelayEchoMeasurementListResponseDTOForTest(3);
-		when(relayEchoService.getInterRelayEchoMeasurements(any())).thenReturn(responseDTO);
+		when(relayTestService.getInterRelayEchoMeasurements(any())).thenReturn(responseDTO);
 		
 		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT)
 									     	   .contentType(MediaType.APPLICATION_JSON)

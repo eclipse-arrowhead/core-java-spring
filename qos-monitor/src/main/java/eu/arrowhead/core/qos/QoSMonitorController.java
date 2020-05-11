@@ -54,7 +54,6 @@ import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.service.PingService;
-import eu.arrowhead.core.qos.service.RelayEchoService;
 import eu.arrowhead.core.qos.service.RelayTestService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -140,9 +139,6 @@ public class QoSMonitorController {
 	
 	@Autowired
 	private PingService pingService;
-	
-	@Autowired
-	private RelayEchoService relayEchoService;
 	
 	@Autowired
 	private RelayTestService relayTestService;
@@ -399,7 +395,7 @@ public class QoSMonitorController {
 		logger.debug("New queryInterRelayEchoMeasurementByCloud request recieved");
 		validateCloudRequest(request, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT);
 		
-		final QoSInterRelayEchoMeasurementListResponseDTO response = relayEchoService.getInterRelayEchoMeasurements(request);
+		final QoSInterRelayEchoMeasurementListResponseDTO response = relayTestService.getInterRelayEchoMeasurements(request);
 		logger.debug("Measurement retrieved successfully");
 		return response;
 	}
