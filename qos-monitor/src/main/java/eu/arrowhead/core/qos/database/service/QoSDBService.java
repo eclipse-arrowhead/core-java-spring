@@ -1053,6 +1053,7 @@ public class QoSDBService {
 		relayEchoMeasurement.setJitterWithTimeout(calculations.getJitterWithTimeout());
 		relayEchoMeasurement.setLostPerMeasurementPercent(calculations.getLostPerMeasurementPercent());
 		relayEchoMeasurement.setCountStartedAt(relayEchoMeasurement.getCountStartedAt());
+		relayEchoMeasurement.setLastAccessAt(aroundNow);
 		relayEchoMeasurement.setSent(relayEchoMeasurement.getSent() + calculations.getSentInThisTest());
 		relayEchoMeasurement.setSentAll(relayEchoMeasurement.getSentAll() + calculations.getSentInThisTest());
 		relayEchoMeasurement.setReceived(relayEchoMeasurement.getReceived() + calculations.getReceivedInThisTest());
