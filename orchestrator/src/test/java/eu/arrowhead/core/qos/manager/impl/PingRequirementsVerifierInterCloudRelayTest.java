@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementListResponseDTO;
@@ -131,7 +132,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		
 		final QoSInterRelayEchoMeasurementResponseDTO response = new QoSInterRelayEchoMeasurementResponseDTO();
 		final QoSInterRelayMeasurementResponseDTO measurement = new QoSInterRelayMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now().minusHours(2));
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now().minusHours(2)));
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		when(interRelayEchoMeasurementCache.get(any())).thenReturn(new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1));

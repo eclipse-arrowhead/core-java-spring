@@ -1,6 +1,6 @@
 package eu.arrowhead.core.gatekeeper.service;
 
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -43,8 +43,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.Relay;
-import eu.arrowhead.common.dto.internal.CloudAccessResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
+import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.ErrorWrapperDTO;
 import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClient;
 
@@ -82,9 +82,8 @@ public class AccessTypesCollectionRequestExecutorTests {
 		
 		testingObject.execute();
 		
-		final CloudAccessResponseDTO cloudAccessResponseDTO = (CloudAccessResponseDTO) queue.take();
-		assertNull(cloudAccessResponseDTO.getCloudName());
-		assertNull(cloudAccessResponseDTO.getCloudOperator());
+		ErrorWrapperDTO response = queue.take();
+		assertTrue(response instanceof ErrorMessageDTO);
 	}
 
 	//=================================================================================================

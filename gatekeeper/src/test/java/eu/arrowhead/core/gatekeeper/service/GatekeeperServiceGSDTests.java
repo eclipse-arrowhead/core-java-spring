@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.dto.internal.DTOConverter;
@@ -455,7 +456,7 @@ public class GatekeeperServiceGSDTests {
 		final QoSReservationResponseDTO reservationResponseDTO = new QoSReservationResponseDTO();
 		reservationResponseDTO.setReservedProviderId(serviceRegistryResponseDTO1.getId());
 		reservationResponseDTO.setReservedServiceId(serviceRegistryResponseDTO1.getServiceDefinition().getId());
-		reservationResponseDTO.setReservedTo(ZonedDateTime.now().plusMinutes(15));
+		reservationResponseDTO.setReservedTo(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now().plusMinutes(15)));
 		
 		final ServiceQueryResultDTO srQueryResult = new ServiceQueryResultDTO();
 		srQueryResult.setServiceQueryData(List.of(serviceRegistryResponseDTO1, serviceRegistryResponseDTO2));
@@ -505,7 +506,7 @@ public class GatekeeperServiceGSDTests {
 		final QoSReservationResponseDTO reservationResponseDTO = new QoSReservationResponseDTO();
 		reservationResponseDTO.setReservedProviderId(serviceRegistryResponseDTO1.getId());
 		reservationResponseDTO.setReservedServiceId(serviceRegistryResponseDTO1.getServiceDefinition().getId());
-		reservationResponseDTO.setReservedTo(ZonedDateTime.now().plusMinutes(15));
+		reservationResponseDTO.setReservedTo(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now().plusMinutes(15)));
 		
 		final QoSIntraPingMeasurementResponseDTO measurementResponseDTO = new QoSIntraPingMeasurementResponseDTO();
 		measurementResponseDTO.setId(1L);

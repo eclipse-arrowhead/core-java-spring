@@ -1,7 +1,6 @@
 package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
-import java.time.ZonedDateTime;
 
 public class QoSReservationResponseDTO implements Serializable {
 
@@ -16,10 +15,10 @@ public class QoSReservationResponseDTO implements Serializable {
 	private String consumerSystemName;
 	private String consumerAddress;
 	private int consumerPort;	
-	private ZonedDateTime reservedTo;	
+	private String reservedTo;	
 	private boolean temporaryLock;
-	private ZonedDateTime createdAt;
-	private ZonedDateTime updatedAt;
+	private String createdAt;
+	private String updatedAt;
 	
 	//=================================================================================================
 	// methods
@@ -29,7 +28,7 @@ public class QoSReservationResponseDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	public QoSReservationResponseDTO(final long id, final long reservedProviderId, final long reservedServiceId, final String consumerSystemName, final String consumerAddress,
-									 final int consumerPort, final ZonedDateTime reservedTo, final boolean temporaryLock, final ZonedDateTime createdAt, final ZonedDateTime updatedAt) {
+									 final int consumerPort, final String reservedTo, final boolean temporaryLock, final String createdAt, final String updatedAt) {
 		this.id = id;
 		this.reservedProviderId = reservedProviderId;
 		this.reservedServiceId = reservedServiceId;
@@ -49,10 +48,10 @@ public class QoSReservationResponseDTO implements Serializable {
 	public String getConsumerSystemName() { return consumerSystemName; }
 	public String getConsumerAddress() { return consumerAddress; }
 	public int getConsumerPort() { return consumerPort; }
-	public ZonedDateTime getReservedTo() { return reservedTo; }
+	public String getReservedTo() { return reservedTo; }
 	public boolean isTemporaryLock() { return temporaryLock; }
-	public ZonedDateTime getCreatedAt() { return createdAt; }
-	public ZonedDateTime getUpdatedAt() { return updatedAt; }
+	public String getCreatedAt() { return createdAt; }
+	public String getUpdatedAt() { return updatedAt; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
@@ -61,8 +60,8 @@ public class QoSReservationResponseDTO implements Serializable {
 	public void setConsumerSystemName(final String consumerSystemName) { this.consumerSystemName = consumerSystemName; }
 	public void setConsumerAddress(final String consumerAddress) { this.consumerAddress = consumerAddress; }
 	public void setConsumerPort(final int consumerPort) { this.consumerPort = consumerPort; }
-	public void setReservedTo(final ZonedDateTime reservedTo) { this.reservedTo = reservedTo; }
+	public void setReservedTo(final String reservedTo) { this.reservedTo = reservedTo; }
 	public void setTemporaryLock(final boolean temporaryLock) { this.temporaryLock = temporaryLock; }
-	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
-	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }	
+	public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
+	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }	
 }

@@ -20,6 +20,7 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.dto.internal.CloudAccessResponseDTO;
+import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.ErrorWrapperDTO;
 import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClient;
 
@@ -63,7 +64,7 @@ public class AccessTypesCollectionRequestExecutor {
 				logger.error("AccessTypeCollectionTask execution rejected at {}", ZonedDateTime.now());
 				
 				// adding empty responseDTO into the blocking queue in order to having exactly as many response as request was sent
-				queue.add(new CloudAccessResponseDTO());
+				queue.add(new ErrorMessageDTO());
 			}
 		}
 		

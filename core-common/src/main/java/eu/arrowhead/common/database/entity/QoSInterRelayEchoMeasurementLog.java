@@ -76,6 +76,7 @@ public class QoSInterRelayEchoMeasurementLog {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	public long getId() { return id; }
 	public QoSInterRelayMeasurement getMeasurement() { return measurement; }
 	public int getMeasurementSequeneceNumber() { return measurementSequeneceNumber; }
 	public boolean isTimeoutFlag() { return timeoutFlag; }
@@ -84,8 +85,11 @@ public class QoSInterRelayEchoMeasurementLog {
 	public Integer getSize() { return size; }
 	public Integer getDuration() { return duration; }
 	public ZonedDateTime getMeasuredAt() { return measuredAt; }
+	public ZonedDateTime getCreatedAt() { return createdAt; }
+	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
 	//-------------------------------------------------------------------------------------------------
+	public void setId(final long id) { this.id = id; }
 	public void setMeasurement(final QoSInterRelayMeasurement measurement) { this.measurement = measurement; }
 	public void setMeasurementSequeneceNumber(final int measurementSequeneceNumber) { this.measurementSequeneceNumber = measurementSequeneceNumber; }
 	public void setTimeoutFlag(final boolean timeoutFlag) { this.timeoutFlag = timeoutFlag; }
@@ -94,4 +98,6 @@ public class QoSInterRelayEchoMeasurementLog {
 	public void setSize(final Integer size) { this.size = size; }
 	public void setDuration(final Integer duration) { this.duration = duration; }
 	public void setMeasuredAt(final ZonedDateTime measuredAt) { this.measuredAt = measuredAt; }
+	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
+	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }	
 }
