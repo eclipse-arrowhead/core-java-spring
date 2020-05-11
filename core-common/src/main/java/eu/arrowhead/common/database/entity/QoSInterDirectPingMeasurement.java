@@ -137,5 +137,5 @@ public class QoSInterDirectPingMeasurement {
 	public void setSentAll(final long sentAll) { this.sentAll = sentAll; }
 	public void setReceivedAll(final long receivedAll) { this.receivedAll = receivedAll; }
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
-	public void setUpdatedAt(final ZonedDateTime updatedAt) {	this.updatedAt = updatedAt; }
+	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

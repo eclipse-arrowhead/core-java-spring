@@ -48,7 +48,7 @@ public enum CoreSystemService {
 	// CA services
 	CERTIFICATE_AUTHORITY_SIGN_SERVICE(CommonConstants.CORE_SERVICE_CERTIFICATE_AUTHORITY_SIGN, CommonConstants.CERTIFICATE_AUTHRORITY_URI + CommonConstants.OP_CA_SIGN_CERTIFICATE_URI),
 
-	//Choreographer services
+	// Choreographer services
 	CHOREOGRAPHER_SERVICE(CommonConstants.CORE_SERVICE_CHOREOGRAPHER_PROCESS, CommonConstants.CHOREOGRAPHER_URI +  CommonConstants.OP_CHOREOGRAPHER_NOTIFY_STEP_DONE),
 	
 	// QoS Monitor services
