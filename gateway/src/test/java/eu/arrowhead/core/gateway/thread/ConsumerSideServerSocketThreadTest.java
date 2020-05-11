@@ -55,6 +55,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.relay.gateway.GatewayRelayClient;
 
 @RunWith(SpringRunner.class)
@@ -166,7 +167,7 @@ public class ConsumerSideServerSocketThreadTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Test
+	@Test(expected = ArrowheadException.class)
 	public void testInitSSLSocketInitializationFailed() {
 		Assert.assertFalse(testingObject.isInitialized());
 		
