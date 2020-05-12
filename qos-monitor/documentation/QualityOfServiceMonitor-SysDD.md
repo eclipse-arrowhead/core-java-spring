@@ -108,6 +108,9 @@ _Activity diagram: Intra-Cloud Ping Measurement Task:_
 | Preconditions | Gatekeeper has to be available. |
 | Main Flow | * Inter-Cloud Direct Ping Measurement Task scheduled <br/>* Task queries Gatekeeper for clouds with direct access and select one to measure its systems <br/>* Stored measurement details are provided upon request  |
 
+_Activity diagram: Intra-Cloud Direct Ping Measurement Task:_
+![Alt text](figures/InterCloudDirectPingMeasurementTask.png)
+
 ### Use Case: Inter-Cloud Relay Echo Measurement Service <a name="inter_relay_echo_service_use_case" />
 
 | Name | Description |
