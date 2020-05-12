@@ -1,7 +1,10 @@
 package eu.arrowhead.core.qos;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -11,12 +14,35 @@ import eu.arrowhead.common.ApplicationInitListener;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.core.CoreSystemService;
 
 @Component
 public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
+	
+	//=================================================================================================
+	// members
+	
+	@Value(CoreCommonConstants.$QOS_IS_GATEKEEPER_PRESENT_WD)
+	private boolean gatekeeperIsPresent;
 
 	//=================================================================================================
 	// assistant methods
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
+		final List<CoreSystemService> result = new ArrayList<>(5);
+		
+		if (gatekeeperIsPresent) {
+			result.add(CoreSystemService.GATEKEEPER_PULL_CLOUDS); 
+			result.add(CoreSystemService.GATEKEEPER_COLLECT_ACCESS_TYPES);
+			result.add(CoreSystemService.GATEKEEPER_COLLECT_SYSTEM_ADDRESSES);
+			result.add(CoreSystemService.GATEKEEPER_RELAY_TEST_SERVICE);
+			result.add(CoreSystemService.GATEKEEPER_GET_CLOUD_SERVICE);
+		}
+
+		return result;
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Override

@@ -1,5 +1,7 @@
 package eu.arrowhead.core.qos.quartz.task;
 
+import java.util.Properties;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.quartz.SimpleTrigger;
@@ -30,6 +32,7 @@ public class ReservationCheckTaskConfig {
 	private int interval;
 	
 	private static final int SCHEDULER_DELAY = 19;
+	private static final String NUM_OF_THREADS = "1";
 	
 	private static final String NAME_OF_TRIGGER = "Services_Reservation_Check_Task_Trigger";
 	private static final String NAME_OF_TASK = "Services_Reservation_Check_Task_Detail";	
@@ -43,11 +46,15 @@ public class ReservationCheckTaskConfig {
 		final AutoWiringSpringBeanQuartzTaskFactory jobFactory = new AutoWiringSpringBeanQuartzTaskFactory();
 		jobFactory.setApplicationContext(applicationContext);
 		final SchedulerFactoryBean schedulerFactory = new SchedulerFactoryBean();
+		final Properties schedulerProperties = new Properties();     
+		schedulerProperties.put(CoreCommonConstants.QUARTZ_THREAD_PROPERTY, NUM_OF_THREADS);
+	    schedulerFactory.setQuartzProperties(schedulerProperties);
+		
         schedulerFactory.setJobFactory(jobFactory);
         schedulerFactory.setJobDetails(servicesReservationCheckTaskDetail().getObject());
-	        schedulerFactory.setTriggers(servicesReservationCheckTaskTrigger().getObject());
-	        schedulerFactory.setStartupDelay(SCHEDULER_DELAY);
-	        logger.info("Services reservation task adjusted with interval: {} seconds", interval);
+        schedulerFactory.setTriggers(servicesReservationCheckTaskTrigger().getObject());
+        schedulerFactory.setStartupDelay(SCHEDULER_DELAY);
+        logger.info("Services reservation task adjusted with interval: {} seconds", interval);
 		
 		return schedulerFactory;        
     }

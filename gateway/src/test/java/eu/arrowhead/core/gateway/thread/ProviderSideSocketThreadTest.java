@@ -57,7 +57,7 @@ import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
-import eu.arrowhead.core.gateway.relay.GatewayRelayClient;
+import eu.arrowhead.relay.gateway.GatewayRelayClient;
 
 @RunWith(SpringRunner.class)
 public class ProviderSideSocketThreadTest {

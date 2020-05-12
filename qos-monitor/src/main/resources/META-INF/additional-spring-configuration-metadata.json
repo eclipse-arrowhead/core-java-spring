@@ -51,12 +51,12 @@
   },
   {
     "name": "cloud_ping_ttl_interval_minutes",
-    "type": "java.lang.String",
+    "type": "java.lang.Integer",
     "description": "A description for 'cloud_ping_ttl_interval_minutes'"
   },
   {
     "name": "ping_ttl_interval_minutes",
-    "type": "java.lang.String",
+    "type": "java.lang.Integer",
     "description": "A description for 'ping_ttl_interval_minutes'"
   },
   {
@@ -73,5 +73,70 @@
     "name": "ping.logMeasurementsDetailsToDB",
     "type": "java.lang.Boolean",
     "description": "A description for 'ping.logMeasurementsDetailsToDB'"
+  },
+  {
+    "name": "relay.test.time_to_repeat",
+    "type": "java.lang.Byte",
+    "description": "A description for 'relay.test.time_to_repeat'"
+  },
+  {
+    "name": "relay.test.message_size",
+    "type": "java.lang.Integer",
+    "description": "A description for 'relay.test.message_size'"
+  },
+  {
+    "name": "relay.test.timeout",
+    "type": "java.lang.Long",
+    "description": "A description for 'relay.test.timeout'"
+  },
+  {
+    "name": "relay.test.log_measurements_to_db",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'relay.test.log_measurements_to_db'"
+  },
+  {
+    "name": "ping.logMeasurementsDetailsToDB",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'ping.logMeasurementsDetailsToDB'"
+  },
+  {
+    "name": "ping.logMeasurementsToDB",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'ping.logMeasurementsToDB'"
+  },
+  {
+    "name": "interping.time_to_repeat",
+    "type": "java.lang.Integer",
+    "description": "A description for 'interping.time_to_repeat'"
+  },
+  {
+    "name": "interping.packet_size",
+    "type": "java.lang.Integer",
+    "description": "A description for 'interping.packet_size'"
+  },
+  {
+    "name": "interping.available_from_success_percent",
+    "type": "java.lang.Integer",
+    "description": "A description for 'interping.available_from_success_percent'"
+  },
+  {
+    "name": "interping.logMeasurementsToDB",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'interping.logMeasurementsToDB'"
+  },
+  {
+    "name": "interping.logMeasurementsDetailsToDB",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'interping.logMeasurementsDetailsToDB'"
+  },
+  {
+    "name": "enable_qos_relay_task",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'enable_qos_relay_task'"
+  },
+  {
+    "name": "relay_ping_ttl_interval_minutes",
+    "type": "java.lang.Integer",
+    "description": "A description for 'relay_ping_ttl_interval_minutes'"
   }
 ]}

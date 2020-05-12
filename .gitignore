@@ -38,3 +38,4 @@ wrapper
 /deb-installer/.settings
 /qos-monitor/.settings
 /qos-monitor/target
+/relay-library/target

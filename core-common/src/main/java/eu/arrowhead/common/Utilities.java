@@ -1,31 +1,5 @@
 package eu.arrowhead.common;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import eu.arrowhead.common.dto.internal.RelayType;
-import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
-import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.exception.AuthException;
-import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.exception.DataNotFoundException;
-import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.common.exception.TimeoutException;
-import eu.arrowhead.common.exception.UnavailableServerException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.http.HttpStatus;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import javax.naming.InvalidNameException;
-import javax.naming.ldap.LdapName;
-import javax.naming.ldap.Rdn;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -62,6 +36,36 @@ import java.util.Objects;
 import java.util.ServiceConfigurationError;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.naming.InvalidNameException;
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
+import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
+import eu.arrowhead.common.dto.internal.RelayType;
+import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
+import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.exception.DataNotFoundException;
+import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.exception.TimeoutException;
+import eu.arrowhead.common.exception.UnavailableServerException;
 
 public class Utilities {
 
@@ -339,6 +343,19 @@ public class Utilities {
 		}
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	public static QoSMeasurementAttribute convertStringToQoSMeasurementAttribute(final String str) {
+		if (isEmpty(str)) {
+			throw new InvalidParameterException("Attribute string is null or empty");
+		}
+				
+		try {
+			return QoSMeasurementAttribute.valueOf(str.toUpperCase().trim());			
+		} catch (final IllegalArgumentException ex) {
+			throw new InvalidParameterException("Unkown attribute string: " + str);
+		}
+	}
+	
 	//-------------------------------------------------------------------------------------------------
 	@Nullable
 	public static String getCertCNFromSubject(final String subjectName) {

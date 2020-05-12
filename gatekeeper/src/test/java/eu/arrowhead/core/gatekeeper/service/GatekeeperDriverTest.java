@@ -17,6 +17,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.http.HttpService;
 
 @RunWith(SpringRunner.class)
 public class GatekeeperDriverTest {
@@ -29,6 +30,9 @@ public class GatekeeperDriverTest {
 	
 	@Mock
 	private Map<String,Object> arrowheadContext;
+	
+	@Mock
+	private HttpService httpService;
 
 	//=================================================================================================
 	// methods
