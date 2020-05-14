@@ -1,12 +1,19 @@
 package eu.arrowhead.core.mscv.controller;
 
+import java.util.Optional;
+
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.CoreDefaults;
+import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.database.entity.mscv.MipCategory;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.mscv.CategoryDto;
-import eu.arrowhead.core.mscv.service.MscvCrudService;
+import eu.arrowhead.common.dto.shared.mscv.CategoryListResponseDto;
+import eu.arrowhead.core.mscv.MscvDtoConverter;
+import eu.arrowhead.core.mscv.Validation;
+import eu.arrowhead.core.mscv.service.crud.CategoryService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -15,7 +22,9 @@ import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_NAME;
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_NAME_PATH;
+import static eu.arrowhead.core.mscv.MscvUtilities.notFoundException;
 
 @Api(tags = {CoreCommonConstants.SWAGGER_TAG_ALL})
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS,
@@ -45,12 +55,14 @@ public class CategoryMgmtController {
 
     private static final String CREATE_CATEGORY_URI = CATEGORY_URI;
     private static final String CREATE_CATEGORY_DESCRIPTION = "Create new MSCV category";
+    private static final String CREATE_CATEGORY_OK = "Category exists already";
     private static final String CREATE_CATEGORY_SUCCESS = "New MSCV category created";
     private static final String CREATE_CATEGORY_BAD_REQUEST = "Unable to create new MSCV category";
 
     private static final String READ_CATEGORY_URI = QUALIFY_CATEGORY_URI;
     private static final String READ_CATEGORY_DESCRIPTION = "Get MSCV category by name";
     private static final String READ_CATEGORY_SUCCESS = "MSCV category returned";
+    private static final String READ_CATEGORY_NOT_FOUND = "MSCV category returned";
     private static final String READ_CATEGORY_BAD_REQUEST = "Unable to return MSCV category";
 
     private static final String READ_ALL_CATEGORY_URI = CATEGORY_URI;
@@ -69,12 +81,13 @@ public class CategoryMgmtController {
     private static final String DELETE_CATEGORY_BAD_REQUEST = "Unable to delete MSCV category";
 
     private final Logger logger = LogManager.getLogger();
-    private final MscvCrudService crudService;
+    private final CategoryService crudService;
+    private final Validation validation;
 
     @Autowired
-    public CategoryMgmtController(final MscvCrudService crudService) {
-        super();
+    public CategoryMgmtController(final CategoryService crudService) {
         this.crudService = crudService;
+        validation = new Validation();
     }
 
     //=================================================================================================
@@ -82,17 +95,29 @@ public class CategoryMgmtController {
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = CREATE_CATEGORY_DESCRIPTION, response = CategoryDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = CREATE_CATEGORY_SUCCESS),
+            @ApiResponse(code = HttpStatus.SC_OK, message = CREATE_CATEGORY_OK),
+            @ApiResponse(code = HttpStatus.SC_CREATED, message = CREATE_CATEGORY_SUCCESS),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CREATE_CATEGORY_BAD_REQUEST, response = ErrorMessageDTO.class),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response = ErrorMessageDTO.class),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response = ErrorMessageDTO.class)
     })
     @PostMapping(CREATE_CATEGORY_URI)
     @ResponseBody
-    public CategoryDto create(@RequestBody final CategoryDto dto) {
+    public ResponseEntity<CategoryDto> create(@RequestBody final CategoryDto dto) {
         logger.debug("create started ...");
-        // TODO implement
-        return null;
+        final String origin = createMgmtOrigin(CREATE_CATEGORY_URI);
+        final MipCategory category;
+
+        validation.verify(dto, origin);
+        category = MscvDtoConverter.convert(dto);
+
+        if (crudService.exists(category)) {
+            return ResponseEntity.ok(dto);
+        } else {
+            final MipCategory created = crudService.create(category);
+            final CategoryDto result = MscvDtoConverter.convert(created);
+            return ResponseEntity.status(HttpStatus.SC_CREATED).body(result);
+        }
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -100,6 +125,7 @@ public class CategoryMgmtController {
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = READ_CATEGORY_SUCCESS),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = READ_CATEGORY_BAD_REQUEST, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = READ_CATEGORY_NOT_FOUND, response = ErrorMessageDTO.class),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response = ErrorMessageDTO.class),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response = ErrorMessageDTO.class)
     })
@@ -107,12 +133,17 @@ public class CategoryMgmtController {
     @ResponseBody
     public CategoryDto read(@PathVariable(PARAMETER_NAME) final String name) {
         logger.debug("read started ...");
-        // TODO implement
-        return null;
+        final String origin = createMgmtOrigin(READ_CATEGORY_URI);
+        validation.verifyName(name, origin);
+
+        final Optional<MipCategory> optionalSshTarget = crudService.find(name);
+        final MipCategory category = optionalSshTarget.orElseThrow(notFoundException(READ_CATEGORY_NOT_FOUND, origin));
+
+        return MscvDtoConverter.convert(category);
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = READ_ALL_CATEGORY_DESCRIPTION, response = CategoryDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = READ_ALL_CATEGORY_DESCRIPTION, response = CategoryListResponseDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = READ_ALL_CATEGORY_SUCCESS),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = READ_ALL_CATEGORY_BAD_REQUEST, response = ErrorMessageDTO.class),
@@ -121,14 +152,17 @@ public class CategoryMgmtController {
     })
     @GetMapping(READ_ALL_CATEGORY_URI)
     @ResponseBody
-    public CategoryDto readAll(
+    public CategoryListResponseDto readAll(
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
         logger.debug("readAll started ...");
-        // TODO implement
-        return null;
+        final CoreUtilities.ValidatedPageParams pageParameters = CoreUtilities
+                .validatePageParameters(page, size, direction, createMgmtOrigin(READ_ALL_CATEGORY_URI));
+
+        final Page<MipCategory> categories = crudService.pageAll(pageParameters.createPageable(sortField));
+        return new CategoryListResponseDto(categories.map(x -> new CategoryDto(x.getName(), x.getAbbreviation())));
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -143,8 +177,15 @@ public class CategoryMgmtController {
     @ResponseBody
     public CategoryDto update(@PathVariable(PARAMETER_NAME) final String name, @RequestBody final CategoryDto dto) {
         logger.debug("update started ...");
-        // TODO implement
-        return null;
+        final String origin = createMgmtOrigin(UPDATE_CATEGORY_URI);
+        validation.verify(dto, origin);
+        validation.verifyName(name, origin);
+
+        final Optional<MipCategory> optionalMipCategory = crudService.find(name);
+        final MipCategory oldCategory = optionalMipCategory.orElseThrow(notFoundException("Category", origin));
+        final MipCategory newCategory = crudService.replace(oldCategory, MscvDtoConverter.convert(dto));
+
+        return MscvDtoConverter.convert(newCategory);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -159,6 +200,13 @@ public class CategoryMgmtController {
     @ResponseStatus(org.springframework.http.HttpStatus.NO_CONTENT)
     public void delete(@PathVariable(PARAMETER_NAME) final String name) {
         logger.debug("delete started ...");
-        // TODO implement
+        final String origin = createMgmtOrigin(DELETE_CATEGORY_URI);
+        validation.verifyName(name, origin);
+        crudService.delete(name);
     }
+
+    private String createMgmtOrigin(final String path) {
+        return CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI + path;
+    }
+
 }

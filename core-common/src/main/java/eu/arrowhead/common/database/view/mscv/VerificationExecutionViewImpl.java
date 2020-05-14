@@ -1,17 +1,17 @@
 package eu.arrowhead.common.database.view.mscv;
 
 import eu.arrowhead.common.database.entity.mscv.Target;
-import eu.arrowhead.common.database.entity.mscv.VerificationExecution;
-import eu.arrowhead.common.dto.shared.mscv.VerificationRunResult;
+import eu.arrowhead.common.database.entity.mscv.VerificationResult;
+import eu.arrowhead.common.dto.shared.mscv.SuccessIndicator;
 import org.springframework.util.Assert;
 
 import java.time.ZonedDateTime;
 
 public class VerificationExecutionViewImpl implements VerificationExecutionView {
 
-    private final VerificationExecution target;
+    private final VerificationResult target;
 
-    public VerificationExecutionViewImpl(final VerificationExecution target) {
+    public VerificationExecutionViewImpl(final VerificationResult target) {
         Assert.notNull(target, "Backing execution is null");
         Assert.notNull(target.getVerificationList(), "Backing verificationList is null");
         this.target = target;
@@ -38,7 +38,7 @@ public class VerificationExecutionViewImpl implements VerificationExecutionView 
     }
 
     @Override
-    public VerificationRunResult getResult() {
+    public SuccessIndicator getResult() {
         return target.getResult();
     }
 

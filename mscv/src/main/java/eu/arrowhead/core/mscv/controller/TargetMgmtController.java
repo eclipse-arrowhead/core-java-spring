@@ -13,7 +13,7 @@ import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.mscv.OS;
 import eu.arrowhead.common.dto.shared.mscv.SshTargetDto;
 import eu.arrowhead.common.dto.shared.mscv.TargetDto;
-import eu.arrowhead.common.dto.shared.mscv.TargetListResponseDTO;
+import eu.arrowhead.common.dto.shared.mscv.TargetListResponseDto;
 import eu.arrowhead.common.dto.shared.mscv.TargetLoginRequest;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.mscv.MscvDtoConverter;
@@ -34,6 +34,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -74,6 +75,7 @@ public class TargetMgmtController {
 
     private static final String CREATE_TARGET_URI = TARGET_URI;
     private static final String CREATE_TARGET_DESCRIPTION = "Create new MSCV target";
+    private static final String CREATE_TARGET_OK = "MSCV target exists already";
     private static final String CREATE_TARGET_SUCCESS = "New MSCV target created";
     private static final String CREATE_TARGET_BAD_REQUEST = "Unable to create new MSCV target";
 
@@ -123,18 +125,27 @@ public class TargetMgmtController {
     @ApiOperation(value = CREATE_TARGET_DESCRIPTION, response = SshTargetDto.class,
             tags = {CoreCommonConstants.SWAGGER_TAG_MGMT, SWAGGER_TAG_TARGET})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = CREATE_TARGET_SUCCESS),
+            @ApiResponse(code = HttpStatus.SC_OK, message = CREATE_TARGET_OK),
+            @ApiResponse(code = HttpStatus.SC_CREATED, message = CREATE_TARGET_SUCCESS),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CREATE_TARGET_BAD_REQUEST, response = ErrorMessageDTO.class),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response = ErrorMessageDTO.class),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response = ErrorMessageDTO.class)
     })
     @PostMapping(CREATE_TARGET_URI)
     @ResponseBody
-    public SshTargetDto create(@RequestBody final SshTargetDto dto) {
+    public ResponseEntity<SshTargetDto> create(@RequestBody final SshTargetDto dto) {
         logger.debug("create started ...");
         validation.verify(dto, createOrigin(CREATE_TARGET_URI));
-        final SshTarget sshTarget = targetService.findOrCreate(dto.getName(), dto.getOs(), dto.getAddress(), dto.getPort());
-        return new SshTargetDto(sshTarget.getName(), sshTarget.getOs(), sshTarget.getAddress(), sshTarget.getPort());
+
+        final SshTarget sshTarget = MscvDtoConverter.convert(dto);
+
+        if (targetService.exists(sshTarget)) {
+            return ResponseEntity.ok(dto);
+        } else {
+            final SshTarget created = targetService.create(sshTarget);
+            final SshTargetDto result = MscvDtoConverter.convert(created);
+            return ResponseEntity.status(HttpStatus.SC_CREATED).body(result);
+        }
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -163,7 +174,7 @@ public class TargetMgmtController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = READ_ALL_TARGET_DESCRIPTION, response = TargetListResponseDTO.class, tags =
+    @ApiOperation(value = READ_ALL_TARGET_DESCRIPTION, response = TargetListResponseDto.class, tags =
             {CoreCommonConstants.SWAGGER_TAG_MGMT, SWAGGER_TAG_TARGET})
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = READ_ALL_TARGET_SUCCESS),
@@ -173,18 +184,18 @@ public class TargetMgmtController {
     })
     @GetMapping(READ_ALL_TARGET_URI)
     @ResponseBody
-    public TargetListResponseDTO readAll(
+    public TargetListResponseDto readAll(
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField,
             @ApiParam(value = "Filter mode. Match all or any filter.")
             @RequestParam(name = "mode", defaultValue = "ANY") final ExampleMatcher.MatchMode mode,
-            @ApiParam(value = "Filter for name. Partial match ignoring case.", example = "Sensor Aggregator")
+            @ApiParam(value = "Filter for name. Partial match ignoring case.")
             @RequestParam(name = PARAMETER_NAME, required = false) final String name,
             @ApiParam(value = "Filter for operating system.", example = "LINUX")
             @RequestParam(name = PARAMETER_OS, required = false) final OS os,
-            @ApiParam(value = "Filter for address. Partial match ignoring case.", example = "sensor-aggregator-")
+            @ApiParam(value = "Filter for address. Partial match ignoring case.")
             @RequestParam(name = PARAMETER_ADDRESS, required = false) final String address,
             @ApiParam(value = "Filter for port.", example = "22")
             @RequestParam(name = PARAMETER_PORT, required = false) final Integer port)
@@ -197,7 +208,7 @@ public class TargetMgmtController {
         final Example<SshTarget> example = Example.of(probe, validation.exampleMatcher(mode));
 
         final Page<SshTarget> targets = targetService.pageByExample(example, pageParameters.createPageable(sortField));
-        return new TargetListResponseDTO(targets.map((x) -> new SshTargetDto(x.getName(), x.getOs(), x.getAddress(), x.getPort())));
+        return new TargetListResponseDto(targets.map((x) -> new SshTargetDto(x.getName(), x.getOs(), x.getAddress(), x.getPort())));
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -222,7 +233,7 @@ public class TargetMgmtController {
 
         final Optional<SshTarget> optionalSshTarget = targetService.find(address, port);
         final SshTarget oldTarget = optionalSshTarget.orElseThrow(notFoundException("Target", origin));
-        final SshTarget newTarget = targetService.replace(oldTarget, dto);
+        final SshTarget newTarget = targetService.replace(oldTarget, MscvDtoConverter.convert(dto));
         return new SshTargetDto(newTarget.getName(), newTarget.getOs(), newTarget.getAddress(), newTarget.getPort());
     }
 

@@ -1,4 +1,4 @@
-package eu.arrowhead.core.mscv.http;
+package eu.arrowhead.common.dto.shared.mscv;
 
 import eu.arrowhead.common.database.view.mscv.VerificationExecutionView;
 

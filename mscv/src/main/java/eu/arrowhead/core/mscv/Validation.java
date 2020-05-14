@@ -4,11 +4,12 @@ import java.util.Objects;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.shared.mscv.CategoryDto;
+import eu.arrowhead.common.dto.shared.mscv.ClientExecutionRequest;
 import eu.arrowhead.common.dto.shared.mscv.SshTargetDto;
 import eu.arrowhead.common.dto.shared.mscv.TargetDto;
 import eu.arrowhead.common.dto.shared.mscv.TargetLoginRequest;
 import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.core.mscv.http.ClientExecutionRequest;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,6 +22,8 @@ public class Validation {
     public static final String PAGE_NULL_ERROR_MESSAGE = "Page must not be null";
     public static final String EXAMPLE_NULL_ERROR_MESSAGE = "Example must not be null";
     public static final String LAYER_NULL_ERROR_MESSAGE = "Layer must not be null";
+    public static final String MIP_NULL_ERROR_MESSAGE = "MIP must not be null";
+    public static final String CATEGORY_NULL_ERROR_MESSAGE = "Category must not be null";
 
     public static final String CREDENTIALS_NULL_ERROR_MESSAGE = "Credentials must not be null/empty";
     public static final String CREDENTIALS_INVALID_ERROR_MESSAGE = "Credentials must be Base64 encoded in the form <user>:<password>";
@@ -41,6 +44,7 @@ public class Validation {
     public static final String ADDRESS_NULL_ERROR_MESSAGE = "Address must not be null";
     public static final String ADDRESS_EMPTY_ERROR_MESSAGE = " Address must have value";
 
+
     public static final String PORT_NULL_ERROR_MESSAGE = "Port must not be null";
     public static final String PORT_EMPTY_ERROR_MESSAGE = "Port must have value";
     public static final String PORT_INVALID_ERROR_MESSAGE = "Port must be positive number between 1 - 65535";
@@ -48,17 +52,36 @@ public class Validation {
     public static final String LIST_NULL_ERROR_MESSAGE = "List must not be null";
     public static final String LIST_EMPTY_ERROR_MESSAGE = "List must not be empty";
 
+    public static final String ABBR_EMPTY_ERROR_MESSAGE = "Abbreviation must have value";
+
 
     private final Logger logger = LogManager.getLogger();
 
     public Validation() { super(); }
 
 
+    public ExampleMatcher exampleMatcher(final ExampleMatcher.MatchMode mode) {
+
+        final ExampleMatcher retValue;
+        switch (mode) {
+            case ALL:
+                retValue = ExampleMatcher.matchingAll();
+                break;
+            case ANY:
+                retValue = ExampleMatcher.matchingAny();
+                break;
+            default:
+                retValue = ExampleMatcher.matching();
+        }
+
+        return retValue.withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING)
+                       .withIgnoreCase()
+                       .withIgnoreNullValues();
+    }
+
     public void verify(final ClientExecutionRequest dto, final String origin) {
         logger.debug("verify({},{}) started...", dto, origin);
-        if (Objects.isNull(dto)) {
-            throw new BadPayloadException(PAYLOAD_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-        }
+        verifyPayload(dto, origin);
         if (Objects.isNull(dto.getLayer())) {
             throw new BadPayloadException(LAYER_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
@@ -87,19 +110,40 @@ public class Validation {
 
     public void verify(final TargetLoginRequest request, final String origin) {
         logger.debug("verify({},{}) started...", request, origin);
+        verifyPayload(request, origin);
         verify(request.getTarget(), origin);
-        if(Utilities.isEmpty(request.getCredentials())) {
+        if (Utilities.isEmpty(request.getCredentials())) {
             throw new BadPayloadException(CREDENTIALS_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
     }
 
+    public void verify(final CategoryDto dto, final String origin) {
+        logger.debug("verify({},{}) started...", dto, origin);
+        verifyPayload(dto, origin);
+        if (Utilities.isEmpty(dto.getName())) {
+            throw new BadPayloadException(NAME_EMPTY_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+        if (Utilities.isEmpty(dto.getAbbreviation())) {
+            throw new BadPayloadException(ABBR_EMPTY_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+    }
+
     public void verifyAddress(final String address, final String origin) {
+        logger.debug("verifyAddress({},{}) started...", address, origin);
         if (Utilities.isEmpty(address)) {
             throw new BadPayloadException(ADDRESS_EMPTY_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
     }
 
+    public void verifyName(final String name, final String origin) {
+        logger.debug("verifyName({},{}) started...", name, origin);
+        if (Utilities.isEmpty(name)) {
+            throw new BadPayloadException(NAME_EMPTY_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+    }
+
     public void verifyPort(final Integer port, final String origin) {
+        logger.debug("verifyPort({},{}) started...", port, origin);
         if (Objects.isNull(port)) {
             throw new BadPayloadException(PORT_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
@@ -109,31 +153,19 @@ public class Validation {
     }
 
     public void verifyCredentials(final String[] credentials, final String origin) {
-        if(Objects.isNull(credentials)) {
+        logger.debug("verifyCredentials({},{}) started...", credentials, origin);
+        if (Objects.isNull(credentials)) {
             throw new BadPayloadException(CREDENTIALS_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
-        if(credentials.length != 2) {
+        if (credentials.length != 2) {
             throw new BadPayloadException(CREDENTIALS_INVALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
     }
 
-    public ExampleMatcher exampleMatcher(final ExampleMatcher.MatchMode mode) {
-
-        final ExampleMatcher retValue;
-        switch (mode) {
-            case ALL:
-                retValue = ExampleMatcher.matchingAll();
-                break;
-            case ANY:
-                retValue = ExampleMatcher.matchingAny();
-                break;
-            default:
-                retValue = ExampleMatcher.matching();
+    public <T> void verifyPayload(final T payload, final String origin) {
+        logger.debug("verifyPayload({},{}) started...", payload, origin);
+        if (Objects.isNull(payload)) {
+            throw new BadPayloadException(PAYLOAD_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
-
-        return retValue.withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING)
-                       .withIgnoreCase()
-                       .withIgnoreNullValues();
     }
-
 }

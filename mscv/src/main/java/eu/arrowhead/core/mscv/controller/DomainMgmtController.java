@@ -37,7 +37,7 @@ import static eu.arrowhead.core.mscv.Constants.PARAMETER_NAME_PATH;
 )
 @RestController
 @RequestMapping(CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI)
-public class DomainMgmtController {
+public class DomainMgmtController extends AbstractMgmtCrudController<DomainDto, String> {
 
     private static final String DOMAIN_URI = "/domain";
     private static final String QUALIFY_DOMAIN_URI = DOMAIN_URI + PARAMETER_NAME_PATH;
@@ -72,7 +72,7 @@ public class DomainMgmtController {
 
     @Autowired
     public DomainMgmtController(final MscvCrudService crudService) {
-        super();
+        super(crudService);
         this.crudService = crudService;
     }
 

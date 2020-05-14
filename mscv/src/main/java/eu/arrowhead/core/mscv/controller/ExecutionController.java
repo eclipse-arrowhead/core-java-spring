@@ -14,10 +14,10 @@ import eu.arrowhead.common.dto.shared.mscv.PublicKeyResponse;
 import eu.arrowhead.common.dto.shared.mscv.TargetLoginRequest;
 import eu.arrowhead.core.mscv.MscvUtilities;
 import eu.arrowhead.core.mscv.Validation;
-import eu.arrowhead.core.mscv.http.ClientExecutionRequest;
-import eu.arrowhead.core.mscv.http.ClientExecutionResponse;
-import eu.arrowhead.core.mscv.http.ExecutionRequest;
-import eu.arrowhead.core.mscv.http.ExecutionResponse;
+import eu.arrowhead.common.dto.shared.mscv.ClientExecutionRequest;
+import eu.arrowhead.common.dto.shared.mscv.ClientExecutionResponse;
+import eu.arrowhead.common.dto.shared.mscv.ExecutionRequest;
+import eu.arrowhead.common.dto.shared.mscv.ExecutionResponse;
 import eu.arrowhead.core.mscv.security.KeyPairFileStorage;
 import eu.arrowhead.core.mscv.service.MscvException;
 import eu.arrowhead.core.mscv.service.TargetService;
@@ -161,7 +161,7 @@ public class ExecutionController {
     @ResponseBody
     public VerificationExecutionView execute(@RequestBody final ExecutionRequest executionRequest) {
         logger.debug("execute started ...");
-        return executionService.executeByIdAndTarget(executionRequest.getExecutionListId(), null);
+        return executionService.executeByIdAndTarget(executionRequest.getExecutionListId(), executionRequest.getTargetId());
     }
 
     private String createOrigin(final String path) {

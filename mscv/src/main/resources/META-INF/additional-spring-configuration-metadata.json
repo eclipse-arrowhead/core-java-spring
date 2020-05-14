@@ -36,64 +36,69 @@
       "description": "Service Registry port."
     },
     {
-      "name": "mscv.defaults.list-name",
+      "name": "mscv.list-name",
       "type": "java.lang.String",
       "description": "The name of the default verification list, which will be executed unless otherwise defined."
     },
     {
-      "name": "mscv.defaults.mip-weight",
+      "name": "mscv.mip-weight",
       "type": "java.lang.Short",
       "description": "The weight of all MIPs in the compliance algorithm."
     },
     {
-      "name": "mscv.defaults.verification-interval",
+      "name": "mscv.verification-interval",
       "type": "java.lang.Long",
       "description": "The verification interval of a specific List in minutes."
     },
     {
-      "name": "mscv.defaults.os",
+      "name": "mscv.os",
       "type": "eu.arrowhead.common.dto.shared.mscv.OS",
       "description": "Assumed Operating System."
     },
     {
-      "name": "mscv.defaults.ssh.port",
+      "name": "mscv.ssh.port",
       "type": "java.lang.Integer",
       "description": "Default SSH port."
     },
     {
-      "name": "mscv.defaults.ssh.connect-timeout",
+      "name": "mscv.ssh.connect-timeout",
       "type": "java.lang.Long",
       "description": "The timeout (in seconds) for connecting to SSH targets."
     },
     {
-      "name": "mscv.defaults.ssh.auth-timeout",
+      "name": "mscv.ssh.auth-timeout",
       "type": "java.lang.Long",
       "description": "The timeout (in seconds) for authentication on SSH targets."
     },
     {
-      "name": "mscv.defaults.ssh.private-key-file",
+      "name": "mscv.ssh.private-key-file",
       "type": "java.io.File",
       "description": "The path to the SSH private key file."
     },
     {
-      "name": "mscv.defaults.ssh.public-key-file",
+      "name": "mscv.ssh.public-key-file",
       "type": "java.io.File",
       "description": "The path to the SSH public key file."
     },
     {
-      "name": "mscv.defaults.ssh.key-pair-file",
+      "name": "mscv.ssh.key-pair-file",
       "type": "java.io.File",
       "description": "The path to a file which contains a KeyPair."
     },
     {
-      "name": "mscv.defaults.ssh.private-key-password",
+      "name": "mscv.ssh.private-key-password",
       "type": "java.lang.String",
-      "description": "The password of the private key file. If there is no password, the property 'mscv.defaults.ssh.empty-password' must be set to true."
+      "description": "The password of the private key file. If there is no password, the property 'mscv.ssh.empty-password' must be set to true."
     },
     {
-      "name": "mscv.defaults.ssh.empty-password",
+      "name": "mscv.ssh.empty-password",
       "type": "java.lang.Boolean",
       "description": "Indicates if the private key needs a password."
+    },
+    {
+      "name": "mscv.scripts-path",
+      "type": "java.lang.String",
+      "description": "The default path for scripts."
     }
   ]
 }

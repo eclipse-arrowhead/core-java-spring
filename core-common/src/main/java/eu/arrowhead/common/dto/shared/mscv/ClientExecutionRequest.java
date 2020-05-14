@@ -1,31 +1,28 @@
-package eu.arrowhead.core.mscv.http;
+package eu.arrowhead.common.dto.shared.mscv;
 
 import java.io.Serializable;
 import java.util.StringJoiner;
 
-import eu.arrowhead.common.dto.shared.mscv.Layer;
-import eu.arrowhead.common.dto.shared.mscv.SshTargetDto;
-
 public class ClientExecutionRequest implements Serializable {
 
-    private SshTargetDto target;
+    private TargetDto target;
     private Layer layer;
 
     public ClientExecutionRequest() {
         super();
     }
 
-    public ClientExecutionRequest(final SshTargetDto target, final Layer layer) {
+    public ClientExecutionRequest(final TargetDto target, final Layer layer) {
         super();
         this.target = target;
         this.layer = layer;
     }
 
-    public SshTargetDto getTarget() {
+    public TargetDto getTarget() {
         return target;
     }
 
-    public void setTarget(final SshTargetDto target) {
+    public void setTarget(final TargetDto target) {
         this.target = target;
     }
 

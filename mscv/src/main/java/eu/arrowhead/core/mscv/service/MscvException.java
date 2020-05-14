@@ -7,7 +7,7 @@ public class MscvException extends Throwable {
         super(message);
     }
 
-    public MscvException(final String message, final Exception cause) {
+    public MscvException(final String message, final Throwable cause) {
         super(message, cause);
     }
 }

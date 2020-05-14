@@ -1,7 +1,7 @@
 package eu.arrowhead.common.database.entity.mscv;
 
-import eu.arrowhead.common.dto.shared.mscv.VerificationRunDetailResult;
-
+import java.util.Objects;
+import java.util.StringJoiner;
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
@@ -15,13 +15,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import java.util.Objects;
-import java.util.StringJoiner;
+
+import eu.arrowhead.common.dto.shared.mscv.DetailSuccessIndicator;
 
 @Entity
-@Table(name = "mscv_verification_detail",
+@Table(name = "mscv_verification_result_detail",
         uniqueConstraints = @UniqueConstraint(name = "u_detail_execution_mip", columnNames = {"executionId", "verificationEntryId"}))
-public class VerificationExecutionDetail {
+public class VerificationResultDetail {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,34 +30,34 @@ public class VerificationExecutionDetail {
     @ManyToOne(optional = false)
     @JoinColumn(name = "executionId", referencedColumnName = "id", nullable = false,
             foreignKey = @ForeignKey(name = "fk_detail_execution", value = ConstraintMode.CONSTRAINT))
-    private VerificationExecution execution;
+    private VerificationResult execution;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "verificationEntryId", referencedColumnName = "id", nullable = false,
             foreignKey = @ForeignKey(name = "fk_detail_verification_entry", value = ConstraintMode.CONSTRAINT))
     private VerificationEntry verificationEntry;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "scriptId", referencedColumnName = "id", nullable = false,
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "scriptId", referencedColumnName = "id", nullable = true,
             foreignKey = @ForeignKey(name = "fk_detail_script", value = ConstraintMode.CONSTRAINT))
     private Script script;
 
     @Column(nullable = false, length = 16)
     @Enumerated(EnumType.STRING)
-    private VerificationRunDetailResult result;
+    private DetailSuccessIndicator result;
 
     @Column(length = 255)
     private String details;
 
-    public VerificationExecutionDetail() {
+    public VerificationResultDetail() {
         super();
     }
 
-    public VerificationExecutionDetail(final VerificationExecution execution,
-                                       final VerificationEntry verificationEntry,
-                                       final Script script,
-                                       final VerificationRunDetailResult result,
-                                       final String details) {
+    public VerificationResultDetail(final VerificationResult execution,
+                                    final VerificationEntry verificationEntry,
+                                    final Script script,
+                                    final DetailSuccessIndicator result,
+                                    final String details) {
         this.execution = execution;
         this.verificationEntry = verificationEntry;
         this.script = script;
@@ -65,11 +65,11 @@ public class VerificationExecutionDetail {
         this.details = details;
     }
 
-    public VerificationExecutionDetail(final Long id, final VerificationExecution execution,
-                                       final VerificationEntry verificationEntry,
-                                       final Script script,
-                                       final VerificationRunDetailResult result,
-                                       final String details) {
+    public VerificationResultDetail(final Long id, final VerificationResult execution,
+                                    final VerificationEntry verificationEntry,
+                                    final Script script,
+                                    final DetailSuccessIndicator result,
+                                    final String details) {
         this.id = id;
         this.execution = execution;
         this.verificationEntry = verificationEntry;
@@ -86,11 +86,11 @@ public class VerificationExecutionDetail {
         this.id = id;
     }
 
-    public VerificationExecution getExecution() {
+    public VerificationResult getExecution() {
         return execution;
     }
 
-    public void setExecution(final VerificationExecution execution) {
+    public void setExecution(final VerificationResult execution) {
         this.execution = execution;
     }
 
@@ -102,11 +102,11 @@ public class VerificationExecutionDetail {
         this.verificationEntry = verificationEntry;
     }
 
-    public VerificationRunDetailResult getResult() {
+    public DetailSuccessIndicator getResult() {
         return result;
     }
 
-    public void setResult(final VerificationRunDetailResult result) {
+    public void setResult(final DetailSuccessIndicator result) {
         this.result = result;
     }
 
@@ -130,7 +130,7 @@ public class VerificationExecutionDetail {
     public boolean equals(final Object o) {
         if (this == o) { return true; }
         if (o == null || getClass() != o.getClass()) { return false; }
-        final VerificationExecutionDetail that = (VerificationExecutionDetail) o;
+        final VerificationResultDetail that = (VerificationResultDetail) o;
         return Objects.equals(id, that.id) &&
                 Objects.equals(execution, that.execution) &&
                 Objects.equals(verificationEntry, that.verificationEntry) &&
@@ -146,7 +146,7 @@ public class VerificationExecutionDetail {
 
     @Override
     public String toString() {
-        final var sj = new StringJoiner(", ", VerificationExecutionDetail.class.getSimpleName() + "[", "]");
+        final var sj = new StringJoiner(", ", VerificationResultDetail.class.getSimpleName() + "[", "]");
 
         sj.add("id=" + id);
         if (Objects.nonNull(execution)) { sj.add("execution=" + execution.getExecutionDate()); }

@@ -1,6 +1,6 @@
 package eu.arrowhead.common.database.view.mscv;
 
-import eu.arrowhead.common.dto.shared.mscv.VerificationRunDetailResult;
+import eu.arrowhead.common.dto.shared.mscv.DetailSuccessIndicator;
 import org.springframework.beans.factory.annotation.Value;
 
 public interface VerificationExecutionDetailView {
@@ -21,5 +21,5 @@ public interface VerificationExecutionDetailView {
     Integer getResultWeight();
 
     @Value("#{target.result}")
-    VerificationRunDetailResult getResult();
+    DetailSuccessIndicator getResult();
 }

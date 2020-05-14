@@ -1,5 +1,6 @@
 package eu.arrowhead.core.mscv;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 @Component
-@ConfigurationProperties("mscv.defaults")
+@ConfigurationProperties("mscv")
 // @ConstructorBinding would allow using final fields. needs Spring Boot 2.2
 public class MscvDefaults {
 
@@ -36,6 +37,9 @@ public class MscvDefaults {
 
     @NotNull
     private SshDefaults ssh;
+
+    @NotBlank
+    private Path defaultPath = Path.of(".", File.pathSeparator).toAbsolutePath();
 
     public MscvDefaults() { super(); }
 
@@ -82,6 +86,14 @@ public class MscvDefaults {
 
     public void setSsh(final SshDefaults ssh) {
         this.ssh = ssh;
+    }
+
+    public Path getDefaultPath() {
+        return defaultPath;
+    }
+
+    public void setDefaultPath(final Path defaultPath) {
+        this.defaultPath = defaultPath;
     }
 
     public static class SshDefaults {

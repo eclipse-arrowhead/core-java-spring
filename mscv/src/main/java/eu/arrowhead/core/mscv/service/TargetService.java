@@ -17,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -71,7 +72,7 @@ public class TargetService {
 
     @Transactional
     public SshTarget findOrCreate(final Target target) {
-        logger.debug("findOrCreateTarget({}) started", target);
+        logger.debug("findOrCreate({}) started", target);
         Assert.notNull(target, "Argument must not be null");
         checkSupported(target.getClass());
         return findOrCreate((SshTarget) target);
@@ -79,14 +80,21 @@ public class TargetService {
 
     @Transactional
     public SshTarget findOrCreate(final SshTarget sshTarget) {
-        logger.debug("findOrCreateTarget({}) started", sshTarget);
+        logger.debug("findOrCreate({}) started", sshTarget);
         Assert.notNull(sshTarget, "Argument must not be null");
         return findOrCreate(sshTarget.getName(), sshTarget.getOs(), sshTarget.getAddress(), sshTarget.getPort());
     }
 
     @Transactional
+    public SshTarget create(final SshTarget sshTarget) {
+        logger.debug("create({}) started", sshTarget);
+        Assert.notNull(sshTarget, "Argument must not be null");
+        return targetRepo.saveAndFlush(sshTarget);
+    }
+
+    @Transactional
     public SshTarget findOrCreate(final String name, final OS os, final String address, final Integer port) {
-        logger.debug("findOrCreateTarget({},{},{},{}) started", name, os, address, port);
+        logger.debug("findOrCreate({},{},{},{}) started", name, os, address, port);
         Assert.hasText(name, NAME_NULL_ERROR_MESSAGE);
         Assert.notNull(os, OS_NULL_ERROR_MESSAGE);
         validation.verifyAddress(address, "MSCV");
@@ -106,7 +114,7 @@ public class TargetService {
 
     @Transactional(readOnly = true)
     public Optional<SshTarget> find(final String address, final Integer port) {
-        logger.debug("findTarget({},{}) started", address, port);
+        logger.debug("find({},{}) started", address, port);
         Assert.hasText(address, ADDRESS_NULL_ERROR_MESSAGE);
         Assert.notNull(port, PORT_NULL_ERROR_MESSAGE);
         return targetRepo.findByAddressAndPort(address, port);
@@ -114,7 +122,7 @@ public class TargetService {
 
     @Transactional(readOnly = true)
     public Optional<Target> find(final String name, final OS os) {
-        logger.debug("findTarget({},{}) started", name, os);
+        logger.debug("find({},{}) started", name, os);
         Assert.hasText(name, NAME_NULL_ERROR_MESSAGE);
         Assert.notNull(os, OS_NULL_ERROR_MESSAGE);
         return targetRepo.findByNameAndOs(name, os);
@@ -122,15 +130,15 @@ public class TargetService {
 
     @Transactional(readOnly = true)
     public Page<SshTarget> pageByExample(final Example<SshTarget> example, final Pageable pageable) {
-        logger.debug("getTargets({},{}) started", example, pageable);
+        logger.debug("pageByExample({},{}) started", example, pageable);
         Assert.notNull(example, EXAMPLE_NULL_ERROR_MESSAGE);
         Assert.notNull(pageable, PAGE_NULL_ERROR_MESSAGE);
         return targetRepo.findAll(example, pageable);
     }
 
     @Transactional
-    public SshTarget replace(final SshTarget oldTarget, final SshTargetDto newValues) {
-        logger.debug("replaceTarget({},{}) started", oldTarget, newValues);
+    public SshTarget replace(final SshTarget oldTarget, final SshTarget newValues) {
+        logger.debug("replace({},{}) started", oldTarget, newValues);
         Assert.notNull(oldTarget, "old " + TARGET_NULL_ERROR_MESSAGE);
         Assert.notNull(newValues, "new " + TARGET_NULL_ERROR_MESSAGE);
 
@@ -139,6 +147,14 @@ public class TargetService {
         oldTarget.setAddress(newValues.getAddress());
         oldTarget.setPort(newValues.getPort());
         return targetRepo.saveAndFlush(oldTarget);
+    }
+
+    @Transactional
+    public void delete(final String address, final Integer port) {
+        logger.debug("delete({},{}) started", address, port);
+        final Optional<SshTarget> target = find(address, port);
+        target.ifPresent(targetRepo::delete);
+        targetRepo.flush();
     }
 
     public void login(final Target target, final String username, final String password) throws MscvException, ArrowheadException {
@@ -167,12 +183,8 @@ public class TargetService {
         return handler.verifyPasswordlessLogin(target);
     }
 
-    @Transactional
-    public void delete(final String address, final Integer port) {
-        logger.debug("delete({},{}) started", address, port);
-        final Optional<SshTarget> target = find(address, port);
-        target.ifPresent(targetRepo::delete);
-        targetRepo.flush();
+    public boolean exists(final SshTarget sshTarget) {
+        return targetRepo.exists(Example.of(sshTarget, ExampleMatcher.matchingAll()));
     }
 
     @Transactional(readOnly = true)

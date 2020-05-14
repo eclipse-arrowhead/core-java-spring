@@ -1,10 +1,10 @@
 package eu.arrowhead.common.database.view.mscv;
 
-import eu.arrowhead.common.database.entity.mscv.Target;
-import eu.arrowhead.common.dto.shared.mscv.VerificationRunResult;
-import org.springframework.beans.factory.annotation.Value;
-
 import java.time.ZonedDateTime;
+
+import eu.arrowhead.common.database.entity.mscv.Target;
+import eu.arrowhead.common.dto.shared.mscv.SuccessIndicator;
+import org.springframework.beans.factory.annotation.Value;
 
 public interface VerificationExecutionView {
 
@@ -21,5 +21,5 @@ public interface VerificationExecutionView {
     ZonedDateTime getExecutionDate();
 
     @Value("#{target.result}")
-    VerificationRunResult getResult();
+    SuccessIndicator getResult();
 }

@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS `mscv_script`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
-CREATE TABLE IF NOT EXISTS `mscv_verification_execution`
+CREATE TABLE IF NOT EXISTS `mscv_verification_result`
 (
     `id`                     bigint(20) PRIMARY KEY AUTO_INCREMENT,
     `execution_date`         TIMESTAMP   NOT NULL,
@@ -110,16 +110,16 @@ CREATE TABLE IF NOT EXISTS `mscv_verification_execution`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
-CREATE TABLE IF NOT EXISTS `mscv_verification_detail`
+CREATE TABLE IF NOT EXISTS `mscv_verification_detail_result`
 (
     `id`                    bigint(20) PRIMARY KEY AUTO_INCREMENT,
     `result`                varchar(16) NOT NULL,
     `details`               varchar(255),
     `verification_entry_id` bigint      NOT NULL,
     `execution_id`          bigint      NOT NULL,
-    `script_id`             bigint      NOT NULL,
+    `script_id`             bigint,
     CONSTRAINT `fk_details_mip_entry` FOREIGN KEY (`verification_entry_id`) REFERENCES `mscv_mip_verification_entry` (`id`) ON DELETE CASCADE,
-    CONSTRAINT `fk_details_execution` FOREIGN KEY (`execution_id`) REFERENCES `mscv_verification_execution` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_details_execution` FOREIGN KEY (`execution_id`) REFERENCES mscv_verification_result (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_details_script` FOREIGN KEY (`script_id`) REFERENCES `mscv_script` (`id`) ON DELETE CASCADE,
     UNIQUE KEY `u_details_execution_mip` (`verification_entry_id`, `execution_id`)
 ) ENGINE = InnoDB

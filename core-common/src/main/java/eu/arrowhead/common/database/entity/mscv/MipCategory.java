@@ -1,13 +1,13 @@
 package eu.arrowhead.common.database.entity.mscv;
 
+import java.util.Objects;
+import java.util.StringJoiner;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.util.Objects;
-import java.util.StringJoiner;
 
 @Entity
 @Table(name = "mscv_mip_category")
@@ -27,8 +27,9 @@ public class MipCategory {
         super();
     }
 
-    public MipCategory(final String name) {
+    public MipCategory(final String name, final String abbreviation) {
         this.name = name;
+        this.abbreviation = abbreviation;
     }
 
     public Long getId() {
