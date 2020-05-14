@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # postrm script for arrowhead-gatekeeper
 #
 # see: dh_installdeb(1)

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # postinst script for arrowhead-onboarding
 #
 # see: dh_installdeb(1)

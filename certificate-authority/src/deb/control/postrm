@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # postrm script for arrowhead-certificate-authority
 #
 # see: dh_installdeb(1)

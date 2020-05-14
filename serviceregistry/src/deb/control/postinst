@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # postinst script for arrowhead-serviceregistry
 #
 # see: dh_installdeb(1)
