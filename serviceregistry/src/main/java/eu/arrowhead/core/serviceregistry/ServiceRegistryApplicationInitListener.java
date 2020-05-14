@@ -1,12 +1,19 @@
 package eu.arrowhead.core.serviceregistry;
 
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.stereotype.Component;
+
 import eu.arrowhead.common.ApplicationInitListener;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreDefaults;
-import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.core.CoreSystemService;
-import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.dto.shared.ServiceRegistryRequestDTO;
@@ -15,17 +22,6 @@ import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Component;
-
-import java.time.ZonedDateTime;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
 
 @Component
 public class ServiceRegistryApplicationInitListener extends ApplicationInitListener {
@@ -71,7 +67,6 @@ public class ServiceRegistryApplicationInitListener extends ApplicationInitListe
                 final ServiceRegistryRequestDTO registryRequest = new ServiceRegistryRequestDTO();
                 registryRequest.setProviderSystem(systemRequestDTO);
                 registryRequest.setServiceDefinition(service.getServiceDefinition());
-                registryRequest.setEndOfValidity(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now().plusYears(1)));
                 registryRequest.setInterfaces(List.of(serviceInterface));
                 registryRequest.setServiceUri(service.getServiceUri());
                 registryRequest.setSecure(securityType.name());
