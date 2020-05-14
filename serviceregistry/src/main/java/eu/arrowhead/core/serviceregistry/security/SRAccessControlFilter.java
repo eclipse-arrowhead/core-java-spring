@@ -8,11 +8,13 @@ import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.security.CoreSystemAccessControlFilter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -44,7 +46,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 			checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
 		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI)) {
 			// A provider system can only register its own services!
-			checkProviderAccessToRegister(clientCN, requestJSON, requestTarget);
+			checkProviderAccessAndReservationsToRegister(clientCN, requestJSON, requestTarget);
 		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI)) {
 			// A provider system can only unregister its own services!
 			checkProviderAccessToDeregister(clientCN, queryParams, requestTarget);
@@ -69,10 +71,12 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void checkProviderAccessToRegister(final String clientCN, final String requestJSON, final String requestTarget) {
+	private void checkProviderAccessAndReservationsToRegister(final String clientCN, final String requestJSON, final String requestTarget) {
+		final String cloudCN = getServerCloudCN();
 		final String clientName = getClientNameFromCN(clientCN);
 		final ServiceRegistryRequestDTO requestBody = Utilities.fromJson(requestJSON, ServiceRegistryRequestDTO.class);
 		final String providerName = requestBody.getProviderSystem() != null ? requestBody.getProviderSystem().getSystemName() : "";
+		final String  serviceDefinition = requestBody.getServiceDefinition() != null ? requestBody.getServiceDefinition().trim() : "";
 		if (Utilities.isEmpty(providerName)) {
 			log.debug("Provider name is not set in the body when use {}", requestTarget);
 			return; // we can't continue the check and the endpoint will throw BadPayloadException
@@ -81,6 +85,15 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 		if (!providerName.equalsIgnoreCase(clientName) && !providerName.replaceAll("_", "").equalsIgnoreCase(clientName)) {
 			log.debug("Provider system name and certificate common name do not match! Registering denied!");
 			throw new AuthException("Provider system name(" + providerName + ") and certificate common name (" + clientCN + ") do not match!", HttpStatus.UNAUTHORIZED.value());
+		}
+		
+		if (!isClientACoreSystem(clientCN, cloudCN)) {
+			for (final CoreSystemService coreSystemService : CoreSystemService.values()) {
+				if (serviceDefinition.equalsIgnoreCase(coreSystemService.getServiceDefinition())) {
+					log.debug("ServiceDefinition is not authorized to use. Registering denied!");
+					throw new AuthException("ServiceDefinition is not authorized to use. '" + requestBody.getServiceDefinition() + "' is a reserved arrowhead core service definition.", HttpStatus.UNAUTHORIZED.value());
+				}
+			}
 		}
 	}
 
