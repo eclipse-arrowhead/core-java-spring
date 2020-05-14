@@ -10,6 +10,15 @@ else
     HOME="/root"
 fi
 
+# Set networkinterfaces choices
+INTERFACES="$(ip -o -4 addr show | awk ' { sub(/\/.*/, "", $4); print $2 " " $4 "," } ' | head -c -2)"
+db_subst arrowhead-core-common/systeminterface choices ${INTERFACES}
+db_subst arrowhead-core-common/interfaces choices ${INTERFACES}
+
+# Get networkinterfaces
+db_input high arrowhead-core-common/systeminterface || true
+db_input high arrowhead-core-common/interfaces || true
+
 # Get installation type
 db_input high arrowhead-core-common/install_type || true
 db_go || true

@@ -1,3 +1,13 @@
+Template: arrowhead-core-common/systeminterface
+Type: select
+Choices: ${choices}
+Description: Select which ip is the network ip of this device
+
+Template: arrowhead-core-common/interfaces
+Type: multiselect
+Choices: ${choices}
+Description: Select which ip's should be used as SANs
+
 Template: arrowhead-core-common/install_type
 Type: select
 Choices: Detached, Authorized

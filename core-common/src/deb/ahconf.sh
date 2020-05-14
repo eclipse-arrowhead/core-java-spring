@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 AH_CONF_DIR="/etc/arrowhead"
 AH_CLOUDS_DIR="${AH_CONF_DIR}/clouds"
@@ -13,9 +13,56 @@ AH_COUNTRY=eu # hard-coded to the Arrowhead Framework
 db_get arrowhead-core-common/relay_master_cert; AH_RELAY_MASTER_CERT=$RET
 db_get arrowhead-core-common/domain_name; AH_DOMAIN_NAME=$RET
 
-OWN_IP=`ip -o -4  address show  | awk ' NR==2 { gsub(/\/.*/, "", $4); print $4 } '`
+db_get arrowhead-core-common/systeminterface; AH_SYSTEM_INTERFACE="$RET"
+db_get arrowhead-core-common/interfaces; AH_NETWORK_INTERFACES="$RET"
+
+OWN_IP="$(echo "${AH_SYSTEM_INTERFACE}" | awk ' { print $2 } ')"
 echo $OWN_IP
 
+readarray -t SAN_IPS<<<"$(echo "${AH_NETWORK_INTERFACES}" | awk ' BEGIN { RS = "," } { print $2 } ')"
+
+ah_subject_alternative_names() {
+  ips="$(echo "${@}" | grep -o -P '(?<=-ips ).*?((?= -dns)|$)')"
+  dns="$(echo "${@}" | grep -o -P '(?<=-dns ).*?((?= -ips)|$)')"
+  out="IP:127.0.0.1,DNS:localhost"
+
+  for ip in ${ips}
+  do
+    if [[ ${out} != *"${ip}"* ]]; then
+      out="${out},IP:${ip}"
+    fi
+  done
+
+  for domain in ${dns}
+  do
+    if [[ ${out} != *"${domain}"* ]]; then
+      out="${out},DNS:${domain}"
+    fi
+  done
+
+  echo "${out}"
+}
+
+ah_ip_valid () {
+	my_ip=${1}
+	
+	if expr "$my_ip" : '[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$' >/dev/null; then
+		OLD_IFS=${IFS}
+		IFS=.
+		set $my_ip
+		for quad in 1 2 3 4; do
+			if eval [ \$$quad -gt 255 ]; then
+				IFS=OLD_IFS
+				return 1
+			fi
+		done
+		IFS=${OLD_IFS}
+		return 0
+	else
+		return 1
+	fi
+}
+ 
 ah_cert () {
     dst_path=${1}
     dst_name=${2}
@@ -32,6 +79,9 @@ ah_cert () {
     gen_cmd="-genkeypair"
     keytool ${gen_cmd} --help >/dev/null 2>&1 || gen_cmd='-genkey'
 
+    # Get a formatted subject alternative names
+    sans="$(ah_subject_alternative_names -ips "${SAN_IPS[@]}" -dns `hostname`)"
+
     if [ ! -f "${file}" ]; then
         keytool ${gen_cmd} \
             -alias ${dst_name} \
@@ -44,7 +94,7 @@ ah_cert () {
             -storepass ${passwd} \
             -storetype PKCS12 \
             -ext BasicConstraints=ca:true,pathlen:3 \
-			-ext SubjectAlternativeName=IP:127.0.0.1,DNS:localhost,DNS:`hostname`,IP:${OWN_IP}
+			-ext SubjectAlternativeName=${sans}
 
         chown :arrowhead ${file}
         chmod 640 ${file}
@@ -135,6 +185,9 @@ ah_cert_signed () {
     if [ ! -f "${dst_file}" ]; then
         ah_cert ${dst_path} ${dst_name} ${cn}
 
+        # Get a formatted subject alternative names
+        sans="$(ah_subject_alternative_names -ips "${SAN_IPS[@]}" -dns `hostname`)"
+
         keytool -export \
             -alias ${src_name} \
             -storepass ${AH_PASS_CERT} \
@@ -160,7 +213,7 @@ ah_cert_signed () {
             -storepass ${AH_PASS_CERT} \
             -validity 3650 \
             -ext BasicConstraints=ca:true,pathlen:2 \
-			-ext SubjectAlternativeName=IP:127.0.0.1,DNS:localhost,DNS:`hostname`,IP:${OWN_IP} \
+			-ext SubjectAlternativeName=${sans} \
         | keytool -importcert \
             -alias ${dst_name} \
             -keypass ${AH_PASS_CERT} \
@@ -168,43 +221,6 @@ ah_cert_signed () {
             -storepass ${AH_PASS_CERT} \
             -noprompt
     fi
-}
-
-ah_ip_valid () {
-	my_ip=${1}
-	
-	if expr "$my_ip" : '[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$' >/dev/null; then
-		OLD_IFS=${IFS}
-		IFS=.
-		set $my_ip
-		for quad in 1 2 3 4; do
-			if eval [ \$$quad -gt 255 ]; then
-				IFS=OLD_IFS
-				return 1
-			fi
-		done
-		IFS=${OLD_IFS}
-		return 0
-	else
-		return 1
-	fi
-}
- 
-ah_subject_alternative_names() {
-    host=${1}
-    ip=${2}
-
-    local san="IP:127.0.0.1,DNS:localhost,DNS:${host},IP:${ip}"
-    
-    if [ ! -z ${AH_DOMAIN_NAME} ]; then
-        if ah_ip_valid ${AH_DOMAIN_NAME}; then
-            san=${san},IP:${AH_DOMAIN_NAME}
-        else
-            san=${san},DNS:${AH_DOMAIN_NAME}
-        fi
-    fi
-
-    echo "${san}"
 }
 
 ah_cert_signed_system () {
@@ -235,9 +251,10 @@ ah_cert_signed_system () {
     src_file="${AH_CLOUDS_DIR}/${AH_CLOUD_NAME}.p12"
 
     if [ ! -f "${file}" ]; then
-		san=$(ah_subject_alternative_names ${host} ${ip})
-		
 		ah_cert ${path} ${name} "${name}.${AH_CLOUD_NAME}.${AH_OPERATOR}.arrowhead.eu" ${passwd}
+
+        # Get a formatted subject alternative names
+        sans="$(ah_subject_alternative_names -ips "${SAN_IPS[@]}" ${ip} -dns ${host})"
 
         keytool -export \
             -alias ${AH_CLOUD_NAME} \
@@ -263,7 +280,7 @@ ah_cert_signed_system () {
             -keystore ${src_file} \
             -storepass ${AH_PASS_CERT} \
             -validity 3650 \
-			-ext SubjectAlternativeName=${san} \
+			-ext SubjectAlternativeName=${sans} \
         | keytool -importcert \
             -alias ${name} \
             -keypass ${passwd} \
@@ -320,10 +337,11 @@ ah_ca_keystore () {
     ca_keystore="${ca_sys_dir}/${ca_sys_name}.p12"
 
     if [ ! -f "${ca_keystore}" ]; then
-        san=$(ah_subject_alternative_names ${host} ${ip})
-        
         # generate CA system keypair
         ah_cert ${ca_sys_dir} ${ca_sys_name} "${ca_sys_name}.${AH_CLOUD_NAME}.${AH_OPERATOR}.arrowhead.eu" ${ca_password}
+
+        # Get a formatted subject alternative names
+        sans="$(ah_subject_alternative_names -ips "${SAN_IPS[@]}" ${ip} -dns ${host})"
 
         # import cloud keypair
         # this is necessary, because CA signs system certificates with the cloud cert
@@ -350,7 +368,7 @@ ah_ca_keystore () {
                 -keystore "${ca_keystore}" \
                 -storepass ${ca_password} \
                 -validity 3650 \
-                -ext SubjectAlternativeName=${san} \
+                -ext SubjectAlternativeName=${sans} \
         | keytool -importcert \
                 -alias ${ca_sys_name} \
                 -keypass ${ca_password} \
