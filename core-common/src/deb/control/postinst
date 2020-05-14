@@ -21,102 +21,102 @@ set -e
 
 
 case "$1" in
-    configure)
-	
-		dos2unix -q /usr/share/arrowhead/conf/ahconf.sh
-		dos2unix -q /usr/bin/ah_gen_system_cert.sh
-		dos2unix -q /usr/bin/ah_gen_relay_cert.sh
-	
-		. /usr/share/arrowhead/conf/ahconf.sh
-		
-		# Create user
-		adduser --system --no-create-home --group arrowhead
+  configure)
+    dos2unix -q /usr/share/arrowhead/conf/ahconf.sh
+    dos2unix -q /usr/bin/ah_gen_system_cert.sh
+    dos2unix -q /usr/bin/ah_gen_relay_cert.sh
 
-		# Create directories
-		mkdir -p ${AH_CLOUDS_DIR}/
-		if [ ! -d /var/log/arrowhead ]; then
-			mkdir -p /var/log/arrowhead
-			chown arrowhead:adm /var/log/arrowhead
-			chmod 750 /var/log/arrowhead
-		fi
+    . /usr/share/arrowhead/conf/ahconf.sh
 
-		# Generate certificate password (if required)
-		if [ -z "${AH_PASS_CERT}" ]; then
-			PASS="$(openssl rand -base64 12)"
-			db_set arrowhead-core-common/cert_password ${PASS}
-		fi
+    # Create user
+    adduser --system --no-create-home --group arrowhead
 
-		db_get arrowhead-core-common/install_type; INSTALL_TYPE="$RET"
-		case ${INSTALL_TYPE} in
-			"Authorized" )
-				# Get additional variables
-				db_get arrowhead-core-common/cloud_cert; cloud_cert=$RET
-				db_get arrowhead-core-common/cloud_alias; cloud_alias=$RET
-				db_get arrowhead-core-common/cloud_password; cloud_password=$RET
-				db_get arrowhead-core-common/master_cert; master_cert=$RET
+    # Create directories
+    mkdir -p ${AH_CLOUDS_DIR}/
+    if [ ! -d /var/log/arrowhead ]; then
+      mkdir -p /var/log/arrowhead
+      chown arrowhead:adm /var/log/arrowhead
+      chmod 750 /var/log/arrowhead
+    fi
 
-				# Extract data from CN field
-				subject=$(keytool -list -keystore "${cloud_cert}" -storepass "${cloud_password}" -v -alias "${cloud_alias}" | grep "Owner:" | head -n1 | sed 's/Owner: //')
-				cloud_name=$(echo "${subject}" | sed 's/^.*CN=\([^.]*\)\.\([^.]*\)\.\([^.]*\)\.\([^,]*\).*$/\1/')
-				operator=$(echo "${subject}" | sed 's/^.*CN=\([^.]*\)\.\([^.]*\)\.\([^.]*\)\.\([^,]*\).*$/\2/')
+    # Generate certificate password (if required)
+    if [ -z "${AH_PASS_CERT}" ]; then
+      PASS="$(openssl rand -base64 12)"
+      db_set arrowhead-core-common/cert_password ${PASS}
+    fi
 
-				# Store data
-				db_set arrowhead-core-common/cloudname ${cloud_name}
-				db_set arrowhead-core-common/operator ${operator}
-			;;
-		esac
+    db_get arrowhead-core-common/install_type; INSTALL_TYPE="$RET"
+    case ${INSTALL_TYPE} in
+      "Authorized" )
+        # Get additional variables
+        db_get arrowhead-core-common/cloud_cert; cloud_cert=$RET
+        db_get arrowhead-core-common/cloud_alias; cloud_alias=$RET
+        db_get arrowhead-core-common/cloud_password; cloud_password=$RET
+        db_get arrowhead-core-common/master_cert; master_cert=$RET
 
-		# Reload global variables
-		. /usr/share/arrowhead/conf/ahconf.sh
+        # Extract data from CN field
+        subject=$(keytool -list -keystore "${cloud_cert}" -storepass "${cloud_password}" -v -alias "${cloud_alias}" | grep "Owner:" | head -n1 | sed 's/Owner: //')
+        cloud_name=$(echo "${subject}" | sed 's/^.*CN=\([^.]*\)\.\([^.]*\)\.\([^.]*\)\.\([^,]*\).*$/\1/')
+        operator=$(echo "${subject}" | sed 's/^.*CN=\([^.]*\)\.\([^.]*\)\.\([^.]*\)\.\([^,]*\).*$/\2/')
 
-		# Do actions based on install type
-		case ${INSTALL_TYPE} in
-			"Authorized" )
-				if [ ! -f ${AH_CLOUDS_DIR}/${AH_CLOUD_NAME}.p12 ]; then
-					# Store cloud certificate
-					keytool -importkeystore \
-						-srckeypass ${cloud_password} \
-						-destkeypass ${AH_PASS_CERT} \
-						-srcstorepass ${cloud_password} \
-						-deststorepass  ${AH_PASS_CERT} \
-						-srcalias ${cloud_alias} \
-						-destalias ${AH_CLOUD_NAME} \
-						-srckeystore "${cloud_cert}" \
-						-destkeystore "${AH_CLOUDS_DIR}/${AH_CLOUD_NAME}.p12" \
-						-deststoretype PKCS12
-					chown :arrowhead "${AH_CLOUDS_DIR}/${AH_CLOUD_NAME}.p12"
-					chmod 640 "${AH_CLOUDS_DIR}/${AH_CLOUD_NAME}.p12"
+        # Store data
+        db_set arrowhead-core-common/cloudname ${cloud_name}
+        db_set arrowhead-core-common/operator ${operator}
+        ;;
+    esac
 
-					# Store master certificate
-					cp "${master_cert}" "${AH_CONF_DIR}/master.crt"
-					chown :arrowhead "${AH_CONF_DIR}/master.crt"
-					chmod 640 "${AH_CONF_DIR}/master.crt"
-				fi
-			;;
+    # Reload global variables
+    . /usr/share/arrowhead/conf/ahconf.sh
 
-			"Detached" )
-				# Generate master and cloud certificates
-				ah_cert ${AH_CONF_DIR} master "arrowhead.eu"
-				ah_cert_export "${AH_CONF_DIR}" master "${AH_CONF_DIR}"
-				ah_cert_signed ${AH_CLOUDS_DIR} ${AH_CLOUD_NAME} "${AH_CLOUD_NAME}.${AH_OPERATOR}.arrowhead.eu" ${AH_CONF_DIR} master
-			;;
+    # Do actions based on install type
+    case ${INSTALL_TYPE} in
+      "Authorized" )
+        if [ ! -f ${AH_CLOUDS_DIR}/${AH_CLOUD_NAME}.p12 ]; then
+          # Store cloud certificate
+          keytool -importkeystore \
+            -srckeypass ${cloud_password} \
+            -destkeypass ${AH_PASS_CERT} \
+            -srcstorepass ${cloud_password} \
+            -deststorepass  ${AH_PASS_CERT} \
+            -srcalias ${cloud_alias} \
+            -destalias ${AH_CLOUD_NAME} \
+            -srckeystore "${cloud_cert}" \
+            -destkeystore "${AH_CLOUDS_DIR}/${AH_CLOUD_NAME}.p12" \
+            -deststoretype PKCS12
 
-			* )
-				echo "Unexpected install type"
-				exit 1
-				;;
-		esac
+          chown :arrowhead "${AH_CLOUDS_DIR}/${AH_CLOUD_NAME}.p12"
+          chmod 640 "${AH_CLOUDS_DIR}/${AH_CLOUD_NAME}.p12"
 
-		# Trust the cloud certificate
-		ah_cert_trust ${AH_CONF_DIR} ${AH_CLOUDS_DIR} ${AH_CLOUD_NAME}
-    ;;
+          # Store master certificate
+          cp "${master_cert}" "${AH_CONF_DIR}/master.crt"
+          chown :arrowhead "${AH_CONF_DIR}/master.crt"
+          chmod 640 "${AH_CONF_DIR}/master.crt"
+        fi
+        ;;
 
-    abort-upgrade|abort-remove|abort-deconfigure)
-    ;;
+      "Detached" )
+        # Generate master and cloud certificates
+        ah_cert ${AH_CONF_DIR} master "arrowhead.eu"
+        ah_cert_export "${AH_CONF_DIR}" master "${AH_CONF_DIR}"
+        ah_cert_signed ${AH_CLOUDS_DIR} ${AH_CLOUD_NAME} "${AH_CLOUD_NAME}.${AH_OPERATOR}.arrowhead.eu" ${AH_CONF_DIR} master
+        ;;
 
-    *)
-        echo "postinst called with unknown argument \`$1'" >&2
+      * )
+        echo "Unexpected install type"
         exit 1
+        ;;
+    esac
+
+    # Trust the cloud certificate
+    ah_cert_trust ${AH_CONF_DIR} ${AH_CLOUDS_DIR} ${AH_CLOUD_NAME}
+    ;;
+
+  abort-upgrade|abort-remove|abort-deconfigure)
+    ;;
+
+  *)
+    echo "postinst called with unknown argument \`$1'" >&2
+    exit 1
     ;;
 esac
 
