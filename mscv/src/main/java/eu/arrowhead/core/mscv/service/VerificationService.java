@@ -55,7 +55,7 @@ public class VerificationService {
     public VerificationListView getListById(final Long id) {
         logger.debug("getListById({}) started", id);
         Assert.notNull(id, ID_NULL_ERROR_MESSAGE);
-        return MscvDtoConverter.convert(findListById(id));
+        return MscvDtoConverter.convertToView(findListById(id));
     }
 
     @Transactional(readOnly = true)
@@ -63,7 +63,7 @@ public class VerificationService {
         logger.debug("getListByName({}) started", name);
         Assert.notNull(name, NAME_NULL_ERROR_MESSAGE);
         final Optional<VerificationEntryList> optional = verListRepository.findOneByNameAndLayer(name, layer);
-        return MscvDtoConverter.convert(optional.orElseThrow(notFoundException("Verification list name")));
+        return MscvDtoConverter.convertToView(optional.orElseThrow(notFoundException("Verification list name")));
     }
 
     @Transactional(readOnly = true)

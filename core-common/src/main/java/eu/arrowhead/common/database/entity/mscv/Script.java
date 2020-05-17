@@ -1,9 +1,8 @@
 package eu.arrowhead.common.database.entity.mscv;
 
 
-import eu.arrowhead.common.dto.shared.mscv.Layer;
-import eu.arrowhead.common.dto.shared.mscv.OS;
-
+import java.util.Objects;
+import java.util.StringJoiner;
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
@@ -17,8 +16,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import java.util.Objects;
-import java.util.StringJoiner;
+
+import eu.arrowhead.common.dto.shared.mscv.Layer;
+import eu.arrowhead.common.dto.shared.mscv.OS;
 
 @Entity
 @Table(name = "mscv_script",
@@ -42,24 +42,24 @@ public class Script {
     @Enumerated(EnumType.STRING)
     private OS os;
 
-    @Column(nullable = false)
-    private String path;
+    @Column(name = "path", nullable = false)
+    private String physicalPath;
 
     public Script() { super(); }
 
-    public Script(final Mip mip, final Layer layer, final OS os, final String path) {
+    public Script(final Mip mip, final Layer layer, final OS os, final String physicalPath) {
         this.mip = mip;
         this.layer = layer;
         this.os = os;
-        this.path = path;
+        this.physicalPath = physicalPath;
     }
 
-    public Script(final Long id, final Mip mip, final Layer layer, final OS os, final String path) {
+    public Script(final Long id, final Mip mip, final Layer layer, final OS os, final String physicalPath) {
         this.id = id;
         this.mip = mip;
         this.layer = layer;
         this.os = os;
-        this.path = path;
+        this.physicalPath = physicalPath;
     }
 
     public Long getId() {
@@ -94,12 +94,12 @@ public class Script {
         this.os = os;
     }
 
-    public String getPath() {
-        return path;
+    public String getPhysicalPath() {
+        return physicalPath;
     }
 
-    public void setPath(final String path) {
-        this.path = path;
+    public void setPhysicalPath(final String physicalPath) {
+        this.physicalPath = physicalPath;
     }
 
     @Override
@@ -111,12 +111,12 @@ public class Script {
                 Objects.equals(mip, script.mip) &&
                 layer == script.layer &&
                 os == script.os &&
-                Objects.equals(path, script.path);
+                Objects.equals(physicalPath, script.physicalPath);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, mip, layer, os, path);
+        return Objects.hash(id, mip, layer, os, physicalPath);
     }
 
     @Override
@@ -126,7 +126,7 @@ public class Script {
                 .add("mip=" + mip)
                 .add("layer=" + layer)
                 .add("os=" + os)
-                .add("path=" + path)
+                .add("path=" + physicalPath)
                 .toString();
     }
 }

@@ -39,7 +39,7 @@ public class MscvDefaults {
     private SshDefaults ssh;
 
     @NotBlank
-    private Path defaultPath = Path.of(".", File.pathSeparator).toAbsolutePath();
+    private String defaultPath = Path.of(".", File.pathSeparator).toAbsolutePath().toString();
 
     public MscvDefaults() { super(); }
 
@@ -88,11 +88,11 @@ public class MscvDefaults {
         this.ssh = ssh;
     }
 
-    public Path getDefaultPath() {
+    public String getDefaultPath() {
         return defaultPath;
     }
 
-    public void setDefaultPath(final Path defaultPath) {
+    public void setDefaultPath(final String defaultPath) {
         this.defaultPath = defaultPath;
     }
 

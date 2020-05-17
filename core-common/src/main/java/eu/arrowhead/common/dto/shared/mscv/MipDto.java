@@ -6,7 +6,7 @@ import java.util.StringJoiner;
 
 public class MipDto implements Serializable {
 
-    private Long extId;
+    private Integer extId;
     private String name;
     private String description;
     private StandardDto standard;
@@ -17,7 +17,7 @@ public class MipDto implements Serializable {
         super();
     }
 
-    public MipDto(final Long extId, final String name, final StandardDto standard, final CategoryDto category, final DomainDto domain) {
+    public MipDto(final Integer extId, final String name, final StandardDto standard, final CategoryDto category, final DomainDto domain) {
         this.extId = extId;
         this.name = name;
         this.standard = standard;
@@ -25,11 +25,11 @@ public class MipDto implements Serializable {
         this.domain = domain;
     }
 
-    public Long getExtId() {
+    public Integer getExtId() {
         return extId;
     }
 
-    public void setExtId(final Long extId) {
+    public void setExtId(final Integer extId) {
         this.extId = extId;
     }
 

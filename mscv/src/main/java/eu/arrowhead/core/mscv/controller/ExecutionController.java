@@ -82,19 +82,6 @@ public class ExecutionController {
     // methods
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Return an echo message with the purpose of testing the core device availability", response = String.class,
-            tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE, response = ErrorMessageDTO.class),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response = ErrorMessageDTO.class),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response = ErrorMessageDTO.class)
-    })
-    @GetMapping(path = CommonConstants.ECHO_URI)
-    public String echoOnboarding() {
-        return "Got it!";
-    }
-
-    //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Return the Base64 encoded public key of the server as well as the SSH identity line", response = String.class,
             tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
     @ApiResponses(value = {

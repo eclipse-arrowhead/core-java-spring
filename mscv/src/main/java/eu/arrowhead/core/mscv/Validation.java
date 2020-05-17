@@ -1,12 +1,20 @@
 package eu.arrowhead.core.mscv;
 
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.mscv.CategoryDto;
 import eu.arrowhead.common.dto.shared.mscv.ClientExecutionRequest;
+import eu.arrowhead.common.dto.shared.mscv.DomainDto;
+import eu.arrowhead.common.dto.shared.mscv.Layer;
+import eu.arrowhead.common.dto.shared.mscv.MipDto;
+import eu.arrowhead.common.dto.shared.mscv.MipIdentifierDto;
+import eu.arrowhead.common.dto.shared.mscv.OS;
+import eu.arrowhead.common.dto.shared.mscv.ScriptRequestDto;
 import eu.arrowhead.common.dto.shared.mscv.SshTargetDto;
+import eu.arrowhead.common.dto.shared.mscv.StandardDto;
 import eu.arrowhead.common.dto.shared.mscv.TargetDto;
 import eu.arrowhead.common.dto.shared.mscv.TargetLoginRequest;
 import eu.arrowhead.common.exception.BadPayloadException;
@@ -22,8 +30,19 @@ public class Validation {
     public static final String PAGE_NULL_ERROR_MESSAGE = "Page must not be null";
     public static final String EXAMPLE_NULL_ERROR_MESSAGE = "Example must not be null";
     public static final String LAYER_NULL_ERROR_MESSAGE = "Layer must not be null";
+
     public static final String MIP_NULL_ERROR_MESSAGE = "MIP must not be null";
+    public static final String MIP_IDENTIFIER_NULL_ERROR_MESSAGE = "MIP identifier not be null";
+    public static final String MIP_IDENTIFIER_FORMAT_ERROR_MESSAGE = "MIP identifier must be in the format: [CATEGORY ABBREVIATION]-[EXTERNAL ID]. e.g. IAC-1";
+    public static final Pattern MIP_IDENTIFIER_PATTERN = Pattern.compile("(\\D+)-(\\d+)");
+
     public static final String CATEGORY_NULL_ERROR_MESSAGE = "Category must not be null";
+    public static final String STANDARD_NULL_ERROR_MESSAGE = "Standard must not be null";
+    public static final String DOMAIN_NULL_ERROR_MESSAGE = "Domain must not be null";
+
+    public static final String SCRIPT_NULL_ERROR_MESSAGE = "Script must not be null";
+    public static final String SCRIPT_CONTENT_NULL_ERROR_MESSAGE = "Script content must not be null";
+    public static final String PATH_NULL_ERROR_MESSAGE = "Path must not be empty";
 
     public static final String CREDENTIALS_NULL_ERROR_MESSAGE = "Credentials must not be null/empty";
     public static final String CREDENTIALS_INVALID_ERROR_MESSAGE = "Credentials must be Base64 encoded in the form <user>:<password>";
@@ -44,7 +63,6 @@ public class Validation {
     public static final String ADDRESS_NULL_ERROR_MESSAGE = "Address must not be null";
     public static final String ADDRESS_EMPTY_ERROR_MESSAGE = " Address must have value";
 
-
     public static final String PORT_NULL_ERROR_MESSAGE = "Port must not be null";
     public static final String PORT_EMPTY_ERROR_MESSAGE = "Port must have value";
     public static final String PORT_INVALID_ERROR_MESSAGE = "Port must be positive number between 1 - 65535";
@@ -53,7 +71,6 @@ public class Validation {
     public static final String LIST_EMPTY_ERROR_MESSAGE = "List must not be empty";
 
     public static final String ABBR_EMPTY_ERROR_MESSAGE = "Abbreviation must have value";
-
 
     private final Logger logger = LogManager.getLogger();
 
@@ -77,6 +94,44 @@ public class Validation {
         return retValue.withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING)
                        .withIgnoreCase()
                        .withIgnoreNullValues();
+    }
+
+
+    public void verify(final MipDto dto, final String origin) {
+        verifyPayload(dto, origin);
+        verify(dto.getCategory(), origin);
+        verify(dto.getDomain(), origin);
+        verify(dto.getStandard(), origin);
+        verifyName(dto.getName(), origin);
+        if (Objects.isNull(dto.getExtId())) {
+            throw new BadPayloadException(ID_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+    }
+
+    public void verify(final MipIdentifierDto dto, final String origin) {
+        verifyPayload(dto, origin);
+        if (Objects.isNull(dto.getExtId())) {
+            throw new BadPayloadException(ID_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+        if (Objects.isNull(dto.getCategoryAbbreviation())) {
+            throw new BadPayloadException(ABBR_EMPTY_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+    }
+
+    public void verify(final ScriptRequestDto dto, final String origin) {
+        if (Objects.isNull(dto)) {
+            throw new BadPayloadException(SCRIPT_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+        verify(dto.getMip(), origin);
+        verifyOs(dto.getOs(), origin);
+        verifyLayer(dto.getLayer(), origin);
+    }
+
+    public void verify(final DomainDto dto, final String origin) {
+        verifyPayload(dto, origin);
+        if (Objects.isNull(dto.getName())) {
+            throw new BadPayloadException(DOMAIN_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
     }
 
     public void verify(final ClientExecutionRequest dto, final String origin) {
@@ -103,9 +158,7 @@ public class Validation {
         if (Utilities.isEmpty(dto.getName())) {
             throw new BadPayloadException(NAME_EMPTY_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
-        if (Objects.isNull(dto.getOs())) {
-            throw new BadPayloadException(OS_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-        }
+        verifyOs(dto.getOs(), origin);
     }
 
     public void verify(final TargetLoginRequest request, final String origin) {
@@ -114,6 +167,18 @@ public class Validation {
         verify(request.getTarget(), origin);
         if (Utilities.isEmpty(request.getCredentials())) {
             throw new BadPayloadException(CREDENTIALS_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+    }
+
+    public void verify(final StandardDto standard, final String origin) {
+        if (Objects.isNull(standard)) {
+            throw new BadPayloadException(STANDARD_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+        if (Objects.isNull(standard.getName())) {
+            throw new BadPayloadException(NAME_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+        if (Objects.isNull(standard.getIdentification())) {
+            throw new BadPayloadException(ID_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
     }
 
@@ -128,6 +193,30 @@ public class Validation {
         }
     }
 
+    public void verifyId(final Long mipId, final String origin) {
+        if (Objects.isNull(mipId)) {
+            throw new BadPayloadException(ID_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+    }
+
+    public void verifyId(final Integer mipId, final String origin) {
+        if (Objects.isNull(mipId)) {
+            throw new BadPayloadException(ID_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+    }
+
+    public void verifyLayer(final Layer layer, final String origin) {
+        if (Objects.isNull(layer)) {
+            throw new BadPayloadException(OS_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+    }
+
+    public void verifyOs(final OS os, final String origin) {
+        if (Objects.isNull(os)) {
+            throw new BadPayloadException(OS_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+    }
+
     public void verifyAddress(final String address, final String origin) {
         logger.debug("verifyAddress({},{}) started...", address, origin);
         if (Utilities.isEmpty(address)) {
@@ -139,6 +228,23 @@ public class Validation {
         logger.debug("verifyName({},{}) started...", name, origin);
         if (Utilities.isEmpty(name)) {
             throw new BadPayloadException(NAME_EMPTY_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+    }
+
+    public void verifyAbbreviation(final String name, final String origin) {
+        logger.debug("verifyAbbreviation({},{}) started...", name, origin);
+        if (Utilities.isEmpty(name)) {
+            throw new BadPayloadException(ABBR_EMPTY_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+    }
+
+    public void verifyIdentifier(final String identifier, final String origin) {
+        logger.debug("verifyIdentifier({},{}) started...", identifier, origin);
+        if (Utilities.isEmpty(identifier)) {
+            throw new BadPayloadException(MIP_IDENTIFIER_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+        if (!MIP_IDENTIFIER_PATTERN.matcher(identifier).matches()) {
+            throw new BadPayloadException(MIP_IDENTIFIER_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
     }
 
@@ -168,4 +274,5 @@ public class Validation {
             throw new BadPayloadException(PAYLOAD_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
     }
+
 }

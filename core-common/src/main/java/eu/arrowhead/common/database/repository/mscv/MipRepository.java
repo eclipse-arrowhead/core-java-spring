@@ -1,7 +1,9 @@
 package eu.arrowhead.common.database.repository.mscv;
 
-import eu.arrowhead.common.database.repository.RefreshableRepository;
+import java.util.Optional;
+
 import eu.arrowhead.common.database.entity.mscv.Mip;
+import eu.arrowhead.common.database.repository.RefreshableRepository;
 import eu.arrowhead.common.database.view.mscv.MipView;
 import org.springframework.stereotype.Repository;
 
@@ -10,4 +12,11 @@ public interface MipRepository extends RefreshableRepository<Mip, Long> {
 
     MipView findViewById(final Long id);
 
+    MipView findViewByName(final String name);
+
+    Optional<Mip> findByExtIdAndCategoryName(final Integer extId, final String category);
+
+    Optional<Mip> findByExtIdAndCategoryAbbreviation(final Integer extId, final String categoryAbbreviation);
+
+    Optional<Mip> findByName(final String name);
 }

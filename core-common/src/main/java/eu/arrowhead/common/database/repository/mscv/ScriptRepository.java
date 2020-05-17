@@ -12,7 +12,10 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ScriptRepository extends RefreshableRepository<Script, Long> {
-    <S extends Script> Optional<S> findOneByMipAndOsAndLayer(final Mip mip, final OS os, final Layer layer);
+
+    <S extends Script> Optional<S> findOneByMipAndLayerAndOs(final Mip mip, final Layer layer, final OS os);
 
     <S extends Script> Set<S> findAllByLayer(final Layer layer);
+
+    <S extends Script> Set<S> findAllByOs(final OS os);
 }

@@ -1,4 +1,4 @@
-package eu.arrowhead.core.mscv.service.crud;
+package eu.arrowhead.core.mscv.service;
 
 import java.util.Optional;
 
@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import static eu.arrowhead.core.mscv.Validation.CATEGORY_NULL_ERROR_MESSAGE;
+import static eu.arrowhead.core.mscv.Validation.NAME_NULL_ERROR_MESSAGE;
 import static eu.arrowhead.core.mscv.Validation.PAGE_NULL_ERROR_MESSAGE;
 
 @Service
@@ -28,19 +29,26 @@ public class CategoryService {
     public CategoryService(final MipCategoryRepository repository) {this.repository = repository;}
 
 
+    @Transactional
     public MipCategory create(final MipCategory category) {
+        logger.debug("create({}) started", category);
+        Assert.notNull(category, CATEGORY_NULL_ERROR_MESSAGE);
         return repository.saveAndFlush(category);
     }
 
     @Transactional(readOnly = true)
     public Optional<MipCategory> find(final String name) {
         logger.debug("find({}) started", name);
+        Assert.notNull(name, NAME_NULL_ERROR_MESSAGE);
+
         return repository.findByName(name);
     }
 
     @Transactional(readOnly = true)
     public boolean exists(final MipCategory category) {
         logger.debug("exists({}) started", category);
+        Assert.notNull(category, CATEGORY_NULL_ERROR_MESSAGE);
+
         return repository.exists(Example.of(category, ExampleMatcher.matchingAll()));
     }
 
@@ -65,6 +73,8 @@ public class CategoryService {
     @Transactional
     public void delete(final String name) {
         logger.debug("delete({}) started", name);
+        Assert.notNull(name, NAME_NULL_ERROR_MESSAGE);
+
         final Optional<MipCategory> optionalMipCategory = find(name);
         optionalMipCategory.ifPresent(repository::delete);
         repository.flush();

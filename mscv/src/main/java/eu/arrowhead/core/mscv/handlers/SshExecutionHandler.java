@@ -269,7 +269,7 @@ public final class SshExecutionHandler implements ExecutionHandler<SshTarget> {
 
                 if (Objects.nonNull(script) && targetOs.equals(script.getOs())) {
 
-                    final Path path = Path.of(script.getPath());
+                    final Path path = Path.of(script.getPhysicalPath());
                     final CommandResult scriptResult;
 
                     scpClient.upload(path, "/tmp" + path.getFileName(), ScpClient.Option.PreserveAttributes);

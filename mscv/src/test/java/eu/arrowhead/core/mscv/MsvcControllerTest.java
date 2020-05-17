@@ -1,17 +1,7 @@
 package eu.arrowhead.core.mscv;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.database.service.CommonDBService;
-import eu.arrowhead.core.mscv.service.MscvCrudService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,6 +15,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import static org.junit.Assert.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -42,9 +36,6 @@ public class MsvcControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @MockBean(name = "mockOnboardingDBService")
-    private MscvCrudService onboardingDBService;
 
     @MockBean(name = "mockCommonDBService")
     private CommonDBService commonDBService;
@@ -65,9 +56,9 @@ public class MsvcControllerTest {
     @Test
     public void echoMsvc() throws Exception {
         final MvcResult response = this.mockMvc.perform(get("/msvc/echo")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
+                                                                .accept(MediaType.APPLICATION_JSON))
+                                               .andExpect(status().isOk())
+                                               .andReturn();
         assertEquals("Got it!", response.getResponse().getContentAsString());
     }
 }

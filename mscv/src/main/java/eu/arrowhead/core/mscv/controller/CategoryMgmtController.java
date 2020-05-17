@@ -11,9 +11,10 @@ import eu.arrowhead.common.database.entity.mscv.MipCategory;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.mscv.CategoryDto;
 import eu.arrowhead.common.dto.shared.mscv.CategoryListResponseDto;
+import eu.arrowhead.core.mscv.Constants;
 import eu.arrowhead.core.mscv.MscvDtoConverter;
 import eu.arrowhead.core.mscv.Validation;
-import eu.arrowhead.core.mscv.service.crud.CategoryService;
+import eu.arrowhead.core.mscv.service.CategoryService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -42,7 +43,7 @@ import static eu.arrowhead.core.mscv.Constants.PARAMETER_NAME;
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_NAME_PATH;
 import static eu.arrowhead.core.mscv.MscvUtilities.notFoundException;
 
-@Api(tags = {CoreCommonConstants.SWAGGER_TAG_ALL})
+@Api(tags = {CoreCommonConstants.SWAGGER_TAG_ALL, CoreCommonConstants.SWAGGER_TAG_MGMT, Constants.SWAGGER_TAG_CATEGORY_MGMT})
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS,
         allowedHeaders = {HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT}
 )
@@ -62,7 +63,7 @@ public class CategoryMgmtController {
     private static final String READ_CATEGORY_URI = QUALIFY_CATEGORY_URI;
     private static final String READ_CATEGORY_DESCRIPTION = "Get MSCV category by name";
     private static final String READ_CATEGORY_SUCCESS = "MSCV category returned";
-    private static final String READ_CATEGORY_NOT_FOUND = "MSCV category returned";
+    private static final String READ_CATEGORY_NOT_FOUND = "MSCV category not found";
     private static final String READ_CATEGORY_BAD_REQUEST = "Unable to return MSCV category";
 
     private static final String READ_ALL_CATEGORY_URI = CATEGORY_URI;
@@ -73,6 +74,7 @@ public class CategoryMgmtController {
     private static final String UPDATE_CATEGORY_URI = QUALIFY_CATEGORY_URI;
     private static final String UPDATE_CATEGORY_DESCRIPTION = "Update MSCV category";
     private static final String UPDATE_CATEGORY_SUCCESS = "MSCV category updated";
+    private static final String UPDATE_CATEGORY_NOT_FOUND = "MSCV category not found";
     private static final String UPDATE_CATEGORY_BAD_REQUEST = "Unable to update MSCV category";
 
     private static final String DELETE_CATEGORY_URI = QUALIFY_CATEGORY_URI;
@@ -93,7 +95,7 @@ public class CategoryMgmtController {
     //=================================================================================================
     // methods
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = CREATE_CATEGORY_DESCRIPTION, response = CategoryDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = CREATE_CATEGORY_DESCRIPTION, response = CategoryDto.class)
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = CREATE_CATEGORY_OK),
             @ApiResponse(code = HttpStatus.SC_CREATED, message = CREATE_CATEGORY_SUCCESS),
@@ -121,7 +123,7 @@ public class CategoryMgmtController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = READ_CATEGORY_DESCRIPTION, response = CategoryDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = READ_CATEGORY_DESCRIPTION, response = CategoryDto.class)
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = READ_CATEGORY_SUCCESS),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = READ_CATEGORY_BAD_REQUEST, response = ErrorMessageDTO.class),
@@ -136,14 +138,14 @@ public class CategoryMgmtController {
         final String origin = createMgmtOrigin(READ_CATEGORY_URI);
         validation.verifyName(name, origin);
 
-        final Optional<MipCategory> optionalSshTarget = crudService.find(name);
-        final MipCategory category = optionalSshTarget.orElseThrow(notFoundException(READ_CATEGORY_NOT_FOUND, origin));
+        final Optional<MipCategory> optionalMipCategory = crudService.find(name);
+        final MipCategory category = optionalMipCategory.orElseThrow(notFoundException("Category", origin));
 
         return MscvDtoConverter.convert(category);
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = READ_ALL_CATEGORY_DESCRIPTION, response = CategoryListResponseDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = READ_ALL_CATEGORY_DESCRIPTION, response = CategoryListResponseDto.class)
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = READ_ALL_CATEGORY_SUCCESS),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = READ_ALL_CATEGORY_BAD_REQUEST, response = ErrorMessageDTO.class),
@@ -166,9 +168,10 @@ public class CategoryMgmtController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = UPDATE_CATEGORY_DESCRIPTION, response = CategoryDto.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = UPDATE_CATEGORY_DESCRIPTION, response = CategoryDto.class)
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = UPDATE_CATEGORY_SUCCESS),
+            @ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = UPDATE_CATEGORY_NOT_FOUND),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = UPDATE_CATEGORY_BAD_REQUEST, response = ErrorMessageDTO.class),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response = ErrorMessageDTO.class),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response = ErrorMessageDTO.class)
@@ -189,7 +192,7 @@ public class CategoryMgmtController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = DELETE_CATEGORY_DESCRIPTION, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = DELETE_CATEGORY_DESCRIPTION)
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_NO_CONTENT, message = DELETE_CATEGORY_SUCCESS),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_CATEGORY_BAD_REQUEST, response = ErrorMessageDTO.class),

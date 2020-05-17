@@ -24,6 +24,11 @@
             <artifactId>arrowhead-core-common</artifactId>
             <version>${revision}</version>
         </dependency>
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.4</version>
+        </dependency>
 
         <!-- SSH CLIENT -->
         <dependency>

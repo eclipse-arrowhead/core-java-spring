@@ -69,7 +69,7 @@ public class VerificationExecutionService {
         final VerificationEntryList entryList = verificationService.findListById(entryListId);
         final SshTarget target = targetService.getTargetById(targetId);
 
-        return MscvDtoConverter.convert(execute(entryList, target));
+        return MscvDtoConverter.convertToView(execute(entryList, target));
     }
 
     @Transactional
@@ -80,7 +80,7 @@ public class VerificationExecutionService {
         final SshTarget target = targetService.findOrCreate(MscvDtoConverter.convert(targetDto));
         final VerificationEntryList suitableList = verificationService.findOrCreateSuitableList(target, layer);
 
-        return MscvDtoConverter.convert(execute(suitableList, target));
+        return MscvDtoConverter.convertToView(execute(suitableList, target));
     }
 
     private VerificationResult execute(final VerificationEntryList entryList, final SshTarget target) {
@@ -99,7 +99,7 @@ public class VerificationExecutionService {
 
                 // prepare result for each verification entry. result will be adapted during execution run.
                 for (VerificationEntry entry : entries) {
-                    final Optional<Script> optionalScript = scriptService.findScriptFor(entry.getMip(), target.getOs(), entryList.getLayer());
+                    final Optional<Script> optionalScript = scriptService.findScriptFor(entry.getMip(), entryList.getLayer(), target.getOs());
 
                     if (optionalScript.isPresent()) {
                         final var detail = new VerificationResultDetail(execution, entry, optionalScript.get(),

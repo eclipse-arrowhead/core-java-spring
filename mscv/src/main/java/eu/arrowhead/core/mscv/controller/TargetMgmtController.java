@@ -56,11 +56,11 @@ import static eu.arrowhead.core.mscv.Constants.PARAMETER_PORT;
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_PORT_PATH;
 import static eu.arrowhead.core.mscv.Constants.PATH_ADDRESS;
 import static eu.arrowhead.core.mscv.Constants.PATH_PORT;
-import static eu.arrowhead.core.mscv.Constants.SWAGGER_TAG_TARGET;
+import static eu.arrowhead.core.mscv.Constants.SWAGGER_TAG_TARGET_MGMT;
 import static eu.arrowhead.core.mscv.MscvUtilities.notFoundException;
 import static eu.arrowhead.core.mscv.Validation.LOGIN_TARGET_NOT_FOUND;
 
-@Api(tags = {CoreCommonConstants.SWAGGER_TAG_ALL})
+@Api(tags = {CoreCommonConstants.SWAGGER_TAG_ALL, CoreCommonConstants.SWAGGER_TAG_MGMT, SWAGGER_TAG_TARGET_MGMT})
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS,
         allowedHeaders = {HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT}
 )
@@ -122,8 +122,7 @@ public class TargetMgmtController {
     //=================================================================================================
     // methods
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = CREATE_TARGET_DESCRIPTION, response = SshTargetDto.class,
-            tags = {CoreCommonConstants.SWAGGER_TAG_MGMT, SWAGGER_TAG_TARGET})
+    @ApiOperation(value = CREATE_TARGET_DESCRIPTION, response = SshTargetDto.class)
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = CREATE_TARGET_OK),
             @ApiResponse(code = HttpStatus.SC_CREATED, message = CREATE_TARGET_SUCCESS),
@@ -149,8 +148,7 @@ public class TargetMgmtController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = READ_TARGET_DESCRIPTION, response = SshTargetDto.class,
-            tags = {CoreCommonConstants.SWAGGER_TAG_MGMT, SWAGGER_TAG_TARGET})
+    @ApiOperation(value = READ_TARGET_DESCRIPTION, response = SshTargetDto.class)
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = READ_TARGET_SUCCESS),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = READ_TARGET_BAD_REQUEST, response = ErrorMessageDTO.class),
@@ -174,8 +172,7 @@ public class TargetMgmtController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = READ_ALL_TARGET_DESCRIPTION, response = TargetListResponseDto.class, tags =
-            {CoreCommonConstants.SWAGGER_TAG_MGMT, SWAGGER_TAG_TARGET})
+    @ApiOperation(value = READ_ALL_TARGET_DESCRIPTION, response = TargetListResponseDto.class)
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = READ_ALL_TARGET_SUCCESS),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = READ_ALL_TARGET_BAD_REQUEST, response = ErrorMessageDTO.class),
@@ -190,7 +187,7 @@ public class TargetMgmtController {
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField,
             @ApiParam(value = "Filter mode. Match all or any filter.")
-            @RequestParam(name = "mode", defaultValue = "ANY") final ExampleMatcher.MatchMode mode,
+            @RequestParam(name = "mode", defaultValue = "ALL") final ExampleMatcher.MatchMode mode,
             @ApiParam(value = "Filter for name. Partial match ignoring case.")
             @RequestParam(name = PARAMETER_NAME, required = false) final String name,
             @ApiParam(value = "Filter for operating system.", example = "LINUX")
@@ -212,8 +209,7 @@ public class TargetMgmtController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = UPDATE_TARGET_DESCRIPTION, response = SshTargetDto.class,
-            tags = {CoreCommonConstants.SWAGGER_TAG_MGMT, SWAGGER_TAG_TARGET})
+    @ApiOperation(value = UPDATE_TARGET_DESCRIPTION, response = SshTargetDto.class)
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = UPDATE_TARGET_SUCCESS),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = UPDATE_TARGET_BAD_REQUEST, response = ErrorMessageDTO.class),
@@ -238,8 +234,7 @@ public class TargetMgmtController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = DELETE_TARGET_DESCRIPTION,
-            tags = {CoreCommonConstants.SWAGGER_TAG_MGMT, SWAGGER_TAG_TARGET})
+    @ApiOperation(value = DELETE_TARGET_DESCRIPTION)
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_TARGET_SUCCESS),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_TARGET_BAD_REQUEST, response = ErrorMessageDTO.class),
@@ -258,8 +253,7 @@ public class TargetMgmtController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = LOGIN_TARGET_DESCRIPTION, response = Void.class,
-            tags = {CoreCommonConstants.SWAGGER_TAG_MGMT, SWAGGER_TAG_TARGET})
+    @ApiOperation(value = LOGIN_TARGET_DESCRIPTION, response = Void.class)
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = LOGIN_TARGET_SUCCESS, response = Void.class),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = LOGIN_TARGET_BAD_REQUEST, response = ErrorMessageDTO.class),
@@ -282,8 +276,7 @@ public class TargetMgmtController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = VERIFY_LOGIN_TARGET_DESCRIPTION, response = Boolean.class,
-            tags = {CoreCommonConstants.SWAGGER_TAG_MGMT, SWAGGER_TAG_TARGET})
+    @ApiOperation(value = VERIFY_LOGIN_TARGET_DESCRIPTION, response = Boolean.class)
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = LOGIN_TARGET_SUCCESS, response = Boolean.class),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = LOGIN_TARGET_BAD_REQUEST, response = ErrorMessageDTO.class),
