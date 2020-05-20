@@ -544,6 +544,7 @@ public class QoSDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = ArrowheadException.class)
 	public void createInterDirectPingMeasurement(final QoSInterDirectMeasurement measurementParam, final PingMeasurementCalculationsDTO calculations, final ZonedDateTime aroundNow) {
 		logger.debug("createInterDirectPingMeasurement started ...");
 
@@ -587,6 +588,7 @@ public class QoSDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = ArrowheadException.class)
 	public QoSInterDirectPingMeasurementLog logInterDirectMeasurementToDB(final String address, final PingMeasurementCalculationsDTO calculations, final ZonedDateTime aroundNow) {
 		logger.debug("logInterDirectMeasurementToDB started ...");
 
@@ -622,6 +624,7 @@ public class QoSDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = ArrowheadException.class)
 	public void logInterDirectMeasurementDetailsToDB(final QoSInterDirectPingMeasurementLog measurementLogSaved, final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
 		logger.debug("logInterDirectMeasurementDetailsToDB started ...");
 
@@ -664,6 +667,7 @@ public class QoSDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = ArrowheadException.class)
 	public void updateInterDirectPingMeasurement(final QoSInterDirectMeasurement measurement, final PingMeasurementCalculationsDTO calculations, final QoSInterDirectPingMeasurement pingMeasurement,
 												 final ZonedDateTime aroundNow) {
 		logger.debug("updateInterDirectPingMeasurement started ...");
@@ -706,6 +710,7 @@ public class QoSDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = ArrowheadException.class)
 	public QoSInterDirectMeasurement getOrCreateDirectInterMeasurement(final String address, final CloudResponseDTO cloudResponseDTO, final QoSMeasurementType type) {
 		logger.debug("getOrCreateDirectInterMeasurement started ...");
 
@@ -735,6 +740,7 @@ public class QoSDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = ArrowheadException.class)
 	public void updateInterDirectMeasurement(final ZonedDateTime aroundNow, final QoSInterDirectMeasurement measurement) {
 		logger.debug("updateInterDirectMeasurement started ...");
 
@@ -1053,6 +1059,7 @@ public class QoSDBService {
 		relayEchoMeasurement.setJitterWithTimeout(calculations.getJitterWithTimeout());
 		relayEchoMeasurement.setLostPerMeasurementPercent(calculations.getLostPerMeasurementPercent());
 		relayEchoMeasurement.setCountStartedAt(relayEchoMeasurement.getCountStartedAt());
+		relayEchoMeasurement.setLastAccessAt(aroundNow);
 		relayEchoMeasurement.setSent(relayEchoMeasurement.getSent() + calculations.getSentInThisTest());
 		relayEchoMeasurement.setSentAll(relayEchoMeasurement.getSentAll() + calculations.getSentInThisTest());
 		relayEchoMeasurement.setReceived(relayEchoMeasurement.getReceived() + calculations.getReceivedInThisTest());

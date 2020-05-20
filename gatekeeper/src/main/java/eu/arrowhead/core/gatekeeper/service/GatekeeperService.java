@@ -106,7 +106,7 @@ public class GatekeeperService {
 	
 	private final long qosReservationPufferSeconds = 5;
 	
-	private final String CLOUD_HAS_NO_RELAY_WARNING_MESSAGE = "The following cloud do not have a relay: ";
+	private final String CLOUD_HAS_NO_RELAY_WARNING_MESSAGE = "The following cloud does not have a relay: ";
 
 	//=================================================================================================
 	// methods
@@ -847,7 +847,7 @@ public class GatekeeperService {
 		final ZonedDateTime now = ZonedDateTime.now();
 		
 		for (final QoSReservationResponseDTO reservation : qosReservations) {
-			if (reservation.getReservedTo().toEpochSecond() - now.toEpochSecond() > qosReservationPufferSeconds) {
+			if (Utilities.parseUTCStringToLocalZonedDateTime(reservation.getReservedTo()).toEpochSecond() - now.toEpochSecond() > qosReservationPufferSeconds) {
 				reservedProviderIdAndSystemIdPairs.add(reservation.getReservedProviderId() + "-" + reservation.getReservedServiceId());
 			}
 		}

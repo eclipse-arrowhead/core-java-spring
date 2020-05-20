@@ -73,24 +73,25 @@ public class CoreUtilities {
 		
 		//=================================================================================================
 		// members
-		
+		private static final int MAX_BATCH_SIZE = Integer.MAX_VALUE;
+
 		private final int validatedPage;
 		private final int validatedSize;
-		private final Direction validatedDirecion;
+		private final Direction validatedDirection;
 		
 		//=================================================================================================
 		// methods
 		
 		//-------------------------------------------------------------------------------------------------
 		public ValidatedPageParams(final int validatedPage, final int validatedSize, final Direction validatedDirection) {
-			this.validatedPage = validatedPage;
-			this.validatedSize = validatedSize;
-			this.validatedDirecion = validatedDirection;
+			this.validatedPage = Math.max(validatedPage, 0);
+			this.validatedSize = validatedSize < 1 ? MAX_BATCH_SIZE : validatedSize;
+			this.validatedDirection = validatedDirection;
 		}
 
 		//-------------------------------------------------------------------------------------------------
 		public int getValidatedPage() { return validatedPage; }
 		public int getValidatedSize() { return validatedSize; }
-		public Direction getValidatedDirecion() { return validatedDirecion; } 
+		public Direction getValidatedDirection() { return validatedDirection; }
 	}
 }

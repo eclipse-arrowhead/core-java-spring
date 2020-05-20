@@ -34,7 +34,7 @@ public class ICNProviderMatchmakingParameters {
 	public long getRandomSeed() { return randomSeed; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setOnlyPreferred(boolean onlyPreferred) { this.onlyPreferred = onlyPreferred; }
+	public void setOnlyPreferred(final boolean onlyPreferred) { this.onlyPreferred = onlyPreferred; }
 	public void setRandomSeed(final long randomSeed) { this.randomSeed = randomSeed; }	
 
 	//-------------------------------------------------------------------------------------------------

@@ -54,7 +54,6 @@ import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.service.PingService;
-import eu.arrowhead.core.qos.service.RelayEchoService;
 import eu.arrowhead.core.qos.service.RelayTestService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -142,9 +141,6 @@ public class QoSMonitorController {
 	private PingService pingService;
 	
 	@Autowired
-	private RelayEchoService relayEchoService;
-	
-	@Autowired
 	private RelayTestService relayTestService;
 
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
@@ -190,7 +186,7 @@ public class QoSMonitorController {
 
 		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTRA_PING_MEASUREMENTS_MGMT_URI);
 		final QoSIntraPingMeasurementListResponseDTO measurementResponse = qosDBService.getIntraPingMeasurementResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), 
-																												 validParameters.getValidatedDirecion(), sortField);
+																												 validParameters.getValidatedDirection(), sortField);
 
 		logger.debug("Measurements  with page: {} and item_per page: {} retrieved successfully", page, size);
 		return measurementResponse;
@@ -285,7 +281,7 @@ public class QoSMonitorController {
 
 		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_MGMT_URI);
 		final QoSInterDirectPingMeasurementListResponseDTO measurementResponse = qosDBService.getInterDirectPingMeasurementsPageResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), 
-																												 						 validParameters.getValidatedDirecion(), sortField);
+																												 						 validParameters.getValidatedDirection(), sortField);
 		logger.debug("Measurements  with page: {} and item_per page: {} retrieved successfully", page, size);
 		return measurementResponse;
 	}
@@ -344,7 +340,7 @@ public class QoSMonitorController {
 
 		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_URI);
 		final QoSInterRelayEchoMeasurementListResponseDTO response = qosDBService.getInterRelayEchoMeasurementsResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(),
-																												  		validParameters.getValidatedDirecion(), sortField);
+																												  		validParameters.getValidatedDirection(), sortField);
 		logger.debug("Measurements  with page: {} and item_per page: {} retrieved successfully", page, size);
 		return response;
 	}
@@ -399,7 +395,7 @@ public class QoSMonitorController {
 		logger.debug("New queryInterRelayEchoMeasurementByCloud request recieved");
 		validateCloudRequest(request, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT);
 		
-		final QoSInterRelayEchoMeasurementListResponseDTO response = relayEchoService.getInterRelayEchoMeasurements(request);
+		final QoSInterRelayEchoMeasurementListResponseDTO response = relayTestService.getInterRelayEchoMeasurements(request);
 		logger.debug("Measurement retrieved successfully");
 		return response;
 	}

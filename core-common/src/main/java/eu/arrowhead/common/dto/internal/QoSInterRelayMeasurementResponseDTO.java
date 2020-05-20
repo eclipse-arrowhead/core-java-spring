@@ -1,7 +1,6 @@
 package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
-import java.time.ZonedDateTime;
 
 import eu.arrowhead.common.dto.shared.QoSMeasurementStatus;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
@@ -18,9 +17,9 @@ public class QoSInterRelayMeasurementResponseDTO implements Serializable {
 	private RelayResponseDTO relay;
 	private QoSMeasurementType measurementType;
 	private QoSMeasurementStatus status;
-	private ZonedDateTime lastMeasurementAt;
-	private ZonedDateTime createdAt;
-	private ZonedDateTime updatedAt;
+	private String lastMeasurementAt;
+	private String createdAt;
+	private String updatedAt;
 	
 	//=================================================================================================
 	// methods
@@ -30,8 +29,7 @@ public class QoSInterRelayMeasurementResponseDTO implements Serializable {
 	
 	//-------------------------------------------------------------------------------------------------
 	public QoSInterRelayMeasurementResponseDTO(final long id, final CloudResponseDTO cloud, final RelayResponseDTO relay, final QoSMeasurementType measurementType, final QoSMeasurementStatus status,
-											   final ZonedDateTime lastMeasurementAt,
-											   final ZonedDateTime createdAt, final ZonedDateTime updatedAt) {
+											   final String lastMeasurementAt, final String createdAt, final String updatedAt) {
 		this.id = id;
 		this.cloud = cloud;
 		this.relay = relay;
@@ -48,9 +46,9 @@ public class QoSInterRelayMeasurementResponseDTO implements Serializable {
 	public RelayResponseDTO getRelay() { return relay; }
 	public QoSMeasurementType getMeasurementType() { return measurementType; }
 	public QoSMeasurementStatus getStatus() { return status; }
-	public ZonedDateTime getLastMeasurementAt() { return lastMeasurementAt; }
-	public ZonedDateTime getCreatedAt() { return createdAt; }
-	public ZonedDateTime getUpdatedAt() { return updatedAt; }
+	public String getLastMeasurementAt() { return lastMeasurementAt; }
+	public String getCreatedAt() { return createdAt; }
+	public String getUpdatedAt() { return updatedAt; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
@@ -58,7 +56,7 @@ public class QoSInterRelayMeasurementResponseDTO implements Serializable {
 	public void setRelay(final RelayResponseDTO relay) { this.relay = relay; }
 	public void setMeasurementType(final QoSMeasurementType measurementType) { this.measurementType = measurementType; } 
 	public void setStatus(final QoSMeasurementStatus status) { this.status = status; }
-	public void setLastMeasurementAt(final ZonedDateTime lastMeasurementAt) { this.lastMeasurementAt = lastMeasurementAt; }
-	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
-	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }	
+	public void setLastMeasurementAt(final String lastMeasurementAt) { this.lastMeasurementAt = lastMeasurementAt; }
+	public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
+	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }	
 }

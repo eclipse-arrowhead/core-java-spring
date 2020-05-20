@@ -11,7 +11,6 @@ import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PreDestroy;
 
@@ -19,7 +18,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
@@ -125,12 +123,6 @@ public abstract class ApplicationInitListener {
 		customDestroy();
 	}
 
-	//-------------------------------------------------------------------------------------------------
-	@Bean(CommonConstants.ARROWHEAD_CONTEXT)
-	public Map<String,Object> getArrowheadContext() {
-		return new ConcurrentHashMap<>();
-	}
-	
 	//=================================================================================================
 	// assistant methods
 	

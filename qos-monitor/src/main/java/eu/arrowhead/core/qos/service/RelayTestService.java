@@ -2,8 +2,11 @@ package eu.arrowhead.core.qos.service;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.annotation.Resource;
 import javax.jms.JMSException;
@@ -16,12 +19,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.QoSInterRelayEchoMeasurement;
+import eu.arrowhead.common.database.entity.QoSInterRelayMeasurement;
+import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSMonitorSenderConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalResponseDTO;
@@ -161,6 +170,23 @@ public class RelayTestService {
 		}
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public QoSInterRelayEchoMeasurementListResponseDTO getInterRelayEchoMeasurements(final CloudRequestDTO request) {
+		logger.debug("getInterRelayEchoMeasurements started...");
+		
+		final List<QoSInterRelayMeasurement> measurements = qosDBService.getInterRelayMeasurementByCloud(validateAndGetCloud(request));
+		
+		final List<QoSInterRelayEchoMeasurement> echoMeasurements = new ArrayList<>();
+		for (final QoSInterRelayMeasurement measurement : measurements) {
+			final Optional<QoSInterRelayEchoMeasurement> optional = qosDBService.getInterRelayEchoMeasurementByMeasurement(measurement);
+			if (optional.isPresent()) {
+				echoMeasurements.add(optional.get());
+			}
+		}
+		
+		return DTOConverter.convertQoSInterRelayEchoMeasurementPageToQoSInterRelayEchoMeasurementListResponseDTO(new PageImpl<>(echoMeasurements));
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -280,5 +306,24 @@ public class RelayTestService {
 		}
 		
 		throw new ArrowheadException("Can't find relay: " + address + ":" + port);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private CloudResponseDTO validateAndGetCloud(final CloudRequestDTO request) {
+		logger.debug("validateAndGetCloud started...");
+		
+		if (request == null) {
+			throw new InvalidParameterException("CloudRequestDTO is null.");
+		}		
+		
+		if (Utilities.isEmpty(request.getOperator())) {
+			throw new InvalidParameterException("Cloud operator is null or blank");
+		}
+		
+		if (Utilities.isEmpty(request.getName())) {
+			throw new InvalidParameterException("Cloud name is null or empty");
+		}
+		
+		return qosMonitorDriver.queryGatekeeperCloudInfo(request.getOperator(), request.getName());
 	}
 }

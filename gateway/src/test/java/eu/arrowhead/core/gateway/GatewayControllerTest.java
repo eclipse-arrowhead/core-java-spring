@@ -163,23 +163,23 @@ public class GatewayControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetActiveSessionsWithInvalidPageParameter() throws Exception {
-		final MvcResult result = getActiveSessions(status().isBadRequest(), "-2", "3");
+		final MvcResult result = getActiveSessions(status().isBadRequest(), null, "3");
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(GATEWAY_ACTIVE_SESSIONS_URI, error.getOrigin());
-		Assert.assertEquals("Page parameter has to be equals or greater than zero and size parameter has to be equals or greater than one.", error.getErrorMessage());
+		Assert.assertEquals("Defined page or size could not be with undefined size or page.", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetActiveSessionsWithInvalidSizeParameter() throws Exception {
-		final MvcResult result = getActiveSessions(status().isBadRequest(), "0", "-1");
+		final MvcResult result = getActiveSessions(status().isBadRequest(), "0", null);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(GATEWAY_ACTIVE_SESSIONS_URI, error.getOrigin());
-		Assert.assertEquals("Page parameter has to be equals or greater than zero and size parameter has to be equals or greater than one.", error.getErrorMessage());
+		Assert.assertEquals("Defined page or size could not be with undefined size or page.", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------

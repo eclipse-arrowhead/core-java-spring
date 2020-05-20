@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.CloudSystemFormDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.QoSInterDirectPingMeasurementResponseDTO;
@@ -448,7 +449,7 @@ public class PingRequirementsVerifier implements QoSVerifier {
 			return getInterDirectPingMeasurementFromQoSMonitor(request);
 		}
 		
-		if (measurement.getMeasurement().getLastMeasurementAt().plusSeconds(pingMeasurementCacheThreshold).isBefore(ZonedDateTime.now())) { // obsolete record
+		if (Utilities.parseUTCStringToLocalZonedDateTime(measurement.getMeasurement().getLastMeasurementAt()).plusSeconds(pingMeasurementCacheThreshold).isBefore(ZonedDateTime.now())) { // obsolete record
 			interDirectPingMeasurementCache.remove(getCloudSystemCacheKey(request));
 			return getInterDirectPingMeasurementFromQoSMonitor(request);
 		}
@@ -480,7 +481,7 @@ public class PingRequirementsVerifier implements QoSVerifier {
 		}
 		
 		for (final QoSInterRelayEchoMeasurementResponseDTO dto : measurement.getData()) {			
-			if (dto.getMeasurement().getLastMeasurementAt().plusSeconds(pingMeasurementCacheThreshold).isBefore(ZonedDateTime.now())) { // obsolete record
+			if (Utilities.parseUTCStringToLocalZonedDateTime(dto.getMeasurement().getLastMeasurementAt()).plusSeconds(pingMeasurementCacheThreshold).isBefore(ZonedDateTime.now())) { // obsolete record
 				interRelayEchoMeasurementCache.remove(getCloudCacheKey(request));
 				return getInterRelayEchoMeasurementFromQoSMonitor(request);
 			}

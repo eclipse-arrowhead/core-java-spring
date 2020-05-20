@@ -220,7 +220,7 @@ public class QoSDBServiceInterDirectTest {
 		
 		try {
 			qoSDBService.createInterDirectMeasurement(measurement.getCloud(), measurement.getAddress(), measurement.getMeasurementType(), measurement.getLastMeasurementAt());			
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			verify(qoSInterDirectMeasurementRepository, times(1)).saveAndFlush(any());
 			
 			final QoSInterDirectMeasurement captured = valueCapture.getValue();
@@ -630,12 +630,12 @@ public class QoSDBServiceInterDirectTest {
 		final CloudResponseDTO cloudResp = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "dvgdafvgadsg", nowStr, nowStr);
 		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResp);
 		final String address = "1.1.1.1";
-		QoSInterDirectMeasurement interDirectMeasurement = getQoSInterDirectMeasurementForTest(QoSMeasurementType.PING);
+		final QoSInterDirectMeasurement interDirectMeasurement = getQoSInterDirectMeasurementForTest(QoSMeasurementType.PING);
 		interDirectMeasurement.setCloud(cloud);
 		
 		when(qoSInterDirectMeasurementRepository.findByCloudAndAddressAndMeasurementType(any(), any(), any())).thenReturn(Optional.of(interDirectMeasurement));
 		
-		QoSInterDirectMeasurement result = qoSDBService.getOrCreateDirectInterMeasurement(address, cloudResp, QoSMeasurementType.PING);
+		final QoSInterDirectMeasurement result = qoSDBService.getOrCreateDirectInterMeasurement(address, cloudResp, QoSMeasurementType.PING);
 		
 		verify(qoSInterDirectMeasurementRepository, times(1)).findByCloudAndAddressAndMeasurementType(eq(cloud), eq(address), eq(QoSMeasurementType.PING));
 		assertEquals(cloudResp.getAuthenticationInfo(), result.getCloud().getAuthenticationInfo());
@@ -648,13 +648,13 @@ public class QoSDBServiceInterDirectTest {
 		final CloudResponseDTO cloudResp = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "dvgdafvgadsg", nowStr, nowStr);
 		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResp);
 		final String address = "1.1.1.1";
-		QoSInterDirectMeasurement interDirectMeasurement = getQoSInterDirectMeasurementForTest(QoSMeasurementType.PING);
+		final QoSInterDirectMeasurement interDirectMeasurement = getQoSInterDirectMeasurementForTest(QoSMeasurementType.PING);
 		interDirectMeasurement.setCloud(cloud);
 		
 		when(qoSInterDirectMeasurementRepository.findByCloudAndAddressAndMeasurementType(any(), any(), any())).thenReturn(Optional.empty());
 		when(qoSInterDirectMeasurementRepository.saveAndFlush(any())).thenReturn(interDirectMeasurement);
 		
-		QoSInterDirectMeasurement result = qoSDBService.getOrCreateDirectInterMeasurement(address, cloudResp, QoSMeasurementType.PING);
+		final QoSInterDirectMeasurement result = qoSDBService.getOrCreateDirectInterMeasurement(address, cloudResp, QoSMeasurementType.PING);
 		
 		verify(qoSInterDirectMeasurementRepository, times(1)).findByCloudAndAddressAndMeasurementType(eq(cloud), eq(address), eq(QoSMeasurementType.PING));
 		verify(qoSInterDirectMeasurementRepository, times(1)).saveAndFlush(any());
@@ -668,7 +668,7 @@ public class QoSDBServiceInterDirectTest {
 		final CloudResponseDTO cloudResp = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "dvgdafvgadsg", nowStr, nowStr);
 		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResp);
 		final String address = "1.1.1.1";
-		QoSInterDirectMeasurement interDirectMeasurement = getQoSInterDirectMeasurementForTest(QoSMeasurementType.PING);
+		final QoSInterDirectMeasurement interDirectMeasurement = getQoSInterDirectMeasurementForTest(QoSMeasurementType.PING);
 		interDirectMeasurement.setCloud(cloud);
 		
 		when(qoSInterDirectMeasurementRepository.findByCloudAndAddressAndMeasurementType(any(), any(), any())).thenReturn(Optional.empty());
@@ -676,7 +676,7 @@ public class QoSDBServiceInterDirectTest {
 		
 		try {
 			qoSDBService.getOrCreateDirectInterMeasurement(address, cloudResp, QoSMeasurementType.PING);			
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			verify(qoSInterDirectMeasurementRepository, times(1)).findByCloudAndAddressAndMeasurementType(eq(cloud), eq(address), eq(QoSMeasurementType.PING));
 			verify(qoSInterDirectMeasurementRepository, times(1)).saveAndFlush(any());
 			throw ex;
@@ -689,7 +689,7 @@ public class QoSDBServiceInterDirectTest {
 		final CloudResponseDTO cloudResp = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "dvgdafvgadsg", "", "");
 		try {
 			qoSDBService.getOrCreateDirectInterMeasurement(null, cloudResp, QoSMeasurementType.PING);			
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			verify(qoSInterDirectMeasurementRepository, times(0)).findByCloudAndAddressAndMeasurementType(any(), any(), any());
 			verify(qoSInterDirectMeasurementRepository, times(0)).saveAndFlush(any());
 			throw ex;
@@ -701,7 +701,7 @@ public class QoSDBServiceInterDirectTest {
 	public void getOrCreateDirectInterMeasurementWithNullCloudTest() {
 		try {
 			qoSDBService.getOrCreateDirectInterMeasurement("1.1.1.1", null, QoSMeasurementType.PING);			
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			verify(qoSInterDirectMeasurementRepository, times(0)).findByCloudAndAddressAndMeasurementType(any(), any(), any());
 			verify(qoSInterDirectMeasurementRepository, times(0)).saveAndFlush(any());
 			throw ex;
@@ -714,7 +714,7 @@ public class QoSDBServiceInterDirectTest {
 		final CloudResponseDTO cloudResp = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "dvgdafvgadsg", "", "");
 		try {
 			qoSDBService.getOrCreateDirectInterMeasurement("1.1.1.1", cloudResp, null);			
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			verify(qoSInterDirectMeasurementRepository, times(0)).findByCloudAndAddressAndMeasurementType(any(), any(), any());
 			verify(qoSInterDirectMeasurementRepository, times(0)).saveAndFlush(any());
 			throw ex;
@@ -780,7 +780,7 @@ public class QoSDBServiceInterDirectTest {
 		final List<QoSInterDirectPingMeasurement> measurementList = getQosInterDirectPingMeasurementListForTest(size);
 		when(qoSInterDirectMeasurementPingRepository.findAll(any(PageRequest.class))).thenReturn(new PageImpl<>(measurementList));
 		
-		Page<QoSInterDirectPingMeasurement> result = qoSDBService.getInterDirectPingMeasurementsPage(-1, -1, null, null);
+		final Page<QoSInterDirectPingMeasurement> result = qoSDBService.getInterDirectPingMeasurementsPage(-1, -1, null, null);
 		
 		verify(qoSInterDirectMeasurementPingRepository, times(1)).findAll(any(PageRequest.class));
 		assertEquals(size, result.getContent().size());
@@ -813,7 +813,7 @@ public class QoSDBServiceInterDirectTest {
 		
 		when(qoSInterDirectMeasurementRepository.findByCloudAndAddressAndMeasurementType(any(), any(), any())).thenReturn(Optional.of(pingMeasurement.getMeasurement()));
 		when(qoSInterDirectMeasurementPingRepository.findByMeasurement(any())).thenReturn(Optional.of(pingMeasurement));
-		Optional<QoSInterDirectPingMeasurement> result = qoSDBService.getInterDirectPingMeasurementByCloudAndSystemAddress(cloudResp, address);
+		final Optional<QoSInterDirectPingMeasurement> result = qoSDBService.getInterDirectPingMeasurementByCloudAndSystemAddress(cloudResp, address);
 		
 		verify(qoSInterDirectMeasurementRepository, times(1)).findByCloudAndAddressAndMeasurementType(eq(cloud), eq(address), eq(QoSMeasurementType.PING));
 		verify(qoSInterDirectMeasurementPingRepository, times(1)).findByMeasurement(eq(pingMeasurement.getMeasurement()));
@@ -832,7 +832,7 @@ public class QoSDBServiceInterDirectTest {
 		final String address = "1.1.1.1";
 		
 		when(qoSInterDirectMeasurementRepository.findByCloudAndAddressAndMeasurementType(any(), any(), any())).thenReturn(Optional.empty());
-		Optional<QoSInterDirectPingMeasurement> result = qoSDBService.getInterDirectPingMeasurementByCloudAndSystemAddress(cloudResp, address);
+		final Optional<QoSInterDirectPingMeasurement> result = qoSDBService.getInterDirectPingMeasurementByCloudAndSystemAddress(cloudResp, address);
 		
 		verify(qoSInterDirectMeasurementRepository, times(1)).findByCloudAndAddressAndMeasurementType(eq(cloud), eq(address), eq(QoSMeasurementType.PING));
 		verify(qoSInterDirectMeasurementPingRepository, times(0)).findByMeasurement(any());

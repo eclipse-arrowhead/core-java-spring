@@ -3,6 +3,7 @@ package eu.arrowhead.core.gateway.thread;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.util.ServiceConfigurationError;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,6 +22,7 @@ import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 
+import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
@@ -108,6 +110,8 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 			logger.debug("Problem occurs in initializing gateway communication: {}", ex.getMessage());
 			logger.debug("Stacktrace:", ex);
 			close();
+			
+			throw new ArrowheadException("Problem occurs in initializing gateway communication: " + ex.getMessage(), HttpStatus.SC_BAD_GATEWAY, ex);
 		}
 	}
 	
@@ -128,6 +132,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 				closeAndInterrupt();
 			} else {
 				final byte[] bytes = relayClient.getBytesFromMessage(message, providerGatewayPublicKey);
+				logger.debug("FROM PROVIDER:" + new String(bytes, StandardCharsets.UTF_8));
 				outConsumer.write(bytes);
 			}
 		} catch (final JMSException | ArrowheadException | IOException ex) {
@@ -177,6 +182,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 				} else {
 					final byte[] data = new byte[size];
 					System.arraycopy(buffer, 0, data, 0, size);
+					logger.debug("FROM CONSUMER:" + new String(data, StandardCharsets.UTF_8));
 					relayClient.sendBytes(relaySession, sender, providerGatewayPublicKey, data);
 				}
 			}

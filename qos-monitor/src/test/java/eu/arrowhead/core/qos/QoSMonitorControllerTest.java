@@ -76,7 +76,6 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.service.PingService;
-import eu.arrowhead.core.qos.service.RelayEchoService;
 import eu.arrowhead.core.qos.service.RelayTestService;
 
 @RunWith(SpringRunner.class)
@@ -117,9 +116,6 @@ public class QoSMonitorControllerTest {
 	
 	@MockBean(name = "mockPingService")
 	private PingService pingService;
-	
-	@MockBean(name = "mockRelayEchoService")
-	private RelayEchoService relayEchoService;
 	
 	@MockBean(name = "mockRelayTestService")
 	private RelayTestService relayTestService;
@@ -873,7 +869,7 @@ public class QoSMonitorControllerTest {
 		requestDTO.setName("test-n");
 		
 		final QoSInterRelayEchoMeasurementListResponseDTO responseDTO = getInterRelayEchoMeasurementListResponseDTOForTest(3);
-		when(relayEchoService.getInterRelayEchoMeasurements(any())).thenReturn(responseDTO);
+		when(relayTestService.getInterRelayEchoMeasurements(any())).thenReturn(responseDTO);
 		
 		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT)
 									     	   .contentType(MediaType.APPLICATION_JSON)
@@ -894,7 +890,7 @@ public class QoSMonitorControllerTest {
 		requestDTO.setName("test-n");
 		
 		final QoSInterRelayEchoMeasurementListResponseDTO responseDTO = getInterRelayEchoMeasurementListResponseDTOForTest(3);
-		when(relayEchoService.getInterRelayEchoMeasurements(any())).thenReturn(responseDTO);
+		when(relayTestService.getInterRelayEchoMeasurements(any())).thenReturn(responseDTO);
 		
 		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT)
 									     	   .contentType(MediaType.APPLICATION_JSON)
@@ -916,7 +912,7 @@ public class QoSMonitorControllerTest {
 		requestDTO.setName(null);
 		
 		final QoSInterRelayEchoMeasurementListResponseDTO responseDTO = getInterRelayEchoMeasurementListResponseDTOForTest(3);
-		when(relayEchoService.getInterRelayEchoMeasurements(any())).thenReturn(responseDTO);
+		when(relayTestService.getInterRelayEchoMeasurements(any())).thenReturn(responseDTO);
 		
 		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT)
 									     	   .contentType(MediaType.APPLICATION_JSON)
@@ -1627,7 +1623,7 @@ public class QoSMonitorControllerTest {
 		pingMeasurementResponseDTO.setId(1L);
 		pingMeasurementResponseDTO.setMeasurement(interDirectMeasurement);
 		pingMeasurementResponseDTO.setAvailable(true);
-		pingMeasurementResponseDTO.setLastAccessAt(ZonedDateTime.now());
+		pingMeasurementResponseDTO.setLastAccessAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		pingMeasurementResponseDTO.setMinResponseTime(1);
 		pingMeasurementResponseDTO.setMaxResponseTime(1);
 		pingMeasurementResponseDTO.setMeanResponseTimeWithTimeout(1);
@@ -1637,11 +1633,11 @@ public class QoSMonitorControllerTest {
 		pingMeasurementResponseDTO.setLostPerMeasurementPercent(0);
 		pingMeasurementResponseDTO.setSent(35);
 		pingMeasurementResponseDTO.setReceived(35);
-		pingMeasurementResponseDTO.setCountStartedAt(ZonedDateTime.now());
+		pingMeasurementResponseDTO.setCountStartedAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		pingMeasurementResponseDTO.setSentAll(35);
 		pingMeasurementResponseDTO.setReceivedAll(35);
-		pingMeasurementResponseDTO.setCreatedAt(ZonedDateTime.now());
-		pingMeasurementResponseDTO.setUpdatedAt(ZonedDateTime.now());
+		pingMeasurementResponseDTO.setCreatedAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
+		pingMeasurementResponseDTO.setUpdatedAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 
 		return pingMeasurementResponseDTO;
 	}
@@ -1652,9 +1648,9 @@ public class QoSMonitorControllerTest {
 														new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "fddddbvf", null, null),
 														"1.1.1.1",
 														type,
-														ZonedDateTime.now(),
-														ZonedDateTime.now(),
-														ZonedDateTime.now());
+														Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()),
+														Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()),
+														Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1675,7 +1671,7 @@ public class QoSMonitorControllerTest {
 		final QoSInterRelayEchoMeasurementResponseDTO relayMeasurementResponseDTO  = new QoSInterRelayEchoMeasurementResponseDTO();
 		relayMeasurementResponseDTO.setId(1L);
 		relayMeasurementResponseDTO.setMeasurement(interRelayMeasurement);
-		relayMeasurementResponseDTO.setLastAccessAt(ZonedDateTime.now());
+		relayMeasurementResponseDTO.setLastAccessAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		relayMeasurementResponseDTO.setMinResponseTime(1);
 		relayMeasurementResponseDTO.setMaxResponseTime(1);
 		relayMeasurementResponseDTO.setMeanResponseTimeWithTimeout(1);
@@ -1685,11 +1681,11 @@ public class QoSMonitorControllerTest {
 		relayMeasurementResponseDTO.setLostPerMeasurementPercent(0);
 		relayMeasurementResponseDTO.setSent(35);
 		relayMeasurementResponseDTO.setReceived(35);
-		relayMeasurementResponseDTO.setCountStartedAt(ZonedDateTime.now());
+		relayMeasurementResponseDTO.setCountStartedAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		relayMeasurementResponseDTO.setSentAll(35);
 		relayMeasurementResponseDTO.setReceivedAll(35);
-		relayMeasurementResponseDTO.setCreatedAt(ZonedDateTime.now());
-		relayMeasurementResponseDTO.setUpdatedAt(ZonedDateTime.now());
+		relayMeasurementResponseDTO.setCreatedAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
+		relayMeasurementResponseDTO.setUpdatedAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 
 		return relayMeasurementResponseDTO;
 	}
@@ -1701,9 +1697,9 @@ public class QoSMonitorControllerTest {
 													   new RelayResponseDTO(1L, "2.2.2.2", 20000, true, false, RelayType.GATEWAY_RELAY, null, null),
 													   type,
 													   QoSMeasurementStatus.FINISHED,
-													   ZonedDateTime.now(),
-													   ZonedDateTime.now(),
-													   ZonedDateTime.now());
+													   Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()),
+													   Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()),
+													   Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 	}
 	
 	//-------------------------------------------------------------------------------------------------

@@ -14,12 +14,9 @@ public interface QoSInterDirectMeasurementRepository extends RefreshableReposito
 
 	//=================================================================================================
 	// methods
+	
 	//-------------------------------------------------------------------------------------------------
 	public Optional<QoSInterDirectMeasurement> findByAddressAndMeasurementType(final String address, final QoSMeasurementType type);
-
-	//-------------------------------------------------------------------------------------------------
 	public List<QoSInterDirectMeasurement> findByCloudAndMeasurementType(final Cloud cloud, final QoSMeasurementType type);
-
-	//-------------------------------------------------------------------------------------------------
 	public Optional<QoSInterDirectMeasurement> findByCloudAndAddressAndMeasurementType(final Cloud cloud,  final String address, final QoSMeasurementType type);
 }
