@@ -106,7 +106,7 @@ To build the Debian packages yourself, start by cloning the repository:
 
 Build them with:
 
-`mvn package`
+`mvn package -DskipTests`
 
 Copy all the packages to your Arrowhead server (you may have to start SSH server on it first with `sudo systemctl start ssh`:
 
