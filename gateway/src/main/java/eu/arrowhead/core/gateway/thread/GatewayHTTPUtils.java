@@ -1,5 +1,6 @@
 package eu.arrowhead.core.gateway.thread;
 
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,12 +11,16 @@ final class GatewayHTTPUtils {
 	//=================================================================================================
 	// members
 	
-	private static final String CRLF = "\\r\\n";
+	static final String CRLF = "\r\n";
+	static final String CRLF_PATTERN_STR = "\\r\\n";
+	
 	private static final String REQUEST_LINE_PREFIX_PATTERN_STR = "^" + createHttpMethodsRegExp() + " \\S+";
-	private static final String REQUEST_LINE_PATTERN_STR = REQUEST_LINE_PREFIX_PATTERN_STR + " HTTP/" + createSupportedHttpVersionsRegExp() + CRLF;
+	private static final String REQUEST_LINE_PATTERN_STR = REQUEST_LINE_PREFIX_PATTERN_STR + " HTTP/" + createSupportedHttpVersionsRegExp() + CRLF_PATTERN_STR;
+	private static final String BOUNDLESS_REQUEST_LINE_PATTERN_STR = REQUEST_LINE_PATTERN_STR.substring(1, REQUEST_LINE_PATTERN_STR.length());
 	
 	private static final Pattern REQUEST_LINE_PREFIX_PATTERN = Pattern.compile(REQUEST_LINE_PREFIX_PATTERN_STR);
 	private static final Pattern REQUEST_LINE_PATTERN = Pattern.compile(REQUEST_LINE_PATTERN_STR);
+	private static final Pattern BOUNDLESS_REQUEST_LINE_PATTERN = Pattern.compile(BOUNDLESS_REQUEST_LINE_PATTERN_STR);
 	
 	private static final String TRANSFER_ENCODING_HEADER = "transfer-encoding";
 	private static final String CHUNKED_VALUE = "chunked";
@@ -44,6 +49,15 @@ final class GatewayHTTPUtils {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	static Answer isStartOfAHttpRequest(final byte[] messageStart) {
+		if (messageStart == null) {
+			return Answer.NO;
+		}
+		
+		return isStartOfAHttpRequest(new String(messageStart, StandardCharsets.ISO_8859_1));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	static Answer isChunkedHttpRequest(final String messageStart) {
 		if (messageStart == null) {
 			return Answer.NO;
@@ -58,7 +72,28 @@ final class GatewayHTTPUtils {
 			return isChunkedTransferEncodingHeaderIsPresent(messageStart);
 		}
 	}
-
+	
+	//-------------------------------------------------------------------------------------------------
+	static Answer isChunkedHttpRequest(final byte[] messageStart) {
+		if (messageStart == null) {
+			return Answer.NO;
+		}
+		
+		return isChunkedHttpRequest(new String(messageStart, StandardCharsets.ISO_8859_1));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	static int[] getIndicesOfHttpRequestLineBoundaries(final StringBuffer request) {
+		if (request != null) {
+			final Matcher matcher = BOUNDLESS_REQUEST_LINE_PATTERN.matcher(request);
+			if (matcher.find()) {
+				return new int[] { matcher.start(), matcher.end() -1 };
+			}
+		}
+		
+		return null; 
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -85,16 +120,14 @@ final class GatewayHTTPUtils {
 	
 	//-------------------------------------------------------------------------------------------------
 	private static Answer isChunkedTransferEncodingHeaderIsPresent(final String messageStart) {
-		final String[] lines = messageStart.split(CRLF);
-		boolean headerSectionEnds = false;
+		final int idxHeaderSectionEnds = messageStart.indexOf(CRLF +  CRLF);
+		final boolean headerSectionEnds = idxHeaderSectionEnds > -1; // means parameter contains all headers (or no headers and no body)
+		
+		final String message = headerSectionEnds ? messageStart.substring(0, idxHeaderSectionEnds) : messageStart; // remove body
+		final String[] lines = message.split(CRLF_PATTERN_STR);
 		boolean chunkedFound = false;
 		
 		for (final String line : lines) {
-			if (line.isBlank()) {
-				headerSectionEnds = true;
-				break;
-			}
-			
 			final String[] parts = line.split(":");
 			if (parts.length > 1 && TRANSFER_ENCODING_HEADER.equalsIgnoreCase(parts[0].trim()) && CHUNKED_VALUE.equalsIgnoreCase(parts[1].trim())) {
 				chunkedFound = true;
