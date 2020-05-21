@@ -19,6 +19,7 @@ import eu.arrowhead.common.database.entity.AuthorizationInterCloud;
 import eu.arrowhead.common.database.entity.AuthorizationInterCloudInterfaceConnection;
 import eu.arrowhead.common.database.entity.AuthorizationIntraCloud;
 import eu.arrowhead.common.database.entity.AuthorizationIntraCloudInterfaceConnection;
+import eu.arrowhead.common.database.entity.CaTrustedKey;
 import eu.arrowhead.common.database.entity.ChoreographerAction;
 import eu.arrowhead.common.database.entity.ChoreographerPlan;
 import eu.arrowhead.common.database.entity.ChoreographerStep;
@@ -1213,4 +1214,31 @@ public class DTOConverter {
             return new ArrayList<>();
         }
     }
+	
+	// -------------------------------------------------------------------------------------------------
+	public static TrustedKeysResponseDTO convertCaTrustedKeyListToTrustedKeysResponseDTO(
+			final Page<CaTrustedKey> trustedKeyEntryList) {
+		Assert.notNull(trustedKeyEntryList, "trustedKeyEntryList is null");
+
+		final long count = trustedKeyEntryList.getTotalElements();
+		final TrustedKeysResponseDTO trustedKeysResponseDTO = new TrustedKeysResponseDTO();
+		trustedKeysResponseDTO
+				.setTrustedKeys(trustedKeyEntryListToTrustedKeysResponseDTOList(trustedKeyEntryList.getContent()));
+
+		return trustedKeysResponseDTO;
+	}
+
+	// -------------------------------------------------------------------------------------------------
+	private static List<TrustedKeyDTO> trustedKeyEntryListToTrustedKeysResponseDTOList(final List<CaTrustedKey> trustedKeyList) {
+		final List<TrustedKeyDTO> trustedKeyDTOs = new ArrayList<>(trustedKeyList.size());
+
+		for (final CaTrustedKey trustedKey : trustedKeyList) {
+			TrustedKeyDTO dto = new TrustedKeyDTO(trustedKey.getId(), trustedKey.getCreatedAt(),
+					trustedKey.getDescription());
+			trustedKeyDTOs.add(dto);
+		}
+
+		return trustedKeyDTOs;
+	}
+
 }

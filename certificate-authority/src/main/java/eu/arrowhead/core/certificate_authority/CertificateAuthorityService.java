@@ -2,13 +2,19 @@ package eu.arrowhead.core.certificate_authority;
 
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.internal.AddTrustedKeyRequestDTO;
 import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
 import eu.arrowhead.common.dto.internal.CertificateSigningResponseDTO;
+import eu.arrowhead.common.dto.internal.TrustedKeyCheckRequestDTO;
+import eu.arrowhead.common.dto.internal.TrustedKeyCheckResponseDTO;
+import eu.arrowhead.common.dto.internal.TrustedKeysResponseDTO;
+import eu.arrowhead.core.certificate_authority.database.CATrustedKeyDBService;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -28,6 +34,9 @@ public class CertificateAuthorityService {
 
     @Autowired
     private CAProperties caProperties;
+
+    @Autowired
+    private CATrustedKeyDBService trustedKeyDbService;
 
     private SecureRandom random;
     private KeyStore keyStore;
@@ -70,4 +79,19 @@ public class CertificateAuthorityService {
         return new CertificateSigningResponseDTO(encodedCertificateChain);
     }
 
+    public TrustedKeyCheckResponseDTO checkTrustedKey(TrustedKeyCheckRequestDTO request) {
+        return trustedKeyDbService.isTrustedKeyValidNow(request);
+    }
+
+    public TrustedKeysResponseDTO getTrustedKeys(int page, int size, Direction direction, String sortField) {
+        return trustedKeyDbService.getTrustedKeyEntries(page, size, direction, sortField);
+    }
+
+    public void addTrustedKey(AddTrustedKeyRequestDTO request) {
+        trustedKeyDbService.addTrustedKey(request);
+    }
+
+    public void deleteTrustedKey(long id) {
+       trustedKeyDbService.deleteTrustedKey(id);
+    }
 }

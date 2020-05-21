@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.ServiceConfigurationError;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.asn1.pkcs.Attribute;
@@ -53,7 +54,7 @@ import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
-class CertificateAuthorityUtils {
+public class CertificateAuthorityUtils {
 
     private static final Logger logger = LogManager.getLogger(CertificateAuthorityService.class);
 
@@ -255,5 +256,12 @@ class CertificateAuthorityUtils {
         }
 
         return alternativeNames;
+    }
+
+    public static String sha256(final String data) {
+        return new String(DigestUtils.sha256(data));
+    }
+
+    private CertificateAuthorityUtils() {
     }
 }
