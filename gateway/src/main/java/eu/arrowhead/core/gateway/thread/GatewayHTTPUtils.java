@@ -29,7 +29,7 @@ final class GatewayHTTPUtils {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	static Answer isStartOfAHttpRequest(final String messageStart) {
+	static Answer isStartOfAHttpRequest(final CharSequence messageStart) {
 		if (messageStart == null) {
 			return Answer.NO;
 		}
@@ -58,7 +58,7 @@ final class GatewayHTTPUtils {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	static Answer isChunkedHttpRequest(final String messageStart) {
+	static Answer isChunkedHttpRequest(final CharSequence messageStart) {
 		if (messageStart == null) {
 			return Answer.NO;
 		}
@@ -69,7 +69,7 @@ final class GatewayHTTPUtils {
 		case CAN_BE:
 			return isHttpRequest;
 		default: 
-			return isChunkedTransferEncodingHeaderIsPresent(messageStart);
+			return isChunkedTransferEncodingHeaderIsPresent(messageStart.toString());
 		}
 	}
 	
@@ -83,7 +83,7 @@ final class GatewayHTTPUtils {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	static int[] getIndicesOfHttpRequestLineBoundaries(final StringBuffer request) {
+	static int[] getIndicesOfHttpRequestLineBoundaries(final CharSequence request) {
 		if (request != null) {
 			final Matcher matcher = BOUNDLESS_REQUEST_LINE_PATTERN.matcher(request);
 			if (matcher.find()) {

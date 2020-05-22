@@ -37,25 +37,23 @@ class GatewayHTTPRequestCache {
 	String getHTTPRequest() {
 		if (cache.length() > 0) {
 			final int[] requestLineBoundaries = GatewayHTTPUtils.getIndicesOfHttpRequestLineBoundaries(cache);
-			final int requestStartIdx = requestLineBoundaries[0];
-			final int requestLineEndIdx = requestLineBoundaries[1];
-			if (requestStartIdx < 0) {
+			if (requestLineBoundaries == null) {
 				return null;
 			}
-			
+			final int requestStartIdx = requestLineBoundaries[0];
+			final int requestLineEndIdx = requestLineBoundaries[1];
 			cache.delete(0, requestStartIdx);
 			
-			final int headerSectionEndsIdx = cache.indexOf(CRLF +  CRLF);
+			final int headerSectionEndsIdx = cache.indexOf(CRLF + CRLF);
 			if (headerSectionEndsIdx < 0) { // means cache does not contain all request
 				return null;
 			} 
 
 			final int bodyLength = getBodyLength(cache.substring(0, headerSectionEndsIdx));
-			final int requestEndIdx = headerSectionEndsIdx + bodyLength + 3; // +3 because headerSectionEndsIdx is the first charachter of the CRLFCRLF sequence
-			if (requestEndIdx > cache.length() - 1) { // means cache does not contain all body
+			final int requestEndIdx = headerSectionEndsIdx + bodyLength + 4; // +4 because of the CRLFCRLF sequence
+			if (requestEndIdx > cache.length()) { // means cache does not contain all body
 				return null;
 			}
-			
 			
 			final String request = cache.substring(0, requestEndIdx);
 			
@@ -74,6 +72,21 @@ class GatewayHTTPRequestCache {
 		final String result = getHTTPRequest();
 		
 		return result == null ? null : result.getBytes(StandardCharsets.ISO_8859_1);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	String getCacheContent() {
+		return cache.toString();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	int getCacheLength() {
+		return cache.length();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	void resetCache() {
+		cache.delete(0, cache.length());
 	}
 	
 	//=================================================================================================

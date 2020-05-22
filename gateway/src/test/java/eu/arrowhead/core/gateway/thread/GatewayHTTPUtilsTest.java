@@ -183,4 +183,43 @@ public class GatewayHTTPUtilsTest {
 		final Answer answer = GatewayHTTPUtils.isChunkedHttpRequest(trickyRequest);
 		Assert.assertEquals(Answer.NO, answer);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetIndicesOfHttpRequestLineBoundariesNullParam() {
+		final int[] boundaries = GatewayHTTPUtils.getIndicesOfHttpRequestLineBoundaries(null);
+		Assert.assertNull(boundaries);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetIndicesOfHttpRequestLineBoundariesNotARequest() {
+		final int[] boundaries = GatewayHTTPUtils.getIndicesOfHttpRequestLineBoundaries("not a request");
+		Assert.assertNull(boundaries);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetIndicesOfHttpRequestLineBoundariesPartialRequestLine() {
+		final int[] boundaries = GatewayHTTPUtils.getIndicesOfHttpRequestLineBoundaries(validFirstPart);
+		Assert.assertNull(boundaries);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetIndicesOfHttpRequestLineBoundariesFullRequestLine() {
+		final int[] boundaries = GatewayHTTPUtils.getIndicesOfHttpRequestLineBoundaries("GET / HTTP/1.1\r\n");
+		Assert.assertNotNull(boundaries);
+		Assert.assertEquals(0, boundaries[0]);
+		Assert.assertEquals(15, boundaries[1]);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetIndicesOfHttpRequestLineBoundariesFullRequestLineAndSomeore() {
+		final int[] boundaries = GatewayHTTPUtils.getIndicesOfHttpRequestLineBoundaries("abcd GET / HTTP/1.1\r\nAccept: application/json\r\n\r\n");
+		Assert.assertNotNull(boundaries);
+		Assert.assertEquals(5, boundaries[0]);
+		Assert.assertEquals(20, boundaries[1]);
+	}
 }
