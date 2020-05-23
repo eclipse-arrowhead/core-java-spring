@@ -6,8 +6,10 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
@@ -23,6 +25,7 @@ import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.certificate_authority.CertificateAuthorityUtils;
 
+@Service
 public class CATrustedKeyDBService {
 
     @Autowired
@@ -46,8 +49,9 @@ public class CATrustedKeyDBService {
         }
 
         try {
-            return DTOConverter.convertCaTrustedKeyListToTrustedKeysResponseDTO(caTrustedKeyRepository
-                    .findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField)));
+            final PageRequest request = PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField);
+            final Page<CaTrustedKey> queryResult = caTrustedKeyRepository.findAll(request);
+            return DTOConverter.convertCaTrustedKeyListToTrustedKeysResponseDTO(queryResult);
         } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -61,6 +65,7 @@ public class CATrustedKeyDBService {
 
         try {
             trustedKey.setPublicKey(request.getPublicKey());
+            trustedKey.setHash(CertificateAuthorityUtils.sha256(request.getPublicKey()));
             trustedKey.setDescription(request.getDescription());
             trustedKey.setValidAfter(ZonedDateTime.from(request.getValidAfter().toInstant()));
             trustedKey.setValidBefore(ZonedDateTime.from(request.getValidBefore().toInstant()));

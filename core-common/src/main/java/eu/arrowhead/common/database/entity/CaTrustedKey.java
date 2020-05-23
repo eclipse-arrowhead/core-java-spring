@@ -25,8 +25,11 @@ public class CaTrustedKey {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false, unique = false, length = CoreDefaults.VARCHAR_EXTENDED)
+    @Column(nullable = false, unique = true, length = CoreDefaults.VARCHAR_EXTENDED)
     private String publicKey;
+
+    @Column(nullable = false, unique = true, length = CoreDefaults.VARCHAR_BASIC)
+    private String hash;
 
     @Column(nullable = false, unique = false, length = CoreDefaults.VARCHAR_BASIC)
     private String description;
@@ -50,14 +53,16 @@ public class CaTrustedKey {
 	public CaTrustedKey() {}
 
     //-------------------------------------------------------------------------------------------------
-	public CaTrustedKey(final String publicKey, final String description) {
+	public CaTrustedKey(final String publicKey, final String hash, final String description) {
         this.publicKey = publicKey;
+        this.hash = hash;
         this.description = description;
     }
 
     //-------------------------------------------------------------------------------------------------
 	public long getId() { return id; }
 	public String getPublicKey() { return publicKey; }
+	public String getHash() { return hash; }
     public String getDescription() { return description; }
     public ZonedDateTime getValidAfter() { return validAfter; }
     public ZonedDateTime getValidBefore() { return validBefore; }
@@ -67,6 +72,7 @@ public class CaTrustedKey {
     //-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
     public void setPublicKey(final String publicKey) { this.publicKey = publicKey; }
+    public void setHash(final String hash) { this.hash = hash; }
     public void setDescription(final String description) { this.description = description; }
 
     public void setValidAfter(final ZonedDateTime validAfter) { this.validAfter = validAfter; }

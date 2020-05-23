@@ -1,8 +1,9 @@
 package eu.arrowhead.core.certificate_authority;
 
-import java.security.InvalidParameterException;
+import java.security.cert.X509Certificate;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.apache.http.HttpStatus;
@@ -33,13 +34,17 @@ import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.dto.internal.AddTrustedKeyRequestDTO;
+import eu.arrowhead.common.dto.internal.CertificateCheckRequestDTO;
+import eu.arrowhead.common.dto.internal.CertificateCheckResponseDTO;
 import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
 import eu.arrowhead.common.dto.internal.CertificateSigningResponseDTO;
+import eu.arrowhead.common.dto.internal.IssuedCertificatesResponseDTO;
 import eu.arrowhead.common.dto.internal.TrustedKeyCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.TrustedKeyCheckResponseDTO;
 import eu.arrowhead.common.dto.internal.TrustedKeysResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -57,6 +62,9 @@ public class CertificateAuthorityController {
 	//
 	private static final String PATH_VARIABLE_ID = "id";
 
+	private static final String OP_CA_MGMT_CERTIFICATES_URI = CoreCommonConstants.MGMT_URI + "/certificates";
+	private static final String OP_CA_MGMT_CERTIFICATE_DELETE_URI = CoreCommonConstants.MGMT_URI + "/certificates/{"
+			+ PATH_VARIABLE_ID + "}";
 	private static final String OP_CA_MGMT_TRUSTED_KEYS_URI = CoreCommonConstants.MGMT_URI + "/keys";
 	private static final String OP_CA_MGMT_TRUSTED_KEY_DELETE_URI = CoreCommonConstants.MGMT_URI + "/keys/{"
 			+ PATH_VARIABLE_ID + "}";
@@ -64,8 +72,11 @@ public class CertificateAuthorityController {
 	private static final String GET_CLOUD_COMMON_NAME_HTTP_200_MESSAGE = "Cloud Common Name returned";
 	private static final String SIGN_CERTIFICATE_HTTP_200_MESSAGE = "Successful certificate signing";
 	private static final String SIGN_CERTIFICATE_HTTP_400_MESSAGE = "Invalid Certificate Signing Request";
+	private static final String CHECK_CERTIFICATE_HTTP_200_MESSAGE = "Certificate is valid";
+	private static final String CHECK_CERTIFICATE_HTTP_400_MESSAGE = "Invalid Certificate Check Request";
 	private static final String CHECK_TRUSTED_KEY_HTTP_200_MESSAGE = "Public key is trusted";
 	private static final String CHECK_TRUSTED_KEY_HTTP_400_MESSAGE = "Invalid Trusted Key Check Request";
+	private static final String GET_ISSUED_CERTIFICATES_HTTP_200_MESSAGE = "Issued certificates returned";
 	private static final String GET_TRUSTED_KEYS_HTTP_200_MESSAGE = "Trusted public keys returned";
 	private static final String ADD_TRUSTED_KEY_HTTP_200_MESSAGE = "Trusted public key added";
 	private static final String ADD_TRUSTED_KEY_HTTP_400_MESSAGE = "Invalid Add Trusted Key Request";
@@ -105,6 +116,21 @@ public class CertificateAuthorityController {
 	}
 
 	// -------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Check certificate validity", response = CertificateCheckResponseDTO.class, tags = {
+			CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiResponses(value = { @ApiResponse(code = HttpStatus.SC_OK, message = CHECK_CERTIFICATE_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CHECK_CERTIFICATE_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE) })
+	@PostMapping(path = CommonConstants.OP_CA_CHECK_CERTIFICATE_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public CertificateCheckResponseDTO checkCertificate(@Valid @RequestBody final CertificateCheckRequestDTO request,
+			BindingResult bindingResult) {
+		handleBindingResult(bindingResult);
+		return certificateAuthorityService.checkCertificate(request);
+	}
+
+	// -------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return a signed certificate", response = CertificateSigningResponseDTO.class, tags = {
 			CoreCommonConstants.SWAGGER_TAG_PRIVATE })
 	@ApiResponses(value = { @ApiResponse(code = HttpStatus.SC_OK, message = SIGN_CERTIFICATE_HTTP_200_MESSAGE),
@@ -114,9 +140,62 @@ public class CertificateAuthorityController {
 	@PostMapping(path = CommonConstants.OP_CA_SIGN_CERTIFICATE_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public CertificateSigningResponseDTO signCertificate(@Valid @RequestBody final CertificateSigningRequestDTO request,
-			BindingResult bindingResult) {
+			HttpServletRequest httpServletRequest, BindingResult bindingResult) {
 		handleBindingResult(bindingResult);
-		return certificateAuthorityService.signCertificate(request);
+		final String requestedByCN = CertificateAuthorityUtils.getRequesterCommonName(httpServletRequest);
+		return certificateAuthorityService.signCertificate(request, requestedByCN);
+	}
+
+	// -------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Get issued Certificates", response = IssuedCertificatesResponseDTO.class, tags = {
+			CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiResponses(value = { @ApiResponse(code = HttpStatus.SC_OK, message = GET_ISSUED_CERTIFICATES_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE) })
+	@GetMapping(path = OP_CA_MGMT_CERTIFICATES_URI)
+	public IssuedCertificatesResponseDTO getIssuedCertificates(
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
+		logger.debug("Get IssuedCertificates request recieved with page: {} and item_per page: {}", page, size);
+
+		int validatedPage;
+		int validatedSize;
+		if (page == null && size == null) {
+			validatedPage = -1;
+			validatedSize = -1;
+		} else {
+			if (page == null || size == null) {
+				throw new BadPayloadException("Only both or none of page and size may be defined.",
+						HttpStatus.SC_BAD_REQUEST,
+						CommonConstants.CERTIFICATE_AUTHRORITY_URI + OP_CA_MGMT_CERTIFICATES_URI);
+			} else {
+				validatedPage = page;
+				validatedSize = size;
+			}
+		}
+
+		final Direction validatedDirection = CoreUtilities.calculateDirection(direction,
+				CommonConstants.CERTIFICATE_AUTHRORITY_URI + OP_CA_MGMT_CERTIFICATES_URI);
+		return certificateAuthorityService.getCertificates(validatedPage, validatedSize, validatedDirection, sortField);
+	}
+
+	// -------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Revoke issued Certificate", response = String.class, tags = {
+			CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiResponses(value = { @ApiResponse(code = HttpStatus.SC_OK, message = GET_ISSUED_CERTIFICATES_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE) })
+	@DeleteMapping(path = OP_CA_MGMT_CERTIFICATE_DELETE_URI)
+	public ResponseEntity<String> revokeCertificate(@PathVariable long id, BindingResult bindingResult) {
+		handleBindingResult(bindingResult);
+		if (certificateAuthorityService.revokeCertificate(id)) {
+			return new ResponseEntity<String>("Certificate revoked", org.springframework.http.HttpStatus.OK);
+		} else {
+			return new ResponseEntity<String>("Certificate revokation failed",
+					org.springframework.http.HttpStatus.BAD_REQUEST);
+		}
 	}
 
 	// -------------------------------------------------------------------------------------------------

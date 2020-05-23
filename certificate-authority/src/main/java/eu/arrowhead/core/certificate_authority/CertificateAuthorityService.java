@@ -1,14 +1,14 @@
 package eu.arrowhead.core.certificate_authority;
 
-import eu.arrowhead.common.SSLProperties;
-import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.internal.AddTrustedKeyRequestDTO;
-import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
-import eu.arrowhead.common.dto.internal.CertificateSigningResponseDTO;
-import eu.arrowhead.common.dto.internal.TrustedKeyCheckRequestDTO;
-import eu.arrowhead.common.dto.internal.TrustedKeyCheckResponseDTO;
-import eu.arrowhead.common.dto.internal.TrustedKeysResponseDTO;
-import eu.arrowhead.core.certificate_authority.database.CATrustedKeyDBService;
+import java.math.BigInteger;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
+import java.time.ZonedDateTime;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,12 +17,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
-import java.util.List;
+import eu.arrowhead.common.SSLProperties;
+import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.internal.AddTrustedKeyRequestDTO;
+import eu.arrowhead.common.dto.internal.CertificateCheckRequestDTO;
+import eu.arrowhead.common.dto.internal.CertificateCheckResponseDTO;
+import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
+import eu.arrowhead.common.dto.internal.CertificateSigningResponseDTO;
+import eu.arrowhead.common.dto.internal.IssuedCertificatesResponseDTO;
+import eu.arrowhead.common.dto.internal.TrustedKeyCheckRequestDTO;
+import eu.arrowhead.common.dto.internal.TrustedKeyCheckResponseDTO;
+import eu.arrowhead.common.dto.internal.TrustedKeysResponseDTO;
+import eu.arrowhead.common.exception.DataNotFoundException;
+import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.core.certificate_authority.database.CACertificateDBService;
+import eu.arrowhead.core.certificate_authority.database.CATrustedKeyDBService;
 
 @Service
 public class CertificateAuthorityService {
@@ -34,6 +43,9 @@ public class CertificateAuthorityService {
 
     @Autowired
     private CAProperties caProperties;
+
+    @Autowired
+    private CACertificateDBService certificateDbService;
 
     @Autowired
     private CATrustedKeyDBService trustedKeyDbService;
@@ -59,8 +71,32 @@ public class CertificateAuthorityService {
         return cloudCommonName;
     }
 
-    public CertificateSigningResponseDTO signCertificate(CertificateSigningRequestDTO request) {
-        CertificateAuthorityUtils.verifyCertificateSigningRequest(request);
+    public CertificateCheckResponseDTO checkCertificate(CertificateCheckRequestDTO request) {
+        if (request == null) {
+            throw new InvalidParameterException("CertificateCheckRequestDTO cannot be null");
+        }
+        if (Utilities.isEmpty(request.getCertificate())) {
+            throw new InvalidParameterException("Certificate cannot be null");
+        }
+
+        final X509Certificate cert = CertificateAuthorityUtils.decodeCertificate(request.getCertificate());
+        final String certCN = CertificateAuthorityUtils.getCommonName(cert);
+        final BigInteger certSerial = CertificateAuthorityUtils.getSerialNumber(cert);
+
+        try {
+            if (!cert.getIssuerX500Principal().equals(cloudCertificate.getSubjectX500Principal())) {
+                throw new DataNotFoundException("Certificate is not issued by this cloud");
+            }
+
+            return certificateDbService.isCertificateValidNow(certSerial);
+        } catch (DataNotFoundException ex) {
+            return new CertificateCheckResponseDTO(certCN, certSerial, "unknown",
+                    ZonedDateTime.from(cert.getNotAfter().toInstant()));
+        }
+    }
+
+    public CertificateSigningResponseDTO signCertificate(CertificateSigningRequestDTO request, String requesterCN) {
+        CertificateAuthorityUtils.verifyCertificateSigningRequest(request, requesterCN);
 
         final JcaPKCS10CertificationRequest csr = CertificateAuthorityUtils.decodePKCS10CSR(request);
         CertificateAuthorityUtils.checkCommonName(csr, cloudCommonName);
@@ -76,7 +112,20 @@ public class CertificateAuthorityService {
         final List<String> encodedCertificateChain = CertificateAuthorityUtils
                 .buildEncodedCertificateChain(clientCertificate, cloudCertificate, rootCertificate);
 
+        final String clientCommonName = CertificateAuthorityUtils.getCommonName(csr);
+        final BigInteger seriaiNumber = CertificateAuthorityUtils.getSerialNumber(clientCertificate);
+        certificateDbService.saveCertificateInfo(clientCommonName, seriaiNumber, requesterCN);
+
         return new CertificateSigningResponseDTO(encodedCertificateChain);
+    }
+
+    public IssuedCertificatesResponseDTO getCertificates(int page, int size, Direction direction, String sortField) {
+        return certificateDbService.getcertificateEntries(page, size, direction, sortField);
+    }
+
+    public boolean revokeCertificate(long id) {
+        // TODO: check createdBy
+        return certificateDbService.revokeCertificate(id);
     }
 
     public TrustedKeyCheckResponseDTO checkTrustedKey(TrustedKeyCheckRequestDTO request) {
@@ -92,6 +141,6 @@ public class CertificateAuthorityService {
     }
 
     public void deleteTrustedKey(long id) {
-       trustedKeyDbService.deleteTrustedKey(id);
+        trustedKeyDbService.deleteTrustedKey(id);
     }
 }

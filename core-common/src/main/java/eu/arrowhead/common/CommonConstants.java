@@ -155,6 +155,7 @@ public class CommonConstants {
 
 	public static final String CERTIFICATE_AUTHRORITY_URI = "/certificate-authority";
 	public static final String OP_CA_CLOUD_COMMON_NAME_URI = "/name";
+	public static final String OP_CA_CHECK_CERTIFICATE_URI = "/checkCertificate";
 	public static final String OP_CA_CHECK_TRUSTED_KEY_URI = "/checkTrustedKey";
 	public static final String OP_CA_SIGN_CERTIFICATE_URI = "/sign";
 

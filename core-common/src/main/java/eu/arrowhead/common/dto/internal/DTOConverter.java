@@ -19,6 +19,7 @@ import eu.arrowhead.common.database.entity.AuthorizationInterCloud;
 import eu.arrowhead.common.database.entity.AuthorizationInterCloudInterfaceConnection;
 import eu.arrowhead.common.database.entity.AuthorizationIntraCloud;
 import eu.arrowhead.common.database.entity.AuthorizationIntraCloudInterfaceConnection;
+import eu.arrowhead.common.database.entity.CaCertificate;
 import eu.arrowhead.common.database.entity.CaTrustedKey;
 import eu.arrowhead.common.database.entity.ChoreographerAction;
 import eu.arrowhead.common.database.entity.ChoreographerPlan;
@@ -1239,6 +1240,42 @@ public class DTOConverter {
 		}
 
 		return trustedKeyDTOs;
+	}
+
+	// -------------------------------------------------------------------------------------------------
+	public static IssuedCertificatesResponseDTO convertCaCertificateListToIssuedCertificatesResponseDTO(
+			final Page<CaCertificate> certificateEntryList) {
+		Assert.notNull(certificateEntryList, "certificateEntryList is null");
+
+		final long count = certificateEntryList.getTotalElements();
+		final IssuedCertificatesResponseDTO certificatesResponseDTO = new IssuedCertificatesResponseDTO();
+		certificatesResponseDTO.setIssuedCertificates(
+				certificateEntryListTocertificatesResponseDTOList(certificateEntryList.getContent()));
+
+		return certificatesResponseDTO;
+	}
+
+	// -------------------------------------------------------------------------------------------------
+	private static List<IssuedCertificateDTO> certificateEntryListTocertificatesResponseDTOList(
+			final List<CaCertificate> certificateList) {
+		Assert.notNull(certificateList, "certificateList is null");
+
+		final List<IssuedCertificateDTO> certificateDTOs = new ArrayList<>(certificateList.size());
+
+		for (final CaCertificate certificate : certificateList) {
+			IssuedCertificateDTO dto = new IssuedCertificateDTO();
+			dto.setId(certificate.getId());
+			dto.setCommonName(certificate.getCommonName());
+			dto.setSerialNumber(certificate.getSerial());
+			dto.setCreatedBy(certificate.getCreatedBy());
+			dto.setCreatedAt(certificate.getCreatedAt());
+			dto.setRevokedAt(certificate.getRevokedAt());
+			dto.setValidFrom(certificate.getValidAfter());
+			dto.setValidUntil(certificate.getValidBefore());
+			certificateDTOs.add(dto);
+		}
+
+		return certificateDTOs;
 	}
 
 }

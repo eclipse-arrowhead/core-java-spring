@@ -1,6 +1,8 @@
 package eu.arrowhead.core.certificate_authority;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.StringReader;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.KeyStore;
@@ -11,6 +13,7 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -18,6 +21,8 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.ServiceConfigurationError;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
@@ -45,6 +50,7 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.pkcs.PKCSException;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
+import org.bouncycastle.util.io.pem.PemReader;
 
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
@@ -72,7 +78,7 @@ public class CertificateAuthorityUtils {
         }
     }
 
-    static void verifyCertificateSigningRequest(CertificateSigningRequestDTO request) {
+    static void verifyCertificateSigningRequest(CertificateSigningRequestDTO request, String requesterCN) {
         if (request == null) {
             logger.error("CertificateSigningRequest cannot be null");
             throw new InvalidParameterException("CertificateSigningRequest cannot be null");
@@ -80,9 +86,14 @@ public class CertificateAuthorityUtils {
 
         final String encodedCSR = request.getEncodedCSR();
 
-        if (encodedCSR == null || encodedCSR.isEmpty()) {
+        if (Utilities.isEmpty(encodedCSR)) {
             logger.error("CertificateSigningRequest cannot be empty");
             throw new InvalidParameterException("CertificateSigningRequest cannot be empty");
+        }
+
+        if (Utilities.isEmpty(requesterCN)) {
+            logger.error("CertificateSigningRequest requester common name cannot be empty");
+            throw new InvalidParameterException("CertificateSigningRequest requester common name cannot be empty");
         }
     }
 
@@ -96,6 +107,17 @@ public class CertificateAuthorityUtils {
         }
     }
 
+    static X509Certificate decodeCertificate(final String encodedCert) {
+        try (StringReader sreader = new StringReader(encodedCert); PemReader preader = new PemReader(sreader)) {
+            final byte[] requestBytes = preader.readPemObject().getContent();
+            final CertificateFactory factory = CertificateFactory.getInstance("X.509");
+            final ByteArrayInputStream in = new ByteArrayInputStream(requestBytes);
+            return (X509Certificate) factory.generateCertificate(in);
+        } catch (IOException | CertificateException ex) {
+            throw new InvalidParameterException("Cannot parse certificate, because> " + ex.getMessage(), ex);
+        }
+    }
+
     static String encodeCertificate(X509Certificate certificate) {
         try {
             return Base64.getEncoder().encodeToString(certificate.getEncoded());
@@ -106,13 +128,57 @@ public class CertificateAuthorityUtils {
 
     static String getCloudCommonName(X509Certificate cloudCertificate) {
         try {
-            final X500Name subject = new JcaX509CertificateHolder(cloudCertificate).getSubject();
-            final RDN cn = subject.getRDNs(BCStyle.CN)[0];
-            return IETFUtils.valueToString(cn.getFirst().getValue());
-        } catch (CertificateEncodingException | NullPointerException e) {
+            return getCommonName(cloudCertificate);
+        } catch (InvalidParameterException | NullPointerException e) {
             logger.error("Cannot get common name from cloud cert, because: " + e.getMessage());
             throw new ServiceConfigurationError("Cannot get common name from cloud cert.", e);
         }
+    }
+
+    static String getCommonName(X509Certificate certificate) {
+        try {
+            final X500Name subject = new JcaX509CertificateHolder(certificate).getSubject();
+            return getCommonName(subject);
+        } catch (CertificateEncodingException | NullPointerException e) {
+            logger.error("Cannot get common name from cert, because: " + e.getMessage());
+            throw new InvalidParameterException("Cannot get common name from cert.", e);
+        }
+    }
+
+    static BigInteger getSerialNumber(X509Certificate certificate) {
+        try {
+            return new JcaX509CertificateHolder(certificate).getSerialNumber();
+        } catch (CertificateEncodingException | NullPointerException e) {
+            logger.error("Cannot get serial number from cert, because: " + e.getMessage());
+            throw new InvalidParameterException("Cannot get serial number from cert, because: " + e.getMessage(), e);
+        }
+    }
+
+    static String getIssuer(X509Certificate certificate) {
+        try {
+            final X500Name issuerName = new JcaX509CertificateHolder(certificate).getIssuer();
+            return getCommonName(issuerName);
+        } catch (CertificateEncodingException | NullPointerException e) {
+            logger.error("Cannot get serial number from cert, because: " + e.getMessage());
+            throw new InvalidParameterException("Cannot get serial number from cert, because: " + e.getMessage(), e);
+        }
+    }
+
+    static String getCommonName(X500Name name) {
+        if (name == null) {
+            throw new InvalidParameterException("Name cannot be null");
+        }
+        final RDN cn = name.getRDNs(BCStyle.CN)[0];
+        return IETFUtils.valueToString(cn.getFirst().getValue());
+        // return Utilities.getCertCNFromSubject(name.toString());
+    }
+
+    static String getCommonName(JcaPKCS10CertificationRequest csr) {
+        if (csr == null) {
+            throw new BadPayloadException("CSR cannot be null");
+        }
+
+        return getCommonName(csr.getSubject());
     }
 
     static void checkCommonName(JcaPKCS10CertificationRequest csr, String cloudCN) {
@@ -122,9 +188,9 @@ public class CertificateAuthorityUtils {
         if (cloudCN == null || cloudCN.isEmpty()) {
             throw new BadPayloadException("CloudCN cannot be null");
         }
-        final String clientCN = Objects.requireNonNull(Utilities.getCertCNFromSubject(csr.getSubject().toString()));
 
-        if (!clientCN.endsWith(cloudCN) || clientCN.split("\\.").length > 6) {
+        final String clientCN = getCommonName(csr);
+        if (!Utilities.isKeyStoreCNArrowheadValid(clientCN, cloudCN)) {
             throw new BadPayloadException(
                     "Certificate request does not have a valid common name! Valid common name: {systemName}."
                             + cloudCN);
@@ -134,8 +200,7 @@ public class CertificateAuthorityUtils {
     static void checkCsrSignature(JcaPKCS10CertificationRequest csr) {
         try {
             final ContentVerifierProvider verifierProvider = new JcaContentVerifierProviderBuilder()
-                    .setProvider(PROVIDER)
-                    .build(csr.getSubjectPublicKeyInfo());
+                    .setProvider(PROVIDER).build(csr.getSubjectPublicKeyInfo());
             if (!csr.isSignatureValid(verifierProvider)) {
                 throw new BadPayloadException("Certificate request has invalid signature! (key pair does not match)");
             }
@@ -227,7 +292,8 @@ public class CertificateAuthorityUtils {
                                  extUtils.createAuthorityKeyIdentifier(cloudCertificate));
             builder.addExtension(Extension.basicConstraints, true, new BasicConstraints(false));
         } catch (NoSuchAlgorithmException | CertIOException | CertificateEncodingException | NullPointerException e) {
-            throw new InvalidParameterException("Appending extensions to the certificate failed! (" + e.getMessage() + ")", e);
+            throw new InvalidParameterException(
+                    "Appending extensions to the certificate failed! (" + e.getMessage() + ")", e);
         }
     }
 
@@ -260,6 +326,16 @@ public class CertificateAuthorityUtils {
 
     public static String sha256(final String data) {
         return new String(DigestUtils.sha256(data));
+    }
+
+    public static String getRequesterCommonName(HttpServletRequest httpServletRequest) {
+        X509Certificate[] clientCerts = (X509Certificate[]) httpServletRequest
+                .getAttribute("javax.servlet.request.X509Certificate");
+        if (clientCerts == null || clientCerts.length != 1) {
+            throw new InvalidParameterException("Unexpected client cert");
+        }
+        final String requestedByCN = getCommonName(clientCerts[0]);
+        return requestedByCN;
     }
 
     private CertificateAuthorityUtils() {
