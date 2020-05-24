@@ -1249,6 +1249,7 @@ public class DTOConverter {
 
 		final long count = certificateEntryList.getTotalElements();
 		final IssuedCertificatesResponseDTO certificatesResponseDTO = new IssuedCertificatesResponseDTO();
+		certificatesResponseDTO.setCount(count);
 		certificatesResponseDTO.setIssuedCertificates(
 				certificateEntryListTocertificatesResponseDTOList(certificateEntryList.getContent()));
 
