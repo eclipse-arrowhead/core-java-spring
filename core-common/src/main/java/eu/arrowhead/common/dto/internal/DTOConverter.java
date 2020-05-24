@@ -1223,6 +1223,7 @@ public class DTOConverter {
 
 		final long count = trustedKeyEntryList.getTotalElements();
 		final TrustedKeysResponseDTO trustedKeysResponseDTO = new TrustedKeysResponseDTO();
+		trustedKeysResponseDTO.setCount(count);
 		trustedKeysResponseDTO
 				.setTrustedKeys(trustedKeyEntryListToTrustedKeysResponseDTOList(trustedKeyEntryList.getContent()));
 

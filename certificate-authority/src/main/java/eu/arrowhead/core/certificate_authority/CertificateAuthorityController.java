@@ -278,12 +278,7 @@ public class CertificateAuthorityController {
 		if (id <= 0) {
 			throw new InvalidParameterException("Invalid id");
 		}
-		try {
-			certificateAuthorityService.deleteTrustedKey(id);
-		} catch (Exception ex) {
-			throw new ArrowheadException("Cannot delete trusted key with id: " + id + ", because: " + ex.getMessage(),
-					ex);
-		}
+		certificateAuthorityService.deleteTrustedKey(id);
 		return new ResponseEntity<String>("OK", org.springframework.http.HttpStatus.NO_CONTENT);
 	}
 
