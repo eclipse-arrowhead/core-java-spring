@@ -152,7 +152,7 @@ public class CertificateAuthorityController {
 	@ApiResponses(value = { @ApiResponse(code = HttpStatus.SC_OK, message = GET_ISSUED_CERTIFICATES_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE) })
-	@GetMapping(path = OP_CA_MGMT_CERTIFICATES_URI)
+	@GetMapping(path = OP_CA_MGMT_CERTIFICATES_URI, produces = MediaType.APPLICATION_JSON_VALUE)
 	public IssuedCertificatesResponseDTO getIssuedCertificates(
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
@@ -188,8 +188,11 @@ public class CertificateAuthorityController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE) })
 	@DeleteMapping(path = OP_CA_MGMT_CERTIFICATE_DELETE_URI)
-	public ResponseEntity<String> revokeCertificate(@PathVariable long id, BindingResult bindingResult) {
-		handleBindingResult(bindingResult);
+	public ResponseEntity<String> revokeCertificate(@PathVariable long id) {
+		if (id <= 0) {
+			throw new InvalidParameterException("Invalid id");
+		}
+
 		if (certificateAuthorityService.revokeCertificate(id)) {
 			return new ResponseEntity<String>("Certificate revoked", org.springframework.http.HttpStatus.OK);
 		} else {
@@ -271,9 +274,8 @@ public class CertificateAuthorityController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE) })
 	@DeleteMapping(path = OP_CA_MGMT_TRUSTED_KEY_DELETE_URI)
-	public ResponseEntity<String> deleteTrustedKey(@PathVariable long id, BindingResult bindingResult) {
-		handleBindingResult(bindingResult);
-		if (id < 0) {
+	public ResponseEntity<String> deleteTrustedKey(@PathVariable long id) {
+		if (id <= 0) {
 			throw new InvalidParameterException("Invalid id");
 		}
 		try {
