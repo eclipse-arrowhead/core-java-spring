@@ -114,8 +114,8 @@ public class CertificateAuthorityService {
                 .buildEncodedCertificateChain(clientCertificate, cloudCertificate, rootCertificate);
 
         final String clientCommonName = CertificateAuthorityUtils.getCommonName(csr);
-        final BigInteger seriaiNumber = CertificateAuthorityUtils.getSerialNumber(clientCertificate);
-        certificateDbService.saveCertificateInfo(clientCommonName, seriaiNumber, requesterCN);
+        final BigInteger serialNumber = CertificateAuthorityUtils.getSerialNumber(clientCertificate);
+        certificateDbService.saveCertificateInfo(clientCommonName, serialNumber, requesterCN);
 
         return new CertificateSigningResponseDTO(encodedCertificateChain);
     }
