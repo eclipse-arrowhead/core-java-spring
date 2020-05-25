@@ -108,13 +108,13 @@ public class CertificateAuthorityUtils {
     }
 
     static X509Certificate decodeCertificate(final String encodedCert) {
-        try (StringReader sreader = new StringReader(encodedCert); PemReader preader = new PemReader(sreader)) {
-            final byte[] requestBytes = preader.readPemObject().getContent();
+        try {
+            final byte[] requestBytes = Base64.getDecoder().decode(encodedCert);
             final CertificateFactory factory = CertificateFactory.getInstance("X.509");
             final ByteArrayInputStream in = new ByteArrayInputStream(requestBytes);
             return (X509Certificate) factory.generateCertificate(in);
-        } catch (IOException | CertificateException ex) {
-            throw new InvalidParameterException("Cannot parse certificate, because> " + ex.getMessage(), ex);
+        } catch (CertificateException | IllegalArgumentException | NullPointerException ex) {
+            throw new InvalidParameterException("Cannot parse certificate, because: " + ex.getMessage(), ex);
         }
     }
 

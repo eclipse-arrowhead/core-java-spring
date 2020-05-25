@@ -5,6 +5,7 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -90,8 +91,8 @@ public class CertificateAuthorityService {
 
             return certificateDbService.isCertificateValidNow(certSerial);
         } catch (DataNotFoundException ex) {
-            return new CertificateCheckResponseDTO(certCN, certSerial, "unknown",
-                    ZonedDateTime.from(cert.getNotAfter().toInstant()));
+            ZonedDateTime endOfValidity = ZonedDateTime.ofInstant(cert.getNotAfter().toInstant(), ZoneId.systemDefault());
+            return new CertificateCheckResponseDTO(certCN, certSerial, "unknown", endOfValidity);
         }
     }
 
