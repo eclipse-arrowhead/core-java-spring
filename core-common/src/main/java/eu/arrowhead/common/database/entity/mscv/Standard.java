@@ -1,8 +1,9 @@
 package eu.arrowhead.common.database.entity.mscv;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.StringJoiner;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -11,10 +12,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.StringJoiner;
+
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "mscv_standard")
@@ -42,12 +42,11 @@ public class Standard {
 
     public Standard() { super(); }
 
-    public Standard(final Long id, final String identification, final String name, final String referenceUri, final Set<Mip> mips) {
+    public Standard(final Long id, final String identification, final String name, final String referenceUri) {
         this.id = id;
         this.identification = identification;
         this.name = name;
         this.referenceUri = referenceUri;
-        this.mips = mips;
     }
 
     public Long getId() {
@@ -113,5 +112,13 @@ public class Standard {
                 .add("name='" + name + "'")
                 .add("referenceUri='" + referenceUri + "'")
                 .toString();
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(final String description) {
+        this.description = description;
     }
 }

@@ -8,15 +8,16 @@ public class MipViewImpl implements MipView {
     private final Mip target;
 
     public MipViewImpl(final Mip target) {
-        Assert.notNull(target,"Backing mip is null");
-        Assert.notNull(target.getCategory(),"Backing mip category is null");
-        Assert.notNull(target.getDomain(),"Backing mip domain is null");
-        Assert.notNull(target.getStandard(),"Backing mip standard is null");
-        this.target = target;}
+        Assert.notNull(target, "Backing mip is null");
+        Assert.notNull(target.getCategory(), "Backing mip category is null");
+        Assert.notNull(target.getDomain(), "Backing mip domain is null");
+        Assert.notNull(target.getStandard(), "Backing mip standard is null");
+        this.target = target;
+    }
 
     @Override
     public String getIdentifier() {
-        return target.getCategory().getAbbreviation() + '-' + target.getIdentifier();
+        return target.getCategory().getAbbreviation() + '-' + target.getExtId();
     }
 
     @Override

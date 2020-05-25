@@ -1,12 +1,12 @@
 package eu.arrowhead.common.dto.shared.mscv;
 
-import org.springframework.data.domain.Page;
-import org.springframework.util.Assert;
-
 import java.util.List;
 import java.util.StringJoiner;
 
-public class PaginationResponse<P> {
+import org.springframework.data.domain.Page;
+import org.springframework.util.Assert;
+
+public abstract class PaginationResponse<P> {
 
     private final List<P> content;
     private final int currentPage;
@@ -56,7 +56,7 @@ public class PaginationResponse<P> {
         return totalElements;
     }
 
-    public boolean isHasNext() {
+    public boolean hasNext() {
         return hasNext;
     }
 

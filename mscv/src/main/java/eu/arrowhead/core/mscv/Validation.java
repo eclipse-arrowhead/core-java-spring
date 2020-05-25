@@ -275,4 +275,10 @@ public class Validation {
         }
     }
 
+    public void verifyIdentification(final String identification, final String origin) {
+        logger.debug("verifyIdentification({},{}) started...", identification, origin);
+        if (Utilities.isEmpty(identification)) {
+            throw new BadPayloadException(STANDARD_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+    }
 }

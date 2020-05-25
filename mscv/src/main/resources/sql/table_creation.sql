@@ -114,7 +114,7 @@ CREATE TABLE IF NOT EXISTS `mscv_verification_detail_result`
 (
     `id`                    bigint(20) PRIMARY KEY AUTO_INCREMENT,
     `result`                varchar(16) NOT NULL,
-    `details`               varchar(255),
+    `details`               varchar(1024),
     `verification_entry_id` bigint      NOT NULL,
     `execution_id`          bigint      NOT NULL,
     `script_id`             bigint,

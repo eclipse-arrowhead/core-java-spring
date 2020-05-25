@@ -10,11 +10,14 @@ import java.nio.CharBuffer;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import eu.arrowhead.common.database.entity.mscv.SshTarget;
 import eu.arrowhead.common.database.entity.mscv.VerificationResult;
 import eu.arrowhead.common.database.entity.mscv.VerificationResultDetail;
+import eu.arrowhead.common.database.repository.mscv.VerificationExecutionDetailRepository;
+import eu.arrowhead.common.database.repository.mscv.VerificationExecutionRepository;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.core.mscv.MscvDefaults;
 import eu.arrowhead.core.mscv.security.KeyPairFileStorage;
@@ -51,6 +54,12 @@ public class ShellBasedSshExecutionHandler implements ExecutionHandler<SshTarget
         this.acceptAllKeyVerifier = acceptAllKeyVerifier;
         this.keyPairFileStorage = keyPairFileStorage;
         this.sshClient = sshClient;
+    }
+
+    @Override
+    public void deferVerification(final VerificationExecutionRepository executionRepo, final VerificationExecutionDetailRepository executionDetailRepo,
+                                  final VerificationResult execution, final List<VerificationResultDetail> detailList) {
+
     }
 
     @Override

@@ -8,7 +8,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
+import javax.servlet.http.Part;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.CoreDefaults;
@@ -59,6 +61,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -158,20 +161,25 @@ public class ScriptMgmtController {
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response = ErrorMessageDTO.class),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response = ErrorMessageDTO.class)
     })
-    @PostMapping(value = UPLOAD_SCRIPT_URI, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = UPLOAD_SCRIPT_URI)
     @ResponseBody
-    public ScriptResponseDto create(@RequestBody final ScriptRequestDto dto, @RequestParam("file") MultipartFile file) {
+    public ScriptResponseDto create(@RequestPart("file") final MultipartFile file,
+                                    @ApiParam(value = "Example: {\"layer\": \"DEVICE\", \"mip\": {\"categoryAbbreviation\": \"IAC\", \"extId\": 1 },   " +
+                                            "\"os\": \"LINUX\" }", type = "eu.arrowhead.common.dto.shared.mscv.ScriptRequestDto")
+                                    @RequestPart(name = "dto", required = true) final Part part) throws IOException {
         logger.debug("create started ...");
         final String origin = createMgmtOrigin(UPLOAD_SCRIPT_URI);
         final ByteArrayOutputStream byteArray;
-        final Script script;
+        final ObjectMapper mapper = new ObjectMapper();
+        final ScriptRequestDto dto;
 
-        validation.verify(dto, origin);
-        script = MscvDtoConverter.convert(dto);
-        if (service.exists(script)) {
-            throw new ArrowheadException("Script meta information exists already", HttpStatus.SC_CONFLICT, origin);
+        try(final InputStream inputStream = part.getInputStream()) {
+            dto = mapper.readValue(inputStream, ScriptRequestDto.class);
+        } catch(final Exception e) {
+            throw new ArrowheadException("Unable to convert Json DTO to ScriptRequestDto.class", HttpStatus.SC_BAD_REQUEST, e);
         }
 
+        validation.verify(dto, origin);
         byteArray = new ByteArrayOutputStream();
 
         try (final InputStream inputStream = file.getInputStream()) {
@@ -180,7 +188,8 @@ public class ScriptMgmtController {
             throw new ArrowheadException("Error during file upload", HttpStatus.SC_INTERNAL_SERVER_ERROR, e);
         }
 
-        final Script uploadedScript = service.create(script, byteArray);
+        final Script uploadedScript = service.create(byteArray, dto.getMip().getCategoryAbbreviation(),
+                                                     dto.getMip().getExtId(), dto.getLayer(), dto.getOs());
         return MscvDtoConverter.convert(uploadedScript);
     }
 

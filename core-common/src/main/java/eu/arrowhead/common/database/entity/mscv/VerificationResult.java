@@ -22,7 +22,7 @@ import eu.arrowhead.common.dto.shared.mscv.SuccessIndicator;
 @Entity
 @Table(name = "mscv_verification_result",
         uniqueConstraints = @UniqueConstraint(name = "u_verification_list_target_date",
-                columnNames = {"targetId", "verificationListId", "executionDate"}))
+                columnNames = {"verification_target_id", "verification_list_id", "execution_date"}))
 public class VerificationResult {
 
     @Id
@@ -30,16 +30,16 @@ public class VerificationResult {
     private Long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "targetId", referencedColumnName = "id", nullable = false,
+    @JoinColumn(name = "verification_target_id", referencedColumnName = "id", nullable = false,
             foreignKey = @ForeignKey(name = "fk_target", value = ConstraintMode.CONSTRAINT))
     private Target target;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "verificationListId", referencedColumnName = "id", nullable = false,
+    @JoinColumn(name = "verification_list_id", referencedColumnName = "id", nullable = false,
             foreignKey = @ForeignKey(name = "fk_verification_list", value = ConstraintMode.CONSTRAINT))
     private VerificationEntryList verificationList;
 
-    @Column(nullable = false)
+    @Column(name = "execution_date", nullable = false)
     private ZonedDateTime executionDate;
 
     @Column(nullable = false, length = 16)

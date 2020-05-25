@@ -1,6 +1,5 @@
 package eu.arrowhead.core.mscv;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -39,7 +38,7 @@ public class MscvDefaults {
     private SshDefaults ssh;
 
     @NotBlank
-    private String defaultPath = Path.of(".", File.pathSeparator).toAbsolutePath().toString();
+    private String defaultPath = Path.of(".").toAbsolutePath().toString();
 
     public MscvDefaults() { super(); }
 

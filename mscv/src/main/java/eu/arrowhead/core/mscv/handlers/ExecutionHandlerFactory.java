@@ -21,11 +21,11 @@ public class ExecutionHandlerFactory {
         registrar.put(cls, handler);
     }
 
-    public <T extends Target, H extends ExecutionHandler<T>> Optional<H> find(final T probe) {
+    public <H extends ExecutionHandler<? extends Target>> Optional<H> find(final Target probe) {
         Assert.notNull(probe, "Probing object must not be null");
-        return find((Class<T>) probe.getClass());
+        return find(probe.getClass());
     }
-    public <T extends Target, H extends ExecutionHandler<T>> Optional<H> find(final Class<T> cls) {
+    public <H extends ExecutionHandler<? extends Target>> Optional<H> find(final Class<? extends Target> cls) {
         Assert.notNull(cls, "Class must not be null");
         return Optional.ofNullable((H)registrar.get(cls));
     }

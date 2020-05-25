@@ -10,6 +10,7 @@ import eu.arrowhead.common.database.entity.mscv.MipCategory;
 import eu.arrowhead.common.database.entity.mscv.MipDomain;
 import eu.arrowhead.common.database.entity.mscv.Script;
 import eu.arrowhead.common.database.entity.mscv.SshTarget;
+import eu.arrowhead.common.database.entity.mscv.Standard;
 import eu.arrowhead.common.database.entity.mscv.Target;
 import eu.arrowhead.common.database.entity.mscv.VerificationEntry;
 import eu.arrowhead.common.database.entity.mscv.VerificationEntryList;
@@ -28,6 +29,7 @@ import eu.arrowhead.common.dto.shared.mscv.MipIdentifierDto;
 import eu.arrowhead.common.dto.shared.mscv.ScriptRequestDto;
 import eu.arrowhead.common.dto.shared.mscv.ScriptResponseDto;
 import eu.arrowhead.common.dto.shared.mscv.SshTargetDto;
+import eu.arrowhead.common.dto.shared.mscv.StandardDto;
 import eu.arrowhead.common.dto.shared.mscv.TargetDto;
 
 public class MscvDtoConverter {
@@ -95,6 +97,7 @@ public class MscvDtoConverter {
         if (Objects.isNull(dto)) { return null; } else { return new MipCategory(dto.getName(), dto.getAbbreviation()); }
     }
 
+    @SuppressWarnings("DuplicatedCode")
     public static MipDto convert(final Mip mip) {
         if (Objects.isNull(mip)) { return null; }
         final MipDto dto = new MipDto();
@@ -102,10 +105,12 @@ public class MscvDtoConverter {
         dto.setDescription(mip.getDescription());
         dto.setCategory(convert(mip.getCategory()));
         dto.setDomain(convert(mip.getDomain()));
+        dto.setStandard(convert(mip.getStandard()));
         dto.setExtId(mip.getExtId());
         return dto;
     }
 
+    @SuppressWarnings("DuplicatedCode")
     public static Mip convert(final MipDto dto) {
         if (Objects.isNull(dto)) { return null; }
         final Mip mip = new Mip();
@@ -113,6 +118,7 @@ public class MscvDtoConverter {
         mip.setDescription(dto.getDescription());
         mip.setCategory(convert(dto.getCategory()));
         mip.setDomain(convert(dto.getDomain()));
+        mip.setStandard(convert(dto.getStandard()));
         mip.setExtId(dto.getExtId());
         return mip;
     }
@@ -150,9 +156,39 @@ public class MscvDtoConverter {
             return null;
         }
         ScriptResponseDto script = new ScriptResponseDto();
+        script.setMip(convert(dto.getMip()));
         script.setLayer(dto.getLayer());
         script.setOs(dto.getOs());
-        script.setMip(convertToView(dto.getMip()));
         return script;
+    }
+
+    public static Standard convert(final StandardDto dto) {
+        if (dto == null) {
+            return null;
+        }
+        Standard standard = new Standard();
+        standard.setIdentification(dto.getIdentification());
+        standard.setName(dto.getName());
+        standard.setReferenceUri(dto.getReferenceUri());
+        standard.setDescription(dto.getDescription());
+        return standard;
+    }
+    public static StandardDto convert(final Standard standard) {
+        if (standard == null) {
+            return null;
+        }
+        StandardDto dto = new StandardDto();
+        dto.setIdentification(standard.getIdentification());
+        dto.setName(standard.getName());
+        dto.setReferenceUri(standard.getReferenceUri());
+        dto.setDescription(standard.getDescription());
+        return dto;
+    }
+
+    public static TargetDto convert(final Target target) {
+        if (target == null) {
+            return null;
+        }
+        return new TargetDto(target.getName(), target.getOs());
     }
 }

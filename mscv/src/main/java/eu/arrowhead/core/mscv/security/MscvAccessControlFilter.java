@@ -14,7 +14,6 @@ import eu.arrowhead.common.SecurityUtilities;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.filter.thirdparty.MultiReadRequestWrapper;
 import eu.arrowhead.common.security.CoreSystemAccessControlFilter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -33,11 +32,11 @@ public class MscvAccessControlFilter extends CoreSystemAccessControlFilter {
         try {
             if (request instanceof HttpServletRequest) {
                 log.debug("Checking access in MscvAccessControlFilter...");
+                final HttpServletRequest httpServletRequest = (HttpServletRequest) request;
 
-                final MultiReadRequestWrapper requestWrapper = new MultiReadRequestWrapper((HttpServletRequest) request);
-                final String requestTarget = Utilities.stripEndSlash(requestWrapper.getRequestURL().toString());
+                final String requestTarget = Utilities.stripEndSlash(httpServletRequest.getRequestURL().toString());
                 final String cloudCN = getServerCloudCN();
-                final String clientCN = SecurityUtilities.getCertificateCNFromRequest(requestWrapper);
+                final String clientCN = SecurityUtilities.getCertificateCNFromRequest(httpServletRequest);
 
                 Assert.notNull(requestTarget, "Unable to determine request target");
                 Assert.notNull(clientCN, "Unable to extract common name from request");
@@ -50,8 +49,7 @@ public class MscvAccessControlFilter extends CoreSystemAccessControlFilter {
                     checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
                 }
 
-                log.debug("Using MultiReadRequestWrapper in the filter chain from now...");
-                chain.doFilter(requestWrapper, response);
+                chain.doFilter(httpServletRequest, response);
 
             } else {
                 chain.doFilter(request, response);

@@ -16,7 +16,7 @@ public interface MipRepository extends RefreshableRepository<Mip, Long> {
 
     Optional<Mip> findByExtIdAndCategoryName(final Integer extId, final String category);
 
-    Optional<Mip> findByExtIdAndCategoryAbbreviation(final Integer extId, final String categoryAbbreviation);
+    Optional<Mip> findByCategoryAbbreviationAndExtId(final String categoryAbbreviation, final Integer extId);
 
     Optional<Mip> findByName(final String name);
 }

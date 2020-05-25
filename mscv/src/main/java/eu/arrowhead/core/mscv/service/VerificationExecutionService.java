@@ -8,6 +8,7 @@ import java.util.Set;
 
 import eu.arrowhead.common.database.entity.mscv.Script;
 import eu.arrowhead.common.database.entity.mscv.SshTarget;
+import eu.arrowhead.common.database.entity.mscv.Target;
 import eu.arrowhead.common.database.entity.mscv.VerificationEntry;
 import eu.arrowhead.common.database.entity.mscv.VerificationEntryList;
 import eu.arrowhead.common.database.entity.mscv.VerificationResult;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import static eu.arrowhead.core.mscv.MscvUtilities.notFoundException;
 import static eu.arrowhead.core.mscv.Validation.LAYER_NULL_ERROR_MESSAGE;
 import static eu.arrowhead.core.mscv.Validation.LIST_NULL_ERROR_MESSAGE;
 import static eu.arrowhead.core.mscv.Validation.TARGET_NULL_ERROR_MESSAGE;
@@ -77,13 +79,17 @@ public class VerificationExecutionService {
         logger.debug("executeWithDefaultList({}, {}) started", targetDto, layer);
         Assert.notNull(targetDto, TARGET_NULL_ERROR_MESSAGE);
         Assert.notNull(layer, LAYER_NULL_ERROR_MESSAGE);
-        final SshTarget target = targetService.findOrCreate(MscvDtoConverter.convert(targetDto));
-        final VerificationEntryList suitableList = verificationService.findOrCreateSuitableList(target, layer);
+        final Optional<Target> optionalTarget = targetService.find(targetDto.getName(), targetDto.getOs());
+        final Target target = optionalTarget.orElseThrow(notFoundException("Target"));
 
-        return MscvDtoConverter.convertToView(execute(suitableList, target));
+        targetService.checkSupported(target.getClass());
+
+        final VerificationEntryList suitableList = verificationService.findOrCreateSuitableList(target, layer);
+        final VerificationResult result = execute(suitableList, target);
+        return MscvDtoConverter.convertToView(result);
     }
 
-    private VerificationResult execute(final VerificationEntryList entryList, final SshTarget target) {
+    private VerificationResult execute(final VerificationEntryList entryList, final Target target) {
 
         final VerificationResult execution = executionRepo.saveAndFlush(
                 new VerificationResult(target, entryList, ZonedDateTime.now(), SuccessIndicator.IN_PROGRESS));
@@ -93,29 +99,21 @@ public class VerificationExecutionService {
 
         final Optional<ExecutionHandler<SshTarget>> optionalHandler = handlerFactory.find(target);
         if (optionalHandler.isPresent()) {
-
             final var executionHandler = optionalHandler.get();
-            try {
 
-                // prepare result for each verification entry. result will be adapted during execution run.
-                for (VerificationEntry entry : entries) {
-                    final Optional<Script> optionalScript = scriptService.findScriptFor(entry.getMip(), entryList.getLayer(), target.getOs());
+            // prepare result for each verification entry. result will be adapted during execution run.
+            for (VerificationEntry entry : entries) {
+                final Optional<Script> optionalScript = scriptService.findScriptFor(entry.getMip(), entryList.getLayer(), target.getOs());
 
-                    if (optionalScript.isPresent()) {
-                        final var detail = new VerificationResultDetail(execution, entry, optionalScript.get(),
-                                                                        DetailSuccessIndicator.NOT_APPLICABLE, null);
-                        detailList.add(detail);
-                    } else {
-                        detailList.add(createNotApplicableDetail(execution, entry));
-                    }
+                if (optionalScript.isPresent()) {
+                    final var detail = new VerificationResultDetail(execution, entry, optionalScript.get(),
+                                                                    DetailSuccessIndicator.NOT_APPLICABLE, null);
+                    detailList.add(detail);
+                } else {
+                    detailList.add(createNotApplicableDetail(execution, entry));
                 }
-
-                executionHandler.performVerification(execution, detailList);
-
-            } catch (final MscvException e) {
-                execution.setResult(SuccessIndicator.ERROR);
-                logger.error("Verification execution failed: {}", e.getMessage());
             }
+            executionHandler.deferVerification(executionRepo, executionDetailRepo, execution, detailList);
         } else {
             execution.setResult(SuccessIndicator.SKIPPED);
             logger.warn("No ExecutionHandler available for target: {}", target);

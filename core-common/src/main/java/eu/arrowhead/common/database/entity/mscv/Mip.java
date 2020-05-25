@@ -1,5 +1,7 @@
 package eu.arrowhead.common.database.entity.mscv;
 
+import java.util.Objects;
+import java.util.StringJoiner;
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
@@ -12,11 +14,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import java.util.Objects;
-import java.util.StringJoiner;
 
 @Entity
-@Table(name = "msvc_mip",
+@Table(name = "mscv_mip",
         uniqueConstraints = @UniqueConstraint(name = "u_mip_category_id",
                 columnNames = {"extId", "categoryId"}))
 public class Mip {
@@ -153,7 +153,7 @@ public class Mip {
         sj.add("extId=" + extId);
         sj.add("name=" + name);
         if (Objects.nonNull(domain)) { sj.add("domain=" + domain.getName()); }
-        if (Objects.nonNull(category)) { sj.add("category=" + category.getName()); }
+        if (Objects.nonNull(category)) { sj.add("category=" + category.getAbbreviation()); }
         if (Objects.nonNull(standard)) { sj.add("standard=" + standard.getName()); }
         return sj.toString();
     }

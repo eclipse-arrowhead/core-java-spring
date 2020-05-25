@@ -4,11 +4,9 @@ package eu.arrowhead.common.dto.shared.mscv;
 import java.io.Serializable;
 import java.util.StringJoiner;
 
-import eu.arrowhead.common.database.view.mscv.MipView;
-
 public class ScriptResponseDto implements Serializable {
 
-    private MipView mip;
+    private MipDto mip;
     private Layer layer;
     private OS os;
     private String contentUri;
@@ -17,18 +15,18 @@ public class ScriptResponseDto implements Serializable {
         super();
     }
 
-    public ScriptResponseDto(final MipView mip, final Layer layer, final OS os, final String contentUri) {
+    public ScriptResponseDto(final MipDto mip, final Layer layer, final OS os, final String contentUri) {
         this.mip = mip;
         this.layer = layer;
         this.os = os;
         this.contentUri = contentUri;
     }
 
-    public MipView getMip() {
+    public MipDto getMip() {
         return mip;
     }
 
-    public void setMip(final MipView mip) {
+    public void setMip(final MipDto mip) {
         this.mip = mip;
     }
 

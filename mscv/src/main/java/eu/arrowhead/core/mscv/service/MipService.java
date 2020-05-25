@@ -52,7 +52,7 @@ public class MipService {
         logger.debug("findByExternalIdAndCategory({},{}) started", extId, categoryAbbreviation);
         Assert.notNull(extId, ID_NULL_ERROR_MESSAGE);
         Assert.notNull(categoryAbbreviation, CATEGORY_NULL_ERROR_MESSAGE);
-        return repository.findByExtIdAndCategoryAbbreviation(extId, categoryAbbreviation);
+        return repository.findByCategoryAbbreviationAndExtId(categoryAbbreviation, extId);
     }
 
     @Transactional(readOnly = true)

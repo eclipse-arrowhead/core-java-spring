@@ -23,6 +23,8 @@ import eu.arrowhead.common.dto.shared.mscv.DetailSuccessIndicator;
         uniqueConstraints = @UniqueConstraint(name = "u_detail_execution_mip", columnNames = {"executionId", "verificationEntryId"}))
 public class VerificationResultDetail {
 
+    private final static int DETAILS_LENGTH = 1024;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -46,7 +48,7 @@ public class VerificationResultDetail {
     @Enumerated(EnumType.STRING)
     private DetailSuccessIndicator result;
 
-    @Column(length = 255)
+    @Column(length = DETAILS_LENGTH)
     private String details;
 
     public VerificationResultDetail() {
@@ -123,7 +125,11 @@ public class VerificationResultDetail {
     }
 
     public void setDetails(final String details) {
-        this.details = details;
+        if (details.length() > DETAILS_LENGTH) {
+            this.details = details.substring(0, DETAILS_LENGTH);
+        } else {
+            this.details = details;
+        }
     }
 
     @Override

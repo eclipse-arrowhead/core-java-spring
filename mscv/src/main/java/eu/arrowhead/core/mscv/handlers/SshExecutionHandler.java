@@ -7,6 +7,7 @@ import java.nio.CharBuffer;
 import java.nio.file.Path;
 import java.security.spec.InvalidKeySpecException;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,6 +26,8 @@ import eu.arrowhead.common.database.entity.mscv.SshTarget;
 import eu.arrowhead.common.database.entity.mscv.Target;
 import eu.arrowhead.common.database.entity.mscv.VerificationResult;
 import eu.arrowhead.common.database.entity.mscv.VerificationResultDetail;
+import eu.arrowhead.common.database.repository.mscv.VerificationExecutionDetailRepository;
+import eu.arrowhead.common.database.repository.mscv.VerificationExecutionRepository;
 import eu.arrowhead.common.dto.shared.mscv.DetailSuccessIndicator;
 import eu.arrowhead.common.dto.shared.mscv.OS;
 import eu.arrowhead.common.dto.shared.mscv.SuccessIndicator;
@@ -52,7 +55,9 @@ import static eu.arrowhead.core.mscv.Validation.USERNAME_NULL_ERROR_MESSAGE;
 @Component
 public final class SshExecutionHandler implements ExecutionHandler<SshTarget> {
 
+    private static final Duration MAX_COMMAND_DURATION = Duration.ofSeconds(10L);
     private static final String AUTHORIZED_KEYS_FILE = "~/.ssh/authorized_keys";
+    private static final Integer SUCCESS_EXIT_CODE = 0;
     private static final int MAX_CONCURRENCY = 4;
 
     private final Logger logger = LogManager.getLogger();
@@ -61,6 +66,7 @@ public final class SshExecutionHandler implements ExecutionHandler<SshTarget> {
     private final KeyPairFileStorage keyPairFileStorage;
     private final CompletionService<Queue<VerificationResultDetail>> completionService;
     private final SshClient sshClient;
+    private final ExecutorService executorService;
 
     @Autowired
     public SshExecutionHandler(final MscvDefaults mscvDefaults,
@@ -69,12 +75,32 @@ public final class SshExecutionHandler implements ExecutionHandler<SshTarget> {
                                @Qualifier(MSCV_EXECUTOR_SERVICE) final ExecutorService executorService,
                                final SshClient sshClient) {
         super();
+        this.executorService = executorService;
         logger.info("Creating {} with script base paths in {}", getClass().getSimpleName(), mscvDefaults.getDefaultPath());
         this.mscvDefaults = mscvDefaults;
         this.acceptAllKeyVerifier = acceptAllKeyVerifier;
         this.keyPairFileStorage = keyPairFileStorage;
         this.completionService = new ExecutorCompletionService(executorService);
         this.sshClient = sshClient;
+    }
+
+    @Override
+    public void deferVerification(final VerificationExecutionRepository executionRepo, final VerificationExecutionDetailRepository executionDetailRepo,
+                                  final VerificationResult execution, final List<VerificationResultDetail> detailList) {
+        executorService.submit(() -> {
+            try {
+                logger.info("Running verification of {}", execution.getTarget());
+                performVerification(execution, detailList);
+            } catch (MscvException e) {
+                execution.setResult(SuccessIndicator.ERROR);
+                logger.error("Verification execution failed: {}", e.getMessage());
+            } finally {
+                executionDetailRepo.saveAll(detailList);
+                executionDetailRepo.flush();
+                executionRepo.saveAndFlush(execution);
+                logger.info("Finished verification of {} with result: {}", execution.getTarget(), execution.getResult());
+            }
+        });
     }
 
     @Override
@@ -167,14 +193,16 @@ public final class SshExecutionHandler implements ExecutionHandler<SshTarget> {
             }
 
             session.disconnect(0, "exit");
+
+
+            intermediateResult.setResult(SuccessIndicator.SUCCESS);
         } catch (final Throwable e) {
             intermediateResult.setResult(SuccessIndicator.ERROR);
             throw new MscvException("Error during verification", e);
+        } finally {
+            resultDetails.clear();
+            resultDetails.addAll(results);
         }
-
-        resultDetails.clear();
-        resultDetails.addAll(results);
-        intermediateResult.setResult(SuccessIndicator.SUCCESS);
     }
 
     @Override
@@ -182,28 +210,49 @@ public final class SshExecutionHandler implements ExecutionHandler<SshTarget> {
         return SshTarget.class;
     }
 
-    private CommandResult executeCommand(final ClientSession session, final String command) throws IOException {
+    private CommandResult executeCommand(final ClientSession session, final String command) throws IOException, InterruptedException {
         final MscvDefaults.SshDefaults sshDefaults = mscvDefaults.getSsh();
         final Duration timeout = Duration.ofSeconds(sshDefaults.getConnectTimeout());
 
-        try (final ChannelExec channel = session.createExecChannel(command);
-             final BufferedReader readFromHost = new BufferedReader(new InputStreamReader(channel.getInvertedOut()))) {
+        try (final ChannelExec channel = session.createExecChannel(command)) {
 
-            final CharBuffer buffer = CharBuffer.allocate(100 * 1024);
             channel.open().verify(timeout.toMillis());
+            final LocalDateTime cmdTimeout = LocalDateTime.now().plus(MAX_COMMAND_DURATION);
 
-            while (channel.isOpen()) {
-                //noinspection ResultOfMethodCallIgnored
-                readFromHost.read(buffer);
+            try (final BufferedReader readOut = new BufferedReader(new InputStreamReader(channel.getInvertedOut()));
+                 final BufferedReader readErr = new BufferedReader(new InputStreamReader(channel.getInvertedErr()))) {
+
+                final CharBuffer buffer = CharBuffer.allocate(100 * 1024);
+
+                while (channel.isOpen()) {
+
+                    if (LocalDateTime.now().isAfter(cmdTimeout)) {
+                        logger.warn("Interrupting command '{}' as it is running for over {}", command, MAX_COMMAND_DURATION);
+                        channel.close(false);
+                    }
+
+                    readIntoBuffer(buffer, readOut, readErr);
+                    Thread.sleep(100L);
+                }
+
+                // read once again to make sure we didn't miss anything
+                readIntoBuffer(buffer, readOut, readErr);
+                buffer.flip(); // prepare reading
+
+                if (!channel.isClosed()) { channel.close(true).await(timeout.toMillis()); }
+                final Integer exitStatus = channel.getExitStatus();
+                return CommandResult.of(exitStatus, buffer);
             }
-
-            buffer.flip(); // prepare reading
-            final Integer exitStatus = channel.getExitStatus();
-            return CommandResult.of(exitStatus, buffer);
         }
     }
 
-    private void copySshIdentity(final ClientSession session) throws IOException, InvalidKeySpecException {
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private void readIntoBuffer(final CharBuffer buffer, final BufferedReader readOut, final BufferedReader readErr) throws IOException {
+        if (readOut.ready()) { readOut.read(buffer); }
+        if (readErr.ready()) { readErr.read(buffer); }
+    }
+
+    private void copySshIdentity(final ClientSession session) throws IOException, InvalidKeySpecException, InterruptedException {
 
         final String sshIdentity = keyPairFileStorage.getPublicKeyAsSshIdentityString();
         final int userPart = sshIdentity.lastIndexOf("mscv");
@@ -269,18 +318,19 @@ public final class SshExecutionHandler implements ExecutionHandler<SshTarget> {
 
                 if (Objects.nonNull(script) && targetOs.equals(script.getOs())) {
 
-                    final Path path = Path.of(script.getPhysicalPath());
+                    final Path sourcePath = Path.of(script.getPhysicalPath());
+                    final String targetPath = "/tmp/" + sourcePath.getFileName();
                     final CommandResult scriptResult;
 
-                    scpClient.upload(path, "/tmp" + path.getFileName(), ScpClient.Option.PreserveAttributes);
-                    executeCommand(scpClient.getSession(), "chmod u+x /tmp" + path.getFileName());
+                    scpClient.upload(sourcePath, targetPath, ScpClient.Option.PreserveAttributes);
+                    executeCommand(scpClient.getSession(), "chmod u+x " + targetPath);
 
-                    scriptResult = executeCommand(scpClient.getSession(), "/tmp" + path.getFileName());
+                    scriptResult = executeCommand(scpClient.getSession(), targetPath);
 
-                    if (scriptResult.exitCode.equals(0)) {
+                    if (SUCCESS_EXIT_CODE.equals(scriptResult.exitCode)) {
                         details.setResult(DetailSuccessIndicator.SUCCESS);
                     } else {
-                        details.setResult(DetailSuccessIndicator.ERROR);
+                        details.setResult(DetailSuccessIndicator.NO_SUCCESS);
                     }
 
                     details.setDetails(scriptResult.output.toString());
@@ -290,9 +340,12 @@ public final class SshExecutionHandler implements ExecutionHandler<SshTarget> {
                 }
 
             } catch (final Exception e) {
-                details.setResult(DetailSuccessIndicator.FAILURE);
-                details.setDetails(e.getMessage());
+                logger.error("{}: {}", e.getClass().getSimpleName(), e.getMessage(), e);
+                details.setResult(DetailSuccessIndicator.ERROR);
+                details.setDetails(e.getClass().getSimpleName() + ": " + e.getMessage());
             }
+
+            logger.debug("Verification entry result: {}", details);
             return details;
         }
     }

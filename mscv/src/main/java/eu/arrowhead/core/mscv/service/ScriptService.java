@@ -4,10 +4,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.StringJoiner;
 import java.util.regex.Matcher;
 
 import eu.arrowhead.common.CommonConstants;
@@ -42,7 +42,9 @@ import static eu.arrowhead.core.mscv.Constants.PARAMETER_LAYER;
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_MIP_IDENTIFIER;
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_OS;
 import static eu.arrowhead.core.mscv.MscvUtilities.notFoundException;
+import static eu.arrowhead.core.mscv.Validation.CATEGORY_NULL_ERROR_MESSAGE;
 import static eu.arrowhead.core.mscv.Validation.EXAMPLE_NULL_ERROR_MESSAGE;
+import static eu.arrowhead.core.mscv.Validation.ID_NULL_ERROR_MESSAGE;
 import static eu.arrowhead.core.mscv.Validation.LAYER_NULL_ERROR_MESSAGE;
 import static eu.arrowhead.core.mscv.Validation.MIP_IDENTIFIER_FORMAT_ERROR_MESSAGE;
 import static eu.arrowhead.core.mscv.Validation.MIP_IDENTIFIER_NULL_ERROR_MESSAGE;
@@ -79,7 +81,7 @@ public class ScriptService {
                                                .scheme(sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP)
                                                .host(properties.getCoreSystemDomainName())
                                                .port(properties.getCoreSystemDomainPort())
-                                               .pathSegment(CommonConstants.MSCV_URI, QUALIFY_SCRIPT_URI)
+                                               .pathSegment(CommonConstants.MSCV_URI.substring(1), QUALIFY_SCRIPT_URI.substring(1))
                                                .build();
     }
 
@@ -100,23 +102,31 @@ public class ScriptService {
         Assert.notNull(os, OS_NULL_ERROR_MESSAGE);
 
         final Matcher matcher = Validation.MIP_IDENTIFIER_PATTERN.matcher(identifier);
-        if(!matcher.matches()) {
+        if (!matcher.matches()) {
             throw new IllegalArgumentException(MIP_IDENTIFIER_FORMAT_ERROR_MESSAGE);
         }
 
-        final String categoryAbbreviation = matcher.group(0);
-        final Integer externalId = Integer.valueOf(matcher.group(1));
-        final Optional<Mip> optionalMip = mipRepository.findByExtIdAndCategoryAbbreviation(externalId, categoryAbbreviation);
+        final String categoryAbbreviation = matcher.group(1);
+        final Integer externalId = Integer.valueOf(matcher.group(2));
+        final Optional<Mip> optionalMip = mipRepository.findByCategoryAbbreviationAndExtId(categoryAbbreviation, externalId);
         final Mip mip = optionalMip.orElseThrow(notFoundException("MIP"));
 
         return scriptRepository.findOneByMipAndLayerAndOs(mip, layer, os);
     }
 
     @Transactional
-    public Script create(final Script script, final ByteArrayOutputStream content) {
-        logger.debug("create({},<stream>) started", script);
-        Assert.notNull(script, SCRIPT_NULL_ERROR_MESSAGE);
+    public Script create(final ByteArrayOutputStream content, final String catAbbr, final Integer extId,
+                         final Layer layer, final OS os) {
+        logger.debug("create(<stream>,{},{},{},{}) started", catAbbr, extId, layer, os);
         Assert.notNull(content, SCRIPT_CONTENT_NULL_ERROR_MESSAGE);
+        Assert.notNull(catAbbr, CATEGORY_NULL_ERROR_MESSAGE);
+        Assert.notNull(extId, ID_NULL_ERROR_MESSAGE);
+        Assert.notNull(layer, LAYER_NULL_ERROR_MESSAGE);
+        Assert.notNull(os, OS_NULL_ERROR_MESSAGE);
+
+        final Optional<Mip> optionalMip = mipRepository.findByCategoryAbbreviationAndExtId(catAbbr, extId);
+        final Mip mip = optionalMip.orElseThrow(notFoundException("MIP"));
+        final Script script = new Script(mip, layer, os, null);
 
         if (exists(script)) { throw new InvalidParameterException("Script meta information exist already"); }
 
@@ -178,6 +188,14 @@ public class ScriptService {
         scriptRepository.flush();
     }
 
+    public String createUriPath(final Script script) {
+        final MipView mipView = new MipViewImpl(script.getMip());
+        final Map<String, String> vars = Map.of(PARAMETER_MIP_IDENTIFIER, mipView.getIdentifier(),
+                                                PARAMETER_LAYER, script.getLayer().path(),
+                                                PARAMETER_OS, script.getOs().path());
+        return uriTemplate.expand(vars).toUriString();
+    }
+
     @Transactional(readOnly = true)
     protected Set<Script> findAllByLayer(final Layer layer) {
         logger.debug("findAllByLayer({}) started", layer);
@@ -194,9 +212,16 @@ public class ScriptService {
 
     private void safeContent(final Script script, final ByteArrayOutputStream content) {
         final String path = createPhysicalPath(script);
-        try (final FileOutputStream out = new FileOutputStream(path)) {
-            content.writeTo(out);
-            script.setPhysicalPath(path);
+        final File file = new File(path);
+        try {
+            //noinspection ResultOfMethodCallIgnored
+            file.getParentFile().mkdirs();
+            //noinspection ResultOfMethodCallIgnored
+            file.createNewFile();
+            try (final FileOutputStream out = new FileOutputStream(file)) {
+                content.writeTo(out);
+                script.setPhysicalPath(path);
+            }
         } catch (final IOException e) {
             throw new ArrowheadException("Unknown IO Exception", e);
         }
@@ -212,20 +237,12 @@ public class ScriptService {
 
     private String createPhysicalPath(final Script script) {
         final MipView mipView = new MipViewImpl(script.getMip());
-        final StringJoiner sj = new StringJoiner(File.pathSeparator);
-        sj.add(defaults.getDefaultPath())
-          .add(mipView.getStandard())
-          .add(script.getOs().path())
-          .add(script.getLayer().path())
-          .add(mipView.getIdentifier());
-        return sj.toString();
-    }
-
-    public String createUriPath(final Script script) {
-        final MipView mipView = new MipViewImpl(script.getMip());
-        final Map<String, String> vars = Map.of(PARAMETER_MIP_IDENTIFIER, mipView.getIdentifier(),
-                                                PARAMETER_LAYER, script.getLayer().path(),
-                                                PARAMETER_OS, script.getOs().path());
-        return uriTemplate.expand(vars).toUriString();
+        final Path path = Path.of(defaults.getDefaultPath())
+                              .resolve(mipView.getStandard())
+                              .resolve(script.getOs().path())
+                              .resolve(script.getLayer().path())
+                              .resolve(mipView.getIdentifier() + ".sh")
+                              .toAbsolutePath();
+        return path.toString().replaceAll(" ", "_");
     }
 }

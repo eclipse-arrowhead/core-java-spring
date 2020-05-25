@@ -8,6 +8,9 @@ public class Constants {
     public static final String PARAMETER_NAME = "name";
     public static final String PARAMETER_NAME_PATH = "/{" + PARAMETER_NAME + "}";
 
+    public static final String PARAMETER_TARGET_NAME = "target";
+    public static final String PARAMETER_TARGET_NAME_PATH = "/{" + PARAMETER_TARGET_NAME + "}";
+
     public static final String PARAMETER_IDENTIFICATION = "identification";
     public static final String PARAMETER_IDENTIFICATION_PATH = "/{" + PARAMETER_IDENTIFICATION + "}";
 
@@ -61,6 +64,7 @@ public class Constants {
     public static final String SWAGGER_TAG_SCRIPT_MGMT = CoreCommonConstants.SWAGGER_TAG_MGMT + " of Scripts";
     public static final String SWAGGER_TAG_STANDARD_MGMT = CoreCommonConstants.SWAGGER_TAG_MGMT + " of Standards";
     public static final String SWAGGER_TAG_TARGET_MGMT = CoreCommonConstants.SWAGGER_TAG_MGMT + " of Targets";
+    public static final String SWAGGER_TAG_VERIFICATION_MGMT = CoreCommonConstants.SWAGGER_TAG_MGMT + " of Results";
 
     private Constants() { throw new IllegalAccessError(); }
 }
