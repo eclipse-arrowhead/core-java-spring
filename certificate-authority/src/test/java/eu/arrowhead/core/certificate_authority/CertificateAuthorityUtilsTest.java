@@ -62,7 +62,7 @@ public class CertificateAuthorityUtilsTest {
 
     @Test(expected = BadPayloadException.class)
     public void testCheckCommonNameNullCloudCN() throws NullPointerException, IOException {
-        final JcaPKCS10CertificationRequest csr = getResourceCSR("certificates/valid.csr");
+        final JcaPKCS10CertificationRequest csr = getResourceCSR("certificates/sysop.csr");
         assertNotNull(csr);
         CertificateAuthorityUtils.checkCommonName(csr, null);
     }

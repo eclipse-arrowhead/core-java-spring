@@ -143,7 +143,7 @@ public class CertificateAuthorityControllerTest {
         mockMvc.perform(post(SIGN_CERTIFICATE_URI).secure(true).with(x509("certificates/sysop.pem"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(asJsonString(new CertificateSigningRequestDTO(getResourceContent("certificates/valid.csr")))))
+                .content(asJsonString(new CertificateSigningRequestDTO(getResourceContent("certificates/sysop.csr")))))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.certificateChain").isArray());
