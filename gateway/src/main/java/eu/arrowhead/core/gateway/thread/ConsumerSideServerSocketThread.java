@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ServiceConfigurationError;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -23,6 +25,7 @@ import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 
 import org.apache.http.HttpStatus;
+import org.apache.http.util.ByteArrayBuffer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
@@ -33,6 +36,7 @@ import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.gateway.service.ActiveSessionDTO;
+import eu.arrowhead.core.gateway.thread.GatewayHTTPUtils.Answer;
 import eu.arrowhead.relay.gateway.GatewayRelayClient;
 
 public class ConsumerSideServerSocketThread extends Thread implements MessageListener {
@@ -168,6 +172,11 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 			final InputStream inConsumer = sslConsumerSocket.getInputStream();
 			outConsumer = sslConsumerSocket.getOutputStream();
 			
+			final GatewayHTTPRequestCache requestCache = new GatewayHTTPRequestCache(BUFFER_SIZE);
+			final List<byte[]> byteArrayCache = new ArrayList<>();
+			boolean contentDetected = false;
+			boolean useHttpCache = false;
+			
 			while (true) {
 				if (interrupted) {
 					close();
@@ -178,12 +187,56 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 				final int size = inConsumer.read(buffer);
 				
 				if (size < 0) { // end of stream
+					if (contentDetected && useHttpCache) {
+						final byte[] remainingBytes = requestCache.getCacheContentBytes();
+						if (remainingBytes != null && remainingBytes.length > 0) {
+							relayClient.sendBytes(relaySession, sender, providerGatewayPublicKey, remainingBytes);
+						}
+					}
+					
 					closeAndInterrupt();
 				} else {
 					final byte[] data = new byte[size];
 					System.arraycopy(buffer, 0, data, 0, size);
-					logger.debug("FROM CONSUMER:" + new String(data, StandardCharsets.UTF_8));
-					relayClient.sendBytes(relaySession, sender, providerGatewayPublicKey, data);
+					logger.debug("FROM CONSUMER:" + new String(data, StandardCharsets.ISO_8859_1));
+					
+					if (!contentDetected) {
+						byteArrayCache.add(data);
+						final Answer canUseHttpCache = canUseHttpCache(byteArrayCache);
+						contentDetected = canUseHttpCache != Answer.CAN_BE;
+						useHttpCache = canUseHttpCache == Answer.YES;
+						switch (canUseHttpCache) {
+						case YES: 
+							for (int i = 0; i < byteArrayCache.size() - 1; ++i) { // don't add the last one, because that one is added later
+								requestCache.addBytes(byteArrayCache.get(i));
+							}
+							byteArrayCache.clear(); // clean
+							break;
+						case NO:
+							// send the whole cache content here
+							relayClient.sendBytes(relaySession, sender, providerGatewayPublicKey, concatenateByteArrays(byteArrayCache)); 
+							break;
+						case CAN_BE: 
+							// no further action is necessary
+						}
+					}
+					
+					if (contentDetected) { 
+						if (useHttpCache) {
+							requestCache.addBytes(data);
+							final byte[] requestBytes = requestCache.getHTTPRequestBytes();
+							if (requestBytes != null) {
+								// requestBytes contains a whole HTTP request
+								relayClient.sendBytes(relaySession, sender, providerGatewayPublicKey, requestBytes);
+							} // else waiting for more bytes
+						} else { // HTTP cache is not used
+							if (byteArrayCache.size() > 0) { // means content detected in this iteration => content of data is already sent with the rest of the cache content
+								byteArrayCache.clear(); // clean cache (not used again as we already determined the content)
+							} else {
+								relayClient.sendBytes(relaySession, sender, providerGatewayPublicKey, data);
+							}
+						}
+					}
 				}
 			}
 		} catch (final IOException | JMSException | ArrowheadException | ServiceConfigurationError | IllegalArgumentException ex) {
@@ -243,5 +296,45 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 	private void closeAndInterrupt() {
 		close();
 		interrupt();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private Answer canUseHttpCache(final List<byte[]> byteArrays) {
+		final byte[] message = concatenateByteArrays(byteArrays);
+		
+		final Answer isHttp = GatewayHTTPUtils.isStartOfAHttpRequest(message);
+		
+		if (isHttp == Answer.YES) {
+			final Answer isChunked = GatewayHTTPUtils.isChunkedHttpRequest(message);
+			
+			// if the message is chunked we can't use cache, so we have to 'negate' the result
+			switch (isChunked) {
+			case YES: return Answer.NO;
+			case CAN_BE: return Answer.CAN_BE;
+			case NO: return Answer.YES;
+			}
+		}
+		
+		return isHttp; // NO or CAN_BE
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private byte[] concatenateByteArrays(final List<byte[]> byteArrays) {
+		final ByteArrayBuffer buffer = new ByteArrayBuffer(calculateLengthSum(byteArrays));
+		for (final byte[] array : byteArrays) {
+			buffer.append(array, 0, array.length);
+		}
+		
+		return buffer.buffer();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private int calculateLengthSum(final List<byte[]> byteArrays) {
+		int result = 0;
+		for (final byte[] array : byteArrays) {
+			result += array.length;
+		}
+		
+		return result;
 	}
 }

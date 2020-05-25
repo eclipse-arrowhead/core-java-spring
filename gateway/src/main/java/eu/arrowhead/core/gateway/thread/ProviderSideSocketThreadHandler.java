@@ -28,6 +28,7 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.GatewayProviderConnectionRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.gateway.service.ActiveSessionDTO;
+import eu.arrowhead.core.gateway.thread.GatewayHTTPUtils.Answer;
 import eu.arrowhead.relay.gateway.GatewayRelayClient;
 
 public class ProviderSideSocketThreadHandler implements MessageListener {
@@ -53,6 +54,9 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 	private ProviderSideSocketThread oldThread;
 	private ProviderSideSocketThread currentThread;
 	private int noRequest = 0;
+	
+	private boolean firstMessage = true;
+	private boolean countRequests = false;
 	
 	private boolean initialized = false;
 	
@@ -126,9 +130,15 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 				close();
 			} else {
 				Assert.notNull(currentThread.getOutputStream(), "Output stream is null.");
-				noRequest++;
-				replaceThreadIfNecessary();
 				final byte[] bytes = relayClient.getBytesFromMessage(message, consumerGatewayPublicKey);
+				
+				if (firstMessage) { // need to decide whether use request counter or not
+					initCountRequestsFlag(bytes);
+					firstMessage = false;
+				}
+				
+				incrementRequestCounter();
+				replaceThreadIfNecessary();
 				currentThread.getOutputStream().write(bytes);
 			}
 		} catch (final JMSException | ArrowheadException | IOException ex) {
@@ -137,7 +147,7 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 			close();
 		}
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public void close() {
 		logger.debug("Provider handler close started...");
@@ -217,6 +227,35 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 				
 				close();
 			}
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void incrementRequestCounter() {
+		if (countRequests) {
+			noRequest++;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void initCountRequestsFlag(final byte[] bytes) {
+		// we only need to count requests if the parameter bytes contains a non-chunked HTTP request
+		
+		final Answer isHttp = GatewayHTTPUtils.isStartOfAHttpRequest(bytes);
+		
+		if (isHttp == Answer.YES) {
+			final Answer isChunked = GatewayHTTPUtils.isChunkedHttpRequest(bytes);
+			
+			// if the message is chunked we don't use request counting
+			switch (isChunked) {
+			case CAN_BE: logger.debug("Invalid answer: CAN_BE");
+						 // break is intentionally left here
+			case YES: countRequests = false;
+					  break;
+			case NO: countRequests = true;
+			}
+		} else {
+			countRequests = false; // not HTTP
 		}
 	}
 }

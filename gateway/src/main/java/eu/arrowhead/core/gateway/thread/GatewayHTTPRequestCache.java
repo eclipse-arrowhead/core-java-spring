@@ -80,6 +80,13 @@ class GatewayHTTPRequestCache {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	byte[] getCacheContentBytes() {
+		final String result = getCacheContent();
+		
+		return result == null ? null : result.getBytes(StandardCharsets.ISO_8859_1);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	int getCacheLength() {
 		return cache.length();
 	}
