@@ -22,6 +22,6 @@ public interface CaCertificateRepository extends RefreshableRepository<CaCertifi
 	public Optional<CaCertificate> findByCommonNameAndSerial(final String commonName, final BigInteger serial);
 
 	@Modifying
-	@Query("update CaCertificate c set c.revokedAt = ?2 where c.id = ?1")
-	boolean setRevokedById(long id, ZonedDateTime revokedAt);
+	@Query("update CaCertificate c set c.revokedAt = ?2 where c.id = ?1 and c.createdBy = ?3")
+	boolean setRevokedById(long id, ZonedDateTime revokedAt, String createdBy);
 }

@@ -123,9 +123,8 @@ public class CertificateAuthorityService {
         return certificateDbService.getcertificateEntries(page, size, direction, sortField);
     }
 
-    public boolean revokeCertificate(long id) {
-        // TODO: check createdBy
-        return certificateDbService.revokeCertificate(id);
+    public boolean revokeCertificate(long id, String requestedByCN) {
+        return certificateDbService.revokeCertificate(id, requestedByCN);
     }
 
     public TrustedKeyCheckResponseDTO checkTrustedKey(TrustedKeyCheckRequestDTO request) {

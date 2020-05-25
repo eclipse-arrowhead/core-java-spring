@@ -91,8 +91,7 @@ public class CertificateAuthorityController {
 	// methods
 
 	// -------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class, tags = {
-			CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -103,9 +102,9 @@ public class CertificateAuthorityController {
 	}
 
 	// -------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return the cloud's Common Name", response = String.class, tags = {
-			CoreCommonConstants.SWAGGER_TAG_CLIENT })
-	@ApiResponses(value = { @ApiResponse(code = HttpStatus.SC_OK, message = GET_CLOUD_COMMON_NAME_HTTP_200_MESSAGE),
+	@ApiOperation(value = "Return the cloud's Common Name", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_CLOUD_COMMON_NAME_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE) })
 	@GetMapping(path = CommonConstants.OP_CA_CLOUD_COMMON_NAME_URI)
@@ -116,9 +115,9 @@ public class CertificateAuthorityController {
 	}
 
 	// -------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Check certificate validity", response = CertificateCheckResponseDTO.class, tags = {
-			CoreCommonConstants.SWAGGER_TAG_CLIENT })
-	@ApiResponses(value = { @ApiResponse(code = HttpStatus.SC_OK, message = CHECK_CERTIFICATE_HTTP_200_MESSAGE),
+	@ApiOperation(value = "Check certificate validity", response = CertificateCheckResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = CHECK_CERTIFICATE_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CHECK_CERTIFICATE_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE) })
@@ -131,9 +130,9 @@ public class CertificateAuthorityController {
 	}
 
 	// -------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return a signed certificate", response = CertificateSigningResponseDTO.class, tags = {
-			CoreCommonConstants.SWAGGER_TAG_PRIVATE })
-	@ApiResponses(value = { @ApiResponse(code = HttpStatus.SC_OK, message = SIGN_CERTIFICATE_HTTP_200_MESSAGE),
+	@ApiOperation(value = "Return a signed certificate", response = CertificateSigningResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = SIGN_CERTIFICATE_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SIGN_CERTIFICATE_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE) })
@@ -147,9 +146,9 @@ public class CertificateAuthorityController {
 	}
 
 	// -------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Get issued Certificates", response = IssuedCertificatesResponseDTO.class, tags = {
-			CoreCommonConstants.SWAGGER_TAG_MGMT })
-	@ApiResponses(value = { @ApiResponse(code = HttpStatus.SC_OK, message = GET_ISSUED_CERTIFICATES_HTTP_200_MESSAGE),
+	@ApiOperation(value = "Get issued Certificates", response = IssuedCertificatesResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_ISSUED_CERTIFICATES_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE) })
 	@GetMapping(path = OP_CA_MGMT_CERTIFICATES_URI, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -182,29 +181,30 @@ public class CertificateAuthorityController {
 	}
 
 	// -------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Revoke issued Certificate", response = String.class, tags = {
-			CoreCommonConstants.SWAGGER_TAG_MGMT })
-	@ApiResponses(value = { @ApiResponse(code = HttpStatus.SC_OK, message = GET_ISSUED_CERTIFICATES_HTTP_200_MESSAGE),
+	@ApiOperation(value = "Revoke issued Certificate", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_ISSUED_CERTIFICATES_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE) })
 	@DeleteMapping(path = OP_CA_MGMT_CERTIFICATE_DELETE_URI)
-	public ResponseEntity<String> revokeCertificate(@PathVariable long id) {
+	public ResponseEntity<String> revokeCertificate(@PathVariable long id, HttpServletRequest httpServletRequest) {
+		final String requestedByCN = CertificateAuthorityUtils.getRequesterCommonName(httpServletRequest);
 		if (id <= 0) {
 			throw new InvalidParameterException("Invalid id");
 		}
 
-		if (certificateAuthorityService.revokeCertificate(id)) {
+		if (certificateAuthorityService.revokeCertificate(id, requestedByCN)) {
 			return new ResponseEntity<String>("Certificate revoked", org.springframework.http.HttpStatus.OK);
 		} else {
-			return new ResponseEntity<String>("Certificate revokation failed",
+			return new ResponseEntity<String>("Certificate revocation failed",
 					org.springframework.http.HttpStatus.BAD_REQUEST);
 		}
 	}
 
 	// -------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Check if the given public key is trusted", response = TrustedKeyCheckResponseDTO.class, tags = {
-			CoreCommonConstants.SWAGGER_TAG_PRIVATE })
-	@ApiResponses(value = { @ApiResponse(code = HttpStatus.SC_OK, message = CHECK_TRUSTED_KEY_HTTP_200_MESSAGE),
+	@ApiOperation(value = "Check if the given public key is trusted", response = TrustedKeyCheckResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = CHECK_TRUSTED_KEY_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CHECK_TRUSTED_KEY_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE) })
@@ -217,9 +217,9 @@ public class CertificateAuthorityController {
 	}
 
 	// -------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Get trusted public keys", response = TrustedKeysResponseDTO.class, tags = {
-			CoreCommonConstants.SWAGGER_TAG_MGMT })
-	@ApiResponses(value = { @ApiResponse(code = HttpStatus.SC_OK, message = GET_TRUSTED_KEYS_HTTP_200_MESSAGE),
+	@ApiOperation(value = "Get trusted public keys", response = TrustedKeysResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_TRUSTED_KEYS_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE) })
 	@GetMapping(path = OP_CA_MGMT_TRUSTED_KEYS_URI)
@@ -252,9 +252,9 @@ public class CertificateAuthorityController {
 	}
 
 	// -------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Add trusted public key", response = String.class, tags = {
-			CoreCommonConstants.SWAGGER_TAG_MGMT })
-	@ApiResponses(value = { @ApiResponse(code = HttpStatus.SC_OK, message = ADD_TRUSTED_KEY_HTTP_200_MESSAGE),
+	@ApiOperation(value = "Add trusted public key", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = ADD_TRUSTED_KEY_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = ADD_TRUSTED_KEY_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE) })
@@ -267,8 +267,7 @@ public class CertificateAuthorityController {
 	}
 
 	// -------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Delete trusted public key", response = String.class, tags = {
-			CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = "Delete trusted public key", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_NO_CONTENT, message = DELETE_TRUSTED_KEY_HTTP_204_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),

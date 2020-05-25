@@ -36,6 +36,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -211,7 +212,7 @@ public class CertificateAuthorityControllerCertificatesTest {
     @Test
     public void testCertificateByIdDeleteValid() throws Exception {
 
-        when(serviceCertificateAuthorityService.revokeCertificate(anyLong())).thenReturn(true);
+        when(serviceCertificateAuthorityService.revokeCertificate(anyLong(), anyString())).thenReturn(true);
 
         mockMvc.perform(delete(CERTIFICATES_URL + 1)).andExpect(status().isOk());
     }
@@ -219,7 +220,7 @@ public class CertificateAuthorityControllerCertificatesTest {
     @Test
     public void testCertificateByIdDeleteInvalid() throws Exception {
 
-        when(serviceCertificateAuthorityService.revokeCertificate(anyLong())).thenReturn(false);
+        when(serviceCertificateAuthorityService.revokeCertificate(anyLong(), anyString())).thenReturn(false);
 
         mockMvc.perform(delete(CERTIFICATES_URL + 1)).andExpect(status().isBadRequest());
     }
