@@ -38,6 +38,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.x509;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
@@ -214,7 +215,8 @@ public class CertificateAuthorityControllerCertificatesTest {
 
         when(serviceCertificateAuthorityService.revokeCertificate(anyLong(), anyString())).thenReturn(true);
 
-        mockMvc.perform(delete(CERTIFICATES_URL + 1)).andExpect(status().isOk());
+        mockMvc.perform(delete(CERTIFICATES_URL + 1).secure(true).with(x509("certificates/sysop.pem")))
+                .andExpect(status().isOk());
     }
 
     @Test

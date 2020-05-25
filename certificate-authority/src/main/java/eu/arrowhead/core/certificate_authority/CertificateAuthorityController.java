@@ -107,7 +107,7 @@ public class CertificateAuthorityController {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_CLOUD_COMMON_NAME_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE) })
-	@GetMapping(path = CommonConstants.OP_CA_CLOUD_COMMON_NAME_URI)
+	@GetMapping(path = CommonConstants.OP_CA_CLOUD_COMMON_NAME_URI, produces = MediaType.TEXT_PLAIN_VALUE)
 	public String getCloudCommonName() {
 		logger.debug("getCloudCommonName started ...");
 
@@ -139,7 +139,7 @@ public class CertificateAuthorityController {
 	@PostMapping(path = CommonConstants.OP_CA_SIGN_CERTIFICATE_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public CertificateSigningResponseDTO signCertificate(@Valid @RequestBody final CertificateSigningRequestDTO request,
-			HttpServletRequest httpServletRequest, BindingResult bindingResult) {
+			BindingResult bindingResult, HttpServletRequest httpServletRequest) {
 		handleBindingResult(bindingResult);
 		final String requestedByCN = CertificateAuthorityUtils.getRequesterCommonName(httpServletRequest);
 		return certificateAuthorityService.signCertificate(request, requestedByCN);
