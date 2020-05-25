@@ -17,6 +17,9 @@ public class CloudWithRelaysListResponseDTO implements Serializable {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
+	public CloudWithRelaysListResponseDTO() {}
+	
+	//-------------------------------------------------------------------------------------------------
 	public CloudWithRelaysListResponseDTO(final List<CloudWithRelaysResponseDTO> data, final long count) {
 		this.data = data;
 		this.count = count;

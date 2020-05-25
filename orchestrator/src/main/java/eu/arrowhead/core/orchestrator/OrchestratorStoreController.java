@@ -122,7 +122,7 @@ public class OrchestratorStoreController {
 		
 		final ValidatedPageParams vpp = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
 		final OrchestratorStoreListResponseDTO orchestratorStoreListResponse = orchestratorStoreDBService.getOrchestratorStoreEntriesResponse(vpp.getValidatedPage(), vpp.getValidatedSize(), 
-																																			  vpp.getValidatedDirecion(), sortField);
+																																			  vpp.getValidatedDirection(), sortField);
 		logger.debug("OrchestratorStores  with page: {} and item_per page: {} retrieved successfully", page, size);
 		
 		return orchestratorStoreListResponse;
@@ -147,7 +147,7 @@ public class OrchestratorStoreController {
 		
 		final ValidatedPageParams vpp = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_TOP_PRIORITY);
 		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesResponse(vpp.getValidatedPage(), vpp.getValidatedSize(),
-																																					    vpp.getValidatedDirecion(), sortField);
+																																					    vpp.getValidatedDirection(), sortField);
 		logger.debug("OrchestratorStores  with page: {} and item_per page: {} retrieved successfully", page, size);
 		
 		return orchestratorStoreResponse;
@@ -174,7 +174,7 @@ public class OrchestratorStoreController {
 		final ValidatedPageParams vpp = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER);
 		checkOrchestratorStoreRequestDTOForConsumerIdAndServiceDefinitionName(request, CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER);
 		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(vpp.getValidatedPage(), vpp.getValidatedSize(),
-																																			  vpp.getValidatedDirecion(), sortField,
+																																			  vpp.getValidatedDirection(), sortField,
 																																			  request.getConsumerSystemId(),
 																																			  request.getServiceDefinitionName(),
 																																			  request.getServiceInterfaceName());

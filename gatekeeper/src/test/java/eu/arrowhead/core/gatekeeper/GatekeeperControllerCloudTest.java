@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -13,8 +16,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +32,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -43,6 +50,8 @@ import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
+import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBServiceTestContext;
 
@@ -55,6 +64,7 @@ public class GatekeeperControllerCloudTest {
 	// members
 	
 	private static final String CLOUDS_MGMT_URI = CommonConstants.GATEKEEPER_URI + CoreCommonConstants.MGMT_URI + "/clouds";
+	private static final String CLOUD_BY_OPERATOR_AND_NAME_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_GET_CLOUD_SERVICE;
 	
 	@Autowired
 	private WebApplicationContext wac;
@@ -521,6 +531,61 @@ public class GatekeeperControllerCloudTest {
 					.andExpect(status().isBadRequest());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetCloudByOperatorAndNameEmptyOperator() throws Exception {
+		final MvcResult result = getCloudByOperatorAndName(" ", "name", status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(CLOUD_BY_OPERATOR_AND_NAME_URI, error.getOrigin());
+		Assert.assertEquals("Operator is empty", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetCloudByOperatorAndNameEmptyName() throws Exception {
+		final MvcResult result = getCloudByOperatorAndName("operator", " ", status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(CLOUD_BY_OPERATOR_AND_NAME_URI, error.getOrigin());
+		Assert.assertEquals("Name is empty", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetCloudByOperatorAndNameOk() throws Exception {
+		final Relay publicRelay = new Relay("localhost", 5678, true, false, RelayType.GATEWAY_RELAY);
+		publicRelay.setId(2);
+		publicRelay.setCreatedAt(ZonedDateTime.now());
+		publicRelay.setUpdatedAt(ZonedDateTime.now());
+		final Relay privateRelay = new Relay("localhost", 1234, true, true, RelayType.GATEWAY_RELAY);
+		privateRelay.setId(1);
+		privateRelay.setCreatedAt(ZonedDateTime.now());
+		privateRelay.setUpdatedAt(ZonedDateTime.now());
+		final Set<CloudGatewayRelay> set = new HashSet<>();
+		final Cloud cloud = new Cloud("operator", "name", true, true, false, "abcd");
+		cloud.setId(12);
+		cloud.setGatewayRelays(set);
+		cloud.setCreatedAt(ZonedDateTime.now());
+		cloud.setUpdatedAt(ZonedDateTime.now());
+		set.add(new CloudGatewayRelay(cloud, privateRelay));
+		
+		when(gatekeeperDBService.getCloudByOperatorAndName(anyString(), anyString())).thenReturn(cloud);
+		when(gatekeeperDBService.getPublicGatewayRelays()).thenReturn(List.of(publicRelay));
+		
+		final MvcResult result = getCloudByOperatorAndName("operator", "name", status().isOk());
+		final CloudWithRelaysResponseDTO cloudResponse = objectMapper.readValue(result.getResponse().getContentAsByteArray(), CloudWithRelaysResponseDTO.class);
+		
+		verify(gatekeeperDBService, times(1)).getCloudByOperatorAndName(anyString(), anyString());
+		verify(gatekeeperDBService, times(1)).getPublicGatewayRelays();
+		
+		Assert.assertEquals(2, cloudResponse.getGatewayRelays().size());
+		Assert.assertEquals("operator", cloudResponse.getOperator());
+		Assert.assertEquals("name", cloudResponse.getName());
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -568,5 +633,13 @@ public class GatekeeperControllerCloudTest {
 		}
 		
 		return new CloudWithRelaysListResponseDTO(cloudDTOList, cloudDTOList.size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MvcResult getCloudByOperatorAndName(final String operator, final String name, final ResultMatcher matcher) throws Exception {
+		return this.mockMvc.perform(get(CLOUD_BY_OPERATOR_AND_NAME_URI + "/" + operator + "/" + name)
+				   		   .accept(MediaType.APPLICATION_JSON))
+				   		   .andExpect(matcher)
+				   		   .andReturn();
 	}
 }

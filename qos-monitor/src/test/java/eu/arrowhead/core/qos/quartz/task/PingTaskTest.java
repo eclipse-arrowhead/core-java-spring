@@ -135,14 +135,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.of(pingMeasurement));
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.of(pingMeasurement));
 		//when(qoSDBService.createPingMeasurement(any(), any(), any())).thenReturn(pingMeasurement);
-		doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		doNothing().when(qoSDBService).updateIntraPingMeasurement(any(), any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -162,12 +162,12 @@ public class PingTaskTest {
 		verify(httpService, times(1)).sendRequest(any(), any(), any());
 		verify(pingMeasurementProperties, times(1)).getTimeout();
 		verify(pingService, atLeastOnce()).getPingResponseList(anyString());
-		verify(qoSDBService, atLeastOnce()).getOrCreateMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).getOrCreateIntraMeasurement(any(), any());
 
-		verify(qoSDBService, atLeastOnce()).getPingMeasurementByMeasurement(any());
-		verify(qoSDBService, atLeastOnce()).updatePingMeasurement(any(), any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementToDB(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementDetailsToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).getIntraPingMeasurementByMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).updateIntraPingMeasurement(any(), any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementDetailsToDB(any(), any(), any());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -198,14 +198,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), any(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -225,12 +225,12 @@ public class PingTaskTest {
 		verify(httpService, times(1)).sendRequest(any(), any(), any());
 		verify(pingMeasurementProperties, times(1)).getTimeout();
 		verify(pingService, atLeastOnce()).getPingResponseList(anyString());
-		verify(qoSDBService, atLeastOnce()).getOrCreateMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).getOrCreateIntraMeasurement(any(), any());
 
-		verify(qoSDBService, atLeastOnce()).getPingMeasurementByMeasurement(any());
-		verify(qoSDBService, atLeastOnce()).createPingMeasurement(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementToDB(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementDetailsToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).getIntraPingMeasurementByMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).createIntraPingMeasurement(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementDetailsToDB(any(), any(), any());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -261,14 +261,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), any(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -288,12 +288,12 @@ public class PingTaskTest {
 		verify(httpService, times(1)).sendRequest(any(), any(), any());
 		verify(pingMeasurementProperties, times(1)).getTimeout();
 		verify(pingService, times(1)).getPingResponseList(anyString());
-		verify(qoSDBService, atLeastOnce()).getOrCreateMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).getOrCreateIntraMeasurement(any(), any());
 
-		verify(qoSDBService, atLeastOnce()).getPingMeasurementByMeasurement(any());
-		verify(qoSDBService, atLeastOnce()).createPingMeasurement(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementToDB(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementDetailsToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).getIntraPingMeasurementByMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).createIntraPingMeasurement(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementDetailsToDB(any(), any(), any());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -326,14 +326,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), any(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -353,12 +353,12 @@ public class PingTaskTest {
 		verify(httpService, times(1)).sendRequest(any(), any(), any());
 		verify(pingMeasurementProperties, times(NUMBER_OF_PROVIDERS)).getTimeout();
 		verify(pingService, times(NUMBER_OF_PROVIDERS)).getPingResponseList(anyString());
-		verify(qoSDBService, atLeastOnce()).getOrCreateMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).getOrCreateIntraMeasurement(any(), any());
 
-		verify(qoSDBService, atLeastOnce()).getPingMeasurementByMeasurement(any());
-		verify(qoSDBService, atLeastOnce()).createPingMeasurement(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementToDB(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementDetailsToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).getIntraPingMeasurementByMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).createIntraPingMeasurement(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementDetailsToDB(any(), any(), any());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -389,14 +389,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), any(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -416,12 +416,12 @@ public class PingTaskTest {
 		verify(httpService, times(0)).sendRequest(any(), any(), any());
 		verify(pingMeasurementProperties, times(0)).getTimeout();
 		verify(pingService, times(0)).getPingResponseList(anyString());
-		verify(qoSDBService,times(0)).getOrCreateMeasurement(any());
+		verify(qoSDBService,times(0)).getOrCreateIntraMeasurement(any(), any());
 
-		verify(qoSDBService, times(0)).getPingMeasurementByMeasurement(any());
-		verify(qoSDBService, times(0)).createPingMeasurement(any(), any(), any());
-		verify(qoSDBService, times(0)).logMeasurementToDB(any(), any(), any());
-		verify(qoSDBService, times(0)).logMeasurementDetailsToDB(any(), any(), any());
+		verify(qoSDBService, times(0)).getIntraPingMeasurementByMeasurement(any());
+		verify(qoSDBService, times(0)).createIntraPingMeasurement(any(), any(), any());
+		verify(qoSDBService, times(0)).logIntraMeasurementToDB(any(), any(), any());
+		verify(qoSDBService, times(0)).logIntraMeasurementDetailsToDB(any(), any(), any());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -452,14 +452,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), any(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -479,12 +479,12 @@ public class PingTaskTest {
 		verify(httpService, times(1)).sendRequest(any(), any(), any());
 		verify(pingMeasurementProperties, times(0)).getTimeout();
 		verify(pingService, times(0)).getPingResponseList(anyString());
-		verify(qoSDBService,times(0)).getOrCreateMeasurement(any());
+		verify(qoSDBService,times(0)).getOrCreateIntraMeasurement(any(), any());
 
-		verify(qoSDBService, times(0)).getPingMeasurementByMeasurement(any());
-		verify(qoSDBService, times(0)).createPingMeasurement(any(), any(), any());
-		verify(qoSDBService, times(0)).logMeasurementToDB(any(), any(), any());
-		verify(qoSDBService, times(0)).logMeasurementDetailsToDB(any(), any(), any());
+		verify(qoSDBService, times(0)).getIntraPingMeasurementByMeasurement(any());
+		verify(qoSDBService, times(0)).createIntraPingMeasurement(any(), any(), any());
+		verify(qoSDBService, times(0)).logIntraMeasurementToDB(any(), any(), any());
+		verify(qoSDBService, times(0)).logIntraMeasurementDetailsToDB(any(), any(), any());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -515,14 +515,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), any(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -544,12 +544,12 @@ public class PingTaskTest {
 			verify(httpService, times(0)).sendRequest(any(), any(), any());
 			verify(pingMeasurementProperties, times(0)).getTimeout();
 			verify(pingService, times(0)).getPingResponseList(anyString());
-			verify(qoSDBService,times(0)).getOrCreateMeasurement(any());
+			verify(qoSDBService,times(0)).getOrCreateIntraMeasurement(any(), any());
 
-			verify(qoSDBService, times(0)).getPingMeasurementByMeasurement(any());
-			verify(qoSDBService, times(0)).createPingMeasurement(any(), any(), any());
-			verify(qoSDBService, times(0)).logMeasurementToDB(any(), any(), any());
-			verify(qoSDBService, times(0)).logMeasurementDetailsToDB(any(), any(), any());
+			verify(qoSDBService, times(0)).getIntraPingMeasurementByMeasurement(any());
+			verify(qoSDBService, times(0)).createIntraPingMeasurement(any(), any(), any());
+			verify(qoSDBService, times(0)).logIntraMeasurementToDB(any(), any(), any());
+			verify(qoSDBService, times(0)).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 			throw ex;
 		}
@@ -584,14 +584,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), any(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -613,12 +613,12 @@ public class PingTaskTest {
 			verify(httpService, times(0)).sendRequest(any(), any(), any());
 			verify(pingMeasurementProperties, times(0)).getTimeout();
 			verify(pingService, times(0)).getPingResponseList(anyString());
-			verify(qoSDBService,times(0)).getOrCreateMeasurement(any());
+			verify(qoSDBService,times(0)).getOrCreateIntraMeasurement(any(), any());
 
-			verify(qoSDBService, times(0)).getPingMeasurementByMeasurement(any());
-			verify(qoSDBService, times(0)).createPingMeasurement(any(), any(), any());
-			verify(qoSDBService, times(0)).logMeasurementToDB(any(), any(), any());
-			verify(qoSDBService, times(0)).logMeasurementDetailsToDB(any(), any(), any());
+			verify(qoSDBService, times(0)).getIntraPingMeasurementByMeasurement(any());
+			verify(qoSDBService, times(0)).createIntraPingMeasurement(any(), any(), any());
+			verify(qoSDBService, times(0)).logIntraMeasurementToDB(any(), any(), any());
+			verify(qoSDBService, times(0)).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 			throw ex;
 		}
@@ -654,14 +654,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), any(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -683,12 +683,12 @@ public class PingTaskTest {
 			verify(httpService, times(1)).sendRequest(any(), any(), any());
 			verify(pingMeasurementProperties, times(0)).getTimeout();
 			verify(pingService, times(0)).getPingResponseList(anyString());
-			verify(qoSDBService,times(0)).getOrCreateMeasurement(any());
+			verify(qoSDBService,times(0)).getOrCreateIntraMeasurement(any(), any());
 
-			verify(qoSDBService, times(0)).getPingMeasurementByMeasurement(any());
-			verify(qoSDBService, times(0)).createPingMeasurement(any(), any(), any());
-			verify(qoSDBService, times(0)).logMeasurementToDB(any(), any(), any());
-			verify(qoSDBService, times(0)).logMeasurementDetailsToDB(any(), any(), any());
+			verify(qoSDBService, times(0)).getIntraPingMeasurementByMeasurement(any());
+			verify(qoSDBService, times(0)).createIntraPingMeasurement(any(), any(), any());
+			verify(qoSDBService, times(0)).logIntraMeasurementToDB(any(), any(), any());
+			verify(qoSDBService, times(0)).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 			throw ex;
 		}
@@ -724,14 +724,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), any(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -753,12 +753,12 @@ public class PingTaskTest {
 			verify(httpService, times(1)).sendRequest(any(), any(), any());
 			verify(pingMeasurementProperties, times(0)).getTimeout();
 			verify(pingService, times(0)).getPingResponseList(anyString());
-			verify(qoSDBService,times(0)).getOrCreateMeasurement(any());
+			verify(qoSDBService,times(0)).getOrCreateIntraMeasurement(any(), any());
 
-			verify(qoSDBService, times(0)).getPingMeasurementByMeasurement(any());
-			verify(qoSDBService, times(0)).createPingMeasurement(any(), any(), any());
-			verify(qoSDBService, times(0)).logMeasurementToDB(any(), any(), any());
-			verify(qoSDBService, times(0)).logMeasurementDetailsToDB(any(), any(), any());
+			verify(qoSDBService, times(0)).getIntraPingMeasurementByMeasurement(any());
+			verify(qoSDBService, times(0)).createIntraPingMeasurement(any(), any(), any());
+			verify(qoSDBService, times(0)).logIntraMeasurementToDB(any(), any(), any());
+			verify(qoSDBService, times(0)).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 			throw ex;
 		}
@@ -792,14 +792,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenThrow(ArrowheadException.class);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), any(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -819,12 +819,12 @@ public class PingTaskTest {
 			verify(httpService, times(1)).sendRequest(any(), any(), any());
 			verify(pingService, times(1)).getPingResponseList(anyString());
 			verify(pingMeasurementProperties, times(0)).getTimeout();
-			verify(qoSDBService,times(0)).getOrCreateMeasurement(any());
+			verify(qoSDBService,times(0)).getOrCreateIntraMeasurement(any(), any());
 
-			verify(qoSDBService, times(0)).getPingMeasurementByMeasurement(any());
-			verify(qoSDBService, times(0)).createPingMeasurement(any(), any(), any());
-			verify(qoSDBService, times(0)).logMeasurementToDB(any(), any(), any());
-			verify(qoSDBService, times(0)).logMeasurementDetailsToDB(any(), any(), any());
+			verify(qoSDBService, times(0)).getIntraPingMeasurementByMeasurement(any());
+			verify(qoSDBService, times(0)).createIntraPingMeasurement(any(), any(), any());
+			verify(qoSDBService, times(0)).logIntraMeasurementToDB(any(), any(), any());
+			verify(qoSDBService, times(0)).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 			throw ex;
 		}
@@ -860,14 +860,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenThrow(ArrowheadException.class);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenThrow(ArrowheadException.class);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), any(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -886,13 +886,13 @@ public class PingTaskTest {
 			verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_QUERY_ALL);
 			verify(httpService, times(1)).sendRequest(any(), any(), any());
 			verify(pingService, times(1)).getPingResponseList(anyString());
-			verify(qoSDBService,times(1)).getOrCreateMeasurement(any());
+			verify(qoSDBService,times(1)).getOrCreateIntraMeasurement(any(), any());
 			verify(pingMeasurementProperties, times(0)).getTimeout();
 
-			verify(qoSDBService, times(0)).getPingMeasurementByMeasurement(any());
-			verify(qoSDBService, times(0)).createPingMeasurement(any(), any(), any());
-			verify(qoSDBService, times(0)).logMeasurementToDB(any(), any(), any());
-			verify(qoSDBService, times(0)).logMeasurementDetailsToDB(any(), any(), any());
+			verify(qoSDBService, times(0)).getIntraPingMeasurementByMeasurement(any());
+			verify(qoSDBService, times(0)).createIntraPingMeasurement(any(), any(), any());
+			verify(qoSDBService, times(0)).logIntraMeasurementToDB(any(), any(), any());
+			verify(qoSDBService, times(0)).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 			throw ex;
 		}
@@ -928,14 +928,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), any(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -956,13 +956,13 @@ public class PingTaskTest {
 			verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_QUERY_ALL);
 			verify(httpService, times(1)).sendRequest(any(), any(), any());
 			verify(pingService, times(1)).getPingResponseList(anyString());
-			verify(qoSDBService,times(1)).getOrCreateMeasurement(any());
+			verify(qoSDBService,times(1)).getOrCreateIntraMeasurement(any(), any());
 			verify(pingMeasurementProperties, times(0)).getTimeout();
 
-			verify(qoSDBService, times(0)).getPingMeasurementByMeasurement(any());
-			verify(qoSDBService, times(0)).createPingMeasurement(any(), any(), any());
-			verify(qoSDBService, times(0)).logMeasurementToDB(any(), any(), any());
-			verify(qoSDBService, times(0)).logMeasurementDetailsToDB(any(), any(), any());
+			verify(qoSDBService, times(0)).getIntraPingMeasurementByMeasurement(any());
+			verify(qoSDBService, times(0)).createIntraPingMeasurement(any(), any(), any());
+			verify(qoSDBService, times(0)).logIntraMeasurementToDB(any(), any(), any());
+			verify(qoSDBService, times(0)).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 			throw ex;
 		}
@@ -1000,14 +1000,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doNothing().when(qoSDBService).createPingMeasurement(any(), calculationsValueCapture.capture(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), calculationsValueCapture.capture(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -1030,12 +1030,12 @@ public class PingTaskTest {
 		verify(httpService, times(1)).sendRequest(any(), any(), any());
 		verify(pingMeasurementProperties, times(1)).getTimeout();
 		verify(pingService, atLeastOnce()).getPingResponseList(anyString());
-		verify(qoSDBService, atLeastOnce()).getOrCreateMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).getOrCreateIntraMeasurement(any(), any());
 
-		verify(qoSDBService, atLeastOnce()).getPingMeasurementByMeasurement(any());
-		verify(qoSDBService, atLeastOnce()).createPingMeasurement(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementToDB(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementDetailsToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).getIntraPingMeasurementByMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).createIntraPingMeasurement(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementDetailsToDB(any(), any(), any());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -1069,14 +1069,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doNothing().when(qoSDBService).createPingMeasurement(any(), calculationsValueCapture.capture(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), calculationsValueCapture.capture(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -1100,12 +1100,12 @@ public class PingTaskTest {
 		verify(httpService, times(1)).sendRequest(any(), any(), any());
 		verify(pingMeasurementProperties, times(1)).getTimeout();
 		verify(pingService, atLeastOnce()).getPingResponseList(anyString());
-		verify(qoSDBService, atLeastOnce()).getOrCreateMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).getOrCreateIntraMeasurement(any(), any());
 
-		verify(qoSDBService, atLeastOnce()).getPingMeasurementByMeasurement(any());
-		verify(qoSDBService, atLeastOnce()).createPingMeasurement(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementToDB(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementDetailsToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).getIntraPingMeasurementByMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).createIntraPingMeasurement(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementDetailsToDB(any(), any(), any());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -1139,14 +1139,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doNothing().when(qoSDBService).createPingMeasurement(any(), calculationsValueCapture.capture(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), calculationsValueCapture.capture(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -1170,12 +1170,12 @@ public class PingTaskTest {
 		verify(httpService, times(1)).sendRequest(any(), any(), any());
 		verify(pingMeasurementProperties, times(1)).getTimeout();
 		verify(pingService, atLeastOnce()).getPingResponseList(anyString());
-		verify(qoSDBService, atLeastOnce()).getOrCreateMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).getOrCreateIntraMeasurement(any(), any());
 
-		verify(qoSDBService, atLeastOnce()).getPingMeasurementByMeasurement(any());
-		verify(qoSDBService, atLeastOnce()).createPingMeasurement(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementToDB(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementDetailsToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).getIntraPingMeasurementByMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).createIntraPingMeasurement(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementDetailsToDB(any(), any(), any());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -1209,14 +1209,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doNothing().when(qoSDBService).createPingMeasurement(any(), calculationsValueCapture.capture(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), calculationsValueCapture.capture(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -1240,12 +1240,12 @@ public class PingTaskTest {
 		verify(httpService, times(1)).sendRequest(any(), any(), any());
 		verify(pingMeasurementProperties, times(1)).getTimeout();
 		verify(pingService, atLeastOnce()).getPingResponseList(anyString());
-		verify(qoSDBService, atLeastOnce()).getOrCreateMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).getOrCreateIntraMeasurement(any(), any());
 
-		verify(qoSDBService, atLeastOnce()).getPingMeasurementByMeasurement(any());
-		verify(qoSDBService, atLeastOnce()).createPingMeasurement(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementToDB(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementDetailsToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).getIntraPingMeasurementByMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).createIntraPingMeasurement(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementDetailsToDB(any(), any(), any());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -1279,14 +1279,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doNothing().when(qoSDBService).createPingMeasurement(any(), calculationsValueCapture.capture(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), calculationsValueCapture.capture(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -1310,12 +1310,12 @@ public class PingTaskTest {
 		verify(httpService, times(1)).sendRequest(any(), any(), any());
 		verify(pingMeasurementProperties, times(1)).getTimeout();
 		verify(pingService, atLeastOnce()).getPingResponseList(anyString());
-		verify(qoSDBService, atLeastOnce()).getOrCreateMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).getOrCreateIntraMeasurement(any(), any());
 
-		verify(qoSDBService, atLeastOnce()).getPingMeasurementByMeasurement(any());
-		verify(qoSDBService, atLeastOnce()).createPingMeasurement(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementToDB(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementDetailsToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).getIntraPingMeasurementByMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).createIntraPingMeasurement(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementDetailsToDB(any(), any(), any());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -1349,14 +1349,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doNothing().when(qoSDBService).createPingMeasurement(any(), calculationsValueCapture.capture(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), calculationsValueCapture.capture(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -1380,12 +1380,12 @@ public class PingTaskTest {
 		verify(httpService, times(1)).sendRequest(any(), any(), any());
 		verify(pingMeasurementProperties, times(1)).getTimeout();
 		verify(pingService, atLeastOnce()).getPingResponseList(anyString());
-		verify(qoSDBService, atLeastOnce()).getOrCreateMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).getOrCreateIntraMeasurement(any(), any());
 
-		verify(qoSDBService, atLeastOnce()).getPingMeasurementByMeasurement(any());
-		verify(qoSDBService, atLeastOnce()).createPingMeasurement(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementToDB(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementDetailsToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).getIntraPingMeasurementByMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).createIntraPingMeasurement(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementDetailsToDB(any(), any(), any());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -1419,14 +1419,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doNothing().when(qoSDBService).createPingMeasurement(any(), calculationsValueCapture.capture(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), calculationsValueCapture.capture(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -1450,12 +1450,12 @@ public class PingTaskTest {
 		verify(httpService, times(1)).sendRequest(any(), any(), any());
 		verify(pingMeasurementProperties, times(1)).getTimeout();
 		verify(pingService, atLeastOnce()).getPingResponseList(anyString());
-		verify(qoSDBService, atLeastOnce()).getOrCreateMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).getOrCreateIntraMeasurement(any(), any());
 
-		verify(qoSDBService, atLeastOnce()).getPingMeasurementByMeasurement(any());
-		verify(qoSDBService, atLeastOnce()).createPingMeasurement(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementToDB(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementDetailsToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).getIntraPingMeasurementByMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).createIntraPingMeasurement(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementDetailsToDB(any(), any(), any());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -1488,14 +1488,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doNothing().when(qoSDBService).createPingMeasurement(any(), calculationsValueCapture.capture(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), calculationsValueCapture.capture(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -1519,12 +1519,12 @@ public class PingTaskTest {
 		verify(httpService, times(1)).sendRequest(any(), any(), any());
 		verify(pingMeasurementProperties, times(1)).getTimeout();
 		verify(pingService, atLeastOnce()).getPingResponseList(anyString());
-		verify(qoSDBService, atLeastOnce()).getOrCreateMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).getOrCreateIntraMeasurement(any(), any());
 
-		verify(qoSDBService, atLeastOnce()).getPingMeasurementByMeasurement(any());
-		verify(qoSDBService, atLeastOnce()).createPingMeasurement(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementToDB(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementDetailsToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).getIntraPingMeasurementByMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).createIntraPingMeasurement(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementDetailsToDB(any(), any(), any());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -1557,14 +1557,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doNothing().when(qoSDBService).createPingMeasurement(any(), calculationsValueCapture.capture(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), calculationsValueCapture.capture(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -1588,12 +1588,12 @@ public class PingTaskTest {
 		verify(httpService, times(1)).sendRequest(any(), any(), any());
 		verify(pingMeasurementProperties, times(1)).getTimeout();
 		verify(pingService, atLeastOnce()).getPingResponseList(anyString());
-		verify(qoSDBService, atLeastOnce()).getOrCreateMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).getOrCreateIntraMeasurement(any(), any());
 
-		verify(qoSDBService, atLeastOnce()).getPingMeasurementByMeasurement(any());
-		verify(qoSDBService, atLeastOnce()).createPingMeasurement(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementToDB(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementDetailsToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).getIntraPingMeasurementByMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).createIntraPingMeasurement(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementDetailsToDB(any(), any(), any());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -1626,14 +1626,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doNothing().when(qoSDBService).createPingMeasurement(any(), calculationsValueCapture.capture(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), calculationsValueCapture.capture(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -1658,12 +1658,12 @@ public class PingTaskTest {
 		verify(httpService, times(1)).sendRequest(any(), any(), any());
 		verify(pingMeasurementProperties, times(1)).getTimeout();
 		verify(pingService, atLeastOnce()).getPingResponseList(anyString());
-		verify(qoSDBService, atLeastOnce()).getOrCreateMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).getOrCreateIntraMeasurement(any(), any());
 
-		verify(qoSDBService, atLeastOnce()).getPingMeasurementByMeasurement(any());
-		verify(qoSDBService, atLeastOnce()).createPingMeasurement(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementToDB(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementDetailsToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).getIntraPingMeasurementByMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).createIntraPingMeasurement(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementDetailsToDB(any(), any(), any());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -1696,14 +1696,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doNothing().when(qoSDBService).createPingMeasurement(any(), calculationsValueCapture.capture(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), calculationsValueCapture.capture(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -1715,8 +1715,8 @@ public class PingTaskTest {
 
 		final PingMeasurementCalculationsDTO calculations = calculationsValueCapture.getValue();
 		assertNotNull(calculations);
-		assertTrue(1567 == calculations.getJitterWithTimeout());
-		assertTrue(25 == calculations.getJitterWithoutTimeout());
+		assertTrue(1487 == calculations.getJitterWithTimeout());
+		assertTrue(26 == calculations.getJitterWithoutTimeout());
 
 		verify(logger, atLeastOnce()).debug(any(String.class));
 		final List<String> debugMessages = debugValueCapture.getAllValues();
@@ -1728,12 +1728,12 @@ public class PingTaskTest {
 		verify(httpService, times(1)).sendRequest(any(), any(), any());
 		verify(pingMeasurementProperties, times(1)).getTimeout();
 		verify(pingService, atLeastOnce()).getPingResponseList(anyString());
-		verify(qoSDBService, atLeastOnce()).getOrCreateMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).getOrCreateIntraMeasurement(any(), any());
 
-		verify(qoSDBService, atLeastOnce()).getPingMeasurementByMeasurement(any());
-		verify(qoSDBService, atLeastOnce()).createPingMeasurement(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementToDB(any(), any(), any());
-		verify(qoSDBService, atLeastOnce()).logMeasurementDetailsToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).getIntraPingMeasurementByMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).createIntraPingMeasurement(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logIntraMeasurementDetailsToDB(any(), any(), any());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -1765,14 +1765,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenThrow(ArrowheadException.class);
-		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenThrow(ArrowheadException.class);
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), any(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -1791,13 +1791,13 @@ public class PingTaskTest {
 			verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_QUERY_ALL);
 			verify(httpService, times(1)).sendRequest(any(), any(), any());
 			verify(pingService, times(1)).getPingResponseList(anyString());
-			verify(qoSDBService,times(1)).getOrCreateMeasurement(any());
+			verify(qoSDBService,times(1)).getOrCreateIntraMeasurement(any(), any());
 			verify(pingMeasurementProperties, atLeastOnce()).getTimeout();
 
-			verify(qoSDBService, times(1)).getPingMeasurementByMeasurement(any());
-			verify(qoSDBService, times(0)).createPingMeasurement(any(), any(), any());
-			verify(qoSDBService, times(0)).logMeasurementToDB(any(), any(), any());
-			verify(qoSDBService, times(0)).logMeasurementDetailsToDB(any(), any(), any());
+			verify(qoSDBService, times(1)).getIntraPingMeasurementByMeasurement(any());
+			verify(qoSDBService, times(0)).createIntraPingMeasurement(any(), any(), any());
+			verify(qoSDBService, times(0)).logIntraMeasurementToDB(any(), any(), any());
+			verify(qoSDBService, times(0)).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 			throw ex;
 		}
@@ -1833,14 +1833,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doThrow(ArrowheadException.class).when(qoSDBService).createPingMeasurement(any(), any(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doThrow(ArrowheadException.class).when(qoSDBService).createIntraPingMeasurement(any(), any(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -1859,13 +1859,13 @@ public class PingTaskTest {
 			verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_QUERY_ALL);
 			verify(httpService, times(1)).sendRequest(any(), any(), any());
 			verify(pingService, times(1)).getPingResponseList(anyString());
-			verify(qoSDBService,times(1)).getOrCreateMeasurement(any());
+			verify(qoSDBService,times(1)).getOrCreateIntraMeasurement(any(), any());
 			verify(pingMeasurementProperties, atLeastOnce()).getTimeout();
 
-			verify(qoSDBService, times(1)).getPingMeasurementByMeasurement(any());
-			verify(qoSDBService, times(1)).createPingMeasurement(any(), any(), any());
-			verify(qoSDBService, times(0)).logMeasurementToDB(any(), any(), any());
-			verify(qoSDBService, times(0)).logMeasurementDetailsToDB(any(), any(), any());
+			verify(qoSDBService, times(1)).getIntraPingMeasurementByMeasurement(any());
+			verify(qoSDBService, times(1)).createIntraPingMeasurement(any(), any(), any());
+			verify(qoSDBService, times(0)).logIntraMeasurementToDB(any(), any(), any());
+			verify(qoSDBService, times(0)).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 			throw ex;
 		}
@@ -1899,14 +1899,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), any(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenThrow(ArrowheadException.class);
-		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenThrow(ArrowheadException.class);
+		doNothing().when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -1925,13 +1925,13 @@ public class PingTaskTest {
 			verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_QUERY_ALL);
 			verify(httpService, times(1)).sendRequest(any(), any(), any());
 			verify(pingService, times(1)).getPingResponseList(anyString());
-			verify(qoSDBService,times(1)).getOrCreateMeasurement(any());
+			verify(qoSDBService,times(1)).getOrCreateIntraMeasurement(any(), any());
 			verify(pingMeasurementProperties, atLeastOnce()).getTimeout();
 
-			verify(qoSDBService, times(1)).getPingMeasurementByMeasurement(any());
-			verify(qoSDBService, times(1)).createPingMeasurement(any(), any(), any());
-			verify(qoSDBService, times(1)).logMeasurementToDB(any(), any(), any());
-			verify(qoSDBService, times(0)).logMeasurementDetailsToDB(any(), any(), any());
+			verify(qoSDBService, times(1)).getIntraPingMeasurementByMeasurement(any());
+			verify(qoSDBService, times(1)).createIntraPingMeasurement(any(), any(), any());
+			verify(qoSDBService, times(1)).logIntraMeasurementToDB(any(), any(), any());
+			verify(qoSDBService, times(0)).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 			throw ex;
 		}
@@ -1968,14 +1968,14 @@ public class PingTaskTest {
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
-		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+		when(qoSDBService.getOrCreateIntraMeasurement(any(SystemResponseDTO.class), any())).thenReturn(measurement);
 
 		//in handleMeasurement
-		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
-		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		when(qoSDBService.getIntraPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createIntraPingMeasurement(any(), any(), any());
 		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
-		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
-		doThrow(ArrowheadException.class).when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+		when(qoSDBService.logIntraMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doThrow(ArrowheadException.class).when(qoSDBService).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 		try {
 
@@ -1994,13 +1994,13 @@ public class PingTaskTest {
 			verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_QUERY_ALL);
 			verify(httpService, times(1)).sendRequest(any(), any(), any());
 			verify(pingService, times(1)).getPingResponseList(anyString());
-			verify(qoSDBService,times(1)).getOrCreateMeasurement(any());
+			verify(qoSDBService,times(1)).getOrCreateIntraMeasurement(any(), any());
 			verify(pingMeasurementProperties, atLeastOnce()).getTimeout();
 
-			verify(qoSDBService, times(1)).getPingMeasurementByMeasurement(any());
-			verify(qoSDBService, times(1)).createPingMeasurement(any(), any(), any());
-			verify(qoSDBService, times(1)).logMeasurementToDB(any(), any(), any());
-			verify(qoSDBService, times(1)).logMeasurementDetailsToDB(any(), any(), any());
+			verify(qoSDBService, times(1)).getIntraPingMeasurementByMeasurement(any());
+			verify(qoSDBService, times(1)).createIntraPingMeasurement(any(), any(), any());
+			verify(qoSDBService, times(1)).logIntraMeasurementToDB(any(), any(), any());
+			verify(qoSDBService, times(1)).logIntraMeasurementDetailsToDB(any(), any(), any());
 
 			throw ex;
 		}

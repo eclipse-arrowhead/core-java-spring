@@ -13,5 +13,7 @@ public interface QoSIntraMeasurementRepository extends RefreshableRepository<QoS
 
 	//=================================================================================================
 	// methods
-	public Optional<QoSIntraMeasurement> findBySystemAndMeasurementType(final System systemToCheck,final QoSMeasurementType type);
+	
+	//-------------------------------------------------------------------------------------------------
+	public Optional<QoSIntraMeasurement> findBySystemAndMeasurementType(final System systemToCheck, final QoSMeasurementType type);
 }

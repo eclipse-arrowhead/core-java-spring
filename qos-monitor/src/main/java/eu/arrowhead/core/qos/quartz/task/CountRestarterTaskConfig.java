@@ -1,5 +1,7 @@
 package eu.arrowhead.core.qos.quartz.task;
 
+import java.util.Properties;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,7 @@ import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.quartz.AutoWiringSpringBeanQuartzTaskFactory;
 
 @Configuration
@@ -24,6 +27,8 @@ public class CountRestarterTaskConfig {
 	private ApplicationContext applicationContext; //NOSONAR
 
 	private static final int SCHEDULER_DELAY = 7;
+	private static final String NUM_OF_THREADS = "1";
+	
 	private static final String CRON_EXPRESSION_MIDNIGHT_EVERY_DAY= "0 0 0 ? * * *";
 	private static final String NAME_OF_TRIGGER = "Counter_Restart_Task_Trigger";
 	private static final String NAME_OF_TASK = "Counter_Restart_Task_Detail";
@@ -38,6 +43,9 @@ public class CountRestarterTaskConfig {
 		jobFactory.setApplicationContext(applicationContext);
 
 		final SchedulerFactoryBean schedulerFactory = new SchedulerFactoryBean();
+		final Properties schedulerProperties = new Properties();     
+		schedulerProperties.put(CoreCommonConstants.QUARTZ_THREAD_PROPERTY, NUM_OF_THREADS);
+	    schedulerFactory.setQuartzProperties(schedulerProperties);
 
 		schedulerFactory.setJobFactory(jobFactory);
 		schedulerFactory.setJobDetails(counterRestartTaskDetails().getObject());

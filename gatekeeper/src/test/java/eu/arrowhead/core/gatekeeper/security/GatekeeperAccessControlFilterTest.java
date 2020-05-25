@@ -51,6 +51,10 @@ public class GatekeeperAccessControlFilterTest {
 	private static final String GATEKEEPER_MGMT_CLOUDS_URI = CommonConstants.GATEKEEPER_URI + CoreCommonConstants.MGMT_URI + "/clouds";
 	private static final String GATEKEEPER_INIT_GSD_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_GSD_SERVICE;
 	private static final String GATEKEEPER_INIT_ICN_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_ICN_SERVICE;
+	private static final String GATEKEEPER_PULL_CLOUDS_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_PULL_CLOUDS_SERVICE;
+	private static final String GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_SERVICE;
+	private static final String GATEKEEPER_COLLECT_ACCESS_TYPES_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_COLLECT_ACCESS_TYPES_SERVICE;
+	private static final String GATEKEEPER_GET_CLOUD_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_GET_CLOUD_SERVICE;
 	
 	@Autowired
 	private ApplicationContext appContext;
@@ -169,6 +173,104 @@ public class GatekeeperAccessControlFilterTest {
 					.andExpect(status().isUnauthorized());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testPullCloudsCertificateQoSMonitor() throws Exception {
+		this.mockMvc.perform(get(GATEKEEPER_PULL_CLOUDS_URI)
+				    .secure(true)
+					.with(x509("certificates/qos_monitor.pem"))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testPullCloudsCertificateNotQoSMonitor() throws Exception {
+		this.mockMvc.perform(get(GATEKEEPER_PULL_CLOUDS_URI)
+				    .secure(true)
+					.with(x509("certificates/provider.pem"))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCollectSystemAddressesCertificateQoSMonitor() throws Exception {
+		this.mockMvc.perform(post(GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_URI)
+				    .secure(true)
+					.with(x509("certificates/qos_monitor.pem"))
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(getCloudRequestDTO()))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCollectSystemAddressesCertificateNotQoSMonitor() throws Exception {
+		this.mockMvc.perform(post(GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_URI)
+				    .secure(true)
+					.with(x509("certificates/provider.pem"))
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(getCloudRequestDTO()))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCollectAccessTypesCertificateQoSMonitor() throws Exception {
+		this.mockMvc.perform(post(GATEKEEPER_COLLECT_ACCESS_TYPES_URI)
+				    .secure(true)
+					.with(x509("certificates/qos_monitor.pem"))
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(List.of(getCloudRequestDTO())))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCollectAccessTypesCertificateNotQoSMonitor() throws Exception {
+		this.mockMvc.perform(post(GATEKEEPER_COLLECT_ACCESS_TYPES_URI)
+				    .secure(true)
+					.with(x509("certificates/provider.pem"))
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(List.of(getCloudRequestDTO())))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetCloudTypesCertificateQoSMonitor() throws Exception {
+		this.mockMvc.perform(get(GATEKEEPER_GET_CLOUD_URI + "/operator/  ")
+				    .secure(true)
+					.with(x509("certificates/qos_monitor.pem"))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest()); //BadRequest means that request gone through on the filter
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetCloudTypesCertificateOrchestrator() throws Exception {
+		this.mockMvc.perform(get(GATEKEEPER_GET_CLOUD_URI + "/operator/  ")
+				    .secure(true)
+					.with(x509("certificates/orchestrator.pem"))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest()); //BadRequest means that request gone through on the filter
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetCloudTypesCertificateProvider() throws Exception {
+		this.mockMvc.perform(get(GATEKEEPER_GET_CLOUD_URI + "/operator/name")
+				    .secure(true)
+					.with(x509("certificates/provider.pem"))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isUnauthorized());
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -189,7 +291,7 @@ public class GatekeeperAccessControlFilterTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ICNRequestFormDTO getICNRequestFormDTO() {
+	private ICNRequestFormDTO getICNRequestFormDTO() {
 		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
 		requestedService.setServiceDefinitionRequirement("test-service");
 		
@@ -204,5 +306,13 @@ public class GatekeeperAccessControlFilterTest {
 		icnRequestFormDTO.setTargetCloudId(1L);
 		
 		return icnRequestFormDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private CloudRequestDTO getCloudRequestDTO() {
+		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
+		cloudRequestDTO.setOperator("test-operator");
+		cloudRequestDTO.setName("test-name");
+		return cloudRequestDTO;
 	}
 }

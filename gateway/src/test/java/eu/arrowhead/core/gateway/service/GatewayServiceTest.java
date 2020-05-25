@@ -60,9 +60,9 @@ import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.exception.UnavailableServerException;
-import eu.arrowhead.core.gateway.relay.ConsumerSideRelayInfo;
-import eu.arrowhead.core.gateway.relay.GatewayRelayClient;
-import eu.arrowhead.core.gateway.relay.ProviderSideRelayInfo;
+import eu.arrowhead.relay.gateway.ConsumerSideRelayInfo;
+import eu.arrowhead.relay.gateway.GatewayRelayClient;
+import eu.arrowhead.relay.gateway.ProviderSideRelayInfo;
 
 @RunWith(SpringRunner.class)
 public class GatewayServiceTest {

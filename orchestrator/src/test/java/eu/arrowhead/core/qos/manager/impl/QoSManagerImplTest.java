@@ -3,7 +3,7 @@ package eu.arrowhead.core.qos.manager.impl;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -11,7 +11,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,12 +26,25 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import eu.arrowhead.common.database.entity.QoSIntraMeasurement;
+import eu.arrowhead.common.database.entity.QoSIntraPingMeasurement;
+import eu.arrowhead.common.database.entity.System;
+import eu.arrowhead.common.dto.internal.CloudResponseDTO;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.QoSMeasurementAttributesFormDTO;
+import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.core.orchestrator.service.OrchestratorDriver;
 import eu.arrowhead.core.qos.database.service.QoSReservationDBService;
 import eu.arrowhead.core.qos.manager.QoSVerifier;
 
@@ -44,6 +59,9 @@ public class QoSManagerImplTest {
 	
 	@Mock
 	private QoSReservationDBService qosReservationDBService;
+	
+	@Mock
+	private OrchestratorDriver orchestratorDriver;
 	
 	@Mock
 	private QoSVerifier verifier;
@@ -330,87 +348,229 @@ public class QoSManagerImplTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testVerifyServicesResultListNull() {
-		qosManager.verifyServices(null, null);
+		qosManager.verifyIntraCloudServices(null, null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testVerifyServicesRequestNull() {
-		qosManager.verifyServices(List.of(), null);
+		qosManager.verifyIntraCloudServices(List.of(), null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testVerifyServicesTrue() {
-		when(verifier.verify(any(OrchestrationResultDTO.class), anyMap(), anyMap())).thenReturn(true);
+	public void testVerifyIntraCloudServicesTrue() {
+		when(verifier.verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE))).thenReturn(true);
 
 		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
 		request.setCommands(Map.of());
-		final List<OrchestrationResultDTO> verifiedList = qosManager.verifyServices(getOrList(1), request);
-		verify(verifier, times(1)).verify(any(OrchestrationResultDTO.class), anyMap(), anyMap());
+		final List<OrchestrationResultDTO> verifiedList = qosManager.verifyIntraCloudServices(getOrList(1), request);
+		verify(verifier, times(1)).verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE));
 		Assert.assertEquals(1, verifiedList.size());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testVerifyServicesFalseNoExclusivity() {
-		when(verifier.verify(any(OrchestrationResultDTO.class), anyMap(), anyMap())).thenReturn(false);
+	public void testVerifyIntraCloudServicesFalseNoExclusivity() {
+		when(verifier.verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE))).thenReturn(false);
 
 		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
 		request.setCommands(Map.of());
-		final List<OrchestrationResultDTO> verifiedList = qosManager.verifyServices(getOrList(1), request);
-		verify(verifier, times(1)).verify(any(OrchestrationResultDTO.class), anyMap(), anyMap());
+		final List<OrchestrationResultDTO> verifiedList = qosManager.verifyIntraCloudServices(getOrList(1), request);
+		verify(verifier, times(1)).verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE));
 		Assert.assertEquals(0, verifiedList.size());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testVerifyServicesFalseWithExclusivity() {
-		when(verifier.verify(any(OrchestrationResultDTO.class), anyMap(), anyMap())).thenReturn(false);
+	public void testVerifyIntraCloudServicesFalseWithExclusivity() {
+		when(verifier.verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE))).thenReturn(false);
 		doNothing().when(qosReservationDBService).removeTemporaryLock(any(OrchestrationResultDTO.class));
 
 		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
 		request.setCommands(Map.of(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY, "100"));
-		final List<OrchestrationResultDTO> verifiedList = qosManager.verifyServices(getOrList(1), request);
-		verify(verifier, times(1)).verify(any(OrchestrationResultDTO.class), anyMap(), anyMap());
+		final List<OrchestrationResultDTO> verifiedList = qosManager.verifyIntraCloudServices(getOrList(1), request);
+		verify(verifier, times(1)).verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE));
 		verify(qosReservationDBService).removeTemporaryLock(any(OrchestrationResultDTO.class));
 		Assert.assertEquals(0, verifiedList.size());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testVerifyServicesNoVerifiers() {
+	public void testVerifyIntraCloudServicesNoVerifiers() {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		final List<QoSVerifier> verifiers	= (List) ReflectionTestUtils.getField(qosManager, "verifiers");
 		verifiers.clear();
-		when(verifier.verify(any(OrchestrationResultDTO.class), anyMap(), anyMap())).thenReturn(false);
+		when(verifier.verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE))).thenReturn(false);
 
 		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
 		request.setCommands(Map.of());
-		final List<OrchestrationResultDTO> verifiedList = qosManager.verifyServices(getOrList(1), request);
-		verify(verifier, never()).verify(any(OrchestrationResultDTO.class), anyMap(), anyMap());
+		final List<OrchestrationResultDTO> verifiedList = qosManager.verifyIntraCloudServices(getOrList(1), request);
+		verify(verifier, never()).verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE));
 		Assert.assertEquals(1, verifiedList.size());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testVerifyServicesFirstVerifierFalse() {
+	public void testVerifyIntraCloudServicesFirstVerifierFalse() {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		final List<QoSVerifier> verifiers	= (List) ReflectionTestUtils.getField(qosManager, "verifiers");
 		verifiers.clear();
 		verifiers.add(verifier);
 		verifiers.add(verifier2);
-		when(verifier.verify(any(OrchestrationResultDTO.class), anyMap(), anyMap())).thenReturn(false);
-		when(verifier2.verify(any(OrchestrationResultDTO.class), anyMap(), anyMap())).thenReturn(true);
+		when(verifier.verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE))).thenReturn(false);
+		when(verifier2.verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE))).thenReturn(true);
 
 		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
 		request.setCommands(Map.of());
-		final List<OrchestrationResultDTO> verifiedList = qosManager.verifyServices(getOrList(1), request);
-		verify(verifier, times(1)).verify(any(OrchestrationResultDTO.class), anyMap(), anyMap());
-		verify(verifier2, never()).verify(any(OrchestrationResultDTO.class), anyMap(), anyMap());
+		final List<OrchestrationResultDTO> verifiedList = qosManager.verifyIntraCloudServices(getOrList(1), request);
+		verify(verifier, times(1)).verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE));
+		verify(verifier2, never()).verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE));
 		Assert.assertEquals(0, verifiedList.size());
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testPreVerifyInterCloudServicesResultListNull() {
+		qosManager.preVerifyInterCloudServices(null, new OrchestrationFormRequestDTO());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testPreVerifyInterCloudServicesRequestNull() {
+		qosManager.preVerifyInterCloudServices(List.of(), null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testPreVerifyInterCloudServicesTrue() {
+		when(verifier.verify(any(QoSVerificationParameters.class), eq(Boolean.TRUE))).thenReturn(true);
+		when(orchestratorDriver.getIntraPingMedianMeasurement(any(QoSMeasurementAttribute.class))).thenReturn(getQosIntraPingMeasurementForTest());
+		
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setCommands(Map.of());
+		final List<GSDPollResponseDTO> verifiedList = qosManager.preVerifyInterCloudServices(getGSDList(1), request);
+		verify(verifier, times(1)).verify(any(QoSVerificationParameters.class), eq(Boolean.TRUE));
+		Assert.assertEquals(1, verifiedList.size());
+		Assert.assertEquals(2, verifiedList.get(0).getAvailableInterfaces().size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testPreVerifyInterCloudServicesFalse() {
+		when(verifier.verify(any(QoSVerificationParameters.class), eq(Boolean.TRUE))).thenReturn(false);
+		when(orchestratorDriver.getIntraPingMedianMeasurement(any(QoSMeasurementAttribute.class))).thenReturn(getQosIntraPingMeasurementForTest());
+		
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setCommands(Map.of());
+		final List<GSDPollResponseDTO> verifiedList = qosManager.preVerifyInterCloudServices(getGSDList(1), request);
+		verify(verifier, times(1)).verify(any(QoSVerificationParameters.class), eq(Boolean.TRUE));
+		Assert.assertEquals(0, verifiedList.size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testPreVerifyInterCloudServicesNoVerifiers() {
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		final List<QoSVerifier> verifiers	= (List) ReflectionTestUtils.getField(qosManager, "verifiers");
+		verifiers.clear();
+		when(verifier.verify(any(QoSVerificationParameters.class), eq(Boolean.TRUE))).thenReturn(false);
+
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setCommands(Map.of());
+		final List<GSDPollResponseDTO> verifiedList = qosManager.preVerifyInterCloudServices(getGSDList(1), request);
+		verify(verifier, never()).verify(any(QoSVerificationParameters.class), eq(Boolean.TRUE));
+		Assert.assertEquals(1, verifiedList.size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testPreVerifyInterCloudServicesFirstVerifierFalse() {
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		final List<QoSVerifier> verifiers	= (List) ReflectionTestUtils.getField(qosManager, "verifiers");
+		verifiers.clear();
+		verifiers.add(verifier);
+		verifiers.add(verifier2);
+		when(verifier.verify(any(QoSVerificationParameters.class), eq(Boolean.TRUE))).thenReturn(false);
+		when(verifier2.verify(any(QoSVerificationParameters.class), eq(Boolean.TRUE))).thenReturn(true);
+
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setCommands(Map.of());
+		final List<GSDPollResponseDTO> verifiedList = qosManager.preVerifyInterCloudServices(getGSDList(1), request);;
+		verify(verifier, times(1)).verify(any(QoSVerificationParameters.class), eq(Boolean.TRUE));
+		verify(verifier2, never()).verify(any(QoSVerificationParameters.class), eq(Boolean.TRUE));
+		Assert.assertEquals(0, verifiedList.size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testVerifyInterCloudServicesResultListNull() {
+		qosManager.verifyInterCloudServices(new CloudResponseDTO(), null, new HashMap<>(), new HashMap<>());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testVerifyInterCloudServicesQoSRequirementsNull() {
+		qosManager.verifyInterCloudServices(new CloudResponseDTO(), List.of(), null, new HashMap<>());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testVerifyInterCloudServicesCommandsNull() {
+		qosManager.verifyInterCloudServices(new CloudResponseDTO(), List.of(), new HashMap<>(), null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void tesVerifyInterCloudServicesTrue() {
+		when(verifier.verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE))).thenReturn(true);
+		when(orchestratorDriver.getIntraPingMedianMeasurement(any(QoSMeasurementAttribute.class))).thenReturn(getQosIntraPingMeasurementForTest());
+		
+		final List<OrchestrationResultDTO> verifiedList = qosManager.verifyInterCloudServices(new CloudResponseDTO(), getOrList(1), new HashMap<>(), new HashMap<>());
+		verify(verifier, times(1)).verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE));
+		Assert.assertEquals(1, verifiedList.size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void tesVerifyInterCloudServicesFalse() {
+		when(verifier.verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE))).thenReturn(false);
+		when(orchestratorDriver.getIntraPingMedianMeasurement(any(QoSMeasurementAttribute.class))).thenReturn(getQosIntraPingMeasurementForTest());
+		
+		final List<OrchestrationResultDTO> verifiedList = qosManager.verifyInterCloudServices(new CloudResponseDTO(), getOrList(1), new HashMap<>(), new HashMap<>());
+		verify(verifier, times(1)).verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE));
+		Assert.assertEquals(0, verifiedList.size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testVerifyInterCloudServicesNoVerifiers() {
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		final List<QoSVerifier> verifiers	= (List) ReflectionTestUtils.getField(qosManager, "verifiers");
+		verifiers.clear();
+		when(verifier.verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE))).thenReturn(false);
+
+		final List<OrchestrationResultDTO> verifiedList = qosManager.verifyInterCloudServices(new CloudResponseDTO(), getOrList(1), new HashMap<>(), new HashMap<>());
+		verify(verifier, never()).verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE));
+		Assert.assertEquals(1, verifiedList.size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testVerifyInterCloudServicesFirstVerifierFalse() {
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		final List<QoSVerifier> verifiers	= (List) ReflectionTestUtils.getField(qosManager, "verifiers");
+		verifiers.clear();
+		verifiers.add(verifier);
+		verifiers.add(verifier2);
+		when(verifier.verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE))).thenReturn(false);
+		when(verifier2.verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE))).thenReturn(true);
+
+		final List<OrchestrationResultDTO> verifiedList = qosManager.verifyInterCloudServices(new CloudResponseDTO(), getOrList(1), new HashMap<>(), new HashMap<>());
+		verify(verifier, times(1)).verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE));
+		verify(verifier2, never()).verify(any(QoSVerificationParameters.class), eq(Boolean.FALSE));
+		Assert.assertEquals(0, verifiedList.size());
+	}
 	
 	//=================================================================================================
 	// assistant methods
@@ -430,5 +590,63 @@ public class QoSManagerImplTest {
 		}
 		
 		return orList;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<GSDPollResponseDTO> getGSDList(final int num) {
+		final List<GSDPollResponseDTO> gsdList = new ArrayList<>(num);
+		for (int i = 0; i < num; ++i) {
+			final CloudResponseDTO cloud = new CloudResponseDTO(i, "test-op-" + i, "test-n-" + i, true, true, false, "dsvcdsvi" + i, null, null);
+			final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
+			srEntry.setId(i);
+			srEntry.setServiceDefinition(new ServiceDefinitionResponseDTO(i, "test-service", null, null));
+			srEntry.setProvider(new SystemResponseDTO(i, "test-sys" + i, "1.1.1.1", 1000, "fgfh", null, null));
+			srEntry.setInterfaces(List.of(new ServiceInterfaceResponseDTO(1, "HTTP-SECURE-JSON", null, null), new ServiceInterfaceResponseDTO(1, "HTTP-SECURE-XML", null, null)));
+			final QoSMeasurementAttributesFormDTO measurement = new QoSMeasurementAttributesFormDTO();
+			measurement.setServiceRegistryEntry(srEntry);
+			measurement.setProviderAvailable(true);
+			final GSDPollResponseDTO gsd = new GSDPollResponseDTO(cloud, "test-service", List.of("HTTP-SECURE-JSON", "HTTP-SECURE-XML"), 1, List.of(measurement), new HashMap<>(), false);
+			gsdList.add(gsd);
+		}
+		
+		return gsdList;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private QoSIntraPingMeasurementResponseDTO getQosIntraPingMeasurementForTest() {
+
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		final QoSIntraPingMeasurement pingMeasurement = new QoSIntraPingMeasurement();
+
+		pingMeasurement.setMeasurement(measurement);
+		pingMeasurement.setAvailable(true);
+		pingMeasurement.setMaxResponseTime(1);
+		pingMeasurement.setMinResponseTime(1);
+		pingMeasurement.setMeanResponseTimeWithoutTimeout(1);
+		pingMeasurement.setMeanResponseTimeWithTimeout(1);
+		pingMeasurement.setJitterWithoutTimeout(1);
+		pingMeasurement.setJitterWithTimeout(1);
+		pingMeasurement.setLostPerMeasurementPercent(0);
+		pingMeasurement.setCountStartedAt(ZonedDateTime.now());
+		pingMeasurement.setLastAccessAt(ZonedDateTime.now());
+		pingMeasurement.setSent(35);
+		pingMeasurement.setSentAll(35);
+		pingMeasurement.setReceived(35);
+		pingMeasurement.setReceivedAll(35);
+
+		return DTOConverter.convertQoSIntraPingMeasurementToPingMeasurementResponseDTO(pingMeasurement);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private QoSIntraMeasurement getQoSIntraMeasurementForTest() {
+
+		final System system = new System("test-sys", "1.1.1.1", 1000, "dfvldsfme");
+		final QoSIntraMeasurement measurement = new QoSIntraMeasurement(
+				system, 
+				QoSMeasurementType.PING, 
+				ZonedDateTime.now());
+
+		return measurement;
 	}
 }

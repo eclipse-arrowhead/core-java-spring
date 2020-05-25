@@ -16,8 +16,10 @@ public class QosMonitorAccessControlFilter extends CoreSystemAccessControlFilter
 	
 	//=================================================================================================
 	// members
-	private static final CoreSystem[] allowedCoreSystemsForGetMeasurements = { CoreSystem.ORCHESTRATOR };
-
+	
+	private static final CoreSystem[] allowedCoreSystemsForGetMeasurements = { CoreSystem.ORCHESTRATOR, CoreSystem.GATEKEEPER };
+	private static final CoreSystem[] allowedCoreSystemsForExecuteRelayTests = { CoreSystem.GATEKEEPER };
+	
 	//=================================================================================================
 	// assistant methods
 
@@ -30,13 +32,19 @@ public class QosMonitorAccessControlFilter extends CoreSystemAccessControlFilter
 		
 		if (requestTarget.endsWith(CommonConstants.ECHO_URI)) {
 			// Everybody in the local cloud can test the server => no further check is necessary
-		} else if ( requestTarget.contains( CoreCommonConstants.MGMT_URI ) ) {
+		} else if (requestTarget.contains(CoreCommonConstants.MGMT_URI)) {
 			// Only the local System Operator can use these methods
 			checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
-		} else if (requestTarget.contains(CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT)) {
+		} else if (requestTarget.contains(CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT) ||
+				   requestTarget.contains(CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT) ||
+				   requestTarget.contains(CommonConstants.OP_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT) ||
+				   requestTarget.contains(CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT)) {
 			// Only the specified core systems can use these methods
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForGetMeasurements, requestTarget);
+		} else if (requestTarget.contains(CommonConstants.OP_QOS_MONITOR_INIT_RELAY_TEST_URI) ||
+				   requestTarget.contains(CommonConstants.OP_QOS_MONITOR_JOIN_RELAY_TEST_URI)) {
+			// Only the specified core systems can use these methods
+			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForExecuteRelayTests, requestTarget);
 		}
 	}
-
 }

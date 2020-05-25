@@ -1,33 +1,27 @@
 package eu.arrowhead.core.choreographer.database.service;
 
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.database.entity.ChoreographerActionPlan;
-import eu.arrowhead.common.database.entity.ChoreographerActionStep;
-import eu.arrowhead.common.database.repository.ChoreographerActionActionStepConnectionRepository;
-import eu.arrowhead.common.database.repository.ChoreographerActionPlanActionConnectionRepository;
-import eu.arrowhead.common.database.repository.ChoreographerActionPlanRepository;
+import eu.arrowhead.common.database.entity.ChoreographerAction;
+import eu.arrowhead.common.database.entity.ChoreographerPlan;
 import eu.arrowhead.common.database.repository.ChoreographerActionRepository;
-import eu.arrowhead.common.database.repository.ChoreographerActionStepRepository;
-import eu.arrowhead.common.database.repository.ChoreographerActionStepServiceDefinitionConnectionRepository;
-import eu.arrowhead.common.database.repository.ChoreographerNextActionStepRepository;
-import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
+import eu.arrowhead.common.database.repository.ChoreographerPlanRepository;
+import eu.arrowhead.common.database.repository.ChoreographerStepRepository;
 import eu.arrowhead.common.dto.internal.ChoreographerActionRequestDTO;
-import eu.arrowhead.common.dto.internal.ChoreographerActionStepRequestDTO;
+import eu.arrowhead.common.dto.internal.ChoreographerStepRequestDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.data.domain.Sort.Direction;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -37,6 +31,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @RunWith(SpringRunner.class)
 public class ChoreographerDBServiceTest {
+
 	
 	//=================================================================================================
 	// members
@@ -45,164 +40,135 @@ public class ChoreographerDBServiceTest {
     private ChoreographerDBService choreographerDBService;
 
     @Mock
-    ChoreographerActionPlanRepository choreographerActionPlanRepository;
-
-    @Mock
-    ChoreographerActionPlanActionConnectionRepository choreographerActionPlanActionConnectionRepository;
-
-    @Mock
-    ChoreographerActionRepository choreographerActionRepository;
-
-    @Mock
-    ChoreographerActionActionStepConnectionRepository choreographerActionActionStepConnectionRepository;
-
-    @Mock
-    ChoreographerActionStepRepository choreographerActionStepRepository;
-
-    @Mock
-    ChoreographerActionStepServiceDefinitionConnectionRepository choreographerActionStepServiceDefinitionConnectionRepository;
-
-    @Mock
-    ChoreographerNextActionStepRepository choreographerNextActionStepRepository;
-
-    @Mock
-    ServiceDefinitionRepository serviceDefinitionRepository;
+    ChoreographerPlanRepository choreographerPlanRepository;
     
     //=================================================================================================
 	// methods
 
     //-------------------------------------------------------------------------------------------------
 	@Test
-    public void getChoreographerActionPlanByIdTest() {
-        final Optional<ChoreographerActionPlan> choreographerActionPlanOptional = Optional.of(getChoreographerActionPlan());
-        when(choreographerActionPlanRepository.findById(anyLong())).thenReturn(choreographerActionPlanOptional);
+    public void getPlanByIdTest() {
+        final Optional<ChoreographerPlan> choreographerPlanOptional = Optional.of(getPlan());
+        when(choreographerPlanRepository.findById(anyLong())).thenReturn(choreographerPlanOptional);
 
-        choreographerDBService.getChoreographerActionPlanById(1);
+        choreographerDBService.getPlanById(1);
+    }
+
+
+    //-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+    public void getPlanByIdTestWithNotExistingId() {
+        when(choreographerPlanRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
+        choreographerDBService.getPlanById(1);
     }
 
     //-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-    public void getChoreographerActionPlanByIdTestWithNotExistingId() {
-        when(choreographerActionPlanRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
-        choreographerDBService.getChoreographerActionPlanById(1);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-    public void getChoreographerActionPlanByIdWithInvalidId() {
-        choreographerDBService.getChoreographerActionPlanById(-1);
+    public void getPlanByIdWithInvalidId() {
+        choreographerDBService.getPlanById(-1);
     }
 
     //-------------------------------------------------------------------------------------------------
 	@Test
-    public void getChoreographerActionPlanEntriesResponseOKTest() {
-        when(choreographerActionPlanRepository.findAll(any(PageRequest.class))).thenReturn(getPageOfChoreographerActionPlanList());
+    public void getPlanEntriesResponseOKTest() {
+        when(choreographerPlanRepository.findAll(any(PageRequest.class))).thenReturn(getPageOfChoreographerPlanList());
 
-        choreographerDBService.getChoreographerActionPlanEntriesResponse(0, 10, Direction.ASC, "id");
+        choreographerDBService.getPlanEntriesResponse(0, 10, Direction.ASC, "id");
     }
 
     //-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-    public void getChoreographerActionPlanEntriesTestWithInvalidSortField() {
-        when(choreographerActionPlanRepository.findAll(any(PageRequest.class))).thenReturn(getPageOfChoreographerActionPlanList());
+    public void getPlanEntriesTestWithInvalidSortField() {
+        when(choreographerPlanRepository.findAll(any(PageRequest.class))).thenReturn(getPageOfChoreographerPlanList());
 
-        choreographerDBService.getChoreographerActionPlanEntriesResponse(0, 10, Sort.Direction.ASC, "notValid");
+        choreographerDBService.getPlanEntriesResponse(0, 10, Direction.ASC, "notValid");
     }
 
     //-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-    public void createChoreographerActionPlanTestWithNullInput() { 
-		choreographerDBService.createChoreographerActionPlan(null, null);
+    public void createPlanTestWithNullInput() {
+		choreographerDBService.createPlan(null, null, null);
 	}
 
     //-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-    public void createChoreographerActionPlanTestWithEmptyActionRequestList() {
-        choreographerDBService.createChoreographerActionPlan("actionPlan", getChoreographerActionRequestDTOEmptyListForTest());
+    public void createPlanTestWithEmptyActionRequestList() {
+        choreographerDBService.createPlan("actionPlan", null, getActionRequestDTOEmptyListForTest());
     }
 
     //-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-    public void createChoreographerActionPlanWithBlankName() {
+    public void createPlanWithBlankName() {
         List<ChoreographerActionRequestDTO> actions = new ArrayList<>();
-        actions.add(getChoreographerActionRequestDTOWithNextActionForTest(3, "testaction0", "testaction1"));
-        actions.add(getChoreographerActionRequestDTOWithNextActionForTest(4, "testaction1", null));
-        choreographerDBService.createChoreographerActionPlan("    ", actions);
+        actions.add(getActionRequestDTOWithNextActionForTest(3, "testaction0", "testaction1"));
+        actions.add(getActionRequestDTOWithNextActionForTest(4, "testaction1", null));
+        choreographerDBService.createPlan("    ", "testaction0", actions);
     }
 
     //-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-    public void removeActionPlanEntryByIdWithInvalidIdTest() {
-        choreographerDBService.removeActionPlanEntryById(getInvalidIdForTest());
+    public void removePlanEntryByIdWithInvalidIdTest() {
+        choreographerDBService.removePlanEntryById(getInvalidIdForTest());
     }
 
     //-------------------------------------------------------------------------------------------------
     @Test(expected = InvalidParameterException.class)
-    public void removeActionPlanEntryByIdWithIdNotInDBTest() {
-        when(choreographerActionPlanRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
+    public void removePlanEntryByIdWithIdNotInDBTest() {
+        when(choreographerPlanRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
 
-        choreographerDBService.removeActionPlanEntryById(getIdForTest());
+        choreographerDBService.removePlanEntryById(getIdForTest());
     }
     
     //=================================================================================================
 	// assistant methods
     
     //-------------------------------------------------------------------------------------------------
-    private List<ChoreographerActionRequestDTO> getChoreographerActionRequestDTOEmptyListForTest() {
+    private List<ChoreographerActionRequestDTO> getActionRequestDTOEmptyListForTest() {
         return List.of();
     }
 
     //-------------------------------------------------------------------------------------------------
-	private ChoreographerActionRequestDTO getChoreographerActionRequestDTOWithNextActionForTest(final int stepListSize, final String actionName, final String nextActionName) {
-        List<ChoreographerActionStepRequestDTO> actionSteps = new ArrayList<>(stepListSize);
+	private ChoreographerActionRequestDTO getActionRequestDTOWithNextActionForTest(final int stepListSize, final String actionName, final String nextActionName) {
+        List<ChoreographerStepRequestDTO> steps = new ArrayList<>(stepListSize);
         for (int i = 0; i < stepListSize; ++i) {
-            actionSteps.add(getChoreographerActionStepDTOForTest(ThreadLocalRandom.current().nextInt(0, 5), ThreadLocalRandom.current().nextInt(0, 5)));
+            steps.add(getChoreographerStepDTOForTest(ThreadLocalRandom.current().nextInt(0, 5)));
         }
 
-        return new ChoreographerActionRequestDTO(actionName, nextActionName, actionSteps);
+        List<String> firstStepNames = new ArrayList<>();
+        firstStepNames.add("testactionstep0");
+
+        return new ChoreographerActionRequestDTO(actionName, nextActionName, firstStepNames, steps);
     }
 
     //-------------------------------------------------------------------------------------------------
-	private ChoreographerActionStepRequestDTO getChoreographerActionStepDTOForTest(final int usedServicesListSize, final int nextStepListSize) {
-        String actionStepName = "testactionplan0";
-        List<String> usedServiceNames = new ArrayList<>(usedServicesListSize);
-        for (int i = 0; i < usedServicesListSize; ++i) {
-            usedServiceNames.add("testservicedefinition" + i);
-        }
+	private ChoreographerStepRequestDTO getChoreographerStepDTOForTest(final int nextStepListSize) {
+        String stepName = "testactionstep0";
+        String serviceName = "testservice0";
+
         List<String> nextStepNames = new ArrayList<>(nextStepListSize);
         for (int i = 1; i <= nextStepListSize; ++i) {
-            nextStepNames.add("testactionplan" + i);
+            nextStepNames.add("testplanstep" + i);
         }
-        
-        return new ChoreographerActionStepRequestDTO(actionStepName, usedServiceNames, nextStepNames);
+
+        return new ChoreographerStepRequestDTO(stepName, serviceName, nextStepNames, 1);
     }
 
     //-------------------------------------------------------------------------------------------------
-	private ChoreographerActionPlan getChoreographerActionPlan() {
-        final ChoreographerActionPlan actionPlan = new ChoreographerActionPlan("testactionplan0");
-        actionPlan.setCreatedAt(getCreatedAtForTest());
-        actionPlan.setUpdatedAt(getUpdatedAtForTest());
-        actionPlan.setId(getIdForTest());
+	private ChoreographerPlan getPlan() {
+        final ChoreographerPlan plan = new ChoreographerPlan("testplan0");
+        plan.setCreatedAt(getCreatedAtForTest());
+        plan.setUpdatedAt(getUpdatedAtForTest());
+        plan.setId(getIdForTest());
+        plan.setFirstAction(new ChoreographerAction("testaction0", null));
 
-        return actionPlan;
+        return plan;
     }
 
     //-------------------------------------------------------------------------------------------------
-	@SuppressWarnings("unused")
-	private ChoreographerActionStep getChoreographerActionStep() {
-        final ChoreographerActionStep actionStep = new ChoreographerActionStep("testactionstep0");
-        actionStep.setId(getIdForTest());
-        actionStep.setCreatedAt(getCreatedAtForTest());
-        actionStep.setUpdatedAt(getUpdatedAtForTest());
+	private PageImpl<ChoreographerPlan> getPageOfChoreographerPlanList() {
+        final List<ChoreographerPlan> choreographerPlanList = List.of(getPlan());
 
-        return actionStep;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-	private PageImpl<ChoreographerActionPlan> getPageOfChoreographerActionPlanList() {
-        final List<ChoreographerActionPlan> choreographerActionPlanList = List.of(getChoreographerActionPlan());
-
-        return new PageImpl<>(choreographerActionPlanList);
+        return new PageImpl<>(choreographerPlanList);
     }
 
     //-------------------------------------------------------------------------------------------------

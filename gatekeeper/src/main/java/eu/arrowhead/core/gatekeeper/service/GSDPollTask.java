@@ -16,9 +16,9 @@ import eu.arrowhead.common.dto.shared.ErrorWrapperDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.exception.TimeoutException;
-import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
-import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayResponse;
-import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementResult;
+import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClient;
+import eu.arrowhead.relay.gatekeeper.GatekeeperRelayResponse;
+import eu.arrowhead.relay.gatekeeper.GeneralAdvertisementResult;
 
 public class GSDPollTask implements Runnable {
 	
@@ -43,7 +43,7 @@ public class GSDPollTask implements Runnable {
 		Assert.notNull(relayClient, "relayClient is null");
 		Assert.notNull(session, "session is null");
 		Assert.isTrue(!Utilities.isEmpty(recipientCloudCN), "recipientCloudCN is empty");
-		Assert.isTrue(!Utilities.isEmpty(recipientCloudPublicKey), "recipientCloudCN is empty");
+		Assert.isTrue(!Utilities.isEmpty(recipientCloudPublicKey), "recipientCloudPublicKey is empty");
 		Assert.notNull(gsdPollRequestDTO, "gsdPollRequestDTO is null");
 		Assert.notNull(queue, "queue is null");
 		

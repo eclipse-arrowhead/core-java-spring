@@ -22,7 +22,7 @@ import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.shared.ErrorWrapperDTO;
-import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
+import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClient;
 
 public class GSDPollRequestExecutor {
 	
@@ -57,11 +57,10 @@ public class GSDPollRequestExecutor {
 		logger.debug("GSDPollRequestExecutor.execute started...");
 		validateMembers();
 		
+		final Map<String,Session> sessionsToClouds = createSessionsToClouds();
 		for (final Entry<Cloud,Relay> cloudRelay : gatekeeperRelayPerCloud.entrySet()) {			
 			try {
-				final String cloudCN = getRecipientCommonName(cloudRelay.getKey());
-				final Map<String,Session> sessionsToClouds = createSessionsToClouds();
-				
+				final String cloudCN = getRecipientCommonName(cloudRelay.getKey());				
 				threadPool.execute(new GSDPollTask(relayClient, sessionsToClouds.get(cloudCN), cloudCN, cloudRelay.getKey().getAuthenticationInfo(), gsdPollRequestDTO, queue));
 			} catch (final RejectedExecutionException ex) {
 				logger.error("GSDPollTask execution rejected at {}", ZonedDateTime.now());
@@ -84,7 +83,7 @@ public class GSDPollRequestExecutor {
 	
 	//-------------------------------------------------------------------------------------------------
 	private Map<String,Session> createSessionsToClouds() {
-		logger.debug("createSessionsToRelays started...");
+		logger.debug("createSessionsToClouds started...");
 		
 		final Map<String,Session> sessionsForRelays = new HashMap<>();
 		
