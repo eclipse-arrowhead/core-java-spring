@@ -78,7 +78,7 @@ public class CertificateAuthorityController {
 	private static final String CHECK_TRUSTED_KEY_HTTP_400_MESSAGE = "Invalid Trusted Key Check Request";
 	private static final String GET_ISSUED_CERTIFICATES_HTTP_200_MESSAGE = "Issued certificates returned";
 	private static final String GET_TRUSTED_KEYS_HTTP_200_MESSAGE = "Trusted public keys returned";
-	private static final String ADD_TRUSTED_KEY_HTTP_200_MESSAGE = "Trusted public key added";
+	private static final String ADD_TRUSTED_KEY_HTTP_201_MESSAGE = "Trusted public key added";
 	private static final String ADD_TRUSTED_KEY_HTTP_400_MESSAGE = "Invalid Add Trusted Key Request";
 	private static final String DELETE_TRUSTED_KEY_HTTP_204_MESSAGE = "Trusted public key removed";
 
@@ -254,7 +254,7 @@ public class CertificateAuthorityController {
 	// -------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Add trusted public key", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = ADD_TRUSTED_KEY_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_CREATED, message = ADD_TRUSTED_KEY_HTTP_201_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = ADD_TRUSTED_KEY_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE) })

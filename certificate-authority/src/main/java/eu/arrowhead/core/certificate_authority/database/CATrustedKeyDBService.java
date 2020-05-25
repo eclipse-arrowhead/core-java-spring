@@ -67,8 +67,8 @@ public class CATrustedKeyDBService {
             trustedKey.setPublicKey(request.getPublicKey());
             trustedKey.setHash(CertificateAuthorityUtils.sha256(request.getPublicKey()));
             trustedKey.setDescription(request.getDescription());
-            trustedKey.setValidAfter(ZonedDateTime.from(request.getValidAfter().toInstant()));
-            trustedKey.setValidBefore(ZonedDateTime.from(request.getValidBefore().toInstant()));
+            trustedKey.setValidAfter(request.getValidAfter());
+            trustedKey.setValidBefore(request.getValidBefore());
         } catch (NullPointerException ex) {
             logger.debug(ex.getMessage(), ex);
             throw new BadPayloadException("Invalid request for addTrustedKey: (" + ex.getMessage() + ")", ex);
@@ -86,7 +86,13 @@ public class CATrustedKeyDBService {
 
         logger.info("Adding a trusted key: " + trustedKey.getDescription());
 
-        caTrustedKeyRepository.saveAndFlush(trustedKey);
+        try {
+            caTrustedKeyRepository.saveAndFlush(trustedKey);
+        } catch (Exception e) {
+            final String msg = "Cannot save Trusted Key";
+            logger.debug(msg + ": " + e.getMessage(), e);
+            throw new BadPayloadException(msg, e);
+        }
     }
 
     public TrustedKeyCheckResponseDTO isTrustedKeyValidNow(final TrustedKeyCheckRequestDTO request) {
