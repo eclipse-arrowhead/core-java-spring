@@ -2,6 +2,7 @@ package eu.arrowhead.core.certificate_authority;
 
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.BadPayloadException;
@@ -193,6 +194,29 @@ public class CertificateAuthorityUtils {
         }
     }
 
+    static void checkProtectedCommonName(JcaPKCS10CertificationRequest csr, final String cloudCN,
+            final String requestedBy) {
+        if (csr == null || Utilities.isEmpty(cloudCN) || Utilities.isEmpty(requestedBy)) {
+            throw new InvalidParameterException("Cannot check protected common names: null or empty params");
+        }
+        final String commonName = getCommonName(csr);
+        checkProtectedCommonName(commonName, cloudCN, requestedBy);
+    }
+
+    static void checkProtectedCommonName(final String commonName, final String cloudCN, final String requestedBy) {
+        if (Utilities.isEmpty(commonName) || Utilities.isEmpty(cloudCN) || Utilities.isEmpty(requestedBy)) {
+            throw new InvalidParameterException("Cannot check protected common names: null or empty params");
+        }
+        final List<String> protectedCommonNames = getProtectedCommonNames(cloudCN);
+
+        if (protectedCommonNames.contains(commonName)) {
+            if (!requestedBy.equals("sysop." + cloudCN)) {
+                throw new InvalidParameterException(
+                        "Only sysop allowed to request a certificate with protected common name");
+            }
+        }
+    }
+
     static void checkCsrSignature(JcaPKCS10CertificationRequest csr) {
         try {
             final ContentVerifierProvider verifierProvider = new JcaContentVerifierProviderBuilder()
@@ -332,6 +356,32 @@ public class CertificateAuthorityUtils {
         }
         final String requestedByCN = getCommonName(clientCerts[0]);
         return requestedByCN;
+    }
+
+    public static List<String> getProtectedCommonNames(final String cloudCommonName)
+    {
+        if (Utilities.isEmpty(cloudCommonName)) {
+            throw new InvalidParameterException("CloudCommonNAme cannot be empty");
+        }
+
+        List<String> names = new ArrayList<>();
+        names.add("sysop." + cloudCommonName);
+
+        CoreSystem[] systems = CoreSystem.values();
+        for (CoreSystem system : systems) {
+            final String sysName = system.name().toLowerCase();
+
+            names.add(sysName + "." + cloudCommonName);
+
+            if (sysName.contains("_")) {
+                names.add(sysName.replace("_", "-") + "." + cloudCommonName);
+            } else if (sysName.contains("-")) {
+                names.add(sysName.replace("-", "_") + "." + cloudCommonName);
+            }
+        }
+
+
+        return names;
     }
 
     private CertificateAuthorityUtils() {

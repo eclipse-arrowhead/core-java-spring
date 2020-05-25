@@ -101,6 +101,7 @@ public class CertificateAuthorityService {
 
         final JcaPKCS10CertificationRequest csr = CertificateAuthorityUtils.decodePKCS10CSR(request);
         CertificateAuthorityUtils.checkCommonName(csr, cloudCommonName);
+        CertificateAuthorityUtils.checkProtectedCommonName(csr, cloudCommonName, requesterCN);
         CertificateAuthorityUtils.checkCsrSignature(csr);
 
         logger.info("Signing certificate for " + csr.getSubject().toString() + "...");
