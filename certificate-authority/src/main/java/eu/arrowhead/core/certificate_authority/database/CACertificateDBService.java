@@ -31,7 +31,7 @@ public class CACertificateDBService {
 
     private final Logger logger = LogManager.getLogger(CACertificateDBService.class);
 
-    public void saveCertificateInfo(final String commonName, final BigInteger serial, final String requesterCN) {
+    public CaCertificate saveCertificateInfo(final String commonName, final BigInteger serial, final String requesterCN) {
         logger.debug("saveCertificateInfo started...");
 
         if (Utilities.isEmpty(commonName)) {
@@ -45,8 +45,8 @@ public class CACertificateDBService {
         }
         logger.debug("saveCertificateInfo for " + commonName);
 
-        CaCertificate certificate = new CaCertificate(commonName, serial, requesterCN);
-        caCertificateRepository.save(certificate);
+        final CaCertificate certificate = new CaCertificate(commonName, serial, requesterCN);
+        return caCertificateRepository.save(certificate);
     }
 
     public IssuedCertificatesResponseDTO getcertificateEntries(final int page, final int size,

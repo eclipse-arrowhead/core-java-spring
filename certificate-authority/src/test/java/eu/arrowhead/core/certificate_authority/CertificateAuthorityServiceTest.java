@@ -2,6 +2,7 @@ package eu.arrowhead.core.certificate_authority;
 
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.CaCertificate;
 import eu.arrowhead.common.dto.internal.CertificateCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.CertificateCheckResponseDTO;
 import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
@@ -43,7 +44,9 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -55,8 +58,8 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = {CACertificateDBServiceTestContext.class, CATrustedKeyDBServiceTestContext.class})
 public class CertificateAuthorityServiceTest {
 
+    public static final long CA_CERT_ID = 999;
     private static final Pattern PEM_PATTERN = Pattern.compile("(?m)(?s)^---*BEGIN.*---*$(.*)^---*END.*---*$.*");
-
     private static final String CONSUMER_CN = "consumer.testcloud2.aitia.arrowhead.eu";
     private static final String SYSOP_CN = "sysop.testcloud2.aitia.arrowhead.eu";
     private static final String SIGN_REQUESTER_DUMMY = "dummy";
@@ -121,6 +124,9 @@ public class CertificateAuthorityServiceTest {
         ReflectionTestUtils.setField(service, "cloudCommonName", cloudCommonName);
 
         ReflectionTestUtils.setField(service, "certificateDbService", caCertificateDBService);
+
+        when(caCertificateDBService.saveCertificateInfo(anyString(), any(), anyString()))
+                .thenReturn(new CaCertificate(CA_CERT_ID));
     }
 
     private SSLProperties getSslProperties() {
@@ -253,12 +259,13 @@ public class CertificateAuthorityServiceTest {
         final List<String> certificateChain = response.getCertificateChain();
         assertEquals(certificateChain.size(), 3);
 
+        assertEquals(response.getId(), CA_CERT_ID);
+
         final X509Certificate clientCert = CertificateAuthorityUtils.decodeCertificate(certificateChain.get(0));
         assertEquals(CertificateAuthorityUtils.getCommonName(clientCert), CONSUMER_CN);
         assertEquals(CertificateAuthorityUtils.decodeCertificate(certificateChain.get(1)), cloudCertificate);
         assertEquals(CertificateAuthorityUtils.decodeCertificate(certificateChain.get(2)), rootCertificate);
     }
-
 
     @Test(expected = InvalidParameterException.class)
     public void testSignCertificateProtectedBase64DerCsr() throws IOException {
@@ -279,6 +286,8 @@ public class CertificateAuthorityServiceTest {
 
         verify(caCertificateDBService, times(1))
                 .saveCertificateInfo(eq(SYSOP_CN), any(), eq(SIGN_REQUESTER_SYSOP));
+
+        assertEquals(response.getId(), CA_CERT_ID);
 
         final List<String> certificateChain = response.getCertificateChain();
         assertEquals(certificateChain.size(), 3);

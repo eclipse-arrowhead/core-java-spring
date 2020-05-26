@@ -1,25 +1,8 @@
 package eu.arrowhead.core.certificate_authority;
 
-import java.math.BigInteger;
-import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.stereotype.Service;
-
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.CaCertificate;
 import eu.arrowhead.common.dto.internal.AddTrustedKeyRequestDTO;
 import eu.arrowhead.common.dto.internal.CertificateCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.CertificateCheckResponseDTO;
@@ -33,6 +16,22 @@ import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.certificate_authority.database.CACertificateDBService;
 import eu.arrowhead.core.certificate_authority.database.CATrustedKeyDBService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import java.math.BigInteger;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.List;
 
 @Service
 public class CertificateAuthorityService {
@@ -107,7 +106,7 @@ public class CertificateAuthorityService {
         logger.info("Signing certificate for " + csr.getSubject().toString() + "...");
 
         final PrivateKey cloudPrivateKey = Utilities.getCloudPrivateKey(keyStore, cloudCommonName,
-                                                                        sslProperties.getKeyPassword());
+                sslProperties.getKeyPassword());
 
         final X509Certificate clientCertificate = CertificateAuthorityUtils.buildCertificate(csr, cloudPrivateKey,
                 cloudCertificate, caProperties, random);
@@ -116,9 +115,9 @@ public class CertificateAuthorityService {
 
         final String clientCommonName = CertificateAuthorityUtils.getCommonName(csr);
         final BigInteger serialNumber = CertificateAuthorityUtils.getSerialNumber(clientCertificate);
-        certificateDbService.saveCertificateInfo(clientCommonName, serialNumber, requesterCN);
+        final CaCertificate caCert = certificateDbService.saveCertificateInfo(clientCommonName, serialNumber, requesterCN);
 
-        return new CertificateSigningResponseDTO(encodedCertificateChain);
+        return new CertificateSigningResponseDTO(caCert.getId(), encodedCertificateChain);
     }
 
     public IssuedCertificatesResponseDTO getCertificates(int page, int size, Direction direction, String sortField) {

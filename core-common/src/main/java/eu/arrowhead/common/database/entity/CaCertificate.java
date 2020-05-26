@@ -1,8 +1,6 @@
 package eu.arrowhead.common.database.entity;
 
-import java.math.BigInteger;
-import java.time.ZonedDateTime;
-import java.util.List;
+import eu.arrowhead.common.CoreDefaults;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,8 +9,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
-
-import eu.arrowhead.common.CoreDefaults;
+import java.math.BigInteger;
+import java.time.ZonedDateTime;
+import java.util.List;
 
 @Entity
 public class CaCertificate {
@@ -55,6 +54,11 @@ public class CaCertificate {
 
     // -------------------------------------------------------------------------------------------------
     public CaCertificate() {
+    }
+
+    // -------------------------------------------------------------------------------------------------
+    public CaCertificate(long id) {
+        this.id = id;
     }
 
     // -------------------------------------------------------------------------------------------------

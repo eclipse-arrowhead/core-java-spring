@@ -137,7 +137,7 @@ public class CertificateAuthorityControllerTest {
     @Test
     public void testSignPostWithValidCSR() throws Exception {
 
-        final CertificateSigningResponseDTO response = new CertificateSigningResponseDTO(new ArrayList<>());
+        final CertificateSigningResponseDTO response = new CertificateSigningResponseDTO(0, new ArrayList<>());
         when(serviceCertificateAuthorityService.signCertificate(any(), anyString())).thenReturn(response);
 
         mockMvc.perform(post(SIGN_CERTIFICATE_URI).secure(true).with(x509("certificates/sysop.pem"))
