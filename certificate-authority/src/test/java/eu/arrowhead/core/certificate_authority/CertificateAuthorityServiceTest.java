@@ -101,6 +101,17 @@ public class CertificateAuthorityServiceTest {
         return new String(Files.readAllBytes(resource.toPath())).trim();
     }
 
+    private static CertificateSigningRequestDTO buildRequest(final String csrResourcePath,
+                                                             final ZonedDateTime validAfter,
+                                                             final ZonedDateTime validBefore) throws IOException {
+        final String encodedCSR = getResourceContent(csrResourcePath);
+        return new CertificateSigningRequestDTO(encodedCSR, validAfter, validBefore);
+    }
+
+    private static CertificateSigningRequestDTO buildRequest(final String csrResourcePath) throws IOException {
+        return buildRequest(csrResourcePath, null, null);
+    }
+
     @Before
     public void setUp() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
         sslProperties = getSslProperties();
@@ -248,8 +259,7 @@ public class CertificateAuthorityServiceTest {
 
     @Test
     public void testSignCertificateValidBase64DerCsr() throws IOException {
-        final String encodedCSR = getResourceContent("certificates/consumer.csr");
-        final CertificateSigningRequestDTO request = new CertificateSigningRequestDTO(encodedCSR);
+        final CertificateSigningRequestDTO request = buildRequest("certificates/consumer.csr");
 
         final CertificateSigningResponseDTO response = service.signCertificate(request, SIGN_REQUESTER_VALID);
 
@@ -269,8 +279,7 @@ public class CertificateAuthorityServiceTest {
 
     @Test(expected = InvalidParameterException.class)
     public void testSignCertificateProtectedBase64DerCsr() throws IOException {
-        final String encodedCSR = getResourceContent("certificates/sysop.csr");
-        final CertificateSigningRequestDTO request = new CertificateSigningRequestDTO(encodedCSR);
+        final CertificateSigningRequestDTO request = buildRequest("certificates/sysop.csr");
 
         final CertificateSigningResponseDTO response = service.signCertificate(request, SIGN_REQUESTER_VALID);
 
@@ -279,8 +288,7 @@ public class CertificateAuthorityServiceTest {
 
     @Test
     public void testSignCertificateProtectedBase64DerCsrSysopRequest() throws IOException {
-        final String encodedCSR = getResourceContent("certificates/sysop.csr");
-        final CertificateSigningRequestDTO request = new CertificateSigningRequestDTO(encodedCSR);
+        final CertificateSigningRequestDTO request = buildRequest("certificates/sysop.csr");
 
         final CertificateSigningResponseDTO response = service.signCertificate(request, SIGN_REQUESTER_SYSOP);
 
