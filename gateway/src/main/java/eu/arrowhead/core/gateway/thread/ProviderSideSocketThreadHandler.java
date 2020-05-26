@@ -219,6 +219,7 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 			try {
 				currentThread.init();
 				noRequest = 0;
+				logger.debug("Request counter reset");
 				currentThread.start();
 				logger.debug("Thread started: {}", currentThread.getName());
 			} catch (final IOException ex) {
@@ -234,11 +235,14 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 	private void incrementRequestCounter() {
 		if (countRequests) {
 			noRequest++;
+			logger.debug("Request counter incremented to: {}", noRequest);
 		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private void initCountRequestsFlag(final byte[] bytes) {
+		logger.debug("initCountRequestsFlag started...");
+		
 		// we only need to count requests if the parameter bytes contains a non-chunked HTTP request
 		
 		final Answer isHttp = GatewayHTTPUtils.isStartOfAHttpRequest(bytes);
@@ -248,13 +252,19 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 			
 			// if the message is chunked we don't use request counting
 			switch (isChunked) {
-			case CAN_BE: logger.error("Invalid answer: CAN_BE");
-						 // break is intentionally left here
-			case YES: countRequests = false;
-					  break;
-			case NO: countRequests = true;
+			case CAN_BE: 
+				logger.error("Invalid answer: CAN_BE");
+				// break is intentionally left here
+			case YES:
+				logger.debug("Request counter is off");
+				countRequests = false;
+				break;
+			case NO: 
+				logger.debug("Request counter is on");
+				countRequests = true;
 			}
 		} else {
+			logger.debug("Request counter is off");
 			countRequests = false; // not HTTP
 		}
 	}

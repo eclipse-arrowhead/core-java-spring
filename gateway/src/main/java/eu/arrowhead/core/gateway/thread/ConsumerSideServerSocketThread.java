@@ -187,7 +187,10 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 				final int size = inConsumer.read(buffer);
 				
 				if (size < 0) { // end of stream
+					logger.debug("End of stream");
+
 					if (contentDetected && useHttpCache) {
+						logger.debug("Sending remaining cache content...");
 						final byte[] remainingBytes = requestCache.getCacheContentBytes();
 						if (remainingBytes != null && remainingBytes.length > 0) {
 							relayClient.sendBytes(relaySession, sender, providerGatewayPublicKey, remainingBytes);
@@ -201,19 +204,25 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 					logger.debug("FROM CONSUMER:" + new String(data, StandardCharsets.ISO_8859_1));
 					
 					if (!contentDetected) {
+						logger.debug("Content detection section start...");
 						byteArrayCache.add(data);
 						final Answer canUseHttpCache = canUseHttpCache(byteArrayCache);
 						contentDetected = canUseHttpCache != Answer.CAN_BE;
 						useHttpCache = canUseHttpCache == Answer.YES;
+						logger.debug("Content detected: {}, cache usage: {}", contentDetected, useHttpCache);
+
 						switch (canUseHttpCache) {
 						case YES: 
+							logger.debug("Moving {} byte arrays from byte array cache to HTTP cache", byteArrayCache.size() - 1);
 							for (int i = 0; i < byteArrayCache.size() - 1; ++i) { // don't add the last one, because that one is added later
 								requestCache.addBytes(byteArrayCache.get(i));
 							}
 							byteArrayCache.clear(); // clean
+							logger.debug("Byte array cache cleared.");
 							break;
 						case NO:
 							// send the whole cache content here
+							logger.debug("Sending {} byte arrays via relay as one message...", byteArrayCache.size());
 							relayClient.sendBytes(relaySession, sender, providerGatewayPublicKey, concatenateByteArrays(byteArrayCache)); 
 							break;
 						case CAN_BE: 
@@ -227,12 +236,19 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 							final byte[] requestBytes = requestCache.getHTTPRequestBytes();
 							if (requestBytes != null) {
 								// requestBytes contains a whole HTTP request
+								logger.debug("Sending HTTP request via relay");
 								relayClient.sendBytes(relaySession, sender, providerGatewayPublicKey, requestBytes);
-							} // else waiting for more bytes
+							} else {
+								// else waiting for more bytes
+								logger.debug("Waiting for more bytes");
+							}
 						} else { // HTTP cache is not used
 							if (byteArrayCache.size() > 0) { // means content detected in this iteration => content of data is already sent with the rest of the cache content
+								logger.debug("Byte array cache content is already sent via relay, so no further action is necessary.");
 								byteArrayCache.clear(); // clean cache (not used again as we already determined the content)
+								logger.debug("Byte array cache cleared.");
 							} else {
+								logger.debug("Sending byte array via relay...");
 								relayClient.sendBytes(relaySession, sender, providerGatewayPublicKey, data);
 							}
 						}
@@ -300,6 +316,8 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 	
 	//-------------------------------------------------------------------------------------------------
 	private Answer canUseHttpCache(final List<byte[]> byteArrays) {
+		logger.debug("canUseHttpCache started...");
+		
 		final byte[] message = concatenateByteArrays(byteArrays);
 		
 		final Answer isHttp = GatewayHTTPUtils.isStartOfAHttpRequest(message);
@@ -309,17 +327,26 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 			
 			// if the message is chunked we can't use cache, so we have to 'negate' the result
 			switch (isChunked) {
-			case YES: return Answer.NO;
-			case CAN_BE: return Answer.CAN_BE;
-			case NO: return Answer.YES;
+			case YES: 
+				logger.debug("HTTP Cache answer: NO");
+				return Answer.NO;
+			case CAN_BE:
+				logger.debug("HTTP Cache answer: CAN_BE");
+				return Answer.CAN_BE;
+			case NO: 
+				logger.debug("HTTP Cache answer: YES");
+				return Answer.YES;
 			}
 		}
-		
+	
+		logger.debug("HTTP Cache answer: ", isHttp.name());
 		return isHttp; // NO or CAN_BE
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private byte[] concatenateByteArrays(final List<byte[]> byteArrays) {
+		logger.debug("concatenateByteArrays started...");
+		
 		final ByteArrayBuffer buffer = new ByteArrayBuffer(calculateLengthSum(byteArrays));
 		for (final byte[] array : byteArrays) {
 			buffer.append(array, 0, array.length);
@@ -330,6 +357,8 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 	
 	//-------------------------------------------------------------------------------------------------
 	private int calculateLengthSum(final List<byte[]> byteArrays) {
+		logger.debug("calculateLengthSum started...");
+
 		int result = 0;
 		for (final byte[] array : byteArrays) {
 			result += array.length;
