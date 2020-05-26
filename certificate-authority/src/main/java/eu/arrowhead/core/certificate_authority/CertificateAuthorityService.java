@@ -58,7 +58,7 @@ public class CertificateAuthorityService {
     private String cloudCommonName;
 
     @PostConstruct
-    private void init() {
+    protected void init() { // protected for testing
         random = new SecureRandom();
         keyStore = CertificateAuthorityUtils.getKeyStore(sslProperties);
 

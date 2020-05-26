@@ -1,7 +1,6 @@
 package eu.arrowhead.core.certificate_authority;
 
 import eu.arrowhead.common.SSLProperties;
-import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.CaCertificate;
 import eu.arrowhead.common.dto.internal.CertificateCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.CertificateCheckResponseDTO;
@@ -32,10 +31,8 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Files;
-import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -60,10 +57,11 @@ public class CertificateAuthorityServiceTest {
 
     public static final long CA_CERT_ID = 999;
     private static final Pattern PEM_PATTERN = Pattern.compile("(?m)(?s)^---*BEGIN.*---*$(.*)^---*END.*---*$.*");
-    private static final String CONSUMER_CN = "consumer.testcloud2.aitia.arrowhead.eu";
-    private static final String SYSOP_CN = "sysop.testcloud2.aitia.arrowhead.eu";
+    private static final String CLOUD_CN = "testcloud2.aitia.arrowhead.eu";
+    private static final String CONSUMER_CN = "consumer." + CLOUD_CN;
+    private static final String SYSOP_CN = "sysop." + CLOUD_CN;
     private static final String SIGN_REQUESTER_DUMMY = "dummy";
-    private static final String SIGN_REQUESTER_VALID = "valid.testcloud2.aitia.arrowhead.eu";
+    private static final String SIGN_REQUESTER_VALID = "valid." + CLOUD_CN;
     private static final String SIGN_REQUESTER_SYSOP = SYSOP_CN;
 
     @Rule
@@ -75,18 +73,13 @@ public class CertificateAuthorityServiceTest {
     @MockBean(name = "mockCATrustedKeyDBService")
     CATrustedKeyDBService caTrustedKeyDBService;
 
-
     @InjectMocks
     CertificateAuthorityService service;
 
-    private SSLProperties sslProperties;
     private CAProperties caProperties;
-    private SecureRandom random;
-    private KeyStore keyStore;
 
     private X509Certificate rootCertificate;
     private X509Certificate cloudCertificate;
-    private String cloudCommonName;
 
     // =================================================================================================
     // methods
@@ -114,27 +107,15 @@ public class CertificateAuthorityServiceTest {
 
     @Before
     public void setUp() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
-        sslProperties = getSslProperties();
-        ReflectionTestUtils.setField(service, "sslProperties", sslProperties);
-
         caProperties = getCAProperties();
         ReflectionTestUtils.setField(service, "caProperties", caProperties);
-
-        random = new SecureRandom();
-        ReflectionTestUtils.setField(service, "random", random);
-
-        keyStore = CertificateAuthorityUtils.getKeyStore(sslProperties);
-        ReflectionTestUtils.setField(service, "keyStore", keyStore);
-
-        rootCertificate = Utilities.getRootCertFromKeyStore(keyStore);
-        cloudCertificate = Utilities.getCloudCertFromKeyStore(keyStore);
-        cloudCommonName = CertificateAuthorityUtils.getCloudCommonName(cloudCertificate);
-
-        ReflectionTestUtils.setField(service, "rootCertificate", rootCertificate);
-        ReflectionTestUtils.setField(service, "cloudCertificate", cloudCertificate);
-        ReflectionTestUtils.setField(service, "cloudCommonName", cloudCommonName);
-
+        ReflectionTestUtils.setField(service, "sslProperties", getSslProperties());
         ReflectionTestUtils.setField(service, "certificateDbService", caCertificateDBService);
+
+        service.init();
+
+        rootCertificate = (X509Certificate) ReflectionTestUtils.getField(service, "rootCertificate");
+        cloudCertificate = (X509Certificate) ReflectionTestUtils.getField(service, "cloudCertificate");
 
         when(caCertificateDBService.saveCertificateInfo(anyString(), any(), anyString()))
                 .thenReturn(new CaCertificate(CA_CERT_ID));
@@ -263,25 +244,15 @@ public class CertificateAuthorityServiceTest {
 
         final CertificateSigningResponseDTO response = service.signCertificate(request, SIGN_REQUESTER_VALID);
 
-        verify(caCertificateDBService, times(1))
-                .saveCertificateInfo(eq(CONSUMER_CN), any(), eq(SIGN_REQUESTER_VALID));
-
-        final List<String> certificateChain = response.getCertificateChain();
-        assertEquals(certificateChain.size(), 3);
-
-        assertEquals(response.getId(), CA_CERT_ID);
-
-        final X509Certificate clientCert = CertificateAuthorityUtils.decodeCertificate(certificateChain.get(0));
-        assertEquals(CertificateAuthorityUtils.getCommonName(clientCert), CONSUMER_CN);
-        assertEquals(CertificateAuthorityUtils.decodeCertificate(certificateChain.get(1)), cloudCertificate);
-        assertEquals(CertificateAuthorityUtils.decodeCertificate(certificateChain.get(2)), rootCertificate);
+        verify(caCertificateDBService).saveCertificateInfo(eq(CONSUMER_CN), any(), eq(SIGN_REQUESTER_VALID));
+        verifyCertSigningResponse(response, CONSUMER_CN);
     }
 
     @Test(expected = InvalidParameterException.class)
     public void testSignCertificateProtectedBase64DerCsr() throws IOException {
         final CertificateSigningRequestDTO request = buildRequest("certificates/sysop.csr");
 
-        final CertificateSigningResponseDTO response = service.signCertificate(request, SIGN_REQUESTER_VALID);
+        service.signCertificate(request, SIGN_REQUESTER_VALID);
 
         verify(caCertificateDBService, never()).saveCertificateInfo(eq(SYSOP_CN), any(), eq(SIGN_REQUESTER_VALID));
     }
@@ -292,17 +263,24 @@ public class CertificateAuthorityServiceTest {
 
         final CertificateSigningResponseDTO response = service.signCertificate(request, SIGN_REQUESTER_SYSOP);
 
-        verify(caCertificateDBService, times(1))
-                .saveCertificateInfo(eq(SYSOP_CN), any(), eq(SIGN_REQUESTER_SYSOP));
+        verify(caCertificateDBService).saveCertificateInfo(eq(SYSOP_CN), any(), eq(SIGN_REQUESTER_SYSOP));
+        verifyCertSigningResponse(response, SYSOP_CN);
+    }
 
+    private X509Certificate verifyCertSigningResponse(CertificateSigningResponseDTO response, String commonName) {
+        assertNotNull(response);
+        assertNotNull(commonName);
         assertEquals(response.getId(), CA_CERT_ID);
 
         final List<String> certificateChain = response.getCertificateChain();
+        assertNotNull(certificateChain);
         assertEquals(certificateChain.size(), 3);
 
         final X509Certificate clientCert = CertificateAuthorityUtils.decodeCertificate(certificateChain.get(0));
-        assertEquals(CertificateAuthorityUtils.getCommonName(clientCert), SYSOP_CN);
+        assertEquals(CertificateAuthorityUtils.getCommonName(clientCert), commonName);
         assertEquals(CertificateAuthorityUtils.decodeCertificate(certificateChain.get(1)), cloudCertificate);
         assertEquals(CertificateAuthorityUtils.decodeCertificate(certificateChain.get(2)), rootCertificate);
+
+        return clientCert;
     }
 }
