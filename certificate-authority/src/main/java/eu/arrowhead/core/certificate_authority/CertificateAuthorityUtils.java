@@ -34,6 +34,7 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.pkcs.PKCSException;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
+import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
@@ -75,7 +76,8 @@ public class CertificateAuthorityUtils {
         }
     }
 
-    static void verifyCertificateSigningRequest(CertificateSigningRequestDTO request, String requesterCN) {
+    static void verifyCertificateSigningRequest(CertificateSigningRequestDTO request, String requesterCN,
+            CAProperties caProperties) {
         if (request == null) {
             logger.error("CertificateSigningRequest cannot be null");
             throw new InvalidParameterException("CertificateSigningRequest cannot be null");
@@ -91,6 +93,23 @@ public class CertificateAuthorityUtils {
         if (Utilities.isEmpty(requesterCN)) {
             logger.error("CertificateSigningRequest requester common name cannot be empty");
             throw new InvalidParameterException("CertificateSigningRequest requester common name cannot be empty");
+        }
+
+        final ZonedDateTime now = ZonedDateTime.now();
+        final ZonedDateTime validBefore = request.getValidBefore();
+        if (validBefore != null) {
+            if (validBefore.isAfter(getValidBefore(now, caProperties))) {
+                logger.error("Validity range parameter exceeds maximum validity range");
+                throw new InvalidParameterException("Validity range parameter exceeds maximum validity range");
+            }
+        }
+
+        final ZonedDateTime validAfter = request.getValidAfter();
+        if (validAfter != null) {
+            if (validAfter.isBefore(getValidAfter(now, caProperties))) {
+                logger.error("Validity range parameter exceeds maximum validity range");
+                throw new InvalidParameterException("Validity range parameter exceeds maximum validity range");
+            }
         }
     }
 
@@ -239,13 +258,23 @@ public class CertificateAuthorityUtils {
         }
     }
 
+    static ZonedDateTime getValidAfter(ZonedDateTime reference, CAProperties caProperties) {
+        Assert.notNull(reference, "reference cannot be null");
+        Assert.notNull(caProperties, "caProperties cannot be null");
+        return reference.minusMinutes(caProperties.getCertValidityNegativeOffsetMinutes());
+    }
+
+    static ZonedDateTime getValidBefore(ZonedDateTime reference, CAProperties caProperties) {
+        Assert.notNull(reference, "reference cannot be null");
+        Assert.notNull(caProperties, "caProperties cannot be null");
+        return reference.plusMinutes(caProperties.getCertValidityPositiveOffsetMinutes());
+    }
+
     static X509Certificate buildCertificate(JcaPKCS10CertificationRequest csr, PrivateKey cloudPrivateKey,
             X509Certificate cloudCertificate, CAProperties caProperties, SecureRandom random) {
         final ZonedDateTime now = ZonedDateTime.now();
-        final Date validFrom = Date
-                .from(now.minusMinutes(caProperties.getCertValidityNegativeOffsetMinutes()).toInstant());
-        final Date validUntil = Date
-                .from(now.plusMinutes(caProperties.getCertValidityPositiveOffsetMinutes()).toInstant());
+        final Date validFrom = Date.from(getValidAfter(now, caProperties).toInstant());
+        final Date validUntil =  Date.from(getValidBefore(now, caProperties).toInstant());
 
         logger.debug("Setting validity from='{}' to='{}'", validFrom, validUntil);
         return buildCertificate(csr, cloudPrivateKey, cloudCertificate, validFrom, validUntil, random);

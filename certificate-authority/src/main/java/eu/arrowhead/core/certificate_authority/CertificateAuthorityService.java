@@ -96,7 +96,7 @@ public class CertificateAuthorityService {
     }
 
     public CertificateSigningResponseDTO signCertificate(CertificateSigningRequestDTO request, String requesterCN) {
-        CertificateAuthorityUtils.verifyCertificateSigningRequest(request, requesterCN);
+        CertificateAuthorityUtils.verifyCertificateSigningRequest(request, requesterCN, caProperties);
 
         final JcaPKCS10CertificationRequest csr = CertificateAuthorityUtils.decodePKCS10CSR(request);
         CertificateAuthorityUtils.checkCommonName(csr, cloudCommonName);

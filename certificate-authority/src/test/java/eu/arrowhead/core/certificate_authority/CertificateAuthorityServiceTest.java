@@ -254,7 +254,7 @@ public class CertificateAuthorityServiceTest {
 
         service.signCertificate(request, SIGN_REQUESTER_VALID);
 
-        verify(caCertificateDBService, never()).saveCertificateInfo(eq(SYSOP_CN), any(), eq(SIGN_REQUESTER_VALID));
+        verify(caCertificateDBService, never()).saveCertificateInfo(anyString(), any(), anyString());
     }
 
     @Test
@@ -265,6 +265,27 @@ public class CertificateAuthorityServiceTest {
 
         verify(caCertificateDBService).saveCertificateInfo(eq(SYSOP_CN), any(), eq(SIGN_REQUESTER_SYSOP));
         verifyCertSigningResponse(response, SYSOP_CN);
+    }
+
+    @Test
+    public void testSignCertificateValidBase64DerCsrValidityOK() throws IOException {
+        final ZonedDateTime now = ZonedDateTime.now();
+        final CertificateSigningRequestDTO request = buildRequest("certificates/consumer.csr", now, now.plusMinutes(1));
+
+        final CertificateSigningResponseDTO response = service.signCertificate(request, SIGN_REQUESTER_VALID);
+
+        verify(caCertificateDBService).saveCertificateInfo(eq(CONSUMER_CN), any(), eq(SIGN_REQUESTER_VALID));
+        verifyCertSigningResponse(response, CONSUMER_CN);
+    }
+
+    @Test(expected = InvalidParameterException.class)
+    public void testSignCertificateValidBase64DerCsrValidityNotOK() throws IOException {
+        final ZonedDateTime now = ZonedDateTime.now();
+        final CertificateSigningRequestDTO request = buildRequest("certificates/consumer.csr", now, now.plusYears(1));
+
+        service.signCertificate(request, SIGN_REQUESTER_VALID);
+
+        verify(caCertificateDBService, never()).saveCertificateInfo(anyString(), any(), anyString());
     }
 
     private X509Certificate verifyCertSigningResponse(CertificateSigningResponseDTO response, String commonName) {
