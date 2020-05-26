@@ -13,13 +13,16 @@ AH_COUNTRY=eu # hard-coded to the Arrowhead Framework
 db_get arrowhead-core-common/relay_master_cert; AH_RELAY_MASTER_CERT=$RET
 db_get arrowhead-core-common/domain_name; AH_DOMAIN_NAME=$RET
 
-db_get arrowhead-core-common/systeminterface; AH_SYSTEM_INTERFACE="$RET"
-db_get arrowhead-core-common/interfaces; AH_NETWORK_INTERFACES="$RET"
+db_get arrowhead-core-common/system_interface; AH_SYSTEM_INTERFACE="$RET"
+
+db_get arrowhead-core-common/san_interfaces; AH_NETWORK_INTERFACES="$RET"
+db_get arrowhead-core-common/san_ips; SAN_IPS="$RET"
+db_get arrowhead-core-common/san_dns; SAN_DNS="$RET"
 
 OWN_IP="$(echo "${AH_SYSTEM_INTERFACE}" | awk ' { print $2 } ')"
 echo $OWN_IP
 
-readarray -t SAN_IPS<<<"$(echo "${AH_NETWORK_INTERFACES}" | awk ' BEGIN { RS = "," } { print $2 } ')"
+readarray -t SAN_INTERFACE_IPS<<<"$(echo "${AH_NETWORK_INTERFACES}" | awk ' BEGIN { RS = "," } { print $2 } ')"
 
 ah_subject_alternative_names() {
   ips="$(echo "${@}" | grep -o -P '(?<=-ips ).*?((?= -dns)|$)')"
@@ -80,7 +83,7 @@ ah_cert () {
     keytool ${gen_cmd} --help >/dev/null 2>&1 || gen_cmd='-genkey'
 
     # Get a formatted subject alternative names
-    sans="$(ah_subject_alternative_names -ips "${SAN_IPS[@]}" -dns `hostname`)"
+    sans="$(ah_subject_alternative_names -ips "${SAN_INTERFACE_IPS[@]}" "${SAN_IPS}" -dns `hostname` "${SAN_DNS}")"
 
     if [ ! -f "${file}" ]; then
       keytool ${gen_cmd} \
@@ -186,7 +189,7 @@ ah_cert_signed () {
     ah_cert ${dst_path} ${dst_name} ${cn}
 
     # Get a formatted subject alternative names
-    sans="$(ah_subject_alternative_names -ips "${SAN_IPS[@]}" -dns `hostname`)"
+    sans="$(ah_subject_alternative_names -ips "${SAN_INTERFACE_IPS[@]}" "${SAN_IPS}" -dns `hostname` "${SAN_DNS}")"
 
     keytool -export \
       -alias ${src_name} \
@@ -254,7 +257,7 @@ ah_cert_signed_system () {
     ah_cert ${path} ${name} "${name}.${AH_CLOUD_NAME}.${AH_OPERATOR}.arrowhead.eu" ${passwd}
 
     # Get a formatted subject alternative names
-    sans="$(ah_subject_alternative_names -ips "${SAN_IPS[@]}" ${ip} -dns ${host})"
+    sans="$(ah_subject_alternative_names -ips "${SAN_INTERFACE_IPS[@]}" "${SAN_IPS}" ${ip} -dns ${host} "${SAN_DNS}")"
 
     keytool -export \
       -alias ${AH_CLOUD_NAME} \
@@ -341,7 +344,7 @@ ah_ca_keystore () {
     ah_cert ${ca_sys_dir} ${ca_sys_name} "${ca_sys_name}.${AH_CLOUD_NAME}.${AH_OPERATOR}.arrowhead.eu" ${ca_password}
 
     # Get a formatted subject alternative names
-    sans="$(ah_subject_alternative_names -ips "${SAN_IPS[@]}" ${ip} -dns ${host})"
+    sans="$(ah_subject_alternative_names -ips "${SAN_INTERFACE_IPS[@]}" "${SAN_IPS}" ${ip} -dns ${host} "${SAN_DNS}")"
 
     # import cloud keypair
     # this is necessary, because CA signs system certificates with the cloud cert

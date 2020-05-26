@@ -1,17 +1,24 @@
-Template: arrowhead-core-common/systeminterface
+Template: arrowhead-core-common/generic_title
+Type: title
+Description: Configuring arrowhead-core-common
+
+Template: arrowhead-core-common/system_interface
 Type: select
 Choices: ${choices}
-Description: Select which ip is the network ip of this device
-
-Template: arrowhead-core-common/interfaces
-Type: multiselect
-Choices: ${choices}
-Description: Select which ip's should be used as SANs
+Description: Select the network interface ip address for inter-service communication
 
 Template: arrowhead-core-common/install_type
 Type: select
 Choices: Detached, Authorized
 Description: Do you want to perform (1) a detached, standalone install or (2) authorized install with externally issued cloud certificate?
+
+Template: arrowhead-core-common/detached_title
+Type: title
+Description: Configuring detached installation
+
+Template: arrowhead-core-common/authorized_title
+Type: title
+Description: Configuring authorized installation
 
 Template: arrowhead-core-common/cloud_cert
 Type: string
@@ -138,3 +145,20 @@ Description: Enter the hostname or IP address of the Service Registry (leave emp
 Template: arrowhead-core-common/domain_name
 Type: string
 Description: Enter the hostname or IP address on which local systems can access this machine (leave empty for auto-detected IP address)
+
+Template: arrowhead-core-common/subject_alternative_names
+Type: title
+Description: Subject Alternative Names
+
+Template: arrowhead-core-common/san_interfaces
+Type: multiselect
+Choices: ${choices}
+Description: Select zero or more network interface ips to be used as SANs
+
+Template: arrowhead-core-common/san_ips
+Type: string
+Description: A space-separated list of additional ip addresses to be used as SANs
+
+Template: arrowhead-core-common/san_dns
+Type: string
+Description: A space-separated list of domain names to be used as SANs

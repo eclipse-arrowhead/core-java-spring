@@ -10,14 +10,16 @@ else
   HOME="/root"
 fi
 
-# Set networkinterfaces choices
-INTERFACES="$(ip -o -4 addr show | awk ' { sub(/\/.*/, "", $4); print $2 " " $4 "," } ' | head -c -2)"
-db_subst arrowhead-core-common/systeminterface choices ${INTERFACES}
-db_subst arrowhead-core-common/interfaces choices ${INTERFACES}
+# Set interface title
+db_settitle arrowhead-core-common/generic_title
 
-# Get networkinterfaces
-db_input high arrowhead-core-common/systeminterface || true
-db_input high arrowhead-core-common/interfaces || true
+# Get list of network interfaces
+INTERFACES="$(ip -o -4 addr show | awk ' { sub(/\/.*/, "", $4); print $2 " " $4 "," } ' | head -c -2)"
+db_subst arrowhead-core-common/system_interface choices ${INTERFACES}
+db_subst arrowhead-core-common/san_interfaces choices ${INTERFACES}
+
+# Get system ip
+db_input high arrowhead-core-common/system_interface || true
 
 # Get installation type
 db_input high arrowhead-core-common/install_type || true
@@ -28,6 +30,8 @@ db_get arrowhead-core-common/install_type; INSTALL_TYPE="$RET"
 case ${INSTALL_TYPE} in
   "Authorized" )
     if [ ! -f ${AH_CLOUDS_DIR}/${AH_CLOUD_NAME}.p12 ]; then
+      db_settitle arrowhead-core-common/authorized_title
+
       # Set default path for cloud certificate
       db_get arrowhead-core-common/cloud_cert;
       if [ -z "$RET" ]; then
@@ -50,6 +54,8 @@ case ${INSTALL_TYPE} in
     ;;
 
   "Detached" )
+    db_settitle arrowhead-core-common/detached_title
+
     # User dialogs
     db_input high arrowhead-core-common/cloud_warning || true
     db_input high arrowhead-core-common/cloudname || true
@@ -62,12 +68,26 @@ case ${INSTALL_TYPE} in
     ;;
 esac
 
+# Run dialogs
+db_go || true
+
+db_settitle arrowhead-core-common/generic_title
+
 # Get certificate password
 if [ -z "${AH_PASS_CERT}" ]; then
   db_input high arrowhead-core-common/cert_password || true
 fi
 
 db_input high arrowhead-core-common/domain_name || true
+
+# Run dialogs
+db_go || true
+
+# Get SANS
+db_settitle arrowhead-core-common/subject_alternative_names
+db_input high arrowhead-core-common/san_interfaces || true
+db_input high arrowhead-core-common/san_ips || true
+db_input high arrowhead-core-common/san_dns || true
 
 # Run dialogs
 db_go || true
