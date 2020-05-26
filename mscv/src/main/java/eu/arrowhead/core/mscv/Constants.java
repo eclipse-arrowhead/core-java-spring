@@ -6,9 +6,11 @@ public class Constants {
 
 
     public static final String PARAMETER_NAME = "name";
+    public static final String PATH_NAME = "/" + PARAMETER_NAME;
     public static final String PARAMETER_NAME_PATH = "/{" + PARAMETER_NAME + "}";
 
     public static final String PARAMETER_TARGET_NAME = "target";
+    public static final String PATH_TARGET_NAME = "/" + PARAMETER_TARGET_NAME;
     public static final String PARAMETER_TARGET_NAME_PATH = "/{" + PARAMETER_TARGET_NAME + "}";
 
     public static final String PARAMETER_IDENTIFICATION = "identification";

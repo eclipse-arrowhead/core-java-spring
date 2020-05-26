@@ -47,6 +47,7 @@ import static eu.arrowhead.core.mscv.Constants.PARAMETER_TARGET_NAME;
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_TARGET_NAME_PATH;
 import static eu.arrowhead.core.mscv.Constants.PATH_LAYER;
 import static eu.arrowhead.core.mscv.Constants.PATH_OS;
+import static eu.arrowhead.core.mscv.Constants.PATH_TARGET_NAME;
 import static eu.arrowhead.core.mscv.MscvUtilities.notFoundException;
 
 @Api(tags = {CoreCommonConstants.SWAGGER_TAG_ALL, CoreCommonConstants.SWAGGER_TAG_MGMT, Constants.SWAGGER_TAG_VERIFICATION_MGMT})
@@ -60,13 +61,13 @@ public class VerificationMgmtController {
     private static final String VERIFICATION_URI = "/results";
 
     private static final String READ_VERIFICATION_URI = VERIFICATION_URI +
-            PARAMETER_TARGET_NAME + PARAMETER_TARGET_NAME_PATH +
+            PATH_TARGET_NAME + PARAMETER_TARGET_NAME_PATH +
             PATH_OS + PARAMETER_OS_PATH +
             PATH_LAYER + PARAMETER_LAYER_PATH;
     private static final String READ_VERIFICATION_DESCRIPTION = "Get the latest verification result";
 
     private static final String FIND_ALL_VERIFICATION_URI = VERIFICATION_URI +
-            PARAMETER_TARGET_NAME + PARAMETER_TARGET_NAME_PATH +
+            PATH_TARGET_NAME + PARAMETER_TARGET_NAME_PATH +
             PATH_OS + PARAMETER_OS_PATH;
     private static final String FIND_ALL_VERIFICATION_DESCRIPTION = "Get verification results";
 
