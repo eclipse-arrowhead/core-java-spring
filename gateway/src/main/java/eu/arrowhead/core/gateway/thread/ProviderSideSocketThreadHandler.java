@@ -248,7 +248,7 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 			
 			// if the message is chunked we don't use request counting
 			switch (isChunked) {
-			case CAN_BE: logger.debug("Invalid answer: CAN_BE");
+			case CAN_BE: logger.error("Invalid answer: CAN_BE");
 						 // break is intentionally left here
 			case YES: countRequests = false;
 					  break;

@@ -136,7 +136,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 				closeAndInterrupt();
 			} else {
 				final byte[] bytes = relayClient.getBytesFromMessage(message, providerGatewayPublicKey);
-				logger.debug("FROM PROVIDER:" + new String(bytes, StandardCharsets.UTF_8));
+				logger.debug("FROM PROVIDER:" + new String(bytes, StandardCharsets.ISO_8859_1));
 				outConsumer.write(bytes);
 			}
 		} catch (final JMSException | ArrowheadException | IOException ex) {
