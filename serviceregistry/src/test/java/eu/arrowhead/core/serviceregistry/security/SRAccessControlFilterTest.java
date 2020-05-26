@@ -188,6 +188,31 @@ public class SRAccessControlFilterTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void testRegisterServiceDefinitionAndCoreServiceDefinitonsCaseInsensitiveMatch() throws Exception {
+		final SystemRequestDTO systemDto = new SystemRequestDTO();
+		systemDto.setSystemName("client-demo-provider");
+		final ServiceRegistryRequestDTO dto = new ServiceRegistryRequestDTO();
+		dto.setProviderSystem(systemDto);
+		dto.setServiceDefinition(CoreSystemService.AUTH_TOKEN_GENERATION_SERVICE.getServiceDefinition());
+		
+		postRegister(dto, "certificates/provider.pem", status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRegisterServiceDefinitionAndCoreServiceDefinitonsNoMatch() throws Exception {
+		// Filter enables the service definiton but we use ill-formed input to make sure DB operation is never happened (without mocking it)
+		final SystemRequestDTO systemDto = new SystemRequestDTO();
+		systemDto.setSystemName("client-demo-provider");
+		final ServiceRegistryRequestDTO dto = new ServiceRegistryRequestDTO();
+		dto.setProviderSystem(systemDto);
+		dto.setServiceDefinition("test-service");
+		
+		postRegister(dto, "certificates/provider.pem", status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void testUnregisterWithNoSystemName() throws Exception {
 		// Filter breaks the filter chain and expects that the web service rejects the ill-formed request
 		deleteUnregister("", "certificates/provider.pem", status().isBadRequest());

@@ -37,13 +37,13 @@ import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.exception.UnavailableServerException;
-import eu.arrowhead.core.gateway.relay.ConsumerSideRelayInfo;
-import eu.arrowhead.core.gateway.relay.ControlRelayInfo;
-import eu.arrowhead.core.gateway.relay.GatewayRelayClient;
-import eu.arrowhead.core.gateway.relay.GatewayRelayClientFactory;
-import eu.arrowhead.core.gateway.relay.ProviderSideRelayInfo;
 import eu.arrowhead.core.gateway.thread.ConsumerSideServerSocketThread;
 import eu.arrowhead.core.gateway.thread.ProviderSideSocketThread;
+import eu.arrowhead.relay.gateway.ConsumerSideRelayInfo;
+import eu.arrowhead.relay.gateway.ControlRelayInfo;
+import eu.arrowhead.relay.gateway.GatewayRelayClient;
+import eu.arrowhead.relay.gateway.GatewayRelayClientFactory;
+import eu.arrowhead.relay.gateway.ProviderSideRelayInfo;
 
 @Component
 public class GatewayService {

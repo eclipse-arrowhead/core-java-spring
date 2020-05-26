@@ -21,6 +21,7 @@ import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 
+import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
@@ -30,8 +31,8 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.core.gateway.relay.GatewayRelayClient;
 import eu.arrowhead.core.gateway.service.ActiveSessionDTO;
+import eu.arrowhead.relay.gateway.GatewayRelayClient;
 
 public class ConsumerSideServerSocketThread extends Thread implements MessageListener {
 	
@@ -96,7 +97,21 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 		Assert.notNull(sender, "sender is null.");
 		
 		this.sender = sender;
-		this.initialized = true;
+		
+		try {
+			final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(sslProperties);
+			final SSLServerSocketFactory serverSocketFactory = sslContext.getServerSocketFactory();
+			sslServerSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(port);
+			sslServerSocket.setNeedClientAuth(true);
+			sslServerSocket.setSoTimeout(timeout);
+			this.initialized = true;
+		} catch (final Throwable ex) {
+			logger.debug("Problem occurs in initializing gateway communication: {}", ex.getMessage());
+			logger.debug("Stacktrace:", ex);
+			close();
+			
+			throw new ArrowheadException("Problem occurs in initializing gateway communication: " + ex.getMessage(), HttpStatus.SC_BAD_GATEWAY, ex);
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -147,12 +162,6 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 		}
 
 		try {
-			final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(sslProperties);
-			final SSLServerSocketFactory serverSocketFactory = sslContext.getServerSocketFactory();
-			sslServerSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(port);
-			sslServerSocket.setNeedClientAuth(true);
-			sslServerSocket.setSoTimeout(timeout);
-			
 			sslConsumerSocket = (SSLSocket) sslServerSocket.accept();
 			final InputStream inConsumer = sslConsumerSocket.getInputStream();
 			outConsumer = sslConsumerSocket.getOutputStream();

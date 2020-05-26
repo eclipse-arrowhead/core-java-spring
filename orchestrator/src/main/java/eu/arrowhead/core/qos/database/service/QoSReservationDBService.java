@@ -60,6 +60,11 @@ public class QoSReservationDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public List<QoSReservation> getAllReservation() {
+		return qosReservationRepository.findAll();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public List<QoSReservation> getAllReservationsExceptMine(final String systemName, final String address, final int port) {
 		logger.debug("getAllReservationsExceptMine started ...");
 		
@@ -164,7 +169,7 @@ public class QoSReservationDBService {
 		int seconds = maxReservationDuration;
 		if (dto.getMetadata() != null && dto.getMetadata().containsKey(OrchestratorDriver.KEY_CALCULATED_SERVICE_TIME_FRAME)) {
 			try {
-				final String calculatedTimeFrameStr = dto.getMetadata().remove(OrchestratorDriver.KEY_CALCULATED_SERVICE_TIME_FRAME);
+				final String calculatedTimeFrameStr = dto.getMetadata().get(OrchestratorDriver.KEY_CALCULATED_SERVICE_TIME_FRAME);
 				final int calculatedTimeFrame = Integer.parseInt(calculatedTimeFrameStr);
 				seconds = Math.min(maxReservationDuration, calculatedTimeFrame);
 			} catch (final NumberFormatException ex) {

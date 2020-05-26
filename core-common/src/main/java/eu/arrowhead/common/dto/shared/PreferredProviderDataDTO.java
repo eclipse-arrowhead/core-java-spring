@@ -48,4 +48,44 @@ public class PreferredProviderDataDTO implements Serializable {
 	public String toString() {
 	  return "PreferredProvider{" + "providerSystem=" + providerSystem + ", providerCloud=" + providerCloud + '}';
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((providerCloud == null) ? 0 : providerCloud.hashCode());
+		result = prime * result + ((providerSystem == null) ? 0 : providerSystem.hashCode());
+		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		PreferredProviderDataDTO other = (PreferredProviderDataDTO) obj;
+		if (providerCloud == null) {
+			if (other.providerCloud != null) {
+				return false;
+			}
+		} else if (!providerCloud.equals(other.providerCloud)) {
+			return false;
+		}
+		if (providerSystem == null) {
+			if (other.providerSystem != null) {
+				return false;
+			}
+		} else if (!providerSystem.equals(other.providerSystem)) {
+			return false;
+		}
+		return true;
+	}	
 }

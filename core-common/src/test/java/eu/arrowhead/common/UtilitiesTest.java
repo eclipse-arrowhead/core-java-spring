@@ -287,23 +287,23 @@ public class UtilitiesTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
-	public void testGetFirstCertFromKeyStoreNullKeyStore() throws KeyStoreException {
-		Utilities.getFirstCertFromKeyStore(null);
+	public void testGetSystemCertFromKeyStoreNullKeyStore() throws KeyStoreException {
+		Utilities.getSystemCertFromKeyStore(null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ServiceConfigurationError.class)
-	public void testGetFirstCertFromKeyStoreNotInitializedKeyStore() throws KeyStoreException {
+	public void testGetSystemCertFromKeyStoreNotInitializedKeyStore() throws KeyStoreException {
 		final KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-		Utilities.getFirstCertFromKeyStore(keystore);
+		Utilities.getSystemCertFromKeyStore(keystore);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ServiceConfigurationError.class)
-	public void testGetFirstCertFromKeyStoreEmptyKeyStore() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+	public void testGetSystemCertFromKeyStoreEmptyKeyStore() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 		final KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
 		keystore.load(null, null);
-		Utilities.getFirstCertFromKeyStore(keystore);
+		Utilities.getSystemCertFromKeyStore(keystore);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

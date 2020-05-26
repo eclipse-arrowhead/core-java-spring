@@ -39,6 +39,10 @@ public class RandomICNProviderMatchmaker implements ICNProviderMatchmakingAlgori
 		}
 		
 		if (params.getPreferredLocalProviders().isEmpty()) {
+			if (params.isOnlyPreferred()) {
+				return null;
+			}
+			
 			logger.debug("No preferred provider is specified, a random one in the OR list is selected.");
 			return orList.get(rng.nextInt(orList.size()));
 		}

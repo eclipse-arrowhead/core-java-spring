@@ -82,14 +82,42 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 	       * [Client](#ca_endpoints_client)
            * [Private](#ca_endpoints_private)
            * [Management](#ca_endpoints_mgmt)
-	8. [QoS Monitor (Quality of Service Monitor)](#qos_monitor)
-       * [System Design Description Overview](#qos_monitor_sdd)
-       * [Services and Use Cases](#qos_monitor_usecases)  
-       * [Endpoints](#qos_monitor_endpoints)
-	       * [Client](#qos_monitor_endpoints_client)
-           * [Private](#qos_monitor_endpoints_private)
-           * [Management](#qos_monitor_endpoints_mgmt)
-	
+    8. **QoS Monitor (Quality of Service Monitor)**
+       * [System Design Description Overview](qos-monitor/documentation/QualityOfServiceMonitor-SysDD.md)
+           * [Services and Use Cases](qos-monitor/documentation/QualityOfServiceMonitor-SysDD.md#services-and-use-cases)  
+       * [Interface Design Description](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md)
+           * [Security](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#security)
+           * [Communication Profile](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#communication-profile)
+               * [Client](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#client-endpoint-description)
+               * [Private](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#private-endpoint-description)
+               * [Management](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#management-endpoint-description)	 
+    9. [Onboarding Controller](#onboardingcontroller)
+       * [System Design Description Overview](#onboardingcontroller_sdd)
+       * [Services and Use Cases](#onboardingcontroller_usecases)
+       * [Security](#onboardingcontroller_security)
+       * [Endpoints](#onboardingcontroller_endpoints)
+           * [Onboarding](#onboardingcontroller_endpoints_onboarding)
+    10. [Device Registry](#deviceregistry)
+        * [System Design Description Overview](#deviceregistry_sdd)
+        * [Services and Use Cases](#deviceregistry_usecases)
+        * [Security](#deviceregistry_security)
+        * [Endpoints](#deviceregistry_endpoints)
+           * [Onboarding](#deviceregistry_endpoints_onboarding)
+           * [Client](#deviceregistry_endpoints_client)
+    11. [System Registry](#systemregistry)
+        * [System Design Description Overview](#systemregistry_sdd)
+        * [Services and Use Cases](#systemregistry_usecases)
+        * [Security](#systemregistry_security)
+        * [Endpoints](#systemregistry_endpoints)
+           * [Onboarding](#systemregistry_endpoints_onboarding)
+           * [Client](#systemregistry_endpoints_client)
+	12. [Choreographer](#choreographer)
+        * [System Design Description Overview](#choreographer_sdd)
+        * [Services and Use Cases](#choreographer_usecases)  
+        * [Endpoints](#choreographer_endpoints)
+	       * [Client](#choreographer_endpoints_client)
+           * [Management](#choreographer_endpoints_mgmt)
+
 <a name="quickstart" />
 
 ## Quick Start Guide
@@ -6403,284 +6431,1207 @@ __Sign CSR with the Cloud Certificate__ output :
 
 The Certificate Authority does not have management endpoints.
 
-<a name="qos_monitor" />
-
-# QOS MONITOR (QUALITY OF SERVICE MONITOR)
-
-<a name="qos_monitor_sdd" />
+<a name="choreographer" />
+ 
+# Choreographer
+ 
+<a name="choreographer_sdd" />
 
 ## System Design Description Overview
 
-The purpose of QoS Monitor supporting core system is providing QoS (Quality of Service) measurements to the QoS Manager (which is part of the Orchestrator core system).
+This supporting core system makes it possible to execute pre-defined workflows through orchestration and service consumption.
 
-![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `AH Service Registry`
-![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `AH Authorization` 
-![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `AH Orchestrator / QoS Manager`
-![#ffcc44](https://placehold.it/15/a33c00/000000?text=+) `AH QoS Monitor`
-![Alt text](/documentation/qos_monitor/sdd/overview.png)
+Each workflow can be divided into three segments:
+* Plans,
+* Actions,
+* and Steps.
 
-<a name="qos_monitor_sysd" />
+_Plans_ define the whole workflow by name and they contain _Actions_ which group coherent _Steps_ together for greater transparency and enabling sequentialization of these _Step_ groups.
 
-## System Design Overview
-![Alt text](/documentation/qos_monitor/sysd/qos_monitor_sys_d.jpg)
+Workflow execution in this generation can only be accomplished if the requested providers in each _Step_ are all available (they are registered with the same name in the service registry as in the plan description) and the requested services call back (notify) to the Choreographer through the Choreography service that the execution on their end is done. Only this way can the Choreographer continue the execution of the _Plan_.
 
-<a name="qos_monitor_provided_services" />
+<a name="choreographer_usecases" />
 
-## Provided services
+## Services and Use Cases
 
-The QoS Monitor provides the following services:
-* [Echo](#qos_monitor_endpoints_get_echo)
-* [Ping Measurement](#qos_monitor_endpoints_ping_measurement_by_system_id)
+This Supporting Core System provides the Choreographer Service which only has one use-case scenario: notifying the Choreographer from the providers' side that the executed _Step_ is done.
 
-<a name="qos_monitor_consumed_services" />
-
-## Consumed services
-
-The QoS Monitor consumes the following service:
-* QueryAll private service from the ServiceRegistry core system
-
-<a name="qos_monitor_usecases" />
-
-## Use cases
-
-The QoS Monitor has the following use cases:
-* [Ping Measurement](documentation/qos_monitor/use_cases/QoSMonitor_use_case_1.md)
-![Alt text](/documentation/qos_monitor/use_cases/PingMeasurement.png)
-* [Reset Counter](documentation/qos_monitor/use_cases/QoSMonitor_use_case_2.md)
-![Alt text](/documentation/qos_monitor/use_cases/Reset_Counter.png)
-* [Get Measurements](documentation/qos_monitor/use_cases/QoSMonitor_use_case_3.md)
-![Alt text](/documentation/qos_monitor/use_cases/GetMeaurements.png)
-
-<a name="qos_monitor_endpoints" />
+<a name="choreographer_endpoints" />
 
 ## Endpoints
 
-<a name="qos_monitor_endpoints_client" />
+The Choreographer offers two types of endpoints: Client and Management.
+
+Swagger API documentation is available on: `https://<host>:<port>` <br />
+The base URL for the requests: `http://<host>:<port>/choreographer`
+
+<a name="choreographer_endpoints_client" />
 
 ### Client endpoint description<br />
 
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
-| [Echo](#qos_monitor_endpoints_get_echo) | /echo | GET    | -    | OK     |
+| [Echo](#choreographer_endpoints_get_echo) | /echo | GET | - | OK |
+| [Notify that a step is done](#choreographer_endpoints_post_nofity) | /notifyStepDone | POST | [SessionRunningStepData](#datastructures_choreographer_session_running_step_data) | OK |
 
-<a name="qos_monitor_endpoints_mgmt" />
+<a name="choreographer_endpoints_mgmt" />
 
-### Management endpoint description<br />
+###  Management endpoint description<br />
 
-| Function | URL subpath | Method | Input | Output |
-| -------- | ----------- | ------ | ----- | ------ |
-| [Get ping measurements mgmt](#qos_monitor_endpoints_get_ping_measurements_list) | /mgmt/ping/measurements | GET | direction && item_per_page && page && sort_field | [PingMeasurement list response](#qos_monitor_ping_measurement_list_response) |
-| [Get ping measurements by system id mgmt](#qos_monitor_mgmt_endpoints_get_ping_measurement_by_system_id) | /mgmt/ping/measurements/{id} | GET | id | [Ping Measurment response](#qos_monitor_ping_measurement_response) |
-
-<a name="qos_monitor_endpoints_private" />
-
-### Private endpoint description<br />
+These endpoints are mainly used by the Management Tool and Cloud Administrators.
 
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
-| [Get ping measurements by system id](#qos_monitor_endpoints_get_ping_measurement_by_system_id) | /ping/measurements/{id} | GET | id | [Ping Measurment response](#qos_monitor_ping_measurement_response) |
+| [Get all plan entries](#choreographer_endpoints_get_mgmt_plan) | /mgmt/plan | GET | - | [ChoreographerPlanEntryList](#datastructures_choreographerplanentrylist) |
+| [Add a plan entry](#choreographer_endpoints_post_mgmt_plan) | /mgmt/plan | POST | [ChoreographerPlanEntry](#datastructures_choreographer_addplanentry) | CREATED |
+| [Get a plan entry by ID](#choreographer_endpoints_get_mgmt_plan_id) | /mgmt/plan/{id} | GET | ChoreographerPlanID | [ChoreographerPlanEntry](#datastructures_choreographerplanentry)
+| [Delete a plan entry by ID](#choreographer_endpoints_delete_plan_id) | /mgmt/plan/{id} | DELETE | ChoreographerPlanID | NO CONTENT |
+| [Start one or more sessions executing a plan](#choreographer_endpoints_start_session_id) | /mgmt/session/start | POST | [ChoreographerPlanIDList](#datastructures_choreographerplanidlist) | CREATED |
+| [Change a running step to finished](#choreographer_endpoints_post_stepfinished) | /mgmt/session/stepFinished | POST | [SessionRunningStepData](#datastructures_choreographer_session_running_step_data_mgmt) | OK |
 
-<a name="qos_monitor_endpoints_get_echo" />
 
-### Echo 
+<a name="choreographer_endpoints_get_echo" />
+
+### Echo
 ```
-GET /qos_monitor/echo
+GET /choreographer/echo
 ```
 
 Returns a "Got it" message with the purpose of testing the core service availability.
 
-### Get ping measurements mgmt
+<a name="choreographer_endpoints_post_nofity" />
 
+### Notify that a step is done
 ```
-GET /mgmt/ping/measurements
+POST /choreographer/notifyStepDone
 ```
 
-__Get subscriptions query parameters__ the input :
+Returns HTTP 200 - OK if the notification of the Choreographer is successful.
 
-`https://qos_monitor_ip:qos_monitor_port/qos_monitor/mgmt/ping/measurements?dirction=`ASC`&item_per_page=`100`&page=`0`&sort_field=`id
+<a name="datastructures_choreographer_session_running_step_data" />
 
-| __Get ping measurements mgmt__  query parameters |
-| ------------------------------------------------------- |
-
-| Parameter | Description | Necessity | Format/Limitations |
-| --------- | ----------- | --------- | ----------- |
-| `direction` |  Direction of sorting. | optional | valid values: "ASC", "DESC" - default: "ASC"|
-| `item_per_page` | Maximum number of items returned. | optional (mandatory, if page is defined)| integer |
-| `page` | Zero based page index. | optional (mandatory, if item_per_page is defined)| integer |
-| `sort_field` | The field to sort the results by. | optional | valid values: "id", "updatedAt", "createdAt" - default: "id" |
-
-<a name="qos_monitor_ping_measurement_list_response" />
-
-__PingMeasurement list response__ the output :
-
+__SessionRunningStepData__ is the input
 ```json
 {
-	"data": [
-		{
-			"id": 1,
-			"measurement": {
-				"id": 1,
-				"system": {
-					"id": 5,
-					"systemName": "testsystem",
-					"address": "testsystem.ai",
-					"port": 12345,
-					"createdAt": "2020-02-04 09:38:56",
-					"updatedAt": "2020-02-04 09:38:56"
-				},
-				"measurementType": "PING",
-				"lastMeasurementAt": "2020-02-14T10:48:10+01:00",
-				"createdAt": "2020-02-04T10:42:04+01:00",
-				"updatedAt": "2020-02-14T10:48:47+01:00"
-			},
-			"available": true,
-			"lastAccessAt": "2020-02-14T10:48:10+01:00",
-			"minResponseTime": 15,
-			"maxResponseTime": 26,
-			"meanResponseTimeWithTimeout": 18,
-			"meanResponseTimeWithoutTimeout": 18,
-			"jitterWithTimeout": 3,
-			"jitterWithoutTimeout": 3,
-			"lostPerMeasurementPercent": 0,
-			"sent": 12075,
-			"received": 12070,
-			"countStartedAt": "2020-02-07T00:00:00+01:00",
-			"sentAll": 63175,
-			"receivedAll": 56721,
-			"createdAt": "2020-02-14T10:48:47+01:00",
-			"updatedAt": "2020-02-14T10:48:47+01:00"
-		}
-	],
-	"count": 1
+  "runningStepId": 0,
+  "sessionId": 0
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `runningStepId` | The id of the running step which the provider gets from the Choreographer | yes |
+| `sessionId` | The id of the session in which the step is running | yes |
+
+<a name="choreographer_endpoints_get_mgmt_plan" />
+
+### Get all plan entries
+```
+GET /choreographer/mgmt/plan
+```
+
+Returns a list of Choreographer Plan records. If `page` and `item_per_page` are not defined, returns all records.
+
+Query params:
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `page` | zero based page index | no |
+| `item_per_page` | maximum number of items returned | no |
+| `sort_field` | sorts by the given column | no |
+| `direction` | direction of sorting | no |
+
+> **Note:** Default value for `sort_field` is `id`. All possible values are: 
+> * `id`
+> * `createdAt`
+> * `updatedAt`
+> * `name`
+
+> **Note:** Default value for `direction` is `ASC`. All possible values are:
+> * `ASC`
+> * `DESC` 
+
+<a name="datastructures_choreographerplanentrylist" />
+
+Returns a __ChoreographerPlanEntryList__
+```json
+[
+  { 
+    "id": 0,
+    "name": "string",
+    "firstActionName": "string",
+    "createdAt": "string", 
+    "updatedAt": "string",
+    "actions": [
+      {
+	"id": 0,
+        "name": "string",
+        "createdAt": "string",
+	"updatedAt": "string",
+        "firstStepNames": [
+          "string"
+        ],
+        "nextActionName": "string",
+        "steps": [
+          {
+	    "id": 0,
+	    "name": "string",
+	    "serviceName": "string",
+            "metadata": "string",
+	    "parameters": "string",
+            "quantity": 0,
+	    "createdAt": "string",
+            "updatedAt": "string",
+            "nextSteps": [
+              {
+                "id": 0,
+                "stepName": "string"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of the PlanEntry |
+| `name` | Name of the PlanEntry |
+| `firstActionName` | Name of the First Action |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+| `actions` | Array of the [ActionEntries](#datasturctures_choreographer_actionentry) in a Plan |
+
+<a name="datasturctures_choreographer_actionentry" />
+
+Contains a list of __ActionEntires__.
+```json
+{
+  "id": 0,
+  "name": "string",
+  "createdAt": "string",
+  "updatedAt": "string",
+  "firstStepNames": [
+    "string"
+  ],
+  "nextActionName": "string",
+  "steps": [
+    {
+      "id": 0,
+      "name": "string",
+      "serviceName": "string",
+      "metadata": "string",
+      "parameters": "string",
+      "quantity": 0,
+      "createdAt": "string",
+      "updatedAt": "string",
+      "nextSteps": [
+        {
+          "id": 0,
+          "stepName": "string"
+        }
+      ]
+    }
+  ]
 }
 ```
 
 | Field | Description |
 | ----- | ----------- |
-| `count` | Number of record found |
-| `data` | Array of data |
-| `id` | ID of the ping measurement |
-| `measurement.id` | ID of the measurement |
-| `measurement.system.id` | ID of the measured system |
-| `measurement.system.systemName` | Name of the measured system |
-| `measurement.system.address` | Address of the measured system |
-| `measurement.system.port` | Port of the measured system |
-| `measurement.system.createdAt` | Date of creation of the measured system |
-| `measurement.system.updatedAt` | Date of update of the measured system |
-| `measurement.measurementType` | Type of the measurement |
-| `measurement.lastMeasurementAt` | Time of the last measurement |
-| `measurement.createdAt` | Date of creation of the measurement |
-| `measurement.updatedAt` | Date of update of the measurement |
-| `available` | Boolean value of the systems calculated availability|
-| `lastAccessAt` | TimeStamp value of the systems last known availability|
-| `minResponseTime` | Integer value of milliseconds of the fastest returned ping|
-| `maxResponseTime` | Integer value of milliseconds of the slowest returned ping|
-| `meanResponseTimeWithTimeout` | Integer value of milliseconds of the calculated average of pings including timeouts|
-| `meanResponseTimeWithoutTimeout` | Integer value of milliseconds of the calculated average of pings not including timeouts|
-| `jitterWithTimeout` | Integer value of milliseconds of the calculated standard deviation of pings including timeouts|
-| `jitterWithoutTimeout` | Integer value of milliseconds of the calculated standard deviation of pings not including timeouts|
-| `lostPerMeasurementPercent` | Integer value of calculated lost ping percentage|
-| `sent` | Integer value of sent pings in measurement|
-| `received` | Integer value of received pings in measurement|
-| `countStartedAt` | TimeSatmp value of the last reset of sent and received fields|
-| `sentAll` | Integer value of sent pings since ping measurement created|
-| `receivedAll` | Integer value of received pings since ping measurement created|
-| `createdAt` | Date of creation of the ping measurement |
-| `updatedAt` | Date of update of the ping measurement |
+| `id` | ID of an Action entry |
+| `name` | Name of an Action entry |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+| `firstStepNames` | The names of the first steps within this Action |
+| `nextActionName` | The name of the Action which follows the current Action |
+| `steps` | Array of [StepEntries](#datasturctures_choreographer_stepentry) in an Action |
 
-<a name="qos_monitor_mgmt_endpoints_get_ping_measurement_by_system_id" />
+<a name="datasturctures_choreographer_stepentry" />
 
-### Get ping measurements by system id mgmt
-
-```
-GET /mgmt/ping/measurements/{id}
-```
-
-__Get ping measurements by system id mgmt path parameter__ the input :
-
-`https://qos_monitor_ip:qos_monitor_port/qos_monitor/mgmt/ping/measurements/`1
-
-| __Get ping measurement by system id__ path parameter |
-| ------------------------------------------------------- |
-
-| Parameter | Description | Necessity | Format/Limitations |
-| --------- | ----------- | --------- | ----------- |
-| `id` |  Id of measured system | mandatory | integer |
-
-<a name="qos_monitor_ping_measurement_response" />
-
-__Ping Measurment response by system id__ the output :
+Contains a list of __StepEntries__.
 
 ```json
 {
-	"id": 1,
-	"measurement": {
-		"id": 1,
-		"system": {
-			"id": 5,
-			"systemName": "testsystem",
-			"address": "testsystem.ai",
-			"port": 12345,
-			"createdAt": "2020-02-04 09:38:56",
-			"updatedAt": "2020-02-04 09:38:56"
-		},
-		"measurementType": "PING",
-		"lastMeasurementAt": "2020-02-14T10:48:10+01:00",
-		"createdAt": "2020-02-04T10:42:04+01:00",
-		"updatedAt": "2020-02-14T10:48:47+01:00"
-	},
-	"available": true,
-	"lastAccessAt": "2020-02-14T10:48:10+01:00",
-	"minResponseTime": 15,
-	"maxResponseTime": 26,
-	"meanResponseTimeWithTimeout": 18,
-	"meanResponseTimeWithoutTimeout": 18,
-	"jitterWithTimeout": 3,
-	"jitterWithoutTimeout": 3,
-	"lostPerMeasurementPercent": 0,
-	"sent": 12075,
-	"received": 12070,
-	"countStartedAt": "2020-02-07T00:00:00+01:00",
-	"sentAll": 63175,
-	"receivedAll": 56721,
-	"createdAt": "2020-02-14T10:48:47+01:00",
-	"updatedAt": "2020-02-14T10:48:47+01:00"
+  "id": 0,
+  "name": "string",
+  "serviceName": "string",
+  "metadata": "string",
+  "parameters": "string",
+  "quantity": 0,
+  "createdAt": "string",
+  "updatedAt": "string",
+  "nextSteps": [
+    {
+      "id": 0,
+      "stepName": "string"
+    }
+  ]
 }
 ```
 
 | Field | Description |
 | ----- | ----------- |
-| `id` | ID of the ping measurement |
-| `measurement.id` | ID of the measurement |
-| `measurement.system.id` | ID of the measured system |
-| `measurement.system.systemName` | Name of the measured system |
-| `measurement.system.address` | Address of the measured system |
-| `measurement.system.port` | Port of the measured system |
-| `measurement.system.createdAt` | Date of creation of the measured system |
-| `measurement.system.updatedAt` | Date of update of the measured system |
-| `measurement.measurementType` | Type of the measurement |
-| `measurement.lastMeasurementAt` | Time of the last measurement |
-| `measurement.createdAt` | Date of creation of the measurement |
-| `measurement.updatedAt` | Date of update of the measurement |
-| `available` | Boolean value of the systems calculated availability|
-| `lastAccessAt` | TimeStamp value of the systems last known availability|
-| `minResponseTime` | Integer value of milliseconds of the fastest returned ping|
-| `maxResponseTime` | Integer value of milliseconds of the slowest returned ping|
-| `meanResponseTimeWithTimeout` | Integer value of milliseconds of the calculated average of pings including timeouts|
-| `meanResponseTimeWithoutTimeout` | Integer value of milliseconds of the calculated average of pings not including timeouts|
-| `jitterWithTimeout` | Integer value of milliseconds of the calculated standard deviation of pings including timeouts|
-| `jitterWithoutTimeout` | Integer value of milliseconds of the calculated standard deviation of pings not including timeouts|
-| `lostPerMeasurementPercent` | Integer value of calculated lost ping percentage|
-| `sent` | Integer value of sent pings in measurement|
-| `received` | Integer value of received pings in measurement|
-| `countStartedAt` | TimeSatmp value of the last reset of sent and received fields|
-| `sentAll` | Integer value of sent pings since ping measurement created|
-| `receivedAll` | Integer value of received pings since ping measurement created|
-| `createdAt` | Date of creation of the ping measurement |
-| `updatedAt` | Date of update of the ping measurement |
+| `id` | ID of a Step entry |
+| `name` | Name of a Step entry |
+| `serviceName` | Name of the service which the step uses |
+| `metadata` | Additional metadata needed for step execution |
+| `parameters` | Parameters needed by the device to run this step |
+| `quantity` |  How many times should the step run in its current position |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+| `nextSteps` | Array of next steps following the Step entry |
 
-<a name="qos_monitor_endpoints_get_ping_measurement_by_system_id" />
+> **Note:**  In the current version the `parameters`, the `metadata` and the `quantity` fields cannot be used when executing plans. These will be implemented in future versions.
 
-### Get ping measurements by system id 
+<a name="choreographer_endpoints_post_mgmt_plan" />
 
-For private endpoints no detailed description available.
+### Add a plan entry
+```
+POST choreographer/mgmt/plan
+```
+
+Creates a plan record and returns HTTP 201 - CREATED if the entry creation is successful or the proper error message if the entry creation failed.
+
+<a name="datastructures_choreographer_addplanentry" />
+
+__ChoreographerPlanEntry__ is the input
+```json
+{
+  "actions": [
+    {
+      "firstStepNames": [
+        "string"
+      ],
+      "name": "string",
+      "nextActionName": "string",
+      "steps": [
+        {
+          "metadata": "string",
+          "name": "string",
+          "nextStepNames": [
+            "string"
+          ],
+          "parameters": "string",
+          "quantity": 0,
+          "serviceName": "string"
+        }
+      ]
+    }
+  ],
+  "firstActionName": "string",
+  "name": "string"
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `name` | Name of the PlanEntry | yes |
+| `firstActionName` | Name of the First Action | yes |
+| `actions` | Array of the [ActionEntries](#datasturctures_choreographer_actionentry) in a Plan | yes |
+
+<a name="choreographer_endpoints_get_mgmt_plan_id" />
+
+### Get a plan entry by ID
+```
+GET /choreographer/mgmt/plan/{id}
+```
+
+Returns the Choreographer Plan Entry specified by the ID path parameter.
+
+<a name="datastructures_choreographerplanentry" />
+
+Returns a ChoreographerPlanEntry
+```json
+{
+  "actions": [
+    {
+      "createdAt": "string",
+      "firstStepNames": [
+        "string"
+      ],
+      "id": 0,
+      "name": "string",
+      "nextActionName": "string",
+      "steps": [
+        {
+          "createdAt": "string",
+          "id": 0,
+          "metadata": "string",
+          "name": "string",
+          "nextSteps": [
+            {
+              "id": 0,
+              "stepName": "string"
+            }
+          ],
+          "parameters": "string",
+          "quantity": 0,
+          "serviceName": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "updatedAt": "string"
+    }
+  ],
+  "createdAt": "string",
+  "firstActionName": "string",
+  "id": 0,
+  "name": "string",
+  "updatedAt": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of the PlanEntry |
+| `name` | Name of the PlanEntry |
+| `firstActionName` | Name of the First Action |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+| `actions` | Array of the [ActionEntries](#datasturctures_choreographer_actionentry) in a Plan |
+
+<a name="choreographer_endpoints_delete_plan_id" />
+
+### Delete a plan entry by id
+```
+DELETE /choreographer/plan/{id}
+```
+
+Remove the Choreographer Plan record specified by the id path parameter.
+
+<a name="choreographer_endpoints_start_session_id" />
+
+### Start one or more sessions executing a plan
+```
+POST /choreographer/mgmt/session/start
+```
+
+Starts one or more plans in sessions.
+
+<a name="datastructures_choreographerplanidlist" />
+
+ChoreographerPlanIDList is the input
+```json
+[
+  {
+    "id": 0
+  }
+]
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| id | ID of a plan to be executed | yes |
+
+<a name="choreographer_endpoints_post_stepfinished" />
+
+### Change a running step to finished
+```
+POST /choreographer/mgmt/session/stepFinished
+```
+
+Returns HTTP 200 - OK if the notification of the Choreographer is successful.
+
+<a name="datastructures_choreographer_session_running_step_data_mgmt" />
+
+__SessionRunningStepData__ is the input
+```json
+{
+  "runningStepId": 0,
+  "sessionId": 0
+}
+```
+
+
+# Onboarding Controller
+<a name="onboardingcontroller" /><br /
+
+## System Design Description Overview
+<a name="onboardingcontroller_sdd" /><br />
+
+The purpose of this System is to be the entry board for the onboarding procedure. The onboarding controller sits at the edge of the Arrowhead local cloud. 
+It is not only reachable from within the cloud by authorized systems, but also from the public through its "accept all" interfaces. 
+Any client may authenticate itself through an Arrowhead certificate, through an authorized manufacturer certificate, or simply through a shared secret.
+
+![onboarding_controller](./documentation/onboarding/onboarding_controller.png)
+
+## Services and Use Cases
+<a name="onboardingcontroller_usecases" />
+
+The only use case is the onboarding procedure. 
+
+The onboarding procedure is needed when a new device produced by any vendor (e.g. Siemens, Infineon, Bosch, etc.), containing a security controller (e.g. TPM), 
+wants to interact with the Arrowhead local cloud. To assure that the cloud is not compromised upon the arrival of this new device, it is important to establish 
+a chain of trust from the new hardware device, to its hosted application systems and their services. Thus, the onboarding procedure makes possible that 
+the device, systems and services are authenticated and authorized to connect to the Arrowhead local cloud.
+
+The use cases in which the external actor interacts with the Arrowhead local cloud during onboarding include:
+* Initialize Device Onboarding (via the Onboarding Controller system)
+* Register a Device in the DeviceRegistry (via the DeviceRegistry system)
+* Register a System in the SystemRegistry (via the SystemRegistry system)
+* Register a Service in the ServiceRegistry (via the ServiceRegistry system)
+* Start normal operation (e.g., service lookup, service consumption, etc.)
+
+The onboarding controller can either relay a ![PKCS #10 Certificate Signing Request](https://tools.ietf.org/html/rfc2986) or generate one on behalf of the client.
+
+
+## Security
+<a name="onboardingcontroller_security" />
+
+This System can be secured via the HTTPS protocol. If it is started in secure mode, it verifies whether the Application System 
+- possesses a proper X.509 identity certificate and whether that certificate is Arrowhead compliant
+- possesses a proper X.509 identity certificate and whether that certificate is trusted by the CA
+- provides a shared secret through ![HTTP Basic Authentication](https://tools.ietf.org/html/rfc7617)
+
+## Endpoints
+<a name="onboardingcontroller_endpoints" />
+
+The Onboarding Controller offers two types of authentication (certificate or HTTP Basic) and two types operation (provide CSR or generate CSR), thus having four different endpoint. 
+No management or private endpoint exists.
+
+Swagger API documentation is available on: `https://<host>:<port>` <br />
+The base URL for the requests: `https://<host>:<port>/onboarding`
+
+The general scheme of the URLs is `https://<host>:<port>/onboarding/<authentication_type>/<operation_type>`
+
+### Client endpoint description<br />
+<a name="onboardingcontroller_endpoints" />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#onboardingcontroller_endpoints_get_echo)     | /echo       | GET    | -     | OK     |
+| [Onboard with Name](#onboardingcontroller_endpoints_name) | /certificate/name   | POST   | [OnboardingWithNameRequest](#datastructures_onboarding_name_request) | [OnboardingWithNameResponse](#datastructures_onboarding_name_response) |
+| [Onboard with Name](#onboardingcontroller_endpoints_name) | /sharedsecret/name | POST   | [OnboardingWithNameRequest](#datastructures_onboarding_name_request) | [OnboardingWithNameResponse](#datastructures_onboarding_name_response) |
+| [Onboard with CSR](#onboardingcontroller_endpoints_csr)    | /certificate/csr      | POST   | [OnboardingWithCsrRequest](#datastructures_onboarding_csr_request) | [OnboardingWithCsrResponse](#datastructures_onboarding_csr_response) |
+| [Onboard with CSR](#onboardingcontroller_endpoints_csr)    | /sharedsecret/csr      | POST   | [OnboardingWithCsrRequest](#datastructures_onboarding_csr_request) | [OnboardingWithCsrResponse](#datastructures_onboarding_csr_response) |
+
+           
+### Onboard with Name
+<a name="onboardingcontroller_endpoints_name" />
+
+```
+POST /certificate/name
+POST /sharedsecret/name
+```                       
+
+Creates a CSR on behalf of the client and eventually returns an onboarding certificate which may be used in the next step of the onboarding controller.
+
+#### Request
+<a name="datastructures_onboarding_name_request" />
+
+```json
+{
+  "creationRequestDTO": {
+    "commonName": "string",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  }
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `commonName` | The common name field for the new certificate |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys | 
+| `privateKey` | Base64 encoded private key |
+| `publicKey` | Base64 encoded public key |
+
+#### Response
+<a name="datastructures_onboarding_name_response" />
+
+```json
+{
+  "rootCertificate": "string",
+  "intermediateCertificate": "string",
+  "onboardingCertificate": {
+    "certificate": "string",
+    "certificateFormat": "string",
+    "certificateType": "AH_ONBOARDING",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  },
+  "deviceRegistry": {
+    "service": "DEVICE_REGISTRY_ONBOARDING_WITH_NAME_SERVICE",
+    "uri": "string"
+  },
+  "systemRegistry": {
+    "service": "SYSTEM_REGISTRY_ONBOARDING_WITH_NAME_SERVICE",
+    "uri": "string"
+  },
+  "serviceRegistry": {
+    "service": "SERVICE_REGISTRY_REGISTER_SERVICE",
+        "uri": "string"
+  },
+  "orchestrationService": {
+    "service": "ORCHESTRATION_SERVICE",
+    "uri": "string"
+  }
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `rootCertificate` | The Arrowhead master certificate |
+| `intermediateCertificate` | The Arrowhead local cloud certificate |
+| `onboardingCertificate` | The onboarding certificate for the next step |
+| `certificateFormat` | The certificate format (usually X.509) |
+| `certificateType` | The certificate type. Always AH_ONBOARDING for this operation |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys | 
+| `privateKey` | Base64 encoded private key |
+| `publicKey` | Base64 encoded public key |
+| `service` | The service which is reachable under `uri` |
+| `uri` | The uri under which the depicted `service` is reachable |
+
+          
+### Onboard with CSR
+<a name="onboardingcontroller_endpoints_csr" />
+
+```
+POST /certificate/csr
+POST /sharedsecret/csr
+```                       
+
+Creates a CSR on behalf of the client and eventually returns an onboarding certificate which may be used in the next step of the onboarding controller.
+
+#### Request
+<a name="datastructures_onboarding_csr_request" />
+
+```json
+{
+  "certificateSigningRequest": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `certificateSigningRequest` | Base64 encoded certificate signing request |
+
+#### Response
+<a name="datastructures_onboarding_csr_response" />
+
+```json
+{
+  "rootCertificate": "string",
+  "intermediateCertificate": "string",
+  "onboardingCertificate": {
+    "certificate": "string",
+    "certificateFormat": "string",
+    "certificateType": "AH_ONBOARDING",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  },
+  "deviceRegistry": {
+    "service": "DEVICE_REGISTRY_ONBOARDING_WITH_CSR_SERVICE",
+    "uri": "string"
+  },
+  "systemRegistry": {
+    "service": "SYSTEM_REGISTRY_ONBOARDING_WITH_CSR_SERVICE",
+    "uri": "string"
+  },
+  "serviceRegistry": {
+    "service": "SERVICE_REGISTRY_REGISTER_SERVICE",
+        "uri": "string"
+  },
+  "orchestrationService": {
+    "service": "ORCHESTRATION_SERVICE",
+    "uri": "string"
+  }
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `rootCertificate` | The Arrowhead master certificate |
+| `intermediateCertificate` | The Arrowhead local cloud certificate |
+| `onboardingCertificate` | The onboarding certificate for the next step |
+| `certificateFormat` | The certificate format (usually X.509) |
+| `certificateType` | The certificate type. Always AH_ONBOARDING for this operation |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys | 
+| `privateKey` | Base64 encoded private key. Always empty for this operation |
+| `publicKey` | Base64 encoded public key |
+| `service` | The service which is reachable under `uri` |
+| `uri` | The uri under which the depicted `service` is reachable |
+
+
+# Device Registry 
+<a name="deviceregistry"/><br />
+ 
+## System Design Description Overview
+<a name="deviceregistry_sdd" /><br />
+
+This System provides the database, which stores information related to the Devices within the Local Cloud.
+
+The purpose of this System is therefore to allow:
+-	Devices to register themselves, making this announcement available to other Application Systems on the network. 
+-	They are also allowed to remove or update their entries when it is necessary. 
+-   Generate a client certificate which can be used by the Device to register its Systems
+
+## Services and Use Cases
+<a name="deviceregistry_usecases" />
+
+This System provides two Core Service: the __device registration__ and __de-registration__.
+Further it provides two Onboarding Services: the __onboarding with name__ and __onboarding with CSR__.
+
+The __register__ method is used to register a device. The device will contain various metadata as well as a physical endpoint. 
+The various parameters are representing the endpoint information that should be registered.
+
+The __unregister__ method is used to unregister device instances that were previously registered in the Registry. 
+The instance parameter is representing the endpoint information that should be removed.
+
+The __onboarding__ methods are used to register a device and to retrieve a device certificate which must be used on the next step of the onboarding procedure.
+
+## Security
+<a name="deviceregistry_security" />
+
+This System can be secured via the HTTPS protocol. If it is started in secure mode, it verifies whether the Application System possesses a proper X.509 identity certificate and whether that certificate is Arrowhead compliant in its making. This certificate structure and creation guidelines ensure:
+-	Application System is properly bootstrapped into the Local Cloud
+-	The Application System indeed belongs to this Local Cloud
+-	The Application System then automatically has the right to register its Systems in the Registry.
+
+If these criteria are met, the Application System’s registration or removal message is processed. An Application System can only delete or alter entries that contain the Device as the System Provider in the entry. 
+
+
+## Endpoints
+<a name="deviceregistry_endpoints" />
+
+The System Registry offers four types of endpoints. Onboarding, Client, Management and Private.
+
+Swagger API documentation is available on: `https://<host>:<port>` <br />
+The base URL for the requests: `http://<host>:<port>/deviceregistry`
+
+### Onboarding endpoint description<br />
+<a name="deviceregistry_endpoints_onboarding" />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Onboard with Name](#deviceregistry_endpoints_onboarding_name)    | /onboarding/name      | POST   | [DeviceOnboardingWithNameRequest](#datastructures_deviceregistry_onboarding_with_name_request) | [DeviceOnboardingWithNameResponse](#datastructures_deviceregistry_onboarding_with_name_response) |
+| [Onboard with CSR](#deviceregistry_endpoints_onboarding_csr) | /onboarding/csr   | POST   | [DeviceOnboardingWithCsrRequest](#datastructures_deviceregistry_onboarding_with_csr_request) | [DeviceOnboardingWithCsrResponse](#datastructures_deviceregistry_onboarding_with_csr_response) |
+
+
+### Client endpoint description<br />
+<a name="deviceregistry_endpoints_onboarding" />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#deviceregistry_endpoints_get_echo)     | /echo       | GET    | -     | OK     |
+| [Query](#deviceregistry_endpoints_post_query)    | /query      | POST   | [DeviceQueryForm](#datastructures_systemqueryform) | [DeviceQueryList](#datastructures_devicequerylist) |
+| [Register](#deviceregistry_endpoints_post_register) | /register   | POST   | [DeviceRegistryEntry](#datastructures_deviceregistryentry) | [DeviceRegistryEntry](#datastructures_deviceregistryentry) |
+| [Unregister](#deviceregistry_delete_unregister) | /unregister | DELETE | Device Name and Mac Address in query parameters| OK |
+
+### Detailed description<br />
+
+A detailed description of management and private endpoints is available in the release notes.
+   
+### Onboard with Name
+<a name="deviceregistry_endpoints_onboarding_name" />
+
+```
+POST /onboarding/name
+```                       
+
+Creates a CSR on behalf of the client, registers the device and eventually returns a device certificate which may be used in the next step of the onboarding controller.
+
+#### Request
+<a name="datastructures_deviceregistry_onboarding_with_name_request" />
+
+```json
+{
+  "certificateCreationRequest": {
+    "commonName": "string",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  },
+  "device": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "deviceName": "string",
+    "macAddress": "string"
+  },
+  "endOfValidity": "string",
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "version": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `commonName` | The common name field for the new certificate |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys | 
+| `privateKey` | Base64 encoded private key |
+| `publicKey` | Base64 encoded public key |
+| `address` | The optional IP address of the device |
+| `authenticationInfo` | Base64 encoded public key of the certificate this device |
+| `deviceName` | The device name |
+| `macAddress` | The MAC address of the device |
+| `endOfValidity` | The validity of this entry |
+| `metadata` | Various meta information as map |
+| `version` | The version of this entry |
+
+#### Response
+<a name="datastructures_deviceregistry_onboarding_with_name_response" />
+
+```json
+{
+  "certificateResponse": {
+    "certificate": "string",
+    "certificateFormat": "string",
+    "certificateType": "AH_DEVICE",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  },
+  "createdAt": "string",
+  "device": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "createdAt": "string",
+    "deviceName": "string",
+    "id": 0,
+    "macAddress": "string",
+    "updatedAt": "string"
+  },
+  "endOfValidity": "string",
+  "id": 0,
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "updatedAt": "string",
+  "version": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `certificate` | The Base64 device certificate for the next step |
+| `certificateFormat` | The certificate format (usually X.509) |
+| `certificateType` | The certificate type. Always AH_DEVICE for this operation |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys | 
+| `privateKey` | Base64 encoded private key |
+| `publicKey` | Base64 encoded public key |
+
+Additionally all fields from [DeviceRegistryEntry](#datastructures_deviceregistryentry) are returned. 
+
+### Onboard with CSR
+<a name="deviceregistry_endpoints_onboarding_csr" />
+
+```
+POST /onboarding/csr
+```                       
+
+Signs the CSR, registers the device and eventually returns a device certificate which may be used in the next step of the onboarding controller.
+
+#### Request
+<a name="datastructures_deviceregistry_onboarding_with_csr_request" />
+
+```json
+{
+  "certificateSigningRequest": "string",
+  "device": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "deviceName": "string",
+    "macAddress": "string"
+  },
+  "endOfValidity": "string",
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "version": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `certificateSigningRequest` | Base64 encoded certificate signing request |
+| `address` | The optional IP address of the device |
+| `authenticationInfo` | Base64 encoded public key of the certificate this device |
+| `deviceName` | The device name |
+| `macAddress` | The MAC address of the device |
+| `endOfValidity` | The validity of this entry |
+| `metadata` | Various meta information as map |
+| `version` | The version of this entry |
+
+#### Response
+<a name="datastructures_deviceregistry_onboarding_with_csr_response" />
+
+```json
+{
+  "certificateResponse": {
+    "certificate": "string",
+    "certificateFormat": "string",
+    "certificateType": "AH_DEVICE",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  },
+  "createdAt": "string",
+  "device": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "createdAt": "string",
+    "deviceName": "string",
+    "id": 0,
+    "macAddress": "string",
+    "updatedAt": "string"
+  },
+  "endOfValidity": "string",
+  "id": 0,
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "updatedAt": "string",
+  "version": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `certificate` | The Base64 device certificate for the next step |
+| `certificateFormat` | The certificate format (usually X.509) |
+| `certificateType` | The certificate type. Always AH_DEVICE for this operation |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys | 
+| `privateKey` | Base64 encoded private key. Always empty for this operation |
+| `publicKey` | Base64 encoded public key |
+
+Additionally all fields from [DeviceRegistryEntry](#datastructures_deviceregistryentry) are returned. 
+
+ 
+# System Registry 
+<a name="systemregistry" />
+ 
+ 
+## System Design Description Overview
+<a name="systemregistry_sdd" />
+
+This System provides the database, which stores information related to the System of the currently actively offered Services within the Local Cloud.
+
+The purpose of this System is therefore to allow:
+-	Devices to register which Systems they offer at the moment, making this announcement available to other Application Systems on the network. 
+-	They are also allowed to remove or update their entries when it is necessary. 
+-   Generate a client certificate which can be used by the System to offer Services
+
+
+## Services and Use Cases
+<a name="systemregistry_usecases" />
+
+This System provides two Core Service the __system registration__ and __de-registration__
+
+The __register__ method is used to register a system. The system will contain various metadata as well as a physical endpoint. 
+The various parameters are representing the endpoint information that should be registered.
+
+The __unregister__ method is used to unregister system instances that were previously registered in the Registry. 
+The instance parameter is representing the endpoint information that should be removed.
+
+
+## Security
+<a name="systemregistry_security" />
+
+This System can be secured via the HTTPS protocol. If it is started in secure mode, it verifies whether the Application System possesses a proper X.509 identity certificate and whether that certificate is Arrowhead compliant in its making. This certificate structure and creation guidelines ensure:
+-	Application System is properly bootstrapped into the Local Cloud
+-	The Application System indeed belongs to this Local Cloud
+-	The Application System then automatically has the right to register its Services in the Registry.
+
+If these criteria are met, the Application System’s registration or removal message is processed. An Application System can only delete or alter entries that contain the Device as the System Provider in the entry. 
+
+
+## Endpoints
+<a name="systemregistry_endpoints" />
+
+The System Registry offers three types of endpoints. Client, Management and Private.
+
+Swagger API documentation is available on: `https://<host>:<port>` <br />
+The base URL for the requests: `http://<host>:<port>/systemregistry`
+
+### Onboarding endpoint description<br />
+<a name="systemregistry_endpoints_onboarding" />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Onboard with Name](#systemregistry_endpoints_onboarding_name)    | /onboarding/name      | POST   | [SystemOnboardingWithNameRequest](#datastructures_systemregistry_onboarding_with_name_request) | [SystemOnboardingWithNameResponse](#datastructures_systemregistry_onboarding_with_name_response) |
+| [Onboard with CSR](#systemregistry_endpoints_onboarding_csr) | /onboarding/csr   | POST   | [SystemOnboardingWithCsrRequest](#datastructures_systemregistry_onboarding_with_csr_request) | [SystemOnboardingWithCsrResponse](#datastructures_systemregistry_onboarding_with_csr_response) |
+
+
+### Client endpoint description<br />
+<a name="systemregistry_endpoints_client" />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#systemregistry_endpoints_get_echo)     | /echo       | GET    | -     | OK     |
+| [Query](#systemregistry_endpoints_post_query)    | /query      | POST   | [SystemQueryForm](#datastructures_systemqueryform) | [SystemQueryList](#datastructures_systemquerylist) |
+| [Register](#systemregistry_endpoints_post_register) | /register   | POST   | [SystenRegistryEntry](#datastructures_systemregistryentry) | [SystenRegistryEntry](#datastructures_systemregistryentry) |
+| [Unregister](#systemregistry_delete_unregister) | /unregister | DELETE | System Name, Address and Port in query parameters| OK |
+
+### Detailed description<br />
+
+A detailed description of public, management and private endpoints is available in the release notes.
+   
+### Onboard with Name
+<a name="systemregistry_endpoints_onboarding_name" />
+
+```
+POST /onboarding/name
+```                       
+
+Creates a CSR on behalf of the client, registers the system and eventually returns a system certificate which is valid in the Arrowhead local cloud.
+
+#### Request
+<a name="datastructures_systemeregistry_onboarding_with_name_request" />
+
+```json
+{
+  "certificateCreationRequest": {
+    "commonName": "string",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  },
+  "provider": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "deviceName": "string",
+    "macAddress": "string"
+  },
+  "system": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "port": 0,
+    "systemName": "string"
+  },
+  "endOfValidity": "string",
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "version": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `commonName` | The common name field for the new certificate |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys | 
+| `privateKey` | Base64 encoded private key |
+| `publicKey` | Base64 encoded public key |
+| `address` | The IP address of the device/system |
+| `authenticationInfo` | Base64 encoded public key of the certificate this device/system |
+| `deviceName` | The device name |
+| `macAddress` | The MAC address of the device |
+| `systemName` | The system name |
+| `port` | The port under which this system's services are available |
+| `endOfValidity` | The validity of this entry |
+| `metadata` | Various meta information as map |
+| `version` | The version of this entry |
+
+#### Response
+<a name="datastructures_systemregistry_onboarding_with_name_response" />
+
+```json
+{
+  "certificateResponse": {
+    "certificate": "string",
+    "certificateFormat": "string",
+    "certificateType": "AH_SYSTEM",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  },
+  "createdAt": "string",
+    "provider": {
+      "address": "string",
+      "authenticationInfo": "string",
+      "createdAt": "string",
+      "deviceName": "string",
+      "id": 0,
+      "macAddress": "string",
+      "updatedAt": "string"
+    },
+    "system": {
+      "address": "string",
+      "authenticationInfo": "string",
+      "createdAt": "string",
+      "id": 0,
+      "port": 0,
+      "systemName": "string",
+      "updatedAt": "string"
+    },
+  "endOfValidity": "string",
+  "id": 0,
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "updatedAt": "string",
+  "version": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `certificate` | The Base64 device certificate for the next step |
+| `certificateFormat` | The certificate format (usually X.509) |
+| `certificateType` | The certificate type. Always AH_SYSTEM for this operation |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys | 
+| `privateKey` | Base64 encoded private key |
+| `publicKey` | Base64 encoded public key |
+
+Additionally all fields from [SystemRegistryEntry](#datastructures_systemregistryentry) are returned. 
+
+### Onboard with CSR
+<a name="systemregistry_endpoints_onboarding_csr" />
+
+```
+POST /onboarding/csr
+```                       
+
+Signs the CSR, registers the device and eventually returns a device certificate which may be used in the next step of the onboarding controller.
+
+#### Request
+<a name="datastructures_systemregistry_onboarding_with_csr_request" />
+
+```json
+{
+  "certificateSigningRequest": "string",
+  "provider": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "deviceName": "string",
+    "macAddress": "string"
+  },
+  "system": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "port": 0,
+    "systemName": "string"
+  },
+  "endOfValidity": "string",
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "version": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `certificateSigningRequest` | Base64 encoded certificate signing request |
+| `address` | The IP address of the device/system |
+| `authenticationInfo` | Base64 encoded public key of the certificate this device/system |
+| `deviceName` | The device name |
+| `macAddress` | The MAC address of the device |
+| `systemName` | The system name |
+| `port` | The port under which this system's services are available |
+| `endOfValidity` | The validity of this entry |
+| `metadata` | Various meta information as map |
+| `version` | The version of this entry |
+
+#### Response
+<a name="datastructures_systemregistry_onboarding_with_csr_response" />
+
+```json
+{
+  "certificateResponse": {
+    "certificate": "string",
+    "certificateFormat": "string",
+    "certificateType": "AH_SYSTEM",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  },
+  "createdAt": "string",
+    "provider": {
+      "address": "string",
+      "authenticationInfo": "string",
+      "createdAt": "string",
+      "deviceName": "string",
+      "id": 0,
+      "macAddress": "string",
+      "updatedAt": "string"
+    },
+    "system": {
+      "address": "string",
+      "authenticationInfo": "string",
+      "createdAt": "string",
+      "id": 0,
+      "port": 0,
+      "systemName": "string",
+      "updatedAt": "string"
+    },
+  "endOfValidity": "string",
+  "id": 0,
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "updatedAt": "string",
+  "version": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `certificate` | The Base64 device certificate for the next step |
+| `certificateFormat` | The certificate format (usually X.509) |
+| `certificateType` | The certificate type. Always AH_DEVICE for this operation |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys | 
+| `privateKey` | Base64 encoded private key. Always empty for this operation |
+| `publicKey` | Base64 encoded public key |
+
+Additionally all fields from [SystemRegistryEntry](#datastructures_systemregistryentry) are returned.

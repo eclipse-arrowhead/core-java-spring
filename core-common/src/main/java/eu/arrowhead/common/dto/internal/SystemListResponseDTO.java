@@ -27,9 +27,9 @@ public class SystemListResponseDTO implements Serializable {
 	public SystemListResponseDTO() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public SystemListResponseDTO(final List<SystemResponseDTO> systemResponeDTOList, final int totalNumberOfSystems) {
+	public SystemListResponseDTO(final List<SystemResponseDTO> systemResponseDTOList, final int totalNumberOfSystems) {
 		super();
-		this.data = systemResponeDTOList;
+		this.data = systemResponseDTOList;
 		this.count = totalNumberOfSystems;
 	}
 	

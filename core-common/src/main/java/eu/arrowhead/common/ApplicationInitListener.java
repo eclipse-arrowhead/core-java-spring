@@ -11,7 +11,6 @@ import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PreDestroy;
 
@@ -19,7 +18,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
@@ -125,12 +123,6 @@ public abstract class ApplicationInitListener {
 		customDestroy();
 	}
 
-	//-------------------------------------------------------------------------------------------------
-	@Bean(CommonConstants.ARROWHEAD_CONTEXT)
-	public Map<String,Object> getArrowheadContext() {
-		return new ConcurrentHashMap<>();
-	}
-	
 	//=================================================================================================
 	// assistant methods
 	
@@ -169,7 +161,7 @@ public abstract class ApplicationInitListener {
 	//-------------------------------------------------------------------------------------------------
 	private void checkServerCertificate(final KeyStore keyStore, final ApplicationContext appContext) {
 		logger.debug("checkServerCertificate started...");
-		final X509Certificate serverCertificate = Utilities.getFirstCertFromKeyStore(keyStore);
+		final X509Certificate serverCertificate = Utilities.getSystemCertFromKeyStore(keyStore);
 		final String serverCN = Utilities.getCertCNFromSubject(serverCertificate.getSubjectDN().getName());
 		if (!Utilities.isKeyStoreCNArrowheadValid(serverCN)) {
 			logger.info("Server CN ({}) is not compliant with the Arrowhead certificate structure, since it does not have 5 parts, or does not end with \"arrowhead.eu\".", serverCN);
@@ -188,7 +180,7 @@ public abstract class ApplicationInitListener {
 		@SuppressWarnings("unchecked")
 		final Map<String,Object> context = appContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
 
-		final X509Certificate serverCertificate = Utilities.getFirstCertFromKeyStore(keyStore);
+		final X509Certificate serverCertificate = Utilities.getSystemCertFromKeyStore(keyStore);
 		publicKey = serverCertificate.getPublicKey();
 		context.put(CommonConstants.SERVER_PUBLIC_KEY, publicKey);
 
