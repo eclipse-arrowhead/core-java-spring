@@ -24,9 +24,9 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 5. [Continuous Integration / Continuous Delivery](#ci_cd)
 6. [How to Contribute](#howtocontribute)
 7. [Documentation](#documentation) 
-    1. [Service Registry](#serviceregistry)
-        * [System Design Description Overview](#serviceregistry_sdd)
-            * [Services and Use Cases](#serviceregistry_usecases)
+    1. [ServiceRegistry](#serviceregistry)
+        * [System Design - SysD](#serviceregistry_sysd)
+            * [Service Description](#serviceregistry_sd)
        * [Interface Design Description](#serviceregistry_endpoints)
             * [Security](#serviceregistry_security)
             * [Communication Profile](#service-registry_cp)
@@ -550,57 +550,82 @@ Join our developer team on Slack. Write an email to [szvetlin@aitia.ai](mailto:s
  
 # Service Registry 
  
-<a name="serviceregistry_sdd" />
+<a name="serviceregistry_sysd" />
  
 ## System Design Description Overview
 
-This System provides the database, which stores information related to the currently actively offered Services within the Local Cloud.
+The objective of the ServiceRegistry system is to provide storage of all active services registered within a local cloud and enable the discovery of them.
+The ServiceRegistry system keeps track of all active services produced within a local cloud. 
 
-The purpose of this System is therefore to allow:
--	Application Systems to register what Services they offer at the moment, making this announcement available to other Application Systems on the network. 
--	They are also allowed to remove or update their entries when it is necessary. 
--	All Application Systems can utilize the lookup functionality of the Registry to find Public Core System Service offerings in the network, otherwise the Orchestrator has to be used. 
+![Service Registry](/documentation/images/service_registry.png)
 
-However, it is worth noting, that within this generation the lookup functionality of Services is integrated within the “orchestration process”. Therefore, in the primary scenario, when an Application System is looking for a Service to consume, it shall ask the Orchestrator System via the Orchestration Service to locate one or more suitable Service Providers and help establish the connection based on metadata submitted in the request. Direct lookups from Application Systems within the network is not advised in this generation, due to security reasons.
+All systems within the local cloud with services producing information to the local cloud shall publish their service within the ServiceRegistry by using the ServiceDiscovery service. The ServiceRegistry system, enables services to be published, un-published or looked up. The ServiceRegistry system holds all published and active services within the local cloud. 
 
-However, the lookup of other Application Systems and Services directly is not within the primary use, since access will not be given without the Authorization JWT (JSON Web Token). The use of the TokenGeneration is restricted to the Orchestrator for general System accountability reasons. 
+All systems within the local cloud with services that produces information shall publish their producing service with the ServiceRegistry system by using the ServiceDiscovery service. If a system disconnects from the local cloud, its services shall be de-registered in the ServiceRegistry system. To address broken systems and network failures a registration time out and keep alive approach is provided. A system should re-register its services according to the TTL data. If not done the ServiceRegistry can unpublish the service.
 
-<a name="serviceregistry_usecases" />
+The details of a service layer agreement, SLA, holds information on service protocol, transport protocol, interface, associated methods, datatypes, encod- ing, semantics, and compression. There are several approaches to provide this information. The obvious one is from design time documentation. The more attractive approach is to provide such information as meta-data with the registered service. In this way the SLA provided by the service producer can be retrieved and decoded by a consumer.
 
-## Services and Use Cases
+There exist some technologies that support SLA description; examples are WSDL, WADL, OpenAPI and HATEOAS. In the ServiceRegistry the SLA information shall be provide as meta-data. Technically it’s stored as key pairs. The following key pairs indicates how the SLA can be provided to a service consumer:
+• wadl=link
+• wsdl=link
+• hateoas=link
 
-This System three types of services:
+There are two optional cleanup tasks within the ServiceRegistry, which can be used to remove old, inactive service offerings. The first task is based on pinging the service provider and if the provider does not respond to the ping, its offered services will be deleted. The second task is based on a feature, called “Time to Live”. Service providers upon registration can provide a timestamp called “end_of_validity” number, which specifies how long the service will be offered by the provider, making the service de-registrations unnecessary, if this task is active. The task is used to remove expired services. The third task is using a feature called "Heartbeat" (Not yet implemented), where the Service provider periodically signals to the ServiceRegistry that it is still alive. When a HeartBeat is not provided by a service provider it's services will be un-registered. All of these internal tasks can be configured in the application.properties file.
+
+To enable discovery of interoperability at the service level, there is a need for information on payload encoding, compression and semantics. In the con- text of the Arrowhead Framework, this is regarded as service meta-data. 
+
+
+<a name="serviceregistry_sd" />
+
+## Service Description
+
+This System three types of interfaces:
 - Client
 - Management
 - Private 
 
-Client services are used by clients (consumers and providers):
+Client interfaces are used by clients (consumers and providers):
 
-These client services are:
+The service provides four interfaces intended for application system usage.
 - Echo
 - Register
 - Unregister
 - Query (Service Discovery)
+ 
+In addition there are several interfaces intended for system of systems management. For the interface details, please see the IDD.
+
+The ServiceRegistry is by default started in secure mode. The primary security is based on HTTPS protocol and usage of X.509 certificates. For a consumption of the ServiceDiscovery service ServiceRegistry verifies that the application system can present a proper X.509 identity certificate and if that certificate is Arrowhead compliant in its making. This certificate structure and creation guidelines ensure:
+
+- Application system is properly bootstrapped into the Local Cloud
+- The application system indeed belongs to this Local Cloud
+- The application system then automatically has the right to register its services in the ServiceRegistry.
+
 
 There are three use case scenarios connected to the Service Registry client services. 
 -   Echo, checking the Core Systems availability 
 -	Service registration, de-registration
 -	Service Registry querying (lookup, service discovery)
 
-The __echo__ service is used to check the Core Systems availability. The service contains a simple response as well as a physical endpoint.
+If these criteria are met, the application system consumption of the ServiceDiscovery service is processed. An application system can only delete or alter entries that contain the application system as the service provider in the entry.
 
-The __register__ service is used to register other services. The services will contain various metadata as well as a physical endpoint. 
-The various parameters are representing the endpoint information that should be registered.
+### Use cases
 
-The __unregister__ service is used to unregister service instances that were previously registered in the Service Registry. 
-The various parameters are representing which service should be removed.
+There are three main use case scenarios connected to the ServiceRegistry.
 
-The __query__ service is used to find and translate a symbolic service name into a physical endpoint, for example an IP address and a port.
-The query parameter is used to request a subset of all the registered services fulfilling the demand of the user of the service.
-The returned listing contains service endpoints that have been fulfilling the query.
+- Echo, checking the Core Systems availability
+- Service registration, de-registration
+- Service Registry querying (lookup, service discovery)
 
+The __echo__ interface is used to check the Core Systems availability. The method provides a simple response as well as a physical endpoint.
 
-There is another functionality that does not bound to any Services, just an internal part of the Service Registry. There are two optional cleanup tasks within the Service Registry, which can be used to remove old, inactive service offerings. The first task is based on pinging the service provider and if the provider does not respond to the ping, its offered services will be deleted. The second task is based on a feature, called “Time to Live”. Service providers upon registration can provide a timestamp called “end_of_validity” number, which specifies how long the service will be offered by the provider, making the service de-registrations unnecessary, if this task is active. The task is used to remove expired services. The third task is using a feature called "Heartbeat" (Not yet implemented), where the Service provider periodically signals to the Service Registry that it is still alive. When it misses it will be removed. All of these internal tasks can be configured in the application.properties file.
+The __register__ interface is used to register other services. The services will contain various metadata as well as a physical endpoint. The various parameters are representing the endpoint information that should be registered.
+
+The __unregister__ interface is used to unregister service instances that were previously registered in the Service Registry. The various parameters are representing which service should be removed.
+
+The __query__ interface is used to find and translate a symbolic service name into a physical endpoint, for example an IP address and a port. The query parameter is used to request a subset of all the registered services fulfilling the demand of the user of the service. The returned listing contains service endpoints that have been fulfilling the query.
+
+A management use case will make use of the management interfaces allowing for supervisory management of the service registry database.
+
 
 <a name="serviceregistry_endpoints" />
 
@@ -623,16 +648,18 @@ If these criteria are met, the Application System’s registration or removal me
 - Security mechanism: TLS or none
 - Data format: JSON
 
-The Service Registry offers three types of services. Client, Management and Private.
+Additional protocols like CoPA and MQTT is under development. Release time plan is end of Q2 2020.
+
+The Service Registry offers three types of interfaces. Client, Management and Private.
 
 Swagger API documentation is available on: `https://<host>:<port>` <br />
 The base URL for the requests: `http://<host>:<port>/serviceregistry`
 
 <a name="serviceregistry_endpoints_client" />
 
-#### Client service description<br />
+#### Client interface description<br />
 
-| Service | URL subpath | Method | Request | Response |
+| Interface Name | URL subpath | Method | Request | Response |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Echo](#serviceregistry_endpoints_get_echo)     | /echo       | GET    | -     | OK     |
 | [Query](#serviceregistry_endpoints_post_query)    | /query      | POST   | [ServiceQueryForm](#datastructures_servicequeryform) | [ServiceQueryList](#datastructures_servicequerylist) |
@@ -641,22 +668,22 @@ The base URL for the requests: `http://<host>:<port>/serviceregistry`
 
 <a name="serviceregistry_endpoints_private" />
 
-#### Private service description<br />
+#### Private interface description<br />
 
 These services can only be used by other core services, therefore they are not part of the public API.
 
-| Service | URL subpath | Method | Request | Response |
+| Interface Name | URL subpath | Method | Request | Response |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Query System](#serviceregistry_endpoints_post_query_system) | /query/system| POST | System | System |
 | [Query System By ID](#serviceregistry_endpoints_get_query_system_id) | /query/system/{id} | GET | ID | System|
 
 <a name="serviceregistry_endpoints_mgmt" />
 
-#### Management service description<br />
+#### Management interface description<br />
 
 These services are mainly used by the Management Tool and Cloud Administrators.
 
-| Service | URL subpath | Method | Request | Reponse |
+| Interface Name | URL subpath | Method | Request | Reponse |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Get all entries](#serviceregistry_endpoints_get_mgmt) | /mgmt/ | GET | - | [ServiceRegistryEntryList](#datastructures_serviceregistryentrylist) |
 | [Add an entry](#serviceregistry_endpoints_post_mgmt) | /mgmt/ | POST | [ServiceRegistryEntry](#datastructures_serviceregistryentry) | [ServiceRegistryEntry](#datastructures_serviceregistry_entry) |
