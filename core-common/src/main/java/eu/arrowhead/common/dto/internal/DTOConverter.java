@@ -1,6 +1,7 @@
 package eu.arrowhead.common.dto.internal;
 
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -49,6 +50,7 @@ import eu.arrowhead.common.database.entity.Subscription;
 import eu.arrowhead.common.database.entity.SubscriptionPublisherConnection;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.entity.SystemRegistry;
+import eu.arrowhead.common.dto.internal.IssuedCertificateDTO.Status;
 import eu.arrowhead.common.dto.shared.ChoreographerActionResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerNextStepResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
@@ -1264,6 +1266,8 @@ public class DTOConverter {
 
 		final List<IssuedCertificateDTO> certificateDTOs = new ArrayList<>(certificateList.size());
 
+		final ZonedDateTime now = ZonedDateTime.now();
+
 		for (final CaCertificate certificate : certificateList) {
 			IssuedCertificateDTO dto = new IssuedCertificateDTO();
 			dto.setId(certificate.getId());
@@ -1271,13 +1275,34 @@ public class DTOConverter {
 			dto.setSerialNumber(certificate.getSerial());
 			dto.setCreatedBy(certificate.getCreatedBy());
 			dto.setCreatedAt(certificate.getCreatedAt());
-			dto.setRevokedAt(certificate.getRevokedAt());
-			dto.setValidFrom(certificate.getValidAfter());
-			dto.setValidUntil(certificate.getValidBefore());
+			
+			final ZonedDateTime revokedAt = certificate.getRevokedAt();
+			final ZonedDateTime validAfter = certificate.getValidAfter();
+			final ZonedDateTime validBefore = certificate.getValidBefore();
+			dto.setRevokedAt(revokedAt);
+			dto.setValidFrom(validAfter);
+			dto.setValidUntil(validBefore);
+			dto.setStatus(getStatus(now, validAfter, validBefore, revokedAt));
+
 			certificateDTOs.add(dto);
 		}
 
 		return certificateDTOs;
+	}
+
+	private static IssuedCertificateDTO.Status getStatus(ZonedDateTime now, ZonedDateTime validAfter, ZonedDateTime validBefore,
+			ZonedDateTime revokedAt) {
+		Assert.notNull(now, "now cannot be null");
+		Assert.notNull(validAfter, "validAfter cannot be null");
+		Assert.notNull(validBefore, "validBefore cannot be null");
+		
+		if (revokedAt != null) {
+			return Status.REVOKED;
+		}
+		if (now.isAfter(validBefore) || now.isBefore(validAfter)) {
+			return Status.EXPIRED;
+		}
+		return Status.GOOD;
 	}
 
 }
