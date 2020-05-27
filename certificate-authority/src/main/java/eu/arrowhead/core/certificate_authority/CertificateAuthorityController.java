@@ -1,11 +1,11 @@
 package eu.arrowhead.core.certificate_authority;
 
-import java.security.cert.X509Certificate;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import eu.arrowhead.common.dto.internal.AddTrustedKeyResponseDTO;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -259,11 +259,11 @@ public class CertificateAuthorityController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE) })
 	@PutMapping(path = OP_CA_MGMT_TRUSTED_KEYS_URI)
-	public ResponseEntity<String> addTrustedKey(@Valid @RequestBody final AddTrustedKeyRequestDTO request,
-			BindingResult bindingResult) {
+	public ResponseEntity<AddTrustedKeyResponseDTO> addTrustedKey(@Valid @RequestBody final AddTrustedKeyRequestDTO request,
+																  BindingResult bindingResult) {
 		handleBindingResult(bindingResult);
-		certificateAuthorityService.addTrustedKey(request);
-		return new ResponseEntity<String>("Trusted key added", org.springframework.http.HttpStatus.CREATED);
+		final AddTrustedKeyResponseDTO response = certificateAuthorityService.addTrustedKey(request);
+		return new ResponseEntity<AddTrustedKeyResponseDTO>(response, org.springframework.http.HttpStatus.CREATED);
 	}
 
 	// -------------------------------------------------------------------------------------------------

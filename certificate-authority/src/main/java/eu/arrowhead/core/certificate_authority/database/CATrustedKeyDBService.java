@@ -3,6 +3,7 @@ package eu.arrowhead.core.certificate_authority.database;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
+import eu.arrowhead.common.dto.internal.AddTrustedKeyResponseDTO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +59,7 @@ public class CATrustedKeyDBService {
         }
     }
 
-    public void addTrustedKey(AddTrustedKeyRequestDTO request) {
+    public AddTrustedKeyResponseDTO addTrustedKey(AddTrustedKeyRequestDTO request) {
         logger.debug("addTrustedKey started...");
 
         CaTrustedKey trustedKey = new CaTrustedKey();
@@ -87,7 +88,11 @@ public class CATrustedKeyDBService {
         logger.info("Adding a trusted key: " + trustedKey.getDescription());
 
         try {
-            caTrustedKeyRepository.saveAndFlush(trustedKey);
+            final CaTrustedKey caTrustedKey = caTrustedKeyRepository.saveAndFlush(trustedKey);
+
+            return new AddTrustedKeyResponseDTO(caTrustedKey.getId(),
+                    caTrustedKey.getValidAfter(),
+                    caTrustedKey.getValidBefore());
         } catch (Exception e) {
             final String msg = "Cannot save Trusted Key";
             logger.debug(msg + ": " + e.getMessage(), e);

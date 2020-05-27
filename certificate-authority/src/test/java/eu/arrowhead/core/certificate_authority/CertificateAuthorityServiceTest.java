@@ -2,10 +2,14 @@ package eu.arrowhead.core.certificate_authority;
 
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.database.entity.CaCertificate;
+import eu.arrowhead.common.dto.internal.AddTrustedKeyRequestDTO;
+import eu.arrowhead.common.dto.internal.AddTrustedKeyResponseDTO;
 import eu.arrowhead.common.dto.internal.CertificateCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.CertificateCheckResponseDTO;
 import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
 import eu.arrowhead.common.dto.internal.CertificateSigningResponseDTO;
+import eu.arrowhead.common.dto.internal.TrustedKeyCheckRequestDTO;
+import eu.arrowhead.common.dto.internal.TrustedKeyCheckResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -45,6 +49,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -56,6 +61,7 @@ import static org.mockito.Mockito.when;
 public class CertificateAuthorityServiceTest {
 
     public static final long CA_CERT_ID = 999;
+    public static final long TRUSTED_KEY_ID = 99;
     private static final Pattern PEM_PATTERN = Pattern.compile("(?m)(?s)^---*BEGIN.*---*$(.*)^---*END.*---*$.*");
     private static final String CLOUD_CN = "testcloud2.aitia.arrowhead.eu";
     private static final String CONSUMER_CN = "consumer." + CLOUD_CN;
@@ -111,6 +117,7 @@ public class CertificateAuthorityServiceTest {
         ReflectionTestUtils.setField(service, "caProperties", caProperties);
         ReflectionTestUtils.setField(service, "sslProperties", getSslProperties());
         ReflectionTestUtils.setField(service, "certificateDbService", caCertificateDBService);
+        ReflectionTestUtils.setField(service, "trustedKeyDbService", caTrustedKeyDBService);
 
         service.init();
 
@@ -245,7 +252,6 @@ public class CertificateAuthorityServiceTest {
         final CertificateSigningResponseDTO response = service.signCertificate(request, SIGN_REQUESTER_VALID);
 
         verify(caCertificateDBService).saveCertificateInfo(eq(CONSUMER_CN), any(), eq(SIGN_REQUESTER_VALID));
-        verifyCertSigningResponse(response, CONSUMER_CN);
     }
 
     @Test(expected = InvalidParameterException.class)
@@ -303,5 +309,33 @@ public class CertificateAuthorityServiceTest {
         assertEquals(CertificateAuthorityUtils.decodeCertificate(certificateChain.get(2)), rootCertificate);
 
         return clientCert;
+    }
+
+    // ------------------------------------------------------------------------
+
+    @Test
+    public void testCheckTrustedKey() {
+        final TrustedKeyCheckRequestDTO request = new TrustedKeyCheckRequestDTO();
+        final TrustedKeyCheckResponseDTO responseDTO = new TrustedKeyCheckResponseDTO();
+        when(caTrustedKeyDBService.isTrustedKeyValidNow(request)).thenReturn(responseDTO);
+
+        final TrustedKeyCheckResponseDTO response = service.checkTrustedKey(request);
+        verify(caTrustedKeyDBService).isTrustedKeyValidNow(eq(request));
+        assertEquals(response, responseDTO);
+    }
+
+    // ------------------------------------------------------------------------
+
+    @Test
+    public void testAddTrustedKey() {
+        final AddTrustedKeyRequestDTO request = new AddTrustedKeyRequestDTO();
+        final AddTrustedKeyResponseDTO responseDTO = new AddTrustedKeyResponseDTO(TRUSTED_KEY_ID);
+        doReturn(responseDTO).when(caTrustedKeyDBService).addTrustedKey(request);
+
+        final AddTrustedKeyResponseDTO response = service.addTrustedKey(request);
+        verify(caTrustedKeyDBService).addTrustedKey(eq(request));
+
+        assertNotNull(response);
+        assertEquals(response, responseDTO);
     }
 }

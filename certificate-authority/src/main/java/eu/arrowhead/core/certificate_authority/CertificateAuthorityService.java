@@ -4,6 +4,7 @@ import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.CaCertificate;
 import eu.arrowhead.common.dto.internal.AddTrustedKeyRequestDTO;
+import eu.arrowhead.common.dto.internal.AddTrustedKeyResponseDTO;
 import eu.arrowhead.common.dto.internal.CertificateCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.CertificateCheckResponseDTO;
 import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
@@ -136,8 +137,8 @@ public class CertificateAuthorityService {
         return trustedKeyDbService.getTrustedKeyEntries(page, size, direction, sortField);
     }
 
-    public void addTrustedKey(AddTrustedKeyRequestDTO request) {
-        trustedKeyDbService.addTrustedKey(request);
+    public AddTrustedKeyResponseDTO addTrustedKey(AddTrustedKeyRequestDTO request) {
+        return trustedKeyDbService.addTrustedKey(request);
     }
 
     public void deleteTrustedKey(long id) {
