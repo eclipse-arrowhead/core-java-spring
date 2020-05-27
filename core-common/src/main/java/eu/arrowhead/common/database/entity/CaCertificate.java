@@ -69,6 +69,16 @@ public class CaCertificate {
     }
 
     // -------------------------------------------------------------------------------------------------
+    public CaCertificate(final String commonName, final BigInteger serial, final String createdBy,
+                         final ZonedDateTime validAfter, final ZonedDateTime validBefore) {
+        this.commonName = commonName;
+        this.serial = serial;
+        this.createdBy = createdBy;
+        this.validAfter = validAfter;
+        this.validBefore = validBefore;
+    }
+
+    // -------------------------------------------------------------------------------------------------
     public long getId() {
         return id;
     }

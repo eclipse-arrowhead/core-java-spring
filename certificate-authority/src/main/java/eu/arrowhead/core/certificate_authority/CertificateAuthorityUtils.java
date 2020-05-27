@@ -98,17 +98,23 @@ public class CertificateAuthorityUtils {
         final ZonedDateTime now = ZonedDateTime.now();
         final ZonedDateTime validBefore = request.getValidBefore();
         if (validBefore != null) {
-            if (validBefore.isAfter(getValidBefore(now, caProperties))) {
-                logger.error("Validity range parameter exceeds maximum validity range");
-                throw new InvalidParameterException("Validity range parameter exceeds maximum validity range");
+            final ZonedDateTime validBeforeLimit = getValidBeforeLimit(now, caProperties);
+            if (validBefore.compareTo(validBeforeLimit) > 0) {
+                final String msg = "Validity range parameter exceeds maximum validity range: validBefore (limit: "
+                        + validBeforeLimit + ", got: " + validBefore + ")";
+                logger.error(msg);
+                throw new InvalidParameterException(msg);
             }
         }
 
         final ZonedDateTime validAfter = request.getValidAfter();
         if (validAfter != null) {
-            if (validAfter.isBefore(getValidAfter(now, caProperties))) {
-                logger.error("Validity range parameter exceeds maximum validity range");
-                throw new InvalidParameterException("Validity range parameter exceeds maximum validity range");
+            final ZonedDateTime validAfterLimit = getValidAfterLimit(now, caProperties);
+            if (validAfter.compareTo(validAfterLimit) < 0) {
+                final String msg = "Validity range parameter exceeds maximum validity range: validAfter (limit: "
+                        + validAfterLimit + ", got: " + validAfter + ")";
+                logger.error(msg);
+                throw new InvalidParameterException(msg);
             }
         }
     }
@@ -258,23 +264,50 @@ public class CertificateAuthorityUtils {
         }
     }
 
-    static ZonedDateTime getValidAfter(ZonedDateTime reference, CAProperties caProperties) {
-        Assert.notNull(reference, "reference cannot be null");
+    static ZonedDateTime getValidAfterLimit(ZonedDateTime now, CAProperties caProperties) {
+        Assert.notNull(now, "now cannot be null");
         Assert.notNull(caProperties, "caProperties cannot be null");
-        return reference.minusMinutes(caProperties.getCertValidityNegativeOffsetMinutes());
+        return now.minusMinutes(caProperties.getCertValidityNegativeOffsetMinutes());
     }
 
-    static ZonedDateTime getValidBefore(ZonedDateTime reference, CAProperties caProperties) {
-        Assert.notNull(reference, "reference cannot be null");
+    static ZonedDateTime getValidBeforeLimit(ZonedDateTime now, CAProperties caProperties) {
+        Assert.notNull(now, "now cannot be null");
         Assert.notNull(caProperties, "caProperties cannot be null");
-        return reference.plusMinutes(caProperties.getCertValidityPositiveOffsetMinutes());
+        return now.plusMinutes(caProperties.getCertValidityPositiveOffsetMinutes());
     }
+
+    static ZonedDateTime getValidAfter(ZonedDateTime requested, ZonedDateTime now, CAProperties caProperties) {
+        final ZonedDateTime validAfterLimit = getValidAfterLimit(now, caProperties);
+        if (requested == null) {
+            return validAfterLimit;
+        }
+
+        return (ZonedDateTime) max(requested, validAfterLimit);
+    }
+
+    static ZonedDateTime getValidBefore(ZonedDateTime requested, ZonedDateTime now, CAProperties caProperties) {
+        final ZonedDateTime validBeforeLimit = getValidBeforeLimit(now, caProperties);
+        if (requested == null) {
+            return validBeforeLimit;
+        }
+
+        return (ZonedDateTime) min(requested, validBeforeLimit);
+    }
+
+    static <T extends Comparable<T>> T max(T a, T b) {
+        return a.compareTo(b) >= 0 ? a : b;
+    }
+
+    static <T extends Comparable<T>> T min(T a, T b) {
+        return a.compareTo(b) < 0 ? a : b;
+    }
+
 
     static X509Certificate buildCertificate(JcaPKCS10CertificationRequest csr, PrivateKey cloudPrivateKey,
-            X509Certificate cloudCertificate, CAProperties caProperties, SecureRandom random) {
+                                            X509Certificate cloudCertificate, CAProperties caProperties, SecureRandom random) {
         final ZonedDateTime now = ZonedDateTime.now();
-        final Date validFrom = Date.from(getValidAfter(now, caProperties).toInstant());
-        final Date validUntil =  Date.from(getValidBefore(now, caProperties).toInstant());
+        final Date validFrom = Date.from(getValidAfterLimit(now, caProperties).toInstant());
+        final Date validUntil = Date.from(getValidBeforeLimit(now, caProperties).toInstant());
 
         logger.debug("Setting validity from='{}' to='{}'", validFrom, validUntil);
         return buildCertificate(csr, cloudPrivateKey, cloudCertificate, validFrom, validUntil, random);
@@ -380,15 +413,14 @@ public class CertificateAuthorityUtils {
     public static String getRequesterCommonName(HttpServletRequest httpServletRequest) {
         X509Certificate[] clientCerts = (X509Certificate[]) httpServletRequest
                 .getAttribute("javax.servlet.request.X509Certificate");
-        if (clientCerts == null || clientCerts.length != 1) {
+        if (clientCerts == null || clientCerts.length < 1) {
             throw new InvalidParameterException("Unexpected client cert");
         }
         final String requestedByCN = getCommonName(clientCerts[0]);
         return requestedByCN;
     }
 
-    public static List<String> getProtectedCommonNames(final String cloudCommonName)
-    {
+    public static List<String> getProtectedCommonNames(final String cloudCommonName) {
         if (Utilities.isEmpty(cloudCommonName)) {
             throw new InvalidParameterException("CloudCommonNAme cannot be empty");
         }

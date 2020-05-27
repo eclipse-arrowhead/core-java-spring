@@ -124,7 +124,7 @@ public class CertificateAuthorityServiceTest {
         rootCertificate = (X509Certificate) ReflectionTestUtils.getField(service, "rootCertificate");
         cloudCertificate = (X509Certificate) ReflectionTestUtils.getField(service, "cloudCertificate");
 
-        when(caCertificateDBService.saveCertificateInfo(anyString(), any(), anyString()))
+        when(caCertificateDBService.saveCertificateInfo(anyString(), any(), anyString(), any(), any()))
                 .thenReturn(new CaCertificate(CA_CERT_ID));
     }
 
@@ -251,7 +251,7 @@ public class CertificateAuthorityServiceTest {
 
         final CertificateSigningResponseDTO response = service.signCertificate(request, SIGN_REQUESTER_VALID);
 
-        verify(caCertificateDBService).saveCertificateInfo(eq(CONSUMER_CN), any(), eq(SIGN_REQUESTER_VALID));
+        verify(caCertificateDBService).saveCertificateInfo(eq(CONSUMER_CN), any(), eq(SIGN_REQUESTER_VALID), any(), any());
     }
 
     @Test(expected = InvalidParameterException.class)
@@ -260,7 +260,7 @@ public class CertificateAuthorityServiceTest {
 
         service.signCertificate(request, SIGN_REQUESTER_VALID);
 
-        verify(caCertificateDBService, never()).saveCertificateInfo(anyString(), any(), anyString());
+        verify(caCertificateDBService, never()).saveCertificateInfo(anyString(), any(), anyString(), any(), any());
     }
 
     @Test
@@ -269,7 +269,7 @@ public class CertificateAuthorityServiceTest {
 
         final CertificateSigningResponseDTO response = service.signCertificate(request, SIGN_REQUESTER_SYSOP);
 
-        verify(caCertificateDBService).saveCertificateInfo(eq(SYSOP_CN), any(), eq(SIGN_REQUESTER_SYSOP));
+        verify(caCertificateDBService).saveCertificateInfo(eq(SYSOP_CN), any(), eq(SIGN_REQUESTER_SYSOP), any(), any());
         verifyCertSigningResponse(response, SYSOP_CN);
     }
 
@@ -280,7 +280,7 @@ public class CertificateAuthorityServiceTest {
 
         final CertificateSigningResponseDTO response = service.signCertificate(request, SIGN_REQUESTER_VALID);
 
-        verify(caCertificateDBService).saveCertificateInfo(eq(CONSUMER_CN), any(), eq(SIGN_REQUESTER_VALID));
+        verify(caCertificateDBService).saveCertificateInfo(eq(CONSUMER_CN), any(), eq(SIGN_REQUESTER_VALID), any(), any());
         verifyCertSigningResponse(response, CONSUMER_CN);
     }
 
@@ -291,7 +291,7 @@ public class CertificateAuthorityServiceTest {
 
         service.signCertificate(request, SIGN_REQUESTER_VALID);
 
-        verify(caCertificateDBService, never()).saveCertificateInfo(anyString(), any(), anyString());
+        verify(caCertificateDBService, never()).saveCertificateInfo(anyString(), any(), anyString(), any(), any());
     }
 
     private X509Certificate verifyCertSigningResponse(CertificateSigningResponseDTO response, String commonName) {

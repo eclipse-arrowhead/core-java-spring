@@ -116,7 +116,12 @@ public class CertificateAuthorityService {
 
         final String clientCommonName = CertificateAuthorityUtils.getCommonName(csr);
         final BigInteger serialNumber = CertificateAuthorityUtils.getSerialNumber(clientCertificate);
-        final CaCertificate caCert = certificateDbService.saveCertificateInfo(clientCommonName, serialNumber, requesterCN);
+        final ZonedDateTime now = ZonedDateTime.now();
+        final ZonedDateTime validBefore = CertificateAuthorityUtils.getValidBefore(request.getValidBefore(), now, caProperties);
+        final ZonedDateTime validAfter = CertificateAuthorityUtils.getValidAfter(request.getValidAfter(), now, caProperties);
+        
+        final CaCertificate caCert = certificateDbService.saveCertificateInfo(clientCommonName, serialNumber, requesterCN,
+                validAfter, validBefore);
 
         return new CertificateSigningResponseDTO(caCert.getId(), encodedCertificateChain);
     }

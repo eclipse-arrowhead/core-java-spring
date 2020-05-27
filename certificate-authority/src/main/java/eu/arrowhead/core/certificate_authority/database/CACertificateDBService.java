@@ -1,17 +1,5 @@
 package eu.arrowhead.core.certificate_authority.database;
 
-import java.math.BigInteger;
-import java.time.ZonedDateTime;
-import java.util.Optional;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.stereotype.Service;
-
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.CaCertificate;
@@ -22,6 +10,17 @@ import eu.arrowhead.common.dto.internal.IssuedCertificatesResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.stereotype.Service;
+
+import java.math.BigInteger;
+import java.time.ZonedDateTime;
+import java.util.Optional;
 
 @Service
 public class CACertificateDBService {
@@ -31,7 +30,8 @@ public class CACertificateDBService {
 
     private final Logger logger = LogManager.getLogger(CACertificateDBService.class);
 
-    public CaCertificate saveCertificateInfo(final String commonName, final BigInteger serial, final String requesterCN) {
+    public CaCertificate saveCertificateInfo(final String commonName, final BigInteger serial, final String requesterCN,
+                                             final ZonedDateTime validAfter, final ZonedDateTime validBefore) {
         logger.debug("saveCertificateInfo started...");
 
         if (Utilities.isEmpty(commonName)) {
@@ -45,12 +45,12 @@ public class CACertificateDBService {
         }
         logger.debug("saveCertificateInfo for " + commonName);
 
-        final CaCertificate certificate = new CaCertificate(commonName, serial, requesterCN);
+        final CaCertificate certificate = new CaCertificate(commonName, serial, requesterCN, validAfter, validBefore);
         return caCertificateRepository.save(certificate);
     }
 
     public IssuedCertificatesResponseDTO getcertificateEntries(final int page, final int size,
-            final Direction direction, final String sortField) {
+                                                               final Direction direction, final String sortField) {
         logger.debug("getcertificateEntries started...");
 
         final int validatedPage = page < 0 ? 0 : page;
