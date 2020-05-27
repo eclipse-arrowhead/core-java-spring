@@ -1,11 +1,11 @@
 package eu.arrowhead.common;
 
+import java.util.List;
+
 import eu.arrowhead.common.core.CoreSystemService;
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
 import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
 import org.jose4j.jws.AlgorithmIdentifiers;
-
-import java.util.List;
 
 public class CommonConstants {
 
@@ -27,6 +27,7 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_SYSTEM_REGISTRY = "System Registry";
 	public static final String CORE_SYSTEM_DEVICE_REGISTRY = "Device Registry";
 	public static final String CORE_SYSTEM_ONBOARDING = "Onboarding Controller";
+	public static final String CORE_SYSTEM_GAMS = "Generic Autonomic Management System";
 
 	public static final String CORE_SERVICE_AUTH_TOKEN_GENERATION = "token-generation";
 	public static final String CORE_SERVICE_AUTH_PUBLIC_KEY = "auth-public-key";
