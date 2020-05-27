@@ -115,6 +115,6 @@ public class CACertificateDBService {
     public boolean revokeCertificate(long id, String createdBy) {
         logger.debug("revokeCertificate started...");
 
-        return caCertificateRepository.setRevokedById(id, ZonedDateTime.now(), createdBy);
+        return (caCertificateRepository.setRevokedById(id, ZonedDateTime.now(), createdBy) == 1);
     }
 }

@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import eu.arrowhead.common.database.entity.CaCertificate;
 
@@ -22,6 +23,7 @@ public interface CaCertificateRepository extends RefreshableRepository<CaCertifi
 	public Optional<CaCertificate> findByCommonNameAndSerial(final String commonName, final BigInteger serial);
 
 	@Modifying
+	@Transactional
 	@Query("update CaCertificate c set c.revokedAt = ?2 where c.id = ?1 and c.createdBy = ?3")
-	boolean setRevokedById(long id, ZonedDateTime revokedAt, String createdBy);
+	int setRevokedById(long id, ZonedDateTime revokedAt, String createdBy);
 }
