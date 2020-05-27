@@ -10,6 +10,7 @@ import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
 import eu.arrowhead.common.dto.internal.CertificateSigningResponseDTO;
 import eu.arrowhead.common.dto.internal.TrustedKeyCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.TrustedKeyCheckResponseDTO;
+import eu.arrowhead.common.dto.internal.TrustedKeysResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -27,6 +28,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -47,6 +49,7 @@ import java.util.regex.Pattern;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -337,5 +340,28 @@ public class CertificateAuthorityServiceTest {
 
         assertNotNull(response);
         assertEquals(response, responseDTO);
+    }
+
+    // ------------------------------------------------------------------------
+
+    @Test
+    public void testGetTrustedKeys() {
+        final TrustedKeysResponseDTO responseDTO = new TrustedKeysResponseDTO();
+        when(caTrustedKeyDBService.getTrustedKeyEntries(anyInt(), anyInt(), any(), anyString()))
+                .thenReturn(responseDTO);
+
+        final TrustedKeysResponseDTO response = service.getTrustedKeys(1, 10, Sort.Direction.ASC, "id");
+        verify(caTrustedKeyDBService).getTrustedKeyEntries(anyInt(), anyInt(), any(), anyString());
+
+        assertNotNull(response);
+        assertEquals(response, responseDTO);
+    }
+
+    // ------------------------------------------------------------------------
+
+    @Test
+    public void testDeleteTrustedKeys() {
+        service.deleteTrustedKey(TRUSTED_KEY_ID);
+        verify(caTrustedKeyDBService).deleteTrustedKey(eq(TRUSTED_KEY_ID));
     }
 }
