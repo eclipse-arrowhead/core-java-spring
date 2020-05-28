@@ -74,7 +74,7 @@ final class GatewayHTTPRequestCache {
 			// We don't remove the whole request from the cache only the request-line because if a request does not finished (some bytes are missing from its body) before a new request starts the cache will
 			// use the new requests starting bytes to finish the previous request. With this solution the first request will fail (as it should) but additional requests can still work.
 			cache.delete(0, requestLineEndIdx + 1);
-			logger.debug("Remove {} bytes from cache.", requestEndIdx + 1);
+			logger.debug("Remove {} bytes from cache.", requestLineEndIdx + 1);
 			
 			return request;
 		}

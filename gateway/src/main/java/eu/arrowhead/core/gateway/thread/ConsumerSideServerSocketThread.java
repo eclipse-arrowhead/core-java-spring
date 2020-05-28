@@ -213,7 +213,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 
 						switch (canUseHttpCache) {
 						case YES: 
-							logger.debug("Moving {} byte arrays from byte array cache to HTTP cache", byteArrayCache.size() - 1);
+							logger.debug("Moving {} byte array(s) from byte array cache to HTTP cache", byteArrayCache.size() - 1);
 							for (int i = 0; i < byteArrayCache.size() - 1; ++i) { // don't add the last one, because that one is added later
 								requestCache.addBytes(byteArrayCache.get(i));
 							}
@@ -222,7 +222,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 							break;
 						case NO:
 							// send the whole cache content here
-							logger.debug("Sending {} byte arrays via relay as one message...", byteArrayCache.size());
+							logger.debug("Sending {} byte array(s) via relay as one message...", byteArrayCache.size());
 							relayClient.sendBytes(relaySession, sender, providerGatewayPublicKey, concatenateByteArrays(byteArrayCache)); 
 							break;
 						case CAN_BE: 
@@ -339,7 +339,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 			}
 		}
 	
-		logger.debug("HTTP Cache answer: ", isHttp.name());
+		logger.debug("HTTP Cache answer: {}", isHttp.name());
 		return isHttp; // NO or CAN_BE
 	}
 	
