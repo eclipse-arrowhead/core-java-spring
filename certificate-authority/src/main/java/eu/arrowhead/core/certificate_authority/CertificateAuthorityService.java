@@ -127,7 +127,7 @@ public class CertificateAuthorityService {
     }
 
     public IssuedCertificatesResponseDTO getCertificates(int page, int size, Direction direction, String sortField) {
-        return certificateDbService.getcertificateEntries(page, size, direction, sortField);
+        return certificateDbService.getCertificateEntries(page, size, direction, sortField);
     }
 
     public boolean revokeCertificate(long id, String requestedByCN) {

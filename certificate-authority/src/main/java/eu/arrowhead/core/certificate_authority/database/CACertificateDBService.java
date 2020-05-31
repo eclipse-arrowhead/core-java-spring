@@ -49,9 +49,9 @@ public class CACertificateDBService {
         return caCertificateRepository.save(certificate);
     }
 
-    public IssuedCertificatesResponseDTO getcertificateEntries(final int page, final int size,
+    public IssuedCertificatesResponseDTO getCertificateEntries(final int page, final int size,
                                                                final Direction direction, final String sortField) {
-        logger.debug("getcertificateEntries started...");
+        logger.debug("getCertificateEntries started...");
 
         final int validatedPage = page < 0 ? 0 : page;
         final int validatedSize = size < 1 ? Integer.MAX_VALUE : size;
