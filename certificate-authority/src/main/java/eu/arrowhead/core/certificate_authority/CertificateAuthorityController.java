@@ -252,7 +252,7 @@ public class CertificateAuthorityController {
 	}
 
 	// -------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Add trusted public key", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = "Add trusted public key", response = AddTrustedKeyResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = ADD_TRUSTED_KEY_HTTP_201_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = ADD_TRUSTED_KEY_HTTP_400_MESSAGE),
