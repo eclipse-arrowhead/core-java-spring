@@ -42,7 +42,6 @@ import eu.arrowhead.common.dto.internal.IssuedCertificatesResponseDTO;
 import eu.arrowhead.common.dto.internal.TrustedKeyCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.TrustedKeyCheckResponseDTO;
 import eu.arrowhead.common.dto.internal.TrustedKeysResponseDTO;
-import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import io.swagger.annotations.Api;
@@ -275,7 +274,7 @@ public class CertificateAuthorityController {
 	@DeleteMapping(path = OP_CA_MGMT_TRUSTED_KEY_DELETE_URI)
 	public ResponseEntity<String> deleteTrustedKey(@PathVariable long id) {
 		if (id <= 0) {
-			throw new InvalidParameterException("Invalid id");
+			throw new BadPayloadException("Invalid id");
 		}
 		certificateAuthorityService.deleteTrustedKey(id);
 		return new ResponseEntity<String>("OK", org.springframework.http.HttpStatus.NO_CONTENT);

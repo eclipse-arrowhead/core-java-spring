@@ -38,6 +38,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -236,6 +238,14 @@ public class CertificateAuthorityControllerTrustedKeysTest {
         doThrow(new InvalidParameterException("dummy")).when(serviceCertificateAuthorityService).deleteTrustedKey(anyLong());
 
         mockMvc.perform(delete(TRUSTED_KEYS_URL + 1)).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testTrustedKeyByIdDeleteInvalidZeroOrNegative() throws Exception {
+
+        verify(serviceCertificateAuthorityService, never()).deleteTrustedKey(anyLong());
+
+        mockMvc.perform(delete(TRUSTED_KEYS_URL + 0)).andExpect(status().isBadRequest());
     }
 
     // -------------------------------------------------------------------------------------------------
