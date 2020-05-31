@@ -56,82 +56,80 @@ public class CertificateAuthorityControllerTest {
 
     @Before
     public void setup() {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac)
+                                      .build();
     }
 
     @Test
     public void testEcho() throws Exception {
         mockMvc.perform(get(ECHO_URI))
-                .andExpect(status().isOk());
+               .andExpect(status().isOk());
     }
 
     @Test
     public void testGetCloudCommonName() throws Exception {
         when(serviceCertificateAuthorityService.getCloudCommonName()).thenReturn("testcloud2.aitia.arrowhead.eu");
-        mockMvc.perform(get(COMMON_NAME_URI)
-                .accept(MediaType.TEXT_PLAIN))
-                .andExpect(status().isOk())
-                .andExpect(content().string("testcloud2.aitia.arrowhead.eu"));
+        mockMvc.perform(get(COMMON_NAME_URI).accept(MediaType.TEXT_PLAIN))
+               .andExpect(status().isOk())
+               .andExpect(content().string("testcloud2.aitia.arrowhead.eu"));
     }
 
     @Test
     public void testSignGet() throws Exception {
         mockMvc.perform(get(SIGN_CERTIFICATE_URI))
-                .andExpect(status().isMethodNotAllowed());
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testSignPut() throws Exception {
         mockMvc.perform(put(SIGN_CERTIFICATE_URI))
-                .andExpect(status().isMethodNotAllowed());
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testSignPatch() throws Exception {
         mockMvc.perform(patch(SIGN_CERTIFICATE_URI))
-                .andExpect(status().isMethodNotAllowed());
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testSignDelete() throws Exception {
         mockMvc.perform(delete(SIGN_CERTIFICATE_URI))
-                .andExpect(status().isMethodNotAllowed());
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testSignHead() throws Exception {
         mockMvc.perform(head(SIGN_CERTIFICATE_URI))
-                .andExpect(status().isMethodNotAllowed());
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testSignOptions() throws Exception {
         mockMvc.perform(options(SIGN_CERTIFICATE_URI))
-                .andExpect(status().isOk());
+               .andExpect(status().isOk());
     }
 
     @Test
     public void testSignPostInvalidContentType() throws Exception {
         mockMvc.perform(post(SIGN_CERTIFICATE_URI))
-                .andExpect(status().isUnsupportedMediaType());
+               .andExpect(status().isUnsupportedMediaType());
     }
 
     @Test
     public void testSignPostWithNullCSR() throws Exception {
-        mockMvc.perform(post(SIGN_CERTIFICATE_URI)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(asJsonString(new CertificateSigningRequestDTO(null))))
-                .andExpect(status().isBadRequest());
+        mockMvc.perform(post(SIGN_CERTIFICATE_URI).contentType(MediaType.APPLICATION_JSON)
+                                                  .accept(MediaType.APPLICATION_JSON)
+                                                  .content(asJsonString(new CertificateSigningRequestDTO(null))))
+               .andExpect(status().isBadRequest());
     }
 
     @Test
     public void testSignPostWithInvalidCSR() throws Exception {
-        mockMvc.perform(post(SIGN_CERTIFICATE_URI)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(asJsonString(new CertificateSigningRequestDTO("INVALID"))))
-                .andExpect(status().isBadRequest());
+        mockMvc.perform(post(SIGN_CERTIFICATE_URI).contentType(MediaType.APPLICATION_JSON)
+                                                  .accept(MediaType.APPLICATION_JSON)
+                                                  .content(asJsonString(new CertificateSigningRequestDTO("INVALID"))))
+               .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -140,13 +138,14 @@ public class CertificateAuthorityControllerTest {
         final CertificateSigningResponseDTO response = new CertificateSigningResponseDTO(0, new ArrayList<>());
         when(serviceCertificateAuthorityService.signCertificate(any(), anyString())).thenReturn(response);
 
-        mockMvc.perform(post(SIGN_CERTIFICATE_URI).secure(true).with(x509("certificates/sysop.pem"))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(asJsonString(new CertificateSigningRequestDTO(getResourceContent("certificates/sysop.csr")))))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.certificateChain").isArray());
+        mockMvc.perform(post(SIGN_CERTIFICATE_URI).secure(true)
+                                                  .with(x509("certificates/sysop.pem"))
+                                                  .contentType(MediaType.APPLICATION_JSON)
+                                                  .accept(MediaType.APPLICATION_JSON)
+                                                  .content(asJsonString(new CertificateSigningRequestDTO(getResourceContent("certificates/sysop.csr")))))
+               .andExpect(status().isOk())
+               .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+               .andExpect(jsonPath("$.certificateChain").isArray());
     }
 
     private static String asJsonString(final Object obj) {

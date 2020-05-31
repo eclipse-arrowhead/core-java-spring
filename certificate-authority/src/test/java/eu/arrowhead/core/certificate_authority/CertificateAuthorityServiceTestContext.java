@@ -7,14 +7,14 @@ import org.springframework.context.annotation.Primary;
 
 @Configuration
 public class CertificateAuthorityServiceTestContext {
-	
-	//=================================================================================================
-	// methods
 
-	//-------------------------------------------------------------------------------------------------
-	@Bean
-	@Primary // This bean is primary only in test context
-	public CertificateAuthorityService mockCertificateAuthorityService() {
-		return Mockito.mock(CertificateAuthorityService.class);
-	}
+    //=================================================================================================
+    // methods
+
+    //-------------------------------------------------------------------------------------------------
+    @Bean
+    @Primary // This bean is primary only in test context
+    public CertificateAuthorityService mockCertificateAuthorityService() {
+        return Mockito.mock(CertificateAuthorityService.class);
+    }
 }

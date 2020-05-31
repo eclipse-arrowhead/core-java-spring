@@ -15,7 +15,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
@@ -26,9 +25,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -77,62 +73,61 @@ public class CertificateAuthorityControllerTrustedKeysTest {
 
     // =================================================================================================
     // methods
-
-    private static String getResourceContent(String resourcePath) throws IOException {
-        File resource = new ClassPathResource(resourcePath).getFile();
-        return new String(Files.readAllBytes(resource.toPath())).trim();
-    }
-
-    // -------------------------------------------------------------------------------------------------
-
     // -------------------------------------------------------------------------------------------------
     @Before
     public void setup() {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac)
+                                      .build();
     }
 
     @Test
     public void testTrustedKeyListPost() throws Exception {
-        mockMvc.perform(post(TRUSTED_KEYS_URL)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(post(TRUSTED_KEYS_URL))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testTrustedKeyListPatch() throws Exception {
-        mockMvc.perform(patch(TRUSTED_KEYS_URL)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(patch(TRUSTED_KEYS_URL))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testTrustedKeyListDelete() throws Exception {
-        mockMvc.perform(delete(TRUSTED_KEYS_URL)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(delete(TRUSTED_KEYS_URL))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testTrustedKeyListHead() throws Exception {
-        mockMvc.perform(head(TRUSTED_KEYS_URL)).andExpect(status().isOk());
+        mockMvc.perform(head(TRUSTED_KEYS_URL))
+               .andExpect(status().isOk());
     }
 
     @Test
     public void testTrustedKeyListOptions() throws Exception {
-        mockMvc.perform(options(TRUSTED_KEYS_URL)).andExpect(status().isOk());
+        mockMvc.perform(options(TRUSTED_KEYS_URL))
+               .andExpect(status().isOk());
     }
 
     @Test
     public void testTrustedKeyListGetWithoutParameter() throws Exception {
         final int PAGE_SIZE = 5;
         final Page<CaTrustedKey> trustedKeyEntryList = createTrustedKeysPageForDBMocking(PAGE_SIZE);
-        final TrustedKeysResponseDTO trustedKeyEntriesDTO = DTOConverter
-                .convertCaTrustedKeyListToTrustedKeysResponseDTO(trustedKeyEntryList);
+        final TrustedKeysResponseDTO trustedKeyEntriesDTO = DTOConverter.convertCaTrustedKeyListToTrustedKeysResponseDTO(trustedKeyEntryList);
 
-        when(serviceCertificateAuthorityService.getTrustedKeys(anyInt(), anyInt(), any(), any()))
-                .thenReturn(trustedKeyEntriesDTO);
+        when(serviceCertificateAuthorityService.getTrustedKeys(anyInt(), anyInt(), any(), any())).thenReturn(trustedKeyEntriesDTO);
 
         final MvcResult response = this.mockMvc.perform(get(TRUSTED_KEYS_URL).accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk()).andReturn();
-        final TrustedKeysResponseDTO responseBody = objectMapper
-                .readValue(response.getResponse().getContentAsString(), TrustedKeysResponseDTO.class);
+                                               .andExpect(status().isOk())
+                                               .andReturn();
+        final TrustedKeysResponseDTO responseBody =
+                objectMapper.readValue(response.getResponse()
+                                               .getContentAsString(), TrustedKeysResponseDTO.class);
 
         assertEquals(PAGE_SIZE, responseBody.getCount());
-        assertEquals(PAGE_SIZE, responseBody.getTrustedKeys().size());
+        assertEquals(PAGE_SIZE, responseBody.getTrustedKeys()
+                                            .size());
     }
 
     // -------------------------------------------------------------------------------------------------
@@ -140,104 +135,116 @@ public class CertificateAuthorityControllerTrustedKeysTest {
     public void testTrustedKeyListGetWithPageAndSizeParameter() throws Exception {
         final int PAGE_SIZE = 5;
         final Page<CaTrustedKey> trustedKeyEntryList = createTrustedKeysPageForDBMocking(PAGE_SIZE);
-        final TrustedKeysResponseDTO trustedKeyEntriesDTO = DTOConverter
-                .convertCaTrustedKeyListToTrustedKeysResponseDTO(trustedKeyEntryList);
+        final TrustedKeysResponseDTO trustedKeyEntriesDTO = DTOConverter.convertCaTrustedKeyListToTrustedKeysResponseDTO(trustedKeyEntryList);
 
         when(serviceCertificateAuthorityService.getTrustedKeys(anyInt(), anyInt(), any(), any()))
                 .thenReturn(trustedKeyEntriesDTO);
 
-        final MvcResult response = this.mockMvc.perform(get(TRUSTED_KEYS_URL)
-                .param(PAGE, "0")
-                .param(ITEM_PER_PAGE, "" + PAGE_SIZE)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
-        final TrustedKeysResponseDTO responseBody = objectMapper
-                .readValue(response.getResponse().getContentAsString(), TrustedKeysResponseDTO.class);
+        final MvcResult response = this.mockMvc.perform(get(TRUSTED_KEYS_URL).param(PAGE, "0")
+                                                                             .param(ITEM_PER_PAGE, "" + PAGE_SIZE)
+                                                                             .accept(MediaType.APPLICATION_JSON))
+                                               .andExpect(status().isOk())
+                                               .andReturn();
+        final TrustedKeysResponseDTO responseBody = objectMapper.readValue(response.getResponse()
+                                                                                   .getContentAsString(), TrustedKeysResponseDTO.class);
 
         assertEquals(PAGE_SIZE, responseBody.getCount());
-        assertEquals(PAGE_SIZE, responseBody.getTrustedKeys().size());
+        assertEquals(PAGE_SIZE, responseBody.getTrustedKeys()
+                                            .size());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testTrustedKeyListGetWithNullPageButDefinedSizeParameter() throws Exception {
-        this.mockMvc.perform(get(TRUSTED_KEYS_URL).param(ITEM_PER_PAGE, "1").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+        this.mockMvc.perform(get(TRUSTED_KEYS_URL).param(ITEM_PER_PAGE, "1")
+                                                  .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testTrustedKeyListGetWithDefinedPageButNullSizeParameter() throws Exception {
-        this.mockMvc.perform(get(TRUSTED_KEYS_URL).param(PAGE, "0").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+        this.mockMvc.perform(get(TRUSTED_KEYS_URL).param(PAGE, "0")
+                                                  .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testTrustedKeyListGetWithInvalidSortDirectionFlagParametert() throws Exception {
-        this.mockMvc.perform(get(TRUSTED_KEYS_URL).param("direction", "invalid").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+        this.mockMvc.perform(get(TRUSTED_KEYS_URL).param("direction", "invalid")
+                                                  .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest());
     }
 
     @Test
     public void testAddTrustedKeyInvalid() throws Exception {
-        doThrow(new ArrowheadException("dummy")).when(serviceCertificateAuthorityService).addTrustedKey(any());
+        doThrow(new ArrowheadException("dummy")).when(serviceCertificateAuthorityService)
+                                                .addTrustedKey(any());
 
-        mockMvc.perform(put(TRUSTED_KEYS_URL)).andExpect(status().isBadRequest());
+        mockMvc.perform(put(TRUSTED_KEYS_URL))
+               .andExpect(status().isBadRequest());
     }
 
     @Test
     public void testAddTrustedKeyValid() throws Exception {
         final AddTrustedKeyRequestDTO requestDTO = new AddTrustedKeyRequestDTO(MOCKED_PUBLIC_KEY, "dummy");
 
-        mockMvc.perform(put(TRUSTED_KEYS_URL)
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(asJsonString(requestDTO)))
-                .andExpect(status().isCreated());
+        mockMvc.perform(put(TRUSTED_KEYS_URL).contentType(MediaType.APPLICATION_JSON_UTF8)
+                                             .content(asJsonString(requestDTO)))
+               .andExpect(status().isCreated());
     }
 
     @Test
     public void testTrustedKeyByIdGet() throws Exception {
-        mockMvc.perform(get(TRUSTED_KEYS_URL + 1)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(get(TRUSTED_KEYS_URL + 1))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testTrustedKeyByIdPost() throws Exception {
-        mockMvc.perform(post(TRUSTED_KEYS_URL + 1)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(post(TRUSTED_KEYS_URL + 1))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testTrustedKeyByIdPut() throws Exception {
-        mockMvc.perform(put(TRUSTED_KEYS_URL + 1)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(put(TRUSTED_KEYS_URL + 1))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testTrustedKeyByIdPatch() throws Exception {
-        mockMvc.perform(patch(TRUSTED_KEYS_URL + 1)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(patch(TRUSTED_KEYS_URL + 1))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testTrustedKeyByIdHead() throws Exception {
-        mockMvc.perform(head(TRUSTED_KEYS_URL + 1)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(head(TRUSTED_KEYS_URL + 1))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testTrustedKeyByIdOptions() throws Exception {
-        mockMvc.perform(options(TRUSTED_KEYS_URL + 1)).andExpect(status().isOk());
+        mockMvc.perform(options(TRUSTED_KEYS_URL + 1))
+               .andExpect(status().isOk());
     }
 
     @Test
     public void testTrustedKeyByIdDeleteValid() throws Exception {
-        mockMvc.perform(delete(TRUSTED_KEYS_URL + 1)).andExpect(status().isNoContent());
+        mockMvc.perform(delete(TRUSTED_KEYS_URL + 1))
+               .andExpect(status().isNoContent());
     }
 
     @Test
     public void testTrustedKeyByIdDeleteInvalid() throws Exception {
 
-        doThrow(new InvalidParameterException("dummy")).when(serviceCertificateAuthorityService).deleteTrustedKey(anyLong());
+        doThrow(new InvalidParameterException("dummy")).when(serviceCertificateAuthorityService)
+                                                       .deleteTrustedKey(anyLong());
 
-        mockMvc.perform(delete(TRUSTED_KEYS_URL + 1)).andExpect(status().isBadRequest());
+        mockMvc.perform(delete(TRUSTED_KEYS_URL + 1))
+               .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -245,49 +252,55 @@ public class CertificateAuthorityControllerTrustedKeysTest {
 
         verify(serviceCertificateAuthorityService, never()).deleteTrustedKey(anyLong());
 
-        mockMvc.perform(delete(TRUSTED_KEYS_URL + 0)).andExpect(status().isBadRequest());
+        mockMvc.perform(delete(TRUSTED_KEYS_URL + 0))
+               .andExpect(status().isBadRequest());
     }
 
     // -------------------------------------------------------------------------------------------------
 
     @Test
     public void testCheckTrustedKeyGet() throws Exception {
-        mockMvc.perform(get(CHECK_TRUSTED_KEY_URL)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(get(CHECK_TRUSTED_KEY_URL))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testCheckTrustedKeyPut() throws Exception {
-        mockMvc.perform(put(CHECK_TRUSTED_KEY_URL)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(put(CHECK_TRUSTED_KEY_URL))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testCheckTrustedKeyPatch() throws Exception {
-        mockMvc.perform(patch(CHECK_TRUSTED_KEY_URL)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(patch(CHECK_TRUSTED_KEY_URL))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testCheckTrustedKeyHead() throws Exception {
-        mockMvc.perform(head(CHECK_TRUSTED_KEY_URL)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(head(CHECK_TRUSTED_KEY_URL))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testCheckTrustedKeyOptions() throws Exception {
-        mockMvc.perform(options(CHECK_TRUSTED_KEY_URL)).andExpect(status().isOk());
+        mockMvc.perform(options(CHECK_TRUSTED_KEY_URL))
+               .andExpect(status().isOk());
     }
 
     @Test
     public void testCheckTrustedKeyDelete() throws Exception {
-        mockMvc.perform(delete(CHECK_TRUSTED_KEY_URL)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(delete(CHECK_TRUSTED_KEY_URL))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testCheckTrustedKeyWithEmptyParam() throws Exception {
 
-        this.mockMvc.perform(post(CHECK_TRUSTED_KEY_URL)
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .accept(MediaType.APPLICATION_JSON_UTF8)
-                .content(""))
-                .andExpect(status().isBadRequest());
+        this.mockMvc.perform(post(CHECK_TRUSTED_KEY_URL).contentType(MediaType.APPLICATION_JSON_UTF8)
+                                                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                                                        .content(""))
+                    .andExpect(status().isBadRequest());
     }
 
     // -------------------------------------------------------------------------------------------------
@@ -296,11 +309,10 @@ public class CertificateAuthorityControllerTrustedKeysTest {
 
         final TrustedKeyCheckRequestDTO request = new TrustedKeyCheckRequestDTO("");
 
-        this.mockMvc.perform(post(CHECK_TRUSTED_KEY_URL)
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .accept(MediaType.APPLICATION_JSON_UTF8)
-                .content(asJsonString(request)))
-                .andExpect(status().isBadRequest());
+        this.mockMvc.perform(post(CHECK_TRUSTED_KEY_URL).contentType(MediaType.APPLICATION_JSON_UTF8)
+                                                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                                                        .content(asJsonString(request)))
+                    .andExpect(status().isBadRequest());
     }
 
     // -------------------------------------------------------------------------------------------------
@@ -313,14 +325,15 @@ public class CertificateAuthorityControllerTrustedKeysTest {
 
         when(serviceCertificateAuthorityService.checkTrustedKey(any())).thenReturn(responseDTO);
 
-        final MvcResult response = this.mockMvc.perform(post(CHECK_TRUSTED_KEY_URL)
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .accept(MediaType.APPLICATION_JSON_UTF8)
-                .content(asJsonString(request)))
-                .andExpect(status().isOk())
-                .andReturn();
-        final TrustedKeyCheckResponseDTO responseBody = objectMapper
-                .readValue(response.getResponse().getContentAsString(), TrustedKeyCheckResponseDTO.class);
+        final MvcResult response =
+                this.mockMvc.perform(post(CHECK_TRUSTED_KEY_URL).contentType(MediaType.APPLICATION_JSON_UTF8)
+                                                                .accept(MediaType.APPLICATION_JSON_UTF8)
+                                                                .content(asJsonString(request)))
+                            .andExpect(status().isOk())
+                            .andReturn();
+        final TrustedKeyCheckResponseDTO responseBody =
+                objectMapper.readValue(response.getResponse()
+                                               .getContentAsString(), TrustedKeyCheckResponseDTO.class);
     }
 
     // =================================================================================================

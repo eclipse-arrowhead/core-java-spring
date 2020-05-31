@@ -37,10 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Files;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.Security;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -115,7 +112,7 @@ public class CertificateAuthorityServiceTest {
     }
 
     @Before
-    public void setUp() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
+    public void setUp() {
         caProperties = getCAProperties();
         ReflectionTestUtils.setField(service, "caProperties", caProperties);
         ReflectionTestUtils.setField(service, "sslProperties", getSslProperties());
@@ -180,7 +177,8 @@ public class CertificateAuthorityServiceTest {
     @Test(expected = InvalidParameterException.class)
     public void testCheckCertificateValidBase64DERNotFound() throws IOException {
         final String pemCert = getResourceContent("certificates/sysop.pem");
-        final String encodedCert = PEM_PATTERN.matcher(pemCert).replaceFirst("$1");
+        final String encodedCert = PEM_PATTERN.matcher(pemCert)
+                                              .replaceFirst("$1");
         final CertificateCheckRequestDTO request = new CertificateCheckRequestDTO(0, encodedCert);
 
         when(caCertificateDBService.isCertificateValidNow(any())).thenThrow(DataNotFoundException.class);
@@ -196,9 +194,9 @@ public class CertificateAuthorityServiceTest {
     public void testCheckCertificateValidBase64DERFound() throws IOException {
         final String pemCert = getResourceContent("certificates/sysop.pem");
         final String encodedCert = PEM_PATTERN.matcher(pemCert)
-                .replaceFirst("$1")
-                .replace("\n", "")
-                .replace("\r", "");
+                                              .replaceFirst("$1")
+                                              .replace("\n", "")
+                                              .replace("\r", "");
         final CertificateCheckRequestDTO request = new CertificateCheckRequestDTO(0, encodedCert);
 
         CertificateCheckResponseDTO responseDTO = new CertificateCheckResponseDTO(SYSOP_CN, BigInteger.ONE, "good", ZonedDateTime.now());
@@ -333,7 +331,8 @@ public class CertificateAuthorityServiceTest {
     public void testAddTrustedKey() {
         final AddTrustedKeyRequestDTO request = new AddTrustedKeyRequestDTO();
         final AddTrustedKeyResponseDTO responseDTO = new AddTrustedKeyResponseDTO(TRUSTED_KEY_ID);
-        doReturn(responseDTO).when(caTrustedKeyDBService).addTrustedKey(request);
+        doReturn(responseDTO).when(caTrustedKeyDBService)
+                             .addTrustedKey(request);
 
         final AddTrustedKeyResponseDTO response = service.addTrustedKey(request);
         verify(caTrustedKeyDBService).addTrustedKey(eq(request));

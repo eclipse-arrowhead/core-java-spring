@@ -70,104 +70,115 @@ public class CAAccessControlFilterTest {
 
         final CAAccessControlFilter acFilter = appContext.getBean(CAAccessControlFilter.class);
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac)
-                .apply(springSecurity())
-                .addFilters(acFilter)
-                .build();
+                                      .apply(springSecurity())
+                                      .addFilters(acFilter)
+                                      .build();
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testEchoCertificateInvalid() throws Exception {
-        this.mockMvc.perform(get(CA_ECHO).secure(true).with(x509("certificates/notvalid.pem"))
-                .accept(MediaType.TEXT_PLAIN))
-                .andExpect(status().isUnauthorized());
+        this.mockMvc.perform(get(CA_ECHO).secure(true)
+                                         .with(x509("certificates/notvalid.pem"))
+                                         .accept(MediaType.TEXT_PLAIN))
+                    .andExpect(status().isUnauthorized());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testEchoCertificateValid() throws Exception {
-        this.mockMvc.perform(get(CA_ECHO).secure(true).with(x509("certificates/valid.pem"))
-                .accept(MediaType.TEXT_PLAIN))
-                .andExpect(status().isOk());
+        this.mockMvc.perform(get(CA_ECHO).secure(true)
+                                         .with(x509("certificates/valid.pem"))
+                                         .accept(MediaType.TEXT_PLAIN))
+                    .andExpect(status().isOk());
     }
 
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testGetCommonNameCertificateInvalid() throws Exception {
-        this.mockMvc.perform(get(CA_CLOUD_COMMON_NAME).secure(true).with(x509("certificates/notvalid.pem"))
-                .accept(MediaType.TEXT_PLAIN))
-                .andExpect(status().isUnauthorized());
+        this.mockMvc.perform(get(CA_CLOUD_COMMON_NAME).secure(true)
+                                                      .with(x509("certificates/notvalid.pem"))
+                                                      .accept(MediaType.TEXT_PLAIN))
+                    .andExpect(status().isUnauthorized());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testGetCommonNameCertificateValid() throws Exception {
-        this.mockMvc.perform(get(CA_CLOUD_COMMON_NAME).secure(true).with(x509("certificates/valid.pem"))
-                .accept(MediaType.TEXT_PLAIN))
-                .andExpect(status().isOk());
+        this.mockMvc.perform(get(CA_CLOUD_COMMON_NAME).secure(true)
+                                                      .with(x509("certificates/valid.pem"))
+                                                      .accept(MediaType.TEXT_PLAIN))
+                    .andExpect(status().isOk());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testCheckCertificateCertificateInvalid() throws Exception {
-        this.mockMvc.perform(post(CA_CHECK_CERTIFICATE).secure(true).with(x509("certificates/notvalid.pem"))
-                .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isUnauthorized());
+        this.mockMvc.perform(post(CA_CHECK_CERTIFICATE).secure(true)
+                                                       .with(x509("certificates/notvalid.pem"))
+                                                       .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andExpect(status().isUnauthorized());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testCheckCertificateCertificateValid() throws Exception {
         // Filter enables the access but we use ill-formed input to make sure real operation never happens
-        this.mockMvc.perform(post(CA_CHECK_CERTIFICATE).secure(true).with(x509("certificates/valid.pem"))
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isBadRequest());
+        this.mockMvc.perform(post(CA_CHECK_CERTIFICATE).secure(true)
+                                                       .with(x509("certificates/valid.pem"))
+                                                       .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                                       .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andExpect(status().isBadRequest());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testSignCertificateCertificateInvalid() throws Exception {
-        this.mockMvc.perform(post(CA_SIGN).secure(true).with(x509("certificates/notvalid.pem"))
-                .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isUnauthorized());
+        this.mockMvc.perform(post(CA_SIGN).secure(true)
+                                          .with(x509("certificates/notvalid.pem"))
+                                          .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andExpect(status().isUnauthorized());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testSignCertificateCertificateValid() throws Exception {
-        this.mockMvc.perform(post(CA_SIGN).secure(true).with(x509("certificates/valid.pem"))
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isUnauthorized());
+        this.mockMvc.perform(post(CA_SIGN).secure(true)
+                                          .with(x509("certificates/valid.pem"))
+                                          .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                          .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andExpect(status().isUnauthorized());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testSignCertificateCertificateSysop() throws Exception {
         // Filter enables the access but we use ill-formed input to make sure real operation never happens
-        this.mockMvc.perform(post(CA_SIGN).secure(true).with(x509("certificates/sysop.pem"))
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isBadRequest());
+        this.mockMvc.perform(post(CA_SIGN).secure(true)
+                                          .with(x509("certificates/sysop.pem"))
+                                          .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                          .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andExpect(status().isBadRequest());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testCheckTrustedKeyCertificateInvalid() throws Exception {
-        this.mockMvc.perform(post(CA_CHECK_TRUSTED_KEY).secure(true).with(x509("certificates/notvalid.pem"))
-                .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isUnauthorized());
+        this.mockMvc.perform(post(CA_CHECK_TRUSTED_KEY).secure(true)
+                                                       .with(x509("certificates/notvalid.pem"))
+                                                       .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andExpect(status().isUnauthorized());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testCheckTrustedKeyCertificateValid() throws Exception {
-        this.mockMvc.perform(post(CA_CHECK_TRUSTED_KEY).secure(true).with(x509("certificates/valid.pem"))
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isUnauthorized());
+        this.mockMvc.perform(post(CA_CHECK_TRUSTED_KEY).secure(true)
+                                                       .with(x509("certificates/valid.pem"))
+                                                       .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                                       .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andExpect(status().isUnauthorized());
     }
 
 
@@ -175,134 +186,150 @@ public class CAAccessControlFilterTest {
     @Test
     public void testCheckTrustedKeyCertificateSysop() throws Exception {
         // Filter enables the access but we use ill-formed input to make sure real operation never happens
-        this.mockMvc.perform(post(CA_CHECK_TRUSTED_KEY).secure(true).with(x509("certificates/sysop.pem"))
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isBadRequest());
+        this.mockMvc.perform(post(CA_CHECK_TRUSTED_KEY).secure(true)
+                                                       .with(x509("certificates/sysop.pem"))
+                                                       .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                                       .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andExpect(status().isBadRequest());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testCertificatesListCertificateInvalid() throws Exception {
-        this.mockMvc.perform(get(CA_MGMT_CERTIFICATES).secure(true).with(x509("certificates/notvalid.pem"))
-                .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isUnauthorized());
+        this.mockMvc.perform(get(CA_MGMT_CERTIFICATES).secure(true)
+                                                      .with(x509("certificates/notvalid.pem"))
+                                                      .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andExpect(status().isUnauthorized());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testCertificatesListCertificateValid() throws Exception {
-        this.mockMvc.perform(get(CA_MGMT_CERTIFICATES).secure(true).with(x509("certificates/valid.pem"))
-                .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isUnauthorized());
+        this.mockMvc.perform(get(CA_MGMT_CERTIFICATES).secure(true)
+                                                      .with(x509("certificates/valid.pem"))
+                                                      .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andExpect(status().isUnauthorized());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testCertificatesListCertificateSysop() throws Exception {
         // Filter enables the access but we use ill-formed input to make sure real operation never happens
-        this.mockMvc.perform(get(CA_MGMT_CERTIFICATES).secure(true).with(x509("certificates/sysop.pem"))
-                .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isOk());
+        this.mockMvc.perform(get(CA_MGMT_CERTIFICATES).secure(true)
+                                                      .with(x509("certificates/sysop.pem"))
+                                                      .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andExpect(status().isOk());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testRevokeCertificateCertificateInvalid() throws Exception {
-        this.mockMvc.perform(delete(CA_MGMT_CERTIFICATES + "/0").secure(true).with(x509("certificates/notvalid.pem"))
-                .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isUnauthorized());
+        this.mockMvc.perform(delete(CA_MGMT_CERTIFICATES + "/0").secure(true)
+                                                                .with(x509("certificates/notvalid.pem"))
+                                                                .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andExpect(status().isUnauthorized());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testRevokeCertificateCertificateValid() throws Exception {
-        this.mockMvc.perform(delete(CA_MGMT_CERTIFICATES + "/0").secure(true).with(x509("certificates/valid.pem"))
-                .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isUnauthorized());
+        this.mockMvc.perform(delete(CA_MGMT_CERTIFICATES + "/0").secure(true)
+                                                                .with(x509("certificates/valid.pem"))
+                                                                .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andExpect(status().isUnauthorized());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testRevokeCertificateCertificateSysop() throws Exception {
         // Filter enables the access but we use ill-formed input to make sure real operation never happens
-        this.mockMvc.perform(delete(CA_MGMT_CERTIFICATES + "/0").secure(true).with(x509("certificates/sysop.pem"))
-                .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isBadRequest());
+        this.mockMvc.perform(delete(CA_MGMT_CERTIFICATES + "/0").secure(true)
+                                                                .with(x509("certificates/sysop.pem"))
+                                                                .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andExpect(status().isBadRequest());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testGetTrustedKeysCertificateInvalid() throws Exception {
-        this.mockMvc.perform(get(CA_MGMT_TRUSTED_KEYS).secure(true).with(x509("certificates/notvalid.pem"))
-                .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isUnauthorized());
+        this.mockMvc.perform(get(CA_MGMT_TRUSTED_KEYS).secure(true)
+                                                      .with(x509("certificates/notvalid.pem"))
+                                                      .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andExpect(status().isUnauthorized());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testGetTrustedKeysCertificateValid() throws Exception {
-        this.mockMvc.perform(get(CA_MGMT_TRUSTED_KEYS).secure(true).with(x509("certificates/valid.pem"))
-                .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isUnauthorized());
+        this.mockMvc.perform(get(CA_MGMT_TRUSTED_KEYS).secure(true)
+                                                      .with(x509("certificates/valid.pem"))
+                                                      .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andExpect(status().isUnauthorized());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testGetTrustedKeysCertificateSysop() throws Exception {
-        this.mockMvc.perform(get(CA_MGMT_TRUSTED_KEYS).secure(true).with(x509("certificates/sysop.pem"))
-                .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isOk());
+        this.mockMvc.perform(get(CA_MGMT_TRUSTED_KEYS).secure(true)
+                                                      .with(x509("certificates/sysop.pem"))
+                                                      .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andExpect(status().isOk());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testAddTrustedKeyCertificateInvalid() throws Exception {
-        this.mockMvc.perform(put(CA_MGMT_TRUSTED_KEYS).secure(true).with(x509("certificates/notvalid.pem"))
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isUnauthorized());
+        this.mockMvc.perform(put(CA_MGMT_TRUSTED_KEYS).secure(true)
+                                                      .with(x509("certificates/notvalid.pem"))
+                                                      .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                                      .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andExpect(status().isUnauthorized());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testAddTrustedKeyCertificateValid() throws Exception {
-        this.mockMvc.perform(put(CA_MGMT_TRUSTED_KEYS).secure(true).with(x509("certificates/valid.pem"))
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isUnauthorized());
+        this.mockMvc.perform(put(CA_MGMT_TRUSTED_KEYS).secure(true)
+                                                      .with(x509("certificates/valid.pem"))
+                                                      .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                                      .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andExpect(status().isUnauthorized());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testAddTrustedKeyCertificateSysop() throws Exception {
-        this.mockMvc.perform(put(CA_MGMT_TRUSTED_KEYS).secure(true).with(x509("certificates/sysop.pem"))
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isBadRequest());
+        this.mockMvc.perform(put(CA_MGMT_TRUSTED_KEYS).secure(true)
+                                                      .with(x509("certificates/sysop.pem"))
+                                                      .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                                      .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andExpect(status().isBadRequest());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testDeleteTrustedKeyCertificateInvalid() throws Exception {
-        this.mockMvc.perform(delete(CA_MGMT_TRUSTED_KEYS + "/1").secure(true).with(x509("certificates/notvalid.pem"))
-                .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isUnauthorized());
+        this.mockMvc.perform(delete(CA_MGMT_TRUSTED_KEYS + "/1").secure(true)
+                                                                .with(x509("certificates/notvalid.pem"))
+                                                                .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andExpect(status().isUnauthorized());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testDeleteTrustedKeyCertificateValid() throws Exception {
-        this.mockMvc.perform(delete(CA_MGMT_TRUSTED_KEYS + "/1").secure(true).with(x509("certificates/valid.pem"))
-                .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isUnauthorized());
+        this.mockMvc.perform(delete(CA_MGMT_TRUSTED_KEYS + "/1").secure(true)
+                                                                .with(x509("certificates/valid.pem"))
+                                                                .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andExpect(status().isUnauthorized());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testDeleteTrustedKeyCertificateSysop() throws Exception {
-        this.mockMvc.perform(delete(CA_MGMT_TRUSTED_KEYS + "/0").secure(true).with(x509("certificates/sysop.pem"))
-                .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isBadRequest());
+        this.mockMvc.perform(delete(CA_MGMT_TRUSTED_KEYS + "/0").secure(true)
+                                                                .with(x509("certificates/sysop.pem"))
+                                                                .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andExpect(status().isBadRequest());
     }
 }

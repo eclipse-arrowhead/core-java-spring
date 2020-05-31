@@ -6,14 +6,12 @@ import eu.arrowhead.common.dto.internal.CertificateCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.CertificateCheckResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.IssuedCertificatesResponseDTO;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
@@ -24,10 +22,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.io.File;
-import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.file.Files;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,67 +70,66 @@ public class CertificateAuthorityControllerCertificatesTest {
 
     // =================================================================================================
     // methods
-
-    private static String getResourceContent(String resourcePath) throws IOException {
-        File resource = new ClassPathResource(resourcePath).getFile();
-        return new String(Files.readAllBytes(resource.toPath())).trim();
-    }
-
-    // -------------------------------------------------------------------------------------------------
-
     // -------------------------------------------------------------------------------------------------
     @Before
     public void setup() {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac)
+                                      .build();
     }
 
     @Test
     public void testCertificatesListPost() throws Exception {
-        mockMvc.perform(post(CERTIFICATES_URL)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(post(CERTIFICATES_URL))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testCertificatesListPut() throws Exception {
-        mockMvc.perform(put(CERTIFICATES_URL)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(put(CERTIFICATES_URL))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testCertificatesListPatch() throws Exception {
-        mockMvc.perform(patch(CERTIFICATES_URL)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(patch(CERTIFICATES_URL))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testCertificatesListDelete() throws Exception {
-        mockMvc.perform(delete(CERTIFICATES_URL)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(delete(CERTIFICATES_URL))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testCertificatesListHead() throws Exception {
-        mockMvc.perform(head(CERTIFICATES_URL)).andExpect(status().isOk());
+        mockMvc.perform(head(CERTIFICATES_URL))
+               .andExpect(status().isOk());
     }
 
     @Test
     public void testCertificatesListOptions() throws Exception {
-        mockMvc.perform(options(CERTIFICATES_URL)).andExpect(status().isOk());
+        mockMvc.perform(options(CERTIFICATES_URL))
+               .andExpect(status().isOk());
     }
 
     @Test
     public void testCertificatesListGetWithoutParameter() throws Exception {
         final int PAGE_SIZE = 5;
         final Page<CaCertificate> certificateEntryList = createCertificatesPageForDBMocking(PAGE_SIZE);
-        final IssuedCertificatesResponseDTO certificateEntriesDTO = DTOConverter
-                .convertCaCertificateListToIssuedCertificatesResponseDTO(certificateEntryList);
+        final IssuedCertificatesResponseDTO certificateEntriesDTO = DTOConverter.convertCaCertificateListToIssuedCertificatesResponseDTO(certificateEntryList);
 
-        when(serviceCertificateAuthorityService.getCertificates(anyInt(), anyInt(), any(), any()))
-                .thenReturn(certificateEntriesDTO);
+        when(serviceCertificateAuthorityService.getCertificates(anyInt(), anyInt(), any(), any())).thenReturn(certificateEntriesDTO);
 
         final MvcResult response = this.mockMvc.perform(get(CERTIFICATES_URL).accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk()).andReturn();
-        final IssuedCertificatesResponseDTO responseBody = objectMapper
-                .readValue(response.getResponse().getContentAsString(), IssuedCertificatesResponseDTO.class);
+                                               .andExpect(status().isOk())
+                                               .andReturn();
+        final IssuedCertificatesResponseDTO responseBody = objectMapper.readValue(response.getResponse()
+                                                                                          .getContentAsString(), IssuedCertificatesResponseDTO.class);
 
         assertEquals(PAGE_SIZE, responseBody.getCount());
-        assertEquals(PAGE_SIZE, responseBody.getIssuedCertificates().size());
+        assertEquals(PAGE_SIZE, responseBody.getIssuedCertificates()
+                                            .size());
     }
 
     // -------------------------------------------------------------------------------------------------
@@ -143,71 +137,81 @@ public class CertificateAuthorityControllerCertificatesTest {
     public void testCertificatesListGetWithPageAndSizeParameter() throws Exception {
         final int PAGE_SIZE = 5;
         final Page<CaCertificate> certificateEntryList = createCertificatesPageForDBMocking(PAGE_SIZE);
-        final IssuedCertificatesResponseDTO certificateEntriesDTO = DTOConverter
-                .convertCaCertificateListToIssuedCertificatesResponseDTO(certificateEntryList);
+        final IssuedCertificatesResponseDTO certificateEntriesDTO = DTOConverter.convertCaCertificateListToIssuedCertificatesResponseDTO(certificateEntryList);
 
-        when(serviceCertificateAuthorityService.getCertificates(anyInt(), anyInt(), any(), any()))
-                .thenReturn(certificateEntriesDTO);
+        when(serviceCertificateAuthorityService.getCertificates(anyInt(), anyInt(), any(), any())).thenReturn(certificateEntriesDTO);
 
         final MvcResult response = this.mockMvc.perform(get(CERTIFICATES_URL).param(PAGE, "0")
-                .param(ITEM_PER_PAGE, "" + PAGE_SIZE).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-                .andReturn();
-        final IssuedCertificatesResponseDTO responseBody = objectMapper
-                .readValue(response.getResponse().getContentAsString(), IssuedCertificatesResponseDTO.class);
+                                                                             .param(ITEM_PER_PAGE, "" + PAGE_SIZE)
+                                                                             .accept(MediaType.APPLICATION_JSON))
+                                               .andExpect(status().isOk())
+                                               .andReturn();
+        final IssuedCertificatesResponseDTO responseBody = objectMapper.readValue(response.getResponse()
+                                                                                          .getContentAsString(), IssuedCertificatesResponseDTO.class);
 
         assertEquals(PAGE_SIZE, responseBody.getCount());
-        assertEquals(PAGE_SIZE, responseBody.getIssuedCertificates().size());
+        assertEquals(PAGE_SIZE, responseBody.getIssuedCertificates()
+                                            .size());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testCertificatesListGetWithNullPageButDefinedSizeParameter() throws Exception {
-        this.mockMvc.perform(get(CERTIFICATES_URL).param(ITEM_PER_PAGE, "1").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+        this.mockMvc.perform(get(CERTIFICATES_URL).param(ITEM_PER_PAGE, "1")
+                                                  .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testCertificatesListGetWithDefinedPageButNullSizeParameter() throws Exception {
-        this.mockMvc.perform(get(CERTIFICATES_URL).param(PAGE, "0").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+        this.mockMvc.perform(get(CERTIFICATES_URL).param(PAGE, "0")
+                                                  .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest());
     }
 
     // -------------------------------------------------------------------------------------------------
     @Test
     public void testCertificatesListGetWithInvalidSortDirectionFlagParametert() throws Exception {
-        this.mockMvc.perform(get(CERTIFICATES_URL).param("direction", "invalid").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+        this.mockMvc.perform(get(CERTIFICATES_URL).param("direction", "invalid")
+                                                  .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest());
     }
 
     @Test
     public void testCertificateByIdGet() throws Exception {
-        mockMvc.perform(get(CERTIFICATES_URL + 1)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(get(CERTIFICATES_URL + 1))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testCertificateByIdPost() throws Exception {
-        mockMvc.perform(post(CERTIFICATES_URL + 1)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(post(CERTIFICATES_URL + 1))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testCertificateByIdPut() throws Exception {
-        mockMvc.perform(put(CERTIFICATES_URL + 1)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(put(CERTIFICATES_URL + 1))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testCertificateByIdPatch() throws Exception {
-        mockMvc.perform(patch(CERTIFICATES_URL + 1)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(patch(CERTIFICATES_URL + 1))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testCertificateByIdHead() throws Exception {
-        mockMvc.perform(head(CERTIFICATES_URL + 1)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(head(CERTIFICATES_URL + 1))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testCertificateByIdOptions() throws Exception {
-        mockMvc.perform(options(CERTIFICATES_URL + 1)).andExpect(status().isOk());
+        mockMvc.perform(options(CERTIFICATES_URL + 1))
+               .andExpect(status().isOk());
     }
 
     @Test
@@ -215,8 +219,9 @@ public class CertificateAuthorityControllerCertificatesTest {
 
         when(serviceCertificateAuthorityService.revokeCertificate(anyLong(), anyString())).thenReturn(true);
 
-        mockMvc.perform(delete(CERTIFICATES_URL + 1).secure(true).with(x509("certificates/sysop.pem")))
-                .andExpect(status().isOk());
+        mockMvc.perform(delete(CERTIFICATES_URL + 1).secure(true)
+                                                    .with(x509("certificates/sysop.pem")))
+               .andExpect(status().isOk());
     }
 
     @Test
@@ -224,46 +229,55 @@ public class CertificateAuthorityControllerCertificatesTest {
 
         when(serviceCertificateAuthorityService.revokeCertificate(anyLong(), anyString())).thenReturn(false);
 
-        mockMvc.perform(delete(CERTIFICATES_URL + 1)).andExpect(status().isBadRequest());
+        mockMvc.perform(delete(CERTIFICATES_URL + 1))
+               .andExpect(status().isBadRequest());
     }
 
     // -------------------------------------------------------------------------------------------------
 
     @Test
     public void testCheckCertificateGet() throws Exception {
-        mockMvc.perform(get(CHECK_CERTIFICATE_URL)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(get(CHECK_CERTIFICATE_URL))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testCheckCertificatePut() throws Exception {
-        mockMvc.perform(put(CHECK_CERTIFICATE_URL)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(put(CHECK_CERTIFICATE_URL))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testCheckCertificatePatch() throws Exception {
-        mockMvc.perform(patch(CHECK_CERTIFICATE_URL)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(patch(CHECK_CERTIFICATE_URL))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testCheckCertificateHead() throws Exception {
-        mockMvc.perform(head(CHECK_CERTIFICATE_URL)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(head(CHECK_CERTIFICATE_URL))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testCheckCertificateOptions() throws Exception {
-        mockMvc.perform(options(CHECK_CERTIFICATE_URL)).andExpect(status().isOk());
+        mockMvc.perform(options(CHECK_CERTIFICATE_URL))
+               .andExpect(status().isOk());
     }
 
     @Test
     public void testCheckCertificateDelete() throws Exception {
-        mockMvc.perform(delete(CHECK_CERTIFICATE_URL)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(delete(CHECK_CERTIFICATE_URL))
+               .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void testCheckCertificateWithEmptyParam() throws Exception {
 
         this.mockMvc.perform(post(CHECK_CERTIFICATE_URL).contentType(MediaType.APPLICATION_JSON_UTF8)
-                .accept(MediaType.APPLICATION_JSON_UTF8).content("")).andExpect(status().isBadRequest());
+                                                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                                                        .content(""))
+                    .andExpect(status().isBadRequest());
     }
 
     // -------------------------------------------------------------------------------------------------
@@ -272,10 +286,10 @@ public class CertificateAuthorityControllerCertificatesTest {
 
         final CertificateCheckRequestDTO request = new CertificateCheckRequestDTO(1, "");
 
-        this.mockMvc
-                .perform(post(CHECK_CERTIFICATE_URL).contentType(MediaType.APPLICATION_JSON_UTF8)
-                        .accept(MediaType.APPLICATION_JSON_UTF8).content(asJsonString(request)))
-                .andExpect(status().isBadRequest());
+        this.mockMvc.perform(post(CHECK_CERTIFICATE_URL).contentType(MediaType.APPLICATION_JSON_UTF8)
+                                                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                                                        .content(asJsonString(request)))
+                    .andExpect(status().isBadRequest());
     }
 
     // -------------------------------------------------------------------------------------------------
@@ -289,14 +303,15 @@ public class CertificateAuthorityControllerCertificatesTest {
 
         when(serviceCertificateAuthorityService.checkCertificate(any())).thenReturn(responseDTO);
 
-        final MvcResult response = this.mockMvc
-                .perform(post(CHECK_CERTIFICATE_URL).contentType(MediaType.APPLICATION_JSON_UTF8)
-                        .accept(MediaType.APPLICATION_JSON_UTF8).content(asJsonString(request)))
-                .andExpect(status().isOk()).andReturn();
-        final CertificateCheckResponseDTO responseBody = objectMapper
-                .readValue(response.getResponse().getContentAsString(), CertificateCheckResponseDTO.class);
+        final MvcResult response = this.mockMvc.perform(post(CHECK_CERTIFICATE_URL).contentType(MediaType.APPLICATION_JSON_UTF8)
+                                                                                   .accept(MediaType.APPLICATION_JSON_UTF8)
+                                                                                   .content(asJsonString(request)))
+                                               .andExpect(status().isOk())
+                                               .andReturn();
+        final CertificateCheckResponseDTO responseBody = objectMapper.readValue(response.getResponse()
+                                                                                        .getContentAsString(), CertificateCheckResponseDTO.class);
 
-        Assert.assertTrue(request.getVersion() == responseBody.getVersion());
+        assertEquals(request.getVersion(), responseBody.getVersion());
     }
 
     // =================================================================================================
@@ -320,7 +335,7 @@ public class CertificateAuthorityControllerCertificatesTest {
             certificateList.add(cert);
         }
 
-        final Page<CaCertificate> entries = new PageImpl<CaCertificate>(certificateList);
+        final Page<CaCertificate> entries = new PageImpl<>(certificateList);
 
         return entries;
     }

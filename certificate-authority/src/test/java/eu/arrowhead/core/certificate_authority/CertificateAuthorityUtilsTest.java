@@ -1,13 +1,9 @@
 package eu.arrowhead.core.certificate_authority;
 
-import static org.junit.Assert.assertNotNull;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Base64;
-import java.util.ServiceConfigurationError;
-
+import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
+import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.exception.DataNotFoundException;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.Rule;
@@ -17,10 +13,13 @@ import org.junit.runner.RunWith;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
-import eu.arrowhead.common.exception.AuthException;
-import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.exception.DataNotFoundException;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Base64;
+import java.util.ServiceConfigurationError;
+
+import static org.junit.Assert.assertNotNull;
 
 @RunWith(SpringRunner.class)
 public class CertificateAuthorityUtilsTest {
@@ -84,11 +83,11 @@ public class CertificateAuthorityUtilsTest {
         return new String(Files.readAllBytes(resource.toPath())).trim();
     }
 
-    private static JcaPKCS10CertificationRequest getResourceCSR(
-            final String resourcePath)
+    private static JcaPKCS10CertificationRequest getResourceCSR(final String resourcePath)
             throws IOException, NullPointerException {
         final String resourceBytes = getResourceContentAsString(resourcePath);
-        final byte[] csrBytes = Base64.getDecoder().decode(resourceBytes);
+        final byte[] csrBytes = Base64.getDecoder()
+                                      .decode(resourceBytes);
         return new JcaPKCS10CertificationRequest(csrBytes);
     }
 }
