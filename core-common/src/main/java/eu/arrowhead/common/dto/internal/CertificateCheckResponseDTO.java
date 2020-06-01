@@ -12,12 +12,13 @@ public class CertificateCheckResponseDTO implements Serializable {
     private String endOfValidity;
     private String commonName;
     private BigInteger serialNumber;
-    private String status;
+    private IssuedCertificateStatus status;
 
     public CertificateCheckResponseDTO() {
     }
 
-    public CertificateCheckResponseDTO(int version, String producedAt, String endOfValidity, String commonName, BigInteger serialNumber, String status) {
+    public CertificateCheckResponseDTO(int version, String producedAt, String endOfValidity, String commonName,
+                                       BigInteger serialNumber, IssuedCertificateStatus status) {
         this.version = version;
         this.producedAt = producedAt;
         this.endOfValidity = endOfValidity;
@@ -66,11 +67,11 @@ public class CertificateCheckResponseDTO implements Serializable {
         this.serialNumber = serialNumber;
     }
 
-    public String getStatus() {
+    public IssuedCertificateStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(IssuedCertificateStatus status) {
         this.status = status;
     }
 }

@@ -50,7 +50,6 @@ import eu.arrowhead.common.database.entity.Subscription;
 import eu.arrowhead.common.database.entity.SubscriptionPublisherConnection;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.entity.SystemRegistry;
-import eu.arrowhead.common.dto.internal.IssuedCertificateDTO.Status;
 import eu.arrowhead.common.dto.shared.ChoreographerActionResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerNextStepResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
@@ -1291,19 +1290,19 @@ public class DTOConverter {
 		return certificateDTOs;
 	}
 
-	private static IssuedCertificateDTO.Status getStatus(ZonedDateTime now, ZonedDateTime validAfter, ZonedDateTime validBefore,
-			ZonedDateTime revokedAt) {
+	private static IssuedCertificateStatus getStatus(ZonedDateTime now, ZonedDateTime validAfter,
+													 ZonedDateTime validBefore, ZonedDateTime revokedAt) {
 		Assert.notNull(now, "now cannot be null");
 		Assert.notNull(validAfter, "validAfter cannot be null");
 		Assert.notNull(validBefore, "validBefore cannot be null");
 		
 		if (revokedAt != null) {
-			return Status.REVOKED;
+			return IssuedCertificateStatus.REVOKED;
 		}
 		if (now.isAfter(validBefore) || now.isBefore(validAfter)) {
-			return Status.EXPIRED;
+			return IssuedCertificateStatus.EXPIRED;
 		}
-		return Status.GOOD;
+		return IssuedCertificateStatus.GOOD;
 	}
 
 }

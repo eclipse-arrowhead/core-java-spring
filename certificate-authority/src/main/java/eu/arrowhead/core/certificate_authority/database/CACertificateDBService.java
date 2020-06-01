@@ -6,6 +6,7 @@ import eu.arrowhead.common.database.entity.CaCertificate;
 import eu.arrowhead.common.database.repository.CaCertificateRepository;
 import eu.arrowhead.common.dto.internal.CertificateCheckResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.IssuedCertificateStatus;
 import eu.arrowhead.common.dto.internal.IssuedCertificatesResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
@@ -116,14 +117,14 @@ public class CACertificateDBService {
                 responseDTO.setProducedAt(Utilities.convertZonedDateTimeToUTCString(now));
                 responseDTO.setCommonName(cert.getCommonName());
                 responseDTO.setSerialNumber(cert.getSerial());
-                responseDTO.setStatus("unknown");
+                responseDTO.setStatus(IssuedCertificateStatus.UNKNOWN);
 
                 if (now.isAfter(cert.getValidAfter()) && now.isBefore(cert.getValidBefore())) {
                     if (cert.getRevokedAt() != null) {
-                        responseDTO.setStatus("revoked");
+                        responseDTO.setStatus(IssuedCertificateStatus.REVOKED);
                         responseDTO.setEndOfValidity(Utilities.convertZonedDateTimeToUTCString(cert.getRevokedAt()));
                     } else {
-                        responseDTO.setStatus("good");
+                        responseDTO.setStatus(IssuedCertificateStatus.GOOD);
                         responseDTO.setEndOfValidity(Utilities.convertZonedDateTimeToUTCString(cert.getValidBefore()));
                     }
                 } else {

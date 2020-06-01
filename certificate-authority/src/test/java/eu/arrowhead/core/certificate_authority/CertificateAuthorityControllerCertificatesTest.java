@@ -6,6 +6,7 @@ import eu.arrowhead.common.database.entity.CaCertificate;
 import eu.arrowhead.common.dto.internal.CertificateCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.CertificateCheckResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.IssuedCertificateStatus;
 import eu.arrowhead.common.dto.internal.IssuedCertificatesResponseDTO;
 import org.junit.Before;
 import org.junit.Test;
@@ -300,8 +301,8 @@ public class CertificateAuthorityControllerCertificatesTest {
         final CertificateCheckRequestDTO request = new CertificateCheckRequestDTO(1, MOCKED_CERT_COMMON_NAME);
 
         final String now = Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now());
-        final CertificateCheckResponseDTO responseDTO = new CertificateCheckResponseDTO(1, now, now, MOCKED_CERT_COMMON_NAME,
-                BigInteger.ONE, "good");
+        final CertificateCheckResponseDTO responseDTO = new CertificateCheckResponseDTO(1, now, now,
+                MOCKED_CERT_COMMON_NAME, BigInteger.ONE, IssuedCertificateStatus.GOOD);
 
         when(serviceCertificateAuthorityService.checkCertificate(any())).thenReturn(responseDTO);
 

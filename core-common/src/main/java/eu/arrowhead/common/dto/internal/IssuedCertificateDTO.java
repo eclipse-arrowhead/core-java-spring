@@ -7,20 +7,6 @@ public class IssuedCertificateDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public enum Status {
-        GOOD("good"), REVOKED("revoked"), EXPIRED("expired");
-
-        Status(String name) {
-            this.name = name;
-        }
-
-        public String toString() {
-            return name;
-        }
-
-        private final String name;
-    }
-
     private long id;
     private String createdBy;
     private String createdAt;
@@ -29,14 +15,15 @@ public class IssuedCertificateDTO implements Serializable {
     private String validUntil;
     private String commonName;
     private BigInteger serialNumber;
-    private Status status;
+    private IssuedCertificateStatus status;
 
     public IssuedCertificateDTO() {
+        status = IssuedCertificateStatus.UNKNOWN;
     }
 
     public IssuedCertificateDTO(long id, String createdBy, String createdAt, String revokedAt,
                                 String validFrom, String validUntil,
-                                String commonName, BigInteger serialNumber, Status status) {
+                                String commonName, BigInteger serialNumber, IssuedCertificateStatus status) {
         this.id = id;
         this.createdBy = createdBy;
         this.createdAt = createdAt;
@@ -116,11 +103,11 @@ public class IssuedCertificateDTO implements Serializable {
         this.serialNumber = serialNumber;
     }
 
-    public Status getStatus() {
+    public IssuedCertificateStatus getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(IssuedCertificateStatus status) {
         this.status = status;
     }
 }

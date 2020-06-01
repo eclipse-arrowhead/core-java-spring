@@ -9,6 +9,7 @@ import eu.arrowhead.common.dto.internal.CertificateCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.CertificateCheckResponseDTO;
 import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
 import eu.arrowhead.common.dto.internal.CertificateSigningResponseDTO;
+import eu.arrowhead.common.dto.internal.IssuedCertificateStatus;
 import eu.arrowhead.common.dto.internal.TrustedKeyCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.TrustedKeyCheckResponseDTO;
 import eu.arrowhead.common.dto.internal.TrustedKeysResponseDTO;
@@ -190,7 +191,7 @@ public class CertificateAuthorityServiceTest {
 
         verify(caCertificateDBService, times(1)).isCertificateValidNow(any());
         assertEquals(response.getCommonName(), SYSOP_CN);
-        assertEquals(response.getStatus(), "unknown");
+        assertEquals(response.getStatus(), IssuedCertificateStatus.UNKNOWN);
     }
 
     @Test()
@@ -204,7 +205,7 @@ public class CertificateAuthorityServiceTest {
 
         final String now = Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now());
         final CertificateCheckResponseDTO responseDTO = new CertificateCheckResponseDTO(0, now, now, SYSOP_CN,
-                BigInteger.ONE, "good");
+                BigInteger.ONE, IssuedCertificateStatus.GOOD);
 
         when(caCertificateDBService.isCertificateValidNow(any())).thenReturn(responseDTO);
 

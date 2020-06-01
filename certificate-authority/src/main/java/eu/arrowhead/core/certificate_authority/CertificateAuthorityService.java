@@ -9,6 +9,7 @@ import eu.arrowhead.common.dto.internal.CertificateCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.CertificateCheckResponseDTO;
 import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
 import eu.arrowhead.common.dto.internal.CertificateSigningResponseDTO;
+import eu.arrowhead.common.dto.internal.IssuedCertificateStatus;
 import eu.arrowhead.common.dto.internal.IssuedCertificatesResponseDTO;
 import eu.arrowhead.common.dto.internal.TrustedKeyCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.TrustedKeyCheckResponseDTO;
@@ -94,7 +95,8 @@ public class CertificateAuthorityService {
             final ZonedDateTime endOfValidity = ZonedDateTime.ofInstant(cert.getNotAfter().toInstant(), ZoneId.systemDefault());
             final String endOfValidityString = Utilities.convertZonedDateTimeToUTCString(endOfValidity);
             final String now = Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now());
-            return new CertificateCheckResponseDTO(1, now, endOfValidityString, certCN, certSerial, "unknown");
+            return new CertificateCheckResponseDTO(request.getVersion(), now, endOfValidityString, certCN,
+                    certSerial, IssuedCertificateStatus.UNKNOWN);
         }
     }
 
