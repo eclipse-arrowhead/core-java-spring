@@ -1,22 +1,11 @@
 package eu.arrowhead.core.certificate_authority.database;
 
-import java.time.ZonedDateTime;
-import java.util.Optional;
-
-import eu.arrowhead.common.dto.internal.AddTrustedKeyResponseDTO;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.stereotype.Service;
-
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.CaTrustedKey;
 import eu.arrowhead.common.database.repository.CaTrustedKeyRepository;
 import eu.arrowhead.common.dto.internal.AddTrustedKeyRequestDTO;
+import eu.arrowhead.common.dto.internal.AddTrustedKeyResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.TrustedKeyCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.TrustedKeyCheckResponseDTO;
@@ -25,20 +14,32 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.certificate_authority.CertificateAuthorityUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.ZonedDateTime;
+import java.util.Optional;
 
 @Service
 public class CATrustedKeyDBService {
 
     @Autowired
-    CaTrustedKeyRepository caTrustedKeyRepository;
+    private CaTrustedKeyRepository caTrustedKeyRepository;
 
     private final Logger logger = LogManager.getLogger(CATrustedKeyDBService.class);
 
+    @Transactional(rollbackFor = ArrowheadException.class)
     public TrustedKeysResponseDTO getTrustedKeyEntries(final int page, final int size, final Direction direction,
-            final String sortField) {
+                                                       final String sortField) {
         logger.debug("getTrustedKeyEntries started...");
 
-        final int validatedPage = page < 0 ? 0 : page;
+        final int validatedPage = Math.max(page, 0);
         final int validatedSize = size < 1 ? Integer.MAX_VALUE : size;
         final Direction validatedDirection = direction == null ? Direction.ASC : direction;
         final String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID
@@ -59,47 +60,60 @@ public class CATrustedKeyDBService {
         }
     }
 
+    @Transactional(rollbackFor = ArrowheadException.class)
     public AddTrustedKeyResponseDTO addTrustedKey(AddTrustedKeyRequestDTO request) {
         logger.debug("addTrustedKey started...");
-
-        CaTrustedKey trustedKey = new CaTrustedKey();
-
         try {
+            if (request == null) {
+                throw new InvalidParameterException("request cannot be null");
+            }
+            if (Utilities.isEmpty(request.getPublicKey())) {
+                throw new InvalidParameterException("public key cannot be null");
+            }
+            if (Utilities.isEmpty(request.getDescription())) {
+                throw new InvalidParameterException("description cannot be null");
+            }
+
+            final ZonedDateTime validAfter = request.getValidAfter();
+            final ZonedDateTime validBefore = request.getValidBefore();
+            if (validAfter == null) {
+                throw new InvalidParameterException("validAfter cannot be null");
+            }
+            if (validBefore == null) {
+                throw new InvalidParameterException("validBefore cannot be null");
+            }
+            if (validAfter.isAfter(validBefore)) {
+                throw new InvalidParameterException("Invalid validity range: validAfter must have a value before validBefore");
+            }
+
+            final CaTrustedKey trustedKey = new CaTrustedKey();
             trustedKey.setPublicKey(request.getPublicKey());
             trustedKey.setHash(CertificateAuthorityUtils.sha256(request.getPublicKey()));
             trustedKey.setDescription(request.getDescription());
-            trustedKey.setValidAfter(request.getValidAfter());
-            trustedKey.setValidBefore(request.getValidBefore());
-        } catch (NullPointerException ex) {
-            logger.debug(ex.getMessage(), ex);
-            throw new BadPayloadException("Invalid request for addTrustedKey: (" + ex.getMessage() + ")", ex);
-        }
+            trustedKey.setValidAfter(validAfter);
+            trustedKey.setValidBefore(validBefore);
 
-        if (trustedKey.getValidAfter().isAfter(trustedKey.getValidBefore())) {
-            final String msg = "Invalid validity range: validAfter must have a value before validBefore";
-            logger.debug(msg);
-            throw new InvalidParameterException(msg);
-        }
+            final ZonedDateTime now = ZonedDateTime.now();
+            trustedKey.setCreatedAt(now);
+            trustedKey.setUpdatedAt(now);
 
-        ZonedDateTime now = ZonedDateTime.now();
-        trustedKey.setCreatedAt(now);
-        trustedKey.setUpdatedAt(now);
+            logger.info("Adding a trusted key: " + trustedKey.getDescription());
 
-        logger.info("Adding a trusted key: " + trustedKey.getDescription());
-
-        try {
             final CaTrustedKey caTrustedKey = caTrustedKeyRepository.saveAndFlush(trustedKey);
 
             return new AddTrustedKeyResponseDTO(caTrustedKey.getId(),
                     caTrustedKey.getValidAfter(),
                     caTrustedKey.getValidBefore());
-        } catch (Exception e) {
-            final String msg = "Cannot save Trusted Key";
-            logger.debug(msg + ": " + e.getMessage(), e);
-            throw new BadPayloadException(msg, e);
+        } catch (final InvalidParameterException ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw ex;
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
     }
 
+    @Transactional(rollbackFor = ArrowheadException.class)
     public TrustedKeyCheckResponseDTO isTrustedKeyValidNow(final TrustedKeyCheckRequestDTO request) {
         if (request == null || request.getPublicKey() == null) {
             throw new BadPayloadException("Invalid request for isTrustedKeyValidNow");
@@ -107,21 +121,32 @@ public class CATrustedKeyDBService {
 
         final String hash = CertificateAuthorityUtils.sha256(request.getPublicKey());
 
-        Optional<CaTrustedKey> trustedKeyResult = caTrustedKeyRepository.findByHash(hash);
+        try {
+            final Optional<CaTrustedKey> trustedKeyResult = caTrustedKeyRepository.findByHash(hash);
 
-        if (trustedKeyResult.isPresent()) {
-            CaTrustedKey trustedKey = trustedKeyResult.get();
-            return new TrustedKeyCheckResponseDTO(trustedKey.getId(), trustedKey.getCreatedAt(),
-                    trustedKey.getDescription());
-        } else {
-            throw new InvalidParameterException("Cannot find trusted certificate");
+            if (trustedKeyResult.isPresent()) {
+                CaTrustedKey trustedKey = trustedKeyResult.get();
+                return new TrustedKeyCheckResponseDTO(trustedKey.getId(), trustedKey.getCreatedAt(),
+                        trustedKey.getDescription());
+            } else {
+                throw new InvalidParameterException("Cannot find trusted certificate");
+            }
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
     }
 
+    @Transactional(rollbackFor = ArrowheadException.class)
     public void deleteTrustedKey(long id) {
         if (id < 0) {
             throw new InvalidParameterException("Invalid trusted key id: " + id);
         }
-        caTrustedKeyRepository.deleteById(id);
+        try {
+            caTrustedKeyRepository.deleteById(id);
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
     }
 }

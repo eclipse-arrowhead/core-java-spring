@@ -1254,13 +1254,13 @@ public class DTOConverter {
 		final IssuedCertificatesResponseDTO certificatesResponseDTO = new IssuedCertificatesResponseDTO();
 		certificatesResponseDTO.setCount(count);
 		certificatesResponseDTO.setIssuedCertificates(
-				certificateEntryListTocertificatesResponseDTOList(certificateEntryList.getContent()));
+				certificateEntryListToCertificatesResponseDTOList(certificateEntryList.getContent()));
 
 		return certificatesResponseDTO;
 	}
 
 	// -------------------------------------------------------------------------------------------------
-	private static List<IssuedCertificateDTO> certificateEntryListTocertificatesResponseDTOList(
+	private static List<IssuedCertificateDTO> certificateEntryListToCertificatesResponseDTOList(
 			final List<CaCertificate> certificateList) {
 		Assert.notNull(certificateList, "certificateList is null");
 
