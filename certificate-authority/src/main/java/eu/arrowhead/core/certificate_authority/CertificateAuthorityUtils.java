@@ -104,7 +104,7 @@ public class CertificateAuthorityUtils {
         }
 
         final ZonedDateTime now = ZonedDateTime.now();
-        final ZonedDateTime validBefore = request.getValidBefore();
+        final ZonedDateTime validBefore = Utilities.parseUTCStringToLocalZonedDateTime(request.getValidBefore());
         if (validBefore != null) {
             final ZonedDateTime validBeforeLimit = getValidBeforeLimit(now, caProperties);
             if (validBefore.compareTo(validBeforeLimit) > 0) {
@@ -115,7 +115,7 @@ public class CertificateAuthorityUtils {
             }
         }
 
-        final ZonedDateTime validAfter = request.getValidAfter();
+        final ZonedDateTime validAfter = Utilities.parseUTCStringToLocalZonedDateTime(request.getValidAfter());
         if (validAfter != null) {
             final ZonedDateTime validAfterLimit = getValidAfterLimit(now, caProperties);
             if (validAfter.compareTo(validAfterLimit) < 0) {

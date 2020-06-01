@@ -1,6 +1,7 @@
 package eu.arrowhead.core.certificate_authority;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.CaCertificate;
 import eu.arrowhead.common.dto.internal.CertificateCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.CertificateCheckResponseDTO;
@@ -298,8 +299,9 @@ public class CertificateAuthorityControllerCertificatesTest {
 
         final CertificateCheckRequestDTO request = new CertificateCheckRequestDTO(1, MOCKED_CERT_COMMON_NAME);
 
-        final CertificateCheckResponseDTO responseDTO = new CertificateCheckResponseDTO(MOCKED_CERT_COMMON_NAME,
-                BigInteger.ONE, "good", ZonedDateTime.now());
+        final String now = Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now());
+        final CertificateCheckResponseDTO responseDTO = new CertificateCheckResponseDTO(1, now, now, MOCKED_CERT_COMMON_NAME,
+                BigInteger.ONE, "good");
 
         when(serviceCertificateAuthorityService.checkCertificate(any())).thenReturn(responseDTO);
 

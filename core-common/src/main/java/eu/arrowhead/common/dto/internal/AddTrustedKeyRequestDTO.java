@@ -1,9 +1,7 @@
 package eu.arrowhead.common.dto.internal;
 
-import java.io.Serializable;
-import java.time.ZonedDateTime;
-
 import javax.validation.constraints.NotBlank;
+import java.io.Serializable;
 
 public class AddTrustedKeyRequestDTO implements Serializable {
 
@@ -15,18 +13,17 @@ public class AddTrustedKeyRequestDTO implements Serializable {
     @NotBlank(message = "The description is mandatory")
     private String description;
 
-    private ZonedDateTime validAfter;
-    private ZonedDateTime validBefore;
+    private String validAfter;
+    private String validBefore;
 
     public AddTrustedKeyRequestDTO() {
     }
 
     public AddTrustedKeyRequestDTO(String publicKey, String description) {
-        this(publicKey, description, null, null);
+        this(publicKey, description, "", "");
     }
 
-    public AddTrustedKeyRequestDTO(String publicKey, String description, ZonedDateTime validAfter,
-            ZonedDateTime validBefore) {
+    public AddTrustedKeyRequestDTO(String publicKey, String description, String validAfter, String validBefore) {
         this.publicKey = publicKey;
         this.validAfter = validAfter;
         this.validBefore = validBefore;
@@ -41,19 +38,19 @@ public class AddTrustedKeyRequestDTO implements Serializable {
         this.publicKey = publicKey;
     }
 
-    public ZonedDateTime getValidBefore() {
+    public String getValidBefore() {
         return validBefore;
     }
 
-    public void setValidBefore(ZonedDateTime validBefore) {
+    public void setValidBefore(String validBefore) {
         this.validBefore = validBefore;
     }
 
-    public ZonedDateTime getValidAfter() {
+    public String getValidAfter() {
         return validAfter;
     }
 
-    public void setValidAfter(ZonedDateTime validAfter) {
+    public void setValidAfter(String validAfter) {
         this.validAfter = validAfter;
     }
 

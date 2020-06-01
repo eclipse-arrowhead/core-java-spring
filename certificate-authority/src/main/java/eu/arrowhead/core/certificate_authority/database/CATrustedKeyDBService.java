@@ -74,14 +74,16 @@ public class CATrustedKeyDBService {
                 throw new InvalidParameterException("description cannot be null");
             }
 
-            final ZonedDateTime validAfter = request.getValidAfter();
-            final ZonedDateTime validBefore = request.getValidBefore();
-            if (validAfter == null) {
-                throw new InvalidParameterException("validAfter cannot be null");
+            final String validAfterString = request.getValidAfter();
+            final String validBeforeString = request.getValidBefore();
+            if (Utilities.isEmpty(validAfterString)) {
+                throw new InvalidParameterException("validAfter cannot be empty");
             }
-            if (validBefore == null) {
-                throw new InvalidParameterException("validBefore cannot be null");
+            if (Utilities.isEmpty(validBeforeString)) {
+                throw new InvalidParameterException("validBefore cannot be empty");
             }
+            final ZonedDateTime validAfter = Utilities.parseUTCStringToLocalZonedDateTime(validAfterString);
+            final ZonedDateTime validBefore =  Utilities.parseUTCStringToLocalZonedDateTime(validBeforeString);
             if (validAfter.isAfter(validBefore)) {
                 throw new InvalidParameterException("Invalid validity range: validAfter must have a value before validBefore");
             }
@@ -102,8 +104,8 @@ public class CATrustedKeyDBService {
             final CaTrustedKey caTrustedKey = caTrustedKeyRepository.saveAndFlush(trustedKey);
 
             return new AddTrustedKeyResponseDTO(caTrustedKey.getId(),
-                    caTrustedKey.getValidAfter(),
-                    caTrustedKey.getValidBefore());
+                    Utilities.convertZonedDateTimeToUTCString(caTrustedKey.getValidAfter()),
+                    Utilities.convertZonedDateTimeToUTCString(caTrustedKey.getValidBefore()));
         } catch (final InvalidParameterException ex) {
             logger.debug(ex.getMessage(), ex);
             throw ex;
@@ -125,8 +127,9 @@ public class CATrustedKeyDBService {
             final Optional<CaTrustedKey> trustedKeyResult = caTrustedKeyRepository.findByHash(hash);
 
             if (trustedKeyResult.isPresent()) {
-                CaTrustedKey trustedKey = trustedKeyResult.get();
-                return new TrustedKeyCheckResponseDTO(trustedKey.getId(), trustedKey.getCreatedAt(),
+                final CaTrustedKey trustedKey = trustedKeyResult.get();
+                return new TrustedKeyCheckResponseDTO(trustedKey.getId(),
+                        Utilities.convertZonedDateTimeToUTCString(trustedKey.getCreatedAt()),
                         trustedKey.getDescription());
             } else {
                 throw new InvalidParameterException("Cannot find trusted certificate");

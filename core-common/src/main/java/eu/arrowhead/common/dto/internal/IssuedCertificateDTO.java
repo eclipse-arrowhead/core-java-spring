@@ -2,13 +2,12 @@ package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
 import java.math.BigInteger;
-import java.time.ZonedDateTime;
 
 public class IssuedCertificateDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public static enum Status {
+    public enum Status {
         GOOD("good"), REVOKED("revoked"), EXPIRED("expired");
 
         Status(String name) {
@@ -19,15 +18,15 @@ public class IssuedCertificateDTO implements Serializable {
             return name;
         }
 
-        private String name;
+        private final String name;
     }
 
     private long id;
     private String createdBy;
-    private ZonedDateTime createdAt;
-    private ZonedDateTime revokedAt;
-    private ZonedDateTime validFrom;
-    private ZonedDateTime validUntil;
+    private String createdAt;
+    private String revokedAt;
+    private String validFrom;
+    private String validUntil;
     private String commonName;
     private BigInteger serialNumber;
     private Status status;
@@ -35,8 +34,9 @@ public class IssuedCertificateDTO implements Serializable {
     public IssuedCertificateDTO() {
     }
 
-    public IssuedCertificateDTO(long id, String createdBy, ZonedDateTime createdAt, ZonedDateTime revokedAt,
-            ZonedDateTime validFrom, ZonedDateTime validUntil, String commonName, BigInteger serialNumber, Status status) {
+    public IssuedCertificateDTO(long id, String createdBy, String createdAt, String revokedAt,
+                                String validFrom, String validUntil,
+                                String commonName, BigInteger serialNumber, Status status) {
         this.id = id;
         this.createdBy = createdBy;
         this.createdAt = createdAt;
@@ -68,35 +68,35 @@ public class IssuedCertificateDTO implements Serializable {
         this.createdBy = createdBy;
     }
 
-    public ZonedDateTime getCreatedAt() {
+    public String getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(ZonedDateTime createdAt) {
+    public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
     }
 
-    public ZonedDateTime getRevokedAt() {
+    public String getRevokedAt() {
         return revokedAt;
     }
 
-    public void setRevokedAt(ZonedDateTime revokedAt) {
+    public void setRevokedAt(String revokedAt) {
         this.revokedAt = revokedAt;
     }
 
-    public ZonedDateTime getValidFrom() {
+    public String getValidFrom() {
         return validFrom;
     }
 
-    public void setValidFrom(ZonedDateTime validFrom) {
+    public void setValidFrom(String validFrom) {
         this.validFrom = validFrom;
     }
 
-    public ZonedDateTime getValidUntil() {
+    public String getValidUntil() {
         return validUntil;
     }
 
-    public void setValidUntil(ZonedDateTime validUntil) {
+    public void setValidUntil(String validUntil) {
         this.validUntil = validUntil;
     }
 

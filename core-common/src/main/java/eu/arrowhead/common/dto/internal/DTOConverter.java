@@ -1237,7 +1237,8 @@ public class DTOConverter {
 		final List<TrustedKeyDTO> trustedKeyDTOs = new ArrayList<>(trustedKeyList.size());
 
 		for (final CaTrustedKey trustedKey : trustedKeyList) {
-			TrustedKeyDTO dto = new TrustedKeyDTO(trustedKey.getId(), trustedKey.getCreatedAt(),
+			final TrustedKeyDTO dto = new TrustedKeyDTO(trustedKey.getId(),
+					Utilities.convertZonedDateTimeToUTCString(trustedKey.getCreatedAt()),
 					trustedKey.getDescription());
 			trustedKeyDTOs.add(dto);
 		}
@@ -1274,14 +1275,14 @@ public class DTOConverter {
 			dto.setCommonName(certificate.getCommonName());
 			dto.setSerialNumber(certificate.getSerial());
 			dto.setCreatedBy(certificate.getCreatedBy());
-			dto.setCreatedAt(certificate.getCreatedAt());
+			dto.setCreatedAt(Utilities.convertZonedDateTimeToUTCString(certificate.getCreatedAt()));
 			
 			final ZonedDateTime revokedAt = certificate.getRevokedAt();
 			final ZonedDateTime validAfter = certificate.getValidAfter();
 			final ZonedDateTime validBefore = certificate.getValidBefore();
-			dto.setRevokedAt(revokedAt);
-			dto.setValidFrom(validAfter);
-			dto.setValidUntil(validBefore);
+			dto.setRevokedAt(Utilities.convertZonedDateTimeToUTCString(revokedAt));
+			dto.setValidFrom(Utilities.convertZonedDateTimeToUTCString(validAfter));
+			dto.setValidUntil(Utilities.convertZonedDateTimeToUTCString(validBefore));
 			dto.setStatus(getStatus(now, validAfter, validBefore, revokedAt));
 
 			certificateDTOs.add(dto);

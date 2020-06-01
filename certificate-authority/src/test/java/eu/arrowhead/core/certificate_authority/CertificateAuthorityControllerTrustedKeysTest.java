@@ -1,6 +1,7 @@
 package eu.arrowhead.core.certificate_authority;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.CaTrustedKey;
 import eu.arrowhead.common.dto.internal.AddTrustedKeyRequestDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
@@ -321,7 +322,8 @@ public class CertificateAuthorityControllerTrustedKeysTest {
 
         final TrustedKeyCheckRequestDTO request = new TrustedKeyCheckRequestDTO(MOCKED_PUBLIC_KEY);
 
-        final TrustedKeyCheckResponseDTO responseDTO = new TrustedKeyCheckResponseDTO(1, ZonedDateTime.now(), "");
+        final TrustedKeyCheckResponseDTO responseDTO = new TrustedKeyCheckResponseDTO(1,
+                Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()), "");
 
         when(serviceCertificateAuthorityService.checkTrustedKey(any())).thenReturn(responseDTO);
 

@@ -1,9 +1,7 @@
 package eu.arrowhead.common.dto.internal;
 
-import java.io.Serializable;
-import java.time.ZonedDateTime;
-
 import javax.validation.constraints.NotBlank;
+import java.io.Serializable;
 
 public class CertificateSigningRequestDTO implements Serializable {
 
@@ -11,17 +9,17 @@ public class CertificateSigningRequestDTO implements Serializable {
 
     @NotBlank(message = "The encodedCSR is mandatory")
     private String encodedCSR;
+    private String validAfter;
+    private String validBefore;
 
-    private ZonedDateTime validAfter;
-    private ZonedDateTime validBefore;
-
-    public CertificateSigningRequestDTO() {}
+    public CertificateSigningRequestDTO() {
+    }
 
     public CertificateSigningRequestDTO(String encodedCSR) {
         this.encodedCSR = encodedCSR;
     }
 
-    public CertificateSigningRequestDTO(String encodedCSR, ZonedDateTime validAfter, ZonedDateTime validBefore) {
+    public CertificateSigningRequestDTO(String encodedCSR, String validAfter, String validBefore) {
         this.encodedCSR = encodedCSR;
         this.validAfter = validAfter;
         this.validBefore = validBefore;
@@ -35,19 +33,19 @@ public class CertificateSigningRequestDTO implements Serializable {
         this.encodedCSR = encodedCSR;
     }
 
-    public ZonedDateTime getValidAfter() {
+    public String getValidAfter() {
         return validAfter;
     }
 
-    public void setValidAfter(ZonedDateTime validAfter) {
+    public void setValidAfter(String validAfter) {
         this.validAfter = validAfter;
     }
 
-    public ZonedDateTime getValidBefore() {
+    public String getValidBefore() {
         return validBefore;
     }
 
-    public void setValidBefore(ZonedDateTime validBefore) {
+    public void setValidBefore(String validBefore) {
         this.validBefore = validBefore;
     }
 }

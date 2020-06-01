@@ -91,8 +91,10 @@ public class CertificateAuthorityService {
 
             return certificateDbService.isCertificateValidNow(certSerial);
         } catch (DataNotFoundException ex) {
-            ZonedDateTime endOfValidity = ZonedDateTime.ofInstant(cert.getNotAfter().toInstant(), ZoneId.systemDefault());
-            return new CertificateCheckResponseDTO(certCN, certSerial, "unknown", endOfValidity);
+            final ZonedDateTime endOfValidity = ZonedDateTime.ofInstant(cert.getNotAfter().toInstant(), ZoneId.systemDefault());
+            final String endOfValidityString = Utilities.convertZonedDateTimeToUTCString(endOfValidity);
+            final String now = Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now());
+            return new CertificateCheckResponseDTO(1, now, endOfValidityString, certCN, certSerial, "unknown");
         }
     }
 
@@ -117,9 +119,11 @@ public class CertificateAuthorityService {
         final String clientCommonName = CertificateAuthorityUtils.getCommonName(csr);
         final BigInteger serialNumber = CertificateAuthorityUtils.getSerialNumber(clientCertificate);
         final ZonedDateTime now = ZonedDateTime.now();
-        final ZonedDateTime validBefore = CertificateAuthorityUtils.getValidBefore(request.getValidBefore(), now, caProperties);
-        final ZonedDateTime validAfter = CertificateAuthorityUtils.getValidAfter(request.getValidAfter(), now, caProperties);
-        
+        final ZonedDateTime validBefore = CertificateAuthorityUtils.getValidBefore(
+                Utilities.parseUTCStringToLocalZonedDateTime(request.getValidBefore()), now, caProperties);
+        final ZonedDateTime validAfter = CertificateAuthorityUtils.getValidAfter(
+                Utilities.parseUTCStringToLocalZonedDateTime(request.getValidAfter()), now, caProperties);
+
         final CaCertificate caCert = certificateDbService.saveCertificateInfo(clientCommonName, serialNumber, requesterCN,
                 validAfter, validBefore);
 

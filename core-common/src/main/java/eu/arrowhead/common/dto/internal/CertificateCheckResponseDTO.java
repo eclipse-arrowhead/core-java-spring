@@ -2,15 +2,14 @@ package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
 import java.math.BigInteger;
-import java.time.ZonedDateTime;
 
 public class CertificateCheckResponseDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private int version;
-    private ZonedDateTime producedAt;
-    private ZonedDateTime endOfValidity;
+    private String producedAt;
+    private String endOfValidity;
     private String commonName;
     private BigInteger serialNumber;
     private String status;
@@ -18,14 +17,7 @@ public class CertificateCheckResponseDTO implements Serializable {
     public CertificateCheckResponseDTO() {
     }
 
-    public CertificateCheckResponseDTO(String commonName, 
-            BigInteger serialNumber, String status,
-            ZonedDateTime endOfValidity) {
-        this(1, ZonedDateTime.now(), endOfValidity, commonName, serialNumber, status);
-    }
-
-    public CertificateCheckResponseDTO(int version, ZonedDateTime producedAt, ZonedDateTime endOfValidity,
-            String commonName, BigInteger serialNumber, String status) {
+    public CertificateCheckResponseDTO(int version, String producedAt, String endOfValidity, String commonName, BigInteger serialNumber, String status) {
         this.version = version;
         this.producedAt = producedAt;
         this.endOfValidity = endOfValidity;
@@ -42,19 +34,19 @@ public class CertificateCheckResponseDTO implements Serializable {
         this.version = version;
     }
 
-    public ZonedDateTime getProducedAt() {
+    public String getProducedAt() {
         return producedAt;
     }
 
-    public void setProducedAt(ZonedDateTime producedAt) {
+    public void setProducedAt(String producedAt) {
         this.producedAt = producedAt;
     }
 
-    public ZonedDateTime getEndOfValidity() {
+    public String getEndOfValidity() {
         return endOfValidity;
     }
 
-    public void setEndOfValidity(ZonedDateTime endOfValidity) {
+    public void setEndOfValidity(String endOfValidity) {
         this.endOfValidity = endOfValidity;
     }
 

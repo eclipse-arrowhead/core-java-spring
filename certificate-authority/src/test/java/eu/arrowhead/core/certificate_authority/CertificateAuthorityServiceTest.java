@@ -1,6 +1,7 @@
 package eu.arrowhead.core.certificate_authority;
 
 import eu.arrowhead.common.SSLProperties;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.CaCertificate;
 import eu.arrowhead.common.dto.internal.AddTrustedKeyRequestDTO;
 import eu.arrowhead.common.dto.internal.AddTrustedKeyResponseDTO;
@@ -104,7 +105,9 @@ public class CertificateAuthorityServiceTest {
                                                              final ZonedDateTime validAfter,
                                                              final ZonedDateTime validBefore) throws IOException {
         final String encodedCSR = getResourceContent(csrResourcePath);
-        return new CertificateSigningRequestDTO(encodedCSR, validAfter, validBefore);
+        return new CertificateSigningRequestDTO(encodedCSR,
+                Utilities.convertZonedDateTimeToUTCString(validAfter),
+                Utilities.convertZonedDateTimeToUTCString(validBefore));
     }
 
     private static CertificateSigningRequestDTO buildRequest(final String csrResourcePath) throws IOException {
@@ -199,7 +202,9 @@ public class CertificateAuthorityServiceTest {
                                               .replace("\r", "");
         final CertificateCheckRequestDTO request = new CertificateCheckRequestDTO(0, encodedCert);
 
-        CertificateCheckResponseDTO responseDTO = new CertificateCheckResponseDTO(SYSOP_CN, BigInteger.ONE, "good", ZonedDateTime.now());
+        final String now = Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now());
+        final CertificateCheckResponseDTO responseDTO = new CertificateCheckResponseDTO(0, now, now, SYSOP_CN,
+                BigInteger.ONE, "good");
 
         when(caCertificateDBService.isCertificateValidNow(any())).thenReturn(responseDTO);
 

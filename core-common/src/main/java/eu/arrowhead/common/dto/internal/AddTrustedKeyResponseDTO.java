@@ -1,39 +1,38 @@
 package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
-import java.time.ZonedDateTime;
 
 public class AddTrustedKeyResponseDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private long id;
-    private ZonedDateTime validAfter;
-    private ZonedDateTime validBefore;
+    private String validAfter;
+    private String validBefore;
 
     public AddTrustedKeyResponseDTO(long id) {
         this(id, null, null);
     }
 
-    public AddTrustedKeyResponseDTO(long id, ZonedDateTime validAfter, ZonedDateTime validBefore) {
+    public AddTrustedKeyResponseDTO(long id, String validAfter, String validBefore) {
         this.id = id;
         this.validAfter = validAfter;
         this.validBefore = validBefore;
     }
 
-    public ZonedDateTime getValidAfter() {
+    public String getValidAfter() {
         return validAfter;
     }
 
-    public void setValidAfter(ZonedDateTime validAfter) {
+    public void setValidAfter(String validAfter) {
         this.validAfter = validAfter;
     }
 
-    public ZonedDateTime getValidBefore() {
+    public String getValidBefore() {
         return validBefore;
     }
 
-    public void setValidBefore(ZonedDateTime validBefore) {
+    public void setValidBefore(String validBefore) {
         this.validBefore = validBefore;
     }
 

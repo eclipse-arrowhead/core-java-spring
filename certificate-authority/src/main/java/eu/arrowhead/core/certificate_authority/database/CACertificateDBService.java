@@ -113,7 +113,7 @@ public class CACertificateDBService {
                 final ZonedDateTime now = ZonedDateTime.now();
                 final CertificateCheckResponseDTO responseDTO = new CertificateCheckResponseDTO();
                 responseDTO.setVersion(1);
-                responseDTO.setProducedAt(now);
+                responseDTO.setProducedAt(Utilities.convertZonedDateTimeToUTCString(now));
                 responseDTO.setCommonName(cert.getCommonName());
                 responseDTO.setSerialNumber(cert.getSerial());
                 responseDTO.setStatus("unknown");
@@ -121,13 +121,13 @@ public class CACertificateDBService {
                 if (now.isAfter(cert.getValidAfter()) && now.isBefore(cert.getValidBefore())) {
                     if (cert.getRevokedAt() != null) {
                         responseDTO.setStatus("revoked");
-                        responseDTO.setEndOfValidity(cert.getRevokedAt());
+                        responseDTO.setEndOfValidity(Utilities.convertZonedDateTimeToUTCString(cert.getRevokedAt()));
                     } else {
                         responseDTO.setStatus("good");
-                        responseDTO.setEndOfValidity(cert.getValidBefore());
+                        responseDTO.setEndOfValidity(Utilities.convertZonedDateTimeToUTCString(cert.getValidBefore()));
                     }
                 } else {
-                    responseDTO.setEndOfValidity(now);
+                    responseDTO.setEndOfValidity(Utilities.convertZonedDateTimeToUTCString(now));
                 }
 
                 return responseDTO;
