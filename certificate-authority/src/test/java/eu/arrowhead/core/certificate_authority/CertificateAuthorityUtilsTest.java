@@ -1,11 +1,9 @@
 package eu.arrowhead.core.certificate_authority;
 
 import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
-import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.exception.DataNotFoundException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
-import org.hamcrest.core.IsInstanceOf;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -27,6 +25,11 @@ public class CertificateAuthorityUtilsTest {
     @Rule
     public ExpectedException thrownException = ExpectedException.none();
 
+    @Test(expected = ServiceConfigurationError.class)
+    public void testGetKeystoreNull() {
+        CertificateAuthorityUtils.getKeyStore(null);
+    }
+
     @Test(expected = BadPayloadException.class)
     public void testDecodePKCS10CSRNull() {
         CertificateAuthorityUtils.decodePKCS10CSR(null);
@@ -42,10 +45,23 @@ public class CertificateAuthorityUtilsTest {
         CertificateAuthorityUtils.decodePKCS10CSR(new CertificateSigningRequestDTO("Invalid CSR String"));
     }
 
-    @Test
+    @Test(expected = BadPayloadException.class)
+    public void testDecodeCertificateNull() {
+        CertificateAuthorityUtils.decodeCertificate(null);
+    }
+
+    @Test(expected = BadPayloadException.class)
+    public void testDecodeCertificateEmpty() {
+        CertificateAuthorityUtils.decodeCertificate("");
+    }
+
+    @Test(expected = InvalidParameterException.class)
+    public void testDecodeCertificateInvalidString() {
+        CertificateAuthorityUtils.decodeCertificate("Invalid Certificate");
+    }
+
+    @Test(expected = InvalidParameterException.class)
     public void testEncodeCertificateNull() {
-        thrownException.expect(IsInstanceOf.instanceOf(AuthException.class));
-        thrownException.expectCause(IsInstanceOf.instanceOf(NullPointerException.class));
         CertificateAuthorityUtils.encodeCertificate(null);
     }
 
@@ -71,11 +87,34 @@ public class CertificateAuthorityUtilsTest {
         CertificateAuthorityUtils.checkCsrSignature(null);
     }
 
-    @Test
+    @Test(expected = BadPayloadException.class)
     public void testGetClientKeyNull() {
-        thrownException.expect(DataNotFoundException.class);
-        thrownException.expectCause(IsInstanceOf.instanceOf(NullPointerException.class));
         CertificateAuthorityUtils.getClientKey(null);
+    }
+
+    @Test(expected = InvalidParameterException.class)
+    public void testGetSubjectAlternativeNamesNull() {
+        CertificateAuthorityUtils.getSubjectAlternativeNames(null);
+    }
+
+    @Test(expected = InvalidParameterException.class)
+    public void testSha256Null() {
+        CertificateAuthorityUtils.sha256(null);
+    }
+
+    @Test(expected = InvalidParameterException.class)
+    public void testGetRequesterCommonNameNull() {
+        CertificateAuthorityUtils.getRequesterCommonName(null);
+    }
+
+    @Test(expected = InvalidParameterException.class)
+    public void testGetProtectedCommonNamesNull() {
+        CertificateAuthorityUtils.getProtectedCommonNames(null);
+    }
+
+    @Test(expected = InvalidParameterException.class)
+    public void testGetProtectedCommonNamesEmpty() {
+        CertificateAuthorityUtils.getProtectedCommonNames("");
     }
 
     private static String getResourceContentAsString(final String resourcePath) throws IOException {
