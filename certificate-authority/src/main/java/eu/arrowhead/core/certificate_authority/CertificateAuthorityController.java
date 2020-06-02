@@ -189,7 +189,7 @@ public class CertificateAuthorityController {
 	public ResponseEntity<String> revokeCertificate(@PathVariable long id, HttpServletRequest httpServletRequest) {
 		final String requestedByCN = CertificateAuthorityUtils.getRequesterCommonName(httpServletRequest);
 		if (id <= 0) {
-			throw new InvalidParameterException("Invalid id");
+			throw new BadPayloadException("Invalid id");
 		}
 
 		if (certificateAuthorityService.revokeCertificate(id, requestedByCN)) {
