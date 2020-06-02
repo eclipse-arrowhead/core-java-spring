@@ -1,184 +1,115 @@
 package eu.arrowhead.common.core;
 
-import eu.arrowhead.common.Utilities;
 import org.springframework.util.Assert;
 
-import static eu.arrowhead.common.CommonConstants.AUTHORIZATION_URI;
-import static eu.arrowhead.common.CommonConstants.CERTIFICATE_AUTHRORITY_URI;
-import static eu.arrowhead.common.CommonConstants.CHOREOGRAPHER_URI;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_AUTH_CONTROL_INTER;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_AUTH_CONTROL_INTRA;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_AUTH_CONTROL_SUBSCRIPTION;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_AUTH_PUBLIC_KEY;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_AUTH_TOKEN_GENERATION;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_CERTIFICATE_AUTHORITY_SIGN;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_CHOREOGRAPHER_PROCESS;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_DEVICE_REGISTRY_ONBOARDING_WITH_CSR;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_DEVICE_REGISTRY_ONBOARDING_WITH_NAME;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_DEVICE_REGISTRY_REGISTER;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_DEVICE_REGISTRY_UNREGISTER;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_EVENT_HANDLER_PUBLISH;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_EVENT_HANDLER_SUBSCRIBE;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_EVENT_HANDLER_UNSUBSCRIBE;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_DATAMANAGER_HISTORIAN;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_DATAMANAGER_PROXY;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_GATEKEEPER_GSD;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_GATEKEEPER_ICN;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_GATEWAY_CONNECT_CONSUMER;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_GATEWAY_CONNECT_PROVIDER;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_GATEWAY_PUBLIC_KEY;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_ONBOARDING_WITH_CERTIFICATE_AND_CSR;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_ONBOARDING_WITH_CERTIFICATE_AND_NAME;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_ONBOARDING_WITH_SHARED_SECRET_AND_CSR;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_ONBOARDING_WITH_SHARED_SECRET_AND_NAME;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_ORCH_PROCESS;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_QOS_MONITOR_PING_MEASUREMENT;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_SERVICE_REGISTRY_REGISTER;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_SERVICE_REGISTRY_UNREGISTER;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_SYSTEM_REGISTRY_ONBOARDING_WITH_CSR;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_SYSTEM_REGISTRY_ONBOARDING_WITH_NAME;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_SYSTEM_REGISTRY_REGISTER;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_SYSTEM_REGISTRY_UNREGISTER;
-import static eu.arrowhead.common.CommonConstants.DEVICE_REGISTRY_URI;
-import static eu.arrowhead.common.CommonConstants.EVENT_HANDLER_URI;
-import static eu.arrowhead.common.CommonConstants.DATAMANAGER_URI;
-import static eu.arrowhead.common.CommonConstants.GATEKEEPER_URI;
-import static eu.arrowhead.common.CommonConstants.GATEWAY_URI;
-import static eu.arrowhead.common.CommonConstants.ONBOARDING_URI;
-import static eu.arrowhead.common.CommonConstants.OP_AUTH_INTER_CHECK_URI;
-import static eu.arrowhead.common.CommonConstants.OP_AUTH_INTRA_CHECK_URI;
-import static eu.arrowhead.common.CommonConstants.OP_AUTH_KEY_URI;
-import static eu.arrowhead.common.CommonConstants.OP_AUTH_SUBSCRIPTION_CHECK_URI;
-import static eu.arrowhead.common.CommonConstants.OP_AUTH_TOKEN_URI;
-import static eu.arrowhead.common.CommonConstants.OP_CA_SIGN_CERTIFICATE_URI;
-import static eu.arrowhead.common.CommonConstants.OP_CHOREOGRAPHER_NOTIFY_STEP_DONE;
-import static eu.arrowhead.common.CommonConstants.OP_DEVICE_REGISTRY_ONBOARDING_WITH_CSR_URI;
-import static eu.arrowhead.common.CommonConstants.OP_DEVICE_REGISTRY_ONBOARDING_WITH_NAME_URI;
-import static eu.arrowhead.common.CommonConstants.OP_DEVICE_REGISTRY_REGISTER_URI;
-import static eu.arrowhead.common.CommonConstants.OP_DEVICE_REGISTRY_UNREGISTER_URI;
-import static eu.arrowhead.common.CommonConstants.OP_EVENT_HANDLER_PUBLISH;
-import static eu.arrowhead.common.CommonConstants.OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE;
-import static eu.arrowhead.common.CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE;
-import static eu.arrowhead.common.CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE;
-import static eu.arrowhead.common.CommonConstants.OP_DATAMANAGER_PROXY;
-import static eu.arrowhead.common.CommonConstants.OP_DATAMANAGER_HISTORIAN;
-import static eu.arrowhead.common.CommonConstants.OP_GATEKEEPER_GSD_SERVICE;
-import static eu.arrowhead.common.CommonConstants.OP_GATEKEEPER_ICN_SERVICE;
-import static eu.arrowhead.common.CommonConstants.OP_GATEWAY_CONNECT_CONSUMER_URI;
-import static eu.arrowhead.common.CommonConstants.OP_GATEWAY_CONNECT_PROVIDER_URI;
-import static eu.arrowhead.common.CommonConstants.OP_GATEWAY_KEY_URI;
-import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_CERTIFICATE_AND_CSR;
-import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_CERTIFICATE_AND_NAME;
-import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_SHARED_SECRET_AND_CSR;
-import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_SHARED_SECRET_AND_NAME;
-import static eu.arrowhead.common.CommonConstants.OP_ORCH_PROCESS;
-import static eu.arrowhead.common.CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT;
-import static eu.arrowhead.common.CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT_SUFFIX;
-import static eu.arrowhead.common.CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI;
-import static eu.arrowhead.common.CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI;
-import static eu.arrowhead.common.CommonConstants.OP_SYSTEM_REGISTRY_ONBOARDING_WITH_CSR_URI;
-import static eu.arrowhead.common.CommonConstants.OP_SYSTEM_REGISTRY_ONBOARDING_WITH_NAME_URI;
-import static eu.arrowhead.common.CommonConstants.OP_SYSTEM_REGISTRY_REGISTER_URI;
-import static eu.arrowhead.common.CommonConstants.OP_SYSTEM_REGISTRY_UNREGISTER_URI;
-import static eu.arrowhead.common.CommonConstants.ORCHESTRATOR_URI;
-import static eu.arrowhead.common.CommonConstants.QOS_MONITOR_URI;
-import static eu.arrowhead.common.CommonConstants.SERVICE_REGISTRY_URI;
-import static eu.arrowhead.common.CommonConstants.SYSTEM_REGISTRY_URI;
+import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.Utilities;
 
 public enum CoreSystemService {
 
-    //=================================================================================================
-    // elements
+	//=================================================================================================
+	// elements
+	
+	// Authorization services
+	AUTH_CONTROL_INTRA_SERVICE(CommonConstants.CORE_SERVICE_AUTH_CONTROL_INTRA, CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_AUTH_INTRA_CHECK_URI),
+	AUTH_CONTROL_INTER_SERVICE(CommonConstants.CORE_SERVICE_AUTH_CONTROL_INTER, CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_AUTH_INTER_CHECK_URI),
+	AUTH_TOKEN_GENERATION_SERVICE(CommonConstants.CORE_SERVICE_AUTH_TOKEN_GENERATION, CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_AUTH_TOKEN_URI),
+	AUTH_PUBLIC_KEY_SERVICE(CommonConstants.CORE_SERVICE_AUTH_PUBLIC_KEY, CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_AUTH_KEY_URI),
+	AUTH_CONTROL_SUBSCRIPTION_SERVICE(CommonConstants.CORE_SERVICE_AUTH_CONTROL_SUBSCRIPTION, CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_AUTH_SUBSCRIPTION_CHECK_URI),
+	
+	// Orchestrator services
+	ORCHESTRATION_SERVICE(CommonConstants.CORE_SERVICE_ORCH_PROCESS, CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS_URI),
+	ORCHESTRATION_QOS_ENABLED_SERVICE(CommonConstants.CORE_SERVICE_ORCH_QOS_ENABLED, CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_ENABLED_URI),
+	ORCHESTRATION_QOS_RESERVATIONS_SERVICE(CommonConstants.CORE_SERVICE_ORCH_QOS_RESERVATIONS, CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_RESERVATIONS_URI),
+	ORCHESTRATION_QOS_TEMPORARY_LOCK_SERVICE(CommonConstants.CORE_SERVICE_ORCH_QOS_TEMPORARY_LOCK, CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_TEMPORARY_LOCK_URI),
+	ORCHESTRATION_QOS_CONFIRM_RESERVATION_SERVICE(CommonConstants.CORE_SERVICE_ORCH_QOS_CONFIRM_RESERVATION, CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_RESERVATIONS_URI),
+	
+	// Gatekeeper services
+	GATEKEEPER_GLOBAL_SERVICE_DISCOVERY(CommonConstants.CORE_SERVICE_GATEKEEPER_GSD, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_GSD_SERVICE),
+	GATEKEEPER_INTER_CLOUD_NEGOTIATION(CommonConstants.CORE_SERVICE_GATEKEEPER_ICN, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_ICN_SERVICE),
+	GATEKEEPER_PULL_CLOUDS(CommonConstants.CORE_SERVICE_GATEKEEPER_PULL_CLOUDS, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_PULL_CLOUDS_SERVICE),
+	GATEKEEPER_COLLECT_SYSTEM_ADDRESSES(CommonConstants.CORE_SERVICE_GATEKEEPER_COLLECT_SYSTEM_ADDRESSES, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_SERVICE),
+	GATEKEEPER_COLLECT_ACCESS_TYPES(CommonConstants.CORE_SERVICE_GATEKEEPER_COLLECT_ACCESS_TYPES, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_COLLECT_ACCESS_TYPES_SERVICE),
+	GATEKEEPER_RELAY_TEST_SERVICE(CommonConstants.CORE_SERVICE_GATEKEEPER_RELAY_TEST, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_RELAY_TEST_SERVICE),
+	GATEKEEPER_GET_CLOUD_SERVICE(CommonConstants.CORE_SERVICE_GATEKEEPER_GET_CLOUD, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_GET_CLOUD_SERVICE +
+								 CommonConstants.OP_GATEKEEPER_GET_CLOUD_SERVICE_SUFFIX),
+	
+	// Gateway services
+	GATEWAY_PUBLIC_KEY_SERVICE(CommonConstants.CORE_SERVICE_GATEWAY_PUBLIC_KEY, CommonConstants.GATEWAY_URI + CommonConstants.OP_GATEWAY_KEY_URI),
+	GATEWAY_PROVIDER_SERVICE(CommonConstants.CORE_SERVICE_GATEWAY_CONNECT_PROVIDER, CommonConstants.GATEWAY_URI + CommonConstants.OP_GATEWAY_CONNECT_PROVIDER_URI),
+	GATEWAY_CONSUMER_SERVICE(CommonConstants.CORE_SERVICE_GATEWAY_CONNECT_CONSUMER, CommonConstants.GATEWAY_URI + CommonConstants.OP_GATEWAY_CONNECT_CONSUMER_URI),
+	
+	// Eventhandler services
+	EVENT_PUBLISH_SERVICE(CommonConstants.CORE_SERVICE_EVENT_HANDLER_PUBLISH, CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH),
+	EVENT_SUBSCRIBE_SERVICE(CommonConstants.CORE_SERVICE_EVENT_HANDLER_SUBSCRIBE, CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE),
+	EVENT_UNSUBSCRIBE_SERVICE(CommonConstants.CORE_SERVICE_EVENT_HANDLER_UNSUBSCRIBE, CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE),
+	EVENT_PUBLISH_AUTH_UPDATE_SERVICE(CommonConstants.CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE, CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE),
 
-    // Authorization services
-    AUTH_CONTROL_INTRA_SERVICE(CORE_SERVICE_AUTH_CONTROL_INTRA, AUTHORIZATION_URI + OP_AUTH_INTRA_CHECK_URI),
-    AUTH_CONTROL_INTER_SERVICE(CORE_SERVICE_AUTH_CONTROL_INTER, AUTHORIZATION_URI + OP_AUTH_INTER_CHECK_URI),
-    AUTH_TOKEN_GENERATION_SERVICE(CORE_SERVICE_AUTH_TOKEN_GENERATION, AUTHORIZATION_URI + OP_AUTH_TOKEN_URI),
-    AUTH_PUBLIC_KEY_SERVICE(CORE_SERVICE_AUTH_PUBLIC_KEY, AUTHORIZATION_URI + OP_AUTH_KEY_URI),
-    AUTH_CONTROL_SUBSCRIPTION_SERVICE(CORE_SERVICE_AUTH_CONTROL_SUBSCRIPTION, AUTHORIZATION_URI + OP_AUTH_SUBSCRIPTION_CHECK_URI),
+        // DataManager services
+        PROXY_SERVICE(CommonConstants.CORE_SERVICE_DATAMANAGER_PROXY, CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_PROXY),
+        HISTORIAN_SERVICE(CommonConstants.CORE_SERVICE_DATAMANAGER_HISTORIAN, CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN),
+	
+	// CA services
+	CERTIFICATE_AUTHORITY_SIGN_SERVICE(CommonConstants.CORE_SERVICE_CERTIFICATE_AUTHORITY_SIGN, CommonConstants.CERTIFICATE_AUTHRORITY_URI + CommonConstants.OP_CA_SIGN_CERTIFICATE_URI),
 
-    // Orchestrator services
-    ORCHESTRATION_SERVICE(CORE_SERVICE_ORCH_PROCESS, ORCHESTRATOR_URI + OP_ORCH_PROCESS),
+	// Choreographer services
+	CHOREOGRAPHER_SERVICE(CommonConstants.CORE_SERVICE_CHOREOGRAPHER_PROCESS, CommonConstants.CHOREOGRAPHER_URI +  CommonConstants.OP_CHOREOGRAPHER_NOTIFY_STEP_DONE),
+	
+	// QoS Monitor services
 
-    // Gatekeeper services
-    GATEKEEPER_GLOBAL_SERVICE_DISCOVERY(CORE_SERVICE_GATEKEEPER_GSD, GATEKEEPER_URI + OP_GATEKEEPER_GSD_SERVICE),
-    GATEKEEPER_INTER_CLOUD_NEGOTIATION(CORE_SERVICE_GATEKEEPER_ICN, GATEKEEPER_URI + OP_GATEKEEPER_ICN_SERVICE),
+	QOS_MONITOR_INTRA_PING_MEASUREMENT_SERVICE(CommonConstants.CORE_SERVICE_QOS_MONITOR_INTRA_PING_MEASUREMENT, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT + 
+										 	   CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT_SUFFIX),
+	QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT_SERVICE(CommonConstants.CORE_SERVICE_QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT),
+	QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_SERVICE(CommonConstants.CORE_SERVICE_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT),
+	QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_SERVICE(CommonConstants.CORE_SERVICE_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT),
+	QOS_MONITOR_PUBLIC_KEY_SERVICE(CommonConstants.CORE_SERVICE_QOS_MONITOR_PUBLIC_KEY, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_KEY_URI),
+	QOS_MONITOR_JOIN_RELAY_TEST_SERVICE(CommonConstants.CORE_SERVICE_QOS_MONITOR_JOIN_RELAY_TEST, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_JOIN_RELAY_TEST_URI),
+	QOS_MONITOR_INIT_RELAY_TEST_SERVICE(CommonConstants.CORE_SERVICE_QOS_MONITOR_INIT_RELAY_TEST, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INIT_RELAY_TEST_URI),
 
-    // Gateway services
-    GATEWAY_PUBLIC_KEY_SERVICE(CORE_SERVICE_GATEWAY_PUBLIC_KEY, GATEWAY_URI + OP_GATEWAY_KEY_URI),
-    GATEWAY_PROVIDER_SERVICE(CORE_SERVICE_GATEWAY_CONNECT_PROVIDER, GATEWAY_URI + OP_GATEWAY_CONNECT_PROVIDER_URI),
-    GATEWAY_CONSUMER_SERVICE(CORE_SERVICE_GATEWAY_CONNECT_CONSUMER, GATEWAY_URI + OP_GATEWAY_CONNECT_CONSUMER_URI),
-
-    // Eventhandler services
-    EVENT_PUBLISH_SERVICE(CORE_SERVICE_EVENT_HANDLER_PUBLISH, EVENT_HANDLER_URI + OP_EVENT_HANDLER_PUBLISH),
-    EVENT_SUBSCRIBE_SERVICE(CORE_SERVICE_EVENT_HANDLER_SUBSCRIBE, EVENT_HANDLER_URI + OP_EVENT_HANDLER_SUBSCRIBE),
-    EVENT_UNSUBSCRIBE_SERVICE(CORE_SERVICE_EVENT_HANDLER_UNSUBSCRIBE, EVENT_HANDLER_URI + OP_EVENT_HANDLER_UNSUBSCRIBE),
-    EVENT_PUBLISH_AUTH_UPDATE_SERVICE(CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE, EVENT_HANDLER_URI + OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE),
-
-    // DataManager services
-    PROXY_SERVICE(CORE_SERVICE_DATAMANAGER_PROXY, DATAMANAGER_URI + OP_DATAMANAGER_PROXY),
-    HISTORIAN_SERVICE(CORE_SERVICE_DATAMANAGER_HISTORIAN, DATAMANAGER_URI + OP_DATAMANAGER_HISTORIAN),
-
-    //Choreographer services
-    CHOREOGRAPHER_SERVICE(CORE_SERVICE_CHOREOGRAPHER_PROCESS, CHOREOGRAPHER_URI +  OP_CHOREOGRAPHER_NOTIFY_STEP_DONE),
-
-    // CA services
-    CERTIFICATE_AUTHORITY_SIGN_SERVICE(CORE_SERVICE_CERTIFICATE_AUTHORITY_SIGN, CERTIFICATE_AUTHRORITY_URI + OP_CA_SIGN_CERTIFICATE_URI),
-   
-    // QoS Monitor services
-    QOS_MONITOR_PING_MEASUREMENT_SERVICE(CORE_SERVICE_QOS_MONITOR_PING_MEASUREMENT,
-            QOS_MONITOR_URI + OP_QOS_MONITOR_PING_MEASUREMENT + OP_QOS_MONITOR_PING_MEASUREMENT_SUFFIX),
-
-    // Onboarding services
-    ONBOARDING_WITH_CERTIFICATE_AND_NAME_SERVICE(CORE_SERVICE_ONBOARDING_WITH_CERTIFICATE_AND_NAME, ONBOARDING_URI + OP_ONBOARDING_WITH_CERTIFICATE_AND_NAME),
-    ONBOARDING_WITH_CERTIFICATE_AND_CSR_SERVICE(CORE_SERVICE_ONBOARDING_WITH_CERTIFICATE_AND_CSR, ONBOARDING_URI + OP_ONBOARDING_WITH_CERTIFICATE_AND_CSR),
-    ONBOARDING_WITH_SHARED_SECRET_AND_NAME_SERVICE(CORE_SERVICE_ONBOARDING_WITH_SHARED_SECRET_AND_NAME, ONBOARDING_URI + OP_ONBOARDING_WITH_SHARED_SECRET_AND_NAME),
-    ONBOARDING_WITH_SHARED_SECRET_AND_CSR_SERVICE(CORE_SERVICE_ONBOARDING_WITH_SHARED_SECRET_AND_CSR, ONBOARDING_URI + OP_ONBOARDING_WITH_SHARED_SECRET_AND_CSR),
+	// Onboarding services
+    ONBOARDING_WITH_CERTIFICATE_AND_NAME_SERVICE(CommonConstants.CORE_SERVICE_ONBOARDING_WITH_CERTIFICATE_AND_NAME, CommonConstants.ONBOARDING_URI + CommonConstants.OP_ONBOARDING_WITH_CERTIFICATE_AND_NAME),
+    ONBOARDING_WITH_CERTIFICATE_AND_CSR_SERVICE(CommonConstants.CORE_SERVICE_ONBOARDING_WITH_CERTIFICATE_AND_CSR, CommonConstants.ONBOARDING_URI + CommonConstants.OP_ONBOARDING_WITH_CERTIFICATE_AND_CSR),
+    ONBOARDING_WITH_SHARED_SECRET_AND_NAME_SERVICE(CommonConstants.CORE_SERVICE_ONBOARDING_WITH_SHARED_SECRET_AND_NAME, CommonConstants.ONBOARDING_URI + CommonConstants.OP_ONBOARDING_WITH_SHARED_SECRET_AND_NAME),
+    ONBOARDING_WITH_SHARED_SECRET_AND_CSR_SERVICE(CommonConstants.CORE_SERVICE_ONBOARDING_WITH_SHARED_SECRET_AND_CSR, CommonConstants.ONBOARDING_URI + CommonConstants.OP_ONBOARDING_WITH_SHARED_SECRET_AND_CSR),
 
     // Device Registry services
-    DEVICE_REGISTRY_REGISTER_SERVICE(CORE_SERVICE_DEVICE_REGISTRY_REGISTER, DEVICE_REGISTRY_URI + OP_DEVICE_REGISTRY_REGISTER_URI),
-    DEVICE_REGISTRY_UNREGISTER_SERVICE(CORE_SERVICE_DEVICE_REGISTRY_UNREGISTER, DEVICE_REGISTRY_URI + OP_DEVICE_REGISTRY_UNREGISTER_URI),
-    DEVICE_REGISTRY_ONBOARDING_WITH_NAME_SERVICE(CORE_SERVICE_DEVICE_REGISTRY_ONBOARDING_WITH_NAME,
-                                                 DEVICE_REGISTRY_URI + ONBOARDING_URI + OP_DEVICE_REGISTRY_ONBOARDING_WITH_NAME_URI),
-    DEVICE_REGISTRY_ONBOARDING_WITH_CSR_SERVICE(CORE_SERVICE_DEVICE_REGISTRY_ONBOARDING_WITH_CSR,
-                                                DEVICE_REGISTRY_URI + ONBOARDING_URI + OP_DEVICE_REGISTRY_ONBOARDING_WITH_CSR_URI),
+    DEVICE_REGISTRY_REGISTER_SERVICE(CommonConstants.CORE_SERVICE_DEVICE_REGISTRY_REGISTER, CommonConstants.DEVICE_REGISTRY_URI + CommonConstants.OP_DEVICE_REGISTRY_REGISTER_URI),
+    DEVICE_REGISTRY_UNREGISTER_SERVICE(CommonConstants.CORE_SERVICE_DEVICE_REGISTRY_UNREGISTER, CommonConstants.DEVICE_REGISTRY_URI + CommonConstants.OP_DEVICE_REGISTRY_UNREGISTER_URI),
+    DEVICE_REGISTRY_ONBOARDING_WITH_NAME_SERVICE(CommonConstants.CORE_SERVICE_DEVICE_REGISTRY_ONBOARDING_WITH_NAME,
+    											 CommonConstants.DEVICE_REGISTRY_URI + CommonConstants.ONBOARDING_URI + CommonConstants.OP_DEVICE_REGISTRY_ONBOARDING_WITH_NAME_URI),
+    DEVICE_REGISTRY_ONBOARDING_WITH_CSR_SERVICE(CommonConstants.CORE_SERVICE_DEVICE_REGISTRY_ONBOARDING_WITH_CSR,
+    											CommonConstants.DEVICE_REGISTRY_URI + CommonConstants.ONBOARDING_URI + CommonConstants.OP_DEVICE_REGISTRY_ONBOARDING_WITH_CSR_URI),
 
     // System Registry services
-    SYSTEM_REGISTRY_REGISTER_SERVICE(CORE_SERVICE_SYSTEM_REGISTRY_REGISTER, SYSTEM_REGISTRY_URI + OP_SYSTEM_REGISTRY_REGISTER_URI),
-    SYSTEM_REGISTRY_UNREGISTER_SERVICE(CORE_SERVICE_SYSTEM_REGISTRY_UNREGISTER, SYSTEM_REGISTRY_URI + OP_SYSTEM_REGISTRY_UNREGISTER_URI),
-    SYSTEM_REGISTRY_ONBOARDING_WITH_NAME_SERVICE(CORE_SERVICE_SYSTEM_REGISTRY_ONBOARDING_WITH_NAME,
-                                                 SYSTEM_REGISTRY_URI + ONBOARDING_URI + OP_SYSTEM_REGISTRY_ONBOARDING_WITH_NAME_URI),
-    SYSTEM_REGISTRY_ONBOARDING_WITH_CSR_SERVICE(CORE_SERVICE_SYSTEM_REGISTRY_ONBOARDING_WITH_CSR,
-                                                SYSTEM_REGISTRY_URI + ONBOARDING_URI + OP_SYSTEM_REGISTRY_ONBOARDING_WITH_CSR_URI),
+    SYSTEM_REGISTRY_REGISTER_SERVICE(CommonConstants.CORE_SERVICE_SYSTEM_REGISTRY_REGISTER, CommonConstants.SYSTEM_REGISTRY_URI + CommonConstants.OP_SYSTEM_REGISTRY_REGISTER_URI),
+    SYSTEM_REGISTRY_UNREGISTER_SERVICE(CommonConstants.CORE_SERVICE_SYSTEM_REGISTRY_UNREGISTER, CommonConstants.SYSTEM_REGISTRY_URI + CommonConstants.OP_SYSTEM_REGISTRY_UNREGISTER_URI),
+    SYSTEM_REGISTRY_ONBOARDING_WITH_NAME_SERVICE(CommonConstants.CORE_SERVICE_SYSTEM_REGISTRY_ONBOARDING_WITH_NAME,
+    											 CommonConstants.SYSTEM_REGISTRY_URI + CommonConstants.ONBOARDING_URI + CommonConstants.OP_SYSTEM_REGISTRY_ONBOARDING_WITH_NAME_URI),
+    SYSTEM_REGISTRY_ONBOARDING_WITH_CSR_SERVICE(CommonConstants.CORE_SERVICE_SYSTEM_REGISTRY_ONBOARDING_WITH_CSR,
+    											CommonConstants.SYSTEM_REGISTRY_URI + CommonConstants.ONBOARDING_URI + CommonConstants.OP_SYSTEM_REGISTRY_ONBOARDING_WITH_CSR_URI),
 
     // Service Registry services
-    SERVICE_REGISTRY_REGISTER_SERVICE(CORE_SERVICE_SERVICE_REGISTRY_REGISTER, SERVICE_REGISTRY_URI + OP_SERVICE_REGISTRY_REGISTER_URI),
-    SERVICE_REGISTRY_UNREGISTER_SERVICE(CORE_SERVICE_SERVICE_REGISTRY_UNREGISTER, SERVICE_REGISTRY_URI + OP_SERVICE_REGISTRY_UNREGISTER_URI);
-
-    //TODO: additional services
-
-    //=================================================================================================
-    // members
-
-    private final String serviceDefinition;
-    private final String serviceUri;
-
-    //=================================================================================================
-    // methods
-
-    //-------------------------------------------------------------------------------------------------
-    public String getServiceDefinition() {
-        return serviceDefinition;
-    }
-
-    public String getServiceUri() {
-        return serviceUri;
-    }
-
-
-    //=================================================================================================
-    // constructors
+    SERVICE_REGISTRY_REGISTER_SERVICE(CommonConstants.CORE_SERVICE_SERVICE_REGISTRY_REGISTER, CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI),
+    SERVICE_REGISTRY_UNREGISTER_SERVICE(CommonConstants.CORE_SERVICE_SERVICE_REGISTRY_UNREGISTER, CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI);
+	
+	//TODO: additional services 
+	
+	//=================================================================================================
+	// members
+	
+	private final String serviceDefinition;
+	private final String serviceUri;
+	
+	//=================================================================================================
+	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	public String getServiceDefinition() { return serviceDefinition; }
+	public String getServiceUri() { return serviceUri; }
+	
+	
+	//=================================================================================================
+	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
 	private CoreSystemService(final String serviceDefinition, final String serviceUri) {

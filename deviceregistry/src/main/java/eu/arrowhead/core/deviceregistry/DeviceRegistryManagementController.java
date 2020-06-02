@@ -213,7 +213,7 @@ public class DeviceRegistryManagementController {
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @GetMapping(path = CoreCommonConstants.MGMT_URI)
+    @GetMapping
     @ResponseBody
     public DeviceRegistryListResponseDTO getDeviceRegistryEntries(
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,

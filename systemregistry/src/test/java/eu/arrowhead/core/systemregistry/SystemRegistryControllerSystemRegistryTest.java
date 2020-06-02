@@ -70,7 +70,7 @@ public class SystemRegistryControllerSystemRegistryTest {
                                   "authenticationInfo", DATE_STRING, DATE_STRING);
 
     private final static DeviceRequestDTO VALID_DEVICE_REQUEST =
-            new DeviceRequestDTO(VALID_DEVICE_NAME, "address", "macAddress", "authenticationInfo");
+            new DeviceRequestDTO(VALID_DEVICE_NAME, "address", "AA:AA:AA:AA:AA:AA", "authenticationInfo");
     private final static DeviceResponseDTO VALID_DEVICE =
             new DeviceResponseDTO(VALID_DEVICE_ID, VALID_DEVICE_NAME, "address", "macAddress",
                                   "authenticationInfo", DATE_STRING, DATE_STRING);

@@ -41,18 +41,13 @@ public class CountRestarterTask implements Job {
 		logger.debug("STARTED: count restarter task");
 
 		if (arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)) {
-
 			return;
 		}
 
-		qoSDBService.updateCountStartedAt();
+		qoSDBService.updateIntraCountStartedAt();
+		qoSDBService.updateInterDirectCountStartedAt();
+		qoSDBService.updateInterRelayCountStartedAt();
 
 		logger.debug("Finished: count restarter task");
 	}
-
-	//=================================================================================================
-	// assistant methods
-	
-	//-------------------------------------------------------------------------------------------------
-
 }

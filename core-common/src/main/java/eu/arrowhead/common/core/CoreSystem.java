@@ -1,64 +1,89 @@
 package eu.arrowhead.common.core;
 
-import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.Defaults;
-import org.springframework.util.Assert;
-
 import java.util.Collections;
 import java.util.List;
 
-import static eu.arrowhead.common.core.CoreSystemService.DEVICE_REGISTRY_ONBOARDING_WITH_NAME_SERVICE;
-import static eu.arrowhead.common.core.CoreSystemService.DEVICE_REGISTRY_REGISTER_SERVICE;
-import static eu.arrowhead.common.core.CoreSystemService.DEVICE_REGISTRY_ONBOARDING_WITH_CSR_SERVICE;
-import static eu.arrowhead.common.core.CoreSystemService.DEVICE_REGISTRY_UNREGISTER_SERVICE;
-import static eu.arrowhead.common.core.CoreSystemService.ONBOARDING_WITH_CERTIFICATE_AND_CSR_SERVICE;
-import static eu.arrowhead.common.core.CoreSystemService.ONBOARDING_WITH_CERTIFICATE_AND_NAME_SERVICE;
-import static eu.arrowhead.common.core.CoreSystemService.ONBOARDING_WITH_SHARED_SECRET_AND_CSR_SERVICE;
-import static eu.arrowhead.common.core.CoreSystemService.ONBOARDING_WITH_SHARED_SECRET_AND_NAME_SERVICE;
-import static eu.arrowhead.common.core.CoreSystemService.SERVICE_REGISTRY_REGISTER_SERVICE;
-import static eu.arrowhead.common.core.CoreSystemService.SERVICE_REGISTRY_UNREGISTER_SERVICE;
-import static eu.arrowhead.common.core.CoreSystemService.SYSTEM_REGISTRY_ONBOARDING_WITH_CSR_SERVICE;
-import static eu.arrowhead.common.core.CoreSystemService.SYSTEM_REGISTRY_ONBOARDING_WITH_NAME_SERVICE;
-import static eu.arrowhead.common.core.CoreSystemService.SYSTEM_REGISTRY_REGISTER_SERVICE;
-import static eu.arrowhead.common.core.CoreSystemService.SYSTEM_REGISTRY_UNREGISTER_SERVICE;
+import org.springframework.util.Assert;
+
+import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.Defaults;
 
 public enum CoreSystem {
+	
+	//=================================================================================================
+	// elements
+	
+	SERVICE_REGISTRY(Defaults.DEFAULT_SERVICE_REGISTRY_PORT, List.of(CoreSystemService.SERVICE_REGISTRY_REGISTER_SERVICE,
+																	 CoreSystemService.SERVICE_REGISTRY_UNREGISTER_SERVICE)),
+	
+    SYSTEM_REGISTRY(Defaults.DEFAULT_SYSTEM_REGISTRY_PORT, List.of(CoreSystemService.SYSTEM_REGISTRY_REGISTER_SERVICE,
+    															   CoreSystemService.SYSTEM_REGISTRY_UNREGISTER_SERVICE,
+    															   CoreSystemService.SYSTEM_REGISTRY_ONBOARDING_WITH_NAME_SERVICE,
+    															   CoreSystemService.SYSTEM_REGISTRY_ONBOARDING_WITH_CSR_SERVICE)),
+    
+    DEVICE_REGISTRY(Defaults.DEFAULT_DEVICE_REGISTRY_PORT, List.of(CoreSystemService.DEVICE_REGISTRY_REGISTER_SERVICE,
+    															   CoreSystemService.DEVICE_REGISTRY_UNREGISTER_SERVICE,
+    															   CoreSystemService.DEVICE_REGISTRY_ONBOARDING_WITH_NAME_SERVICE,
+    															   CoreSystemService.DEVICE_REGISTRY_ONBOARDING_WITH_CSR_SERVICE)),
+    
+    ONBOARDING_CONTROLLER(Defaults.DEFAULT_ONBOARDING_PORT, List.of(CoreSystemService.ONBOARDING_WITH_CERTIFICATE_AND_NAME_SERVICE,
+														    		CoreSystemService.ONBOARDING_WITH_SHARED_SECRET_AND_NAME_SERVICE,
+														    		CoreSystemService.ONBOARDING_WITH_CERTIFICATE_AND_CSR_SERVICE,
+														    		CoreSystemService.ONBOARDING_WITH_SHARED_SECRET_AND_CSR_SERVICE)),
+    
+	AUTHORIZATION(Defaults.DEFAULT_AUTHORIZATION_PORT, List.of(CoreSystemService.AUTH_CONTROL_INTRA_SERVICE,
+															   CoreSystemService.AUTH_CONTROL_INTER_SERVICE,
+															   CoreSystemService.AUTH_TOKEN_GENERATION_SERVICE,
+															   CoreSystemService.AUTH_PUBLIC_KEY_SERVICE,
+															   CoreSystemService.AUTH_CONTROL_SUBSCRIPTION_SERVICE)),
+	
+	ORCHESTRATOR(Defaults.DEFAULT_ORCHESTRATOR_PORT, List.of(CoreSystemService.ORCHESTRATION_SERVICE,
+															 CoreSystemService.ORCHESTRATION_QOS_ENABLED_SERVICE,
+															 CoreSystemService.ORCHESTRATION_QOS_RESERVATIONS_SERVICE,
+															 CoreSystemService.ORCHESTRATION_QOS_TEMPORARY_LOCK_SERVICE,
+															 CoreSystemService.ORCHESTRATION_QOS_CONFIRM_RESERVATION_SERVICE)),
+	
+	GATEKEEPER(Defaults.DEFAULT_GATEKEEPER_PORT, List.of(CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY,
+														 CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATION,
+														 CoreSystemService.GATEKEEPER_PULL_CLOUDS,
+														 CoreSystemService.GATEKEEPER_COLLECT_SYSTEM_ADDRESSES,
+														 CoreSystemService.GATEKEEPER_COLLECT_ACCESS_TYPES,
+														 CoreSystemService.GATEKEEPER_RELAY_TEST_SERVICE,
+														 CoreSystemService.GATEKEEPER_GET_CLOUD_SERVICE)),
+	
+	EVENT_HANDLER(Defaults.DEFAULT_EVENT_HANDLER_PORT, List.of(CoreSystemService.EVENT_PUBLISH_SERVICE,
+															   CoreSystemService.EVENT_SUBSCRIBE_SERVICE,
+															   CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE,
+															   CoreSystemService.EVENT_PUBLISH_AUTH_UPDATE_SERVICE)),
 
-    //=================================================================================================
-    // elements
-
-    SERVICE_REGISTRY(Defaults.DEFAULT_SERVICE_REGISTRY_PORT, List.of(SERVICE_REGISTRY_REGISTER_SERVICE, SERVICE_REGISTRY_UNREGISTER_SERVICE)),
-    SYSTEM_REGISTRY(Defaults.DEFAULT_SYSTEM_REGISTRY_PORT, List.of(SYSTEM_REGISTRY_REGISTER_SERVICE, SYSTEM_REGISTRY_UNREGISTER_SERVICE,
-                                                                   SYSTEM_REGISTRY_ONBOARDING_WITH_NAME_SERVICE, SYSTEM_REGISTRY_ONBOARDING_WITH_CSR_SERVICE)),
-    DEVICE_REGISTRY(Defaults.DEFAULT_DEVICE_REGISTRY_PORT, List.of(DEVICE_REGISTRY_REGISTER_SERVICE, DEVICE_REGISTRY_UNREGISTER_SERVICE,
-                                                                   DEVICE_REGISTRY_ONBOARDING_WITH_NAME_SERVICE, DEVICE_REGISTRY_ONBOARDING_WITH_CSR_SERVICE)),
-    ONBOARDING_CONTROLLER(Defaults.DEFAULT_ONBOARDING_PORT, List.of(ONBOARDING_WITH_CERTIFICATE_AND_NAME_SERVICE,
-                                                                    ONBOARDING_WITH_SHARED_SECRET_AND_NAME_SERVICE,
-                                                                    ONBOARDING_WITH_CERTIFICATE_AND_CSR_SERVICE,
-                                                                    ONBOARDING_WITH_SHARED_SECRET_AND_CSR_SERVICE)),
-    AUTHORIZATION(Defaults.DEFAULT_AUTHORIZATION_PORT, List.of(CoreSystemService.AUTH_CONTROL_INTRA_SERVICE, CoreSystemService.AUTH_CONTROL_INTER_SERVICE,
-            CoreSystemService.AUTH_TOKEN_GENERATION_SERVICE, CoreSystemService.AUTH_PUBLIC_KEY_SERVICE,
-            CoreSystemService.AUTH_CONTROL_SUBSCRIPTION_SERVICE)),
-    ORCHESTRATOR(Defaults.DEFAULT_ORCHESTRATOR_PORT, List.of(CoreSystemService.ORCHESTRATION_SERVICE)),
-    GATEKEEPER(Defaults.DEFAULT_GATEKEEPER_PORT, List.of(CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY, CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATION)),
-    EVENT_HANDLER(Defaults.DEFAULT_EVENT_HANDLER_PORT, List.of(CoreSystemService.EVENT_PUBLISH_SERVICE, CoreSystemService.EVENT_SUBSCRIBE_SERVICE
-            , CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE, CoreSystemService.EVENT_PUBLISH_AUTH_UPDATE_SERVICE)),
-    DATAMANAGER(Defaults.DEFAULT_DATAMANAGER_PORT, List.of(CoreSystemService.PROXY_SERVICE, CoreSystemService.HISTORIAN_SERVICE)),
-    GATEWAY(Defaults.DEFAULT_GATEWAY_PORT, List.of(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE, CoreSystemService.GATEWAY_PROVIDER_SERVICE, CoreSystemService.GATEWAY_CONSUMER_SERVICE)),
+        DATAMANAGER(Defaults.DEFAULT_DATAMANAGER_PORT, List.of(CoreSystemService.PROXY_SERVICE, CoreSystemService.HISTORIAN_SERVICE)),
+	
+	GATEWAY(Defaults.DEFAULT_GATEWAY_PORT, List.of(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE,
+												   CoreSystemService.GATEWAY_PROVIDER_SERVICE,
+												   CoreSystemService.GATEWAY_CONSUMER_SERVICE)),
+	
 	CHOREOGRAPHER(Defaults.DEFAULT_CHOREOGRAPHER_PORT, List.of(CoreSystemService.CHOREOGRAPHER_SERVICE)),
-    QOS_MONITOR(Defaults.DEFAULT_QOS_MONITOR_PORT, List.of(CoreSystemService.QOS_MONITOR_PING_MEASUREMENT_SERVICE)),
-    CERTIFICATE_AUTHORITY(Defaults.DEFAULT_CERTIFICATE_AUTHORITY_PORT, List.of(CoreSystemService.CERTIFICATE_AUTHORITY_SIGN_SERVICE));
-
-    //=================================================================================================
-    // members
-
-    private final int defaultPort;
-    private final List<CoreSystemService> services;
-
-    //=================================================================================================
-    // methods
-
-    //-------------------------------------------------------------------------------------------------
+	
+	QOS_MONITOR(Defaults.DEFAULT_QOS_MONITOR_PORT, List.of(CoreSystemService.QOS_MONITOR_INTRA_PING_MEASUREMENT_SERVICE,
+														   CoreSystemService.QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT_SERVICE,
+														   CoreSystemService.QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_SERVICE,
+														   CoreSystemService.QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_SERVICE,
+														   CoreSystemService.QOS_MONITOR_PUBLIC_KEY_SERVICE,
+														   CoreSystemService.QOS_MONITOR_JOIN_RELAY_TEST_SERVICE,
+														   CoreSystemService.QOS_MONITOR_INIT_RELAY_TEST_SERVICE)),
+	
+	CERTIFICATE_AUTHORITY(Defaults.DEFAULT_CERTIFICATE_AUTHORITY_PORT, List.of(CoreSystemService.CERTIFICATE_AUTHORITY_SIGN_SERVICE));
+	
+	//=================================================================================================
+	// members
+	
+	private final int defaultPort;
+	private final List<CoreSystemService> services;
+	
+	//=================================================================================================
+	// methods
+	
+	//-------------------------------------------------------------------------------------------------
 	public int getDefaultPort() { return defaultPort; }
 	public List<CoreSystemService> getServices() { return services; }
 	

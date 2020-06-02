@@ -22,8 +22,8 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.SSLProperties;
-import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
-import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientFactory;
+import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClient;
+import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClientFactory;
 
 @Component
 public class RelaySubscriberDataContainer {
@@ -96,6 +96,20 @@ public class RelaySubscriberDataContainer {
 			relaySubsriberTaskScheduler.unscheduleJob(new TriggerKey(RelaySubscriberTaskConfig.NAME_OF_TRIGGER));
 			canceled = true;
 			logger.debug("STOPPED: Relay Subscriber task.");
+		} catch (final SchedulerException ex) {
+			logger.error(ex.getMessage());
+			logger.debug("Stacktrace:", ex);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public void shutdown() {
+		logger.debug("shutdown started...");
+		
+		try {
+			relaySubsriberTaskScheduler.shutdown();
+			canceled = true;
+			logger.debug("SHUTDOWN: Relay Subscriber task.");
 		} catch (final SchedulerException ex) {
 			logger.error(ex.getMessage());
 			logger.debug("Stacktrace:", ex);

@@ -6,6 +6,7 @@ public class CoreCommonConstants {
 	// members
 	
 	public static final String APPLICATION_PROPERTIES = "application.properties";
+	public static final String QUARTZ_THREAD_PROPERTY = "org.quartz.threadPool.threadCount";
 	
 	public static final String DATABASE_URL = "spring.datasource.url";
 	public static final String DATABASE_USER = "spring.datasource.username";
@@ -29,6 +30,9 @@ public class CoreCommonConstants {
 	public static final String RELAY_MESSAGE_TYPE_ACK = "ack";
 	public static final String RELAY_MESSAGE_TYPE_GSD_POLL = "gsd_poll";
 	public static final String RELAY_MESSAGE_TYPE_ICN_PROPOSAL = "icn_proposal";
+	public static final String RELAY_MESSAGE_TYPE_ACCESS_TYPE = "access_type";
+	public static final String RELAY_MESSAGE_TYPE_SYSTEM_ADDRESS_LIST = "system_address_list";
+	public static final String RELAY_MESSAGE_TYPE_QOS_RELAY_TEST = "qos_relay_test";
 	
 	public static final String LOCAL_SYSTEM_OPERATOR_NAME = "sysop"; 
 	
@@ -145,6 +149,17 @@ public class CoreCommonConstants {
 	public static final String $QOS_PING_MEASUREMENT_CACHE_THRESHOLD_WD = "${" + QOS_PING_MEASUREMENT_CACHE_THRESHOLD + ":" + CoreDefaults.DEFAULT_QOS_PING_MEASUREMENT_CACHE_THRESHOLD + "}";
 	public static final String QOS_NOT_MEASURED_SYSTEM_VERIFY_RESULT = "qos_not_measured_system_verify_result"; // result of verify if a system has no measurement records
 	public static final String $QOS_NOT_MEASURED_SYSTEM_VERIFY_RESULT = "${" + QOS_NOT_MEASURED_SYSTEM_VERIFY_RESULT + ":" + CoreDefaults.DEFAULT_QOS_NOT_MEASURED_SYSTEM_VERIFY_RESULT + "}";
+	public static final String $QOS_DEFAULT_REFERENCE_MIN_RESPONSE_TIME_WD = "${default.min_response_time:" + CoreDefaults.DEFAULT_QOS_DEFAULT_REFERENCE_MIN_RESPONSE_TIME + "}";
+	public static final String $QOS_DEFAULT_REFERENCE_MAX_RESPONSE_TIME_WD = "${default.max_response_time:" + CoreDefaults.DEFAULT_QOS_DEFAULT_REFERENCE_MAX_RESPONSE_TIME + "}";
+	public static final String $QOS_DEFAULT_REFERENCE_MEAN_RESPONSE_TIME_WITH_TIMEOUT_WD = "${default.mean_response_time_with_timeout:" + CoreDefaults.DEFAULT_QOS_DEFAULT_REFERENCE_MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT + "}";
+	public static final String $QOS_DEFAULT_REFERENCE_MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT_WD = "${default.mean_response_time_without_timeout:" + CoreDefaults.DEFAULT_QOS_DEFAULT_REFERENCE_MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT + "}";
+	public static final String $QOS_DEFAULT_REFERENCE_JITTER_WITH_TIMEOUT_WD = "${default.jitter_with_timeout:" + CoreDefaults.DEFAULT_QOS_DEFAULT_REFERENCE_JITTER_WITHOUT_TIMEOUT + "}";
+	public static final String $QOS_DEFAULT_REFERENCE_JITTER_WITHOUT_TIMEOUT_WD = "${default.jitter_without_timeout:" + CoreDefaults.DEFAULT_QOS_DEFAULT_REFERENCE_JITTER_WITHOUT_TIMEOUT + "}";
+	public static final String $QOS_DEFAULT_REFERENCE_LOST_PET_MEASUREMENT_PERCENT_WD = "${default.lost_per_measurement_percent:" + CoreDefaults.DEFAULT_QOS_DEFAULT_REFERENCE_LOST_PER_MEASUREMENT_PERCENT + "}";
+	public static final String QOS_ENABLED_RELAY_TASK = "enable_qos_relay_task";
+	public static final String $QOS_ENABLED_RELAY_TASK_WD =  "${" + QOS_ENABLED_RELAY_TASK + ":" + CoreDefaults.DEFAULT_QOS_ENABLED_RELAY_TASK + "}";
+	public static final String QOS_IS_GATEKEEPER_PRESENT = "gatekeeper_is_present";
+	public static final String $QOS_IS_GATEKEEPER_PRESENT_WD = "${" + QOS_IS_GATEKEEPER_PRESENT + ":" + CoreDefaults.DEFAULT_QOS_IS_GATEKEEPER_PRESENT + "}";
 	
 	public static final String NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS = "no_gatekeeper_relay_request_handler_workers";
 	public static final String $NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS_WD = "${" + NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + ":" + 
@@ -185,6 +200,21 @@ public class CoreCommonConstants {
 	
 	public static final String CLOUD_PING_TTL_INTERVAL = "cloud_ping_ttl_interval_minutes";
 	public static final String $CLOUD_PING_TTL_INTERVAL_WD = "${" + CLOUD_PING_TTL_INTERVAL + ":" + CoreDefaults.DEFAULT_CLOUD_PING_TTL_INTERVAL_MINUTES + "}";
+	
+	public static final String RELAY_ECHO_TTL_INTERVAL = "relay_echo_ttl_interval_minutes";
+	public static final String $RELAY_ECHO_TTL_INTERVAL_WD = "${" + RELAY_ECHO_TTL_INTERVAL + ":" + CoreDefaults.DEFAULT_RELAY_ECHO_TTL_INTERVAL_MINUTES + "}";
+	
+	public static final String RELAY_TEST_BAD_GATEWAY_RETRY_MIN = "relay.test.bad_gateway_retry_min";
+	public static final String $RELAY_TEST_BAD_GATEWAY_RETRY_MIN_WD = "${" + RELAY_TEST_BAD_GATEWAY_RETRY_MIN + ":" + CoreDefaults.DEFAULT_RELAY_TEST_BAD_GATEWAY_RETRY_MIN + "}";
+	public static final String RELAY_TEST_TIME_TO_REPEAT = "relay.test.time_to_repeat";
+	public static final String $RELAY_TEST_TIME_TO_REPEAT_WD = "${" + RELAY_TEST_TIME_TO_REPEAT + ":" + CoreDefaults.DEFAULT_RELAY_TEST_TIME_TO_REPEAT + "}";
+	public static final String RELAY_TEST_TIMEOUT = "rely.test.timeout"; 
+	public static final String $RELAY_TEST_TIMEOUT_WD = "${" + RELAY_TEST_TIMEOUT + ":" + CoreDefaults.DEFAULT_RELAY_TEST_TIMEOUT + "}";
+	public static final String RELAY_TEST_MESSAGE_SIZE = "relay.test.messsage_size";
+	public static final String $RELAY_TEST_MESSAGE_SIZE_WD = "${" + RELAY_TEST_MESSAGE_SIZE + ":" + CoreDefaults.DEFAULT_RELAY_TEST_MESSAGE_SIZE + "}";
+	public static final String RELAY_TEST_LOG_MEASUREMENTS_IN_DB = "relay.test.log_measurements_in_db";
+	public static final String $RELAY_TEST_LOG_MEASUREMENTS_IN_DB_WD = "${" + RELAY_TEST_LOG_MEASUREMENTS_IN_DB + ":" + CoreDefaults.DEFAULT_RELAY_TEST_LOG_MEASUREMENTS_IN_DB + "}";
+	
     public static final String CERTIFICATE_FORMAT = "X.509";
 
     //=================================================================================================

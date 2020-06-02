@@ -86,13 +86,15 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 	       * [Client](#ca_endpoints_client)
            * [Private](#ca_endpoints_private)
            * [Management](#ca_endpoints_mgmt)
-    9. [QoS Monitor (Quality of Service Monitor)](#qos_monitor)
-       * [System Design Description Overview](#qos_monitor_sdd)
-       * [Services and Use Cases](#qos_monitor_usecases)  
-       * [Endpoints](#qos_monitor_endpoints)
-	       * [Client](#qos_monitor_endpoints_client)
-           * [Private](#qos_monitor_endpoints_private)
-           * [Management](#qos_monitor_endpoints_mgmt)
+    9. **QoS Monitor (Quality of Service Monitor)**
+       * [System Design Description Overview](qos-monitor/documentation/QualityOfServiceMonitor-SysDD.md)
+           * [Services and Use Cases](qos-monitor/documentation/QualityOfServiceMonitor-SysDD.md#services-and-use-cases)  
+       * [Interface Design Description](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md)
+           * [Security](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#security)
+           * [Communication Profile](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#communication-profile)
+               * [Client](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#client-endpoint-description)
+               * [Private](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#private-endpoint-description)
+               * [Management](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#management-endpoint-description)	 
     10. [Onboarding Controller](#onboardingcontroller)
        * [System Design Description Overview](#onboardingcontroller_sdd)
        * [Services and Use Cases](#onboardingcontroller_usecases)
@@ -119,7 +121,7 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
         * [Endpoints](#choreographer_endpoints)
 	       * [Client](#choreographer_endpoints_client)
            * [Management](#choreographer_endpoints_mgmt)
-	
+
 <a name="quickstart" />
 
 ## Quick Start Guide
@@ -6614,288 +6616,6 @@ __Sign CSR with the Cloud Certificate__ output :
 
 The Certificate Authority does not have management endpoints.
 
-<a name="qos_monitor" />
-
-# QOS MONITOR (QUALITY OF SERVICE MONITOR)
-
-<a name="qos_monitor_sdd" />
-
-## System Design Description Overview
-
-The purpose of QoS Monitor supporting core system is providing QoS (Quality of Service) measurements to the QoS Manager (which is part of the Orchestrator core system).
-
-![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `AH Service Registry`
-![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `AH Authorization` 
-![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `AH Orchestrator / QoS Manager`
-![#ffcc44](https://placehold.it/15/a33c00/000000?text=+) `AH QoS Monitor`
-![Alt text](/documentation/qos_monitor/sdd/overview.png)
-
-<a name="qos_monitor_sysd" />
-
-## System Design Overview
-![Alt text](/documentation/qos_monitor/sysd/qos_monitor_sys_d.jpg)
-
-<a name="qos_monitor_provided_services" />
-
-## Provided services
-
-The QoS Monitor provides the following services:
-* [Echo](#qos_monitor_endpoints_get_echo)
-* [Ping Measurement](#qos_monitor_endpoints_ping_measurement_by_system_id)
-
-<a name="qos_monitor_consumed_services" />
-
-## Consumed services
-
-The QoS Monitor consumes the following service:
-* QueryAll private service from the ServiceRegistry core system
-
-<a name="qos_monitor_usecases" />
-
-## Use cases
-
-The QoS Monitor has the following use cases:
-* [Ping Measurement](documentation/qos_monitor/use_cases/QoSMonitor_use_case_1.md)
-![Alt text](/documentation/qos_monitor/use_cases/PingMeasurement.png)
-* [Reset Counter](documentation/qos_monitor/use_cases/QoSMonitor_use_case_2.md)
-![Alt text](/documentation/qos_monitor/use_cases/Reset_Counter.png)
-* [Get Measurements](documentation/qos_monitor/use_cases/QoSMonitor_use_case_3.md)
-![Alt text](/documentation/qos_monitor/use_cases/GetMeaurements.png)
-
-<a name="qos_monitor_endpoints" />
-
-## Endpoints
-
-<a name="qos_monitor_endpoints_client" />
-
-### Client endpoint description<br />
-
-| Function | URL subpath | Method | Input | Output |
-| -------- | ----------- | ------ | ----- | ------ |
-| [Echo](#qos_monitor_endpoints_get_echo) | /echo | GET    | -    | OK     |
-
-<a name="qos_monitor_endpoints_mgmt" />
-
-### Management endpoint description<br />
-
-| Function | URL subpath | Method | Input | Output |
-| -------- | ----------- | ------ | ----- | ------ |
-| [Get ping measurements mgmt](#qos_monitor_endpoints_get_ping_measurements_list) | /mgmt/ping/measurements | GET | direction && item_per_page && page && sort_field | [PingMeasurement list response](#qos_monitor_ping_measurement_list_response) |
-| [Get ping measurements by system id mgmt](#qos_monitor_mgmt_endpoints_get_ping_measurement_by_system_id) | /mgmt/ping/measurements/{id} | GET | id | [Ping Measurment response](#qos_monitor_ping_measurement_response) |
-
-<a name="qos_monitor_endpoints_private" />
-
-### Private endpoint description<br />
-
-| Function | URL subpath | Method | Input | Output |
-| -------- | ----------- | ------ | ----- | ------ |
-| [Get ping measurements by system id](#qos_monitor_endpoints_get_ping_measurement_by_system_id) | /ping/measurements/{id} | GET | id | [Ping Measurment response](#qos_monitor_ping_measurement_response) |
-
-<a name="qos_monitor_endpoints_get_echo" />
-
-### Echo 
-```
-GET /qos_monitor/echo
-```
-
-Returns a "Got it" message with the purpose of testing the core service availability.
-
-### Get ping measurements mgmt
-
-```
-GET /mgmt/ping/measurements
-```
-
-__Get subscriptions query parameters__ the input :
-
-`https://qos_monitor_ip:qos_monitor_port/qos_monitor/mgmt/ping/measurements?dirction=`ASC`&item_per_page=`100`&page=`0`&sort_field=`id
-
-| __Get ping measurements mgmt__  query parameters |
-| ------------------------------------------------------- |
-
-| Parameter | Description | Necessity | Format/Limitations |
-| --------- | ----------- | --------- | ----------- |
-| `direction` |  Direction of sorting. | optional | valid values: "ASC", "DESC" - default: "ASC"|
-| `item_per_page` | Maximum number of items returned. | optional (mandatory, if page is defined)| integer |
-| `page` | Zero based page index. | optional (mandatory, if item_per_page is defined)| integer |
-| `sort_field` | The field to sort the results by. | optional | valid values: "id", "updatedAt", "createdAt" - default: "id" |
-
-<a name="qos_monitor_ping_measurement_list_response" />
-
-__PingMeasurement list response__ the output :
-
-```json
-{
-	"data": [
-		{
-			"id": 1,
-			"measurement": {
-				"id": 1,
-				"system": {
-					"id": 5,
-					"systemName": "testsystem",
-					"address": "testsystem.ai",
-					"port": 12345,
-					"createdAt": "2020-02-04 09:38:56",
-					"updatedAt": "2020-02-04 09:38:56"
-				},
-				"measurementType": "PING",
-				"lastMeasurementAt": "2020-02-14T10:48:10+01:00",
-				"createdAt": "2020-02-04T10:42:04+01:00",
-				"updatedAt": "2020-02-14T10:48:47+01:00"
-			},
-			"available": true,
-			"lastAccessAt": "2020-02-14T10:48:10+01:00",
-			"minResponseTime": 15,
-			"maxResponseTime": 26,
-			"meanResponseTimeWithTimeout": 18,
-			"meanResponseTimeWithoutTimeout": 18,
-			"jitterWithTimeout": 3,
-			"jitterWithoutTimeout": 3,
-			"lostPerMeasurementPercent": 0,
-			"sent": 12075,
-			"received": 12070,
-			"countStartedAt": "2020-02-07T00:00:00+01:00",
-			"sentAll": 63175,
-			"receivedAll": 56721,
-			"createdAt": "2020-02-14T10:48:47+01:00",
-			"updatedAt": "2020-02-14T10:48:47+01:00"
-		}
-	],
-	"count": 1
-}
-```
-
-| Field | Description |
-| ----- | ----------- |
-| `count` | Number of record found |
-| `data` | Array of data |
-| `id` | ID of the ping measurement |
-| `measurement.id` | ID of the measurement |
-| `measurement.system.id` | ID of the measured system |
-| `measurement.system.systemName` | Name of the measured system |
-| `measurement.system.address` | Address of the measured system |
-| `measurement.system.port` | Port of the measured system |
-| `measurement.system.createdAt` | Date of creation of the measured system |
-| `measurement.system.updatedAt` | Date of update of the measured system |
-| `measurement.measurementType` | Type of the measurement |
-| `measurement.lastMeasurementAt` | Time of the last measurement |
-| `measurement.createdAt` | Date of creation of the measurement |
-| `measurement.updatedAt` | Date of update of the measurement |
-| `available` | Boolean value of the systems calculated availability|
-| `lastAccessAt` | TimeStamp value of the systems last known availability|
-| `minResponseTime` | Integer value of milliseconds of the fastest returned ping|
-| `maxResponseTime` | Integer value of milliseconds of the slowest returned ping|
-| `meanResponseTimeWithTimeout` | Integer value of milliseconds of the calculated average of pings including timeouts|
-| `meanResponseTimeWithoutTimeout` | Integer value of milliseconds of the calculated average of pings not including timeouts|
-| `jitterWithTimeout` | Integer value of milliseconds of the calculated standard deviation of pings including timeouts|
-| `jitterWithoutTimeout` | Integer value of milliseconds of the calculated standard deviation of pings not including timeouts|
-| `lostPerMeasurementPercent` | Integer value of calculated lost ping percentage|
-| `sent` | Integer value of sent pings in measurement|
-| `received` | Integer value of received pings in measurement|
-| `countStartedAt` | TimeSatmp value of the last reset of sent and received fields|
-| `sentAll` | Integer value of sent pings since ping measurement created|
-| `receivedAll` | Integer value of received pings since ping measurement created|
-| `createdAt` | Date of creation of the ping measurement |
-| `updatedAt` | Date of update of the ping measurement |
-
-<a name="qos_monitor_mgmt_endpoints_get_ping_measurement_by_system_id" />
-
-### Get ping measurements by system id mgmt
-
-```
-GET /mgmt/ping/measurements/{id}
-```
-
-__Get ping measurements by system id mgmt path parameter__ the input :
-
-`https://qos_monitor_ip:qos_monitor_port/qos_monitor/mgmt/ping/measurements/`1
-
-| __Get ping measurement by system id__ path parameter |
-| ------------------------------------------------------- |
-
-| Parameter | Description | Necessity | Format/Limitations |
-| --------- | ----------- | --------- | ----------- |
-| `id` |  Id of measured system | mandatory | integer |
-
-<a name="qos_monitor_ping_measurement_response" />
-
-__Ping Measurment response by system id__ the output :
-
-```json
-{
-	"id": 1,
-	"measurement": {
-		"id": 1,
-		"system": {
-			"id": 5,
-			"systemName": "testsystem",
-			"address": "testsystem.ai",
-			"port": 12345,
-			"createdAt": "2020-02-04 09:38:56",
-			"updatedAt": "2020-02-04 09:38:56"
-		},
-		"measurementType": "PING",
-		"lastMeasurementAt": "2020-02-14T10:48:10+01:00",
-		"createdAt": "2020-02-04T10:42:04+01:00",
-		"updatedAt": "2020-02-14T10:48:47+01:00"
-	},
-	"available": true,
-	"lastAccessAt": "2020-02-14T10:48:10+01:00",
-	"minResponseTime": 15,
-	"maxResponseTime": 26,
-	"meanResponseTimeWithTimeout": 18,
-	"meanResponseTimeWithoutTimeout": 18,
-	"jitterWithTimeout": 3,
-	"jitterWithoutTimeout": 3,
-	"lostPerMeasurementPercent": 0,
-	"sent": 12075,
-	"received": 12070,
-	"countStartedAt": "2020-02-07T00:00:00+01:00",
-	"sentAll": 63175,
-	"receivedAll": 56721,
-	"createdAt": "2020-02-14T10:48:47+01:00",
-	"updatedAt": "2020-02-14T10:48:47+01:00"
-}
-```
-
-| Field | Description |
-| ----- | ----------- |
-| `id` | ID of the ping measurement |
-| `measurement.id` | ID of the measurement |
-| `measurement.system.id` | ID of the measured system |
-| `measurement.system.systemName` | Name of the measured system |
-| `measurement.system.address` | Address of the measured system |
-| `measurement.system.port` | Port of the measured system |
-| `measurement.system.createdAt` | Date of creation of the measured system |
-| `measurement.system.updatedAt` | Date of update of the measured system |
-| `measurement.measurementType` | Type of the measurement |
-| `measurement.lastMeasurementAt` | Time of the last measurement |
-| `measurement.createdAt` | Date of creation of the measurement |
-| `measurement.updatedAt` | Date of update of the measurement |
-| `available` | Boolean value of the systems calculated availability|
-| `lastAccessAt` | TimeStamp value of the systems last known availability|
-| `minResponseTime` | Integer value of milliseconds of the fastest returned ping|
-| `maxResponseTime` | Integer value of milliseconds of the slowest returned ping|
-| `meanResponseTimeWithTimeout` | Integer value of milliseconds of the calculated average of pings including timeouts|
-| `meanResponseTimeWithoutTimeout` | Integer value of milliseconds of the calculated average of pings not including timeouts|
-| `jitterWithTimeout` | Integer value of milliseconds of the calculated standard deviation of pings including timeouts|
-| `jitterWithoutTimeout` | Integer value of milliseconds of the calculated standard deviation of pings not including timeouts|
-| `lostPerMeasurementPercent` | Integer value of calculated lost ping percentage|
-| `sent` | Integer value of sent pings in measurement|
-| `received` | Integer value of received pings in measurement|
-| `countStartedAt` | TimeSatmp value of the last reset of sent and received fields|
-| `sentAll` | Integer value of sent pings since ping measurement created|
-| `receivedAll` | Integer value of received pings since ping measurement created|
-| `createdAt` | Date of creation of the ping measurement |
-| `updatedAt` | Date of update of the ping measurement |
-
-<a name="qos_monitor_endpoints_get_ping_measurement_by_system_id" />
-
-### Get ping measurements by system id 
-
-For private endpoints no detailed description is available.
-
 <a name="choreographer" />
  
 # Choreographer
@@ -8099,5 +7819,4 @@ Signs the CSR, registers the device and eventually returns a device certificate 
 | `privateKey` | Base64 encoded private key. Always empty for this operation |
 | `publicKey` | Base64 encoded public key |
 
-Additionally all fields from [SystemRegistryEntry](#datastructures_systemregistryentry) are returned. 
-
+Additionally all fields from [SystemRegistryEntry](#datastructures_systemregistryentry) are returned.

@@ -1,17 +1,9 @@
 package eu.arrowhead.core.onboarding;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.arrowhead.common.database.service.CommonDBService;
-import eu.arrowhead.core.onboarding.service.OnboardingService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,11 +18,12 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import eu.arrowhead.core.onboarding.service.OnboardingService;
+
 @RunWith(SpringRunner.class)
-@SpringBootTest//(classes = OnboardingMain.class)
+@SpringBootTest
 @ContextConfiguration(classes = {OnboardingTestContext.class})
 public class OnboardingControllerTest {
-
 
     //=================================================================================================
     // members
@@ -40,15 +33,8 @@ public class OnboardingControllerTest {
 
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @MockBean(name = "mockOnboardingDBService")
     private OnboardingService onboardingDBService;
-
-    @MockBean(name = "mockCommonDBService")
-    private CommonDBService commonDBService;
-
 
     //=================================================================================================
     // methods

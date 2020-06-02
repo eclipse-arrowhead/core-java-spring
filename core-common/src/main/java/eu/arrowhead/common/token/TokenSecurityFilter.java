@@ -49,6 +49,7 @@ public abstract class TokenSecurityFilter extends ArrowheadFilter {
 				checkToken(clientCN, token, requestTarget);
 			} catch (final ArrowheadException ex) {
 				handleException(ex, response);
+				return;
 			}
 		}
 		

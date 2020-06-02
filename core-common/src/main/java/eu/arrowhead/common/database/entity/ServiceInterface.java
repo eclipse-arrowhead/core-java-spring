@@ -16,10 +16,12 @@ import javax.persistence.PreUpdate;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.SQLInsert;
 
 import eu.arrowhead.common.CoreDefaults;
 
 @Entity
+@SQLInsert(sql = "INSERT IGNORE INTO service_interface(created_at, interface_name, updated_at) VALUES (?, ?, ?)") //members' sequence is strictly defined
 public class ServiceInterface {
 	
 	//=================================================================================================
