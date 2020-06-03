@@ -134,6 +134,9 @@ public class CATrustedKeyDBService {
             } else {
                 throw new InvalidParameterException("Cannot find trusted certificate");
             }
+        } catch (final InvalidParameterException ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw ex;
         } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
