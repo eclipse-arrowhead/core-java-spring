@@ -225,7 +225,7 @@ public class GatekeeperService {
 						} else {
 							qosMeasurements.add(new QoSMeasurementAttributesFormDTO(srEntryDTO,
 																					pingMeasurement.isAvailable(),
-																					Utilities.convertZonedDateTimeToUTCString(pingMeasurement.getLastAccessAt()),
+																					pingMeasurement.getLastAccessAt(),
 																					pingMeasurement.getMinResponseTime(),
 																					pingMeasurement.getMaxResponseTime(),
 																					pingMeasurement.getMeanResponseTimeWithTimeout(),
@@ -880,7 +880,7 @@ public class GatekeeperService {
 				if (pingMeasurement.hasRecord()) {
 					orchestrationResult.setQosMeasurements(new QoSMeasurementAttributesFormDTO(null,
 																							   pingMeasurement.isAvailable(),
-																							   Utilities.convertZonedDateTimeToUTCString(pingMeasurement.getLastAccessAt()),
+																							   pingMeasurement.getLastAccessAt(),
 																							   pingMeasurement.getMinResponseTime(),
 																							   pingMeasurement.getMaxResponseTime(),
 																							   pingMeasurement.getMeanResponseTimeWithTimeout(),

@@ -717,7 +717,7 @@ public class DTOConverter {
 		pingMeasurementResponseDTO.setId(pingMeasurement.getId());
 		pingMeasurementResponseDTO.setMeasurement(measurementResponseDTO);
 		pingMeasurementResponseDTO.setAvailable(pingMeasurement.isAvailable());
-		pingMeasurementResponseDTO.setLastAccessAt(pingMeasurement.getLastAccessAt());
+		pingMeasurementResponseDTO.setLastAccessAt(Utilities.convertZonedDateTimeToUTCString(pingMeasurement.getLastAccessAt()));
 		pingMeasurementResponseDTO.setMinResponseTime(pingMeasurement.getMinResponseTime());
 		pingMeasurementResponseDTO.setMaxResponseTime(pingMeasurement.getMaxResponseTime());
 		pingMeasurementResponseDTO.setMeanResponseTimeWithTimeout(pingMeasurement.getMeanResponseTimeWithTimeout());
@@ -727,11 +727,11 @@ public class DTOConverter {
 		pingMeasurementResponseDTO.setLostPerMeasurementPercent(pingMeasurement.getLostPerMeasurementPercent());
 		pingMeasurementResponseDTO.setSent(pingMeasurement.getSent());
 		pingMeasurementResponseDTO.setReceived(pingMeasurement.getReceived());
-		pingMeasurementResponseDTO.setCountStartedAt(pingMeasurement.getCountStartedAt());
+		pingMeasurementResponseDTO.setCountStartedAt(Utilities.convertZonedDateTimeToUTCString(pingMeasurement.getCountStartedAt()));
 		pingMeasurementResponseDTO.setSentAll(pingMeasurement.getSentAll());
 		pingMeasurementResponseDTO.setReceivedAll(pingMeasurement.getReceivedAll());
-		pingMeasurementResponseDTO.setCreatedAt(pingMeasurement.getCreatedAt());
-		pingMeasurementResponseDTO.setUpdatedAt(pingMeasurement.getUpdatedAt());
+		pingMeasurementResponseDTO.setCreatedAt(Utilities.convertZonedDateTimeToUTCString(pingMeasurement.getCreatedAt()));
+		pingMeasurementResponseDTO.setUpdatedAt(Utilities.convertZonedDateTimeToUTCString(pingMeasurement.getUpdatedAt()));
 
 		return pingMeasurementResponseDTO;
 	}
@@ -775,9 +775,9 @@ public class DTOConverter {
 				measurement.getId(), 
 				system, 
 				measurement.getMeasurementType(), 
-				measurement.getLastMeasurementAt(), 
-				measurement.getCreatedAt(), 
-				measurement.getUpdatedAt());
+				Utilities.convertZonedDateTimeToUTCString(measurement.getLastMeasurementAt()), 
+				Utilities.convertZonedDateTimeToUTCString(measurement.getCreatedAt()), 
+				Utilities.convertZonedDateTimeToUTCString(measurement.getUpdatedAt()));
 	}
 
 	//-------------------------------------------------------------------------------------------------
