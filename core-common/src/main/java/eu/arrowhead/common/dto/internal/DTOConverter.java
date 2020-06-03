@@ -1,6 +1,7 @@
 package eu.arrowhead.common.dto.internal;
 
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -19,6 +20,8 @@ import eu.arrowhead.common.database.entity.AuthorizationInterCloud;
 import eu.arrowhead.common.database.entity.AuthorizationInterCloudInterfaceConnection;
 import eu.arrowhead.common.database.entity.AuthorizationIntraCloud;
 import eu.arrowhead.common.database.entity.AuthorizationIntraCloudInterfaceConnection;
+import eu.arrowhead.common.database.entity.CaCertificate;
+import eu.arrowhead.common.database.entity.CaTrustedKey;
 import eu.arrowhead.common.database.entity.ChoreographerAction;
 import eu.arrowhead.common.database.entity.ChoreographerPlan;
 import eu.arrowhead.common.database.entity.ChoreographerStep;
@@ -1213,4 +1216,93 @@ public class DTOConverter {
             return new ArrayList<>();
         }
     }
+	
+	// -------------------------------------------------------------------------------------------------
+	public static TrustedKeysResponseDTO convertCaTrustedKeyListToTrustedKeysResponseDTO(
+			final Page<CaTrustedKey> trustedKeyEntryList) {
+		Assert.notNull(trustedKeyEntryList, "trustedKeyEntryList is null");
+
+		final long count = trustedKeyEntryList.getTotalElements();
+		final TrustedKeysResponseDTO trustedKeysResponseDTO = new TrustedKeysResponseDTO();
+		trustedKeysResponseDTO.setCount(count);
+		trustedKeysResponseDTO
+				.setTrustedKeys(trustedKeyEntryListToTrustedKeysResponseDTOList(trustedKeyEntryList.getContent()));
+
+		return trustedKeysResponseDTO;
+	}
+
+	// -------------------------------------------------------------------------------------------------
+	private static List<TrustedKeyDTO> trustedKeyEntryListToTrustedKeysResponseDTOList(final List<CaTrustedKey> trustedKeyList) {
+		final List<TrustedKeyDTO> trustedKeyDTOs = new ArrayList<>(trustedKeyList.size());
+
+		for (final CaTrustedKey trustedKey : trustedKeyList) {
+			final TrustedKeyDTO dto = new TrustedKeyDTO(trustedKey.getId(),
+					Utilities.convertZonedDateTimeToUTCString(trustedKey.getCreatedAt()),
+					trustedKey.getDescription());
+			trustedKeyDTOs.add(dto);
+		}
+
+		return trustedKeyDTOs;
+	}
+
+	// -------------------------------------------------------------------------------------------------
+	public static IssuedCertificatesResponseDTO convertCaCertificateListToIssuedCertificatesResponseDTO(
+			final Page<CaCertificate> certificateEntryList) {
+		Assert.notNull(certificateEntryList, "certificateEntryList is null");
+
+		final long count = certificateEntryList.getTotalElements();
+		final IssuedCertificatesResponseDTO certificatesResponseDTO = new IssuedCertificatesResponseDTO();
+		certificatesResponseDTO.setCount(count);
+		certificatesResponseDTO.setIssuedCertificates(
+				certificateEntryListToCertificatesResponseDTOList(certificateEntryList.getContent()));
+
+		return certificatesResponseDTO;
+	}
+
+	// -------------------------------------------------------------------------------------------------
+	private static List<IssuedCertificateDTO> certificateEntryListToCertificatesResponseDTOList(
+			final List<CaCertificate> certificateList) {
+		Assert.notNull(certificateList, "certificateList is null");
+
+		final List<IssuedCertificateDTO> certificateDTOs = new ArrayList<>(certificateList.size());
+
+		final ZonedDateTime now = ZonedDateTime.now();
+
+		for (final CaCertificate certificate : certificateList) {
+			IssuedCertificateDTO dto = new IssuedCertificateDTO();
+			dto.setId(certificate.getId());
+			dto.setCommonName(certificate.getCommonName());
+			dto.setSerialNumber(certificate.getSerial());
+			dto.setCreatedBy(certificate.getCreatedBy());
+			dto.setCreatedAt(Utilities.convertZonedDateTimeToUTCString(certificate.getCreatedAt()));
+			
+			final ZonedDateTime revokedAt = certificate.getRevokedAt();
+			final ZonedDateTime validAfter = certificate.getValidAfter();
+			final ZonedDateTime validBefore = certificate.getValidBefore();
+			dto.setRevokedAt(Utilities.convertZonedDateTimeToUTCString(revokedAt));
+			dto.setValidFrom(Utilities.convertZonedDateTimeToUTCString(validAfter));
+			dto.setValidUntil(Utilities.convertZonedDateTimeToUTCString(validBefore));
+			dto.setStatus(getStatus(now, validAfter, validBefore, revokedAt));
+
+			certificateDTOs.add(dto);
+		}
+
+		return certificateDTOs;
+	}
+
+	private static IssuedCertificateStatus getStatus(ZonedDateTime now, ZonedDateTime validAfter,
+													 ZonedDateTime validBefore, ZonedDateTime revokedAt) {
+		Assert.notNull(now, "now cannot be null");
+		Assert.notNull(validAfter, "validAfter cannot be null");
+		Assert.notNull(validBefore, "validBefore cannot be null");
+		
+		if (revokedAt != null) {
+			return IssuedCertificateStatus.REVOKED;
+		}
+		if (now.isAfter(validBefore) || now.isBefore(validAfter)) {
+			return IssuedCertificateStatus.EXPIRED;
+		}
+		return IssuedCertificateStatus.GOOD;
+	}
+
 }
