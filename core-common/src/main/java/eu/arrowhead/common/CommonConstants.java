@@ -108,7 +108,9 @@ public class CommonConstants {
 	public static final String $SERVICE_REGISTRY_ADDRESS_WD = "${" + SERVICE_REGISTRY_ADDRESS + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_ADDRESS + "}";
 	public static final String SERVICE_REGISTRY_PORT = "sr_port";
 	public static final String $SERVICE_REGISTRY_PORT_WD = "${" + SERVICE_REGISTRY_PORT + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_PORT + "}";
-	
+
+	public static final String GAMS_URI = "/gams";
+
 	public static final String ONBOARDING_URI = "/onboarding";
 	public static final String ONBOARDING_AUTH_WITH_CERTIFICATE_URI = "/certificate";
 	public static final String ONBOARDING_AUTH_WITH_SHARED_SECRET_URI = "/sharedsecret";

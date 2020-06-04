@@ -17,7 +17,12 @@
 	      	<artifactId>arrowhead-core-common</artifactId>
 	      	<version>${revision}</version>
 	    </dependency>
-  	</dependencies>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.12</version>
+		</dependency>
+	</dependencies>
  
 	<build>
 	 	<plugins>
