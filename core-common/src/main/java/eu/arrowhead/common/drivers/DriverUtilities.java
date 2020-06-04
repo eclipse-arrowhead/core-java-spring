@@ -30,6 +30,8 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.Resource;
+import java.security.PublicKey;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -88,6 +90,17 @@ public class DriverUtilities {
         return pingService(echoUri);
     }
 
+    public UriComponents findUri(final CoreSystemService service) throws DriverException {
+        try {
+            return findUriByOrchestrator(service);
+        } catch (final Exception e) {
+            // silently ignored
+        }
+
+        return findUriByServiceRegistry(service);
+    }
+
+    //-------------------------------------------------------------------------------------------------
     public UriComponents findUriByContext(final CoreSystemService service) throws DriverException {
         Assert.notNull(service, "CoreSystemService must not be null");
         logger.debug("Searching for '{}' uri in context ...", service.getServiceDefinition());
@@ -159,10 +172,7 @@ public class DriverUtilities {
         logger.debug("findUriByOrchestrator started...");
 
         final UriComponents queryUri = getOrchestrationQueryUri();
-        final SystemRequestDTO requester = new SystemRequestDTO();
-        requester.setAddress(coreSystemProps.getCoreSystemDomainName());
-        requester.setPort(coreSystemProps.getCoreSystemDomainPort());
-        requester.setSystemName(coreSystemProps.getCoreSystemName());
+        final SystemRequestDTO requester = getCoreSystemRequestDTO();
 
         final ServiceQueryFormDTO serviceQueryForm = new ServiceQueryFormDTO.Builder(service.getServiceDefinition())
                 .interfaces(getInterface())
@@ -245,11 +255,30 @@ public class DriverUtilities {
                                    .build();
     }
 
+    //-------------------------------------------------------------------------------------------------
     public String getCoreSystemServiceKey(final CoreSystemService service) {
         Assert.notNull(service, "CoreSystemService must not be null");
         return service.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
     }
 
+    //-------------------------------------------------------------------------------------------------
+    public SystemRequestDTO getCoreSystemRequestDTO() {
+        logger.debug("getCoreSystemRequestDTO started...");
+
+        final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
+        final SystemRequestDTO result = new SystemRequestDTO();
+        result.setSystemName(coreSystemProps.getCoreSystem().name().toLowerCase());
+        result.setAddress(coreSystemProps.getCoreSystemDomainName());
+        result.setPort(coreSystemProps.getCoreSystemDomainPort());
+
+        if (sslProperties.isSslEnabled() && Objects.nonNull(publicKey)) {
+            result.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+        }
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------------------------------
     protected UriComponents getServiceRegistryQueryUri() {
         logger.debug("getServiceRegistryQueryUri started...");
 
@@ -265,19 +294,18 @@ public class DriverUtilities {
         }
     }
 
+    //-------------------------------------------------------------------------------------------------
     protected UriComponents getOrchestrationQueryUri() throws DriverException {
         logger.debug("getOrchestrationQueryUri started...");
         return findUriByServiceRegistry(CoreSystemService.ORCHESTRATION_SERVICE);
     }
 
-    protected String getScheme() {
-        return sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
-    }
-
+    //-------------------------------------------------------------------------------------------------
     protected String getScheme(final ServiceSecurityType securityType) {
         return securityType == ServiceSecurityType.NOT_SECURE ? CommonConstants.HTTP : CommonConstants.HTTPS;
     }
 
+    //-------------------------------------------------------------------------------------------------
     protected String getInterface() {
         return sslProperties.isSslEnabled() ? CommonConstants.HTTP_SECURE_JSON : CommonConstants.HTTP_INSECURE_JSON;
     }
@@ -290,16 +318,8 @@ public class DriverUtilities {
 
     public static class DriverException extends UnavailableServerException {
 
-        protected DriverException(final String message) {
-            super(message);
-        }
-
         protected DriverException(final String message, final HttpStatus httpStatus) {
             super(message, httpStatus.value());
-        }
-
-        protected DriverException(final String message, final Throwable cause) {
-            super(message, cause);
         }
 
         protected DriverException(final String msg, final int errorCode, final String origin, final Throwable cause) {
