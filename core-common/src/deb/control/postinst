@@ -28,6 +28,36 @@ case "$1" in
 
     . /usr/share/arrowhead/conf/ahconf.sh
 
+    # Store system properties in the config file
+    db_get arrowhead-core-common/system_interface
+    ah_set_conf_prop system_interface "$RET"
+
+    db_get arrowhead-core-common/domain_name
+    ah_set_conf_prop domain_name "$RET"
+
+    db_get arrowhead-core-common/cloudname
+    ah_set_conf_prop cloudname "$RET"
+
+    db_get arrowhead-core-common/operator
+    ah_set_conf_prop operator "$RET"
+
+    db_get arrowhead-core-common/relay_master_cert
+    ah_set_conf_prop relay_master_cert "$RET"
+
+    db_get arrowhead-core-common/cert_password
+    ah_set_conf_prop cert_password "$RET"
+
+    db_get arrowhead-core-common/san_interfaces
+    ah_set_conf_prop san_interfaces "$RET"
+
+    db_get arrowhead-core-common/san_ips
+    ah_set_conf_prop san_ips "$RET"
+
+    db_get arrowhead-core-common/san_dns
+    ah_set_conf_prop san_dns "$RET"
+
+    AH_PASS_CERT="$(ah_get_conf_prop cert_password)"
+
     # Create user
     adduser --system --no-create-home --group arrowhead
 
@@ -43,6 +73,8 @@ case "$1" in
     if [ -z "${AH_PASS_CERT}" ]; then
       PASS="$(openssl rand -base64 12)"
       db_set arrowhead-core-common/cert_password ${PASS}
+      ah_set_conf_prop cert_password "${PASS}"
+      err "${PASS}"
     fi
 
     db_get arrowhead-core-common/install_type; INSTALL_TYPE="$RET"
@@ -55,13 +87,25 @@ case "$1" in
         db_get arrowhead-core-common/master_cert; master_cert=$RET
 
         # Extract data from CN field
-        subject=$(keytool -list -keystore "${cloud_cert}" -storepass "${cloud_password}" -v -alias "${cloud_alias}" | grep "Owner:" | head -n1 | sed 's/Owner: //')
-        cloud_name=$(echo "${subject}" | sed 's/^.*CN=\([^.]*\)\.\([^.]*\)\.\([^.]*\)\.\([^,]*\).*$/\1/')
-        operator=$(echo "${subject}" | sed 's/^.*CN=\([^.]*\)\.\([^.]*\)\.\([^.]*\)\.\([^,]*\).*$/\2/')
+        subject=$(keytool -list \
+          -keystore "${cloud_cert}" \
+          -storepass "${cloud_password}" \
+          -v -alias "${cloud_alias}" | \
+          grep "Owner:" | \
+          head -n1 | \
+          sed 's/Owner: //')
+
+        cloud_name=$(echo "${subject}" | \
+          sed 's/^.*CN=\([^.]*\)\.\([^.]*\)\.\([^.]*\)\.\([^,]*\).*$/\1/')
+
+        operator=$(echo "${subject}" | \
+          sed 's/^.*CN=\([^.]*\)\.\([^.]*\)\.\([^.]*\)\.\([^,]*\).*$/\2/')
 
         # Store data
         db_set arrowhead-core-common/cloudname ${cloud_name}
         db_set arrowhead-core-common/operator ${operator}
+        ah_set_conf_prop cloudname "${cloudname}"
+        ah_set_conf_prop operator "${operator}"
         ;;
     esac
 
@@ -98,7 +142,8 @@ case "$1" in
         # Generate master and cloud certificates
         ah_cert ${AH_CONF_DIR} master "arrowhead.eu"
         ah_cert_export "${AH_CONF_DIR}" master "${AH_CONF_DIR}"
-        ah_cert_signed ${AH_CLOUDS_DIR} ${AH_CLOUD_NAME} "${AH_CLOUD_NAME}.${AH_OPERATOR}.arrowhead.eu" ${AH_CONF_DIR} master
+        ah_cert_signed ${AH_CLOUDS_DIR} ${AH_CLOUD_NAME} \
+          "${AH_CLOUD_NAME}.${AH_OPERATOR}.arrowhead.eu" ${AH_CONF_DIR} master
         ;;
 
       * )

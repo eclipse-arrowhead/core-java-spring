@@ -1,0 +1,229 @@
+#!/bin/bash
+set -e #-x
+
+AH_LIBRARY='/usr/share/arrowhead/conf/ahconf.sh'
+
+################ ARGUMENT PARSING ################
+if [[ $# -eq 0 ]]; then
+  HELP_FLAG=1
+fi
+
+POSITIONAL=()
+SYSTEMS=()
+for i in "$@"; do
+  case $i in
+    cert)
+      CERT_FLAG=1
+      shift
+      ;;
+    -r=*|--root-path=*)
+      AH_CONF_DIR="${i#*=}"
+      shift
+      ;;
+    -d=*|--cloud-path=*)
+      AH_CLOUDS_DIR="${i#*=}"
+      shift
+      ;;
+    -t=*|--system-path=*)
+      AH_SYSTEMS_DIR="${i#*=}"
+      shift
+      ;;
+    -c=*|--config-file=*)
+      AH_CONF_FILE="${i#*=}"
+      shift
+      ;;
+    -a=*|--library-file=*)
+      AH_LIBRARY="${i#*=}"
+      shift
+      ;;
+    -s=*|--system-cert=*)
+      SYSTEMS+=("${i#*=}")
+      shift
+      ;;
+    -u|--system-certs)
+      UPDATE_SYSTEM_CERTS_FLAG=1
+      shift
+      ;;
+    -m|--master-certs)
+      UPDATE_MASTER_CERTS_FLAG=1
+      shift
+      ;;
+    -h|--help)
+      HELP_FLAG=1
+      shift
+      ;;
+    *)    # unknown option
+      POSITIONAL+=("$1") # save it in an array for later
+      shift
+      ;;
+  esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
+################ ARGUMENT PARSING ################
+
+print_help() {
+  echo "Manipulate certain aspects of the arrowhead system"
+  echo "Usage:"
+  echo "  arrowhead cert (-m|-u|-s=<system>...) [-c=CFGPATH] [-a=LIBPATH] [-r=ROOTPATH] [-d=CLOUDPATH] [t=SYSPATH]"
+  echo
+  echo "Commands:"
+  echo "  cert          Used to update arrowhead certificates"
+  echo
+  echo "Options:"
+  echo "  -r=ROOTPATH   --root-path=ROOTPATH    Alternative folder destination for root certificates"
+  echo "                                        Default: /etc/arrowhead/"
+  echo "  -d=CLOUDPATH  --cloud-path=CLOUDPATH  Alternative folder destination for cloud certificates"
+  echo "                                        Default: ROOTPATH/clouds"
+  echo "  -t=SYSPATH    --systems-path=SYSPATH  Alternative folder destingation for systems certificates"
+  echo "                                        Default: ROOTPATH/systems"
+  echo "  -c=CFGPATH    --config-file=CFGPATH   Alternative path to arrowhead config file"
+  echo "                                        Default: ROOTPATH/arrowhead.cfg"
+  echo "  -a=LIBPATH    --library-file=LIBPATH  Alternative path to ahconf.sh library file"
+  echo "                                        Default: /usr/share/arrowhead/conf/ahconf.sh"
+  echo "  -s=SYSTEM     --system=SYSTEM         Update certificate for SYSTEM"
+  echo "  -u            --system-certs          Update all system certificates"
+  echo "  -m            --master-certs          Update master certificates. Will also update the"
+  echo "                                        cloud certificates and all system certificates"
+  echo "                                        in order to not break the chain of trust"
+  echo "  -h            --help                  Displays this help message"
+}
+
+err() {
+  echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" >&2
+}
+
+# Check for command flags here.
+# Do additional checks in the commands own function
+main() {
+  if [[ -n "${HELP_FLAG}" ]]; then
+    print_help
+    exit 0
+  fi
+  if [[ -n "${CERT_FLAG}" ]]; then
+    cert
+    exit 0
+  fi
+}
+
+############# CERT RELATED FUNCTIONS #############
+# Parses command flags
+cert() {
+  if [[ "${EUID}" -ne 0 ]]; then
+    err "This command must be run as root"
+    exit 1
+  fi
+  
+  local flags="$((
+    ${UPDATE_SYSTEM_CERTS_FLAG} +
+    ${UPDATE_MASTER_CERTS_FLAG} +
+    (${#SYSTEMS[@]} && 1 )))"
+
+  if (( ${flags} > 1 )); then
+    err "Multiple mutually exclusive flags given"
+    print_help
+    exit 1
+  elif (( ${flags} < 1 )); then
+    err "Insufficient number of flags given"
+    print_help
+    exit 1
+  fi
+
+  if [[ "${#SYSTEMS[@]}" -gt 0 ]]; then
+    for system in "${SYSTEMS[@]}"; do
+      update_system_cert "${system}"
+    done
+    exit $?
+  fi
+  if [[ -n "${UPDATE_MASTER_CERTS_FLAG}" ]]; then
+    update_master_certs
+    update_system_certs
+    exit $?
+  fi
+  if [[ -n "${UPDATE_SYSTEM_CERTS_FLAG}" ]]; then
+    update_system_certs
+    exit $?
+  fi
+  
+}
+
+# Creates new root certificates.
+update_master_certs() {
+  . "${AH_LIBRARY}"
+
+  mkdir -p "${AH_CONF_DIR}"
+
+  local password
+  while true; do
+    read -p "Do you wish to update the certificate password? (yn): " yn
+    case $yn in
+      [Yy]* )
+        echo -n "Enter new password:"
+        read -s password
+        ah_set_conf_prop cert_password "$password"
+        PASSWORD_CHANGED=1
+        break
+        ;;
+      [Nn]* )
+        break
+        ;;
+      * ) echo "Please answer yes or no." ;;
+    esac
+  done
+
+  rm "${AH_CONF_DIR}/master.crt" 2>/dev/null || true
+  rm "${AH_CONF_DIR}/master.p12" 2>/dev/null || true
+  rm "${AH_CONF_DIR}/truststore.p12" 2>/dev/null || true
+  rm "${AH_CLOUDS_DIR}/${AH_CLOUD_NAME}.p12" 2>/dev/null || true
+
+  ah_cert "${AH_CONF_DIR}" master "arrowhead.eu"
+  ah_cert_export "${AH_CONF_DIR}" master "${AH_CONF_DIR}"
+  ah_cert_signed "${AH_CLOUDS_DIR}" "${AH_CLOUD_NAME}"\
+    "${AH_CLOUD_NAME}.${AH_OPERATOR}.arrowhead.eu" "${AH_CONF_DIR}" master
+  ah_cert_trust "${AH_CONF_DIR}" "${AH_CLOUDS_DIR}" "${AH_CLOUD_NAME}"
+}
+
+# Creates new certificates for all defined systems
+update_system_certs() {
+  . "${AH_LIBRARY}"
+
+  mkdir -p "${AH_SYSTEMS_DIR}"
+
+  local systems=()
+  readarray -t systems <<< "$(ah_get_conf_prop systems | awk ' BEGIN { RS = " " } { print $1 } ')"
+  
+  for system in "${systems[@]}"; do
+    update_system_cert "${system}"
+  done
+}
+
+update_system_cert() {
+  local system="$1"
+  . "${AH_LIBRARY}"
+
+  local system_dir="${AH_SYSTEMS_DIR}/${system}"
+
+  mkdir -p "${system_dir}"
+
+  rm "${system_dir}/${system}.p12" 2>/dev/null || true
+
+  if [[ "${system}" == "certificate_authority" ]]; then
+    ah_ca_keystore "${system}"
+  else
+    ah_cert_signed_system "${system}"
+  fi
+
+  if [[ -n "${PASSWORD_CHANGED}" && "${system}" != 'sysop' ]]; then
+    local password="$(ah_get_conf_prop cert_password)"
+    sed -i \
+      -e "s/^server\.ssl\.key-store-password=.*/server.ssl.key-store-password=${password}/"\
+      -e "s/^server\.ssl\.key-password=.*/server.ssl.key-password=${password}/"\
+      -e "s/^server\.ssl\.trust-store-password=.*/server.ssl.trust-store-password=${password}/"\
+      "${system_dir}/application.properties"
+  fi
+
+  echo "Updated ${system}"
+  return 0
+}
+############# CERT RELATED FUNCTIONS #############
+
+main "$@"; exit

@@ -30,6 +30,15 @@ case "$1" in
 
     SYSTEM_DIR="${AH_SYSTEMS_DIR}/${SYSTEM_NAME}"
 
+    systems="$(ah_get_conf_prop systems)"
+    if [[ "${systems}" != *"${SYSTEM_NAME}"* ]]; then
+      systems="${systems}${SYSTEM_NAME} "
+    fi
+    if [[ "${systems}" != *"sysop"* ]]; then
+      systems="${systems}sysop "
+    fi
+    ah_set_conf_prop systems "${systems}"
+
     db_get arrowhead-core-common/mysql_password_sr; system_passwd=$RET || true
     db_unregister arrowhead-core-common/mysql_password_sr
 

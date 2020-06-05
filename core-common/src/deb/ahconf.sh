@@ -1,26 +1,51 @@
 #!/bin/bash
 
-AH_CONF_DIR="/etc/arrowhead"
-AH_CLOUDS_DIR="${AH_CONF_DIR}/clouds"
-AH_SYSTEMS_DIR="${AH_CONF_DIR}/systems"
+if [[ -z "$AH_CONF_DIR" ]]; then
+  AH_CONF_DIR="/etc/arrowhead"
+fi
+if [[ -z "$AH_CLOUDS_DIR" ]]; then
+  AH_CLOUDS_DIR="${AH_CONF_DIR}/clouds"
+fi
+if [[ -z "$AH_SYSTEMS_DIR" ]]; then
+  AH_SYSTEMS_DIR="${AH_CONF_DIR}/systems"
+fi
+if [[ -z "$AH_CONF_FILE" ]]; then
+  AH_CONF_FILE="${AH_CONF_DIR}/arrowhead.cfg"
+fi
 
-db_get arrowhead-core-common/cert_password; AH_PASS_CERT=$RET
-db_get arrowhead-core-common/cloudname; AH_CLOUD_NAME=$RET
-db_get arrowhead-core-common/operator; AH_OPERATOR=$RET
+err() {
+  echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" >&2
+}
+
+# Get property from configuration file
+ah_get_conf_prop() {
+  echo "$(grep -Po "${AH_CONF_FILE}" -e "()(?<=^$1=).*")"
+}
+
+# Set property in configuration file
+ah_set_conf_prop() {
+  local out="$(echo "$2" | sed 's/[\\\/\&]/\\&/g')"
+  if ! sed -i "/^$1=.*/{s//$1=${out}/;h};\${x;/./{x;q0};x;q1}" "${AH_CONF_FILE}"; then
+    err "ah_set_conf_prop: Could not find $1"
+  fi
+}
+
+AH_PASS_CERT="$(ah_get_conf_prop cert_password)"
+AH_CLOUD_NAME="$(ah_get_conf_prop cloudname)"
+AH_OPERATOR="$(ah_get_conf_prop operator)"
 AH_COMPANY=arrowhead # hard-coded to the Arrowhead Framework
 AH_COUNTRY=eu # hard-coded to the Arrowhead Framework
 
-db_get arrowhead-core-common/relay_master_cert; AH_RELAY_MASTER_CERT=$RET
-db_get arrowhead-core-common/domain_name; AH_DOMAIN_NAME=$RET
+AH_RELAY_MASTER_CERT="$(ah_get_conf_prop relay_master_cert)"
+AH_DOMAIN_NAME="$(ah_get_conf_prop domain_name)"
 
-db_get arrowhead-core-common/system_interface; AH_SYSTEM_INTERFACE="$RET"
+AH_SYSTEM_INTERFACE="$(ah_get_conf_prop system_interface)"
 
-db_get arrowhead-core-common/san_interfaces; AH_NETWORK_INTERFACES="$RET"
-db_get arrowhead-core-common/san_ips; SAN_IPS="$RET"
-db_get arrowhead-core-common/san_dns; SAN_DNS="$RET"
+AH_NETWORK_INTERFACES="$(ah_get_conf_prop san_interfaces)"
+SAN_IPS="$(ah_get_conf_prop san_ips)"
+SAN_DNS="$(ah_get_conf_prop san_dns)"
 
 OWN_IP="$(echo "${AH_SYSTEM_INTERFACE}" | awk ' { print $2 } ')"
-echo $OWN_IP
 
 readarray -t SAN_INTERFACE_IPS<<<"$(echo "${AH_NETWORK_INTERFACES}" | awk ' BEGIN { RS = "," } { print $2 } ')"
 
@@ -78,31 +103,31 @@ ah_cert () {
 
   file="${dst_path}/${dst_name}.p12"
 
-    # The command has been renamed in newer versions of keytool
-    gen_cmd="-genkeypair"
-    keytool ${gen_cmd} --help >/dev/null 2>&1 || gen_cmd='-genkey'
+  # The command has been renamed in newer versions of keytool
+  gen_cmd="-genkeypair"
+  keytool ${gen_cmd} --help >/dev/null 2>&1 || gen_cmd='-genkey'
 
-    # Get a formatted subject alternative names
-    sans="$(ah_subject_alternative_names -ips "${SAN_INTERFACE_IPS[@]}" "${SAN_IPS}" -dns `hostname` "${SAN_DNS}")"
+  # Get a formatted subject alternative names
+  sans="$(ah_subject_alternative_names -ips "${SAN_INTERFACE_IPS[@]}" "${SAN_IPS}" -dns `hostname` "${SAN_DNS}")"
 
-    if [ ! -f "${file}" ]; then
-      keytool ${gen_cmd} \
-        -alias ${dst_name} \
-        -keyalg RSA \
-        -keysize 2048 \
-        -dname "CN=${cn}, OU=${AH_OPERATOR}, O=${AH_COMPANY}, C=${AH_COUNTRY}" \
-        -validity 3650 \
-        -keypass ${passwd} \
-        -keystore ${file} \
-        -storepass ${passwd} \
-        -storetype PKCS12 \
-        -ext BasicConstraints=ca:true,pathlen:3 \
-        -ext SubjectAlternativeName=${sans}
+  if [ ! -f "${file}" ]; then
+    keytool ${gen_cmd} \
+      -alias ${dst_name} \
+      -keyalg RSA \
+      -keysize 2048 \
+      -dname "CN=${cn}, OU=${AH_OPERATOR}, O=${AH_COMPANY}, C=${AH_COUNTRY}" \
+      -validity 3650 \
+      -keypass ${passwd} \
+      -keystore ${file} \
+      -storepass ${passwd} \
+      -storetype PKCS12 \
+      -ext BasicConstraints=ca:true,pathlen:3 \
+      -ext SubjectAlternativeName=${sans}
 
-      chown :arrowhead ${file}
-      chmod 640 ${file}
-    fi
-  }
+    chown :arrowhead ${file}
+    chmod 640 ${file}
+  fi
+}
 
 ah_cert_export () {
   src_path=${1}
@@ -428,6 +453,8 @@ ah_cert_trust () {
   fi
 }
 
+# Only use this in maintainer scripts.
+# Do not call this in the `arrowhead` command
 ah_db_tables_and_user () {
   mysql_user_name=${1}
   priv_file_name=${2}
