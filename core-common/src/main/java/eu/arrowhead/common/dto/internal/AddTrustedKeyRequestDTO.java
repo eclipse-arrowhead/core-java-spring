@@ -22,10 +22,6 @@ public class AddTrustedKeyRequestDTO implements Serializable {
     public AddTrustedKeyRequestDTO() {
     }
 
-    public AddTrustedKeyRequestDTO(String publicKey, String description) {
-        this(publicKey, description, "", "");
-    }
-
     public AddTrustedKeyRequestDTO(String publicKey, String description, String validAfter, String validBefore) {
         this.publicKey = publicKey;
         this.validAfter = validAfter;
