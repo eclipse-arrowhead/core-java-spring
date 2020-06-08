@@ -13,7 +13,10 @@ public class AddTrustedKeyRequestDTO implements Serializable {
     @NotBlank(message = "The description is mandatory")
     private String description;
 
+    @NotBlank(message = "The validAfter field is mandatory")
     private String validAfter;
+
+    @NotBlank(message = "The validBefore field is mandatory")
     private String validBefore;
 
     public AddTrustedKeyRequestDTO() {

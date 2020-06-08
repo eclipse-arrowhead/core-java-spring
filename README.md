@@ -6367,7 +6367,7 @@ The Certificate Authority provides the following services:
 | [Get issued certificates](#ca_endpoints_get_certificates) | /mgmt/certificates      | GET    | - | [IssuedCertificatesResponse](#ca_issued_certificates_response) |
 | [Revoke certificate](#ca_endpoints_revoke_certificate)    | /mgmt/certificates/{id} | DELETE | Certificate record id | OK |
 | [Get trusted keys](#ca_endpoints_get_trusted_keys)        | /mgmt/keys              | GET    | - | [TrustedKeysResponse](#ca_trusted_keys_response) |
-| [Add trusted key](#ca_endpoints_add_trusted_key)          | /mgmt/keys              | PUT    | [AddTrustedKeyRequest](#ca_add_trusted_key_request) | 201 Created |
+| [Add trusted key](#ca_endpoints_add_trusted_key)          | /mgmt/keys              | PUT    | [AddTrustedKeyRequest](#ca_add_trusted_key_request) | [AddTrustedKeyResponse](#ca_add_trusted_key_response) |
 | [Delete trusted key](#ca_endpoints_delete_trusted_key)    | /mgmt/keys/{id}         | DELETE | Key record id | 204 No Content |
 
 <a name="ca_endpoints_get_echo" />
@@ -6387,7 +6387,7 @@ Returns a "Got it" message with the purpose of testing the core service availabi
 POST /certificate-authority/checkCertificate
 ```
 
-Returns whether the given certificate is valid, or has been revoked. The client SHALL not trust a revoked certificate.
+Returns whether the given certificate is valid or has been revoked. The client SHALL not trust a revoked certificate.
 
 <a name="ca_certificate_check_request" />
 
@@ -6400,10 +6400,10 @@ __CertificateCheckRequest__ is the input:
 }
 ```
 
-| Parameter        | Description                   | Necessity | Format/Limitations              |
-| ---------------- | ----------------------------- | --------- | ------------------------------- |
-| `version`        | Version of the check protocol | mandatory | integer, currently must be `1`  |
-| `certificate`    | The certificate to check      | mandatory | Base64 encoded X509 certificate (PEM without headers) |
+| Parameter     | Description                   | Necessity | Format/Limitations                                     |
+| ------------- | ----------------------------- | --------- | ------------------------------------------------------ |
+| `version`     | Version of the check protocol | mandatory | integer, currently must be `1`                         |
+| `certificate` | The certificate to check      | mandatory | Base64 encoded X.509 certificate (PEM without headers) |
 
 <a name="ca_certificate_check_response" />
 
@@ -6420,14 +6420,14 @@ Returns a __CertificateCheckResponse__:
 }
 ```
 
-| Field              | Description                                         |
-| ------------------ | --------------------------------------------------- |
-| `version`          | Version of the check protocol                       |
-| `producedAt`       | The time at wich the response has been created      |
-| `commonName`       | Common name of the certificate                       |
-| `serialNumber`     | Serial number of the certificate                    |
-| `endOfValidity`    | End of validity due to expiration or revocation     |
-| `status`           | One of the following: `good`, `revoked`, `unknown`  |
+| Field              | Description                                                    |
+| ------------------ | -------------------------------------------------------------- |
+| `version`          | Version of the check protocol                                  |
+| `producedAt`       | The time at wich the response has been created                 |
+| `commonName`       | Common name of the certificate                                 |
+| `serialNumber`     | Serial number of the certificate                               |
+| `endOfValidity`    | End of validity due to expiration or revocation                |
+| `status`           | One of the following: `good`, `revoked`, `expired`, `unknown`  |
 
 <a name="ca_endpoints_sign" />
 
@@ -6441,9 +6441,11 @@ Returns the whole certificate chain beginning with the newly generated leaf cert
 
 Each certificate's issuer is the same as the subject of the following one. The issuer of the root certificate is the same as the subject.
 
-The request may contain a `validAfter` and `validBefore` fields to limit the validity range of the Certificate to be generated more than the default values set in Certificate Authority.
+The request may contain `validAfter` and `validBefore` fields to limit the validity range of the Certificate to be generated more than the default values set in Certificate Authority.
 
-Metadata of of each generated certificate is stored in the database to allow handling revocation and validity checking.
+Metadata of each generated certificate is stored in the database to allow handling revocation and validity checking.
+
+A request for signing a certificate with restricted common name is only accepted if it is requested by `sysop`. Common names starting with the name of a Core System or `sysop` are restricted.
 
 <a name="ca_certificate_signing_request" />
 
@@ -6492,7 +6494,7 @@ Returns __CertificateSigningResponse__:
 POST /certificate-authority/checkTrustedKey
 ```
 
-Returns whether the given public key has been registered as trusted or not. If not, HTTP `204 No Content` is returned.
+Returns whether the given public key has been registered as trusted or not.
 
 <a name="ca_trusted_key_check_request" />
 
@@ -6520,11 +6522,11 @@ Returns a __TrustedKeyCheckResponse__:
 }
 ```
 
-| Field              | Description                                         | Format/Limitations        |
-| ------------------ | --------------------------------------------------- | ------------------------- |
-| `id`               | Record Id                                           | integer                   |
-| `createdAt`        | The time at wich the key has been added             | ISO 8601 date/time string |
-| `description`      | Description of the key, e.g. device identifier      | string                    |
+| Field         | Description                                    | Format/Limitations        |
+| ------------- | ---------------------------------------------- | ------------------------- |
+| `id`          | Record Id                                      | integer                   |
+| `createdAt`   | The time at which the key has been added       | ISO 8601 date/time string |
+| `description` | Description of the key, e.g. device identifier | string                    |
 
 
 <a name="ca_endpoints_get_certificates" />
@@ -6535,7 +6537,7 @@ Returns a __TrustedKeyCheckResponse__:
 GET /certificate-authority/mgmt/certificates
 ```
 
-Returns data about all of the certificates issued by the Certificate Authority.
+Returns data about every certificate issued by the Certificate Authority.
 If `page` and `item_per_page` are not defined, returns all records.
 
 Query params:
@@ -6564,8 +6566,9 @@ Query params:
 Returns a __IssuedCertificatesResponse__:
 
 ```json
-[
-  {
+{
+  "count": "integer",
+  "issuedCertificates": [
     "id": "integer",
     "createdAt": "string",
     "createdBy": "string",
@@ -6575,21 +6578,22 @@ Returns a __IssuedCertificatesResponse__:
     "commonName": "string",
     "serialNumber": "string",
     "status": "string"
-  }
-]
+  ]
+}
 ```
 
-| Field              | Description                                               |
-| ------------------ | --------------------------------------------------------- |
-| `id`               | ID of the certificate record                              |
-| `createdAt`        | The time at wich the record has been created              |
-| `createdBy`        | Name of the system which requested the certificate        |
-| `validFrom`        | Beginning of validity of the certificate                  |
-| `validUntil`       | End of validity of the certificate                        |
+| Field              | Description                                                |
+| ------------------ | ---------------------------------------------------------- |
+| `count`            | Number of issued certificate records                       |
+| `id`               | ID of the certificate record                               |
+| `createdAt`        | The time at wich the record has been created               |
+| `createdBy`        | Name of the system which requested the certificate         |
+| `validFrom`        | Beginning of validity of the certificate                   |
+| `validUntil`       | End of validity of the certificate                         |
 | `revokedAt`        | The time at which the certificate has been revoked or null |
 | `commonName`       | Common name of the certificate                             |
-| `serialNumber`     | Serial number of the certificate                          |
-| `status`           | One of the following: `good`, `revoked`, `expired`        |
+| `serialNumber`     | Serial number of the certificate                           |
+| `status`           | One of the following: `good`, `revoked`, `expired`         |
 
 
 <a name="ca_endpoints_revoke_certificate" />
@@ -6637,7 +6641,6 @@ Query params:
 > **Note:** Default value for `sort_field` is `id`. All possible values are: 
 > * `id`
 > * `createdAt`
-> * `createdBy`
 
 > **Note:** Default value for `direction` is `ASC`. All possible values are:
 > * `ASC`
@@ -6648,21 +6651,20 @@ Query params:
 Returns a __TrustedKeysResponse__:
 
 ```json
-[
-  {
+{
+  "count": "integer",
+  "trustedKeys": [
     "id": "integer",
-    "addedAt": "string",
-    "addedBy": "string",
+    "createdAt": "string",
     "description": "string"
-  }
-]
+  ]
+}
 ```
 
 | Field            | Description                                    |
 | ---------------- | ---------------------------------------------- |
 | `id`             | Record ID                                      |
-| `addedAt`        | The time at wich the key has been added        |
-| `addedBy`        | Name of the system which added the key         |
+| `createdAt`      | The time at wich the key has been added        |
 | `description`    | Description of the key; e.g. device identifier |
 
 
@@ -6694,10 +6696,28 @@ __AddTrustedKeyRequest__  is the input:
 | -------------- | ---------------------------------------------- | --------- | --------------------------------------------------- |
 | `publicKey`    | The public key to add as trusted               | mandatory | Base64 encoded DER public key (PEM without headers) |
 | `description`  | Description of the key; e.g. device identifier | mandatory | string                                              |
-| `validAfter`   | Beginning of validity                          | optional  | ISO 8601 date/time string                           |
-| `validBefore`  | End of validity                                | optional  | ISO 8601 date/time string                           |
+| `validAfter`   | Beginning of validity                          | mandatory | ISO 8601 date/time string                           |
+| `validBefore`  | End of validity                                | mandatory | ISO 8601 date/time string                           |
 
-Returns HTTP `201 Created` on success.
+
+<a name="ca_add_trusted_key_response" />
+
+Returns an __AddTrustedKeyResponse__ with HTTP `201 Created` on success:
+
+```json
+{
+  "id": "integer",
+  "validAfter": "string",
+  "validBefore": "string"
+}
+```
+
+| Field            | Description                  |
+| ---------------- | ---------------------------- |
+| `id`             | Record ID                    |
+| `validAfter`     | Beginning of validity        |
+| `validBefore`    | End of validity              |
+
 
 <a name="ca_endpoints_delete_trusted_key" />
 
@@ -6718,9 +6738,9 @@ Query params:
 Returns HTTP `204 No Content` on success.
 
 <a name="choreographer" />
- 
+
 # Choreographer
- 
+
 <a name="choreographer_sdd" />
 
 ## System Design Description Overview
@@ -7194,14 +7214,14 @@ The general scheme of the URLs is `https://<host>:<port>/onboarding/<authenticat
 | [Onboard with CSR](#onboardingcontroller_endpoints_csr)    | /certificate/csr      | POST   | [OnboardingWithCsrRequest](#datastructures_onboarding_csr_request) | [OnboardingWithCsrResponse](#datastructures_onboarding_csr_response) |
 | [Onboard with CSR](#onboardingcontroller_endpoints_csr)    | /sharedsecret/csr      | POST   | [OnboardingWithCsrRequest](#datastructures_onboarding_csr_request) | [OnboardingWithCsrResponse](#datastructures_onboarding_csr_response) |
 
-           
+
 ### Onboard with Name
 <a name="onboardingcontroller_endpoints_name" />
 
 ```
 POST /certificate/name
 POST /sharedsecret/name
-```                       
+```
 
 Creates a CSR on behalf of the client and eventually returns an onboarding certificate which may be used in the next step of the onboarding controller.
 
@@ -7226,7 +7246,7 @@ Creates a CSR on behalf of the client and eventually returns an onboarding certi
 | ----- | ----------- |
 | `commonName` | The common name field for the new certificate |
 | `keyAlgorithm` | The key algorithm of the provided keys |
-| `keyFormat` | The key format of the provided keys | 
+| `keyFormat` | The key format of the provided keys |
 | `privateKey` | Base64 encoded private key |
 | `publicKey` | Base64 encoded public key |
 
@@ -7275,20 +7295,20 @@ Creates a CSR on behalf of the client and eventually returns an onboarding certi
 | `certificateFormat` | The certificate format (usually X.509) |
 | `certificateType` | The certificate type. Always AH_ONBOARDING for this operation |
 | `keyAlgorithm` | The key algorithm of the provided keys |
-| `keyFormat` | The key format of the provided keys | 
+| `keyFormat` | The key format of the provided keys |
 | `privateKey` | Base64 encoded private key |
 | `publicKey` | Base64 encoded public key |
 | `service` | The service which is reachable under `uri` |
 | `uri` | The uri under which the depicted `service` is reachable |
 
-          
+
 ### Onboard with CSR
 <a name="onboardingcontroller_endpoints_csr" />
 
 ```
 POST /certificate/csr
 POST /sharedsecret/csr
-```                       
+```
 
 Creates a CSR on behalf of the client and eventually returns an onboarding certificate which may be used in the next step of the onboarding controller.
 
@@ -7350,7 +7370,7 @@ Creates a CSR on behalf of the client and eventually returns an onboarding certi
 | `certificateFormat` | The certificate format (usually X.509) |
 | `certificateType` | The certificate type. Always AH_ONBOARDING for this operation |
 | `keyAlgorithm` | The key algorithm of the provided keys |
-| `keyFormat` | The key format of the provided keys | 
+| `keyFormat` | The key format of the provided keys |
 | `privateKey` | Base64 encoded private key. Always empty for this operation |
 | `publicKey` | Base64 encoded public key |
 | `service` | The service which is reachable under `uri` |
@@ -7359,7 +7379,7 @@ Creates a CSR on behalf of the client and eventually returns an onboarding certi
 
 # Device Registry 
 <a name="deviceregistry"/><br />
- 
+
 ## System Design Description Overview
 <a name="deviceregistry_sdd" /><br />
 
@@ -7425,13 +7445,13 @@ The base URL for the requests: `http://<host>:<port>/deviceregistry`
 ### Detailed description<br />
 
 A detailed description of management and private endpoints is available in the release notes.
-   
+
 ### Onboard with Name
 <a name="deviceregistry_endpoints_onboarding_name" />
 
 ```
 POST /onboarding/name
-```                       
+```
 
 Creates a CSR on behalf of the client, registers the device and eventually returns a device certificate which may be used in the next step of the onboarding controller.
 
@@ -7469,7 +7489,7 @@ Creates a CSR on behalf of the client, registers the device and eventually retur
 | ----- | ----------- |
 | `commonName` | The common name field for the new certificate |
 | `keyAlgorithm` | The key algorithm of the provided keys |
-| `keyFormat` | The key format of the provided keys | 
+| `keyFormat` | The key format of the provided keys |
 | `privateKey` | Base64 encoded private key |
 | `publicKey` | Base64 encoded public key |
 | `address` | The optional IP address of the device |
@@ -7524,7 +7544,7 @@ Creates a CSR on behalf of the client, registers the device and eventually retur
 | `certificateFormat` | The certificate format (usually X.509) |
 | `certificateType` | The certificate type. Always AH_DEVICE for this operation |
 | `keyAlgorithm` | The key algorithm of the provided keys |
-| `keyFormat` | The key format of the provided keys | 
+| `keyFormat` | The key format of the provided keys |
 | `privateKey` | Base64 encoded private key |
 | `publicKey` | Base64 encoded public key |
 
@@ -7535,7 +7555,7 @@ Additionally all fields from [DeviceRegistryEntry](#datastructures_deviceregistr
 
 ```
 POST /onboarding/csr
-```                       
+```
 
 Signs the CSR, registers the device and eventually returns a device certificate which may be used in the next step of the onboarding controller.
 
@@ -7616,17 +7636,17 @@ Signs the CSR, registers the device and eventually returns a device certificate 
 | `certificateFormat` | The certificate format (usually X.509) |
 | `certificateType` | The certificate type. Always AH_DEVICE for this operation |
 | `keyAlgorithm` | The key algorithm of the provided keys |
-| `keyFormat` | The key format of the provided keys | 
+| `keyFormat` | The key format of the provided keys |
 | `privateKey` | Base64 encoded private key. Always empty for this operation |
 | `publicKey` | Base64 encoded public key |
 
 Additionally all fields from [DeviceRegistryEntry](#datastructures_deviceregistryentry) are returned. 
 
- 
+
 # System Registry 
 <a name="systemregistry" />
- 
- 
+
+
 ## System Design Description Overview
 <a name="systemregistry_sdd" />
 
@@ -7691,13 +7711,13 @@ The base URL for the requests: `http://<host>:<port>/systemregistry`
 ### Detailed description<br />
 
 A detailed description of public, management and private endpoints is available in the release notes.
-   
+
 ### Onboard with Name
 <a name="systemregistry_endpoints_onboarding_name" />
 
 ```
 POST /onboarding/name
-```                       
+```
 
 Creates a CSR on behalf of the client, registers the system and eventually returns a system certificate which is valid in the Arrowhead local cloud.
 
@@ -7741,7 +7761,7 @@ Creates a CSR on behalf of the client, registers the system and eventually retur
 | ----- | ----------- |
 | `commonName` | The common name field for the new certificate |
 | `keyAlgorithm` | The key algorithm of the provided keys |
-| `keyFormat` | The key format of the provided keys | 
+| `keyFormat` | The key format of the provided keys |
 | `privateKey` | Base64 encoded private key |
 | `publicKey` | Base64 encoded public key |
 | `address` | The IP address of the device/system |
@@ -7807,7 +7827,7 @@ Creates a CSR on behalf of the client, registers the system and eventually retur
 | `certificateFormat` | The certificate format (usually X.509) |
 | `certificateType` | The certificate type. Always AH_SYSTEM for this operation |
 | `keyAlgorithm` | The key algorithm of the provided keys |
-| `keyFormat` | The key format of the provided keys | 
+| `keyFormat` | The key format of the provided keys |
 | `privateKey` | Base64 encoded private key |
 | `publicKey` | Base64 encoded public key |
 
@@ -7818,7 +7838,7 @@ Additionally all fields from [SystemRegistryEntry](#datastructures_systemregistr
 
 ```
 POST /onboarding/csr
-```                       
+```
 
 Signs the CSR, registers the device and eventually returns a device certificate which may be used in the next step of the onboarding controller.
 
@@ -7916,7 +7936,7 @@ Signs the CSR, registers the device and eventually returns a device certificate 
 | `certificateFormat` | The certificate format (usually X.509) |
 | `certificateType` | The certificate type. Always AH_DEVICE for this operation |
 | `keyAlgorithm` | The key algorithm of the provided keys |
-| `keyFormat` | The key format of the provided keys | 
+| `keyFormat` | The key format of the provided keys |
 | `privateKey` | Base64 encoded private key. Always empty for this operation |
 | `publicKey` | Base64 encoded public key |
 
