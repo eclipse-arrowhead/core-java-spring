@@ -98,6 +98,7 @@ public class Receiver {
             try {
                 runStep(firstStep, sessionId);
             } catch (InterruptedException e) {
+                choreographerDBService.setSessionStatus(sessionId, ChoreographerStatusType.ABORTED);
                 logger.debug(e.getMessage(), e);
             }
         });
