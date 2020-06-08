@@ -6661,11 +6661,12 @@ Returns a __TrustedKeysResponse__:
 }
 ```
 
-| Field            | Description                                    |
-| ---------------- | ---------------------------------------------- |
-| `id`             | Record ID                                      |
-| `createdAt`      | The time at wich the key has been added        |
-| `description`    | Description of the key; e.g. device identifier |
+| Field         | Description                                    |
+| ------------- | ---------------------------------------------- |
+| `count`       | The total number of the trusted keys           |
+| `id`          | Record ID                                      |
+| `createdAt`   | The time at which the key has been added       |
+| `description` | Description of the key; e.g. device identifier |
 
 
 <a name="ca_endpoints_add_trusted_key" />
