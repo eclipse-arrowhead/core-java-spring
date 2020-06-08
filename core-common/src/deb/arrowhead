@@ -40,6 +40,10 @@ for i in "$@"; do
       SYSTEMS+=("${i#*=}")
       shift
       ;;
+    -n|--new-system)
+      NEW_SYSTEM=1
+      shift
+      ;;
     -u|--system-certs)
       UPDATE_SYSTEM_CERTS_FLAG=1
       shift
@@ -64,7 +68,7 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 print_help() {
   echo "Manipulate certain aspects of the arrowhead system"
   echo "Usage:"
-  echo "  arrowhead cert (-m|-u|-s=<system>...) [-c=CFGPATH] [-a=LIBPATH] [-r=ROOTPATH] [-d=CLOUDPATH] [t=SYSPATH]"
+  echo "  arrowhead cert (-m|-u|[-n] -s=SYSTEM...) [-c=CFGPATH] [-a=LIBPATH] [-r=ROOTPATH] [-d=CLOUDPATH] [t=SYSPATH]"
   echo
   echo "Commands:"
   echo "  cert          Used to update arrowhead certificates"
@@ -81,6 +85,7 @@ print_help() {
   echo "  -a=LIBPATH    --library-file=LIBPATH  Alternative path to ahconf.sh library file"
   echo "                                        Default: /usr/share/arrowhead/conf/ahconf.sh"
   echo "  -s=SYSTEM     --system=SYSTEM         Update certificate for SYSTEM"
+  echo "  -n            --new-system            Stops this script from editing application.properties"
   echo "  -u            --system-certs          Update all system certificates"
   echo "  -m            --master-certs          Update master certificates. Will also update the"
   echo "                                        cloud certificates and all system certificates"
@@ -116,7 +121,8 @@ cert() {
   local flags="$((
     ${UPDATE_SYSTEM_CERTS_FLAG} +
     ${UPDATE_MASTER_CERTS_FLAG} +
-    (${#SYSTEMS[@]} && 1 )))"
+    (${#SYSTEMS[@]} && 1 ||
+      ${#SYSTEMS[@]} && ${NEW_SYSTEM})))"
 
   if (( ${flags} > 1 )); then
     err "Multiple mutually exclusive flags given"
@@ -212,7 +218,7 @@ update_system_cert() {
     ah_cert_signed_system "${system}"
   fi
 
-  if [[ -n "${PASSWORD_CHANGED}" && "${system}" != 'sysop' ]]; then
+  if [[ -n "${PASSWORD_CHANGED}" && "${system}" != 'sysop' && -z "${NEW_SYSTEM}" ]]; then
     local password="$(ah_get_conf_prop cert_password)"
     sed -i \
       -e "s/^server\.ssl\.key-store-password=.*/server.ssl.key-store-password=${password}/"\

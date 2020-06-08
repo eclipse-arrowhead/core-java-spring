@@ -221,6 +221,7 @@ Please follow this guide to install them: [Debian Installer Guide](documentation
 <a name="quickstart_compile" />
 
 ### Compile source code and manually install MySQL and Maven.
+
 #### Requirements
 
 > **Note:** A system with 2GB of RAM is advised. 
@@ -476,10 +477,15 @@ The Key-Store is intended to store the certificates and/or key-pair certificates
 The Trust-Store is containing those certificates, what the web-server considers as trusted ones. Arrowhead Framework is designed for handling the `p12` type of Trust-Stores. Typically your Trust-Store should contain only the cloud certificate, which ensures that only those incoming HTTPS requests are authorized to access, which are having this certificate within their certificate chain.
 
 ### How to create my own certificates?
+
+#### Method A
+
 Currently Arrowhead community have the possibility to create only "self signed" certifications. See the tutorials:
 * [Create Arrowhead Cloud Self Signed Certificate](documentation/certificates/create_cloud_certificate.pdf)
 * [Create Arrowhead Client Self Signed Certificate](documentation/certificates/create_client_certificate.pdf)
 * [Create Trust Store](documentation/certificates/create_trust_store.pdf)
+
+#### Method B
 
 If you wish to generate all Certificates by a script, you can use the scripts in the [scripts/certificate_generation](scripts/certificate_generation) folder.
 
@@ -488,6 +494,12 @@ If you wish to generate all Certificates by a script, you can use the scripts in
 * lib_certs.sh - Certificate generation code
 * mk_certs.sh - Usage example
 * rm_certs.sh - Delete generated certs 
+
+#### Method C
+
+You can also use the arrowhead script. For this barely any scripting knowledge is needed, just follow the instructions.
+
+[Arrowhead scripts](documentation/deb-installer/DEBIAN-INSTALL.md#arrowhead-management-script).
 
 ### System Operator Certificate
 
