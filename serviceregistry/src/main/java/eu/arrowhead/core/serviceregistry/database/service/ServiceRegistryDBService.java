@@ -538,6 +538,34 @@ public class ServiceRegistryDBService {
 		
 		return DTOConverter.convertServiceRegistryListToServiceRegistryListResponseDTO(serviceRegistryEntriesByServiceDefinition);		
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<ServiceRegistry> getServiceRegistryEntriesByServiceDefinitonList(final List<String> serviceDefinitions) {
+		logger.debug("getServiceRegistryEntriesByServiceDefinitonList started...");
+		Assert.notNull(serviceDefinitions, "Service definition list is null");
+		
+		final List<ServiceRegistry> results = new ArrayList<>();
+		for (final String definition : serviceDefinitions) {
+			if (Utilities.isEmpty(definition)) {
+				throw new InvalidParameterException("Service definition is empty or null");
+			}			
+			
+			final Optional<ServiceDefinition> opt = serviceDefinitionRepository.findByServiceDefinition(definition.trim().toLowerCase());
+			if (opt.isPresent()) {
+				results.addAll(serviceRegistryRepository.findByServiceDefinition(opt.get()));
+			} else {
+				logger.debug("Service with definition of '" + definition + "'is not exists");
+			}
+		}
+		return results;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ServiceRegistryListResponseDTO getServiceRegistryEntriesByServiceDefinitonListResponse(final List<String> serviceDefinitions) {
+		logger.debug("getServiceRegistryEntriesByServiceDefinitonListResponse started...");
+		final List<ServiceRegistry> results = getServiceRegistryEntriesByServiceDefinitonList(serviceDefinitions);
+		return DTOConverter.convertServiceRegistryListToServiceRegistryListResponseDTO(new PageImpl<ServiceRegistry>(results));
+	}
 		
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
