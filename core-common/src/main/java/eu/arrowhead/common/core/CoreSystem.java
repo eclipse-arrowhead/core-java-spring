@@ -70,7 +70,9 @@ public enum CoreSystem {
 														   CoreSystemService.QOS_MONITOR_JOIN_RELAY_TEST_SERVICE,
 														   CoreSystemService.QOS_MONITOR_INIT_RELAY_TEST_SERVICE)),
 	
-	CERTIFICATE_AUTHORITY(Defaults.DEFAULT_CERTIFICATE_AUTHORITY_PORT, List.of(CoreSystemService.CERTIFICATE_AUTHORITY_SIGN_SERVICE));
+	CERTIFICATE_AUTHORITY(Defaults.DEFAULT_CERTIFICATE_AUTHORITY_PORT, List.of(CoreSystemService.CERTIFICATE_AUTHORITY_SIGN_SERVICE)),
+
+	GAMS(Defaults.DEFAULT_GENERIC_AUTONOMIC_MANAGEMENT_PORT, List.of());
 	
 	//=================================================================================================
 	// members

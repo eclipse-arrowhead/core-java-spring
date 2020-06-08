@@ -1,10 +1,7 @@
 package eu.arrowhead.core.gams.service;
 
-import eu.arrowhead.common.SecurityUtilities;
-import eu.arrowhead.common.drivers.CertificateAuthorityDriver;
-import eu.arrowhead.common.drivers.OrchestrationDriver;
 import eu.arrowhead.core.gams.rest.dto.CreateSensorRequest;
-import eu.arrowhead.core.gams.rest.dto.InstanceDto;
+import eu.arrowhead.core.gams.rest.dto.GamsInstanceDto;
 import eu.arrowhead.core.gams.rest.dto.PublishSensorDataRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,24 +14,18 @@ public class SensorService {
     //=================================================================================================
     // members
     private final Logger logger = LogManager.getLogger(SensorService.class);
-    private final OrchestrationDriver orchestrationDriver;
-    private final CertificateAuthorityDriver caDriver;
-    private final SecurityUtilities securityUtilities;
 
     @Autowired
-    public SensorService(final OrchestrationDriver orchestrationDriver,
-                         final CertificateAuthorityDriver caDriver,
-                         final SecurityUtilities securityUtilities) {
-        this.orchestrationDriver = orchestrationDriver;
-        this.caDriver = caDriver;
-        this.securityUtilities = securityUtilities;
+    public SensorService() {
     }
 
-    public InstanceDto create(final CreateSensorRequest createSensorRequest) {
+    public GamsInstanceDto create(final CreateSensorRequest createSensorRequest) {
         return null;
     }
 
-    public InstanceDto publish(final PublishSensorDataRequest publishSensorDataRequest) {
+    public GamsInstanceDto publish(final PublishSensorDataRequest publishSensorDataRequest) {
+        logger.debug("publish({})", publishSensorDataRequest);
+        logger.info(publishSensorDataRequest.getData().getClass());
         return null;
     }
 

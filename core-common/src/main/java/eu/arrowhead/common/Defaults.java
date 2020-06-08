@@ -24,6 +24,7 @@ public class Defaults {
 	public static final int DEFAULT_EVENT_HANDLER_PORT = 8455;
 	public static final int DEFAULT_CHOREOGRAPHER_PORT = 8457;
 	public static final int DEFAULT_CERTIFICATE_AUTHORITY_PORT = 8448;
+    public static final int DEFAULT_GENERIC_AUTONOMIC_MANAGEMENT_PORT = 8502;
 
     // HTTP client defaults
     public static final int DEFAULT_CONNECTION_TIMEOUT = 30000;

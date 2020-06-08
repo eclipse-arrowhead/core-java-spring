@@ -6,7 +6,7 @@ import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.core.gams.Validation;
 import eu.arrowhead.core.gams.rest.dto.CreateSensorRequest;
-import eu.arrowhead.core.gams.rest.dto.InstanceDto;
+import eu.arrowhead.core.gams.rest.dto.GamsInstanceDto;
 import eu.arrowhead.core.gams.rest.dto.PublishSensorDataRequest;
 import eu.arrowhead.core.gams.service.SensorService;
 import io.swagger.annotations.Api;
@@ -68,7 +68,7 @@ public class SensorController {
     // methods
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = CREATE_SENSOR_DESCRIPTION, response = InstanceDto.class,
+    @ApiOperation(value = CREATE_SENSOR_DESCRIPTION, response = GamsInstanceDto.class,
             tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = CREATE_SENSOR_SUCCESS),
@@ -79,7 +79,7 @@ public class SensorController {
     })
     @PostMapping(CREATE_SENSOR_URI)
     @ResponseBody
-    public InstanceDto create(@RequestBody final CreateSensorRequest createSensorRequest) {
+    public GamsInstanceDto create(@RequestBody final CreateSensorRequest createSensorRequest) {
         logger.debug("create started ...");
 
         validation.verify(createSensorRequest, createOrigin(CREATE_SENSOR_URI));
@@ -96,7 +96,8 @@ public class SensorController {
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUBLISH_SENSOR_BAD_REQUEST, response = ErrorMessageDTO.class),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response = ErrorMessageDTO.class),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response = ErrorMessageDTO.class)
-    })@PostMapping(PUBLISH_SENSOR_URI)
+    })
+    @PostMapping(PUBLISH_SENSOR_URI)
     @ResponseBody
     public void publish(@RequestBody final PublishSensorDataRequest publishSensorDataRequest) {
         logger.debug("publish started ...");

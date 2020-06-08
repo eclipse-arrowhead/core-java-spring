@@ -11,8 +11,6 @@
         </Console>
     </Appenders>
     <Loggers>
-		<Root level="OFF">
-            <AppenderRef ref="FileAppender" />
-        </Root>
+		<Root level="DEBUG" />
     </Loggers>
 </Configuration>

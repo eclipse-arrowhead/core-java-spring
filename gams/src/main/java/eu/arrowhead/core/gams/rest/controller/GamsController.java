@@ -6,7 +6,7 @@ import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.core.gams.Validation;
 import eu.arrowhead.core.gams.rest.dto.CreateInstanceRequest;
-import eu.arrowhead.core.gams.rest.dto.InstanceDto;
+import eu.arrowhead.core.gams.rest.dto.GamsInstanceDto;
 import eu.arrowhead.core.gams.service.InstanceService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -70,7 +70,7 @@ public class GamsController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = CREATE_INSTANCE_DESCRIPTION, response = InstanceDto.class,
+    @ApiOperation(value = CREATE_INSTANCE_DESCRIPTION, response = GamsInstanceDto.class,
             tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = CREATE_INSTANCE_SUCCESS),
@@ -81,7 +81,7 @@ public class GamsController {
     })
     @PostMapping(CREATE_INSTANCE_URI)
     @ResponseBody
-    public InstanceDto create(@RequestBody final CreateInstanceRequest createInstanceRequest) {
+    public GamsInstanceDto create(@RequestBody final CreateInstanceRequest createInstanceRequest) {
         logger.debug("create started ...");
 
         validation.verify(createInstanceRequest, createOrigin(CREATE_INSTANCE_URI));
