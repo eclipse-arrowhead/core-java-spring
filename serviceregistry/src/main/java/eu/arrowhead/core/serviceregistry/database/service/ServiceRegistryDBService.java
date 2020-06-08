@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
@@ -915,6 +916,32 @@ public class ServiceRegistryDBService {
 		final String name = validateSystemParamString(systemName);
 		try {
 			return systemRepository.findBySystemName(name);
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ServiceRegistryListResponseDTO getServiceRegistryEntriesBySystemIdResponse(final long systemId) {
+		final List<ServiceRegistry> result = getServiceRegistryEntriesBySystemId(systemId);
+		return DTOConverter.convertServiceRegistryListToServiceRegistryListResponseDTO(new PageImpl<ServiceRegistry>(result));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<ServiceRegistry> getServiceRegistryEntriesBySystemId(final long systemId) {
+		logger.debug("getServiceRegistryEntriesBySystemId started...");		
+		validateSystemId(systemId);
+		
+		try {
+			final Optional<System> opt = systemRepository.findById(systemId);
+			if (opt.isEmpty()) {
+				throw new InvalidParameterException("No system with id: " + systemId + " exists");
+			} else {
+				return serviceRegistryRepository.findBySystem(opt.get());
+			}			
+		} catch (final InvalidParameterException ex) {
+			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
