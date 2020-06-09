@@ -1075,7 +1075,7 @@ public class ServiceRegistryDBService {
 		logger.debug("validateSystemId started...");
 		
 		if (systemId < 1) {
-			throw new IllegalArgumentException("System id must be greater than zero");
+			throw new InvalidParameterException("System id must be greater than zero");
 		}
 		
 		return systemId;

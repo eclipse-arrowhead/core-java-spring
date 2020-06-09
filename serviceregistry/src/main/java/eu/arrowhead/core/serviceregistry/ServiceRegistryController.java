@@ -794,7 +794,7 @@ public class ServiceRegistryController {
 	@PostMapping(path = CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SERVICE_DEFINITION_LIST_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public ServiceRegistryListResponseDTO queryServiceRegistryEntriesByServiceDefinitonList(@RequestBody final List<String> request) {
 		logger.debug("Service query by service definition list request received");
-		validateServiceDefinitionListRequest(request, CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SERVICE_DEFINITION_LIST_URI);
+		validateServiceDefinitionListRequest(request,  CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SERVICE_DEFINITION_LIST_URI);
 		
 		final ServiceRegistryListResponseDTO response = serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinitonListResponse(request);
 		logger.debug("Service Registry Entries by service definition list are successfully retrieved");
