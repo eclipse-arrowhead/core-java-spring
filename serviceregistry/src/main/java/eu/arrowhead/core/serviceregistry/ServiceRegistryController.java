@@ -724,7 +724,7 @@ public class ServiceRegistryController {
 	@ResponseBody public SystemResponseDTO queryRegistryBySystemDTO(@RequestBody final SystemRequestDTO request) {
 		logger.debug("Service query by systemRequestDTO request received");
 
-		checkSystemRequest(request, CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI, false);
+		checkSystemRequest(request, CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI, false);
 		
 		final String systemName = request.getSystemName();
 		final String address = request.getAddress();
