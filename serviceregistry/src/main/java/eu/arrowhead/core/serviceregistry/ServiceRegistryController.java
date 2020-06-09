@@ -724,7 +724,7 @@ public class ServiceRegistryController {
 	@ResponseBody public SystemResponseDTO queryRegistryBySystemDTO(@RequestBody final SystemRequestDTO request) {
 		logger.debug("Service query by systemRequestDTO request received");
 
-		checkSystemRequest(request, CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI, false);
+		checkSystemRequest(request, CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI, false);
 		
 		final String systemName = request.getSystemName();
 		final String address = request.getAddress();
@@ -744,7 +744,7 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path = CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_ALL_URI)
+	@GetMapping(path = CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_ALL_SERVICE_URI)
 	@ResponseBody public ServiceRegistryListResponseDTO getServiceRegistryEntries() {
 		logger.debug("New Service Registry get request recieved");
 
