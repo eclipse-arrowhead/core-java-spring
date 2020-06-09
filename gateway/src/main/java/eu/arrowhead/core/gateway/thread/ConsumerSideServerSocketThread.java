@@ -188,15 +188,6 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 				
 				if (size < 0) { // end of stream
 					logger.debug("End of stream");
-
-					if (contentDetected && useHttpCache) {
-						logger.debug("Sending remaining cache content...");
-						final byte[] remainingBytes = requestCache.getCacheContentBytes();
-						if (remainingBytes != null && remainingBytes.length > 0) {
-							relayClient.sendBytes(relaySession, sender, providerGatewayPublicKey, remainingBytes);
-						}
-					}
-					
 					closeAndInterrupt();
 				} else {
 					final byte[] data = new byte[size];
