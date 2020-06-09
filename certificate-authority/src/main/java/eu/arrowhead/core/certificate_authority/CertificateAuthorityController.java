@@ -43,7 +43,6 @@ import eu.arrowhead.common.dto.internal.TrustedKeyCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.TrustedKeyCheckResponseDTO;
 import eu.arrowhead.common.dto.internal.TrustedKeysResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.exception.InvalidParameterException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -68,7 +67,6 @@ public class CertificateAuthorityController {
 	private static final String OP_CA_MGMT_TRUSTED_KEY_DELETE_URI = CoreCommonConstants.MGMT_URI + "/keys/{"
 			+ PATH_VARIABLE_ID + "}";
 
-	private static final String GET_CLOUD_COMMON_NAME_HTTP_200_MESSAGE = "Cloud Common Name returned";
 	private static final String SIGN_CERTIFICATE_HTTP_200_MESSAGE = "Successful certificate signing";
 	private static final String SIGN_CERTIFICATE_HTTP_400_MESSAGE = "Invalid Certificate Signing Request";
 	private static final String CHECK_CERTIFICATE_HTTP_200_MESSAGE = "Certificate is valid";
@@ -98,19 +96,6 @@ public class CertificateAuthorityController {
 	@GetMapping(path = CommonConstants.ECHO_URI)
 	public String echoService() {
 		return "Got it!";
-	}
-
-	// -------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return the cloud's Common Name", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
-	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = GET_CLOUD_COMMON_NAME_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE) })
-	@GetMapping(path = CommonConstants.OP_CA_CLOUD_COMMON_NAME_URI, produces = MediaType.TEXT_PLAIN_VALUE)
-	public String getCloudCommonName() {
-		logger.debug("getCloudCommonName started ...");
-
-		return certificateAuthorityService.getCloudCommonName();
 	}
 
 	// -------------------------------------------------------------------------------------------------
