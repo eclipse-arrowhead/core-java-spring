@@ -326,6 +326,8 @@ public class ConsumerSideServerSocketThreadTest {
 						sslConsumerSocket.addHandshakeCompletedListener(listener);
 						final OutputStream outConsumer = sslConsumerSocket.getOutputStream();
 						outConsumer.write(new byte[] { 5, 6, 7, 8 });
+						Thread.sleep(500);
+						outConsumer.write(new byte[] { 5, 6, 7, 8 });
 						int j = 0;
 						while (!handshakeCompleted[0] && ++j < 10) {
 							Thread.sleep(500);
