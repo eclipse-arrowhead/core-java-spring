@@ -2,6 +2,9 @@ package eu.arrowhead.core.serviceregistry.security;
 
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.x509;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -32,10 +35,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 
 /**
@@ -56,6 +61,9 @@ public class SRAccessControlFilterTest {
 	private static final String SERVICE_REGISTRY_REGISTER = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI;
 	private static final String SERVICE_REGISTRY_UNREGISTER = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI;
 	private static final String SERVICE_REGISTRY_QUERY = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI;
+	private static final String SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI;
+	private static final String SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI;
+	private static final String SERVICE_REGISTRY_QUERY_ALL = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_ALL_SERVICE_URI;
 
 	@Autowired
 	private ApplicationContext appContext;
@@ -324,6 +332,96 @@ public class SRAccessControlFilterTest {
 		postQuery(serviceQueryFormDTO, "certificates/provider.pem", status().isOk());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryRegistryBySystemIdOrchestrator() throws Exception {
+		when(serviceRegistryDBService.getSystemById(anyLong())).thenReturn(new SystemResponseDTO());
+		
+		getQueryBySystemId(1l, "certificates/orchestrator.pem", status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryRegistryBySystemIdNotAllowedCoreSys() throws Exception {
+		when(serviceRegistryDBService.getSystemById(anyLong())).thenReturn(new SystemResponseDTO());
+		
+		getQueryBySystemId(1l, "certificates/gateway.pem", status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryRegistryBySystemIdAppSys() throws Exception {
+		when(serviceRegistryDBService.getSystemById(anyLong())).thenReturn(new SystemResponseDTO());
+		
+		getQueryBySystemId(1l, "certificates/provider.pem", status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryRegistryBySystemDTOOrchestrator() throws Exception {
+		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
+		
+		postQueryBySystemDTO(new SystemRequestDTO("system", "0.0.0.0", 5000, null), "certificates/orchestrator.pem", status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryRegistryBySystemDTONotAllowedCoreSys() throws Exception {
+		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
+		
+		postQueryBySystemDTO(new SystemRequestDTO("system", "0.0.0.0", 5000, null), "certificates/gateway.pem", status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryRegistryBySystemDTOAppSys() throws Exception {
+		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
+		
+		postQueryBySystemDTO(new SystemRequestDTO("system", "0.0.0.0", 5000, null), "certificates/provider.pem", status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryAllQoS() throws Exception {
+		when(serviceRegistryDBService.getServiceRegistryEntriesResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(new ServiceRegistryListResponseDTO());
+		
+		getQueryAll("certificates/qos_monitor.pem", status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryAllGatekeeper() throws Exception {
+		when(serviceRegistryDBService.getServiceRegistryEntriesResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(new ServiceRegistryListResponseDTO());
+		
+		getQueryAll("certificates/gatekeeper.pem", status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryAllNotAllowedCoreSys() throws Exception {
+		when(serviceRegistryDBService.getServiceRegistryEntriesResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(new ServiceRegistryListResponseDTO());
+		
+		getQueryAll("certificates/orchestrator.pem", status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryAllAppSys() throws Exception {
+		when(serviceRegistryDBService.getServiceRegistryEntriesResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(new ServiceRegistryListResponseDTO());
+		
+		getQueryAll("certificates/provider.pem", status().isUnauthorized());
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -354,6 +452,34 @@ public class SRAccessControlFilterTest {
 			    	.contentType(MediaType.APPLICATION_JSON)
 			    	.content(objectMapper.writeValueAsBytes(form))
 			    	.accept(MediaType.APPLICATION_JSON))
+					.andExpect(matcher);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void getQueryBySystemId(final long systemId, final String certificatePath, final ResultMatcher matcher) throws Exception {
+		this.mockMvc.perform(get(SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID.replace("{id}", String.valueOf(systemId)))
+			    	.secure(true)
+			    	.with(x509(certificatePath)))
+					.andExpect(matcher);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void postQueryBySystemDTO(final SystemRequestDTO request, final String certificatePath, final ResultMatcher matcher) throws Exception {
+		this.mockMvc.perform(post(SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO)
+			    	.secure(true)
+			    	.with(x509(certificatePath))
+					.contentType(MediaType.APPLICATION_JSON)
+			    	.content(objectMapper.writeValueAsBytes(request))
+			    	.accept(MediaType.APPLICATION_JSON))
+					.andExpect(matcher);
+	}
+	
+
+	//-------------------------------------------------------------------------------------------------
+	private void getQueryAll(final String certificatePath, final ResultMatcher matcher) throws Exception {
+		this.mockMvc.perform(get(SERVICE_REGISTRY_QUERY_ALL)
+			    	.secure(true)
+			    	.with(x509(certificatePath)))
 					.andExpect(matcher);
 	}
 }
