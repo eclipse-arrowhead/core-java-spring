@@ -47,12 +47,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.GatewayProviderConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
@@ -464,36 +461,6 @@ public class ProviderSideSocketThreadTest {
 			public long getDeliveryDelay() throws JMSException { return 0; }
 			public void close() throws JMSException {}
 		};
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private SSLProperties getTestSSLPropertiesForThread() {
-		final SSLProperties sslProps = new SSLProperties();
-		ReflectionTestUtils.setField(sslProps, "sslEnabled", true);
-		ReflectionTestUtils.setField(sslProps, "keyStoreType", "PKCS12");
-		final Resource keystore = new ClassPathResource("certificates/gateway.p12");
-		ReflectionTestUtils.setField(sslProps, "keyStore", keystore);
-		ReflectionTestUtils.setField(sslProps, "keyStorePassword", "123456");
-		final Resource truststore = new ClassPathResource("certificates/truststore.p12");
-		ReflectionTestUtils.setField(sslProps, "trustStore", truststore);
-		ReflectionTestUtils.setField(sslProps, "trustStorePassword", "123456");
-		
-		return sslProps;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private SSLProperties getTestSSLPropertiesForTestServerThread() {
-		final SSLProperties sslProps = new SSLProperties();
-		ReflectionTestUtils.setField(sslProps, "sslEnabled", true);
-		ReflectionTestUtils.setField(sslProps, "keyStoreType", "PKCS12");
-		final Resource keystore = new ClassPathResource("certificates/authorization.p12");
-		ReflectionTestUtils.setField(sslProps, "keyStore", keystore);
-		ReflectionTestUtils.setField(sslProps, "keyStorePassword", "123456");
-		final Resource truststore = new ClassPathResource("certificates/truststore.p12");
-		ReflectionTestUtils.setField(sslProps, "trustStore", truststore);
-		ReflectionTestUtils.setField(sslProps, "trustStorePassword", "123456");
-		
-		return sslProps;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
