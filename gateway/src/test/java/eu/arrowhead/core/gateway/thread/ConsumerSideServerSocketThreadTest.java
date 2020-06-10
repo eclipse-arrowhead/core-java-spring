@@ -346,7 +346,7 @@ public class ConsumerSideServerSocketThreadTest {
 		consumerSide.start();
 		testingObject.run();
 	
-		verify(relayClient, times(1)).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		verify(relayClient, times(2)).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
 		
 		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertTrue(interrupted);
