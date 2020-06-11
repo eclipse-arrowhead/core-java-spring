@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -448,7 +447,7 @@ public class ProviderSideSocketThreadHandlerTest {
 		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(simpleRequest.getBytes(StandardCharsets.ISO_8859_1));
 		
 		final GatewayProviderConnectionRequestDTO connectionRequest = (GatewayProviderConnectionRequestDTO) ReflectionTestUtils.getField(testingObject, "connectionRequest");
-		connectionRequest.getProvider().setPort(22004);
+		connectionRequest.getProvider().setPort(22104);
 		new Thread() {
 			@Override
 			public void run() {
