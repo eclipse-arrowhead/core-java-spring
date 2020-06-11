@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -80,6 +81,11 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	private static final String SERVICE_REGISTRY_REGISTER_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI;
 	private static final String SERVICE_REGISTRY_UNREGISTER_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI;
 	private static final String SERVICE_REGISTRY_QUERY_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI;
+	private static final String SERVICE_REGISTRY_QUERY_SYSTEM_BY_ID_URI = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI;
+	private static final String SERVICE_REGISTRY_QUERY_SYSTEM_BY_DTO_URI = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI;
+	private static final String SERVICE_REGISTRY_QUERY_ALL_URI = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_ALL_SERVICE_URI;
+	private static final String SERVICE_REGISTRY_QUERY_SERVICES_BY_SYSTEM_ID_URI = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SYSTEM_ID_URI;
+	private static final String SERVICE_REGISTRY_QUERY_SERVICES_BY_SERVICE_DEFINITION_LIST_URI = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SERVICE_DEFINITION_LIST_URI;
 
 	private static final String SERVICE_REGISTRY_MGMT_URI = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.MGMT_URI;
 	private static final String SERVICE_REGISTRY_MGMT_SERVICEDEF_URI = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.MGMT_URI + "/servicedef";
@@ -629,6 +635,159 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	}
 	
 	//=================================================================================================
+	// Tests of queryRegistryBySystemId
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryRegistryBySystemIdOk() throws Exception {
+		when(serviceRegistryDBService.getSystemById(anyLong())).thenReturn(new SystemResponseDTO());
+		getQuerySystemsById(1l, status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryRegistryBySystemIdInvalidID() throws Exception {
+		when(serviceRegistryDBService.getSystemById(anyLong())).thenReturn(new SystemResponseDTO());
+		final MvcResult result = getQuerySystemsById(-1l, status().isBadRequest());
+		
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICE_REGISTRY_QUERY_SYSTEM_BY_ID_URI, error.getOrigin());
+	}
+	
+	//=================================================================================================
+	// Tests of queryRegistryBySystemDTO
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryRegistryBySystemDTOOk() throws Exception {
+		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
+		postQuerySystemsByDTO(new SystemRequestDTO("name", "0.0.0.0", 45000, null), status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryRegistryBySystemDTONullSysName() throws Exception {
+		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
+		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO(null, "0.0.0.0", 45000, null), status().isBadRequest());
+		
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICE_REGISTRY_QUERY_SYSTEM_BY_DTO_URI, error.getOrigin());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryRegistryBySystemDTONullAddress() throws Exception {
+		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
+		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO("name", null, 45000, null), status().isBadRequest());
+		
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICE_REGISTRY_QUERY_SYSTEM_BY_DTO_URI, error.getOrigin());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryRegistryBySystemDTONullPort() throws Exception {
+		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
+		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO("name", "0.0.0.0", null, null), status().isBadRequest());
+		
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICE_REGISTRY_QUERY_SYSTEM_BY_DTO_URI, error.getOrigin());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryRegistryBySystemDTOInvalidPort() throws Exception {
+		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
+		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO("name", "0.0.0.0", CommonConstants.SYSTEM_PORT_RANGE_MAX + 1, null), status().isBadRequest());
+		
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICE_REGISTRY_QUERY_SYSTEM_BY_DTO_URI, error.getOrigin());
+	}
+	
+	//=================================================================================================
+	// Tests of getServiceRegistryEntries
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testGetServiceRegistryEntriesOk() throws Exception {
+		when(serviceRegistryDBService.getServiceRegistryEntriesResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(new ServiceRegistryListResponseDTO());
+		getQueryAll(status().isOk());
+	}
+	
+	//=================================================================================================
+	// Tests of getServiceRegistryEntriesBySystemId
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testGetServiceRegistryEntriesBySystemIdOk() throws Exception {
+		when(serviceRegistryDBService.getServiceRegistryEntriesBySystemIdResponse(anyLong())).thenReturn(new ServiceRegistryListResponseDTO());
+		getQueryServicesBySysId(1l, status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testGetServiceRegistryEntriesBySystemInvalidId() throws Exception {
+		when(serviceRegistryDBService.getServiceRegistryEntriesBySystemIdResponse(anyLong())).thenReturn(new ServiceRegistryListResponseDTO());
+		final MvcResult result = getQueryServicesBySysId(-1l, status().isBadRequest());
+		
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICE_REGISTRY_QUERY_SERVICES_BY_SYSTEM_ID_URI, error.getOrigin());
+	}
+	
+	//=================================================================================================
+	// Tests of queryServiceRegistryEntriesByServiceDefinitonList
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQqueryServiceRegistryEntriesByServiceDefinitonListOk() throws Exception {
+		when(serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinitonListResponse(any())).thenReturn(new ServiceRegistryListResponseDTO());
+		postQueryServicesByDefinitions(List.of("service-def"), status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQqueryServiceRegistryEntriesByServiceDefinitonListWithNull() throws Exception {
+		when(serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinitonListResponse(any())).thenReturn(new ServiceRegistryListResponseDTO());
+		final List<String> definitions = new ArrayList<>(1);
+		definitions.add(null);
+		final MvcResult result = postQueryServicesByDefinitions(definitions, status().isBadRequest());
+		
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICE_REGISTRY_QUERY_SERVICES_BY_SERVICE_DEFINITION_LIST_URI, error.getOrigin());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQqueryServiceRegistryEntriesByServiceDefinitonListWithBlank() throws Exception {
+		when(serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinitonListResponse(any())).thenReturn(new ServiceRegistryListResponseDTO());
+		final MvcResult result = postQueryServicesByDefinitions(List.of("  "), status().isBadRequest());
+		
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICE_REGISTRY_QUERY_SERVICES_BY_SERVICE_DEFINITION_LIST_URI, error.getOrigin());
+	}
+	
+	//=================================================================================================
 	// Tests of addService
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1052,6 +1211,50 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		return this.mockMvc.perform(post(SERVICE_REGISTRY_QUERY_URI)
 						   .contentType(MediaType.APPLICATION_JSON)
 						   .content(objectMapper.writeValueAsBytes(form))
+						   .accept(MediaType.APPLICATION_JSON))
+						   .andExpect(matcher)
+						   .andReturn();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MvcResult getQuerySystemsById(final long id, final ResultMatcher matcher) throws Exception {
+		return this.mockMvc.perform(get(SERVICE_REGISTRY_QUERY_SYSTEM_BY_ID_URI.replace("{id}", String.valueOf(id)))
+						   .accept(MediaType.APPLICATION_JSON))
+						   .andExpect(matcher)
+						   .andReturn();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MvcResult postQuerySystemsByDTO(final SystemRequestDTO request, final ResultMatcher matcher) throws Exception {
+		return this.mockMvc.perform(post(SERVICE_REGISTRY_QUERY_SYSTEM_BY_DTO_URI)
+						   .contentType(MediaType.APPLICATION_JSON)
+						   .content(objectMapper.writeValueAsBytes(request))
+						   .accept(MediaType.APPLICATION_JSON))
+						   .andExpect(matcher)
+						   .andReturn();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MvcResult getQueryAll(final ResultMatcher matcher) throws Exception {
+		return this.mockMvc.perform(get(SERVICE_REGISTRY_QUERY_ALL_URI)
+						   .accept(MediaType.APPLICATION_JSON))
+						   .andExpect(matcher)
+						   .andReturn();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MvcResult getQueryServicesBySysId(final long id, final ResultMatcher matcher) throws Exception {
+		return this.mockMvc.perform(get(SERVICE_REGISTRY_QUERY_SERVICES_BY_SYSTEM_ID_URI.replace("{id}", String.valueOf(id)))
+						   .accept(MediaType.APPLICATION_JSON))
+						   .andExpect(matcher)
+						   .andReturn();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MvcResult postQueryServicesByDefinitions(final List<String> request, final ResultMatcher matcher) throws Exception {
+		return this.mockMvc.perform(post(SERVICE_REGISTRY_QUERY_SERVICES_BY_SERVICE_DEFINITION_LIST_URI)
+						   .contentType(MediaType.APPLICATION_JSON)
+						   .content(objectMapper.writeValueAsBytes(request))
 						   .accept(MediaType.APPLICATION_JSON))
 						   .andExpect(matcher)
 						   .andReturn();

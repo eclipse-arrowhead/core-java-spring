@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
@@ -537,6 +538,34 @@ public class ServiceRegistryDBService {
 		
 		return DTOConverter.convertServiceRegistryListToServiceRegistryListResponseDTO(serviceRegistryEntriesByServiceDefinition);		
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<ServiceRegistry> getServiceRegistryEntriesByServiceDefinitonList(final List<String> serviceDefinitions) {
+		logger.debug("getServiceRegistryEntriesByServiceDefinitonList started...");
+		Assert.notNull(serviceDefinitions, "Service definition list is null");
+		
+		final List<ServiceRegistry> results = new ArrayList<>();
+		for (final String definition : serviceDefinitions) {
+			if (Utilities.isEmpty(definition)) {
+				throw new InvalidParameterException("Service definition is empty or null");
+			}			
+			
+			final Optional<ServiceDefinition> opt = serviceDefinitionRepository.findByServiceDefinition(definition.trim().toLowerCase());
+			if (opt.isPresent()) {
+				results.addAll(serviceRegistryRepository.findByServiceDefinition(opt.get()));
+			} else {
+				logger.debug("Service with definition of '" + definition + "'is not exists");
+			}
+		}
+		return results;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ServiceRegistryListResponseDTO getServiceRegistryEntriesByServiceDefinitonListResponse(final List<String> serviceDefinitions) {
+		logger.debug("getServiceRegistryEntriesByServiceDefinitonListResponse started...");
+		final List<ServiceRegistry> results = getServiceRegistryEntriesByServiceDefinitonList(serviceDefinitions);
+		return DTOConverter.convertServiceRegistryListToServiceRegistryListResponseDTO(new PageImpl<ServiceRegistry>(results));
+	}
 		
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
@@ -921,6 +950,32 @@ public class ServiceRegistryDBService {
 		}
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public ServiceRegistryListResponseDTO getServiceRegistryEntriesBySystemIdResponse(final long systemId) {
+		final List<ServiceRegistry> result = getServiceRegistryEntriesBySystemId(systemId);
+		return DTOConverter.convertServiceRegistryListToServiceRegistryListResponseDTO(new PageImpl<ServiceRegistry>(result));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<ServiceRegistry> getServiceRegistryEntriesBySystemId(final long systemId) {
+		logger.debug("getServiceRegistryEntriesBySystemId started...");		
+		validateSystemId(systemId);
+		
+		try {
+			final Optional<System> opt = systemRepository.findById(systemId);
+			if (opt.isEmpty()) {
+				throw new InvalidParameterException("No system with id: " + systemId + " exists");
+			} else {
+				return serviceRegistryRepository.findBySystem(opt.get());
+			}			
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
 	//=================================================================================================
 	// assistant methods
 
@@ -1020,7 +1075,7 @@ public class ServiceRegistryDBService {
 		logger.debug("validateSystemId started...");
 		
 		if (systemId < 1) {
-			throw new IllegalArgumentException("System id must be greater than zero");
+			throw new InvalidParameterException("System id must be greater than zero");
 		}
 		
 		return systemId;
