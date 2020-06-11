@@ -1,7 +1,15 @@
 #!/bin/bash
 set -e #-x
 
+################# DEFAULT VALUES #################
 AH_LIBRARY='/usr/share/arrowhead/conf/ahconf.sh'
+HELP_FLAG=0
+CERT_FLAG=0
+NEW_SYSTEM_FLAG=0
+UPDATE_SYSTEM_CERTS_FLAG=0
+UPDATE_MASTER_CERTS_FLAG=0
+SYSTEMS=()
+################# DEFAULT VALUES #################
 
 ################ ARGUMENT PARSING ################
 if [[ $# -eq 0 ]]; then
@@ -9,7 +17,6 @@ if [[ $# -eq 0 ]]; then
 fi
 
 POSITIONAL=()
-SYSTEMS=()
 for i in "$@"; do
   case $i in
     cert)
@@ -41,7 +48,7 @@ for i in "$@"; do
       shift
       ;;
     -n|--new-system)
-      NEW_SYSTEM=1
+      NEW_SYSTEM_FLAG=1
       shift
       ;;
     -u|--system-certs)
@@ -100,11 +107,11 @@ err() {
 # Check for command flags here.
 # Do additional checks in the commands own function
 main() {
-  if [[ -n "${HELP_FLAG}" ]]; then
+  if [[ "${HELP_FLAG}" == 1 ]]; then
     print_help
     exit 0
   fi
-  if [[ -n "${CERT_FLAG}" ]]; then
+  if [[ "${CERT_FLAG}" == 1 ]]; then
     cert
     exit 0
   fi
@@ -122,7 +129,7 @@ cert() {
     ${UPDATE_SYSTEM_CERTS_FLAG} +
     ${UPDATE_MASTER_CERTS_FLAG} +
     (${#SYSTEMS[@]} && 1 ||
-      ${#SYSTEMS[@]} && ${NEW_SYSTEM})))"
+      ${#SYSTEMS[@]} && ${NEW_SYSTEM_FLAG})))"
 
   if (( ${flags} > 1 )); then
     err "Multiple mutually exclusive flags given"
@@ -140,12 +147,12 @@ cert() {
     done
     exit $?
   fi
-  if [[ -n "${UPDATE_MASTER_CERTS_FLAG}" ]]; then
+  if [[ "${UPDATE_MASTER_CERTS_FLAG}" == 1 ]]; then
     update_master_certs
     update_system_certs
     exit $?
   fi
-  if [[ -n "${UPDATE_SYSTEM_CERTS_FLAG}" ]]; then
+  if [[ "${UPDATE_SYSTEM_CERTS_FLAG}" == 1 ]]; then
     update_system_certs
     exit $?
   fi
@@ -218,7 +225,7 @@ update_system_cert() {
     ah_cert_signed_system "${system}"
   fi
 
-  if [[ -n "${PASSWORD_CHANGED}" && "${system}" != 'sysop' && -z "${NEW_SYSTEM}" ]]; then
+  if [[ -n "${PASSWORD_CHANGED}" && "${system}" != 'sysop' && "${NEW_SYSTEM_FLAG}" == "0" ]]; then
     local password="$(ah_get_conf_prop cert_password)"
     sed -i \
       -e "s/^server\.ssl\.key-store-password=.*/server.ssl.key-store-password=${password}/"\
