@@ -61,6 +61,11 @@ case "$1" in
 
     ah_cert_signed_system ${SYSTEM_NAME}
 
+    if [ ! -d "${AH_SYSTEMS_DIR}/sysop" ]; then
+      mkdir -p ${AH_SYSTEMS_DIR}/sysop
+      ah_cert_signed_system sysop
+    fi
+
     # modify log config and application.properties
 
     ah_transform_log_file ${SYSTEM_DIR}

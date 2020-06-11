@@ -63,9 +63,8 @@ case "$1" in
 
     if [ ! -d "${AH_SYSTEMS_DIR}/sysop" ]; then
       mkdir -p ${AH_SYSTEMS_DIR}/sysop
+      ah_cert_signed_system sysop
     fi
-
-    ah_cert_signed_system sysop
 
     # modify log config and application.properties
 
