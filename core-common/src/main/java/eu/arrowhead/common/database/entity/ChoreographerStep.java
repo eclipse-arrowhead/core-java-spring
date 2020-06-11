@@ -34,17 +34,14 @@ public class ChoreographerStep {
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false, unique = true, length = CoreDefaults.VARCHAR_BASIC)
+    @Column(nullable = false, /*unique = true,*/ length = CoreDefaults.VARCHAR_BASIC)
     private String name;
 
-    @Column(nullable = false, unique = true, length = CoreDefaults.VARCHAR_BASIC)
+    @Column(nullable = false, /*unique = true,*/ length = CoreDefaults.VARCHAR_BASIC)
     private String serviceName;
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    private String metadata;
-
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String parameters;
+    private String staticParameters;
 
     @Column(nullable = false)
     private int quantity;
@@ -84,11 +81,10 @@ public class ChoreographerStep {
 
     //-------------------------------------------------------------------------------------------------
 
-    public ChoreographerStep(String name, String serviceName, String metadata, String parameters, ChoreographerAction action, int quantity) {
+    public ChoreographerStep(String name, String serviceName, String metadata, String staticParameters, ChoreographerAction action, int quantity) {
         this.name = name;
         this.serviceName = serviceName;
-        this.metadata = metadata;
-        this.parameters = parameters;
+        this.staticParameters = staticParameters;
         this.action = action;
         this.quantity = quantity;
     }
@@ -102,8 +98,7 @@ public class ChoreographerStep {
     public ChoreographerAction getActionFirstStep() { return actionFirstStep; }
     public ChoreographerAction getAction() { return action; }
     public String getServiceName() { return serviceName; }
-    public String getMetadata() { return metadata; }
-    public String getParameters() { return parameters; }
+    public String getStaticParameters() { return staticParameters; }
     public Set<ChoreographerStepNextStepConnection> getNextSteps() { return nextSteps; }
     public Set<ChoreographerStepNextStepConnection> getSteps() { return steps; }
     public Set<ChoreographerRunningStep> getRunningSteps() { return runningSteps; }
@@ -117,8 +112,7 @@ public class ChoreographerStep {
     public void setActionFirstStep(ChoreographerAction actionFirstStep) { this.actionFirstStep = actionFirstStep; }
     public void setAction(ChoreographerAction action) { this.action = action; }
     public void setServiceName(String serviceName) { this.serviceName = serviceName; }
-    public void setMetadata(String metadata) { this.metadata = metadata; }
-    public void setParameters(String parameters) { this.parameters = parameters; }
+    public void setStaticParameters(String parameters) { this.staticParameters = parameters; }
     public void setNextSteps(Set<ChoreographerStepNextStepConnection> nextSteps) { this.nextSteps = nextSteps; }
     public void setSteps(Set<ChoreographerStepNextStepConnection> actionSteps) { this.steps = actionSteps; }
     public void setRunningSteps(Set<ChoreographerRunningStep> runningSteps) { this.runningSteps = runningSteps; }

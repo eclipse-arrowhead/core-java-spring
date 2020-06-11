@@ -942,7 +942,7 @@ public class DTOConverter {
                                                 step.getName(),
                                                 step.getServiceName(),
                                                 step.getMetadata(),
-                                                step.getParameters(),
+                                                step.getStaticParameters(),
                                                 collectNextStepsFromStep(step.getNextSteps()),
                                                 step.getQuantity(),
                                                 Utilities.convertZonedDateTimeToUTCString(step.getCreatedAt()),

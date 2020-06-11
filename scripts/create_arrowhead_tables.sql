@@ -345,8 +345,7 @@ CREATE TABLE IF NOT EXISTS `choreographer_step` (
   `action_first_step_id` bigint(20),
   `action_id` bigint(20) NOT NULL,
   `service_name` varchar(255) NOT NULL,
-  `metadata` text,
-  `parameters` text,
+  `static_parameters` text,
   `quantity` int(20) NOT NULL DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -398,6 +397,20 @@ CREATE TABLE IF NOT EXISTS `choreographer_worklog` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE IF NOT EXISTS `choreographer_executor` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `name` varchar(255) NOT NULL,
+    `address` varchar(255) NOT NULL,
+    `port` int(11) NOT NULL,
+    `base_uri` varchar(255) DEFAULT NULL,
+    `service_definition_name` varchar(255) NOT NULL,
+    `version` int(11) NOT NULL,
+    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY `unique_service_definition_name_version` (`service_definition_name`, `version`),
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 -- QoS Monitor
 -- Intra
 
@@ -407,7 +420,7 @@ CREATE TABLE IF NOT EXISTS `qos_intra_measurement` (
 	`measurement_type` varchar(255) NOT NULL,
 	`last_measurement_at` timestamp NOT NULL,
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT `fk_system` FOREIGN KEY (`system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE,
 	UNIQUE KEY `unique_system_id_measurement_type` (`system_id`, `measurement_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
