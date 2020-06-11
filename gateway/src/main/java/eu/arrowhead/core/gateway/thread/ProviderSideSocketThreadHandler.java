@@ -200,7 +200,7 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 	private void replaceThreadIfNecessary() {
 		logger.debug("Provider handler replaceThread started...");
 		
-		if (noRequest >= maxRequestPerSocket || currentThread.isInterrupted()) {
+		if (noRequest > maxRequestPerSocket || currentThread.isInterrupted()) {
 			// new thread needed because we reach the threshold or current thread is interrupted
 			
 			if (!currentThread.isInterrupted()) {
@@ -218,7 +218,7 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 			logger.debug("Creating thread: {}", currentThread.getName());
 			try {
 				currentThread.init();
-				noRequest = 0;
+				noRequest = 1;
 				logger.debug("Request counter reset");
 				currentThread.start();
 				logger.debug("Thread started: {}", currentThread.getName());

@@ -4,13 +4,17 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.security.PublicKey;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.jms.BytesMessage;
@@ -62,6 +66,11 @@ public class ProviderSideSocketThreadHandlerTest {
 	
 	//=================================================================================================
 	// members
+	
+	private static final String simpleRequest = "DELETE / HTTP/1.1\r\n" + 
+												"Accept: text/plain\r\n" + 
+												"User-Agent: Apache-HttpClient/4.5.8 (Java/11.0.3)\r\n" + 
+												"\r\n";
 	
 	private ApplicationContext appContext;
 	private GatewayRelayClient relayClient;
@@ -358,23 +367,129 @@ public class ProviderSideSocketThreadHandlerTest {
 		verify(relayClient).closeConnection(any(Session.class));
 	}
 	
-//	//-------------------------------------------------------------------------------------------------
-//	@Test
-//	public void testOnMessageNormalMessage() throws JMSException {
-//		final ByteArrayOutputStream outputStream = new ByteArrayOutputStream(10);
-//		ReflectionTestUtils.setField(testingObject, "outProvider", outputStream);
-//		final ActiveMQTextMessage message = new ActiveMQTextMessage();
-//		message.setJMSDestination(new ActiveMQQueue("bla"));
-//		
-//		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(new byte[] { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 });
-//		
-//		testingObject.onMessage(message);
-//		
-//		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
-//		Assert.assertTrue(!interrupted);
-//		Assert.assertArrayEquals(new byte[] { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 }, outputStream.toByteArray());
-//	}
-//	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testOnMessageNormalOutputStreamNull() throws JMSException {
+		final ProviderSideSocketThread currentThread = mock(ProviderSideSocketThread.class, "currentThread");
+		when(currentThread.getOutputStream()).thenReturn(null);
+		ReflectionTestUtils.setField(testingObject, "currentThread", currentThread);
+		ReflectionTestUtils.setField(testingObject, "initialized", true);
+		
+		final ActiveMQTextMessage message = new ActiveMQTextMessage();
+		message.setJMSDestination(new ActiveMQQueue("bla"));
+		
+		testingObject.onMessage(message);
+		
+		verify(currentThread).getOutputStream();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOnMessageNormalMessage() throws JMSException {
+		final ProviderSideSocketThread currentThread = mock(ProviderSideSocketThread.class, "currentThread");
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream(10);
+		when(currentThread.getOutputStream()).thenReturn(outputStream);
+		ReflectionTestUtils.setField(testingObject, "currentThread", currentThread);
+		ReflectionTestUtils.setField(testingObject, "initialized", true);
+		
+		final ActiveMQTextMessage message = new ActiveMQTextMessage();
+		message.setJMSDestination(new ActiveMQQueue("bla"));
+		
+		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(new byte[] { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 });
+		
+		testingObject.onMessage(message);
+		
+		Assert.assertArrayEquals(new byte[] { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 }, outputStream.toByteArray());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOnMessageNormalHttpMessage() throws JMSException {
+		final ProviderSideSocketThread currentThread = mock(ProviderSideSocketThread.class, "currentThread");
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream(1024);
+		when(currentThread.getOutputStream()).thenReturn(outputStream);
+		ReflectionTestUtils.setField(testingObject, "currentThread", currentThread);
+		ReflectionTestUtils.setField(testingObject, "initialized", true);
+		
+		final ActiveMQTextMessage message = new ActiveMQTextMessage();
+		message.setJMSDestination(new ActiveMQQueue("bla"));
+		
+		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(simpleRequest.getBytes(StandardCharsets.ISO_8859_1));
+		
+		int noRequest = (Integer) ReflectionTestUtils.getField(testingObject, "noRequest");
+		Assert.assertEquals(0, noRequest);
+		
+		testingObject.onMessage(message);
+		
+		final boolean countRequests = (Boolean) ReflectionTestUtils.getField(testingObject, "countRequests");
+		noRequest = (Integer) ReflectionTestUtils.getField(testingObject, "noRequest");
+		
+		Assert.assertTrue(countRequests);
+		Assert.assertEquals(1, noRequest);
+		Assert.assertEquals(simpleRequest, new String(outputStream.toByteArray(), StandardCharsets.ISO_8859_1));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOnMessageNormalHttpMessageThreadChange() throws JMSException {
+		final ProviderSideSocketThread currentThread = mock(ProviderSideSocketThread.class, "currentThread");
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream(1024);
+		when(currentThread.getOutputStream()).thenReturn(outputStream);
+		ReflectionTestUtils.setField(testingObject, "currentThread", currentThread);
+		ReflectionTestUtils.setField(testingObject, "sender", getTestMessageProducer());
+		ReflectionTestUtils.setField(testingObject, "initialized", true);
+		
+		final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(getTestSSLPropertiesForThread());
+		ReflectionTestUtils.setField(testingObject, "socketFactory", sslContext.getSocketFactory());
+		
+		final ActiveMQTextMessage message = new ActiveMQTextMessage();
+		message.setJMSDestination(new ActiveMQQueue("bla"));
+		
+		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(simpleRequest.getBytes(StandardCharsets.ISO_8859_1));
+		
+		final GatewayProviderConnectionRequestDTO connectionRequest = (GatewayProviderConnectionRequestDTO) ReflectionTestUtils.getField(testingObject, "connectionRequest");
+		connectionRequest.getProvider().setPort(22004);
+		new Thread() {
+			@Override
+			public void run() {
+				final SSLProperties props = getTestSSLPropertiesForTestServerThread();
+				final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(props);
+				final SSLServerSocketFactory serverSocketFactory = sslContext.getServerSocketFactory();
+				try {
+					final SSLServerSocket dummyServerSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(22104);
+					final Socket socket = dummyServerSocket.accept();
+					socket.close();
+				} catch (final IOException ex) {
+					ex.printStackTrace();
+				}
+			}
+		}.start();
+		
+		int noRequest = (Integer) ReflectionTestUtils.getField(testingObject, "noRequest");
+		Assert.assertEquals(0, noRequest);
+		
+		testingObject.onMessage(message);
+		final boolean countRequests = (Boolean) ReflectionTestUtils.getField(testingObject, "countRequests");
+		Assert.assertTrue(countRequests);
+		noRequest = (Integer) ReflectionTestUtils.getField(testingObject, "noRequest");
+		Assert.assertEquals(1, noRequest);
+		
+		testingObject.onMessage(message);
+		noRequest = (Integer) ReflectionTestUtils.getField(testingObject, "noRequest");
+		Assert.assertEquals(2, noRequest);
+		
+		testingObject.onMessage(message);
+		noRequest = (Integer) ReflectionTestUtils.getField(testingObject, "noRequest");
+		Assert.assertEquals(3, noRequest);
+		
+		testingObject.onMessage(message);
+		noRequest = (Integer) ReflectionTestUtils.getField(testingObject, "noRequest");
+		Assert.assertEquals(1, noRequest);
+		
+		final ProviderSideSocketThread oldThread = (ProviderSideSocketThread) ReflectionTestUtils.getField(testingObject, "oldThread");
+		Assert.assertNotNull(oldThread);
+		Assert.assertEquals(currentThread, oldThread);
+	}
 	
 	//=================================================================================================
 	// assistant methods
