@@ -1,8 +1,5 @@
 package eu.arrowhead.core.gams.service;
 
-import java.util.Optional;
-import java.util.UUID;
-
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.drivers.DriverUtilities;
 import eu.arrowhead.common.exception.DataNotFoundException;
@@ -15,6 +12,9 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class InstanceService {
@@ -41,11 +41,11 @@ public class InstanceService {
         return new GamsInstanceDto(instance.getName(), instance.getUidAsString(), Utilities.convertZonedDateTimeToUTCString(instance.getCreatedAt()));
     }
 
-    protected GamsInstance findByUid(final String uid) {
+    public GamsInstance findByUid(final String uid) {
         logger.debug("findByUid({})", uid);
         Assert.notNull(uid, "Instance uid must not be null");
 
         final Optional<GamsInstance> instanceByUid = instanceRepository.findByUid(UUID.fromString(uid));
-        return instanceByUid.orElseThrow(() -> new DataNotFoundException("Unable to find gams with given uid"));
+        return instanceByUid.orElseThrow(() -> new DataNotFoundException("Unable to find gams instance with given uid"));
     }
 }

@@ -5,9 +5,13 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.core.gams.Validation;
+import eu.arrowhead.core.gams.database.entities.GamsInstance;
+import eu.arrowhead.core.gams.database.entities.Sensor;
 import eu.arrowhead.core.gams.rest.dto.CreateSensorRequest;
 import eu.arrowhead.core.gams.rest.dto.GamsInstanceDto;
 import eu.arrowhead.core.gams.rest.dto.PublishSensorDataRequest;
+import eu.arrowhead.core.gams.rest.dto.SensorDto;
+import eu.arrowhead.core.gams.service.InstanceService;
 import eu.arrowhead.core.gams.service.SensorService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -19,12 +23,15 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import static eu.arrowhead.core.gams.Constants.PARAMETER_SENSOR;
+import static eu.arrowhead.core.gams.Constants.PARAMETER_UID;
 import static eu.arrowhead.core.gams.Constants.PATH_PARAMETER_SENSOR;
 import static eu.arrowhead.core.gams.Constants.PATH_PARAMETER_UID;
 import static eu.arrowhead.core.gams.Constants.PATH_ROOT;
@@ -57,10 +64,12 @@ public class SensorController {
     private final Logger logger = LogManager.getLogger(SensorController.class);
     private final Validation validation = new Validation();
 
+    private final InstanceService instanceService;
     private final SensorService sensorService;
 
     @Autowired
-    public SensorController(final SensorService sensorService) {
+    public SensorController(InstanceService instanceService, final SensorService sensorService) {
+        this.instanceService = instanceService;
         this.sensorService = sensorService;
     }
 
@@ -79,11 +88,14 @@ public class SensorController {
     })
     @PostMapping(CREATE_SENSOR_URI)
     @ResponseBody
-    public GamsInstanceDto create(@RequestBody final CreateSensorRequest createSensorRequest) {
+    public SensorDto create(@PathVariable(PARAMETER_UID) final String instanceUid, @RequestBody final CreateSensorRequest createSensorRequest) {
         logger.debug("create started ...");
+        final String origin = CommonConstants.GAMS_URI + "/" + instanceUid;
 
-        validation.verify(createSensorRequest, createOrigin(CREATE_SENSOR_URI));
-        return sensorService.create(createSensorRequest);
+        validation.verify(createSensorRequest, origin);
+
+        final GamsInstance instance = instanceService.findByUid(instanceUid);
+        return sensorService.create(instance, createSensorRequest);
     }
 
 
@@ -99,15 +111,24 @@ public class SensorController {
     })
     @PostMapping(PUBLISH_SENSOR_URI)
     @ResponseBody
-    public void publish(@RequestBody final PublishSensorDataRequest publishSensorDataRequest) {
+    public void publish(@PathVariable(PARAMETER_UID) final String instanceUid,
+                        @PathVariable(PARAMETER_SENSOR) final String sensorUid,
+                        @RequestBody final PublishSensorDataRequest publishSensorDataRequest) {
         logger.debug("publish started ...");
+        final String origin = CommonConstants.GAMS_URI + "/" + instanceUid + PATH_SENSOR + "/" + sensorUid;
 
-        validation.verify(publishSensorDataRequest, createOrigin(PUBLISH_SENSOR_URI));
-        sensorService.publish(publishSensorDataRequest);
+        validation.verify(publishSensorDataRequest, origin);
+
+        final GamsInstance instance = instanceService.findByUid(instanceUid);
+        final Sensor sensor = sensorService.findByUid(sensorUid);
+
+        validation.verifyEquals(sensor.getInstance(), instance, origin);
+
+        sensorService.publish(sensor, publishSensorDataRequest);
     }
 
     //-------------------------------------------------------------------------------------------------
-    private String createOrigin(final String path) {
-        return CommonConstants.GAMS_URI + PATH_PARAMETER_UID + path;
+    private String createOrigin(final String uid, final String path) {
+        return CommonConstants.GAMS_URI + "/" + uid + path;
     }
 }

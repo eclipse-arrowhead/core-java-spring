@@ -6,14 +6,24 @@ import java.util.StringJoiner;
 
 public class SensorDataDto implements Serializable {
 
+    private String uid;
     private String timestamp;
     private Object data;
 
     public SensorDataDto() { super(); }
 
-    public SensorDataDto(final String timestamp, final Object data) {
+    public SensorDataDto(final String uid, final String timestamp, final Object data) {
+        this.uid = uid;
         this.timestamp = timestamp;
         this.data = data;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 
     public String getTimestamp() {
@@ -37,18 +47,20 @@ public class SensorDataDto implements Serializable {
         if (this == o) { return true; }
         if (o == null || getClass() != o.getClass()) { return false; }
         final SensorDataDto that = (SensorDataDto) o;
-        return Objects.equals(timestamp, that.timestamp) &&
+        return Objects.equals(uid, that.uid) &&
+                Objects.equals(timestamp, that.timestamp) &&
                 Objects.equals(data, that.data);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(timestamp, data);
+        return Objects.hash(uid, timestamp, data);
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", SensorDataDto.class.getSimpleName() + "[", "]")
+                .add("uid='" + uid + "'")
                 .add("timestamp='" + timestamp + "'")
                 .add("data=" + data)
                 .toString();

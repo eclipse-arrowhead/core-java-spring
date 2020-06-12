@@ -1,15 +1,18 @@
 package eu.arrowhead.core.gams;
 
-import java.util.Objects;
-
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.core.gams.database.entities.GamsInstance;
 import eu.arrowhead.core.gams.rest.dto.CreateInstanceRequest;
 import eu.arrowhead.core.gams.rest.dto.CreateSensorRequest;
 import eu.arrowhead.core.gams.rest.dto.PublishSensorDataRequest;
 import org.apache.http.HttpStatus;
 
+import java.util.Objects;
+
 public class Validation {
+    public static final String GAMS_IS_NULL_ERROR = "Gams instance must not be null";
+
     public static final String PAYLOAD_IS_NULL_ERROR = "Payload must not be null";
     public static final String PAYLOAD_IS_EMPTY_ERROR = "Payload must not be empty";
     public static final String TIMESTAMP_IS_EMPTY_ERROR = "Timestamp must not be empty";
@@ -37,6 +40,16 @@ public class Validation {
             throw new BadPayloadException(PAYLOAD_IS_EMPTY_ERROR, HttpStatus.SC_BAD_REQUEST, origin);
         } else if (Utilities.isEmpty(dto.getTimestamp())) {
             throw new BadPayloadException(TIMESTAMP_IS_EMPTY_ERROR, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+    }
+
+    public void verifyEquals(final GamsInstance aInstance, final GamsInstance bInstance, final String origin) {
+        if (Objects.isNull(aInstance)) {
+            throw new BadPayloadException("Sensor is missing Gams instance", HttpStatus.SC_BAD_REQUEST, origin);
+        } else if (Objects.isNull(bInstance)) {
+            throw new BadPayloadException(GAMS_IS_NULL_ERROR, HttpStatus.SC_BAD_REQUEST, origin);
+        } else if (!Objects.equals(aInstance, bInstance)) {
+            throw new BadPayloadException("Sensor belongs to a different Gams instance", HttpStatus.SC_BAD_REQUEST, origin);
         }
     }
 }
