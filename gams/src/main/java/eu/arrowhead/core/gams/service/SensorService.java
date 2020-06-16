@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.time.ZonedDateTime;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -40,45 +41,40 @@ public class SensorService {
         this.sensorDataRepository = sensorDataRepository;
     }
 
-    public SensorDto create(final GamsInstance instance, final CreateSensorRequest request) {
+    public Sensor create(final GamsInstance instance, final CreateSensorRequest request) {
         logger.debug("publish({})", request);
         Assert.notNull(request, "CreateSensorRequest must not be null");
         Assert.notNull(request.getName(), "Sensor name must not be null");
         Assert.notNull(request.getType(), "Sensor type must not be null");
 
         Sensor sensor = new Sensor(instance, request.getName(), request.getType());
-        sensor = sensorRepository.saveAndFlush(sensor);
-
-        return new SensorDto(sensor.getUidAsString(), sensor.getName(), sensor.getType());
+        return sensorRepository.saveAndFlush(sensor);
     }
 
-    public SensorDataDto publish(final Sensor sensor, final PublishSensorDataRequest request) {
-        logger.debug("publish({})", request);
+    public AbstractSensorData store(final Sensor sensor, final ZonedDateTime timestamp, final Object data) {
+        logger.debug("publish({},{},{})", sensor, timestamp, data);
         Assert.notNull(sensor, "Sensor must not be null");
-        Assert.notNull(request, "PublishSensorDataRequest must not be null");
-        Assert.notNull(request.getTimestamp(), "Timestamp must not be null");
-        Assert.notNull(request.getData(), "Sensor data must not be null");
+        Assert.notNull(timestamp, "Timestamp must not be null");
+        Assert.notNull(data, "Sensor data must not be null");
 
-        final ZonedDateTime timestamp = Utilities.parseUTCStringToLocalZonedDateTime(request.getTimestamp());
         AbstractSensorData sensorData;
 
         switch (sensor.getType()) {
             case EVENT:
-                sensorData = new StringSensorData(sensor, timestamp, (String) request.getData());
+                sensorData = new StringSensorData(sensor, timestamp, (String) data);
                 break;
             case FLOATING_POINT_NUMBER:
-                final long doubleNumber = MathHelper.convert(request.getData());
+                final long doubleNumber = MathHelper.convert(data);
                 sensorData = new DoubleSensorData(sensor, timestamp, doubleNumber / MathHelper.PRECISION);
                 break;
             case INTEGER_NUMBER:
             default:
-                final long longNumber = MathHelper.convert(request.getData());
+                final long longNumber = MathHelper.convert(data);
                 sensorData = new LongSensorData(sensor, timestamp, longNumber);
                 break;
         }
 
-        sensorData = sensorDataRepository.saveAndFlush(sensorData);
-        return new SensorDataDto(sensor.getUidAsString(), request.getTimestamp(), sensorData.getData());
+        return sensorDataRepository.saveAndFlush(sensorData);
     }
 
     public Sensor findByUid(String uid) {

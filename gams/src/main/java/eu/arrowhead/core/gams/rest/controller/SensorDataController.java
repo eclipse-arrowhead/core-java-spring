@@ -3,15 +3,14 @@ package eu.arrowhead.core.gams.rest.controller;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.core.gams.Validation;
 import eu.arrowhead.core.gams.database.entities.GamsInstance;
 import eu.arrowhead.core.gams.database.entities.Sensor;
-import eu.arrowhead.core.gams.rest.dto.CreateSensorRequest;
-import eu.arrowhead.core.gams.rest.dto.GamsInstanceDto;
 import eu.arrowhead.core.gams.rest.dto.PublishSensorDataRequest;
-import eu.arrowhead.core.gams.rest.dto.SensorDto;
 import eu.arrowhead.core.gams.service.InstanceService;
+import eu.arrowhead.core.gams.service.MapeKService;
 import eu.arrowhead.core.gams.service.SensorService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,11 +29,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.ZonedDateTime;
+
 import static eu.arrowhead.core.gams.Constants.PARAMETER_SENSOR;
 import static eu.arrowhead.core.gams.Constants.PARAMETER_UID;
 import static eu.arrowhead.core.gams.Constants.PATH_PARAMETER_SENSOR;
 import static eu.arrowhead.core.gams.Constants.PATH_PARAMETER_UID;
-import static eu.arrowhead.core.gams.Constants.PATH_ROOT;
 import static eu.arrowhead.core.gams.Constants.PATH_SENSOR;
 
 @Api(tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
@@ -43,51 +43,60 @@ import static eu.arrowhead.core.gams.Constants.PATH_SENSOR;
 )
 @RestController
 @RequestMapping(CommonConstants.GAMS_URI + PATH_PARAMETER_UID)
-public class SensorController {
+public class SensorDataController {
 
     //=================================================================================================
     // members
-    private static final String CREATE_SENSOR_URI = PATH_ROOT;
-    private static final String CREATE_SENSOR_DESCRIPTION = "Register a sensor to an instance";
-    private static final String CREATE_SENSOR_SUCCESS = "New sensor registered";
-    private static final String CREATE_SENSOR_CONFLICT = "Sensor registered to gams instance already";
-    private static final String CREATE_SENSOR_BAD_REQUEST = "Unable to register sensor";
+    private static final String QUALIFY_SENSOR_URI = PATH_SENSOR + PATH_PARAMETER_SENSOR;
 
-    private final Logger logger = LogManager.getLogger(SensorController.class);
+    private static final String PUBLISH_SENSOR_URI = QUALIFY_SENSOR_URI;
+    private static final String PUBLISH_SENSOR_DESCRIPTION = "Publish sensor data to an instance";
+    private static final String PUBLISH_SENSOR_SUCCESS = "Sensor data published";
+    private static final String PUBLISH_SENSOR_BAD_REQUEST = "Unable to publish sensor";
+    private static final String PUBLISH_SENSOR_NOT_FOUND = "Sensor or instance not found";
+
+    private final Logger logger = LogManager.getLogger(SensorDataController.class);
     private final Validation validation = new Validation();
 
     private final InstanceService instanceService;
     private final SensorService sensorService;
+    private final MapeKService mapeKService;
 
     @Autowired
-    public SensorController(InstanceService instanceService, final SensorService sensorService) {
+    public SensorDataController(InstanceService instanceService, final SensorService sensorService, final MapeKService mapeKService) {
         this.instanceService = instanceService;
         this.sensorService = sensorService;
+        this.mapeKService = mapeKService;
     }
 
     //=================================================================================================
     // methods
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = CREATE_SENSOR_DESCRIPTION, response = GamsInstanceDto.class,
+    @ApiOperation(value = PUBLISH_SENSOR_DESCRIPTION, response = Void.class,
             tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = CREATE_SENSOR_SUCCESS),
-            @ApiResponse(code = HttpStatus.SC_CONFLICT, message = CREATE_SENSOR_CONFLICT, response = ErrorMessageDTO.class),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CREATE_SENSOR_BAD_REQUEST, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_OK, message = PUBLISH_SENSOR_SUCCESS),
+            @ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = PUBLISH_SENSOR_NOT_FOUND, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUBLISH_SENSOR_BAD_REQUEST, response = ErrorMessageDTO.class),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response = ErrorMessageDTO.class),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response = ErrorMessageDTO.class)
     })
-    @PostMapping(CREATE_SENSOR_URI)
+    @PostMapping(PUBLISH_SENSOR_URI)
     @ResponseBody
-    public SensorDto create(@PathVariable(PARAMETER_UID) final String instanceUid, @RequestBody final CreateSensorRequest createSensorRequest) {
-        logger.debug("create started ...");
-        final String origin = CommonConstants.GAMS_URI + "/" + instanceUid;
+    public void publish(@PathVariable(PARAMETER_UID) final String instanceUid,
+                        @PathVariable(PARAMETER_SENSOR) final String sensorUid,
+                        @RequestBody final PublishSensorDataRequest request) {
+        logger.debug("publish started ...");
+        final String origin = CommonConstants.GAMS_URI + "/" + instanceUid + PATH_SENSOR + "/" + sensorUid;
 
-        validation.verify(createSensorRequest, origin);
+        validation.verify(request, origin);
 
         final GamsInstance instance = instanceService.findByUid(instanceUid);
-        final Sensor sensor = sensorService.create(instance, createSensorRequest);
-        return new SensorDto(sensor.getUidAsString(), sensor.getName(), sensor.getType());
+        final Sensor sensor = sensorService.findByUid(sensorUid);
+        validation.verifyEquals(sensor.getInstance(), instance, origin);
+
+        final ZonedDateTime timestamp = Utilities.parseUTCStringToLocalZonedDateTime(request.getTimestamp());
+        mapeKService.monitor(instance, sensor, timestamp, request.getData());
     }
 }

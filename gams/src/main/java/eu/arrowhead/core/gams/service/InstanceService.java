@@ -30,15 +30,14 @@ public class InstanceService {
     }
 
     //-------------------------------------------------------------------------------------------------
-    public GamsInstanceDto create(final CreateInstanceRequest instanceRequest)
+    public GamsInstance create(final CreateInstanceRequest instanceRequest)
             throws DriverUtilities.DriverException {
         logger.debug("create({})", instanceRequest);
         Assert.notNull(instanceRequest, "CreateInstanceRequest must not be null");
         Assert.hasText(instanceRequest.getName(), "CreateInstanceRequest must not be empty");
 
         GamsInstance instance = new GamsInstance(instanceRequest.getName(), UUID.randomUUID());
-        instance = instanceRepository.saveAndFlush(instance);
-        return new GamsInstanceDto(instance.getName(), instance.getUidAsString(), Utilities.convertZonedDateTimeToUTCString(instance.getCreatedAt()));
+        return instanceRepository.saveAndFlush(instance);
     }
 
     public GamsInstance findByUid(final String uid) {

@@ -3,8 +3,10 @@ package eu.arrowhead.core.gams.rest.controller;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.core.gams.Validation;
+import eu.arrowhead.core.gams.database.entities.GamsInstance;
 import eu.arrowhead.core.gams.rest.dto.CreateInstanceRequest;
 import eu.arrowhead.core.gams.rest.dto.GamsInstanceDto;
 import eu.arrowhead.core.gams.service.InstanceService;
@@ -83,9 +85,10 @@ public class GamsController {
     @ResponseBody
     public GamsInstanceDto create(@RequestBody final CreateInstanceRequest createInstanceRequest) {
         logger.debug("create started ...");
-
         validation.verify(createInstanceRequest, createOrigin(CREATE_INSTANCE_URI));
-        return instanceService.create(createInstanceRequest);
+        final GamsInstance instance = instanceService.create(createInstanceRequest);
+
+        return new GamsInstanceDto(instance.getName(), instance.getUidAsString(), Utilities.convertZonedDateTimeToUTCString(instance.getCreatedAt()));
     }
 
     //-------------------------------------------------------------------------------------------------
