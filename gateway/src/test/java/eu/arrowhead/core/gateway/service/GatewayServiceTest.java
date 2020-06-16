@@ -500,7 +500,7 @@ public class GatewayServiceTest {
 				final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(props);
 				final SSLServerSocketFactory serverSocketFactory = sslContext.getServerSocketFactory();
 				try {
-					final SSLServerSocket dummyServerSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(22002);
+					final SSLServerSocket dummyServerSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(22032);
 					final Socket socket = dummyServerSocket.accept();
 					socket.close();
 				} catch (final IOException ex) {
@@ -835,7 +835,7 @@ public class GatewayServiceTest {
 		final SystemRequestDTO provider = new SystemRequestDTO();
 		provider.setSystemName("provider");
 		provider.setAddress("localhost");
-		provider.setPort(22002);
+		provider.setPort(22032);
 		provider.setAuthenticationInfo("provAuth");
 		final CloudRequestDTO consumerCloud = new CloudRequestDTO();
 		consumerCloud.setName("testcloud1");

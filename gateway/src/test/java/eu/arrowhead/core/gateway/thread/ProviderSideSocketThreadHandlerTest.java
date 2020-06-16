@@ -1,6 +1,8 @@
 package eu.arrowhead.core.gateway.thread;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -8,10 +10,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,9 +41,13 @@ import javax.jms.TemporaryTopic;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
+import javax.net.ssl.HandshakeCompletedListener;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.activemq.command.ActiveMQTextMessage;
@@ -317,7 +327,7 @@ public class ProviderSideSocketThreadHandlerTest {
 				final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(props);
 				final SSLServerSocketFactory serverSocketFactory = sslContext.getServerSocketFactory();
 				try {
-					final SSLServerSocket dummyServerSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(22002);
+					final SSLServerSocket dummyServerSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(22062);
 					final Socket socket = dummyServerSocket.accept();
 					socket.close();
 				} catch (final IOException ex) {
@@ -326,6 +336,8 @@ public class ProviderSideSocketThreadHandlerTest {
 			}
 		}.start();
 		
+		final GatewayProviderConnectionRequestDTO connectionRequest = (GatewayProviderConnectionRequestDTO) ReflectionTestUtils.getField(testingObject, "connectionRequest");
+		connectionRequest.getProvider().setPort(22062);
 		testingObject.init("queueId", getTestMessageProducer());
 		
 		Assert.assertTrue(testingObject.isInitialized());
@@ -430,7 +442,7 @@ public class ProviderSideSocketThreadHandlerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testOnMessageNormalHttpMessageThreadChange() throws JMSException {
+	public void testOnMessageNormalHttpMessageThreadChange() throws JMSException, UnknownHostException, IOException {
 		final ProviderSideSocketThread currentThread = mock(ProviderSideSocketThread.class, "currentThread");
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream(1024);
 		when(currentThread.getOutputStream()).thenReturn(outputStream);
@@ -438,31 +450,36 @@ public class ProviderSideSocketThreadHandlerTest {
 		ReflectionTestUtils.setField(testingObject, "sender", getTestMessageProducer());
 		ReflectionTestUtils.setField(testingObject, "initialized", true);
 		
-		final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(getTestSSLPropertiesForThread());
-		ReflectionTestUtils.setField(testingObject, "socketFactory", sslContext.getSocketFactory());
+		
+		final SSLSocketFactory socketFactory = mock(SSLSocketFactory.class, "socketFactory");
+		when(socketFactory.createSocket(anyString(), anyInt())).thenReturn(getDummySSLSocket());
+		
+//		final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(getTestSSLPropertiesForThread());
+//		ReflectionTestUtils.setField(testingObject, "socketFactory", sslContext.getSocketFactory());
+		ReflectionTestUtils.setField(testingObject, "socketFactory", socketFactory);
 		
 		final ActiveMQTextMessage message = new ActiveMQTextMessage();
 		message.setJMSDestination(new ActiveMQQueue("bla"));
 		
 		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(simpleRequest.getBytes(StandardCharsets.ISO_8859_1));
 		
-		final GatewayProviderConnectionRequestDTO connectionRequest = (GatewayProviderConnectionRequestDTO) ReflectionTestUtils.getField(testingObject, "connectionRequest");
-		connectionRequest.getProvider().setPort(22104);
-		new Thread() {
-			@Override
-			public void run() {
-				final SSLProperties props = getTestSSLPropertiesForTestServerThread();
-				final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(props);
-				final SSLServerSocketFactory serverSocketFactory = sslContext.getServerSocketFactory();
-				try {
-					final SSLServerSocket dummyServerSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(22104);
-					final Socket socket = dummyServerSocket.accept();
-					socket.close();
-				} catch (final IOException ex) {
-					ex.printStackTrace();
-				}
-			}
-		}.start();
+//		final GatewayProviderConnectionRequestDTO connectionRequest = (GatewayProviderConnectionRequestDTO) ReflectionTestUtils.getField(testingObject, "connectionRequest");
+//		connectionRequest.getProvider().setPort(22104);
+//		new Thread() {
+//			@Override
+//			public void run() {
+//				final SSLProperties props = getTestSSLPropertiesForTestServerThread();
+//				final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(props);
+//				final SSLServerSocketFactory serverSocketFactory = sslContext.getServerSocketFactory();
+//				try {
+//					final SSLServerSocket dummyServerSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(22104);
+//					final Socket socket = dummyServerSocket.accept();
+//					socket.close();
+//				} catch (final IOException ex) {
+//					ex.printStackTrace();
+//				}
+//			}
+//		}.start();
 		
 		int noRequest = (Integer) ReflectionTestUtils.getField(testingObject, "noRequest");
 		Assert.assertEquals(0, noRequest);
@@ -620,5 +637,39 @@ public class ProviderSideSocketThreadHandlerTest {
 		ReflectionTestUtils.setField(sslProps, "trustStorePassword", "123456");
 		
 		return sslProps;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private SSLSocket getDummySSLSocket() {
+		return new SSLSocket() {
+			public void startHandshake() throws IOException {}
+			public void setWantClientAuth(final boolean arg0) {}
+			public void setUseClientMode(final boolean arg0) {}
+			public void setNeedClientAuth(final boolean arg0) {}
+			public void setEnabledProtocols(final String[] arg0) {}
+			public void setEnabledCipherSuites(final String[] arg0) {}
+			public void setEnableSessionCreation(final boolean arg0) {}
+			public void removeHandshakeCompletedListener(final HandshakeCompletedListener arg0) {}
+			public boolean getWantClientAuth() { return false; }
+			public boolean getUseClientMode() { return false; }
+			public String[] getSupportedProtocols() { return null; }
+			public String[] getSupportedCipherSuites() { return null; }
+			public SSLSession getSession() { return null; }
+			public boolean getNeedClientAuth() { return false; }
+			public String[] getEnabledProtocols() { return null; }
+			public String[] getEnabledCipherSuites() { return null; }
+			public boolean getEnableSessionCreation() { return false; }
+			public void addHandshakeCompletedListener(final HandshakeCompletedListener arg0) {} 
+			
+			@Override
+			public OutputStream getOutputStream() throws IOException {
+				return new ByteArrayOutputStream(1024);
+			}
+			
+			@Override
+			public InputStream getInputStream() throws IOException {
+				return new ByteArrayInputStream(new byte[0]);
+			}
+		};
 	}
 }
