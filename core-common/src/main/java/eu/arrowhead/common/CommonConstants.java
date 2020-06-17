@@ -60,6 +60,13 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_CHOREOGRAPHER_PROCESS = "choreographer-service";
 
 	public static final String CORE_SERVICE_CERTIFICATE_AUTHORITY_SIGN = "ca-sign";
+	public static final String CORE_SERVICE_CERTIFICATE_AUTHORITY_LIST_CERTIFICATES = "ca-list-certificates";
+	public static final String CORE_SERVICE_CERTIFICATE_AUTHORITY_CHECK_CERTIFICATE = "ca-check-certificate";
+	public static final String CORE_SERVICE_CERTIFICATE_AUTHORITY_REVOKE_CERTIFICATE = "ca-revoke-certificate";
+	public static final String CORE_SERVICE_CERTIFICATE_AUTHORITY_LIST_TRUSTED_KEYS = "ca-list-trusted-keys";
+	public static final String CORE_SERVICE_CERTIFICATE_AUTHORITY_CHECK_TRUSTED_KEY = "ca-check-trusted-key";
+	public static final String CORE_SERVICE_CERTIFICATE_AUTHORITY_ADD_TRUSTED_KEY = "ca-add-trusted-key";
+	public static final String CORE_SERVICE_CERTIFICATE_AUTHORITY_DELETE_TRUSTED_KEY = "ca-delete-trusted-key";
 	
 	public static final String CORE_SERVICE_QOS_MONITOR_INTRA_PING_MEASUREMENT = "qos-monitor-intra-ping-measurement";
 	public static final String CORE_SERVICE_QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT = "qos-monitor-intra-ping-median-measurement";
@@ -154,7 +161,12 @@ public class CommonConstants {
 	public static final String OP_AUTH_SUBSCRIPTION_CHECK_URI = "/subscription/check";
 
 	public static final String CERTIFICATE_AUTHRORITY_URI = "/certificate-authority";
-	public static final String OP_CA_CLOUD_COMMON_NAME_URI = "/name";
+	public static final String OP_CA_MGMT_CERTIFICATES_URI = "/mgmt/certificates";
+	public static final String OP_CA_MGMT_CERTIFICATES_URI_SUFFIX = "/{" + COMMON_FIELD_NAME_ID + "}";
+	public static final String OP_CA_MGMT_TRUSTED_KEYS_URI = "/mgmt/keys";
+	public static final String OP_CA_MGMT_TRUSTED_KEYS_URI_SUFFIX = "/{" + COMMON_FIELD_NAME_ID + "}";
+	public static final String OP_CA_CHECK_CERTIFICATE_URI = "/checkCertificate";
+	public static final String OP_CA_CHECK_TRUSTED_KEY_URI = "/checkTrustedKey";
 	public static final String OP_CA_SIGN_CERTIFICATE_URI = "/sign";
 
 	public static final String ORCHESTRATOR_URI = "/orchestrator";

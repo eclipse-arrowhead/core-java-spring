@@ -30,6 +30,8 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 	private static final CoreSystem[] allowedCoreSystemsForQueryBySystemDTO = { CoreSystem.ORCHESTRATOR };
 	private static final CoreSystem[] allowedCoreSystemsForQueryAll = { CoreSystem.QOS_MONITOR, CoreSystem.GATEKEEPER };
 	
+	private static final String ID_PATH_VARIABLE = "{" + CommonConstants.COMMON_FIELD_NAME_ID + "}"; 
+	
 	//=================================================================================================
 	// assistant methods
 
@@ -57,13 +59,13 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 				// Public core system services are allowed to query directly by the local systems
 				checkIfRequestedServiceIsAPublicCoreSystemService(requestJSON);
 			}			
-		} else if (requestTarget.endsWith(CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI)) {
+		} else if (requestTarget.contains(CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI.replace(ID_PATH_VARIABLE, ""))) {
 			// Only dedicated core systems can use this service
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForQueryBySystemId, requestTarget);
 		} else if (requestTarget.endsWith(CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI)) {
 			// Only dedicated core systems can use this service
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForQueryBySystemDTO, requestTarget);
-		} else if (requestTarget.endsWith(CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_ALL_URI)) {
+		} else if (requestTarget.endsWith(CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_ALL_SERVICE_URI)) {
 			// Only dedicated core systems can use this service
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForQueryAll, requestTarget);
 		}

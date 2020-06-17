@@ -14,24 +14,21 @@ import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
 
 @Service
-public class CertificateAuthorityDriver {
+public class CertificateAuthorityDriver extends AbstractDriver {
 
     //=================================================================================================
     // members
     private final Logger logger = LogManager.getLogger(CertificateAuthorityDriver.class);
-    private final DriverUtilities driverUtilities;
-    private final HttpService httpService;
 
     @Autowired
     public CertificateAuthorityDriver(final DriverUtilities driverUtilities, final HttpService httpService) {
-        this.driverUtilities = driverUtilities;
-        this.httpService = httpService;
+        super(driverUtilities, httpService);
     }
 
     public CertificateSigningResponseDTO signCertificate(final CertificateSigningRequestDTO request) throws DriverUtilities.DriverException {
         logger.traceEntry("signCertificate: {}", request);
-        Assert.notNull(request,"CertificateSigningRequestDTO must not be null");
-        final UriComponents uri = driverUtilities.findUriByOrchestrator(CoreSystemService.CERTIFICATE_AUTHORITY_SIGN_SERVICE);
+        Assert.notNull(request, "CertificateSigningRequestDTO must not be null");
+        final UriComponents uri = driverUtilities.findUri(CoreSystemService.CERTIFICATE_AUTHORITY_SIGN_SERVICE);
         final ResponseEntity<CertificateSigningResponseDTO> httpResponse = httpService
                 .sendRequest(uri, HttpMethod.POST, CertificateSigningResponseDTO.class, request);
         final CertificateSigningResponseDTO result = httpResponse.getBody();

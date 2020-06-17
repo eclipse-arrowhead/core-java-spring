@@ -621,3 +621,30 @@ CREATE TABLE IF NOT EXISTS `qos_reservation` (
 	CONSTRAINT `fk_reserved_service` FOREIGN KEY (`reserved_service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
 	UNIQUE KEY `unique_reserved_provider_and_service` (`reserved_provider_id`, `reserved_service_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Certificate Authority
+
+CREATE TABLE IF NOT EXISTS `ca_certificate` (
+  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+  `common_name` varchar(255) NOT NULL,
+  `serial` bigint(20) NOT NULL,
+  `created_by` varchar(255) NOT NULL,
+  `valid_after` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `valid_before` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `revoked_at` timestamp NULL,
+  UNIQUE KEY `unique_certificate_serial` (`serial`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `ca_trusted_key` (
+  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+  `public_key` text NOT NULL,
+  `hash` varchar(255) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  `valid_after` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `valid_before` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY `unique_hash` (`hash`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;
