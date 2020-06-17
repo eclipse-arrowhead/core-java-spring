@@ -2,9 +2,9 @@ package eu.arrowhead.core.qos.manager.impl;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.QoSIntraMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
@@ -99,7 +100,7 @@ public class PingRequirementsVerifierIntraCloudTest {
 	public void testVerifyObsoleteCache() {
 		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now().minusHours(2));
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now().minusHours(2)));
 		response.setMeasurement(measurement);
 		when(intraPingMeasurementCache.get(anyLong())).thenReturn(response);
 		when(orchestratorDriver.getIntraPingMeasurement(anyLong())).thenThrow(new ArrowheadException("just for finish the method execution"));
@@ -172,7 +173,7 @@ public class PingRequirementsVerifierIntraCloudTest {
 	public void testVerifyMaximumThresholdResponseRequirementInvalid() { // also tests that cache is stored the measurement
 		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -200,7 +201,7 @@ public class PingRequirementsVerifierIntraCloudTest {
 	public void testVerifyMaximumThresholdResponseRequirementNotPositive() { // measurement comes from qos monitor
 		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -221,7 +222,7 @@ public class PingRequirementsVerifierIntraCloudTest {
 	public void testVerifyMaximumThresholdResponseRequirementNotVerified() { // measurement comes from qos monitor
 		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -243,7 +244,7 @@ public class PingRequirementsVerifierIntraCloudTest {
 	public void testVerifyMaximumThresholdResponseRequirementVerified() { // measurement comes from qos monitor
 		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -265,7 +266,7 @@ public class PingRequirementsVerifierIntraCloudTest {
 	public void testVerifyAverageThresholdResponseRequirementInvalid() { // measurement comes from qos monitor
 		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -286,7 +287,7 @@ public class PingRequirementsVerifierIntraCloudTest {
 	public void testVerifyAverageThresholdResponseRequirementNotPositive() { // measurement comes from qos monitor
 		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -307,7 +308,7 @@ public class PingRequirementsVerifierIntraCloudTest {
 	public void testVerifyAverageThresholdResponseRequirementNotVerified() { // measurement comes from qos monitor
 		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -329,7 +330,7 @@ public class PingRequirementsVerifierIntraCloudTest {
 	public void testVerifyAverageThresholdResponseRequirementVerified() { // measurement comes from qos monitor
 		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -351,7 +352,7 @@ public class PingRequirementsVerifierIntraCloudTest {
 	public void testVerifyJitterThresholdResponseRequirementInvalid() { // measurement comes from qos monitor
 		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -372,7 +373,7 @@ public class PingRequirementsVerifierIntraCloudTest {
 	public void testVerifyJitterThresholdResponseRequirementNegative() { // measurement comes from qos monitor
 		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -393,7 +394,7 @@ public class PingRequirementsVerifierIntraCloudTest {
 	public void testVerifyJitterThresholdResponseRequirementNotVerified() { // measurement comes from qos monitor
 		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -415,7 +416,7 @@ public class PingRequirementsVerifierIntraCloudTest {
 	public void testVerifyJitterThresholdResponseRequirementVerified() { // measurement comes from qos monitor
 		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -437,7 +438,7 @@ public class PingRequirementsVerifierIntraCloudTest {
 	public void testVerifyRecentPacketLossRequirementInvalid() { // measurement comes from qos monitor
 		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -459,7 +460,7 @@ public class PingRequirementsVerifierIntraCloudTest {
 	public void testVerifyRecentPacketLossRequirementNegative() { // measurement comes from qos monitor
 		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -481,7 +482,7 @@ public class PingRequirementsVerifierIntraCloudTest {
 	public void testVerifyRecentPacketLossRequirementNotVerified() { // measurement comes from qos monitor
 		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -504,7 +505,7 @@ public class PingRequirementsVerifierIntraCloudTest {
 	public void testVerifyRecentPacketLossRequirementVerified() { // measurement comes from qos monitor
 		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -527,7 +528,7 @@ public class PingRequirementsVerifierIntraCloudTest {
 	public void testVerifyPacketLossRequirementInvalid() { // measurement comes from qos monitor
 		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -549,7 +550,7 @@ public class PingRequirementsVerifierIntraCloudTest {
 	public void testVerifyPacketLossRequirementNegative() { // measurement comes from qos monitor
 		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -571,7 +572,7 @@ public class PingRequirementsVerifierIntraCloudTest {
 	public void testVerifyPacketLossRequirementNotVerified() { // measurement comes from qos monitor
 		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);
@@ -594,7 +595,7 @@ public class PingRequirementsVerifierIntraCloudTest {
 	public void testVerifyPacketLossRequirementVerified() { // measurement comes from qos monitor
 		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
-		measurement.setLastMeasurementAt(ZonedDateTime.now());
+		measurement.setLastMeasurementAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		response.setMeasurement(measurement);
 		response.setId(12L);
 		response.setAvailable(true);

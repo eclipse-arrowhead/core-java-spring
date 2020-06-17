@@ -72,7 +72,14 @@ public enum CoreSystem {
 														   CoreSystemService.QOS_MONITOR_JOIN_RELAY_TEST_SERVICE,
 														   CoreSystemService.QOS_MONITOR_INIT_RELAY_TEST_SERVICE)),
 	
-	CERTIFICATE_AUTHORITY(Defaults.DEFAULT_CERTIFICATE_AUTHORITY_PORT, List.of(CoreSystemService.CERTIFICATE_AUTHORITY_SIGN_SERVICE));
+	CERTIFICATE_AUTHORITY(Defaults.DEFAULT_CERTIFICATE_AUTHORITY_PORT, List.of(CoreSystemService.CERTIFICATE_AUTHORITY_SIGN_SERVICE,
+																				CoreSystemService.CERTIFICATE_AUTHORITY_LIST_CERTIFICATES_SERVICE,
+																				CoreSystemService.CERTIFICATE_AUTHORITY_CHECK_CERTIFICATE_SERVICE,
+																				CoreSystemService.CERTIFICATE_AUTHORITY_REVOKE_CERTIFICATE_SERVICE,
+																				CoreSystemService.CERTIFICATE_AUTHORITY_LIST_TRUSTED_KEYS_SERVICE,
+																				CoreSystemService.CERTIFICATE_AUTHORITY_CHECK_TRUSTED_KEY_SERVICE,
+																				CoreSystemService.CERTIFICATE_AUTHORITY_ADD_TRUSTED_KEY_SERVICE,
+																				CoreSystemService.CERTIFICATE_AUTHORITY_DELETE_TRUSTED_KEY_SERVICE));
 	
 	//=================================================================================================
 	// members

@@ -47,7 +47,7 @@ public class CoreCommonConstants {
 
 	public static final String OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI = "/query/system/{" + COMMON_FIELD_NAME_ID + "}";
 	public static final String OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI = "/query/system";
-	public static final String OP_SERVICE_REGISTRY_QUERY_ALL_URI = "/query/all";
+	public static final String OP_SERVICE_REGISTRY_QUERY_ALL_SERVICE_URI = "/query/all";
 		
 	public static final String ORCHESTRATOR_STORE_MGMT_URI = "/mgmt/store";
 	
@@ -171,6 +171,8 @@ public class CoreCommonConstants {
 	public static final String $GATEWAY_MIN_PORT_WD = "${" + GATEWAY_MIN_PORT + ":" + CoreDefaults.DEFAULT_GATEWAY_MIN_PORT + "}";
 	public static final String GATEWAY_MAX_PORT = "max_port";
 	public static final String $GATEWAY_MAX_PORT_WD = "${" + GATEWAY_MAX_PORT + ":" + CoreDefaults.DEFAULT_GATEWAY_MAX_PORT + "}";
+	public static final String GATEWAY_PROVIDER_SIDE_MAX_REQUEST_PER_SOCKET = "provider_side_max_request_per_socket";
+	public static final String $GATEWAY_PROVIDER_SIDE_MAX_REQUEST_PER_SOCKET = "${" + GATEWAY_PROVIDER_SIDE_MAX_REQUEST_PER_SOCKET + ":" + CoreDefaults.DEFAULT_GATEWAY_PROVIDER_SIDE_MAX_REQUEST_PER_SOCKET + "}";
 	
 	public static final String GATEWAY_ACTIVE_SESSION_MAP = "activeSessions";
 	public static final String GATEWAY_AVAILABLE_PORTS_QUEUE = "availableQueue";

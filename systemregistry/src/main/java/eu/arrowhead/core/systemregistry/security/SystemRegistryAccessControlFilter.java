@@ -5,7 +5,6 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SecurityUtilities;
 import eu.arrowhead.common.dto.shared.CertificateType;
 import eu.arrowhead.common.security.CoreSystemAccessControlFilter;
-import org.bouncycastle.crypto.tls.CertChainType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;

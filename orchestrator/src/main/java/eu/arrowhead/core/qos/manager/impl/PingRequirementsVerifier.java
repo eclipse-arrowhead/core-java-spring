@@ -418,7 +418,8 @@ public class PingRequirementsVerifier implements QoSVerifier {
 			return getIntraPingMeasurementFromQoSMonitor(systemId);
 		}
 		
-		if (measurement.getMeasurement().getLastMeasurementAt().plusSeconds(pingMeasurementCacheThreshold).isBefore(ZonedDateTime.now())) { // obsolete record
+		final ZonedDateTime lastMeasurementAt = Utilities.parseUTCStringToLocalZonedDateTime(measurement.getMeasurement().getLastMeasurementAt());
+		if (lastMeasurementAt.plusSeconds(pingMeasurementCacheThreshold).isBefore(ZonedDateTime.now())) { // obsolete record
 			intraPingMeasurementCache.remove(systemId);
 			return getIntraPingMeasurementFromQoSMonitor(systemId);
 		}

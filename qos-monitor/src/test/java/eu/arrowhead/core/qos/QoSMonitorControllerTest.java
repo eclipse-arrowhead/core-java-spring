@@ -1571,7 +1571,7 @@ public class QoSMonitorControllerTest {
 		pingMeasurementResponseDTO.setId(1L);
 		pingMeasurementResponseDTO.setMeasurement(qoSIntraMeasurementResponseDTO);
 		pingMeasurementResponseDTO.setAvailable(true);
-		pingMeasurementResponseDTO.setLastAccessAt(ZonedDateTime.now());
+		pingMeasurementResponseDTO.setLastAccessAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		pingMeasurementResponseDTO.setMinResponseTime(1);
 		pingMeasurementResponseDTO.setMaxResponseTime(1);
 		pingMeasurementResponseDTO.setMeanResponseTimeWithTimeout(1);
@@ -1581,11 +1581,11 @@ public class QoSMonitorControllerTest {
 		pingMeasurementResponseDTO.setLostPerMeasurementPercent(0);
 		pingMeasurementResponseDTO.setSent(35);
 		pingMeasurementResponseDTO.setReceived(35);
-		pingMeasurementResponseDTO.setCountStartedAt(ZonedDateTime.now());
+		pingMeasurementResponseDTO.setCountStartedAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 		pingMeasurementResponseDTO.setSentAll(35);
 		pingMeasurementResponseDTO.setReceivedAll(35);
-		pingMeasurementResponseDTO.setCreatedAt(ZonedDateTime.now());
-		pingMeasurementResponseDTO.setUpdatedAt(ZonedDateTime.now());
+		pingMeasurementResponseDTO.setCreatedAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
+		pingMeasurementResponseDTO.setUpdatedAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 
 		return pingMeasurementResponseDTO;
 	}
@@ -1599,9 +1599,9 @@ public class QoSMonitorControllerTest {
 				1,//measurement.getId(), 
 				system, 
 				QoSMeasurementType.PING,//measurement.getMeasurementType(), 
-				ZonedDateTime.now(),//measurement.getLastMeasurementAt(), 
-				ZonedDateTime.now(),//measurement.getCreatedAt(), 
-				ZonedDateTime.now());//measurement.getUpdatedAt());
+				Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()),//measurement.getLastMeasurementAt(), 
+				Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()),//measurement.getCreatedAt(), 
+				Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));//measurement.getUpdatedAt());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
