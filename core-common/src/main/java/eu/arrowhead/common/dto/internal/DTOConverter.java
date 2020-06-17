@@ -1,6 +1,7 @@
 package eu.arrowhead.common.dto.internal;
 
 
+import java.lang.reflect.Array;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,6 +14,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import eu.arrowhead.common.database.entity.ChoreographerStepDetail;
+import eu.arrowhead.common.dto.shared.ChoreographerStepDetailResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
 
@@ -941,7 +943,7 @@ public class DTOConverter {
 
         return new ChoreographerStepResponseDTO(step.getId(),
                                                 step.getName(),
-                                                new ArrayList<>(step.getStepDetails()),
+                                                collectStepDetailsFromStep(step.getStepDetails()),
                                                 step.getStaticParameters(),
                                                 collectNextStepsFromStep(step.getNextSteps()),
                                                 step.getQuantity(),
@@ -960,7 +962,6 @@ public class DTOConverter {
             final ChoreographerAction actionEntry) {
         Assert.notNull(actionEntry, "Action entry is null.");
 
-
         return new ChoreographerActionResponseDTO(actionEntry.getId(),
                                                   actionEntry.getName(),
                                                   collectNextActionNameFromAction(actionEntry.getNextAction()),
@@ -970,6 +971,27 @@ public class DTOConverter {
                                                   Utilities.convertZonedDateTimeToUTCString(actionEntry.getUpdatedAt()));
     }
 
+    public static ChoreographerStepDetailResponseDTO convertStepDetailToStepDetailResponseDTO(final ChoreographerStepDetail stepDetailEntry) {
+		Assert.notNull(stepDetailEntry, "StepDetail entry is null.");
+		ChoreographerStepDetailResponseDTO detailResponseDTO = new ChoreographerStepDetailResponseDTO();
+
+		detailResponseDTO.setId(stepDetailEntry.getId());
+		detailResponseDTO.setVersion(stepDetailEntry.getVersion());
+
+		if (stepDetailEntry.getMaxVersion() != null && stepDetailEntry.getMinVersion() != null) {
+			detailResponseDTO.setMaxVersion(stepDetailEntry.getMaxVersion());
+			detailResponseDTO.setMinVersion(stepDetailEntry.getMinVersion());
+		}
+
+		detailResponseDTO.setDto(stepDetailEntry.getDto());
+		detailResponseDTO.setServiceDefinition(stepDetailEntry.getServiceDefinition());
+		detailResponseDTO.setType(stepDetailEntry.getType());
+		detailResponseDTO.setCreatedAt(Utilities.convertZonedDateTimeToUTCString(stepDetailEntry.getCreatedAt()));
+		detailResponseDTO.setUpdatedAt(Utilities.convertZonedDateTimeToUTCString(stepDetailEntry.getUpdatedAt()));
+
+		return detailResponseDTO;
+	}
+
     //-------------------------------------------------------------------------------------------------
     public static ChoreographerPlanResponseDTO convertPlanToPlanResponseDTO(
             final ChoreographerPlan planEntry) {
@@ -977,7 +999,6 @@ public class DTOConverter {
 
         return new ChoreographerPlanResponseDTO(planEntry.getId(),
                                                 planEntry.getName(),
-
                                                 planEntry.getFirstAction().getName(),
                                                 collectActionsFromPlan(planEntry.getActions()),
                                                 Utilities.convertZonedDateTimeToUTCString(planEntry.getCreatedAt()),
@@ -1094,8 +1115,7 @@ public class DTOConverter {
     }
 
     //-------------------------------------------------------------------------------------------------
-    public static List<ChoreographerActionResponseDTO> collectActionsFromPlan(
-            final Set<ChoreographerAction> actions) {
+    public static List<ChoreographerActionResponseDTO> collectActionsFromPlan(final Set<ChoreographerAction> actions) {
         Assert.notNull(actions, "Action list is null.");
         final List<ChoreographerActionResponseDTO> result = new ArrayList<>(actions.size());
         for (final ChoreographerAction action : actions) {
@@ -1106,6 +1126,7 @@ public class DTOConverter {
         return result;
     }
 
+	//-------------------------------------------------------------------------------------------------
     public static String collectNextActionNameFromAction(final ChoreographerAction nextAction) {
         if (nextAction != null) {
             return nextAction.getName();
@@ -1113,7 +1134,19 @@ public class DTOConverter {
 
         return null;
     }
-	
+
+	//-------------------------------------------------------------------------------------------------
+	public static List<ChoreographerStepDetailResponseDTO> collectStepDetailsFromStep(final Set<ChoreographerStepDetail> stepDetails) {
+		Assert.notNull(stepDetails, "StepDetail list is null.");
+		final List<ChoreographerStepDetailResponseDTO> result = new ArrayList<>(stepDetails.size());
+
+		for (final ChoreographerStepDetail stepDetail : stepDetails) {
+			result.add(convertStepDetailToStepDetailResponseDTO(stepDetail));
+		}
+
+		return result;
+	}
+
 	//=================================================================================================
 	// assistant methods
 
