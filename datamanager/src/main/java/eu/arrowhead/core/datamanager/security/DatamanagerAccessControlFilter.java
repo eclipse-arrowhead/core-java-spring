@@ -32,10 +32,44 @@ public class DatamanagerAccessControlFilter extends CoreSystemAccessControlFilte
 		final String cloudCN = getServerCloudCN();
 
 		if (requestTarget.endsWith(CommonConstants.ECHO_URI)) {
-                        // Everybody in the local cloud can test the server => no further check is necessary
-		//} else if ( requestTarget.contains( CoreCommonConstants.OP_DATAMANAGER_HISTORIAN) ) { // check /systemName/serviceName also
-		//	final SenML req = Utilities.fromJson(requestJSON, SenML.class);
-                }
+      // Everybody in the local cloud can test the server => no further check is necessary
+      return;
+		} 
+
+    // only the system named Sysname is allowed to write to <historian or proxy>/$SysName/$SrvName
+    if (!method.toLowerCase().equals("get")) {
+      int sysNameStartPosition = requestTarget.indexOf("/datamanager"+CommonConstants.OP_DATAMANAGER_HISTORIAN+"/");
+      int sysNameStopPosition = -1;
+      if ( sysNameStartPosition != -1) {
+        sysNameStopPosition = requestTarget.indexOf("/", sysNameStartPosition + 0 + ("/datamanager"+CommonConstants.OP_DATAMANAGER_HISTORIAN+"/").length());
+        String requestTargetSystemName = requestTarget.substring(sysNameStartPosition + ("/datamanager"+CommonConstants.OP_DATAMANAGER_HISTORIAN+"/").length(), sysNameStopPosition);
+
+        //logger.info("reqtarget:" + requestTarget);
+        //logger.info("start: "+sysNameStartPosition+", stop: " + sysNameStopPosition);
+        //logger.info("rewqSysname: " + requestTargetSystemName);
+
+        checkIfRequesterSystemNameisEqualsWithClientNameFromCN(requestTargetSystemName, clientCN);
+        return;
+      }
+
+      if ( sysNameStartPosition == -1) {
+        sysNameStartPosition = requestTarget.indexOf("/datamanager"+CommonConstants.OP_DATAMANAGER_PROXY+"/");
+        sysNameStopPosition = requestTarget.indexOf("/", sysNameStartPosition + 0 + ("/datamanager"+CommonConstants.OP_DATAMANAGER_PROXY+"/").length());
+        String requestTargetSystemName = requestTarget.substring(sysNameStartPosition + ("/datamanager"+CommonConstants.OP_DATAMANAGER_PROXY+"/").length(), sysNameStopPosition);
+
+        //logger.info("rewqSysname: " + requestTargetSystemName);
+        checkIfRequesterSystemNameisEqualsWithClientNameFromCN(requestTargetSystemName, clientCN);
+        return;
+      } else {
+        throw new AuthException("Illegal request");
+      }
+    }
+
+    /*if ( requestTarget.contains( CommonConstants.OP_DATAMANAGER_HISTORIAN) ) {
+      final SenML req = Utilities.fromJson(requestJSON, SenML.class);
+		} else if ( requestTarget.contains( CommonConstants.OP_DATAMANAGER_PROXY) ) {
+      final SenML req = Utilities.fromJson(requestJSON, SenML.class);
+    }*/
 
 	}
 
