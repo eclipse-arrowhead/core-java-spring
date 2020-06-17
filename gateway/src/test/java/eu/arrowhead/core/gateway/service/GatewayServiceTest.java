@@ -483,7 +483,7 @@ public class GatewayServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testConnectProviderEverythingOK() throws JMSException {
+	public void testConnectProviderEverythingOK() throws JMSException, InterruptedException {
 		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
 		final MessageProducer producer = getTestMessageProducer();
 		
@@ -493,6 +493,7 @@ public class GatewayServiceTest {
 		when(activeSessions.put(any(String.class), any(ActiveSessionDTO.class))).thenReturn(null);
 		when(appContext.getBean(SSLProperties.class)).thenReturn(getTestSSLPropertiesForThread());
 		
+		final boolean[] started = { false };
 		new Thread() {
 			@Override
 			public void run() {
@@ -501,6 +502,7 @@ public class GatewayServiceTest {
 				final SSLServerSocketFactory serverSocketFactory = sslContext.getServerSocketFactory();
 				try {
 					final SSLServerSocket dummyServerSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(22032);
+					started[0] = true;
 					final Socket socket = dummyServerSocket.accept();
 					socket.close();
 				} catch (final IOException ex) {
@@ -508,6 +510,11 @@ public class GatewayServiceTest {
 				}
 			}
 		}.start();
+		
+		while (!started[0]) {
+			Thread.sleep(1000);
+		}
+		Thread.sleep(1000);
 		
 		final GatewayProviderConnectionResponseDTO response = testingObject.connectProvider(request);
 		
