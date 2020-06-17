@@ -317,9 +317,10 @@ public class ProviderSideSocketThreadHandlerTest {
 
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testInitOk() {
+	public void testInitOk() throws InterruptedException {
 		Assert.assertTrue(!testingObject.isInitialized());
 		
+		final boolean[] started = { false };
 		new Thread() {
 			@Override
 			public void run() {
@@ -328,6 +329,7 @@ public class ProviderSideSocketThreadHandlerTest {
 				final SSLServerSocketFactory serverSocketFactory = sslContext.getServerSocketFactory();
 				try {
 					final SSLServerSocket dummyServerSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(22062);
+					started[0] = true;
 					final Socket socket = dummyServerSocket.accept();
 					socket.close();
 				} catch (final IOException ex) {
@@ -335,7 +337,12 @@ public class ProviderSideSocketThreadHandlerTest {
 				}
 			}
 		}.start();
-		
+
+		while (!started[0]) {
+			Thread.sleep(1000);
+		}
+		Thread.sleep(1000);
+
 		final GatewayProviderConnectionRequestDTO connectionRequest = (GatewayProviderConnectionRequestDTO) ReflectionTestUtils.getField(testingObject, "connectionRequest");
 		connectionRequest.getProvider().setPort(22062);
 		testingObject.init("queueId", getTestMessageProducer());
@@ -453,33 +460,12 @@ public class ProviderSideSocketThreadHandlerTest {
 		
 		final SSLSocketFactory socketFactory = mock(SSLSocketFactory.class, "socketFactory");
 		when(socketFactory.createSocket(anyString(), anyInt())).thenReturn(getDummySSLSocket());
-		
-//		final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(getTestSSLPropertiesForThread());
-//		ReflectionTestUtils.setField(testingObject, "socketFactory", sslContext.getSocketFactory());
 		ReflectionTestUtils.setField(testingObject, "socketFactory", socketFactory);
 		
 		final ActiveMQTextMessage message = new ActiveMQTextMessage();
 		message.setJMSDestination(new ActiveMQQueue("bla"));
 		
 		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(simpleRequest.getBytes(StandardCharsets.ISO_8859_1));
-		
-//		final GatewayProviderConnectionRequestDTO connectionRequest = (GatewayProviderConnectionRequestDTO) ReflectionTestUtils.getField(testingObject, "connectionRequest");
-//		connectionRequest.getProvider().setPort(22104);
-//		new Thread() {
-//			@Override
-//			public void run() {
-//				final SSLProperties props = getTestSSLPropertiesForTestServerThread();
-//				final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(props);
-//				final SSLServerSocketFactory serverSocketFactory = sslContext.getServerSocketFactory();
-//				try {
-//					final SSLServerSocket dummyServerSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(22104);
-//					final Socket socket = dummyServerSocket.accept();
-//					socket.close();
-//				} catch (final IOException ex) {
-//					ex.printStackTrace();
-//				}
-//			}
-//		}.start();
 		
 		int noRequest = (Integer) ReflectionTestUtils.getField(testingObject, "noRequest");
 		Assert.assertEquals(0, noRequest);
