@@ -91,7 +91,7 @@ public class ChoreographerDBService {
 
             final Optional<ChoreographerAction> actionOptional = choreographerActionRepository.findById(actionId);
             if (actionOptional.isPresent()) {
-                return choreographerStepRepository.saveAndFlush(new ChoreographerStep(name, serviceName, metadata, parameters, actionOptional.get(), quantity));
+                return choreographerStepRepository.saveAndFlush(new ChoreographerStep(name, metadata, parameters, actionOptional.get(), quantity));
             } else {
                 throw new InvalidParameterException("Action with given ID doesn't exist.");
             }

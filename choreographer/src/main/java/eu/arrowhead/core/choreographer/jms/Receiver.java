@@ -30,11 +30,14 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.security.PublicKey;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -189,7 +192,12 @@ public class Receiver {
         ChoreographerRunningStep runningStep = insertInitiatedRunningStep(step.getId(), sessionId);
 
         ServiceQueryFormDTO serviceQuery = new ServiceQueryFormDTO();
-        serviceQuery.setServiceDefinitionRequirement(step.getServiceName().toLowerCase());
+        //serviceQuery.setServiceDefinitionRequirement(step.getServiceName().toLowerCase());
+
+        if (sslEnabled) {
+            final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
+            requesterSystem.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+        }
 
         final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO.Builder(requesterSystem)
                                                                                              .requestedService(serviceQuery)

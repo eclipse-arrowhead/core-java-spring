@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import eu.arrowhead.common.database.entity.ChoreographerStepDetail;
 import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
 
@@ -940,8 +941,7 @@ public class DTOConverter {
 
         return new ChoreographerStepResponseDTO(step.getId(),
                                                 step.getName(),
-                                                step.getServiceName(),
-                                                step.getMetadata(),
+                                                new ArrayList<>(step.getStepDetails()),
                                                 step.getStaticParameters(),
                                                 collectNextStepsFromStep(step.getNextSteps()),
                                                 step.getQuantity(),

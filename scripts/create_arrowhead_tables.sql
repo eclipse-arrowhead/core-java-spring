@@ -344,7 +344,6 @@ CREATE TABLE IF NOT EXISTS `choreographer_step` (
   `name` varchar(255) NOT NULL,
   `action_first_step_id` bigint(20),
   `action_id` bigint(20) NOT NULL,
-  `service_name` varchar(255) NOT NULL,
   `static_parameters` text,
   `quantity` int(20) NOT NULL DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -410,6 +409,22 @@ CREATE TABLE IF NOT EXISTS `choreographer_executor` (
     UNIQUE KEY `unique_service_definition_name_version` (`service_definition_name`, `version`),
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `choreographer_step_detail` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `service_definition` varchar(255) NOT NULL,
+    `version` int(11),
+    `type` varchar(255) NOT NULL,
+    `min_version` int(11),
+    `max_version` int(11),
+    `dto` text NOT NULL,
+    `step_id` bigint(20) NOT NULL,
+    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    CONSTRAINT `step_detail_step_id` FOREIGN KEY (`step_id`) REFERENCES `choreographer_step` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `check_type` CHECK (UPPER(`type`)='MAIN' OR UPPER(`type`)='PRECONDITION')
+) ENGINE=InnoDB DEFAULT CHARSET =utf8;
 
 -- QoS Monitor
 -- Intra
