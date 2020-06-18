@@ -68,5 +68,5 @@ public class ArrowheadException extends RuntimeException {
 	public String getOrigin() { return origin; }
 	
 	//-------------------------------------------------------------------------------------------------
-	void setExceptionType(final ExceptionType exceptionType) { this.exceptionType = exceptionType; }
+	protected void setExceptionType(final ExceptionType exceptionType) { this.exceptionType = exceptionType; }
 }

@@ -13,7 +13,6 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.quartz.TriggerKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -60,13 +59,15 @@ public class UriCrawlerTask implements Job {
 		logger.debug("STARTED: URI crawler task");
 		
 		if (arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)) {
-			cancelJob();
+			logger.debug("FINISHED: URI crawler task can not run if server is in standalone mode");
+			shutdown();
 			return;
 		}
 		
 		final List<CoreSystemService> requiredServices = getRequiredServices();
 		if (requiredServices.isEmpty()) {
-			cancelJob();
+			logger.debug("FINISHED: URI crawler task. Have no required core services");
+			shutdown();
 			return;
 		}
 		
@@ -82,7 +83,7 @@ public class UriCrawlerTask implements Job {
 		logger.debug("FINISHED: URI crawler task. Number of acquired URI: {}/{}", count, requiredServices.size());
 		
 		if (count == requiredServices.size()) {
-			cancelJob();
+			shutdown();
 		}
 	}
 	
@@ -90,12 +91,11 @@ public class UriCrawlerTask implements Job {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private void cancelJob() {
-		logger.debug("cancelJob started...");
-		
+	private void shutdown() {
+		logger.debug("shutdown started...");
 		try {
-			uriCrawlerTaskScheduler.unscheduleJob(new TriggerKey(UriCrawlerTaskConfig.NAME_OF_TRIGGER));
-			logger.debug("STOPPED: URI crawler task.");
+			uriCrawlerTaskScheduler.shutdown();
+			logger.debug("SHUTDOWN: URI crawler task.");
 		} catch (final SchedulerException ex) {
 			logger.error(ex.getMessage());
 			logger.debug("Stacktrace:", ex);
@@ -115,7 +115,8 @@ public class UriCrawlerTask implements Job {
 			}
 		}
 		
-		throw new JobExecutionException("URI crawler task can't find required services list.");
+		waitBeforeRetry();
+		throw new JobExecutionException("URI crawler task can't find required services list.", true);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -130,9 +131,19 @@ public class UriCrawlerTask implements Job {
 			}
 		}
 		
-		throw new JobExecutionException("URI crawler task can't find Service Registry Query URI.");
+		waitBeforeRetry();
+		throw new JobExecutionException("URI crawler task can't find Service Registry Query URI.", true);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	private void waitBeforeRetry() {
+		try {
+			Thread.sleep(1000);
+		} catch (final InterruptedException ex) {
+			// intentionally blank
+		}
+	}
+ 	
 	//-------------------------------------------------------------------------------------------------
 	private void checkServiceRegistryConnection(final UriComponents queryUri) throws JobExecutionException {
 		logger.debug("checkServiceRegistryConnection started...");
@@ -141,7 +152,8 @@ public class UriCrawlerTask implements Job {
 		try {
 			httpService.sendRequest(echoUri, HttpMethod.GET, String.class);
 		} catch (final ArrowheadException ex) {
-			throw new JobExecutionException("URI crawler task can't access Service Registry.");
+			waitBeforeRetry();
+			throw new JobExecutionException("URI crawler task can't access Service Registry.", true);
 		}
 	}
 	
@@ -168,7 +180,7 @@ public class UriCrawlerTask implements Job {
 			final ResponseEntity<ServiceQueryResultDTO> response = httpService.sendRequest(queryUri, HttpMethod.POST, ServiceQueryResultDTO.class, form);
 			final ServiceQueryResultDTO result = response.getBody();
 			if (!result.getServiceQueryData().isEmpty()) {
-				final int lastIdx = result.getServiceQueryData().size() - 1; // to make sure we use the newest one if some entries stucked in the DB
+				final int lastIdx = result.getServiceQueryData().size() - 1; // to make sure we use the newest one if some old entries are in the DB
 				final ServiceRegistryResponseDTO entry = result.getServiceQueryData().get(lastIdx);
 				final String scheme = entry.getSecure() == ServiceSecurityType.NOT_SECURE ? CommonConstants.HTTP : CommonConstants.HTTPS;
 				final UriComponents uri = Utilities.createURI(scheme, entry.getProvider().getAddress(), entry.getProvider().getPort(), entry.getServiceUri());

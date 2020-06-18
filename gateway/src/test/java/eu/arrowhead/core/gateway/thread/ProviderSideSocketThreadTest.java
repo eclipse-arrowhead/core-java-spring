@@ -1,17 +1,23 @@
 package eu.arrowhead.core.gateway.thread;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.net.UnknownHostException;
 import java.security.PublicKey;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.jms.BytesMessage;
 import javax.jms.CompletionListener;
@@ -32,32 +38,25 @@ import javax.jms.TemporaryTopic;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLServerSocket;
-import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.HandshakeCompletedListener;
+import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
-import org.apache.activemq.command.ActiveMQQueue;
-import org.apache.activemq.command.ActiveMQTextMessage;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.context.ApplicationContext;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import eu.arrowhead.common.CoreCommonConstants;
-import eu.arrowhead.common.SSLProperties;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.GatewayProviderConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
-import eu.arrowhead.core.gateway.relay.GatewayRelayClient;
+import eu.arrowhead.relay.gateway.GatewayRelayClient;
 
 @RunWith(SpringRunner.class)
 public class ProviderSideSocketThreadTest {
@@ -65,8 +64,8 @@ public class ProviderSideSocketThreadTest {
 	//=================================================================================================
 	// members
 	
-	private ApplicationContext appContext;
 	private GatewayRelayClient relayClient;
+	private SSLSocketFactory socketFactory;
 	
 	private ProviderSideSocketThread testingObject;
 	
@@ -77,32 +76,24 @@ public class ProviderSideSocketThreadTest {
 	@Before
 	public void setUp() {
 		relayClient = mock(GatewayRelayClient.class, "relayClient");
-		appContext = mock(ApplicationContext.class, "appContext");
+		socketFactory = mock(SSLSocketFactory.class, "socketFactory");
 		
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
-		when(appContext.getBean(CoreCommonConstants.GATEWAY_ACTIVE_SESSION_MAP, ConcurrentHashMap.class)).thenReturn(new ConcurrentHashMap<>());
-		when(appContext.getBean(SSLProperties.class)).thenReturn(getTestSSLPropertiesForThread());
 		
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
-		testingObject = new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 60000);
+		testingObject = new ProviderSideSocketThread(relayClient, getTestSession(), socketFactory, connectionRequest, getTestConsumerGWPublicKey(), 60000, getTestMessageProducer());
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
-	public void testConstructorAppContextNull() {
-		new ProviderSideSocketThread(null, null, null, null, 0);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorRelayClientNull() {
-		new ProviderSideSocketThread(appContext, null, null, null, 0);
+		new ProviderSideSocketThread(null, null, null, null, null, 0, null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorRelaySessionNull() {
-		new ProviderSideSocketThread(appContext, relayClient, null, null, 0);
+		new ProviderSideSocketThread(relayClient, null, null, null, null, 0, null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -110,15 +101,40 @@ public class ProviderSideSocketThreadTest {
 	public void testConstructorRelaySessionClosed() {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(true);
 
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), null, 0);
+		new ProviderSideSocketThread(relayClient, getTestSession(), null, null, null, 0, null);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructorSocketFactoryNull() {
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		
+		new ProviderSideSocketThread(relayClient, getTestSession(), null, null, null, 0, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructorConsumerGatewayPublicKeyNull() {
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		
+		new ProviderSideSocketThread(relayClient, getTestSession(), socketFactory, null, null, 0, null);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructorSenderNull() {
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		
+		new ProviderSideSocketThread(relayClient, getTestSession(), socketFactory, null, getTestConsumerGWPublicKey(), 0, null);
+	}
+
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorConnectionRequestNull() {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), null, 0);
+		new ProviderSideSocketThread(relayClient, getTestSession(), socketFactory, null, getTestConsumerGWPublicKey(), 0, getTestMessageProducer());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -129,7 +145,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.setProvider(null);
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThread(relayClient, getTestSession(), socketFactory, connectionRequest, getTestConsumerGWPublicKey(), 0, getTestMessageProducer());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -140,7 +156,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setSystemName(null);
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThread(relayClient, getTestSession(), socketFactory, connectionRequest, getTestConsumerGWPublicKey(), 0, getTestMessageProducer());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -151,7 +167,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setSystemName(" ");
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThread(relayClient, getTestSession(), socketFactory, connectionRequest, getTestConsumerGWPublicKey(), 0, getTestMessageProducer());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -162,7 +178,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setAddress(null);
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThread(relayClient, getTestSession(), socketFactory, connectionRequest, getTestConsumerGWPublicKey(), 0, getTestMessageProducer());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -173,7 +189,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setAddress("\r\n");
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThread(relayClient, getTestSession(), socketFactory, connectionRequest, getTestConsumerGWPublicKey(), 0, getTestMessageProducer());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -184,7 +200,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setPort(null);
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThread(relayClient, getTestSession(), socketFactory, connectionRequest, getTestConsumerGWPublicKey(), 0, getTestMessageProducer());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -195,7 +211,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setPort(-2);
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThread(relayClient, getTestSession(), socketFactory, connectionRequest, getTestConsumerGWPublicKey(), 0, getTestMessageProducer());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -206,7 +222,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setPort(1111111);
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThread(relayClient, getTestSession(), socketFactory, connectionRequest, getTestConsumerGWPublicKey(), 0, getTestMessageProducer());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -217,7 +233,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setAuthenticationInfo(null);
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThread(relayClient, getTestSession(), socketFactory, connectionRequest, getTestConsumerGWPublicKey(), 0, getTestMessageProducer());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -228,7 +244,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setAuthenticationInfo("");
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThread(relayClient, getTestSession(), socketFactory, connectionRequest, getTestConsumerGWPublicKey(), 0, getTestMessageProducer());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -239,7 +255,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.setServiceDefinition(null);
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThread(relayClient, getTestSession(), socketFactory, connectionRequest, getTestConsumerGWPublicKey(), 0, getTestMessageProducer());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -250,7 +266,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.setServiceDefinition("\t\t\t");
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThread(relayClient, getTestSession(), socketFactory, connectionRequest, getTestConsumerGWPublicKey(), 0, getTestMessageProducer());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -261,7 +277,7 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.setConsumerGWPublicKey(null);
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThread(relayClient, getTestSession(), socketFactory, connectionRequest, getTestConsumerGWPublicKey(), 0, getTestMessageProducer());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -272,96 +288,27 @@ public class ProviderSideSocketThreadTest {
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.setConsumerGWPublicKey(" ");
 		
-		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		new ProviderSideSocketThread(relayClient, getTestSession(), socketFactory, connectionRequest, getTestConsumerGWPublicKey(), 0, getTestMessageProducer());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testConstructorOk() {
-		Assert.assertEquals("provider.test-service", testingObject.getName());
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = IllegalArgumentException.class)
-	public void testInitQueueIdNull() {
-		testingObject.init(null, null);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = IllegalArgumentException.class)
-	public void testInitQueueIdEmpty() {
-		testingObject.init(" ", null);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = IllegalArgumentException.class)
-	public void testInitSenderNull() {
-		testingObject.init("queueId", null);
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testInitOk() {
-		Assert.assertTrue(!testingObject.isInitialized());
-		
-		testingObject.init("queueId", getTestMessageProducer());
-		
-		Assert.assertTrue(testingObject.isInitialized());
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = IllegalArgumentException.class)
-	public void testOnMessageOutProviderNull() {
-		testingObject.onMessage(null);
+		Assert.assertTrue(testingObject.getName().startsWith("provider.test-service"));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testOnMessageCloseControlMessage() throws JMSException {
-		final ByteArrayOutputStream outputStream = new ByteArrayOutputStream(10);
-		ReflectionTestUtils.setField(testingObject, "outProvider", outputStream);
-		final ActiveMQTextMessage message = new ActiveMQTextMessage();
-		message.setJMSDestination(new ActiveMQQueue("bla" + GatewayRelayClient.CONTROL_QUEUE_SUFFIX));
+	public void testInitOk() throws UnknownHostException, IOException {
+		boolean initialized = (Boolean) ReflectionTestUtils.getField(testingObject, "initialized");
+		Assert.assertFalse(initialized);
 		
-		doNothing().when(relayClient).handleCloseControlMessage(any(Message.class), any(Session.class));
+		when(socketFactory.createSocket(anyString(), anyInt())).thenReturn(getDummySSLSocket(new byte[0]));
 		
-		testingObject.onMessage(message);
+		testingObject.init();
 		
-		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
-		Assert.assertTrue(interrupted);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testOnMessageExceptionThrown() throws JMSException {
-		final ByteArrayOutputStream outputStream = new ByteArrayOutputStream(10);
-		ReflectionTestUtils.setField(testingObject, "outProvider", outputStream);
-		final ActiveMQTextMessage message = new ActiveMQTextMessage();
-		message.setJMSDestination(new ActiveMQQueue("bla" + GatewayRelayClient.CONTROL_QUEUE_SUFFIX));
-		
-		doThrow(new JMSException("test")).when(relayClient).handleCloseControlMessage(any(Message.class), any(Session.class));
-		
-		testingObject.onMessage(message);
-		
-		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
-		Assert.assertTrue(interrupted);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testOnMessageNormalMessage() throws JMSException {
-		final ByteArrayOutputStream outputStream = new ByteArrayOutputStream(10);
-		ReflectionTestUtils.setField(testingObject, "outProvider", outputStream);
-		final ActiveMQTextMessage message = new ActiveMQTextMessage();
-		message.setJMSDestination(new ActiveMQQueue("bla"));
-		
-		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(new byte[] { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 });
-		
-		testingObject.onMessage(message);
-		
-		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
-		Assert.assertTrue(!interrupted);
-		Assert.assertArrayEquals(new byte[] { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 }, outputStream.toByteArray());
+		initialized = (Boolean) ReflectionTestUtils.getField(testingObject, "initialized");
+		Assert.assertTrue(initialized);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -372,57 +319,47 @@ public class ProviderSideSocketThreadTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testRunWhenInternalExceptionThrown() {
-		final SSLProperties sslProps = getTestSSLPropertiesForThread();
-		ReflectionTestUtils.setField(sslProps, "keyStoreType", "invalid");
+	public void testRunWhenInternalExceptionThrown() throws JMSException, UnknownHostException, IOException {
+		doThrow(JMSException.class).when(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		when(socketFactory.createSocket(anyString(), anyInt())).thenReturn(getDummySSLSocket(new byte[] { 1, 2, 3, 4 }));
 		
-		when(appContext.getBean(SSLProperties.class)).thenReturn(sslProps);
+		testingObject.init();
+		boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
+		Assert.assertFalse(interrupted);
+		
+		testingObject.run();
+		
+		verify(relayClient, times(1)).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
 
-		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
-		final ProviderSideSocketThread thread = new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 60000);
-		thread.init("queueId", getTestMessageProducer());
-		thread.run();
-
-		final boolean interrupted = (boolean) ReflectionTestUtils.getField(thread, "interrupted");
+		// because of the exception
+		interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertTrue(interrupted);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Ignore
 	@Test
-	public void testRunWhenOtherSideCloseTheConnectionAfterSendingSomeBytes() throws JMSException {
+	public void testRunWhenInputStreamIsClosed() throws JMSException, UnknownHostException, IOException {
+		final byte[] bytes = new byte[2000];
+		for (int i = 0; i < bytes.length; ++i) {
+			bytes[i] = (byte) (i % 127);
+		}
+		
 		doNothing().when(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		when(socketFactory.createSocket(anyString(), anyInt())).thenReturn(getDummySSLSocket(bytes));
 		
-		testingObject.init("queueId", getTestMessageProducer());
-		
-		new Thread() {
-			public void run() {
-				try {
-					final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(getTestSSLPropertiesForTestServerThread());
-					final SSLServerSocketFactory serverSocketFactory = sslContext.getServerSocketFactory();
-					final SSLServerSocket sslServerSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(22002);
-					sslServerSocket.setNeedClientAuth(true);
-					sslServerSocket.setSoTimeout(600000);
-					
-					final SSLSocket sslConsumerSocket = (SSLSocket) sslServerSocket.accept();
-					final OutputStream outConsumer = sslConsumerSocket.getOutputStream();
-					outConsumer.write(new byte[] { 1, 2, 3, 4 });
-					
-					sslConsumerSocket.close();
-					sslServerSocket.close();
-				} catch (final Exception ex) {
-					ex.printStackTrace();
-				}
-			};
-		}.start();
+		testingObject.init();
+		boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
+		Assert.assertFalse(interrupted);
 		
 		testingObject.run();
 		
-		verify(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
-		
-		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
+		verify(relayClient, times(2)).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+
+		// because of input stream is empty
+		interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertTrue(interrupted);
 	}
+
 	
 	//=================================================================================================
 	// assistant methods
@@ -501,20 +438,20 @@ public class ProviderSideSocketThreadTest {
 		return new MessageProducer() {
 			
 			//-------------------------------------------------------------------------------------------------
-			public void setTimeToLive(long timeToLive) throws JMSException {}
-			public void setPriority(int defaultPriority) throws JMSException {}
-			public void setDisableMessageTimestamp(boolean value) throws JMSException {}
-			public void setDisableMessageID(boolean value) throws JMSException {}
-			public void setDeliveryMode(int deliveryMode) throws JMSException {	}
-			public void setDeliveryDelay(long deliveryDelay) throws JMSException {}
-			public void send(Destination destination, Message message, int deliveryMode, int priority, long timeToLive, CompletionListener completionListener) throws JMSException {}
-			public void send(Message message, int deliveryMode, int priority, long timeToLive, CompletionListener completionListener) throws JMSException {}
-			public void send(Destination destination, Message message, int deliveryMode, int priority, long timeToLive) throws JMSException {}
-			public void send(Message message, int deliveryMode, int priority, long timeToLive) throws JMSException {}
-			public void send(Destination destination, Message message, CompletionListener completionListener) throws JMSException {}
-			public void send(Message message, CompletionListener completionListener) throws JMSException {}
-			public void send(Destination destination, Message message) throws JMSException {}
-			public void send(Message message) throws JMSException {}
+			public void setTimeToLive(final long timeToLive) throws JMSException {}
+			public void setPriority(final int defaultPriority) throws JMSException {}
+			public void setDisableMessageTimestamp(final boolean value) throws JMSException {}
+			public void setDisableMessageID(final boolean value) throws JMSException {}
+			public void setDeliveryMode(final int deliveryMode) throws JMSException {	}
+			public void setDeliveryDelay(final long deliveryDelay) throws JMSException {}
+			public void send(final Destination destination, final Message message, final int deliveryMode, final int priority, final long timeToLive, final CompletionListener completionListener) throws JMSException {}
+			public void send(final Message message, final int deliveryMode, final int priority, final long timeToLive, final CompletionListener completionListener) throws JMSException {}
+			public void send(final Destination destination, final Message message, final int deliveryMode, final int priority, final long timeToLive) throws JMSException {}
+			public void send(final Message message, final int deliveryMode, final int priority, final long timeToLive) throws JMSException {}
+			public void send(final Destination destination, final Message message, final CompletionListener completionListener) throws JMSException {}
+			public void send(final Message message, final CompletionListener completionListener) throws JMSException {}
+			public void send(final Destination destination, final Message message) throws JMSException {}
+			public void send(final Message message) throws JMSException {}
 			public long getTimeToLive() throws JMSException { return 0; }
 			public int getPriority() throws JMSException { return 0; }
 			public boolean getDisableMessageTimestamp() throws JMSException { return false;	}
@@ -527,32 +464,43 @@ public class ProviderSideSocketThreadTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private SSLProperties getTestSSLPropertiesForThread() {
-		final SSLProperties sslProps = new SSLProperties();
-		ReflectionTestUtils.setField(sslProps, "sslEnabled", true);
-		ReflectionTestUtils.setField(sslProps, "keyStoreType", "PKCS12");
-		final Resource keystore = new ClassPathResource("certificates/gateway.p12");
-		ReflectionTestUtils.setField(sslProps, "keyStore", keystore);
-		ReflectionTestUtils.setField(sslProps, "keyStorePassword", "123456");
-		final Resource truststore = new ClassPathResource("certificates/truststore.p12");
-		ReflectionTestUtils.setField(sslProps, "trustStore", truststore);
-		ReflectionTestUtils.setField(sslProps, "trustStorePassword", "123456");
+	private PublicKey getTestConsumerGWPublicKey() {
+		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq5Jq4tOeFoLqxOqtYcujbCNZina3iuV9+/o8D1R9D0HvgnmlgPlqWwjDSxV7m7SGJpuc/rRXJ85OzqV3rwRHO8A8YWXiabj8EdgEIyqg4SOgTN7oZ7MQUisTpwtWn9K14se4dHt/YE9mUW4en19p/yPUDwdw3ECMJHamy/O+Mh6rbw6AFhYvz6F5rXYB8svkenOuG8TSBFlRkcjdfqQqtl4xlHgmlDNWpHsQ3eFAO72mKQjm2ZhWI1H9CLrJf1NQs2GnKXgHBOM5ET61fEHWN8axGGoSKfvTed5vhhX7l5uwxM+AKQipLNNKjEaQYnyX3TL9zL8I7y+QkhzDa7/5kQIDAQAB";
 		
-		return sslProps;
+		return Utilities.getPublicKeyFromBase64EncodedString(publicKey);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private SSLProperties getTestSSLPropertiesForTestServerThread() {
-		final SSLProperties sslProps = new SSLProperties();
-		ReflectionTestUtils.setField(sslProps, "sslEnabled", true);
-		ReflectionTestUtils.setField(sslProps, "keyStoreType", "PKCS12");
-		final Resource keystore = new ClassPathResource("certificates/authorization.p12");
-		ReflectionTestUtils.setField(sslProps, "keyStore", keystore);
-		ReflectionTestUtils.setField(sslProps, "keyStorePassword", "123456");
-		final Resource truststore = new ClassPathResource("certificates/truststore.p12");
-		ReflectionTestUtils.setField(sslProps, "trustStore", truststore);
-		ReflectionTestUtils.setField(sslProps, "trustStorePassword", "123456");
-		
-		return sslProps;
+	private SSLSocket getDummySSLSocket(final byte[] input) {
+		return new SSLSocket() {
+			public void startHandshake() throws IOException {}
+			public void setWantClientAuth(final boolean arg0) {}
+			public void setUseClientMode(final boolean arg0) {}
+			public void setNeedClientAuth(final boolean arg0) {}
+			public void setEnabledProtocols(final String[] arg0) {}
+			public void setEnabledCipherSuites(final String[] arg0) {}
+			public void setEnableSessionCreation(final boolean arg0) {}
+			public void removeHandshakeCompletedListener(final HandshakeCompletedListener arg0) {}
+			public boolean getWantClientAuth() { return false; }
+			public boolean getUseClientMode() { return false; }
+			public String[] getSupportedProtocols() { return null; }
+			public String[] getSupportedCipherSuites() { return null; }
+			public SSLSession getSession() { return null; }
+			public boolean getNeedClientAuth() { return false; }
+			public String[] getEnabledProtocols() { return null; }
+			public String[] getEnabledCipherSuites() { return null; }
+			public boolean getEnableSessionCreation() { return false; }
+			public void addHandshakeCompletedListener(final HandshakeCompletedListener arg0) {} 
+			
+			@Override
+			public OutputStream getOutputStream() throws IOException {
+				return new ByteArrayOutputStream();
+			}
+			
+			@Override
+			public InputStream getInputStream() throws IOException {
+				return new ByteArrayInputStream(input);
+			}
+		};
 	}
 }

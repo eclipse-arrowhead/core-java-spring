@@ -72,11 +72,11 @@ import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.TimeoutException;
 import eu.arrowhead.common.http.HttpService;
-import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
-import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayResponse;
-import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementResult;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingAlgorithm;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingParameters;
+import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClient;
+import eu.arrowhead.relay.gatekeeper.GatekeeperRelayResponse;
+import eu.arrowhead.relay.gatekeeper.GeneralAdvertisementResult;
 
 @RunWith(SpringRunner.class)
 public class GatekeeperDriverICNTest {
@@ -200,19 +200,19 @@ public class GatekeeperDriverICNTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class) 
 	public void testQueryAuthorizationBasedOnOchestrationResponseRequestCloudNull() {
-		testingObject.queryAuthorizationBasedOnOchestrationResponse(null, null);
+		testingObject.queryAuthorizationBasedOnOrchestrationResponse(null, null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class) 
 	public void testQueryAuthorizationBasedOnOchestrationResponseOrchestrationResponseNull() {
-		testingObject.queryAuthorizationBasedOnOchestrationResponse(new CloudRequestDTO(), null);
+		testingObject.queryAuthorizationBasedOnOrchestrationResponse(new CloudRequestDTO(), null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class) 
 	public void testQueryAuthorizationBasedOnOchestrationResponseOrchestrationResponseEmpty() {
-		testingObject.queryAuthorizationBasedOnOchestrationResponse(new CloudRequestDTO(), new OrchestrationResponseDTO());
+		testingObject.queryAuthorizationBasedOnOrchestrationResponse(new CloudRequestDTO(), new OrchestrationResponseDTO());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -220,7 +220,7 @@ public class GatekeeperDriverICNTest {
 	public void testQueryAuthorizationBasedOnOchestrationResponseURINotFound() {
 		when(arrowheadContext.containsKey(CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(false);
 		
-		testingObject.queryAuthorizationBasedOnOchestrationResponse(new CloudRequestDTO(), new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO())));
+		testingObject.queryAuthorizationBasedOnOrchestrationResponse(new CloudRequestDTO(), new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO())));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -230,7 +230,7 @@ public class GatekeeperDriverICNTest {
 		when(arrowheadContext.containsKey(key)).thenReturn(true);
 		when(arrowheadContext.get(key)).thenReturn("1234");
 		
-		testingObject.queryAuthorizationBasedOnOchestrationResponse(new CloudRequestDTO(), new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO())));
+		testingObject.queryAuthorizationBasedOnOrchestrationResponse(new CloudRequestDTO(), new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO())));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -243,7 +243,7 @@ public class GatekeeperDriverICNTest {
 		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(AuthorizationInterCloudCheckResponseDTO.class), any(AuthorizationInterCloudCheckRequestDTO.class)))
 																																												.thenReturn(response);
 		
-		final OrchestrationResponseDTO authorizedResponse = testingObject.queryAuthorizationBasedOnOchestrationResponse(new CloudRequestDTO(), new OrchestrationResponseDTO(getTestOrchestrationResults()));
+		final OrchestrationResponseDTO authorizedResponse = testingObject.queryAuthorizationBasedOnOrchestrationResponse(new CloudRequestDTO(), new OrchestrationResponseDTO(getTestOrchestrationResults()));
 		
 		Assert.assertTrue(authorizedResponse.getResponse().isEmpty());
 	}
@@ -261,7 +261,7 @@ public class GatekeeperDriverICNTest {
 		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(getTestOrchestrationResults());
 		Assert.assertEquals(2, orchestrationResponse.getResponse().size());
 		
-		final OrchestrationResponseDTO authorizedResponse = testingObject.queryAuthorizationBasedOnOchestrationResponse(new CloudRequestDTO(), orchestrationResponse);
+		final OrchestrationResponseDTO authorizedResponse = testingObject.queryAuthorizationBasedOnOrchestrationResponse(new CloudRequestDTO(), orchestrationResponse);
 		
 		Assert.assertEquals(1, authorizedResponse.getResponse().size());
 		Assert.assertEquals(2, authorizedResponse.getResponse().get(0).getProvider().getId());

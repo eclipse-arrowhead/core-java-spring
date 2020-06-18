@@ -3,11 +3,14 @@ package eu.arrowhead.common.dto.shared;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 public class ServiceRegistryRequestDTO implements Serializable {
 	
 	//=================================================================================================
 	// members
+	
+	public static final String KEY_RECOMMENDED_ORCHESTRATION_TIME = "recommendedOrchestrationTime"; // in seconds
 	
 	private static final long serialVersionUID = -3805773665976065056L;
 	
@@ -19,7 +22,37 @@ public class ServiceRegistryRequestDTO implements Serializable {
 	private Map<String,String> metadata;
 	private Integer version;
 	private List<String> interfaces;
-	
+
+	//=================================================================================================
+	// constructors
+
+	public ServiceRegistryRequestDTO() {
+	}
+
+	public ServiceRegistryRequestDTO(final String serviceDefinition, final SystemRequestDTO providerSystem, final String serviceUri, final String endOfValidity,
+									 final String secure,
+									 final List<String> interfaces) {
+		this.serviceDefinition = serviceDefinition;
+		this.providerSystem = providerSystem;
+		this.serviceUri = serviceUri;
+		this.endOfValidity = endOfValidity;
+		this.secure = secure;
+		this.interfaces = interfaces;
+	}
+
+	public ServiceRegistryRequestDTO(final String serviceDefinition, final SystemRequestDTO providerSystem, final String serviceUri, final String endOfValidity,
+									 final String secure,
+									 final Map<String, String> metadata, final Integer version, final List<String> interfaces) {
+		this.serviceDefinition = serviceDefinition;
+		this.providerSystem = providerSystem;
+		this.serviceUri = serviceUri;
+		this.endOfValidity = endOfValidity;
+		this.secure = secure;
+		this.metadata = metadata;
+		this.version = version;
+		this.interfaces = interfaces;
+	}
+
 	//=================================================================================================
 	// methods
 
@@ -39,7 +72,23 @@ public class ServiceRegistryRequestDTO implements Serializable {
 	public void setServiceUri(final String serviceUri) { this.serviceUri = serviceUri; }
 	public void setEndOfValidity(final String endOfValidity) { this.endOfValidity = endOfValidity; }
 	public void setSecure(final String secure) { this.secure = secure; }
-	public void setMetadata(Map<String,String> metadata) { this.metadata = metadata; }
+	public void setMetadata(final Map<String,String> metadata) { this.metadata = metadata; }
 	public void setVersion(final Integer version) { this.version = version; }
 	public void setInterfaces(final List<String> interfaces) { this.interfaces = interfaces; }
-} 
+
+	//-------------------------------------------------------------------------------------------------
+
+	@Override
+	public String toString() {
+		return new StringJoiner(", ", ServiceRegistryRequestDTO.class.getSimpleName() + "[", "]")
+				.add("serviceDefinition='" + serviceDefinition + "'")
+				.add("providerSystem=" + providerSystem)
+				.add("serviceUri='" + serviceUri + "'")
+				.add("endOfValidity='" + endOfValidity + "'")
+				.add("secure='" + secure + "'")
+				.add("metadata=" + metadata)
+				.add("version=" + version)
+				.add("interfaces=" + interfaces)
+				.toString();
+	}
+}

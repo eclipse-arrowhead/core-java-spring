@@ -25,11 +25,11 @@ import org.hibernate.annotations.OnDeleteAction;
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"consumerCloudId", "providerSystemId", "serviceId"}))
 public class AuthorizationInterCloud {
-	
-	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt"); //NOSONAR
 
 	//=================================================================================================
 	// members
+	
+	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt"); //NOSONAR
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

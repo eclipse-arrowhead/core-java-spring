@@ -5,18 +5,21 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
@@ -24,6 +27,8 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudCheckResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudSystemFormDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.internal.GSDQueryFormDTO;
@@ -31,9 +36,15 @@ import eu.arrowhead.common.dto.internal.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.internal.ICNResultDTO;
 import eu.arrowhead.common.dto.internal.IdIdListDTO;
+import eu.arrowhead.common.dto.internal.QoSInterDirectPingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementListResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
 import eu.arrowhead.common.dto.internal.TokenDataDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationResponseDTO;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
@@ -165,6 +176,89 @@ public class OrchestratorDriverTest {
 		orchestratorDriver.generateAuthTokens(request, List.of(dto));
 		
 		Assert.assertEquals("ABCDE", dto.getAuthorizationTokens().get(dto.getInterfaces().get(0).getInterfaceName()));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGenerateAuthTokensTokenNoCalculatedServiceTimeFrame() {
+		ReflectionTestUtils.setField(orchestratorDriver, "tokenDuration", 1001);
+		
+		final OrchestrationResultDTO dto = getOrchestrationResultDTO(1);
+		final UriComponents tokenUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8445, "/token");
+		final Map<String,String> tokenMap = Map.of(dto.getInterfaces().get(0).getInterfaceName(), "ABCDE");
+		final TokenDataDTO tokenDataDTO = new TokenDataDTO(DTOConverter.convertSystemResponseDTOToSystemRequestDTO(dto.getProvider()), tokenMap);
+		final TokenGenerationResponseDTO responseDTO = new TokenGenerationResponseDTO();
+		responseDTO.setTokenData(List.of(tokenDataDTO));
+
+		final ArgumentCaptor<TokenGenerationRequestDTO> captor = ArgumentCaptor.forClass(TokenGenerationRequestDTO.class);
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(tokenUri);
+		when(httpService.sendRequest(eq(tokenUri), eq(HttpMethod.POST), eq(TokenGenerationResponseDTO.class), captor.capture())).
+																												thenReturn(new ResponseEntity<TokenGenerationResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setRequesterSystem(new SystemRequestDTO());
+		
+		orchestratorDriver.generateAuthTokens(request, List.of(dto));
+		
+		final TokenGenerationRequestDTO requestDTO = captor.getValue();
+		Assert.assertEquals(1001, requestDTO.getProviders().get(0).getTokenDuration());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGenerateAuthTokensTokenInvalidCalculatedServiceTimeFrame() {
+		ReflectionTestUtils.setField(orchestratorDriver, "tokenDuration", 1000);
+		
+		final OrchestrationResultDTO dto = getOrchestrationResultDTO(1);
+		dto.getMetadata().put(OrchestratorDriver.KEY_CALCULATED_SERVICE_TIME_FRAME, "300invalid");
+		final UriComponents tokenUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8445, "/token");
+		final Map<String,String> tokenMap = Map.of(dto.getInterfaces().get(0).getInterfaceName(), "ABCDE");
+		final TokenDataDTO tokenDataDTO = new TokenDataDTO(DTOConverter.convertSystemResponseDTOToSystemRequestDTO(dto.getProvider()), tokenMap);
+		final TokenGenerationResponseDTO responseDTO = new TokenGenerationResponseDTO();
+		responseDTO.setTokenData(List.of(tokenDataDTO));
+
+		final ArgumentCaptor<TokenGenerationRequestDTO> captor = ArgumentCaptor.forClass(TokenGenerationRequestDTO.class);
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(tokenUri);
+		when(httpService.sendRequest(eq(tokenUri), eq(HttpMethod.POST), eq(TokenGenerationResponseDTO.class), captor.capture())).
+																												thenReturn(new ResponseEntity<TokenGenerationResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setRequesterSystem(new SystemRequestDTO());
+		
+		orchestratorDriver.generateAuthTokens(request, List.of(dto));
+		
+		final TokenGenerationRequestDTO requestDTO = captor.getValue();
+		Assert.assertEquals(1000, requestDTO.getProviders().get(0).getTokenDuration());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGenerateAuthTokensTokenValidCalculatedServiceTimeFrame() {
+		ReflectionTestUtils.setField(orchestratorDriver, "tokenDuration", 1000);
+		
+		final OrchestrationResultDTO dto = getOrchestrationResultDTO(1);
+		dto.getMetadata().put(OrchestratorDriver.KEY_CALCULATED_SERVICE_TIME_FRAME, "300");
+		final UriComponents tokenUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8445, "/token");
+		final Map<String,String> tokenMap = Map.of(dto.getInterfaces().get(0).getInterfaceName(), "ABCDE");
+		final TokenDataDTO tokenDataDTO = new TokenDataDTO(DTOConverter.convertSystemResponseDTOToSystemRequestDTO(dto.getProvider()), tokenMap);
+		final TokenGenerationResponseDTO responseDTO = new TokenGenerationResponseDTO();
+		responseDTO.setTokenData(List.of(tokenDataDTO));
+
+		final ArgumentCaptor<TokenGenerationRequestDTO> captor = ArgumentCaptor.forClass(TokenGenerationRequestDTO.class);
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(tokenUri);
+		when(httpService.sendRequest(eq(tokenUri), eq(HttpMethod.POST), eq(TokenGenerationResponseDTO.class), captor.capture())).
+																												thenReturn(new ResponseEntity<TokenGenerationResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setRequesterSystem(new SystemRequestDTO());
+		
+		orchestratorDriver.generateAuthTokens(request, List.of(dto));
+		
+		final TokenGenerationRequestDTO requestDTO = captor.getValue();
+		Assert.assertEquals(300, requestDTO.getProviders().get(0).getTokenDuration());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -395,6 +489,180 @@ public class OrchestratorDriverTest {
 		orchestratorDriver.doInterCloudNegotiation(null);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetCloudsWithExclusiveGatewayAndPublicRelaysOk() {
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8449, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_GET_CLOUD_SERVICE + 
+																								"/test-op/test-n");
+		final CloudWithRelaysResponseDTO responseDTO = new CloudWithRelaysResponseDTO();
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(uri);
+		when(httpService.sendRequest(eq(uri), eq(HttpMethod.GET), eq(CloudWithRelaysResponseDTO.class))).thenReturn(new ResponseEntity<CloudWithRelaysResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		final CloudWithRelaysResponseDTO result = orchestratorDriver.getCloudsWithExclusiveGatewayAndPublicRelays("test-op", "test-n");
+		Assert.assertNotNull(result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetCloudsWithExclusiveGatewayAndPublicRelaysUriNotFound() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false);
+		orchestratorDriver.getCloudsWithExclusiveGatewayAndPublicRelays("test-op", "test-n");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetCloudsWithExclusiveGatewayAndPublicRelaysUriWrongType() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn("invalid");
+		
+		orchestratorDriver.getCloudsWithExclusiveGatewayAndPublicRelays("test-op", "test-n");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetIntraPingMeasurementUriNotFound() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false);
+		
+		orchestratorDriver.getIntraPingMeasurement(1);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetIntraPingMeasurementUriWrongType() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn("invalid");
+		
+		orchestratorDriver.getIntraPingMeasurement(1);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetIntraPingMeasurementOk() {
+		final int systemId = 23;
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT + 
+				 									  CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT_SUFFIX).expand(systemId);
+		Assert.assertTrue(uri.toString().contains("/measurements/intracloud/ping"));
+		
+		final QoSIntraPingMeasurementResponseDTO responseDTO = new QoSIntraPingMeasurementResponseDTO();
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(uri);
+		when(httpService.sendRequest(eq(uri), eq(HttpMethod.GET), eq(QoSIntraPingMeasurementResponseDTO.class))).thenReturn(new ResponseEntity<QoSIntraPingMeasurementResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		final QoSIntraPingMeasurementResponseDTO result = orchestratorDriver.getIntraPingMeasurement(systemId);
+		
+		Assert.assertNotNull(result);
+		Assert.assertFalse(result.hasRecord());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetIntraPingMedianMeasurementUriNotFound() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false);
+		
+		orchestratorDriver.getIntraPingMedianMeasurement(QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetIntraPingMedianMeasurementUriWrongType() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn("invalid");
+		
+		orchestratorDriver.getIntraPingMedianMeasurement(QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetIntraPingMedianMeasurementOk() {
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT)
+										   .expand(QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT.name());
+		Assert.assertTrue(uri.toString().contains("/measurements/intracloud/ping_median"));
+		
+		final QoSIntraPingMeasurementResponseDTO responseDTO = new QoSIntraPingMeasurementResponseDTO();
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(uri);
+		when(httpService.sendRequest(eq(uri), eq(HttpMethod.GET), eq(QoSIntraPingMeasurementResponseDTO.class))).thenReturn(new ResponseEntity<QoSIntraPingMeasurementResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		final QoSIntraPingMeasurementResponseDTO result = orchestratorDriver.getIntraPingMedianMeasurement(QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT);
+		
+		Assert.assertNotNull(result);
+		Assert.assertFalse(result.hasRecord());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetInterDirectPingMeasurementUriNotFound() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false);
+		
+		orchestratorDriver.getInterDirectPingMeasurement(new CloudSystemFormDTO());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetInterDirectPingMeasurementUriWrongType() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn("invalid");
+		
+		orchestratorDriver.getInterDirectPingMeasurement(new CloudSystemFormDTO());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetInterDirectPingMeasurementOk() {
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT);
+		Assert.assertTrue(uri.toString().contains("/measurements/intercloud/ping"));
+		
+		final CloudSystemFormDTO requestDTO = new CloudSystemFormDTO();
+		
+		final QoSInterDirectPingMeasurementResponseDTO responseDTO = new QoSInterDirectPingMeasurementResponseDTO();
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(uri);
+		when(httpService.sendRequest(eq(uri), eq(HttpMethod.POST), eq(QoSInterDirectPingMeasurementResponseDTO.class), eq(requestDTO))).thenReturn(new ResponseEntity<QoSInterDirectPingMeasurementResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		final QoSInterDirectPingMeasurementResponseDTO result = orchestratorDriver.getInterDirectPingMeasurement(requestDTO);
+		
+		Assert.assertNotNull(result);
+		Assert.assertFalse(result.hasRecord());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetInterRelayEchoMeasurementUriNotFound() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false);
+		
+		orchestratorDriver.getInterRelayEchoMeasurement(new CloudRequestDTO());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetInterRelayEchoMeasurementUriWrongType() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn("invalid");
+		
+		orchestratorDriver.getInterRelayEchoMeasurement(new CloudRequestDTO());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetInterRelayEchoMeasurementOk() {
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT);
+		Assert.assertTrue(uri.toString().contains("/measurements/intercloud/relay_echo"));
+		
+		final CloudRequestDTO requestDTO = new CloudRequestDTO();
+		
+		final QoSInterRelayEchoMeasurementListResponseDTO  responseDTO = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(new QoSInterRelayEchoMeasurementResponseDTO()), 1);
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(uri);
+		when(httpService.sendRequest(eq(uri), eq(HttpMethod.POST), eq(QoSInterRelayEchoMeasurementListResponseDTO.class), eq(requestDTO))).thenReturn(new ResponseEntity<QoSInterRelayEchoMeasurementListResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		final QoSInterRelayEchoMeasurementListResponseDTO result = orchestratorDriver.getInterRelayEchoMeasurement(requestDTO);
+		
+		Assert.assertNotNull(result);
+		Assert.assertTrue(result.getCount() == 1);
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -405,7 +673,7 @@ public class OrchestratorDriverTest {
 		final List<ServiceInterfaceResponseDTO> intfs = new ArrayList<>(1);
 		intfs.add(new ServiceInterfaceResponseDTO(1, "HTTP-SECURE-JSON", null, null));
 		
-		return new OrchestrationResultDTO(provider, service, "/uri" + index, ServiceSecurityType.TOKEN, null, intfs, null);
+		return new OrchestrationResultDTO(provider, service, "/uri" + index, ServiceSecurityType.TOKEN, new HashMap<>(), intfs, null);
 	}
 
 	//-------------------------------------------------------------------------------------------------

@@ -14,20 +14,22 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.ApplicationInitListener;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.core.gatekeeper.quartz.subscriber.RelaySubscriberDataContainer;
-import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientFactory;
-import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientUsingCachedSessions;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.GetRandomAndDedicatedIfAnyGatekeeperMatchmaker;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.GetRandomCommonPreferredIfAnyOrRandomCommonPublicGatewayMatchmaker;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.ICNProviderMatchmakingAlgorithm;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.RandomICNProviderMatchmaker;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingAlgorithm;
+import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClientFactory;
+import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClientUsingCachedSessions;
 
 @Component
 public class GatekeeperApplicationInitListener extends ApplicationInitListener {
@@ -79,11 +81,17 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	@Override
 	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
 		if (gatewayIsPresent) {
-			return List.of(CoreSystemService.AUTH_CONTROL_INTER_SERVICE, CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.GATEWAY_CONSUMER_SERVICE,
-						   CoreSystemService.GATEWAY_PROVIDER_SERVICE, CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE); 
+			return List.of(CoreSystemService.AUTH_CONTROL_INTER_SERVICE, CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.ORCHESTRATION_QOS_ENABLED_SERVICE,
+					CoreSystemService.ORCHESTRATION_QOS_RESERVATIONS_SERVICE, CoreSystemService.ORCHESTRATION_QOS_TEMPORARY_LOCK_SERVICE,
+					CoreSystemService.QOS_MONITOR_INTRA_PING_MEASUREMENT_SERVICE, CoreSystemService.ORCHESTRATION_QOS_CONFIRM_RESERVATION_SERVICE,
+					CoreSystemService.GATEWAY_PROVIDER_SERVICE, CoreSystemService.GATEWAY_CONSUMER_SERVICE,
+					CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE, CoreSystemService.QOS_MONITOR_PUBLIC_KEY_SERVICE,
+					CoreSystemService.QOS_MONITOR_JOIN_RELAY_TEST_SERVICE, CoreSystemService.QOS_MONITOR_INIT_RELAY_TEST_SERVICE); 
 		}
 		
-		return List.of(CoreSystemService.AUTH_CONTROL_INTER_SERVICE, CoreSystemService.ORCHESTRATION_SERVICE); 
+		return List.of(CoreSystemService.AUTH_CONTROL_INTER_SERVICE, CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.ORCHESTRATION_QOS_ENABLED_SERVICE,
+					   CoreSystemService.ORCHESTRATION_QOS_RESERVATIONS_SERVICE, CoreSystemService.ORCHESTRATION_QOS_TEMPORARY_LOCK_SERVICE,
+					   CoreSystemService.QOS_MONITOR_INTRA_PING_MEASUREMENT_SERVICE, CoreSystemService.ORCHESTRATION_QOS_CONFIRM_RESERVATION_SERVICE); 
 	}
 		
 	//-------------------------------------------------------------------------------------------------
@@ -98,6 +106,11 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 		if (gatewayIsMandatory && !gatewayIsPresent) {
 			throw new ServiceConfigurationError("Gatekeeper can't start with 'gateway_is_present=false' property when the 'gateway_is_mandatory' property is true!");
 		}
+		
+		@SuppressWarnings("unchecked")
+		final Map<String,Object> context = event.getApplicationContext().getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
+		final UriComponents queryAll = createQueryAllUri(CommonConstants.HTTPS);
+		context.put(CoreCommonConstants.SR_QUERY_ALL, queryAll);
 		
 		initializeGatekeeperRelayClient(event.getApplicationContext());
 		relaySubscriberDataContainer = event.getApplicationContext().getBean(RelaySubscriberDataContainer.class);
@@ -126,5 +139,14 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 
 		this.gatekeeperRelayClientWithCache = (GatekeeperRelayClientUsingCachedSessions) GatekeeperRelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, sslProps, timeout,
 																																				  true);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents createQueryAllUri(final String scheme) {
+		logger.debug("createQueryAllUri started...");
+
+		final String registyUriStr = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_ALL_SERVICE_URI;
+
+		return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), registyUriStr);
 	}
 }

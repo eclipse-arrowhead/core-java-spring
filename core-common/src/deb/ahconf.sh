@@ -190,6 +190,23 @@ ah_ip_valid () {
 	fi
 }
  
+ah_subject_alternative_names() {
+    host=${1}
+    ip=${2}
+
+    local san="IP:127.0.0.1,DNS:localhost,DNS:${host},IP:${ip}"
+    
+    if [ ! -z ${AH_DOMAIN_NAME} ]; then
+        if ah_ip_valid ${AH_DOMAIN_NAME}; then
+            san=${san},IP:${AH_DOMAIN_NAME}
+        else
+            san=${san},DNS:${AH_DOMAIN_NAME}
+        fi
+    fi
+
+    echo "${san}"
+}
+
 ah_cert_signed_system () {
     name=${1}
 	passwd=${2}
@@ -218,15 +235,7 @@ ah_cert_signed_system () {
     src_file="${AH_CLOUDS_DIR}/${AH_CLOUD_NAME}.p12"
 
     if [ ! -f "${file}" ]; then
-		san="IP:127.0.0.1,DNS:localhost,DNS:${host},IP:${ip}"
-		
-		if [ ! -z ${AH_DOMAIN_NAME} ]; then
-			if ah_ip_valid ${AH_DOMAIN_NAME}; then
-				san=${san},IP:${AH_DOMAIN_NAME}
-			else
-				san=${san},DNS:${AH_DOMAIN_NAME}
-			fi
-		fi
+		san=$(ah_subject_alternative_names ${host} ${ip})
 		
 		ah_cert ${path} ${name} "${name}.${AH_CLOUD_NAME}.${AH_OPERATOR}.arrowhead.eu" ${passwd}
 
@@ -263,6 +272,94 @@ ah_cert_signed_system () {
             -noprompt
 		
         ah_cert_import "${AH_CONF_DIR}" "master" "${path}" ${name} ${passwd}
+    fi
+}
+
+# Create the keystore for the CA system
+# Apart from being a regular Arrowhead compliant system keystore,
+# it also has to contain the private key of the cloud
+ah_ca_keystore () {
+    ca_sys_name=${1}        # name of the CA system
+    host=${2}               # hostname of the CA system (default: `hostname`)
+    ip=${3}                 # IP address of the CA system (default: $OWN_IP)
+    cloud_keystore=${4}     # path of the cloud keystore (default: "${AH_CLOUDS_DIR}/${AH_CLOUD_NAME}.p12")
+    ca_password=${5}        # password used in the CA keystore (default: $AH_PASS_CERT)
+    cloud_password=${6}     # password used in the cloud keystore (default: $AH_PASS_CERT)
+    cloud_alias_src=${7}    # cloud cert alias in the cloud keystore (default: $AH_CLOUD_NAME)
+    cloud_alias_dst=${8}    # cloud cert alias in the CA keystore (default: $AH_CLOUD_NAME)
+    
+    if [ -z ${host} ]; then
+        host=`hostname`
+    fi
+
+    if [ -z ${ip} ]; then
+        ip=${OWN_IP}
+    fi
+
+    if [ -z ${cloud_keystore} ]; then
+        cloud_keystore="${AH_CLOUDS_DIR}/${AH_CLOUD_NAME}.p12"
+    fi
+
+    if [ -z ${ca_password} ]; then
+        ca_password=${AH_PASS_CERT}
+    fi
+
+    if [ -z ${cloud_password} ]; then
+        cloud_password=${ca_password}
+    fi
+
+    if [ -z ${cloud_alias_src} ]; then
+        cloud_alias_src=${AH_CLOUD_NAME}
+    fi
+
+    if [ -z ${cloud_alias_dst} ]; then
+        cloud_alias_dst=${cloud_alias_src}
+    fi
+
+    ca_sys_dir="${AH_SYSTEMS_DIR}/${ca_sys_name}"
+    ca_keystore="${ca_sys_dir}/${ca_sys_name}.p12"
+
+    if [ ! -f "${ca_keystore}" ]; then
+        san=$(ah_subject_alternative_names ${host} ${ip})
+        
+        # generate CA system keypair
+        ah_cert ${ca_sys_dir} ${ca_sys_name} "${ca_sys_name}.${AH_CLOUD_NAME}.${AH_OPERATOR}.arrowhead.eu" ${ca_password}
+
+        # import cloud keypair
+        # this is necessary, because CA signs system certificates with the cloud cert
+        keytool -importkeystore \
+                -srckeypass ${cloud_password} \
+                -srcstorepass ${cloud_password} \
+                -destkeypass ${ca_password} \
+                -deststorepass  ${ca_password} \
+                -srcalias ${cloud_alias_src} \
+                -destalias ${cloud_alias_dst} \
+                -srckeystore "${cloud_keystore}" \
+                -destkeystore "${ca_keystore}" \
+                -deststoretype PKCS12
+        
+        # sign CA system cert with the cloud cert
+        keytool -certreq \
+                -alias ${ca_sys_name} \
+                -keypass ${ca_password} \
+                -keystore "${ca_keystore}" \
+                -storepass ${ca_password} \
+        | keytool -gencert \
+                -alias ${cloud_alias_dst} \
+                -keypass ${ca_password} \
+                -keystore "${ca_keystore}" \
+                -storepass ${ca_password} \
+                -validity 3650 \
+                -ext SubjectAlternativeName=${san} \
+        | keytool -importcert \
+                -alias ${ca_sys_name} \
+                -keypass ${ca_password} \
+                -keystore "${ca_keystore}" \
+                -storepass ${ca_password} \
+                -noprompt
+
+        # import root certificate
+        ah_cert_import "${AH_CONF_DIR}" "master" "${ca_sys_dir}" ${ca_sys_name} ${ca_password}
     fi
 }
 

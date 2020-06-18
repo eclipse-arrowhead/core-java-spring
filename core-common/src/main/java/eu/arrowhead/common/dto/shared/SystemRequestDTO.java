@@ -2,6 +2,7 @@ package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 public class SystemRequestDTO implements Serializable {
 	
@@ -17,7 +18,18 @@ public class SystemRequestDTO implements Serializable {
 	
 	//=================================================================================================
 	// methods
-	
+
+
+	public SystemRequestDTO() {
+	}
+
+	public SystemRequestDTO(final String systemName, final String address, final Integer port, final String authenticationInfo) {
+		this.systemName = systemName;
+		this.address = address;
+		this.port = port;
+		this.authenticationInfo = authenticationInfo;
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	public String getSystemName() { return systemName; }
 	public String getAddress() { return address; }
@@ -42,14 +54,27 @@ public class SystemRequestDTO implements Serializable {
 		if (this == obj) {
 			return true;
 		}
+		
 		if (obj == null) {
 			return false;
 		}
+		
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
+		
 		final SystemRequestDTO other = (SystemRequestDTO) obj;
 		
 		return Objects.equals(address, other.address) && Objects.equals(port, other.port) && Objects.equals(systemName, other.systemName);
+	}
+
+	@Override
+	public String toString() {
+		return new StringJoiner(", ", SystemRequestDTO.class.getSimpleName() + "[", "]")
+				.add("systemName='" + systemName + "'")
+				.add("address='" + address + "'")
+				.add("port=" + port)
+				.add("authenticationInfo='" + authenticationInfo + "'")
+				.toString();
 	}
 }

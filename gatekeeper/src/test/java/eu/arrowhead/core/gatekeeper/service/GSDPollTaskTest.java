@@ -43,8 +43,8 @@ import eu.arrowhead.common.dto.shared.ErrorWrapperDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
-import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementResult;
+import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClient;
+import eu.arrowhead.relay.gatekeeper.GeneralAdvertisementResult;
 
 @RunWith(SpringRunner.class)
 public class GSDPollTaskTest {

@@ -4,6 +4,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.Relay;
@@ -30,13 +33,19 @@ import eu.arrowhead.common.dto.internal.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.ICNProposalResponseDTO;
 import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.internal.ICNResultDTO;
+import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSReservationResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSTemporaryLockResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationFlags.Flag;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.OrchestratorWarnings;
+import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
@@ -325,7 +334,7 @@ public class GatekeeperServiceICNTest {
 		when(commonDBService.getOwnCloud(anyBoolean())).thenReturn(ownCloud);
 		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
 		resultDTO.setProvider(new SystemResponseDTO());
-		RelayResponseDTO relay = new RelayResponseDTO();
+		final RelayResponseDTO relay = new RelayResponseDTO();
 		relay.setType(RelayType.GATEWAY_RELAY);
 		final ICNProposalResponseDTO icnResponse = new ICNProposalResponseDTO(resultDTO, relay, new GatewayProviderConnectionResponseDTO());
 		when(gatekeeperDriver.sendICNProposal(any(Cloud.class), any(ICNProposalRequestDTO.class))).thenReturn(icnResponse);
@@ -338,6 +347,7 @@ public class GatekeeperServiceICNTest {
 		Assert.assertEquals(CoreSystem.GATEWAY.name().toLowerCase(), icnResponse.getResponse().get(0).getProvider().getSystemName());
 		Assert.assertEquals("127.0.0.1", icnResponse.getResponse().get(0).getProvider().getAddress());
 		Assert.assertEquals(33333, icnResponse.getResponse().get(0).getProvider().getPort());
+		Assert.assertTrue(icnResult.getResponse().get(0).getWarnings().contains(OrchestratorWarnings.VIA_GATEWAY));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -364,7 +374,7 @@ public class GatekeeperServiceICNTest {
 	@Test(expected = AuthException.class)
 	public void testDoICNRequestedCloudWantsToUseGatewayButNoRelaysAreProvided() {
 		ReflectionTestUtils.setField(testingObject, "gatewayIsMandatory", true);
-		ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
 		request.setGatewayIsPresent(true);
 		
 		testingObject.doICN(request);
@@ -856,9 +866,12 @@ public class GatekeeperServiceICNTest {
 		final RelayRequestDTO relay = getTestRelayDTO();
 		request.setPreferredGatewayRelays(List.of(relay));
 		
-		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO()));
+		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
+		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null));
+		resultDTO.setService(new ServiceDefinitionResponseDTO(1, "test-service", null, null));
+		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(resultDTO));
 		when(gatekeeperDriver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(orchestrationResponse);
-		when(gatekeeperDriver.queryAuthorizationBasedOnOchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(new OrchestrationResponseDTO());
+		when(gatekeeperDriver.queryAuthorizationBasedOnOrchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(new OrchestrationResponseDTO());
 		
 		final ICNProposalResponseDTO response = testingObject.doICN(request);
 		
@@ -880,9 +893,13 @@ public class GatekeeperServiceICNTest {
 		final RelayRequestDTO relay = getTestRelayDTO();
 		request.setPreferredGatewayRelays(List.of(relay));
 		
-		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO()));
+		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
+		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null));
+		resultDTO.setService(new ServiceDefinitionResponseDTO(1, "test-service", null, null));
+		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(resultDTO));
 		when(gatekeeperDriver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(orchestrationResponse);
-		when(gatekeeperDriver.queryAuthorizationBasedOnOchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(orchestrationResponse);
+		when(gatekeeperDriver.queryAuthorizationBasedOnOrchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(orchestrationResponse);
+		when(gatekeeperDriver.getQoSReservationList()).thenReturn(new ArrayList<>());
 		
 		final ICNProposalResponseDTO response = testingObject.doICN(request);
 		
@@ -908,11 +925,15 @@ public class GatekeeperServiceICNTest {
 		request.setPreferredGatewayRelays(List.of(relay));
 		request.setConsumerGatewayPublicKey("consumerGWPublicKey");
 		
-		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO()));
+		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
+		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null));
+		resultDTO.setService(new ServiceDefinitionResponseDTO(1, "test-service", null, null));
+		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(resultDTO));
 		when(gatekeeperDriver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(orchestrationResponse);
-		when(gatekeeperDriver.queryAuthorizationBasedOnOchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(orchestrationResponse);
+		when(gatekeeperDriver.queryAuthorizationBasedOnOrchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(orchestrationResponse);
 		when(gatekeeperDBService.getCloudByOperatorAndName(any(String.class), any(String.class))).thenReturn(new Cloud());
 		when(gatewayMatchmaker.doMatchmaking(any(RelayMatchmakingParameters.class))).thenReturn(null);
+		when(gatekeeperDriver.getQoSReservationList()).thenReturn(new ArrayList<>());
 		
 		testingObject.doICN(request);
 	}
@@ -938,10 +959,15 @@ public class GatekeeperServiceICNTest {
 		request.setConsumerGatewayPublicKey("consumerGWPublicKey");
 		
 		final OrchestrationResultDTO selectedResult = new OrchestrationResultDTO();
-		selectedResult.setProvider(new SystemResponseDTO());
-		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(selectedResult, new OrchestrationResultDTO()));
+		selectedResult.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null));
+		selectedResult.setService(new ServiceDefinitionResponseDTO(1, "test-service", null, null));
+		final OrchestrationResultDTO otherResult = new OrchestrationResultDTO();
+		otherResult.setProvider(new SystemResponseDTO(2, "test-sys", "0.0.0.0", 78058, null, null, null));
+		otherResult.setService(new ServiceDefinitionResponseDTO(1, "test-service", null, null));
+		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(selectedResult, otherResult));
 		when(gatekeeperDriver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(orchestrationResponse);
-		when(gatekeeperDriver.queryAuthorizationBasedOnOchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(orchestrationResponse);
+		when(gatekeeperDriver.getQoSReservationList()).thenReturn(new ArrayList<>());
+		when(gatekeeperDriver.queryAuthorizationBasedOnOrchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(orchestrationResponse);
 		when(gatekeeperDBService.getCloudByOperatorAndName(any(String.class), any(String.class))).thenReturn(new Cloud());
 		final Relay selectedRelay = new Relay("localhost", 1234, false, false, RelayType.GATEWAY_RELAY);
 		selectedRelay.setCreatedAt(ZonedDateTime.now());
@@ -962,6 +988,194 @@ public class GatekeeperServiceICNTest {
 		Assert.assertEquals("queueId", response.getConnectionInfo().getQueueId());
 		Assert.assertEquals("peerName", response.getConnectionInfo().getPeerName());
 		Assert.assertEquals("providerGWPublicKey", response.getConnectionInfo().getProviderGWPublicKey());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDoICNQoSRequiredButNotEnabled() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		request.setRequesterCloud(cloud);
+		final RelayRequestDTO relay = getTestRelayDTO();
+		request.setPreferredGatewayRelays(List.of(relay));
+		request.getNegotiationFlags().put(Flag.ENABLE_QOS, true);
+		
+		when(gatekeeperDriver.checkQoSEnabled()).thenReturn(false);
+		
+		final ICNProposalResponseDTO response = testingObject.doICN(request);
+		
+		Assert.assertEquals(0, response.getResponse().size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDoICNNeedReservationButTemporaryLockNotPossible() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		request.setRequesterCloud(cloud);
+		final RelayRequestDTO relay = getTestRelayDTO();
+		request.setPreferredGatewayRelays(List.of(relay));
+		request.getNegotiationFlags().put(Flag.ENABLE_QOS, true);
+		request.getCommands().put(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY, "15");
+		
+		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
+		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null));
+		resultDTO.setService(new ServiceDefinitionResponseDTO(1, "test-service", null, null));
+		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(resultDTO));
+		
+		when(gatekeeperDriver.checkQoSEnabled()).thenReturn(true);
+		when(gatekeeperDriver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(orchestrationResponse);
+		when(gatekeeperDriver.sendQoSTemporaryLockRequest(any())).thenReturn(new QoSTemporaryLockResponseDTO());		
+		
+		final ICNProposalResponseDTO response = testingObject.doICN(request);
+		
+		Assert.assertEquals(0, response.getResponse().size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDoICNWithQoSButNoAvailableMeasurements() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		request.setRequesterCloud(cloud);
+		final RelayRequestDTO relay = getTestRelayDTO();
+		request.setPreferredGatewayRelays(List.of(relay));
+		request.getNegotiationFlags().put(Flag.ENABLE_QOS, true);
+		
+		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
+		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null));
+		resultDTO.setService(new ServiceDefinitionResponseDTO(1, "test-service", null, null));
+		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(resultDTO));
+		
+		when(gatekeeperDriver.checkQoSEnabled()).thenReturn(true);
+		when(gatekeeperDriver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(orchestrationResponse);
+		when(gatekeeperDriver.queryAuthorizationBasedOnOrchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(orchestrationResponse);
+		when(gatekeeperDriver.getQoSIntraPingMeasurementsForLocalSystem(anyLong())).thenReturn(new QoSIntraPingMeasurementResponseDTO());
+		
+		final ICNProposalResponseDTO response = testingObject.doICN(request);
+		
+		Assert.assertEquals(0, response.getResponse().size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDoICNWithoutGatwayAndReservationButAllProviderReserved() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		request.setRequesterCloud(cloud);
+		final RelayRequestDTO relay = getTestRelayDTO();
+		request.setPreferredGatewayRelays(List.of(relay));
+		request.getNegotiationFlags().put(Flag.ENABLE_QOS, false);
+		
+		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
+		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null));
+		resultDTO.setService(new ServiceDefinitionResponseDTO(1, "test-service", null, null));
+		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(resultDTO));
+		
+		final QoSReservationResponseDTO reservationResponseDTO = new QoSReservationResponseDTO();
+		reservationResponseDTO.setReservedProviderId(resultDTO.getProvider().getId());
+		reservationResponseDTO.setReservedServiceId(resultDTO.getService().getId());
+		reservationResponseDTO.setReservedTo(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now().plusMinutes(15)));
+		
+		when(gatekeeperDriver.checkQoSEnabled()).thenReturn(true);
+		when(gatekeeperDriver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(orchestrationResponse);
+		when(gatekeeperDriver.queryAuthorizationBasedOnOrchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(orchestrationResponse);
+		when(gatekeeperDriver.getQoSReservationList()).thenReturn(List.of(reservationResponseDTO));
+		
+		final ICNProposalResponseDTO response = testingObject.doICN(request);
+		
+		Assert.assertEquals(0, response.getResponse().size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDoICNWithoutGatwayAndReservationProviderNotReserved() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		request.setRequesterCloud(cloud);
+		final RelayRequestDTO relay = getTestRelayDTO();
+		request.setPreferredGatewayRelays(List.of(relay));
+		request.getNegotiationFlags().put(Flag.ENABLE_QOS, false);
+		
+		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
+		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null));
+		resultDTO.setService(new ServiceDefinitionResponseDTO(1, "test-service", null, null));
+		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(resultDTO));
+		
+		when(gatekeeperDriver.checkQoSEnabled()).thenReturn(true);
+		when(gatekeeperDriver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(orchestrationResponse);
+		when(gatekeeperDriver.queryAuthorizationBasedOnOrchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(orchestrationResponse);
+		when(gatekeeperDriver.getQoSReservationList()).thenReturn(List.of());
+		
+		final ICNProposalResponseDTO response = testingObject.doICN(request);
+		
+		Assert.assertEquals(1, response.getResponse().size());
+		Assert.assertEquals(resultDTO.getProvider().getSystemName(), response.getResponse().get(0).getProvider().getSystemName());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDoICNWithoutGatewayButNeedReservation() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		request.setRequesterCloud(cloud);
+		final RelayRequestDTO relay = getTestRelayDTO();
+		request.setPreferredGatewayRelays(List.of(relay));
+		request.getNegotiationFlags().put(Flag.ENABLE_QOS, true);
+		request.getCommands().put(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY, "15");
+		
+		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
+		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null));
+		resultDTO.setService(new ServiceDefinitionResponseDTO(1, "test-service", null, null));
+		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(resultDTO));
+		
+		when(gatekeeperDriver.checkQoSEnabled()).thenReturn(true);
+		when(gatekeeperDriver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(orchestrationResponse);
+		when(gatekeeperDriver.sendQoSTemporaryLockRequest(any())).thenReturn(new QoSTemporaryLockResponseDTO(List.of(resultDTO)));
+		when(gatekeeperDriver.queryAuthorizationBasedOnOrchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(orchestrationResponse);
+		when(icnProviderMatchmaker.doMatchmaking(any(), any())).thenReturn(resultDTO);
+		
+		final ICNProposalResponseDTO response = testingObject.doICN(request);
+		
+		verify(icnProviderMatchmaker, times(1)).doMatchmaking(any(), any());
+		Assert.assertEquals(1, response.getResponse().size());
+		Assert.assertEquals(resultDTO.getProvider().getSystemName(), response.getResponse().get(0).getProvider().getSystemName());
 	}
 
 	//=================================================================================================

@@ -11,7 +11,7 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
-import eu.arrowhead.core.gateway.relay.GatewayRelayClient;
+import eu.arrowhead.relay.gateway.GatewayRelayClient;
 
 @JsonInclude(Include.NON_NULL)
 public class ActiveSessionDTO implements Serializable {

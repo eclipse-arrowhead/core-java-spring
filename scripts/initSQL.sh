@@ -17,3 +17,7 @@ wget https://raw.githubusercontent.com/arrowhead-f/core-java-spring/master/scrip
 wget https://raw.githubusercontent.com/arrowhead-f/core-java-spring/master/scripts/choreographer_privileges.sql
 wget https://raw.githubusercontent.com/arrowhead-f/core-java-spring/master/scripts/gatekeeper_privileges.sql
 wget https://raw.githubusercontent.com/arrowhead-f/core-java-spring/master/scripts/gateway_privileges.sql
+wget https://raw.githubusercontent.com/arrowhead-f/core-java-spring/master/scripts/certificate_authority_privileges.sql
+wget https://raw.githubusercontent.com/arrowhead-f/core-java-spring/master/scripts/system_registry_privileges.sql
+wget https://raw.githubusercontent.com/arrowhead-f/core-java-spring/master/scripts/device_registry_privileges.sql
+wget https://raw.githubusercontent.com/arrowhead-f/core-java-spring/master/scripts/onboarding_controller_privileges.sql

@@ -111,7 +111,7 @@ public class GatekeeperDriverGSDTest {
 	//=================================================================================================
 	// assistant methods
 	
-	//-------------------------------------------------------------------------------------------------		
+	//-------------------------------------------------------------------------------------------------	
 	private GSDPollRequestDTO getGSDPollRequestDTO() {
 		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
 		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
@@ -120,6 +120,6 @@ public class GatekeeperDriverGSDTest {
 		cloudRequestDTO.setOperator("test-operator");
 		cloudRequestDTO.setName("test-name");
 		
-		return new GSDPollRequestDTO(serviceQueryFormDTO, cloudRequestDTO, false);
+		return new GSDPollRequestDTO(serviceQueryFormDTO, cloudRequestDTO, false, false);
 	}
 }

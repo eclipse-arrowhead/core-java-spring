@@ -1,24 +1,29 @@
+
 # Arrowhead Framework 4.1.3
 
 [Arrowhead](http://www.arrowhead.eu/) (and its continuation, [Productive4.0](https://productive40.eu/)) is an ambitious holistic innovation project,
  meant to open the doors to the potentials of Digital Industry and to maintain a leadership position of the industries in Europe. All partners involved will work on creating the capability to efficiently design and integrate hardware and software of Internet of Things (IoT) devices. Linking the real with the digital world takes more than just adding software to the hardware.
- 
+
 
 ## Disclaimer
 Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you have older systems please refer to the [Migration Guide](#migration) 
- 
+
 ## Table of Contents
 1. [Quick Start Guide](#quickstart)
     1. [Docker](#quickstart_docker)
-        * [Handy Docker Commands](#quickstart_dockercommands)
+        * [System Requirements](#quickstart_dockersysreqs)
+        * [Examples](#quickstart_examples)
+        * [Guide](#quickstart_dockerguide)
+        * [Cheat-Sheet](#quickstart_dockercommands)
         * [Troubleshooting](#quickstart_dockertroubleshooting)
 	2. [Debian Installer](#quickstart_debian)
     3. [Compile Code](#quickstart_compile)
 2. [Migration Guide 4.1.2 -> 4.1.3](#migration)
 3. [Certificates](#certificates)
 4. [Gatekeeper and Gateway Setup with ActiveMQ Relay](#setupgatekeeper_and_gateway)
-5. [How to Contribute](#howtocontribute)
-6. [Documentation](#documentation) 
+5. [Continuous Integration / Continuous Delivery](#ci_cd)
+6. [How to Contribute](#howtocontribute)
+7. [Documentation](#documentation) 
     1. [Service Registry](#serviceregistry)
        * [System Design Description Overview](#serviceregistry_sdd)
        * [Services and Use Cases](#serviceregistry_usecases)
@@ -48,15 +53,11 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
     4. [EventHandler](#event_handler)
        * [System Design Description Overview](#event_handler_sdd)
        * [Services and Use Cases](#event_handler_usecases)  
-       * [Service Description Overview](#publish_service_description_overview)
-           * [Publish](#publish_service_description_overview)
-	   * [Subcribe](#subscribe_service_description_overview)
-	   * [Unsubscribe](#unsubscribe_service_description_overview)
-	   * [PublishAuthUpdate](#publish_auth_update_service_description_overview)
+       * [Service Description Overview](#event_handler_provided_services)
        * [Endpoints](#event_handler_endpoints)
            * [Client](#event_handler_endpoints_client)
-           * [Private](#event_handler_endpoints_private)
            * [Management](#event_handler_endpoints_management)
+           * [Private](#event_handler_endpoints_private)
            * [Removed Endpoints](#event_handler_removed)
     5. [Gatekeeper](#gatekeeper)
        * [System Design Description Overview](#gatekeeper_sdd)
@@ -73,7 +74,49 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 	       * [Client](#gateway_endpoints_client)
            * [Private](#gateway_endpoints_private)
            * [Management](#gateway_endpoints_mgmt)
-	
+    7. [Certificate Authority](#ca)
+       * [System Design Description Overview](#ca_sdd)
+       * [Services and Use Cases](#ca_usecases)  
+       * [Endpoints](#ca_endpoints)
+	       * [Client](#ca_endpoints_client)
+           * [Private](#ca_endpoints_private)
+           * [Management](#ca_endpoints_mgmt)
+    8. **QoS Monitor (Quality of Service Monitor)**
+       * [System Design Description Overview](qos-monitor/documentation/QualityOfServiceMonitor-SysDD.md)
+           * [Services and Use Cases](qos-monitor/documentation/QualityOfServiceMonitor-SysDD.md#services-and-use-cases)  
+       * [Interface Design Description](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md)
+           * [Security](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#security)
+           * [Communication Profile](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#communication-profile)
+               * [Client](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#client-endpoint-description)
+               * [Private](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#private-endpoint-description)
+               * [Management](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#management-endpoint-description)	 
+    9. [Onboarding Controller](#onboardingcontroller)
+       * [System Design Description Overview](#onboardingcontroller_sdd)
+       * [Services and Use Cases](#onboardingcontroller_usecases)
+       * [Security](#onboardingcontroller_security)
+       * [Endpoints](#onboardingcontroller_endpoints)
+           * [Onboarding](#onboardingcontroller_endpoints_onboarding)
+    10. [Device Registry](#deviceregistry)
+        * [System Design Description Overview](#deviceregistry_sdd)
+        * [Services and Use Cases](#deviceregistry_usecases)
+        * [Security](#deviceregistry_security)
+        * [Endpoints](#deviceregistry_endpoints)
+           * [Onboarding](#deviceregistry_endpoints_onboarding)
+           * [Client](#deviceregistry_endpoints_client)
+    11. [System Registry](#systemregistry)
+        * [System Design Description Overview](#systemregistry_sdd)
+        * [Services and Use Cases](#systemregistry_usecases)
+        * [Security](#systemregistry_security)
+        * [Endpoints](#systemregistry_endpoints)
+           * [Onboarding](#systemregistry_endpoints_onboarding)
+           * [Client](#systemregistry_endpoints_client)
+	12. [Choreographer](#choreographer)
+        * [System Design Description Overview](#choreographer_sdd)
+        * [Services and Use Cases](#choreographer_usecases)  
+        * [Endpoints](#choreographer_endpoints)
+	       * [Client](#choreographer_endpoints_client)
+           * [Management](#choreographer_endpoints_mgmt)
+
 <a name="quickstart" />
 
 ## Quick Start Guide
@@ -82,7 +125,13 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 
 ### Docker
 
-#### Requirements
+[Docker](https://docs.docker.com/) is a container platform that can be used to package and deploy applications in server environments, among other.
+In particular, the [`docker-compose`](https://docs.docker.com/compose/) utility may with advantage be used during application development to test integration with the Arrowhead Core systems.
+Here, we provide brief instructions on how to install and run both Docker and container images for the Arrowhead Core systems.
+
+<a name="quickstart_dockersysreqs" />
+
+#### System Requirements
 
 > **Note:** A system with 4GB of RAM is advised. 
 
@@ -93,6 +142,8 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
   * [Windows](https://docs.docker.com/docker-for-windows/install/)
 * [Docker Compose](https://docs.docker.com/compose/install/)
 
+<a name="quickstart_examples" />
+
 Don't forget to create a volume for mysql: `docker volume create --name=mysql` <br />
 Don't forget to copy the `initSQL.sh` script next to the docker-compose file and execute it! On the first run it initializes the Database!<br />
 Example copy command which does this for you, execute from the project root directory.
@@ -102,17 +153,21 @@ cd docker
 ./initSQL.sh
 ```
 
-Inside the `docker` folder an example is provided. 
+#### Examples
 
-##### Core System Config
+We provide two examples of how Docker containers can be used to host Arrowhead Core systems in this repository.
+The first one is located in the [`docker`](docker) folder and the second one in the [`docker-all`](docker-all) folder.
+The former example shows how some prebuilt Docker images can be used to bring up networks, while the second describes how a Docker image can be constructed that contains all Arrowhead Core systems.
+Please refer to those folders for more information.
+In particular, each folder contains its own `README.md` file with more instructions.
 
-Example Core System Configuration files are available in this folder. 
+<a name="quickstart_dockerguide" />
+
+#### Docker Guide
 
 > **Note:** Don't forget to set `domain.name` and `domain.port` properties!
 
-##### Docker Compose
-
-Example Docker Compose file is located here. The interesting part is the volumes section. 
+Example Docker Compose file is located [here](docker/docker-compose.yml). The interesting part is the volumes section. 
 Format is /path/on/your/local/machine:/path/inside/docker/container
 
 You may want to copy the config files elsewhere with the compose file too. If you copy them, please don't forget to change the volume mounting point, but DON'T change the volume mounting point inside the container, otherwise it will start up with default config.
@@ -132,16 +187,17 @@ If you change your config you have to restart the appropriate container
 
 `docker restart <containerName>`
 
-<a name="quickstart_dockercommands" />
+<a name="quickstart_cheatsheet" />
 
-##### Handy Docker Commands
- 
+#### Docker Cheat-Sheet
+
 | Command | Description |
 | ------- | ----------- |
 | `docker ps -a` | List all containers |
 | `docker images` | List all images |
 | `docker-compose up -d` | Starts the Docker containers |
 | `docker-compose down` | Destroys the Docker containers |
+| `docker restart <containerName>` | Restarts a container, making it re-read its configuration files |
 | `docker logs <containerName>` | Shows logs for the container |
 | `docker volume create --name=<volumeName>` | Creates a named volume |
 | `docker volume rm <volumeName>` | Removes the specified named volume |
@@ -152,7 +208,6 @@ If you change your config you have to restart the appropriate container
 
 Q: MySQL won't start. What did went wrong? <br />
 A: Probably you missed to copy the init SQL script next to the compose file, or you have a typo in its name. Solution: [https://github.com/arrowhead-f/core-java-spring/issues/105](https://github.com/arrowhead-f/core-java-spring/issues/105)
-
 
 <a name="quickstart_debian" />
 
@@ -248,12 +303,12 @@ The following endpoints no longer exist, instead use the ones on the right:
  * `PUT /serviceregistry/mgmt/subscriptions/{id}`
  * `PUT /serviceregistry/support/remove` -> `DELETE /serviceregistry/unregister`
  * `DELETE /serviceregistry/mgmt/all`
- 
- 
+
+
  * __serviceregistry/register__ - data structure changed
- 
+
 Description for this endpoint is available here: [Register](#serviceregistry_endpoints_post_register)
- 
+
 Old payload, which is no longer usable
  ```json
 {
@@ -298,23 +353,23 @@ New payload - you can easily map the old fields to the new ones.
     "HTTP-SECURE-JSON"
   ]
 }
-```
- 
+ ```
+
 ### Authorization Core System:
  * __/mgmt/intracloud__ - data structure changed
  * __/mgmt/intercloud__ - data structure changed
- 
+
  How to [Add Intracloud rules](#authorization_endpoints_post_intracloud) <br />
  How to [Add Intercloud rules](#authorization_endpoints_post_intercloud)
- 
+
 ### Orchestration Core System:
  * __/mgmt/store__ - data structure changed
  * __/orchestrator/orchestration__ - data structure changed
- 
+
  Description for this endpoint is available here: [Orchestration](#orchestrator_endpoints_post_orchestration)
- 
+
  Old payload, which is no longer usable
- 
+
  ```json
 {
   "requesterSystem" : {
@@ -345,7 +400,7 @@ New payload - you can easily map the old fields to the new ones.
   "requestedQoS" : { },
   "commands" : { }
 }
-```
+ ```
 
 New payload - you can easily map the old fields to the new ones.
 
@@ -426,11 +481,21 @@ Currently Arrowhead community have the possibility to create only "self signed" 
 * [Create Arrowhead Client Self Signed Certificate](documentation/certificates/create_client_certificate.pdf)
 * [Create Trust Store](documentation/certificates/create_trust_store.pdf)
 
+If you wish to generate all Certificates by a script, you can use the scripts in the [scripts/certificate_generation](scripts/certificate_generation) folder.
+
+> **Note:** Basic scripting knowledge is required!
+
+* lib_certs.sh - Certificate generation code
+* mk_certs.sh - Usage example
+* rm_certs.sh - Delete generated certs 
+
 ### System Operator Certificate
 
 The System Operator Certificate is a special client certificate with the naming convention of `sysop.my_cloud.my_company.arrowhead.eu`.
-SysOp certificate allows the client to use the management endpoints of the Arrowhead Core Systems. Typical usage of SysOp certificate is by front end applications running in a web browser.
+SysOp certificate allows the client to use the management endpoints of the Arrowhead Core Systems. Typical usage of SysOp certificate is by front end applications running in a web browser (for example if you want to access the Swagger or use the Management Tool in secure mode.
 * [Import SysOp Certificate (Windows 10)](documentation/certificates/import_sysop_certificate_win10.pdf)
+* [Import SysOp Certificate (macOS)](documentation/certificates/import_sysop_certificate_macos.pdf)
+* [Import SysOp Certificate (Linux)](documentation/certificates/import_sysop_certificate_linux.pdf)
 
 ### Include certificate in Docker container
 
@@ -445,6 +510,13 @@ The following guide describes step by step, how to include your own certificates
 ## Gatekeeper and Gateway Setup with ActiveMQ Relay
 
 Please follow this guide to setup the Arrowhead Gatekeeper and Gateway core systems: [Gatekeeper & Gateway Setup Guide with ActiveMQ Relay](documentation/gatekeeper/GatekeeperSetup.md)
+
+<a name="ci_cd" />
+
+## Continuous Integration / Continuous Delivery
+
+Arrowhead's CI/CD pipeline is based on the work of Haris Isakovic and Peter Ketcher from TU Wien. Thank you for providing this amazing guide and countless hours of help setting it up properly.
+[CI/CD Tutorial for Arrowhead Framework](documentation/ci_cd/Arrowhead_CICD.pdf)
 
 <a name="howtocontribute" />
 
@@ -472,13 +544,13 @@ Join our developer team on Slack. Write an email to [szvetlin@aitia.ai](mailto:s
 <a name="documentation" />
 
 # Documentation 
- 
+
 <a name="serviceregistry" />
- 
+
 # Service Registry 
- 
+
 <a name="serviceregistry_sdd" />
- 
+
 ## System Design Description Overview
 
 This System provides the database, which stores information related to the currently actively offered Services within the Local Cloud.
@@ -852,7 +924,7 @@ Returns a __ServiceRegistryEntry__
             In this version interfaces and metadata were bound to the service definition and security type was not
             defined at all. The response object did not contain any modification related time stamp information.
             Service Registry object did contain an  "udp" flag beside the interface definition.
-            
+
 <a name="serviceregistry_delete_unregister" />
 
 ###### Register activity diagram
@@ -877,7 +949,7 @@ Query params:
 
 > **Note:** 4.1.2 version: PUT /serviceregistry/remove <br />
             In this version the input was a JSON object with many unnecessary information.
-            
+
 <a name="serviceregistry_endpoints_post_query_system" />
 
 ###### Unregister activity diagram
@@ -994,13 +1066,13 @@ Returns a __ServiceRegistryEntryList__
            modification related time stamp information. Interfaces and metadata were bound to the service
            definition and security type was not defined. Service Registry object did contain an "udp"
            flag beside the interface definition.
-           
+
 <a name="serviceregistry_endpoints_post_mgmt" />
 
 ### Add an entry
 ```
 POST /serviceregistry/mgmt
-```           
+```
 
 Creates service registry record and returns the newly created record.
 
@@ -1108,7 +1180,7 @@ Returns a __ServiceRegistryEntry__
             metadata were bound to the service definition and security type was not defined at all. The response
             object did not contain any modification related time stamp information. Service Registry object did
             contain an "udp" flag beside the interface definition.
-            
+
 <a name="serviceregistry_endpoints_get_mgmt" />
 
 ### Get an entry by ID
@@ -1178,7 +1250,7 @@ Returns a __ServiceRegistryEntry__
             In this version interfaces and metadata were bound to the service definition and security type was not
             defined at all. The response object did not contain any modification related time stamp information.
             Service Registry object did contain an "udp" flag beside the interface definition.
-            
+
 <a name="serviceregistry_endpoints_put_mgmt" />            
             
 ### Replace an entry by ID            
@@ -1292,13 +1364,13 @@ Returns a __ServiceRegistryEntry__
             In this version interfaces and metadata were bound to the service definition and security type was not
             defined at all. The response object did not contain any modification related time stamp information.
             Service Registry object did contain an "udp" flag beside the interface definition.
-            
+
 <a name="serviceregistry_endpoints_patch_mgmt" />            
             
 ### Modify an entry by ID     
 ```
 PATCH /serviceregistry/mgmt/{id}
-```   
+```
 
 Updates and returns the modified service registry record specified by the id path parameter. Not
 defined fields are **NOT** going to be updated.    
@@ -1415,13 +1487,13 @@ Remove the service registry record specified by the id path parameter.
 
 > **Note:** 4.1.2 version: DELETE /serviceregistry/mgmt/{entryId} <br />
     This version did return Http 404 (not found), when record was not found by id. 
-    
+
 <a name="serviceregistry_endpoints_get_mgmt_grouped" />
 
 ### Get grouped view
 ```
 GET /serviceregistry/mgmt/grouped
-```        
+```
 
 Returns all Service Registry Entries grouped for the purpose of the Management Tools' Service Registry view:
 * autoCompleteData
@@ -1558,7 +1630,7 @@ Returns a __ServiceRegistryGrouped__
 | ----- | ----------- |
 | `autocompleteData` | Data for the Management Tools' autocomplete engine |
 | `servicesGroupedByServiceDefinitionAndInterface` | Services Grouped by Service Definition and Interface |
-| `servicesGroupedBySystems` | Services Grouped By Systems |  
+| `servicesGroupedBySystems` | Services Grouped By Systems |
 
 > **Note:** 4.1.2 version: Not existed
 
@@ -1709,7 +1781,7 @@ Returns a __ServiceDefinitionList__
             This version always returned the records in an array of JSON objects. The objects did not contain any
             modification related time stamp information. Interfaces and metadata were part of the service
             definition entity.
-            
+
 <a name="serviceregistry_endpoints_post_service" />
 
 ### Add a service
@@ -1741,9 +1813,9 @@ Returns a __Service Definition__
   "createdAt": "string",
   "updatedAt": "string"
 }
-```  
+```
 
-| Field | Description | 
+| Field | Description |
 | ----- | ----------- |
 | `id` | ID of the entry |
 | `serviceDefinition` | Service Definition |
@@ -1753,7 +1825,7 @@ Returns a __Service Definition__
 > **Note:** 4.1.2 version: POST /mgmt/services <br />
             In this version interfaces and metadata were part of the service definition entity. The response object
             did not contain any modification related time stamp information.
-            
+
 <a name="serviceregistry_endpoints_get_service_id" />
 
 ### Get a service by ID
@@ -1774,7 +1846,7 @@ Returns a __ServiceDefinition__
 }
 ```
 
-| Field | Description | 
+| Field | Description |
 | ----- | ----------- |
 | `id` | ID of the entry |
 | `serviceDefinition` | Service Definition |
@@ -1790,7 +1862,7 @@ Returns a __ServiceDefinition__
 ### Replace a service by ID
 ```
 PUT /serviceregistry/mgmt/services/{id}
-```            
+```
 
 Updates and returns the modified Service Definition record specified by the ID path parameter.
 
@@ -1802,7 +1874,7 @@ __ServiceDefinition__ is the input
 ```
 
 | Field | Description | Mandatory |
-| ----- | ----------- | --------- | 
+| ----- | ----------- | --------- |
 | `serviceDefinition` | Service Definition | yes |
 
 Returns a __ServiceDefinition__
@@ -1816,7 +1888,7 @@ Returns a __ServiceDefinition__
 }
 ```
 
-| Field | Description | 
+| Field | Description |
 | ----- | ----------- |
 | `id` | ID of the entry |
 | `serviceDefinition` | Service Definition |
@@ -1826,13 +1898,13 @@ Returns a __ServiceDefinition__
 > **Note:** 4.1.2 version: PUT /mgmt/services/{serviceId} <br />
             The response object did not contain any modification related time stamp information. Interfaces and
             metadata were part of the service definition entity.
-            
+
 <a name="serviceregistry_endpoints_patch_service_id" />
 
 ### Modify a service by ID
 ```
 PATCH /serviceregistry/mgmt/services/{id}
-```            
+```
 
 Updates and returns the modified Service Definition record specified by the ID path parameter.
 
@@ -1844,7 +1916,7 @@ __ServiceDefinition__ is the input
 ```
 
 | Field | Description | Mandatory |
-| ----- | ----------- | --------- | 
+| ----- | ----------- | --------- |
 | `serviceDefinition` | Service Definition | no |
 
 Returns a __ServiceDefinition__
@@ -1858,7 +1930,7 @@ Returns a __ServiceDefinition__
 }
 ```
 
-| Field | Description | 
+| Field | Description |
 | ----- | ----------- |
 | `id` | ID of the entry |
 | `serviceDefinition` | Service Definition |
@@ -1878,13 +1950,13 @@ Removes the service definition record specified by the id path parameter.
 
 > **Note:** 4.1.2 version: DELETE /mgmt/services/{serviceId}
             This version did return HTTP 404 (Not Found), when record was not found by ID.
-            
+
 <a name="serviceregistry_endpoints_get_systems" />
 
 ### Get all systems
 ```
 GET /serviceregistry/mgmt/systems
-```            
+```
 
 Returns a list of System records. If `page` and `item_per_page` are not defined, it returns all records.
 
@@ -1905,7 +1977,7 @@ Query params:
 > **Note:** Default value for `direction` is `ASC`. All possible values are:
 > * `ASC`
 > * `DESC` 
-            
+
 <a name="datastructures_systemlist" />
 
 Returns a __SystemList__
@@ -1940,14 +2012,14 @@ Returns a __SystemList__
 > **Note:** 4.1.2 version: GET /mgmt/systems
             This version always returned the records in an array of JSON objects. The objects did not contain any
             modification related time stamp information.
-            
-            
+
+
 <a name="serviceregistry_endpoints_post_systems" />
 
 ### Add a system
 ```
 POST /serviceregistry/mgmt/systems
-```            
+```
 
 Creates a System record and returns the newly created record.
 
@@ -2035,7 +2107,7 @@ Returns a __System__
 
 > **Note:** 4.1.2 version: GET /mgmt/systems/{systemId} <br />
             In this version the response object did not contain any modification related time stamp information
- 
+
 
 <a name="serviceregistry_endpoints_put_system_id" />
 
@@ -2091,13 +2163,13 @@ Returns a __System__
 
 > **Note:** 4.1.2 version: PUT /mgmt/systems/{systemId} <br />
             In this version the response object did not contain any modification related time stamp information.
-            
+
 <a name="serviceregistry_endpoints_patch_system_id" />
 
 ### Modify a system by ID
 ```
 PATCH /serviceregistry/mgmt/systems/{id}
-```            
+```
 
 Updates and returns the modified system record specified by the id path parameter. Not defined
 fields are going to be NOT updated.
@@ -2143,7 +2215,7 @@ Returns a __System__
 | `authenticationInfo` | Authentication Info |
 | `createdAt` | Creation date of the entry |
 | `updatedAt` | When the entry was last updated |
-                        
+
 > **Note:** 4.1.2 version: Not existed
 
 <a name="serviceregistry_endpoints_delete_system_id" />
@@ -2151,13 +2223,13 @@ Returns a __System__
 ### Delete a system by ID
 ```
 DELETE /serviceregistry/mgmt/systems/{id}
-```                        
+```
 
 Removes the System record specified by the ID path parameter.
 
 > **Note:** 4.1.2 version: DELETE /mgmt/systems/{systemId} <br />
             This version did return HTTP 404 (Not Found), when record was not found by ID.
-            
+
 <a name="authorization" />
 
 # Authorization
@@ -2216,17 +2288,17 @@ The base URL for the requests: `http://<host>:<port>/authorization`
 
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
-| [Echo](#authorization_endpoints_get_echo)     | /echo       | GET    | -     | OK     |  
+| [Echo](#authorization_endpoints_get_echo)     | /echo       | GET    | -     | OK     |
 | [Get Public Key](#authorization_endpoints__get_publickey) | /publickey | GET | - | [Public Key](#datastructures_publickey) |
 
 <a name="authorization_endpoints_private" />
 
 ### Private endpoint description <br />
-        
+
 These services can only be used by other core services, therefore they are not part of the public API.        
         
 | Function | URL subpath | Method | Input | Output |
-| -------- | ----------- | ------ | ----- | ------ |        
+| -------- | ----------- | ------ | ----- | ------ |
 | [Check an Intercloud rule](#authorization_endpoints_post_intercloud_check) | /intercloud/check | POST | [InterCloudRule](#datastructures_intercloudrule) | [InterCloudResult](#datastructures_intercloudresult) |
 | [Check an Intracloud rule](#authorization_endpoints_post_intracloud_check) | /intracloud/check | POST | [IntraCloudRule](#datastructures_intracloudrule) | [IntraCloudResult](#datastructures_intracloudresult) |
 | [Generate Token](#authoritation_endpoints_post_token) | /token | POST | [TokenRule](#datastructures_tokenrule) | [TokenData](#datastructures_tokendata) |
@@ -2270,31 +2342,31 @@ The following services no longer exist:
 ```
 GET /authorization/echo
 ```
-            
+
 Returns a "Got it" message with the purpose of testing the core service availability.
 
 > **Note:** 4.1.2 version: GET /authorization/mgmt
             It was only available for the system operator of the local cloud.  
-            
+
 <a name="authorization_endpoints__get_publickey" />
 
 ### Get Public Key
 ```
 GET /authorization/publickey
-```                      
+```
 
 Returns the public key of the Authorization core service as a (Base64 encoded) text. This service is
 necessary for providers if they want to utilize the token based security.
 
 > **Note:**: 4.1.2 version: GET /authorization/mgmt/publickey
              It was only available for system operator of the local cloud.
-             
+
 <a name="authorization_endpoints_post_intercloud_check" />
 
 ### Check an Intercloud rule
 ```
 POST /authorization/intercloud/check
-```              
+```
 
 This service can only be used by other core services, therefore is not part of the public API.
 
@@ -2526,7 +2598,7 @@ Returns a __TokenData__
 }
 ```
 
-| Field | Description | 
+| Field | Description |
 | ----- | ----------- |
 | `tokenData` | Token Data |
 
@@ -2605,12 +2677,12 @@ Returns an __IntracloudRuleList__
     }
   ]
 }
-``` 
+```
 
 | Field | Description |
 | ----- | ----------- |
 | `count` | number of records |
-| `data` | An array containing the data | 
+| `data` | An array containing the data |
 | `id` | ID of the entry |
 | `consumerSystem` | Consumer System |
 | `providerSystem` | Provider System |
@@ -2621,17 +2693,17 @@ Returns an __IntracloudRuleList__
 
 > **Note:** Authorization is a little stricter than before: the access now depends on specific interfaces besides
             provider and service.
-            
+
 > **Note:** 4.1.2 version: GET /authorization/mgmt/intracloud <br />
             This version always returned all records in an array of JSON objects. The objects did not contain
             any time information. Access didn't depend on interface.
-            
+
 <a name="authorization_endpoints_post_intracloud" />
 
 ### Add Intracloud rules
 ```
 POST /authorization/mgmt/intracloud
-```                        
+```
 
 Creates Intracloud authorization rules and returns the newly created rules.
 
@@ -2710,12 +2782,12 @@ Returns an __IntracloudRuleList__
     }
   ]
 }
-``` 
+```
 
 | Field | Description |
 | ----- | ----------- |
 | `count` | number of records |
-| `data` | An array containing the data | 
+| `data` | An array containing the data |
 | `id` | ID of the entry |
 | `consumerSystem` | Consumer System |
 | `providerSystem` | Provider System |
@@ -2727,7 +2799,7 @@ Returns an __IntracloudRuleList__
 > **Note:** 4.1.2 version: POST /authorization/mgmt/intracloud <br />
             This version required whole JSON objects as consumer, provider and service instead of ids and
             didn't use interface restrictions.
-            
+
 <a name="authorization_endpoints_get_intracloud_id" />
 
 ### Get an Intracloud rule by ID
@@ -2793,25 +2865,25 @@ Returns an __IntraCloudRule__
 
 > **Note:** 4.1.2 version: GET /authorization/mgmt/intracloud/{id} <br />
             The returned structure did not contain time information and interface restrictions
-            
+
 <a name="authorization_endpoints_delete_intracloud_id" />
 
 ### Delete an Intracloud rule by ID
 ```
 DELETE /authorization/mgmt/intracloud/{id}
-```            
+```
 
 Removes the Intracloud related authorization rule specified by the ID path parameter.
 
 > **Note:** 4.1.2 version: DELETE /authorization/mgmt/intracloud/{id}
             Same the new version.
-            
+
 <a name="authorization_endpoinds_get_intercloud" />
 
 ### Get all Intercloud rules
 ```
 GET authorization/mgmt/intercloud
-```            
+```
 
 Returns a list of Intercloud related authorization rules. If `page` and `item_per_page` are not
 defined, it returns all records. 
@@ -2888,7 +2960,7 @@ Returns an __IntercloudRuleList__
 | Field | Description |
 | ----- | ----------- |
 | `count` | number of records |
-| `data` | An array containing the data | 
+| `data` | An array containing the data |
 | `id` | ID of the entry |
 | `cloud` | Cloud information |
 | `provider` | Provider System |
@@ -2903,13 +2975,13 @@ Returns an __IntercloudRuleList__
 > **Note:** 4.1.2 version: GET /authorization/mgmt/intercloud <br />
             This version always returned all records in an array of JSON objects. The objects did not contain
             any time information. Access didn't depend on provider and interface.   
-            
+
 <a name="authorization_endpoints_post_intercloud" />
 
 ### Add Intercloud rules
 ```
 POST /authorization/mgmt/intercloud
-```                    
+```
 
 Creates Intercloud authorization rules and returns the newly created rules.
 
@@ -2995,7 +3067,7 @@ Returns an __IntercloudRuleList__
 | Field | Description |
 | ----- | ----------- |
 | `count` | number of records |
-| `data` | An array containing the data | 
+| `data` | An array containing the data |
 | `id` | ID of the entry |
 | `cloud` | Cloud information |
 | `provider` | Provider System |
@@ -3007,13 +3079,13 @@ Returns an __IntercloudRuleList__
 > **Note:** 4.1.2 version: POST /authorization/mgmt/intercloud <br />
             This version required whole JSON objects as consumer cloud and service instead of ids and didn't
             use provider and interface restrictions.
-            
+
 <a name="authorization_endpoints_get_intercloud_id" />
 
 ### Get an Intercloud rule by ID
 ```
 GET /authorization/mgmt/intercloud/{id}
-```            
+```
 
 Returns the Intercloud related authorization record specified by the ID path parameter.
 
@@ -3069,7 +3141,7 @@ Returns an __IntercloudRuleList__
 | Field | Description |
 | ----- | ----------- |
 | `count` | number of records |
-| `data` | An array containing the data | 
+| `data` | An array containing the data |
 | `id` | ID of the entry |
 | `cloud` | Cloud information |
 | `provider` | Provider System |
@@ -3089,7 +3161,7 @@ Removes the Intercloud related authorization record specified by the ID path par
 
 > **Note:** 4.1.2 version: DELETE /authorization/mgmt/intercloud/{id}
             Same as the new version.
-            
+
 <a name="orchestrator" />
 
 # Orchestrator
@@ -3215,7 +3287,7 @@ Use case 2: *Orchestration information pushed to Application System*
 | Brief Description | The Orchestrator pushes new information on Application Systems |
 | Primary Actors | Orchestrator |
 | Secondary Actors | the other Core Systems instances of the Local Cloud |
-| Preconditions | Change in the Orchestration Store. | 
+| Preconditions | Change in the Orchestration Store. |
 | Main flow | - The Orchestrator detects a change in the Orchestration Store.<br />- The Orchestrator begins the orchestration process with the other Core Systems for every change in the Store.<br />- The orchestrator pushes new connection rules to the Application Systems based on the new Store entry. |
 | Postconditions | - |
 
@@ -3249,7 +3321,7 @@ The base URL for the requests: `http://<host>:<port>/orchestrator`
 | [Echo](#orcchestrator_endpoints_get_echo) | /echo  | GET | - | OK |
 | [Orchestration](#orchestrator_endpoints_post_orchestration) | /orchestration | POST | [ServiceRequestForm](#datastructures_servicerequestform) | [Orchestration Response](#datastructures_orchestration_response) |
 | [Start store Orchestration by ID](#orchrestrator_endpoints_get_oschestration_id) | /orchestration/{id} | GET | StoreEntryID | [Orchestration Response](#datastructures_orchestration_response) |
- 
+
 <a name="orchestrator_endpoints_private" />
 
 ### Private endpoint description <br />
@@ -3295,7 +3367,7 @@ Returns a "Got it" message with the purpose of testing the core service availabi
 
 > **Note:** 4.1.2 version: GET /orchestrator/orchestration
             It was basically the same with a slightly different return message
-            
+
 <a name="orchestrator_endpoints_post_orchestration" />
 
 ### Orchestration
@@ -3397,7 +3469,7 @@ the requested service are optional,
 | `requestedService` | Requested Service | yes |
 | `preferredProviders` | Preferred Providers | no |
 | `orchestrationFlags` | Orchestration Flags | no |
-            
+
 Orchestration flags:
 * `matchmaking`: the service automatically selects exactly one provider from the appropriate
 providers (if any),
@@ -3688,17 +3760,17 @@ Returns a __StoreEntryList__
 
 > **Note:** Rules are a little stricter than before: the service interface is also part of it. But the defaultEntry flag
            is no longer supported; now, entries with priority 1 is considered as defaults.
-           
+
 > **Note:** 4.1.2 version: GET /orchestrator/mgmt/store/all <br />
             This version always returned all records in an array of JSON objects. The objects did not contain
             any time information. Rules didn't depend on interface.
-            
+
 <a name="orchestrator_endpoints_post_store" />
 
 ### Add Store Entries
 ```
 POST /orchestrator/mgmt/store
-```                       
+```
 
 Creates Orchestrator Store records and returns the newly created records.
 
@@ -3824,13 +3896,13 @@ Returns a __StoreEntryList__
 > **Note:** 4.1.2 version: POST /orchestrator/mgmt/store<br/ >
             This version required whole JSON objects as consumer instead of id and didn't contains interface
             names. Also, it used defaultEntry flags.
-            
+
 <a name="orchestrator_endpoints_get_store_id" />
 
 ### Get Store Entry by ID 
 ```
 GET /orchestrator/mgmt/store/{id}
-```             
+```
 
 Returns the orchestrator store rule record specified by the ID path parameter.
 
@@ -3919,9 +3991,9 @@ Removes the Orchestrator Store rule record specified by the ID path parameter.
 
 > **Note:** 4.1.2 version: DELETE /orchestrator/mgmt/store/{id} <br />
             Same as the new version.
-            
+
 <a name="orchestrator_endpoints_post_consumer" />
-  
+
 ### Get Entries by Consumer
 ```
 GET /orchestrator/mgmt/store/all_by_consumer
@@ -3958,7 +4030,7 @@ __ConsumerRule is the input__
  "serviceDefinitionName": "string",
  "serviceInterfaceName": "string"
 }
-``` 
+```
 
 | Field | Description | Mandatory |
 | ----- | ----------- | --------- |
@@ -4049,14 +4121,14 @@ Returns a __StoreEntryList__
 > **Note:** 4.1.2 version: PUT /orchestrator/mgmt/store <br />
             This version always returned all matching records in an array of JSON objects. The objects did not
             contain any time information and filtering by interface name was not available.
-            
+
 <a name="orchestrator_endpoints_get_priority" />
 
 ### Get Top Priority Entries
 ```
 GET /orchestrator/mgmt/store/all_top_priority
-```            
-            
+```
+
 Returns a list of orchestrator store rule records whose priority is 1. If `page` and `item_per_page` are
 not defined, no paging is involved.             
 
@@ -4167,7 +4239,7 @@ Returns a __StoreEntryList__
 ### Modify Priorities
 ```
 POST /orchestrator/mgmt/store/modify_priorities
-```            
+```
 
 Changes the priority field of the specified entries.
 
@@ -4202,32 +4274,517 @@ __PriorityList__ is the input
 
 ## System Design Description Overview
 
-placeholder
+The purpose of Event Handler supporting core system is providing authorized publish-subscribe messaging system to the Arrowhead Framework.
+
+![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `AH Service Registry`
+![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `AH Authorization` 
+![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `AH Orchestrator`
+![#ffcc44](https://placehold.it/15/ffcc44/000000?text=+) `AH Event Handler`
+![Alt text](/documentation/eventhandler/overview.png)
+
+<a name="event_handler_sysd" />
+
+## System Design Overview
+![Alt text](/documentation/eventhandler/sysd/event_handler_controller.jpg)
+
+<a name="event_handler_provided_services" />
+
+## Provided services
+
+The Event Handler provides the following services:
+* [Echo](#eventhandler_endpoints_get_echo)
+* [Publish](#eventhandler_endpoints_post_publish)
+* [Subscribe](#eventhandler_endpoints_post_subscribe)
+* [Unsubscribe](#eventhandler_endpoints_delete_unsubscribe)
+* [AuthUpdate](#eventhandler_endpoints_post_auth_update)
+
+<a name="event_handler_consumed_services" />
+
+## Consumed services
+
+The Event Handler consumes the following services:
+* CheckAuthorizationSubscription private service from the Authorization core system
+* Notification service from the subscriber client system
 
 <a name="event_handler_usecases" />
 
-## Services and Use Cases
+## Use cases
 
-placeholder
-
-
-<a name="publish_service_description_overview" />
-
-## Publish Service Description Overview
-
-placeholder
-
+The Event Handler has the following use cases:
+* [Publish Event](documentation/eventhandler/use_cases/EH_use_case_1.md)
+![Alt text](/documentation/eventhandler/use_cases/PublishEvent.png)
+* [Register Subscription](documentation/eventhandler/use_cases/EH_use_case_2.md)
+![Alt text](/documentation/eventhandler/use_cases/RegisterSubscription.png)
+* [Unregister Subscription](documentation/eventhandler/use_cases/EH_use_case_3.md)
+![Alt text](/documentation/eventhandler/use_cases/Unsubscribe.png)
+* [Update Authorization](documentation/eventhandler/use_cases/EH_use_case_4.md)
+![Alt text](/documentation/authorization/SubscriptionAuthUpdate.png)
+![Alt text](/documentation/eventhandler/use_cases/PublishAuthUpdate.png)
 
 <a name="event_handler_endpoints" />
 
 ## Endpoints
 
-placeholder
+<a name="event_handler_endpoints_client" />
+
+### Client endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#eventhandler_endpoints_get_echo) | /echo | GET    | -    | OK     |
+| [Subscribe](#eventhandler_endpoints_post_subscribe) | /subscribe | POST    | -    | OK     |
+| [Unsubscribe](#eventhandler_endpoints_delete_unsubscribe) | /unsubscribe | DELETE    | -    | OK     |
+| [Publish](#eventhandler_endpoints_post_publish) | /publish | POST    | -    | OK     |
+
+<a name="event_handler_endpoints_management" />
+
+### Management endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Get subscriptions](#eventhandler_endpoints_get_subscription_list) | /mgmt/subscriptions | GET | direction && item_per_page && page && sort_field | [Subscription list response](#eventhandler_subscription_list_response) |
+| [Get subscription by id](#eventhandler_endpoints_get_subscription) | /mgmt/subscriptions/{id} | GET | id | [Subscription response](#eventhandler_subscription_response) |
+| [Update subscription](#eventhandler_endpoints_put_subscription) | /mgmt/subscriptions/{id} | PUT | id && Subscription request| Subscription response |
+| [Delete subscription](#eventhandler_endpoints_delete_subscription) | /mgmt/subscriptions/{id} | DELETE | id | OK |
+
+<a name="event_handler_endpoints_private" />
+
+### Private endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [AuthorizationUpdate](#eventhandler_endpoints_post_auth_update) | /publish/authupdate | POST    | -    | OK     |
+
+<a name="eventhandler_endpoints_get_echo" />
+
+### Echo 
+```
+GET /eventhandler/echo
+```
+
+Returns a "Got it" message with the purpose of testing the core service availability.
+
+<a name="eventhandler_endpoints_post_subscribe" />
+
+### Subscribe 
+```
+POST /eventhandler/subscribe
+```
+
+Creates a subscription record specified by parameters.
+
+<a name="datastructures_subscriptionrequest" />
+
+__SubscriptionRequest__ is the input.
+
+```json
+{
+  "eventType": "string",
+  "filterMetaData": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "matchMetaData": true,
+  "notifyUri": "string",
+  "sources": [
+    {
+      "systemName": "string",
+      "address": "string",
+      "authenticationInfo": "string",
+      "port": 0
+    }
+  ],
+  "startDate": "string",
+  "endDate": "string",
+  "subscriberSystem": {
+    "systemName": "string",
+    "address": "string",
+    "authenticationInfo": "string",
+    "port": 0
+  }
+}
+```
+| __SubscriptionRequest__  fields |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `eventType` | Type of event to subscribe to | mandatory | max. length = 255 |
+| `filterMetaData` | The received event has to contain all the "key - value" pairs defined here  | optional | max.length = 65535 |
+| `matchMetaData` | A flag to turn on/off metadata filtering | mandatory |  true or false |
+| `notifyUri` | Url subpath of the subscriber system's notification endpoint | mandatory | max.length = 65535 |
+| `sources` | List of publisher systems | optional (if not defined or empty, all publishers will be able to send requests which are authorized and allowed by the other filtering options )| not defined |
+| `startDate` | If startDate is defined, the subscriber system will only receive events when the event's timestamp is after startDate.  | optional ( StartDate must be after the current date/time. ) | UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format |
+| `endDate` | If endDate is defined, the subscriber system will only receive events when the event's timestamp is before endDate. | optional ( EndDate must be after the current date/time. If startDate is defined endDate must be after startDate. )|  UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format  |
+| `subscriberSystem` | Details of subscriber system | mandatory | as in system |
+
+| __System__  fields |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `systemName` | The name of the system. | mandatory | max. length = 255 |
+| `address` |  Domain name or IP of the system. | mandatory | max. length = 255 |
+| `authenticationInfo` | Public key of the system. | optional | single line string without the "-----BEGIN PUBLIC KEY-----" prefix and the "-----END PUBLIC KEY-----" suffix |
+| `port` | The port where the system provides services | mandatory | max.length = defined by local cloud operator ( default valid range: 1-65535 ) |
+
+<a name="eventhandler_subscription_response" />
+
+__SubscriptionRequest__ output:
+
+```json
+
+{
+        "id": 0,
+        "eventType": {
+        "eventTypeName": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "filterMetaData": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "id": 0,
+      "matchMetaData": true,
+      "notifyUri": "string",
+      "sources": [
+        {
+          "id": 0,
+          "systemName": "string",
+          "address": "string",
+          "authenticationInfo": "string",
+          "port": 0,
+          "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "startDate": "string",
+      "endDate": "string",
+      "subscriberSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "authenticationInfo": "string",
+        "port": 0,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+
+```
+
+<a name="eventhandler_endpoints_delete_unsubscribe" />
+
+### Unsubscribe 
+```
+DELETE /eventhandler/unsubscribe
+```
+Removes the subscription record specified by parameters.
+
+<a name="datastructures_eventhandlerunsubscriberequest" />
+
+__Unsubscribe query parameters__ are the input :
+`https://eventhandler_ip:unsubscribe_port/eventhandler/unsubscribe?address=`192.168.0.1`&event_type=`EVENT_TYPE_1`&port=`9009`&system_name=`test_consumer`
+
+| __Unsubscribe__  query parameters |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `address` |  Domain name or IP of the system. | mandatory | max. length = 255 |
+| `event_type` | Type of event to subscribe to | mandatory | max. length = 255 |
+| `port` | The port where the system provides services | mandatory | max.length = defined by local cloud operator ( default valid range: 1-65535 ) |
+| `system_name` | The name of the system. | mandatory | max. length = 255 |
+
+<a name="eventhandler_endpoints_post_publish" />
+
+### Publish
+```
+POST /eventhandler/publish
+```
+
+Start the publishing process to deliver the event to the subscribers.
+
+<a name="eventhandler_endpoints_publish" />
+
+__PublishRequest__ is the input:
+
+```json
+{
+  "eventType": "string",
+  "metaData": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "payload": "string",
+  "source": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "port": 0,
+    "systemName": "string"
+  },
+  "timeStamp": "string"
+}
+```
+
+| __PublishRequest__  fields |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `eventType` | Type of event. | mandatory | max. length = 255 |
+| `metaData` |  The "key - value" pairs for event filtering. | optional | max.length = 65535 |
+| `payload` | String representation of the event. | mandatory | not defined |
+| `source` |   Details of the publisher system. | mandatory | as in system |
+| `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format |
+
+| __System__  fields |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `systemName` | The name of the system. | mandatory | max. length = 255 |
+| `address` |  Domain name or IP of the system. | mandatory | max. length = 255 |
+| `authenticationInfo` | Public key of the system. | optional | single line string without the "-----BEGIN PUBLIC KEY-----" prefix and the "-----END PUBLIC KEY-----" suffix |
+| `port` | The port where the system provides services | mandatory | max.length = defined by local cloud operator ( default valid range: 1-65535 ) |
+
+<a name="eventhandler_endpoints_get_subscription_list" />
+
+### Get subscriptions
+
+```
+GET /mgmt/eventhandler/subscriptions
+```
+
+
+__Get subscriptions query parameters__  the input :
+
+`https://eventhandler_ip:eventhandler_port/eventhandler/mgmt/subscriptions?dirction=`ASC`&item_per_page=`100`&page=`0`&sort_field=`id
+
+| __Get subscriptions__  query parameters |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `direction` |  Direction of sorting. | optional | valid values: "ASC", "DESC" - default: "ASC"|
+| `item_per_page` | Maximum number of items returned. | optional (mandatory, if page is defined)| integer |
+| `page` | Zero based page index. | optional (mandatory, if item_per_page is defined)| integer |
+| `sort_field` | The field to sort the results by. | optional | valid values: "id", "updatedAt", "createdAt" - default: "id" |
+
+<a name="eventhandler_subscription_list_response" />
+
+__Get subscriptions query parameters__  the output :
+
+```json
+{
+  "count": 0,
+  "data": [
+    {
+        "id": 0,
+        "eventType": {
+        "eventTypeName": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "filterMetaData": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "id": 0,
+      "matchMetaData": true,
+      "notifyUri": "string",
+      "sources": [
+        {
+          "id": 0,
+          "systemName": "string",
+          "address": "string",
+          "authenticationInfo": "string",
+          "port": 0,
+          "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "startDate": "string",
+      "endDate": "string",
+      "subscriberSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "authenticationInfo": "string",
+        "port": 0,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+  ]
+}
+```
+
+<a name="eventhandler_endpoints_get_subscription" />
+
+### Get subscription by id
+
+```
+GET /mgmt/eventhandler/subscriptions/{id}
+```
+
+__Get subscriptions query parameters__  the input :
+
+`https://eventhandler_ip:eventhandler_port/eventhandler/mgmt/subscriptions/`1
+
+| __Get subscription by id__   path parameter |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `id` |  Id of subscription | mandatory | integer |
+
+<a name="eventhandler_subscription_response" />
+
+__Get subscription by id__  the output :
+
+```json
+    {
+        "id": 0,
+        "eventType": {
+        "eventTypeName": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "filterMetaData": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "id": 0,
+      "matchMetaData": true,
+      "notifyUri": "string",
+      "sources": [
+        {
+          "id": 0,
+          "systemName": "string",
+          "address": "string",
+          "authenticationInfo": "string",
+          "port": 0,
+          "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "startDate": "string",
+      "endDate": "string",
+      "subscriberSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "authenticationInfo": "string",
+        "port": 0,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+```
+
+<a name="eventhandler_endpoints_put_subscription" />
+
+### Update subscription
+
+```
+PUT /mgmt/eventhandler/subscriptions/{id}
+```
+
+__Update subscription request__  the input :
+
+`https://eventhandler_ip:eventhandler_port/eventhandler/mgmt/subscriptions/`1
+
+| __Update subscription__   path parameter |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `id` |  Id of subscription | mandatory | integer |
+
+```json
+{
+  "eventType": "string",
+  "filterMetaData": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "matchMetaData": true,
+  "notifyUri": "string",
+  "sources": [
+    {
+      "systemName": "string",
+      "address": "string",
+      "authenticationInfo": "string",
+      "port": 0
+    }
+  ],
+  "startDate": "string",
+  "endDate": "string",
+  "subscriberSystem": {
+    "systemName": "string",
+    "address": "string",
+    "authenticationInfo": "string",
+    "port": 0
+  }
+}
+```
+| __SubscriptionRequest__  fields |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `eventType` | Type of event to subscribe to | mandatory | max. length = 255 |
+| `filterMetaData` | The received event has to contain all the "key - value" pairs defined here  | optional | max.length = 65535 |
+| `matchMetaData` | A flag to turn on/off metadata filtering | mandatory |  true or false |
+| `notifyUri` | Url subpath of the subscriber system's notification endpoint | mandatory | max.length = 65535 |
+| `sources` | List of publisher systems | optional (if not defined or empty, all publishers will be able to send requests which are authorized and allowed by the other filtering options )| not defined |
+| `startDate` | If startDate is defined, the subscriber system will only receive events when the event's timestamp is after startDate.  | optional ( StartDate must be after the current date/time. ) | UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format |
+| `endDate` | If endDate is defined, the subscriber system will only receive events when the event's timestamp is before endDate. | optional ( EndDate must be after the current date/time. If startDate is defined endDate must be after startDate. )|  UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format  |
+| `subscriberSystem` | Details of subscriber system | mandatory | as in system |
+
+<a name="eventhandler_endpoints_delete_subscription" />
+
+### Delete subscription
+
+```
+DELETE /mgmt/eventhandler/subscriptions/{id}
+```
+
+__Delete subscription parameters__  the input :
+
+`https://eventhandler_ip:eventhandler_port/eventhandler/mgmt/subscriptions/`1
+
+| __Get subscription by id__   path parameter |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `id` |  Id of subscription | mandatory | integer |
+
+<a name="eventhandler_endpoints_post_auth_update" />
+
+### Publish Auth Update <br />
+
+This service can only be used by other core services, therefore this is not part of the public API.    
 
 # Gatekeeper 
- 
+
 <a name="gatekeeper_sdd" />
- 
+
 ## System Design Description Overview
 
 This supporting core system has the purpose of providing inter-Cloud servicing capabilities in the Arrowhead Framework by its following services:
@@ -5297,9 +5854,9 @@ DELETE /gatekeeper/mgmgt/relays/{id}
 Remove requested Relay entry.
 
 # Gateway
- 
+
 <a name="gateway_sdd" />
- 
+
 ## System Design Description Overview
 
 This supporting core system has the purpose of establishing a secured datapath - if required - between a consumer and a provider located in different clouds by its following services:
@@ -5750,3 +6307,1638 @@ __ActiveSession__ is the output.
 | `responseQueue` | response messaging queue through the the Relay |
 | `responseControlQueue` | control queue of response messaging through the the Relay |
 | `sessionStartedAt` | Time stamp of session start |
+
+<a name="ca" />
+
+# Certificate Authority
+
+<a name="ca_sdd" />
+
+## System Design Description Overview
+
+The main purpose of the Certificate Authority supporting core system is issuing signed certificates to be used in the local cloud.
+The issued certificates may be revoked from the Management Interface. Systems may check whether a certificate has been revoked, and refuse their acceptance.
+
+<a name="ca_provided_services" />
+
+## Provided services
+
+The Certificate Authority provides the following services:
+* [Echo](#ca_endpoints_get_echo)
+* [Certificate validity checking](#ca_endpoints_check_certificate)
+* [Certificate signing](#ca_endpoints_sign)
+
+<a name="ca_usecases" />
+
+## Use cases
+
+1. Issue signed certificates to new consumers coming via the Onboarding Controller.
+2. Handle certificate revocation.
+3. Act as a trusted public key store.
+
+<a name="ca_endpoints" />
+
+## Endpoints
+
+<a name="ca_endpoints_client" />
+
+### Client endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#ca_endpoints_get_echo)                                | /echo             | GET  | - | OK |
+| [Check certificate validity](#ca_endpoints_check_certificate) | /checkCertificate | POST | [CertificateCheckRequest](#ca_certificate_check_request) | [CertificateCheckResponse](#ca_certificate_check_response) |
+
+<a name="ca_endpoints_private" />
+
+### Private endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Sign CSR with the Cloud Certificate](#ca_endpoints_sign) | /sign | POST | [CertificateSigningRequest](#ca_certificate_signing_request) | [CertificateSigningResponse](#ca_certificate_signing_response) |
+| [Check trusted key](#ca_endpoints_check_trusted_key) | /checkTrustedKey | POST | [TrustedKeyCheckRequest](#ca_trusted_key_check_request) | [TrustedKeyCheckResponse](#ca_trusted_key_check_response) |
+
+<a name="ca_endpoints_mgmt" />
+
+### Management endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Get issued certificates](#ca_endpoints_get_certificates) | /mgmt/certificates      | GET    | - | [IssuedCertificatesResponse](#ca_issued_certificates_response) |
+| [Revoke certificate](#ca_endpoints_revoke_certificate)    | /mgmt/certificates/{id} | DELETE | Certificate record id | OK |
+| [Get trusted keys](#ca_endpoints_get_trusted_keys)        | /mgmt/keys              | GET    | - | [TrustedKeysResponse](#ca_trusted_keys_response) |
+| [Add trusted key](#ca_endpoints_add_trusted_key)          | /mgmt/keys              | PUT    | [AddTrustedKeyRequest](#ca_add_trusted_key_request) | [AddTrustedKeyResponse](#ca_add_trusted_key_response) |
+| [Delete trusted key](#ca_endpoints_delete_trusted_key)    | /mgmt/keys/{id}         | DELETE | Key record id | 204 No Content |
+
+<a name="ca_endpoints_get_echo" />
+
+### Echo 
+```
+GET /certificate-authority/echo
+```
+
+Returns a "Got it" message with the purpose of testing the core service availability.
+
+<a name="ca_endpoints_check_certificate" />
+
+### Check certificate validity
+
+```
+POST /certificate-authority/checkCertificate
+```
+
+Returns whether the given certificate is valid or has been revoked. The client SHALL not trust a revoked certificate.
+
+<a name="ca_certificate_check_request" />
+
+__CertificateCheckRequest__ is the input:
+
+```json
+{
+  "version": "integer",
+  "certificate": "string"
+}
+```
+
+| Parameter     | Description                   | Necessity | Format/Limitations                                     |
+| ------------- | ----------------------------- | --------- | ------------------------------------------------------ |
+| `version`     | Version of the check protocol | mandatory | integer, currently must be `1`                         |
+| `certificate` | The certificate to check      | mandatory | Base64 encoded X.509 certificate (PEM without headers) |
+
+<a name="ca_certificate_check_response" />
+
+Returns a __CertificateCheckResponse__:
+
+```json
+{
+  "version": "integer",
+  "producedAt": "string",
+  "endOfValidity": "string",
+  "commonName": "string",
+  "serialNumber": "string",
+  "status": "string"
+}
+```
+
+| Field              | Description                                                    |
+| ------------------ | -------------------------------------------------------------- |
+| `version`          | Version of the check protocol                                  |
+| `producedAt`       | The time at wich the response has been created                 |
+| `commonName`       | Common name of the certificate                                 |
+| `serialNumber`     | Serial number of the certificate                               |
+| `endOfValidity`    | End of validity due to expiration or revocation                |
+| `status`           | One of the following: `good`, `revoked`, `expired`, `unknown`  |
+
+<a name="ca_endpoints_sign" />
+
+### Sign CSR with the Cloud Certificate
+
+```
+POST /certificate-authority/sign
+```
+
+Returns the whole certificate chain beginning with the newly generated leaf certificate and ending with the root certificate.
+
+Each certificate's issuer is the same as the subject of the following one. The issuer of the root certificate is the same as the subject.
+
+The request may contain `validAfter` and `validBefore` fields to limit the validity range of the Certificate to be generated more than the default values set in Certificate Authority.
+
+Metadata of each generated certificate is stored in the database to allow handling revocation and validity checking.
+
+A request for signing a certificate with restricted common name is only accepted if it is requested by `sysop`. Common names starting with the name of a Core System or `sysop` are restricted.
+
+<a name="ca_certificate_signing_request" />
+
+__CertificateSigningRequest__  is the input:
+
+```json
+{
+  "encodedCSR": "string",
+  "validAfter": "string",
+  "validBefore": "string"
+}
+```
+
+| Parameter     | Description                          | Necessity | Format/Limitations        |
+| ------------- | ------------------------------------ | --------- | ------------------------- |
+| `encodedCSR`  | PKCS #10 Certificate Signing Request | mandatory | Base64 encoded CSR        |
+| `validAfter`  | Beginning of Certificate validity    | optional  | ISO 8601 date/time string |
+| `validBefore` | End of Certificate validity          | optional  | ISO 8601 date/time string |
+
+<a name="ca_certificate_signing_response" />
+
+Returns __CertificateSigningResponse__:
+
+```json
+{
+  "id": "integer",
+  "certificateChain": [
+    "<generated client certificate>",
+    "<cloud certificate>",
+    "<root certificate>"
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id`               | ID of the newly generated Certificate in the database          |
+| `certificateChain` | The whole certificate chain in an array of Base64 encoded DER strings (PEM without headers) |
+
+
+<a name="ca_endpoints_check_trusted_key" />
+
+### Check trusted key
+
+```
+POST /certificate-authority/checkTrustedKey
+```
+
+Returns whether the given public key has been registered as trusted or not.
+
+<a name="ca_trusted_key_check_request" />
+
+__TrustedKeyCheckRequest__ is the input:
+
+```json
+{
+  "publicKey": "string"
+}
+```
+
+| Field          | Description             | Necessity | Format/Limitations                                   |
+| -------------- | ----------------------- | --------- | ---------------------------------------------------- |
+| `publicKey`    | The public key to check | mandatory | Base64 encoded DER public key (PEM without headers)  |
+
+<a name="ca_trusted_key_check_response" />
+
+Returns a __TrustedKeyCheckResponse__:
+
+```json
+{
+  "id": "integer",
+  "createdAt": "string",
+  "description": "string"
+}
+```
+
+| Field         | Description                                    | Format/Limitations        |
+| ------------- | ---------------------------------------------- | ------------------------- |
+| `id`          | Record Id                                      | integer                   |
+| `createdAt`   | The time at which the key has been added       | ISO 8601 date/time string |
+| `description` | Description of the key, e.g. device identifier | string                    |
+
+
+<a name="ca_endpoints_get_certificates" />
+
+### Get issued certificates
+
+```
+GET /certificate-authority/mgmt/certificates
+```
+
+Returns data about every certificate issued by the Certificate Authority.
+If `page` and `item_per_page` are not defined, returns all records.
+
+Query params:
+
+| Parameter       | Description                      | Necessity |
+| --------------- | -------------------------------- | --------- |
+| `page`          | zero based page index            | optional  |
+| `item_per_page` | maximum number of items returned | optional  |
+| `sort_field`    | sorts by the given column        | optional  |
+| `direction`     | direction of sorting             | optional  |
+
+> **Note:** Default value for `sort_field` is `id`. All possible values are: 
+> * `id`
+> * `createdAt`
+> * `createdBy`
+> * `validfrom`
+> * `validUntil`
+> * `commonName`
+
+> **Note:** Default value for `direction` is `ASC`. All possible values are:
+> * `ASC`
+> * `DESC` 
+
+<a name="ca_issued_certificates_response" />
+
+Returns a __IssuedCertificatesResponse__:
+
+```json
+{
+  "count": "integer",
+  "issuedCertificates": [
+    "id": "integer",
+    "createdAt": "string",
+    "createdBy": "string",
+    "validfrom": "string",
+    "validUntil": "string",
+    "revokedAt": "string",
+    "commonName": "string",
+    "serialNumber": "string",
+    "status": "string"
+  ]
+}
+```
+
+| Field              | Description                                                |
+| ------------------ | ---------------------------------------------------------- |
+| `count`            | Number of issued certificate records                       |
+| `id`               | ID of the certificate record                               |
+| `createdAt`        | The time at wich the record has been created               |
+| `createdBy`        | Name of the system which requested the certificate         |
+| `validFrom`        | Beginning of validity of the certificate                   |
+| `validUntil`       | End of validity of the certificate                         |
+| `revokedAt`        | The time at which the certificate has been revoked or null |
+| `commonName`       | Common name of the certificate                             |
+| `serialNumber`     | Serial number of the certificate                           |
+| `status`           | One of the following: `good`, `revoked`, `expired`         |
+
+
+<a name="ca_endpoints_revoke_certificate" />
+
+### Revoke certificate
+
+```
+DELETE /certificate-authority/mgmt/certificate/{id}
+```
+
+Revoke a previously issued certificate.
+Revocation means that subsequent requests to the [Check certificate validity](#ca_endpoints_check_certificate) service return with `revoked` status.
+The client SHALL not trust the revoked certificate.
+
+Query params:
+
+| Parameter       | Description             | Necessity |
+| --------------- | ----------------------- | --------- |
+| `id`            | Certificate record ID   | mandatory |
+
+Returns HTTP `200 OK` on success.
+
+
+<a name="ca_endpoints_get_trusted_keys" />
+
+### Get trusted keys
+
+```
+GET /certificate-authority/mgmt/keys
+```
+
+Returns the list of public keys that are added to be trusted.
+The keys may be used e.g. by the Onboarding Controller to identify a device.
+If `page` and `item_per_page` are not defined, returns all records.
+
+Query params:
+
+| Parameter       | Description                      | Necessity |
+| --------------- | -------------------------------- | --------- |
+| `page`          | zero based page index            | optional  |
+| `item_per_page` | maximum number of items returned | optional  |
+| `sort_field`    | sorts by the given column        | optional  |
+| `direction`     | direction of sorting             | optional  |
+
+> **Note:** Default value for `sort_field` is `id`. All possible values are: 
+> * `id`
+> * `createdAt`
+
+> **Note:** Default value for `direction` is `ASC`. All possible values are:
+> * `ASC`
+> * `DESC` 
+
+<a name="ca_trusted_keys_response" />
+
+Returns a __TrustedKeysResponse__:
+
+```json
+{
+  "count": "integer",
+  "trustedKeys": [
+    "id": "integer",
+    "createdAt": "string",
+    "description": "string"
+  ]
+}
+```
+
+| Field         | Description                                    |
+| ------------- | ---------------------------------------------- |
+| `count`       | The total number of the trusted keys           |
+| `id`          | Record ID                                      |
+| `createdAt`   | The time at which the key has been added       |
+| `description` | Description of the key; e.g. device identifier |
+
+
+<a name="ca_endpoints_add_trusted_key" />
+
+### Add trusted key
+
+```
+PUT /certificate-authority/mgmt/keys
+```
+
+Add a public key to the list of trusted keys.
+This key may be used by e.g. the Onboarding Controller to onboard a device with known public key.
+
+<a name="ca_add_trusted_key_request" />
+
+__AddTrustedKeyRequest__  is the input:
+
+```json
+{
+  "publicKey": "string",
+  "description": "string",
+  "validAfter": "string",
+  "validBefore": "string"
+}
+```
+
+| Field          | Description                                    | Necessity | Format/Limitations                                  |
+| -------------- | ---------------------------------------------- | --------- | --------------------------------------------------- |
+| `publicKey`    | The public key to add as trusted               | mandatory | Base64 encoded DER public key (PEM without headers) |
+| `description`  | Description of the key; e.g. device identifier | mandatory | string                                              |
+| `validAfter`   | Beginning of validity                          | mandatory | ISO 8601 date/time string                           |
+| `validBefore`  | End of validity                                | mandatory | ISO 8601 date/time string                           |
+
+
+<a name="ca_add_trusted_key_response" />
+
+Returns an __AddTrustedKeyResponse__ with HTTP `201 Created` on success:
+
+```json
+{
+  "id": "integer",
+  "validAfter": "string",
+  "validBefore": "string"
+}
+```
+
+| Field            | Description                  |
+| ---------------- | ---------------------------- |
+| `id`             | Record ID                    |
+| `validAfter`     | Beginning of validity        |
+| `validBefore`    | End of validity              |
+
+
+<a name="ca_endpoints_delete_trusted_key" />
+
+### Delete trusted key
+
+```
+DELETE /certificate-authority/mgmt/keys/{id}
+```
+
+Delete a public key from the list of trusted keys.
+
+Query params:
+
+| Parameter       | Description          | Necessity |
+| --------------- | -------------------- | --------- |
+| `id`            | Key record ID        | mandatory |
+
+Returns HTTP `204 No Content` on success.
+
+<a name="choreographer" />
+
+# Choreographer
+
+<a name="choreographer_sdd" />
+
+## System Design Description Overview
+
+This supporting core system makes it possible to execute pre-defined workflows through orchestration and service consumption.
+
+Each workflow can be divided into three segments:
+* Plans,
+* Actions,
+* and Steps.
+
+_Plans_ define the whole workflow by name and they contain _Actions_ which group coherent _Steps_ together for greater transparency and enabling sequentialization of these _Step_ groups.
+
+Workflow execution in this generation can only be accomplished if the requested providers in each _Step_ are all available (they are registered with the same name in the service registry as in the plan description) and the requested services call back (notify) to the Choreographer through the Choreography service that the execution on their end is done. Only this way can the Choreographer continue the execution of the _Plan_.
+
+<a name="choreographer_usecases" />
+
+## Services and Use Cases
+
+This Supporting Core System provides the Choreographer Service which only has one use-case scenario: notifying the Choreographer from the providers' side that the executed _Step_ is done.
+
+<a name="choreographer_endpoints" />
+
+## Endpoints
+
+The Choreographer offers two types of endpoints: Client and Management.
+
+Swagger API documentation is available on: `https://<host>:<port>` <br />
+The base URL for the requests: `http://<host>:<port>/choreographer`
+
+<a name="choreographer_endpoints_client" />
+
+### Client endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#choreographer_endpoints_get_echo) | /echo | GET | - | OK |
+| [Notify that a step is done](#choreographer_endpoints_post_nofity) | /notifyStepDone | POST | [SessionRunningStepData](#datastructures_choreographer_session_running_step_data) | OK |
+
+<a name="choreographer_endpoints_mgmt" />
+
+###  Management endpoint description<br />
+
+These endpoints are mainly used by the Management Tool and Cloud Administrators.
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Get all plan entries](#choreographer_endpoints_get_mgmt_plan) | /mgmt/plan | GET | - | [ChoreographerPlanEntryList](#datastructures_choreographerplanentrylist) |
+| [Add a plan entry](#choreographer_endpoints_post_mgmt_plan) | /mgmt/plan | POST | [ChoreographerPlanEntry](#datastructures_choreographer_addplanentry) | CREATED |
+| [Get a plan entry by ID](#choreographer_endpoints_get_mgmt_plan_id) | /mgmt/plan/{id} | GET | ChoreographerPlanID | [ChoreographerPlanEntry](#datastructures_choreographerplanentry)
+| [Delete a plan entry by ID](#choreographer_endpoints_delete_plan_id) | /mgmt/plan/{id} | DELETE | ChoreographerPlanID | NO CONTENT |
+| [Start one or more sessions executing a plan](#choreographer_endpoints_start_session_id) | /mgmt/session/start | POST | [ChoreographerPlanIDList](#datastructures_choreographerplanidlist) | CREATED |
+| [Change a running step to finished](#choreographer_endpoints_post_stepfinished) | /mgmt/session/stepFinished | POST | [SessionRunningStepData](#datastructures_choreographer_session_running_step_data_mgmt) | OK |
+
+
+<a name="choreographer_endpoints_get_echo" />
+
+### Echo
+```
+GET /choreographer/echo
+```
+
+Returns a "Got it" message with the purpose of testing the core service availability.
+
+<a name="choreographer_endpoints_post_nofity" />
+
+### Notify that a step is done
+```
+POST /choreographer/notifyStepDone
+```
+
+Returns HTTP 200 - OK if the notification of the Choreographer is successful.
+
+<a name="datastructures_choreographer_session_running_step_data" />
+
+__SessionRunningStepData__ is the input
+```json
+{
+  "runningStepId": 0,
+  "sessionId": 0
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `runningStepId` | The id of the running step which the provider gets from the Choreographer | yes |
+| `sessionId` | The id of the session in which the step is running | yes |
+
+<a name="choreographer_endpoints_get_mgmt_plan" />
+
+### Get all plan entries
+```
+GET /choreographer/mgmt/plan
+```
+
+Returns a list of Choreographer Plan records. If `page` and `item_per_page` are not defined, returns all records.
+
+Query params:
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `page` | zero based page index | no |
+| `item_per_page` | maximum number of items returned | no |
+| `sort_field` | sorts by the given column | no |
+| `direction` | direction of sorting | no |
+
+> **Note:** Default value for `sort_field` is `id`. All possible values are: 
+> * `id`
+> * `createdAt`
+> * `updatedAt`
+> * `name`
+
+> **Note:** Default value for `direction` is `ASC`. All possible values are:
+> * `ASC`
+> * `DESC` 
+
+<a name="datastructures_choreographerplanentrylist" />
+
+Returns a __ChoreographerPlanEntryList__
+```json
+[
+  { 
+    "id": 0,
+    "name": "string",
+    "firstActionName": "string",
+    "createdAt": "string", 
+    "updatedAt": "string",
+    "actions": [
+      {
+	"id": 0,
+        "name": "string",
+        "createdAt": "string",
+	"updatedAt": "string",
+        "firstStepNames": [
+          "string"
+        ],
+        "nextActionName": "string",
+        "steps": [
+          {
+	    "id": 0,
+	    "name": "string",
+	    "serviceName": "string",
+            "metadata": "string",
+	    "parameters": "string",
+            "quantity": 0,
+	    "createdAt": "string",
+            "updatedAt": "string",
+            "nextSteps": [
+              {
+                "id": 0,
+                "stepName": "string"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of the PlanEntry |
+| `name` | Name of the PlanEntry |
+| `firstActionName` | Name of the First Action |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+| `actions` | Array of the [ActionEntries](#datasturctures_choreographer_actionentry) in a Plan |
+
+<a name="datasturctures_choreographer_actionentry" />
+
+Contains a list of __ActionEntires__.
+```json
+{
+  "id": 0,
+  "name": "string",
+  "createdAt": "string",
+  "updatedAt": "string",
+  "firstStepNames": [
+    "string"
+  ],
+  "nextActionName": "string",
+  "steps": [
+    {
+      "id": 0,
+      "name": "string",
+      "serviceName": "string",
+      "metadata": "string",
+      "parameters": "string",
+      "quantity": 0,
+      "createdAt": "string",
+      "updatedAt": "string",
+      "nextSteps": [
+        {
+          "id": 0,
+          "stepName": "string"
+        }
+      ]
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of an Action entry |
+| `name` | Name of an Action entry |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+| `firstStepNames` | The names of the first steps within this Action |
+| `nextActionName` | The name of the Action which follows the current Action |
+| `steps` | Array of [StepEntries](#datasturctures_choreographer_stepentry) in an Action |
+
+<a name="datasturctures_choreographer_stepentry" />
+
+Contains a list of __StepEntries__.
+
+```json
+{
+  "id": 0,
+  "name": "string",
+  "serviceName": "string",
+  "metadata": "string",
+  "parameters": "string",
+  "quantity": 0,
+  "createdAt": "string",
+  "updatedAt": "string",
+  "nextSteps": [
+    {
+      "id": 0,
+      "stepName": "string"
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of a Step entry |
+| `name` | Name of a Step entry |
+| `serviceName` | Name of the service which the step uses |
+| `metadata` | Additional metadata needed for step execution |
+| `parameters` | Parameters needed by the device to run this step |
+| `quantity` |  How many times should the step run in its current position |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+| `nextSteps` | Array of next steps following the Step entry |
+
+> **Note:**  In the current version the `parameters`, the `metadata` and the `quantity` fields cannot be used when executing plans. These will be implemented in future versions.
+
+<a name="choreographer_endpoints_post_mgmt_plan" />
+
+### Add a plan entry
+```
+POST choreographer/mgmt/plan
+```
+
+Creates a plan record and returns HTTP 201 - CREATED if the entry creation is successful or the proper error message if the entry creation failed.
+
+<a name="datastructures_choreographer_addplanentry" />
+
+__ChoreographerPlanEntry__ is the input
+```json
+{
+  "actions": [
+    {
+      "firstStepNames": [
+        "string"
+      ],
+      "name": "string",
+      "nextActionName": "string",
+      "steps": [
+        {
+          "metadata": "string",
+          "name": "string",
+          "nextStepNames": [
+            "string"
+          ],
+          "parameters": "string",
+          "quantity": 0,
+          "serviceName": "string"
+        }
+      ]
+    }
+  ],
+  "firstActionName": "string",
+  "name": "string"
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `name` | Name of the PlanEntry | yes |
+| `firstActionName` | Name of the First Action | yes |
+| `actions` | Array of the [ActionEntries](#datasturctures_choreographer_actionentry) in a Plan | yes |
+
+<a name="choreographer_endpoints_get_mgmt_plan_id" />
+
+### Get a plan entry by ID
+```
+GET /choreographer/mgmt/plan/{id}
+```
+
+Returns the Choreographer Plan Entry specified by the ID path parameter.
+
+<a name="datastructures_choreographerplanentry" />
+
+Returns a ChoreographerPlanEntry
+```json
+{
+  "actions": [
+    {
+      "createdAt": "string",
+      "firstStepNames": [
+        "string"
+      ],
+      "id": 0,
+      "name": "string",
+      "nextActionName": "string",
+      "steps": [
+        {
+          "createdAt": "string",
+          "id": 0,
+          "metadata": "string",
+          "name": "string",
+          "nextSteps": [
+            {
+              "id": 0,
+              "stepName": "string"
+            }
+          ],
+          "parameters": "string",
+          "quantity": 0,
+          "serviceName": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "updatedAt": "string"
+    }
+  ],
+  "createdAt": "string",
+  "firstActionName": "string",
+  "id": 0,
+  "name": "string",
+  "updatedAt": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of the PlanEntry |
+| `name` | Name of the PlanEntry |
+| `firstActionName` | Name of the First Action |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+| `actions` | Array of the [ActionEntries](#datasturctures_choreographer_actionentry) in a Plan |
+
+<a name="choreographer_endpoints_delete_plan_id" />
+
+### Delete a plan entry by id
+```
+DELETE /choreographer/plan/{id}
+```
+
+Remove the Choreographer Plan record specified by the id path parameter.
+
+<a name="choreographer_endpoints_start_session_id" />
+
+### Start one or more sessions executing a plan
+```
+POST /choreographer/mgmt/session/start
+```
+
+Starts one or more plans in sessions.
+
+<a name="datastructures_choreographerplanidlist" />
+
+ChoreographerPlanIDList is the input
+```json
+[
+  {
+    "id": 0
+  }
+]
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| id | ID of a plan to be executed | yes |
+
+<a name="choreographer_endpoints_post_stepfinished" />
+
+### Change a running step to finished
+```
+POST /choreographer/mgmt/session/stepFinished
+```
+
+Returns HTTP 200 - OK if the notification of the Choreographer is successful.
+
+<a name="datastructures_choreographer_session_running_step_data_mgmt" />
+
+__SessionRunningStepData__ is the input
+```json
+{
+  "runningStepId": 0,
+  "sessionId": 0
+}
+```
+
+
+# Onboarding Controller
+<a name="onboardingcontroller" /><br /
+
+## System Design Description Overview
+<a name="onboardingcontroller_sdd" /><br />
+
+The purpose of this System is to be the entry board for the onboarding procedure. The onboarding controller sits at the edge of the Arrowhead local cloud. 
+It is not only reachable from within the cloud by authorized systems, but also from the public through its "accept all" interfaces. 
+Any client may authenticate itself through an Arrowhead certificate, through an authorized manufacturer certificate, or simply through a shared secret.
+
+![onboarding_controller](./documentation/onboarding/onboarding_controller.png)
+
+## Services and Use Cases
+<a name="onboardingcontroller_usecases" />
+
+The only use case is the onboarding procedure. 
+
+The onboarding procedure is needed when a new device produced by any vendor (e.g. Siemens, Infineon, Bosch, etc.), containing a security controller (e.g. TPM), 
+wants to interact with the Arrowhead local cloud. To assure that the cloud is not compromised upon the arrival of this new device, it is important to establish 
+a chain of trust from the new hardware device, to its hosted application systems and their services. Thus, the onboarding procedure makes possible that 
+the device, systems and services are authenticated and authorized to connect to the Arrowhead local cloud.
+
+The use cases in which the external actor interacts with the Arrowhead local cloud during onboarding include:
+* Initialize Device Onboarding (via the Onboarding Controller system)
+* Register a Device in the DeviceRegistry (via the DeviceRegistry system)
+* Register a System in the SystemRegistry (via the SystemRegistry system)
+* Register a Service in the ServiceRegistry (via the ServiceRegistry system)
+* Start normal operation (e.g., service lookup, service consumption, etc.)
+
+The onboarding controller can either relay a ![PKCS #10 Certificate Signing Request](https://tools.ietf.org/html/rfc2986) or generate one on behalf of the client.
+
+
+## Security
+<a name="onboardingcontroller_security" />
+
+This System can be secured via the HTTPS protocol. If it is started in secure mode, it verifies whether the Application System 
+- possesses a proper X.509 identity certificate and whether that certificate is Arrowhead compliant
+- possesses a proper X.509 identity certificate and whether that certificate is trusted by the CA
+- provides a shared secret through ![HTTP Basic Authentication](https://tools.ietf.org/html/rfc7617)
+
+## Endpoints
+<a name="onboardingcontroller_endpoints" />
+
+The Onboarding Controller offers two types of authentication (certificate or HTTP Basic) and two types operation (provide CSR or generate CSR), thus having four different endpoint. 
+No management or private endpoint exists.
+
+Swagger API documentation is available on: `https://<host>:<port>` <br />
+The base URL for the requests: `https://<host>:<port>/onboarding`
+
+The general scheme of the URLs is `https://<host>:<port>/onboarding/<authentication_type>/<operation_type>`
+
+### Client endpoint description<br />
+<a name="onboardingcontroller_endpoints" />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#onboardingcontroller_endpoints_get_echo)     | /echo       | GET    | -     | OK     |
+| [Onboard with Name](#onboardingcontroller_endpoints_name) | /certificate/name   | POST   | [OnboardingWithNameRequest](#datastructures_onboarding_name_request) | [OnboardingWithNameResponse](#datastructures_onboarding_name_response) |
+| [Onboard with Name](#onboardingcontroller_endpoints_name) | /sharedsecret/name | POST   | [OnboardingWithNameRequest](#datastructures_onboarding_name_request) | [OnboardingWithNameResponse](#datastructures_onboarding_name_response) |
+| [Onboard with CSR](#onboardingcontroller_endpoints_csr)    | /certificate/csr      | POST   | [OnboardingWithCsrRequest](#datastructures_onboarding_csr_request) | [OnboardingWithCsrResponse](#datastructures_onboarding_csr_response) |
+| [Onboard with CSR](#onboardingcontroller_endpoints_csr)    | /sharedsecret/csr      | POST   | [OnboardingWithCsrRequest](#datastructures_onboarding_csr_request) | [OnboardingWithCsrResponse](#datastructures_onboarding_csr_response) |
+
+
+### Onboard with Name
+<a name="onboardingcontroller_endpoints_name" />
+
+```
+POST /certificate/name
+POST /sharedsecret/name
+```
+
+Creates a CSR on behalf of the client and eventually returns an onboarding certificate which may be used in the next step of the onboarding controller.
+
+#### Request
+<a name="datastructures_onboarding_name_request" />
+
+```json
+{
+  "creationRequestDTO": {
+    "commonName": "string",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  }
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `commonName` | The common name field for the new certificate |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys |
+| `privateKey` | Base64 encoded private key |
+| `publicKey` | Base64 encoded public key |
+
+#### Response
+<a name="datastructures_onboarding_name_response" />
+
+```json
+{
+  "rootCertificate": "string",
+  "intermediateCertificate": "string",
+  "onboardingCertificate": {
+    "certificate": "string",
+    "certificateFormat": "string",
+    "certificateType": "AH_ONBOARDING",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  },
+  "deviceRegistry": {
+    "service": "DEVICE_REGISTRY_ONBOARDING_WITH_NAME_SERVICE",
+    "uri": "string"
+  },
+  "systemRegistry": {
+    "service": "SYSTEM_REGISTRY_ONBOARDING_WITH_NAME_SERVICE",
+    "uri": "string"
+  },
+  "serviceRegistry": {
+    "service": "SERVICE_REGISTRY_REGISTER_SERVICE",
+        "uri": "string"
+  },
+  "orchestrationService": {
+    "service": "ORCHESTRATION_SERVICE",
+    "uri": "string"
+  }
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `rootCertificate` | The Arrowhead master certificate |
+| `intermediateCertificate` | The Arrowhead local cloud certificate |
+| `onboardingCertificate` | The onboarding certificate for the next step |
+| `certificateFormat` | The certificate format (usually X.509) |
+| `certificateType` | The certificate type. Always AH_ONBOARDING for this operation |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys |
+| `privateKey` | Base64 encoded private key |
+| `publicKey` | Base64 encoded public key |
+| `service` | The service which is reachable under `uri` |
+| `uri` | The uri under which the depicted `service` is reachable |
+
+
+### Onboard with CSR
+<a name="onboardingcontroller_endpoints_csr" />
+
+```
+POST /certificate/csr
+POST /sharedsecret/csr
+```
+
+Creates a CSR on behalf of the client and eventually returns an onboarding certificate which may be used in the next step of the onboarding controller.
+
+#### Request
+<a name="datastructures_onboarding_csr_request" />
+
+```json
+{
+  "certificateSigningRequest": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `certificateSigningRequest` | Base64 encoded certificate signing request |
+
+#### Response
+<a name="datastructures_onboarding_csr_response" />
+
+```json
+{
+  "rootCertificate": "string",
+  "intermediateCertificate": "string",
+  "onboardingCertificate": {
+    "certificate": "string",
+    "certificateFormat": "string",
+    "certificateType": "AH_ONBOARDING",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  },
+  "deviceRegistry": {
+    "service": "DEVICE_REGISTRY_ONBOARDING_WITH_CSR_SERVICE",
+    "uri": "string"
+  },
+  "systemRegistry": {
+    "service": "SYSTEM_REGISTRY_ONBOARDING_WITH_CSR_SERVICE",
+    "uri": "string"
+  },
+  "serviceRegistry": {
+    "service": "SERVICE_REGISTRY_REGISTER_SERVICE",
+        "uri": "string"
+  },
+  "orchestrationService": {
+    "service": "ORCHESTRATION_SERVICE",
+    "uri": "string"
+  }
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `rootCertificate` | The Arrowhead master certificate |
+| `intermediateCertificate` | The Arrowhead local cloud certificate |
+| `onboardingCertificate` | The onboarding certificate for the next step |
+| `certificateFormat` | The certificate format (usually X.509) |
+| `certificateType` | The certificate type. Always AH_ONBOARDING for this operation |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys |
+| `privateKey` | Base64 encoded private key. Always empty for this operation |
+| `publicKey` | Base64 encoded public key |
+| `service` | The service which is reachable under `uri` |
+| `uri` | The uri under which the depicted `service` is reachable |
+
+
+# Device Registry 
+<a name="deviceregistry"/><br />
+
+## System Design Description Overview
+<a name="deviceregistry_sdd" /><br />
+
+This System provides the database, which stores information related to the Devices within the Local Cloud.
+
+The purpose of this System is therefore to allow:
+-	Devices to register themselves, making this announcement available to other Application Systems on the network. 
+-	They are also allowed to remove or update their entries when it is necessary. 
+-   Generate a client certificate which can be used by the Device to register its Systems
+
+## Services and Use Cases
+<a name="deviceregistry_usecases" />
+
+This System provides two Core Service: the __device registration__ and __de-registration__.
+Further it provides two Onboarding Services: the __onboarding with name__ and __onboarding with CSR__.
+
+The __register__ method is used to register a device. The device will contain various metadata as well as a physical endpoint. 
+The various parameters are representing the endpoint information that should be registered.
+
+The __unregister__ method is used to unregister device instances that were previously registered in the Registry. 
+The instance parameter is representing the endpoint information that should be removed.
+
+The __onboarding__ methods are used to register a device and to retrieve a device certificate which must be used on the next step of the onboarding procedure.
+
+## Security
+<a name="deviceregistry_security" />
+
+This System can be secured via the HTTPS protocol. If it is started in secure mode, it verifies whether the Application System possesses a proper X.509 identity certificate and whether that certificate is Arrowhead compliant in its making. This certificate structure and creation guidelines ensure:
+-	Application System is properly bootstrapped into the Local Cloud
+-	The Application System indeed belongs to this Local Cloud
+-	The Application System then automatically has the right to register its Systems in the Registry.
+
+If these criteria are met, the Application System’s registration or removal message is processed. An Application System can only delete or alter entries that contain the Device as the System Provider in the entry. 
+
+
+## Endpoints
+<a name="deviceregistry_endpoints" />
+
+The System Registry offers four types of endpoints. Onboarding, Client, Management and Private.
+
+Swagger API documentation is available on: `https://<host>:<port>` <br />
+The base URL for the requests: `http://<host>:<port>/deviceregistry`
+
+### Onboarding endpoint description<br />
+<a name="deviceregistry_endpoints_onboarding" />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Onboard with Name](#deviceregistry_endpoints_onboarding_name)    | /onboarding/name      | POST   | [DeviceOnboardingWithNameRequest](#datastructures_deviceregistry_onboarding_with_name_request) | [DeviceOnboardingWithNameResponse](#datastructures_deviceregistry_onboarding_with_name_response) |
+| [Onboard with CSR](#deviceregistry_endpoints_onboarding_csr) | /onboarding/csr   | POST   | [DeviceOnboardingWithCsrRequest](#datastructures_deviceregistry_onboarding_with_csr_request) | [DeviceOnboardingWithCsrResponse](#datastructures_deviceregistry_onboarding_with_csr_response) |
+
+
+### Client endpoint description<br />
+<a name="deviceregistry_endpoints_onboarding" />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#deviceregistry_endpoints_get_echo)     | /echo       | GET    | -     | OK     |
+| [Query](#deviceregistry_endpoints_post_query)    | /query      | POST   | [DeviceQueryForm](#datastructures_systemqueryform) | [DeviceQueryList](#datastructures_devicequerylist) |
+| [Register](#deviceregistry_endpoints_post_register) | /register   | POST   | [DeviceRegistryEntry](#datastructures_deviceregistryentry) | [DeviceRegistryEntry](#datastructures_deviceregistryentry) |
+| [Unregister](#deviceregistry_delete_unregister) | /unregister | DELETE | Device Name and Mac Address in query parameters| OK |
+
+### Detailed description<br />
+
+A detailed description of management and private endpoints is available in the release notes.
+
+### Onboard with Name
+<a name="deviceregistry_endpoints_onboarding_name" />
+
+```
+POST /onboarding/name
+```
+
+Creates a CSR on behalf of the client, registers the device and eventually returns a device certificate which may be used in the next step of the onboarding controller.
+
+#### Request
+<a name="datastructures_deviceregistry_onboarding_with_name_request" />
+
+```json
+{
+  "certificateCreationRequest": {
+    "commonName": "string",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  },
+  "device": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "deviceName": "string",
+    "macAddress": "string"
+  },
+  "endOfValidity": "string",
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "version": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `commonName` | The common name field for the new certificate |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys |
+| `privateKey` | Base64 encoded private key |
+| `publicKey` | Base64 encoded public key |
+| `address` | The optional IP address of the device |
+| `authenticationInfo` | Base64 encoded public key of the certificate this device |
+| `deviceName` | The device name |
+| `macAddress` | The MAC address of the device |
+| `endOfValidity` | The validity of this entry |
+| `metadata` | Various meta information as map |
+| `version` | The version of this entry |
+
+#### Response
+<a name="datastructures_deviceregistry_onboarding_with_name_response" />
+
+```json
+{
+  "certificateResponse": {
+    "certificate": "string",
+    "certificateFormat": "string",
+    "certificateType": "AH_DEVICE",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  },
+  "createdAt": "string",
+  "device": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "createdAt": "string",
+    "deviceName": "string",
+    "id": 0,
+    "macAddress": "string",
+    "updatedAt": "string"
+  },
+  "endOfValidity": "string",
+  "id": 0,
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "updatedAt": "string",
+  "version": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `certificate` | The Base64 device certificate for the next step |
+| `certificateFormat` | The certificate format (usually X.509) |
+| `certificateType` | The certificate type. Always AH_DEVICE for this operation |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys |
+| `privateKey` | Base64 encoded private key |
+| `publicKey` | Base64 encoded public key |
+
+Additionally all fields from [DeviceRegistryEntry](#datastructures_deviceregistryentry) are returned. 
+
+### Onboard with CSR
+<a name="deviceregistry_endpoints_onboarding_csr" />
+
+```
+POST /onboarding/csr
+```
+
+Signs the CSR, registers the device and eventually returns a device certificate which may be used in the next step of the onboarding controller.
+
+#### Request
+<a name="datastructures_deviceregistry_onboarding_with_csr_request" />
+
+```json
+{
+  "certificateSigningRequest": "string",
+  "device": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "deviceName": "string",
+    "macAddress": "string"
+  },
+  "endOfValidity": "string",
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "version": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `certificateSigningRequest` | Base64 encoded certificate signing request |
+| `address` | The optional IP address of the device |
+| `authenticationInfo` | Base64 encoded public key of the certificate this device |
+| `deviceName` | The device name |
+| `macAddress` | The MAC address of the device |
+| `endOfValidity` | The validity of this entry |
+| `metadata` | Various meta information as map |
+| `version` | The version of this entry |
+
+#### Response
+<a name="datastructures_deviceregistry_onboarding_with_csr_response" />
+
+```json
+{
+  "certificateResponse": {
+    "certificate": "string",
+    "certificateFormat": "string",
+    "certificateType": "AH_DEVICE",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  },
+  "createdAt": "string",
+  "device": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "createdAt": "string",
+    "deviceName": "string",
+    "id": 0,
+    "macAddress": "string",
+    "updatedAt": "string"
+  },
+  "endOfValidity": "string",
+  "id": 0,
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "updatedAt": "string",
+  "version": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `certificate` | The Base64 device certificate for the next step |
+| `certificateFormat` | The certificate format (usually X.509) |
+| `certificateType` | The certificate type. Always AH_DEVICE for this operation |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys |
+| `privateKey` | Base64 encoded private key. Always empty for this operation |
+| `publicKey` | Base64 encoded public key |
+
+Additionally all fields from [DeviceRegistryEntry](#datastructures_deviceregistryentry) are returned. 
+
+
+# System Registry 
+<a name="systemregistry" />
+
+
+## System Design Description Overview
+<a name="systemregistry_sdd" />
+
+This System provides the database, which stores information related to the System of the currently actively offered Services within the Local Cloud.
+
+The purpose of this System is therefore to allow:
+-	Devices to register which Systems they offer at the moment, making this announcement available to other Application Systems on the network. 
+-	They are also allowed to remove or update their entries when it is necessary. 
+-   Generate a client certificate which can be used by the System to offer Services
+
+
+## Services and Use Cases
+<a name="systemregistry_usecases" />
+
+This System provides two Core Service the __system registration__ and __de-registration__
+
+The __register__ method is used to register a system. The system will contain various metadata as well as a physical endpoint. 
+The various parameters are representing the endpoint information that should be registered.
+
+The __unregister__ method is used to unregister system instances that were previously registered in the Registry. 
+The instance parameter is representing the endpoint information that should be removed.
+
+
+## Security
+<a name="systemregistry_security" />
+
+This System can be secured via the HTTPS protocol. If it is started in secure mode, it verifies whether the Application System possesses a proper X.509 identity certificate and whether that certificate is Arrowhead compliant in its making. This certificate structure and creation guidelines ensure:
+-	Application System is properly bootstrapped into the Local Cloud
+-	The Application System indeed belongs to this Local Cloud
+-	The Application System then automatically has the right to register its Services in the Registry.
+
+If these criteria are met, the Application System’s registration or removal message is processed. An Application System can only delete or alter entries that contain the Device as the System Provider in the entry. 
+
+
+## Endpoints
+<a name="systemregistry_endpoints" />
+
+The System Registry offers three types of endpoints. Client, Management and Private.
+
+Swagger API documentation is available on: `https://<host>:<port>` <br />
+The base URL for the requests: `http://<host>:<port>/systemregistry`
+
+### Onboarding endpoint description<br />
+<a name="systemregistry_endpoints_onboarding" />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Onboard with Name](#systemregistry_endpoints_onboarding_name)    | /onboarding/name      | POST   | [SystemOnboardingWithNameRequest](#datastructures_systemregistry_onboarding_with_name_request) | [SystemOnboardingWithNameResponse](#datastructures_systemregistry_onboarding_with_name_response) |
+| [Onboard with CSR](#systemregistry_endpoints_onboarding_csr) | /onboarding/csr   | POST   | [SystemOnboardingWithCsrRequest](#datastructures_systemregistry_onboarding_with_csr_request) | [SystemOnboardingWithCsrResponse](#datastructures_systemregistry_onboarding_with_csr_response) |
+
+
+### Client endpoint description<br />
+<a name="systemregistry_endpoints_client" />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#systemregistry_endpoints_get_echo)     | /echo       | GET    | -     | OK     |
+| [Query](#systemregistry_endpoints_post_query)    | /query      | POST   | [SystemQueryForm](#datastructures_systemqueryform) | [SystemQueryList](#datastructures_systemquerylist) |
+| [Register](#systemregistry_endpoints_post_register) | /register   | POST   | [SystenRegistryEntry](#datastructures_systemregistryentry) | [SystenRegistryEntry](#datastructures_systemregistryentry) |
+| [Unregister](#systemregistry_delete_unregister) | /unregister | DELETE | System Name, Address and Port in query parameters| OK |
+
+### Detailed description<br />
+
+A detailed description of public, management and private endpoints is available in the release notes.
+
+### Onboard with Name
+<a name="systemregistry_endpoints_onboarding_name" />
+
+```
+POST /onboarding/name
+```
+
+Creates a CSR on behalf of the client, registers the system and eventually returns a system certificate which is valid in the Arrowhead local cloud.
+
+#### Request
+<a name="datastructures_systemeregistry_onboarding_with_name_request" />
+
+```json
+{
+  "certificateCreationRequest": {
+    "commonName": "string",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  },
+  "provider": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "deviceName": "string",
+    "macAddress": "string"
+  },
+  "system": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "port": 0,
+    "systemName": "string"
+  },
+  "endOfValidity": "string",
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "version": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `commonName` | The common name field for the new certificate |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys |
+| `privateKey` | Base64 encoded private key |
+| `publicKey` | Base64 encoded public key |
+| `address` | The IP address of the device/system |
+| `authenticationInfo` | Base64 encoded public key of the certificate this device/system |
+| `deviceName` | The device name |
+| `macAddress` | The MAC address of the device |
+| `systemName` | The system name |
+| `port` | The port under which this system's services are available |
+| `endOfValidity` | The validity of this entry |
+| `metadata` | Various meta information as map |
+| `version` | The version of this entry |
+
+#### Response
+<a name="datastructures_systemregistry_onboarding_with_name_response" />
+
+```json
+{
+  "certificateResponse": {
+    "certificate": "string",
+    "certificateFormat": "string",
+    "certificateType": "AH_SYSTEM",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  },
+  "createdAt": "string",
+    "provider": {
+      "address": "string",
+      "authenticationInfo": "string",
+      "createdAt": "string",
+      "deviceName": "string",
+      "id": 0,
+      "macAddress": "string",
+      "updatedAt": "string"
+    },
+    "system": {
+      "address": "string",
+      "authenticationInfo": "string",
+      "createdAt": "string",
+      "id": 0,
+      "port": 0,
+      "systemName": "string",
+      "updatedAt": "string"
+    },
+  "endOfValidity": "string",
+  "id": 0,
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "updatedAt": "string",
+  "version": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `certificate` | The Base64 device certificate for the next step |
+| `certificateFormat` | The certificate format (usually X.509) |
+| `certificateType` | The certificate type. Always AH_SYSTEM for this operation |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys |
+| `privateKey` | Base64 encoded private key |
+| `publicKey` | Base64 encoded public key |
+
+Additionally all fields from [SystemRegistryEntry](#datastructures_systemregistryentry) are returned. 
+
+### Onboard with CSR
+<a name="systemregistry_endpoints_onboarding_csr" />
+
+```
+POST /onboarding/csr
+```
+
+Signs the CSR, registers the device and eventually returns a device certificate which may be used in the next step of the onboarding controller.
+
+#### Request
+<a name="datastructures_systemregistry_onboarding_with_csr_request" />
+
+```json
+{
+  "certificateSigningRequest": "string",
+  "provider": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "deviceName": "string",
+    "macAddress": "string"
+  },
+  "system": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "port": 0,
+    "systemName": "string"
+  },
+  "endOfValidity": "string",
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "version": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `certificateSigningRequest` | Base64 encoded certificate signing request |
+| `address` | The IP address of the device/system |
+| `authenticationInfo` | Base64 encoded public key of the certificate this device/system |
+| `deviceName` | The device name |
+| `macAddress` | The MAC address of the device |
+| `systemName` | The system name |
+| `port` | The port under which this system's services are available |
+| `endOfValidity` | The validity of this entry |
+| `metadata` | Various meta information as map |
+| `version` | The version of this entry |
+
+#### Response
+<a name="datastructures_systemregistry_onboarding_with_csr_response" />
+
+```json
+{
+  "certificateResponse": {
+    "certificate": "string",
+    "certificateFormat": "string",
+    "certificateType": "AH_SYSTEM",
+    "keyPairDTO": {
+      "keyAlgorithm": "string",
+      "keyFormat": "string",
+      "privateKey": "string",
+      "publicKey": "string"
+    }
+  },
+  "createdAt": "string",
+    "provider": {
+      "address": "string",
+      "authenticationInfo": "string",
+      "createdAt": "string",
+      "deviceName": "string",
+      "id": 0,
+      "macAddress": "string",
+      "updatedAt": "string"
+    },
+    "system": {
+      "address": "string",
+      "authenticationInfo": "string",
+      "createdAt": "string",
+      "id": 0,
+      "port": 0,
+      "systemName": "string",
+      "updatedAt": "string"
+    },
+  "endOfValidity": "string",
+  "id": 0,
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "updatedAt": "string",
+  "version": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `certificate` | The Base64 device certificate for the next step |
+| `certificateFormat` | The certificate format (usually X.509) |
+| `certificateType` | The certificate type. Always AH_DEVICE for this operation |
+| `keyAlgorithm` | The key algorithm of the provided keys |
+| `keyFormat` | The key format of the provided keys |
+| `privateKey` | Base64 encoded private key. Always empty for this operation |
+| `publicKey` | Base64 encoded public key |
+
+Additionally all fields from [SystemRegistryEntry](#datastructures_systemregistryentry) are returned.

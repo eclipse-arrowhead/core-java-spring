@@ -44,11 +44,11 @@ public class EventHandlerDBService {
 	// members
 	
 	private static final String LESS_THAN_ONE_ERROR_MESSAGE= " must be greater than zero.";
-	private static final String NOT_AVAILABLE_SORTABLE_FIELD_ERROR_MESSAGE = " sortable field  is not available.";
+	private static final String NOT_AVAILABLE_SORTABLE_FIELD_ERROR_MESSAGE = " sortable field is not available.";
 	private static final String NOT_IN_DB_ERROR_MESSAGE = " is not available in database";
 	private static final String EMPTY_OR_NULL_ERROR_MESSAGE = " is empty or null";
 	private static final String NULL_ERROR_MESSAGE = " is null";
-	private static final String VIOLATES_UNIQUE_CONSTRAINT = " violates uniqueConstraint rules";
+	private static final String VIOLATES_UNIQUE_CONSTRAINT = " violates unique constraint rules";
 	private static final String IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the past than the tolerated time difference";
 	private static final String INVALID_TYPE_ERROR_MESSAGE = " is not valid.";
 
@@ -104,6 +104,33 @@ public class EventHandlerDBService {
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<Subscription> getSubscriptionsList() {
+		logger.debug("getSubscriptionsList started ...");
+		
+		final Page<Subscription> subscriptions;
+		
+		final int validatedPage = 0;
+		final int validatedSize = Integer.MAX_VALUE ;
+		final Direction validatedDirection = Direction.ASC;
+		final String validatedSortField = CommonConstants.COMMON_FIELD_NAME_ID;
+		
+		try {
+			subscriptions = subscriptionRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
+		
+			if ( subscriptions == null || subscriptions.getContent() == null) {
+				
+				return List.of();
+			}
+			
+			return subscriptions.getContent();
+		
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	public SubscriptionResponseDTO getSubscriptionByIdResponse(final long id) {
@@ -144,7 +171,7 @@ public class EventHandlerDBService {
 		try {
 			final Optional<Subscription> subcriptionOptional = subscriptionRepository.findByEventTypeAndSubscriberSystem(subscription.getEventType(), subscription.getSubscriberSystem());
 			if (subcriptionOptional.isPresent()) {
-				return  subcriptionOptional.get();
+				return subcriptionOptional.get();
 			} else {
 				throw new InvalidParameterException("Subscription with name  '" + subscription.getSubscriberSystem().getSystemName() + "' and eventType '" +
 													subscription.getEventType().getEventTypeName() + "' not exists");
@@ -312,7 +339,16 @@ public class EventHandlerDBService {
 		logger.debug("updateSubscriberAuthorization started ...");
 		
 		for (final Subscription subscriptionEntry : involvedSubscriptions) {
-			updateSubscriptionEntryPublisherConnections(subscriptionEntry, authorizedPublishers);
+					
+			final Optional<Subscription> subcriptionOptional = subscriptionRepository.findById(subscriptionEntry.getId());
+			if (subcriptionOptional.isPresent()) {
+				final Subscription subscription = subcriptionOptional.get();
+				
+				updateSubscriptionEntryPublisherConnections(subscription, authorizedPublishers);
+			}else {
+				logger.debug("SubscriberSystem" + NOT_IN_DB_ERROR_MESSAGE);
+			}
+			
 		}
 	}
 	
@@ -357,7 +393,7 @@ public class EventHandlerDBService {
 		subscription.setOnlyPredefinedPublishers(request.getSources() != null && !request.getSources().isEmpty());
 		subscription.setMatchMetaData(request.getMatchMetaData());
 		if (subscription.isMatchMetaData() && (subscription.getFilterMetaData() == null || subscription.getFilterMetaData().isEmpty())) {
-			throw new InvalidParameterException("If MatchMetaData is true filterMetaData sould not be null or empty");
+			throw new InvalidParameterException("If MatchMetaData is true filterMetaData should not be null or empty");
 		}
 		
 		if (request.getStartDate() != null) {
@@ -408,7 +444,7 @@ public class EventHandlerDBService {
 		
 		if (start != null && end != null) {
 			if (end.isBefore(start) || !end.isAfter(start)) {
-				throw new InvalidParameterException("Start Date sould be before End Date");
+				throw new InvalidParameterException("Start Date should be before End Date");
 			}			
 		}
 	}
