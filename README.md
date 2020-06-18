@@ -1,12 +1,12 @@
 
-# Arrowhead Framework 4.1.3
+# Arrowhead Framework 4.2.0
 
 [Arrowhead](http://www.arrowhead.eu/) (and its continuation, [Productive4.0](https://productive40.eu/)) is an ambitious holistic innovation project,
  meant to open the doors to the potentials of Digital Industry and to maintain a leadership position of the industries in Europe. All partners involved will work on creating the capability to efficiently design and integrate hardware and software of Internet of Things (IoT) devices. Linking the real with the digital world takes more than just adding software to the hardware.
 
 
 ## Disclaimer
-Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you have older systems please refer to the [Migration Guide](#migration) 
+Please be aware, that versions starting from 4.1.3 are __NOT__ backwards compatible with 4.1.2. If you have older systems please refer to the [Migration Guide](#migration) 
 
 ## Table of Contents
 1. [Quick Start Guide](#quickstart)
