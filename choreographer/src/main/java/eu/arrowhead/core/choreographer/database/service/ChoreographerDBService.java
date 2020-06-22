@@ -3,13 +3,16 @@ package eu.arrowhead.core.choreographer.database.service;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerAction;
+import eu.arrowhead.common.database.entity.ChoreographerExecutor;
 import eu.arrowhead.common.database.entity.ChoreographerPlan;
 import eu.arrowhead.common.database.entity.ChoreographerRunningStep;
 import eu.arrowhead.common.database.entity.ChoreographerSession;
 import eu.arrowhead.common.database.entity.ChoreographerStep;
 import eu.arrowhead.common.database.entity.ChoreographerStepNextStepConnection;
 import eu.arrowhead.common.database.entity.ChoreographerWorklog;
+import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.ChoreographerActionRepository;
+import eu.arrowhead.common.database.repository.ChoreographerExecutorRepository;
 import eu.arrowhead.common.database.repository.ChoreographerRunningStepRepository;
 import eu.arrowhead.common.database.repository.ChoreographerSessionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerStepNextStepConnectionRepository;
@@ -20,6 +23,7 @@ import eu.arrowhead.common.dto.internal.ChoreographerActionRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerStatusType;
 import eu.arrowhead.common.dto.internal.ChoreographerStepRequestDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.shared.ChoreographerExecutorResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -64,6 +68,9 @@ public class ChoreographerDBService {
 
     @Autowired
     private ChoreographerRunningStepRepository choreographerRunningStepRepository;
+
+    @Autowired
+    private ChoreographerExecutorRepository choreographerExecutorRepository;
 
     private final Logger logger = LogManager.getLogger(ChoreographerDBService.class);
     
@@ -604,5 +611,31 @@ public class ChoreographerDBService {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
+    }
+
+    private ChoreographerExecutor createExecutor(String name, String address, int port, String baseUri, String serviceDefinitionName, int version) {
+        logger.debug("createExecutor started...");
+
+        try {
+            final Optional<ChoreographerExecutor> executorOptional = choreographerExecutorRepository.findByServiceDefinitionNameAndVersion(serviceDefinitionName, version);
+            if (executorOptional.isPresent()) {
+                throw new InvalidParameterException("Executor with service definition name: " + serviceDefinitionName + ", version: " + version + " already exists.");
+            } else {
+                return choreographerExecutorRepository.saveAndFlush(new ChoreographerExecutor(name, address, port, baseUri, serviceDefinitionName, version));
+            }
+        } catch (final InvalidParameterException ex) {
+            throw ex;
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public ChoreographerExecutorResponseDTO createExecutorResponse(final String name, final String address, final int port, final String baseUri, final String serviceDefinitionName, final int version) {
+        logger.debug("createExecutorResponse started...");
+
+        return DTOConverter.convertExecutorToExecutorResponseDTO(createExecutor(name, address, port, baseUri, serviceDefinitionName, version));
     }
 }

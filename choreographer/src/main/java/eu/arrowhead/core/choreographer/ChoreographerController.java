@@ -7,12 +7,16 @@ import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
+import eu.arrowhead.common.database.entity.ChoreographerExecutor;
 import eu.arrowhead.common.database.entity.ChoreographerSession;
 import eu.arrowhead.common.dto.internal.ChoreographerPlanRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerRunPlanRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerExecutorRequestDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerExecutorResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerSessionRunningStepDataDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
 import io.swagger.annotations.Api;
@@ -28,6 +32,7 @@ import org.springframework.http.HttpHeaders;
 
 import org.springframework.http.MediaType;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -62,6 +67,7 @@ public class ChoreographerController {
     private static final String PLAN_MGMT_URI = CoreCommonConstants.MGMT_URI + "/plan";
     private static final String PLAN_MGMT_BY_ID_URI = PLAN_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
     private static final String SESSION_MGMT_URI = CoreCommonConstants.MGMT_URI + "/session";
+    private static final String EXECUTOR_MGMT_URI = CoreCommonConstants.MGMT_URI + "/executor";
 
     private static final String START_SESSION_MGMT_URI = SESSION_MGMT_URI + "/start";
     private static final String STEP_FINISHED_MGMT_URI = SESSION_MGMT_URI + "/stepFinished";
@@ -71,6 +77,8 @@ public class ChoreographerController {
 
     private static final String POST_PLAN_MGMT_HTTP_201_MESSAGE = "Plan created with given service definition and first Action.";
     private static final String POST_PLAN_MGMT_HTTP_400_MESSAGE = "Could not create Plan.";
+    private static final String POST_EXECUTOR_HTTP_201_MESSAGE = "Executor created.";
+    private static final String POST_EXECUTOR_HTTP_400_MESSAGE = "Could not create executor.";
 
     private static final String DELETE_PLAN_HTTP_200_MESSAGE = "Plan successfully removed.";
     private static final String DELETE_PLAN_HTTP_400_MESSAGE = "Could not remove Plan.";
@@ -80,7 +88,11 @@ public class ChoreographerController {
 
     private static final String STEP_FINISHED_HTTP_200_MESSAGE = "Choreographer notified that the running step is done.";
     private static final String STEP_FINISHED_HTTP_400_MESSAGE = "Could not notify Choreographer that the running step is done.";
-
+    private static final String EXECUTOR_NAME_NULL_ERROR_MESSAGE = "Executor name can't be null.";
+    private static final String EXECUTOR_ADDRESS_NULL_ERROR_MESSAGE = "Executor address can't be null.";
+    private static final String EXECUTOR_PORT_NULL_ERROR_MESSAGE = "Executor port can't be null.";
+    private static final String EXECUTOR_SD_NULL_ERROR_MESSAGE = "Executor service definition name can't be null.";
+    private static final String EXECUTOR_VERSION_NULL_ERROR_MESSAGE = "Executor version number can't be null.";
 
     private final Logger logger = LogManager.getLogger(ChoreographerController.class);
 
@@ -249,6 +261,19 @@ public class ChoreographerController {
         jmsTemplate.convertAndSend("session-step-done", request);
     }
 
+    @ApiOperation(value = "Return created executor.", response = ChoreographerExecutorResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_EXECUTOR_HTTP_201_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_EXECUTOR_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+    })
+    @PostMapping(path = EXECUTOR_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
+    @ResponseBody public ChoreographerExecutorResponseDTO addExecutor(@RequestBody final ChoreographerExecutorRequestDTO request) {
+        return callCreateExecutor(request);
+    }
+
 
     //=================================================================================================
 	// assistant methods
@@ -259,6 +284,54 @@ public class ChoreographerController {
 
         if (Utilities.isEmpty(request.getName())) {
             throw new BadPayloadException("Plan name is null or blank.", HttpStatus.SC_BAD_REQUEST, origin);
+        }
+    }
+
+    private ChoreographerExecutorResponseDTO callCreateExecutor(ChoreographerExecutorRequestDTO request) {
+        logger.debug("callCreateExecutor started...");
+
+        checkExecutorRequest(request, CommonConstants.CHOREOGRAPHER_URI + EXECUTOR_MGMT_URI);
+
+        final String validatedName = request.getName();
+        final String validatedAddress = request.getAddress();
+        final int validatedPort = request.getPort();
+        final String validatedBaseUri = request.getBaseUri();
+        final String validatedServiceDefinitionName = request.getServiceDefinitionName();
+        final int validatedVersion = request.getVersion();
+
+        return choreographerDBService.createExecutorResponse(validatedName, validatedAddress, validatedPort, validatedBaseUri, validatedServiceDefinitionName, validatedVersion);
+    }
+
+    private void checkExecutorRequest(final ChoreographerExecutorRequestDTO request, final String origin) {
+        logger.debug("checkExecutorRequest started...");
+
+        if (request == null) {
+            throw new BadPayloadException("Executor is null.", HttpStatus.SC_BAD_REQUEST, origin);
+        }
+
+        if (Utilities.isEmpty(request.getName())) {
+            throw new BadPayloadException(EXECUTOR_NAME_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+
+        if (Utilities.isEmpty(request.getAddress())) {
+            throw new BadPayloadException(EXECUTOR_ADDRESS_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+
+        if (request.getPort() == null) {
+            throw new BadPayloadException(EXECUTOR_PORT_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+
+        if (Utilities.isEmpty(request.getServiceDefinitionName())) {
+            throw new BadPayloadException(EXECUTOR_SD_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+
+        if (request.getVersion() == null) {
+            throw new BadPayloadException(EXECUTOR_VERSION_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+
+        final int validatedPort = request.getPort();
+        if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+            throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
         }
     }
 }

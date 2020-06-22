@@ -13,7 +13,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import eu.arrowhead.common.database.entity.ChoreographerExecutor;
 import eu.arrowhead.common.database.entity.ChoreographerStepDetail;
+import eu.arrowhead.common.dto.shared.ChoreographerExecutorResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerStepDetailResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
@@ -1005,6 +1007,13 @@ public class DTOConverter {
                                                 Utilities.convertZonedDateTimeToUTCString(planEntry.getUpdatedAt()));
     }
 
+	public static ChoreographerExecutorResponseDTO convertExecutorToExecutorResponseDTO(ChoreographerExecutor executor) {
+		Assert.notNull(executor, "Executor is null.");
+
+		return new ChoreographerExecutorResponseDTO(executor.getId(), executor.getName(), executor.getAddress(), executor.getPort(), executor.getBaseUri(),
+				executor.getServiceDefinitionName(), executor.getVersion(), Utilities.convertZonedDateTimeToUTCString(executor.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(executor.getUpdatedAt()));
+	}
+
     //-------------------------------------------------------------------------------------------------
     public static SystemRegistryResponseDTO convertSystemRegistryToSystemRegistryResponseDTO(final SystemRegistry entry) {
 
@@ -1146,6 +1155,8 @@ public class DTOConverter {
 
 		return result;
 	}
+
+
 
 	//=================================================================================================
 	// assistant methods
@@ -1337,5 +1348,4 @@ public class DTOConverter {
 		}
 		return IssuedCertificateStatus.GOOD;
 	}
-
 }
