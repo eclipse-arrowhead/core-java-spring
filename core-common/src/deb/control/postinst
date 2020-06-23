@@ -74,7 +74,6 @@ case "$1" in
       PASS="$(openssl rand -base64 12)"
       db_set arrowhead-core-common/cert_password ${PASS}
       ah_set_conf_prop cert_password "${PASS}"
-      err "${PASS}"
     fi
 
     db_get arrowhead-core-common/install_type; INSTALL_TYPE="$RET"

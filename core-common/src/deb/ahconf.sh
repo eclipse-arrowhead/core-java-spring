@@ -12,6 +12,9 @@ fi
 if [[ -z "$AH_CONF_FILE" ]]; then
   AH_CONF_FILE="${AH_CONF_DIR}/arrowhead.cfg"
 fi
+if [[ -z "$AH_RELAYS_DIR" ]]; then
+  AH_RELAY_DIR="${AH_CONF_DIR}/relays"
+fi
 
 err() {
   echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" >&2
@@ -198,7 +201,7 @@ ah_cert_import () {
     -storepass ${passwd} \
     -storetype PKCS12 \
     -noprompt
-  }
+}
 
 ah_cert_signed () {
   dst_path=${1}
@@ -304,6 +307,75 @@ ah_cert_signed_system () {
       -storepass ${passwd} \
       | keytool -gencert \
       -alias ${AH_CLOUD_NAME} \
+      -keypass ${AH_PASS_CERT} \
+      -keystore ${src_file} \
+      -storepass ${AH_PASS_CERT} \
+      -validity 3650 \
+      -ext SubjectAlternativeName=${sans} \
+      | keytool -importcert \
+      -alias ${name} \
+      -keypass ${passwd} \
+      -keystore ${file} \
+      -storepass ${passwd} \
+      -noprompt
+
+    ah_cert_import "${AH_CONF_DIR}" "master" "${path}" ${name} ${passwd}
+  fi
+}
+
+ah_cert_signed_relay () {
+  name=${1}
+  passwd=${2}
+  host=${3}
+  ip=${4}
+  path_dir=${5}
+
+  if [ -z ${passwd} ] ; then
+    passwd=${AH_PASS_CERT}
+  fi
+
+  if [ -z ${host} ]; then
+    host=`hostname`
+  fi
+
+  if [ -z ${ip} ]; then
+    ip=${OWN_IP}
+  fi
+
+  if [ -z ${path_dir} ]; then
+    path_dir=${AH_RELAYS_DIR}
+  fi
+
+  path="${path_dir}/${name}"
+  file="${path}/${name}.p12"
+  src_file="${AH_RELAYS_DIR}/relay.p12"
+
+  if [ ! -f "${file}" ]; then
+    ah_cert ${path} ${name} "${name}.relay.arrowhead.eu" ${passwd}
+
+    # Get a formatted subject alternative names
+    sans="$(ah_subject_alternative_names -ips "${SAN_INTERFACE_IPS[@]}" "${SAN_IPS}" ${ip} -dns ${host} "${SAN_DNS}")"
+
+    keytool -export \
+      -alias relay \
+      -storepass ${AH_PASS_CERT} \
+      -keystore ${src_file} \
+      | keytool -import \
+      -trustcacerts \
+      -alias relay \
+      -keystore ${file} \
+      -keypass ${passwd} \
+      -storepass ${passwd} \
+      -storetype PKCS12 \
+      -noprompt
+
+    keytool -certreq \
+      -alias ${name} \
+      -keypass ${passwd} \
+      -keystore ${file} \
+      -storepass ${passwd} \
+      | keytool -gencert \
+      -alias relay \
       -keypass ${AH_PASS_CERT} \
       -keystore ${src_file} \
       -storepass ${AH_PASS_CERT} \

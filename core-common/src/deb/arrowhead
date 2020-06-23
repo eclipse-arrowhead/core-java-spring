@@ -59,6 +59,10 @@ for i in "$@"; do
       UPDATE_MASTER_CERTS_FLAG=1
       shift
       ;;
+    -b|--relay-certs)
+      UPDATE_RELAY_CERTS_FLAG=1
+      shift
+      ;;
     -h|--help)
       HELP_FLAG=1
       shift
@@ -70,12 +74,15 @@ for i in "$@"; do
   esac
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
+if [[ ${#POSITIONAL[@]} -gt 0 ]]; then
+  HELP_FLAG=1
+fi
 ################ ARGUMENT PARSING ################
 
 print_help() {
   echo "Manipulate certain aspects of the arrowhead system"
   echo "Usage:"
-  echo "  arrowhead cert (-m|-u|[-n] -s=SYSTEM...) [-c=CFGPATH] [-a=LIBPATH] [-r=ROOTPATH] [-d=CLOUDPATH] [t=SYSPATH]"
+  echo "  arrowhead cert (-m|-u|[-n] -s=SYSTEM...) [-c=CFGPATH] [-a=LIBPATH] [-r=ROOTPATH] [-d=CLOUDPATH] [-t=SYSPATH]"
   echo
   echo "Commands:"
   echo "  cert          Used to update arrowhead certificates"
@@ -109,7 +116,15 @@ err() {
 main() {
   if [[ "${HELP_FLAG}" == 1 ]]; then
     print_help
-    exit 0
+
+    local stat=0
+
+    for arg in "${POSITIONAL[@]}"; do
+      err "Invalid argument: ${arg}"
+      stat=1
+    done
+
+    exit "${stat}"
   fi
   if [[ "${CERT_FLAG}" == 1 ]]; then
     cert
@@ -149,6 +164,7 @@ cert() {
   fi
   if [[ "${UPDATE_MASTER_CERTS_FLAG}" == 1 ]]; then
     update_master_certs
+    update_cloud_certs
     update_system_certs
     exit $?
   fi
@@ -157,10 +173,14 @@ cert() {
     exit $?
   fi
   
+  if [[ "${UPDATE_RELAY_CERTS_FLAG}" == 1 ]]; then
+    update_relay_certs
+    exit $?
+  fi
 }
 
 # Creates new root certificates.
-update_master_certs() {
+update_master_cert() {
   . "${AH_LIBRARY}"
 
   mkdir -p "${AH_CONF_DIR}"
@@ -186,10 +206,19 @@ update_master_certs() {
   rm "${AH_CONF_DIR}/master.crt" 2>/dev/null || true
   rm "${AH_CONF_DIR}/master.p12" 2>/dev/null || true
   rm "${AH_CONF_DIR}/truststore.p12" 2>/dev/null || true
-  rm "${AH_CLOUDS_DIR}/${AH_CLOUD_NAME}.p12" 2>/dev/null || true
 
   ah_cert "${AH_CONF_DIR}" master "arrowhead.eu"
   ah_cert_export "${AH_CONF_DIR}" master "${AH_CONF_DIR}"
+}
+
+# Creates bew cloud certificates
+update_cloud_certs() {
+  . "${AH_LIBRARY}"
+
+  mkdir -p "${AH_CONF_DIR}"
+
+  rm "${AH_CLOUDS_DIR}/${AH_CLOUD_NAME}.p12" 2>/dev/null || true
+
   ah_cert_signed "${AH_CLOUDS_DIR}" "${AH_CLOUD_NAME}"\
     "${AH_CLOUD_NAME}.${AH_OPERATOR}.arrowhead.eu" "${AH_CONF_DIR}" master
   ah_cert_trust "${AH_CONF_DIR}" "${AH_CLOUDS_DIR}" "${AH_CLOUD_NAME}"
@@ -237,6 +266,49 @@ update_system_cert() {
   echo "Updated ${system}"
   return 0
 }
+
+# Creates new relay master certificates
+update_relay_master_cert() {
+  . "${AH_LIBRARY}"
+
+  mkdir -p "${AH_RELAYS_DIR}"
+
+  rm "${AH_RELAYS_DIR}/relay.p12" 2>/dev/null || true
+
+  ah_cert_signed "${AH_RELAY_DIR}" "relay"\
+    "relay.arrowhead.eu" "${AH_CONF_DIR}" master
+  ah_cert_trust "${AH_RELAY_DIR}" "${AH_RELAY_DIR}" "relay"
+}
+
+update_relay_certs() {
+  . "${AH_LIBRARY}/relays"
+
+  mkdir -p "${AH_CONF_DIR}"
+
+  local relays=()
+  readarray -t systems <<< "$(ah_get_conf_prop relays | awk ' BEGIN { RS = " " } { print $1 } ')"
+  
+  for relay in "${relays[@]}"; do
+    update_relay_cert "${relay}"
+  done
+}
+
+update_relay_cert() {
+  local relay="$1"
+  . "${AH_LIBRARY}"
+
+  local relay_dir="${AH_RELAYS_DIR}/${relay}"
+
+  mkdir -p "${relay_dir}"
+
+  rm "${relay_dir}/${relay}.p12" 2>/dev/null || true
+
+  ah_cert_signed_relay "${relay}"
+
+  echo "Updated ${relay}"
+  return 0
+}
+
 ############# CERT RELATED FUNCTIONS #############
 
 main "$@"; exit
