@@ -56,6 +56,8 @@ case "$1" in
     db_get arrowhead-core-common/san_dns
     ah_set_conf_prop san_dns "$RET"
 
+    ah_set_conf_prop systems ""
+
     AH_PASS_CERT="$(ah_get_conf_prop cert_password)"
 
     # Create user

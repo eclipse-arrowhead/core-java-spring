@@ -59,6 +59,10 @@ for i in "$@"; do
       UPDATE_MASTER_CERTS_FLAG=1
       shift
       ;;
+    -e|--relay-master-certs)
+      UPDATE_RELAY_MASTER_CERTS_FLAG=1
+      shift
+      ;;
     -b|--relay-certs)
       UPDATE_RELAY_CERTS_FLAG=1
       shift
@@ -104,6 +108,9 @@ print_help() {
   echo "  -m            --master-certs          Update master certificates. Will also update the"
   echo "                                        cloud certificates and all system certificates"
   echo "                                        in order to not break the chain of trust"
+  echo "  -e            --relay-master-cert     Update relay master certificate. Will also update relay"
+  echo "                                        certificates in order to not break the chain of trust"
+  echo "  -b            --relay-certs           Update all relay certificates"
   echo "  -h            --help                  Displays this help message"
 }
 
@@ -147,12 +154,12 @@ cert() {
       ${#SYSTEMS[@]} && ${NEW_SYSTEM_FLAG})))"
 
   if (( ${flags} > 1 )); then
+    print_help
     err "Multiple mutually exclusive flags given"
-    print_help
     exit 1
-  elif (( ${flags} < 1 )); then
-    err "Insufficient number of flags given"
+  elif (( ${flags} + ${UPDATE_RELAY_CERTS_FLAG} < 1 )); then
     print_help
+    err "Insufficient number of flags given"
     exit 1
   fi
 
@@ -174,6 +181,7 @@ cert() {
   fi
   
   if [[ "${UPDATE_RELAY_CERTS_FLAG}" == 1 ]]; then
+    update_relay_master_cert
     update_relay_certs
     exit $?
   fi
