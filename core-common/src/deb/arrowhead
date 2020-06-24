@@ -9,7 +9,7 @@ NEW_SYSTEM_FLAG=0
 UPDATE_SYSTEM_CERTS_FLAG=0
 UPDATE_MASTER_CERTS_FLAG=0
 UPDATE_RELAY_CERTS_FLAG=0
-UPDATE_RELAY_MASTER_CERTS_FLAG=0
+UPDATE_RELAY_MASTER_CERT_FLAG=0
 SYSTEMS=()
 ################# DEFAULT VALUES #################
 
@@ -61,8 +61,8 @@ for i in "$@"; do
       UPDATE_MASTER_CERTS_FLAG=1
       shift
       ;;
-    -e|--relay-master-certs)
-      UPDATE_RELAY_MASTER_CERTS_FLAG=1
+    -e|--relay-master-cert)
+      UPDATE_RELAY_MASTER_CERT_FLAG=1
       shift
       ;;
     -b|--relay-certs)
@@ -159,7 +159,7 @@ cert() {
     ))"
 
   local relay_flags="$((
-    ${UPDATE_RELAY_MASTER_CERTS_FLAG} +
+    ${UPDATE_RELAY_MASTER_CERT_FLAG} +
     ${UPDATE_RELAY_CERTS_FLAG}
     ))"
 
@@ -185,9 +185,12 @@ cert() {
     exit $?
   fi
   if [[ "${UPDATE_MASTER_CERTS_FLAG}" == 1 ]]; then
-    update_master_certs
+    update_master_cert
     update_cloud_certs
     update_system_certs
+
+    update_relay_master_cert
+    update_relay_certs
     exit $?
   fi
   if [[ "${UPDATE_SYSTEM_CERTS_FLAG}" == 1 ]]; then
@@ -195,7 +198,7 @@ cert() {
     exit $?
   fi
   
-  if [[ "${UPDATE_RELAY_MASTER_CERTS_FLAG}" == 1 ]]; then
+  if [[ "${UPDATE_RELAY_MASTER_CERT_FLAG}" == 1 ]]; then
     update_relay_master_cert
     update_relay_certs
     exit $?
@@ -237,6 +240,7 @@ update_master_cert() {
 
   ah_cert "${AH_CONF_DIR}" master "arrowhead.eu"
   ah_cert_export "${AH_CONF_DIR}" master "${AH_CONF_DIR}"
+  echo "Updated [master] certificate"
 }
 
 # Creates bew cloud certificates
@@ -250,6 +254,7 @@ update_cloud_certs() {
   ah_cert_signed "${AH_CLOUDS_DIR}" "${AH_CLOUD_NAME}"\
     "${AH_CLOUD_NAME}.${AH_OPERATOR}.arrowhead.eu" "${AH_CONF_DIR}" master
   ah_cert_trust "${AH_CONF_DIR}" "${AH_CLOUDS_DIR}" "${AH_CLOUD_NAME}"
+  echo "Updated ${AH_CLOUD_NAME} [cloud] certificate"
 }
 
 # Creates new certificates for all defined systems
@@ -264,6 +269,7 @@ update_system_certs() {
   for system in "${systems[@]}"; do
     update_system_cert "${system}"
   done
+  echo "Updated all [system] certificates"
 }
 
 update_system_cert() {
@@ -291,7 +297,7 @@ update_system_cert() {
       "${system_dir}/application.properties"
   fi
 
-  echo "Updated ${system}"
+  echo "Updated ${system} [system] certificate"
   return 0
 }
 
@@ -303,22 +309,24 @@ update_relay_master_cert() {
 
   rm "${AH_RELAYS_DIR}/relay.p12" 2>/dev/null || true
 
-  ah_cert_signed "${AH_RELAY_DIR}" "relay"\
+  ah_cert_signed "${AH_RELAYS_DIR}" "relay"\
     "relay.arrowhead.eu" "${AH_CONF_DIR}" master
-  ah_cert_trust "${AH_RELAY_DIR}" "${AH_RELAY_DIR}" "relay"
+  ah_cert_trust "${AH_RELAYS_DIR}" "${AH_RELAYS_DIR}" "relay"
+  echo "Updated [relay master] certificate"
 }
 
 update_relay_certs() {
-  . "${AH_LIBRARY}/relays"
+  . "${AH_LIBRARY}"
 
   mkdir -p "${AH_CONF_DIR}"
 
   local relays=()
-  readarray -t systems <<< "$(ah_get_conf_prop relays | awk ' BEGIN { RS = " " } { print $1 } ')"
+  readarray -t relays <<< "$(ah_get_conf_prop relays | awk ' BEGIN { RS = " " } { print $1 } ')"
   
   for relay in "${relays[@]}"; do
     update_relay_cert "${relay}"
   done
+  echo "Updated all [relay] certificates"
 }
 
 update_relay_cert() {
@@ -333,7 +341,7 @@ update_relay_cert() {
 
   ah_cert_signed_relay "${relay}"
 
-  echo "Updated ${relay}"
+  echo "Updated ${relay} [relay] certificate"
   return 0
 }
 
