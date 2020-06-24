@@ -8,6 +8,8 @@ CERT_FLAG=0
 NEW_SYSTEM_FLAG=0
 UPDATE_SYSTEM_CERTS_FLAG=0
 UPDATE_MASTER_CERTS_FLAG=0
+UPDATE_RELAY_CERTS_FLAG=0
+UPDATE_RELAY_MASTER_CERTS_FLAG=0
 SYSTEMS=()
 ################# DEFAULT VALUES #################
 
@@ -150,14 +152,27 @@ cert() {
   local flags="$((
     ${UPDATE_SYSTEM_CERTS_FLAG} +
     ${UPDATE_MASTER_CERTS_FLAG} +
-    (${#SYSTEMS[@]} && 1 ||
-      ${#SYSTEMS[@]} && ${NEW_SYSTEM_FLAG})))"
+    (
+      ${#SYSTEMS[@]} && 1 ||
+      ${#SYSTEMS[@]} && ${NEW_SYSTEM_FLAG}
+    )
+    ))"
 
-  if (( ${flags} > 1 )); then
+  local relay_flags="$((
+    ${UPDATE_RELAY_MASTER_CERTS_FLAG} +
+    ${UPDATE_RELAY_CERTS_FLAG}
+    ))"
+
+  local total_flags="$((
+    ${flags} + 
+    ${relay_flags}
+    ))"
+
+  if (( ${flags} > 1 || ${relay_flags} > 1 )); then
     print_help
     err "Multiple mutually exclusive flags given"
     exit 1
-  elif (( ${flags} + ${UPDATE_RELAY_CERTS_FLAG} < 1 )); then
+  elif (( ${total_flags} < 1 )); then
     print_help
     err "Insufficient number of flags given"
     exit 1
@@ -180,8 +195,13 @@ cert() {
     exit $?
   fi
   
-  if [[ "${UPDATE_RELAY_CERTS_FLAG}" == 1 ]]; then
+  if [[ "${UPDATE_RELAY_MASTER_CERTS_FLAG}" == 1 ]]; then
     update_relay_master_cert
+    update_relay_certs
+    exit $?
+  fi
+
+  if [[ "${UPDATE_RELAY_CERTS_FLAG}" == 1 ]]; then
     update_relay_certs
     exit $?
   fi

@@ -13,7 +13,7 @@ if [[ -z "$AH_CONF_FILE" ]]; then
   AH_CONF_FILE="${AH_CONF_DIR}/arrowhead.cfg"
 fi
 if [[ -z "$AH_RELAYS_DIR" ]]; then
-  AH_RELAY_DIR="${AH_CONF_DIR}/relays"
+  AH_RELAYS_DIR="${AH_CONF_DIR}/relays"
 fi
 
 err() {
