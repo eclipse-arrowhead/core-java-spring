@@ -7,17 +7,17 @@ import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
-import eu.arrowhead.common.database.entity.ChoreographerExecutor;
 import eu.arrowhead.common.database.entity.ChoreographerSession;
+import eu.arrowhead.common.dto.internal.ChoreographerExecutorListResponseDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerPlanRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerRunPlanRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
+import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerSessionRunningStepDataDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
-import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
 import io.swagger.annotations.Api;
@@ -29,11 +29,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 
 import org.springframework.http.MediaType;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -151,7 +151,7 @@ public class ChoreographerController {
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @DeleteMapping(path = PLAN_MGMT_BY_ID_URI)
-    public void removeActionPlanById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+    public void removePlanById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
         logger.debug("New Plan delete request received with id of " + id + ".");
 
         if (id < 1) {
@@ -171,7 +171,7 @@ public class ChoreographerController {
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @GetMapping(path = PLAN_MGMT_BY_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody public ChoreographerPlanResponseDTO getActionPlanById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+    @ResponseBody public ChoreographerPlanResponseDTO getPlanById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
         logger.debug("New ChoreographerActionStep get request received with id: " + id + ".");
 
         if (id < 1) {
@@ -193,7 +193,7 @@ public class ChoreographerController {
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @GetMapping(path = PLAN_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody public List<ChoreographerPlanResponseDTO> getChoreographerActionPlans(
+    @ResponseBody public List<ChoreographerPlanResponseDTO> getPlans(
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
@@ -299,6 +299,44 @@ public class ChoreographerController {
         logger.debug("Executor entry with id: {} successfully retrieved", id);
 
         return executorEntryByIdResponse;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = "Return requested executor entries by the given parameters", response = ChoreographerExecutorListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_OK, message = GET_EXECUTOR_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_EXECUTOR_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+    })
+    @GetMapping(path = EXECUTOR_MGMT_URI)
+    @ResponseBody public ChoreographerExecutorListResponseDTO getExecutorEntries(
+            @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
+            @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
+            @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
+            @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
+        logger.debug("New Executor get request received with page: {} and item_per page: {}", page, size);
+
+        int validatedPage;
+        int validatedSize;
+        if (page == null && size == null) {
+            validatedPage = -1;
+            validatedSize = -1;
+        } else {
+            if (page == null || size == null) {
+                throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI +
+                        EXECUTOR_MGMT_URI);
+            } else {
+                validatedPage = page;
+                validatedSize = size;
+            }
+        }
+
+        final Sort.Direction validatedDirection = CoreUtilities.calculateDirection(direction, CommonConstants.CHOREOGRAPHER_URI + EXECUTOR_MGMT_URI);
+        final ChoreographerExecutorListResponseDTO executorEntriesResponse = choreographerDBService.getExecutorEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
+        logger.debug("Service Registry entries with page: {} and item_per page: {} successfully retrieved", page, size);
+
+        return executorEntriesResponse;
     }
 
     //-------------------------------------------------------------------------------------------------

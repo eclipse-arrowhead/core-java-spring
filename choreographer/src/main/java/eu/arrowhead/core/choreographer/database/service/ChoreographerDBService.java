@@ -10,6 +10,7 @@ import eu.arrowhead.common.database.entity.ChoreographerSession;
 import eu.arrowhead.common.database.entity.ChoreographerStep;
 import eu.arrowhead.common.database.entity.ChoreographerStepNextStepConnection;
 import eu.arrowhead.common.database.entity.ChoreographerWorklog;
+import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.ChoreographerActionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerExecutorRepository;
@@ -20,6 +21,7 @@ import eu.arrowhead.common.database.repository.ChoreographerPlanRepository;
 import eu.arrowhead.common.database.repository.ChoreographerStepRepository;
 import eu.arrowhead.common.database.repository.ChoreographerWorklogRepository;
 import eu.arrowhead.common.dto.internal.ChoreographerActionRequestDTO;
+import eu.arrowhead.common.dto.internal.ChoreographerExecutorListResponseDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerStatusType;
 import eu.arrowhead.common.dto.internal.ChoreographerStepRequestDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
@@ -680,6 +682,35 @@ public class ChoreographerDBService {
             }
         } catch (InvalidParameterException ex) {
             throw ex;
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public ChoreographerExecutorListResponseDTO getExecutorEntriesResponse(int page, int size, Direction direction, String sortField) {
+        logger.debug("getExecutorEntriesResponse started...");
+
+        final Page<ChoreographerExecutor> executorEntries = getExecutorEntries(page, size, direction, sortField);
+
+        return DTOConverter.convertExecutorListToExecutorListResponseDTO(executorEntries);
+
+    }
+
+    private Page<ChoreographerExecutor> getExecutorEntries(int page, int size, Direction direction, String sortField) {
+        logger.debug("getExecutorEntries started...");
+
+        final int validatedPage = page < 0 ? 0 : page;
+        final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size;
+        final Direction validatedDirection = direction == null ? Direction.ASC : direction;
+        final String validatedSortField = sortField == null ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+        if (!ChoreographerExecutor.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
+            throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
+        }
+
+        try {
+            return choreographerExecutorRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
         } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);

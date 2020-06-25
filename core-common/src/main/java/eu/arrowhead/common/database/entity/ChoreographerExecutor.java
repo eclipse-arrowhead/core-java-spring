@@ -12,6 +12,7 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"serviceDefinitionName", "version"}))
@@ -19,6 +20,8 @@ public class ChoreographerExecutor {
 
     //=================================================================================================
     // members
+
+    public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt", "name", "serviceDefinitionName"); //NOSONAR
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
