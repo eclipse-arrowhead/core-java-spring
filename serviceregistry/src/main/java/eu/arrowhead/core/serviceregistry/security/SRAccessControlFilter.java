@@ -25,7 +25,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 	
 	private static final CoreSystem[] allowedCoreSystemsForQuery = { CoreSystem.ORCHESTRATOR, CoreSystem.GATEKEEPER, CoreSystem.CERTIFICATE_AUTHORITY, CoreSystem.EVENT_HANDLER,
 																	 CoreSystem.AUTHORIZATION, CoreSystem.QOS_MONITOR, CoreSystem.ONBOARDING_CONTROLLER, CoreSystem.DEVICE_REGISTRY,
-															         CoreSystem.SYSTEM_REGISTRY, };
+															         CoreSystem.SYSTEM_REGISTRY, CoreSystem.CHOREOGRAPHER,};
 	private static final CoreSystem[] allowedCoreSystemsForQueryBySystemId = { CoreSystem.ORCHESTRATOR };
 	private static final CoreSystem[] allowedCoreSystemsForQueryBySystemDTO = { CoreSystem.ORCHESTRATOR };
 	private static final CoreSystem[] allowedCoreSystemsForQueryAllService = { CoreSystem.QOS_MONITOR, CoreSystem.GATEKEEPER };
