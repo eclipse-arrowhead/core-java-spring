@@ -48,7 +48,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import static eu.arrowhead.common.CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_REGISTER;
+import static eu.arrowhead.common.CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER;
 import static eu.arrowhead.common.CommonConstants.OP_CHOREOGRAPHER_NOTIFY_STEP_DONE;
+
 
 @Api(tags = { CoreCommonConstants.SWAGGER_TAG_ALL })
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS,
@@ -251,8 +254,7 @@ public class ChoreographerController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Notify the Choreographer that a step is done in a session.",
-            tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+    @ApiOperation(value = "Notify the Choreographer that a step is done in a session.", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_CREATED, message = STEP_FINISHED_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = STEP_FINISHED_HTTP_400_MESSAGE),
@@ -267,6 +269,41 @@ public class ChoreographerController {
         jmsTemplate.convertAndSend("session-step-done", request);
     }
 
+    //-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = "Return created executor.", response = ChoreographerExecutorResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_EXECUTOR_HTTP_201_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_EXECUTOR_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+    })
+    @PostMapping(path = OP_CHOREOGRAPHER_EXECUTOR_REGISTER, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
+    @ResponseBody public ChoreographerExecutorResponseDTO registerExecutor(@RequestBody final ChoreographerExecutorRequestDTO request) {
+        return callCreateExecutor(request);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = "Remove executor.", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_EXECUTOR_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_EXECUTOR_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+    })
+    @DeleteMapping(path = OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER)
+    public void unregisterExecutor(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+        logger.debug("New Executor delete request received with id: {}", id);
+
+        if (id < 1) {
+            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER);
+        }
+
+        choreographerDBService.removeExecutorEntryById(id);
+        logger.debug("Executor with id: '{}' successfully deleted", id);
+    }
+
+    //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Return created executor.", response = ChoreographerExecutorResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_EXECUTOR_HTTP_201_MESSAGE),
@@ -348,7 +385,7 @@ public class ChoreographerController {
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @DeleteMapping(path = EXECUTOR_MGMT_BY_ID_URI)
-    public void removeServiceDefinition(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+    public void removeExecutor(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
         logger.debug("New Executor delete request received with id: {}", id);
 
         if (id < 1) {

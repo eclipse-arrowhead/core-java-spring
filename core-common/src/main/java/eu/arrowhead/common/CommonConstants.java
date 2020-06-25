@@ -58,6 +58,8 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "event-publish-auth-update";
 
 	public static final String CORE_SERVICE_CHOREOGRAPHER_PROCESS = "choreographer-service";
+	public static final String CORE_SERVICE_CHOREOGRAPHER_REGISTER_EXECUTOR = "executor-register";
+	public static final String CORE_SERVICE_CHOREOGRAPHER_UNREGISTER_EXECUTOR = "executor-unregister";
 
 	public static final String CORE_SERVICE_CERTIFICATE_AUTHORITY_SIGN = "ca-sign";
 	public static final String CORE_SERVICE_CERTIFICATE_AUTHORITY_LIST_CERTIFICATES = "ca-list-certificates";
@@ -198,6 +200,8 @@ public class CommonConstants {
 
 	public static final String CHOREOGRAPHER_URI = "/choreographer";
 	public static final String OP_CHOREOGRAPHER_NOTIFY_STEP_DONE = "/notifyStepDone";
+	public static final String OP_CHOREOGRAPHER_EXECUTOR_REGISTER = "/executor/register";
+	public static final String OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER = "/executor/unregister";
 
 	public static final String GATEWAY_URI = "/gateway";
 	public static final String OP_GATEWAY_KEY_URI = "/publickey";
