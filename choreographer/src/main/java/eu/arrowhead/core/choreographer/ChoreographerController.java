@@ -16,6 +16,7 @@ import eu.arrowhead.common.dto.shared.ChoreographerExecutorRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerSessionRunningStepDataDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
@@ -68,12 +69,15 @@ public class ChoreographerController {
     private static final String PLAN_MGMT_BY_ID_URI = PLAN_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
     private static final String SESSION_MGMT_URI = CoreCommonConstants.MGMT_URI + "/session";
     private static final String EXECUTOR_MGMT_URI = CoreCommonConstants.MGMT_URI + "/executor";
+    private static final String EXECUTOR_MGMT_BY_ID_URI = EXECUTOR_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
 
     private static final String START_SESSION_MGMT_URI = SESSION_MGMT_URI + "/start";
     private static final String STEP_FINISHED_MGMT_URI = SESSION_MGMT_URI + "/stepFinished";
 
     private static final String GET_PlAN_MGMT_HTTP_200_MESSAGE = "Step returned.";
     private static final String GET_PLAN_MGMT_HTTP_400_MESSAGE = "Could not retrieve Step.";
+    private static final String GET_EXECUTOR_HTTP_200_MESSAGE = "Executor returned.";
+    private static final String GET_EXECUTOR_HTTP_400_MESSAGE = "Could not retrieve Executor.";
 
     private static final String POST_PLAN_MGMT_HTTP_201_MESSAGE = "Plan created with given service definition and first Action.";
     private static final String POST_PLAN_MGMT_HTTP_400_MESSAGE = "Could not create Plan.";
@@ -82,6 +86,8 @@ public class ChoreographerController {
 
     private static final String DELETE_PLAN_HTTP_200_MESSAGE = "Plan successfully removed.";
     private static final String DELETE_PLAN_HTTP_400_MESSAGE = "Could not remove Plan.";
+    private static final String DELETE_EXECUTOR_HTTP_200_MESSAGE = "Executor successfully removed.";
+    private static final String DELETE_EXECUTOR_HTTP_400_MESSAGE = "Could not remove Executor.";
 
     private static final String START_SESSION_HTTP_200_MESSAGE = "Initiated running plan with given id.";
     private static final String START_PLAN_HTTP_400_MESSAGE = "Could not start Plan with given ID.";
@@ -274,6 +280,46 @@ public class ChoreographerController {
         return callCreateExecutor(request);
     }
 
+    //-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = "Return requested executor entry.", response = ServiceRegistryResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_OK, message = GET_EXECUTOR_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_EXECUTOR_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+    })
+    @GetMapping(path = EXECUTOR_MGMT_BY_ID_URI)
+    @ResponseBody public ChoreographerExecutorResponseDTO getExecutorEntryById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+        logger.debug("New Executor get request received with id: {}", id);
+
+        if (id < 1) {
+            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + EXECUTOR_MGMT_BY_ID_URI);
+        }
+        final ChoreographerExecutorResponseDTO executorEntryByIdResponse = choreographerDBService.getExecutorEntryByIdResponse(id);
+        logger.debug("Executor entry with id: {} successfully retrieved", id);
+
+        return executorEntryByIdResponse;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = "Remove executor.", tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_EXECUTOR_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_EXECUTOR_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+    })
+    @DeleteMapping(path = EXECUTOR_MGMT_BY_ID_URI)
+    public void removeServiceDefinition(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+        logger.debug("New Executor delete request received with id: {}", id);
+
+        if (id < 1) {
+            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + EXECUTOR_MGMT_BY_ID_URI);
+        }
+
+        choreographerDBService.removeExecutorEntryById(id);
+        logger.debug("Executor with id: '{}' successfully deleted", id);
+    }
 
     //=================================================================================================
 	// assistant methods

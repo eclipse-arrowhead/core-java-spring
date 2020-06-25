@@ -633,9 +633,56 @@ public class ChoreographerDBService {
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
+    public void removeExecutorEntryById(final long id) {
+        logger.debug("removeExecutorEntryById started...");
+
+        try {
+            if (!choreographerExecutorRepository.existsById(id)) {
+                throw new InvalidParameterException("Executor with id '" + id + "' does not exist");
+            }
+
+            choreographerExecutorRepository.deleteById(id);
+            choreographerExecutorRepository.flush();
+        } catch (final InvalidParameterException ex) {
+            throw ex;
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public ChoreographerExecutorResponseDTO getExecutorEntryByIdResponse(final long id) {
+        logger.debug("getExecutorEntryByIdResponse started...");
+
+        return DTOConverter.convertExecutorToExecutorResponseDTO(getExecutorEntryById(id));
+    }
+
+
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
     public ChoreographerExecutorResponseDTO createExecutorResponse(final String name, final String address, final int port, final String baseUri, final String serviceDefinitionName, final int version) {
         logger.debug("createExecutorResponse started...");
 
         return DTOConverter.convertExecutorToExecutorResponseDTO(createExecutor(name, address, port, baseUri, serviceDefinitionName, version));
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    private ChoreographerExecutor getExecutorEntryById(final long id) {
+        logger.debug("getExecutorEntryById started...");
+
+        try {
+            final Optional<ChoreographerExecutor> find = choreographerExecutorRepository.findById(id);
+            if (find.isPresent()) {
+                return find.get();
+            } else {
+                throw new InvalidParameterException("Executor with id of '" + id + "' does not exist.");
+            }
+        } catch (InvalidParameterException ex) {
+            throw ex;
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
     }
 }

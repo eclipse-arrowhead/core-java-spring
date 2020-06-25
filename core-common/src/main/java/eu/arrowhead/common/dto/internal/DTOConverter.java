@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
 import eu.arrowhead.common.database.entity.ChoreographerStepDetail;
@@ -149,7 +150,7 @@ public class DTOConverter {
 		
 		return dto;
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public static ServiceRegistryListResponseDTO convertServiceRegistryListToServiceRegistryListResponseDTO(final Page<ServiceRegistry> serviceRegistryEntries) {
 		Assert.notNull(serviceRegistryEntries, "List of serviceRegistryEntries is null");
@@ -1009,6 +1010,11 @@ public class DTOConverter {
 
 	public static ChoreographerExecutorResponseDTO convertExecutorToExecutorResponseDTO(ChoreographerExecutor executor) {
 		Assert.notNull(executor, "Executor is null.");
+		Assert.notNull(executor.getAddress(), "Related address is null.");
+		Assert.notNull(executor.getName(), "Related executor name is null.");
+		Assert.notNull(executor.getPort(), "Related executor port is null.");
+		Assert.notNull(executor.getVersion(), "Related executor version is null.");
+		Assert.notNull(executor.getServiceDefinitionName(), "Related executor service definition name is null.");
 
 		return new ChoreographerExecutorResponseDTO(executor.getId(), executor.getName(), executor.getAddress(), executor.getPort(), executor.getBaseUri(),
 				executor.getServiceDefinitionName(), executor.getVersion(), Utilities.convertZonedDateTimeToUTCString(executor.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(executor.getUpdatedAt()));
