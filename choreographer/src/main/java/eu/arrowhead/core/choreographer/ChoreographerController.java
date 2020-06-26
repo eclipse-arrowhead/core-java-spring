@@ -130,7 +130,7 @@ public class ChoreographerController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Register one or more Plans.",
+    @ApiOperation(value = "Register a plan.",
     			  tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_PLAN_MGMT_HTTP_201_MESSAGE),

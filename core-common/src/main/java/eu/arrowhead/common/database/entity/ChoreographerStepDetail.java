@@ -117,7 +117,7 @@ public class ChoreographerStepDetail {
     //-------------------------------------------------------------------------------------------------
     @Override
     public String toString() {
-        return "Executor [id = " + id + ", serviceDefinition = " + serviceDefinition + ", version = " + version + ", type = " + type +
+        return "StepDetail [id = " + id + ", serviceDefinition = " + serviceDefinition + ", version = " + version + ", type = " + type +
                 ", minVersion = " + minVersion + ", maxVersion = " + maxVersion + ", dto = " + dto + ", step = " + step + ", createdAt = " + createdAt + ", updatedAt = " + updatedAt + "]";
     }
 }

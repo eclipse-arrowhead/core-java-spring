@@ -1,5 +1,8 @@
 package eu.arrowhead.core.choreographer.database.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerAction;
@@ -8,6 +11,7 @@ import eu.arrowhead.common.database.entity.ChoreographerPlan;
 import eu.arrowhead.common.database.entity.ChoreographerRunningStep;
 import eu.arrowhead.common.database.entity.ChoreographerSession;
 import eu.arrowhead.common.database.entity.ChoreographerStep;
+import eu.arrowhead.common.database.entity.ChoreographerStepDetail;
 import eu.arrowhead.common.database.entity.ChoreographerStepNextStepConnection;
 import eu.arrowhead.common.database.entity.ChoreographerWorklog;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
@@ -16,6 +20,7 @@ import eu.arrowhead.common.database.repository.ChoreographerActionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerExecutorRepository;
 import eu.arrowhead.common.database.repository.ChoreographerRunningStepRepository;
 import eu.arrowhead.common.database.repository.ChoreographerSessionRepository;
+import eu.arrowhead.common.database.repository.ChoreographerStepDetailRepository;
 import eu.arrowhead.common.database.repository.ChoreographerStepNextStepConnectionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerPlanRepository;
 import eu.arrowhead.common.database.repository.ChoreographerStepRepository;
@@ -26,7 +31,9 @@ import eu.arrowhead.common.dto.internal.ChoreographerStatusType;
 import eu.arrowhead.common.dto.internal.ChoreographerStepRequestDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerOFRRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
@@ -38,6 +45,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -74,6 +82,9 @@ public class ChoreographerDBService {
     @Autowired
     private ChoreographerExecutorRepository choreographerExecutorRepository;
 
+    @Autowired
+    private ChoreographerStepDetailRepository choreographerStepDetailRepository;
+
     private final Logger logger = LogManager.getLogger(ChoreographerDBService.class);
     
     //=================================================================================================
@@ -81,16 +92,12 @@ public class ChoreographerDBService {
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public ChoreographerStep createStep(final String name, final String serviceName, final String metadata, final String parameters, final int quantity, final long actionId) {
+    public ChoreographerStep createStep(final String name, final String metadata, final String parameters, final int quantity, final long actionId) {
         logger.debug("createStep started...");
 
         try {
             if (Utilities.isEmpty(name)) {
                 throw new InvalidParameterException("Step name is null or blank.");
-            }
-
-            if (Utilities.isEmpty(serviceName)) {
-                throw new InvalidParameterException("Service name is null or blank.");
             }
 
             final Optional<ChoreographerStep> stepOptional = choreographerStepRepository.findByNameAndActionId(name, actionId);
@@ -100,7 +107,11 @@ public class ChoreographerDBService {
 
             final Optional<ChoreographerAction> actionOptional = choreographerActionRepository.findById(actionId);
             if (actionOptional.isPresent()) {
-                return choreographerStepRepository.saveAndFlush(new ChoreographerStep(name, metadata, parameters, actionOptional.get(), quantity));
+                ChoreographerStep step =  choreographerStepRepository.saveAndFlush(new ChoreographerStep(name, metadata, parameters, actionOptional.get(), quantity));
+
+
+
+                return step;
             } else {
                 throw new InvalidParameterException("Action with given ID doesn't exist.");
             }
@@ -160,6 +171,60 @@ public class ChoreographerDBService {
     }
 
     //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public void addStepDetailToStep(ChoreographerStep step, String type, ChoreographerOFRRequestDTO ofrRequestDTO) {
+        logger.debug("addStepDetailToStep started...");
+
+        try {
+            if (ofrRequestDTO != null) {
+                if (ofrRequestDTO.getRequestedService() != null) {
+                    if (!Utilities.isEmpty(ofrRequestDTO.getRequestedService().getServiceDefinitionRequirement())) {
+                        ServiceQueryFormDTO service = ofrRequestDTO.getRequestedService();
+                        ChoreographerStepDetail stepDetail = new ChoreographerStepDetail();
+                        ObjectWriter ow = new ObjectMapper().writer();
+                        if (service.getVersionRequirement() != null && service.getMaxVersionRequirement() == null && service.getMinVersionRequirement() == null) {
+                            stepDetail.setServiceDefinition(service.getServiceDefinitionRequirement());
+                            stepDetail.setVersion(service.getVersionRequirement());
+                            stepDetail.setType(type);
+                            stepDetail.setDto(ow.writeValueAsString(ofrRequestDTO));
+                            stepDetail.setStep(step);
+                        }
+
+                        if (service.getMinVersionRequirement() != null && service.getMaxVersionRequirement() != null && service.getVersionRequirement() == null) {
+                            stepDetail.setServiceDefinition(service.getServiceDefinitionRequirement());
+                            stepDetail.setMaxVersion(service.getMaxVersionRequirement());
+                            stepDetail.setMinVersion(service.getMinVersionRequirement());
+                            stepDetail.setType(type);
+                            stepDetail.setDto(ow.writeValueAsString(ofrRequestDTO));
+                            stepDetail.setStep(step);
+                        }
+
+                        if (service.getVersionRequirement() != null && service.getMinVersionRequirement() != null && service.getMaxVersionRequirement() != null) {
+                            throw new InvalidParameterException("A service can only have one version or one min/max version pair defined.");
+                        }
+
+                        choreographerStepDetailRepository.saveAndFlush(stepDetail);
+                    } else {
+                        throw new InvalidParameterException("The service definition description of the requested service is null or empty.");
+                    }
+                } else {
+                    throw new InvalidParameterException("The requested service in the OFR is null.");
+                }
+            } else {
+                throw new InvalidParameterException("The OFR request for the step is null.");
+            }
+        } catch (JsonProcessingException ex) {
+            logger.debug(ex.getMessage(), ex);
+        } catch (InvalidParameterException ex) {
+            throw ex;
+        } catch (ArrowheadException ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+
+    //-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
     public ChoreographerAction createAction(final String name, final List<String> firstStepNames, final long planId, final List<ChoreographerStepRequestDTO> steps) {
         logger.debug("createAction started...");
@@ -189,11 +254,24 @@ public class ChoreographerDBService {
 
             if (steps != null && !steps.isEmpty()) {
             	for (final ChoreographerStepRequestDTO step : steps) {
-                    actionEntry.getStepEntries().add(createStep(step.getName(), step.getServiceName(), step.getMetadata(), step.getParameters(), step.getQuantity(), actionEntry.getId()));
+                    final ChoreographerOFRRequestDTO usedService = step.getUsedService();
+                    final List<ChoreographerOFRRequestDTO> preconditions = step.getPreconditions();
+
+                    ChoreographerStep persistedStep = createStep(step.getName(), step.getMetadata(), step.getParameters(), step.getQuantity(), actionEntry.getId());
+                    actionEntry.getStepEntries().add(persistedStep);
+
+                    addStepDetailToStep(persistedStep, "MAIN", usedService);
+
+                    if (!CollectionUtils.isEmpty(preconditions)) {
+                        for (ChoreographerOFRRequestDTO precondition : preconditions) {
+                            addStepDetailToStep(persistedStep, "PRECONDITION", precondition);
+                        }
+                    }
             	}
 
             	for (final ChoreographerStepRequestDTO step : steps) {
             		final List<String> nextStepNames = step.getNextStepNames();
+
             		if (nextStepNames != null && !nextStepNames.isEmpty()) {
             			addNextStepsToStep(step.getName(), new HashSet<>(nextStepNames), actionEntry.getId());
             		}
