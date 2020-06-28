@@ -66,8 +66,6 @@ public class DataManagerController {
 	//=================================================================================================
 	// members
 	
-	//private static final String DATAMANAGER_T_URI = CoreCommonConstants.MGMT_URI + "/subscriptions";
-
 	private static final String OP_NOT_VALID_ERROR_MESSAGE = " Illegal operation. ";
 	private static final String NOT_FOUND_ERROR_MESSAGE = " Resource not found. ";
 	
@@ -125,7 +123,7 @@ public class DataManagerController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(value= "/historian/{systemName}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value= CommonConstants.OP_DATAMANAGER_HISTORIAN + "/{systemName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public DataManagerServicesResponseDTO historianSystemGet(
 		@PathVariable(value="systemName", required=true) String systemName
 		) {
@@ -145,7 +143,7 @@ public class DataManagerController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PutMapping(value= "/historian/{systemName}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(value= CommonConstants.OP_DATAMANAGER_HISTORIAN + "/{systemName}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public DataManagerServicesResponseDTO historianSystemPut(
 			@PathVariable(value="systemName", required=true) String systemName,
 			@RequestBody DataManagerOperationDTO req
@@ -154,7 +152,7 @@ public class DataManagerController {
 
 		String op = req.getOp();
 		if (op == null) {
-		  throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, "/historian/"+systemName);
+		  throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/" + systemName);
 		}
 
 		if(op.equals("list")) {
@@ -163,7 +161,7 @@ public class DataManagerController {
 			ret.setServices(services);
 			return ret;
 		}
-		throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, "/historian/"+systemName);
+		throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/" + systemName);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -174,7 +172,7 @@ public class DataManagerController {
 			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = CoreCommonConstants.SWAGGER_HTTP_404_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(value= "/historian/{system}/{service}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value= CommonConstants.OP_DATAMANAGER_HISTORIAN + "/{system}/{service}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public Vector<SenML> historianServiceGet(
 		@PathVariable(value="system", required=true) String systemName,
 		@PathVariable(value="service", required=true) String serviceName,
@@ -202,11 +200,11 @@ public class DataManagerController {
           try {
             signalXCount = Integer.parseInt(params.getFirst("sig"+signalCountId+"count"));
           } catch(NumberFormatException nfe) {
-            throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, "/historian/"+systemName+"/"+serviceName);
+            throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/"+systemName+"/"+serviceName);
           }
         }
         if (signalXCount <= 0) {
-            throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, "/historian/"+systemName+"/"+serviceName);
+            throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/"+systemName+"/"+serviceName);
         }
 				signalCounts.add(signalXCount);
 				signalCountId++;
@@ -218,7 +216,7 @@ public class DataManagerController {
 		}
 
 		if (count <= 0) {
-			throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, "/historian/"+systemName+"/"+serviceName);
+			throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/" + systemName + "/" + serviceName);
 		}
 
 		Vector<SenML> ret = null;
@@ -245,7 +243,7 @@ public class DataManagerController {
 		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PutMapping(value= "/historian/{systemName}/{serviceName}", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(value= CommonConstants.OP_DATAMANAGER_HISTORIAN + "/{systemName}/{serviceName}", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public void historianServicePut(
 	@PathVariable(value="systemName", required=true) String systemName,
 	@PathVariable(value="serviceName", required=true) String serviceName,
@@ -278,7 +276,7 @@ public class DataManagerController {
 		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(value= "/proxy", produces=MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value= CommonConstants.OP_DATAMANAGER_PROXY, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public DataManagerSystemsResponseDTO proxyGet() {
 		logger.debug("proxyGet ...");
 
@@ -298,14 +296,14 @@ public class DataManagerController {
 		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PutMapping(value= "/proxy", consumes = MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(value= CommonConstants.OP_DATAMANAGER_PROXY, consumes = MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public DataManagerSystemsResponseDTO proxyPut(
 			@RequestBody DataManagerOperationDTO req
 		) {
 		logger.debug("proxyPut. ..");
 		String op = req.getOp();
 		if (op == null) {
-		  throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, "/proxy");
+		  throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_PROXY);
 		}
 
 		if(op.equals("list")) {
@@ -315,7 +313,7 @@ public class DataManagerController {
 			return ret;
 		}
 
-	        throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, "/proxy");
+	        throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_PROXY);
 	}
 
 
@@ -326,7 +324,7 @@ public class DataManagerController {
 		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(value= "/proxy/{systemName}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value= CommonConstants.OP_DATAMANAGER_PROXY + "/{systemName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public DataManagerServicesResponseDTO proxySystemGet(
 			@PathVariable(value="systemName", required=true) String systemName
 		) {
@@ -345,7 +343,7 @@ public class DataManagerController {
 		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PutMapping(value= "/proxy/{systemName}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(value= CommonConstants.OP_DATAMANAGER_PROXY + "/{systemName}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public DataManagerServicesResponseDTO proxySystemPut(
 			@PathVariable(value="systemName", required=true) String systemName,
 			@RequestBody DataManagerOperationDTO req
@@ -354,7 +352,7 @@ public class DataManagerController {
 
 		String op = req.getOp();
 		if (op == null) {
-		  throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, "/proxy/"+systemName);
+		  throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_PROXY + "/" + systemName);
 		}
 		if(op.equals("list")){
 			final ArrayList<String> services = proxyService.getEndpointsNamesFromSystem(systemName);
@@ -364,15 +362,15 @@ public class DataManagerController {
 			return ret;
 		} else if(op.equals("delete")) {
 			String serviceName = req.getServiceName();
-			logger.info("Delete proxy Service: " + serviceName + " for: " + systemName);
+			logger.debug("Delete proxy Service: " + serviceName + " for: " + systemName);
 			final boolean res = proxyService.deleteEndpointFromService(systemName, serviceName);
 			if (res == true) {
 				throw new ArrowheadException(null, HttpStatus.SC_OK);
 			} else {
-				throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, "/proxy/"+systemName);
+				throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_PROXY + "/" + systemName);
 			}
 		} else {
-			throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, "/proxy/"+systemName);
+			throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_PROXY + "/" + systemName);
 		}
 	}
 
@@ -383,7 +381,7 @@ public class DataManagerController {
 		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(value= "/proxy/{systemName}/{serviceName}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value= CommonConstants.OP_DATAMANAGER_PROXY + "/{systemName}/{serviceName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public Vector<SenML> proxyServiceGet(
 			@PathVariable(value="systemName", required=true) String systemName,
 			@PathVariable(value="serviceName", required=true) String serviceName
@@ -392,8 +390,8 @@ public class DataManagerController {
 
 			final ProxyElement pe = proxyService.getEndpointFromService(systemName, serviceName);
 			if (pe == null) {
-				logger.info("proxy GET to serviceName: " + serviceName + " not found");
-				throw new BadPayloadException(NOT_FOUND_ERROR_MESSAGE, HttpStatus.SC_NOT_FOUND, "/proxy/"+systemName+"/"+serviceName);
+				logger.debug("proxy GET to serviceName: " + serviceName + " not found");
+				throw new BadPayloadException(NOT_FOUND_ERROR_MESSAGE, HttpStatus.SC_NOT_FOUND, CommonConstants.OP_DATAMANAGER_PROXY + "/" + systemName + "/" + serviceName);
 			}
 
 			return pe.msg;
@@ -407,7 +405,7 @@ public class DataManagerController {
 		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PutMapping(value= "/proxy/{systemName}/{serviceName}", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(value= CommonConstants.OP_DATAMANAGER_PROXY + "/{systemName}/{serviceName}", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public void proxyServicePut(
 			@PathVariable(value="systemName", required=true) String systemName,
 			@PathVariable(value="serviceName", required=true) String serviceName,
