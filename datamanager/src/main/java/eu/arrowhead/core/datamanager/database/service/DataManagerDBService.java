@@ -76,6 +76,8 @@ public class DataManagerDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	private int serviceToID(final String systemName, final String serviceName, final Connection conn) {
+    logger.debug("serviceToID for {}/{}", systemName, serviceName);
+
 	  int id=-1;
 
 	  PreparedStatement stmt;
@@ -101,6 +103,8 @@ public class DataManagerDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	public ArrayList<String> getAllHistorianSystems() {
+    logger.debug("getAllHistorianSystems");
+
 	  ArrayList<String> ret = new ArrayList<String>();
 	  Connection conn = null;
 
@@ -130,6 +134,8 @@ public class DataManagerDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	public boolean addServiceForSystem(final String systemName, final String serviceName, final String serviceType) {
+    logger.debug("addServiceForSystem for {}/{}", systemName, serviceName);
+
 	  Connection conn = null;
 	  try {
 	    conn = getConnection();
@@ -167,6 +173,8 @@ public class DataManagerDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	public ArrayList<String> getServicesFromSystem(final String systemName) {
+    logger.debug("getServicesFromSystem for {}", systemName);
+
 	  ArrayList<String> ret = new ArrayList<String>();
 	  Connection conn = null;
 	  try {
@@ -200,6 +208,8 @@ public class DataManagerDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	public boolean createEndpoint(final String systemName, final String serviceName) {
+    logger.debug("createEndpoint for {}/{}", systemName, serviceName);
+
 	  Connection conn = null;
 	  try {
 	    conn = getConnection();
@@ -237,6 +247,8 @@ public class DataManagerDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	public boolean updateEndpoint(final String systemName, final String serviceName, final Vector<SenML> message) {
+    logger.debug("updateEndpoint for {}/{}", systemName, serviceName);
+
 	  boolean ret = true;
 
 	  double bt = message.get(0).getBt();
@@ -336,6 +348,7 @@ public class DataManagerDBService {
   //-------------------------------------------------------------------------------------------------
   public Vector<SenML> fetchMessagesFromEndpoint(final String systemName, final String serviceName, double from, double to, final int count) {
     logger.debug("fetchMessagesFromEndpoint for "+ systemName + "/"+serviceName);
+
     Connection conn = null;
 
     try {
@@ -433,6 +446,7 @@ public class DataManagerDBService {
 	//-------------------------------------------------------------------------------------------------
 	public Vector<SenML> fetchSignalsFromEndpoint(String systemName, String serviceName, double from, double to, final Vector<Integer> counts, final Vector<String> signals) {
 		logger.debug("fetchSignalsFromEndpoint for "+ systemName + "/"+serviceName);
+
 		Connection conn = null;
 
 	  try {
@@ -469,8 +483,6 @@ public class DataManagerDBService {
 
         ResultSet rs = stmt.executeQuery();
 
-        //double bt = 0;
-        //String bu = null;
         int dataLeft = signalCount;
         while(rs.next() == true && dataLeft > 0) {
           SenML msg = new SenML();
@@ -514,7 +526,7 @@ public class DataManagerDBService {
 	    return messages;
 
 	  } catch (SQLException e) {
-	    //logger.debug("SHOULD NOT HAPPEN" + e.toString());
+	    logger.debug("SQl error: " + e.toString());
 	  } finally {
 	    try {
 	      closeConnection(conn);
@@ -523,7 +535,6 @@ public class DataManagerDBService {
 
 	  }
 
-	  //logger.debug("fetchEndpoint: no data");
 	  return null;
 	}
 
@@ -541,7 +552,7 @@ public class DataManagerDBService {
 	    if (m.getT() == null) {
 	      continue;
 	    }
-	    if (m.getT() > 268435456) { // absolute
+	    if (m.getT() > SenML.RELATIVE_TIMESTAMP_INDICATOR) { // absolute
 	      if (m.getT() > max ) {
           max = m.getT();
 	      }
@@ -565,7 +576,7 @@ public class DataManagerDBService {
 	    if (m.getT() == null) {
 	      continue;
 	    }
-	    if (m.getT() > 268435456) { // absolute
+	    if (m.getT() > SenML.RELATIVE_TIMESTAMP_INDICATOR) { // absolute
 	      if (m.getT() < min ) {
           min = m.getT();
 	      }

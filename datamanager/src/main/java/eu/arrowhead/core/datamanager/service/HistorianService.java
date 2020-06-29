@@ -61,7 +61,7 @@ public class HistorianService {
 
   //-------------------------------------------------------------------------------------------------
   public ArrayList<String> getSystems(){
-    logger.debug("getSystems started ...");
+    logger.debug("getSystems");
 
     return dataManagerDBService.getAllHistorianSystems();
   }
@@ -69,44 +69,44 @@ public class HistorianService {
   
   //-------------------------------------------------------------------------------------------------
   public ArrayList<String> getServicesFromSystem(final String systemName) {
-    logger.debug("getServicesFromSystem started ...");
 
     if (Utilities.isEmpty(systemName)) {
       return null;
     }
+    logger.debug("getServicesFromSystem for {}", systemName);
 
     return dataManagerDBService.getServicesFromSystem(systemName);
   }
 
   //-------------------------------------------------------------------------------------------------
   public boolean createEndpoint(final String systemName, final String serviceName) {
-    logger.debug("createEndpoint started ...");
 
     if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
       return false;
     }
+    logger.debug("createEndpoint for {}/{}", systemName, serviceName);
 
     return dataManagerDBService.createEndpoint(systemName, serviceName);
   }
 
   //-------------------------------------------------------------------------------------------------
   public boolean addServiceForSystem(final String systemName, final String serviceName, final String serviceType){
-    logger.debug("addServiceForSystem started ...");
 
     if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName) || Utilities.isEmpty(serviceType)) {
       return false;
     }
+    logger.debug("addServiceForSystem for {}/{}", systemName, serviceName);
 
     return dataManagerDBService.addServiceForSystem(systemName, serviceName, serviceType);
   }
 
   //-------------------------------------------------------------------------------------------------
   public boolean updateEndpoint(final String systemName, final String serviceName, final Vector<SenML> msg) {
-    logger.debug("updateEndpoint...");
 
     if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
       return false;
     }
+    logger.debug("updateEndpoint for {}/{}", systemName, serviceName);
 
     if (msg == null) {
       return false;
@@ -121,22 +121,22 @@ public class HistorianService {
   
   //-------------------------------------------------------------------------------------------------
   public Vector<SenML> fetchEndpoint(final String systemName, final String serviceName, double from, double to, final int count) {
-    logger.debug("fetchEndpoint...");
 
     if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
       return null;
     }
+    logger.debug("fetchEndpoint for {}/{}", systemName, serviceName);
 
     return dataManagerDBService.fetchMessagesFromEndpoint(systemName, serviceName, from, to, count);
   }
 
   //-------------------------------------------------------------------------------------------------
   public Vector<SenML> fetchEndpoint(final String systemName, final String serviceName, double from, double to, final Vector<Integer> counts, final Vector<String> signals) {
-    logger.debug("fetchEndpoint with signals...");
 
     if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
       return null;
     }
+    logger.debug("fetchEndpoint with signals for {}/{}", systemName, serviceName);
 
     if (counts == null || signals == null) {
       return null;
