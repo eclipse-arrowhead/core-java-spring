@@ -1,3 +1,16 @@
+/********************************************************************************
+ * Copyright (c) 2020 {Lulea University of Technology}
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0 
+ *
+ * Contributors: 
+ *   {Lulea University of Technology} - implementation
+ *   Arrowhead Consortia - conceptualization 
+ ********************************************************************************/
 package eu.arrowhead.core.datamanager;
 
 import java.util.List;
@@ -365,7 +378,7 @@ public class DataManagerController {
 				throw new DataNotFoundException(NOT_FOUND_ERROR_MESSAGE, HttpStatus.SC_NOT_FOUND, CommonConstants.OP_DATAMANAGER_PROXY + "/" + systemName + "/" + serviceName);
 			}
 
-			return pe.msg;
+			return pe.getMessage();
 			}
 
 	//-------------------------------------------------------------------------------------------------
@@ -381,30 +394,30 @@ public class DataManagerController {
 	@ResponseBody public void proxyServicePut(
 			@PathVariable(value="systemName", required=true) String systemName,
 			@PathVariable(value="serviceName", required=true) String serviceName,
-			@RequestBody Vector<SenML> sml
+			@RequestBody Vector<SenML> message
 			) {
 			logger.debug("proxyServicePut for " + systemName + "/"+serviceName);
 
-			validateSenMLMessage(systemName, serviceName, sml);
+			validateSenMLMessage(systemName, serviceName, message);
 
-			SenML head = sml.firstElement();
+			SenML head = message.firstElement();
 			if(head.getBt() == null) {
 				head.setBt((double)System.currentTimeMillis() / 1000);
 			}
 
-			validateSenMLContent(sml);
+			validateSenMLContent(message);
 
 			final ProxyElement pe = proxyService.getEndpointFromService(systemName, serviceName);
 			if (pe == null) {
 				final boolean ret = proxyService.addEndpointForService(new ProxyElement(systemName, serviceName));
 				if (ret==true){
-					proxyService.updateEndpointFromService(systemName, serviceName, sml);
+					proxyService.updateEndpointFromService(systemName, serviceName, message);
 					throw new ResponseStatusException(org.springframework.http.HttpStatus.CREATED);
 				} else { 
 					throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
 				}
 			} else {
-				proxyService.updateEndpointFromService(systemName, serviceName, sml);
+				proxyService.updateEndpointFromService(systemName, serviceName, message);
 			}
 		}
 

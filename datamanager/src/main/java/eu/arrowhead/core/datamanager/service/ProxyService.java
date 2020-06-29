@@ -1,3 +1,16 @@
+/********************************************************************************
+ * Copyright (c) 2020 {Lulea University of Technology}
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0 
+ *
+ * Contributors: 
+ *   {Lulea University of Technology} - implementation
+ *   Arrowhead Consortia - conceptualization 
+ ********************************************************************************/
 package eu.arrowhead.core.datamanager.service;
 
 import javax.annotation.Resource;
@@ -46,114 +59,118 @@ public class ProxyService {
 
     //-------------------------------------------------------------------------------------------------
     public List<String> getAllSystems() {
-      logger.debug("getAllSystems started ...");
+      logger.debug("getAllSystems...");
 
       List<String> res = new ArrayList<>();
-      Iterator<ProxyElement> epi = endpoints.iterator();
+      Iterator<ProxyElement> pei = endpoints.iterator();
 
-      while (epi.hasNext()) {
-	ProxyElement pe = epi.next();
+      while (pei.hasNext()) {
+        ProxyElement pe = pei.next();
 
-	if (!systemExists(res, pe.systemName)) {
-	  res.add(pe.systemName);
-	}
+        if (!systemExists(res, pe.getSystemName())) {
+          res.add(pe.getSystemName());
+        }
       }
       return res;
     }
 
     //-------------------------------------------------------------------------------------------------
-    private boolean systemExists(List <String> systems, String systemName) {
+    private boolean systemExists(final List <String> systems, final String systemName) {
+      logger.debug("systemExists...");
 
-      if (systems == null || systemName == null) {
-	return false;
+      if(Utilities.isEmpty(systemName)){
+        return false;
+      }
+
+      if (systems == null) {
+        return false;
       }
 
       Iterator<String> sysi = systems.iterator();
       while (sysi.hasNext()) {
-	String tmpsys = sysi.next();
-	if (tmpsys.equals(systemName)) {
-	  return true;
-	}
+        String tmpSystemName = sysi.next();
+        if (tmpSystemName.equals(systemName)) {
+          return true;
+        }
       }
-
 
       return false;
     }
 
     //-------------------------------------------------------------------------------------------------
-    public ArrayList<ProxyElement> getEndpointsFromSystem(String systemName) {
-      logger.debug("getEndpointsFromSystem started ...");
+    public ArrayList<ProxyElement> getEndpointsFromSystem(final String systemName) {
+      logger.debug("getEndpointsFromSystem...");
 
-      if (systemName == null) {
-	return null;
+      if(Utilities.isEmpty(systemName)) {
+        return null;
       }
 
       ArrayList<ProxyElement> res = new ArrayList<>();
-      Iterator<ProxyElement> epi = endpoints.iterator();
+      Iterator<ProxyElement> pei = endpoints.iterator();
 
-      while (epi.hasNext()) {
-	ProxyElement pe = epi.next();
-	if (systemName.equals(pe.systemName)) {
-	  res.add(pe);
-	}
+      while (pei.hasNext()) {
+        ProxyElement pe = pei.next();
+        if (systemName.equals(pe.getSystemName())) {
+          res.add(pe);
+        }
       }
 
       return res;
     }
 
     //-------------------------------------------------------------------------------------------------
-    public boolean deleteAllEndpointsForSystem(String systemName) {
-      logger.debug("deleteAllEndpointsForSystem started ...");
+    public boolean deleteAllEndpointsForSystem(final String systemName) {
+      logger.debug("deleteAllEndpointsForSystem...");
 
-      if (systemName == null) {
-	return false;
+      if(Utilities.isEmpty(systemName)) {
+        return false;
       }
 
-      Iterator<ProxyElement> epi = endpoints.iterator();
+      Iterator<ProxyElement> pei = endpoints.iterator();
 
-      while (epi.hasNext()) {
-	ProxyElement pe = epi.next();
-	if (systemName.equals(pe.systemName)) {
-	  epi.remove();
-	}
+      while (pei.hasNext()) {
+        ProxyElement pe = pei.next();
+        if (systemName.equals(pe.getSystemName())) {
+          pei.remove();
+        }
       }
 
       return true;
     }
 
     //-------------------------------------------------------------------------------------------------
-    public ArrayList<String> getEndpointsNamesFromSystem(String systemName) {
+    public ArrayList<String> getEndpointsNamesFromSystem(final String systemName) {
       logger.debug("getEndpointsNamesFromSystem started ...");
 
-      if (systemName == null) {
-	return null;
+      if(Utilities.isEmpty(systemName)) {
+        return null;
       }
 
       ArrayList<String> res = new ArrayList<>();
-      Iterator<ProxyElement> epi = endpoints.iterator();
+      Iterator<ProxyElement> pei = endpoints.iterator();
 
-      while (epi.hasNext()) {
-	ProxyElement pe = epi.next();
-	if (systemName.equals(pe.systemName)) {
-	  res.add(pe.serviceName);
-	}
+      while (pei.hasNext()) {
+        ProxyElement pe = pei.next();
+        if (systemName.equals(pe.getSystemName())) {
+          res.add(pe.getServiceName());
+        }
       }
 
       return res;
     }
 
     //-------------------------------------------------------------------------------------------------
-    public boolean addEndpointForService(ProxyElement e) {
-      logger.debug("addEndpointForService started ...");
+    public boolean addEndpointForService(final ProxyElement e) {
+      logger.debug("addEndpointForService...");
 
       if (e == null) {
-	return false;
+        return false;
       }
 
       for(ProxyElement tmp: endpoints) {
-	if (tmp.serviceName.equals(e.serviceName)) {
-	  return false;
-	}
+        if (tmp.getServiceName().equals(e.getServiceName())) {
+          return false;
+        }
       }
       endpoints.add(e);
 
@@ -161,61 +178,65 @@ public class ProxyService {
     }
 
     //-------------------------------------------------------------------------------------------------
-    public ProxyElement getEndpointFromService(String systemName, String serviceName) {
-      logger.debug("getEndpointFromService started ...");
+    public ProxyElement getEndpointFromService(final String systemName, final String serviceName) {
+      logger.debug("getEndpointFromService...");
 
-      if (systemName == null || serviceName == null) {
-	return null;
+      if(Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
+        return null;
       }
 
-      Iterator<ProxyElement> epi = endpoints.iterator();
+      Iterator<ProxyElement> pei = endpoints.iterator();
 
-      while (epi.hasNext()) {
-	ProxyElement currpe = epi.next();
-	if (serviceName.equals(currpe.serviceName)) {
-	  return currpe;
-	}
+      while (pei.hasNext()) {
+        ProxyElement currpe = pei.next();
+        if (serviceName.equals(currpe.getServiceName())) {
+          return currpe;
+        }
       }
 
       return null;
     }
 
     //-------------------------------------------------------------------------------------------------
-    public boolean updateEndpointFromService(String systemName, String serviceName, Vector<SenML> msg) {
-      logger.debug("updateEndpointFromService started ...");
+    public boolean updateEndpointFromService(final String systemName, final String serviceName, final Vector<SenML> message) {
+      logger.debug("updateEndpointFromService...");
 
-      if (systemName == null || serviceName == null) {
-	return false;
+      if(Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
+        return false;
       }
 
-      Iterator<ProxyElement> epi = endpoints.iterator();
+      if (message == null) {
+        return false;
+      }
 
-      while (epi.hasNext()) {
-	ProxyElement pe = epi.next();
-	if (systemName.equals(pe.systemName) && serviceName.equals(pe.serviceName)) {
-	  pe.msg = msg;
-	  return true;
-	}
+      Iterator<ProxyElement> pei = endpoints.iterator();
+
+      while (pei.hasNext()) {
+        ProxyElement pe = pei.next();
+        if (systemName.equals(pe.getSystemName()) && serviceName.equals(pe.getServiceName())) {
+          pe.setMessage(message);
+          return true;
+        }
       }
       return false;
     }
 
     //-------------------------------------------------------------------------------------------------
-    public boolean deleteEndpointFromService(String systemName, String serviceName) {
-      logger.debug("deleteEndpointFromService started ...");
+    public boolean deleteEndpointFromService(final String systemName, final String serviceName) {
+      logger.debug("deleteEndpointFromService...");
 
-      if (systemName == null || serviceName == null) {
-	return false;
+      if(Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
+        return false;
       }
 
-      Iterator<ProxyElement> epi = endpoints.iterator();
+      Iterator<ProxyElement> pei = endpoints.iterator();
 
-      while (epi.hasNext()) {
-	ProxyElement pe = epi.next();
-	if (systemName.equals(pe.systemName) && serviceName.equals(pe.serviceName)) {
-	  epi.remove();
-	  return true;
-	}
+      while (pei.hasNext()) {
+        ProxyElement pe = pei.next();
+        if (systemName.equals(pe.getSystemName()) && serviceName.equals(pe.getServiceName())) {
+          pei.remove();
+          return true;
+        }
       }
 
       return false;
