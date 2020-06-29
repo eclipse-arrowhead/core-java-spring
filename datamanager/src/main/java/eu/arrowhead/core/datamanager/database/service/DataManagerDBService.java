@@ -237,10 +237,10 @@ public class DataManagerDBService {
 	  Connection conn = null;
 	  try {
 	    conn = getConnection();
+      conn.setAutoCommit(false);
 	    int sid = serviceToID(systemName, serviceName, conn);
 	    if (sid != -1) {
 	      String sql = "INSERT INTO dmhist_messages(sid, bt, mint, maxt, msg) VALUES(?, ?, ?, ?, ?)";
-	      //System.out.println("sql=" + sql);
 	      PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 	      stmt.setLong(1, sid);
 	      stmt.setDouble(2, bt);
@@ -257,120 +257,127 @@ public class DataManagerDBService {
 
 	      // that was the entire message, now insert each individual JSON object in the message
 	      String bu = msg.get(0).getBu();
-	      for (SenML m : msg) {
-		double t = 0;
-		if (m.getT() != null) {
-		  if (m.getT() < 268435456) { //if relative ts, update it
-		    t = m.getT() + bt;
-		  }
-		} else {
-		  t = bt;
-		}
+        for (SenML m : msg) {
+          double t = 0;
+          if (m.getT() != null) {
+            if (m.getT() < 268435456) { //if relative ts, update it
+              t = m.getT() + bt;
+            }
+          } else {
+            t = bt;
+          }
 
-		if (m.getU() == null) {
-		  m.setU(bu);
-		}
+          if (m.getU() == null) {
+            m.setU(bu);
+          }
 
-		if (m.getN() != null) {
-		  sql = "INSERT INTO dmhist_entries(sid, mid, n, t, u, v, vs, vb) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
-		  stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-		  stmt.setInt(1, sid);
-		  stmt.setInt(2, mid);
-		  stmt.setString(3, m.getN());
-		  stmt.setDouble(4, t);
-		  stmt.setString(5, m.getU());
-		  if (m.getV() == null) {
-		    stmt.setNull(6, java.sql.Types.DOUBLE);
-		  } else {
-		    stmt.setDouble(6, m.getV());
-		  } 
-		  stmt.setString(7, m.getVs());
-		  if (m.getVb() != null) {
-		    stmt.setBoolean(8, m.getVb());
-		  } else {
-		    stmt.setNull(8, java.sql.Types.BOOLEAN);
-		  }
-		  stmt.executeUpdate();
-		  rs = stmt.getGeneratedKeys();
-		  rs.close();
-		  stmt.close();
-		}
+          if (m.getN() != null) {
+            sql = "INSERT INTO dmhist_entries(sid, mid, n, t, u, v, vs, vb) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+            stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            stmt.setInt(1, sid);
+            stmt.setInt(2, mid);
+            stmt.setString(3, m.getN());
+            stmt.setDouble(4, t);
+            stmt.setString(5, m.getU());
+            if (m.getV() == null) {
+              stmt.setNull(6, java.sql.Types.DOUBLE);
+            } else {
+              stmt.setDouble(6, m.getV());
+            } 
+            stmt.setString(7, m.getVs());
+            if (m.getVb() != null) {
+              stmt.setBoolean(8, m.getVb());
+            } else {
+              stmt.setNull(8, java.sql.Types.BOOLEAN);
+            }
+            stmt.executeUpdate();
+            rs = stmt.getGeneratedKeys();
+            rs.close();
+            stmt.close();
+          }
 
-	      }
+        }
 
-	    } else {
-	      ret = false;
-	    }
-	  } catch (SQLException e) {
-	    ret = false;
-	    //System.out.println("Exception: " + e.toString() + "\n" + e.getStackTrace());
-	  } finally {
-	    try{
-	      closeConnection(conn);
-	    } catch(Exception e){
-	    }
+        conn.commit();
 
-	  }
+      } else {
+        ret = false;
+      }
+    } catch (SQLException e) {
 
-	  return ret;
-	}
+      try {
+        conn.rollback();
+      } catch(SQLException err) {
+        logger.debug("Commit failed");
+      }
+      ret = false;
+    } finally {
+      try{
+        closeConnection(conn);
+      } catch(Exception e){
+      }
 
-	//-------------------------------------------------------------------------------------------------
-	public Vector<SenML> fetchMessagesFromEndpoint(String systemName, String serviceName, double from, double to, int count) {
-	  logger.debug("fetchMessagesFromEndpoint for "+ systemName + "/"+serviceName);
-	  Connection conn = null;
+    }
 
-	  try {
-	    conn = getConnection();
-	    int serviceId = serviceToID(systemName, serviceName, conn);
-	    if (serviceId == -1) {
-	      logger.debug("fetchMessagesFromEndpoint: service doesn't exist");
-	      return null;
-	    }
+    return ret;
+  }
 
-	    if (from < 0.0) {
-	      from = 0.0;                                       //1970-01-01
-	    }
-	    if (to <= 0.0) {
-	      to = 1000 + (long)(System.currentTimeMillis() / 1000.0); // current timestamp - not ok to insert data that is created in the future (excl. minor clock drift)
-	    }
+  //-------------------------------------------------------------------------------------------------
+  public Vector<SenML> fetchMessagesFromEndpoint(String systemName, String serviceName, double from, double to, int count) {
+    logger.debug("fetchMessagesFromEndpoint for "+ systemName + "/"+serviceName);
+    Connection conn = null;
 
-	    String sql = "";
-	    PreparedStatement stmt = null;
-	    sql = "SELECT id FROM dmhist_messages WHERE sid=? AND bt >=? AND bt <=? ORDER BY bt DESC LIMIT ?;";
-	    stmt = conn.prepareStatement(sql);
-	    stmt.setInt(1, serviceId);
-	    stmt.setDouble(2, from);
-	    stmt.setDouble(3, to);
-	    stmt.setInt(4, count);
+    try {
+      conn = getConnection();
+      int serviceId = serviceToID(systemName, serviceName, conn);
+      if (serviceId == -1) {
+        logger.debug("fetchMessagesFromEndpoint: service doesn't exist");
+        return null;
+      }
 
-	    Vector<SenML> messages = new Vector<SenML>();
-	    SenML hdr = new SenML();
-	    hdr.setBn(serviceName);
-	    messages.add(hdr);
-	    double bt = 0;
-	    String bu = null;
-	    ResultSet messageListRs = stmt.executeQuery();
-	    while(messageListRs.next() == true) {
-		    int mid = messageListRs.getInt("id");
+      if (from < 0.0) {
+        from = 0.0;                                       //1970-01-01
+      }
+      if (to <= 0.0) {
+        to = 1000 + (long)(System.currentTimeMillis() / 1000.0); // current timestamp - not ok to insert data that is created in the future (excl. minor clock drift)
+      }
 
-		    String sql2 = "SELECT * FROM dmhist_entries WHERE sid=? AND mid=? AND t>=? AND t <=? ORDER BY t DESC;";
-		    PreparedStatement stmt2 = conn.prepareStatement(sql2);
-		    stmt2.setInt(1, serviceId);
-		    stmt2.setInt(2, mid);
-		    stmt2.setDouble(3, from);
-		    stmt2.setDouble(4, to);
+      String sql = "";
+      PreparedStatement stmt = null;
+      sql = "SELECT id FROM dmhist_messages WHERE sid=? AND bt >=? AND bt <=? ORDER BY bt DESC LIMIT ?;";
+      stmt = conn.prepareStatement(sql);
+      stmt.setInt(1, serviceId);
+      stmt.setDouble(2, from);
+      stmt.setDouble(3, to);
+      stmt.setInt(4, count);
 
-		    ResultSet rs2 = stmt2.executeQuery();
-		    while(rs2.next() == true ) {
-			    //logger.debug("\t-> "+ rs2.getString("n") + ", " + rs2.getInt("t"));
-			    SenML msg = new SenML();
-			    msg.setT((double)rs2.getLong("t"));
-			    msg.setN(rs2.getString("n"));
-			    msg.setU(rs2.getString("u"));
-			    double v = rs2.getDouble("v");
-			    if (!rs2.wasNull()) {
-				    msg.setV(v);
+      Vector<SenML> messages = new Vector<SenML>();
+      SenML hdr = new SenML();
+      hdr.setBn(serviceName);
+      messages.add(hdr);
+      double bt = 0;
+      String bu = null;
+      ResultSet messageListRs = stmt.executeQuery();
+      while(messageListRs.next() == true) {
+        int mid = messageListRs.getInt("id");
+
+        String sql2 = "SELECT * FROM dmhist_entries WHERE sid=? AND mid=? AND t>=? AND t <=? ORDER BY t DESC;";
+        PreparedStatement stmt2 = conn.prepareStatement(sql2);
+        stmt2.setInt(1, serviceId);
+        stmt2.setInt(2, mid);
+        stmt2.setDouble(3, from);
+        stmt2.setDouble(4, to);
+
+        ResultSet rs2 = stmt2.executeQuery();
+        while(rs2.next() == true ) {
+          //logger.debug("\t-> "+ rs2.getString("n") + ", " + rs2.getInt("t"));
+          SenML msg = new SenML();
+          msg.setT((double)rs2.getLong("t"));
+          msg.setN(rs2.getString("n"));
+          msg.setU(rs2.getString("u"));
+          double v = rs2.getDouble("v");
+          if (!rs2.wasNull()) {
+            msg.setV(v);
 			    }
 
 			    msg.setVs(rs2.getString("vs"));
@@ -410,7 +417,7 @@ public class DataManagerDBService {
 		  }
 	  }
 
-	  logger.debug("fetchMessagesFromEndpoint: no data");
+	  //logger.debug("fetchMessagesFromEndpoint: no data");
 	  return null;
 	}
 
@@ -453,7 +460,7 @@ public class DataManagerDBService {
         stmt.setDouble(3, from);
         stmt.setDouble(4, to);
         stmt.setInt(5, signalCount);
-        logger.debug("SQL: " + stmt.toString());
+        //logger.debug("SQL: " + stmt.toString());
 
         ResultSet rs = stmt.executeQuery();
 
@@ -511,7 +518,7 @@ public class DataManagerDBService {
 
 	  }
 
-	  logger.debug("fetchEndpoint: no data");
+	  //logger.debug("fetchEndpoint: no data");
 	  return null;
 	}
 

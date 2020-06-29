@@ -1,18 +1,23 @@
 package eu.arrowhead.core.datamanager.security;
 
-import java.util.Map;
-
+import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.SecurityUtilities;
+import eu.arrowhead.common.dto.shared.CertificateType;
+import eu.arrowhead.common.security.CoreSystemAccessControlFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.CoreCommonConstants;
-import eu.arrowhead.common.dto.shared.SenML;
+//import eu.arrowhead.common.dto.shared.SenML;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.core.CoreSystem;
+//import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.exception.AuthException;
-import eu.arrowhead.common.security.CoreSystemAccessControlFilter;
+
+import java.util.Map;
 
 @Component
 @ConditionalOnProperty(name = CommonConstants.SERVER_SSL_ENABLED, matchIfMissing = true) 
@@ -38,15 +43,11 @@ public class DatamanagerAccessControlFilter extends CoreSystemAccessControlFilte
 
     // only the system named Sysname is allowed to write to <historian or proxy>/$SysName/$SrvName
     if (!method.toLowerCase().equals("get")) {
-      int sysNameStartPosition = requestTarget.indexOf("/datamanager"+CommonConstants.OP_DATAMANAGER_HISTORIAN+"/");
+      int sysNameStartPosition = requestTarget.indexOf(CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN+"/");
       int sysNameStopPosition = -1;
       if ( sysNameStartPosition != -1) {
-        sysNameStopPosition = requestTarget.indexOf("/", sysNameStartPosition + 0 + ("/datamanager"+CommonConstants.OP_DATAMANAGER_HISTORIAN+"/").length());
-        String requestTargetSystemName = requestTarget.substring(sysNameStartPosition + ("/datamanager"+CommonConstants.OP_DATAMANAGER_HISTORIAN+"/").length(), sysNameStopPosition);
-
-        //logger.info("reqtarget:" + requestTarget);
-        //logger.info("start: "+sysNameStartPosition+", stop: " + sysNameStopPosition);
-        //logger.info("rewqSysname: " + requestTargetSystemName);
+        sysNameStopPosition = requestTarget.indexOf("/", sysNameStartPosition + 0 + (CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN+"/").length());
+        String requestTargetSystemName = requestTarget.substring(sysNameStartPosition + (CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN+"/").length(), sysNameStopPosition);
 
         checkIfRequesterSystemNameisEqualsWithClientNameFromCN(requestTargetSystemName, clientCN);
         return;
@@ -54,22 +55,15 @@ public class DatamanagerAccessControlFilter extends CoreSystemAccessControlFilte
 
       if ( sysNameStartPosition == -1) {
         sysNameStartPosition = requestTarget.indexOf("/datamanager"+CommonConstants.OP_DATAMANAGER_PROXY+"/");
-        sysNameStopPosition = requestTarget.indexOf("/", sysNameStartPosition + 0 + ("/datamanager"+CommonConstants.OP_DATAMANAGER_PROXY+"/").length());
-        String requestTargetSystemName = requestTarget.substring(sysNameStartPosition + ("/datamanager"+CommonConstants.OP_DATAMANAGER_PROXY+"/").length(), sysNameStopPosition);
+        sysNameStopPosition = requestTarget.indexOf("/", sysNameStartPosition + 0 + (CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_PROXY+"/").length());
+        String requestTargetSystemName = requestTarget.substring(sysNameStartPosition + (CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_PROXY+"/").length(), sysNameStopPosition);
 
-        //logger.info("rewqSysname: " + requestTargetSystemName);
         checkIfRequesterSystemNameisEqualsWithClientNameFromCN(requestTargetSystemName, clientCN);
         return;
       } else {
         throw new AuthException("Illegal request");
       }
     }
-
-    /*if ( requestTarget.contains( CommonConstants.OP_DATAMANAGER_HISTORIAN) ) {
-      final SenML req = Utilities.fromJson(requestJSON, SenML.class);
-		} else if ( requestTarget.contains( CommonConstants.OP_DATAMANAGER_PROXY) ) {
-      final SenML req = Utilities.fromJson(requestJSON, SenML.class);
-    }*/
 
 	}
 
