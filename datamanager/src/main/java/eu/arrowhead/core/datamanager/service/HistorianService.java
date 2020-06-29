@@ -111,7 +111,7 @@ public class HistorianService {
     logger.debug("fetchEndpoint...");
 
     if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
-      return false;
+      return null;
     }
 
     return dataManagerDBService.fetchMessagesFromEndpoint(systemName, serviceName, from, to, count);
@@ -122,7 +122,7 @@ public class HistorianService {
     logger.debug("fetchEndpoint with signals...");
 
     if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
-      return false;
+      return null;
     }
 
     if (counts == null || signals == null) {
