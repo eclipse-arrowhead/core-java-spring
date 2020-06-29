@@ -116,7 +116,7 @@ public class DataManagerController {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Interface to get all services that s specific system has active in the Historian service", response = DataManagerServicesResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiOperation(value = "Interface to get all services that a specific system has active in the Historian service", response = DataManagerServicesResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -133,34 +133,6 @@ public class DataManagerController {
 		ret.setServices(services);
 
 		return ret;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Interface to interact with system object that is active in the Historian service", response = DataManagerServicesResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
-	@ApiResponses (value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-	})
-	@PutMapping(value= CommonConstants.OP_DATAMANAGER_HISTORIAN + "/{systemName}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public DataManagerServicesResponseDTO historianSystemPut(
-			@PathVariable(value="systemName", required=true) String systemName,
-			@RequestBody DataManagerOperationDTO req
-		) {
-		logger.debug("historianSystemPut for " + systemName);
-
-		String op = req.getOp();
-		if (op == null) {
-		  throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/" + systemName);
-		}
-
-		if(op.equals("list")) {
-			DataManagerServicesResponseDTO ret = new DataManagerServicesResponseDTO();
-			final ArrayList<String> services = historianService.getServicesFromSystem(systemName);
-			ret.setServices(services);
-			return ret;
-		}
-		throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/" + systemName);
 	}
 
 	//-------------------------------------------------------------------------------------------------

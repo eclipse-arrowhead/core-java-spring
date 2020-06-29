@@ -22,8 +22,8 @@ public class DataManagerApplicationInitListener extends ApplicationInitListener 
         }
     }
 
-    @Override
-    protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
-        return List.of();
-    }
+//    @Override
+//    protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
+//        return List.of();
+//    }
 }
