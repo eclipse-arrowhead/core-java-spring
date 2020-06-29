@@ -57,6 +57,7 @@ import eu.arrowhead.common.dto.shared.DataManagerOperationDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.datamanager.database.service.DataManagerDBService;
 import eu.arrowhead.core.datamanager.service.ProxyService;
 import eu.arrowhead.core.datamanager.service.ProxyElement;
@@ -83,9 +84,6 @@ public class DataManagerController {
 	
 	private final Logger logger = LogManager.getLogger(DataManagerController.class);
 
-	//@Autowired
-	//DataManagerService dataManagerService;
-	
 	@Autowired
 	ProxyService proxyService;
 
@@ -102,8 +100,7 @@ public class DataManagerController {
 	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE)
 	})
 	@GetMapping(path = CommonConstants.ECHO_URI)
 	@ResponseBody public String echoService() {
@@ -114,12 +111,13 @@ public class DataManagerController {
 	@ApiOperation(value = "Interface to the Historian service", response = DataManagerSystemsResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path= CommonConstants.OP_DATAMANAGER_HISTORIAN, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public DataManagerSystemsResponseDTO historianGet(
 			) {
-		logger.debug("historianGet ...");
+		logger.debug("historianGet");
 
 		DataManagerSystemsResponseDTO ret = new DataManagerSystemsResponseDTO();
 
@@ -132,6 +130,7 @@ public class DataManagerController {
 	@ApiOperation(value = "Interface to get all services that a specific system has active in the Historian service", response = DataManagerServicesResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CoreCommonConstants.SWAGGER_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
@@ -139,7 +138,11 @@ public class DataManagerController {
 	@ResponseBody public DataManagerServicesResponseDTO historianSystemGet(
 		@PathVariable(value="systemName", required=true) String systemName
 		) {
-		logger.debug("historianSystemGet for " + systemName);
+		logger.debug("historianSystemGet for {}", systemName);
+
+    if(Utilities.isEmpty(systemName)) {
+      throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN);
+    }
 
 		DataManagerServicesResponseDTO ret = new DataManagerServicesResponseDTO();
 		final ArrayList<String> services = historianService.getServicesFromSystem(systemName);
@@ -152,6 +155,7 @@ public class DataManagerController {
 	@ApiOperation(value = "Interface to get sensor data from a service", response = SenML.class, responseContainer="Vector", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CoreCommonConstants.SWAGGER_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = CoreCommonConstants.SWAGGER_HTTP_404_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
@@ -162,7 +166,11 @@ public class DataManagerController {
 		@PathVariable(value="service", required=true) String serviceName,
 		@RequestParam MultiValueMap<String, String> params
 		) {
-		logger.debug("historianServiceGet for "+systemName + "/"+serviceName);
+
+    if(Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
+      throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN);
+    }
+		logger.debug("historianServiceGet for {}/{}", systemName, serviceName);
 
 		double from=-1, to=-1;
 		int count = 1;
@@ -229,22 +237,25 @@ public class DataManagerController {
 	@ResponseBody public void historianServicePut(
 	@PathVariable(value="systemName", required=true) String systemName,
 	@PathVariable(value="serviceName", required=true) String serviceName,
-	@RequestBody Vector<SenML> sml
+	@RequestBody Vector<SenML> message
 	) {
-		logger.debug("historianServiceGet for "+systemName + "/"+serviceName);
+    if(Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
+      throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN);
+    }
+		logger.debug("historianServicePut for {}/{}", systemName, serviceName);
 
-		validateSenMLMessage(systemName, serviceName, sml);
+		validateSenMLMessage(systemName, serviceName, message);
 
 		historianService.createEndpoint(systemName, serviceName);
 
-		SenML head = sml.firstElement();
+		SenML head = message.firstElement();
 		if(head.getBt() == null) {
 			head.setBt((double)System.currentTimeMillis() / 1000);
 		}
 
-		validateSenMLContent(sml);
+		validateSenMLContent(message);
 
-		final boolean statusCode = historianService.updateEndpoint(systemName, serviceName, sml);
+		final boolean statusCode = historianService.updateEndpoint(systemName, serviceName, message);
 		if (statusCode == false) {
 			throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -270,35 +281,6 @@ public class DataManagerController {
 		return ret;
 	}
 
-
-	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Start interface for the Proxy service", response = DataManagerSystemsResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
-	@ApiResponses (value = {
-		@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
-		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-	})
-	@PutMapping(value= CommonConstants.OP_DATAMANAGER_PROXY, consumes = MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public DataManagerSystemsResponseDTO proxyPut(
-			@RequestBody DataManagerOperationDTO req
-		) {
-		logger.debug("proxyPut. ..");
-		String op = req.getOp();
-		if (op == null) {
-		  throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_PROXY);
-		}
-
-		if(op.equals("list")) {
-			DataManagerSystemsResponseDTO ret = new DataManagerSystemsResponseDTO();
-			final List<String> systems = proxyService.getAllSystems();
-			ret.setSystems(systems);
-			return ret;
-		}
-
-	        throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_PROXY);
-	}
-
-
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Interface to get a system's all services in the Proxy service", response = DataManagerServicesResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses (value = {
@@ -310,51 +292,15 @@ public class DataManagerController {
 	@ResponseBody public DataManagerServicesResponseDTO proxySystemGet(
 			@PathVariable(value="systemName", required=true) String systemName
 		) {
-		logger.debug("proxySystemGet for " + systemName);
+    if(Utilities.isEmpty(systemName)) {
+      throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_PROXY);
+    }
+		logger.debug("proxySystemGet for {}", systemName);
 
 		DataManagerServicesResponseDTO ret = new DataManagerServicesResponseDTO();
 		final ArrayList<String> services = proxyService.getEndpointsNamesFromSystem(systemName);
 		ret.setServices(services);
 		return ret;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Interface to manage a system's services in the Proxy service", response = DataManagerServicesResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
-	@ApiResponses (value = {
-		@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
-		@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CoreCommonConstants.SWAGGER_HTTP_400_MESSAGE),
-		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-	})
-	@PutMapping(value= CommonConstants.OP_DATAMANAGER_PROXY + "/{systemName}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public DataManagerServicesResponseDTO proxySystemPut(
-			@PathVariable(value="systemName", required=true) String systemName,
-			@RequestBody DataManagerOperationDTO req
-		) {
-		logger.debug("proxySystemPut for " + systemName);
-
-		String op = req.getOp();
-		if (op == null) {
-		  throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_PROXY + "/" + systemName);
-		}
-		if(op.equals("list")){
-			final ArrayList<String> services = proxyService.getEndpointsNamesFromSystem(systemName);
-
-			DataManagerServicesResponseDTO ret = new DataManagerServicesResponseDTO();
-			ret.setServices(services);
-			return ret;
-		} else if(op.equals("delete")) {
-			String serviceName = req.getServiceName();
-			logger.debug("Delete proxy Service: " + serviceName + " for: " + systemName);
-			final boolean res = proxyService.deleteEndpointFromService(systemName, serviceName);
-			if (res == true) {
-				throw new ArrowheadException(null, HttpStatus.SC_OK);
-			} else {
-				throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_PROXY + "/" + systemName);
-			}
-		} else {
-			throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_PROXY + "/" + systemName);
-		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -370,7 +316,10 @@ public class DataManagerController {
 			@PathVariable(value="systemName", required=true) String systemName,
 			@PathVariable(value="serviceName", required=true) String serviceName
 			) {
-			logger.debug("proxyServiceGet for " + systemName + "/"+serviceName);
+      if(Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
+        throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_PROXY);
+      }
+			logger.debug("proxyServiceGet for {}/{}", systemName, serviceName);
 
 			final ProxyElement pe = proxyService.getEndpointFromService(systemName, serviceName);
 			if (pe == null) {
@@ -379,7 +328,7 @@ public class DataManagerController {
 			}
 
 			return pe.getMessage();
-			}
+  }
 
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Interface to update a system's last data", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
@@ -396,7 +345,10 @@ public class DataManagerController {
 			@PathVariable(value="serviceName", required=true) String serviceName,
 			@RequestBody Vector<SenML> message
 			) {
-			logger.debug("proxyServicePut for " + systemName + "/"+serviceName);
+      if(Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName) || message == null) {
+        throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_PROXY);
+      }
+			logger.debug("proxyServicePut for {}/{}", systemName, serviceName);
 
 			validateSenMLMessage(systemName, serviceName, message);
 
@@ -427,73 +379,73 @@ public class DataManagerController {
 	
 	
 	//=================================================================================================
-        private void validateSenMLMessage(String systemName, String serviceName, Vector<SenML> message) {
-                Assert.notNull(systemName, "systemName is null.");
-                Assert.notNull(serviceName, "serviceName is null.");
-                Assert.notNull(message, "message is null.");
-                Assert.isTrue(!message.isEmpty(), "message is empty");
+  private void validateSenMLMessage(String systemName, String serviceName, Vector<SenML> message) {
+    Assert.notNull(systemName, "systemName is null.");
+    Assert.notNull(serviceName, "serviceName is null.");
+    Assert.notNull(message, "message is null.");
+    Assert.isTrue(!message.isEmpty(), "message is empty");
 
-                SenML head = (SenML)message.get(0);
-                Assert.notNull(head.getBn(), "bn is null.");
-        }
+    SenML head = (SenML)message.get(0);
+    Assert.notNull(head.getBn(), "bn is null.");
+  }
 
-	//-------------------------------------------------------------------------------------------------
-	public void validateSenMLContent(final Vector<SenML> sml) {
+  //-------------------------------------------------------------------------------------------------
+  public void validateSenMLContent(final Vector<SenML> message) {
 
-	  /* check that bn, bt and bu are included only once, and in the first object */
-	  Iterator<SenML> entry = sml.iterator();
-	  int bnc=0, btc=0, buc=0;
-	  while (entry.hasNext()) {
-	    SenML element = entry.next();
-	    if (element.getBn() != null) {
-	      bnc++;
-	    }
-	    if (element.getBt() != null) {
-	      btc++;
-	    }
-	    if (element.getBu() != null) {
-	      buc++;
-	    }
-	  }
+    /* check that bn, bt and bu are included only once, and in the first object */
+    Iterator<SenML> entry = message.iterator();
+    int bnc=0, btc=0, buc=0;
+    while (entry.hasNext()) {
+      SenML element = entry.next();
+      if (element.getBn() != null) {
+        bnc++;
+      }
+      if (element.getBt() != null) {
+        btc++;
+      }
+      if (element.getBu() != null) {
+        buc++;
+      }
+    }
 
-	  /* bu can only exist once. bt can only exist one, bu can exist 0 or 1 times */
-	  Assert.isTrue(!(bnc != 1 || btc != 1 || buc > 1), "invalid bn/bt/bu");
+    /* bu can only exist once. bt can only exist one, bu can exist 0 or 1 times */
+    Assert.isTrue(!(bnc != 1 || btc != 1 || buc > 1), "invalid bn/bt/bu");
 
-	  /* bn must exist in [0] */
-	  SenML element = (SenML)sml.get(0);
-	  Assert.notNull(element.getBn(), "bn is missing");
+    /* bn must exist in [0] */
+    SenML element = (SenML)message.get(0);
+    Assert.notNull(element.getBn(), "bn is missing");
 
-	  /* bt must exist in [0] */
-	  Assert.notNull(element.getBt(), "bt is missing");
+    /* bt must exist in [0] */
+    Assert.notNull(element.getBt(), "bt is missing");
 
-	  /* bt cannot be negative */
-	  Assert.isTrue(element.getBt() >= 0.0, "a negative base time is not allowed");
+    /* bt cannot be negative */
+    Assert.isTrue(element.getBt() >= 0.0, "a negative base time is not allowed");
 
-	  /* bu must exist in [0], if it exists */
-	  Assert.isTrue(!(element.getBu() == null && buc == 1), "invalid use of bu");
+    /* bu must exist in [0], if it exists */
+    Assert.isTrue(!(element.getBu() == null && buc == 1), "invalid use of bu");
 
-	  /* check that v, bv, sv, etc are included only once per object */
-	  entry = sml.iterator();
-	  while (entry.hasNext()) {
-	    element = (SenML)entry.next();
+    /* check that v, bv, sv, etc are included only once per object */
+    entry = message.iterator();
+    while (entry.hasNext()) {
+      element = (SenML)entry.next();
 
-	    int valueCount = 0;
-	    if (element.getV() != null) {
-	      valueCount++;
-	    }
-	    if (element.getVs() != null) {
-	      valueCount++;
-	    }
-	    if (element.getVd() != null) {
-	      valueCount++;
-	    }
-	    if (element.getVb() != null) {
-	      valueCount++;
-	    }
+      int valueCount = 0;
+      if (element.getV() != null) {
+        valueCount++;
+      }
+      if (element.getVs() != null) {
+        valueCount++;
+      }
+      if (element.getVd() != null) {
+        valueCount++;
+      }
+      if (element.getVb() != null) {
+        valueCount++;
+      }
 
-	    Assert.isTrue(!(valueCount > 1 && element.getS() == null), "too many value tags");
-	  } 
+      Assert.isTrue(!(valueCount > 1 && element.getS() == null), "too many value tags");
+    } 
 
-	}	
+  }	
 }
 

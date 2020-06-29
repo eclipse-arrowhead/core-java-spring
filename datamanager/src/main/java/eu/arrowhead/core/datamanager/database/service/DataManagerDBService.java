@@ -60,9 +60,6 @@ public class DataManagerDBService {
 
 	private static final Logger logger = LogManager.getLogger(DataManagerDBService.class);
 	
-	//@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
-	//private boolean secure;
-
 	//=================================================================================================
 	// methods
 
@@ -151,7 +148,6 @@ public class DataManagerDBService {
 	      id = rs.getInt(1);
 	      rs.close();
 	      stmt.close();
-
 	    }
 
 	  } catch (Exception e) {
@@ -160,8 +156,8 @@ public class DataManagerDBService {
 	  } finally {
 	    try {
 	      closeConnection(conn);
-	    } catch (SQLException e) {
-        logger.debug("addServiceForSystem: " + e.toString());
+	    } catch (SQLException se) {
+        logger.debug("addServiceForSystem: " + se.toString());
       }
 
 	  }
@@ -240,12 +236,12 @@ public class DataManagerDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public boolean updateEndpoint(final String systemName, final String serviceName, final Vector<SenML> msg) {
+	public boolean updateEndpoint(final String systemName, final String serviceName, final Vector<SenML> message) {
 	  boolean ret = true;
 
-	  double bt = msg.get(0).getBt();
-	  double maxTs = getLargestTimestamp(msg);
-	  double minTs = getSmallestTimestamp(msg);
+	  double bt = message.get(0).getBt();
+	  double maxTs = getLargestTimestamp(message);
+	  double minTs = getSmallestTimestamp(message);
 
 	  Connection conn = null;
 	  try {
@@ -259,7 +255,7 @@ public class DataManagerDBService {
 	      stmt.setDouble(2, bt);
 	      stmt.setDouble(3, minTs);
 	      stmt.setDouble(4, maxTs);
-	      stmt.setString(5, msg.toString());
+	      stmt.setString(5, message.toString());
 
 	      int mid = stmt.executeUpdate();
 	      ResultSet rs = stmt.getGeneratedKeys();
@@ -269,11 +265,11 @@ public class DataManagerDBService {
 	      stmt.close();
 
 	      // that was the entire message, now insert each individual JSON object in the message
-	      String bu = msg.get(0).getBu();
-        for (SenML m : msg) {
+	      String bu = message.get(0).getBu();
+        for (SenML m : message) {
           double t = 0;
           if (m.getT() != null) {
-            if (m.getT() < SenML.RELATIVE_TIMESTAMP_INDICATOR /*268435456*/) { //if relative ts, update it
+            if (m.getT() < SenML.RELATIVE_TIMESTAMP_INDICATOR) {
               t = m.getT() + bt;
             }
           } else {
