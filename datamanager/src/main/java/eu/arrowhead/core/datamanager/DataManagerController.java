@@ -38,14 +38,13 @@ import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.SenML;
-//import eu.arrowhead.common.dto.shared.SigML;
 import eu.arrowhead.common.dto.shared.DataManagerSystemsResponseDTO;
 import eu.arrowhead.common.dto.shared.DataManagerServicesResponseDTO;
 import eu.arrowhead.common.dto.shared.DataManagerOperationDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.core.datamanager.database.service.DataManagerDBService;
-import eu.arrowhead.core.datamanager.service.DataManagerService;
 import eu.arrowhead.core.datamanager.service.ProxyService;
 import eu.arrowhead.core.datamanager.service.ProxyElement;
 import eu.arrowhead.core.datamanager.service.HistorianService;
@@ -71,8 +70,8 @@ public class DataManagerController {
 	
 	private final Logger logger = LogManager.getLogger(DataManagerController.class);
 
-	@Autowired
-	DataManagerService dataManagerService;
+	//@Autowired
+	//DataManagerService dataManagerService;
 	
 	@Autowired
 	ProxyService proxyService;
@@ -180,9 +179,7 @@ public class DataManagerController {
 		) {
 		logger.debug("historianServiceGet for "+systemName + "/"+serviceName);
 
-		int statusCode = 0;
-		
-		long from=-1, to=-1;
+		double from=-1, to=-1;
 		int count = 1;
 
 		Vector<String> signals = new Vector<String>();
@@ -190,7 +187,7 @@ public class DataManagerController {
 		Iterator<String> it = params.keySet().iterator();
 		int signalCountId = 0;
 		while(it.hasNext()){
-			String par = (String)it.next();
+			String par = it.next();
 			if (par.equals("count")) {
 				count = Integer.parseInt(params.getFirst(par));
 			} else if (par.equals("sig"+signalCountId)) {
@@ -209,9 +206,9 @@ public class DataManagerController {
 				signalCounts.add(signalXCount);
 				signalCountId++;
 			} else if (par.equals("from")) {
-				from = Long.parseLong(params.getFirst(par));
+				from = Double.parseDouble(params.getFirst(par));
 			} else if (par.equals("to")) {
-				to = Long.parseLong(params.getFirst(par));
+				to = Double.parseDouble(params.getFirst(par));
 			}
 		}
 
@@ -340,6 +337,7 @@ public class DataManagerController {
 	@ApiOperation(value = "Interface to manage a system's services in the Proxy service", response = DataManagerServicesResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses (value = {
 		@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+		@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CoreCommonConstants.SWAGGER_HTTP_400_MESSAGE),
 		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
@@ -379,6 +377,7 @@ public class DataManagerController {
 	@ApiResponses (value = {
 		@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
 		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+		@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = CoreCommonConstants.SWAGGER_HTTP_404_MESSAGE),
 		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(value= CommonConstants.OP_DATAMANAGER_PROXY + "/{systemName}/{serviceName}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -391,7 +390,7 @@ public class DataManagerController {
 			final ProxyElement pe = proxyService.getEndpointFromService(systemName, serviceName);
 			if (pe == null) {
 				logger.debug("proxy GET to serviceName: " + serviceName + " not found");
-				throw new BadPayloadException(NOT_FOUND_ERROR_MESSAGE, HttpStatus.SC_NOT_FOUND, CommonConstants.OP_DATAMANAGER_PROXY + "/" + systemName + "/" + serviceName);
+				throw new DataNotFoundException(NOT_FOUND_ERROR_MESSAGE, HttpStatus.SC_NOT_FOUND, CommonConstants.OP_DATAMANAGER_PROXY + "/" + systemName + "/" + serviceName);
 			}
 
 			return pe.msg;
@@ -401,6 +400,7 @@ public class DataManagerController {
 	@ApiOperation(value = "Interface to update a system's last data", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses (value = {
 		@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+		@ApiResponse(code = HttpStatus.SC_CREATED, message = CoreCommonConstants.SWAGGER_HTTP_201_MESSAGE),
 		@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CoreCommonConstants.SWAGGER_HTTP_400_MESSAGE),
 		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
@@ -456,10 +456,10 @@ public class DataManagerController {
 	public void validateSenMLContent(final Vector<SenML> sml) {
 
 	  /* check that bn, bt and bu are included only once, and in the first object */
-	  Iterator entry = sml.iterator();
+	  Iterator<SenML> entry = sml.iterator();
 	  int bnc=0, btc=0, buc=0;
 	  while (entry.hasNext()) {
-	    SenML element = (SenML)entry.next();
+	    SenML element = entry.next();
 	    if (element.getBn() != null) {
 	      bnc++;
 	    }
@@ -481,7 +481,6 @@ public class DataManagerController {
 	  /* bt must exist in [0] */
 	  Assert.notNull(element.getBt(), "bt is missing");
 
-	  System.err.println("bt: "+ element.getBt());
 	  /* bt cannot be negative */
 	  Assert.isTrue(element.getBt() >= 0.0, "a negative base time is not allowed");
 

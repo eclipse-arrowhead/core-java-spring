@@ -16,6 +16,8 @@ import eu.arrowhead.common.CommonConstants;
 @JsonInclude(Include.NON_NULL)
 public class SenML implements Serializable {
 
+  public static final long RELATIVE_TIMESTAMP_INDICATOR = 268435456L;
+
   //=================================================================================================
   // members
   private String bn;

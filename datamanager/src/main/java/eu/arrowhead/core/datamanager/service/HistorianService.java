@@ -34,11 +34,7 @@ public class HistorianService {
   private final Logger logger = LogManager.getLogger(HistorianService.class);
 
   @Autowired
-  private DataManagerDriver dataManagerDriver;
-
-  @Autowired
   private DataManagerDBService dataManagerDBService;
-
 
   //=================================================================================================
   // methods
@@ -59,13 +55,10 @@ public class HistorianService {
 
   
   //-------------------------------------------------------------------------------------------------
-  public ArrayList<String> getServicesFromSystem(String systemName) {
+  public ArrayList<String> getServicesFromSystem(final String systemName) {
     logger.debug("getServicesFromSystem started ...");
 
-    if (systemName == null) {
-      return null;
-    }
-    if (systemName.equals("")) {
+    if (Utilities.isEmpty(systemName)) {
       return null;
     }
 
@@ -73,10 +66,10 @@ public class HistorianService {
   }
 
   //-------------------------------------------------------------------------------------------------
-  public boolean createEndpoint(String systemName, String serviceName) {
+  public boolean createEndpoint(final String systemName, final String serviceName) {
     logger.debug("createEndpoint started ...");
 
-    if (systemName == null || serviceName == null) {
+    if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
       return false;
     }
 
@@ -84,43 +77,63 @@ public class HistorianService {
   }
 
   //-------------------------------------------------------------------------------------------------
-  public boolean addServiceForSystem(String systemName, String serviceName, String serviceType){
+  public boolean addServiceForSystem(final String systemName, final String serviceName, final String serviceType){
     logger.debug("addServiceForSystem started ...");
+
+    if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName) || Utilities.isEmpty(serviceType)) {
+      return false;
+    }
 
     return dataManagerDBService.addServiceForSystem(systemName, serviceName, serviceType);
   }
 
   //-------------------------------------------------------------------------------------------------
-  public boolean updateEndpoint(String systemName, String serviceName, Vector<SenML> msg) {
-    logger.debug("updateEndpoint started ...");
+  public boolean updateEndpoint(final String systemName, final String serviceName, final Vector<SenML> msg) {
+    logger.debug("updateEndpoint...");
 
-    if (systemName == null || serviceName == null) {
+    if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
       return false;
     }
+
     if (msg == null) {
       return false;
     }
+
+    if (msg.size() == 0) {
+      return false;
+    }
+
     return dataManagerDBService.updateEndpoint(systemName, serviceName, msg);
   }
   
   //-------------------------------------------------------------------------------------------------
-  public Vector<SenML> fetchEndpoint(String systemName, String serviceName, double from, double to, int count) {
-    logger.debug("fetchEndpoint started ...");
+  public Vector<SenML> fetchEndpoint(final String systemName, final String serviceName, double from, double to, final int count) {
+    logger.debug("fetchEndpoint...");
 
-    if (systemName == null || serviceName == null) {
-      logger.debug("systemName or serviceName is null");
-      return null;
+    if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
+      return false;
     }
 
     return dataManagerDBService.fetchMessagesFromEndpoint(systemName, serviceName, from, to, count);
   }
 
   //-------------------------------------------------------------------------------------------------
-  public Vector<SenML> fetchEndpoint(String systemName, String serviceName, double from, double to, Vector<Integer> counts, Vector<String> signals) {
-    logger.debug("fetchEndpoint started ...");
+  public Vector<SenML> fetchEndpoint(final String systemName, final String serviceName, double from, double to, final Vector<Integer> counts, final Vector<String> signals) {
+    logger.debug("fetchEndpoint with signals...");
 
-    if (systemName == null || serviceName == null) {
-      logger.debug("systemName or serviceName is null");
+    if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
+      return false;
+    }
+
+    if (counts == null || signals == null) {
+      return null;
+    }
+
+    if (signals.size() == 0) {
+      return null;
+    }
+
+    if (counts.size() != signals.size()) {
       return null;
     }
 
@@ -131,7 +144,4 @@ public class HistorianService {
   //=================================================================================================
   // assistant methods
   
-  
-
-
 }

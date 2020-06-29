@@ -4908,7 +4908,7 @@ __GetSystemListResponse__ output:
 GET /datamanager/historian/{systemName}
 ```
 
-Returns a list of all service enpoints that have data stored in the database.
+Returns a list of all service endpoints that have data stored in the database.
 
 <a name="datamanager_histgetssrvlist_response" />
 
@@ -4932,7 +4932,7 @@ __GetServicestResponse__ output:
 GET /datamanager/historian/{systemName}/{serviceName}
 ```
 
-Returns sensor data from a service endpoints from the database.
+Returns sensor data from a service endpoint from the database.
 
 <a name="datamanager_histgetsrvdata_response" />
 
@@ -4952,7 +4952,7 @@ __GetServiceDatatResponse__ output:
 	"u": "string",
 	"v": 0.0,
 	"vs": "string",
-	"vb"; false,
+	"vb": false,
 	"vd": "string"
    }
 ]
@@ -4963,7 +4963,7 @@ __GetServiceDatatResponse__ output:
 PUT /datamanager/historian/{systemName}/{serviceName}
 ```
 
-Stores sensor data in a service endpoints in the database.
+Stores sensor data in a service endpoint in the database.
 
 <a name="datamanager_putsrvdata_request" />
 

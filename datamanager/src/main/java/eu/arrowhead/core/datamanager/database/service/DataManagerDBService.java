@@ -35,9 +35,9 @@ import java.sql.SQLException;
 public class DataManagerDBService {
 	//=================================================================================================
 	// members
-	
-	private Connection connection = null;
 
+  public static final int MAX_ALLOWED_TIME_DIFF  = 1000; //milliseconds
+	
 	@Value("${spring.datasource.url}")
 	private String url;
 	@Value("${spring.datasource.username}")
@@ -47,10 +47,9 @@ public class DataManagerDBService {
 
 	private static final Logger logger = LogManager.getLogger(DataManagerDBService.class);
 	
-	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
-	private boolean secure;
+	//@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
+	//private boolean secure;
 
-	
 	//=================================================================================================
 	// methods
 
@@ -61,12 +60,12 @@ public class DataManagerDBService {
 
 
 	//-------------------------------------------------------------------------------------------------
-	private void closeConnection(Connection conn) throws SQLException {
+	private void closeConnection(final Connection conn) throws SQLException {
 	  conn.close();
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private int serviceToID(String systemName, String serviceName, Connection conn) {
+	private int serviceToID(final String systemName, final String serviceName, final Connection conn) {
 	  int id=-1;
 
 	  PreparedStatement stmt;
@@ -82,9 +81,8 @@ public class DataManagerDBService {
 
 	    rs.close();
 	    stmt.close();
-	  } catch(SQLException se){
-	    id = -1;
-	  } catch(Exception e){
+	  } catch(Exception e) {
+      logger.debug("serviceToID: " + e.toString());
 	    id = -1;
 	  }
 
@@ -121,7 +119,7 @@ public class DataManagerDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public boolean addServiceForSystem(String systemName, String serviceName, String serviceType) {
+	public boolean addServiceForSystem(final String systemName, final String serviceName, final String serviceType) {
 	  Connection conn = null;
 	  try {
 	    conn = getConnection();
@@ -143,12 +141,15 @@ public class DataManagerDBService {
 
 	    }
 
-	  } catch (SQLException e) {
+	  } catch (Exception e) {
+      logger.debug("addServiceForSystem: " + e.toString());
 	    return false;
 	  } finally {
 	    try {
 	      closeConnection(conn);
-	    } catch (SQLException e) {}
+	    } catch (SQLException e) {
+        logger.debug("addServiceForSystem: " + e.toString());
+      }
 
 	  }
 
@@ -156,7 +157,7 @@ public class DataManagerDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public ArrayList<String> getServicesFromSystem(String systemName) {
+	public ArrayList<String> getServicesFromSystem(final String systemName) {
 	  ArrayList<String> ret = new ArrayList<String>();
 	  Connection conn = null;
 	  try {
@@ -178,8 +179,8 @@ public class DataManagerDBService {
 	  finally {
 	    try {
 	      closeConnection(conn);
-	    }catch(SQLException db){
-	      logger.error(db.toString());
+	    } catch(SQLException db) {
+	      logger.debug("getServicesFromSystem:" + db.toString());
 	    }
 
 	  }
@@ -189,16 +190,15 @@ public class DataManagerDBService {
 
 
 	//-------------------------------------------------------------------------------------------------
-	public boolean createEndpoint(String systemName, String serviceName) {
+	public boolean createEndpoint(final String systemName, final String serviceName) {
 	  Connection conn = null;
 	  try {
 	    conn = getConnection();
 	    int id = serviceToID(systemName, serviceName, conn);
 	    if (id != -1) {
-	      return true; //already exists
+	      return true;
 	    } else {
-	      String sql = "INSERT INTO dmhist_services(system_name, service_name) "+
-		"VALUES(?,?);";
+	      String sql = "INSERT INTO dmhist_services(system_name, service_name) " + "VALUES(?,?);";
 	      PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 	      stmt.setString (1, systemName);
 	      stmt.setString (2, serviceName);
@@ -211,14 +211,14 @@ public class DataManagerDBService {
 
 	    }
 
-	  } catch (SQLException db) {
-	    logger.error(db.toString());
+	  } catch (Exception db) {
+	    logger.debug("createEndpoint: " + db.toString());
 	    return false;
 	  } finally {
 	    try{
 	      closeConnection(conn);
 	    } catch(Exception e){
-	      logger.error(e.toString());
+        logger.debug("createEndpoint: " + e.toString());
 	    }
 
 	  }
@@ -227,7 +227,7 @@ public class DataManagerDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public boolean updateEndpoint(String systemName, String serviceName, Vector<SenML> msg) {
+	public boolean updateEndpoint(final String systemName, final String serviceName, final Vector<SenML> msg) {
 	  boolean ret = true;
 
 	  double bt = msg.get(0).getBt();
@@ -260,7 +260,7 @@ public class DataManagerDBService {
         for (SenML m : msg) {
           double t = 0;
           if (m.getT() != null) {
-            if (m.getT() < 268435456) { //if relative ts, update it
+            if (m.getT() < SenML.RELATIVE_TIMESTAMP_INDICATOR /*268435456*/) { //if relative ts, update it
               t = m.getT() + bt;
             }
           } else {
@@ -304,17 +304,19 @@ public class DataManagerDBService {
         ret = false;
       }
     } catch (SQLException e) {
+      logger.debug("Database store error: " + e.toString());
 
       try {
         conn.rollback();
       } catch(SQLException err) {
-        logger.debug("Commit failed");
+        logger.debug("Database store error: " + err.toString());
       }
       ret = false;
     } finally {
       try{
         closeConnection(conn);
       } catch(Exception e){
+        logger.debug("Database error: " + e.toString());
       }
 
     }
@@ -323,7 +325,7 @@ public class DataManagerDBService {
   }
 
   //-------------------------------------------------------------------------------------------------
-  public Vector<SenML> fetchMessagesFromEndpoint(String systemName, String serviceName, double from, double to, int count) {
+  public Vector<SenML> fetchMessagesFromEndpoint(final String systemName, final String serviceName, double from, double to, final int count) {
     logger.debug("fetchMessagesFromEndpoint for "+ systemName + "/"+serviceName);
     Connection conn = null;
 
@@ -339,7 +341,7 @@ public class DataManagerDBService {
         from = 0.0;                                       //1970-01-01
       }
       if (to <= 0.0) {
-        to = 1000 + (long)(System.currentTimeMillis() / 1000.0); // current timestamp - not ok to insert data that is created in the future (excl. minor clock drift)
+        to = MAX_ALLOWED_TIME_DIFF + (long)(System.currentTimeMillis() / 1000.0); // current timestamp - not ok to insert data that is created in the future (excl. minor clock drift)
       }
 
       String sql = "";
@@ -370,7 +372,6 @@ public class DataManagerDBService {
 
         ResultSet rs2 = stmt2.executeQuery();
         while(rs2.next() == true ) {
-          //logger.debug("\t-> "+ rs2.getString("n") + ", " + rs2.getInt("t"));
           SenML msg = new SenML();
           msg.setT((double)rs2.getLong("t"));
           msg.setN(rs2.getString("n"));
@@ -417,12 +418,11 @@ public class DataManagerDBService {
 		  }
 	  }
 
-	  //logger.debug("fetchMessagesFromEndpoint: no data");
 	  return null;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public Vector<SenML> fetchSignalsFromEndpoint(String systemName, String serviceName, double from, double to, Vector<Integer> counts, Vector<String> signals) {
+	public Vector<SenML> fetchSignalsFromEndpoint(String systemName, String serviceName, double from, double to, final Vector<Integer> counts, final Vector<String> signals) {
 		logger.debug("fetchSignalsFromEndpoint for "+ systemName + "/"+serviceName);
 		Connection conn = null;
 
@@ -434,21 +434,18 @@ public class DataManagerDBService {
 	      return null;
 	    }
 
-	    String signalsList = "";
-	    signalsList = String.join(", ", signals);
-
 	    if (from < 0.0) {
 	      from = 0.0;                                       // not before 1970-01-01
 	    }
 	    if (to <= 0.0) {
-	      to = 1000 + (long)(System.currentTimeMillis() / 1000.0); // current timestamp - not ok to insert data that is created in the future (excl. minor clock drift)
+	      to = MAX_ALLOWED_TIME_DIFF + (long)(System.currentTimeMillis() / 1000.0); // current timestamp - not ok to insert data that is created in the future (excl. minor clock drift)
 	    }
 
       Vector<SenML> messages = new Vector<SenML>();
       SenML hdr = new SenML();
       hdr.setBn(serviceName);
       messages.add(hdr);
-	    //for (String signalName: signals) {
+
       for (int index = 0; index < signals.size(); index++) {
         String signalName = signals.get(index);
         int signalCount = counts.get(index);
@@ -460,12 +457,11 @@ public class DataManagerDBService {
         stmt.setDouble(3, from);
         stmt.setDouble(4, to);
         stmt.setInt(5, signalCount);
-        //logger.debug("SQL: " + stmt.toString());
 
         ResultSet rs = stmt.executeQuery();
 
-        double bt = 0;
-        String bu = null;
+        //double bt = 0;
+        //String bu = null;
         int dataLeft = signalCount;
         while(rs.next() == true && dataLeft > 0) {
           SenML msg = new SenML();
@@ -528,7 +524,7 @@ public class DataManagerDBService {
   
 	//-------------------------------------------------------------------------------------------------
 	//returns largest (newest) timestamp value
-	private double getLargestTimestamp(Vector<SenML> msg) {
+	private double getLargestTimestamp(final Vector<SenML> msg) {
 	  double bt = msg.get(0).getBt();
 	  double max = bt;
 	  for (SenML m : msg) {
@@ -538,11 +534,11 @@ public class DataManagerDBService {
 	    }
 	    if (m.getT() > 268435456) { // absolute
 	      if (m.getT() > max ) {
-		max = m.getT();
+          max = m.getT();
 	      }
 	    } else {                      //relative
 	      if (m.getT()+bt > max ) {
-		max = m.getT() + bt;
+          max = m.getT() + bt;
 	      }
 	    }
 	  }
@@ -552,7 +548,7 @@ public class DataManagerDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	//returns smallest (oldest) timestamp value
-	private double getSmallestTimestamp(Vector<SenML> msg) {
+	private double getSmallestTimestamp(final Vector<SenML> msg) {
 	  double bt = msg.get(0).getBt();
 	  double min = bt;
 	  for (SenML m : msg) {
@@ -562,11 +558,11 @@ public class DataManagerDBService {
 	    }
 	    if (m.getT() > 268435456) { // absolute
 	      if (m.getT() < min ) {
-		min = m.getT();
+          min = m.getT();
 	      }
 	    } else {                      //relative
 	      if (m.getT()+bt < min ) {
-		min = m.getT() + bt;
+          min = m.getT() + bt;
 	      }
 	    }
 	  }

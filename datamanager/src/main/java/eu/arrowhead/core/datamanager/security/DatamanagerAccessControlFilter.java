@@ -41,22 +41,24 @@ public class DatamanagerAccessControlFilter extends CoreSystemAccessControlFilte
       return;
 		} 
 
-    // only the system named Sysname is allowed to write to <historian or proxy>/$SysName/$SrvName
+    // only the system named $SysName is allowed to write to <historian or proxy>/$SysName/$SrvName
     if (!method.toLowerCase().equals("get")) {
-      int sysNameStartPosition = requestTarget.indexOf(CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN+"/");
+      final String dataManagerHistorianURI = CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN+"/";
+      int sysNameStartPosition = requestTarget.indexOf(dataManagerHistorianURI);
       int sysNameStopPosition = -1;
       if ( sysNameStartPosition != -1) {
-        sysNameStopPosition = requestTarget.indexOf("/", sysNameStartPosition + 0 + (CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN+"/").length());
-        String requestTargetSystemName = requestTarget.substring(sysNameStartPosition + (CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN+"/").length(), sysNameStopPosition);
+        sysNameStopPosition = requestTarget.indexOf("/", sysNameStartPosition + dataManagerHistorianURI.length());
+        String requestTargetSystemName = requestTarget.substring(sysNameStartPosition + dataManagerHistorianURI.length(), sysNameStopPosition);
 
         checkIfRequesterSystemNameisEqualsWithClientNameFromCN(requestTargetSystemName, clientCN);
         return;
       }
 
       if ( sysNameStartPosition == -1) {
-        sysNameStartPosition = requestTarget.indexOf("/datamanager"+CommonConstants.OP_DATAMANAGER_PROXY+"/");
-        sysNameStopPosition = requestTarget.indexOf("/", sysNameStartPosition + 0 + (CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_PROXY+"/").length());
-        String requestTargetSystemName = requestTarget.substring(sysNameStartPosition + (CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_PROXY+"/").length(), sysNameStopPosition);
+        final String dataManagerProxyURI = CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_PROXY+"/";
+        sysNameStartPosition = requestTarget.indexOf(dataManagerProxyURI);
+        sysNameStopPosition = requestTarget.indexOf("/", sysNameStartPosition + dataManagerProxyURI.length());
+        String requestTargetSystemName = requestTarget.substring(sysNameStartPosition + dataManagerProxyURI.length(), sysNameStopPosition);
 
         checkIfRequesterSystemNameisEqualsWithClientNameFromCN(requestTargetSystemName, clientCN);
         return;
