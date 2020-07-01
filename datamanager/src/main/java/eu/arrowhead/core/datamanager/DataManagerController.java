@@ -190,11 +190,11 @@ public class DataManagerController {
           try {
             signalXCount = Integer.parseInt(params.getFirst("sig"+signalCountId+"count"));
           } catch(NumberFormatException nfe) {
-            throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/"+systemName+"/"+serviceName);
+            throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/" + systemName + "/" + serviceName);
           }
         }
         if (signalXCount <= 0) {
-            throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/"+systemName+"/"+serviceName);
+            throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/" + systemName + "/" + serviceName);
         }
 				signalCounts.add(signalXCount);
 				signalCountId++;
@@ -206,7 +206,7 @@ public class DataManagerController {
 		}
 
 		if (count <= 0) {
-			throw new BadPayloadException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/" + systemName + "/" + serviceName);
+      throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/" + systemName + "/" + serviceName);
 		}
 
 		Vector<SenML> ret = null;
@@ -364,7 +364,6 @@ public class DataManagerController {
 				final boolean ret = proxyService.addEndpointForService(new ProxyElement(systemName, serviceName));
 				if (ret==true){
 					proxyService.updateEndpointFromService(systemName, serviceName, message);
-					throw new ResponseStatusException(org.springframework.http.HttpStatus.CREATED);
 				} else { 
 					throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
 				}

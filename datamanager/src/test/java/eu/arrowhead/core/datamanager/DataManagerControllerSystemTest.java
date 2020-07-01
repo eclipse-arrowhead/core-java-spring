@@ -1,9 +1,10 @@
 package eu.arrowhead.core.datamanager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.arrowhead.common.dto.internal.SystemListResponseDTO;
-import eu.arrowhead.common.dto.shared.SystemRequestDTO;
-import eu.arrowhead.common.dto.shared.SystemResponseDTO;
+//import eu.arrowhead.common.dto.internal.SystemListResponseDTO;
+//import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+//import eu.arrowhead.common.dto.shared.SystemResponseDTO;
+import eu.arrowhead.common.dto.shared.DataManagerSystemsResponseDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.datamanager.database.service.DataManagerDBService;
 import org.junit.Before;
@@ -60,6 +61,10 @@ public class DataManagerControllerSystemTest {
     @MockBean(name = "mockDataManagerDBService")
     private DataManagerDBService dataManagerDBService;
 
+    private static final String DATAMANAGER_ECHO_URI  = "/datamanager/echo";
+    private static final String DATAMANAGER_PROXY_URI  = "/datamanager/proxy";
+    private static final String DATAMANAGER_HISTORIAN_URI  = "/datamanager/historian";
+
     //=================================================================================================
     // methods
 
@@ -75,10 +80,30 @@ public class DataManagerControllerSystemTest {
 
     @Test
     public void echoHistorian() throws Exception {
-        final MvcResult response = this.mockMvc.perform(get("/datamanager/echo")
+        final MvcResult response = this.mockMvc.perform(get(DATAMANAGER_ECHO_URI)
                                                                 .accept(MediaType.APPLICATION_JSON))
                                                .andExpect(status().isOk())
                                                .andReturn();
         assertEquals("Got it!", response.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void testProxy() throws Exception {
+        final MvcResult response = this.mockMvc.perform(get(DATAMANAGER_PROXY_URI)
+                                                                .accept(MediaType.APPLICATION_JSON))
+                                               .andExpect(status().isOk())
+                                               .andReturn();
+        final DataManagerSystemsResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), DataManagerSystemsResponseDTO.class);
+        assertEquals(0, responseBody.getSystems().size());
+    }
+
+    @Test
+    public void testHistorian() throws Exception {
+        final MvcResult response = this.mockMvc.perform(get(DATAMANAGER_HISTORIAN_URI)
+                                                                .accept(MediaType.APPLICATION_JSON))
+                                               .andExpect(status().isOk())
+                                               .andReturn();
+        final DataManagerSystemsResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), DataManagerSystemsResponseDTO.class);
+        assertEquals(0, responseBody.getSystems().size());
     }
 }

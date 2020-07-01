@@ -29,8 +29,6 @@ import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.dto.shared.SenML;
 import eu.arrowhead.core.datamanager.database.service.DataManagerDBService;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList; 
 import java.util.Iterator; 
