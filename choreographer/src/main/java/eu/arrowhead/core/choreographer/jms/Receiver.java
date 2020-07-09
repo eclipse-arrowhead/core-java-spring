@@ -35,6 +35,8 @@ import org.springframework.web.util.UriComponents;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.security.PublicKey;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -76,11 +78,6 @@ public class Receiver {
         requesterSystem.setSystemName(coreSystemRegistrationProperties.getCoreSystemName().toLowerCase());
         requesterSystem.setAddress(coreSystemRegistrationProperties.getCoreSystemDomainName());
         requesterSystem.setPort(coreSystemRegistrationProperties.getCoreSystemDomainPort());
-
-        //if (sslEnabled) {
-        //    final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
-        //    requesterSystem.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
-        //}
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -98,6 +95,7 @@ public class Receiver {
             try {
                 runStep(firstStep, sessionId);
             } catch (InterruptedException e) {
+                choreographerDBService.setSessionStatus(sessionId, ChoreographerStatusType.ABORTED);
                 logger.debug(e.getMessage(), e);
             }
         });
@@ -189,6 +187,11 @@ public class Receiver {
 
         ServiceQueryFormDTO serviceQuery = new ServiceQueryFormDTO();
         serviceQuery.setServiceDefinitionRequirement(step.getServiceName().toLowerCase());
+
+        if (sslEnabled) {
+            final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
+            requesterSystem.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+        }
 
         final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO.Builder(requesterSystem)
                                                                                              .requestedService(serviceQuery)

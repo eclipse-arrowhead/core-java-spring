@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # prerm script for arrowhead-serviceregistry
 #
 # see: dh_installdeb(1)
@@ -20,20 +20,20 @@ PKG_NAME="arrowhead-serviceregistry"
 
 
 case "$1" in
-    remove)
-        systemctl stop ${PKG_NAME}.service
-		systemctl disable ${PKG_NAME}.service
+  remove)
+    systemctl stop ${PKG_NAME}.service
+    systemctl disable ${PKG_NAME}.service
     ;;
 
-    upgrade|deconfigure)
+  upgrade|deconfigure)
     ;;
 
-    failed-upgrade)
+  failed-upgrade)
     ;;
 
-    *)
-        echo "prerm called with unknown argument \`$1'" >&2
-        exit 1
+  *)
+    echo "prerm called with unknown argument \`$1'" >&2
+    exit 1
     ;;
 esac
 

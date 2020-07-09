@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # preinst script for arrowhead-core-common
 #
 # see: dh_installdeb(1)
@@ -15,15 +15,15 @@ set -e
 
 
 case "$1" in
-    install|upgrade)
+  install|upgrade)
     ;;
 
-    abort-upgrade)
+  abort-upgrade)
     ;;
 
-    *)
-        echo "preinst called with unknown argument \`$1'" >&2
-        exit 1
+  *)
+    echo "preinst called with unknown argument \`$1'" >&2
+    exit 1
     ;;
 esac
 

@@ -15,6 +15,11 @@
     "description": "A description for 'min_port'"
   },
   {
+    "name": "provider_side_max_request_per_socket",
+    "type": "java.lang.Integer",
+    "description": "A description for 'provider_side_max_request_per_socket'"
+  },
+  {
     "name": "max_port",
     "type": "java.lang.Integer",
     "description": "A description for 'max_port'"
