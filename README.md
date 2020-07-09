@@ -681,7 +681,7 @@ The following endpoints no longer exist:
 GET /serviceregistry/echo
 ```
 
-Returns a "Got it" message with the purpose of testing the core service availability.
+Returns a "Got it!" message with the purpose of testing the core service availability.
 
 > **Note:** 4.1.2 version: GET /serviceregistry
 
@@ -2343,7 +2343,7 @@ The following services no longer exist:
 GET /authorization/echo
 ```
 
-Returns a "Got it" message with the purpose of testing the core service availability.
+Returns a "Got it!" message with the purpose of testing the core service availability.
 
 > **Note:** 4.1.2 version: GET /authorization/mgmt
             It was only available for the system operator of the local cloud.  
@@ -3363,7 +3363,7 @@ The following services  no longer exist:
 GET /orchestrator/echo
 ```
 
-Returns a "Got it" message with the purpose of testing the core service availability.
+Returns a "Got it!" message with the purpose of testing the core service availability.
 
 > **Note:** 4.1.2 version: GET /orchestrator/orchestration
             It was basically the same with a slightly different return message
@@ -4362,7 +4362,7 @@ The Event Handler has the following use cases:
 GET /eventhandler/echo
 ```
 
-Returns a "Got it" message with the purpose of testing the core service availability.
+Returns a "Got it!" message with the purpose of testing the core service availability.
 
 <a name="eventhandler_endpoints_post_subscribe" />
 
@@ -4883,7 +4883,7 @@ The following endpoints no longer exist:
 GET /gatekeeper/echo
 ```
 
-Returns a "Got it" message with the purpose of testing the core service availability.
+Returns a "Got it!" message with the purpose of testing the core service availability.
 
 <a name="gatekeeper_endpoints_post_init_gsd" />
 
@@ -5934,7 +5934,7 @@ Use case 2: *Connect to Provider*
 GET /gateway/echo
 ```
 
-Returns a "Got it" message with the purpose of testing the core service availability.
+Returns a "Got it!" message with the purpose of testing the core service availability.
 
 <a name="gateway_endpoints_connect_to_consumer" />
 
@@ -6377,7 +6377,7 @@ The Certificate Authority provides the following services:
 GET /certificate-authority/echo
 ```
 
-Returns a "Got it" message with the purpose of testing the core service availability.
+Returns a "Got it!" message with the purpose of testing the core service availability.
 
 <a name="ca_endpoints_check_certificate" />
 
@@ -6804,7 +6804,7 @@ These endpoints are mainly used by the Management Tool and Cloud Administrators.
 GET /choreographer/echo
 ```
 
-Returns a "Got it" message with the purpose of testing the core service availability.
+Returns a "Got it!" message with the purpose of testing the core service availability.
 
 <a name="choreographer_endpoints_post_nofity" />
 
