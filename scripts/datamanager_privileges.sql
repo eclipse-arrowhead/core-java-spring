@@ -1,5 +1,7 @@
 USE `arrowhead`;
 
+REVOKE ALL, GRANT OPTION FROM 'datamanager'@'localhost';
+
 GRANT ALL PRIVILEGES ON `arrowhead`.`dmhist_services` TO 'datamanager'@'localhost';
 #GRANT ALL PRIVILEGES ON `arrowhead`.`dmhist_files` TO 'datamanager'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`dmhist_messages` TO 'datamanager'@'localhost';
