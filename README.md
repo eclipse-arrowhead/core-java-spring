@@ -4864,7 +4864,7 @@ The base URL for the requests: `http://<host>:<port>/datamanager`
 | [Fetch data from db](#datamanager_histendpoints_getdb) | /historian/{systemName}/{serviceName} | GET    | -   | SenML |
 | [Store data in db](#datamanager_histendpoints_storedb) | /historian/{systemName}/{serviceName} | PUT    | SenML   | - |
 | [Get system list](#datamanager_proxyendpoints_getsys) | /proxy | GET    | -    | SystemList     |
-| [Get service list](#datamanager_proxyendpoints_getsrv_from_sys) | /poxy/{systemName} | GET    | -    | ServiceList |
+| [Get service list](#datamanager_proxyendpoints_getsrv_from_sys) | /proxy/{systemName} | GET    | -    | ServiceList |
 | [Fetch data from cache](#datamanager_proxyendpoints_getdb) | /proxy/{systemName}/{serviceName} | GET    | -   | SenML |
 | [Store data in cache](#datamanager_proxyendpoints_storedb) | /proxy/{systemName}/{serviceName} | PUT    | SenML   | - |
 
