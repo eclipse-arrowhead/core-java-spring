@@ -4829,7 +4829,7 @@ The DataManager provides the following services:
 
 The DataManager consumes the following services:
 
-None currently, but will consume Configuration later on.
+None currently, but will consume Orchestration later on.
 
 <a name="datamanager_usecases" />
 
@@ -4875,7 +4875,7 @@ The base URL for the requests: `http://<host>:<port>/datamanager`
 GET /datamanager/echo
 ```
 
-Returns a "Got it" message with the purpose of testing the service availability.
+Returns a "Got it!" message with the purpose of testing the system availability.
 
 <a name="datamanager_histendpoints_getsys" />
 
@@ -4893,13 +4893,8 @@ __GetSystemListResponse__ output:
 ```json
 
 {
-      "systems": [
-        {
-         
-          "systemName": "string"
-        }
-      ]
-    }
+  "systems": ["systemName1", "systemNameX"]
+}
 
 ```
 
@@ -4912,18 +4907,13 @@ Returns a list of all service endpoints that have data stored in the database.
 
 <a name="datamanager_histgetssrvlist_response" />
 
-__GetServicestResponse__ output:
+__GetServicesResponse__ output:
 
 ```json
 
 {
-      "services": [
-        {
-         
-          "serviceName": "string"
-        }
-      ]
-    }
+  "services": ["serviceDefinition1", "serviceDefinitionX"]
+}
 
 ```
 
