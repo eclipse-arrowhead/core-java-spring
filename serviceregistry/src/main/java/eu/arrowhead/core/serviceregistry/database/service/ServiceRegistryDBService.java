@@ -945,22 +945,30 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ServiceInterfaceResponseDTO getServiceInterfaceById(final long interfaceId) {
+	public ServiceInterface getServiceInterfaceById(final long id) {
 		logger.debug("getServiceInterfaceById started...");
 
 		try {
-			final Optional<ServiceInterface> interfaceOption = serviceInterfaceRepository.findById(interfaceId);
-			if (!interfaceOption.isPresent()){
-				throw new InvalidParameterException("ServiceInterface with id " + interfaceId + " not found.");
+			final Optional<ServiceInterface> find = serviceInterfaceRepository.findById(id);
+			if (find.isPresent()) {
+				return find.get();
+			} else {
+				throw new InvalidParameterException("Service interface with id of '" + id + "' does not exist");
 			}
-
-			return DTOConverter.convertServiceInterfaceToServiceInterfaceResponseDTO(interfaceOption.get());
 		} catch (final InvalidParameterException ex) {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ServiceInterfaceResponseDTO getServiceInterfaceByIdResponse(final long id) {
+		logger.debug("getServiceInterfaceByIdResponse started...");
+
+		final ServiceInterface serviceInterfaceEntry = getServiceInterfaceById(id);
+		return DTOConverter.convertServiceInterfaceToServiceInterfaceResponseDTO(serviceInterfaceEntry);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
