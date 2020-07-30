@@ -776,6 +776,7 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	//TODO testIt
 	@ApiOperation(value = "Return requested service interfaces by the given parameters", response = ServiceInterfacesListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICE_INTERFACES_HTTP_200_MESSAGE),
@@ -813,6 +814,7 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	//TODO testIt
 	@ApiOperation(value = "Return requested service interface", response = ServiceInterfaceResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICE_INTERFACES_HTTP_200_MESSAGE),
@@ -823,18 +825,19 @@ public class ServiceRegistryController {
 	@GetMapping(path = SERVICE_INTERFACES_BY_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public ServiceInterfaceResponseDTO  getServiceInterfaceById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
 		logger.debug("New Service Interface get request received with id: {}", id);
-		
+
 		if (id < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_INTERFACES_BY_ID_URI);
 		}
-		
+
 		final ServiceInterfaceResponseDTO serviceInterfaceEntry = serviceRegistryDBService.getServiceInterfaceByIdResponse(id);
 		logger.debug("Service interface with id: '{}' successfully retrieved", id);
-		
+
 		return serviceInterfaceEntry;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	//TODO testIt
 	@ApiOperation(value = "Return created service interface", response = ServiceInterfaceResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_SERVICE_INTERFACES_HTTP_201_MESSAGE),
@@ -847,20 +850,23 @@ public class ServiceRegistryController {
 	@ResponseBody public ServiceInterfaceResponseDTO addServiceInterface(@RequestBody final ServiceInterfaceRequestDTO serviceInterfaceRequestDTO) {
 		final String serviceInterface = serviceInterfaceRequestDTO.getServiceInterface();
 		logger.debug("New Service Interface registration request received with interface: {}", serviceInterface);
-		
+
 		if (Utilities.isEmpty(serviceInterface)) {
 			throw new BadPayloadException("Service interface is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_INTERFACES_URI);
 		}
-		
-		//TODO - add interface name validation here
-		
+
+		if (!interfaceNameVerifier.isValid(serviceInterface)) {
+			throw new BadPayloadException("Specified interface name is not valid: " + serviceInterface, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_INTERFACES_URI);
+		}
+
 		final ServiceInterfaceResponseDTO serviceInterfaceResponse = serviceRegistryDBService.createServiceInterfaceResponse(serviceInterface);
 		logger.debug("{} service interface successfully registered.", serviceInterface);
-		
+
 		return serviceInterfaceResponse;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	//TODO testIt
 	@ApiOperation(value = "Return updated service interface", response = ServiceInterfaceResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = PUT_SERVICE_INTERFACES_HTTP_200_MESSAGE),
@@ -873,25 +879,27 @@ public class ServiceRegistryController {
 																				 @RequestBody final ServiceInterfaceRequestDTO serviceInterfaceRequestDTO) {
 		final String serviceInterface = serviceInterfaceRequestDTO.getServiceInterface();
 		logger.debug("New Service Interface update request received with id: {}, interface: {}", id, serviceInterface);
-		
+
 		if (id < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_INTERFACES_BY_ID_URI);
-		}		
-		
+		}
+
 		if (Utilities.isEmpty(serviceInterface)) {
 			throw new BadPayloadException("serviceInterface is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_INTERFACES_BY_ID_URI);
 		}
-		
-		// TODO add interface name validation here
-		
+
+		if (!interfaceNameVerifier.isValid(serviceInterface)) {
+			throw new BadPayloadException("Specified interface name is not valid: " + serviceInterface, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_INTERFACES_URI);
+		}
+
 		final ServiceInterfaceResponseDTO serviceInterfaceResponse = serviceRegistryDBService.updateServiceInterfaceByIdResponse(id, serviceInterface);
 		logger.debug("Service interface with id: '{}' successfully updated with interface '{}'.", id, serviceInterface);
-		
+
 		return serviceInterfaceResponse;
 	}
 	
-
 	//-------------------------------------------------------------------------------------------------
+	//TODO TestIt
 	@ApiOperation(value = "Return updated service interface", response = ServiceInterfaceResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = PATCH_SERVICE_INTERFACES_HTTP_200_MESSAGE),
@@ -907,6 +915,7 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	//TODO TestIt
 	@ApiOperation(value = "Remove service interface", tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_SERVICE_INTERFACES_HTTP_200_MESSAGE),
@@ -917,11 +926,11 @@ public class ServiceRegistryController {
 	@DeleteMapping(path = SERVICE_INTERFACES_BY_ID_URI)
 	public void removeServiceInterface(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
 		logger.debug("New Service Interface delete request received with id: {}", id);
-		
+
 		if (id < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_INTERFACES_BY_ID_URI);
 		}
-		
+
 		serviceRegistryDBService.removeServiceInterfaceById(id);
 		logger.debug("Service interface with id: '{}' successfully deleted", id);
 	}
