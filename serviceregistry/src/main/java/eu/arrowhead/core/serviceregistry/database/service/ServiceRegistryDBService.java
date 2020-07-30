@@ -924,6 +924,7 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	//TODO TestIt
 	public Page<ServiceInterface> getServiceInterfaceEntries(final int page, final int size, final Direction direction, final String sortField) {
 		logger.debug("getServiceInterfaceEntries started...");
 
@@ -942,10 +943,11 @@ public class ServiceRegistryDBService {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
-		
+
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	//TODO TestIt
 	public ServiceInterface getServiceInterfaceById(final long id) {
 		logger.debug("getServiceInterfaceById started...");
 
@@ -965,6 +967,7 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	//TODO TestIt
 	public ServiceInterfaceResponseDTO getServiceInterfaceByIdResponse(final long id) {
 		logger.debug("getServiceInterfaceByIdResponse started...");
 
@@ -973,6 +976,7 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	//TODO TestIt
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public ServiceInterface createServiceInterface(final String serviceInterface) {
 		logger.debug("createServiceInterface started...");
@@ -980,6 +984,8 @@ public class ServiceRegistryDBService {
 		if (Utilities.isEmpty(serviceInterface)) {
 			throw new InvalidParameterException("serviceInterface is null or blank");
 		}
+
+		Assert.isTrue(interfaceNameVerifier.isValid(serviceInterface), "Specified interface name is not valid: " + serviceInterface);
 
 		final String validatedServiceInterface = serviceInterface.trim().toLowerCase();
 		checkConstraintsOfServiceInterfaceTable(validatedServiceInterface);
@@ -993,6 +999,7 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	//TODO TestIt
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public ServiceInterfaceResponseDTO createServiceInterfaceResponse(final String serviceInterface) {
 		logger.debug("createServiceInterfaceResponse started...");
@@ -1003,6 +1010,7 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	//TODO TestIt
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public ServiceInterface updateServiceInterfaceById(final long id, final String serviceInterface) {
 		logger.debug("updateServiceInterfaceById started..");
@@ -1010,6 +1018,8 @@ public class ServiceRegistryDBService {
 		if (Utilities.isEmpty(serviceInterface)) {
 			throw new InvalidParameterException("serviceInterface is null or blank");
 		}
+
+		Assert.isTrue(interfaceNameVerifier.isValid(serviceInterface), "Specified interface name is not valid: " + serviceInterface);
 
 		try {
 			final Optional<ServiceInterface> find = serviceInterfaceRepository.findById(id);
@@ -1034,6 +1044,7 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	//TODO TestIt
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public ServiceInterfaceResponseDTO updateServiceInterfaceByIdResponse(final long id, final String serviceInterface) {
 		logger.debug("updateServiceInterfaceByIdResponse started...");
@@ -1044,6 +1055,7 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	//TODO TestIt
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void removeServiceInterfaceById(final long id) {
 		logger.debug("removeServiceInterfaceById started...");
@@ -1064,10 +1076,11 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	//TODO TestIt
 	public ServiceInterfacesListResponseDTO getServiceInterfaceEntriesResponse(final int page, final int size, final Direction direction, final String sortField) {
 		logger.debug("getServiceInterfaceEntriesResponse started...");
 		final Page<ServiceInterface> serviceInterfaceEntries = getServiceInterfaceEntries(page, size, direction, sortField);
-		
+
 		return DTOConverter.convertServiceInterfacesListToServiceInterfaceListResponseDTO(serviceInterfaceEntries);
 	}
 	
