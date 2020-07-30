@@ -36,6 +36,7 @@ import eu.arrowhead.common.database.repository.ServiceRegistryRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.ServiceDefinitionsListResponseDTO;
+import eu.arrowhead.common.dto.internal.ServiceInterfacesListResponseDTO;
 import eu.arrowhead.common.dto.internal.ServiceRegistryGroupedResponseDTO;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.internal.SystemListResponseDTO;
@@ -1060,6 +1061,14 @@ public class ServiceRegistryDBService {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ServiceInterfacesListResponseDTO getServiceInterfaceEntriesResponse(final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getServiceInterfaceEntriesResponse started...");
+		final Page<ServiceInterface> serviceInterfaceEntries = getServiceInterfaceEntries(page, size, direction, sortField);
+		
+		return DTOConverter.convertServiceInterfacesListToServiceInterfaceListResponseDTO(serviceInterfaceEntries);
 	}
 	
 	//=================================================================================================

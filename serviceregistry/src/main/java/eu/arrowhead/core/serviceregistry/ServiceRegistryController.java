@@ -33,10 +33,13 @@ import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.internal.ServiceDefinitionRequestDTO;
 import eu.arrowhead.common.dto.internal.ServiceDefinitionsListResponseDTO;
+import eu.arrowhead.common.dto.internal.ServiceInterfaceRequestDTO;
+import eu.arrowhead.common.dto.internal.ServiceInterfacesListResponseDTO;
 import eu.arrowhead.common.dto.internal.ServiceRegistryGroupedResponseDTO;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.internal.SystemListResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryRequestDTO;
@@ -92,6 +95,19 @@ public class ServiceRegistryController {
 	private static final String PATCH_SERVICES_HTTP_400_MESSAGE = "Could not update service definition";
 	private static final String DELETE_SERVICES_HTTP_200_MESSAGE = "Service definition removed";
 	private static final String DELETE_SERVICES_HTTP_400_MESSAGE = "Could not remove service definition";
+	
+	private static final String SERVICE_INTERFACES_URI = CoreCommonConstants.MGMT_URI + "/services";
+	private static final String SERVICE_INTERFACES_BY_ID_URI = SERVICE_INTERFACES_URI + "/{" + PATH_VARIABLE_ID + "}";
+	private static final String GET_SERVICE_INTERFACES_HTTP_200_MESSAGE = "Service Interfaces returned";
+	private static final String GET_SERVICE_INTERFACES_HTTP_400_MESSAGE = "Could not retrieve service interface";
+	private static final String POST_SERVICE_INTERFACES_HTTP_201_MESSAGE = "Service interface created";
+	private static final String POST_SERVICE_INTERFACES_HTTP_400_MESSAGE = "Could not create service interface";
+	private static final String PUT_SERVICE_INTERFACES_HTTP_200_MESSAGE = "Service interface updated";
+	private static final String PUT_SERVICE_INTERFACES_HTTP_400_MESSAGE = "Could not update service interface";
+	private static final String PATCH_SERVICE_INTERFACES_HTTP_200_MESSAGE = "Service interface updated";
+	private static final String PATCH_SERVICE_INTERFACES_HTTP_400_MESSAGE = "Could not update service interface";
+	private static final String DELETE_SERVICE_INTERFACES_HTTP_200_MESSAGE = "Service interface removed";
+	private static final String DELETE_SERVICE_INTERFACES_HTTP_400_MESSAGE = "Could not remove service interface";
 	
 	private static final String SERVICE_REGISTRY_REGISTER_DESCRIPTION = "Registers a service";
 	private static final String SERVICE_REGISTRY_REGISTER_201_MESSAGE = "Service registered";
@@ -758,7 +774,158 @@ public class ServiceRegistryController {
 		
 		return serviceRegistryEntriesResponse;
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return requested service interfaces by the given parameters", response = ServiceInterfacesListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICE_INTERFACES_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SERVICE_INTERFACES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = SERVICE_INTERFACES_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public ServiceInterfacesListResponseDTO getServiceInterfaces(
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
+		logger.debug("New Service Interface get request received with page: {} and item_per page: {}", page, size);
+
+		int validatedPage;
+		int validatedSize;
+		if (page == null && size == null) {
+			validatedPage = -1;
+			validatedSize = -1;
+		} else {
+			if (page == null || size == null) {
+				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_INTERFACES_URI);
+			} else {
+				validatedPage = page;
+				validatedSize = size;
+			}
+		}
+
+		final Direction validatedDirection = CoreUtilities.calculateDirection(direction, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_INTERFACES_URI);
+		final ServiceInterfacesListResponseDTO serviceInterfaceEntries = serviceRegistryDBService.getServiceInterfaceEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
+		logger.debug("Service interface  with page: {} and item_per page: {} successfully retrieved", page, size);
+
+		return serviceInterfaceEntries;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return requested service interface", response = ServiceInterfaceResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICE_INTERFACES_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SERVICE_INTERFACES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = SERVICE_INTERFACES_BY_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public ServiceInterfaceResponseDTO  getServiceInterfaceById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+		logger.debug("New Service Interface get request received with id: {}", id);
 		
+		if (id < 1) {
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_INTERFACES_BY_ID_URI);
+		}
+		
+		final ServiceInterfaceResponseDTO serviceInterfaceEntry = serviceRegistryDBService.getServiceInterfaceByIdResponse(id);
+		logger.debug("Service interface with id: '{}' successfully retrieved", id);
+		
+		return serviceInterfaceEntry;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return created service interface", response = ServiceInterfaceResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_SERVICE_INTERFACES_HTTP_201_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_SERVICE_INTERFACES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = SERVICE_INTERFACES_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
+	@ResponseBody public ServiceInterfaceResponseDTO addServiceInterface(@RequestBody final ServiceInterfaceRequestDTO serviceInterfaceRequestDTO) {
+		final String serviceInterface = serviceInterfaceRequestDTO.getServiceInterface();
+		logger.debug("New Service Interface registration request received with interface: {}", serviceInterface);
+		
+		if (Utilities.isEmpty(serviceInterface)) {
+			throw new BadPayloadException("Service interface is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_INTERFACES_URI);
+		}
+		
+		//TODO - add interface name validation here
+		
+		final ServiceInterfaceResponseDTO serviceInterfaceResponse = serviceRegistryDBService.createServiceInterfaceResponse(serviceInterface);
+		logger.debug("{} service interface successfully registered.", serviceInterface);
+		
+		return serviceInterfaceResponse;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return updated service interface", response = ServiceInterfaceResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = PUT_SERVICE_INTERFACES_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_SERVICE_INTERFACES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PutMapping(path = SERVICE_INTERFACES_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public ServiceInterfaceResponseDTO putUpdateServiceInterface(@PathVariable(value = PATH_VARIABLE_ID) final long id,
+																				 @RequestBody final ServiceInterfaceRequestDTO serviceInterfaceRequestDTO) {
+		final String serviceInterface = serviceInterfaceRequestDTO.getServiceInterface();
+		logger.debug("New Service Interface update request received with id: {}, interface: {}", id, serviceInterface);
+		
+		if (id < 1) {
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_INTERFACES_BY_ID_URI);
+		}		
+		
+		if (Utilities.isEmpty(serviceInterface)) {
+			throw new BadPayloadException("serviceInterface is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_INTERFACES_BY_ID_URI);
+		}
+		
+		// TODO add interface name validation here
+		
+		final ServiceInterfaceResponseDTO serviceInterfaceResponse = serviceRegistryDBService.updateServiceInterfaceByIdResponse(id, serviceInterface);
+		logger.debug("Service interface with id: '{}' successfully updated with interface '{}'.", id, serviceInterface);
+		
+		return serviceInterfaceResponse;
+	}
+	
+
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return updated service interface", response = ServiceInterfaceResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = PATCH_SERVICE_INTERFACES_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PATCH_SERVICE_INTERFACES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PatchMapping(path = SERVICE_INTERFACES_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = "application/json")
+	@ResponseBody public ServiceInterfaceResponseDTO patchUpdateServiceInterface(@PathVariable(value = PATH_VARIABLE_ID) final long id,
+																				   @RequestBody final ServiceInterfaceRequestDTO serviceInterfaceRequestDTO) {
+		// Currently ServiceInterface has only one updatable field, therefore PUT and PATCH do the same
+		return putUpdateServiceInterface(id, serviceInterfaceRequestDTO);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Remove service interface", tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_SERVICE_INTERFACES_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_SERVICE_INTERFACES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@DeleteMapping(path = SERVICE_INTERFACES_BY_ID_URI)
+	public void removeServiceInterface(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+		logger.debug("New Service Interface delete request received with id: {}", id);
+		
+		if (id < 1) {
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_INTERFACES_BY_ID_URI);
+		}
+		
+		serviceRegistryDBService.removeServiceInterfaceById(id);
+		logger.debug("Service interface with id: '{}' successfully deleted", id);
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
