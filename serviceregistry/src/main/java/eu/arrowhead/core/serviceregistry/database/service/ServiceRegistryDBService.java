@@ -1403,7 +1403,7 @@ public class ServiceRegistryDBService {
 		try {
 			final Optional<ServiceInterface> find = serviceInterfaceRepository.findByInterfaceName(serviceInterface.toLowerCase().trim());
 			if (find.isPresent()) {
-				throw new InvalidParameterException(serviceInterface + " definition already exists");
+				throw new InvalidParameterException(serviceInterface + " interface already exists");
 			}
 		} catch (final InvalidParameterException ex) {
 			throw ex;
