@@ -1,0 +1,106 @@
+package eu.arrowhead.core.serviceregistry;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import eu.arrowhead.common.database.entity.ServiceInterface;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.ServiceInterfacesListResponseDTO;
+import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = ServiceRegistryMain.class)
+@ContextConfiguration (classes = { ServiceRegistryDBServiceTestContext.class })
+public class ServiceRegistryControllerServiceInterfaceTest {
+
+	//=================================================================================================
+	// members
+
+	@Autowired
+	private WebApplicationContext wac;
+
+	private MockMvc mockMvc;
+
+	@Autowired
+	private ObjectMapper objectMapper;
+
+	@MockBean(name = "mockServiceRegistryDBService") 
+	private ServiceRegistryDBService serviceRegistryDBService;
+
+	//=================================================================================================
+	// methods
+
+	//-------------------------------------------------------------------------------------------------
+	@Before
+	public void setup() {
+		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+	}
+	
+	//=================================================================================================
+	// Tests of getServiceNames
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getServiceInterfacesTestWithoutParameter() throws Exception  {
+		final int numOfEntries = 5;
+		final Page<ServiceInterface> serviceInterfaceEntries = createServiceInterfacePageForDBMocking(numOfEntries);
+		final ServiceInterfacesListResponseDTO serviceInterfaceEntriesDTO = DTOConverter.convertServiceInterfacesListToServiceInterfaceListResponseDTO(serviceInterfaceEntries);
+
+		when(serviceRegistryDBService.getServiceInterfaceEntriesResponse(anyInt(), anyInt(), any(), any())).thenReturn(serviceInterfaceEntriesDTO);
+
+		final MvcResult response = this.mockMvc.perform(get("/serviceregistry/mgmt//service/interfaces")
+												.accept(MediaType.APPLICATION_JSON))
+												.andExpect(status().isOk())
+												.andReturn();
+		final ServiceInterfacesListResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ServiceInterfacesListResponseDTO.class);
+
+		assertEquals(numOfEntries, responseBody.getCount());
+	}
+
+	//=================================================================================================
+	// assistant methods
+
+	//-------------------------------------------------------------------------------------------------
+	private Page<ServiceInterface> createServiceInterfacePageForDBMocking(final int amountOfEntry) {
+		final List<ServiceInterface> serviceInterfaceList = new ArrayList<>(amountOfEntry);
+		for (int i = 0; i < amountOfEntry; ++i) {
+			final ServiceInterface serviceInterface = new ServiceInterface("mockedService" + i);
+			serviceInterface.setId(i);
+			final ZonedDateTime timeStamp = ZonedDateTime.now();
+			serviceInterface.setCreatedAt(timeStamp);
+			serviceInterface.setUpdatedAt(timeStamp);
+			serviceInterfaceList.add(serviceInterface);
+		}
+
+		final Page<ServiceInterface> entries = new PageImpl<ServiceInterface>(serviceInterfaceList);
+
+		return entries;
+	}
+
+}
