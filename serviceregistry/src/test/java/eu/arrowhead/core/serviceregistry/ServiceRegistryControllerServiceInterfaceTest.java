@@ -85,7 +85,7 @@ public class ServiceRegistryControllerServiceInterfaceTest {
 
 		when(serviceRegistryDBService.getServiceInterfaceEntriesResponse(anyInt(), anyInt(), any(), any())).thenReturn(serviceInterfaceEntriesDTO);
 
-		final MvcResult response = this.mockMvc.perform(get("/serviceregistry/mgmt//service/interfaces")
+		final MvcResult response = this.mockMvc.perform(get("/serviceregistry/mgmt/interfaces")
 												.accept(MediaType.APPLICATION_JSON))
 												.andExpect(status().isOk())
 												.andReturn();
@@ -103,7 +103,7 @@ public class ServiceRegistryControllerServiceInterfaceTest {
 
 		when(serviceRegistryDBService.getServiceInterfaceEntriesResponse(anyInt(), anyInt(), any(), any())).thenReturn(serviceInterfaceEntriesDTO);
 
-		final MvcResult response = this.mockMvc.perform(get("/serviceregistry/mgmt/service/interfaces")
+		final MvcResult response = this.mockMvc.perform(get("/serviceregistry/mgmt/interfaces")
 											.param("page", "0")
 											.param("item_per_page", String.valueOf(numOfEntries))
 											.accept(MediaType.APPLICATION_JSON))
@@ -117,7 +117,7 @@ public class ServiceRegistryControllerServiceInterfaceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getServiceInterfacesTestWithNullPageButDefinedSizeParameter() throws Exception {
-		this.mockMvc.perform(get("/serviceregistry/mgmt/service/interfaces")
+		this.mockMvc.perform(get("/serviceregistry/mgmt/interfaces")
 					.param("item_per_page", "1")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
@@ -126,7 +126,7 @@ public class ServiceRegistryControllerServiceInterfaceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getServiceInterfacesTestWithDefinedPageButNullSizeParameter() throws Exception {
-		this.mockMvc.perform(get("/serviceregistry/mgmt/service/interfaces")
+		this.mockMvc.perform(get("/serviceregistry/mgmt/interfaces")
 					.param("page", "0")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
@@ -135,7 +135,7 @@ public class ServiceRegistryControllerServiceInterfaceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getServiceInterfacesTestWithInvalidSortDirectionFlagParameter() throws Exception {
-		this.mockMvc.perform(get("/serviceregistry/mgmt/service/interfaces")
+		this.mockMvc.perform(get("/serviceregistry/mgmt/interfaces")
 					.param("direction", "invalid")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
@@ -152,7 +152,7 @@ public class ServiceRegistryControllerServiceInterfaceTest {
 
 		when(serviceRegistryDBService.getServiceInterfaceByIdResponse(anyLong())).thenReturn(serviceInterfaceResponseDTO);
 
-		final MvcResult response = this.mockMvc.perform(get("/serviceregistry/mgmt/service/interfaces/" + requestedId)
+		final MvcResult response = this.mockMvc.perform(get("/serviceregistry/mgmt/interfaces/" + requestedId)
 												.accept(MediaType.APPLICATION_JSON))
 												.andExpect(status().isOk())
 												.andReturn();
@@ -164,7 +164,7 @@ public class ServiceRegistryControllerServiceInterfaceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getServiceInterfaceByIdTestWithInvalidId() throws Exception {
-		this.mockMvc.perform(get("/serviceregistry/mgmt/service/interfaces/-1")
+		this.mockMvc.perform(get("/serviceregistry/mgmt/interfaces/-1")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}
@@ -181,7 +181,7 @@ public class ServiceRegistryControllerServiceInterfaceTest {
 		when(interfaceValidator.isValid(anyString())).thenReturn(Boolean.TRUE);
 		when(serviceRegistryDBService.createServiceInterfaceResponse(anyString())).thenReturn(serviceInterfaceResponseDTO);
 
-		final MvcResult response = this.mockMvc.perform(post("/serviceregistry/mgmt/service/interfaces")
+		final MvcResult response = this.mockMvc.perform(post("/serviceregistry/mgmt/interfaces")
 												.content("{\"serviceInterface\": \"" + serviceInterface + "\"}")
 												.contentType(MediaType.APPLICATION_JSON)
 												.accept(MediaType.APPLICATION_JSON))
@@ -195,7 +195,7 @@ public class ServiceRegistryControllerServiceInterfaceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void addServiceInterfaceTestWithNullInterface() throws Exception {
-		this.mockMvc.perform(post("/serviceregistry/mgmt/service/interfaces")
+		this.mockMvc.perform(post("/serviceregistry/mgmt/interfaces")
 					.content("{}")
 					.contentType(MediaType.APPLICATION_JSON)
 					.accept(MediaType.APPLICATION_JSON))
@@ -205,7 +205,7 @@ public class ServiceRegistryControllerServiceInterfaceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void addServiceInterfaceTestWithBlankInterface() throws Exception {
-		this.mockMvc.perform(post("/serviceregistry/mgmt/service/interfaces")
+		this.mockMvc.perform(post("/serviceregistry/mgmt/interfaces")
 					.content("{\"serviceInterface\": \"      \"}")
 					.contentType(MediaType.APPLICATION_JSON)
 					.accept(MediaType.APPLICATION_JSON))
@@ -225,7 +225,7 @@ public class ServiceRegistryControllerServiceInterfaceTest {
 		when(interfaceValidator.isValid(anyString())).thenReturn(Boolean.TRUE);
 		when(serviceRegistryDBService.updateServiceInterfaceByIdResponse(anyLong(), anyString())).thenReturn(serviceInterfaceResponseDTO);
 		
-		final MvcResult response = this.mockMvc.perform(put("/serviceregistry/mgmt/service/interfaces/" + id)
+		final MvcResult response = this.mockMvc.perform(put("/serviceregistry/mgmt/interfaces/" + id)
 												.content("{\"serviceInterface\": \"" + serviceInterface + "\"}")
 												.contentType(MediaType.APPLICATION_JSON)
 												.accept(MediaType.APPLICATION_JSON))
@@ -239,7 +239,7 @@ public class ServiceRegistryControllerServiceInterfaceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void putUpdateServiceInterfaceTestWithNullInterface() throws Exception {
-		this.mockMvc.perform(put("/serviceregistry/mgmt/service/interfaces/5")
+		this.mockMvc.perform(put("/serviceregistry/mgmt/interfaces/5")
 					.content("{}")
 					.contentType(MediaType.APPLICATION_JSON)
 					.accept(MediaType.APPLICATION_JSON))
@@ -249,7 +249,7 @@ public class ServiceRegistryControllerServiceInterfaceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void putUpdateServiceInterfaceTestWithBlankInterface() throws Exception {
-		this.mockMvc.perform(put("/serviceregistry/mgmt/service/interfaces/5")
+		this.mockMvc.perform(put("/serviceregistry/mgmt/interfaces/5")
 					.content("{\"serviceInterface\": \"     \"}")
 					.contentType(MediaType.APPLICATION_JSON)
 					.accept(MediaType.APPLICATION_JSON))
@@ -269,7 +269,7 @@ public class ServiceRegistryControllerServiceInterfaceTest {
 		when(interfaceValidator.isValid(anyString())).thenReturn(Boolean.TRUE);
 		when(serviceRegistryDBService.updateServiceInterfaceByIdResponse(anyLong(), anyString())).thenReturn(serviceInterfaceResponseDTO);
 
-		final MvcResult response = this.mockMvc.perform(patch("/serviceregistry/mgmt/service/interfaces/" + id)
+		final MvcResult response = this.mockMvc.perform(patch("/serviceregistry/mgmt/interfaces/" + id)
 												.content("{\"serviceInterface\": \"" + serviceInterface + "\"}")
 												.contentType(MediaType.APPLICATION_JSON)
 												.accept(MediaType.APPLICATION_JSON))
@@ -283,7 +283,7 @@ public class ServiceRegistryControllerServiceInterfaceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void patchUpdateServiceInterfaceTestWithNullInterface() throws Exception {
-		this.mockMvc.perform(patch("/serviceregistry/mgmt/service/interfaces/5")
+		this.mockMvc.perform(patch("/serviceregistry/mgmt/interfaces/5")
 					.content("{}")
 					.contentType(MediaType.APPLICATION_JSON)
 					.accept(MediaType.APPLICATION_JSON))
@@ -293,7 +293,7 @@ public class ServiceRegistryControllerServiceInterfaceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void patchUpdateServiceInterfaceTestWithBlankInterface() throws Exception {
-		this.mockMvc.perform(patch("/serviceregistry/mgmt/service/interfaces/5")
+		this.mockMvc.perform(patch("/serviceregistry/mgmt/interfaces/5")
 					.content("{\"serviceInterface\": \"      \"}")
 					.contentType(MediaType.APPLICATION_JSON)
 					.accept(MediaType.APPLICATION_JSON))
@@ -306,7 +306,7 @@ public class ServiceRegistryControllerServiceInterfaceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void removeServiceInterfaceTestWithValidId( ) throws Exception {
-		this.mockMvc.perform(delete("/serviceregistry/mgmt/service/interfaces/4")
+		this.mockMvc.perform(delete("/serviceregistry/mgmt/interfaces/4")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isOk());
 	}
@@ -314,7 +314,7 @@ public class ServiceRegistryControllerServiceInterfaceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void removeServiceInterfaceTestWithInvalidId( ) throws Exception {
-		this.mockMvc.perform(delete("/serviceregistry/mgmt/service/interfaces/0")
+		this.mockMvc.perform(delete("/serviceregistry/mgmt/interfaces/0")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}

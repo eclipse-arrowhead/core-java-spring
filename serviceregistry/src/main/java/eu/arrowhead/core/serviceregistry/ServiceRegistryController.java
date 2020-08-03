@@ -96,7 +96,7 @@ public class ServiceRegistryController {
 	private static final String DELETE_SERVICES_HTTP_200_MESSAGE = "Service definition removed";
 	private static final String DELETE_SERVICES_HTTP_400_MESSAGE = "Could not remove service definition";
 	
-	private static final String SERVICE_INTERFACES_URI = CoreCommonConstants.MGMT_URI + "/service/interfaces";
+	private static final String SERVICE_INTERFACES_URI = CoreCommonConstants.MGMT_URI + "/interfaces";
 	private static final String SERVICE_INTERFACES_BY_ID_URI = SERVICE_INTERFACES_URI + "/{" + PATH_VARIABLE_ID + "}";
 	private static final String GET_SERVICE_INTERFACES_HTTP_200_MESSAGE = "Service Interfaces returned";
 	private static final String GET_SERVICE_INTERFACES_HTTP_400_MESSAGE = "Could not retrieve service interface";
