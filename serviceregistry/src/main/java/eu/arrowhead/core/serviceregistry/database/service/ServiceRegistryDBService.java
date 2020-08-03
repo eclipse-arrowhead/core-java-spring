@@ -987,7 +987,7 @@ public class ServiceRegistryDBService {
 
 		Assert.isTrue(interfaceNameVerifier.isValid(serviceInterface), "Specified interface name is not valid: " + serviceInterface);
 
-		final String validatedServiceInterface = serviceInterface.trim().toLowerCase();
+		final String validatedServiceInterface = serviceInterface.trim().toUpperCase();
 		checkConstraintsOfServiceInterfaceTable(validatedServiceInterface);
 		final ServiceInterface serviceInterfaceEntry = new ServiceInterface(validatedServiceInterface);
 		try {
@@ -1024,7 +1024,7 @@ public class ServiceRegistryDBService {
 		try {
 			final Optional<ServiceInterface> find = serviceInterfaceRepository.findById(id);
 			if (find.isPresent()) {
-				final String validatedServiceInterface = serviceInterface.trim().toLowerCase();
+				final String validatedServiceInterface = serviceInterface.trim().toUpperCase();
 				final ServiceInterface serviceInterfaceEntry = find.get();
 				if (!validatedServiceInterface.equals(serviceInterfaceEntry.getInterfaceName())) {
 					checkConstraintsOfServiceInterfaceTable(validatedServiceInterface);
@@ -1401,7 +1401,7 @@ public class ServiceRegistryDBService {
 		logger.debug("checkConstraintsOfServiceInterfaceTable started...");
 
 		try {
-			final Optional<ServiceInterface> find = serviceInterfaceRepository.findByInterfaceName(serviceInterface.toLowerCase().trim());
+			final Optional<ServiceInterface> find = serviceInterfaceRepository.findByInterfaceName(serviceInterface.toUpperCase().trim());
 			if (find.isPresent()) {
 				throw new InvalidParameterException(serviceInterface + " interface already exists");
 			}
