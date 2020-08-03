@@ -9,7 +9,7 @@ public class ServiceInterfaceRequestDTO implements Serializable {
 
 	private static final long serialVersionUID = -5448099699710703982L;
 
-	private String serviceInterface;
+	private String interfaceName;
 
 	//=================================================================================================
 	// methods
@@ -18,14 +18,14 @@ public class ServiceInterfaceRequestDTO implements Serializable {
 	public ServiceInterfaceRequestDTO() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public ServiceInterfaceRequestDTO(final String serviceInterface) {
-		this.serviceInterface = serviceInterface;
+	public ServiceInterfaceRequestDTO(final String interfaceName) {
+		this.interfaceName = interfaceName;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public String getServiceInterface() { return serviceInterface; }
+	public String getInterfaceName() { return interfaceName; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setServiceInterface(final String serviceInterface) { this.serviceInterface = serviceInterface; }
+	public void setInterfaceName(final String interfaceName) { this.interfaceName = interfaceName; }
 
 }

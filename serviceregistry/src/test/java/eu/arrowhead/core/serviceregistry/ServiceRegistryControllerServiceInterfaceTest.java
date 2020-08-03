@@ -175,21 +175,21 @@ public class ServiceRegistryControllerServiceInterfaceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void addServiceInterfaceTestWithValidInterface() throws Exception {
-		final String serviceInterface = "testInterface";
-		final ServiceInterfaceResponseDTO serviceInterfaceResponseDTO = new ServiceInterfaceResponseDTO(0, serviceInterface,"","");
+		final String interfaceName = "testInterface";
+		final ServiceInterfaceResponseDTO serviceInterfaceResponseDTO = new ServiceInterfaceResponseDTO(0, interfaceName,"","");
 
 		when(interfaceValidator.isValid(anyString())).thenReturn(Boolean.TRUE);
 		when(serviceRegistryDBService.createServiceInterfaceResponse(anyString())).thenReturn(serviceInterfaceResponseDTO);
 
 		final MvcResult response = this.mockMvc.perform(post("/serviceregistry/mgmt/interfaces")
-												.content("{\"serviceInterface\": \"" + serviceInterface + "\"}")
+												.content("{\"interfaceName\": \"" + interfaceName + "\"}")
 												.contentType(MediaType.APPLICATION_JSON)
 												.accept(MediaType.APPLICATION_JSON))
 												.andExpect(status().isCreated())
 												.andReturn();
 		final ServiceInterfaceResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ServiceInterfaceResponseDTO.class);
 
-		assertEquals(serviceInterface, responseBody.getInterfaceName());
+		assertEquals(interfaceName, responseBody.getInterfaceName());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -218,22 +218,22 @@ public class ServiceRegistryControllerServiceInterfaceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void putUpdateServiceInterfaceTestWithValidInterface() throws Exception {
-		final String serviceInterface = "testInterface";
+		final String interfaceName = "testInterface";
 		final int id = 5;
-		final ServiceInterfaceResponseDTO serviceInterfaceResponseDTO = new ServiceInterfaceResponseDTO(id, serviceInterface,"","");
+		final ServiceInterfaceResponseDTO serviceInterfaceResponseDTO = new ServiceInterfaceResponseDTO(id, interfaceName,"","");
 
 		when(interfaceValidator.isValid(anyString())).thenReturn(Boolean.TRUE);
 		when(serviceRegistryDBService.updateServiceInterfaceByIdResponse(anyLong(), anyString())).thenReturn(serviceInterfaceResponseDTO);
 		
 		final MvcResult response = this.mockMvc.perform(put("/serviceregistry/mgmt/interfaces/" + id)
-												.content("{\"serviceInterface\": \"" + serviceInterface + "\"}")
+												.content("{\"interfaceName\": \"" + interfaceName + "\"}")
 												.contentType(MediaType.APPLICATION_JSON)
 												.accept(MediaType.APPLICATION_JSON))
 												.andExpect(status().isOk())
 												.andReturn();
 		final ServiceInterfaceResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ServiceInterfaceResponseDTO.class);
 
-		assertEquals(serviceInterface, responseBody.getInterfaceName());
+		assertEquals(interfaceName, responseBody.getInterfaceName());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -262,22 +262,22 @@ public class ServiceRegistryControllerServiceInterfaceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void patchUpdateServiceInterfaceTestWithValidInterface() throws Exception {
-		final String serviceInterface = "testInterface";
+		final String interfaceName = "testInterface";
 		final int id = 5;
-		final ServiceInterfaceResponseDTO serviceInterfaceResponseDTO = new ServiceInterfaceResponseDTO(id, serviceInterface,"","");
+		final ServiceInterfaceResponseDTO serviceInterfaceResponseDTO = new ServiceInterfaceResponseDTO(id, interfaceName,"","");
 
 		when(interfaceValidator.isValid(anyString())).thenReturn(Boolean.TRUE);
 		when(serviceRegistryDBService.updateServiceInterfaceByIdResponse(anyLong(), anyString())).thenReturn(serviceInterfaceResponseDTO);
 
 		final MvcResult response = this.mockMvc.perform(patch("/serviceregistry/mgmt/interfaces/" + id)
-												.content("{\"serviceInterface\": \"" + serviceInterface + "\"}")
+												.content("{\"interfaceName\": \"" + interfaceName + "\"}")
 												.contentType(MediaType.APPLICATION_JSON)
 												.accept(MediaType.APPLICATION_JSON))
 												.andExpect(status().isOk())
 												.andReturn();
 		final ServiceInterfaceResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ServiceInterfaceResponseDTO.class);
 
-		assertEquals(serviceInterface, responseBody.getInterfaceName());
+		assertEquals(interfaceName, responseBody.getInterfaceName());
 	}
 
 	//-------------------------------------------------------------------------------------------------

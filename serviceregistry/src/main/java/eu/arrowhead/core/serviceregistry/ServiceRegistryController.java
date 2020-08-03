@@ -848,19 +848,19 @@ public class ServiceRegistryController {
 	@PostMapping(path = SERVICE_INTERFACES_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
 	@ResponseBody public ServiceInterfaceResponseDTO addServiceInterface(@RequestBody final ServiceInterfaceRequestDTO serviceInterfaceRequestDTO) {
-		final String serviceInterface = serviceInterfaceRequestDTO.getServiceInterface();
-		logger.debug("New Service Interface registration request received with interface: {}", serviceInterface);
+		final String interfaceName = serviceInterfaceRequestDTO.getInterfaceName();
+		logger.debug("New Service Interface registration request received with interface: {}", interfaceName);
 
-		if (Utilities.isEmpty(serviceInterface)) {
+		if (Utilities.isEmpty(interfaceName)) {
 			throw new BadPayloadException("Service interface is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_INTERFACES_URI);
 		}
 
-		if (!interfaceNameVerifier.isValid(serviceInterface)) {
-			throw new BadPayloadException("Specified interface name is not valid: " + serviceInterface, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_INTERFACES_URI);
+		if (!interfaceNameVerifier.isValid(interfaceName)) {
+			throw new BadPayloadException("Specified interface name is not valid: " + interfaceName, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_INTERFACES_URI);
 		}
 
-		final ServiceInterfaceResponseDTO serviceInterfaceResponse = serviceRegistryDBService.createServiceInterfaceResponse(serviceInterface);
-		logger.debug("{} service interface successfully registered.", serviceInterface);
+		final ServiceInterfaceResponseDTO serviceInterfaceResponse = serviceRegistryDBService.createServiceInterfaceResponse(interfaceName);
+		logger.debug("{} service interface successfully registered.", interfaceName);
 
 		return serviceInterfaceResponse;
 	}
@@ -877,23 +877,23 @@ public class ServiceRegistryController {
 	@PutMapping(path = SERVICE_INTERFACES_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public ServiceInterfaceResponseDTO putUpdateServiceInterface(@PathVariable(value = PATH_VARIABLE_ID) final long id,
 																				 @RequestBody final ServiceInterfaceRequestDTO serviceInterfaceRequestDTO) {
-		final String serviceInterface = serviceInterfaceRequestDTO.getServiceInterface();
-		logger.debug("New Service Interface update request received with id: {}, interface: {}", id, serviceInterface);
+		final String interfaceName = serviceInterfaceRequestDTO.getInterfaceName();
+		logger.debug("New Service Interface update request received with id: {}, interface: {}", id, interfaceName);
 
 		if (id < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_INTERFACES_BY_ID_URI);
 		}
 
-		if (Utilities.isEmpty(serviceInterface)) {
+		if (Utilities.isEmpty(interfaceName)) {
 			throw new BadPayloadException("serviceInterface is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_INTERFACES_BY_ID_URI);
 		}
 
-		if (!interfaceNameVerifier.isValid(serviceInterface)) {
-			throw new BadPayloadException("Specified interface name is not valid: " + serviceInterface, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_INTERFACES_URI);
+		if (!interfaceNameVerifier.isValid(interfaceName)) {
+			throw new BadPayloadException("Specified interface name is not valid: " + interfaceName, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_INTERFACES_URI);
 		}
 
-		final ServiceInterfaceResponseDTO serviceInterfaceResponse = serviceRegistryDBService.updateServiceInterfaceByIdResponse(id, serviceInterface);
-		logger.debug("Service interface with id: '{}' successfully updated with interface '{}'.", id, serviceInterface);
+		final ServiceInterfaceResponseDTO serviceInterfaceResponse = serviceRegistryDBService.updateServiceInterfaceByIdResponse(id, interfaceName);
+		logger.debug("Service interface with id: '{}' successfully updated with interface '{}'.", id, interfaceName);
 
 		return serviceInterfaceResponse;
 	}
