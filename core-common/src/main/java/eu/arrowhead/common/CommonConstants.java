@@ -127,6 +127,7 @@ public class CommonConstants {
 
 	public static final String SERVICE_REGISTRY_URI = "/serviceregistry";
 	public static final String OP_SERVICE_REGISTRY_REGISTER_URI = "/register";
+	public static final String OP_SERVICE_REGISTRY_REGISTER_SYSTEM_URI = "/register-system";
 	public static final String OP_SERVICE_REGISTRY_UNREGISTER_URI = "/unregister";
 	public static final String OP_SERVICE_REGISTRY_QUERY_URI = "/query";	
 	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME = "system_name";
