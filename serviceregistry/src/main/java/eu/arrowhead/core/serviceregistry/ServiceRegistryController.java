@@ -220,7 +220,21 @@ public class ServiceRegistryController {
 	@ResponseBody public SystemResponseDTO addSystem(@RequestBody final SystemRequestDTO request) {
 		return callCreateSystem(request);
 	}
-	
+
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return created consumer system ", response = SystemResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_SYSTEM_HTTP_201_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_SYSTEM_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = CommonConstants.OP_SERVICE_REGISTRY_REGISTER_SYSTEM_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseStatus(org.springframework.http.HttpStatus.CREATED)
+	@ResponseBody public SystemResponseDTO addConsumerSystem(@RequestBody final SystemRequestDTO request) {
+		return callCreateSystem(request);
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return updated system ", response = SystemResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
