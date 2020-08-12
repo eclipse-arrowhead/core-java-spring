@@ -437,6 +437,18 @@ public class SRAccessControlFilterTest {
 
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void testRegisterSystemWithSystemNameWithoutUnderlinesMatchSystemNameInCertifiacte() throws Exception {
+
+		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO(
+				"sys_op",//systemName,
+				"localhost", //address
+				12345,//port,
+				null);//authenticationInfo);
+		postRegisterSystem(systemRequestDTO, "certificates/valid.pem", status().isCreated());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void testRegisterSystemWithSystemNameNotMatchSystemNameInCertifiacte() throws Exception {
 
 		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO(
@@ -449,9 +461,26 @@ public class SRAccessControlFilterTest {
 
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testRegisterSystemWithNoSystemName() throws Exception {
+	public void testRegisterSystemWithNullSystemName() throws Exception {
 		// Filter breaks the filter chain and expects that the web service rejects the ill-formed request
-		postRegisterSystem(new SystemRequestDTO(), "certificates/valid.pem", status().isBadRequest());
+		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO(
+				null,//systemName,
+				"localhost", //address
+				12345,//port,
+				null);//authenticationInfo);
+		postRegisterSystem(systemRequestDTO, "certificates/valid.pem", status().isBadRequest());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRegisterSystemWithEmptySystemName() throws Exception {
+		// Filter breaks the filter chain and expects that the web service rejects the ill-formed request
+		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO(
+				"   ",//systemName,
+				"localhost", //address
+				12345,//port,
+				null);//authenticationInfo);
+		postRegisterSystem(systemRequestDTO, "certificates/valid.pem", status().isBadRequest());
 	}
 
 	//=================================================================================================
