@@ -21,6 +21,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Objects;
+import java.util.ServiceConfigurationError;
 import javax.servlet.http.HttpServletRequest;
 
 import eu.arrowhead.common.dto.shared.CertificateCreationRequestDTO;
@@ -81,9 +82,6 @@ public class SecurityUtilities {
         keyPairGenerator = KeyPairGenerator.getInstance(keyFactoryAlgorithm);
         keyPairGenerator.initialize(keySize);
     }
-
-    //=================================================================================================
-    // methods
 
     //-------------------------------------------------------------------------------------------------
     public static String getCertificateCNFromRequest(final HttpServletRequest request) {
@@ -172,8 +170,19 @@ public class SecurityUtilities {
         }
     }
 
-    //=================================================================================================
-    // assistant methods
+    //-------------------------------------------------------------------------------------------------
+    public KeyStore getKeyStore() {
+        try {
+            final KeyStore keystore = KeyStore.getInstance(sslProperties.getKeyStoreType());
+            keystore.load(sslProperties.getKeyStore()
+                                       .getInputStream(),
+                          sslProperties.getKeyStorePassword()
+                                       .toCharArray());
+            return keystore;
+        } catch (KeyStoreException | IOException | CertificateException | NoSuchAlgorithmException e) {
+            throw new ServiceConfigurationError("Cannot open keystore: " + e.getMessage());
+        }
+    }
 
     //-------------------------------------------------------------------------------------------------
     public String createCertificateSigningRequest(final String baseCommonName, final KeyPair keyPair, final CertificateType type,
@@ -188,8 +197,7 @@ public class SecurityUtilities {
 
         logger.debug("Preparing Certificate Signing Request ...");
         // get cloud certificate for cloudName and operator
-        final KeyStore keyStore = KeyStore.getInstance(sslProperties.getKeyStore().getFile(), sslProperties.getKeyStorePassword().toCharArray());
-        final X509Certificate cloudCertFromKeyStore = Utilities.getCloudCertFromKeyStore(keyStore);
+        final X509Certificate cloudCertFromKeyStore = Utilities.getCloudCertFromKeyStore(getKeyStore());
 
         // "CN=<commonName>.<type>.<cloudName>.<operator>.arrowhead.eu, OU=<operator>, O=arrowhead, C=eu"
         final String cloudName = getCommonNameFromCloudCertificate(cloudCertFromKeyStore.getSubjectDN());
