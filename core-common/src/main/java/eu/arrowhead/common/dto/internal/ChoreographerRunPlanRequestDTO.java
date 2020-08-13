@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 
 public class ChoreographerRunPlanRequestDTO {
@@ -42,4 +44,10 @@ public class ChoreographerRunPlanRequestDTO {
 
     //-------------------------------------------------------------------------------------------------
     public void setId(long id) { this.id = id; }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        return new Gson().toJson(this);
+    }
 }

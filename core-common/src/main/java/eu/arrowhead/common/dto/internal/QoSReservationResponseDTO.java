@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 
 public class QoSReservationResponseDTO implements Serializable {
@@ -77,5 +79,11 @@ public class QoSReservationResponseDTO implements Serializable {
 	public void setReservedTo(final String reservedTo) { this.reservedTo = reservedTo; }
 	public void setTemporaryLock(final boolean temporaryLock) { this.temporaryLock = temporaryLock; }
 	public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
-	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }	
+	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

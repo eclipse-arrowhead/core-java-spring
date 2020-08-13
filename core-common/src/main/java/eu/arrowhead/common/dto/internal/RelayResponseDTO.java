@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 
 import java.util.Objects;
@@ -103,6 +105,10 @@ public class RelayResponseDTO implements Serializable {
 		}
 		return true;
 	}
-	
-	
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

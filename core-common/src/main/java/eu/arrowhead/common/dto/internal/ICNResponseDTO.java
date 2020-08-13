@@ -16,6 +16,7 @@ package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
 
+import com.google.gson.Gson;
 import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 
 public class ICNResponseDTO extends OrchestrationResponseDTO implements Serializable {
@@ -24,4 +25,10 @@ public class ICNResponseDTO extends OrchestrationResponseDTO implements Serializ
 	// members
 
 	private static final long serialVersionUID = 419607094931834994L;
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 
 public class GatewayProviderConnectionResponseDTO implements Serializable {
@@ -49,4 +51,10 @@ public class GatewayProviderConnectionResponseDTO implements Serializable {
 	public void setQueueId(final String queueId) { this.queueId = queueId; }
 	public void setPeerName(final String peerName) { this.peerName = peerName; }
 	public void setProviderGWPublicKey(final String providerGWPublicKey) { this.providerGWPublicKey = providerGWPublicKey; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

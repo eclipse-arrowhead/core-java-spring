@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gson.Gson;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.dto.shared.OrchestrationFlags.Flag;
@@ -135,6 +136,12 @@ public class OrchestrationFormRequestDTO implements Serializable {
 		this.setCommands(builder.commands);
 		this.setQosRequirements(builder.qosRequirements);
 	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 	
 	//=================================================================================================
 	// nested classes
@@ -232,6 +239,12 @@ public class OrchestrationFormRequestDTO implements Serializable {
 		//-------------------------------------------------------------------------------------------------
 		public OrchestrationFormRequestDTO build() {
 			return new OrchestrationFormRequestDTO(this).validateCrossParameterConstraints();
+		}
+
+		//-------------------------------------------------------------------------------------------------
+		@Override
+		public String toString() {
+			return new Gson().toJson(this);
 		}
 	}
 }

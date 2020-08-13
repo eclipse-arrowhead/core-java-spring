@@ -16,6 +16,7 @@ package eu.arrowhead.common.dto.shared;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.google.gson.Gson;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -59,11 +60,9 @@ public class SystemRegistryOnboardingWithNameRequestDTO extends SystemRegistryRe
         this.certificateCreationRequest = certificateCreationRequest;
     }
 
+    //-------------------------------------------------------------------------------------------------
     @Override
     public String toString() {
-        return new StringJoiner(", ", SystemRegistryOnboardingWithNameRequestDTO.class.getSimpleName() + "[", "]")
-                .add("certificateRequest=" + certificateCreationRequest)
-                .add("parent=" + super.toString())
-                .toString();
+        return new Gson().toJson(this);
     }
 }

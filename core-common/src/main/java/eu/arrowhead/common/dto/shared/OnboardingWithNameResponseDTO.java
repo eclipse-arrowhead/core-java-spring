@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.shared;
 
+import com.google.gson.Gson;
+
 public class OnboardingWithNameResponseDTO extends OnboardingResponseDTO {
 
     //=================================================================================================
@@ -28,6 +30,12 @@ public class OnboardingWithNameResponseDTO extends OnboardingResponseDTO {
                                          final CertificateCreationResponseDTO onboardingCertificate, final String intermediateCertificate,
                                          final String rootCertificate) {
         super(deviceRegistry, systemRegistry, serviceRegistry, orchestrationService, onboardingCertificate, intermediateCertificate, rootCertificate);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        return new Gson().toJson(this);
     }
 
     // this class exist to keep the structure of <operation>RequestDTO, <operation>ResponseDTO

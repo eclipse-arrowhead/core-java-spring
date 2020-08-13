@@ -21,6 +21,7 @@ import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.google.gson.Gson;
 
 @JsonInclude(Include.NON_NULL)
 public class ServiceRegistryResponseDTO implements Serializable {
@@ -74,18 +75,6 @@ public class ServiceRegistryResponseDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", ServiceRegistryResponseDTO.class.getSimpleName() + "[", "]")
-				.add("id=" + id)
-				.add("serviceDefinition=" + serviceDefinition)
-				.add("provider=" + provider)
-				.add("serviceUri='" + serviceUri + "'")
-				.add("endOfValidity='" + endOfValidity + "'")
-				.add("secure=" + secure)
-				.add("metadata=" + metadata)
-				.add("version=" + version)
-				.add("interfaces=" + interfaces)
-				.add("createdAt='" + createdAt + "'")
-				.add("updatedAt='" + updatedAt + "'")
-				.toString();
+		return new Gson().toJson(this);
 	}
 }

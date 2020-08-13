@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -50,4 +52,10 @@ public class ChoreographerPlanRequestDTO implements Serializable {
 	public void setName(final String name) { this.name = name; }
     public void setActions(final List<ChoreographerActionRequestDTO> actions) { this.actions = actions; }
     public void setFirstActionName(String firstActionName) { this.firstActionName = firstActionName; }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        return new Gson().toJson(this);
+    }
 }

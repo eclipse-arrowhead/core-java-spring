@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import com.google.gson.Gson;
+
 import java.util.List;
 
 public class CloudWithRelaysAndPublicRelaysResponseDTO extends CloudResponseDTO {
@@ -51,4 +53,10 @@ public class CloudWithRelaysAndPublicRelaysResponseDTO extends CloudResponseDTO 
 	public void setGatekeeperRelays(final List<RelayResponseDTO> gatekeeperRelays) { this.gatekeeperRelays = gatekeeperRelays; }
 	public void setGatewayRelays(final List<RelayResponseDTO> gatewayRelays) { this.gatewayRelays = gatewayRelays; }
 	public void setPublicRelays(final List<RelayResponseDTO> publicRelays) { this.publicRelays = publicRelays; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

@@ -17,6 +17,7 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.gson.Gson;
 
 public class QoSIntraPingMeasurementResponseDTO  implements Serializable {
 
@@ -95,4 +96,10 @@ public class QoSIntraPingMeasurementResponseDTO  implements Serializable {
 	public void setReceivedAll(final long receivedAll) { this.receivedAll = receivedAll; }
 	public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

@@ -17,6 +17,7 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.util.List;
 
+import com.google.gson.Gson;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 
 public class AuthorizationIntraCloudCheckRequestDTO implements Serializable {
@@ -52,4 +53,10 @@ public class AuthorizationIntraCloudCheckRequestDTO implements Serializable {
 	public void setConsumer(final SystemRequestDTO consumer) { this.consumer = consumer; }
 	public void setServiceDefinitionId(final Long serviceDefinitionId) { this.serviceDefinitionId = serviceDefinitionId; }
 	public void setProviderIdsWithInterfaceIds(final List<IdIdListDTO> providerIdsWithInterfaceIds) { this.providerIdsWithInterfaceIds = providerIdsWithInterfaceIds; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

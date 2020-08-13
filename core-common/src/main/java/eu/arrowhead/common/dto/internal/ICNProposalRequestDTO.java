@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gson.Gson;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
@@ -137,5 +138,11 @@ public class ICNProposalRequestDTO implements Serializable {
 		if (commands != null) {
 			this.commands = commands;
 		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
 	}
 }

@@ -16,6 +16,7 @@ package eu.arrowhead.common.dto.shared;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.google.gson.Gson;
 
 import java.io.Serializable;
 import java.util.List;
@@ -97,17 +98,9 @@ public class SystemRegistryResponseDTO implements Serializable {
 		return Objects.hash(id, system, provider, endOfValidity, metadata, version, createdAt, updatedAt);
 	}
 
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", SystemRegistryResponseDTO.class.getSimpleName() + "[", "]")
-				.add("id=" + id)
-				.add("system=" + system)
-				.add("provider=" + provider)
-				.add("endOfValidity='" + endOfValidity + "'")
-				.add("metadata=" + metadata)
-				.add("version=" + version)
-				.add("createdAt='" + createdAt + "'")
-				.add("updatedAt='" + updatedAt + "'")
-				.toString();
+		return new Gson().toJson(this);
 	}
 }

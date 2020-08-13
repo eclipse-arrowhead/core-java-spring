@@ -17,6 +17,7 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.util.List;
 
+import com.google.gson.Gson;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 
@@ -49,4 +50,10 @@ public class QoSTemporaryLockRequestDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public void setRequester(final SystemRequestDTO requester) { this.requester = requester; }
 	public void setOrList(final List<OrchestrationResultDTO> orList) { this.orList = orList; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 
 public class QoSBestRelayRequestDTO implements Serializable {
@@ -45,4 +47,10 @@ public class QoSBestRelayRequestDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public void setCloud(final CloudResponseDTO cloud) { this.cloud = cloud; }
 	public void setAttribute(final String attribute) { this.attribute = attribute; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

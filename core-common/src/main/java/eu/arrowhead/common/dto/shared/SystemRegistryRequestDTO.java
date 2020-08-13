@@ -16,6 +16,7 @@ package eu.arrowhead.common.dto.shared;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.google.gson.Gson;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -70,14 +71,9 @@ public class SystemRegistryRequestDTO implements Serializable {
 	public void setMetadata(final Map<String,String> metadata) { this.metadata = metadata; }
 	public void setVersion(final Integer version) { this.version = version; }
 
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", SystemRegistryRequestDTO.class.getSimpleName() + "[", "]")
-				.add("system=" + system)
-				.add("provider=" + provider)
-				.add("endOfValidity='" + endOfValidity + "'")
-				.add("metadata=" + metadata)
-				.add("version=" + version)
-				.toString();
+		return new Gson().toJson(this);
 	}
 }

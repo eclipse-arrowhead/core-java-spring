@@ -18,6 +18,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.gson.Gson;
 import org.springframework.util.Assert;
 
 public class SystemAddressSetRelayResponseDTO implements Serializable {
@@ -47,4 +48,10 @@ public class SystemAddressSetRelayResponseDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	public void setAddresses(final Set<String> addresses) { this.addresses = addresses; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

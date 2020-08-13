@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.shared;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 import java.util.Map;
 
@@ -31,6 +33,12 @@ public class DeviceRegistryOnboardingWithCsrResponseDTO extends DeviceRegistryOn
                                                       final String updatedAt,
                                                       final CertificateCreationResponseDTO certificateResponse) {
         super(id, device, endOfValidity, metadata, version, createdAt, updatedAt, certificateResponse);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        return new Gson().toJson(this);
     }
 
     // this class exist to keep the structure of <operation>RequestDTO, <operation>ResponseDTO

@@ -14,6 +14,7 @@
 
 package eu.arrowhead.common.dto.shared;
 
+import com.google.gson.Gson;
 import org.springframework.util.Assert;
 
 import java.io.Serializable;
@@ -62,18 +63,12 @@ public class SystemQueryFormDTO implements Serializable {
 	public void setMaxVersionRequirement(final Integer maxVersionRequirement) { this.maxVersionRequirement = maxVersionRequirement; }
 	public void setPingProviders(final boolean pingProviders) { this.pingProviders = pingProviders; }
 
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", SystemQueryFormDTO.class.getSimpleName() + "[", "]")
-				.add("systemNameRequirements='" + systemNameRequirements + "'")
-				.add("deviceNameRequirements='" + deviceNameRequirements + "'")
-				.add("metadataRequirements=" + metadataRequirements)
-				.add("versionRequirement=" + versionRequirement)
-				.add("minVersionRequirement=" + minVersionRequirement)
-				.add("maxVersionRequirement=" + maxVersionRequirement)
-				.add("pingProviders=" + pingProviders)
-				.toString();
+		return new Gson().toJson(this);
 	}
+
 	//=================================================================================================
 	// assistant methods
 
@@ -162,6 +157,12 @@ public class SystemQueryFormDTO implements Serializable {
 		//-------------------------------------------------------------------------------------------------
 		public SystemQueryFormDTO build() {
 			return new SystemQueryFormDTO(this);
+		}
+
+		//-------------------------------------------------------------------------------------------------
+		@Override
+		public String toString() {
+			return new Gson().toJson(this);
 		}
 	}
 }

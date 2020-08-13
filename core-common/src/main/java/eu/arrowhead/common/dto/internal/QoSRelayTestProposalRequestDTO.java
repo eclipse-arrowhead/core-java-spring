@@ -16,6 +16,7 @@ package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
 
+import com.google.gson.Gson;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
@@ -58,4 +59,10 @@ public class QoSRelayTestProposalRequestDTO implements Serializable {
 	public void setRelay(final RelayRequestDTO relay) { this.relay = relay; }
 	public void setSenderQoSMonitorPublicKey(final String senderQoSMonitorPublicKey) { this.senderQoSMonitorPublicKey = senderQoSMonitorPublicKey; }
 	public void setRequesterCloud(final CloudRequestDTO requesterCloud) { this.requesterCloud = requesterCloud; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

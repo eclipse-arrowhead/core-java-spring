@@ -16,6 +16,7 @@ package eu.arrowhead.common.dto.shared;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.google.gson.Gson;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -97,16 +98,9 @@ public class DeviceResponseDTO implements Serializable {
 				Objects.equals(deviceName, other.deviceName);
 	}
 
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", DeviceResponseDTO.class.getSimpleName() + "[", "]")
-				.add("id=" + id)
-				.add("deviceName='" + deviceName + "'")
-				.add("address='" + address + "'")
-				.add("macAddress='" + macAddress + "'")
-				.add("authenticationInfo='" + authenticationInfo + "'")
-				.add("createdAt='" + createdAt + "'")
-				.add("updatedAt='" + updatedAt + "'")
-				.toString();
+		return new Gson().toJson(this);
 	}
 }

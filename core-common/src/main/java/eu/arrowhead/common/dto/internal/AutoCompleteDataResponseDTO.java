@@ -20,6 +20,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+import com.google.gson.Gson;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 
 @JsonInclude(Include.NON_NULL)
@@ -55,4 +56,10 @@ public class AutoCompleteDataResponseDTO implements Serializable {
 	public void setServiceList(final List<IdValueDTO> serviceList) { this.serviceList = serviceList; }
 	public void setSystemList(final List<SystemResponseDTO> systemList) { this.systemList = systemList; }
 	public void setInterfaceList(final List<IdValueDTO> interfaceList) { this.interfaceList = interfaceList; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

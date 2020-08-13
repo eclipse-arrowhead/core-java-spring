@@ -17,6 +17,7 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.util.Map;
 
+import com.google.gson.Gson;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 
@@ -70,4 +71,10 @@ public class OrchestratorStoreRequestDTO implements Serializable {
 	public void setServiceInterfaceName(final String serviceInterfaceName) {this.serviceInterfaceName = serviceInterfaceName; }
 	public void setPriority(final Integer priority) {this.priority = priority;}
 	public void setAttribute(final Map<String,String> attribute) {this.attribute = attribute;}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

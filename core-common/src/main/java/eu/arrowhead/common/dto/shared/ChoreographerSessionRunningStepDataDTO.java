@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.shared;
 
+import com.google.gson.Gson;
+
 public class ChoreographerSessionRunningStepDataDTO {
 
     private long sessionId;
@@ -41,5 +43,11 @@ public class ChoreographerSessionRunningStepDataDTO {
 
     public void setRunningStepId(long runningStepId) {
         this.runningStepId = runningStepId;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        return new Gson().toJson(this);
     }
 }

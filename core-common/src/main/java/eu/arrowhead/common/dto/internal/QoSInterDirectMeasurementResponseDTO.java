@@ -18,6 +18,7 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import com.google.gson.Gson;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 
 public class QoSInterDirectMeasurementResponseDTO implements Serializable {
@@ -75,5 +76,11 @@ public class QoSInterDirectMeasurementResponseDTO implements Serializable {
 	@JsonIgnore
 	public boolean hasRecord() {
 		return id != null;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
 	}
 }

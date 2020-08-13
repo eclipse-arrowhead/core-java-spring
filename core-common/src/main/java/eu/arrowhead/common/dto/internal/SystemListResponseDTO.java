@@ -21,6 +21,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+import com.google.gson.Gson;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 
 @JsonInclude(Include.NON_NULL)
@@ -54,4 +55,10 @@ public class SystemListResponseDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public void setData(final List<SystemResponseDTO> data) { this.data = data; }
 	public void setCount(final long count) { this.count = count; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

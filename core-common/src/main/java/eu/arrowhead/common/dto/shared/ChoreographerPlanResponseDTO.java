@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.shared;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -62,4 +64,10 @@ public class ChoreographerPlanResponseDTO implements Serializable {
     public void setActions(final List<ChoreographerActionResponseDTO> actions) { this.actions = actions; }
     public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
     public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        return new Gson().toJson(this);
+    }
 }

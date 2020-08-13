@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -45,5 +47,11 @@ public class IdIdListDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final Long id) { this.id = id; }
-	public void setIdList(final List<Long> idList) { this.idList = idList; }	
+	public void setIdList(final List<Long> idList) { this.idList = idList; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

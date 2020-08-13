@@ -17,6 +17,7 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.util.List;
 
+import com.google.gson.Gson;
 import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 
@@ -65,4 +66,10 @@ public class ICNProposalResponseDTO extends OrchestrationResponseDTO implements 
 	public void setUseGateway(final boolean useGateway) { this.useGateway = useGateway; }
 	public void setRelay(final RelayResponseDTO relay) { this.relay = relay; }
 	public void setConnectionInfo(final GatewayProviderConnectionResponseDTO connectionInfo) { this.connectionInfo = connectionInfo; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

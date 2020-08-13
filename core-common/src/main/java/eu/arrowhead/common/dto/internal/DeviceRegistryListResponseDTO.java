@@ -16,6 +16,7 @@ package eu.arrowhead.common.dto.internal;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.google.gson.Gson;
 import eu.arrowhead.common.dto.shared.DeviceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRegistryResponseDTO;
 
@@ -56,5 +57,11 @@ public class DeviceRegistryListResponseDTO implements Serializable {
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setData(final List<DeviceRegistryResponseDTO> data) {this.data = data;}
-	public void setCount(final long count) {this.count = count;}	
+	public void setCount(final long count) {this.count = count;}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

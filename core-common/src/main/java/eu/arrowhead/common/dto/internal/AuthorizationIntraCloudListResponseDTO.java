@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -45,5 +47,11 @@ public class AuthorizationIntraCloudListResponseDTO implements Serializable {
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setData(final List<AuthorizationIntraCloudResponseDTO> data) { this.data = data; }
-	public void setCount(final long count) { this.count = count; }	
+	public void setCount(final long count) { this.count = count; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

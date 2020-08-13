@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.shared;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 import java.util.StringJoiner;
 
@@ -121,17 +123,9 @@ public abstract class OnboardingResponseDTO implements Serializable {
         this.rootCertificate = rootCertificate;
     }
 
-
+    //-------------------------------------------------------------------------------------------------
     @Override
     public String toString() {
-        return new StringJoiner(", ", OnboardingResponseDTO.class.getSimpleName() + "[", "]")
-                .add("deviceRegistry=" + deviceRegistry)
-                .add("systemRegistry=" + systemRegistry)
-                .add("serviceRegistry=" + serviceRegistry)
-                .add("orchestrationService=" + orchestrationService)
-                .add("onboardingCertificate=" + onboardingCertificate)
-                .add("intermediateCertificate='" + intermediateCertificate + "'")
-                .add("rootCertificate='" + rootCertificate + "'")
-                .toString();
+        return new Gson().toJson(this);
     }
 }

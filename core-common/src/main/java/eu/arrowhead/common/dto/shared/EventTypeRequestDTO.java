@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.shared;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 
 public class EventTypeRequestDTO implements Serializable {
@@ -41,4 +43,10 @@ public class EventTypeRequestDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	public void setEventTypeName(final String eventTypeName) { this.eventTypeName = eventTypeName; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

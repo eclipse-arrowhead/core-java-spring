@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gson.Gson;
 import org.springframework.util.Assert;
 
 public class ServiceQueryFormDTO implements Serializable {
@@ -78,6 +79,12 @@ public class ServiceQueryFormDTO implements Serializable {
 		this.minVersionRequirement = builder.minVersionRequirement;
 		this.maxVersionRequirement = builder.maxVersionRequirement;
 		this.pingProviders = builder.pingProviders;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
 	}
 	
 	//=================================================================================================
@@ -160,6 +167,12 @@ public class ServiceQueryFormDTO implements Serializable {
 		//-------------------------------------------------------------------------------------------------
 		public ServiceQueryFormDTO build() {
 			return new ServiceQueryFormDTO(this);
+		}
+
+		//-------------------------------------------------------------------------------------------------
+		@Override
+		public String toString() {
+			return new Gson().toJson(this);
 		}
 	}
 }

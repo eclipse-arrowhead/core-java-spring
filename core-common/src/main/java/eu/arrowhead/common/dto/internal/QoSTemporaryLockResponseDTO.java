@@ -18,6 +18,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.Gson;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 
 public class QoSTemporaryLockResponseDTO implements Serializable {
@@ -50,4 +51,9 @@ public class QoSTemporaryLockResponseDTO implements Serializable {
 		}
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

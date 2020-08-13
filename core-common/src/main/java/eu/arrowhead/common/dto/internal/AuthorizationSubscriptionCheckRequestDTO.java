@@ -17,6 +17,7 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.util.Set;
 
+import com.google.gson.Gson;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 
 public class AuthorizationSubscriptionCheckRequestDTO implements Serializable {
@@ -48,4 +49,10 @@ public class AuthorizationSubscriptionCheckRequestDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public void setConsumer(final SystemRequestDTO consumer) { this.consumer = consumer; }
 	public void setProviders(final Set<SystemRequestDTO> publishers) { this.publishers = publishers; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

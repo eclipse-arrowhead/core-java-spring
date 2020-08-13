@@ -16,6 +16,7 @@ package eu.arrowhead.common.dto.internal;
 
 import java.util.List;
 
+import com.google.gson.Gson;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 
@@ -42,6 +43,10 @@ public class QoSReservationRequestDTO extends QoSTemporaryLockRequestDTO {
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setSelected(final OrchestrationResultDTO selected) { this.selected = selected; }
-	
-	
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

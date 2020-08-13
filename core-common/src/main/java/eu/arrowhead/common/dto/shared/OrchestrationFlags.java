@@ -17,6 +17,7 @@ package eu.arrowhead.common.dto.shared;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gson.Gson;
 import eu.arrowhead.common.CommonConstants;
 
 public class OrchestrationFlags extends HashMap<String,Boolean> {
@@ -89,6 +90,12 @@ public class OrchestrationFlags extends HashMap<String,Boolean> {
 		result.put(CommonConstants.ORCHESTRATION_FLAG_ENABLE_QOS, Flag.ENABLE_QOS);
 		
 		return result;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
 	}
 	
 	//=================================================================================================

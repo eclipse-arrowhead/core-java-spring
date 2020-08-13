@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.shared;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 import java.util.StringJoiner;
 

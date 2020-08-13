@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 
 public class DecryptedMessageDTO implements Serializable {
@@ -39,4 +41,10 @@ public class DecryptedMessageDTO implements Serializable {
 	public void setMessageType(final String messageType) { this.messageType = messageType; }
 	public void setSessionId(final String sessionId) { this.sessionId = sessionId; }
 	public void setPayload(final String payload) { this.payload = payload; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

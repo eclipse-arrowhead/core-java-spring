@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -45,5 +47,11 @@ public class GSDQueryResultDTO implements Serializable {
 	
 	//-------------------------------------------------------------------------------------------------	
 	public void setResults(final List<GSDPollResponseDTO> results) { this.results = results; }
-	public void setUnsuccessfulRequests(final int unsuccessfulRequests) { this.unsuccessfulRequests = unsuccessfulRequests; }	
+	public void setUnsuccessfulRequests(final int unsuccessfulRequests) { this.unsuccessfulRequests = unsuccessfulRequests; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

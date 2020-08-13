@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 
 import javax.validation.constraints.NotBlank;
@@ -48,5 +50,11 @@ public class CertificateCheckRequestDTO implements Serializable {
 
     public void setCertificate(String certificate) {
         this.certificate = certificate;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        return new Gson().toJson(this);
     }
 }

@@ -22,6 +22,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import com.google.gson.Gson;
 import eu.arrowhead.common.dto.shared.ErrorWrapperDTO;
 import eu.arrowhead.common.dto.shared.QoSMeasurementAttributesFormDTO;
 
@@ -86,5 +87,11 @@ public class GSDPollResponseDTO implements Serializable, ErrorWrapperDTO {
 	@Override
 	public boolean isError() {
 		return false;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
 	}
 }

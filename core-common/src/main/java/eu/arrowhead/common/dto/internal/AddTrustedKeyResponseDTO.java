@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 
 public class AddTrustedKeyResponseDTO implements Serializable {
@@ -56,5 +58,10 @@ public class AddTrustedKeyResponseDTO implements Serializable {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return new Gson().toJson(this);
     }
 }

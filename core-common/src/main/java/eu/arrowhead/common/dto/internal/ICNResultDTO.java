@@ -20,6 +20,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+import com.google.gson.Gson;
 import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 
@@ -42,5 +43,11 @@ public class ICNResultDTO extends OrchestrationResponseDTO implements Serializab
 	//-------------------------------------------------------------------------------------------------
 	public ICNResultDTO(final List<OrchestrationResultDTO> response) {
 		super(response);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
 	}
 }

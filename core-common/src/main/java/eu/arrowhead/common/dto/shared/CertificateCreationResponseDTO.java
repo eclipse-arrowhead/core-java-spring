@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.shared;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 import java.util.StringJoiner;
 
@@ -85,13 +87,9 @@ public class CertificateCreationResponseDTO implements Serializable {
         this.keyPairDTO = keyPairDTO;
     }
 
+    //-------------------------------------------------------------------------------------------------
     @Override
     public String toString() {
-        return new StringJoiner(", ", CertificateCreationResponseDTO.class.getSimpleName() + "[", "]")
-                .add("certificate='" + certificate + "'")
-                .add("certificateFormat=" + certificateFormat)
-                .add("certificateType=" + certificateType)
-                .add("keyPairDTO=" + keyPairDTO)
-                .toString();
+        return new Gson().toJson(this);
     }
 }

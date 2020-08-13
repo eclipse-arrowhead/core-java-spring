@@ -16,6 +16,7 @@ package eu.arrowhead.common.dto.shared;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.google.gson.Gson;
 import org.springframework.util.Assert;
 
 import java.io.Serializable;
@@ -53,12 +54,10 @@ public abstract class SystemRegistryOnboardingResponseDTO extends SystemRegistry
         this.certificateResponse = certificateResponse;
     }
 
+    //-------------------------------------------------------------------------------------------------
     @Override
     public String toString() {
-        return new StringJoiner(", ", SystemRegistryOnboardingResponseDTO.class.getSimpleName() + "[", "]")
-                .add("certificateResponse=" + certificateResponse)
-                .add("parent=" + super.toString())
-                .toString();
+        return new Gson().toJson(this);
     }
 
     public void load(final SystemRegistryResponseDTO dto)

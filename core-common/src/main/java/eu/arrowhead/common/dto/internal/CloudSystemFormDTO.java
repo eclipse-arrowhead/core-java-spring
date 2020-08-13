@@ -16,6 +16,7 @@ package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
 
+import com.google.gson.Gson;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 
 public class CloudSystemFormDTO implements Serializable {
@@ -43,5 +44,11 @@ public class CloudSystemFormDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	public void setCloud(final CloudResponseDTO cloud) { this.cloud = cloud; }
-	public void setSystem(final SystemResponseDTO system) { this.system = system; }	
+	public void setSystem(final SystemResponseDTO system) { this.system = system; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

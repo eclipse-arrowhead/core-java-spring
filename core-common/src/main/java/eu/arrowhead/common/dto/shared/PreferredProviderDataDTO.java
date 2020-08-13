@@ -17,6 +17,7 @@ package eu.arrowhead.common.dto.shared;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.gson.Gson;
 
 public class PreferredProviderDataDTO implements Serializable {
 	
@@ -56,11 +57,11 @@ public class PreferredProviderDataDTO implements Serializable {
 	public boolean isValid() {
 		return isLocal() || isGlobal();
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-	  return "PreferredProvider{" + "providerSystem=" + providerSystem + ", providerCloud=" + providerCloud + '}';
+		return new Gson().toJson(this);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

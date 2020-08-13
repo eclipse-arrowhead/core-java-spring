@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 import java.math.BigInteger;
 
@@ -87,5 +89,11 @@ public class CertificateCheckResponseDTO implements Serializable {
 
     public void setStatus(IssuedCertificateStatus status) {
         this.status = status;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        return new Gson().toJson(this);
     }
 }

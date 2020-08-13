@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.shared;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 
 public class ChoreographerNextStepResponseDTO implements Serializable {
@@ -45,4 +47,10 @@ public class ChoreographerNextStepResponseDTO implements Serializable {
     //-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
     public void setStepName(final String stepName) { this.stepName = stepName; }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        return new Gson().toJson(this);
+    }
 }

@@ -17,6 +17,7 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.util.Set;
 
+import com.google.gson.Gson;
 import eu.arrowhead.common.database.entity.Subscription;
 import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
 
@@ -49,4 +50,10 @@ public class EventPublishStartDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public void setRequest(final EventPublishRequestDTO request) { this.request = request; }
 	public void setInvolvedSubscriptions(final Set<Subscription> involvedSubscriptions) { this.involvedSubscriptions = involvedSubscriptions; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.shared;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
@@ -73,4 +75,10 @@ public class SubscriptionRequestDTO implements Serializable {
 	public void setStartDate(final String startDate) { this.startDate = startDate; }
 	public void setEndDate(final String endDate) { this.endDate = endDate; }
 	public void setSources(final Set<SystemRequestDTO> sources) { this.sources = sources; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gson.Gson;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -98,4 +99,10 @@ public class OrchestrationResultDTO implements Serializable {
 	public void setQosMeasurements(final QoSMeasurementAttributesFormDTO qosMeasurements) { this.qosMeasurements = qosMeasurements; }
 	public void setAuthorizationTokens(final Map<String,String> authorizationTokens) { this.authorizationTokens = authorizationTokens; }
 	public void setWarnings(final List<OrchestratorWarnings> warnings) { this.warnings = warnings; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

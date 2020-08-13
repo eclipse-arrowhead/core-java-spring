@@ -18,6 +18,7 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import com.google.gson.Gson;
 import eu.arrowhead.common.dto.shared.ErrorWrapperDTO;
 
 public class CloudAccessResponseDTO implements Serializable, ErrorWrapperDTO {
@@ -59,6 +60,12 @@ public class CloudAccessResponseDTO implements Serializable, ErrorWrapperDTO {
 	@Override
 	public boolean isError() {
 		return false;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
 	}
 	
 }

@@ -18,6 +18,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.Gson;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
@@ -65,4 +66,10 @@ public class TokenGenerationRequestDTO implements Serializable {
 	public void setConsumerCloud(final CloudRequestDTO consumerCloud) { this.consumerCloud = consumerCloud; }
 	public void setProviders(final List<TokenGenerationProviderDTO> providers) { this.providers = providers; }
 	public void setService(final String service) { this.service = service; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

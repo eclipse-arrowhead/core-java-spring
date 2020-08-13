@@ -14,6 +14,7 @@
 
 package eu.arrowhead.common.dto.shared;
 
+import com.google.gson.Gson;
 import eu.arrowhead.common.core.CoreSystemService;
 
 import java.io.Serializable;
@@ -48,11 +49,9 @@ public class ServiceEndpoint implements Serializable {
     }
     public void setUri(final URI uri) { this.uri = uri; }
 
+    //-------------------------------------------------------------------------------------------------
     @Override
     public String toString() {
-        return new StringJoiner(", ", ServiceEndpoint.class.getSimpleName() + "[", "]")
-                .add("system=" + system)
-                .add("uri=" + uri)
-                .toString();
+        return new Gson().toJson(this);
     }
 }

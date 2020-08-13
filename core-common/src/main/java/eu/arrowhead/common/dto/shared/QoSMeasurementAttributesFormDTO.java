@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.shared;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 
 public class QoSMeasurementAttributesFormDTO implements Serializable {
@@ -95,4 +97,10 @@ public class QoSMeasurementAttributesFormDTO implements Serializable {
 	public void setReceived(final long received) { this.received = received; }
 	public void setSentAll(final long sentAll) { this.sentAll = sentAll; }
 	public void setReceivedAll(final long receivedAll) { this.receivedAll = receivedAll; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

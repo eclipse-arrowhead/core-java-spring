@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import com.google.gson.Gson;
+
 public class ChoreographerStartSessionDTO {
 
     private long sessionId;
@@ -41,5 +43,10 @@ public class ChoreographerStartSessionDTO {
 
     public void setPlanId(long planId) {
         this.planId = planId;
+    }
+
+    @Override
+    public String toString() {
+        return new Gson().toJson(this);
     }
 }

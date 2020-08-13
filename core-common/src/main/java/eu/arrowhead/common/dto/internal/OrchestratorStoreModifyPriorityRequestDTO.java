@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 import java.util.Map;
 
@@ -42,4 +44,10 @@ public class OrchestratorStoreModifyPriorityRequestDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	public void setPriorityMap(final Map<Long,Integer> priorityMap) { this.priorityMap = priorityMap; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

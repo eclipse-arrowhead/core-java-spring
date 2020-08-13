@@ -16,6 +16,7 @@ package eu.arrowhead.common.dto.shared;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.google.gson.Gson;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -67,11 +68,9 @@ public class OnboardingWithCsrRequestDTO implements Serializable {
         return Objects.equals(certificateSigningRequest, other.certificateSigningRequest);
     }
 
+    //-------------------------------------------------------------------------------------------------
     @Override
     public String toString() {
-        return new StringJoiner(", ", OnboardingWithCsrRequestDTO.class.getSimpleName() + "[", "]")
-                .add("certificateSigningRequest='" + certificateSigningRequest + "'")
-                .add("parent=" + super.toString())
-                .toString();
+        return new Gson().toJson(this);
     }
 }

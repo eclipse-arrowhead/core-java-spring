@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.shared;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 import java.util.Map;
 
@@ -58,4 +60,10 @@ public class EventPublishRequestDTO implements Serializable {
 	public void setMetaData(final Map<String,String> metaData) { this.metaData = metaData; }
 	public void setPayload(final String startDate) { this.payload = startDate; }
 	public void setTimeStamp(final String endDate) { this.timeStamp = endDate; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

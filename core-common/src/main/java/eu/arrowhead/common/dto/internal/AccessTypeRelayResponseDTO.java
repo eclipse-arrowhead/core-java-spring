@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 
 public class AccessTypeRelayResponseDTO implements Serializable {
@@ -41,4 +43,10 @@ public class AccessTypeRelayResponseDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	public void setDirectAccess(final boolean directAccess) { this.directAccess = directAccess; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

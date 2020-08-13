@@ -16,6 +16,7 @@ package eu.arrowhead.common.dto.shared;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.google.gson.Gson;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -48,12 +49,10 @@ public class DeviceQueryResultDTO implements Serializable
 		this.unfilteredHits = unfilteredHits;
 	}
 
+    //-------------------------------------------------------------------------------------------------
     @Override
     public String toString() {
-        return new StringJoiner(", ", DeviceQueryResultDTO.class.getSimpleName() + "[", "]")
-                .add("deviceQueryData=" + deviceQueryData)
-                .add("unfilteredHits=" + unfilteredHits)
-                .toString();
+        return new Gson().toJson(this);
     }
 
     //=================================================================================================

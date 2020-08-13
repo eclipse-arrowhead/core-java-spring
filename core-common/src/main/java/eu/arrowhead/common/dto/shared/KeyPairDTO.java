@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.shared;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -66,13 +68,9 @@ public class KeyPairDTO implements Serializable {
         this.privateKey = privateKey;
     }
 
+    //-------------------------------------------------------------------------------------------------
     @Override
     public String toString() {
-        return new StringJoiner(", ", KeyPairDTO.class.getSimpleName() + "[", "]")
-                .add("keyAlgorithm='" + keyAlgorithm + "'")
-                .add("keyFormat='" + keyFormat + "'")
-                .add("publicKey='" + publicKey + "'")
-                .add("privateKey='" + Objects.nonNull(privateKey) + "'")
-                .toString();
+        return new Gson().toJson(this);
     }
 }

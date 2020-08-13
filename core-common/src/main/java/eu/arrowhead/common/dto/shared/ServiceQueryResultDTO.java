@@ -20,6 +20,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.google.gson.Gson;
 
 @JsonInclude(Include.NON_NULL)
 public class ServiceQueryResultDTO implements Serializable {
@@ -42,4 +43,10 @@ public class ServiceQueryResultDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public void setServiceQueryData(final List<ServiceRegistryResponseDTO> serviceQueryData) { this.serviceQueryData = serviceQueryData; }
 	public void setUnfilteredHits(final int unfilteredHits) { this.unfilteredHits = unfilteredHits; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

@@ -17,6 +17,7 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.util.List;
 
+import com.google.gson.Gson;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -57,4 +58,10 @@ public class GeneralRelayRequestDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	public void setMessageType(final String messageType) { this.messageType = messageType; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

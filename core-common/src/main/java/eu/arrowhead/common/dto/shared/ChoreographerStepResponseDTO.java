@@ -15,6 +15,7 @@
 package eu.arrowhead.common.dto.shared;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.google.gson.Gson;
 
 import java.io.Serializable;
 import java.util.List;
@@ -78,4 +79,10 @@ public class ChoreographerStepResponseDTO implements Serializable {
     public void setQuantity(int quantity) { this.quantity = quantity; }
     public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
     public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        return new Gson().toJson(this);
+    }
 }

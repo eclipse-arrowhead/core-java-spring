@@ -16,6 +16,7 @@ package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
 
+import com.google.gson.Gson;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
@@ -57,4 +58,10 @@ public class QoSRelayTestProposalResponseDTO implements Serializable {
 	public void setQueueId(final String queueId) { this.queueId = queueId; }
 	public void setPeerName(final String peerName) { this.peerName = peerName; }
 	public void setReceiverQoSMonitorPublicKey(final String receiverQoSMonitorPublicKey) { this.receiverQoSMonitorPublicKey = receiverQoSMonitorPublicKey; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }

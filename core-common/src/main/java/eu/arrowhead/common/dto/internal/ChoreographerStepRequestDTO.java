@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -67,4 +69,10 @@ public class ChoreographerStepRequestDTO implements Serializable {
     public void setMetadata(String metadata) { this.metadata = metadata; }
     public void setParameters(String parameters) { this.parameters = parameters; }
     public void setQuantity(int quantity) { this.quantity = quantity; }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        return new Gson().toJson(this);
+    }
 }

@@ -19,6 +19,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.google.gson.Gson;
 
 @JsonInclude(Include.NON_NULL)
 public class ServiceRegistryGroupedResponseDTO implements Serializable {
@@ -57,5 +58,11 @@ public class ServiceRegistryGroupedResponseDTO implements Serializable {
 	public void setServicesGroupedByServiceDefinition(final List<ServicesGroupedByServiceDefinitionResponseDTO> servicesGroupedByServiceDefinition) {
 		this.servicesGroupedByServiceDefinition = servicesGroupedByServiceDefinition;
 	}
-	public void setAutoCompleteData(final AutoCompleteDataResponseDTO autoCompleteData) { this.autoCompleteData = autoCompleteData; }	
+	public void setAutoCompleteData(final AutoCompleteDataResponseDTO autoCompleteData) { this.autoCompleteData = autoCompleteData; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
 }
