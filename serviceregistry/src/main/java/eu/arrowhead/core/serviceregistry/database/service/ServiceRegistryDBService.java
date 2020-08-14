@@ -1060,7 +1060,7 @@ public class ServiceRegistryDBService {
 			serviceInterfaceRepository.deleteById(id);
 			serviceInterfaceRepository.flush();
 		} catch (final InvalidParameterException ex) {
-			logger.debug( ex.getMessage());
+			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
