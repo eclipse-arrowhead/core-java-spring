@@ -924,7 +924,6 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	//TODO TestIt
 	public Page<ServiceInterface> getServiceInterfaceEntries(final int page, final int size, final Direction direction, final String sortField) {
 		logger.debug("getServiceInterfaceEntries started...");
 
@@ -947,7 +946,6 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	//TODO TestIt
 	public ServiceInterface getServiceInterfaceById(final long id) {
 		logger.debug("getServiceInterfaceById started...");
 
@@ -967,7 +965,6 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	//TODO TestIt
 	public ServiceInterfaceResponseDTO getServiceInterfaceByIdResponse(final long id) {
 		logger.debug("getServiceInterfaceByIdResponse started...");
 
@@ -976,7 +973,6 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	//TODO TestIt
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public ServiceInterface createServiceInterface(final String serviceInterface) {
 		logger.debug("createServiceInterface started...");
@@ -999,7 +995,6 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	//TODO TestIt
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public ServiceInterfaceResponseDTO createServiceInterfaceResponse(final String serviceInterface) {
 		logger.debug("createServiceInterfaceResponse started...");
@@ -1010,7 +1005,6 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	//TODO TestIt
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public ServiceInterface updateServiceInterfaceById(final long id, final String serviceInterface) {
 		logger.debug("updateServiceInterfaceById started..");
@@ -1044,7 +1038,6 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	//TODO TestIt
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public ServiceInterfaceResponseDTO updateServiceInterfaceByIdResponse(final long id, final String serviceInterface) {
 		logger.debug("updateServiceInterfaceByIdResponse started...");
@@ -1055,7 +1048,6 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	//TODO TestIt
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void removeServiceInterfaceById(final long id) {
 		logger.debug("removeServiceInterfaceById started...");
