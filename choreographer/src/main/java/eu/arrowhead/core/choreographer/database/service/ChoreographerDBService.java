@@ -28,6 +28,7 @@ import eu.arrowhead.common.database.repository.ChoreographerStepRepository;
 import eu.arrowhead.common.database.repository.ChoreographerWorklogRepository;
 import eu.arrowhead.common.dto.internal.ChoreographerActionRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerExecutorListResponseDTO;
+import eu.arrowhead.common.dto.internal.ChoreographerExecutorSearchResponseDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerStatusType;
 import eu.arrowhead.common.dto.internal.ChoreographerStepRequestDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
@@ -795,7 +796,29 @@ public class ChoreographerDBService {
         final Page<ChoreographerExecutor> executorEntries = getExecutorEntries(page, size, direction, sortField);
 
         return DTOConverter.convertExecutorListToExecutorListResponseDTO(executorEntries);
+    }
 
+    public ChoreographerExecutorSearchResponseDTO getExecutorByServiceDefinitionAndVersion (final String serviceDefinition, final int version) {
+        logger.debug("getExecutorByServiceDefinitionAndVersion sarted...");
+
+        ChoreographerExecutorSearchResponseDTO responseDTO = new ChoreographerExecutorSearchResponseDTO(new ArrayList<>());
+
+        Optional<ChoreographerExecutor> executorOptional = choreographerExecutorRepository.findByServiceDefinitionNameAndVersion(serviceDefinition, version);
+        executorOptional.ifPresent(executor -> responseDTO.getData().add(DTOConverter.convertExecutorToExecutorResponseDTO(executor)));
+
+        return responseDTO;
+    }
+
+    public ChoreographerExecutorSearchResponseDTO getExecutorByServiceDefinitionAndMinMaxVersion(final String serviceDefinition, final int minVersion, final int maxVersion) {
+        logger.debug("getExecutorByServiceDefinitionAndMinMaxVersion started...");
+
+        List<ChoreographerExecutor> executorList = new ArrayList<>();
+
+        for (int currentVersion = minVersion; currentVersion <= maxVersion; currentVersion++) {
+            choreographerExecutorRepository.findByServiceDefinitionNameAndVersion(serviceDefinition, currentVersion).ifPresent(executor -> executorList.add(executor));
+        }
+
+        return DTOConverter.convertExecutorListToExecutorSearchResponseDTO(executorList);
     }
 
     private Page<ChoreographerExecutor> getExecutorEntries(int page, int size, Direction direction, String sortField) {

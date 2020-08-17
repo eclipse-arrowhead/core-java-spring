@@ -1367,4 +1367,16 @@ public class DTOConverter {
 
 		return new ChoreographerExecutorListResponseDTO(executorEntryDTOs, executorEntries.getTotalElements());
 	}
+
+	public static ChoreographerExecutorSearchResponseDTO convertExecutorListToExecutorSearchResponseDTO(List<ChoreographerExecutor> executorEntries) {
+		Assert.notNull(executorEntries, "List of executors is null");
+
+		final List<ChoreographerExecutorResponseDTO> executorEntryDTOs = new ArrayList<>();
+		for (final ChoreographerExecutor executorEntry: executorEntries) {
+			executorEntryDTOs.add(convertExecutorToExecutorResponseDTO(executorEntry));
+		}
+
+		return new ChoreographerExecutorSearchResponseDTO(executorEntryDTOs);
+	}
+
 }

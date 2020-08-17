@@ -9,12 +9,14 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.database.entity.ChoreographerSession;
 import eu.arrowhead.common.dto.internal.ChoreographerExecutorListResponseDTO;
+import eu.arrowhead.common.dto.internal.ChoreographerExecutorSearchResponseDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerPlanRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerRunPlanRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerOFRRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerSessionRunningStepDataDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
@@ -77,6 +79,8 @@ public class ChoreographerController {
     private static final String START_SESSION_MGMT_URI = SESSION_MGMT_URI + "/start";
     private static final String STEP_FINISHED_MGMT_URI = SESSION_MGMT_URI + "/stepFinished";
 
+    private static final String EXECUTOR_SEARCH_MGMT_URI = EXECUTOR_MGMT_URI + "/searchExecutors";
+
     private static final String GET_PlAN_MGMT_HTTP_200_MESSAGE = "Step returned.";
     private static final String GET_PLAN_MGMT_HTTP_400_MESSAGE = "Could not retrieve Step.";
     private static final String GET_EXECUTOR_HTTP_200_MESSAGE = "Executor returned.";
@@ -102,6 +106,14 @@ public class ChoreographerController {
     private static final String EXECUTOR_PORT_NULL_ERROR_MESSAGE = "Executor port can't be null.";
     private static final String EXECUTOR_SD_NULL_ERROR_MESSAGE = "Executor service definition name can't be null.";
     private static final String EXECUTOR_VERSION_NULL_ERROR_MESSAGE = "Executor version number can't be null.";
+    private static final String EXECUTOR_VERSION_MIN_VERSION_MAX_VERSION_AMBIGUOUS_ERROR_MESSAGE = "Minimum and maximum version requirements can only be used if version requirement is left blank. Version requirement can only be used if minimum and maximum version requirements are left blank.";
+    private static final String EXECUTOR_MIN_VERSION_GREATER_THAN_MAX_VERSION_ERROR_MESSAGE = "Maximum version requirement must be greater or equal to the minimum version requirement.";
+
+
+    private static final String EXECUTOR_REQUEST_PARAM_SERVICE_DEFINITION = "service-definition";
+    private static final String EXECUTOR_REQUEST_PARAM_MIN_VERSION = "min_version";
+    private static final String EXECUTOR_REQUEST_PARAM_MAX_VERSION = "max_version";
+    private static final String EXECUTOR_REQUEST_PARAM_VERSION = "version";
 
     private final Logger logger = LogManager.getLogger(ChoreographerController.class);
 
@@ -395,6 +407,36 @@ public class ChoreographerController {
 
         choreographerDBService.removeExecutorEntryById(id);
         logger.debug("Executor with id: '{}' successfully deleted", id);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = "Return list of executors suited to execute the task with the service definition and version requriements.",
+            response = ChoreographerExecutorSearchResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_OK, message = GET_EXECUTOR_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_EXECUTOR_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+    })
+    @GetMapping(path = EXECUTOR_SEARCH_MGMT_URI)
+    @ResponseBody public ChoreographerExecutorSearchResponseDTO getExecutorsByServiceDefinitionAndVersion(
+            @RequestParam(name = EXECUTOR_REQUEST_PARAM_SERVICE_DEFINITION, required = true) final String serviceDefinition,
+            @RequestParam(name = EXECUTOR_REQUEST_PARAM_MIN_VERSION, required = false) final Integer minVersion,
+            @RequestParam(name = EXECUTOR_REQUEST_PARAM_MAX_VERSION, required = false) final Integer maxVersion,
+            @RequestParam(name = EXECUTOR_REQUEST_PARAM_VERSION, required = false) final Integer version) {
+
+        logger.debug("New Executor get request received with service definition: {}", serviceDefinition);
+
+        if (minVersion != null && maxVersion != null && version == null) {
+            if (maxVersion < minVersion) {
+                throw new BadPayloadException(EXECUTOR_MIN_VERSION_GREATER_THAN_MAX_VERSION_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + EXECUTOR_SEARCH_MGMT_URI);
+            }
+            return choreographerDBService.getExecutorByServiceDefinitionAndMinMaxVersion(serviceDefinition, minVersion, maxVersion);
+        } else if (version != null && minVersion == null && maxVersion == null) {
+            return choreographerDBService.getExecutorByServiceDefinitionAndVersion(serviceDefinition, version);
+        } else {
+            throw new BadPayloadException(EXECUTOR_VERSION_MIN_VERSION_MAX_VERSION_AMBIGUOUS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + EXECUTOR_SEARCH_MGMT_URI);
+        }
     }
 
     //=================================================================================================
