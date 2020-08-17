@@ -14,6 +14,7 @@ import eu.arrowhead.common.database.entity.ChoreographerStep;
 import eu.arrowhead.common.database.entity.ChoreographerStepDetail;
 import eu.arrowhead.common.database.entity.ChoreographerStepNextStepConnection;
 import eu.arrowhead.common.database.entity.ChoreographerWorklog;
+import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.ChoreographerActionRepository;
@@ -33,6 +34,7 @@ import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerOFRRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -172,15 +174,16 @@ public class ChoreographerDBService {
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public void addStepDetailToStep(ChoreographerStep step, String type, ChoreographerOFRRequestDTO ofrRequestDTO) {
+    public ChoreographerStepDetail addStepDetailToStep(ChoreographerStep step, String type, ChoreographerOFRRequestDTO ofrRequestDTO) {
         logger.debug("addStepDetailToStep started...");
+
+        ChoreographerStepDetail stepDetail = new ChoreographerStepDetail();
 
         try {
             if (ofrRequestDTO != null) {
                 if (ofrRequestDTO.getRequestedService() != null) {
                     if (!Utilities.isEmpty(ofrRequestDTO.getRequestedService().getServiceDefinitionRequirement())) {
                         ServiceQueryFormDTO service = ofrRequestDTO.getRequestedService();
-                        ChoreographerStepDetail stepDetail = new ChoreographerStepDetail();
                         ObjectWriter ow = new ObjectMapper().writer();
                         if (service.getVersionRequirement() != null && service.getMaxVersionRequirement() == null && service.getMinVersionRequirement() == null) {
                             stepDetail.setServiceDefinition(service.getServiceDefinitionRequirement());
@@ -202,8 +205,6 @@ public class ChoreographerDBService {
                         if (service.getVersionRequirement() != null && service.getMinVersionRequirement() != null && service.getMaxVersionRequirement() != null) {
                             throw new InvalidParameterException("A service can only have one version or one min/max version pair defined.");
                         }
-
-                        choreographerStepDetailRepository.saveAndFlush(stepDetail);
                     } else {
                         throw new InvalidParameterException("The service definition description of the requested service is null or empty.");
                     }
@@ -221,6 +222,8 @@ public class ChoreographerDBService {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
+
+        return choreographerStepDetailRepository.saveAndFlush(stepDetail);
     }
 
 
@@ -260,13 +263,21 @@ public class ChoreographerDBService {
                     ChoreographerStep persistedStep = createStep(step.getName(), step.getMetadata(), step.getParameters(), step.getQuantity(), actionEntry.getId());
                     actionEntry.getStepEntries().add(persistedStep);
 
-                    addStepDetailToStep(persistedStep, "MAIN", usedService);
+                    List<ChoreographerStepDetail> stepDetails = new ArrayList<>();
+
+                    stepDetails.add(addStepDetailToStep(persistedStep, "MAIN", usedService));
 
                     if (!CollectionUtils.isEmpty(preconditions)) {
                         for (ChoreographerOFRRequestDTO precondition : preconditions) {
-                            addStepDetailToStep(persistedStep, "PRECONDITION", precondition);
+                            stepDetails.add(addStepDetailToStep(persistedStep, "PRECONDITION", precondition));
                         }
                     }
+
+                    for (ChoreographerStepDetail stepDetail : stepDetails) {
+                        persistedStep.getStepDetails().add(stepDetail);
+                    }
+
+                    choreographerStepRepository.saveAndFlush(persistedStep);
             	}
 
             	for (final ChoreographerStepRequestDTO step : steps) {
@@ -285,6 +296,7 @@ public class ChoreographerDBService {
                     if (stepOptional.isPresent()) {
                         ChoreographerStep step = stepOptional.get();
                         step.setActionFirstStep(actionEntry);
+                        actionEntry.getFirstStepEntries().add(step);
                         choreographerStepRepository.saveAndFlush(step);
                     } else {
                         throw new InvalidParameterException("The given first step(s) with the given name(s) must be included in the step list too.");
@@ -335,6 +347,16 @@ public class ChoreographerDBService {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public ChoreographerPlanResponseDTO createPlanResponse(final String name, final String firstActionName, final List<ChoreographerActionRequestDTO> actions) {
+        logger.debug("createPlanResponse started...");
+
+        final ChoreographerPlan planEntry = createPlan(name, firstActionName, actions);
+
+        return DTOConverter.convertPlanToPlanResponseDTO(planEntry);
     }
 
 	//-------------------------------------------------------------------------------------------------

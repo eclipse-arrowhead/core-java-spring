@@ -979,7 +979,10 @@ public class DTOConverter {
 		ChoreographerStepDetailResponseDTO detailResponseDTO = new ChoreographerStepDetailResponseDTO();
 
 		detailResponseDTO.setId(stepDetailEntry.getId());
-		detailResponseDTO.setVersion(stepDetailEntry.getVersion());
+
+		if (stepDetailEntry.getVersion() != null) {
+			detailResponseDTO.setVersion(stepDetailEntry.getVersion());
+		}
 
 		if (stepDetailEntry.getMaxVersion() != null && stepDetailEntry.getMinVersion() != null) {
 			detailResponseDTO.setMaxVersion(stepDetailEntry.getMaxVersion());
@@ -996,8 +999,7 @@ public class DTOConverter {
 	}
 
     //-------------------------------------------------------------------------------------------------
-    public static ChoreographerPlanResponseDTO convertPlanToPlanResponseDTO(
-            final ChoreographerPlan planEntry) {
+    public static ChoreographerPlanResponseDTO convertPlanToPlanResponseDTO(final ChoreographerPlan planEntry) {
         Assert.notNull(planEntry, "Plan entry is null.");
 
         return new ChoreographerPlanResponseDTO(planEntry.getId(),
@@ -1118,9 +1120,9 @@ public class DTOConverter {
     }
 
     //-------------------------------------------------------------------------------------------------
-    public static List<String> collectFirstStepNamesFromAction(
-            final Set<ChoreographerStep> steps) {
+    public static List<String> collectFirstStepNamesFromAction(final Set<ChoreographerStep> steps) {
         Assert.notNull(steps, "Steps list is null.");
+
         final List<String> result = new ArrayList<>(steps.size());
         for (final ChoreographerStep step : steps) {
             result.add(step.getName());
