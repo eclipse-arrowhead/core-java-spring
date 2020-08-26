@@ -79,7 +79,7 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
        * [Services and Use Cases](#datamanager_usecases)  
        * [Service Description Overview](#datamanager_provided_services)
        * [Endpoints](#datamanager_endpoints)
-	   * [Client](#datamanager_endpoints_client)
+	       * [Client](#datamanager_endpoints_client)
     8. [Certificate Authority](#ca)
        * [System Design Description Overview](#ca_sdd)
        * [Services and Use Cases](#ca_usecases)  
