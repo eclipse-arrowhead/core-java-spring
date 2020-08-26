@@ -85,13 +85,13 @@ public class DataManagerController {
 	private final Logger logger = LogManager.getLogger(DataManagerController.class);
 
 	@Autowired
-	ProxyService proxyService;
+	private ProxyService proxyService;
 
 	@Autowired
-	HistorianService historianService;
+	private HistorianService historianService;
 
 	@Autowired
-	DataManagerDBService dataManagerDBService;
+	private DataManagerDBService dataManagerDBService;
 	
 	//=================================================================================================
 	// methods
