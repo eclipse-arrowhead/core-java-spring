@@ -4796,7 +4796,7 @@ This service can only be used by other core services, therefore this is not part
 
 ## System Design Description Overview
 
-The purpose of DataManager supporting core system is to provide storage for sensor data.
+The purpose of DataManager supporting core system is to provide storage of sensor data.
 
 ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `AH Service Registry`
 ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `AH Authorization` 
