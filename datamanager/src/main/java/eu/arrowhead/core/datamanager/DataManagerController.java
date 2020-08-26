@@ -185,28 +185,36 @@ public class DataManagerController {
 				count = Integer.parseInt(params.getFirst(par));
 			} else if (par.equals("sig"+signalCountId)) {
 				signals.add(params.getFirst(par));
-        int signalXCount = 1;
-        if (params.getFirst("sig"+signalCountId+"count") != null) {
-          try {
-            signalXCount = Integer.parseInt(params.getFirst("sig"+signalCountId+"count"));
-          } catch(NumberFormatException nfe) {
-            throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/" + systemName + "/" + serviceName);
-          }
-        }
-        if (signalXCount <= 0) {
-            throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/" + systemName + "/" + serviceName);
-        }
+        		int signalXCount = 1;
+        		if (params.getFirst("sig"+signalCountId+"count") != null) {
+          			try {
+            			signalXCount = Integer.parseInt(params.getFirst("sig"+signalCountId+"count"));
+          			} catch(NumberFormatException nfe) {
+            			throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/" + systemName + "/" + serviceName);
+          			}
+        		}
+        		if (signalXCount <= 0) {
+            		throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/" + systemName + "/" + serviceName);
+        		}
 				signalCounts.add(signalXCount);
 				signalCountId++;
 			} else if (par.equals("from")) {
-				from = Double.parseDouble(params.getFirst(par));
+				try {
+					from = Double.parseDouble(params.getFirst(par));
+				}  catch(NumberFormatException nfe) {
+					throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/" + systemName + "/" + serviceName);
+				}
 			} else if (par.equals("to")) {
-				to = Double.parseDouble(params.getFirst(par));
+				try {
+					to = Double.parseDouble(params.getFirst(par));
+				}  catch(NumberFormatException nfe) {
+					throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/" + systemName + "/" + serviceName);
+				}
 			}
 		}
 
 		if (count <= 0) {
-      throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/" + systemName + "/" + serviceName);
+      		throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/" + systemName + "/" + serviceName);
 		}
 
 		Vector<SenML> ret = null;
@@ -316,9 +324,9 @@ public class DataManagerController {
 			@PathVariable(value="systemName", required=true) String systemName,
 			@PathVariable(value="serviceName", required=true) String serviceName
 			) {
-      if(Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
-        throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_PROXY);
-      }
+            if(Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
+                throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_PROXY);
+            }
 			logger.debug("proxyServiceGet for {}/{}", systemName, serviceName);
 
 			final ProxyElement pe = proxyService.getEndpointFromService(systemName, serviceName);
@@ -345,9 +353,9 @@ public class DataManagerController {
 			@PathVariable(value="serviceName", required=true) String serviceName,
 			@RequestBody Vector<SenML> message
 			) {
-      if(Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName) || message == null) {
-        throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_PROXY);
-      }
+            if(Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName) || message == null) {
+                throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_PROXY);
+            }
 			logger.debug("proxyServicePut for {}/{}", systemName, serviceName);
 
 			validateSenMLMessage(systemName, serviceName, message);
@@ -447,4 +455,3 @@ public class DataManagerController {
 
   }	
 }
-
