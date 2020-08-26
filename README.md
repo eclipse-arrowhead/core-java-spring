@@ -4905,7 +4905,7 @@ GET /datamanager/historian/{systemName}
 
 Returns a list of all service endpoints that have data stored in the database.
 
-<a name="datamanager_histgetssrvlist_response" />
+<a name="datamanager_histgetsrvlist_response" />
 
 __GetServicesResponse__ output:
 
@@ -4926,7 +4926,7 @@ Returns sensor data from a service endpoint from the database.
 
 <a name="datamanager_histgetsrvdata_response" />
 
-__GetServiceDatatResponse__ output:
+__GetServiceDataResponse__ output:
 
 ```json
 
