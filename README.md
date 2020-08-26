@@ -4973,7 +4973,7 @@ __PutSServiceDataRequest__ input:
 	"u": "string",
 	"v": 0.0,
 	"vs": "string",
-	"vb"; false,
+	"vb": false,
 	"vd": "string"
    }
 ]
