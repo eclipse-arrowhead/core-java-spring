@@ -4837,13 +4837,9 @@ None currently, but will consume Orchestration later on.
 
 The DataManager has the following use cases:
 * [Update cache message](documentation/datamanager/use_cases/DM_use_case_1.md)
-![Alt text](/documentation/datamanager/use_cases/TemporaryStore.png)
 * [Fetch cache message](documentation/datamanager/use_cases/DM_use_case_2.md)
-![Alt text](/documentation/datamanager/use_cases/FetchTemporary.png)
 * [Update stored message](documentation/datamanager/use_cases/DM_use_case_3.md)
-![Alt text](/documentation/datamanager/use_cases/TemporaryStore.png)
 * [Fetch stored message](documentation/datamanager/use_cases/DM_use_case_4.md)
-![Alt text](/documentation/datamanager/use_cases/FetchTemporary.png)
 
 <a name="datamanager_endpoints" />
 
