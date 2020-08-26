@@ -247,9 +247,9 @@ public class DataManagerController {
 	@PathVariable(value="serviceName", required=true) String serviceName,
 	@RequestBody Vector<SenML> message
 	) {
-    if(Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
-      throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN);
-    }
+        if(Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
+            throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN);
+        }
 		logger.debug("historianServicePut for {}/{}", systemName, serviceName);
 
 		validateSenMLMessage(systemName, serviceName, message);
@@ -300,9 +300,9 @@ public class DataManagerController {
 	@ResponseBody public DataManagerServicesResponseDTO proxySystemGet(
 			@PathVariable(value="systemName", required=true) String systemName
 		) {
-    if(Utilities.isEmpty(systemName)) {
-      throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_PROXY);
-    }
+        if(Utilities.isEmpty(systemName)) {
+            throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_PROXY);
+        }
 		logger.debug("proxySystemGet for {}", systemName);
 
 		DataManagerServicesResponseDTO ret = new DataManagerServicesResponseDTO();
