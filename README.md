@@ -4862,8 +4862,8 @@ The base URL for the requests: `http://<host>:<port>/datamanager`
 | [Store data in db](#datamanager_histendpoints_storedb) | /historian/{systemName}/{serviceName} | PUT    | SenML   | - |
 | [Get system list](#datamanager_proxyendpoints_getsys) | /proxy | GET    | -    | SystemList     |
 | [Get service list](#datamanager_proxyendpoints_getsrv_from_sys) | /proxy/{systemName} | GET    | -    | ServiceList |
-| [Fetch data from cache](#datamanager_proxyendpoints_getdb) | /proxy/{systemName}/{serviceName} | GET    | -   | SenML |
-| [Store data in cache](#datamanager_proxyendpoints_storedb) | /proxy/{systemName}/{serviceName} | PUT    | SenML   | - |
+| [Fetch data from cache](#datamanager_proxyendpoints_fetchdata) | /proxy/{systemName}/{serviceName} | GET    | -   | SenML |
+| [Store data in cache](#datamanager_proxyendpoints_storedata) | /proxy/{systemName}/{serviceName} | PUT    | SenML   | - |
 
 <a name="datamanager_endpoints_get_echo" />
 
@@ -4918,6 +4918,8 @@ __GetServicesResponse__ output:
 
 ```
 
+<a name="datamanager_proxyendpoints_fetchdata" />
+
 ### Fetch data from cache
 ```
 GET /datamanager/proxy/{systemName}/{serviceName}
@@ -4948,6 +4950,8 @@ __GetServiceDataResponse__ output:
    }
 ]
 ```
+
+<a name="datamanager_proxyendpoints_storedata" />
 
 ### Store data in cache
 ```
