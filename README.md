@@ -4876,7 +4876,7 @@ Returns a "Got it!" message with the purpose of testing the system availability.
 
 <a name="datamanager_endpoints_client" />
 
-<a name="datamanager_endpoints_proxy" />
+<a name="datamanager_proxyendpoints_getsys" />
 
 ### Get system list
 ```
@@ -4896,6 +4896,8 @@ __GetSystemListResponse__ output:
 }
 
 ```
+
+<a name="datamanager_proxyendpoints_getsrv_from_sys" />
 
 ### Get service list
 ```
