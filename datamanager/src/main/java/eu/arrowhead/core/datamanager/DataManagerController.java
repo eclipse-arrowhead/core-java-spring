@@ -182,7 +182,11 @@ public class DataManagerController {
 		while(it.hasNext()){
 			String par = it.next();
 			if (par.equals("count")) {
-				count = Integer.parseInt(params.getFirst(par));
+				try {
+					count = Integer.parseInt(params.getFirst(par));
+				} catch(NumberFormatException nfe) {
+					throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/" + systemName + "/" + serviceName);
+				}
 			} else if (par.equals("sig"+signalCountId)) {
 				signals.add(params.getFirst(par));
         		int signalXCount = 1;
@@ -219,7 +223,7 @@ public class DataManagerController {
 
 		Vector<SenML> ret = null;
 
-		if(signals.size() == 0) {
+		if(signals.isEmpty()){
 			ret = historianService.fetchEndpoint(systemName, serviceName, from, to, count);
 		} else {
 			ret = historianService.fetchEndpoint(systemName, serviceName, from, to, signalCounts, signals);
@@ -264,7 +268,7 @@ public class DataManagerController {
 		validateSenMLContent(message);
 
 		final boolean statusCode = historianService.updateEndpoint(systemName, serviceName, message);
-		if (statusCode == false) {
+		if (!statusCode) {
 			throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
