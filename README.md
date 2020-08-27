@@ -4842,14 +4842,14 @@ The DataManager has the following use cases:
 * [Update stored message](documentation/datamanager/use_cases/DM_use_case_3.md)
 * [Fetch stored message](documentation/datamanager/use_cases/DM_use_case_4.md)
 
-<a name="datamanager_endpoints" />
+<a name="datamanager_endpoints_historian" />
 
 ## Endpoints
 
 Swagger API documentation is available on: `https://<host>:<port>` <br />
 The base URL for the requests: `http://<host>:<port>/datamanager`
 
-<a name="datamanager_endpoints_client" />
+
 
 ### Client endpoint description<br />
 
@@ -4865,7 +4865,7 @@ The base URL for the requests: `http://<host>:<port>/datamanager`
 | [Fetch data from cache](#datamanager_proxyendpoints_getdb) | /proxy/{systemName}/{serviceName} | GET    | -   | SenML |
 | [Store data in cache](#datamanager_proxyendpoints_storedb) | /proxy/{systemName}/{serviceName} | PUT    | SenML   | - |
 
-<a name="datamanager_histendpoints_get_echo" />
+<a name="datamanager_endpoints_get_echo" />
 
 ### Echo
 ```
@@ -4873,6 +4873,118 @@ GET /datamanager/echo
 ```
 
 Returns a "Got it!" message with the purpose of testing the system availability.
+
+<a name="datamanager_endpoints_client" />
+
+<a name="datamanager_endpoints_proxy" />
+
+### Get system list
+```
+GET /datamanager/proxy
+```
+
+Returns a list of all systems that have at least one active service endpoint.
+
+### Get system list
+```
+GET /datamanager/proxy/
+```
+
+Returns a list of all systems that have at least one active service endpoint.
+
+<a name="datamanager_getsyslist_response" />
+
+__GetSystemListResponse__ output:
+
+```json
+
+{
+  "systems": ["systemName1", "systemNameX"]
+}
+
+```
+
+### Get service list
+```
+GET /datamanager/proxy/{systemName}
+```
+
+Returns a list of all service endpoints that are active.
+
+<a name="datamanager_proxygetsrvlist_response" />
+
+__GetServicesResponse__ output:
+
+```json
+
+{
+  "services": ["serviceDefinition1", "serviceDefinitionX"]
+}
+
+```
+
+### Fetch data from cache
+```
+GET /datamanager/proxy/{systemName}/{serviceName}
+```
+
+Returns sensor data from a service endpoint from the cache.
+
+<a name="datamanager_proxygetsrvdata_response" />
+
+__GetServiceDataResponse__ output:
+
+```json
+
+[
+   {
+    "bn": "string",
+	  "bt": 0.0,
+	  "bu": "string",
+	  "bver": 0
+   }, {
+    "n": "string",
+	  "t": 0.0,
+	  "u": "string",
+	  "v": 0.0,
+	  "vs": "string",
+	  "vb": false,
+	  "vd": "string"
+   }
+]
+```
+
+### Store data in cache
+```
+PUT /datamanager/proxy/{systemName}/{serviceName}
+```
+
+Stores sensor data in a service endpoint in the proxy cache.
+
+<a name="datamanager_putsrvdata_request" />
+
+__PutSServiceDataRequest__ input:
+
+```json
+
+[
+   {
+    "bn": "string",
+	  "bt": 0.0,
+	  "bu": "string",
+	  "bver": 0
+    }, {
+     "n": "string",
+	   "t": 0.0,
+	   "u": "string",
+	   "v": 0.0,
+	   "vs": "string",
+	   "vb": false,
+	   "vd": "string"
+    }
+]
+```
+
 
 <a name="datamanager_histendpoints_getsys" />
 
