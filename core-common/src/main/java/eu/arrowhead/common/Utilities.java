@@ -472,11 +472,17 @@ public class Utilities {
         PrivateKey privateKey = null;
         String element;
         try {
+
             final Enumeration<String> enumeration = keystore.aliases();
             while (enumeration.hasMoreElements()) {
                 element = enumeration.nextElement();
+				// the first certificate is not always the end certificate. java does not guarantee the order
+				final Certificate[] chain = keystore.getCertificateChain(element);
+				if(Objects.isNull(chain) || chain.length < 3) {
+					continue;
+				}
 
-                privateKey = (PrivateKey) keystore.getKey(element, keyPass.toCharArray());
+				privateKey = (PrivateKey) keystore.getKey(element, keyPass.toCharArray());
                 if (privateKey != null) {
                     break;
                 }
@@ -504,9 +510,9 @@ public class Utilities {
 				final X509Certificate certificate = (X509Certificate) keystore.getCertificate(alias);
 				if (isCloudCertificate(certificate)) {
 					final PrivateKey privateKey = (PrivateKey) keystore.getKey(alias, keyPass.toCharArray());
-            if (privateKey != null) {
+					if (privateKey != null) {
 						logger.debug("Found cloud private key with alias: " + alias);
-                return privateKey;
+						return privateKey;
 					}
 				}
             }

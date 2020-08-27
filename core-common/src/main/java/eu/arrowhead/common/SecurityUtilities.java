@@ -88,8 +88,15 @@ public class SecurityUtilities {
         Assert.notNull(request, "request must not be null");
         final X509Certificate[] certificates = (X509Certificate[]) request.getAttribute(CommonConstants.ATTR_JAVAX_SERVLET_REQUEST_X509_CERTIFICATE);
         if (certificates != null && certificates.length != 0) {
-            final X509Certificate cert = certificates[0];
-            return Utilities.getCertCNFromSubject(cert.getSubjectDN().getName());
+            for(final X509Certificate cert : certificates) {
+                final String fullCN = Utilities.getCertCNFromSubject(cert.getSubjectDN().getName());
+                if(Objects.isNull(fullCN)) { continue; }
+
+                final String[] strings = fullCN.split("\\.");
+                if(strings.length != 5) { continue; }
+
+                return fullCN;
+            }
         }
 
         return null;
@@ -142,8 +149,7 @@ public class SecurityUtilities {
         if (sslProperties.isSslEnabled()) {
             if (Objects.nonNull(certificates) && certificates.length > 0) {
 
-                final X509Certificate cert = certificates[0];
-                final String clientCN = Utilities.getCertCNFromSubject(cert.getSubjectDN().getName());
+                final String clientCN = getCertificateCNFromRequest(httpServletRequest);
                 final String requestTarget = Utilities.stripEndSlash(httpServletRequest.getRequestURL().toString());
 
                 authenticateCertificate(clientCN, requestTarget, minimumStrength);
