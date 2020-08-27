@@ -5002,6 +5002,8 @@ __GetSystemListResponse__ output:
 
 ```
 
+<a name="datamanager_histendpoints_getsrv_from_sys" />
+
 ### Get service list
 ```
 GET /datamanager/historian/{systemName}
@@ -5020,6 +5022,8 @@ __GetServicesResponse__ output:
 }
 
 ```
+
+<a name="datamanager_histendpoints_getdb" />
 
 ### Fetch data from db
 ```
@@ -5051,6 +5055,8 @@ __GetServiceDataResponse__ output:
    }
 ]
 ```
+
+<a name="datamanager_histendpoints_storedb" />
 
 ### Store data in db
 ```
