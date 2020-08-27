@@ -4880,13 +4880,6 @@ Returns a "Got it!" message with the purpose of testing the system availability.
 
 ### Get system list
 ```
-GET /datamanager/proxy
-```
-
-Returns a list of all systems that have at least one active service endpoint.
-
-### Get system list
-```
 GET /datamanager/proxy/
 ```
 
