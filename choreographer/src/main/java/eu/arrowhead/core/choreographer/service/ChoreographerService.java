@@ -1,4 +1,4 @@
-package eu.arrowhead.core.choreographer.jms;
+package eu.arrowhead.core.choreographer.service;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
@@ -30,7 +30,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
 
@@ -44,7 +43,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Component
-public class Receiver {
+public class ChoreographerService {
 
     //=================================================================================================
     // members
@@ -66,7 +65,7 @@ public class Receiver {
     @Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
     private boolean sslEnabled;
 
-    private final Logger logger = LogManager.getLogger(Receiver.class);
+    private final Logger logger = LogManager.getLogger(ChoreographerService.class);
 
     private SystemRequestDTO requesterSystem;
 
@@ -259,4 +258,7 @@ public class Receiver {
         }
         throw new ArrowheadException("Choreographer can't find orchestration process URI.");
     }
+
+    //-------------------------------------------------------------------------------------------------
+    private 
 }
