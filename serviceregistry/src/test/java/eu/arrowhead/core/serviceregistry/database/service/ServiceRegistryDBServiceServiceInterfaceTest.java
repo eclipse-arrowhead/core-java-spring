@@ -1,6 +1,8 @@
 package eu.arrowhead.core.serviceregistry.database.service;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -78,7 +80,7 @@ public class ServiceRegistryDBServiceServiceInterfaceTest {
 		final Optional<ServiceInterface> serviceInterfaceEntry = Optional.of(new ServiceInterface(testInterface));
 
 		when(interfaceNameVerifier.isValid(eq(testInterface))).thenReturn(Boolean.TRUE);
-		when(serviceInterfaceRepository.findByInterfaceName(eq(testInterface))).thenReturn(serviceInterfaceEntry);
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(serviceInterfaceEntry);
 
 		serviceRegistryDBService.createServiceInterface(testInterface);
 	}
@@ -90,7 +92,7 @@ public class ServiceRegistryDBServiceServiceInterfaceTest {
 		final Optional<ServiceInterface> serviceInterfaceEntry = Optional.of(new ServiceInterface(testInterface));
 
 		when(interfaceNameVerifier.isValid(anyString())).thenReturn(Boolean.TRUE);
-		when(serviceInterfaceRepository.findByInterfaceName(eq(testInterface))).thenReturn(serviceInterfaceEntry);
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(serviceInterfaceEntry);
 
 		serviceRegistryDBService.createServiceInterface(testInterface.toUpperCase());
 	}
@@ -102,7 +104,7 @@ public class ServiceRegistryDBServiceServiceInterfaceTest {
 		final Optional<ServiceInterface> serviceInterfaceEntry = Optional.of(new ServiceInterface(testInterface));
 
 		when(interfaceNameVerifier.isValid(anyString())).thenReturn(Boolean.TRUE);
-		when(serviceInterfaceRepository.findByInterfaceName(eq(testInterface))).thenReturn(serviceInterfaceEntry);
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(serviceInterfaceEntry);
 
 		serviceRegistryDBService.createServiceInterface("  " + testInterface + "  ");
 	}
@@ -147,7 +149,7 @@ public class ServiceRegistryDBServiceServiceInterfaceTest {
 
 		when(interfaceNameVerifier.isValid(anyString())).thenReturn(Boolean.TRUE);
 		when(serviceInterfaceRepository.findById(eq(testId2))).thenReturn(serviceInterfaceEntry2);
-		when(serviceInterfaceRepository.findByInterfaceName(eq(testInterface1))).thenReturn(serviceInterfaceEntry1);
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(serviceInterfaceEntry1);
 
 		serviceRegistryDBService.updateServiceInterfaceById(testId2, testInterface1);
 	}
@@ -168,9 +170,9 @@ public class ServiceRegistryDBServiceServiceInterfaceTest {
 
 		when(interfaceNameVerifier.isValid(anyString())).thenReturn(Boolean.TRUE);
 		when(serviceInterfaceRepository.findById(eq(testId0))).thenReturn(serviceInterfaceEntry0);
-		when(serviceInterfaceRepository.findByInterfaceName(eq(testInterface0))).thenReturn(serviceInterfaceEntry0);
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(serviceInterfaceEntry0);
 		when(serviceInterfaceRepository.findById(eq(testId1))).thenReturn(serviceInterfaceEntry1);
-		when(serviceInterfaceRepository.findByInterfaceName(eq(testInterface1))).thenReturn(serviceInterfaceEntry1);
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(serviceInterfaceEntry1);
 
 		serviceRegistryDBService.updateServiceInterfaceById(testId0, testInterface1.toUpperCase());
 	}
@@ -191,9 +193,9 @@ public class ServiceRegistryDBServiceServiceInterfaceTest {
 
 		when(interfaceNameVerifier.isValid(anyString())).thenReturn(Boolean.TRUE);
 		when(serviceInterfaceRepository.findById(eq(testId0))).thenReturn(serviceInterfaceEntry0);
-		when(serviceInterfaceRepository.findByInterfaceName(eq(testInterface0))).thenReturn(serviceInterfaceEntry0);
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(serviceInterfaceEntry0);
 		when(serviceInterfaceRepository.findById(eq(testId1))).thenReturn(serviceInterfaceEntry1);
-		when(serviceInterfaceRepository.findByInterfaceName(eq(testInterface1))).thenReturn(serviceInterfaceEntry1);
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(serviceInterfaceEntry1);
 
 		serviceRegistryDBService.updateServiceInterfaceById(testId0, "  " + testInterface1 + "  ");
 	}
@@ -202,10 +204,21 @@ public class ServiceRegistryDBServiceServiceInterfaceTest {
 	// Tests of removeServiceInterfaceById
 
 	//-------------------------------------------------------------------------------------------------
-	@Test
+	@Test(expected = InvalidParameterException.class)
 	public void removeServiceInterfaceByIdTest() {
+
 		when(serviceInterfaceRepository.existsById(anyLong())).thenReturn(false);
 
-		serviceRegistryDBService.removeServiceInterfaceById(0);
+		try {
+
+			serviceRegistryDBService.removeServiceInterfaceById(0);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("does not exist"));
+
+			throw ex;
+		}
+
 	}
 }
