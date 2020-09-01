@@ -65,6 +65,7 @@
                   <includes>
                     <include>eu/arrowhead/common/Utilities.*</include>
                     <include>eu/arrowhead/common/Utilities$1.*</include>
+                    <include>eu/arrowhead/common/SecurityUtilities.*</include>
                     <include>eu/arrowhead/common/CommonConstants.*</include>
                     <include>eu/arrowhead/common/Defaults.*</include>
                     <include>eu/arrowhead/common/SSLProperties.*</include>
