@@ -549,6 +549,13 @@ All work on Arrowhead repositories happens directly on GitHub. Both core team me
 
 The latest version of the core systems are available in the ```master``` branch. The code for the next release is merged in the ```development``` branch. If you would like to contribute, please check out the ```development``` branch. Create a new branch from ```development```. Don't forget do write documentation, unit and integration tests. When finished, create a pull request back into ```development```. If accepted, your contribution will be in the next release. :)
 
+### Useful Guides about Java Coding Practices
+
+Before you make a pull request, please make sure you clean your code as best as you can. The following resources can help to understand what **clean code** means:
+
+* [Clean Coding in Java](https://www.baeldung.com/java-clean-code)
+* [A short summary of Java Coding best practices](https://medium.com/@rhamedy/a-short-summary-of-java-coding-best-practices-31283d0167d3)
+
 ### Bugs
 
 #### Where To Find Known Issues
