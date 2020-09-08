@@ -14,44 +14,52 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import org.springframework.util.Assert;
+
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.google.gson.Gson;
-import org.springframework.util.Assert;
-
 public class SystemAddressSetRelayResponseDTO implements Serializable {
-	
-	//=================================================================================================
-	// members
-	
-	private static final long serialVersionUID = 3040647144187918101L;
-	
-	private Set<String> addresses = new HashSet<>();
 
-	//=================================================================================================
-	// methods
+    //=================================================================================================
+    // members
 
-	//-------------------------------------------------------------------------------------------------
-	public SystemAddressSetRelayResponseDTO() {}
-	
-	//-------------------------------------------------------------------------------------------------
-	public SystemAddressSetRelayResponseDTO(final Set<String> addresses) {
-		Assert.notNull(addresses, "'addresses' is null.");
-		
-		this.addresses = addresses; 
-	}
+    private static final long serialVersionUID = 3040647144187918101L;
 
-	//-------------------------------------------------------------------------------------------------
-	public Set<String> getAddresses() { return addresses; }
+    private Set<String> addresses = new HashSet<>();
 
-	//-------------------------------------------------------------------------------------------------
-	public void setAddresses(final Set<String> addresses) { this.addresses = addresses; }
+    //=================================================================================================
+    // methods
 
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	public String toString() {
-		return new Gson().toJson(this);
-	}
+    //-------------------------------------------------------------------------------------------------
+    public SystemAddressSetRelayResponseDTO() {
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public SystemAddressSetRelayResponseDTO(final Set<String> addresses) {
+        Assert.notNull(addresses, "'addresses' is null.");
+
+        this.addresses = addresses;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public Set<String> getAddresses() {
+        return addresses;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public void setAddresses(final Set<String> addresses) {
+        this.addresses = addresses;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
+    }
 }

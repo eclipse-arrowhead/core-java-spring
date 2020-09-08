@@ -14,51 +14,71 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import java.io.Serializable;
-import java.util.List;
-
-import com.google.gson.Gson;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 
+import java.io.Serializable;
+import java.util.List;
+
 public class GSDQueryFormDTO implements Serializable {
 
-	//=================================================================================================
-	// members
+    //=================================================================================================
+    // members
 
-	private static final long serialVersionUID = 1906800805302171428L;
-	
-	private ServiceQueryFormDTO requestedService;
-	private List<CloudRequestDTO> preferredClouds;
-	private boolean needQoSMeasurements;
-	
-	//=================================================================================================
-	// methods
-	
-	//-------------------------------------------------------------------------------------------------	
-	public GSDQueryFormDTO() {}
-	
-	//-------------------------------------------------------------------------------------------------
-	public GSDQueryFormDTO(final ServiceQueryFormDTO requestedService, final List<CloudRequestDTO> preferredClouds,
-						   final boolean needQoSMeasurements) {
-		this.requestedService = requestedService;
-		this.preferredClouds = preferredClouds;
-		this.needQoSMeasurements = needQoSMeasurements;
-	}
+    private static final long serialVersionUID = 1906800805302171428L;
 
-	//-------------------------------------------------------------------------------------------------
-	public ServiceQueryFormDTO getRequestedService() { return requestedService; }
-	public List<CloudRequestDTO> getPreferredClouds() { return preferredClouds; }
-	public boolean getNeedQoSMeasurements() { return needQoSMeasurements; }
+    private ServiceQueryFormDTO requestedService;
+    private List<CloudRequestDTO> preferredClouds;
+    private boolean needQoSMeasurements;
 
-	//-------------------------------------------------------------------------------------------------
-	public void setRequestedService(final ServiceQueryFormDTO requestedService) { this.requestedService = requestedService; }
-	public void setPreferredClouds(final List<CloudRequestDTO> preferredClouds) { this.preferredClouds = preferredClouds; }
-	public void setNeedQoSMeasurements (final boolean needQoSMeasurements) { this.needQoSMeasurements = needQoSMeasurements; }
+    //=================================================================================================
+    // methods
 
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	public String toString() {
-		return new Gson().toJson(this);
-	}
+    //-------------------------------------------------------------------------------------------------
+    public GSDQueryFormDTO() {
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public GSDQueryFormDTO(final ServiceQueryFormDTO requestedService, final List<CloudRequestDTO> preferredClouds,
+                           final boolean needQoSMeasurements) {
+        this.requestedService = requestedService;
+        this.preferredClouds = preferredClouds;
+        this.needQoSMeasurements = needQoSMeasurements;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public ServiceQueryFormDTO getRequestedService() {
+        return requestedService;
+    }
+
+    public List<CloudRequestDTO> getPreferredClouds() {
+        return preferredClouds;
+    }
+
+    public boolean getNeedQoSMeasurements() {
+        return needQoSMeasurements;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public void setRequestedService(final ServiceQueryFormDTO requestedService) {
+        this.requestedService = requestedService;
+    }
+
+    public void setPreferredClouds(final List<CloudRequestDTO> preferredClouds) {
+        this.preferredClouds = preferredClouds;
+    }
+
+    public void setNeedQoSMeasurements(final boolean needQoSMeasurements) {
+        this.needQoSMeasurements = needQoSMeasurements;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
+    }
 }

@@ -14,44 +14,57 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import com.google.gson.Gson;
-
 import java.io.Serializable;
 import java.util.List;
 
 public class QoSInterRelayEchoMeasurementListResponseDTO implements Serializable {
 
-	//=================================================================================================
-	// members
+    //=================================================================================================
+    // members
 
-	private static final long serialVersionUID = 7632688877032376191L;
-	
-	private List<QoSInterRelayEchoMeasurementResponseDTO> data;
-	private long count;
+    private static final long serialVersionUID = 7632688877032376191L;
 
-	//=================================================================================================
-	// methods
+    private List<QoSInterRelayEchoMeasurementResponseDTO> data;
+    private long count;
 
-	//-------------------------------------------------------------------------------------------------
-	public QoSInterRelayEchoMeasurementListResponseDTO() {}
+    //=================================================================================================
+    // methods
 
-	//-------------------------------------------------------------------------------------------------
-	public QoSInterRelayEchoMeasurementListResponseDTO(final List<QoSInterRelayEchoMeasurementResponseDTO> data, final long count) {
-		this.data = data;
-		this.count = count;
-	}
+    //-------------------------------------------------------------------------------------------------
+    public QoSInterRelayEchoMeasurementListResponseDTO() {
+    }
 
-	//-------------------------------------------------------------------------------------------------
-	public List<QoSInterRelayEchoMeasurementResponseDTO> getData() { return data; }
-	public long getCount() { return count; }
+    //-------------------------------------------------------------------------------------------------
+    public QoSInterRelayEchoMeasurementListResponseDTO(final List<QoSInterRelayEchoMeasurementResponseDTO> data, final long count) {
+        this.data = data;
+        this.count = count;
+    }
 
-	//-------------------------------------------------------------------------------------------------
-	public void setData(final List<QoSInterRelayEchoMeasurementResponseDTO> data) { this.data = data; }
-	public void setCount(final long count) { this.count = count; }
+    //-------------------------------------------------------------------------------------------------
+    public List<QoSInterRelayEchoMeasurementResponseDTO> getData() {
+        return data;
+    }
 
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	public String toString() {
-		return new Gson().toJson(this);
-	}
+    public long getCount() {
+        return count;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public void setData(final List<QoSInterRelayEchoMeasurementResponseDTO> data) {
+        this.data = data;
+    }
+
+    public void setCount(final long count) {
+        this.count = count;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
+    }
 }

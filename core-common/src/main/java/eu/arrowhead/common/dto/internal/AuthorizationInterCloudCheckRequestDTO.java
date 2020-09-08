@@ -14,49 +14,71 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+
 import java.io.Serializable;
 import java.util.List;
 
-import com.google.gson.Gson;
-import eu.arrowhead.common.dto.shared.CloudRequestDTO;
-
 public class AuthorizationInterCloudCheckRequestDTO implements Serializable {
 
-	//=================================================================================================
-	// members
-	
-	private static final long serialVersionUID = -263209252842507399L;
-	
-	private CloudRequestDTO cloud;
-	private String serviceDefinition;
-	private List<IdIdListDTO> providerIdsWithInterfaceIds;
-	
-	//=================================================================================================
-	// methods
-	
-	//-------------------------------------------------------------------------------------------------
-	public AuthorizationInterCloudCheckRequestDTO() {}
-	
-	//-------------------------------------------------------------------------------------------------
-	public AuthorizationInterCloudCheckRequestDTO(final CloudRequestDTO cloud, final String serviceDefinition, final List<IdIdListDTO> providerIdsWithInterfaceIds) {
-		this.cloud = cloud;
-		this.serviceDefinition = serviceDefinition;
-		this.providerIdsWithInterfaceIds = providerIdsWithInterfaceIds;
-	}
+    //=================================================================================================
+    // members
 
-	//-------------------------------------------------------------------------------------------------
-	public CloudRequestDTO getCloud() { return cloud; }
-	public String getServiceDefinition() { return serviceDefinition; }
-	public List<IdIdListDTO> getProviderIdsWithInterfaceIds() { return providerIdsWithInterfaceIds; }
+    private static final long serialVersionUID = -263209252842507399L;
 
-	//-------------------------------------------------------------------------------------------------
-	public void setCloud(final CloudRequestDTO cloud) { this.cloud = cloud; }
-	public void setServiceDefinition(final String serviceDefinition) { this.serviceDefinition = serviceDefinition; }
-	public void setProviderIdsWithInterfaceIds(final List<IdIdListDTO> providerIdsWithInterfaceIds) { this.providerIdsWithInterfaceIds = providerIdsWithInterfaceIds; }
+    private CloudRequestDTO cloud;
+    private String serviceDefinition;
+    private List<IdIdListDTO> providerIdsWithInterfaceIds;
 
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	public String toString() {
-		return new Gson().toJson(this);
-	}
+    //=================================================================================================
+    // methods
+
+    //-------------------------------------------------------------------------------------------------
+    public AuthorizationInterCloudCheckRequestDTO() {
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public AuthorizationInterCloudCheckRequestDTO(final CloudRequestDTO cloud, final String serviceDefinition, final List<IdIdListDTO> providerIdsWithInterfaceIds) {
+        this.cloud = cloud;
+        this.serviceDefinition = serviceDefinition;
+        this.providerIdsWithInterfaceIds = providerIdsWithInterfaceIds;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public CloudRequestDTO getCloud() {
+        return cloud;
+    }
+
+    public String getServiceDefinition() {
+        return serviceDefinition;
+    }
+
+    public List<IdIdListDTO> getProviderIdsWithInterfaceIds() {
+        return providerIdsWithInterfaceIds;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public void setCloud(final CloudRequestDTO cloud) {
+        this.cloud = cloud;
+    }
+
+    public void setServiceDefinition(final String serviceDefinition) {
+        this.serviceDefinition = serviceDefinition;
+    }
+
+    public void setProviderIdsWithInterfaceIds(final List<IdIdListDTO> providerIdsWithInterfaceIds) {
+        this.providerIdsWithInterfaceIds = providerIdsWithInterfaceIds;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
+    }
 }

@@ -14,64 +14,102 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import java.io.Serializable;
-
-import com.google.gson.Gson;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 
+import java.io.Serializable;
+
 public class QoSIntraMeasurementResponseDTO implements Serializable {
 
-	//=================================================================================================
-	// members
+    //=================================================================================================
+    // members
 
-	private static final long serialVersionUID = -8158447252910402563L;
+    private static final long serialVersionUID = -8158447252910402563L;
 
-	private long id;
-	private SystemResponseDTO system;
-	private QoSMeasurementType measurementType;
-	private String lastMeasurementAt;
-	private String createdAt;
-	private String updatedAt;
+    private long id;
+    private SystemResponseDTO system;
+    private QoSMeasurementType measurementType;
+    private String lastMeasurementAt;
+    private String createdAt;
+    private String updatedAt;
 
-	//=================================================================================================
-	// methods
+    //=================================================================================================
+    // methods
 
-	//-------------------------------------------------------------------------------------------------
-	public QoSIntraMeasurementResponseDTO() {}
+    //-------------------------------------------------------------------------------------------------
+    public QoSIntraMeasurementResponseDTO() {
+    }
 
-	//-------------------------------------------------------------------------------------------------
-	public QoSIntraMeasurementResponseDTO(final long id, final SystemResponseDTO system, final QoSMeasurementType measurementType, final String lastMeasurementAt, 
-										  final String createdAt, final String updatedAt) {
+    //-------------------------------------------------------------------------------------------------
+    public QoSIntraMeasurementResponseDTO(final long id, final SystemResponseDTO system, final QoSMeasurementType measurementType, final String lastMeasurementAt,
+                                          final String createdAt, final String updatedAt) {
 
-		this.id = id;
-		this.system = system;
-		this.measurementType = measurementType;
-		this.lastMeasurementAt = lastMeasurementAt;
-		this.createdAt = createdAt;
-		this.updatedAt = updatedAt;
-	}
+        this.id = id;
+        this.system = system;
+        this.measurementType = measurementType;
+        this.lastMeasurementAt = lastMeasurementAt;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 
-	//-------------------------------------------------------------------------------------------------
-	public long getId() { return id; }
-	public SystemResponseDTO getSystem() { return system; }
-	public QoSMeasurementType getMeasurementType() { return measurementType; }
-	public String getLastMeasurementAt() { return lastMeasurementAt; }
-	public String getCreatedAt() { return createdAt; }
-	public String getUpdatedAt() { return updatedAt; }
+    //-------------------------------------------------------------------------------------------------
+    public long getId() {
+        return id;
+    }
 
-	//-------------------------------------------------------------------------------------------------
-	public void setId(final long id) { this.id = id; }
-	public void setSystem(final SystemResponseDTO system) { this.system = system; }
-	public void setMeasurementType(final QoSMeasurementType measurementType) { this.measurementType = measurementType; }
-	public void setLastMeasurementAt(final String lastMeasurementAt) { this.lastMeasurementAt = lastMeasurementAt;	}
-	public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
-	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
+    public SystemResponseDTO getSystem() {
+        return system;
+    }
 
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	public String toString() {
-		return new Gson().toJson(this);
-	}
+    public QoSMeasurementType getMeasurementType() {
+        return measurementType;
+    }
+
+    public String getLastMeasurementAt() {
+        return lastMeasurementAt;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public String getUpdatedAt() {
+        return updatedAt;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public void setId(final long id) {
+        this.id = id;
+    }
+
+    public void setSystem(final SystemResponseDTO system) {
+        this.system = system;
+    }
+
+    public void setMeasurementType(final QoSMeasurementType measurementType) {
+        this.measurementType = measurementType;
+    }
+
+    public void setLastMeasurementAt(final String lastMeasurementAt) {
+        this.lastMeasurementAt = lastMeasurementAt;
+    }
+
+    public void setCreatedAt(final String createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setUpdatedAt(final String updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
+    }
 
 }

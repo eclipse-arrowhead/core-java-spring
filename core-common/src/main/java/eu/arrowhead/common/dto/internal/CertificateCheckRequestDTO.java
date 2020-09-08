@@ -14,11 +14,8 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import com.google.gson.Gson;
-
-import java.io.Serializable;
-
 import javax.validation.constraints.NotBlank;
+import java.io.Serializable;
 
 public class CertificateCheckRequestDTO implements Serializable {
 
@@ -29,7 +26,8 @@ public class CertificateCheckRequestDTO implements Serializable {
     @NotBlank(message = "The certificate is mandatory")
     private String certificate;
 
-    public CertificateCheckRequestDTO() {}
+    public CertificateCheckRequestDTO() {
+    }
 
     public CertificateCheckRequestDTO(int version, String certificate) {
         this.version = version;
@@ -55,6 +53,10 @@ public class CertificateCheckRequestDTO implements Serializable {
     //-------------------------------------------------------------------------------------------------
     @Override
     public String toString() {
-        return new Gson().toJson(this);
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
     }
 }

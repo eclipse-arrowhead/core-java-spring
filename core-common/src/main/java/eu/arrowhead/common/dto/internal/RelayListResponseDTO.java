@@ -14,44 +14,57 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import com.google.gson.Gson;
-
 import java.io.Serializable;
 import java.util.List;
 
 public class RelayListResponseDTO implements Serializable {
 
-	//=================================================================================================
-	// members
-	
-	private static final long serialVersionUID = 4091489448271794951L;
+    //=================================================================================================
+    // members
 
-	private List<RelayResponseDTO> data;
-	private long count;
-	
-	//=================================================================================================
-	// methods
-	
-	//-------------------------------------------------------------------------------------------------
-	public RelayListResponseDTO() {}
+    private static final long serialVersionUID = 4091489448271794951L;
 
-	//-------------------------------------------------------------------------------------------------
-	public RelayListResponseDTO(final List<RelayResponseDTO> data, final long count) {
-		this.data = data;
-		this.count = count;
-	}
+    private List<RelayResponseDTO> data;
+    private long count;
 
-	//-------------------------------------------------------------------------------------------------
-	public List<RelayResponseDTO> getData() { return data; }
-	public long getCount() { return count; }
+    //=================================================================================================
+    // methods
 
-	//-------------------------------------------------------------------------------------------------
-	public void setData(final List<RelayResponseDTO> data) { this.data = data; }
-	public void setCount(final long count) { this.count = count; }
+    //-------------------------------------------------------------------------------------------------
+    public RelayListResponseDTO() {
+    }
 
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	public String toString() {
-		return new Gson().toJson(this);
-	}
+    //-------------------------------------------------------------------------------------------------
+    public RelayListResponseDTO(final List<RelayResponseDTO> data, final long count) {
+        this.data = data;
+        this.count = count;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public List<RelayResponseDTO> getData() {
+        return data;
+    }
+
+    public long getCount() {
+        return count;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public void setData(final List<RelayResponseDTO> data) {
+        this.data = data;
+    }
+
+    public void setCount(final long count) {
+        this.count = count;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
+    }
 }

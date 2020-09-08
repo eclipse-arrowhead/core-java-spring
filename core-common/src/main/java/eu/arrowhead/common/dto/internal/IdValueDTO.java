@@ -14,43 +14,56 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import com.google.gson.Gson;
-
 import java.io.Serializable;
 
 public class IdValueDTO implements Serializable {
 
-	//=================================================================================================
-	// members
-	
-	private static final long serialVersionUID = 4139505993669240877L;
+    //=================================================================================================
+    // members
 
-	private long id;
-	private String value;
-	
-	//=================================================================================================
-	// methods
-	
-	//-------------------------------------------------------------------------------------------------
-	public IdValueDTO() {}
+    private static final long serialVersionUID = 4139505993669240877L;
 
-	//-------------------------------------------------------------------------------------------------
-	public IdValueDTO(final long id, final String value) {
-		this.id = id;
-		this.value = value;
-	}
+    private long id;
+    private String value;
 
-	//-------------------------------------------------------------------------------------------------
-	public long getId() { return id; }
-	public String getValue() { return value; }
+    //=================================================================================================
+    // methods
 
-	//-------------------------------------------------------------------------------------------------
-	public void setId(final long id) { this.id = id; }
-	public void setValue(final String value) { this.value = value; }
+    //-------------------------------------------------------------------------------------------------
+    public IdValueDTO() {
+    }
 
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	public String toString() {
-		return new Gson().toJson(this);
-	}
+    //-------------------------------------------------------------------------------------------------
+    public IdValueDTO(final long id, final String value) {
+        this.id = id;
+        this.value = value;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public long getId() {
+        return id;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public void setId(final long id) {
+        this.id = id;
+    }
+
+    public void setValue(final String value) {
+        this.value = value;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
+    }
 }

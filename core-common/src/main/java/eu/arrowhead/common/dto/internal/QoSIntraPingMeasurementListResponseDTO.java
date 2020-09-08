@@ -14,44 +14,57 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import com.google.gson.Gson;
-
 import java.io.Serializable;
 import java.util.List;
 
 public class QoSIntraPingMeasurementListResponseDTO implements Serializable {
 
-	//=================================================================================================
-	// members
+    //=================================================================================================
+    // members
 
-	private static final long serialVersionUID = 1261528929899029505L;	
+    private static final long serialVersionUID = 1261528929899029505L;
 
-	private List<QoSIntraPingMeasurementResponseDTO> data;
-	private long count;
+    private List<QoSIntraPingMeasurementResponseDTO> data;
+    private long count;
 
-	//=================================================================================================
-	// methods
+    //=================================================================================================
+    // methods
 
-	//-------------------------------------------------------------------------------------------------
-	public QoSIntraPingMeasurementListResponseDTO() {}
+    //-------------------------------------------------------------------------------------------------
+    public QoSIntraPingMeasurementListResponseDTO() {
+    }
 
-	//-------------------------------------------------------------------------------------------------
-	public QoSIntraPingMeasurementListResponseDTO(final List<QoSIntraPingMeasurementResponseDTO> data, final long count) {
-		this.data = data;
-		this.count = count;
-	}
+    //-------------------------------------------------------------------------------------------------
+    public QoSIntraPingMeasurementListResponseDTO(final List<QoSIntraPingMeasurementResponseDTO> data, final long count) {
+        this.data = data;
+        this.count = count;
+    }
 
-	//-------------------------------------------------------------------------------------------------
-	public List<QoSIntraPingMeasurementResponseDTO> getData() { return data; }
-	public long getCount() { return count; }
+    //-------------------------------------------------------------------------------------------------
+    public List<QoSIntraPingMeasurementResponseDTO> getData() {
+        return data;
+    }
 
-	//-------------------------------------------------------------------------------------------------
-	public void setData(final List<QoSIntraPingMeasurementResponseDTO> data) { this.data = data; }
-	public void setCount(final long count) { this.count = count; }
+    public long getCount() {
+        return count;
+    }
 
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	public String toString() {
-		return new Gson().toJson(this);
-	}
+    //-------------------------------------------------------------------------------------------------
+    public void setData(final List<QoSIntraPingMeasurementResponseDTO> data) {
+        this.data = data;
+    }
+
+    public void setCount(final long count) {
+        this.count = count;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
+    }
 }

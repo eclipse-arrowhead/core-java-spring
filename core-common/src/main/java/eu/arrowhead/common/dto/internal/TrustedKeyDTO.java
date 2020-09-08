@@ -14,8 +14,6 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import com.google.gson.Gson;
-
 import java.io.Serializable;
 
 public class TrustedKeyDTO implements Serializable {
@@ -62,6 +60,10 @@ public class TrustedKeyDTO implements Serializable {
     //-------------------------------------------------------------------------------------------------
     @Override
     public String toString() {
-        return new Gson().toJson(this);
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
     }
 }

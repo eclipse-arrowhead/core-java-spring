@@ -14,39 +14,46 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import com.google.gson.Gson;
-
 import java.io.Serializable;
 
 public class ServiceDefinitionRequestDTO implements Serializable {
 
-	//=================================================================================================
-	// members
-	
-	private static final long serialVersionUID = -1966787184376371095L;
-	
-	private String serviceDefinition;
-			
-	//=================================================================================================
-	// methods
-		
-	//-------------------------------------------------------------------------------------------------
-	public ServiceDefinitionRequestDTO() {}
-	
-	//-------------------------------------------------------------------------------------------------
-	public ServiceDefinitionRequestDTO(final String serviceDefinition) {
-		this.serviceDefinition = serviceDefinition;
-	}
+    //=================================================================================================
+    // members
 
-	//-------------------------------------------------------------------------------------------------
-	public String getServiceDefinition() { return serviceDefinition; }
-	
-	//-------------------------------------------------------------------------------------------------
-	public void setServiceDefinition(final String serviceDefinition) { this.serviceDefinition = serviceDefinition; }
+    private static final long serialVersionUID = -1966787184376371095L;
 
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	public String toString() {
-		return new Gson().toJson(this);
-	}
+    private String serviceDefinition;
+
+    //=================================================================================================
+    // methods
+
+    //-------------------------------------------------------------------------------------------------
+    public ServiceDefinitionRequestDTO() {
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public ServiceDefinitionRequestDTO(final String serviceDefinition) {
+        this.serviceDefinition = serviceDefinition;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public String getServiceDefinition() {
+        return serviceDefinition;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public void setServiceDefinition(final String serviceDefinition) {
+        this.serviceDefinition = serviceDefinition;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
+    }
 }

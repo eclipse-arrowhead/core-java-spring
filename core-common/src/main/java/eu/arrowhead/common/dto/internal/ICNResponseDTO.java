@@ -14,21 +14,24 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import java.io.Serializable;
-
-import com.google.gson.Gson;
 import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
+
+import java.io.Serializable;
 
 public class ICNResponseDTO extends OrchestrationResponseDTO implements Serializable {
 
-	//=================================================================================================
-	// members
+    //=================================================================================================
+    // members
 
-	private static final long serialVersionUID = 419607094931834994L;
+    private static final long serialVersionUID = 419607094931834994L;
 
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	public String toString() {
-		return new Gson().toJson(this);
-	}
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
+    }
 }

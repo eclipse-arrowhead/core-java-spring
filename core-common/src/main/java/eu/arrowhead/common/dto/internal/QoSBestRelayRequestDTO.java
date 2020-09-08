@@ -14,43 +14,56 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import com.google.gson.Gson;
-
 import java.io.Serializable;
 
 public class QoSBestRelayRequestDTO implements Serializable {
-	
-	//=================================================================================================
-	// members
 
-	private static final long serialVersionUID = -8357593897933589292L;
-	
-	private CloudResponseDTO cloud;
-	private String attribute;
-	
-	//=================================================================================================
-	// methods
+    //=================================================================================================
+    // members
 
-	//-------------------------------------------------------------------------------------------------
-	public QoSBestRelayRequestDTO() {}
-	
-	//-------------------------------------------------------------------------------------------------
-	public QoSBestRelayRequestDTO(final CloudResponseDTO cloud, final String attribute) {
-		this.cloud = cloud;
-		this.attribute = attribute;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	public CloudResponseDTO getCloud() { return cloud; }
-	public String getAttribute() { return attribute; }
+    private static final long serialVersionUID = -8357593897933589292L;
 
-	//-------------------------------------------------------------------------------------------------
-	public void setCloud(final CloudResponseDTO cloud) { this.cloud = cloud; }
-	public void setAttribute(final String attribute) { this.attribute = attribute; }
+    private CloudResponseDTO cloud;
+    private String attribute;
 
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	public String toString() {
-		return new Gson().toJson(this);
-	}
+    //=================================================================================================
+    // methods
+
+    //-------------------------------------------------------------------------------------------------
+    public QoSBestRelayRequestDTO() {
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public QoSBestRelayRequestDTO(final CloudResponseDTO cloud, final String attribute) {
+        this.cloud = cloud;
+        this.attribute = attribute;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public CloudResponseDTO getCloud() {
+        return cloud;
+    }
+
+    public String getAttribute() {
+        return attribute;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public void setCloud(final CloudResponseDTO cloud) {
+        this.cloud = cloud;
+    }
+
+    public void setAttribute(final String attribute) {
+        this.attribute = attribute;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
+    }
 }

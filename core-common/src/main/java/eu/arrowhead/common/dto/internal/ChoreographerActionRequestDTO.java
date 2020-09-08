@@ -14,28 +14,30 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.Serializable;
 import java.util.List;
 
 public class ChoreographerActionRequestDTO implements Serializable {
-	
-	//=================================================================================================
-	// members
 
-	private static final long serialVersionUID = 305775285238451287L;
+    //=================================================================================================
+    // members
 
-	private String name;
+    private static final long serialVersionUID = 305775285238451287L;
+
+    private String name;
     private String nextActionName;
     private List<String> firstStepNames;
     private List<ChoreographerStepRequestDTO> steps;
 
     //=================================================================================================
-	// methods
-    
+    // methods
+
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerActionRequestDTO() {}
+    public ChoreographerActionRequestDTO() {
+    }
 
     //-------------------------------------------------------------------------------------------------
 
@@ -47,20 +49,46 @@ public class ChoreographerActionRequestDTO implements Serializable {
     }
 
     //-------------------------------------------------------------------------------------------------
-	public String getName() { return name; }
-	public String getNextActionName() { return nextActionName; }
-	public List<ChoreographerStepRequestDTO> getSteps() { return steps; }
-    public List<String> getFirstStepNames() { return firstStepNames; }
+    public String getName() {
+        return name;
+    }
+
+    public String getNextActionName() {
+        return nextActionName;
+    }
+
+    public List<ChoreographerStepRequestDTO> getSteps() {
+        return steps;
+    }
+
+    public List<String> getFirstStepNames() {
+        return firstStepNames;
+    }
 
     //-------------------------------------------------------------------------------------------------
-	public void setName(final String name) { this.name = name; }
-    public void setNextActionName(final String nextActionName) { this.nextActionName = nextActionName; }
-    public void setSteps(final List<ChoreographerStepRequestDTO> steps) { this.steps = steps; }
-    public void setFirstStepNames(List<String> firstStepNames) { this.firstStepNames = firstStepNames; }
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public void setNextActionName(final String nextActionName) {
+        this.nextActionName = nextActionName;
+    }
+
+    public void setSteps(final List<ChoreographerStepRequestDTO> steps) {
+        this.steps = steps;
+    }
+
+    public void setFirstStepNames(List<String> firstStepNames) {
+        this.firstStepNames = firstStepNames;
+    }
 
     //-------------------------------------------------------------------------------------------------
     @Override
     public String toString() {
-        return new Gson().toJson(this);
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
     }
 }

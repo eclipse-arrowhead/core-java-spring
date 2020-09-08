@@ -14,8 +14,6 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import com.google.gson.Gson;
-
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
@@ -44,6 +42,10 @@ public class TrustedKeyCheckRequestDTO implements Serializable {
     //-------------------------------------------------------------------------------------------------
     @Override
     public String toString() {
-        return new Gson().toJson(this);
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
     }
 }

@@ -15,77 +15,16 @@
 package eu.arrowhead.common.dto.internal;
 
 
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
+import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.System;
+import eu.arrowhead.common.database.entity.*;
+import eu.arrowhead.common.dto.shared.*;
 import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
 
-import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.database.entity.AuthorizationInterCloud;
-import eu.arrowhead.common.database.entity.AuthorizationInterCloudInterfaceConnection;
-import eu.arrowhead.common.database.entity.AuthorizationIntraCloud;
-import eu.arrowhead.common.database.entity.AuthorizationIntraCloudInterfaceConnection;
-import eu.arrowhead.common.database.entity.CaCertificate;
-import eu.arrowhead.common.database.entity.CaTrustedKey;
-import eu.arrowhead.common.database.entity.ChoreographerAction;
-import eu.arrowhead.common.database.entity.ChoreographerPlan;
-import eu.arrowhead.common.database.entity.ChoreographerStep;
-import eu.arrowhead.common.database.entity.ChoreographerStepNextStepConnection;
-import eu.arrowhead.common.database.entity.Cloud;
-import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
-import eu.arrowhead.common.database.entity.CloudGatewayRelay;
-import eu.arrowhead.common.database.entity.Device;
-import eu.arrowhead.common.database.entity.DeviceRegistry;
-import eu.arrowhead.common.database.entity.EventType;
-import eu.arrowhead.common.database.entity.ForeignSystem;
-import eu.arrowhead.common.database.entity.OrchestratorStore;
-import eu.arrowhead.common.database.entity.QoSInterDirectMeasurement;
-import eu.arrowhead.common.database.entity.QoSInterDirectPingMeasurement;
-import eu.arrowhead.common.database.entity.QoSInterRelayEchoMeasurement;
-import eu.arrowhead.common.database.entity.QoSInterRelayMeasurement;
-import eu.arrowhead.common.database.entity.QoSIntraMeasurement;
-import eu.arrowhead.common.database.entity.QoSIntraPingMeasurement;
-import eu.arrowhead.common.database.entity.QoSReservation;
-import eu.arrowhead.common.database.entity.Relay;
-import eu.arrowhead.common.database.entity.ServiceDefinition;
-import eu.arrowhead.common.database.entity.ServiceInterface;
-import eu.arrowhead.common.database.entity.ServiceRegistry;
-import eu.arrowhead.common.database.entity.ServiceRegistryInterfaceConnection;
-import eu.arrowhead.common.database.entity.Subscription;
-import eu.arrowhead.common.database.entity.SubscriptionPublisherConnection;
-import eu.arrowhead.common.database.entity.System;
-import eu.arrowhead.common.database.entity.SystemRegistry;
-import eu.arrowhead.common.dto.shared.ChoreographerActionResponseDTO;
-import eu.arrowhead.common.dto.shared.ChoreographerNextStepResponseDTO;
-import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
-import eu.arrowhead.common.dto.shared.ChoreographerStepResponseDTO;
-import eu.arrowhead.common.dto.shared.CloudRequestDTO;
-import eu.arrowhead.common.dto.shared.DeviceQueryResultDTO;
-import eu.arrowhead.common.dto.shared.DeviceRegistryResponseDTO;
-import eu.arrowhead.common.dto.shared.DeviceResponseDTO;
-import eu.arrowhead.common.dto.shared.EventDTO;
-import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
-import eu.arrowhead.common.dto.shared.EventTypeResponseDTO;
-import eu.arrowhead.common.dto.shared.PreferredProviderDataDTO;
-import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
-import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
-import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
-import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
-import eu.arrowhead.common.dto.shared.SubscriptionListResponseDTO;
-import eu.arrowhead.common.dto.shared.SubscriptionResponseDTO;
-import eu.arrowhead.common.dto.shared.SystemQueryResultDTO;
-import eu.arrowhead.common.dto.shared.SystemRegistryResponseDTO;
-import eu.arrowhead.common.dto.shared.SystemRequestDTO;
-import eu.arrowhead.common.dto.shared.SystemResponseDTO;
+import java.time.ZonedDateTime;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class DTOConverter {
 	

@@ -14,19 +14,17 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import com.google.gson.Gson;
-
 import java.io.Serializable;
 import java.util.List;
 
 public class ChoreographerStepRequestDTO implements Serializable {
-	
-	//=================================================================================================
-	// members
 
-	private static final long serialVersionUID = -8100852327039160839L;
+    //=================================================================================================
+    // members
 
-	private String name;
+    private static final long serialVersionUID = -8100852327039160839L;
+
+    private String name;
     private String serviceName;
     private String metadata;
     private String parameters;
@@ -34,13 +32,14 @@ public class ChoreographerStepRequestDTO implements Serializable {
     private List<String> nextStepNames;
 
     //=================================================================================================
-	// methods
-    
-    //-------------------------------------------------------------------------------------------------
-	public ChoreographerStepRequestDTO() {}
+    // methods
 
     //-------------------------------------------------------------------------------------------------
-	public ChoreographerStepRequestDTO(final String name, final String serviceName, final List<String> nextStepNames, final int quantity) {
+    public ChoreographerStepRequestDTO() {
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public ChoreographerStepRequestDTO(final String name, final String serviceName, final List<String> nextStepNames, final int quantity) {
         this(name, serviceName, null, null, nextStepNames, quantity);
     }
 
@@ -55,24 +54,62 @@ public class ChoreographerStepRequestDTO implements Serializable {
     }
 
     //-------------------------------------------------------------------------------------------------
-	public String getName() { return name; }
-	public String getServiceName() { return serviceName; }
-	public List<String> getNextStepNames() { return nextStepNames; }
-    public String getMetadata() { return metadata; }
-    public String getParameters() { return parameters; }
-    public int getQuantity() { return quantity; }
+    public String getName() {
+        return name;
+    }
+
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public List<String> getNextStepNames() {
+        return nextStepNames;
+    }
+
+    public String getMetadata() {
+        return metadata;
+    }
+
+    public String getParameters() {
+        return parameters;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
 
     //-------------------------------------------------------------------------------------------------
-	public void setName(final String name) { this.name = name; }
-    public void setServiceName(final String serviceName) { this.serviceName = serviceName; }
-    public void setNextStepNames(final List<String> nextStepNames) { this.nextStepNames = nextStepNames; }
-    public void setMetadata(String metadata) { this.metadata = metadata; }
-    public void setParameters(String parameters) { this.parameters = parameters; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public void setServiceName(final String serviceName) {
+        this.serviceName = serviceName;
+    }
+
+    public void setNextStepNames(final List<String> nextStepNames) {
+        this.nextStepNames = nextStepNames;
+    }
+
+    public void setMetadata(String metadata) {
+        this.metadata = metadata;
+    }
+
+    public void setParameters(String parameters) {
+        this.parameters = parameters;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
 
     //-------------------------------------------------------------------------------------------------
     @Override
     public String toString() {
-        return new Gson().toJson(this);
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
     }
 }

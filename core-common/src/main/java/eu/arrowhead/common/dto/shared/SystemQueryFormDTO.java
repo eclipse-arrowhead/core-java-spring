@@ -14,13 +14,13 @@
 
 package eu.arrowhead.common.dto.shared;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.Assert;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.StringJoiner;
 
 public class SystemQueryFormDTO implements Serializable {
 
@@ -66,7 +66,11 @@ public class SystemQueryFormDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return new Gson().toJson(this);
+		try {
+		return new ObjectMapper().writeValueAsString(this);
+	} catch (final JsonProcessingException ex) {
+		return "toString failure";
+	}
 	}
 
 	//=================================================================================================
@@ -162,7 +166,11 @@ public class SystemQueryFormDTO implements Serializable {
 		//-------------------------------------------------------------------------------------------------
 		@Override
 		public String toString() {
-			return new Gson().toJson(this);
+			try {
+		return new ObjectMapper().writeValueAsString(this);
+	} catch (final JsonProcessingException ex) {
+		return "toString failure";
+	}
 		}
 	}
 }

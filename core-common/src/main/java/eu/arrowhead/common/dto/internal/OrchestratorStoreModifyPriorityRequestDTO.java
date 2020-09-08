@@ -14,40 +14,47 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import com.google.gson.Gson;
-
 import java.io.Serializable;
 import java.util.Map;
 
 public class OrchestratorStoreModifyPriorityRequestDTO implements Serializable {
 
-	//=================================================================================================
-	// members
-	
-	private static final long serialVersionUID = 9141560687987073900L;
+    //=================================================================================================
+    // members
 
-	private Map<Long,Integer> priorityMap;
-	
-	//=================================================================================================
-	// methods
-	
-	//-------------------------------------------------------------------------------------------------
-	public OrchestratorStoreModifyPriorityRequestDTO() {}
-	
-	//-------------------------------------------------------------------------------------------------
-	public OrchestratorStoreModifyPriorityRequestDTO(final Map<Long,Integer> priorityMap) {
-		this.priorityMap = priorityMap;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	public Map<Long,Integer> getPriorityMap() { return priorityMap; }
+    private static final long serialVersionUID = 9141560687987073900L;
 
-	//-------------------------------------------------------------------------------------------------
-	public void setPriorityMap(final Map<Long,Integer> priorityMap) { this.priorityMap = priorityMap; }
+    private Map<Long, Integer> priorityMap;
 
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	public String toString() {
-		return new Gson().toJson(this);
-	}
+    //=================================================================================================
+    // methods
+
+    //-------------------------------------------------------------------------------------------------
+    public OrchestratorStoreModifyPriorityRequestDTO() {
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public OrchestratorStoreModifyPriorityRequestDTO(final Map<Long, Integer> priorityMap) {
+        this.priorityMap = priorityMap;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public Map<Long, Integer> getPriorityMap() {
+        return priorityMap;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public void setPriorityMap(final Map<Long, Integer> priorityMap) {
+        this.priorityMap = priorityMap;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
+    }
 }

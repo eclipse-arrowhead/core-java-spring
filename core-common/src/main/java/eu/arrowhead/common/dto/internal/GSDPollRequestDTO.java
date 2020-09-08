@@ -14,54 +14,80 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import java.io.Serializable;
-
-import com.google.gson.Gson;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 
+import java.io.Serializable;
+
 public class GSDPollRequestDTO implements Serializable {
 
-	//=================================================================================================
-	// members
-	
-	private static final long serialVersionUID = 3261316799155286413L;
-	
-	private ServiceQueryFormDTO requestedService;
-	private CloudRequestDTO requesterCloud;	
-	private boolean gatewayIsPresent = false;
-	private boolean needQoSMeasurements = false;
-	
-	//=================================================================================================
-	// methods
-	
-	//-------------------------------------------------------------------------------------------------
-	public GSDPollRequestDTO() {} 	
-	
-	//-------------------------------------------------------------------------------------------------
-	public GSDPollRequestDTO(final ServiceQueryFormDTO requestedService, final CloudRequestDTO requesterCloud, final boolean gatewayIsPresent,
-							 final boolean needQoSMeasurements) {
-		this.requestedService = requestedService;
-		this.gatewayIsPresent = gatewayIsPresent;
-		this.requesterCloud = requesterCloud;
-		this.needQoSMeasurements = needQoSMeasurements;
-	}
+    //=================================================================================================
+    // members
 
-	//-------------------------------------------------------------------------------------------------	
-	public ServiceQueryFormDTO getRequestedService() { return requestedService; }
-	public CloudRequestDTO getRequesterCloud() { return requesterCloud; } 
-	public boolean isGatewayIsPresent() { return gatewayIsPresent; }
-	public boolean getNeedQoSMeasurements() { return needQoSMeasurements; }
+    private static final long serialVersionUID = 3261316799155286413L;
 
-	//-------------------------------------------------------------------------------------------------	
-	public void setRequestedService(final ServiceQueryFormDTO requestedService) { this.requestedService = requestedService; }
-	public void setRequesterCloud(final CloudRequestDTO requesterCloud) { this.requesterCloud = requesterCloud; }
-	public void setGatewayIsPresent(final boolean gatewayIsPresent) { this.gatewayIsPresent = gatewayIsPresent; }
-	public void setNeedQoSMeasurements (final boolean needQoSMeasurements) { this.needQoSMeasurements = needQoSMeasurements; }
+    private ServiceQueryFormDTO requestedService;
+    private CloudRequestDTO requesterCloud;
+    private boolean gatewayIsPresent = false;
+    private boolean needQoSMeasurements = false;
 
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	public String toString() {
-		return new Gson().toJson(this);
-	}
+    //=================================================================================================
+    // methods
+
+    //-------------------------------------------------------------------------------------------------
+    public GSDPollRequestDTO() {
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public GSDPollRequestDTO(final ServiceQueryFormDTO requestedService, final CloudRequestDTO requesterCloud, final boolean gatewayIsPresent,
+                             final boolean needQoSMeasurements) {
+        this.requestedService = requestedService;
+        this.gatewayIsPresent = gatewayIsPresent;
+        this.requesterCloud = requesterCloud;
+        this.needQoSMeasurements = needQoSMeasurements;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public ServiceQueryFormDTO getRequestedService() {
+        return requestedService;
+    }
+
+    public CloudRequestDTO getRequesterCloud() {
+        return requesterCloud;
+    }
+
+    public boolean isGatewayIsPresent() {
+        return gatewayIsPresent;
+    }
+
+    public boolean getNeedQoSMeasurements() {
+        return needQoSMeasurements;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public void setRequestedService(final ServiceQueryFormDTO requestedService) {
+        this.requestedService = requestedService;
+    }
+
+    public void setRequesterCloud(final CloudRequestDTO requesterCloud) {
+        this.requesterCloud = requesterCloud;
+    }
+
+    public void setGatewayIsPresent(final boolean gatewayIsPresent) {
+        this.gatewayIsPresent = gatewayIsPresent;
+    }
+
+    public void setNeedQoSMeasurements(final boolean needQoSMeasurements) {
+        this.needQoSMeasurements = needQoSMeasurements;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
+    }
 }

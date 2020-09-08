@@ -14,12 +14,12 @@
 
 package eu.arrowhead.common.dto.shared;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 
 public class ServiceRegistryRequestDTO implements Serializable {
 	
@@ -95,6 +95,10 @@ public class ServiceRegistryRequestDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return new Gson().toJson(this);
+		try {
+		return new ObjectMapper().writeValueAsString(this);
+	} catch (final JsonProcessingException ex) {
+		return "toString failure";
+	}
 	}
 }

@@ -14,13 +14,13 @@
 
 package eu.arrowhead.common.dto.shared;
 
-import java.io.Serializable;
-import java.util.Objects;
-import java.util.StringJoiner;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.Serializable;
+import java.util.Objects;
 
 @JsonInclude(Include.NON_NULL)
 public class SystemResponseDTO implements Serializable {
@@ -102,6 +102,10 @@ public class SystemResponseDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return new Gson().toJson(this);
+		try {
+		return new ObjectMapper().writeValueAsString(this);
+	} catch (final JsonProcessingException ex) {
+		return "toString failure";
+	}
 	}
 }

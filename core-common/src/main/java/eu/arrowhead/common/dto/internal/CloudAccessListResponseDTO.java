@@ -14,44 +14,57 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import com.google.gson.Gson;
-
 import java.io.Serializable;
 import java.util.List;
 
 public class CloudAccessListResponseDTO implements Serializable {
-	
-	//=================================================================================================
-	// members
 
-	private static final long serialVersionUID = 1493703097974010312L;
+    //=================================================================================================
+    // members
 
-	private List<CloudAccessResponseDTO> data;
-	private long count;
+    private static final long serialVersionUID = 1493703097974010312L;
 
-	//=================================================================================================
-	// methods
+    private List<CloudAccessResponseDTO> data;
+    private long count;
 
-	//-------------------------------------------------------------------------------------------------
-	public CloudAccessListResponseDTO() {}
+    //=================================================================================================
+    // methods
 
-	//-------------------------------------------------------------------------------------------------
-	public CloudAccessListResponseDTO(final List<CloudAccessResponseDTO> data, final long count) {
-		this.data = data;
-		this.count = count;
-	}
+    //-------------------------------------------------------------------------------------------------
+    public CloudAccessListResponseDTO() {
+    }
 
-	//-------------------------------------------------------------------------------------------------
-	public List<CloudAccessResponseDTO> getData() { return data; }
-	public long getCount() { return count; }
+    //-------------------------------------------------------------------------------------------------
+    public CloudAccessListResponseDTO(final List<CloudAccessResponseDTO> data, final long count) {
+        this.data = data;
+        this.count = count;
+    }
 
-	//-------------------------------------------------------------------------------------------------
-	public void setData(final List<CloudAccessResponseDTO> data) { this.data = data; }
-	public void setCount(final long count) { this.count = count; }
+    //-------------------------------------------------------------------------------------------------
+    public List<CloudAccessResponseDTO> getData() {
+        return data;
+    }
 
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	public String toString() {
-		return new Gson().toJson(this);
-	}
+    public long getCount() {
+        return count;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public void setData(final List<CloudAccessResponseDTO> data) {
+        this.data = data;
+    }
+
+    public void setCount(final long count) {
+        this.count = count;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
+    }
 }

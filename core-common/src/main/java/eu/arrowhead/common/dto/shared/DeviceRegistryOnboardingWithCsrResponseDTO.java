@@ -14,7 +14,8 @@
 
 package eu.arrowhead.common.dto.shared;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -38,7 +39,11 @@ public class DeviceRegistryOnboardingWithCsrResponseDTO extends DeviceRegistryOn
     //-------------------------------------------------------------------------------------------------
     @Override
     public String toString() {
-        return new Gson().toJson(this);
+        try {
+		return new ObjectMapper().writeValueAsString(this);
+	} catch (final JsonProcessingException ex) {
+		return "toString failure";
+	}
     }
 
     // this class exist to keep the structure of <operation>RequestDTO, <operation>ResponseDTO

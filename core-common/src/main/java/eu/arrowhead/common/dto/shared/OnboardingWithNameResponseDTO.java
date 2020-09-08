@@ -14,7 +14,8 @@
 
 package eu.arrowhead.common.dto.shared;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class OnboardingWithNameResponseDTO extends OnboardingResponseDTO {
 
@@ -35,7 +36,11 @@ public class OnboardingWithNameResponseDTO extends OnboardingResponseDTO {
     //-------------------------------------------------------------------------------------------------
     @Override
     public String toString() {
-        return new Gson().toJson(this);
+        try {
+		return new ObjectMapper().writeValueAsString(this);
+	} catch (final JsonProcessingException ex) {
+		return "toString failure";
+	}
     }
 
     // this class exist to keep the structure of <operation>RequestDTO, <operation>ResponseDTO

@@ -14,19 +14,14 @@
 
 package eu.arrowhead.common.dto.shared;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import com.google.gson.Gson;
-import org.springframework.util.Assert;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.dto.shared.OrchestrationFlags.Flag;
 import eu.arrowhead.common.exception.BadPayloadException;
+import org.springframework.util.Assert;
+
+import java.io.Serializable;
+import java.util.*;
 
 public class OrchestrationFormRequestDTO implements Serializable {
 	
@@ -140,7 +135,11 @@ public class OrchestrationFormRequestDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return new Gson().toJson(this);
+		try {
+		return new ObjectMapper().writeValueAsString(this);
+	} catch (final JsonProcessingException ex) {
+		return "toString failure";
+	}
 	}
 	
 	//=================================================================================================
@@ -244,7 +243,11 @@ public class OrchestrationFormRequestDTO implements Serializable {
 		//-------------------------------------------------------------------------------------------------
 		@Override
 		public String toString() {
-			return new Gson().toJson(this);
+			try {
+		return new ObjectMapper().writeValueAsString(this);
+	} catch (final JsonProcessingException ex) {
+		return "toString failure";
+	}
 		}
 	}
 }

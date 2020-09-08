@@ -14,45 +14,59 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
+
 import java.io.Serializable;
 import java.util.Set;
 
-import com.google.gson.Gson;
-import eu.arrowhead.common.dto.shared.SystemResponseDTO;
-
 public class AuthorizationSubscriptionCheckResponseDTO implements Serializable {
 
-	//=================================================================================================
-	// members
-	
-	private static final long serialVersionUID = 306170062969145764L;
-	
-	private SystemResponseDTO consumer;
-	private Set<SystemResponseDTO> publishers;
-	
-	//=================================================================================================
-	// methods
-	
-	//-------------------------------------------------------------------------------------------------
-	public AuthorizationSubscriptionCheckResponseDTO() {}
-	
-	//-------------------------------------------------------------------------------------------------
-	public AuthorizationSubscriptionCheckResponseDTO(final SystemResponseDTO consumer, final Set<SystemResponseDTO> publishers) {
-		this.consumer = consumer;
-		this.publishers = publishers;
-	}
+    //=================================================================================================
+    // members
 
-	//-------------------------------------------------------------------------------------------------
-	public SystemResponseDTO getConsumer() { return consumer; }
-	public Set<SystemResponseDTO> getPublishers() { return publishers; }
+    private static final long serialVersionUID = 306170062969145764L;
 
-	//-------------------------------------------------------------------------------------------------
-	public void setConsumer(final SystemResponseDTO consumer) { this.consumer = consumer; }
-	public void setProviders(final Set<SystemResponseDTO> publishers) { this.publishers = publishers; }
+    private SystemResponseDTO consumer;
+    private Set<SystemResponseDTO> publishers;
 
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	public String toString() {
-		return new Gson().toJson(this);
-	}
+    //=================================================================================================
+    // methods
+
+    //-------------------------------------------------------------------------------------------------
+    public AuthorizationSubscriptionCheckResponseDTO() {
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public AuthorizationSubscriptionCheckResponseDTO(final SystemResponseDTO consumer, final Set<SystemResponseDTO> publishers) {
+        this.consumer = consumer;
+        this.publishers = publishers;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public SystemResponseDTO getConsumer() {
+        return consumer;
+    }
+
+    public Set<SystemResponseDTO> getPublishers() {
+        return publishers;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public void setConsumer(final SystemResponseDTO consumer) {
+        this.consumer = consumer;
+    }
+
+    public void setProviders(final Set<SystemResponseDTO> publishers) {
+        this.publishers = publishers;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
+    }
 }

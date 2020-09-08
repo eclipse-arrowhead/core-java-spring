@@ -14,44 +14,57 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import com.google.gson.Gson;
-
 import java.io.Serializable;
 import java.util.List;
 
 public class CloudWithRelaysListResponseDTO implements Serializable {
 
-	//=================================================================================================
-	// members
-	
-	private static final long serialVersionUID = 6232775950375371424L;
-	
-	private List<CloudWithRelaysResponseDTO> data;
-	private long count;
-	
-	//=================================================================================================
-	// methods
-	
-	//-------------------------------------------------------------------------------------------------
-	public CloudWithRelaysListResponseDTO() {}
-	
-	//-------------------------------------------------------------------------------------------------
-	public CloudWithRelaysListResponseDTO(final List<CloudWithRelaysResponseDTO> data, final long count) {
-		this.data = data;
-		this.count = count;
-	}
+    //=================================================================================================
+    // members
 
-	//-------------------------------------------------------------------------------------------------
-	public List<CloudWithRelaysResponseDTO> getData() { return data; }
-	public long getCount() { return count; }
+    private static final long serialVersionUID = 6232775950375371424L;
 
-	//-------------------------------------------------------------------------------------------------
-	public void setData(final List<CloudWithRelaysResponseDTO> data) { this.data = data; }
-	public void setCount(final long count) { this.count = count; }
+    private List<CloudWithRelaysResponseDTO> data;
+    private long count;
 
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	public String toString() {
-		return new Gson().toJson(this);
-	}
+    //=================================================================================================
+    // methods
+
+    //-------------------------------------------------------------------------------------------------
+    public CloudWithRelaysListResponseDTO() {
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public CloudWithRelaysListResponseDTO(final List<CloudWithRelaysResponseDTO> data, final long count) {
+        this.data = data;
+        this.count = count;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public List<CloudWithRelaysResponseDTO> getData() {
+        return data;
+    }
+
+    public long getCount() {
+        return count;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public void setData(final List<CloudWithRelaysResponseDTO> data) {
+        this.data = data;
+    }
+
+    public void setCount(final long count) {
+        this.count = count;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
+    }
 }

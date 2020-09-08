@@ -14,11 +14,12 @@
 
 package eu.arrowhead.common.dto.shared;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.arrowhead.common.CommonConstants;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import com.google.gson.Gson;
-import eu.arrowhead.common.CommonConstants;
 
 public class OrchestrationFlags extends HashMap<String,Boolean> {
 	
@@ -95,7 +96,11 @@ public class OrchestrationFlags extends HashMap<String,Boolean> {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return new Gson().toJson(this);
+		try {
+		return new ObjectMapper().writeValueAsString(this);
+	} catch (final JsonProcessingException ex) {
+		return "toString failure";
+	}
 	}
 	
 	//=================================================================================================

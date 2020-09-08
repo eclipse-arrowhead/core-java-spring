@@ -14,15 +14,15 @@
 
 package eu.arrowhead.common.dto.shared;
 
-import java.io.Serializable;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.ExceptionType;
+
+import java.io.Serializable;
 
 @JsonInclude(Include.NON_NULL)
 public class ErrorMessageDTO implements Serializable, ErrorWrapperDTO {
@@ -83,7 +83,11 @@ public class ErrorMessageDTO implements Serializable, ErrorWrapperDTO {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return new Gson().toJson(this);
+		try {
+		return new ObjectMapper().writeValueAsString(this);
+	} catch (final JsonProcessingException ex) {
+		return "toString failure";
+	}
 	}
 
 	//-------------------------------------------------------------------------------------------------

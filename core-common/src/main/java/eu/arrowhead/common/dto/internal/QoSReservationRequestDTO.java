@@ -14,39 +14,46 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import java.util.List;
-
-import com.google.gson.Gson;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 
+import java.util.List;
+
 public class QoSReservationRequestDTO extends QoSTemporaryLockRequestDTO {
 
-	//=================================================================================================
-	// members
-	
-	private static final long serialVersionUID = -6108159091117829133L;
-	
-	private OrchestrationResultDTO selected;
+    //=================================================================================================
+    // members
 
-	//=================================================================================================
-	// methods
-	
-	//-------------------------------------------------------------------------------------------------
-	public QoSReservationRequestDTO(final OrchestrationResultDTO selected, final SystemRequestDTO requester, final List<OrchestrationResultDTO> orList) {
-		super(requester, orList);
-		this.selected = selected;
-	}
+    private static final long serialVersionUID = -6108159091117829133L;
 
-	//-------------------------------------------------------------------------------------------------
-	public OrchestrationResultDTO getSelected() { return selected; }
-	
-	//-------------------------------------------------------------------------------------------------
-	public void setSelected(final OrchestrationResultDTO selected) { this.selected = selected; }
+    private OrchestrationResultDTO selected;
 
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	public String toString() {
-		return new Gson().toJson(this);
-	}
+    //=================================================================================================
+    // methods
+
+    //-------------------------------------------------------------------------------------------------
+    public QoSReservationRequestDTO(final OrchestrationResultDTO selected, final SystemRequestDTO requester, final List<OrchestrationResultDTO> orList) {
+        super(requester, orList);
+        this.selected = selected;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public OrchestrationResultDTO getSelected() {
+        return selected;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public void setSelected(final OrchestrationResultDTO selected) {
+        this.selected = selected;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
+    }
 }

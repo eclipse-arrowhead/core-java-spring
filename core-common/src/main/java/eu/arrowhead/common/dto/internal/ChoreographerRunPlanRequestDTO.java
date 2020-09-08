@@ -14,9 +14,8 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import com.google.gson.Gson;
-
-import java.io.Serializable;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ChoreographerRunPlanRequestDTO {
 
@@ -40,14 +39,22 @@ public class ChoreographerRunPlanRequestDTO {
     }
 
     //-------------------------------------------------------------------------------------------------
-    public long getId() { return id; }
+    public long getId() {
+        return id;
+    }
 
     //-------------------------------------------------------------------------------------------------
-    public void setId(long id) { this.id = id; }
+    public void setId(long id) {
+        this.id = id;
+    }
 
     //-------------------------------------------------------------------------------------------------
     @Override
     public String toString() {
-        return new Gson().toJson(this);
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
     }
 }

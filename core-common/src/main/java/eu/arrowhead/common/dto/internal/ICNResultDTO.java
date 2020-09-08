@@ -14,40 +14,42 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import java.io.Serializable;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import com.google.gson.Gson;
 import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 
+import java.io.Serializable;
+import java.util.List;
+
 @JsonInclude(Include.NON_NULL)
 public class ICNResultDTO extends OrchestrationResponseDTO implements Serializable {
-	
-	//=================================================================================================
-	// members
 
-	private static final long serialVersionUID = -286883397386724556L;
+    //=================================================================================================
+    // members
 
-	//=================================================================================================
-	// methods
+    private static final long serialVersionUID = -286883397386724556L;
 
-	//-------------------------------------------------------------------------------------------------
-	public ICNResultDTO() {
-		super();
-	}
+    //=================================================================================================
+    // methods
 
-	//-------------------------------------------------------------------------------------------------
-	public ICNResultDTO(final List<OrchestrationResultDTO> response) {
-		super(response);
-	}
+    //-------------------------------------------------------------------------------------------------
+    public ICNResultDTO() {
+        super();
+    }
 
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	public String toString() {
-		return new Gson().toJson(this);
-	}
+    //-------------------------------------------------------------------------------------------------
+    public ICNResultDTO(final List<OrchestrationResultDTO> response) {
+        super(response);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
+    }
 }

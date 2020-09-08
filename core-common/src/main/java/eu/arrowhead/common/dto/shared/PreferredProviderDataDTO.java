@@ -14,10 +14,11 @@
 
 package eu.arrowhead.common.dto.shared;
 
-import java.io.Serializable;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.Serializable;
 
 public class PreferredProviderDataDTO implements Serializable {
 	
@@ -61,7 +62,11 @@ public class PreferredProviderDataDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return new Gson().toJson(this);
+		try {
+		return new ObjectMapper().writeValueAsString(this);
+	} catch (final JsonProcessingException ex) {
+		return "toString failure";
+	}
 	}
 	
 	//-------------------------------------------------------------------------------------------------

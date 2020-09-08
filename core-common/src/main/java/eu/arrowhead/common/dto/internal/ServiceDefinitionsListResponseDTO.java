@@ -14,49 +14,62 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import java.io.Serializable;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import com.google.gson.Gson;
 import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
+
+import java.io.Serializable;
+import java.util.List;
 
 @JsonInclude(Include.NON_NULL)
 public class ServiceDefinitionsListResponseDTO implements Serializable {
 
-	//=================================================================================================
-	// members
-	
-	private static final long serialVersionUID = 6737069652359698446L;
-	
-	private List<ServiceDefinitionResponseDTO> data;
-	private long count;
-	
-	//=================================================================================================
-	// methods
-	
-	//-------------------------------------------------------------------------------------------------
-	public ServiceDefinitionsListResponseDTO() {}
+    //=================================================================================================
+    // members
 
-	//-------------------------------------------------------------------------------------------------
-	public ServiceDefinitionsListResponseDTO(final List<ServiceDefinitionResponseDTO> data, final long count) {
-		this.data = data;
-		this.count = count;
-	}
+    private static final long serialVersionUID = 6737069652359698446L;
 
-	//-------------------------------------------------------------------------------------------------
-	public List<ServiceDefinitionResponseDTO> getData() { return data; }
-	public long getCount() { return count; }
-	
-	//-------------------------------------------------------------------------------------------------
-	public void setData(final List<ServiceDefinitionResponseDTO> data) { this.data = data; }
-	public void setCount(final long count) { this.count = count; }
+    private List<ServiceDefinitionResponseDTO> data;
+    private long count;
 
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	public String toString() {
-		return new Gson().toJson(this);
-	}
+    //=================================================================================================
+    // methods
+
+    //-------------------------------------------------------------------------------------------------
+    public ServiceDefinitionsListResponseDTO() {
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public ServiceDefinitionsListResponseDTO(final List<ServiceDefinitionResponseDTO> data, final long count) {
+        this.data = data;
+        this.count = count;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public List<ServiceDefinitionResponseDTO> getData() {
+        return data;
+    }
+
+    public long getCount() {
+        return count;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public void setData(final List<ServiceDefinitionResponseDTO> data) {
+        this.data = data;
+    }
+
+    public void setCount(final long count) {
+        this.count = count;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
+    }
 }

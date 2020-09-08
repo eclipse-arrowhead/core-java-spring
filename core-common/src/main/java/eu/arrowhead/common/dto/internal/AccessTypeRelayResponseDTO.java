@@ -14,39 +14,49 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.Serializable;
 
 public class AccessTypeRelayResponseDTO implements Serializable {
-	
-	//=================================================================================================
-	// members
-	
-	private static final long serialVersionUID = -4308914768098206657L;
-	
-	private boolean directAccess;
-	
-	//=================================================================================================
-	// methods
 
-	//-------------------------------------------------------------------------------------------------
-	public AccessTypeRelayResponseDTO() {}
+    //=================================================================================================
+    // members
 
-	//-------------------------------------------------------------------------------------------------
-	public AccessTypeRelayResponseDTO(final boolean directAccess) {
-		this.directAccess = directAccess;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	public boolean isDirectAccess() { return directAccess; }
+    private static final long serialVersionUID = -4308914768098206657L;
 
-	//-------------------------------------------------------------------------------------------------
-	public void setDirectAccess(final boolean directAccess) { this.directAccess = directAccess; }
+    private boolean directAccess;
 
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	public String toString() {
-		return new Gson().toJson(this);
-	}
+    //=================================================================================================
+    // methods
+
+    //-------------------------------------------------------------------------------------------------
+    public AccessTypeRelayResponseDTO() {
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public AccessTypeRelayResponseDTO(final boolean directAccess) {
+        this.directAccess = directAccess;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public boolean isDirectAccess() {
+        return directAccess;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public void setDirectAccess(final boolean directAccess) {
+        this.directAccess = directAccess;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
+    }
 }

@@ -14,41 +14,55 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import java.io.Serializable;
-
-import com.google.gson.Gson;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
+
+import java.io.Serializable;
 
 public class CloudSystemFormDTO implements Serializable {
 
-	private static final long serialVersionUID = -1391881322265049372L;
-	
-	private CloudResponseDTO cloud;
-	private SystemResponseDTO system;
-	
-	//=================================================================================================
-	// methods
-	
-	//-------------------------------------------------------------------------------------------------
-	public CloudSystemFormDTO() {}
-	
-	//-------------------------------------------------------------------------------------------------
-	public CloudSystemFormDTO(final CloudResponseDTO cloud, final SystemResponseDTO system) {
-		this.cloud = cloud;
-		this.system = system;
-	}
+    private static final long serialVersionUID = -1391881322265049372L;
 
-	//-------------------------------------------------------------------------------------------------
-	public CloudResponseDTO getCloud() { return cloud; }
-	public SystemResponseDTO getSystem() { return system; }
+    private CloudResponseDTO cloud;
+    private SystemResponseDTO system;
 
-	//-------------------------------------------------------------------------------------------------
-	public void setCloud(final CloudResponseDTO cloud) { this.cloud = cloud; }
-	public void setSystem(final SystemResponseDTO system) { this.system = system; }
+    //=================================================================================================
+    // methods
 
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	public String toString() {
-		return new Gson().toJson(this);
-	}
+    //-------------------------------------------------------------------------------------------------
+    public CloudSystemFormDTO() {
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public CloudSystemFormDTO(final CloudResponseDTO cloud, final SystemResponseDTO system) {
+        this.cloud = cloud;
+        this.system = system;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public CloudResponseDTO getCloud() {
+        return cloud;
+    }
+
+    public SystemResponseDTO getSystem() {
+        return system;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public void setCloud(final CloudResponseDTO cloud) {
+        this.cloud = cloud;
+    }
+
+    public void setSystem(final SystemResponseDTO system) {
+        this.system = system;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
+    }
 }
