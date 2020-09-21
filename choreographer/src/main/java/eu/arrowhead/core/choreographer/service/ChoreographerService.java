@@ -9,8 +9,10 @@ import eu.arrowhead.common.database.entity.ChoreographerAction;
 import eu.arrowhead.common.database.entity.ChoreographerPlan;
 import eu.arrowhead.common.database.entity.ChoreographerRunningStep;
 import eu.arrowhead.common.database.entity.ChoreographerStep;
+import eu.arrowhead.common.database.entity.ChoreographerStepDetail;
 import eu.arrowhead.common.database.entity.ChoreographerStepNextStepConnection;
 import eu.arrowhead.common.dto.internal.ChoreographerStatusType;
+import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerSessionRunningStepDataDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFlags;
@@ -18,8 +20,10 @@ import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
 import org.apache.logging.log4j.LogManager;
@@ -35,7 +39,9 @@ import org.springframework.web.util.UriComponents;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.sound.midi.SysexMessage;
 import java.security.PublicKey;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashSet;
 import java.util.List;
@@ -52,6 +58,9 @@ public class ChoreographerService {
 
     @Autowired
     private ChoreographerDBService choreographerDBService;
+
+    @Autowired
+    private ChoreographerDriver choreographerDriver;
 
     @Autowired
     private HttpService httpService;
@@ -91,7 +100,7 @@ public class ChoreographerService {
         long sessionId = startSessionDTO.getSessionId();
 
         ChoreographerPlan plan = choreographerDBService.getPlanById(startSessionDTO.getPlanId());
-        ChoreographerAction firstAction = plan.getFirstAction();
+        /*ChoreographerAction firstAction = plan.getFirstAction();
         Set<ChoreographerStep> firstSteps = new HashSet<>(firstAction.getFirstStepEntries());
 
         choreographerDBService.setSessionStatus(sessionId, ChoreographerStatusType.RUNNING);
@@ -103,7 +112,10 @@ public class ChoreographerService {
                 choreographerDBService.setSessionStatus(sessionId, ChoreographerStatusType.ABORTED);
                 logger.debug(e.getMessage(), e);
             }
-        });
+        });*/
+
+
+
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -259,6 +271,22 @@ public class ChoreographerService {
         throw new ArrowheadException("Choreographer can't find orchestration process URI.");
     }
 
+    /*
     //-------------------------------------------------------------------------------------------------
-    private 
+    private Set<String> getServiceDefinitionsFromPlan(ChoreographerPlan plan) {
+        Set<String> serviceDefinitions = new HashSet<>();
+
+        final Set<ChoreographerAction> actions = plan.getActions();
+        for (ChoreographerAction action : actions) {
+            final Set<ChoreographerStep> steps = action.getStepEntries();
+            for (ChoreographerStep step : steps) {
+                final Set<ChoreographerStepDetail> stepDetails = step.getStepDetails();
+                for (ChoreographerStepDetail stepDetail : stepDetails) {
+                    serviceDefinitions.add(stepDetail.getServiceDefinition().toLowerCase());
+                }
+            }
+        }
+
+        return serviceDefinitions;
+    }*/
 }

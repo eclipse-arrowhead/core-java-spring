@@ -77,7 +77,7 @@ public class ChoreographerDriverTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void estQueryServiceRegistryByServiceDefinitionListNullList() {
+    public void testQueryServiceRegistryByServiceDefinitionListNullList() {
         choreographerDriver.queryServiceRegistryByServiceDefinitionList(null);
     }
 

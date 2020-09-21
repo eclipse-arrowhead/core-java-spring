@@ -5,6 +5,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.common.exception.ArrowheadException;
 import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -15,7 +16,11 @@ import org.springframework.jms.support.converter.MappingJackson2MessageConverter
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessageType;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.util.ErrorHandler;
 import org.springframework.web.util.UriComponents;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import javax.jms.ConnectionFactory;
 import java.util.List;
@@ -65,6 +70,15 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
         converter.setTargetType(MessageType.TEXT);
         converter.setTypeIdPropertyName("_type");
         return converter;
+    }
+
+    @Service
+    public class ExampleErrorHandler implements ErrorHandler {
+
+        @Override
+        public void handleError(Throwable throwable) {
+            System.out.println("Hello");
+        }
     }
 
     @Override

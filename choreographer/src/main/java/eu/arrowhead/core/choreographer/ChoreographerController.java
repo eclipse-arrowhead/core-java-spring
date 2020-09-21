@@ -7,7 +7,11 @@ import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
+import eu.arrowhead.common.database.entity.ChoreographerAction;
+import eu.arrowhead.common.database.entity.ChoreographerPlan;
 import eu.arrowhead.common.database.entity.ChoreographerSession;
+import eu.arrowhead.common.database.entity.ChoreographerStep;
+import eu.arrowhead.common.database.entity.ChoreographerStepDetail;
 import eu.arrowhead.common.dto.internal.ChoreographerExecutorListResponseDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerExecutorSearchResponseDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerPlanRequestDTO;
@@ -21,7 +25,9 @@ import eu.arrowhead.common.dto.shared.ChoreographerSessionRunningStepDataDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
+import eu.arrowhead.core.choreographer.service.ChoreographerDriver;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -48,7 +54,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.naming.InsufficientResourcesException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static eu.arrowhead.common.CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_REGISTER;
 import static eu.arrowhead.common.CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER;
@@ -108,6 +118,7 @@ public class ChoreographerController {
     private static final String EXECUTOR_VERSION_NULL_ERROR_MESSAGE = "Executor version number can't be null.";
     private static final String EXECUTOR_VERSION_MIN_VERSION_MAX_VERSION_AMBIGUOUS_ERROR_MESSAGE = "Minimum and maximum version requirements can only be used if version requirement is left blank. Version requirement can only be used if minimum and maximum version requirements are left blank.";
     private static final String EXECUTOR_MIN_VERSION_GREATER_THAN_MAX_VERSION_ERROR_MESSAGE = "Maximum version requirement must be greater or equal to the minimum version requirement.";
+    private static final String CHOREOGRAPHER_INSUFFICIENT_PROVIDERS_FOR_PLAN_ERROR_MESSAGE = "Can't start plan because not every service definition has a corresponding provider.";
 
 
     private static final String EXECUTOR_REQUEST_PARAM_SERVICE_DEFINITION = "service-definition";
@@ -122,6 +133,9 @@ public class ChoreographerController {
 
     @Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired
+    private ChoreographerDriver choreographerDriver;
 
     @Autowired
     private JmsTemplate jmsTemplate;
@@ -240,6 +254,12 @@ public class ChoreographerController {
     @ResponseBody public void startPlan(@RequestBody final List<ChoreographerRunPlanRequestDTO> requests) {
         for (final ChoreographerRunPlanRequestDTO request : requests) {
             logger.debug("startPlan started...");
+
+            //CHECK EXECUTORS AND PROVIDERS
+
+            checkIfPlanHasEveryRequiredProvider(request, CommonConstants.CHOREOGRAPHER_URI + START_SESSION_MGMT_URI);
+
+
             ChoreographerSession session = choreographerDBService.initiateSession(request.getId());
 
             logger.debug("Sending a message to start-session.");
@@ -497,5 +517,38 @@ public class ChoreographerController {
         if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
             throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
         }
+    }
+
+    private void checkIfPlanHasEveryRequiredProvider (final ChoreographerRunPlanRequestDTO request, final String origin) {
+        ChoreographerPlan plan = choreographerDBService.getPlanById(request.getId());
+
+        Set<String> serviceDefinitionsFromPlan = getServiceDefinitionsFromPlan(plan);
+        Set<String> serviceDefinitionsByProviders = new HashSet<>();
+
+        for (ServiceRegistryResponseDTO dto : choreographerDriver.queryServiceRegistryByServiceDefinitionList(new ArrayList<>(serviceDefinitionsFromPlan)).getData()) {
+            serviceDefinitionsByProviders.add(dto.getServiceDefinition().getServiceDefinition());
+        }
+
+        if (!serviceDefinitionsByProviders.equals(serviceDefinitionsFromPlan)) {
+            throw new BadPayloadException(CHOREOGRAPHER_INSUFFICIENT_PROVIDERS_FOR_PLAN_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    private Set<String> getServiceDefinitionsFromPlan(ChoreographerPlan plan) {
+        Set<String> serviceDefinitions = new HashSet<>();
+
+        final Set<ChoreographerAction> actions = plan.getActions();
+        for (ChoreographerAction action : actions) {
+            final Set<ChoreographerStep> steps = action.getStepEntries();
+            for (ChoreographerStep step : steps) {
+                final Set<ChoreographerStepDetail> stepDetails = step.getStepDetails();
+                for (ChoreographerStepDetail stepDetail : stepDetails) {
+                    serviceDefinitions.add(stepDetail.getServiceDefinition().toLowerCase());
+                }
+            }
+        }
+
+        return serviceDefinitions;
     }
 }

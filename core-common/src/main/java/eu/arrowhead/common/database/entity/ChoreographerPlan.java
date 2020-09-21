@@ -40,7 +40,7 @@ public class ChoreographerPlan {
     @JoinColumn(name = "firstActionId", referencedColumnName = "id")
     private ChoreographerAction firstAction;
 
-    @OneToMany(mappedBy = "plan", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "plan", fetch = FetchType.EAGER, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<ChoreographerAction> actions = new HashSet<>();
 
