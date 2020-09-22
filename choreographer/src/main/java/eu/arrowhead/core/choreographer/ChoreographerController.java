@@ -119,6 +119,7 @@ public class ChoreographerController {
     private static final String EXECUTOR_VERSION_MIN_VERSION_MAX_VERSION_AMBIGUOUS_ERROR_MESSAGE = "Minimum and maximum version requirements can only be used if version requirement is left blank. Version requirement can only be used if minimum and maximum version requirements are left blank.";
     private static final String EXECUTOR_MIN_VERSION_GREATER_THAN_MAX_VERSION_ERROR_MESSAGE = "Maximum version requirement must be greater or equal to the minimum version requirement.";
     private static final String CHOREOGRAPHER_INSUFFICIENT_PROVIDERS_FOR_PLAN_ERROR_MESSAGE = "Can't start plan because not every service definition has a corresponding provider.";
+    private static final String CHOREOGRAPHER_INSUFFICIENT_EXECUTORS_FOR_PLAN_ERROR_MESSAGE = "Can't start plan because not every service definition has a corresponding executor.";
 
 
     private static final String EXECUTOR_REQUEST_PARAM_SERVICE_DEFINITION = "service-definition";
@@ -255,10 +256,8 @@ public class ChoreographerController {
         for (final ChoreographerRunPlanRequestDTO request : requests) {
             logger.debug("startPlan started...");
 
-            //CHECK EXECUTORS AND PROVIDERS
-
             checkIfPlanHasEveryRequiredProvider(request, CommonConstants.CHOREOGRAPHER_URI + START_SESSION_MGMT_URI);
-
+            checkIfPlanHasEveryRequiredExecutor(request, CommonConstants.CHOREOGRAPHER_URI + START_SESSION_MGMT_URI);
 
             ChoreographerSession session = choreographerDBService.initiateSession(request.getId());
 
@@ -519,6 +518,7 @@ public class ChoreographerController {
         }
     }
 
+    //-------------------------------------------------------------------------------------------------
     private void checkIfPlanHasEveryRequiredProvider (final ChoreographerRunPlanRequestDTO request, final String origin) {
         ChoreographerPlan plan = choreographerDBService.getPlanById(request.getId());
 
@@ -533,6 +533,36 @@ public class ChoreographerController {
             throw new BadPayloadException(CHOREOGRAPHER_INSUFFICIENT_PROVIDERS_FOR_PLAN_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
     }
+
+    //-------------------------------------------------------------------------------------------------
+    private void checkIfPlanHasEveryRequiredExecutor(final ChoreographerRunPlanRequestDTO request, final String origin) {
+        ChoreographerPlan plan = choreographerDBService.getPlanById(request.getId());
+
+        final Set<ChoreographerAction> actions = plan.getActions();
+        for (ChoreographerAction action : actions) {
+            final Set<ChoreographerStep> steps = action.getStepEntries();
+            for (ChoreographerStep step : steps) {
+                final Set<ChoreographerStepDetail> stepDetails = step.getStepDetails();
+                for (ChoreographerStepDetail stepDetail : stepDetails) {
+                    Integer maxVersion = stepDetail.getMaxVersion();
+                    Integer minVersion = stepDetail.getMinVersion();
+                    Integer version = stepDetail.getVersion();
+                    String serviceDefinition = stepDetail.getServiceDefinition();
+
+                    if (maxVersion != null && minVersion != null) {
+                        if (choreographerDBService.getExecutorByServiceDefinitionAndMinMaxVersion(serviceDefinition, minVersion, maxVersion).getData().isEmpty()) {
+                            throw new BadPayloadException(CHOREOGRAPHER_INSUFFICIENT_EXECUTORS_FOR_PLAN_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+                        }
+                    } else if (version != null) {
+                        if (choreographerDBService.getExecutorByServiceDefinitionAndVersion(serviceDefinition, version).getData().isEmpty()) {
+                            throw new BadPayloadException(CHOREOGRAPHER_INSUFFICIENT_EXECUTORS_FOR_PLAN_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
     //-------------------------------------------------------------------------------------------------
     private Set<String> getServiceDefinitionsFromPlan(ChoreographerPlan plan) {

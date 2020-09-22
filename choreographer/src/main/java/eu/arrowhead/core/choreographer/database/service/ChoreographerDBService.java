@@ -191,12 +191,16 @@ public class ChoreographerDBService {
                         }
 
                         if (service.getMinVersionRequirement() != null && service.getMaxVersionRequirement() != null && service.getVersionRequirement() == null) {
-                            stepDetail.setServiceDefinition(service.getServiceDefinitionRequirement());
-                            stepDetail.setMaxVersion(service.getMaxVersionRequirement());
-                            stepDetail.setMinVersion(service.getMinVersionRequirement());
-                            stepDetail.setType(type);
-                            stepDetail.setDto(ow.writeValueAsString(ofrRequestDTO));
-                            stepDetail.setStep(step);
+                            if (service.getMinVersionRequirement() < service.getMaxVersionRequirement()) {
+                                stepDetail.setServiceDefinition(service.getServiceDefinitionRequirement());
+                                stepDetail.setMaxVersion(service.getMaxVersionRequirement());
+                                stepDetail.setMinVersion(service.getMinVersionRequirement());
+                                stepDetail.setType(type);
+                                stepDetail.setDto(ow.writeValueAsString(ofrRequestDTO));
+                                stepDetail.setStep(step);
+                            } else {
+                                throw new InvalidParameterException("Minimum version must be lesser than maximum version.");
+                            }
                         }
 
                         if (service.getVersionRequirement() != null && service.getMinVersionRequirement() != null && service.getMaxVersionRequirement() != null) {
