@@ -86,7 +86,12 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 			log.debug("Provider name is not set in the body when use {}", requestTarget);
 			return; // we can't continue the check and the endpoint will throw BadPayloadException
 		}
-		
+	
+		// Translator must be able to register external services:
+		if (clientCN.startsWith(CommonConstants.CORE_SYSTEM_TRANSLATOR.toLowerCase())) {
+			return;
+		}
+
 		if (!providerName.equalsIgnoreCase(clientName) && !providerName.replaceAll("_", "").equalsIgnoreCase(clientName)) {
 			log.debug("Provider system name and certificate common name do not match! Registering denied!");
 			throw new AuthException("Provider system name(" + providerName + ") and certificate common name (" + clientCN + ") do not match!", HttpStatus.UNAUTHORIZED.value());
@@ -165,6 +170,11 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 					if (service.getServiceDefinition().equalsIgnoreCase(requestBody.getServiceDefinitionRequirement().trim())) {
 						return;
 					}
+				}
+
+				// Translator must be able to register external services:
+				if (clientCN.startsWith(CommonConstants.CORE_SYSTEM_TRANSLATOR.toLowerCase())) {
+					return;
 				}
 			}
 			

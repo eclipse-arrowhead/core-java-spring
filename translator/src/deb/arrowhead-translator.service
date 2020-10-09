@@ -1,0 +1,14 @@
+[Unit]
+Description=arrowhead-translator
+After=network.target mysql.target
+
+[Service]
+WorkingDirectory=/etc/arrowhead/systems/translator
+ExecStart=/usr/bin/java -Dlog4j.configurationFile=file:/etc/arrowhead/systems/translator/log4j2.xml -jar /usr/share/arrowhead/translator/arrowhead-translator.jar 
+TimeoutStopSec=5
+Type=simple
+User=arrowhead
+Group=arrowhead
+
+[Install]
+WantedBy=default.target

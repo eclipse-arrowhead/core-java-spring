@@ -79,7 +79,11 @@ public enum CoreSystem {
 																				CoreSystemService.CERTIFICATE_AUTHORITY_LIST_TRUSTED_KEYS_SERVICE,
 																				CoreSystemService.CERTIFICATE_AUTHORITY_CHECK_TRUSTED_KEY_SERVICE,
 																				CoreSystemService.CERTIFICATE_AUTHORITY_ADD_TRUSTED_KEY_SERVICE,
-																				CoreSystemService.CERTIFICATE_AUTHORITY_DELETE_TRUSTED_KEY_SERVICE));
+																				CoreSystemService.CERTIFICATE_AUTHORITY_DELETE_TRUSTED_KEY_SERVICE)),
+																				
+	TRANSLATOR(Defaults.DEFAULT_TRANSLATOR_PORT, List.of(CoreSystemService.TRANSLATOR_SERVICE,
+												   CoreSystemService.TRANSLATOR_FIWARE_SERVICE,
+												   CoreSystemService.TRANSLATOR_PLUGIN_SERVICE));
 	
 	//=================================================================================================
 	// members
