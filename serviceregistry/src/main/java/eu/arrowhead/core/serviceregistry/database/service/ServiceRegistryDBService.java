@@ -14,6 +14,7 @@
 
 package eu.arrowhead.core.serviceregistry.database.service;
 
+import java.sql.*;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import com.mysql.cj.protocol.Resultset;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,7 +100,19 @@ public class ServiceRegistryDBService {
 	
 	private static final String COULD_NOT_DELETE_SYSTEM_ERROR_MESSAGE = "Could not delete System, with given parameters";
 	private static final String PORT_RANGE_ERROR_MESSAGE = "Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".";
-	
+
+	@Value("${spring.datasource.url}")
+	private String url;
+
+	@Value("${spring.datasource.username}")
+	private String username;
+
+	@Value("${spring.datasource.password}")
+	private String password;
+
+	@Value("${spring.datasource.driver-class-name}")
+	private String driverclassName;
+
 	//=================================================================================================
 	// methods
 	
@@ -713,11 +727,13 @@ public class ServiceRegistryDBService {
 		logger.debug("createServiceRegistry started...");
 		Assert.notNull(serviceDefinition, "Service definition is not specified.");
 		Assert.notNull(provider, "Provider is not specified.");
-		
-		checkConstraintOfSystemRegistryTable(serviceDefinition, provider);
+
+		//-------------------EDITED BY APARAJITA---------------------------//
+		//checkConstraintOfSystemRegistryTable(serviceDefinition, provider);
 		checkSRSecurityValue(securityType, provider.getAuthenticationInfo());
 		checkSRServiceInterfacesList(interfaces);
-		
+		//-------------------EDITED BY APARAJITA---------------------------//
+		//removeServiceRegistry(serviceDefinition.getServiceDefinition(), provider.getSystemName(), provider.getAddress(),provider.getPort());
 		try {
 			final ServiceSecurityType secure = securityType == null ? ServiceSecurityType.NOT_SECURE : securityType;
 			final String validatedServiceUri = Utilities.isEmpty(serviceUri) ? null : serviceUri.trim();
@@ -744,10 +760,12 @@ public class ServiceRegistryDBService {
 		logger.debug("updateServiceRegistry started...");
 		Assert.notNull(srEntry, "ServiceRegistry Entry is not specified.");	
 		Assert.notNull(serviceDefinition, "Service definition is not specified.");
-		Assert.notNull(provider, "Provider is not specified.");		
-		
+		Assert.notNull(provider, "Provider is not specified.");
+
+		//-------------RDITED BY APARAJITA------------------//
 		if (checkServiceRegistryIfUniqueValidationNeeded(srEntry, serviceDefinition, provider)) {
-			checkConstraintOfSystemRegistryTable(serviceDefinition, provider);			
+			//checkConstraintOfSystemRegistryTable(serviceDefinition, provider);
+			checkConstraintOfSystemRegistryTable(serviceDefinition, serviceUri);
 		}
 		
 		checkSRSecurityValue(securityType, provider.getAuthenticationInfo());
@@ -780,14 +798,17 @@ public class ServiceRegistryDBService {
 				throw new InvalidParameterException("No system with name: " + validatedSystemName + ", address: " + validatedSystemAddress + ", port: " + providerSystemPort + 
 													" exists.");
 			}
-			
-			final Optional<ServiceRegistry> optServiceRegistryEntry = serviceRegistryRepository.findByServiceDefinitionAndSystem(optServiceDefinition.get(), optProviderSystem.get());
+
+			//------------------------EDITED BY APARAJITA----------------------------//
+			final List<ServiceRegistry> optServiceRegistryEntry = serviceRegistryRepository.findByServiceDefinition(optServiceDefinition.get());
 			if (optServiceRegistryEntry.isEmpty()) {
 				throw new InvalidParameterException("No Service Registry entry with provider: (" + validatedSystemName + ", " + validatedSystemAddress + ":" + providerSystemPort +
-													") and service definition: " + validatedServiceDefinition + " exists.");
+						") and service definition: " + validatedServiceDefinition + " exists.");
 			}
-			
-			removeServiceRegistryEntryById(optServiceRegistryEntry.get().getId()); 
+			for(int i=0; i<optServiceRegistryEntry.size();i++){
+				removeServiceRegistryEntryById(optServiceRegistryEntry.get(i).getId());
+			}
+
 		} catch (final InvalidParameterException ex) {
 			throw ex;
 		} catch (final Exception ex) {
@@ -795,14 +816,15 @@ public class ServiceRegistryDBService {
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
-	
+
+
 	//-------------------------------------------------------------------------------------------------
-	@SuppressWarnings({"squid:S3655", "squid:S3776"})
+	/*@SuppressWarnings({"squid:S3655", "squid:S3776"})
 	public ServiceQueryResultDTO queryRegistry(final ServiceQueryFormDTO form) {
 		logger.debug("queryRegistry is started...");
 		Assert.notNull(form, "Form is null.");
 		Assert.isTrue(!Utilities.isEmpty(form.getServiceDefinitionRequirement()), "Service definition requirement is null or blank");
-		
+
 		final String serviceDefinitionRequirement = form.getServiceDefinitionRequirement().toLowerCase().trim();
 		try {
 			final Optional<ServiceDefinition> optServiceDefinition = serviceDefinitionRepository.findByServiceDefinition(serviceDefinitionRequirement);
@@ -863,7 +885,91 @@ public class ServiceRegistryDBService {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
-	}
+	}*/
+	//-------Added By Aparajita
+	@SuppressWarnings({"squid:S3655", "squid:S3776"})
+	public ServiceQueryResultDTO queryRegistry(final ServiceQueryFormDTO form) throws SQLException {
+		logger.debug("queryRegistry is started...");
+		Assert.notNull(form, "Form is null.");
+		//Assert.isTrue(!Utilities.isEmpty(form.getServiceDefinitionRequirement()) || !Utilities.isEmpty(form.getMetadataRequirements().toString()), "Service definition requirement is null or blank");
+		String serviceDefinitionRequirement="";
+		if(Utilities.isEmpty(form.getServiceDefinitionRequirement())) {
+			String metaData = form.getMetadataRequirements().toString();
+			String metaDataRefined= metaData.replace("{", "").replace("}", "").trim();
+			String sqlStmt = "select service_definition from arrowhead.service_definition where id IN(select service_id FROM arrowhead.service_registry where metadata=" + "\"" +
+					metaDataRefined + "\");";
+			DriverManager.registerDriver(new com.mysql.cj.jdbc.Driver());
+			Connection conn = DriverManager.getConnection(url, username, password);
+			Statement stmt = conn.createStatement();
+			ResultSet rs;
+			rs = stmt.executeQuery(sqlStmt);
+			while (rs.next()) {
+				serviceDefinitionRequirement = rs.getString(1);
+			}
+		}
+		else {
+			 serviceDefinitionRequirement = form.getServiceDefinitionRequirement().toLowerCase().trim();
+		}
+		try {
+			final Optional<ServiceDefinition> optServiceDefinition = serviceDefinitionRepository.findByServiceDefinition(serviceDefinitionRequirement);
+			if (optServiceDefinition.isEmpty()) {
+				// no service definition found
+				logger.debug("Service definition not found: {}", serviceDefinitionRequirement);
+				return DTOConverter.convertListOfServiceRegistryEntriesToServiceQueryResultDTO(null, 0);
+			}
+
+				final List<ServiceRegistry> providedServices = new ArrayList<>(serviceRegistryRepository.findByServiceDefinition(optServiceDefinition.get()));
+				final int unfilteredHits = providedServices.size();
+				logger.debug("Potential service providers before filtering: {}", unfilteredHits);
+				if (providedServices.isEmpty()) {
+					// no providers found
+					return DTOConverter.convertListOfServiceRegistryEntriesToServiceQueryResultDTO(providedServices, unfilteredHits);
+				}
+
+				// filter on interfaces
+				if (form.getInterfaceRequirements() != null && !form.getInterfaceRequirements().isEmpty()) {
+					final List<String> normalizedInterfaceRequirements = RegistryUtils.normalizeInterfaceNames(form.getInterfaceRequirements());
+					RegistryUtils.filterOnInterfaces(providedServices, normalizedInterfaceRequirements);
+				}
+
+				// filter on security type
+				if (!providedServices.isEmpty() && form.getSecurityRequirements() != null && !form.getSecurityRequirements().isEmpty()) {
+					final List<ServiceSecurityType> normalizedSecurityTypes = RegistryUtils.normalizeSecurityTypes(form.getSecurityRequirements());
+					RegistryUtils.filterOnSecurityType(providedServices, normalizedSecurityTypes);
+				}
+
+				// filter on version
+				if (!providedServices.isEmpty()) {
+					if (form.getVersionRequirement() != null) {
+						RegistryUtils.filterOnVersion(providedServices, form.getVersionRequirement().intValue());
+					} else if (form.getMinVersionRequirement() != null || form.getMaxVersionRequirement() != null) {
+						final int minVersion = form.getMinVersionRequirement() == null ? 1 : form.getMinVersionRequirement().intValue();
+						final int maxVersion = form.getMaxVersionRequirement() == null ? Integer.MAX_VALUE : form.getMaxVersionRequirement().intValue();
+						RegistryUtils.filterOnVersion(providedServices, minVersion, maxVersion);
+					}
+				}
+
+				// filter on metadata
+				if (!providedServices.isEmpty() && form.getMetadataRequirements() != null && !form.getMetadataRequirements().isEmpty()) {
+					final Map<String,String> normalizedMetadata = RegistryUtils.normalizeMetadata(form.getMetadataRequirements());
+					RegistryUtils.filterOnMeta(providedServices, normalizedMetadata);
+				}
+
+				// filter on ping
+				if (!providedServices.isEmpty() && form.getPingProviders()) {
+					RegistryUtils.filterOnPing(providedServices, pingTimeout);
+				}
+
+				logger.debug("Potential service providers after filtering: {}", providedServices.size());
+
+				return DTOConverter.convertListOfServiceRegistryEntriesToServiceQueryResultDTO(providedServices, unfilteredHits);
+			} catch (final IllegalStateException e) {
+				throw new InvalidParameterException("Invalid keys in the metadata requirements (whitespace only differences)");
+			} catch (final Exception ex) {
+				logger.debug(ex.getMessage(), ex);
+				throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			}
+		}
 
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
@@ -1137,15 +1243,38 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkConstraintOfSystemRegistryTable(final ServiceDefinition serviceDefinition, final System provider) {
+	/*private void checkConstraintOfSystemRegistryTable(final ServiceDefinition serviceDefinition, final System provider) {
 		logger.debug("checkConstraintOfSystemRegistryTable started...");
-		
+
 		try {
-			final Optional<ServiceRegistry> find = serviceRegistryRepository.findByServiceDefinitionAndSystem(serviceDefinition, provider);
+			//final Optional<ServiceRegistry> find = serviceRegistryRepository.findByServiceDefinitionAndSystem(serviceDefinition, provider);
 			if (find.isPresent()) {
 				throw new InvalidParameterException("Service Registry entry with provider: (" + provider.getSystemName() + ", " + provider.getAddress() + ":" + provider.getPort() +
 													") and service definition: " + serviceDefinition.getServiceDefinition() + " already exists.");
 			}
+
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}*/
+//-------------------below function checkConstraintOfSystemRegistryTable() Added by APARAJITA----------------------------------//
+	private void checkConstraintOfSystemRegistryTable(final ServiceDefinition serviceDefinition, final String serviceUri) {
+		logger.debug("checkConstraintOfSystemRegistryTable started...");
+
+		try {
+			final List<ServiceRegistry> find = serviceRegistryRepository.findByServiceDefinition(serviceDefinition);
+			int i=0;
+			while(i<find.size()){
+				if (find.get(i).getServiceUri().equalsIgnoreCase(serviceUri)) {
+					throw new InvalidParameterException("Service Registry entry with serviceUri "+serviceUri+" and service definition: " + serviceDefinition.getServiceDefinition() + " already exists.");
+				}
+				else
+					i++;
+			}
+
 		} catch (final InvalidParameterException ex) {
 			throw ex;
 		} catch (final Exception ex) {
@@ -1245,5 +1374,9 @@ public class ServiceRegistryDBService {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
+	}
+
+	private void printOut(final Object object) {
+		java.lang.System.out.println(Utilities.toPrettyJson(Utilities.toJson(object)));
 	}
 }
