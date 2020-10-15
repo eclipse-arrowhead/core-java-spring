@@ -146,7 +146,7 @@ CREATE TABLE IF NOT EXISTS `service_registry` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `service_registry_pair` (`service_id`,`system_id`),
+  UNIQUE KEY `service_registry_pair` (`service_id`,`service_uri`),
   KEY `service_registry_system` (`system_id`),
   CONSTRAINT `service_registry_service` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
   CONSTRAINT `service_registry_system` FOREIGN KEY (`system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE
