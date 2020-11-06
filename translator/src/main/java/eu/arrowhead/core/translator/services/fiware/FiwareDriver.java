@@ -28,6 +28,7 @@ public class FiwareDriver {
     private final int fiwarePort;
 
     public FiwareDriver(HttpService httpService, String fiwareHost, int fiwarePort) {
+        logger.info(String.format("New FIWARE Driver with Broker host: [%s] port: [%d]", fiwareHost, fiwarePort));
         Assert.notNull(httpService, "No HttpService");
         Assert.notNull(fiwareHost, "No fiwareHost");
         Assert.state(!fiwareHost.isBlank(), String.format("No valid fiwareHost (blank) [%s]", fiwareHost));
@@ -147,39 +148,18 @@ public class FiwareDriver {
     }
 
     //-------------------------------------------------------------------------------------------------
-    private UriComponents getUriTypes() {
-        return getUriBuilder().path(fiwareURLservices.getTypesURL()).build();
-    }
-
-    //-------------------------------------------------------------------------------------------------
     private UriComponents getUriTypes(Map<String, Object> queryParams) {
+        Assert.notNull(queryParams, "queryParams is null.");
         return getUriEntities("", queryParams);
     }
 
     //-------------------------------------------------------------------------------------------------
     private UriComponents getUriTypes(String path) {
+        Assert.notNull(path, "path is null.");
+        Assert.isTrue(!path.isEmpty(), "path empty.");
         UriComponentsBuilder uriBuilder = getUriBuilder();
         uriBuilder.path(fiwareURLservices.getTypesURL() + path);
         return uriBuilder.build();
     }
 
-    //-------------------------------------------------------------------------------------------------
-    private UriComponents getUriTypes(String path, Map<String, Object> queryParams) {
-        UriComponentsBuilder uriBuilder = getUriBuilder();
-        uriBuilder.path(fiwareURLservices.getTypesURL() + path);
-        queryParams.entrySet().forEach((entry) -> {
-            uriBuilder.queryParam(entry.getKey(), entry.getValue());
-        });
-        return uriBuilder.build();
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    private UriComponents getUriRegistrations() {
-        return getUriBuilder().path(fiwareURLservices.getRegistrationsURL()).build();
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    private UriComponents getUriSubcriptions() {
-        return getUriBuilder().path(fiwareURLservices.getSubscriptionsURL()).build();
-    }
 }

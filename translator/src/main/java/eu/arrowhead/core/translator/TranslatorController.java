@@ -32,6 +32,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -49,6 +51,11 @@ public class TranslatorController {
     //=================================================================================================
     // members
     private final Logger logger = LogManager.getLogger(TranslatorController.class);
+
+    private static final String MEDIA_TYPE_APPLICATION_SENML = "application/senml+json";
+    
+    private static final String TRANSLATOR_FIWARE_SERVICES_URL_ENTITIES = "/translator/v2/entities";
+    private static final String TRANSLATOR_FIWARE_SERVICES_URL_TYPES = "/translator/v2/types";
 
     private static final String PATH_VARIABLE_ID = "id";
     private static final String PATH_ENTITY_ID = "entityId";
@@ -109,6 +116,7 @@ public class TranslatorController {
     @ApiOperation(value = "This method initiates the creation of a new translation hub, if none exists already, between two systems.", response = TranslatorHubAccess.class, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
     @ApiResponses(value = {
         @ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+        @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CoreCommonConstants.SWAGGER_HTTP_400_MESSAGE),
         @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
         @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
@@ -121,7 +129,7 @@ public class TranslatorController {
             return translatorService.createTranslationHub(setup,host);
         } catch (Exception ex) {
             logger.warn("Exception: " + ex.getLocalizedMessage());
-            throw new ArrowheadException("Exception", HttpStatus.SC_BAD_REQUEST, ex.getLocalizedMessage());
+            throw new ArrowheadException(ex.getLocalizedMessage(), HttpStatus.SC_BAD_REQUEST);
         }
     }
 
@@ -132,7 +140,7 @@ public class TranslatorController {
         @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
         @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @GetMapping(PATH_TRANSLATOR_ALL)
+    @GetMapping(path = PATH_TRANSLATOR_ALL, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ArrayList<TranslatorHubAccess> getTranslatorList(@RequestHeader("host") String hostPort) {
         String host = hostPort.contains(":")?hostPort.substring(0, hostPort.indexOf(":")):hostPort;
@@ -143,10 +151,11 @@ public class TranslatorController {
     @ApiOperation(value = "Public method to check for a specific hub provided his translatorId", response = TranslatorHubAccess.class, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
     @ApiResponses(value = {
         @ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+        @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CoreCommonConstants.SWAGGER_HTTP_400_MESSAGE),
         @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
         @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @GetMapping(PATH_TRANSLATOR_BY_ID)
+    @GetMapping(path = PATH_TRANSLATOR_BY_ID, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public TranslatorHubAccess getTranslator(@RequestHeader("host") String hostPort, @PathVariable(value = PATH_VARIABLE_ID) final int translatorId) {
         String host = hostPort.contains(":")?hostPort.substring(0, hostPort.indexOf(":")):hostPort;
@@ -162,16 +171,20 @@ public class TranslatorController {
     @ApiOperation(value = "Public method to get Service from a System @ Translator-Plugin", response = Object.class, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
     @ApiResponses(value = {
         @ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+        @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CoreCommonConstants.SWAGGER_HTTP_400_MESSAGE),
         @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+        @ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = CoreCommonConstants.SWAGGER_HTTP_404_MESSAGE),
+        @ApiResponse(code = HttpStatus.SC_UNSUPPORTED_MEDIA_TYPE, message = CoreCommonConstants.SWAGGER_HTTP_415_MESSAGE),
         @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @GetMapping(path = PATH_TRANSLATOR_PLUGIN_ENTITY_AND_SERVICE, produces = {MediaType.TEXT_PLAIN_VALUE, MediaType.APPLICATION_JSON_VALUE, "application/senml+json"})
+    @GetMapping(path = PATH_TRANSLATOR_PLUGIN_ENTITY_AND_SERVICE, produces = {MediaType.TEXT_PLAIN_VALUE, MediaType.APPLICATION_JSON_VALUE, MEDIA_TYPE_APPLICATION_SENML})
     @ResponseBody
     public Object pluginGetEntityValue(
             HttpServletRequest request,
             @PathVariable(value = PATH_ENTITY_ID) final String entityId,
             @PathVariable(value = PATH_SERVICE_NAME) final String serviceName
     ) {
+        if (request.getHeader(HttpHeaders.ACCEPT) == null) throw new ArrowheadException("No ACCEPT header", HttpStatus.SC_BAD_REQUEST);
         return fiwareService.pluginEntityService(entityId, serviceName, request.getHeader(HttpHeaders.ACCEPT));
     }
 
@@ -185,7 +198,7 @@ public class TranslatorController {
     @GetMapping(path = PATH_TRANSLATOR_FIWARE_ROOT, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public FiwareUrlServices fiwareGetIt() {
-        return new FiwareUrlServices("/translator/v2/entities", "/translator/v2/types", null, null);
+        return new FiwareUrlServices(TRANSLATOR_FIWARE_SERVICES_URL_ENTITIES, TRANSLATOR_FIWARE_SERVICES_URL_TYPES, null, null);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -197,7 +210,7 @@ public class TranslatorController {
     })
     @GetMapping(path = PATH_TRANSLATOR_FIWARE_ENTITIES, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public FiwareEntity[] fiwareListEntities(
+    public ArrayList<FiwareEntity> fiwareListEntities(
             @RequestParam(required = false) String id,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String idPattern,
@@ -215,7 +228,12 @@ public class TranslatorController {
             @RequestParam(required = false) String options,
             @RequestParam(required = false) Map<String, Object> allRequestParams
     ) {
-        return fiwareService.listEntities(allRequestParams);
+        List<FiwareEntity> fiwareResponse = Arrays.asList(fiwareService.listEntities(allRequestParams));
+        ArrayList<FiwareEntity> ahResponse = fiwareService.getArrowheadServices(id, type);
+
+        ahResponse.addAll(fiwareResponse);
+        
+        return ahResponse;
     }
 
     //-------------------------------------------------------------------------------------------------

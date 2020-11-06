@@ -2,6 +2,8 @@ package eu.arrowhead.core.translator.services.fiware.common;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -13,6 +15,14 @@ public class FiwareEntity {
     private String id;
     private String type;
     private final Map<String, Object> other = new HashMap<>();
+
+    @JsonCreator
+    public FiwareEntity(
+        @JsonProperty("id") String id,
+        @JsonProperty("type") String type) {
+        this.id = id; 
+        this.type = type;
+    }
 
     //=================================================================================================
     // methods

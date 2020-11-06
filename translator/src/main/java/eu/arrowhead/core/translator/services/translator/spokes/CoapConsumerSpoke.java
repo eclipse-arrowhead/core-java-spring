@@ -37,7 +37,7 @@ public class CoapConsumerSpoke implements BaseSpokeConsumer {
     public void in(BaseContext context) {
         //if the context has no error then
         //start a coap client worker
-        new Thread(new Worker(context), "name").start();
+        new Thread(new Worker(context), serviceAddress).start();
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -81,7 +81,6 @@ public class CoapConsumerSpoke implements BaseSpokeConsumer {
 
             CoapResponse response = null;
             long lStartTime = System.nanoTime();
-            System.out.println(lStartTime + ": CoAP sending to: " + client.getURI());
 
             switch (context.getMethod()) {
                 case GET:
@@ -101,12 +100,9 @@ public class CoapConsumerSpoke implements BaseSpokeConsumer {
             }
 
             lStartTime = System.nanoTime();
-            System.out.println(lStartTime + ": CoAP response recieved");
 
             if (response != null) {
                 context.setContent(response.getResponseText());
-            } else {
-                //TODO: need to signal an error to the next spoke
             }
             activity++;
             nextSpoke.in(context);

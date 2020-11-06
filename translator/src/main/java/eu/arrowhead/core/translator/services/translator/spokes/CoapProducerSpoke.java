@@ -54,7 +54,6 @@ public class CoapProducerSpoke extends CoapServer implements BaseSpokeProducer {
     //-------------------------------------------------------------------------------------------------
     @Override
     public String getAddress() {
-        // TODO Get full address of the spoke providers (scheme, url, port, path)
         return "coap://" + this.interfaceAddress + ":" + Integer.toString(this.getEndpoints().get(0).getAddress().getPort()) + "/";
 
     }
@@ -65,7 +64,6 @@ public class CoapProducerSpoke extends CoapServer implements BaseSpokeProducer {
         Exchange exchange = cachedCoapExchangeMap.get(context.getKey());
         Response response = new Response(ResponseCode.CONTENT);
         response.setPayload(context.getContent());
-        System.out.println("content: " + context.getContent());
         exchange.sendResponse(response);
     }
 
@@ -132,6 +130,7 @@ public class CoapProducerSpoke extends CoapServer implements BaseSpokeProducer {
                     method = Method.DELETE;
                     break;
                 default:
+                    method = Method.GET;
                     break;
             }
             context.setMethod(method);

@@ -12,9 +12,11 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.common.dto.shared.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 import eu.arrowhead.core.translator.services.fiware.common.FiwareEntity;
+import eu.arrowhead.core.translator.services.fiware.common.SenML;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
@@ -55,7 +57,7 @@ public class ArrowheadDriver {
     // methods
     //-------------------------------------------------------------------------------------------------
     public void serviceRegistryRegisterAllServices(FiwareEntity entity) {
-		Assert.notNull(entity, "entity is null.");
+        Assert.notNull(entity, "entity is null.");
         logger.debug("serviceRegistryRegisterAllServices: " + entity.getId());
         logger.debug(createRegisterUri());
         UriComponents registerUri = createRegisterUri();
@@ -73,9 +75,23 @@ public class ArrowheadDriver {
         });
 
     }
+
     
     //-------------------------------------------------------------------------------------------------
-    public void serviceRegistryUnegisterAllServices(FiwareEntity entity) {
+    public SenML[] getDataFromService(UriComponents url) {
+        ResponseEntity<SenML[]> httpRsp = httpService.sendRequest(url, HttpMethod.GET, SenML[].class);
+        return httpRsp.getBody();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public ServiceRegistryListResponseDTO serviceRegistryListAllServices() {
+        UriComponents mgmtUri = createMgmtUri();
+        ResponseEntity<ServiceRegistryListResponseDTO> response = httpService.sendRequest(mgmtUri, HttpMethod.GET , ServiceRegistryListResponseDTO.class);
+        return response.getBody();
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    public void serviceRegistryUnregisterAllServices(FiwareEntity entity) {
         Assert.notNull(entity, "entity is null.");
         logger.debug("serviceRegistryUnegisterAllServices: " + entity.getId());
         getServicesNames(entity).forEach(serviceName -> {
@@ -95,10 +111,9 @@ public class ArrowheadDriver {
         try (final DatagramSocket socket = new DatagramSocket()) {
             socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
             return socket.getLocalAddress().getHostAddress();
-        } catch (SocketException ex) {
-        } catch (UnknownHostException ex) {
+        } catch (SocketException | UnknownHostException ex) {
+            return "127.0.0.1";
         }
-        return "127.0.0.1";
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -110,11 +125,18 @@ public class ArrowheadDriver {
     }
 
     //-------------------------------------------------------------------------------------------------
+    private UriComponents createMgmtUri() {
+        logger.debug("createMgmtUri started...");
+        String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
+        String registerUriStr = CommonConstants.SERVICE_REGISTRY_URI + "/mgmt";
+        return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), registerUriStr);
+    }
+
+    //-------------------------------------------------------------------------------------------------
     private UriComponents createUnregisterUri(FiwareEntity entity, String serviceName) {
         Assert.notNull(entity, "entity is null.");
         Assert.notNull(serviceName, "serviceName is null.");
         Assert.isTrue(!serviceName.isEmpty(), "serviceName is empty.");
-
         logger.debug("createRegisterUri started...");
         String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
         String unregisterUriStr = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI;
@@ -155,11 +177,6 @@ public class ArrowheadDriver {
         result.setAddress(myIpAddress);
         result.setPort(translatorPort);
 
-        if (sslProperties.isSslEnabled()) {
-            // TODO: Enable it after security keys are fixed
-            //result.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
-        }
-
         return result;
     }
 
@@ -184,15 +201,6 @@ public class ArrowheadDriver {
         ArrayList<String> list = new ArrayList<>();
         for (Map.Entry<String, Object> entry:entity.any().entrySet()) {
             list.add(entry.getKey());
-        }
-        return list;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    private ArrayList<String> getServicesNamesDefinitions(FiwareEntity entity) {
-        ArrayList<String> list = new ArrayList<>();
-        for (Map.Entry<String, Object> entry:entity.any().entrySet()) {
-            list.add(getServiceDefinition(entity.getType(), entry.getKey()));
         }
         return list;
     }

@@ -13,19 +13,32 @@ import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+
+import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.common.CoreSystemRegistrationProperties;
+
+import eu.arrowhead.common.Utilities;
+
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.core.translator.services.fiware.common.FiwareEntity;
+import eu.arrowhead.core.translator.services.fiware.common.SenML;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.web.util.UriComponents;
 
 @Service
 public class FiwareService {
@@ -78,7 +91,7 @@ public class FiwareService {
     public void unregisterAll() {
         logger.info("-- Custom destroy of FIWARE Service --");
         for (Map.Entry<String,FiwareEntity> entry: entities.entrySet()) {
-            getArrowheadDriver().serviceRegistryUnegisterAllServices(entry.getValue());
+            getArrowheadDriver().serviceRegistryUnregisterAllServices(entry.getValue());
         }
         logger.info("-----------------------------");
     }
@@ -100,7 +113,35 @@ public class FiwareService {
 
     //-------------------------------------------------------------------------------------------------
     public Object retrieveEntityAttributes(String entityId, Map<String, Object> queryParams) {
-        return getFiwareDriver().retrieveEntityAttributes(entityId, queryParams);
+        Object o = null;
+        try {
+            o = getFiwareDriver().retrieveEntityAttributes(entityId, queryParams);
+        } catch(Exception ex) {
+            UriComponents url = findEntityInArrowhead(entityId);
+            if (url == null) {
+                return "{}";
+            }
+            
+            try {
+                SenML[] snml = getArrowheadDriver().getDataFromService(url);
+                ObjectMapper mapper = new ObjectMapper();
+                ObjectNode jsonVal = mapper.createObjectNode();
+                ObjectNode jsonTmp = mapper.createObjectNode();
+
+                jsonVal.put("value",snml[0].getV().toString());
+                jsonVal.put("type","Number");
+
+                jsonTmp.set(snml[0].getBn(), jsonVal);
+
+                return jsonTmp;
+            } catch(Exception ex2) {
+            }
+
+            return o;
+            
+        }
+                
+        return o;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -158,7 +199,7 @@ public class FiwareService {
             try {
                 fiwareDriver = new FiwareDriver(httpService, fiwareHost, fiwarePort);
             } catch(Exception ex) {
-                logger.warn("Exception: "+ex.getLocalizedMessage());
+                logger.warn(ex.getLocalizedMessage());
             }
         }
         return fiwareDriver;
@@ -176,6 +217,38 @@ public class FiwareService {
         return arrowheadDriver;
     }
     
+    //-------------------------------------------------------------------------------------------------
+    public UriComponents findEntityInArrowhead(String id) {
+        ServiceRegistryListResponseDTO srl = getArrowheadDriver().serviceRegistryListAllServices();
+        for (ServiceRegistryResponseDTO sr: srl.getData()) {
+
+            if (id.equals(sr.getProvider().getSystemName())) {
+                return Utilities.createURI(CommonConstants.HTTP, sr.getProvider().getAddress(), sr.getProvider().getPort(),sr.getServiceUri());
+            }
+
+        }
+        return null;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public ArrayList<FiwareEntity> getArrowheadServices(String id, String type) {
+
+        ArrayList<FiwareEntity> entities = new ArrayList<>();
+        ServiceRegistryListResponseDTO srl = getArrowheadDriver().serviceRegistryListAllServices();
+        for (ServiceRegistryResponseDTO sr: srl.getData()) {
+
+            if (sr.getServiceDefinition().getServiceDefinition().startsWith("http-")) {
+                if ((type != null && type.equals(sr.getServiceDefinition().getServiceDefinition()))) {
+                    entities.add(new FiwareEntity(sr.getProvider().getSystemName(), sr.getServiceDefinition().getServiceDefinition()));
+                }
+                else if(id == null && type == null) {
+                    entities.add(new FiwareEntity(sr.getProvider().getSystemName(), sr.getServiceDefinition().getServiceDefinition()));
+                }
+            }
+
+        }
+        return entities;
+    }
 
     //-------------------------------------------------------------------------------------------------
     private void updateEntities(FiwareEntity[] updatedEntitiesArray) {
@@ -212,13 +285,14 @@ public class FiwareService {
         checkIfRemoved.forEach((id) -> {
             logger.debug("REMOVE entity id:{} type:{} -> AH unregister", id, entities.get(id).getType());
             FiwareEntity entity = entities.remove(id);
-            getArrowheadDriver().serviceRegistryUnegisterAllServices(entity);
+            getArrowheadDriver().serviceRegistryUnregisterAllServices(entity);
         });
 
     }
 
     //-------------------------------------------------------------------------------------------------
     private ArrayNode jsonObjectToSenMl(String serviceName, Object o) {
+        ObjectMapper mapper = new ObjectMapper();
         ArrayNode senML = mapper.createArrayNode();
         JsonNode json = mapper.valueToTree(o);
         JsonNode sensorValue = mapper.createObjectNode();
@@ -233,8 +307,9 @@ public class FiwareService {
 
     //-------------------------------------------------------------------------------------------------
     private String jsonObjectToText(String serviceName, Object o) {
+        ObjectMapper mapper = new ObjectMapper();
         JsonNode json = mapper.valueToTree(o);
-        return String.format("%s value is %s", serviceName, json.has(FIWARE_VALUE)?json.get(FIWARE_VALUE).asText():"unknown");
+        return json.has("value")?json.get("value").asText():"unknown";
     }
 
     //=================================================================================================

@@ -5,14 +5,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.http.MediaType;
 
 public class HttpConsumerSpoke implements BaseSpokeConsumer {
 
     //=================================================================================================
     // members
+    private final Logger logger = LogManager.getLogger(HttpConsumerSpoke.class);
     BaseSpoke nextSpoke;
     String serviceAddress = "";
     public int activity = 0;
@@ -69,13 +71,11 @@ public class HttpConsumerSpoke implements BaseSpokeConsumer {
         @Override
         public void run() {
 
-            System.out.println("HttpClient Spoke sending Request");
             // get the requested host, if the port is not specified, the constructor
             // sets it to -1
 
             //Added path to access resources, not just root "/"
             String myurl = HttpConsumerSpoke.this.serviceAddress + "/" + this.context.getPath();
-            System.out.println("To address:" + myurl);
             StringBuilder result = new StringBuilder();
             URL url;
             HttpURLConnection conn;
@@ -110,7 +110,7 @@ public class HttpConsumerSpoke implements BaseSpokeConsumer {
                 if (payloadExpected) {
                     // create the content
                     conn.setDoOutput(true);
-                    conn.setRequestProperty("content-type", "application/xml");
+                    conn.setRequestProperty("content-type", MediaType.APPLICATION_JSON_VALUE);
                     OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream());
                     writer.write(this.context.getContent());
                     writer.flush();
@@ -123,17 +123,9 @@ public class HttpConsumerSpoke implements BaseSpokeConsumer {
                     result.append(line);
                 }
                 rd.close();
-                context.setContent(result.toString());
-
-            } catch (ProtocolException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            } catch (MalformedURLException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            } catch (IOException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
+                context.setContent(result.toString()); 
+            } catch (IOException ex) {
+                logger.debug(ex.getMessage());
             }
 
             // get the mapping to http for the incoming request

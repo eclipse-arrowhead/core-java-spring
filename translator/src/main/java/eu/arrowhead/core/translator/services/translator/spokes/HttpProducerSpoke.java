@@ -1,10 +1,13 @@
 package eu.arrowhead.core.translator.services.translator.spokes;
 
+
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.translator.services.translator.common.TranslatorDef.Method;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.http.HttpEntity;
@@ -45,18 +48,20 @@ import org.apache.http.protocol.ResponseContent;
 import org.apache.http.protocol.ResponseDate;
 import org.apache.http.protocol.ResponseServer;
 import org.apache.http.util.EntityUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.californium.core.network.config.NetworkConfig;
 
 public class HttpProducerSpoke implements BaseSpokeProducer {
 
     //=================================================================================================
     // members
-    private static final Charset UTF_8 = Charset.forName("UTF-8");
+    private final Logger logger = LogManager.getLogger(HttpProducerSpoke.class);
+    private static final Charset UTF_8 = StandardCharsets.UTF_8;
     private static final int SOCKET_TIMEOUT = NetworkConfig.getStandard().getInt(NetworkConfig.Keys.HTTP_SERVER_SOCKET_TIMEOUT);
     private static final int SOCKET_BUFFER_SIZE = NetworkConfig.getStandard().getInt(NetworkConfig.Keys.HTTP_SERVER_SOCKET_BUFFER_SIZE);
     private static final String SERVER_NAME = "Californium Http Proxy";
 
-    BaseSpoke nextSpoke;
     Map<Integer, HttpAsyncExchange> cachedHttpExchangeMap = new HashMap<>();
     private String address = "";
     ListeningIOReactor ioReactor;
@@ -104,7 +109,8 @@ public class HttpProducerSpoke implements BaseSpokeProducer {
                 public void run() {
                     try {
                         ioReactor.execute(ioEventDispatch);
-                    } catch (IOException e) {
+                    } catch (IOException ex) {
+                        throw new ArrowheadException(ex.getLocalizedMessage());
                     }
 
                 }
@@ -121,10 +127,9 @@ public class HttpProducerSpoke implements BaseSpokeProducer {
             }
 
             address = address + ":" + Integer.toString(((InetSocketAddress) endpoint1.getAddress()).getPort()) + "/";
-            System.out.println(address);
 
-        } catch (IOException e) {
-
+        } catch (IOException ex) {
+            logger.debug(ex.getMessage());
         }
     }
 
@@ -135,8 +140,8 @@ public class HttpProducerSpoke implements BaseSpokeProducer {
     public void close() {
         try {
             ioReactor.shutdown();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ex) {
+            logger.debug(ex.getMessage());
         }
     }
 
@@ -154,13 +159,11 @@ public class HttpProducerSpoke implements BaseSpokeProducer {
 
         try {
             constructHttpResponse(context.getContent(), httpResponse);
-        } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } catch (UnsupportedEncodingException ex) {
+            logger.debug(ex.getMessage());
         }
 
         long lStartTime = System.nanoTime();
-        System.out.println(lStartTime + ": http: response sent");
         // send the response
         cachedHttpExchangeMap.get(context.getKey()).submitResponse();
 
@@ -210,14 +213,12 @@ public class HttpProducerSpoke implements BaseSpokeProducer {
         public void handle(HttpRequest httpRequest, HttpAsyncExchange httpExchange, HttpContext httpContext) throws HttpException, IOException {
 
             long lStartTime = System.nanoTime();
-            System.out.println(lStartTime + ": http: request received");
             activity++;
             BaseContext context = new BaseContext();
 
             //store the http context for generating the response
             cachedHttpExchangeMap.put(context.getKey(), httpExchange);
 
-            //TODO: prepare http request for next spoke
             context.setMethod(Method.valueOf(httpRequest.getRequestLine().getMethod().toUpperCase()));
             context.setPath(httpRequest.getRequestLine().getUri());
             // set the payload if the http entity is present
@@ -226,24 +227,9 @@ public class HttpProducerSpoke implements BaseSpokeProducer {
 
                 // get the bytes from the entity
                 String payload = EntityUtils.toString(httpEntity);
-                if (payload != null && payload.length() > 0) {
-
-                    // the only supported charset in CoAP is UTF-8
-                    Charset coapCharset = UTF_8;
-
-                    // get the charset for the http entity
-                    ContentType httpContentType = ContentType.getOrDefault(httpEntity);
-                    Charset httpCharset = httpContentType.getCharset();
-
-                    // check if the charset is the one allowed by coap
-                    if (httpCharset != null && !httpCharset.equals(coapCharset)) {
-                        // translate the payload to the utf-8 charset
-                        // payload = changeCharset(payload, httpCharset, coapCharset);
-                    }
-                }
+                
                 context.setContent(payload);
             }
-            nextSpoke.in(context);
         }
 
         //-------------------------------------------------------------------------------------------------

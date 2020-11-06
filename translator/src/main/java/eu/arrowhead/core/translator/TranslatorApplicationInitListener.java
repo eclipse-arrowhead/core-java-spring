@@ -32,16 +32,7 @@ public class TranslatorApplicationInitListener extends ApplicationInitListener {
 	
 	//=================================================================================================
 	// assistant methods
-    
-        
-        //-------------------------------------------------------------------------------------------------
-	@Override
-	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
-
-		return List.of(CoreSystemService.AUTH_CONTROL_SUBSCRIPTION_SERVICE);
-	}
-        
-        //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 	@Override
 	protected void customInit(final ContextRefreshedEvent event) {
 		logger.debug("customInit started...");

@@ -1,5 +1,8 @@
 package eu.arrowhead.core.translator.services.translator.common;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class TranslatorSetup {
 
     private final String producerName;
@@ -7,7 +10,12 @@ public class TranslatorSetup {
     private final String consumerName;
     private final String consumerAddress;
 
-    public TranslatorSetup(String producerName, String producerAddress, String consumerName, String consumerAddress) {
+    @JsonCreator
+    public TranslatorSetup(
+            @JsonProperty("producerName") String producerName,
+            @JsonProperty("producerAddress") String producerAddress,
+            @JsonProperty("consumerName") String consumerName,
+            @JsonProperty("consumerAddress") String consumerAddress) {
         this.producerName = producerName;
         this.producerAddress = producerAddress;
         this.consumerName = consumerName;

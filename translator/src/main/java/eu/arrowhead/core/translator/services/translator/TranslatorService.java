@@ -23,7 +23,7 @@ public class TranslatorService {
     // methods
     //-------------------------------------------------------------------------------------------------
     public void start() {
-        logger.info("Starting TranslatorService");
+        logger.debug("Starting TranslatorService");
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -36,8 +36,8 @@ public class TranslatorService {
         EndPoint producerEP = new EndPoint(setup.getProducerName(), setup.getProducerAddress());
 
         if (consumerEP.isLocal() || producerEP.isLocal()) {
-            logger.warn("Not valid ip address, we need absolut address, not relative (as 127.0.0.1 or localhost)");
-            throw new Exception("Not valid ip address, we need absolut address, not relative (as 127.0.0.1 or localhost)");
+            logger.warn("Not valid ip address, we need absolute address, not relative (as 127.0.0.1 or localhost)");
+            throw new Exception("Not valid ip address, we need absolute address, not relative (as 127.0.0.1 or localhost)");
         } else {
 
             int translatorId = (producerEP.getName() + consumerEP.getName()).hashCode();
