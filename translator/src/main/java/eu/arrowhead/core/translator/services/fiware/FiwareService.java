@@ -113,9 +113,9 @@ public class FiwareService {
 
     //-------------------------------------------------------------------------------------------------
     public Object retrieveEntityAttributes(String entityId, Map<String, Object> queryParams) {
-        Object o = null;
+        Object obj = null;
         try {
-            o = getFiwareDriver().retrieveEntityAttributes(entityId, queryParams);
+            obj = getFiwareDriver().retrieveEntityAttributes(entityId, queryParams);
         } catch(Exception ex) {
             UriComponents url = findEntityInArrowhead(entityId);
             if (url == null) {
@@ -137,11 +137,11 @@ public class FiwareService {
             } catch(Exception ex2) {
             }
 
-            return o;
+            return obj;
             
         }
                 
-        return o;
+        return obj;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -291,10 +291,10 @@ public class FiwareService {
     }
 
     //-------------------------------------------------------------------------------------------------
-    private ArrayNode jsonObjectToSenMl(String serviceName, Object o) {
+    private ArrayNode jsonObjectToSenMl(String serviceName, Object obj) {
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode senML = mapper.createArrayNode();
-        JsonNode json = mapper.valueToTree(o);
+        JsonNode json = mapper.valueToTree(obj);
         JsonNode sensorValue = mapper.createObjectNode();
         ((ObjectNode) sensorValue).put(SENML_NAME, serviceName);
         ((ObjectNode) sensorValue).put(SENML_VALUE, json.has(FIWARE_VALUE)?json.get(FIWARE_VALUE).asText():FIWARE_EMPTY);
@@ -306,9 +306,9 @@ public class FiwareService {
     }
 
     //-------------------------------------------------------------------------------------------------
-    private String jsonObjectToText(String serviceName, Object o) {
+    private String jsonObjectToText(String serviceName, Object obj) {
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode json = mapper.valueToTree(o);
+        JsonNode json = mapper.valueToTree(obj);
         return json.has("value")?json.get("value").asText():"unknown";
     }
 

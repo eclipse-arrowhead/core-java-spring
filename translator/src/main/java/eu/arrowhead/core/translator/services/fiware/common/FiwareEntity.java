@@ -55,14 +55,14 @@ public class FiwareEntity {
 
     //-------------------------------------------------------------------------------------------------
     @Override
-    public boolean equals(Object o) {
-        if (o == null || o.getClass() != FiwareEntity.class) {
+    public boolean equals(Object obj) {
+        if (obj == null || obj.getClass() != FiwareEntity.class) {
             return false;
         }
-        if (o == this) {
+        if (obj == this) {
             return true;
         }
-        FiwareEntity entity = (FiwareEntity) o;
+        FiwareEntity entity = (FiwareEntity) obj;
         if (!id.equals(entity.id) || !type.equals(entity.type)) {
             return false;
         }
