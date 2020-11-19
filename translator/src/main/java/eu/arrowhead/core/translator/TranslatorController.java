@@ -163,7 +163,7 @@ public class TranslatorController {
             return translatorService.getHub(translatorId, host);
         } catch (Exception ex) {
             logger.warn("Exception: " + ex.getLocalizedMessage());
-            throw new ArrowheadException("Exception", HttpStatus.SC_BAD_REQUEST, ex.getLocalizedMessage());
+            throw new ArrowheadException(ex.getLocalizedMessage(), HttpStatus.SC_BAD_REQUEST);
         }
     }
 

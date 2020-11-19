@@ -71,6 +71,7 @@ public class ArrowheadDriver {
                 logger.debug(response.getStatusCodeValue() + " " + response.getBody());
             } catch (Exception ex) {
                 logger.warn("Exception: " + ex.getLocalizedMessage());
+                logger.debug("Stacktrace", ex);
             }
         });
 
@@ -100,6 +101,7 @@ public class ArrowheadDriver {
                 logger.debug(response.getStatusCodeValue() + " " + response.getBody());
             } catch (Exception ex) {
                 logger.warn("Exception: " + ex.getLocalizedMessage());
+                logger.debug("Stacktrace", ex);
             }
         });
     }
