@@ -72,7 +72,12 @@
             <name>Spring Repository</name>
 			<url>https://repo.spring.io/plugins-release/</url>
         </repository>
-    </repositories>
+		<repository>
+			<id>jenkins-repo</id>
+			<name>Jenkins Repository</name>
+			<url>https://repo.jenkins-ci.org/public/</url>
+		</repository>
+	</repositories>
 
 	<dependencies>
 		<dependency>
