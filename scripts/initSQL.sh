@@ -22,3 +22,4 @@ wget https://raw.githubusercontent.com/arrowhead-f/core-java-spring/master/scrip
 wget https://raw.githubusercontent.com/arrowhead-f/core-java-spring/master/scripts/qos_monitor_privileges.sql
 wget https://raw.githubusercontent.com/arrowhead-f/core-java-spring/master/scripts/service_registry_privileges.sql
 wget https://raw.githubusercontent.com/arrowhead-f/core-java-spring/master/scripts/system_registry_privileges.sql
+wget https://raw.githubusercontent.com/arrowhead-f/core-java-spring/master/scripts/translator_privileges.sql
