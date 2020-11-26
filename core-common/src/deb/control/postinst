@@ -105,7 +105,7 @@ case "$1" in
         # Store data
         db_set arrowhead-core-common/cloudname ${cloud_name}
         db_set arrowhead-core-common/operator ${operator}
-        ah_set_conf_prop cloudname "${cloudname}"
+        ah_set_conf_prop cloudname "${cloud_name}"
         ah_set_conf_prop operator "${operator}"
         ;;
     esac
