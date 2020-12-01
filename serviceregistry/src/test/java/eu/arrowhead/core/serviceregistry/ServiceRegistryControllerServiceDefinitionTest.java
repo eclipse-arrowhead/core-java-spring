@@ -71,7 +71,7 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	}
 	
 	//=================================================================================================
-	// Tests of getServiceDefinitions
+	// Tests of getServiceNames
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test

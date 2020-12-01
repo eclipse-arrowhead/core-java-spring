@@ -50,7 +50,7 @@ In the first step you have to make sure that ActiveMQ cleans up all the unused q
                     <constantPendingMessageLimitStrategy limit="1000"/>
                   </pendingMessageLimitStrategy>
                 </policyEntry>
-                <policyEntry queue=">" gcInactiveDestinations="true" inactiveTimoutBeforeGC="60000"/>
+                <policyEntry queue=">" gcInactiveDestinations="true" inactiveTimeoutBeforeGC="60000"/>
               </policyEntries>
             </policyMap>
         </destinationPolicy>
@@ -192,7 +192,7 @@ owIDAQAB
 ```
 We don't need the `BEGIN PUBLIC KEY` prefix and the `END PUBLIC KEY` suffix and you have to eliminate all line breaks as well. So the desired output of the public key above is
 ```
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyxw7OMHft33H69BgLiXmiNI1nTo2mdRIoDru0q5BLg0RQOKZD4woSeDd7LYNV1p66YAZWEan6+TUi5EGC8kXnaLNL52nwal3p1/2TAY+p+95OtI9iUVfI5pzfyxEVxc1nqV40F70XNKoFduPWLFwYaSEg3cXaBiUSiCgTsMQzoEZQ9o7ueTxnUrBgx0UlsuQQOdKagTJMfuTF1/2IKMtlVgnZ5/yVTRtsaUlage+TG/9tto2pxd3TWj5rTGGLDbkKSg4BP9YOHcTTnJZNbG1bnRwgDrpEPI4TaK6GNOQicRTiKLjv79/EyGFJzgTkcPJ0lW4pc9Al/2Dx15z9L6owIDAQAB
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyxw7OMHft33H69BgLiXmiNI1nTo2mdRIoDru0q5BLg0RQOKZD4woSeDd7LYNV1p66YAZWEan6+TUi5EGC8kXnaLNL52nwal3p1/2TAY+p+95OtI9iUVfI5pzfyxEVxc1nqV40F70XNKoFduPWLFwYaSEg3cXaBiUSiCgTsMQzoEZQ9o7ueTxnUrBgx0UlsuQQOdKagTJMfuTF1/2IKMtlVgnHZ5/yVTRtsaUlage+TG/9tto2pxd3TWj5rTGGLDbkKSg4BP9YOHcTTnJZNbG1bnRwgDrpEPI4TaK6GNOQicRTiKLjv79/EyGFJzgTkcPJ0lW4pc9Al/2Dx15z9L6owIDAQAB
 ```
 in one line. This is the authorization info we will use in the next step.
 

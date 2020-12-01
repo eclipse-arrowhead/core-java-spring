@@ -22,6 +22,9 @@ echo Authorization started
 #nohup java -jar $(find . -maxdepth 1 -name arrowhead-eventhandler-\*.jar | sort | tail -n1) &> sout_eventhandler.log &
 #echo Event Handler started
 
+#cd ../../datamanager/target
+#nohup java -jar $(find . -maxdepth 1 -name arrowhead-datamanager-\*.jar | sort | tail -n1) &> sout_datamanager.log &
+#echo DataManager started
 
 cd ../../orchestrator/target
 nohup java -jar $(find . -maxdepth 1 -name arrowhead-orchestrator-\*.jar | sort | tail -n1) &> sout_orch.log &

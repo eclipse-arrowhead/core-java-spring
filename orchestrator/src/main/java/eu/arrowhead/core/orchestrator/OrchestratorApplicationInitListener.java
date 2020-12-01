@@ -78,10 +78,16 @@ public class OrchestratorApplicationInitListener extends ApplicationInitListener
 		if (gatekeeperIsPresent) {
 			result.add(CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY);
 			result.add(CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATION);
+			result.add(CoreSystemService.GATEKEEPER_GET_CLOUD_SERVICE);
 		}
 		
 		if (qosEnabled) {
-			result.add(CoreSystemService.QOS_MONITOR_PING_MEASUREMENT_SERVICE);
+			result.add(CoreSystemService.QOS_MONITOR_INTRA_PING_MEASUREMENT_SERVICE);
+			result.add(CoreSystemService.QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT_SERVICE);
+			result.add(CoreSystemService.QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_SERVICE);
+			result.add(CoreSystemService.QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_SERVICE);
+			result.add(CoreSystemService.QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_SERVICE);
+			result.add(CoreSystemService.QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_SERVICE);
 		}
 		
 		return result;

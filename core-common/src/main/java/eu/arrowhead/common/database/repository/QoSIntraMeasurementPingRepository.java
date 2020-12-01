@@ -9,7 +9,10 @@ import eu.arrowhead.common.database.entity.QoSIntraPingMeasurement;
 
 @Repository
 public interface QoSIntraMeasurementPingRepository extends RefreshableRepository<QoSIntraPingMeasurement,Long> {
-
+	
 	//=================================================================================================
+	// methods
+
+	//-------------------------------------------------------------------------------------------------
 	public Optional<QoSIntraPingMeasurement> findByMeasurement(final QoSIntraMeasurement measurement);
 }

@@ -22,8 +22,10 @@ public class Defaults {
 	public static final int DEFAULT_QOS_MONITOR_PORT = 8451;
 	public static final int DEFAULT_GATEWAY_PORT = 8453;
 	public static final int DEFAULT_EVENT_HANDLER_PORT = 8455;
+	public static final int DEFAULT_DATAMANAGER_PORT = 8461;
 	public static final int DEFAULT_CHOREOGRAPHER_PORT = 8457;
-    public static final int DEFAULT_CERTIFICATE_AUTHORITY_PORT = 8448;
+	public static final int DEFAULT_CERTIFICATE_AUTHORITY_PORT = 8448;
+	public static final int DEFAULT_TRANSLATOR_PORT = 8462;
     public static final int DEFAULT_MSCV_PORT = 8501;
 
     // HTTP client defaults
@@ -36,8 +38,9 @@ public class Defaults {
     public static final String CORS_ALLOW_CREDENTIALS = "true";
 
     // CA defaults
-	public static final long DEFAULT_CA_CERT_VALIDITY_NEG_OFFSET_MILLIS = 5000;
-	public static final long DEFAULT_CA_CERT_VALIDITY_POS_OFFSET_MILLIS = 1000L * 3600 * 24 * 365;
+	public static final long DEFAULT_CA_CERT_VALIDITY_NEG_OFFSET_MINUTES = 1;
+	public static final long DEFAULT_CA_CERT_VALIDITY_POS_OFFSET_MINUTES = 60 * 24 * 365;
+
     //-------------------------------------------------------------------------------------------------
     private Defaults() {
         throw new UnsupportedOperationException();

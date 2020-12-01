@@ -313,72 +313,131 @@ CREATE TABLE IF NOT EXISTS `subscription_publisher_connection` (
   CONSTRAINT `system_constraint` FOREIGN KEY (`system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- DataManager
+
+CREATE TABLE IF NOT EXISTS `dmhist_services` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `system_name` varchar(255) NOT NULL,
+  `service_name` varchar(255) NOT NULL,
+  `service_type` varchar(255),
+  last_update timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `dmhist_messages` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `sid` bigint(20) NOT NULL,
+  `bt` double NOT NULL,
+  `mint` double NOT NULL,
+  `maxt` double NOT NULL,
+  `msg` BLOB NOT NULL,
+  `datastored` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `service_id_constr` FOREIGN KEY (`sid`) REFERENCES `dmhist_services` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `dmhist_entries` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `sid` bigint(20) NOT NULL,
+  `mid` bigint(20) NOT NULL,
+  `n` varchar(128) NOT NULL,
+  `t` double NOT NULL,
+  `u` varchar(64),
+  `v`  double,
+  `vs` BLOB,
+  `vb` BOOLEAN,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `service_id_fk` FOREIGN KEY(`sid`) REFERENCES `dmhist_services`(`id`) ON DELETE CASCADE,
+  CONSTRAINT `message_id_fk` FOREIGN KEY(`mid`) REFERENCES `dmhist_messages`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 -- Choreographer
 
-CREATE TABLE IF NOT EXISTS `choreographer_action_plan` (
-  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-  `action_plan_name` varchar(255) UNIQUE NOT NULL,
+CREATE TABLE IF NOT EXISTS `choreographer_plan` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `first_action_id` bigint(20),
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `choreographer_action` (
-  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-  `action_name` varchar(255) UNIQUE NOT NULL,
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `plan_id` bigint(20) NOT NULL,
   `next_action_id` bigint(20) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT `next_action` FOREIGN KEY (`next_action_id`) REFERENCES `choreographer_action` (`id`) ON DELETE CASCADE
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name_plan_id_unique_key` (`name`,`plan_id`),
+  CONSTRAINT `next_action` FOREIGN KEY (`next_action_id`) REFERENCES `choreographer_action` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `plan` FOREIGN KEY (`plan_id`) REFERENCES `choreographer_plan` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `choreographer_action_step` (
-  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-  `name` varchar(255) UNIQUE NOT NULL,
+ALTER TABLE `choreographer_plan` ADD FOREIGN KEY (`first_action_id`) references `choreographer_action`(`id`);
+
+CREATE TABLE IF NOT EXISTS `choreographer_step` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `action_first_step_id` bigint(20),
+  `action_id` bigint(20) NOT NULL,
+  `service_name` varchar(255) NOT NULL,
+  `metadata` text,
+  `parameters` text,
+  `quantity` int(20) NOT NULL DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name_action_id_unique_key` (`name`, `action_id`),
+  CONSTRAINT `action_first_step` FOREIGN KEY (`action_first_step_id`) REFERENCES `choreographer_action` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `action` FOREIGN KEY (`action_id`) REFERENCES `choreographer_action` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `choreographer_action_plan_action_connection` (
-  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-  `action_plan_id` bigint(20) NOT NULL,
-  `action_id` bigint(20) NOT NULL,
+CREATE TABLE IF NOT EXISTS `choreographer_step_next_step_connection` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `step_id` bigint(20) NOT NULL,
+  `next_step_id` bigint(20) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT `action_plan_fk1` FOREIGN KEY (`action_plan_id`) REFERENCES `choreographer_action_plan` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `action_fk1` FOREIGN KEY (`action_id`) REFERENCES `choreographer_action` (`id`) ON DELETE CASCADE
+  PRIMARY KEY (`id`),
+  CONSTRAINT `current_step` FOREIGN KEY (`step_id`) REFERENCES choreographer_step (`id`) ON DELETE CASCADE,
+  CONSTRAINT `next_step` FOREIGN KEY (`step_id`) REFERENCES choreographer_step (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `choreographer_action_action_step_connection` (
-  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-  `action_id` bigint(20) NOT NULL,
-  `action_step_id` bigint(20) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+CREATE TABLE IF NOT EXISTS `choreographer_session` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `plan_id` bigint(20) NOT NULL,
+  `started_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT `action_fk2` FOREIGN KEY (`action_id`) REFERENCES `choreographer_action` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `action_step_fk1` FOREIGN KEY (`action_step_id`) REFERENCES `choreographer_action_step` (`id`) ON DELETE CASCADE
+  `status` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `session_plan` FOREIGN KEY (`plan_id`) REFERENCES `choreographer_plan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `choreographer_action_step_service_definition_connection` (
-  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-  `action_step_id` bigint(20) NOT NULL,
-  `service_definition_id` bigint(20) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+CREATE TABLE IF NOT EXISTS `choreographer_running_step` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `step_id` bigint(20) NOT NULL,
+  `session_id` bigint(20) NOT NULL,
+  `status` varchar(255) NOT NULL,
+  `message` text,
+  `started_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT `service_definition` FOREIGN KEY (`service_definition_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `action_step` FOREIGN KEY (`action_step_id`) REFERENCES `choreographer_action_step` (`id`) ON DELETE CASCADE
+  PRIMARY KEY (`id`),
+  CONSTRAINT `running_step` FOREIGN KEY (`step_id`) REFERENCES `choreographer_step` (`id`),
+  CONSTRAINT `running_step_session` FOREIGN KEY (`session_id`) REFERENCES `choreographer_session`(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `choreographer_next_action_step` (
-  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-  `action_step_id` bigint(20) NOT NULL,
-  `next_action_step_id` bigint(20) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT `current_action_step` FOREIGN KEY (`action_step_id`) REFERENCES `choreographer_action_step` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `next_action_step` FOREIGN KEY (`action_step_id`) REFERENCES `choreographer_action_step` (`id`) ON DELETE CASCADE
+CREATE TABLE IF NOT EXISTS `choreographer_worklog` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `entry_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `message` text,
+  `exception` text,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- QoS Monitor
+-- Intra
 
 CREATE TABLE IF NOT EXISTS `qos_intra_measurement` (
 	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
@@ -410,8 +469,8 @@ CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement` (
 	`received_all` bigint(20) NOT NULL DEFAULT 0,
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	CONSTRAINT `fk_measurement` FOREIGN KEY (`measurement_id`) REFERENCES `qos_intra_measurement` (`id`) ON DELETE CASCADE,
-	UNIQUE KEY `unique_measurement` (`measurement_id`)
+	CONSTRAINT `fk_intra_measurement` FOREIGN KEY (`measurement_id`) REFERENCES `qos_intra_measurement` (`id`) ON DELETE CASCADE,
+	UNIQUE KEY `unique_intra_measurement` (`measurement_id`)
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -449,7 +508,137 @@ CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement_log_details` (
 	`measured_at` timestamp NOT NULL,
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	CONSTRAINT `fk_measurement_log` FOREIGN KEY (`measurement_log_id`) REFERENCES `qos_intra_ping_measurement_log` (`id`) ON DELETE CASCADE
+	CONSTRAINT `fk_intra_measurement_log` FOREIGN KEY (`measurement_log_id`) REFERENCES `qos_intra_ping_measurement_log` (`id`) ON DELETE CASCADE
+
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- QoS Monitor
+-- Inter
+
+CREATE TABLE IF NOT EXISTS `qos_inter_direct_measurement` (
+	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+	`cloud_id` bigint(20) NOT NULL,
+	`address` varchar(255) NOT NULL,
+	`measurement_type` varchar(255) NOT NULL,
+	`last_measurement_at` timestamp NOT NULL,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `fk_cloud_inter_direct` FOREIGN KEY (`cloud_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE,
+	UNIQUE KEY `unique_cloud_id_address_measurement_type` (`cloud_id`, `address`, `measurement_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `qos_inter_direct_ping_measurement` (
+	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+	`measurement_id` bigint(20) NOT NULL,
+	`available` int(1) NOT NULL DEFAULT 0,
+	`last_access_at` timestamp NULL DEFAULT NULL,
+	`min_response_time` int(11) DEFAULT NULL,
+	`max_response_time` int(11) DEFAULT NULL,
+	`mean_response_time_with_timeout` int(11) NULL DEFAULT NULL,
+	`mean_response_time_without_timeout` int(11) NULL DEFAULT NULL,
+	`jitter_with_timeout` int(11) NULL DEFAULT NULL,
+	`jitter_without_timeout` int(11) NULL DEFAULT NULL,
+	`lost_per_measurement_percent` int(3) NOT NULL DEFAULT 0,
+	`sent` bigint(20) NOT NULL DEFAULT 0,
+	`received` bigint(20) NOT NULL DEFAULT 0,
+	`count_started_at` timestamp NULL,
+	`sent_all` bigint(20) NOT NULL DEFAULT 0,
+	`received_all` bigint(20) NOT NULL DEFAULT 0,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `fk_inter_direct_measurement` FOREIGN KEY (`measurement_id`) REFERENCES `qos_inter_direct_measurement` (`id`) ON DELETE CASCADE,
+	UNIQUE KEY `unique_measurement` (`measurement_id`)
+
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `qos_inter_direct_ping_measurement_log` (
+	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+	`measured_system_address` varchar(255) NOT NULL,
+	`available` int(1) NOT NULL DEFAULT 0,
+	`min_response_time` int(11) DEFAULT NULL,
+	`max_response_time` int(11) DEFAULT NULL,
+	`mean_response_time_with_timeout` int(11) NULL DEFAULT NULL,
+	`mean_response_time_without_timeout` int(11) NULL DEFAULT NULL,
+	`jitter_with_timeout` int(11) NULL DEFAULT NULL,
+	`jitter_without_timeout` int(11) NULL DEFAULT NULL,
+	`lost_per_measurement_percent` int(3) NOT NULL DEFAULT 0,
+	`sent` bigint(20) NOT NULL DEFAULT 0,
+	`received` bigint(20) NOT NULL DEFAULT 0,
+	`measured_at` timestamp NOT NULL,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `qos_inter_direct_ping_measurement_log_details` (
+	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+	`measurement_log_id` bigint(20) NOT NULL,
+	`measurement_sequenece_number` int(3) NOT NULL,
+	`success_flag` int(1) NOT NULL DEFAULT 0,
+	`timeout_flag` int(1) NOT NULL DEFAULT 0,
+	`error_message` varchar(255) NULL DEFAULT NULL,
+	`throwable` varchar(255) NULL DEFAULT NULL,
+	`size_` int(11) NULL DEFAULT NULL,
+	`rtt` int(11) NULL DEFAULT NULL,
+	`ttl` int(3) NULL DEFAULT NULL,
+	`duration` int(5) NULL DEFAULT NULL,
+	`measured_at` timestamp NOT NULL,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `fk_inter_direct_ping_measurement_log` FOREIGN KEY (`measurement_log_id`) REFERENCES `qos_inter_direct_ping_measurement_log` (`id`) ON DELETE CASCADE
+
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `qos_inter_relay_measurement` (
+	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+	`cloud_id` bigint(20) NOT NULL,
+	`relay_id` bigint(20) NOT NULL,
+	`measurement_type` varchar(255) NOT NULL,
+	`status` varchar(255) NOT NULL,
+	`last_measurement_at` timestamp NOT NULL,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `fk_cloud_inter_relay` FOREIGN KEY (`cloud_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `fk_relay_inter_relay` FOREIGN KEY (`relay_id`) REFERENCES `relay` (`id`) ON DELETE CASCADE,
+	UNIQUE KEY `unique_cloud_relay_measurement_type` (`cloud_id`, `relay_id`, `measurement_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `qos_inter_relay_echo_measurement` (
+	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+	`measurement_id` bigint(20) NOT NULL,
+	`last_access_at` timestamp NULL DEFAULT NULL,
+	`min_response_time` int(11) DEFAULT NULL,
+	`max_response_time` int(11) DEFAULT NULL,
+	`mean_response_time_with_timeout` int(11) NULL DEFAULT NULL,
+	`mean_response_time_without_timeout` int(11) NULL DEFAULT NULL,
+	`jitter_with_timeout` int(11) NULL DEFAULT NULL,
+	`jitter_without_timeout` int(11) NULL DEFAULT NULL,
+	`lost_per_measurement_percent` int(3) NOT NULL DEFAULT 0,
+	`sent` bigint(20) NOT NULL DEFAULT 0,
+	`received` bigint(20) NOT NULL DEFAULT 0,
+	`count_started_at` timestamp NULL,
+	`sent_all` bigint(20) NOT NULL DEFAULT 0,
+	`received_all` bigint(20) NOT NULL DEFAULT 0,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `fk_inter_relay_measurement` FOREIGN KEY (`measurement_id`) REFERENCES `qos_inter_relay_measurement` (`id`) ON DELETE CASCADE,
+	UNIQUE KEY `unique_inter_relay_echo_measurement` (`measurement_id`)
+
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `qos_inter_relay_echo_measurement_log` (
+	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+	`measurement_id` bigint(20) NOT NULL,
+	`measurement_sequenece_number` int(3) NOT NULL,
+	`timeout_flag` int(1) NOT NULL DEFAULT 0,
+	`error_message` varchar(255) NULL DEFAULT NULL,
+	`throwable` varchar(255) NULL DEFAULT NULL,
+	`size_` int(11) NULL DEFAULT NULL,
+	`duration` int(5) NULL DEFAULT NULL,
+	`measured_at` timestamp NOT NULL,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `fk_inter_relay_echo_measurement_log` FOREIGN KEY (`measurement_id`) REFERENCES `qos_inter_relay_measurement` (`id`) ON DELETE CASCADE
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -470,6 +659,33 @@ CREATE TABLE IF NOT EXISTS `qos_reservation` (
 	CONSTRAINT `fk_reserved_service` FOREIGN KEY (`reserved_service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
 	UNIQUE KEY `unique_reserved_provider_and_service` (`reserved_provider_id`, `reserved_service_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Certificate Authority
+
+CREATE TABLE IF NOT EXISTS `ca_certificate` (
+  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+  `common_name` varchar(255) NOT NULL,
+  `serial` bigint(20) NOT NULL,
+  `created_by` varchar(255) NOT NULL,
+  `valid_after` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `valid_before` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `revoked_at` timestamp NULL,
+  UNIQUE KEY `unique_certificate_serial` (`serial`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `ca_trusted_key` (
+  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+  `public_key` text NOT NULL,
+  `hash` varchar(255) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  `valid_after` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `valid_before` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY `unique_hash` (`hash`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;
 
 -- MSVC
 use arrowhead;

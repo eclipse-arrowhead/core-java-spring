@@ -1,5 +1,12 @@
 package eu.arrowhead.common.drivers;
 
+import java.security.PublicKey;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import javax.annotation.Resource;
+
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.CoreSystemRegistrationProperties;
@@ -28,13 +35,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import javax.annotation.Resource;
-import java.security.PublicKey;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 @Component
 public class DriverUtilities {
@@ -93,8 +93,11 @@ public class DriverUtilities {
     public UriComponents findUri(final CoreSystemService service) throws DriverException {
         try {
             return findUriByOrchestrator(service);
+        } catch (final DriverException e) {
+            logger.debug(e.getMessage());
         } catch (final Exception e) {
-            // silently ignored
+            logger.info("Unable to find '{}' via Orchestrator. Retrying using ServiceRegistry. Error: {}: {}",
+                        service.getServiceDefinition(), e.getClass().getSimpleName(), e.getMessage());
         }
 
         return findUriByServiceRegistry(service);
@@ -172,7 +175,10 @@ public class DriverUtilities {
         logger.debug("findUriByOrchestrator started...");
 
         final UriComponents queryUri = getOrchestrationQueryUri();
-        final SystemRequestDTO requester = getCoreSystemRequestDTO();
+        final SystemRequestDTO requester = new SystemRequestDTO();
+        requester.setAddress(coreSystemProps.getCoreSystemDomainName());
+        requester.setPort(coreSystemProps.getCoreSystemDomainPort());
+        requester.setSystemName(coreSystemProps.getCoreSystemName());
 
         final ServiceQueryFormDTO serviceQueryForm = new ServiceQueryFormDTO.Builder(service.getServiceDefinition())
                 .interfaces(getInterface())

@@ -28,18 +28,25 @@ import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.Cloud;
+import eu.arrowhead.common.database.entity.Relay;
+import eu.arrowhead.common.dto.internal.CloudAccessListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudRelaysAssignmentRequestDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysAndPublicRelaysListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
+import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.internal.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.internal.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.internal.ICNResultDTO;
+import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayListResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
+import eu.arrowhead.common.dto.internal.SystemAddressSetRelayResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
@@ -64,6 +71,8 @@ public class GatekeeperController {
 	private static final String PATH_VARIABLE_ID = "id";
 	private static final String PATH_VARIABLE_ADDRESS = "address";
 	private static final String PATH_VARIABLE_PORT = "port";
+	private static final String PATH_VARIABLE_OPERATOR = "operator";
+	private static final String PATH_VARIABLE_NAME = "name";
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = "Id must be greater than 0.";
 	
 	private static final String CLOUDS_MGMT_URI =  CoreCommonConstants.MGMT_URI + "/clouds";
@@ -77,8 +86,8 @@ public class GatekeeperController {
 	private static final String INIT_GLOBAL_SERVICE_DISCOVERY_URI = "/init_gsd";
 	private static final String INIT_INTER_CLOUD_NEGOTIATION_URI = "/init_icn";
 	
-	private static final String GET_CLOUDS_MGMT_HTTP_200_MESSAGE = "Cloud entries returned";
-	private static final String GET_CLOUDS_MGMT_HTTP_400_MESSAGE = "Could not retrieve Cloud entries";
+	private static final String GET_CLOUDS_HTTP_200_MESSAGE = "Cloud entries returned";
+	private static final String GET_CLOUDS_HTTP_400_MESSAGE = "Could not retrieve Cloud entries";
 	private static final String POST_CLOUDS_MGMT_HTTP_201_MESSAGE = "Cloud entries created";
 	private static final String POST_CLOUDS_MGMT_HTTP_400_MESSAGE = "Could not create Cloud entries";
 	private static final String POST_CLOUDS_ASSIGN_MGMT_HTTP_200_MESSAGE = "Cloud and Relay entries assigned";
@@ -103,6 +112,20 @@ public class GatekeeperController {
 	private static final String POST_INIT_ICN_HTTP_200_MESSAGE = "ICN result returned";
 	private static final String POST_INIT_ICN_HTTP_400_MESSAGE = "Could not initiate inter cloud negotiation";
 	private static final String POST_INIT_ICN_HTTP_504_MESSAGE = "Timeout occurs in the communication via relay.";
+	private static final String GET_PULL_CLOUDS_DESCRIPTION = "Return all registrated clouds for QoS Monitor Core System";
+	private static final String POST_COLLECT_SYSTEM_ADDRESSES_DESCRIPTION = "Return all registrated system ip address from a neighbor cloud for QoS Monitor Core System";
+	private static final String POST_COLLECT_SYSTEM_ADDRESSES_HTTP_200_MESSAGE = "Addresses returned";
+	private static final String POST_COLLECT_SYSTEM_ADDRESSES_HTTP_400_MESSAGE = "Could not collect addresses";
+	private static final String POST_COLLECT_ACCESS_TYPES_DESCRIPTION = "Return access types of requested clouds for QoS Monitor Core System";
+	private static final String POST_COLLECT_ACCESS_TYPES_HTTP_200_MESSAGE = "Access types returned";
+	private static final String POST_COLLECT_ACCESS_TYPES_HTTP_400_MESSAGE = "Could not collect access types";
+	private static final String POST_INIT_RELAY_TEST_DESCRIPTION = "Starts a test between this cloud and the target cloud using the specified relay.";
+	private static final String POST_INIT_RELAY_TEST_HTTP_200_MESSAGE = "Test started";
+	private static final String POST_INIT_RELAY_TEST_HTTP_400_MESSAGE = "Could not start the test";
+	private static final String POST_INIT_RELAY_TEST_HTTP_504_MESSAGE = "Timeout occurs in the communication via relay.";
+	private static final String GET_GET_CLOUD_DESCRIPTION = "Returns the specified cloud (with all the available gateway relays, even public ones)";
+	private static final String GET_GET_CLOUD_HTTP_200_MESSAGE = "Cloud returned";
+	private static final String GET_GET_CLOUD_HTTP_400_MESSAGE = "Could not acquire cloud";
 	
 	private final Logger logger = LogManager.getLogger(GatekeeperController.class);
 	
@@ -130,8 +153,8 @@ public class GatekeeperController {
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return requested Cloud entries by the given parameters", response = CloudWithRelaysListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = GET_CLOUDS_MGMT_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CLOUDS_MGMT_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_CLOUDS_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CLOUDS_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
@@ -154,8 +177,8 @@ public class GatekeeperController {
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return requested Cloud entry", response = CloudWithRelaysResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = GET_CLOUDS_MGMT_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CLOUDS_MGMT_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_CLOUDS_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CLOUDS_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
@@ -365,7 +388,6 @@ public class GatekeeperController {
 		
 		logger.debug("Relay entry with address: '{}', and port: '{}' successfully retrieved", address, port);
 		return relayResponse;
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -478,6 +500,115 @@ public class GatekeeperController {
 		
 		logger.debug("Inter cloud negotiation has been finished.");
 		return result;
+	}
+	
+
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = GET_PULL_CLOUDS_DESCRIPTION, response = CloudWithRelaysAndPublicRelaysListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_CLOUDS_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CLOUDS_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = CommonConstants.OP_GATEKEEPER_PULL_CLOUDS_SERVICE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public CloudWithRelaysAndPublicRelaysListResponseDTO pullClouds() {
+		logger.debug("new pullClouds request received");
+		final CloudWithRelaysAndPublicRelaysListResponseDTO cloudsResponse = gatekeeperDBService.getCloudsWithPublicRelaysResponse(-1, -1, null, null);
+		logger.debug("pullClouds request successfully finished");
+		return cloudsResponse;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = POST_COLLECT_SYSTEM_ADDRESSES_DESCRIPTION, response = SystemAddressSetRelayResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_COLLECT_SYSTEM_ADDRESSES_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_COLLECT_SYSTEM_ADDRESSES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = CommonConstants.OP_GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_SERVICE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public SystemAddressSetRelayResponseDTO collectSystemAddressesOfNeighborCloud(@RequestBody final CloudRequestDTO dto) {
+		logger.debug("new collectSystemAddressesOfNeighborCloud request received");
+		
+		validateCloudRequestDTO(dto, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_SERVICE);
+		final SystemAddressSetRelayResponseDTO addresses = gatekeeperService.initSystemAddressCollection(dto);
+		
+		logger.debug("collectSystemAddressesOfNeighborCloud request successfully finished");
+		return addresses;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = POST_COLLECT_ACCESS_TYPES_DESCRIPTION, response = CloudAccessListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_COLLECT_ACCESS_TYPES_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_COLLECT_ACCESS_TYPES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = CommonConstants.OP_GATEKEEPER_COLLECT_ACCESS_TYPES_SERVICE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public CloudAccessListResponseDTO collectNeighborCloudAccessTypes(@RequestBody final List<CloudRequestDTO> dtos) throws InterruptedException {
+		logger.debug("new collectNeighborCloudAccessTypes request received");
+		for (final CloudRequestDTO cloudRequestDTO : dtos) {
+			validateCloudRequestDTO(cloudRequestDTO, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_COLLECT_ACCESS_TYPES_SERVICE);
+		}
+		final CloudAccessListResponseDTO accessTypes = gatekeeperService.initAccessTypesCollection(dtos);
+		logger.debug("collectNeighborCloudAccessTypes request successfully finished");
+		return accessTypes;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = POST_INIT_RELAY_TEST_DESCRIPTION, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_INIT_RELAY_TEST_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_INIT_RELAY_TEST_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_GATEWAY, message = POST_INIT_RELAY_TEST_HTTP_504_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = CommonConstants.OP_GATEKEEPER_RELAY_TEST_SERVICE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	public void initRelayTest(@RequestBody final QoSRelayTestProposalRequestDTO request) {
+		logger.debug("new initRelayTest request received");
+		
+		validateQoSRelayTestProposalRequestDTO(request, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_RELAY_TEST_SERVICE);
+		gatekeeperService.initRelayTest(request);
+		
+		logger.debug("initRelayTest request successfully finished");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = GET_GET_CLOUD_DESCRIPTION, response = CloudWithRelaysResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_GET_CLOUD_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_GET_CLOUD_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = CommonConstants.OP_GATEKEEPER_GET_CLOUD_SERVICE + CommonConstants.OP_GATEKEEPER_GET_CLOUD_SERVICE_SUFFIX, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public CloudWithRelaysResponseDTO getCloudByOperatorAndName(@PathVariable(value = PATH_VARIABLE_OPERATOR) final String operator,
+																			  @PathVariable(value = PATH_VARIABLE_NAME) final String name) {
+		logger.debug("New getCloudByOperatorAndName get request recieved with operator: '{}', and name: '{}'", operator, name);
+		final String origin = CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_GET_CLOUD_SERVICE;
+		
+		if (Utilities.isEmpty(operator)) {
+			throw new BadPayloadException("Operator is empty", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (Utilities.isEmpty(name)) {
+			throw new BadPayloadException("Name is empty", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		final Cloud cloud = gatekeeperDBService.getCloudByOperatorAndName(operator, name);
+		final CloudWithRelaysResponseDTO response = DTOConverter.convertCloudToCloudWithRelaysResponseDTO(cloud);
+		final List<Relay> publicGatewayRelays = gatekeeperDBService.getPublicGatewayRelays();
+
+		for (final Relay relay : publicGatewayRelays) {
+			response.getGatewayRelays().add(DTOConverter.convertRelayToRelayResponseDTO(relay));
+		}
+		
+		logger.debug("Cloud entry with operator: '{}', and name: '{}' successfully retrieved", operator, name);
+		
+		return response;
 	}
 	
 	//=================================================================================================
@@ -651,6 +782,23 @@ public class GatekeeperController {
 		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
 			throw new BadPayloadException("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".",
 										  HttpStatus.SC_BAD_REQUEST, origin);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateQoSRelayTestProposalRequestDTO(final QoSRelayTestProposalRequestDTO request, final String origin) {
+		logger.debug("validateQoSRelayTestProposalRequestDTO started...");
+		
+		if (request == null) {
+			throw new BadPayloadException("Relay test proposal is null.", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		validateCloudRequestDTO(request.getTargetCloud(), origin);
+		validateRelayRequestDTO(request.getRelay(), origin);
+		
+		final RelayType relayType = Utilities.convertStringToRelayType(request.getRelay().getType());
+		if (RelayType.GATEKEEPER_RELAY == relayType) {
+			throw new BadPayloadException("Invalid relay type for testing: " + RelayType.GATEKEEPER_RELAY, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 	}
 }

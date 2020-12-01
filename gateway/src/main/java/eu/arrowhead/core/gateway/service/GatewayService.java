@@ -37,13 +37,13 @@ import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.exception.UnavailableServerException;
-import eu.arrowhead.core.gateway.relay.ConsumerSideRelayInfo;
-import eu.arrowhead.core.gateway.relay.ControlRelayInfo;
-import eu.arrowhead.core.gateway.relay.GatewayRelayClient;
-import eu.arrowhead.core.gateway.relay.GatewayRelayClientFactory;
-import eu.arrowhead.core.gateway.relay.ProviderSideRelayInfo;
 import eu.arrowhead.core.gateway.thread.ConsumerSideServerSocketThread;
-import eu.arrowhead.core.gateway.thread.ProviderSideSocketThread;
+import eu.arrowhead.core.gateway.thread.ProviderSideSocketThreadHandler;
+import eu.arrowhead.relay.gateway.ConsumerSideRelayInfo;
+import eu.arrowhead.relay.gateway.ControlRelayInfo;
+import eu.arrowhead.relay.gateway.GatewayRelayClient;
+import eu.arrowhead.relay.gateway.GatewayRelayClientFactory;
+import eu.arrowhead.relay.gateway.ProviderSideRelayInfo;
 
 @Component
 public class GatewayService {
@@ -53,6 +53,9 @@ public class GatewayService {
 	
 	@Value(CoreCommonConstants.$GATEWAY_SOCKET_TIMEOUT_WD)
 	private int gatewaySocketTimeout;
+	
+	@Value(CoreCommonConstants.$GATEWAY_PROVIDER_SIDE_MAX_REQUEST_PER_SOCKET)
+	private int gatewayProviderSideMaxRequestPerSocket;
 	
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
@@ -111,16 +114,15 @@ public class GatewayService {
 		final RelayRequestDTO relay = request.getRelay();
 		final Session session = getRelaySession(relay);
 		
-		ProviderSideSocketThread thread = null;
+		ProviderSideSocketThreadHandler handler = null;
 		try {
-			thread = new ProviderSideSocketThread(appContext, relayClient, session, request, gatewaySocketTimeout);
-			final ProviderSideRelayInfo info = relayClient.initializeProviderSideRelay(session, thread);
-			thread.init(info.getQueueId(), info.getMessageSender());
+			handler = new ProviderSideSocketThreadHandler(appContext, relayClient, session, request, gatewaySocketTimeout, gatewayProviderSideMaxRequestPerSocket);
+			final ProviderSideRelayInfo info = relayClient.initializeProviderSideRelay(session, handler);
+			handler.init(info.getQueueId(), info.getMessageSender());
 			final ActiveSessionDTO activeSession = new ActiveSessionDTO(info.getQueueId(), info.getPeerName(), request.getConsumer(), request.getConsumerCloud(), request.getProvider(),
 																		request.getProviderCloud(), request.getServiceDefinition(), request.getRelay(), Utilities.convertZonedDateTimeToUTCString(now),
 																		null);
 			activeSessions.put(info.getQueueId(), activeSession);
-			thread.start();
 			
 			return new GatewayProviderConnectionResponseDTO(info.getQueueId(), info.getPeerName(), Base64.getEncoder().encodeToString(myPublicKey.getEncoded()));
 		} catch (final JMSException ex) {
@@ -129,8 +131,8 @@ public class GatewayService {
 		} catch (final ArrowheadException ex) {
 			relayClient.closeConnection(session);
 			
-			if (thread != null && thread.isInitialized()) {
-				thread.setInterrupted(true);
+			if (handler != null) {
+				handler.close();
 			}
 			
 			throw ex;

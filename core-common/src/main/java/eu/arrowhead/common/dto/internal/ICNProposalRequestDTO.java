@@ -2,7 +2,9 @@ package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.util.Assert;
 
@@ -25,6 +27,7 @@ public class ICNProposalRequestDTO implements Serializable {
 	private List<RelayRequestDTO> knownGatewayRelays = new ArrayList<>();
 	private List<RelayRequestDTO> preferredGatewayRelays = new ArrayList<>();
 	private OrchestrationFlags negotiationFlags = new OrchestrationFlags();
+	private Map<String,String> commands = new HashMap<>();
 	private boolean gatewayIsPresent = false;
 	private String consumerGatewayPublicKey;
 	
@@ -37,7 +40,7 @@ public class ICNProposalRequestDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public ICNProposalRequestDTO(final ServiceQueryFormDTO requestedService, final CloudRequestDTO requesterCloud, final SystemRequestDTO requesterSystem, 
 							     final List<SystemRequestDTO> preferredSystems, final List<RelayRequestDTO> preferredGatewayRelays, final List<RelayRequestDTO> knownGatewayRelays,
-							     final OrchestrationFlags negotiationFlags, final boolean gatewayIsPresent) {
+							     final OrchestrationFlags negotiationFlags, final boolean gatewayIsPresent, final Map<String,String> commands) {
 		Assert.notNull(requestedService, "Requested service is null.");
 		Assert.notNull(requesterCloud, "Requester cloud is null.");
 		Assert.notNull(requesterSystem, "Requester system is null.");
@@ -62,6 +65,10 @@ public class ICNProposalRequestDTO implements Serializable {
 		if (negotiationFlags != null) {
 			this.negotiationFlags = negotiationFlags;
 		}
+		
+		if (commands != null) {
+			this.commands = commands;
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -72,6 +79,7 @@ public class ICNProposalRequestDTO implements Serializable {
 	public List<RelayRequestDTO> getPreferredGatewayRelays() { return preferredGatewayRelays; }
 	public List<RelayRequestDTO> getKnownGatewayRelays() { return knownGatewayRelays; }
 	public OrchestrationFlags getNegotiationFlags() { return negotiationFlags; }
+	public Map<String, String> getCommands() { return commands; }
 	public boolean getGatewayIsPresent() { return gatewayIsPresent; }
 	public String getConsumerGatewayPublicKey() { return consumerGatewayPublicKey; }
 	
@@ -107,6 +115,13 @@ public class ICNProposalRequestDTO implements Serializable {
 	public void setNegotiationFlags(final OrchestrationFlags negotiationFlags) {
 		if (negotiationFlags != null) {
 			this.negotiationFlags = negotiationFlags;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public void setCommands(final Map<String,String> commands) {
+		if (commands != null) {
+			this.commands = commands;
 		}
 	}
 }

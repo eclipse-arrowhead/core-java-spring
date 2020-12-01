@@ -2,6 +2,7 @@ package eu.arrowhead.common.database.entity;
 
 import java.time.ZonedDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -16,15 +17,19 @@ import javax.persistence.PreUpdate;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.SQLInsert;
 
 import eu.arrowhead.common.CoreDefaults;
 
 @Entity
+@SQLInsert(sql = "INSERT IGNORE INTO service_interface(created_at, interface_name, updated_at) VALUES (?, ?, ?)") //members' sequence is strictly defined
 public class ServiceInterface {
 	
 	//=================================================================================================
 	// members
-	
+
+	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "interfaceName", "updatedAt", "createdAt"); //NOSONAR
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;

@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -11,6 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -34,6 +36,8 @@ import javax.jms.TemporaryTopic;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
+import javax.net.ssl.HandshakeCompletedEvent;
+import javax.net.ssl.HandshakeCompletedListener;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLSocket;
@@ -43,7 +47,6 @@ import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -55,13 +58,44 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
-import eu.arrowhead.core.gateway.relay.GatewayRelayClient;
+import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.relay.gateway.GatewayRelayClient;
 
 @RunWith(SpringRunner.class)
 public class ConsumerSideServerSocketThreadTest {
 
 	//=================================================================================================
 	// members
+	
+	private static final String simpleRequest = "DELETE / HTTP/1.1\r\n" + 
+												"Accept: text/plain\r\n" + 
+												"User-Agent: Apache-HttpClient/4.5.8 (Java/11.0.3)\r\n" + 
+												"\r\n";
+	
+	private static final String validFirstPart = "POST /car?token=eyJhbGciOiJSU0EtT0FFUC0yNTYiLCJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiY3R5IjoiSldUIn0.L4Iwcfrne6BD-DZcnyjRi4-8GT8XekzXLd3nNSLVXliIbB-lE76AgZnjs9ieQPRMqXDenrVY9SkuWqszEF2uqJP0rzxon-Xwr02yTAUlC1iPzoVomUnaQkpl3OsKEAkbfKgii9lZG2nqMtoAkCzxe8cgY6hu8Mpa6KihhTje9EpqNQhvbc1_vswHRlvd7dGNChY17JEhTMhlhbLvreEH7JUy24MeA7PLh2yWyPL0ouXoocdLzDh1weEgY5GEh_Ag4kpQ8Y9GnE4RULdrqvYF5zv28M_d4SmWvB2ISB5Z1qZyKcAhdT4hlF5stj5FwxMWr19m6-5neJ-QA5VviXIjxQ.kK5rWeM9dM8VZ7K3G_dGVw.gLCdSjagrxvnXgbVodHxYP7fRQogCFTtZVUqhKHOcRxJoHrbHx9tu1U2RAE0TMNo7ytcNez3DJa-Ahn8AX1MMqwlUOdx3wrSAPsn7spvTOWsSWDMpzZ2ASnpX3IQPc-9j1D1YWD3qCpBH-PeRzVXLUD1M1panI6WLZORrw-a52hsHrnBmoA87VBcL5pQ_jqfsMkJbpvsIKlNFZP9ZsgHmoqTnFNc5OGiHcm-gmVly64T_lPRh2S3Wjzjb0g47xs0irCIjTApKT4U2rG0M4Drg-5ns4C7l7lNSMd5NdLkwiZ_4ly7wu3RbWEonQQRR08-uFv-uXczWB_-FquhhN_LUF81hh4HP-FJDAEpUuMCNX0qTL0uwvTujnLfjZWopIjpw5Z3RG5bKrsBveN3FpI-0NlF48LhGXwx2Kbj98c-mm5_ZO5ck6GTmlIVQpU3H9WJ9NXNW6LnQYlUPtUtub8xFy9SNQZ47gwOQ1V18Ui1xAcO4FLF7DlmQysy0xyWbQH3ryVguL5uEsvVI6UaDCO-zRr5L7vIghlRLJvH2c1bpG-SfxgBZbdKvK"; 
+	private static final String validSecondPart = "rApdWo-9_e-eC8B-Yi9u2WfdrShUq5s2OTUFNc2Up0YSG7g-v7I65RkqSIcSgYWBbtQc-cmOxgztPP1D83XzpWl-89-Wng0bI5brSxFhER4E2wjHANJOJ1bXYVVocyoGFrJ3Yf1nLElg0uJPEOMWDU0QsCimdtunfVt-deF9R4Iz2CoKatWzCS_3y8lDSglVFS2HBxkY8hOPhLzSh42ER8kQWZSAYWJc-Zc39fp_9ByuiAaVbNzfvz2dQI1GMVjBlcL_FWkdg2.MMy3Ajz0IJVqcOMt9GBtDAkQHGOBBmOfcmBd_rjC-3c HTTP/1.1\r\n" + 
+												  "Accept: text/plain\r\n" + 
+												  "Accept: application/json\r\n" + 
+												  "Content-Type: application/json\r\n" + 
+												  "Content-Length: 35\r\n" + 
+												  "Host: 127.0.0.1:8000\r\n" + 
+												  "Connection: Keep-Alive\r\n" + 
+												  "User-Agent: Apache-HttpClient/4.5.8 (Java/11.0.3)\r\n" + 
+												  "Accept-Encoding: gzip,deflate\r\n" + 
+												  "\r\n" + 
+												  "{\"brand\":\"opel - 0\",\"color\":\"blue\"}";
+	
+	private static final String chunkedSecondPart = "rApdWo-9_e-eC8B-Yi9u2WfdrShUq5s2OTUFNc2Up0YSG7g-v7I65RkqSIcSgYWBbtQc-cmOxgztPP1D83XzpWl-89-Wng0bI5brSxFhER4E2wjHANJOJ1bXYVVocyoGFrJ3Yf1nLElg0uJPEOMWDU0QsCimdtunfVt-deF9R4Iz2CoKatWzCS_3y8lDSglVFS2HBxkY8hOPhLzSh42ER8kQWZSAYWJc-Zc39fp_9ByuiAaVbNzfvz2dQI1GMVjBlcL_FWkdg2.MMy3Ajz0IJVqcOMt9GBtDAkQHGOBBmOfcmBd_rjC-3c HTTP/1.1\r\n" + 
+													"Accept: text/plain\r\n" + 
+													"Accept: application/json\r\n" + 
+													"Content-Type: application/json\r\n" + 
+													"Host: 127.0.0.1:8000\r\n" + 
+													"Connection: Keep-Alive\r\n" + 
+													"Transfer-Encoding: chunked\r\n" +
+													"User-Agent: Apache-HttpClient/4.5.8 (Java/11.0.3)\r\n" +
+													"\r\n" + 
+													"10" +
+													"abcdefghij";
 	
 	private ApplicationContext appContext;
 	private GatewayRelayClient relayClient;
@@ -166,7 +200,7 @@ public class ConsumerSideServerSocketThreadTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Test
+	@Test(expected = ArrowheadException.class)
 	public void testInitSSLSocketInitializationFailed() {
 		Assert.assertFalse(testingObject.isInitialized());
 		
@@ -233,13 +267,13 @@ public class ConsumerSideServerSocketThreadTest {
 		final ActiveMQTextMessage message = new ActiveMQTextMessage();
 		message.setJMSDestination(new ActiveMQQueue("bla"));
 		
-		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(new byte[] { 10, 8, 6, 4,  2, 9, 7, 5, 3, 1 });
+		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(new byte[] { 10, 8, 6, 4, 2, 9, 7, 5, 3, 1 });
 		
 		testingObject.onMessage(message);
 		
 		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertTrue(!interrupted);
-		Assert.assertArrayEquals(new byte[] { 10, 8, 6, 4,  2, 9, 7, 5, 3, 1 }, outputStream.toByteArray());
+		Assert.assertArrayEquals(new byte[] { 10, 8, 6, 4, 2, 9, 7, 5, 3, 1 }, outputStream.toByteArray());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -270,22 +304,257 @@ public class ConsumerSideServerSocketThreadTest {
 
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	@Ignore
-	public void testRunWhenOtherSideCloseTheConnectionAfterSendingSomeBytes() throws Exception {
-		doNothing().when(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+	public void testRunWhenOtherSideSendingSomeBytes() throws Exception {
+		final boolean[] handshakeCompleted = { false };
 		
-		testingObject.init(getTestMessageProducer());
-		testingObject.start();
-	
-		final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(getTestSSLPropertiesForTestOtherSocket());
-		final SSLSocketFactory socketFactory = (SSLSocketFactory) sslContext.getSocketFactory();
-		final SSLSocket sslProviderSocket = (SSLSocket) socketFactory.createSocket("localhost", 22003);
-		final OutputStream outProvider = sslProviderSocket.getOutputStream();
-		outProvider.write(new byte[] { 5, 6, 7, 8 });
-		Thread.sleep(1); // it's necessary: without it the test fails most of the time but not always
-		sslProviderSocket.close();
+		final HandshakeCompletedListener listener = new HandshakeCompletedListener() {
+			@Override
+			public void handshakeCompleted(final HandshakeCompletedEvent event) {
+				handshakeCompleted[0] = true;
+			}
+		};
+		
+		final Thread consumerSide = new Thread() {
+			@Override
+			public void run() {
+				for (int i = 0; i < 60; ++i) {
+					try {
+						Thread.sleep(1000);
+						final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(getTestSSLPropertiesForTestOtherSocket());
+						final SSLSocketFactory socketFactory = (SSLSocketFactory) sslContext.getSocketFactory();
+						final SSLSocket sslConsumerSocket = (SSLSocket) socketFactory.createSocket("localhost", 22003);
+						sslConsumerSocket.addHandshakeCompletedListener(listener);
+						final OutputStream outConsumer = sslConsumerSocket.getOutputStream();
+						outConsumer.write(new byte[] { 5, 6, 7, 8 });
+						Thread.sleep(500);
+						outConsumer.write(new byte[] { 5, 6, 7, 8 });
+						int j = 0;
+						while (!handshakeCompleted[0] && ++j < 10) {
+							Thread.sleep(500);
+						}
+						sslConsumerSocket.close();
+						break;
+					} catch (final IOException | InterruptedException ex) {
+						// exception happens when this side is not ready to accept the connection
+						ex.printStackTrace();
+					}
+				}
+			}
+		};
 
-		verify(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		testingObject.init(getTestMessageProducer());
+		consumerSide.start();
+		testingObject.run();
+	
+		verify(relayClient, times(2)).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		
+		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
+		Assert.assertTrue(interrupted);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRunWhenOtherSideSendingSimpleHTTPRequest() throws Exception {
+		final boolean[] handshakeCompleted = { false };
+		
+		final HandshakeCompletedListener listener = new HandshakeCompletedListener() {
+			@Override
+			public void handshakeCompleted(final HandshakeCompletedEvent event) {
+				handshakeCompleted[0] = true;
+			}
+		};
+		
+		final Thread consumerSide = new Thread() {
+			@Override
+			public void run() {
+				for (int i = 0; i < 60; ++i) {
+					try {
+						Thread.sleep(1000);
+						final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(getTestSSLPropertiesForTestOtherSocket());
+						final SSLSocketFactory socketFactory = (SSLSocketFactory) sslContext.getSocketFactory();
+						final SSLSocket sslConsumerSocket = (SSLSocket) socketFactory.createSocket("localhost", 22003);
+						sslConsumerSocket.addHandshakeCompletedListener(listener);
+						final OutputStream outConsumer = sslConsumerSocket.getOutputStream();
+						outConsumer.write(string2bytes(simpleRequest));
+						int j = 0;
+						while (!handshakeCompleted[0] && ++j < 10) {
+							Thread.sleep(500);
+						}
+						sslConsumerSocket.close();
+						break;
+					} catch (final IOException | InterruptedException ex) {
+						// exception happens when this side is not ready to accept the connection
+						ex.printStackTrace();
+					}
+				}
+			}
+		};
+
+		testingObject.init(getTestMessageProducer());
+		consumerSide.start();
+		testingObject.run();
+	
+		verify(relayClient, times(1)).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		
+		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
+		Assert.assertTrue(interrupted);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRunWhenOtherSideSendingTwoPartsHTTPRequest() throws Exception {
+		final boolean[] handshakeCompleted = { false };
+		
+		final HandshakeCompletedListener listener = new HandshakeCompletedListener() {
+			@Override
+			public void handshakeCompleted(final HandshakeCompletedEvent event) {
+				handshakeCompleted[0] = true;
+			}
+		};
+		
+		final Thread consumerSide = new Thread() {
+			@Override
+			public void run() {
+				for (int i = 0; i < 60; ++i) {
+					try {
+						Thread.sleep(1000);
+						final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(getTestSSLPropertiesForTestOtherSocket());
+						final SSLSocketFactory socketFactory = (SSLSocketFactory) sslContext.getSocketFactory();
+						final SSLSocket sslConsumerSocket = (SSLSocket) socketFactory.createSocket("localhost", 22003);
+						sslConsumerSocket.addHandshakeCompletedListener(listener);
+						final OutputStream outConsumer = sslConsumerSocket.getOutputStream();
+						outConsumer.write(string2bytes(validFirstPart));
+						Thread.sleep(100);
+						outConsumer.write(string2bytes(validSecondPart));
+						int j = 0;
+						while (!handshakeCompleted[0] && ++j < 10) {
+							Thread.sleep(500);
+						}
+						sslConsumerSocket.close();
+						break;
+					} catch (final IOException | InterruptedException ex) {
+						// exception happens when this side is not ready to accept the connection
+						ex.printStackTrace();
+					}
+				}
+			}
+		};
+
+		testingObject.init(getTestMessageProducer());
+		consumerSide.start();
+		testingObject.run();
+	
+		verify(relayClient, times(1)).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		
+		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
+		Assert.assertTrue(interrupted);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRunWhenOtherSideSendingUnfinishedAndFinishedHTTPRequest() throws Exception {
+		final boolean[] handshakeCompleted = { false };
+		
+		final HandshakeCompletedListener listener = new HandshakeCompletedListener() {
+			@Override
+			public void handshakeCompleted(final HandshakeCompletedEvent event) {
+				handshakeCompleted[0] = true;
+			}
+		};
+		
+		final Thread consumerSide = new Thread() {
+			@Override
+			public void run() {
+				for (int i = 0; i < 60; ++i) {
+					try {
+						Thread.sleep(1000);
+						final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(getTestSSLPropertiesForTestOtherSocket());
+						final SSLSocketFactory socketFactory = (SSLSocketFactory) sslContext.getSocketFactory();
+						final SSLSocket sslConsumerSocket = (SSLSocket) socketFactory.createSocket("localhost", 22003);
+						sslConsumerSocket.addHandshakeCompletedListener(listener);
+						final OutputStream outConsumer = sslConsumerSocket.getOutputStream();
+						outConsumer.write(string2bytes(validFirstPart));
+						Thread.sleep(100);
+						outConsumer.write(string2bytes(validSecondPart.substring(0, validSecondPart.length() - 5)));
+						Thread.sleep(100);
+						outConsumer.write(string2bytes(validFirstPart));
+						Thread.sleep(100);
+						outConsumer.write(string2bytes(validSecondPart));
+					
+						int j = 0;
+						while (!handshakeCompleted[0] && ++j < 10) {
+							Thread.sleep(500);
+						}
+						sslConsumerSocket.close();
+						break;
+					} catch (final IOException | InterruptedException ex) {
+						// exception happens when this side is not ready to accept the connection
+						ex.printStackTrace();
+					}
+				}
+			}
+		};
+
+		testingObject.init(getTestMessageProducer());
+		consumerSide.start();
+		testingObject.run();
+	
+		verify(relayClient, times(2)).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		
+		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
+		Assert.assertTrue(interrupted);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRunWhenOtherSideSendingChunkedHTTPRequest() throws Exception {
+		final boolean[] handshakeCompleted = { false };
+		
+		final HandshakeCompletedListener listener = new HandshakeCompletedListener() {
+			@Override
+			public void handshakeCompleted(final HandshakeCompletedEvent event) {
+				handshakeCompleted[0] = true;
+			}
+		};
+		
+		final Thread consumerSide = new Thread() {
+			@Override
+			public void run() {
+				for (int i = 0; i < 60; ++i) {
+					try {
+						Thread.sleep(1000);
+						final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(getTestSSLPropertiesForTestOtherSocket());
+						final SSLSocketFactory socketFactory = (SSLSocketFactory) sslContext.getSocketFactory();
+						final SSLSocket sslConsumerSocket = (SSLSocket) socketFactory.createSocket("localhost", 22003);
+						sslConsumerSocket.addHandshakeCompletedListener(listener);
+						final OutputStream outConsumer = sslConsumerSocket.getOutputStream();
+						outConsumer.write(string2bytes(validFirstPart));
+						Thread.sleep(100);
+						outConsumer.write(string2bytes(chunkedSecondPart));
+						Thread.sleep(100);
+						outConsumer.write(new byte[] { 1, 2, 3, 4, });
+						Thread.sleep(100);
+						outConsumer.write(new byte[] { 1, 2, 3, 4, });
+					
+						int j = 0;
+						while (!handshakeCompleted[0] && ++j < 10) {
+							Thread.sleep(500);
+						}
+						sslConsumerSocket.close();
+						break;
+					} catch (final IOException | InterruptedException ex) {
+						// exception happens when this side is not ready to accept the connection
+						ex.printStackTrace();
+					}
+				}
+			}
+		};
+
+		testingObject.init(getTestMessageProducer());
+		consumerSide.start();
+		testingObject.run();
+	
+		verify(relayClient, times(3)).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
 		
 		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertTrue(interrupted);
@@ -402,5 +671,10 @@ public class ConsumerSideServerSocketThreadTest {
 	private void initTestingObject() {
 		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq5Jq4tOeFoLqxOqtYcujbCNZina3iuV9+/o8D1R9D0HvgnmlgPlqWwjDSxV7m7SGJpuc/rRXJ85OzqV3rwRHO8A8YWXiabj8EdgEIyqg4SOgTN7oZ7MQUisTpwtWn9K14se4dHt/YE9mUW4en19p/yPUDwdw3ECMJHamy/O+Mh6rbw6AFhYvz6F5rXYB8svkenOuG8TSBFlRkcjdfqQqtl4xlHgmlDNWpHsQ3eFAO72mKQjm2ZhWI1H9CLrJf1NQs2GnKXgHBOM5ET61fEHWN8axGGoSKfvTed5vhhX7l5uwxM+AKQipLNNKjEaQYnyX3TL9zL8I7y+QkhzDa7/5kQIDAQAB";
 		testingObject = new ConsumerSideServerSocketThread(appContext, 22003, relayClient, getTestSession(), publicKey, "queueId", 600000, "consumer", "test-service");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private byte[] string2bytes(final String str) {
+		return str.getBytes(StandardCharsets.ISO_8859_1);
 	}
 }

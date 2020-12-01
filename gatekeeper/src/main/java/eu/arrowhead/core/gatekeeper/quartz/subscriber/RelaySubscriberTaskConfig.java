@@ -1,5 +1,7 @@
 package eu.arrowhead.core.gatekeeper.quartz.subscriber;
 
+import java.util.Properties;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.quartz.SimpleTrigger;
@@ -30,6 +32,7 @@ public class RelaySubscriberTaskConfig {
 	private int schedulerInterval;
 	
 	private static final int SCHEDULER_DELAY = 2;
+	private static final String NUM_OF_THREADS = "10";
 	
 	static final String NAME_OF_TRIGGER = "Relay_Subscriber_Task_Trigger";
 	private static final String NAME_OF_TASK = "Relay_Subscriber_Task";
@@ -44,6 +47,10 @@ public class RelaySubscriberTaskConfig {
 		jobFactory.setApplicationContext(applicationContext);
 		
 		final SchedulerFactoryBean schedulerFactory = new SchedulerFactoryBean();
+		final Properties schedulerProperties = new Properties();     
+		schedulerProperties.put(CoreCommonConstants.QUARTZ_THREAD_PROPERTY, NUM_OF_THREADS);
+	    schedulerFactory.setQuartzProperties(schedulerProperties);
+		
 		schedulerFactory.setJobFactory(jobFactory);
 		schedulerFactory.setJobDetails(relaySubscriberTaskDetail().getObject());
 		schedulerFactory.setTriggers(relaySubscriberTaskTrigger().getObject());

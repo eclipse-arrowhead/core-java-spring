@@ -1,13 +1,15 @@
 package eu.arrowhead.core.gateway.service;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.net.Socket;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Map;
@@ -33,6 +35,9 @@ import javax.jms.TemporaryTopic;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -40,7 +45,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -60,9 +64,10 @@ import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.exception.UnavailableServerException;
-import eu.arrowhead.core.gateway.relay.ConsumerSideRelayInfo;
-import eu.arrowhead.core.gateway.relay.GatewayRelayClient;
-import eu.arrowhead.core.gateway.relay.ProviderSideRelayInfo;
+import eu.arrowhead.core.gateway.thread.SSLContextFactory;
+import eu.arrowhead.relay.gateway.ConsumerSideRelayInfo;
+import eu.arrowhead.relay.gateway.GatewayRelayClient;
+import eu.arrowhead.relay.gateway.ProviderSideRelayInfo;
 
 @RunWith(SpringRunner.class)
 public class GatewayServiceTest {
@@ -478,7 +483,7 @@ public class GatewayServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testConnectProviderEverythingOK() throws JMSException {
+	public void testConnectProviderEverythingOK() throws JMSException, InterruptedException {
 		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
 		final MessageProducer producer = getTestMessageProducer();
 		
@@ -486,6 +491,30 @@ public class GatewayServiceTest {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
 		when(relayClient.initializeProviderSideRelay(any(Session.class), any(MessageListener.class))).thenReturn(new ProviderSideRelayInfo("peerName", "queueId", producer, producer));
 		when(activeSessions.put(any(String.class), any(ActiveSessionDTO.class))).thenReturn(null);
+		when(appContext.getBean(SSLProperties.class)).thenReturn(getTestSSLPropertiesForThread());
+		
+		final boolean[] started = { false };
+		new Thread() {
+			@Override
+			public void run() {
+				final SSLProperties props = getTestSSLPropertiesForDummyProvider();
+				final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(props);
+				final SSLServerSocketFactory serverSocketFactory = sslContext.getServerSocketFactory();
+				try {
+					final SSLServerSocket dummyServerSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(22032);
+					started[0] = true;
+					final Socket socket = dummyServerSocket.accept();
+					socket.close();
+				} catch (final IOException ex) {
+					ex.printStackTrace();
+				}
+			}
+		}.start();
+		
+		while (!started[0]) {
+			Thread.sleep(1000);
+		}
+		Thread.sleep(1000);
 		
 		final GatewayProviderConnectionResponseDTO response = testingObject.connectProvider(request);
 		
@@ -812,8 +841,8 @@ public class GatewayServiceTest {
 		consumer.setAuthenticationInfo("consAuth");
 		final SystemRequestDTO provider = new SystemRequestDTO();
 		provider.setSystemName("provider");
-		provider.setAddress("fgh.de");
-		provider.setPort(22002);
+		provider.setAddress("localhost");
+		provider.setPort(22032);
 		provider.setAuthenticationInfo("provAuth");
 		final CloudRequestDTO consumerCloud = new CloudRequestDTO();
 		consumerCloud.setName("testcloud1");
@@ -938,5 +967,19 @@ public class GatewayServiceTest {
 		ReflectionTestUtils.setField(sslProps, "trustStorePassword", "123456");
 		
 		return sslProps;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private SSLProperties getTestSSLPropertiesForDummyProvider() {
+		final SSLProperties props = new SSLProperties();
+		ReflectionTestUtils.setField(props, "sslEnabled", true);
+		ReflectionTestUtils.setField(props, "keyStoreType", "PKCS12");
+		ReflectionTestUtils.setField(props, "keyStore", new ClassPathResource("certificates/authorization.p12"));
+		ReflectionTestUtils.setField(props, "keyStorePassword", "123456");
+		ReflectionTestUtils.setField(props, "keyPassword", "123456");
+		ReflectionTestUtils.setField(props, "trustStore", new ClassPathResource("certificates/truststore.p12"));
+		ReflectionTestUtils.setField(props, "trustStorePassword", "123456");
+		
+		return props;
 	}
 }

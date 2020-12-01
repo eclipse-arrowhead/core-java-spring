@@ -32,6 +32,10 @@ public class DefaultICNProviderMatchmaker implements ICNProviderMatchmakingAlgor
 		Assert.notNull(params, "params is null");
 		
 		if (params.getPreferredLocalProviders().isEmpty()) {
+			if (params.isOnlyPreferred()) {
+				return null;
+			}
+			
 			logger.debug("No preferred provider is specified, the first one in the OR list is selected.");
 			return orList.get(0);
 		}
