@@ -1,4 +1,4 @@
- #!/bin/bash
+choreographer #!/bin/bash
 
  echo "****************************"
  echo "******* Building JAR *******"

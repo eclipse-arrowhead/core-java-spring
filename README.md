@@ -74,14 +74,20 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 	       * [Client](#gateway_endpoints_client)
            * [Private](#gateway_endpoints_private)
            * [Management](#gateway_endpoints_mgmt)
-    7. [Certificate Authority](#ca)
+    7. [DataManager](#datamanager)
+       * [System Design Description Overview](#datamanager_sdd)
+       * [Services and Use Cases](#datamanager_usecases)  
+       * [Service Description Overview](#datamanager_provided_services)
+       * [Endpoints](#datamanager_endpoints)
+	       * [Client](#datamanager_endpoints_client)
+    8. [Certificate Authority](#ca)
        * [System Design Description Overview](#ca_sdd)
        * [Services and Use Cases](#ca_usecases)  
        * [Endpoints](#ca_endpoints)
 	       * [Client](#ca_endpoints_client)
            * [Private](#ca_endpoints_private)
            * [Management](#ca_endpoints_mgmt)
-    8. **QoS Monitor (Quality of Service Monitor)**
+    9. **QoS Monitor (Quality of Service Monitor)**
        * [System Design Description Overview](qos-monitor/documentation/QualityOfServiceMonitor-SysDD.md)
            * [Services and Use Cases](qos-monitor/documentation/QualityOfServiceMonitor-SysDD.md#services-and-use-cases)  
        * [Interface Design Description](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md)
@@ -90,27 +96,27 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
                * [Client](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#client-endpoint-description)
                * [Private](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#private-endpoint-description)
                * [Management](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#management-endpoint-description)	 
-    9. [Onboarding Controller](#onboardingcontroller)
+    10. [Onboarding Controller](#onboardingcontroller)
        * [System Design Description Overview](#onboardingcontroller_sdd)
        * [Services and Use Cases](#onboardingcontroller_usecases)
        * [Security](#onboardingcontroller_security)
        * [Endpoints](#onboardingcontroller_endpoints)
            * [Onboarding](#onboardingcontroller_endpoints_onboarding)
-    10. [Device Registry](#deviceregistry)
+    11. [Device Registry](#deviceregistry)
         * [System Design Description Overview](#deviceregistry_sdd)
         * [Services and Use Cases](#deviceregistry_usecases)
         * [Security](#deviceregistry_security)
         * [Endpoints](#deviceregistry_endpoints)
            * [Onboarding](#deviceregistry_endpoints_onboarding)
            * [Client](#deviceregistry_endpoints_client)
-    11. [System Registry](#systemregistry)
+    12. [System Registry](#systemregistry)
         * [System Design Description Overview](#systemregistry_sdd)
         * [Services and Use Cases](#systemregistry_usecases)
         * [Security](#systemregistry_security)
         * [Endpoints](#systemregistry_endpoints)
            * [Onboarding](#systemregistry_endpoints_onboarding)
            * [Client](#systemregistry_endpoints_client)
-	12. [Choreographer](#choreographer)
+	13. [Choreographer](#choreographer)
         * [System Design Description Overview](#choreographer_sdd)
         * [Services and Use Cases](#choreographer_usecases)  
         * [Endpoints](#choreographer_endpoints)
@@ -270,6 +276,7 @@ Service Registry will be available on ```https://localhost:8443``` <br />
 Authorization will be available on ```https://localhost:8445``` <br />
 Orchestrator will be available on ```https://localhost:8441``` <br />
 Event Handler will be available on ```https://localhost:8455``` <br />
+DataManager will be available on ```https://localhost:8461``` <br />
 Gatekeeper will be available on ```https://localhost:8449``` <br />
 Gateway will be available on ```https://localhost:8453``` <br />
 
@@ -541,6 +548,13 @@ All work on Arrowhead repositories happens directly on GitHub. Both core team me
 ### Branch Organization
 
 The latest version of the core systems are available in the ```master``` branch. The code for the next release is merged in the ```development``` branch. If you would like to contribute, please check out the ```development``` branch. Create a new branch from ```development```. Don't forget do write documentation, unit and integration tests. When finished, create a pull request back into ```development```. If accepted, your contribution will be in the next release. :)
+
+### Useful Guides about Java Coding Practices
+
+Before you make a pull request, please make sure you clean your code as best as you can. The following resources can help to understand what **clean code** means:
+
+* [Clean Coding in Java](https://www.baeldung.com/java-clean-code)
+* [A short summary of Java Coding best practices](https://medium.com/@rhamedy/a-short-summary-of-java-coding-best-practices-31283d0167d3)
 
 ### Bugs
 
@@ -4792,6 +4806,311 @@ __Delete subscription parameters__  the input :
 ### Publish Auth Update <br />
 
 This service can only be used by other core services, therefore this is not part of the public API.    
+
+<a name="datamanager" />
+
+# DataManager
+
+<a name="datamanager_sdd" />
+
+## System Design Description Overview
+
+The purpose of DataManager supporting core system is to provide storage of sensor data.
+
+![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `AH Service Registry`
+![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `AH Authorization` 
+![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `AH Orchestrator`
+![#ffcc44](https://placehold.it/15/ffcc44/000000?text=+) `AH DataManager`
+![Alt text](/documentation/datamanager/overview.png)
+
+The DataManager provides features for producers and consumers to:
+* Store SenML sensor and actuator data,
+* Fetch cached data,
+* and perform database queries.
+
+Type support data model is SenML https://tools.ietf.org/html/rfc8428
+
+<a name="datamanager_sysd" />
+
+## System Design Overview
+
+<a name="datamanager_provided_services" />
+
+## Provided services
+
+The DataManager provides the following services:
+* [Echo](#datamanager_endpoints_get_echo)
+* [Historian](#datamanager_endpoints_historian)
+* [Proxy](#datamanager_endpoints_proxy)
+
+<a name="datamanager_consumed_services" />
+
+## Consumed services
+
+The DataManager consumes the following services:
+
+None currently, but will consume Orchestration later on.
+
+<a name="datamanager_usecases" />
+
+## Use cases
+
+The DataManager has the following use cases:
+* [Update cache message](documentation/datamanager/use_cases/DM_use_case_1.md)
+* [Fetch cache message](documentation/datamanager/use_cases/DM_use_case_2.md)
+* [Update stored message](documentation/datamanager/use_cases/DM_use_case_3.md)
+* [Fetch stored message](documentation/datamanager/use_cases/DM_use_case_4.md)
+
+<a name="datamanager_endpoints_historian" />
+
+## Endpoints
+
+Swagger API documentation is available on: `https://<host>:<port>` <br />
+The base URL for the requests: `http://<host>:<port>/datamanager`
+
+
+
+### Client endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#datamanager_endpoints_get_echo) | /echo | GET    | -    | OK     |
+| [Get system list](#datamanager_histendpoints_getsys) | /historian | GET    | -    | SystemList     |
+| [Get service list](#datamanager_histendpoints_getsrv_from_sys) | /historian/{systemName} | GET    | -    | ServiceList |
+| [Fetch data from db](#datamanager_histendpoints_getdb) | /historian/{systemName}/{serviceName} | GET    | -   | SenML |
+| [Store data in db](#datamanager_histendpoints_storedb) | /historian/{systemName}/{serviceName} | PUT    | SenML   | - |
+| [Get system list](#datamanager_proxyendpoints_getsys) | /proxy | GET    | -    | SystemList     |
+| [Get service list](#datamanager_proxyendpoints_getsrv_from_sys) | /proxy/{systemName} | GET    | -    | ServiceList |
+| [Fetch data from cache](#datamanager_proxyendpoints_fetchdata) | /proxy/{systemName}/{serviceName} | GET    | -   | SenML |
+| [Store data in cache](#datamanager_proxyendpoints_storedata) | /proxy/{systemName}/{serviceName} | PUT    | SenML   | - |
+
+<a name="datamanager_endpoints_get_echo" />
+
+### Echo
+```
+GET /datamanager/echo
+```
+
+Returns a "Got it!" message with the purpose of testing the system availability.
+
+<a name="datamanager_endpoints_client" />
+
+<a name="datamanager_proxyendpoints_getsys" />
+
+### Get system list
+```
+GET /datamanager/proxy/
+```
+
+Returns a list of all systems that have at least one active service endpoint.
+
+<a name="datamanager_getsyslist_response" />
+
+__GetSystemListResponse__ output:
+
+```json
+
+{
+  "systems": ["systemName1", "systemNameX"]
+}
+
+```
+
+<a name="datamanager_proxyendpoints_getsrv_from_sys" />
+
+### Get service list
+```
+GET /datamanager/proxy/{systemName}
+```
+
+Returns a list of all service endpoints that are active.
+
+<a name="datamanager_proxygetsrvlist_response" />
+
+__GetServicesResponse__ output:
+
+```json
+
+{
+  "services": ["serviceDefinition1", "serviceDefinitionX"]
+}
+
+```
+
+<a name="datamanager_proxyendpoints_fetchdata" />
+
+### Fetch data from cache
+```
+GET /datamanager/proxy/{systemName}/{serviceName}
+```
+
+Returns sensor data from a service endpoint from the cache.
+
+<a name="datamanager_proxygetsrvdata_response" />
+
+__GetServiceDataResponse__ output:
+
+```json
+
+[
+   {
+    "bn": "string",
+	  "bt": 0.0,
+	  "bu": "string",
+	  "bver": 0
+   }, {
+    "n": "string",
+	  "t": 0.0,
+	  "u": "string",
+	  "v": 0.0,
+	  "vs": "string",
+	  "vb": false,
+	  "vd": "string"
+   }
+]
+```
+
+<a name="datamanager_proxyendpoints_storedata" />
+
+### Store data in cache
+```
+PUT /datamanager/proxy/{systemName}/{serviceName}
+```
+
+Stores sensor data in a service endpoint in the proxy cache.
+
+<a name="datamanager_putsrvdata_request" />
+
+__PutSServiceDataRequest__ input:
+
+```json
+
+[
+   {
+    "bn": "string",
+	  "bt": 0.0,
+	  "bu": "string",
+	  "bver": 0
+    }, {
+     "n": "string",
+	   "t": 0.0,
+	   "u": "string",
+	   "v": 0.0,
+	   "vs": "string",
+	   "vb": false,
+	   "vd": "string"
+    }
+]
+```
+
+
+<a name="datamanager_histendpoints_getsys" />
+
+### Get system list
+```
+GET /datamanager/historian
+```
+
+Returns a list of all systems that have at least one service endpoint in the database.
+
+<a name="datamanager_getsyslist_response" />
+
+__GetSystemListResponse__ output:
+
+```json
+
+{
+  "systems": ["systemName1", "systemNameX"]
+}
+
+```
+
+<a name="datamanager_histendpoints_getsrv_from_sys" />
+
+### Get service list
+```
+GET /datamanager/historian/{systemName}
+```
+
+Returns a list of all service endpoints that have data stored in the database.
+
+<a name="datamanager_histgetsrvlist_response" />
+
+__GetServicesResponse__ output:
+
+```json
+
+{
+  "services": ["serviceDefinition1", "serviceDefinitionX"]
+}
+
+```
+
+<a name="datamanager_histendpoints_getdb" />
+
+### Fetch data from db
+```
+GET /datamanager/historian/{systemName}/{serviceName}
+```
+
+Returns sensor data from a service endpoint from the database.
+
+<a name="datamanager_histgetsrvdata_response" />
+
+__GetServiceDataResponse__ output:
+
+```json
+
+[
+   {
+        "bn": "string",
+	"bt": 0.0,
+	"bu": "string",
+	"bver": 0
+   }, {
+        "n": "string",
+	"t": 0.0,
+	"u": "string",
+	"v": 0.0,
+	"vs": "string",
+	"vb": false,
+	"vd": "string"
+   }
+]
+```
+
+<a name="datamanager_histendpoints_storedb" />
+
+### Store data in db
+```
+PUT /datamanager/historian/{systemName}/{serviceName}
+```
+
+Stores sensor data in a service endpoint in the database.
+
+<a name="datamanager_putsrvdata_request" />
+
+__PutSServiceDataRequest__ input:
+
+```json
+
+[
+   {
+        "bn": "string",
+	"bt": 0.0,
+	"bu": "string",
+	"bver": 0
+   }, {
+        "n": "string",
+	"t": 0.0,
+	"u": "string",
+	"v": 0.0,
+	"vs": "string",
+	"vb": false,
+	"vd": "string"
+   }
+]
+```
 
 # Gatekeeper 
 

@@ -108,6 +108,11 @@ Type: password
 Default:
 Description: MySQL password for Gateway system (leave empty for random). 
 
+Template: arrowhead-core-common/mysql_password_translator
+Type: password
+Default:
+Description: MySQL password for Translator system (leave empty for random). 
+
 Template: arrowhead-core-common/mysql_password_orch
 Type: password
 Default:
@@ -137,6 +142,11 @@ Template: arrowhead-core-common/mysql_password_ca
 Type: password
 Default:
 Description: MySQL password for Certificate Authority system (leave empty for random).
+
+Template: arrowhead-core-common/mysql_password_datamanager
+Type: password
+Default:
+Description: MySQL password for Datamanager system (leave empty for random).
 
 Template: arrowhead-core-common/sr_host
 Type: string

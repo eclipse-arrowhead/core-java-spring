@@ -50,7 +50,7 @@ In the first step you have to make sure that ActiveMQ cleans up all the unused q
                     <constantPendingMessageLimitStrategy limit="1000"/>
                   </pendingMessageLimitStrategy>
                 </policyEntry>
-                <policyEntry queue=">" gcInactiveDestinations="true" inactiveTimoutBeforeGC="60000"/>
+                <policyEntry queue=">" gcInactiveDestinations="true" inactiveTimeoutBeforeGC="60000"/>
               </policyEntries>
             </policyMap>
         </destinationPolicy>
