@@ -29,6 +29,7 @@
 	    <module>certificate-authority</module>
 	    <module>orchestrator</module>
 	    <module>eventhandler</module>
+	    <module>datamanager</module>
 	    <module>relay-library</module>
 	    <module>gatekeeper</module>
 	    <module>gateway</module>
@@ -40,6 +41,7 @@
 	    <module>qos-monitor</module>
 	    <module>deb-installer</module>
 	    <module>docker-all</module>
+		<module>translator</module>
   	</modules>
   	
 	<properties>
@@ -73,6 +75,11 @@
             <name>Spring Repository</name>
 			<url>https://repo.spring.io/plugins-release/</url>
         </repository>
+	<repository>
+            <id>jenkins-repo</id>
+            <name>Jenkins Repository</name>
+			<url>https://repo.jenkins-ci.org/public/</url>
+        </repository>	
     </repositories>
 
 	<dependencies>
@@ -200,6 +207,13 @@
 		</dependency>
 -->
 		
+		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+		<!--<dependency>
+      			<groupId>com.google.code.gson</groupId>
+      			<artifactId>gson</artifactId>
+      			<version>2.8.5</version>
+		</dependency>-->
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>

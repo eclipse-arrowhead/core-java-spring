@@ -1,7 +1,6 @@
 package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
-import java.time.ZonedDateTime;
 
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
@@ -16,9 +15,9 @@ public class QoSIntraMeasurementResponseDTO implements Serializable {
 	private long id;
 	private SystemResponseDTO system;
 	private QoSMeasurementType measurementType;
-	private ZonedDateTime lastMeasurementAt;
-	private ZonedDateTime createdAt;
-	private ZonedDateTime updatedAt;
+	private String lastMeasurementAt;
+	private String createdAt;
+	private String updatedAt;
 
 	//=================================================================================================
 	// methods
@@ -27,8 +26,8 @@ public class QoSIntraMeasurementResponseDTO implements Serializable {
 	public QoSIntraMeasurementResponseDTO() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public QoSIntraMeasurementResponseDTO(final long id, final SystemResponseDTO system, final QoSMeasurementType measurementType, final ZonedDateTime lastMeasurementAt, 
-										  final ZonedDateTime createdAt, final ZonedDateTime updatedAt) {
+	public QoSIntraMeasurementResponseDTO(final long id, final SystemResponseDTO system, final QoSMeasurementType measurementType, final String lastMeasurementAt, 
+										  final String createdAt, final String updatedAt) {
 
 		this.id = id;
 		this.system = system;
@@ -42,16 +41,16 @@ public class QoSIntraMeasurementResponseDTO implements Serializable {
 	public long getId() { return id; }
 	public SystemResponseDTO getSystem() { return system; }
 	public QoSMeasurementType getMeasurementType() { return measurementType; }
-	public ZonedDateTime getLastMeasurementAt() { return lastMeasurementAt; }
-	public ZonedDateTime getCreatedAt() { return createdAt; }
-	public ZonedDateTime getUpdatedAt() { return updatedAt; }
+	public String getLastMeasurementAt() { return lastMeasurementAt; }
+	public String getCreatedAt() { return createdAt; }
+	public String getUpdatedAt() { return updatedAt; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
 	public void setSystem(final SystemResponseDTO system) { this.system = system; }
 	public void setMeasurementType(final QoSMeasurementType measurementType) { this.measurementType = measurementType; }
-	public void setLastMeasurementAt(final ZonedDateTime lastMeasurementAt) { this.lastMeasurementAt = lastMeasurementAt;	}
-	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
-	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
+	public void setLastMeasurementAt(final String lastMeasurementAt) { this.lastMeasurementAt = lastMeasurementAt;	}
+	public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
+	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
 
 }

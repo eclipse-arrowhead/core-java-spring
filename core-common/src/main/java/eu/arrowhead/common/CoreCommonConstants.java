@@ -47,14 +47,19 @@ public class CoreCommonConstants {
 
 	public static final String OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI = "/query/system/{" + COMMON_FIELD_NAME_ID + "}";
 	public static final String OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI = "/query/system";
-	public static final String OP_SERVICE_REGISTRY_QUERY_ALL_URI = "/query/all";
+	public static final String OP_SERVICE_REGISTRY_QUERY_ALL_SERVICE_URI = "/query/all";
 		
 	public static final String ORCHESTRATOR_STORE_MGMT_URI = "/mgmt/store";
 	
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
 	public static final String SWAGGER_HTTP_200_MESSAGE = "Core service is available";
+	public static final String SWAGGER_HTTP_201_MESSAGE = "Created";
+	public static final String SWAGGER_HTTP_400_MESSAGE = "Bad request";
 	public static final String SWAGGER_HTTP_401_MESSAGE = "You are not authorized";
+	public static final String SWAGGER_HTTP_404_MESSAGE = "Not found";
+	public static final String SWAGGER_HTTP_409_MESSAGE = "Request caused a conflict";
+    public static final String SWAGGER_HTTP_415_MESSAGE = "MediaType not supported";
 	public static final String SWAGGER_HTTP_500_MESSAGE = "Core service is not available";
 	
 	public static final String SWAGGER_TAG_MGMT = "Management";
@@ -168,6 +173,8 @@ public class CoreCommonConstants {
 	public static final String $GATEWAY_MIN_PORT_WD = "${" + GATEWAY_MIN_PORT + ":" + CoreDefaults.DEFAULT_GATEWAY_MIN_PORT + "}";
 	public static final String GATEWAY_MAX_PORT = "max_port";
 	public static final String $GATEWAY_MAX_PORT_WD = "${" + GATEWAY_MAX_PORT + ":" + CoreDefaults.DEFAULT_GATEWAY_MAX_PORT + "}";
+	public static final String GATEWAY_PROVIDER_SIDE_MAX_REQUEST_PER_SOCKET = "provider_side_max_request_per_socket";
+	public static final String $GATEWAY_PROVIDER_SIDE_MAX_REQUEST_PER_SOCKET = "${" + GATEWAY_PROVIDER_SIDE_MAX_REQUEST_PER_SOCKET + ":" + CoreDefaults.DEFAULT_GATEWAY_PROVIDER_SIDE_MAX_REQUEST_PER_SOCKET + "}";
 	
 	public static final String GATEWAY_ACTIVE_SESSION_MAP = "activeSessions";
 	public static final String GATEWAY_AVAILABLE_PORTS_QUEUE = "availableQueue";
@@ -213,6 +220,12 @@ public class CoreCommonConstants {
 	public static final String $RELAY_TEST_LOG_MEASUREMENTS_IN_DB_WD = "${" + RELAY_TEST_LOG_MEASUREMENTS_IN_DB + ":" + CoreDefaults.DEFAULT_RELAY_TEST_LOG_MEASUREMENTS_IN_DB + "}";
 	
     public static final String CERTIFICATE_FORMAT = "X.509";
+
+	// Translator-Fiware
+    public static final String FIWARE_SERVER_HOST = "fiware.server.host";
+    public static final String $FIWARE_SERVER_HOST = "${" + FIWARE_SERVER_HOST + ":}";
+    public static final String FIWARE_SERVER_PORT = "fiware.server.port";
+    public static final String $FIWARE_SERVER_PORT = "${" + FIWARE_SERVER_PORT + ":0}";
 
     //=================================================================================================
 	// assistant methods

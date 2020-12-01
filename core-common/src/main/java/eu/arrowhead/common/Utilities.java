@@ -280,6 +280,9 @@ public class Utilities {
 
 	//-------------------------------------------------------------------------------------------------
 	public static UriComponents createURI(final String scheme, final String host, final int port, final String path, final String... queryParams) {
+		if (queryParams == null || queryParams.length == 0) {
+			return createURI(scheme, host, port, path);
+		}
 		if (queryParams.length % 2 != 0) {
 			throw new InvalidParameterException("queryParams variable arguments conatins a key without value");
 		}
@@ -415,7 +418,7 @@ public class Utilities {
 
 		try {
 		    // debian installation with new certificates have a different alias
-            // i.e. the format is {cloudname}." + AH_MASTER_NAME + "." + AH_MASTER_SUFFIX
+            // i.e. the format is {cloudname}.{cloudoperator}." + AH_MASTER_NAME + "." + AH_MASTER_SUFFIX
 			final Enumeration<String> enumeration = keystore.aliases();
 			while (enumeration.hasMoreElements()) {
 				final String alias = enumeration.nextElement();
@@ -472,11 +475,17 @@ public class Utilities {
         PrivateKey privateKey = null;
         String element;
         try {
+
             final Enumeration<String> enumeration = keystore.aliases();
             while (enumeration.hasMoreElements()) {
                 element = enumeration.nextElement();
+				// the first certificate is not always the end certificate. java does not guarantee the order
+				final Certificate[] chain = keystore.getCertificateChain(element);
+				if(Objects.isNull(chain) || chain.length < 3) {
+					continue;
+				}
 
-                privateKey = (PrivateKey) keystore.getKey(element, keyPass.toCharArray());
+				privateKey = (PrivateKey) keystore.getKey(element, keyPass.toCharArray());
                 if (privateKey != null) {
                     break;
                 }
@@ -504,9 +513,9 @@ public class Utilities {
 				final X509Certificate certificate = (X509Certificate) keystore.getCertificate(alias);
 				if (isCloudCertificate(certificate)) {
 					final PrivateKey privateKey = (PrivateKey) keystore.getKey(alias, keyPass.toCharArray());
-            if (privateKey != null) {
+					if (privateKey != null) {
 						logger.debug("Found cloud private key with alias: " + alias);
-                return privateKey;
+						return privateKey;
 					}
 				}
             }

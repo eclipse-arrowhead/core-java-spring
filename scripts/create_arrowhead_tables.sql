@@ -313,6 +313,44 @@ CREATE TABLE IF NOT EXISTS `subscription_publisher_connection` (
   CONSTRAINT `system_constraint` FOREIGN KEY (`system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- DataManager
+
+CREATE TABLE IF NOT EXISTS `dmhist_services` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `system_name` varchar(255) NOT NULL,
+  `service_name` varchar(255) NOT NULL,
+  `service_type` varchar(255),
+  last_update timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `dmhist_messages` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `sid` bigint(20) NOT NULL,
+  `bt` double NOT NULL,
+  `mint` double NOT NULL,
+  `maxt` double NOT NULL,
+  `msg` BLOB NOT NULL,
+  `datastored` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `service_id_constr` FOREIGN KEY (`sid`) REFERENCES `dmhist_services` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `dmhist_entries` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `sid` bigint(20) NOT NULL,
+  `mid` bigint(20) NOT NULL,
+  `n` varchar(128) NOT NULL,
+  `t` double NOT NULL,
+  `u` varchar(64),
+  `v`  double,
+  `vs` BLOB,
+  `vb` BOOLEAN,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `service_id_fk` FOREIGN KEY(`sid`) REFERENCES `dmhist_services`(`id`) ON DELETE CASCADE,
+  CONSTRAINT `message_id_fk` FOREIGN KEY(`mid`) REFERENCES `dmhist_messages`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 -- Choreographer
 
 CREATE TABLE IF NOT EXISTS `choreographer_plan` (
@@ -621,3 +659,30 @@ CREATE TABLE IF NOT EXISTS `qos_reservation` (
 	CONSTRAINT `fk_reserved_service` FOREIGN KEY (`reserved_service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
 	UNIQUE KEY `unique_reserved_provider_and_service` (`reserved_provider_id`, `reserved_service_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Certificate Authority
+
+CREATE TABLE IF NOT EXISTS `ca_certificate` (
+  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+  `common_name` varchar(255) NOT NULL,
+  `serial` bigint(20) NOT NULL,
+  `created_by` varchar(255) NOT NULL,
+  `valid_after` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `valid_before` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `revoked_at` timestamp NULL,
+  UNIQUE KEY `unique_certificate_serial` (`serial`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `ca_trusted_key` (
+  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+  `public_key` text NOT NULL,
+  `hash` varchar(255) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  `valid_after` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `valid_before` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY `unique_hash` (`hash`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;
