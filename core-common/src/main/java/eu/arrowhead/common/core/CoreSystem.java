@@ -83,7 +83,11 @@ public enum CoreSystem {
 																				
 	TRANSLATOR(Defaults.DEFAULT_TRANSLATOR_PORT, List.of(CoreSystemService.TRANSLATOR_SERVICE,
 												   CoreSystemService.TRANSLATOR_FIWARE_SERVICE,
-												   CoreSystemService.TRANSLATOR_PLUGIN_SERVICE));
+												   CoreSystemService.TRANSLATOR_PLUGIN_SERVICE)),
+
+	MSCV(Defaults.DEFAULT_MSCV_PORT, List.of(CoreSystemService.MSCV_VERIFICATION_SERVICE,
+											 CoreSystemService.MSCV_PUBLIC_KEY_SERVICE,
+											 CoreSystemService.MSCV_LOGIN_SERVICE));
 	
 	//=================================================================================================
 	// members

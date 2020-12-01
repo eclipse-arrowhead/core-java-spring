@@ -1,6 +1,6 @@
 [Unit]
 Description=msvc
-After=network.target mysql.target arrowhead-serviceregistry arrowhead-eventhandler
+After=network.target
 
 [Service]
 WorkingDirectory=/etc/arrowhead/systems/msvc

@@ -104,8 +104,15 @@ public enum CoreSystemService {
 
     // Service Registry services
     SERVICE_REGISTRY_REGISTER_SERVICE(CommonConstants.CORE_SERVICE_SERVICE_REGISTRY_REGISTER, CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI),
-    SERVICE_REGISTRY_UNREGISTER_SERVICE(CommonConstants.CORE_SERVICE_SERVICE_REGISTRY_UNREGISTER, CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI);
-	
+    SERVICE_REGISTRY_UNREGISTER_SERVICE(CommonConstants.CORE_SERVICE_SERVICE_REGISTRY_UNREGISTER,
+										CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI),
+
+	// Monitoring and Standard Verification Services
+	MSCV_VERIFICATION_SERVICE(CommonConstants.CORE_SERVICE_MSCV_VERIFICATION, CommonConstants.MSCV_URI + CommonConstants.OP_MSCV_EXECUTE_URI),
+	MSCV_PUBLIC_KEY_SERVICE(CommonConstants.CORE_SERVICE_MSCV_PUBLIC_KEY, CommonConstants.MSCV_URI + CommonConstants.OP_MSCV_PUBLIC_KEY_URI),
+	MSCV_LOGIN_SERVICE(CommonConstants.CORE_SERVICE_MSCV_LOGIN, CommonConstants.MSCV_URI + CommonConstants.OP_MSCV_LOGIN_URI);
+
+
 	//TODO: additional services 
 	
 	//=================================================================================================

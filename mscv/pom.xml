@@ -162,7 +162,7 @@
 
                                 <data>
                                     <type>file</type>
-                                    <src>${project.basedir}/src/deb/arrowhead-onboarding.service</src>
+                                    <src>${project.basedir}/src/deb/arrowhead-mscv.service</src>
                                     <mapper>
                                         <type>perm</type>
                                         <prefix>/etc/systemd/system</prefix>
