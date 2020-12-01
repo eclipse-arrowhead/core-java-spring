@@ -313,6 +313,44 @@ CREATE TABLE IF NOT EXISTS `subscription_publisher_connection` (
   CONSTRAINT `system_constraint` FOREIGN KEY (`system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- DataManager
+
+CREATE TABLE IF NOT EXISTS `dmhist_services` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `system_name` varchar(255) NOT NULL,
+  `service_name` varchar(255) NOT NULL,
+  `service_type` varchar(255),
+  last_update timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `dmhist_messages` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `sid` bigint(20) NOT NULL,
+  `bt` double NOT NULL,
+  `mint` double NOT NULL,
+  `maxt` double NOT NULL,
+  `msg` BLOB NOT NULL,
+  `datastored` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `service_id_constr` FOREIGN KEY (`sid`) REFERENCES `dmhist_services` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `dmhist_entries` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `sid` bigint(20) NOT NULL,
+  `mid` bigint(20) NOT NULL,
+  `n` varchar(128) NOT NULL,
+  `t` double NOT NULL,
+  `u` varchar(64),
+  `v`  double,
+  `vs` BLOB,
+  `vb` BOOLEAN,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `service_id_fk` FOREIGN KEY(`sid`) REFERENCES `dmhist_services`(`id`) ON DELETE CASCADE,
+  CONSTRAINT `message_id_fk` FOREIGN KEY(`mid`) REFERENCES `dmhist_messages`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 -- Choreographer
 
 CREATE TABLE IF NOT EXISTS `choreographer_plan` (
