@@ -6,6 +6,8 @@ After=network.target mysql.target
 WorkingDirectory=/etc/arrowhead/systems/qos_monitor
 ExecStart=/usr/bin/java -Dlog4j.configurationFile=file:/etc/arrowhead/systems/qos_monitor/log4j2.xml -jar /usr/share/arrowhead/qos_monitor/arrowhead-qos-monitor.jar
 TimeoutStopSec=5
+Restart=on-failure
+RestartSec=20s
 Type=simple
 User=arrowhead
 Group=arrowhead

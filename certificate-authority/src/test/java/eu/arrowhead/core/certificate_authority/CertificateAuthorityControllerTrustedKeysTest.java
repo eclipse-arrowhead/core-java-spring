@@ -189,7 +189,8 @@ public class CertificateAuthorityControllerTrustedKeysTest {
 
     @Test
     public void testAddTrustedKeyValid() throws Exception {
-        final AddTrustedKeyRequestDTO requestDTO = new AddTrustedKeyRequestDTO(MOCKED_PUBLIC_KEY, "dummy");
+        final String now = Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now());
+        final AddTrustedKeyRequestDTO requestDTO = new AddTrustedKeyRequestDTO(MOCKED_PUBLIC_KEY, "dummy", now, now);
 
         mockMvc.perform(put(TRUSTED_KEYS_URL).contentType(MediaType.APPLICATION_JSON_UTF8)
                                              .content(asJsonString(requestDTO)))

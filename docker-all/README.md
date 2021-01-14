@@ -15,7 +15,15 @@ $ mvn -DskipTests=true package -pl docker-all -am
 
 If you are using an IDE, running the maven `package` goal should also cause the [`target`](target) folder to be populated.
 
-Secondly, change the current directory to the [`example`](example) folder located in this directory, and then execute the following terminal commands:
+As a second step, retrieve all necessary .sql files. For this run the following command:
+
+```sh
+[docker-all/]$ chmod u+x initSQL.sh
+[docker-all/]$ ./initSQL.sh
+```
+The script downloads all required files to setup the database.
+
+Thirdly, change the current directory to the [`example`](example) folder located in this directory, and then execute the following terminal commands:
 
 ```sh
 $ docker volume create arrowhead_core_mysql

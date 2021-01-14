@@ -87,11 +87,6 @@ public class ChoreographerService {
         requesterSystem.setSystemName(coreSystemRegistrationProperties.getCoreSystemName().toLowerCase());
         requesterSystem.setAddress(coreSystemRegistrationProperties.getCoreSystemDomainName());
         requesterSystem.setPort(coreSystemRegistrationProperties.getCoreSystemDomainPort());
-
-        //if (sslEnabled) {
-        //    final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
-        //    requesterSystem.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
-        //}
     }
 
     //-------------------------------------------------------------------------------------------------

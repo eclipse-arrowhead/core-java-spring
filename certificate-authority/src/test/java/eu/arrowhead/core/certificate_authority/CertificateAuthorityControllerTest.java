@@ -67,14 +67,6 @@ public class CertificateAuthorityControllerTest {
     }
 
     @Test
-    public void testGetCloudCommonName() throws Exception {
-        when(serviceCertificateAuthorityService.getCloudCommonName()).thenReturn("testcloud2.aitia.arrowhead.eu");
-        mockMvc.perform(get(COMMON_NAME_URI).accept(MediaType.TEXT_PLAIN))
-               .andExpect(status().isOk())
-               .andExpect(content().string("testcloud2.aitia.arrowhead.eu"));
-    }
-
-    @Test
     public void testSignGet() throws Exception {
         mockMvc.perform(get(SIGN_CERTIFICATE_URI))
                .andExpect(status().isMethodNotAllowed());

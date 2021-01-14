@@ -1,13 +1,13 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
 . /usr/share/debconf/confmodule
 
 if logname 2>/dev/null; then
-    USER=$(logname)
-    HOME=$(eval echo "~$USER")
+  USER=$(logname)
+  HOME=$(eval echo "~$USER")
 else
-    USER="root"
-    HOME="/root"
+  USER="root"
+  HOME="/root"
 fi
 
 # Get installation type

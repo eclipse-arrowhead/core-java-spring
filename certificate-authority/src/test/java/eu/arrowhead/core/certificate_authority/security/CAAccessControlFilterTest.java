@@ -39,8 +39,6 @@ public class CAAccessControlFilterTest {
     // members
 
     private static final String CA_ECHO = CommonConstants.CERTIFICATE_AUTHRORITY_URI + CommonConstants.ECHO_URI;
-    private static final String CA_CLOUD_COMMON_NAME = CommonConstants.CERTIFICATE_AUTHRORITY_URI
-            + CommonConstants.OP_CA_CLOUD_COMMON_NAME_URI;
     private static final String CA_MGMT_CERTIFICATES = CommonConstants.CERTIFICATE_AUTHRORITY_URI
             + CommonConstants.OP_CA_MGMT_CERTIFICATES_URI;
     private static final String CA_MGMT_TRUSTED_KEYS = CommonConstants.CERTIFICATE_AUTHRORITY_URI
@@ -90,25 +88,6 @@ public class CAAccessControlFilterTest {
         this.mockMvc.perform(get(CA_ECHO).secure(true)
                                          .with(x509("certificates/valid.pem"))
                                          .accept(MediaType.TEXT_PLAIN))
-                    .andExpect(status().isOk());
-    }
-
-
-    // -------------------------------------------------------------------------------------------------
-    @Test
-    public void testGetCommonNameCertificateInvalid() throws Exception {
-        this.mockMvc.perform(get(CA_CLOUD_COMMON_NAME).secure(true)
-                                                      .with(x509("certificates/notvalid.pem"))
-                                                      .accept(MediaType.TEXT_PLAIN))
-                    .andExpect(status().isUnauthorized());
-    }
-
-    // -------------------------------------------------------------------------------------------------
-    @Test
-    public void testGetCommonNameCertificateValid() throws Exception {
-        this.mockMvc.perform(get(CA_CLOUD_COMMON_NAME).secure(true)
-                                                      .with(x509("certificates/valid.pem"))
-                                                      .accept(MediaType.TEXT_PLAIN))
                     .andExpect(status().isOk());
     }
 
