@@ -953,6 +953,25 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+<<<<<<< HEAD
+	public ServiceRegistryListResponseDTO getServiceRegistryEntriesBySystemIdResponse(final long systemId) {
+		final List<ServiceRegistry> result = getServiceRegistryEntriesBySystemId(systemId);
+		return DTOConverter.convertServiceRegistryListToServiceRegistryListResponseDTO(new PageImpl<ServiceRegistry>(result));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<ServiceRegistry> getServiceRegistryEntriesBySystemId(final long systemId) {
+		logger.debug("getServiceRegistryEntriesBySystemId started...");		
+		validateSystemId(systemId);
+		
+		try {
+			final Optional<System> opt = systemRepository.findById(systemId);
+			if (opt.isEmpty()) {
+				throw new InvalidParameterException("No system with id: " + systemId + " exists");
+			} else {
+				return serviceRegistryRepository.findBySystem(opt.get());
+			}			
+=======
 	public Page<ServiceInterface> getServiceInterfaceEntries(final int page, final int size, final Direction direction, final String sortField) {
 		logger.debug("getServiceInterfaceEntries started...");
 
@@ -985,6 +1004,7 @@ public class ServiceRegistryDBService {
 			} else {
 				throw new InvalidParameterException("Service interface with id of '" + id + "' does not exist");
 			}
+>>>>>>> 76ca66ce258808fe8b8e62cfaa77be1dc54bdf0c
 		} catch (final InvalidParameterException ex) {
 			throw ex;
 		} catch (final Exception ex) {
@@ -993,6 +1013,8 @@ public class ServiceRegistryDBService {
 		}
 	}
 	
+<<<<<<< HEAD
+=======
 	//-------------------------------------------------------------------------------------------------
 	public ServiceInterfaceResponseDTO getServiceInterfaceByIdResponse(final long id) {
 		logger.debug("getServiceInterfaceByIdResponse started...");
@@ -1104,32 +1126,7 @@ public class ServiceRegistryDBService {
 		return DTOConverter.convertServiceInterfacesListToServiceInterfaceListResponseDTO(serviceInterfaceEntries);
 	}
 	
-	//-------------------------------------------------------------------------------------------------
-	public ServiceRegistryListResponseDTO getServiceRegistryEntriesBySystemIdResponse(final long systemId) {
-		final List<ServiceRegistry> result = getServiceRegistryEntriesBySystemId(systemId);
-		return DTOConverter.convertServiceRegistryListToServiceRegistryListResponseDTO(new PageImpl<ServiceRegistry>(result));
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	public List<ServiceRegistry> getServiceRegistryEntriesBySystemId(final long systemId) {
-		logger.debug("getServiceRegistryEntriesBySystemId started...");		
-		validateSystemId(systemId);
-		
-		try {
-			final Optional<System> opt = systemRepository.findById(systemId);
-			if (opt.isEmpty()) {
-				throw new InvalidParameterException("No system with id: " + systemId + " exists");
-			} else {
-				return serviceRegistryRepository.findBySystem(opt.get());
-			}			
-		} catch (final InvalidParameterException ex) {
-			throw ex;
-		} catch (final Exception ex) {
-			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-		}
-	}
-
+>>>>>>> 76ca66ce258808fe8b8e62cfaa77be1dc54bdf0c
 	//=================================================================================================
 	// assistant methods
 
