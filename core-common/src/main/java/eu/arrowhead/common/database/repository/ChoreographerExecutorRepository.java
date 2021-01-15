@@ -3,7 +3,6 @@ package eu.arrowhead.common.database.repository;
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -12,5 +11,5 @@ public interface ChoreographerExecutorRepository extends RefreshableRepository<C
     //=================================================================================================
     // methods
 
-    public Optional<ChoreographerExecutor> findByServiceDefinitionNameAndVersion(final String serviceDefinitionName, final Integer version);
+    public Optional<ChoreographerExecutor> findByAddressAndPortAndBaseUri(final String address, final int port, final String baseUri);
 }

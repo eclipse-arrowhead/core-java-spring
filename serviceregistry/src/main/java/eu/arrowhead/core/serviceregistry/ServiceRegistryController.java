@@ -967,6 +967,25 @@ public class ServiceRegistryController {
 		return response;
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return service registry entries by service definition list", response = ServiceRegistryListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICE_REGISTRY_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SERVICE_REGISTRY_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SERVICE_DEFINITION_LIST_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public ServiceRegistryListResponseDTO queryServiceRegistryEntriesByServiceDefinitionList(@RequestBody final List<String> request) {
+		logger.debug("Service query by service definition list request received");
+		validateServiceDefinitionListRequest(request, CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SERVICE_DEFINITION_LIST_URI);
+
+		final ServiceRegistryListResponseDTO response = serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinitonListResponse(request);
+		logger.debug("Service Registry Entries by service definition list are successfully retrieved");
+		return response;
+	}
+
+
 	//=================================================================================================
 	// assistant methods
 

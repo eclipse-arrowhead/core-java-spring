@@ -17,15 +17,12 @@ import eu.arrowhead.common.dto.internal.ChoreographerExecutorSearchResponseDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerPlanRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerRunPlanRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
-import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorResponseDTO;
-import eu.arrowhead.common.dto.shared.ChoreographerOFRRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerSessionRunningStepDataDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
 import eu.arrowhead.core.choreographer.service.ChoreographerDriver;
 import io.swagger.annotations.Api;
@@ -54,15 +51,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.naming.InsufficientResourcesException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static eu.arrowhead.common.CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_REGISTER;
-import static eu.arrowhead.common.CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER;
-import static eu.arrowhead.common.CommonConstants.OP_CHOREOGRAPHER_NOTIFY_STEP_DONE;
+import static eu.arrowhead.common.CommonConstants.*;
 
 
 @Api(tags = { CoreCommonConstants.SWAGGER_TAG_ALL })
@@ -87,7 +81,7 @@ public class ChoreographerController {
     private static final String EXECUTOR_MGMT_BY_ID_URI = EXECUTOR_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
 
     private static final String START_SESSION_MGMT_URI = SESSION_MGMT_URI + "/start";
-    private static final String STEP_FINISHED_MGMT_URI = SESSION_MGMT_URI + "/stepFinished";
+    private static final String STEP_FINISHED_MGMT_URI = SESSION_MGMT_URI + "/notifyStepDone";
 
     private static final String EXECUTOR_SEARCH_MGMT_URI = EXECUTOR_MGMT_URI + "/searchExecutors";
 
@@ -241,7 +235,8 @@ public class ChoreographerController {
         return choreographerActionPlanEntriesResponse;
     }
 
-    //-------------------------------------------------------------------------------------------------
+    //TODO: Revision after DB change.
+    /*//-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Initiate the start of one or more plans.",
             tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses(value = {
@@ -264,7 +259,7 @@ public class ChoreographerController {
             logger.debug("Sending a message to start-session.");
             jmsTemplate.convertAndSend("start-session", new ChoreographerStartSessionDTO(session.getId(), request.getId()));
         }
-    }
+    }*/
 
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Notify the Choreographer that a step is done in a session.",
@@ -277,7 +272,7 @@ public class ChoreographerController {
     })
     @PostMapping(path = STEP_FINISHED_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = org.springframework.http.HttpStatus.OK)
-    @ResponseBody public void stepFinished(@RequestBody final List<ChoreographerSessionRunningStepDataDTO> requests) {
+    @ResponseBody public void notifyStepDoneMgmt(@RequestBody final List<ChoreographerSessionRunningStepDataDTO> requests) {
         for (final ChoreographerSessionRunningStepDataDTO request : requests) {
             logger.debug("notifyStepDone started...");
             logger.debug("Sending message to session-step-done.");
@@ -336,6 +331,22 @@ public class ChoreographerController {
     }
 
     //-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = "Notify the Choreographer that an error happened during the execution of a step in a session.", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_CREATED, message = STEP_FINISHED_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = STEP_FINISHED_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+    })
+    @PostMapping(path = OP_CHOREOGRAPHER_EXECUTOR_NOTIFY_STEP_ERROR, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(value = org.springframework.http.HttpStatus.OK)
+    @ResponseBody public void notifyStepError(@RequestBody final ChoreographerSessionRunningStepDataDTO request) {
+        logger.debug("notifyStepError started...");
+        logger.debug("Sending message to session-step-error.");
+        jmsTemplate.convertAndSend("session-step-error", request);
+    }
+
+    //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Return created executor.", response = ChoreographerExecutorResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_EXECUTOR_HTTP_201_MESSAGE),
@@ -370,7 +381,8 @@ public class ChoreographerController {
         return executorEntryByIdResponse;
     }
 
-    //-------------------------------------------------------------------------------------------------
+    //TODO: Revision after db change.
+    /*//-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Return requested executor entries by the given parameters", response = ChoreographerExecutorListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = GET_EXECUTOR_HTTP_200_MESSAGE),
@@ -406,7 +418,7 @@ public class ChoreographerController {
         logger.debug("Service Registry entries with page: {} and item_per page: {} successfully retrieved", page, size);
 
         return executorEntriesResponse;
-    }
+    }*/
 
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Remove executor.", tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
@@ -428,8 +440,9 @@ public class ChoreographerController {
         logger.debug("Executor with id: '{}' successfully deleted", id);
     }
 
-    //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Return list of executors suited to execute the task with the service definition and version requriements.",
+    //TODO: Revision after db change.
+    /*//-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = "Return list of executors suited to execute the task with the service definition and version requirements.",
             response = ChoreographerExecutorSearchResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = GET_EXECUTOR_HTTP_200_MESSAGE),
@@ -456,7 +469,7 @@ public class ChoreographerController {
         } else {
             throw new BadPayloadException(EXECUTOR_VERSION_MIN_VERSION_MAX_VERSION_AMBIGUOUS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + EXECUTOR_SEARCH_MGMT_URI);
         }
-    }
+    }*/
 
     //=================================================================================================
 	// assistant methods
@@ -534,7 +547,8 @@ public class ChoreographerController {
         }
     }
 
-    //-------------------------------------------------------------------------------------------------
+    //TODO: Revision after DB change.
+    /*//-------------------------------------------------------------------------------------------------
     private void checkIfPlanHasEveryRequiredExecutor(final ChoreographerRunPlanRequestDTO request, final String origin) {
         ChoreographerPlan plan = choreographerDBService.getPlanById(request.getId());
 
@@ -561,8 +575,7 @@ public class ChoreographerController {
                 }
             }
         }
-    }
-
+    }*/
 
     //-------------------------------------------------------------------------------------------------
     private Set<String> getServiceDefinitionsFromPlan(ChoreographerPlan plan) {

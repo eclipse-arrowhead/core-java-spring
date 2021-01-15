@@ -440,12 +440,30 @@ CREATE TABLE IF NOT EXISTS `choreographer_executor` (
     `address` varchar(255) NOT NULL,
     `port` int(11) NOT NULL,
     `base_uri` varchar(255) DEFAULT NULL,
+    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `choreographer_executor_service_definition` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
     `service_definition_name` varchar(255) NOT NULL,
     `version` int(11) NOT NULL,
     `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY `unique_service_definition_name_version` (`service_definition_name`, `version`),
-    PRIMARY KEY (`id`)
+    PRIMARY  KEY (`id`),
+    UNIQUE KEY `unique_service_definition_name_version` (`service_definition_name`, `version`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `choreographer_executor_service_definition_connection` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `service_definition_id` bigint(20) NOT NULL,
+    `executor_id` bigint(20) NOT NULL,
+    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    CONSTRAINT `fk_executor_sd` FOREIGN KEY (`service_definition_id`) REFERENCES `choreographer_executor_service_definition` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_executor_id` FOREIGN KEY (`executor_id`) REFERENCES `choreographer_executor` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `choreographer_step_detail` (

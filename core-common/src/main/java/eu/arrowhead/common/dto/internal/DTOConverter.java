@@ -15,8 +15,11 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
+import eu.arrowhead.common.database.entity.ChoreographerExecutorServiceDefinition;
+import eu.arrowhead.common.database.entity.ChoreographerExecutorServiceDefinitionConnection;
 import eu.arrowhead.common.database.entity.ChoreographerStepDetail;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerStepDetailResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
@@ -233,6 +236,13 @@ public class DTOConverter {
 		
 		return new ServiceInterfaceResponseDTO(intf.getId(), intf.getInterfaceName(), Utilities.convertZonedDateTimeToUTCString(intf.getCreatedAt()), 
 											   Utilities.convertZonedDateTimeToUTCString(intf.getUpdatedAt()));
+	}
+
+	public static ChoreographerExecutorServiceDefinitionResponseDTO convertExecutorServiceDefinitionToExecturServiceDefinitionResponseDTO(final ChoreographerExecutorServiceDefinition serviceDefinition) {
+		Assert.notNull(serviceDefinition, "Service definition entry is null.");
+
+		return new ChoreographerExecutorServiceDefinitionResponseDTO(serviceDefinition.getId(), serviceDefinition.getServiceDefinitionName(), serviceDefinition.getVersion(),
+				Utilities.convertZonedDateTimeToUTCString(serviceDefinition.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(serviceDefinition.getUpdatedAt()));
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -1022,16 +1032,17 @@ public class DTOConverter {
                                                 Utilities.convertZonedDateTimeToUTCString(planEntry.getUpdatedAt()));
     }
 
+	// TODO: Revision after DB change passed: NO
 	public static ChoreographerExecutorResponseDTO convertExecutorToExecutorResponseDTO(ChoreographerExecutor executor) {
 		Assert.notNull(executor, "Executor is null.");
 		Assert.notNull(executor.getAddress(), "Related address is null.");
 		Assert.notNull(executor.getName(), "Related executor name is null.");
 		Assert.notNull(executor.getPort(), "Related executor port is null.");
-		Assert.notNull(executor.getVersion(), "Related executor version is null.");
-		Assert.notNull(executor.getServiceDefinitionName(), "Related executor service definition name is null.");
 
-		return new ChoreographerExecutorResponseDTO(executor.getId(), executor.getName(), executor.getAddress(), executor.getPort(), executor.getBaseUri(),
-				executor.getServiceDefinitionName(), executor.getVersion(), Utilities.convertZonedDateTimeToUTCString(executor.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(executor.getUpdatedAt()));
+		return new ChoreographerExecutorResponseDTO(executor.getId(), executor.getName(), executor.getAddress(),
+				executor.getPort(), executor.getBaseUri(), collectServiceDefinitionsFromExecutor(executor.getServiceDefinitionConnections()),
+				Utilities.convertZonedDateTimeToUTCString(executor.getCreatedAt()),
+				Utilities.convertZonedDateTimeToUTCString(executor.getUpdatedAt()));
 	}
 
     //-------------------------------------------------------------------------------------------------
@@ -1118,8 +1129,7 @@ public class DTOConverter {
     }
 
     //-------------------------------------------------------------------------------------------------
-    public static List<ChoreographerStepResponseDTO> collectStepsFromAction(
-            final Set<ChoreographerStep> steps) {
+    public static List<ChoreographerStepResponseDTO> collectStepsFromAction(final Set<ChoreographerStep> steps) {
         Assert.notNull(steps, "Steps list is null.");
 
         final List<ChoreographerStepResponseDTO> result = new ArrayList<>(steps.size());
@@ -1206,6 +1216,15 @@ public class DTOConverter {
 		
 		result.sort((dto1, dto2) -> dto1.getInterfaceName().compareToIgnoreCase(dto2.getInterfaceName()));
 		
+		return result;
+	}
+
+	public static List<ChoreographerExecutorServiceDefinitionResponseDTO> collectServiceDefinitionsFromExecutor(final Set<ChoreographerExecutorServiceDefinitionConnection> serviceDefinitionConnections) {
+		final List<ChoreographerExecutorServiceDefinitionResponseDTO> result = new ArrayList<>(serviceDefinitionConnections.size());
+		for (final ChoreographerExecutorServiceDefinitionConnection connection : serviceDefinitionConnections) {
+			result.add(convertExecutorServiceDefinitionToExecturServiceDefinitionResponseDTO(connection.getServiceDefinitionEntry()));
+		}
+
 		return result;
 	}
 	
@@ -1369,7 +1388,8 @@ public class DTOConverter {
 		return IssuedCertificateStatus.GOOD;
 	}
 
-	public static ChoreographerExecutorListResponseDTO convertExecutorListToExecutorListResponseDTO(Page<ChoreographerExecutor> executorEntries) {
+	//TODO: Revision after DB change.
+	/*public static ChoreographerExecutorListResponseDTO convertExecutorListToExecutorListResponseDTO(Page<ChoreographerExecutor> executorEntries) {
 		Assert.notNull(executorEntries, "List of executors is null");
 
 		final List<ChoreographerExecutorResponseDTO> executorEntryDTOs = new ArrayList<>(executorEntries.getNumberOfElements());
@@ -1380,6 +1400,7 @@ public class DTOConverter {
 		return new ChoreographerExecutorListResponseDTO(executorEntryDTOs, executorEntries.getTotalElements());
 	}
 
+	//TODO: Revision after DB change.
 	public static ChoreographerExecutorSearchResponseDTO convertExecutorListToExecutorSearchResponseDTO(List<ChoreographerExecutor> executorEntries) {
 		Assert.notNull(executorEntries, "List of executors is null");
 
@@ -1389,6 +1410,6 @@ public class DTOConverter {
 		}
 
 		return new ChoreographerExecutorSearchResponseDTO(executorEntryDTOs);
-	}
+	}*/
 
 }

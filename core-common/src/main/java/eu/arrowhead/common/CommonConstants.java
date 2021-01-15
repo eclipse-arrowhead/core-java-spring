@@ -208,9 +208,10 @@ public class CommonConstants {
 	public static final String OP_GATEKEEPER_GET_CLOUD_SERVICE_SUFFIX = "{operator}/{name}";
 
 	public static final String CHOREOGRAPHER_URI = "/choreographer";
-	public static final String OP_CHOREOGRAPHER_NOTIFY_STEP_DONE = "/notifyStepDone";
+	public static final String OP_CHOREOGRAPHER_NOTIFY_STEP_DONE = "/executor/notifyStepDone";
 	public static final String OP_CHOREOGRAPHER_EXECUTOR_REGISTER = "/executor/register";
 	public static final String OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER = "/executor/unregister";
+	public static final String OP_CHOREOGRAPHER_EXECUTOR_NOTIFY_STEP_ERROR = "executor/notifyStepError";
 
 	public static final String GATEWAY_URI = "/gateway";
 	public static final String OP_GATEWAY_KEY_URI = "/publickey";

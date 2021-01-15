@@ -7,6 +7,8 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerAction;
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
+import eu.arrowhead.common.database.entity.ChoreographerExecutorServiceDefinition;
+import eu.arrowhead.common.database.entity.ChoreographerExecutorServiceDefinitionConnection;
 import eu.arrowhead.common.database.entity.ChoreographerPlan;
 import eu.arrowhead.common.database.entity.ChoreographerRunningStep;
 import eu.arrowhead.common.database.entity.ChoreographerSession;
@@ -16,6 +18,8 @@ import eu.arrowhead.common.database.entity.ChoreographerStepNextStepConnection;
 import eu.arrowhead.common.database.entity.ChoreographerWorklog;
 import eu.arrowhead.common.database.repository.ChoreographerActionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerExecutorRepository;
+import eu.arrowhead.common.database.repository.ChoreographerExecutorServiceDefinitionConnectionRepository;
+import eu.arrowhead.common.database.repository.ChoreographerExecutorServiceDefinitionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerRunningStepRepository;
 import eu.arrowhead.common.database.repository.ChoreographerSessionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerStepDetailRepository;
@@ -83,6 +87,12 @@ public class ChoreographerDBService {
 
     @Autowired
     private ChoreographerStepDetailRepository choreographerStepDetailRepository;
+
+    @Autowired
+    private ChoreographerExecutorServiceDefinitionRepository choreographerExecutorServiceDefinitionRepository;
+
+    @Autowired
+    private ChoreographerExecutorServiceDefinitionConnectionRepository choreographerExecutorServiceDefinitionConnectionRepository;
 
     private final Logger logger = LogManager.getLogger(ChoreographerDBService.class);
     
@@ -716,15 +726,55 @@ public class ChoreographerDBService {
         }
     }
 
+    //-------------------------------------------------------------------------------------------------
     private ChoreographerExecutor createExecutor(String name, String address, int port, String baseUri, String serviceDefinitionName, int version) {
         logger.debug("createExecutor started...");
 
         try {
-            final Optional<ChoreographerExecutor> executorOptional = choreographerExecutorRepository.findByServiceDefinitionNameAndVersion(serviceDefinitionName, version);
+            final Optional<ChoreographerExecutor> executorOptional = choreographerExecutorRepository.findByAddressAndPortAndBaseUri(address, port, baseUri);
+            final Optional<ChoreographerExecutorServiceDefinition> serviceDefinitionOptional = choreographerExecutorServiceDefinitionRepository.findByServiceDefinitionNameAndVersion(serviceDefinitionName, version);
+            ChoreographerExecutor executor;
             if (executorOptional.isPresent()) {
-                throw new InvalidParameterException("Executor with service definition name: " + serviceDefinitionName + ", version: " + version + " already exists.");
+                executor = executorOptional.get();
+                if (serviceDefinitionOptional.isPresent()) {
+                    ChoreographerExecutorServiceDefinition serviceDefinition = serviceDefinitionOptional.get();
+                    final Optional<ChoreographerExecutorServiceDefinitionConnection> executorServiceDefinitionConnectionOptional = choreographerExecutorServiceDefinitionConnectionRepository.findByExecutorEntryAndServiceDefinitionEntry(executor, serviceDefinition);
+                    if (executorServiceDefinitionConnectionOptional.isEmpty()) {
+                        choreographerExecutorServiceDefinitionConnectionRepository.saveAndFlush(new ChoreographerExecutorServiceDefinitionConnection(executor, serviceDefinition));
+                    } else {
+                        throw new InvalidParameterException("Executor with address: " + address + ", port: " + port + "and baseUri: "
+                                + baseUri + "already has a service definition entry with service name: "
+                                + serviceDefinitionName + " and version: " + version + ".");
+                    }
+                } else {
+                    ChoreographerExecutorServiceDefinition serviceDefinition = choreographerExecutorServiceDefinitionRepository.saveAndFlush(new ChoreographerExecutorServiceDefinition(serviceDefinitionName, version));
+                    choreographerExecutorServiceDefinitionConnectionRepository.saveAndFlush(new ChoreographerExecutorServiceDefinitionConnection(executor, serviceDefinition));
+                }
+
             } else {
-                return choreographerExecutorRepository.saveAndFlush(new ChoreographerExecutor(name, address, port, baseUri, serviceDefinitionName, version));
+                executor = choreographerExecutorRepository.saveAndFlush(new ChoreographerExecutor(name, address, port, baseUri));
+
+                ChoreographerExecutorServiceDefinition serviceDefinition;
+                serviceDefinition = serviceDefinitionOptional.orElseGet(() -> choreographerExecutorServiceDefinitionRepository.saveAndFlush(new ChoreographerExecutorServiceDefinition(serviceDefinitionName, version)));
+                choreographerExecutorServiceDefinitionConnectionRepository.saveAndFlush(new ChoreographerExecutorServiceDefinitionConnection(executor, serviceDefinition));
+            }
+            return executor;
+        } catch (final InvalidParameterException ex) {
+            throw ex;
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+    private ChoreographerExecutorServiceDefinition createServiceDefinition(String serviceDefinitionName, int version) {
+        final Optional<ChoreographerExecutorServiceDefinition> serviceDefinitionOptional = choreographerExecutorServiceDefinitionRepository.findByServiceDefinitionNameAndVersion(serviceDefinitionName, version);
+
+        try {
+            if (serviceDefinitionOptional.isPresent()) {
+                throw new InvalidParameterException("Executor service definition with service definition name: " + serviceDefinitionName + " and version: " + version + "already exists.");
+            } else {
+                return choreographerExecutorServiceDefinitionRepository.saveAndFlush(new ChoreographerExecutorServiceDefinition(serviceDefinitionName, version));
             }
         } catch (final InvalidParameterException ex) {
             throw ex;
@@ -789,16 +839,18 @@ public class ChoreographerDBService {
         }
     }
 
-    //-------------------------------------------------------------------------------------------------
+    //TODO: Revision after db change.
+    /*//-------------------------------------------------------------------------------------------------
     public ChoreographerExecutorListResponseDTO getExecutorEntriesResponse(int page, int size, Direction direction, String sortField) {
         logger.debug("getExecutorEntriesResponse started...");
 
         final Page<ChoreographerExecutor> executorEntries = getExecutorEntries(page, size, direction, sortField);
 
         return DTOConverter.convertExecutorListToExecutorListResponseDTO(executorEntries);
-    }
+    }*/
 
-    public ChoreographerExecutorSearchResponseDTO getExecutorByServiceDefinitionAndVersion (final String serviceDefinition, final int version) {
+    //TODO: Revision after database change.
+    /*public ChoreographerExecutorSearchResponseDTO getExecutorByServiceDefinitionAndVersion (final String serviceDefinition, final int version) {
         logger.debug("getExecutorByServiceDefinitionAndVersion sarted...");
 
         ChoreographerExecutorSearchResponseDTO responseDTO = new ChoreographerExecutorSearchResponseDTO(new ArrayList<>());
@@ -809,6 +861,7 @@ public class ChoreographerDBService {
         return responseDTO;
     }
 
+    //TODO: Revision after database change.
     public ChoreographerExecutorSearchResponseDTO getExecutorByServiceDefinitionAndMinMaxVersion(final String serviceDefinition, final int minVersion, final int maxVersion) {
         logger.debug("getExecutorByServiceDefinitionAndMinMaxVersion started...");
 
@@ -819,7 +872,7 @@ public class ChoreographerDBService {
         }
 
         return DTOConverter.convertExecutorListToExecutorSearchResponseDTO(executorList);
-    }
+    }*/
 
     private Page<ChoreographerExecutor> getExecutorEntries(int page, int size, Direction direction, String sortField) {
         logger.debug("getExecutorEntries started...");

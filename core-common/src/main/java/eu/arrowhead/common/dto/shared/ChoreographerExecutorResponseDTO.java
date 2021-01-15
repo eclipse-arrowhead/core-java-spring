@@ -1,9 +1,10 @@
 package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.StringJoiner;
 
-public class ChoreographerExecutorResponseDTO implements Serializable {
+public class  ChoreographerExecutorResponseDTO implements Serializable {
 
     //=================================================================================================
     // members
@@ -15,8 +16,7 @@ public class ChoreographerExecutorResponseDTO implements Serializable {
     private String address;
     private Integer port;
     private String baseUri;
-    private String serviceDefinitionName;
-    private Integer version;
+    private List<ChoreographerExecutorServiceDefinitionResponseDTO> serviceDefinitions;
     private String createdAt;
     private String updatedAt;
 
@@ -24,29 +24,28 @@ public class ChoreographerExecutorResponseDTO implements Serializable {
     // constructors
 
     //-------------------------------------------------------------------------------------------------
-
     public ChoreographerExecutorResponseDTO() {
     }
 
-    public ChoreographerExecutorResponseDTO(long id, String name, String address, Integer port, String serviceDefinitionName, Integer version, String createdAt, String updatedAt) {
-        this.id = id;
-        this.name = name;
-        this.address = address;
-        this.port = port;
-        this.serviceDefinitionName = serviceDefinitionName;
-        this.version = version;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
-
-    public ChoreographerExecutorResponseDTO(long id, String name, String address, Integer port, String baseUri, String serviceDefinitionName, Integer version, String createdAt, String updatedAt) {
+    //-------------------------------------------------------------------------------------------------
+    public ChoreographerExecutorResponseDTO(long id, String name, String address, Integer port, String baseUri, List<ChoreographerExecutorServiceDefinitionResponseDTO> serviceDefinitions, String createdAt, String updatedAt) {
         this.id = id;
         this.name = name;
         this.address = address;
         this.port = port;
         this.baseUri = baseUri;
-        this.serviceDefinitionName = serviceDefinitionName;
-        this.version = version;
+        this.serviceDefinitions = serviceDefinitions;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public ChoreographerExecutorResponseDTO(long id, String name, String address, Integer port, List<ChoreographerExecutorServiceDefinitionResponseDTO> serviceDefinitions, String createdAt, String updatedAt) {
+        this.id = id;
+        this.name = name;
+        this.address = address;
+        this.port = port;
+        this.serviceDefinitions = serviceDefinitions;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -60,8 +59,7 @@ public class ChoreographerExecutorResponseDTO implements Serializable {
     public String getAddress() { return address; }
     public Integer getPort() { return port; }
     public String getBaseUri() { return baseUri; }
-    public String getServiceDefinitionName() { return serviceDefinitionName; }
-    public Integer getVersion() { return version; }
+    public List<ChoreographerExecutorServiceDefinitionResponseDTO> getServiceDefinitions() { return serviceDefinitions; }
     public String getCreatedAt() { return createdAt; }
     public String getUpdatedAt() { return updatedAt; }
 
@@ -71,8 +69,7 @@ public class ChoreographerExecutorResponseDTO implements Serializable {
     public void setAddress(String address) { this.address = address; }
     public void setPort(Integer port) { this.port = port; }
     public void setBaseUri(String baseUri) { this.baseUri = baseUri; }
-    public void setServiceDefinitionName(String serviceDefinitionName) { this.serviceDefinitionName = serviceDefinitionName; }
-    public void setVersion(Integer version) { this.version = version; }
+    public void setServiceDefinitions(List<ChoreographerExecutorServiceDefinitionResponseDTO> serviceDefinitions) { this.serviceDefinitions = serviceDefinitions; }
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
     public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
 
@@ -85,8 +82,7 @@ public class ChoreographerExecutorResponseDTO implements Serializable {
                 .add("address=" + address)
                 .add("port='" + port + "'")
                 .add("baseUri='" + baseUri + "'")
-                .add("serviceDefinitionName=" + serviceDefinitionName)
-                .add("version=" + version)
+                .add("serviceDefinition=" + serviceDefinitions.toString())
                 .add("createdAt='" + createdAt + "'")
                 .add("updatedAt='" + updatedAt + "'")
                 .toString();

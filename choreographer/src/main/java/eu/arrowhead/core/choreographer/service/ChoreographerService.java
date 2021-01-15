@@ -95,22 +95,26 @@ public class ChoreographerService {
         long sessionId = startSessionDTO.getSessionId();
 
         ChoreographerPlan plan = choreographerDBService.getPlanById(startSessionDTO.getPlanId());
-        /*ChoreographerAction firstAction = plan.getFirstAction();
+
+        System.out.println("Plan with session id of " + startSessionDTO.getSessionId() + " and planId of " + startSessionDTO.getPlanId() + " started successfully");
+
+        //TODO: Get the first step or first steps in a plan and search for appropriate executors than call the Executor if available.
+        //TODO: If after starting a plan a step doesn't have a corresponding Executor put the plan execution to hold !! (Can be restarted manually later or periodically automatically.)
+
+        ChoreographerAction firstAction = plan.getFirstAction();
         Set<ChoreographerStep> firstSteps = new HashSet<>(firstAction.getFirstStepEntries());
 
         choreographerDBService.setSessionStatus(sessionId, ChoreographerStatusType.RUNNING);
 
         firstSteps.parallelStream().forEach(firstStep -> {
             try {
-                runStep(firstStep, sessionId);
+                //runStep(firstStep, sessionId);
+                executeStep(firstStep, sessionId);
             } catch (InterruptedException e) {
                 choreographerDBService.setSessionStatus(sessionId, ChoreographerStatusType.ABORTED);
                 logger.debug(e.getMessage(), e);
             }
-        });*/
-
-
-
+        });
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -191,9 +195,21 @@ public class ChoreographerService {
         }
     }
 
+    @JmsListener(destination = "session-step-error")
+    public void receiveSessionStepErrorMessage(ChoreographerSessionRunningStepDataDTO sessionRunningStepDataDTO) {
+        //TODO: Implement logic corresponding to what happens when a running step in a session returns from an executor with an error.
+    }
+
+    public void executeStep(ChoreographerStep step, long sessionId) throws InterruptedException {
+        logger.debug("Execution of step with the id of " + step.getId() + " and sessionId of " + sessionId + " started.");
+
+        ChoreographerRunningStep runningStep = insertInitiatedRunningStep(step.getId(), sessionId);
+        step.getStepDetails().stream().filter(t -> t.getType().equals("PRECONDITION"));
+    }
+
     //-------------------------------------------------------------------------------------------------
     public void runStep(ChoreographerStep step, long sessionId) throws InterruptedException {
-        logger.debug("Running " + step.getId() + "     " + step.getName() + "       sessionId: " + sessionId + "!");
+        /*logger.debug("Running " + step.getId() + "     " + step.getName() + "       sessionId: " + sessionId + "!");
 
         ChoreographerRunningStep runningStep = insertInitiatedRunningStep(step.getId(), sessionId);
 
@@ -232,7 +248,7 @@ public class ChoreographerService {
             choreographerDBService.setRunningStepStatus(runningStep.getId(),ChoreographerStatusType.ABORTED,
                     "Step aborted because the Orchestrator couldn't find any suitable providers. Rerun the plan when there are suitable providers for all steps!");
             choreographerDBService.setSessionStatus(sessionId, ChoreographerStatusType.ABORTED);
-        }
+        }*/
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -240,7 +256,7 @@ public class ChoreographerService {
         return choreographerDBService.registerRunningStep(stepId, sessionId, ChoreographerStatusType.RUNNING, "Step running is initiated and search for provider started.");
     }
 
-    //-------------------------------------------------------------------------------------------------
+    /*//-------------------------------------------------------------------------------------------------
     public OrchestrationResponseDTO queryOrchestrator(final OrchestrationFormRequestDTO form) {
         logger.debug("queryOrchestrator started...");
 
@@ -264,24 +280,5 @@ public class ChoreographerService {
             }
         }
         throw new ArrowheadException("Choreographer can't find orchestration process URI.");
-    }
-
-    /*
-    //-------------------------------------------------------------------------------------------------
-    private Set<String> getServiceDefinitionsFromPlan(ChoreographerPlan plan) {
-        Set<String> serviceDefinitions = new HashSet<>();
-
-        final Set<ChoreographerAction> actions = plan.getActions();
-        for (ChoreographerAction action : actions) {
-            final Set<ChoreographerStep> steps = action.getStepEntries();
-            for (ChoreographerStep step : steps) {
-                final Set<ChoreographerStepDetail> stepDetails = step.getStepDetails();
-                for (ChoreographerStepDetail stepDetail : stepDetails) {
-                    serviceDefinitions.add(stepDetail.getServiceDefinition().toLowerCase());
-                }
-            }
-        }
-
-        return serviceDefinitions;
     }*/
 }
