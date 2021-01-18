@@ -25,11 +25,11 @@ public class ChoreographerExecutorServiceDefinitionConnection {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "executorId", referencedColumnName = "id", nullable = false)
     private ChoreographerExecutor executorEntry;
 
-    @ManyToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne (fetch = FetchType.EAGER)
     @JoinColumn (name = "serviceDefinitionId", referencedColumnName = "id", nullable = false)
     private ChoreographerExecutorServiceDefinition serviceDefinitionEntry;
 

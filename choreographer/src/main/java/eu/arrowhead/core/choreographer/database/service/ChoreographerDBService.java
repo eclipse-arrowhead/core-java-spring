@@ -740,23 +740,28 @@ public class ChoreographerDBService {
                     ChoreographerExecutorServiceDefinition serviceDefinition = serviceDefinitionOptional.get();
                     final Optional<ChoreographerExecutorServiceDefinitionConnection> executorServiceDefinitionConnectionOptional = choreographerExecutorServiceDefinitionConnectionRepository.findByExecutorEntryAndServiceDefinitionEntry(executor, serviceDefinition);
                     if (executorServiceDefinitionConnectionOptional.isEmpty()) {
-                        choreographerExecutorServiceDefinitionConnectionRepository.saveAndFlush(new ChoreographerExecutorServiceDefinitionConnection(executor, serviceDefinition));
+                        executor.getServiceDefinitionConnections().add(choreographerExecutorServiceDefinitionConnectionRepository.saveAndFlush(new ChoreographerExecutorServiceDefinitionConnection(executor, serviceDefinition)));
                     } else {
                         throw new InvalidParameterException("Executor with address: " + address + ", port: " + port + "and baseUri: "
                                 + baseUri + "already has a service definition entry with service name: "
                                 + serviceDefinitionName + " and version: " + version + ".");
                     }
                 } else {
-                    ChoreographerExecutorServiceDefinition serviceDefinition = choreographerExecutorServiceDefinitionRepository.saveAndFlush(new ChoreographerExecutorServiceDefinition(serviceDefinitionName, version));
-                    choreographerExecutorServiceDefinitionConnectionRepository.saveAndFlush(new ChoreographerExecutorServiceDefinitionConnection(executor, serviceDefinition));
+                    ChoreographerExecutorServiceDefinition serviceDefinition = choreographerExecutorServiceDefinitionRepository
+                            .saveAndFlush(new ChoreographerExecutorServiceDefinition(serviceDefinitionName, version));
+                    executor.getServiceDefinitionConnections().add(choreographerExecutorServiceDefinitionConnectionRepository
+                            .saveAndFlush(new ChoreographerExecutorServiceDefinitionConnection(executor, serviceDefinition)));
                 }
 
             } else {
                 executor = choreographerExecutorRepository.saveAndFlush(new ChoreographerExecutor(name, address, port, baseUri));
 
                 ChoreographerExecutorServiceDefinition serviceDefinition;
-                serviceDefinition = serviceDefinitionOptional.orElseGet(() -> choreographerExecutorServiceDefinitionRepository.saveAndFlush(new ChoreographerExecutorServiceDefinition(serviceDefinitionName, version)));
-                choreographerExecutorServiceDefinitionConnectionRepository.saveAndFlush(new ChoreographerExecutorServiceDefinitionConnection(executor, serviceDefinition));
+                serviceDefinition = serviceDefinitionOptional.orElseGet(() -> choreographerExecutorServiceDefinitionRepository
+                        .saveAndFlush(new ChoreographerExecutorServiceDefinition(serviceDefinitionName, version)));
+                executor.getServiceDefinitionConnections().add(choreographerExecutorServiceDefinitionConnectionRepository
+                        .saveAndFlush(new ChoreographerExecutorServiceDefinitionConnection(executor, serviceDefinition)));
+
             }
             return executor;
         } catch (final InvalidParameterException ex) {
@@ -839,40 +844,50 @@ public class ChoreographerDBService {
         }
     }
 
-    //TODO: Revision after db change.
-    /*//-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
     public ChoreographerExecutorListResponseDTO getExecutorEntriesResponse(int page, int size, Direction direction, String sortField) {
         logger.debug("getExecutorEntriesResponse started...");
 
         final Page<ChoreographerExecutor> executorEntries = getExecutorEntries(page, size, direction, sortField);
 
         return DTOConverter.convertExecutorListToExecutorListResponseDTO(executorEntries);
-    }*/
+    }
 
-    //TODO: Revision after database change.
-    /*public ChoreographerExecutorSearchResponseDTO getExecutorByServiceDefinitionAndVersion (final String serviceDefinition, final int version) {
+    public ChoreographerExecutorSearchResponseDTO getExecutorByServiceDefinitionAndVersion (final String serviceDefinition, final int version) {
         logger.debug("getExecutorByServiceDefinitionAndVersion sarted...");
 
         ChoreographerExecutorSearchResponseDTO responseDTO = new ChoreographerExecutorSearchResponseDTO(new ArrayList<>());
 
-        Optional<ChoreographerExecutor> executorOptional = choreographerExecutorRepository.findByServiceDefinitionNameAndVersion(serviceDefinition, version);
-        executorOptional.ifPresent(executor -> responseDTO.getData().add(DTOConverter.convertExecutorToExecutorResponseDTO(executor)));
+        Optional<ChoreographerExecutorServiceDefinition> serviceDefinitionOptional = choreographerExecutorServiceDefinitionRepository
+                .findByServiceDefinitionNameAndVersion(serviceDefinition, version);
+
+        if (serviceDefinitionOptional.isPresent()) {
+            for (ChoreographerExecutorServiceDefinitionConnection conn : serviceDefinitionOptional.get().getExecutorConnections()) {
+                responseDTO.getData().add(DTOConverter.convertExecutorToExecutorResponseDTO(conn.getExecutorEntry()));
+            }
+        }
 
         return responseDTO;
     }
 
-    //TODO: Revision after database change.
     public ChoreographerExecutorSearchResponseDTO getExecutorByServiceDefinitionAndMinMaxVersion(final String serviceDefinition, final int minVersion, final int maxVersion) {
         logger.debug("getExecutorByServiceDefinitionAndMinMaxVersion started...");
 
         List<ChoreographerExecutor> executorList = new ArrayList<>();
 
         for (int currentVersion = minVersion; currentVersion <= maxVersion; currentVersion++) {
-            choreographerExecutorRepository.findByServiceDefinitionNameAndVersion(serviceDefinition, currentVersion).ifPresent(executor -> executorList.add(executor));
+            Optional<ChoreographerExecutorServiceDefinition> serviceDefinitionOptional = choreographerExecutorServiceDefinitionRepository
+                    .findByServiceDefinitionNameAndVersion(serviceDefinition, currentVersion);
+
+            if (serviceDefinitionOptional.isPresent()) {
+                for (ChoreographerExecutorServiceDefinitionConnection conn : serviceDefinitionOptional.get().getExecutorConnections()) {
+                    executorList.add(conn.getExecutorEntry());
+                }
+            }
         }
 
         return DTOConverter.convertExecutorListToExecutorSearchResponseDTO(executorList);
-    }*/
+    }
 
     private Page<ChoreographerExecutor> getExecutorEntries(int page, int size, Direction direction, String sortField) {
         logger.debug("getExecutorEntries started...");
@@ -887,6 +902,28 @@ public class ChoreographerDBService {
 
         try {
             return choreographerExecutorRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+    public List<Long> getSuitableExecutorsByStepId(long stepId) {
+        logger.debug("getSuitableExecutorsByStepId started...");
+
+        try {
+            if (choreographerStepRepository.findById(stepId).isPresent()) {
+                Optional<List<Long>> suitableExecutorIds = choreographerExecutorRepository.findExecutorsByStepId(stepId);
+                if (suitableExecutorIds.isPresent()) {
+                    return suitableExecutorIds.get();
+                } else {
+                    throw new InvalidParameterException("No suitable executor found for step " + stepId);
+                }
+            } else {
+                throw new InvalidParameterException("Step with id of " + stepId + " doesn't exist.");
+            }
+        } catch (InvalidParameterException ex) {
+            throw ex;
         } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);

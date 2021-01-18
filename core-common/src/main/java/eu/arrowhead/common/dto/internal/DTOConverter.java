@@ -1032,7 +1032,6 @@ public class DTOConverter {
                                                 Utilities.convertZonedDateTimeToUTCString(planEntry.getUpdatedAt()));
     }
 
-	// TODO: Revision after DB change passed: NO
 	public static ChoreographerExecutorResponseDTO convertExecutorToExecutorResponseDTO(ChoreographerExecutor executor) {
 		Assert.notNull(executor, "Executor is null.");
 		Assert.notNull(executor.getAddress(), "Related address is null.");
@@ -1388,8 +1387,7 @@ public class DTOConverter {
 		return IssuedCertificateStatus.GOOD;
 	}
 
-	//TODO: Revision after DB change.
-	/*public static ChoreographerExecutorListResponseDTO convertExecutorListToExecutorListResponseDTO(Page<ChoreographerExecutor> executorEntries) {
+	public static ChoreographerExecutorListResponseDTO convertExecutorListToExecutorListResponseDTO(Page<ChoreographerExecutor> executorEntries) {
 		Assert.notNull(executorEntries, "List of executors is null");
 
 		final List<ChoreographerExecutorResponseDTO> executorEntryDTOs = new ArrayList<>(executorEntries.getNumberOfElements());
@@ -1400,7 +1398,6 @@ public class DTOConverter {
 		return new ChoreographerExecutorListResponseDTO(executorEntryDTOs, executorEntries.getTotalElements());
 	}
 
-	//TODO: Revision after DB change.
 	public static ChoreographerExecutorSearchResponseDTO convertExecutorListToExecutorSearchResponseDTO(List<ChoreographerExecutor> executorEntries) {
 		Assert.notNull(executorEntries, "List of executors is null");
 
@@ -1410,6 +1407,5 @@ public class DTOConverter {
 		}
 
 		return new ChoreographerExecutorSearchResponseDTO(executorEntryDTOs);
-	}*/
-
+	}
 }

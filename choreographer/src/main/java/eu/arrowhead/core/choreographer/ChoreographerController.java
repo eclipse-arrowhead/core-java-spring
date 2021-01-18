@@ -79,6 +79,7 @@ public class ChoreographerController {
     private static final String SESSION_MGMT_URI = CoreCommonConstants.MGMT_URI + "/session";
     private static final String EXECUTOR_MGMT_URI = CoreCommonConstants.MGMT_URI + "/executor";
     private static final String EXECUTOR_MGMT_BY_ID_URI = EXECUTOR_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
+    private static final String EXECUTOR_MGMT_TEST_BY_STEP_ID = EXECUTOR_MGMT_URI + "/byStepId" + "/{" + PATH_VARIABLE_ID + "}";
 
     private static final String START_SESSION_MGMT_URI = SESSION_MGMT_URI + "/start";
     private static final String STEP_FINISHED_MGMT_URI = SESSION_MGMT_URI + "/notifyStepDone";
@@ -114,7 +115,6 @@ public class ChoreographerController {
     private static final String EXECUTOR_MIN_VERSION_GREATER_THAN_MAX_VERSION_ERROR_MESSAGE = "Maximum version requirement must be greater or equal to the minimum version requirement.";
     private static final String CHOREOGRAPHER_INSUFFICIENT_PROVIDERS_FOR_PLAN_ERROR_MESSAGE = "Can't start plan because not every service definition has a corresponding provider.";
     private static final String CHOREOGRAPHER_INSUFFICIENT_EXECUTORS_FOR_PLAN_ERROR_MESSAGE = "Can't start plan because not every service definition has a corresponding executor.";
-
 
     private static final String EXECUTOR_REQUEST_PARAM_SERVICE_DEFINITION = "service-definition";
     private static final String EXECUTOR_REQUEST_PARAM_MIN_VERSION = "min_version";
@@ -235,8 +235,7 @@ public class ChoreographerController {
         return choreographerActionPlanEntriesResponse;
     }
 
-    //TODO: Revision after DB change.
-    /*//-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Initiate the start of one or more plans.",
             tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses(value = {
@@ -259,7 +258,7 @@ public class ChoreographerController {
             logger.debug("Sending a message to start-session.");
             jmsTemplate.convertAndSend("start-session", new ChoreographerStartSessionDTO(session.getId(), request.getId()));
         }
-    }*/
+    }
 
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Notify the Choreographer that a step is done in a session.",
@@ -327,6 +326,7 @@ public class ChoreographerController {
         }
 
         choreographerDBService.removeExecutorEntryById(id);
+        choreographerDBService.removeExecutorEntryById(id);
         logger.debug("Executor with id: '{}' successfully deleted", id);
     }
 
@@ -381,8 +381,27 @@ public class ChoreographerController {
         return executorEntryByIdResponse;
     }
 
-    //TODO: Revision after db change.
-    /*//-------------------------------------------------------------------------------------------------
+    //TODO: delete endpoint
+    //-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = "Return requested executor entry.", response = ServiceRegistryResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_OK, message = GET_EXECUTOR_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_EXECUTOR_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+    })
+    @GetMapping(path = EXECUTOR_MGMT_TEST_BY_STEP_ID)
+    @ResponseBody public List<Long> getSuitableExecutorIds(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+        logger.debug("test");
+
+        if (id < 1) {
+            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + EXECUTOR_MGMT_BY_ID_URI);
+        }
+
+        return choreographerDBService.getSuitableExecutorsByStepId(id);
+    }
+
+    //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Return requested executor entries by the given parameters", response = ChoreographerExecutorListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = GET_EXECUTOR_HTTP_200_MESSAGE),
@@ -418,7 +437,7 @@ public class ChoreographerController {
         logger.debug("Service Registry entries with page: {} and item_per page: {} successfully retrieved", page, size);
 
         return executorEntriesResponse;
-    }*/
+    }
 
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Remove executor.", tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
@@ -440,8 +459,7 @@ public class ChoreographerController {
         logger.debug("Executor with id: '{}' successfully deleted", id);
     }
 
-    //TODO: Revision after db change.
-    /*//-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Return list of executors suited to execute the task with the service definition and version requirements.",
             response = ChoreographerExecutorSearchResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses(value = {
@@ -469,7 +487,7 @@ public class ChoreographerController {
         } else {
             throw new BadPayloadException(EXECUTOR_VERSION_MIN_VERSION_MAX_VERSION_AMBIGUOUS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + EXECUTOR_SEARCH_MGMT_URI);
         }
-    }*/
+    }
 
     //=================================================================================================
 	// assistant methods
@@ -548,7 +566,7 @@ public class ChoreographerController {
     }
 
     //TODO: Revision after DB change.
-    /*//-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
     private void checkIfPlanHasEveryRequiredExecutor(final ChoreographerRunPlanRequestDTO request, final String origin) {
         ChoreographerPlan plan = choreographerDBService.getPlanById(request.getId());
 
@@ -556,8 +574,12 @@ public class ChoreographerController {
         for (ChoreographerAction action : actions) {
             final Set<ChoreographerStep> steps = action.getStepEntries();
             for (ChoreographerStep step : steps) {
-                final Set<ChoreographerStepDetail> stepDetails = step.getStepDetails();
-                for (ChoreographerStepDetail stepDetail : stepDetails) {
+
+                if (choreographerDBService.getSuitableExecutorsByStepId(step.getId()).isEmpty()) {
+                    throw new BadPayloadException(CHOREOGRAPHER_INSUFFICIENT_EXECUTORS_FOR_PLAN_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+                }
+                //final Set<ChoreographerStepDetail> stepDetails = step.getStepDetails();
+                /*for (ChoreographerStepDetail stepDetail : stepDetails) {
                     Integer maxVersion = stepDetail.getMaxVersion();
                     Integer minVersion = stepDetail.getMinVersion();
                     Integer version = stepDetail.getVersion();
@@ -572,10 +594,10 @@ public class ChoreographerController {
                             throw new BadPayloadException(CHOREOGRAPHER_INSUFFICIENT_EXECUTORS_FOR_PLAN_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
                         }
                     }
-                }
+                }*/
             }
         }
-    }*/
+    }
 
     //-------------------------------------------------------------------------------------------------
     private Set<String> getServiceDefinitionsFromPlan(ChoreographerPlan plan) {

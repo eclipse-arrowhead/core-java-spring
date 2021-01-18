@@ -42,7 +42,7 @@ public class ChoreographerExecutorServiceDefinition {
     @Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private ZonedDateTime updatedAt;
 
-    @OneToMany(mappedBy = "serviceDefinitionEntry", fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "serviceDefinitionEntry", fetch = FetchType.LAZY, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<ChoreographerExecutorServiceDefinitionConnection> executorConnections = new HashSet<>();
 
