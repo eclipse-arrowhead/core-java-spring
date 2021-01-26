@@ -17,6 +17,7 @@ import eu.arrowhead.common.dto.internal.ChoreographerExecutorSearchResponseDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerPlanRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerRunPlanRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
+import eu.arrowhead.common.dto.internal.ChoreographerSuitableExecutorResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerSessionRunningStepDataDTO;
@@ -381,9 +382,8 @@ public class ChoreographerController {
         return executorEntryByIdResponse;
     }
 
-    //TODO: delete endpoint
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Return requested executor entry.", response = ServiceRegistryResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+    @ApiOperation(value = "Return the ids of the suitable Executors entries by step id.", response = ServiceRegistryResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = GET_EXECUTOR_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_EXECUTOR_HTTP_400_MESSAGE),
@@ -391,14 +391,14 @@ public class ChoreographerController {
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @GetMapping(path = EXECUTOR_MGMT_TEST_BY_STEP_ID)
-    @ResponseBody public List<Long> getSuitableExecutorIds(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
-        logger.debug("test");
+    @ResponseBody public ChoreographerSuitableExecutorResponseDTO getSuitableExecutorIds(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+        logger.debug("getSuitableExecutorIds started...");
 
         if (id < 1) {
             throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + EXECUTOR_MGMT_BY_ID_URI);
         }
 
-        return choreographerDBService.getSuitableExecutorsByStepId(id);
+        return choreographerDBService.getSuitableExecutorIdsByStepId(id);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -575,7 +575,7 @@ public class ChoreographerController {
             final Set<ChoreographerStep> steps = action.getStepEntries();
             for (ChoreographerStep step : steps) {
 
-                if (choreographerDBService.getSuitableExecutorsByStepId(step.getId()).isEmpty()) {
+                if (choreographerDBService.getSuitableExecutorIdsByStepId(step.getId()).getSuitableExecutorIds().isEmpty()) {
                     throw new BadPayloadException(CHOREOGRAPHER_INSUFFICIENT_EXECUTORS_FOR_PLAN_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
                 }
                 //final Set<ChoreographerStepDetail> stepDetails = step.getStepDetails();

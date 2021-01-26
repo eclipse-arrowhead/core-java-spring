@@ -32,6 +32,7 @@ import eu.arrowhead.common.dto.internal.ChoreographerExecutorListResponseDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerExecutorSearchResponseDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerStatusType;
 import eu.arrowhead.common.dto.internal.ChoreographerStepRequestDTO;
+import eu.arrowhead.common.dto.internal.ChoreographerSuitableExecutorResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerOFRRequestDTO;
@@ -908,14 +909,14 @@ public class ChoreographerDBService {
         }
     }
 
-    public List<Long> getSuitableExecutorsByStepId(long stepId) {
+    public ChoreographerSuitableExecutorResponseDTO getSuitableExecutorIdsByStepId(long stepId) {
         logger.debug("getSuitableExecutorsByStepId started...");
 
         try {
             if (choreographerStepRepository.findById(stepId).isPresent()) {
                 Optional<List<Long>> suitableExecutorIds = choreographerExecutorRepository.findExecutorsByStepId(stepId);
                 if (suitableExecutorIds.isPresent()) {
-                    return suitableExecutorIds.get();
+                    return DTOConverter.convertSuitableExecutorIdsToSuitableExecutorResponseDTO(suitableExecutorIds.get());
                 } else {
                     throw new InvalidParameterException("No suitable executor found for step " + stepId);
                 }

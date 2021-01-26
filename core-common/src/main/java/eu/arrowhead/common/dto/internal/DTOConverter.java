@@ -1185,7 +1185,13 @@ public class DTOConverter {
 		return result;
 	}
 
-
+	public static ChoreographerSuitableExecutorResponseDTO convertSuitableExecutorIdsToSuitableExecutorResponseDTO (List<Long> executorIds) {
+		ChoreographerSuitableExecutorResponseDTO dto = new ChoreographerSuitableExecutorResponseDTO();
+		for (long id : executorIds) {
+			dto.getSuitableExecutorIds().add(id);
+		}
+		return dto;
+	}
 
 	//=================================================================================================
 	// assistant methods
