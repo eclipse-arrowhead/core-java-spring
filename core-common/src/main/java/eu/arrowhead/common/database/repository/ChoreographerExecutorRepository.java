@@ -25,7 +25,7 @@ public interface ChoreographerExecutorRepository extends RefreshableRepository<C
             "on conn.executorEntry.id = ex.id " +
             "where sdet.step.id = ?1 " +
             "group by ex.id " +
-            "having count(distinct sdet.id) = (select count(id) from ChoreographerStepDetail where step.id = 12)")
+            "having count(distinct sdet.id) = (select count(id) from ChoreographerStepDetail where step.id = ?1)")
     public Optional<List<Long>> findExecutorsByStepId(final long stepId);
 
     //-------------------------------------------------------------------------------------------------
