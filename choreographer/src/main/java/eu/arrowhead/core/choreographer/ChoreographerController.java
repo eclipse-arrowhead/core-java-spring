@@ -565,7 +565,6 @@ public class ChoreographerController {
         }
     }
 
-    //TODO: Revision after DB change.
     //-------------------------------------------------------------------------------------------------
     private void checkIfPlanHasEveryRequiredExecutor(final ChoreographerRunPlanRequestDTO request, final String origin) {
         ChoreographerPlan plan = choreographerDBService.getPlanById(request.getId());
@@ -578,23 +577,6 @@ public class ChoreographerController {
                 if (choreographerDBService.getSuitableExecutorIdsByStepId(step.getId()).getSuitableExecutorIds().isEmpty()) {
                     throw new BadPayloadException(CHOREOGRAPHER_INSUFFICIENT_EXECUTORS_FOR_PLAN_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
                 }
-                //final Set<ChoreographerStepDetail> stepDetails = step.getStepDetails();
-                /*for (ChoreographerStepDetail stepDetail : stepDetails) {
-                    Integer maxVersion = stepDetail.getMaxVersion();
-                    Integer minVersion = stepDetail.getMinVersion();
-                    Integer version = stepDetail.getVersion();
-                    String serviceDefinition = stepDetail.getServiceDefinition();
-
-                    if (maxVersion != null && minVersion != null) {
-                        if (choreographerDBService.getExecutorByServiceDefinitionAndMinMaxVersion(serviceDefinition, minVersion, maxVersion).getData().isEmpty()) {
-                            throw new BadPayloadException(CHOREOGRAPHER_INSUFFICIENT_EXECUTORS_FOR_PLAN_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-                        }
-                    } else if (version != null) {
-                        if (choreographerDBService.getExecutorByServiceDefinitionAndVersion(serviceDefinition, version).getData().isEmpty()) {
-                            throw new BadPayloadException(CHOREOGRAPHER_INSUFFICIENT_EXECUTORS_FOR_PLAN_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-                        }
-                    }
-                }*/
             }
         }
     }

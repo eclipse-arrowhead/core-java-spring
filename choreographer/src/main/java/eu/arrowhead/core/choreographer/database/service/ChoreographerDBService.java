@@ -918,7 +918,8 @@ public class ChoreographerDBService {
                 if (suitableExecutorIds.isPresent()) {
                     return DTOConverter.convertSuitableExecutorIdsToSuitableExecutorResponseDTO(suitableExecutorIds.get());
                 } else {
-                    throw new InvalidParameterException("No suitable executor found for step " + stepId);
+                    throw new InvalidParameterException("No suitable executor found for step with the id of: " + stepId +
+                            ". Please create and implement the missing executor(s) and restart the plan.");
                 }
             } else {
                 throw new InvalidParameterException("Step with id of " + stepId + " doesn't exist.");
