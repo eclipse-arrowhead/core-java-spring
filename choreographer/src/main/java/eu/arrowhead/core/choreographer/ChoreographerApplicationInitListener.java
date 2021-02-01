@@ -58,9 +58,10 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
 
     @Bean
     public JmsListenerContainerFactory<?> getFactory(ConnectionFactory connectionFactory,
-                                                    DefaultJmsListenerContainerFactoryConfigurer configurer) {
+                                                    DefaultJmsListenerContainerFactoryConfigurer configurer, ExampleErrorHandler errorHandler) {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         configurer.configure(factory, connectionFactory);
+        factory.setErrorHandler(errorHandler);
         return factory;
     }
 
@@ -77,7 +78,7 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
 
         @Override
         public void handleError(Throwable throwable) {
-            System.out.println("Hello");
+            System.out.println("Error happened during Workflow Choreography.");
         }
     }
 
