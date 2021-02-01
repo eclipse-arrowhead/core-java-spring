@@ -17,7 +17,7 @@ public class AuthAccessControlFilter extends CoreSystemAccessControlFilter {
 	//=================================================================================================
 	// members
 	private static final String AUTHORIZATION_INTRA_CLOUD_MGMT_URI = CoreCommonConstants.MGMT_URI + "/intracloud";
-	private static final CoreSystem[] allowedCoreSystemsForChecks = { CoreSystem.ORCHESTRATOR, CoreSystem.GATEKEEPER };
+	private static final CoreSystem[] allowedCoreSystemsForChecks = { CoreSystem.ORCHESTRATOR, CoreSystem.GATEKEEPER, CoreSystem.CHOREOGRAPHER };
 	private static final CoreSystem[] allowedCoreSystemsForSubscriptionChecks = { CoreSystem.EVENT_HANDLER };
 	private static final CoreSystem[] allowedCoreSystemsForRuleMgmt = { CoreSystem.ONBOARDING_CONTROLLER };
 

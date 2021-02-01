@@ -43,8 +43,8 @@ public class OrchestratorAccessControlFilter extends CoreSystemAccessControlFilt
 			final OrchestrationFlags orchestrationFlags = orchestrationFormRequestDTO.getOrchestrationFlags();
 			
 			if (orchestrationFlags.getOrDefault(CommonConstants.ORCHESTRATION_FLAG_EXTERNAL_SERVICE_REQUEST, false)) {
-				// If this is an external service request, only the local Gatekeeper can use these methods
-				final CoreSystem[] allowedCoreSystems = { CoreSystem.GATEKEEPER };
+				// If this is an external service request, only the local Gatekeeper and the Choreographer can use these methods
+				final CoreSystem[] allowedCoreSystems = { CoreSystem.GATEKEEPER, CoreSystem.CHOREOGRAPHER };
 				checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystems, requestTarget);				
 			} else {
 				// Otherwise all request from the local cloud are allowed, but requester system has to be match with the certificate
