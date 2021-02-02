@@ -49,6 +49,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -743,8 +744,8 @@ public class ChoreographerDBService {
                     if (executorServiceDefinitionConnectionOptional.isEmpty()) {
                         executor.getServiceDefinitionConnections().add(choreographerExecutorServiceDefinitionConnectionRepository.saveAndFlush(new ChoreographerExecutorServiceDefinitionConnection(executor, serviceDefinition)));
                     } else {
-                        throw new InvalidParameterException("Executor with address: " + address + ", port: " + port + "and baseUri: "
-                                + baseUri + "already has a service definition entry with service name: "
+                        throw new InvalidParameterException("Executor with address: " + address + ", port: " + port + " and baseUri: "
+                                + baseUri + " already has a service definition entry with service name: "
                                 + serviceDefinitionName + " and version: " + version + ".");
                     }
                 } else {
@@ -925,6 +926,32 @@ public class ChoreographerDBService {
                 throw new InvalidParameterException("Step with id of " + stepId + " doesn't exist.");
             }
         } catch (InvalidParameterException ex) {
+            throw ex;
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public void removeExecutor(String executorAddress, int executorPort, String executorBaseUri) {
+        logger.debug("removeExecutor started...");
+        Assert.isTrue(!Utilities.isEmpty(executorAddress), "Executor address is not specified.");
+        Assert.isTrue(!Utilities.isEmpty(executorBaseUri), "Executor base URI is not specified.");
+
+        final String validatedExecutorAddress = executorAddress.toLowerCase().trim();
+        final String validatedBaseUri = executorBaseUri.toLowerCase().trim();
+
+        try {
+            final Optional<ChoreographerExecutor> executorOptional = choreographerExecutorRepository
+                    .findByAddressAndPortAndBaseUri(validatedExecutorAddress, executorPort, validatedBaseUri);
+            if (executorOptional.isEmpty()) {
+                throw new InvalidParameterException("No executor with address: " + validatedExecutorAddress
+                        + ", port: " + executorPort + " and baseURI: " + validatedBaseUri + ".");
+            }
+
+            removeExecutorEntryById(executorOptional.get().getId());
+        } catch (final InvalidParameterException ex) {
             throw ex;
         } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);

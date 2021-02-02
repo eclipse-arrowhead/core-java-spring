@@ -165,7 +165,7 @@ public class ChoreographerService {
 
                     firstStepsInNewAction.parallelStream().forEach(firstStepInNewAction -> {
                         try {
-                            runStep(firstStepInNewAction, sessionId);
+                            executeStep(firstStepInNewAction, sessionId);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -190,7 +190,7 @@ public class ChoreographerService {
             if (allPreviousStepsDone) {
                 // Run next step
                 try {
-                    runStep(nextStep.getNextStepEntry(), sessionId);
+                    executeStep(nextStep.getNextStepEntry(), sessionId);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -199,6 +199,7 @@ public class ChoreographerService {
         }
     }
 
+    //-------------------------------------------------------------------------------------------------
     @JmsListener(destination = "session-step-error")
     public void receiveSessionStepErrorMessage(ChoreographerSessionRunningStepDataDTO sessionRunningStepDataDTO) {
         //TODO: Implement logic corresponding to what happens when a running step in a session returns from an executor with an error.
@@ -243,7 +244,7 @@ public class ChoreographerService {
 
         ChoreographerExecutorResponseDTO executor = choreographerDBService.getExecutorEntryByIdResponse(executorId);
 
-        UriComponents uri = Utilities.createURI(CommonConstants.HTTP, executor.getAddress(), executor.getPort(), executor.getBaseUri() + "/start");
+        UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, executor.getAddress(), executor.getPort(), executor.getBaseUri() + "/start");
 
         ChoreographerSessionRunningStepDataDTO runningStepDataDTO = new ChoreographerSessionRunningStepDataDTO(sessionId, runningStep.getId(), preconditionOrchestrationResponses, mainStepOrchestrationResponse);
 
@@ -252,52 +253,12 @@ public class ChoreographerService {
         } catch (UnavailableServerException ex) {
             //TODO: Needs handling, possibly retrying and / or choosing another viable Executor from the list.
             System.out.println("Executor nem online!!");
+
+            //TODO: Check how the following code sequence should play out.
+            //choreographerDBService.setRunningStepStatus(runningStep.getId(),ChoreographerStatusType.ABORTED,
+            //        "Step aborted because the Orchestrator couldn't find any suitable providers. Rerun the plan when there are suitable providers for all steps!");
+            //choreographerDBService.setSessionStatus(sessionId, ChoreographerStatusType.ABORTED);
         }
-
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    public void runStep(ChoreographerStep step, long sessionId) throws InterruptedException {
-        /*logger.debug("Running " + step.getId() + "     " + step.getName() + "       sessionId: " + sessionId + "!");
-
-        ChoreographerRunningStep runningStep = insertInitiatedRunningStep(step.getId(), sessionId);
-
-        ServiceQueryFormDTO serviceQuery = new ServiceQueryFormDTO();
-        //serviceQuery.setServiceDefinitionRequirement(step.getServiceName().toLowerCase());
-
-        if (sslEnabled) {
-            final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
-            requesterSystem.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
-        }
-
-        final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO.Builder(requesterSystem)
-                                                                                             .requestedService(serviceQuery)
-                                                                                             .flag(OrchestrationFlags.Flag.MATCHMAKING, true)
-                                                                                             .flag(OrchestrationFlags.Flag.OVERRIDE_STORE, true)
-                                                                                             .flag(OrchestrationFlags.Flag.TRIGGER_INTER_CLOUD, false)
-                                                                                             .build();
-
-        final OrchestrationResponseDTO orchestrationResponse = queryOrchestrator(orchestrationForm);
-
-        List<OrchestrationResultDTO> orchestrationResultList = orchestrationResponse.getResponse();
-
-        logger.debug(orchestrationResultList);
-
-        ChoreographerSessionRunningStepDataDTO runningStepDataDTO = new ChoreographerSessionRunningStepDataDTO(sessionId, runningStep.getId());
-
-        if (!orchestrationResultList.isEmpty()) {
-            OrchestrationResultDTO orchestrationResult = orchestrationResultList.get(0);
-            UriComponents uri = Utilities.createURI(orchestrationResult.getProvider().getAuthenticationInfo(),
-                    orchestrationResult.getProvider().getAddress(),
-                    orchestrationResult.getProvider().getPort(),
-                    orchestrationResult.getServiceUri());
-
-            httpService.sendRequest(uri, HttpMethod.POST, Void.class, runningStepDataDTO);
-        } else {
-            choreographerDBService.setRunningStepStatus(runningStep.getId(),ChoreographerStatusType.ABORTED,
-                    "Step aborted because the Orchestrator couldn't find any suitable providers. Rerun the plan when there are suitable providers for all steps!");
-            choreographerDBService.setSessionStatus(sessionId, ChoreographerStatusType.ABORTED);
-        }*/
     }
 
     //-------------------------------------------------------------------------------------------------

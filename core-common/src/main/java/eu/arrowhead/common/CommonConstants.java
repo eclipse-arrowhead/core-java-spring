@@ -212,6 +212,9 @@ public class CommonConstants {
 	public static final String OP_CHOREOGRAPHER_EXECUTOR_REGISTER = "/executor/register";
 	public static final String OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER = "/executor/unregister";
 	public static final String OP_CHOREOGRAPHER_EXECUTOR_NOTIFY_STEP_ERROR = "executor/notifyStepError";
+	public static final String OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_ADDRESS = "address";
+	public static final String OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_PORT = "port";
+	public static final String OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_BASE_URI = "base_uri";
 
 	public static final String GATEWAY_URI = "/gateway";
 	public static final String OP_GATEWAY_KEY_URI = "/publickey";

@@ -319,16 +319,15 @@ public class ChoreographerController {
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @DeleteMapping(path = OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER)
-    public void unregisterExecutor(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
-        logger.debug("New Executor delete request received with id: {}", id);
+    public void unregisterExecutor(@RequestParam(CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_ADDRESS) final String executorAddress,
+                                   @RequestParam(CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_PORT) final int executorPort,
+                                   @RequestParam(CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_BASE_URI) final String executorBaseUri) {
+        logger.debug("Executor removal request received.");
 
-        if (id < 1) {
-            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER);
-        }
+        checkUnregisterExecutorParameters(executorAddress, executorPort, executorBaseUri);
 
-        choreographerDBService.removeExecutorEntryById(id);
-        choreographerDBService.removeExecutorEntryById(id);
-        logger.debug("Executor with id: '{}' successfully deleted", id);
+        choreographerDBService.removeExecutor(executorAddress, executorPort, executorBaseUri);
+        logger.debug("Removed Executor with address: {}, port: {} and baseURI: {}", executorAddress, executorPort, executorBaseUri);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -597,5 +596,24 @@ public class ChoreographerController {
         }
 
         return serviceDefinitions;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    private void checkUnregisterExecutorParameters(final String executorAddress, final int executorPort, final String executorBaseUri) {
+        // parameters can't be null, but can be empty
+        logger.debug("checkUnregisterExecutorParameters started...");
+
+        final String origin = CommonConstants.CHOREOGRAPHER_URI + CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER;
+        if (Utilities.isEmpty(executorAddress)) {
+            throw new BadPayloadException("Executor address is blank.", HttpStatus.SC_BAD_REQUEST, origin);
+        }
+
+        if (Utilities.isEmpty(executorBaseUri)) {
+            throw new BadPayloadException("The base URI of the Executor is blank.", HttpStatus.SC_BAD_REQUEST, origin);
+        }
+
+        if (executorPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || executorPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+            throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
+        }
     }
 }
