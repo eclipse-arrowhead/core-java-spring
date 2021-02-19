@@ -14,11 +14,11 @@
 	<name>core-java-spring</name>
 	<description>Arrowhead Core Services using Spring Boot</description>
 
-	<url>https://github.com/arrowhead-f/core-java-spring</url>
+	<url>https://github.com/eclipse-arrowhead/core-java-spring</url>
 	<licenses>
     	<license>
-	     	<name>Apache License, Version 2.0</name>
-	     	<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+	     	<name>Eclipse Public License - v 2.0</name>
+	     	<url>https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt</url>
 	   </license>
   	</licenses>
   	
