@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # prerm script for arrowhead-core-common
 #
 # see: dh_installdeb(1)
@@ -18,15 +18,15 @@ set -e
 
 
 case "$1" in
-    remove|upgrade|deconfigure)
+  remove|upgrade|deconfigure)
     ;;
 
-    failed-upgrade)
+  failed-upgrade)
     ;;
 
-    *)
-        echo "prerm called with unknown argument \`$1'" >&2
-        exit 1
+  *)
+    echo "prerm called with unknown argument \`$1'" >&2
+    exit 1
     ;;
 esac
 

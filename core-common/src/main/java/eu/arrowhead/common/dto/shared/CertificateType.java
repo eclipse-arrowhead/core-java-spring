@@ -14,10 +14,10 @@
 
 package eu.arrowhead.common.dto.shared;
 
+import java.util.Objects;
+
 import eu.arrowhead.common.Utilities;
 import org.springframework.util.Assert;
-
-import java.util.Objects;
 
 public enum CertificateType {
 
@@ -63,8 +63,9 @@ public enum CertificateType {
     }
 
     public String appendTypeToCN(final String commonName) {
-        if (Utilities.notEmpty(commonNamePart)) {
+        /* if (Utilities.notEmpty(commonNamePart)) {
             return commonName + '.' + commonNamePart;
-        } else { return commonName; }
+        } else { return commonName; } */
+        return commonName;
     }
 }

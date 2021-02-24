@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # postrm script for arrowhead-core-common
 #
 # see: dh_installdeb(1)
@@ -22,35 +22,36 @@ set -e
 
 
 case "$1" in
-    purge)
-        db_get arrowhead-core-common/cloudname; AH_CLOUD_NAME=$RET
-        AH_CONF_DIR="/etc/arrowhead"
-        AH_CLOUDS_DIR="${AH_CONF_DIR}/clouds"
-        AH_SYSTEMS_DIR="${AH_CONF_DIR}/systems"
+  purge)
+    db_get arrowhead-core-common/cloudname; AH_CLOUD_NAME=$RET
+    AH_CONF_DIR="/etc/arrowhead"
+    AH_CLOUDS_DIR="${AH_CONF_DIR}/clouds"
+    AH_SYSTEMS_DIR="${AH_CONF_DIR}/systems"
 
-        rm -f ${AH_CLOUDS_DIR}/${AH_CLOUD_NAME}.p12
-        rm -f ${AH_CONF_DIR}/master.p12
-        rm -f ${AH_CONF_DIR}/truststore.p12
-        rm -f ${AH_CONF_DIR}/master.crt
-        rm -f ${AH_MYSQL_CONF}
-        rmdir ${AH_CLOUDS_DIR} 2>/dev/null || true
-        rmdir ${AH_SYSTEMS_DIR} 2>/dev/null || true
-        rmdir ${AH_CONF_DIR} 2>/dev/null || true
-        rmdir /var/log/arrowhead 2>/dev/null || true
+    rm -f ${AH_CLOUDS_DIR}/${AH_CLOUD_NAME}.p12
+    rm -f ${AH_CONF_DIR}/master.p12
+    rm -f ${AH_CONF_DIR}/truststore.p12
+    rm -f ${AH_CONF_DIR}/master.crt
+    rm -f ${AH_MYSQL_CONF}
+    rmdir ${AH_CLOUDS_DIR} 2>/dev/null || true
+    rmdir ${AH_SYSTEMS_DIR} 2>/dev/null || true
+    rmdir ${AH_CONF_DIR} 2>/dev/null || true
+    rmdir /var/log/arrowhead 2>/dev/null || true
 
-        deluser arrowhead || true
-        db_purge
+    deluser arrowhead || true
+    db_purge
 
-        if [ -d ${AH_CONF_DIR} ]; then
-            echo "Directory '${AH_CONF_DIR}' is not empty, please remove manually" >&2
-        fi
-    ;;
-    remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+    if [ -d ${AH_CONF_DIR} ]; then
+      echo "Directory '${AH_CONF_DIR}' is not empty, please remove manually" >&2
+    fi
     ;;
 
-    *)
-        echo "postrm called with unknown argument \`$1'" >&2
-        exit 1
+  remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+    ;;
+
+  *)
+    echo "postrm called with unknown argument \`$1'" >&2
+    exit 1
     ;;
 esac
 

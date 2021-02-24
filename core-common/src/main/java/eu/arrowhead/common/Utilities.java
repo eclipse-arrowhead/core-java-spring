@@ -294,6 +294,9 @@ public class Utilities {
 
 	//-------------------------------------------------------------------------------------------------
 	public static UriComponents createURI(final String scheme, final String host, final int port, final String path, final String... queryParams) {
+		if (queryParams == null || queryParams.length == 0) {
+			return createURI(scheme, host, port, path);
+		}
 		if (queryParams.length % 2 != 0) {
 			throw new InvalidParameterException("queryParams variable arguments conatins a key without value");
 		}
@@ -429,7 +432,7 @@ public class Utilities {
 
 		try {
 		    // debian installation with new certificates have a different alias
-            // i.e. the format is {cloudname}." + AH_MASTER_NAME + "." + AH_MASTER_SUFFIX
+            // i.e. the format is {cloudname}.{cloudoperator}." + AH_MASTER_NAME + "." + AH_MASTER_SUFFIX
 			final Enumeration<String> enumeration = keystore.aliases();
 			while (enumeration.hasMoreElements()) {
 				final String alias = enumeration.nextElement();

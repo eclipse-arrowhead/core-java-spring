@@ -50,10 +50,12 @@ import eu.arrowhead.common.database.repository.ServiceRegistryRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.ServiceDefinitionsListResponseDTO;
+import eu.arrowhead.common.dto.internal.ServiceInterfacesListResponseDTO;
 import eu.arrowhead.common.dto.internal.ServiceRegistryGroupedResponseDTO;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.internal.SystemListResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryRequestDTO;
@@ -935,6 +937,158 @@ public class ServiceRegistryDBService {
 		}
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public Page<ServiceInterface> getServiceInterfaceEntries(final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getServiceInterfaceEntries started...");
+
+		final int validatedPage = page < 0 ? 0 : page;
+		final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size;
+		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
+		final String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+
+		if (!ServiceInterface.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
+			throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
+		}
+
+		try {
+			return serviceInterfaceRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ServiceInterface getServiceInterfaceById(final long id) {
+		logger.debug("getServiceInterfaceById started...");
+
+		try {
+			final Optional<ServiceInterface> find = serviceInterfaceRepository.findById(id);
+			if (find.isPresent()) {
+				return find.get();
+			} else {
+				throw new InvalidParameterException("Service interface with id of '" + id + "' does not exist");
+			}
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ServiceInterfaceResponseDTO getServiceInterfaceByIdResponse(final long id) {
+		logger.debug("getServiceInterfaceByIdResponse started...");
+
+		final ServiceInterface serviceInterfaceEntry = getServiceInterfaceById(id);
+		return DTOConverter.convertServiceInterfaceToServiceInterfaceResponseDTO(serviceInterfaceEntry);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public ServiceInterface createServiceInterface(final String serviceInterface) {
+		logger.debug("createServiceInterface started...");
+
+		if (Utilities.isEmpty(serviceInterface)) {
+			throw new InvalidParameterException("serviceInterface is null or blank");
+		}
+
+		Assert.isTrue(interfaceNameVerifier.isValid(serviceInterface), "Specified interface name is not valid: " + serviceInterface);
+
+		final String validatedServiceInterface = serviceInterface.trim().toUpperCase();
+		checkConstraintsOfServiceInterfaceTable(validatedServiceInterface);
+		final ServiceInterface serviceInterfaceEntry = new ServiceInterface(validatedServiceInterface);
+		try {
+			return serviceInterfaceRepository.saveAndFlush(serviceInterfaceEntry);
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public ServiceInterfaceResponseDTO createServiceInterfaceResponse(final String serviceInterface) {
+		logger.debug("createServiceInterfaceResponse started...");
+
+		final ServiceInterface serviceInterfaceEntry = createServiceInterface(serviceInterface);
+
+		return DTOConverter.convertServiceInterfaceToServiceInterfaceResponseDTO(serviceInterfaceEntry);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public ServiceInterface updateServiceInterfaceById(final long id, final String serviceInterface) {
+		logger.debug("updateServiceInterfaceById started..");
+
+		if (Utilities.isEmpty(serviceInterface)) {
+			throw new InvalidParameterException("serviceInterface is null or blank");
+		}
+
+		Assert.isTrue(interfaceNameVerifier.isValid(serviceInterface), "Specified interface name is not valid: " + serviceInterface);
+
+		try {
+			final Optional<ServiceInterface> find = serviceInterfaceRepository.findById(id);
+			if (find.isPresent()) {
+				final String validatedServiceInterface = serviceInterface.trim().toUpperCase();
+				final ServiceInterface serviceInterfaceEntry = find.get();
+				if (!validatedServiceInterface.equals(serviceInterfaceEntry.getInterfaceName())) {
+					checkConstraintsOfServiceInterfaceTable(validatedServiceInterface);
+				}
+
+				serviceInterfaceEntry.setInterfaceName(validatedServiceInterface);
+				return serviceInterfaceRepository.saveAndFlush(serviceInterfaceEntry);
+			} else {
+				throw new InvalidParameterException("Service interface with id of '" + id + "' does not exist");
+			}
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public ServiceInterfaceResponseDTO updateServiceInterfaceByIdResponse(final long id, final String serviceInterface) {
+		logger.debug("updateServiceInterfaceByIdResponse started...");
+
+		final ServiceInterface serviceInterfaceEntry = updateServiceInterfaceById(id, serviceInterface);
+
+		return DTOConverter.convertServiceInterfaceToServiceInterfaceResponseDTO(serviceInterfaceEntry);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public void removeServiceInterfaceById(final long id) {
+		logger.debug("removeServiceInterfaceById started...");
+
+		try {
+			if (!serviceInterfaceRepository.existsById(id)) {
+				throw new InvalidParameterException("Service Interface with id '" + id + "' does not exist");
+			}
+
+			serviceInterfaceRepository.deleteById(id);
+			serviceInterfaceRepository.flush();
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ServiceInterfacesListResponseDTO getServiceInterfaceEntriesResponse(final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getServiceInterfaceEntriesResponse started...");
+		final Page<ServiceInterface> serviceInterfaceEntries = getServiceInterfaceEntries(page, size, direction, sortField);
+
+		return DTOConverter.convertServiceInterfacesListToServiceInterfaceListResponseDTO(serviceInterfaceEntries);
+	}
+	
 	//=================================================================================================
 	// assistant methods
 
@@ -1241,6 +1395,23 @@ public class ServiceRegistryDBService {
 			srEntry.setVersion(version);
 				
 			return serviceRegistryRepository.saveAndFlush(srEntry);
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkConstraintsOfServiceInterfaceTable(final String serviceInterface) {
+		logger.debug("checkConstraintsOfServiceInterfaceTable started...");
+
+		try {
+			final Optional<ServiceInterface> find = serviceInterfaceRepository.findByInterfaceName(serviceInterface.toUpperCase().trim());
+			if (find.isPresent()) {
+				throw new InvalidParameterException(serviceInterface + " interface already exists");
+			}
+		} catch (final InvalidParameterException ex) {
+			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);

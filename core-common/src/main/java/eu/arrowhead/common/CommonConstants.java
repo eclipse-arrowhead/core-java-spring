@@ -32,11 +32,13 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_CERTIFICATE_AUTHORITY = "Certificate Authority";
 	public static final String CORE_SYSTEM_CHOREOGRAPHER = "Choreographer";
 	public static final String CORE_SYSTEM_EVENT_HANDLER = "Event Handler";
+	public static final String CORE_SYSTEM_DATAMANAGER  = "DataManager";
 	public static final String CORE_SYSTEM_GATEKEEPER = "Gatekeeper";
 	public static final String CORE_SYSTEM_GATEWAY = "Gateway";
 	public static final String CORE_SYSTEM_ORCHESTRATOR = "Orchestrator";
 	public static final String CORE_SYSTEM_SERVICE_REGISTRY = "Service Registry";
 	public static final String CORE_SYSTEM_QOS_MONITOR = "Quality of Service Monitor";
+    public static final String CORE_SYSTEM_TRANSLATOR = "Translator";
 
 	public static final String CORE_SYSTEM_SYSTEM_REGISTRY = "System Registry";
 	public static final String CORE_SYSTEM_DEVICE_REGISTRY = "Device Registry";
@@ -70,6 +72,9 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_EVENT_HANDLER_SUBSCRIBE = "event-subscribe";
 	public static final String CORE_SERVICE_EVENT_HANDLER_UNSUBSCRIBE = "event-unsubscribe";
 	public static final String CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "event-publish-auth-update";
+
+	public static final String CORE_SERVICE_DATAMANAGER_PROXY = "proxy";
+	public static final String CORE_SERVICE_DATAMANAGER_HISTORIAN = "historian";
 
 	public static final String CORE_SERVICE_CHOREOGRAPHER_PROCESS = "choreographer-service";
 
@@ -108,6 +113,10 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_ONBOARDING_WITH_SHARED_SECRET_AND_NAME = "onboarding-with-shared-secret-and-name";
 	public static final String CORE_SERVICE_ONBOARDING_WITH_SHARED_SECRET_AND_CSR = "onboarding-with-shared-secret-and-csr";
 
+    public static final String CORE_SERVICE_TRANSLATOR = "translation-service";
+    public static final String CORE_SERVICE_TRANSLATOR_FIWARE = "translation-fiware-service";
+    public static final String CORE_SERVICE_TRANSLATOR_PLUGIN = "translation-plugin-service";
+
 	public static final String COMMON_FIELD_NAME_ID = "id";
 	
 	public static final String ARROWHEAD_CONTEXT = "arrowheadContext";
@@ -141,6 +150,7 @@ public class CommonConstants {
 
 	public static final String SERVICE_REGISTRY_URI = "/serviceregistry";
 	public static final String OP_SERVICE_REGISTRY_REGISTER_URI = "/register";
+	public static final String OP_SERVICE_REGISTRY_REGISTER_SYSTEM_URI = "/register-system";
 	public static final String OP_SERVICE_REGISTRY_UNREGISTER_URI = "/unregister";
 	public static final String OP_SERVICE_REGISTRY_QUERY_URI = "/query";	
 	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME = "system_name";
@@ -234,10 +244,20 @@ public class CommonConstants {
 	public static final String OP_QOS_MONITOR_JOIN_RELAY_TEST_URI = "/join_relay_test";
 	public static final String OP_QOS_MONITOR_INIT_RELAY_TEST_URI = "/init_relay_test";
 
+	public static final String DATAMANAGER_URI = "/datamanager";
+	public static final String OP_DATAMANAGER_PROXY = "/proxy";
+	public static final String OP_DATAMANAGER_HISTORIAN = "/historian";
+
+    public static final String TRANSLATOR_URI = "/translator";
+    public static final String OP_TRANSLATOR_FIWARE_URI = "/v2";
+    public static final String OP_TRANSLATOR_PLUGIN_URI = "/plugin";
+
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
 	public static final String SWAGGER_HTTP_200_MESSAGE = "Core service is available";
+	public static final String SWAGGER_HTTP_400_MESSAGE = "Bad request";
 	public static final String SWAGGER_HTTP_401_MESSAGE = "You are not authorized";
+	public static final String SWAGGER_HTTP_409_MESSAGE = "Request caused a conflict";
 	public static final String SWAGGER_HTTP_500_MESSAGE = "Core service is not available";
 
 	public static final String REQUEST_PARAM_TOKEN = "token";
@@ -245,8 +265,8 @@ public class CommonConstants {
 	public static final String ECHO_URI = "/echo";
 	
 	public static final List<CoreSystemService> PUBLIC_CORE_SYSTEM_SERVICES = List.of(CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.AUTH_PUBLIC_KEY_SERVICE,
-  			  																		  CoreSystemService.EVENT_PUBLISH_SERVICE, CoreSystemService.EVENT_SUBSCRIBE_SERVICE,
-  			  																		  CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE, CoreSystemService.CHOREOGRAPHER_SERVICE);
+  			  																		  CoreSystemService.EVENT_PUBLISH_SERVICE, CoreSystemService.EVENT_SUBSCRIBE_SERVICE, CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE, 
+																					  CoreSystemService.PROXY_SERVICE, CoreSystemService.HISTORIAN_SERVICE, CoreSystemService.CHOREOGRAPHER_SERVICE, CoreSystemService.TRANSLATOR_SERVICE);
 	
 	public static final String HTTP_CLIENT_CONNECTION_TIMEOUT = "http.client.connection.timeout";
 	public static final String $HTTP_CLIENT_CONNECTION_TIMEOUT_WD = "${" + HTTP_CLIENT_CONNECTION_TIMEOUT + ":" + Defaults.DEFAULT_CONNECTION_TIMEOUT + "}";

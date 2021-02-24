@@ -73,6 +73,7 @@ public class SRAccessControlFilterTest {
 	private static final String SERVICE_REGISTRY_ECHO = CommonConstants.SERVICE_REGISTRY_URI + "/echo";
 	private static final String SERVICE_REGISTRY_MGMT_SYSTEMS = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.MGMT_URI + "/systems";
 	private static final String SERVICE_REGISTRY_REGISTER = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI;
+	private static final String SERVICE_REGISTRY_REGISTER_SYSTEM = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_REGISTER_SYSTEM_URI;
 	private static final String SERVICE_REGISTRY_UNREGISTER = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI;
 	private static final String SERVICE_REGISTRY_QUERY = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI;
 	private static final String SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI;
@@ -435,7 +436,67 @@ public class SRAccessControlFilterTest {
 		
 		getQueryAll("certificates/provider.pem", status().isUnauthorized());
 	}
-	
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRegisterSystemWithSystemNameMatchSystemNameInCertifiacte() throws Exception {
+
+		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO(
+				"sysop",//systemName,
+				"localhost", //address
+				12345,//port,
+				null);//authenticationInfo);
+		postRegisterSystem(systemRequestDTO, "certificates/valid.pem", status().isCreated());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRegisterSystemWithSystemNameWithoutUnderlinesMatchSystemNameInCertifiacte() throws Exception {
+
+		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO(
+				"sys_op",//systemName,
+				"localhost", //address
+				12345,//port,
+				null);//authenticationInfo);
+		postRegisterSystem(systemRequestDTO, "certificates/valid.pem", status().isCreated());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRegisterSystemWithSystemNameNotMatchSystemNameInCertifiacte() throws Exception {
+
+		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO(
+				"not_sysop",//systemName,
+				"localhost", //address
+				12345,//port,
+				null);//authenticationInfo);
+		postRegisterSystem(systemRequestDTO, "certificates/valid.pem", status().isUnauthorized());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRegisterSystemWithNullSystemName() throws Exception {
+		// Filter breaks the filter chain and expects that the web service rejects the ill-formed request
+		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO(
+				null,//systemName,
+				"localhost", //address
+				12345,//port,
+				null);//authenticationInfo);
+		postRegisterSystem(systemRequestDTO, "certificates/valid.pem", status().isBadRequest());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRegisterSystemWithEmptySystemName() throws Exception {
+		// Filter breaks the filter chain and expects that the web service rejects the ill-formed request
+		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO(
+				"   ",//systemName,
+				"localhost", //address
+				12345,//port,
+				null);//authenticationInfo);
+		postRegisterSystem(systemRequestDTO, "certificates/valid.pem", status().isBadRequest());
+	}
+
 	//=================================================================================================
 	// assistant methods
 	
@@ -449,7 +510,18 @@ public class SRAccessControlFilterTest {
 			    	.accept(MediaType.APPLICATION_JSON))
 					.andExpect(matcher);
 	}
-	
+
+	//-------------------------------------------------------------------------------------------------
+	private void postRegisterSystem(final SystemRequestDTO request, final String certificatePath, final ResultMatcher matcher) throws Exception {
+		this.mockMvc.perform(post(SERVICE_REGISTRY_REGISTER_SYSTEM)
+					.secure(true)
+					.with(x509(certificatePath))
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(request))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(matcher);
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	private void deleteUnregister(final String systemName, final String certificatePath, final ResultMatcher matcher) throws Exception {
 		this.mockMvc.perform(delete(SERVICE_REGISTRY_UNREGISTER + "?" + CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME + "=" + systemName)

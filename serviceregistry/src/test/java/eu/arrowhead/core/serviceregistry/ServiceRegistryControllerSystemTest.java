@@ -81,6 +81,7 @@ public class ServiceRegistryControllerSystemTest {
 	ServiceRegistryDBService serviceRegistryDBService;
 	
 	private static final String SYSTEMS_URL = "/serviceregistry/mgmt/systems/";
+	private static final String REGISTER_SYSTEM_URL = "/serviceregistry/" + CommonConstants.OP_SERVICE_REGISTRY_REGISTER_SYSTEM_URI;
 	private static final String MOCKED_SYSTEM_NAME = "mockedSystemName";
 	private static final String MOCKED_SYSTEM_ADDRESS = "mockedSystemAddress";
 	private static final String MOCKED_SYSTEM_AUTHENTICATION_INFO = "mockedSystemAuthenticationInfo";
@@ -306,6 +307,125 @@ public class ServiceRegistryControllerSystemTest {
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}
+
+//-------------------------------------------------------------------------------------------------	
+@Test
+public void addConsumerSystemTestWithValidDefinition() throws Exception {
+	final System system = createSystemForDBMocking();
+	final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
+	final SystemRequestDTO request = createValidSystemRequestDTO();
+
+	when(serviceRegistryDBService.createSystemResponse(anyString(), anyString(), anyInt(), anyString())).thenReturn(systemResponseDTO);
+
+	final MvcResult response = this.mockMvc.perform(post(REGISTER_SYSTEM_URL)
+											.contentType(MediaType.APPLICATION_JSON)
+											.content(objectMapper.writeValueAsBytes(request))
+											.accept(MediaType.APPLICATION_JSON))
+											.andExpect(status().isCreated())
+											.andReturn();
+	final SystemResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), SystemResponseDTO.class);
+
+	Assert.assertTrue(request.getSystemName().trim().equalsIgnoreCase(responseBody.getSystemName().trim()));
+}
+
+//-------------------------------------------------------------------------------------------------	
+@Test
+public void addConsumerSystemTestWithNullPortDefinition() throws Exception {
+	final SystemRequestDTO request = createNullPortSystemRequestDTO();
+
+	this.mockMvc.perform(post(REGISTER_SYSTEM_URL)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(request))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+}
+
+//-------------------------------------------------------------------------------------------------	
+@Test
+public void addConsumerSystemTestWithBelowPortRangePortDefinition() throws Exception {
+	final SystemRequestDTO request = createBelowPortRangePortSystemRequestDTO();
+
+	this.mockMvc.perform(post(REGISTER_SYSTEM_URL)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(request))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+}
+
+//-------------------------------------------------------------------------------------------------	
+@Test
+public void addConsumerSystemTestWithAbovePortRangePortDefinition() throws Exception {
+	final SystemRequestDTO request = createAbovePortRangePortSystemRequestDTO();
+
+	this.mockMvc.perform(post(REGISTER_SYSTEM_URL)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(request))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+}
+
+//-------------------------------------------------------------------------------------------------	
+@Test
+public void addConsumerSystemTestWithNullSystemNameDefinition() throws Exception {
+	final SystemRequestDTO request = createNullSystemNameSystemRequestDTO();
+
+	this.mockMvc.perform(post(REGISTER_SYSTEM_URL)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(request))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+}
+
+//-------------------------------------------------------------------------------------------------	
+@Test
+public void addConsumerSystemTestWithEmptySystemNameDefinition() throws Exception {
+	final SystemRequestDTO request = createEmptySystemNameSystemRequestDTO();
+
+	this.mockMvc.perform(post(REGISTER_SYSTEM_URL)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(request))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+}
+
+//-------------------------------------------------------------------------------------------------	
+@Test
+public void addConsumerSystemTestWithCoreSytemNames() throws Exception {
+	final SystemRequestDTO request = createValidSystemRequestDTO();
+
+	for (final CoreSystem coreSystem : CoreSystem.values()) {
+		request.setSystemName(coreSystem.name());
+		this.mockMvc.perform(post(REGISTER_SYSTEM_URL)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(request))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+}
+
+//-------------------------------------------------------------------------------------------------	
+@Test
+public void addConsumerSystemTestWithNullAddressDefinition() throws Exception {
+	final SystemRequestDTO request = createNullAddressSystemRequestDTO();
+
+	this.mockMvc.perform(post(REGISTER_SYSTEM_URL)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(request))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+}
+
+//-------------------------------------------------------------------------------------------------	
+@Test
+public void addConsumerSystemTestWithEmptyAddressDefinition() throws Exception {
+	final SystemRequestDTO request = createEmptyAddressSystemRequestDTO();
+
+	this.mockMvc.perform(post(REGISTER_SYSTEM_URL)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(request))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+}
 
 	//-------------------------------------------------------------------------------------------------	
 	@Test

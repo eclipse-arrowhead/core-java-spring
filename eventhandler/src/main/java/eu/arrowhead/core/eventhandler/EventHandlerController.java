@@ -117,10 +117,10 @@ public class EventHandlerController {
 	private final Logger logger = LogManager.getLogger(EventHandlerController.class);
 	
 	@Autowired
-	EventHandlerService eventHandlerService;
+	private EventHandlerService eventHandlerService;
 	
 	@Autowired
-	EventHandlerDBService eventHandlerDBService;
+	private EventHandlerDBService eventHandlerDBService;
 	
 	//=================================================================================================
 	// methods

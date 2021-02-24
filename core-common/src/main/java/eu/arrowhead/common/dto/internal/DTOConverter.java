@@ -242,6 +242,18 @@ public class DTOConverter {
 		return new ServiceInterfaceResponseDTO(intf.getId(), intf.getInterfaceName(), Utilities.convertZonedDateTimeToUTCString(intf.getCreatedAt()), 
 											   Utilities.convertZonedDateTimeToUTCString(intf.getUpdatedAt()));
 	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static ServiceInterfacesListResponseDTO convertServiceInterfacesListToServiceInterfaceListResponseDTO(final Page<ServiceInterface> serviceInterfaces) {
+		Assert.notNull(serviceInterfaces, "List of ServiceInterface is null");
+
+		final List<ServiceInterfaceResponseDTO> serviceInterfaceDTOs = new ArrayList<>(serviceInterfaces.getNumberOfElements());
+		for (final ServiceInterface serviceInterface : serviceInterfaces) {
+			serviceInterfaceDTOs.add(convertServiceInterfaceToServiceInterfaceResponseDTO(serviceInterface));
+		}
+
+		return new ServiceInterfacesListResponseDTO(serviceInterfaceDTOs, serviceInterfaces.getTotalElements());
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public static ServiceQueryResultDTO convertListOfServiceRegistryEntriesToServiceQueryResultDTO(final List<ServiceRegistry> entries, final int unfilteredHits) {
@@ -1283,7 +1295,7 @@ public class DTOConverter {
 		final ZonedDateTime now = ZonedDateTime.now();
 
 		for (final CaCertificate certificate : certificateList) {
-			IssuedCertificateDTO dto = new IssuedCertificateDTO();
+			final IssuedCertificateDTO dto = new IssuedCertificateDTO();
 			dto.setId(certificate.getId());
 			dto.setCommonName(certificate.getCommonName());
 			dto.setSerialNumber(certificate.getSerial());
@@ -1304,8 +1316,8 @@ public class DTOConverter {
 		return certificateDTOs;
 	}
 
-	private static IssuedCertificateStatus getStatus(ZonedDateTime now, ZonedDateTime validAfter,
-													 ZonedDateTime validBefore, ZonedDateTime revokedAt) {
+	private static IssuedCertificateStatus getStatus(final ZonedDateTime now, final ZonedDateTime validAfter,
+													 final ZonedDateTime validBefore, final ZonedDateTime revokedAt) {
 		Assert.notNull(now, "now cannot be null");
 		Assert.notNull(validAfter, "validAfter cannot be null");
 		Assert.notNull(validBefore, "validBefore cannot be null");

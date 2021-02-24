@@ -16,14 +16,12 @@ package eu.arrowhead.core.certificate_authority.security;
 
 import java.util.Map;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
-
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.core.CoreSystem;
-import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.security.CoreSystemAccessControlFilter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
 
 @Component
 @ConditionalOnProperty(name = CommonConstants.SERVER_SSL_ENABLED, matchIfMissing = true)
@@ -31,8 +29,8 @@ public class CAAccessControlFilter extends CoreSystemAccessControlFilter {
 
 	// =================================================================================================
 	// members
-	private static final CoreSystem[] allowedCoreSystemsForTrustedKeyHandling = { CoreSystem.ONBOARDING_CONTROLLER };
-	private static final CoreSystem[] allowedCoreSystemsForCertificateHandling = { CoreSystem.ONBOARDING_CONTROLLER };
+	private static final CoreSystem[] allowedCoreSystemsForTrustedKeyHandling = { CoreSystem.ONBOARDING_CONTROLLER, CoreSystem.DEVICE_REGISTRY, CoreSystem.SYSTEM_REGISTRY };
+	private static final CoreSystem[] allowedCoreSystemsForCertificateHandling = { CoreSystem.ONBOARDING_CONTROLLER, CoreSystem.DEVICE_REGISTRY, CoreSystem.SYSTEM_REGISTRY };
 
 	// =================================================================================================
 	// assistant methods
@@ -66,12 +64,11 @@ public class CAAccessControlFilter extends CoreSystemAccessControlFilter {
 			final CoreSystem[] allowedCoreSystems, final String requestTarget) {
 
 		boolean result = checkIfClientIsAnAllowedCoreSystemNoException(clientCN, cloudCN,
-				allowedCoreSystemsForTrustedKeyHandling, requestTarget);
+				allowedCoreSystems, requestTarget);
+
 
 		if (!result) {
 			checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
-		} else {
-			throw new AuthException(clientCN + " is unauthorized to access " + requestTarget);
 		}
 	}
 }

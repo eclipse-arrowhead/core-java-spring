@@ -69,6 +69,8 @@ public enum CoreSystem {
 															   CoreSystemService.EVENT_SUBSCRIBE_SERVICE,
 															   CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE,
 															   CoreSystemService.EVENT_PUBLISH_AUTH_UPDATE_SERVICE)),
+
+        DATAMANAGER(Defaults.DEFAULT_DATAMANAGER_PORT, List.of(CoreSystemService.PROXY_SERVICE, CoreSystemService.HISTORIAN_SERVICE)),
 	
 	GATEWAY(Defaults.DEFAULT_GATEWAY_PORT, List.of(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE,
 												   CoreSystemService.GATEWAY_PROVIDER_SERVICE,
@@ -91,7 +93,11 @@ public enum CoreSystem {
 																				CoreSystemService.CERTIFICATE_AUTHORITY_LIST_TRUSTED_KEYS_SERVICE,
 																				CoreSystemService.CERTIFICATE_AUTHORITY_CHECK_TRUSTED_KEY_SERVICE,
 																				CoreSystemService.CERTIFICATE_AUTHORITY_ADD_TRUSTED_KEY_SERVICE,
-																				CoreSystemService.CERTIFICATE_AUTHORITY_DELETE_TRUSTED_KEY_SERVICE));
+																				CoreSystemService.CERTIFICATE_AUTHORITY_DELETE_TRUSTED_KEY_SERVICE)),
+																				
+	TRANSLATOR(Defaults.DEFAULT_TRANSLATOR_PORT, List.of(CoreSystemService.TRANSLATOR_SERVICE,
+												   CoreSystemService.TRANSLATOR_FIWARE_SERVICE,
+												   CoreSystemService.TRANSLATOR_PLUGIN_SERVICE));
 	
 	//=================================================================================================
 	// members

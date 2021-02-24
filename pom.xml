@@ -29,6 +29,7 @@
 	    <module>certificate-authority</module>
 	    <module>orchestrator</module>
 	    <module>eventhandler</module>
+	    <module>datamanager</module>
 	    <module>relay-library</module>
 	    <module>gatekeeper</module>
 	    <module>gateway</module>
@@ -36,9 +37,9 @@
 		<module>systemregistry</module>
 		<module>deviceregistry</module>
 		<module>onboarding</module>
-	    <module>qos-monitor</module>
 	    <module>deb-installer</module>
 	    <module>docker-all</module>
+		<module>translator</module>
   	</modules>
   	
 	<properties>
@@ -61,7 +62,6 @@
   		<jms.api.version>2.0.1</jms.api.version>
   		<activemq.client.version>5.15.9</activemq.client.version>
 		<bouncy.castle.version>1.64</bouncy.castle.version>
-  		<icmp4j.version>1.2</icmp4j.version>
   		<jna.version>5.5.0</jna.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -72,11 +72,6 @@
             <name>Spring Repository</name>
 			<url>https://repo.spring.io/plugins-release/</url>
         </repository>
-		<repository>
-			<id>jenkins-repo</id>
-			<name>Jenkins Repository</name>
-			<url>https://repo.jenkins-ci.org/public/</url>
-		</repository>
 	</repositories>
 
 	<dependencies>
@@ -180,11 +175,6 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<dependency>
-        	<groupId>sheltekio.javalibs</groupId>
-        	<artifactId>icmp4j</artifactId>
-        	<version>${icmp4j.version}</version>
-    	</dependency>
     	<dependency>
         	<groupId>net.java.dev.jna</groupId>
         	<artifactId>jna</artifactId>
@@ -204,6 +194,13 @@
 		</dependency>
 -->
 		
+		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+		<!--<dependency>
+      			<groupId>com.google.code.gson</groupId>
+      			<artifactId>gson</artifactId>
+      			<version>2.8.5</version>
+		</dependency>-->
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>

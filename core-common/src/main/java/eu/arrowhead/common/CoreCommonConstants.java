@@ -68,7 +68,12 @@ public class CoreCommonConstants {
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
 	public static final String SWAGGER_HTTP_200_MESSAGE = "Core service is available";
+	public static final String SWAGGER_HTTP_201_MESSAGE = "Created";
+	public static final String SWAGGER_HTTP_400_MESSAGE = "Bad request";
 	public static final String SWAGGER_HTTP_401_MESSAGE = "You are not authorized";
+	public static final String SWAGGER_HTTP_404_MESSAGE = "Not found";
+	public static final String SWAGGER_HTTP_409_MESSAGE = "Request caused a conflict";
+    public static final String SWAGGER_HTTP_415_MESSAGE = "MediaType not supported";
 	public static final String SWAGGER_HTTP_500_MESSAGE = "Core service is not available";
 	
 	public static final String SWAGGER_TAG_MGMT = "Management";
@@ -229,6 +234,12 @@ public class CoreCommonConstants {
 	public static final String $RELAY_TEST_LOG_MEASUREMENTS_IN_DB_WD = "${" + RELAY_TEST_LOG_MEASUREMENTS_IN_DB + ":" + CoreDefaults.DEFAULT_RELAY_TEST_LOG_MEASUREMENTS_IN_DB + "}";
 	
     public static final String CERTIFICATE_FORMAT = "X.509";
+
+	// Translator-Fiware
+    public static final String FIWARE_SERVER_HOST = "fiware.server.host";
+    public static final String $FIWARE_SERVER_HOST = "${" + FIWARE_SERVER_HOST + ":}";
+    public static final String FIWARE_SERVER_PORT = "fiware.server.port";
+    public static final String $FIWARE_SERVER_PORT = "${" + FIWARE_SERVER_PORT + ":0}";
 
     //=================================================================================================
 	// assistant methods

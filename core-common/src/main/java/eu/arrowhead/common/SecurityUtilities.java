@@ -14,6 +14,30 @@
 
 package eu.arrowhead.common;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.Principal;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.security.spec.EncodedKeySpec;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
+import java.util.Objects;
+import java.util.ServiceConfigurationError;
+import javax.servlet.http.HttpServletRequest;
+
 import eu.arrowhead.common.dto.shared.CertificateCreationRequestDTO;
 import eu.arrowhead.common.dto.shared.CertificateCreationResponseDTO;
 import eu.arrowhead.common.dto.shared.CertificateType;
@@ -42,33 +66,15 @@ import org.springframework.util.Assert;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.StringUtils;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.Principal;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
-import java.util.Objects;
-
 @Component
 public class SecurityUtilities {
 
     //=================================================================================================
     // members
     private final static String SIGNATURE_ALGORITHM = "SHA256WithRSA";
+    private static final String X509_FORMAT = "X.509";
+    private static final String PKCS8_FORMAT = "PKCS#8";
+    private static final String PKCS1_FORMAT = "PKCS#1";
 
     private final Logger logger = LogManager.getLogger(SecurityUtilities.class);
 
@@ -82,21 +88,18 @@ public class SecurityUtilities {
     public SecurityUtilities(@Value("${security.key.algorithm:RSA}") final String keyFactoryAlgorithm,
                              @Value("${security.key.size:2048}") final Integer keySize,
                              final SSLProperties sslProperties) throws NoSuchAlgorithmException {
-        Assert.hasText(keyFactoryAlgorithm,"keyFactoryAlgorithm must not be null");
-        Assert.notNull(keySize,"keyFactoryAlgorithm keySize not be null");
-        Assert.notNull(sslProperties,"sslProperties must not be null");
+        Assert.hasText(keyFactoryAlgorithm, "keyFactoryAlgorithm must not be null");
+        Assert.notNull(keySize, "keyFactoryAlgorithm keySize not be null");
+        Assert.notNull(sslProperties, "sslProperties must not be null");
         this.sslProperties = sslProperties;
         keyFactory = KeyFactory.getInstance(keyFactoryAlgorithm);
         keyPairGenerator = KeyPairGenerator.getInstance(keyFactoryAlgorithm);
         keyPairGenerator.initialize(keySize);
     }
 
-    //=================================================================================================
-    // methods
-
     //-------------------------------------------------------------------------------------------------
     public static String getCertificateCNFromRequest(final HttpServletRequest request) {
-        Assert.notNull(request,"request must not be null");
+        Assert.notNull(request, "request must not be null");
         final X509Certificate[] certificates = (X509Certificate[]) request.getAttribute(CommonConstants.ATTR_JAVAX_SERVLET_REQUEST_X509_CERTIFICATE);
         if (certificates != null && certificates.length != 0) {
             final X509Certificate cert = certificates[0];
@@ -145,8 +148,8 @@ public class SecurityUtilities {
 
     //-------------------------------------------------------------------------------------------------
     public void authenticateCertificate(final HttpServletRequest httpServletRequest, final CertificateType minimumStrength) {
-        Assert.notNull(httpServletRequest,"httpServletRequest must not be null");
-        Assert.notNull(minimumStrength,"minimumStrength must not be null");
+        Assert.notNull(httpServletRequest, "httpServletRequest must not be null");
+        Assert.notNull(minimumStrength, "minimumStrength must not be null");
 
         final X509Certificate[] certificates = (X509Certificate[]) httpServletRequest.getAttribute(CommonConstants.ATTR_JAVAX_SERVLET_REQUEST_X509_CERTIFICATE);
 
@@ -167,9 +170,9 @@ public class SecurityUtilities {
 
     //-------------------------------------------------------------------------------------------------
     public void authenticateCertificate(final String clientCN, final String requestTarget, final CertificateType minimumStrength) {
-        Assert.notNull(clientCN,"clientCN must not be null");
-        Assert.notNull(requestTarget,"requestTarget must not be null");
-        Assert.notNull(minimumStrength,"minimumStrength must not be null");
+        Assert.notNull(clientCN, "clientCN must not be null");
+        Assert.notNull(requestTarget, "requestTarget must not be null");
+        Assert.notNull(minimumStrength, "minimumStrength must not be null");
 
         if (sslProperties.isSslEnabled()) {
 
@@ -181,8 +184,19 @@ public class SecurityUtilities {
         }
     }
 
-    //=================================================================================================
-    // assistant methods
+    //-------------------------------------------------------------------------------------------------
+    public KeyStore getKeyStore() {
+        try {
+            final KeyStore keystore = KeyStore.getInstance(sslProperties.getKeyStoreType());
+            keystore.load(sslProperties.getKeyStore()
+                                       .getInputStream(),
+                          sslProperties.getKeyStorePassword()
+                                       .toCharArray());
+            return keystore;
+        } catch (KeyStoreException | IOException | CertificateException | NoSuchAlgorithmException e) {
+            throw new ServiceConfigurationError("Cannot open keystore: " + e.getMessage());
+        }
+    }
 
     //-------------------------------------------------------------------------------------------------
     public String createCertificateSigningRequest(final String baseCommonName, final KeyPair keyPair, final CertificateType type,
@@ -197,8 +211,7 @@ public class SecurityUtilities {
 
         logger.debug("Preparing Certificate Signing Request ...");
         // get cloud certificate for cloudName and operator
-        final KeyStore keyStore = KeyStore.getInstance(sslProperties.getKeyStore().getFile(), sslProperties.getKeyStorePassword().toCharArray());
-        final X509Certificate cloudCertFromKeyStore = Utilities.getCloudCertFromKeyStore(keyStore);
+        final X509Certificate cloudCertFromKeyStore = Utilities.getCloudCertFromKeyStore(getKeyStore());
 
         // "CN=<commonName>.<type>.<cloudName>.<operator>.arrowhead.eu, OU=<operator>, O=arrowhead, C=eu"
         final String cloudName = getCommonNameFromCloudCertificate(cloudCertFromKeyStore.getSubjectDN());
@@ -269,7 +282,7 @@ public class SecurityUtilities {
         Assert.isTrue(Utilities.notEmpty(commonName), "CommonName is null or blank");
 
         final KeyPairDTO keyPairDTO = creationRequestDTO.getKeyPairDTO();
-        final KeyPair keyPair;
+        KeyPair keyPair;
 
         if (Objects.nonNull(keyPairDTO) &&
                 Objects.nonNull(keyPairDTO.getPublicKey()) &&
@@ -277,8 +290,22 @@ public class SecurityUtilities {
 
             final String encodedPublicKey = keyPairDTO.getPublicKey();
             final String encodedPrivateKey = keyPairDTO.getPrivateKey();
+            final String keyFormat = keyPairDTO.getKeyFormat();
 
-            keyPair = getKeyPairFromBase64EncodedStrings(encodedPublicKey, encodedPrivateKey);
+
+            if (Objects.nonNull(keyFormat)) {
+                keyPair = getKeyPairFromBase64EncodedStringsForFormat(encodedPublicKey, encodedPrivateKey, keyFormat);
+            } else {
+                try {
+                    keyPair = getKeyPairFromBase64EncodedStringsForFormat(encodedPublicKey, encodedPrivateKey, PKCS8_FORMAT);
+                } catch (final AuthException e1) {
+                    try {
+                        keyPair = getKeyPairFromBase64EncodedStringsForFormat(encodedPublicKey, encodedPrivateKey, PKCS1_FORMAT);
+                    } catch (final AuthException e2) {
+                        keyPair = getKeyPairFromBase64EncodedStringsForFormat(encodedPublicKey, encodedPrivateKey, X509_FORMAT);
+                    }
+                }
+            }
         } else {
             keyPair = generateKeyPair();
         }
@@ -302,53 +329,79 @@ public class SecurityUtilities {
     }
 
     //-------------------------------------------------------------------------------------------------
-    private PublicKey getPublicKeyFromBase64EncodedString(final String encodedKey) {
-        Assert.isTrue(Utilities.notEmpty(encodedKey), "Encoded key is null or blank");
-
-        final byte[] keyBytes = Base64.getDecoder().decode(encodedKey);
-        return generatePublicKeyFromByteArray(keyBytes);
-    }
-
-
-    //-------------------------------------------------------------------------------------------------
     private KeyPair generateKeyPair() {
         return keyPairGenerator.generateKeyPair();
     }
 
     //-------------------------------------------------------------------------------------------------
-    private KeyPair getKeyPairFromBase64EncodedStrings(final String encodedPublicKey,
-                                                       final String encodedPrivateKey) {
-        final PublicKey publicKey = getPublicKeyFromBase64EncodedString(encodedPublicKey);
-        final PrivateKey privateKey = getPrivateKeyFromBase64EncodedString(encodedPrivateKey);
+    private KeyPair getKeyPairFromBase64EncodedStringsForFormat(final String encodedPublicKey,
+                                                                final String encodedPrivateKey,
+                                                                final String keyFormat) {
+
+        Assert.notNull(keyFormat, "KeyFormat must not be null");
+
+        final byte[] publicKeyBytes = Base64.getDecoder().decode(encodedPublicKey);
+        final byte[] privateKeyBytes = Base64.getDecoder().decode(encodedPrivateKey);
+        final EncodedKeySpec publicKeySpec;
+        final EncodedKeySpec privateKeySpec;
+
+        // public key must be x509
+        publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+
+        if (keyFormat.equalsIgnoreCase(X509_FORMAT)) {
+            privateKeySpec = new X509EncodedKeySpec(privateKeyBytes);
+        } else if (keyFormat.equalsIgnoreCase(PKCS8_FORMAT)) {
+            privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
+        } else if (keyFormat.equalsIgnoreCase(PKCS1_FORMAT)) {
+            final byte[] pkcs8Bytes = convertPkcs1ToPkcs8(privateKeyBytes);
+            privateKeySpec = new PKCS8EncodedKeySpec(pkcs8Bytes);
+        } else {
+            logger.error("getKeyPairFromBase64EncodedStringsForFormat: Unknown or unsupported key format.");
+            throw new AuthException("Unknown or unsupported key format.");
+        }
+
+        return generateKeyPairFromSpec(privateKeySpec, publicKeySpec);
+    }
+
+    private KeyPair generateKeyPairFromSpec(final EncodedKeySpec privateKeySpec, final EncodedKeySpec publicKeySpec) {
+        final PublicKey publicKey;
+        final PrivateKey privateKey;
+
+        try {
+            publicKey = keyFactory.generatePublic(publicKeySpec);
+        } catch (final InvalidKeySpecException ex) {
+            logger.warn("generateKeyPairFromSpec: Unable to generate public key from key spec format '{}'.",
+                        publicKeySpec.getFormat());
+            throw new AuthException("Public key decoding failed due to wrong key format", ex);
+        }
+
+        try {
+            privateKey = keyFactory.generatePrivate(privateKeySpec);
+        } catch (final InvalidKeySpecException ex) {
+            logger.warn("generateKeyPairFromSpec: Unable to generate private key from key spec format '{}'.",
+                        privateKeySpec.getFormat());
+            throw new AuthException("Private key decoding failed due to wrong key format", ex);
+        }
         return new KeyPair(publicKey, privateKey);
     }
 
-    //-------------------------------------------------------------------------------------------------
-    private PrivateKey getPrivateKeyFromBase64EncodedString(final String encodedKey) {
-        Assert.isTrue(Utilities.notEmpty(encodedKey), "Encoded key is null or blank");
-
-        final byte[] keyBytes = Base64.getDecoder().decode(encodedKey);
-        return generatePrivateKeyFromByteArray(keyBytes);
+    private byte[] convertPkcs1ToPkcs8(byte[] pkcs1Bytes) {
+        // We can't use Java internal APIs to parse ASN.1 structures, so we build a PKCS#8 key Java can understand
+        int pkcs1Length = pkcs1Bytes.length;
+        int totalLength = pkcs1Length + 22;
+        byte[] pkcs8Header = new byte[]{
+                0x30, (byte) 0x82, (byte) ((totalLength >> 8) & 0xff), (byte) (totalLength & 0xff), // Sequence + total length
+                0x2, 0x1, 0x0, // Integer (0)
+                0x30, 0xD, 0x6, 0x9, 0x2A, (byte) 0x86, 0x48, (byte) 0x86, (byte) 0xF7, 0xD, 0x1, 0x1, 0x1, 0x5, 0x0, // Sequence: 1.2.840.113549.1.1.1, NULL
+                0x4, (byte) 0x82, (byte) ((pkcs1Length >> 8) & 0xff), (byte) (pkcs1Length & 0xff) // Octet string + length
+        };
+        return join(pkcs8Header, pkcs1Bytes);
     }
 
-    //-------------------------------------------------------------------------------------------------
-    private PublicKey generatePublicKeyFromByteArray(final byte[] keyBytes) {
-        try {
-            return keyFactory.generatePublic(new X509EncodedKeySpec(keyBytes));
-        } catch (final InvalidKeySpecException ex) {
-            logger.error("getPublicKey: X509 keySpec could not be created from the decoded bytes.");
-            throw new AuthException("Public key decoding failed due wrong input key", ex);
-        }
+    private byte[] join(byte[] byteArray1, byte[] byteArray2) {
+        byte[] bytes = new byte[byteArray1.length + byteArray2.length];
+        System.arraycopy(byteArray1, 0, bytes, 0, byteArray1.length);
+        System.arraycopy(byteArray2, 0, bytes, byteArray1.length, byteArray2.length);
+        return bytes;
     }
-
-    //-------------------------------------------------------------------------------------------------
-    private PrivateKey generatePrivateKeyFromByteArray(final byte[] keyBytes) {
-        try {
-            return keyFactory.generatePrivate(new X509EncodedKeySpec(keyBytes));
-        } catch (final InvalidKeySpecException ex) {
-            logger.error("getPublicKey: X509 keySpec could not be created from the decoded bytes.");
-            throw new AuthException("Public key decoding failed due wrong input key", ex);
-        }
-    }
-
 }

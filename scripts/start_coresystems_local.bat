@@ -22,6 +22,10 @@ REM cd ..\..\eventhandler\target
 REM START "" /B "cmd /c javaw -jar arrowhead-eventhandler-4.2.0.jar > sout_eventhandler.log 2>&1"
 REM echo Event Handler started
 
+REM cd ..\..\datamanager\target
+REM START "" /B "cmd /c javaw -jar arrowhead-datamanager-4.1.3.jar > sout_datamanager.log 2>&1"
+REM echo DataManager started
+
 cd ..\..\orchestrator\target
 START "" /B "cmd /c javaw -jar arrowhead-orchestrator-4.2.0.jar > sout_orch.log 2>&1"
 echo Orchestrator started

@@ -24,6 +24,10 @@ cd ..\..\eventhandler\target
 START "" /B "cmd /c javaw -jar arrowhead-eventhandler-4.2.0.jar > sout_eventhandler.log 2>&1"
 echo Event Handler started
 
+cd ..\..\datamanager\target
+START "" /B "cmd /c javaw -jar arrowhead-datamanager-4.1.3.jar > sout_datamanager.log 2>&1"
+echo DataManager started
+
 cd ..\..\gatekeeper\target
 START "" /B "cmd /c javaw -jar arrowhead-gatekeeper-4.2.0.jar > sout_gk.log 2>&1"
 echo Gatekeeper started

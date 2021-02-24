@@ -14,6 +14,8 @@
 
 package eu.arrowhead.core.deviceregistry.security;
 
+import java.util.Map;
+
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SecurityUtilities;
@@ -22,8 +24,6 @@ import eu.arrowhead.common.security.CoreSystemAccessControlFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
 
 @Component
 @ConditionalOnProperty(name = CommonConstants.SERVER_SSL_ENABLED, matchIfMissing = true)
@@ -41,7 +41,9 @@ public class DeviceRegistryAccessControlFilter extends CoreSystemAccessControlFi
     protected void checkClientAuthorized(final String clientCN, final String method, final String requestTarget, final String requestJSON,
                                          final Map<String, String[]> queryParams) {
 
-        if (requestTarget.contains(CommonConstants.ONBOARDING_URI) || requestTarget.contains(CommonConstants.OP_DEVICE_REGISTRY_UNREGISTER_URI)) {
+        if (requestTarget.endsWith(CommonConstants.ECHO_URI)
+                || requestTarget.contains(CommonConstants.ONBOARDING_URI)
+                || requestTarget.contains(CommonConstants.OP_DEVICE_REGISTRY_UNREGISTER_URI)) {
             securityUtilities.authenticateCertificate(clientCN, requestTarget, CertificateType.AH_ONBOARDING);
             return;
         }

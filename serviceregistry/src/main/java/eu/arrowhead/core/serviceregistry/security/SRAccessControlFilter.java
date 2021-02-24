@@ -27,6 +27,7 @@ import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.security.CoreSystemAccessControlFilter;
 
@@ -82,6 +83,9 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 		} else if (requestTarget.endsWith(CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_ALL_SERVICE_URI)) {
 			// Only dedicated core systems can use this service
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForQueryAll, requestTarget);
+		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICE_REGISTRY_REGISTER_SYSTEM_URI)) {
+			// A consumer system can only register its own system!
+			checkIfConsumerIsRegisteringOwnSystem(clientCN, cloudCN, requestJSON, requestTarget);
 		}
 	}
 
@@ -96,7 +100,12 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 			log.debug("Provider name is not set in the body when use {}", requestTarget);
 			return; // we can't continue the check and the endpoint will throw BadPayloadException
 		}
-		
+	
+		// Translator must be able to register external services:
+		if (clientCN.startsWith(CommonConstants.CORE_SYSTEM_TRANSLATOR.toLowerCase()+ ".")) {
+			return;
+		}
+
 		if (!providerName.equalsIgnoreCase(clientName) && !providerName.replaceAll("_", "").equalsIgnoreCase(clientName)) {
 			log.debug("Provider system name and certificate common name do not match! Registering denied!");
 			throw new AuthException("Provider system name(" + providerName + ") and certificate common name (" + clientCN + ") do not match!", HttpStatus.UNAUTHORIZED.value());
@@ -176,12 +185,36 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 						return;
 					}
 				}
+
+				// Translator must be able to register external services:
+				if (clientCN.startsWith(CommonConstants.CORE_SYSTEM_TRANSLATOR.toLowerCase()+ ".")) {
+					return;
+				}
 			}
 			
 			throw new AuthException("This core system only query data about its own services.", HttpStatus.UNAUTHORIZED.value());
 		}
 	}
-	
+
+	//-------------------------------------------------------------------------------------------------
+	private void checkIfConsumerIsRegisteringOwnSystem(final String clientCN, final String cloudCN, final String requestJSON,
+			final String requestTarget) {
+
+		final String clientName = getClientNameFromCN(clientCN);
+		final SystemRequestDTO requestBody = Utilities.fromJson(requestJSON, SystemRequestDTO.class);
+		final String consumerName = requestBody.getSystemName();
+		
+		if (Utilities.isEmpty(consumerName)) {
+			log.debug("Consumer name is not set in the query parameters when use {}", requestTarget);
+			return; // we can't continue the check and the endpoint will throw BadPayloadException
+		}
+		
+		if (!consumerName.equalsIgnoreCase(clientName) && !consumerName.replaceAll("_", "").equalsIgnoreCase(clientName)) {
+			log.debug("Consumer system name and certificate common name do not match! Registering denied!");
+			throw new AuthException("Consumer system name(" + consumerName + ") and certificate common name (" + clientCN + ") do not match!", HttpStatus.UNAUTHORIZED.value());
+		}
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	private CoreSystem getClientCoreSystem(final String clientCN, final String cloudCN) {
 		for (final CoreSystem coreSystem : CoreSystem.values()) {
