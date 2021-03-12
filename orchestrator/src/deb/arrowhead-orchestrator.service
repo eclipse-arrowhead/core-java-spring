@@ -1,0 +1,16 @@
+[Unit]
+Description=arrowhead-orchestrator
+After=network.target mysql.target
+
+[Service]
+WorkingDirectory=/etc/arrowhead/systems/orchestrator
+ExecStart=/usr/bin/java -Dlog4j.configurationFile=file:/etc/arrowhead/systems/orchestrator/log4j2.xml -jar /usr/share/arrowhead/orchestrator/arrowhead-orchestrator.jar 
+TimeoutStopSec=5
+Restart=on-failure
+RestartSec=20s
+Type=simple
+User=arrowhead
+Group=arrowhead
+
+[Install]
+WantedBy=default.target

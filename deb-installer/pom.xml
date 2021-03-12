@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+  	<parent>
+    	<groupId>eu.arrowhead</groupId>
+    	<artifactId>core</artifactId>
+    	<version>${revision}</version>
+  	</parent>
+  	<packaging>pom</packaging>
+	<artifactId>deb-installer</artifactId>
+	<name>arrowhead-installer</name>
+	<description>Arrowhead Debian Installers</description>
+
+	<url>https://github.com/arrowhead-f/core-java-spring</url>
+	<licenses>
+    	<license>
+	     	<name>Apache License, Version 2.0</name>
+	     	<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+	   </license>
+  	</licenses>
+	
+	<profiles>
+		<profile>
+			<id>deb-installer</id>
+			<build>
+				<finalName>arrowhead-installers-${revision}</finalName>
+				<plugins>
+					<plugin>
+    					<groupId>org.springframework.boot</groupId>
+    					<artifactId>spring-boot-maven-plugin</artifactId>
+    					<configuration>
+          					<skip>true</skip>
+    					</configuration>
+  					</plugin>
+  					
+  					<plugin>
+						<artifactId>maven-clean-plugin</artifactId>
+		    			<version>${mvn.clean.version}</version>
+		    			<configuration>
+		      				<filesets>
+		        				<fileset>
+			          				<directory>../../core-java-spring-installers/packages</directory>
+							        <excludes>
+			            				<exclude>.placeholder</exclude>
+			            			</excludes>
+			          				<followSymlinks>false</followSymlinks>
+		        				</fileset>
+			      			</filesets>
+		    			</configuration>
+		  			</plugin>
+					
+			   		<plugin>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>${mvn.resources.version}</version>
+						<executions>
+							<execution>
+								<id>copy-deb-files</id>
+								<phase>install</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>../../core-java-spring-installers/packages</outputDirectory>
+									<resources>
+										<resource>
+											<directory>../target</directory>
+											<includes>
+												<include>*.deb</include>
+											</includes>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+							<execution>
+								<id>copy-doc-file</id>
+								<phase>install</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>../../core-java-spring-installers</outputDirectory>
+									<overwrite>true</overwrite>
+									<resources>
+										<resource>
+											<directory>../documentation/deb-installer</directory>
+											<includes>
+												<include>DEBIAN-INSTALL.md</include>
+											</includes>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

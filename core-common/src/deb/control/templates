@@ -1,0 +1,174 @@
+Template: arrowhead-core-common/generic_title
+Type: title
+Description: Configuring arrowhead-core-common
+
+Template: arrowhead-core-common/system_interface
+Type: select
+Choices: ${choices}
+Description: Select the network interface ip address for inter-service communication
+
+Template: arrowhead-core-common/install_type
+Type: select
+Choices: Detached, Authorized
+Description: Do you want to perform (1) a detached, standalone install or (2) authorized install with externally issued cloud certificate?
+
+Template: arrowhead-core-common/detached_title
+Type: title
+Description: Configuring detached installation
+
+Template: arrowhead-core-common/authorized_title
+Type: title
+Description: Configuring authorized installation
+
+Template: arrowhead-core-common/cloud_cert
+Type: string
+Default:
+Description: Enter the path for the externally issued cloud certificate (p12 file)
+
+Template: arrowhead-core-common/master_cert
+Type: string
+Default:
+Description: Enter the path for the externally issued master certificate (crt file)
+
+Template: arrowhead-core-common/relay_master_cert
+Type: string
+Default:
+Description: Enter the path for the extarnally issued relay master certificate (crt file, leave empty if you don't want to use secured relays)
+
+Template: arrowhead-core-common/cloud_password
+Type: password
+Default:
+Description: Enter the password for the externally issued cloud certificate
+
+Template: arrowhead-core-common/cloud_alias
+Type: string
+Default:
+Description: Enter the alias for the externally issued cloud certificate
+
+Template: arrowhead-core-common/cloud_warning
+Type: note
+Description: The name and operator of a cloud should not contain . (dot) or any whitespaces.
+
+Template: arrowhead-core-common/cloudname
+Type: string
+Default: testcloud
+Description: The name of the Arrowhead local cloud
+
+Template: arrowhead-core-common/operator
+Type: string
+Default: user
+Description: The name (or name of the organization) of the operator of the local cloud
+
+Template: arrowhead-core-common/mysql_password_root
+Type: password
+Default:
+Description: Password for the MySQL root user. Note that password is stored by debconf in '/var/cache/debconf/passwords.dat'.
+
+Template: arrowhead-core-common/cert_password
+Type: password
+Default:
+Description: Password for the certificates and stores (Minimum 6 characters, leave empty for random). Note that password is stored by debconf in '/var/cache/debconf/passwords.dat'.
+
+Template: arrowhead-core-common/reconf_warning
+Type: note
+Description: You have to manually reconfigure all Arrowhead systems when changing passwords
+
+Template: arrowhead-core-common/db_host
+Type: string
+Default: localhost
+Description: Enter the hostname or IP address of the database server
+
+Template: arrowhead-core-common/mysql_password_auth
+Type: password
+Default:
+Description: MySQL password for Authorization system (leave empty for random). 
+
+Template: arrowhead-core-common/mysql_password_chor
+Type: password
+Default:
+Description: MySQL password for Choreographer system (leave empty for random). 
+
+Template: arrowhead-core-common/mysql_password_eh
+Type: password
+Default:
+Description: MySQL password for Event Handler system (leave empty for random). 
+
+Template: arrowhead-core-common/mysql_password_qos
+Type: password
+Default:
+Description: MySQL password for Qos Monitor system (leave empty for random). 
+
+Template: arrowhead-core-common/mysql_password_gk
+Type: password
+Default:
+Description: MySQL password for Gatekeeper system (leave empty for random). 
+
+Template: arrowhead-core-common/mysql_password_gw
+Type: password
+Default:
+Description: MySQL password for Gateway system (leave empty for random). 
+
+Template: arrowhead-core-common/mysql_password_translator
+Type: password
+Default:
+Description: MySQL password for Translator system (leave empty for random). 
+
+Template: arrowhead-core-common/mysql_password_orch
+Type: password
+Default:
+Description: MySQL password for Orchestrator system (leave empty for random). 
+
+Template: arrowhead-core-common/mysql_password_sr
+Type: password
+Default:
+Description: MySQL password for Service Registry system (leave empty for random). 
+
+Template: arrowhead-core-common/mysql_password_sysr
+Type: password
+Default:
+Description: MySQL password for System Registry system (leave empty for random).
+
+Template: arrowhead-core-common/mysql_password_dr
+Type: password
+Default:
+Description: MySQL password for Device Registry system (leave empty for random).
+
+Template: arrowhead-core-common/mysql_password_onboarding
+Type: password
+Default:
+Description: MySQL password for Onboarding Controller system (leave empty for random).
+
+Template: arrowhead-core-common/mysql_password_ca
+Type: password
+Default:
+Description: MySQL password for Certificate Authority system (leave empty for random).
+
+Template: arrowhead-core-common/mysql_password_datamanager
+Type: password
+Default:
+Description: MySQL password for Datamanager system (leave empty for random).
+
+Template: arrowhead-core-common/sr_host
+Type: string
+Description: Enter the hostname or IP address of the Service Registry (leave empty if the SR on the same computer than the system)
+
+Template: arrowhead-core-common/domain_name
+Type: string
+Description: Enter the hostname or IP address on which local systems can access this machine (leave empty for auto-detected IP address)
+
+Template: arrowhead-core-common/subject_alternative_names
+Type: title
+Description: Subject Alternative Names
+
+Template: arrowhead-core-common/san_interfaces
+Type: multiselect
+Choices: ${choices}
+Description: Select zero or more network interface ips to be used as SANs
+
+Template: arrowhead-core-common/san_ips
+Type: string
+Description: A space-separated list of additional ip addresses to be used as SANs
+
+Template: arrowhead-core-common/san_dns
+Type: string
+Description: A space-separated list of domain names to be used as SANs

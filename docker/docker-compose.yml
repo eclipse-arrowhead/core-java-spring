@@ -1,0 +1,89 @@
+version: "3"
+
+services:
+  mysql:
+    container_name: mysql
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=THIS_WILL_BE_YOUR_CONTAINERS_ROOT_PW
+    volumes:
+      - mysql:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d/
+    ports:
+      - 3306:3306
+
+  serviceregistry:
+    container_name: serviceregistry
+    image: svetlint/serviceregistry:latest
+    depends_on:
+      - mysql
+    volumes:
+      # dont forget to change the route of the locally available config file
+      # format is <file on your local machine, (change this!!!)>:<file location inside the container (don't change this part!!!)>
+      - ./core_system_config/serviceregistry.properties:/serviceregistry/application.properties
+    ports:
+      - 8443:8443
+
+  authorization:
+    container_name: authorization
+    image: svetlint/authorization:latest
+    depends_on:
+      - mysql
+    volumes:
+      - ./core_system_config/authorization.properties:/authorization/application.properties
+    ports:
+      - 8445:8445
+
+  orchestrator:
+    container_name: orchestrator
+    image: svetlint/orchestrator:latest
+    depends_on:
+      - mysql
+    volumes:
+      - ./core_system_config/orchestrator.properties:/orchestrator/application.properties
+    ports:
+      - 8441:8441
+
+  eventhandler:
+    container_name: eventhandler
+    image: svetlint/eventhandler:latest
+    depends_on:
+      - mysql
+    volumes:
+      - ./core_system_config/eventhandler.properties:/eventhandler/application.properties
+    ports:
+      - 8455:8455
+  
+  gatekeeper:
+    container_name: gatekeeper
+    image: svetlint/gatekeeper:latest
+    depends_on:
+      - mysql
+    volumes:
+      - ./core_system_config/gatekeeper.properties:/gatekeeper/application.properties
+    ports:
+      - 8449:8449
+
+  gateway:
+    container_name: gateway
+    image: svetlint/gateway:latest
+    depends_on:
+      - mysql
+    volumes:
+      - ./core_system_config/gateway.properties:/gateway/application.properties
+    ports:
+      - 8453:8453
+
+  certificateauthority:
+    container_name: certificateauthority
+    image: svetlint/certificateauthority:latest
+    depends_on:
+      - mysql
+    volumes:
+      - ./core_system_config/certificateauthority.properties:/certificateauthority/application.properties
+    ports:
+      - 8448:8448 
+
+volumes:
+  mysql:
+    external: true  

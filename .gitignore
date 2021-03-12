@@ -1,0 +1,39 @@
+!.mvn/wrapper/maven-wrapper.jar
+
+### STS ###
+.apt_generated
+.factorypath
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+/build/
+
+### VS Code ###
+.vscode/
+wrapper
+/target
+/**/target
+/mvnw
+/mvnw.cmd
+/.settings
+/**/.settings
+*.prefs
+/*.log
+/**/*.log
+
+/.metadata/
+/deb-installer/.classpath
+/deb-installer/.project
+/deb-installer/.settings
+deviceregistry/bin

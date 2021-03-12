@@ -1,0 +1,16 @@
+[Unit]
+Description=arrowhead-authorization
+After=network.target mysql.target
+
+[Service]
+WorkingDirectory=/etc/arrowhead/systems/authorization
+ExecStart=/usr/bin/java -Dlog4j.configurationFile=file:/etc/arrowhead/systems/authorization/log4j2.xml -jar /usr/share/arrowhead/authorization/arrowhead-authorization.jar 
+TimeoutStopSec=5
+Restart=on-failure
+RestartSec=20s
+Type=simple
+User=arrowhead
+Group=arrowhead
+
+[Install]
+WantedBy=default.target

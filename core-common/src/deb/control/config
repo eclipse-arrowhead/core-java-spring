@@ -1,0 +1,94 @@
+#!/bin/bash -e
+
+. /usr/share/debconf/confmodule
+
+if logname 2>/dev/null; then
+  USER=$(logname)
+  HOME=$(eval echo "~$USER")
+else
+  USER="root"
+  HOME="/root"
+fi
+
+# Set interface title
+db_settitle arrowhead-core-common/generic_title
+
+# Get list of network interfaces
+INTERFACES="$(ip -o -4 addr show | awk ' { sub(/\/.*/, "", $4); print $2 " " $4 "," } ' | head -c -2)"
+db_subst arrowhead-core-common/system_interface choices ${INTERFACES}
+db_subst arrowhead-core-common/san_interfaces choices ${INTERFACES}
+
+# Get system ip
+db_input high arrowhead-core-common/system_interface || true
+
+# Get installation type
+db_input high arrowhead-core-common/install_type || true
+db_go || true
+db_get arrowhead-core-common/install_type; INSTALL_TYPE="$RET"
+
+# User dialog
+case ${INSTALL_TYPE} in
+  "Authorized" )
+    if [ ! -f ${AH_CLOUDS_DIR}/${AH_CLOUD_NAME}.p12 ]; then
+      db_settitle arrowhead-core-common/authorized_title
+
+      # Set default path for cloud certificate
+      db_get arrowhead-core-common/cloud_cert;
+      if [ -z "$RET" ]; then
+        db_set arrowhead-core-common/cloud_cert "${HOME}/cloud.p12"
+      fi
+
+      # Set default path for master certificate
+      db_get arrowhead-core-common/master_cert; master_cert=$RET
+      if [ -z "$RET" ]; then
+        db_set arrowhead-core-common/master_cert "${HOME}/master.crt"
+      fi
+
+      # User dialogs
+      db_input critical arrowhead-core-common/cloud_cert || true
+      db_input critical arrowhead-core-common/cloud_alias || true
+      db_input critical arrowhead-core-common/cloud_password || true
+      db_input critical arrowhead-core-common/master_cert || true
+      db_input critical arrowhead-core-common/relay_master_cert || true
+    fi
+    ;;
+
+  "Detached" )
+    db_settitle arrowhead-core-common/detached_title
+
+    # User dialogs
+    db_input high arrowhead-core-common/cloud_warning || true
+    db_input high arrowhead-core-common/cloudname || true
+    db_input high arrowhead-core-common/operator || true
+    ;;
+
+  * )
+    echo "Unexpected install type"
+    exit 1
+    ;;
+esac
+
+# Run dialogs
+db_go || true
+
+db_settitle arrowhead-core-common/generic_title
+
+# Get certificate password
+if [ -z "${AH_PASS_CERT}" ]; then
+  db_input high arrowhead-core-common/cert_password || true
+fi
+
+db_input high arrowhead-core-common/domain_name || true
+
+# Run dialogs
+db_go || true
+
+# Get SANS
+db_settitle arrowhead-core-common/subject_alternative_names
+db_input high arrowhead-core-common/san_interfaces || true
+db_input high arrowhead-core-common/san_ips || true
+db_input high arrowhead-core-common/san_dns || true
+
+# Run dialogs
+db_go || true
+

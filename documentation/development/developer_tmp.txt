@@ -1,0 +1,352 @@
+Raw Arrowhead 4.1.3 Core Systems Developer Guide
+
+Contents 
+
+1 Introduction
+
+The objective of the Arrowhead Framework is to efficiently support the development, deployment and
+operation of interconnected, cooperative systems. It is based on the Service Oriented Architecture philosophy.
+The building elements of the framework are systems that provide and consume services, and
+cooperate as systems of systems. Some commonly used systems, such as orchestration, authorization or
+service registry are considered as core. These can be used by any system of systems that follow the
+guidelines of the Arrowhead Framework.
+
+This document contains the development details of the core systems (Service Registry, Authorization, Orchestrator, Gatekeeper, Gateway, Event Handler and Choreographer for now) of the Arrowhead Framework. These core systems are implemented in Java 11 using the Spring Boot Framework.
+
+Every core system is a web server providing a set of REST web services which can be used by other systems (core systems, producers and consumers) of the cloud and the management tool. The core systems persist their data into a MySQL database.
+
+We assume that the reader are familiar with Java 11 features, the SQL language (and MySQL) and has a basic understanding of the concept of dependency injection on which the Spring Framework are building. In a later chapter we provide a list that contains all the technologies and libraries we used in the implementation of Arrowhead core systems.
+
+2 Getting started
+
+
+
+3 Tools
+
+Eclipse
+Git (Tortoise Git, SourceTree)
+Maven
+MySQL Workbench
+KeyStore Explorer
+
+4 Used frameworks & libraries
+
+Spring Boot (core, web, security, data JPA)
+Hibernate, MySQL connector, MariaDB connector
+Jackson
+Apache HttpClient
+Quartz
+JUnit4, Mockito
+Log4j2 (LMAX Disruptor)
+Swagger2, Swagger2 UI
+Jose4j
+JMS Api and Apache ActiveMQ Client
+
+5 DB
+
+6 Maven
+
+7 General structure
+
+Every core system have basically the same general structure. We define three separate layers. 
+
+The first layer (web layer) is for the web service endpoints (in the controller classes) Here we define the REST endpoints, perform basic input validations and sometimes minor conversations on input parameters (i.e. create an enumeration value from a String). Basic validation means checking mandatory parameters are specified and valid, specified optional parameters are valid, the specified parameter combination is valid. We check everything in this layer that is possible without accessing the database (so no unique constraint checking here).
+In the web layer no business logic is implemented, endpoints call a method from the second layer after input validation and possible conversation steps and returns the value. Let's see an example for an endpoint:
+
+@RestController
+@RequestMapping(CommonConstants.SERVICE_REGISTRY_URI)
+public class ServiceRegistryController {
+
+	...
+
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = SERVICE_REGISTRY_QUERY_DESCRIPTION, response = ServiceQueryResultDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = SERVICE_REGISTRY_QUERY_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SERVICE_REGISTRY_QUERY_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public ServiceQueryResultDTO queryRegistry(@RequestBody final ServiceQueryFormDTO form) {
+		logger.debug("Service query request received");
+		
+		if (Utilities.isEmpty(form.getServiceDefinitionRequirement())) {
+			throw new BadPayloadException("Service definition requirement is null or blank" , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI +
+										  CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI);
+		}
+		
+		final ServiceQueryResultDTO result = serviceRegistryDBService.queryRegistry(form);
+		logger.debug("Return {} providers for service {}", result.getServiceQueryData().size(), form.getServiceDefinitionRequirement());
+		
+		return result;
+	}
+
+	...
+}
+
+We use a lot of annotations to tell the Spring Boot framework (and other libraries) how to work. @RestController defines that this class handles the HTTP request calls arriving to the server. @RequestMapping annotation of the class specified that this class only serves those HTTP requests whose URI's starts with the given prefix. 
+The example method handles the  /service_registry/query POST requests. This method expects an input JSON in the request's body and returns an output JSON (see $PostMapping annotation). The Jackson library is automatically converts the input JSON to a ServiceQueryFormDTO object before this method is called and similarly converts the returned ServiceQueryResultDTO object to JSON that will appears in the body of the response (see @RequestBody and @ResponseBody annotation). If Jackson fails the mapping an HTTP error will return. The body of the method is quite simple: some input validation and request delegation to the lower layer.
+If any exception occurs (for example BadPayloadException) a mechanism (see ArrowheadResponseEntityExceptionHandler class for details) automatically converts the exception to an HTTP error response which contains the error details in JSON format.
+@ApiOperation and @ApiResponses annotations are part of the Swagger library: they are help to show information (short description, response structure, tags, possible HTTP status codes) about the web service endpoint on the Swagger UI.
+
+The second layer (service layer) is for the business logic. This layer contains the higher level database service classes (such as ServiceRegistryDBService from the previous example), driver classes that typically handle calls of other core system's web services,
+and other service classes implementing non-database related business logic. These service and driver classes also checks input before performing any action. Some input validation may be very similar to the ones in the web layer (because service methods can be called from other layers, not just from the web layer, for example from an other service method), others may be new (i.e. in database service classes the methods check existence of record ids, unique constraints, etc). Error handling in the service layer most of the time ends with throwing an unchecked exception (an ArrowheadException descendant or IllegalArgumentException) as error handling is the caller's responsibility by design. If the caller was an endpoint method from the web layer, the error handling is done automatically by converting the exception to an HTTP error status and an error JSON in the response body as previously mentioned.
+
+Let's see an example for a database service class
+
+@Service
+public class ServiceRegistryDBService {
+
+	...
+
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public System createSystem(final String systemName, final String address, final int port, final String authenticationInfo) {		
+		logger.debug("createSystem started...");
+		
+		final System system = validateNonNullSystemParameters(systemName, address, port, authenticationInfo);
+		
+		try {
+			return systemRepository.saveAndFlush(system);
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+}
+
+@Service tells Spring Boot to create a singleton instance of this class which can be used in any Spring managed classes (see dependency injection in Spring Boot documentation). The createSystem() method inserts a system record into the database after doing some
+validation. It's very important to notice that transaction handling is controlled by the database service classes. Using Spring Boot framework made transaction handling very simple to the developer, you only thing to do is mark every public method that alters records in the database with the @Transactional annotation (see the example above). A public method marked with this annotation rolls back if any specified or unchecked exception occurs during the method execution. Other important thing in the example that you have to catch every exception comes from the lower level database-related code and throws an ArrowheadException instead (after logging the problem, of course). This is necessary because not specified, checked exceptions (such as SQLException) don't trigger the transaction rollback.
+
+
+The third layer (database layer) is for lower level database handling. This layer contains the database entity classes and repository interfaces. We using the Spring Data JPA module to handle database CRUD methods. See details in the reference documentation.
+
+Of course, there are other classes we use that does not fit into any layers (or using them in multiple layers), such as filters, converters, utilities, data transfer objects, initializators, etc. We will discuss those later.
+
+8 Configuration
+
+Every core system is a standalone web server (Spring Boot uses Tomcat by default) which can be configured using the configuration file named application.properties (which is a standard Java property file). This file can be found in the /src/main/resources folder. Core systems may have unique properties however most of them appear in (almost) all configuration files.
+
+Common properties
+
+spring.datasource.url: database JDBC URL 
+spring.datasource.username, spring.datasource.password: access information for the database
+spring.datasource.driver-class-name: fully qualified name of the JDBC driver class
+spring.jpa.database-platform: Hibernate-related property, the dialect class of the used database (it helps Hibernate to generate optimized queries)
+spring.jpa.show-sql: Hibernate-related property. If true, Hibernate will print every generated SQL query to the console. It can help debugging database-related bugs.
+spring.jpa.properties.hibernate.format_sql: Hibernate-related property. If true, the above mentioned generated SQL query logging will be more human readable.
+spring.jpa.hibernate.ddl-auto=none: Hibernate-related property. Hibernate can change database structure based on the changes of the entity classes, if this property has other value than none. We don't use this feature, so don't modify the none value to anything else.
+server.address=0.0.0.0: The embedded Tomcat web server will bind to this address. 0.0.0.0 means Tomcat will be accessible on all IP-addresses the machine has.
+server.port: The port on which the Tomcat web server will listen for requests.
+domain.name: The address of the core system. This will be the address that is written into the database and all the other systems (core, producers, consumers) will use this address to access to the core system's web services.
+domain.port: The port of the core system. This will be the port that is written into the database and all the other systems (core, producers, consumers) will use this port to access to the core system's web services.
+
+core_system_name: the name of the core system (it is the string representation of one of the elements of CoreSystem enumeration)
+log_all_request_and_response: if true, all request and response will be logged. It can help debugging web-service related bugs.
+
+server.ssl.enabled: if true, web server uses HTTPS protocol, if false, it uses HTTP. All the remaining properties are ignored, if SSL is not enabled.
+server.ssl.key-store-type=PKCS12: Type of the key store
+server.ssl.key-store=classpath:certificates/service_registry.p12: the location of the key store. The certificates for development can be found in the /src/main/resources/certificates folder for every core system. Please note if you want to use an other certificate file on your file system you have change the prefix from classpath to file.
+server.ssl.key-store-password: the password of the key store file. Please note that some components in the code assumes that the password of the key store and the password of the idividual key are the same.
+server.ssl.key-alias: the alias of the key belongs to the core system
+server.ssl.key-password: the password of the key (identified by the alias above) stored in the key store file. Please note that some components in the code assumes that the password of the key store and the password of the idividual key are the same.
+server.ssl.client-auth=need: This means that the web server demands a valid certificate for every request
+server.ssl.trust-store-type=PKCS12: Type of the trust store
+server.ssl.trust-store=classpath:certificates/truststore.p12: the location of the trust store (web server only accepts requests that comes from a trusted client). The certificates for development can be found in the /src/main/resources/certificates folder for every core system. Please note if you want to use an other certificate file on your file system you have change the prefix from classpath to file.
+server.ssl.trust-store-password: The password of the trust store file.
+disable.hostname.verifier=false: If false, when the core system uses web service from other core system, it will check that the certificate of the other core system contains (as common name or Subject Alternative Name) the hostname or IP-address of that other core system. You can disable this feature by setting this property true. This is a feature for testing purposes only, there is a security risk using it in production environment.
+
+Common properties (except in Service Registry)
+
+sr_address: address of the Service Registry core system
+sr_port: port of the Service Registry core system
+
+9 Modules 
+
+The Arrowhead Framework contains several modules (see Maven for modules). There is one for each core system. These core systems share a lot of classes, interfaces and enumerations so we created one more module named arrowhead-core-common which contains the shared code. In the following chapters we will discuss the interesting elements of each modules.
+
+Before read further (and take a look on the source code) we suggest to read a little about dependency injection and the meaning and usage of @Autowired, @Resource, @Value, @PostConstruct annotations.
+
+9.1 Common module
+
+The common module contains all the classes, interfaces and enumeration that is used by more than core systems. Parts of the common module can also be used by the consumers and providers written in Java. These parts are exported to a JAR file using Maven during the build process. 
+
+Let's see the contents of the module:
+
+* eu.arrowhead.common.CommonConstants and eu.arrowhead.common.CoreCommonConstants: we try to avoid using literals (especially string literals) in the code (except in error message). Instead we using constants. All constants the we use in multiple files go to these classes. The difference between the two classes that the CommonConstants is exported to the JAR file for the client library. The constants in the CoreCommonConstants are only visible for the core systems.
+* eu.arrowhead.common.Defaults and eu.arrowhead.common.CoreDefaults: storage classes for default values.
+* eu.arrowhead.common.CoreSystemRegistrationProperties: storage class for core system information (values comes from the application.properties file)
+* eu.arrowhead.common.SSLProperties: storage class for core system SSL-related information (values comes from the application.properties file)
+* eu.arrowhead.common.Utilities and eu.arrowhead.common.CoreUtilities: Useful method collections. It contains support methods to
+  - basic string manipulations,
+  - date/string conversions (Please note the we store local times in the database, but the web services expects UTC timestamp as text in "yyyy-MM-dd HH:mm:ss" format and all response JSON containing timestamps in the same format. These methods can be used to make the necessary conversions),
+  - JSON/object conversions,
+  - map/string conversions,
+  - URI creations,
+  - certificate handling ,
+  - etc.
+  
+* eu.arrowhead.common.ApplicationInitListener: Every core system needs to do some things after the web server started but before it starts handling requests. Similarly, they might want to do some action before the web server stops. This class performs these things using the @EventListener/onApplicationEvent() (see Spring documentation) and @PreDestroy annotations. It is an abstract class (so the core systems has to create a child class of it), but does most of the work (beacuse core systems wants to do similar things at startup and shutdown). This class introduces a shared map container named arrowheadContext which can be used to propagate information between differenct components of a core system.
+
+On startup it
+ - (in secure mode) checks that the server certificate is Arrowhead compliant,
+ - (in secure mode) stores the server common name, its public and private keys in the arrowheadContext,
+ - checks if the Service Registry is accessible (in case of Service Registry itself, this step is skipped), and register all public services into the Service Registry
+ - stores the Service Registry query URI in the arrowheadContext,
+ - stores the list of required core services (for example, Orchestrator needs URIs for using Authorization to check permissions) in the arrowheadContext (an other component will process this list, see later),
+ - calls the customInit() method (empty by default, but descendant classes override this)
+ 
+On shutdown (please note that force killing the web server prevents to execute the shutdown event handler code) it 
+ - checks if the Service Registry is accessible (in case of Service Registry itself, this step is skipped), and unregister all public services into the Service Registry
+ - calls the customDestroy() method (empty by default, but descendant classes override this)
+
+* eu.arrowhead.common.core.CoreSystem and eu.arrowhead.common.core.CoreSystemService: enums that describe core systems and their services (we use these for example in the ApplicationInitListener class to register core system services into the Service Registry)
+* eu.arrowhead.common.database.entity package: All database entity classes that represents the database tables are here. Core systems does not use directly other core systems' tables/entities but the connections between entities makes necessary to at least "see" them. For database entities see JPA documentation.
+* eu.arrowhead.common.database.repository: All database repository interface are here. We use these to interact with the database. When you use Spring Data JPA you only specify interfaces (which extend Spring Data JPA interfaces), the implementations are generated by the Spring using the interfaces, annotations and name conventions (see Spring Data JPS for details).
+* eu.arrowhead.common.database.repository.RefreshableRepository and eu.arrowhead.common.database.repository.RefreshableRepositoryImpl: Unfortunately, no built-in Spring Data JPA interface provides method to refresh an entity object without repeating the whole query (which is strange hence the underlying JPA vendor supports that) and we needed this feature. RefreshableRepositry adds this method to the built-in ones and RefreshableRepositoryImpl implements it.
+* eu.arrowhead.common.database.service.CommonDBService: Database services are usually in one of the core system modules, because core systems does not access directly to other core systems' records. But there is an exception: the cloud entity that represents the own cloud (the cloud that belongs to this specific set of core systems) are used by multiple core systems. This class contains the high level database operations related to the own cloud.
+* eu.arrowhead.common.dto.internal and eu.arrowhead.common.dto.shared packages: Arrowhead Framework uses DTOs (Data Transfer Objects) to represent JSON objects in the code base. When a request body contains a JSON the Jackson library automatically converts it to a request DTO and web service methods returns a response DTO which is converted to JSON and returned in the response body. All DTO classes are in these packages: if a DTO is used in a web service that is designed by called in producer/consumer code, it is in the shared package. The whole shared package is exported to the JAR file for the client library. The DTOs that are used only in "private" web services (services for other core systems or the management tool) are in the internal package. DTOs are just plain java classes with some restrictions: 
+ - you have to implement a nullary constructor
+ - you need getter/setter methods for all members
+ - every member is either a number, text, logical value, enumeration value, an other DTO object or a list/map of such types.
+ - always represent timestamps as strings in "yyyy-MM-dd HH:mm:ss" format and all timestamps are in UTC.
+ - in request DTOs try to avoid using primitives (like int, long, double, boolean) especially in mandatory parameters because when the Jackson does not find a member in the JSON he just ignore that member when creating the DTO object so the member will be initialized by using the default value of the type (0 in case of int, long, 0.0 in case of double, false in case of boolean). After the Jackson finished the DTO creation there is no way to decide whether a 0 value comes from the JSON or a member is missing from the JSON. Instead of using primitives you can use their object counterparts like Integer, Long, Double or Boolean (this way if Jackson does not initialize a member from the JSON, the member will be null). If a parameter is optional and have a default value you still can use primitive types if you provide the default value as well in the class.
+ - in response DTOs it is fine to use primitives
+ - For the two most important request DTOs (ServiceQueryFormDTO and OrchestrationFormRequestDTO) we implemented the builder pattern (see details here) to provide an easy and elegant way to create these object in the client code (consumers/providers)
+
+* eu.arrowhead.common.core.dto.internal.DTOUtilities: support methods relating to DTOs
+* eu.arrowhead.common.core.dto.internal.DTOConverter: This class collects all the methods that converts database entities to response DTOs.
+* eu.arrowhead.common.exception package: This package contains all the custom exception types we use in the code base.
+* eu.arrowhead.common.filter.ArrowheadFilter: In Arrowhead Framework we use Spring Filters (see documentation) to force authentication requirements, and some other purposes as well. This class is the common base class of our filters. It provides support methods to convert exceptions (thrown by the filter itself) to error responses.
+* eu.arrowhead.common.filter.InboundDebugFilter and eu.arrowhead.common.filter.OutboundDebugFilter: filters for debugging purposes, they are logging every request and response including the bodies. This last aspect comes with a problem in filters hence in normal circumstances you can't read the body of a request in filters because it is in a stream and a stream's content can't be read multiple times. We use a custom solution to work around this (see MultiReadRequestWrapper class later). There is a similar problem with responses body: the output stream can't be read multiple times: fortunately, there is a built-in solution in Spring for this issue: see ContentCachingResponseWrapper class.
+* eu.arrowhead.common.filter.PayloadSizeFilter: Simple filter that forces to use the request methods right: GET and DELETE has not request message body, while the body of the POST, PUT or PATCH requests cannot be empty.
+* eu.arrowhead.common.filter.thirdparty.MultiReadRequestWrapper and eu.arrowhead.common.filter.thirdparty.CustomServletInputStream: It contains the solution for the problem that you can't read request bodies multiple times. See details here: https://stackoverflow.com/a/54258488
+* eu.arrowhead.common.http.HttpService: Support class for calling web services from the components of the Arrowhead Framework. It uses Apache HttpClient and Spring REST Templates to call the web services. It contains all the boilerplate codes (SSL initialization, error handling, etc.) so the user can call web services by using one method. It supports both HTTP and HTTPS requests.
+* eu.arrowhead.common.http.ArrowheadHttpClientResponseErrorHandler: HttpService uses this class to automatically converts HTTP errors to exceptions.
+* eu.arrowhead.common.http.ArrowheadResponseEntityExceptionHandler: Spring uses this class to automatically converts ArrowheadException objects to HTTP error responses in web service endpoint methods. See ResponseEntityExceptionHandler and @ControllerAdvice in the Spring documentation for details.
+* eu.arrowhead.common.intf.ServiceInterfaceNameVerifier: Service interfaces are represented in the framework as strings. But every interface name has to follow this format: <PROTOCOL>-<SECURITY>-<FORMAT>, where security can be SECURE or INSECURE and protocol and format must be a sequence of letters, numbers and underscore. This class verifies this requirement by using a regular expression checker. The class has a strict mode flag: if it is set to true, than <PROTOCOL> and <FORMAT> has to come from a predefined set (defined in the class).
+* eu.arrowhead.common.log4j2.JDBCConnectionFactoryForLog4J2: The Framework is using log4j2 for logging and we log into the database as well as into log files. There is a built-in support in log4j2 to logging into databases (see here), but to use that we need to implement a class (this class) that returns a database connection which the log4j can use. Please note that this class not Spring-managed so we can't just use @Value annotations to acquire the database access information: instead we have to manually load the application.properties file to get the necessary data.
+* eu.arrowhead.common.quartz.AutoWiringSpringBeanQuartzTaskFactory: We using Quartz to scheduling tasks throughout the Framework (see Quartz and Spring Quartz integration here). However, there is no built-in support for injecting Spring beans into the Job class. This class does exactly that. See https://www.baeldung.com/spring-quartz-schedule for details.
+* eu.arrowhead.common.quartz.uricrawler package: The core systems wants to call web services from other core systems. Before a core system does that, it need the exact URI of the required services which can be acquired from the Service Registry. But a core system only registers its services when it starts and there is possibility that two core systems wants to use each other's services. So to avoiding the confusion URI acquiring happens in asynchronous way. We have a Quartz task, UriCrawlerTask (see Quartz and Spring Quartz integration here) that runs periodically, using the arrowheadContext shared container to find the required service lists and try to acquire the URIs (and store them in the arrowheadContext). If any of the URI acquiring is unsuccessful, it tries that again in the next period. If all URI is available, the task unscheduling itself and stops. UriCrawlerTaskConfig contains the necessary configuration (see the previously mention documentation for details).
+* eu.arrowhead.common.relay.RelayClient: Gatekeepers and gateways does not communicate directly (because there is no guarantee they can do that, for example they don't necessarily have public IP addresses), they are using relays (i. e. ActiveMQ servers) to establish communication channels. Gatekeepers and gateways using different high-level interfaces to interact with relays, but the two interfaces has common methods: this interface declared those. 
+* eu.arrowhead.common.relay.RelayCryptographer: When gatekeepers and gateways communicating via a relay every message is encrypted and signed by the Arrowhead Framework. This way we can ensure safe communication even on unsecured relays. Arrowhead Framework uses JWT (JSON Web Token) technology for encryption and signing. We are using jose4j as JWT implementation. RelayCryptographer encapsulates all the methods that using jose4j to encrypt/decrypt and sign/verify relay-related messages and providers higher-level API for the gatekeepers and gateways. Please note that we also use JWT (and jose4j) for token generation and verification in the consumer authorization process, but those are handled by different classes.
+* eu.arrowhead.common.security.DefaultSecurityConfig: This class define the security settings of the web servers (see Spring Security for details), and also initializes the debug filters if request logging is enabled. Please note that DefaultSecurityConfig actually does nothing because of lacking the necessary annotations (@Configuration and @EnableWebSecutity). We use this as a base class in every core system (i.e. SRSecurityConfig in the Service Registry), and adding the annotations to the descendant class. If needed, custom security configuration can also be defined there.
+* eu.arrowhead.common.security.AccessControlFilter and eu.arrowhead.common.security.CoreSystemAccessControlFilter: As we stated before, Arrowhead Framework uses filters to enforce certain authentication requirements. AccessControlFilter serves as a base class such filters while providing default implementation (which is that web services can only be called from the local cloud) and some support methods. CoreSystemAccessControlFilter extends AccessControlFilter with additional support methods which can be used in the concrete implementation of access restrictions.
+* eu.arrowhead.common.swagger package: It contains the default Swagger UI configuration. In the core systems we derived from this class and add the necessary annotations to activate Swagger (@Configuration, @EnableSwagger2). See Swagger documentation for details.
+DefaultSwaggerController is a controller class to make sure the Swagger UI appears on the root URI: <server address>:<port>.
+* eu.arrowhead.common.testhelper.StandaloneModeInTests: When running unit tests we do not want to core systems try to register their services into the Service Registry (because Service Registry may not running). We introducing a server.standalone.mode property and the ApplicationInitListener search for this property in the arrowheadContext shared container. If the property is found and true, the ApplicationInitListener skips the registration steps. We just have to be sure that server.standalone.mode is set to true BEFORE the ApplicationInitListener's onApplicationEvent() method is executed. StandalonModeInTests class is also an @EventListener on the same event and the we use the @Order annotation to define the order of the method executions. Please note that this class is abstract: if you want to use it in your unit tests you just have to create a descendant class with empty body (and add @Component annotation to it because otherwise Spring will not find it).
+* eu.arrowhead.common.token.TokenSecurityFilter and eu.arrowhead.common.token.TokenUtilities: One of the tasks of the Authorization core system is to generate authorization tokens to consumers for a specific service and a specific provider. The consumer must add this to token to its request by adding an extra 'token' query parameter when calling the provider's service. The provider may checks this token before it serves the consumer's request. We describe token and token generation in the Authorization chapter later. TokenSecurityFilter is for the developers of such providers. It's an abstract class (developers has to implement the methods that returns the necessary keys) but contains (with TokenUtuilities class) the whole token checking functionality.
+
+9.2 Service Registry Module
+
+The Service Registry is responsible for storing and returning service definitions, systems, service interfaces and services. 
+
+The application.properties file of the service registry contains some custom property which are not used by (all) other core systems.
+
+ping_scheduled: Service Registry has an optional feature to ping service providers in a fixed time interval, and remove service offerings where the service provider was not available. Set this property to true to enable this feature.
+ping_timeout: how much time the Service Registry should wait for the ping response (in milliseconds)
+ping_interval: how frequently should the ping happen, in minutes
+
+ttl_scheduled: Service Registry has an optional feature to automatically remove service offerings, where the endOfValidity timestamp field is in the past, meaning the offering expired. Set this property to true to enable this feature.
+ttl_interval: how frequently the database should be checked for expired services, in minutes
+
+use_strict_service_intf_name_verifier: Interface names has to follow this format <PROTOCOL>-<SECURITY>-<FORMAT>, where security can be SECURE or INSECURE and protocol and format must be a sequence of letters, numbers and underscore. A regexp checker will verify that. If this setting is set to true then the PROTOCOL and FORMAT must come from a predefined set. Currently, only HTTP and HTTPS are acceptable as PROTOCOL and JSON and XML as FORMAT.
+
+Let's see the contents of the module:
+
+* eu.arrowhead.core.serviceregistry.ServiceRegistryMain: the main class of the Service Registry is the default implementation of the Spring Boot web server (see Spring Boot documentation). We using annotations to tell Spring this is a Spring Boot application (@SpringBootApplication) and where to search for Spring-managed classes (@ComponentScan), database entities (@EntityScan) and database repositories (@EnableJpaRepositories). And it enables Swagger UI (@EnableSwagger2 annotation)
+* eu.arrowhead.core.serviceregistry.ServiceRegistryApplicationInitListener: it contains the custom initialization of the Service Registry:
+   - creates a cloud record in the database (own cloud), if it not exists yet
+   - registers itself as a system into the database (and deletes the previous record if exists)
+* eu.arrowhead.core.serviceregistry.ServiceRegistryController: it contains the web service endpoints of the Service Registry, see Service Registry API documentation.
+* eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService: this class implements the higher level database-related methods that handles service definitions, systems, service interfaces and services. These are basically CRUD methods. 
+* eu.arrowhead.core.serviceregistry.database.service.RegistryUtils: a collection of methods used by ServiceRegistryDBService.queryRegistry() method to filter results. The implementation of these methods uses streams and lambda expressions (see Java documentation).
+* eu.arrowhead.core.serviceregistry.quartz.task package: it contains the two optional feature implementation previously mentioned before (application.properties file's custom properties). ProvidersReachabliltyTask (and ProvidersReachablilityTaskConfig) runs periodically and pings the services found in the database and removes the inaccessible ones. ServiceEndOfValdityTask (and ServiceEndOfValidityTaskConfig) periodically checks the end of validity timestamps the services and removes the expired ones. We are using Quartz for scheduled tasks (see Quartz and Spring Quartz integration here).
+* eu.arrowhead.core.serviceregistry.security.SRSecurityConfig: it's an empty descendant of the DefaultSecurityConfig class. We use @EnableWebSecurity and @Configuration annotations to activate the security.
+* eu.arrowhead.core.serviceregistry.security.SRAccessControlFilter: it is a descendant class of the CoreSystemAccessControlFilter and it enforces authentication requirements of the Service Registry web services. Only works in secured mode (see @ConditionalOnProperty annotation). Implemented rules:
+
+ - web services are only accessible from the local cloud (inherited through the base class);
+ - management web services (/mgmt appears in the URI) are only accessible to the local system operator (sysop.<cloud>.<operator>.arrowhead.eu);
+ - providers can only registers/unregisters itself (/register and /unregister URI);
+ - every local system can queries (/query URI) public core system services (see CommonConstants.PUBLIC_CORE_SYSTEM_SERVICES);
+ - a predefined set of core systems can use query (/query URI) without limitations;
+ - a predefined set of core systems can use query by system (/query/system/{id} URI);
+ 
+ * eu.arrowhead.core.serviceregistry.swagger.SRSwaggerConfig: it is a descendant class of DefaultSwaggerConfig. It configures and activates Swagger UI. See Swagger Documentation for details.
+
+9.3 Authorization Module
+
+The Authorization core system is responsible for storing authorization rules and checking whether a system can use an other system's service or not (and in case of using event handler whether a system can be notified about an other system's events or not). Two types of authorization rules are exist: intra-cloud (consumer is in the same cloud than the provider) and inter-cloud (consumer is in a different cloud than the provider) rules. An intra-cloud rule tells that a local consumer has right to call the specific service of a specific local provider using specific service interface(s). An inter-cloud rule tells that any costumer from a specific cloud has right to call the specific service of a specific provider using specific service interface(s).
+Furthermore, it provides token generation feature. Providers can use tokens as an additional security layer to make sure that the consumer that wants to use its service comes through the proper channels (performing an orchestration which indicates authorization checking as well) to acquire its URI.
+
+The application.properties file of the Authorization contains some custom property which are not used by (all) other core systems.
+
+use_strict_service_intf_name_verifier: Interface names has to follow this format <PROTOCOL>-<SECURITY>-<FORMAT>, where security can be SECURE or INSECURE and protocol and format must be a sequence of letters, numbers and underscore. A regexp checker will verify that. If this setting is set to true then the PROTOCOL and FORMAT must come from a predefined set. Currently, only HTTP and HTTPS are acceptable as PROTOCOL and JSON and XML as FORMAT.
+eventhandler_is_present: the Event Handler optional core system also used Authorization rules to decide whether it should notify a system about an other system's events or not. To do this Event Handler needs to know about the authorization rule changes. So Authorization notifies Event Handler about the changes but only if this property is true.
+
+Let's see the contents of the module:
+
+* eu.arrowhead.core.authorization.AuthorizationMain: the main class of the Authorization core system is the default implementation of the Spring Boot web server (see Spring Boot documentation). We using annotations to tell Spring this is a Spring Boot application (@SpringBootApplication) and where to search for Spring-managed classes (@ComponentScan), database entities (@EntityScan) and database repositories (@EnableJpaRepositories). And it enables Swagger UI (@EnableSwagger2 annotation)
+* eu.arrowhead.core.authorization.AuthorizationApplicationInitListener: it overrides the getRequiredCoreSystemServiceUris(), because if there is Event Handler in the local cloud the it needs one of the Event Handler's service URIs to be able to notify about authorization rule changes.
+* eu.arrowhead.core.authorization.AuthorizationController: it contains the web service endpoints of the Authorization core system, see Authorization API documentation.
+* eu.arrowhead.core.authorization.database.service.AuthorizationDBService: this class implements the higher level database-related methods that handle inter-cloud and intra-cloud rule creation, deletion, reading and checking.
+* eu.arrowhead.core.authorization.security.AuthSecurityConfig: it's an empty descendant of the DefaultSecurityConfig class. We use @EnableWebSecurity and @Configuration annotations to activate the security.
+* eu.arrowhead.core.authorization.security.AuthAccessControlFilter: it is a descendant class of the CoreSystemAccessControlFilter and it enforces authentication requirements of the Authorization web services. Only works in secured mode (see @ConditionalOnProperty annotation). Implemented rules:
+
+ - web services are only accessible from the local cloud (inherited through the base class);
+ - management web services (/mgmt appears in the URI) are only accessible to the local system operator (sysop.<cloud>.<operator>.arrowhead.eu);
+ - a predefined set of core systems can use authorization checking and token generation services;
+ 
+* eu.arrowhead.core.authorization.swagger.AuthSwaggerConfig: it is a descendant class of DefaultSwaggerConfig. It configures and activates Swagger UI. See Swagger Documentation for details.
+* eu.arrowhead.core.authorization.token.TokenGenerationService: this class implements the token generation feature. The token is an additional security tool that Arrowhead providers can utilize to make sure that any consumer trying to use its services comes through the proper channel (using orchestration). A token is a long string identifier in which is signed (by the Authorization core system) and encrypted and contains information about the consumer (name, cloud), the service (so can't reuse token to access to a different service), the service interface (so can't reuse token to access the service in a different format/protocol) and optionally an expiration date (forcing consumers to orchestrate periodically). The consumer receives the token(s) in the orchestration results which can be passed to the provider as a query parameter (at least in case of HTTP(S) services). We are using JWT (JSON Web Tokens) standard (see jwt.io) and JOSE (JSON Object Signing and Encryption) specification suite (https://datatracker.ietf.org/wg/jose/charter/) to implement our token generation. We are using the jose4j (https://bitbucket.org/b_c/jose4j/wiki/Home) implementation (which relies solely on the Java Cryptography Architecture API for cryptography) of JOSE in this class. First, we generate the JSON object that contains the information about the consumer, service, etc.(and some other JWT-related data), then sign it using the Authorization core system's private key (the selected signing algorithm is "RS512" (RSA/SHA512). After that, we encrypt the signed JSON using the provider's public key (which is stored in the DB as authenticationInfo). The encryption algorithm is "A256CBC-HS512". We also need a key management encryption algorithm as well (hence the previous algorithm uses a generated secret key that need to include in the JSON in an encrypted format), which is "RSA-OAEP-256". It seems difficult, but the jose4j did most of the work: we just have to select the algorithms, provide the necessary keys and payload, and call some high-level methods.
+
+9.4 Orchestrator Module
+
+The Orchestration core system is responsible for storing orchestration rules and performs store (using the previously mentioned rules) and dynamic orchestration. In both cases, the orchestrator tries to find suitable providers for a consumer. These providers can be local ones or (if a gatekeeper is installed in the cloud) from an other cloud. 
+
+The application.properties of the Orchestrator contains some custom property which are not used by (all) other core systems.
+
+use_strict_service_intf_name_verifier: Interface names has to follow this format <PROTOCOL>-<SECURITY>-<FORMAT>, where security can be SECURE or INSECURE and protocol and format must be a sequence of letters, numbers and underscore. A regexp checker will verify that. If this setting is set to true then the PROTOCOL and FORMAT must come from a predefined set. Currently, only HTTP and HTTPS are acceptable as PROTOCOL and JSON and XML as FORMAT.
+gatekeeper_is_present: a flag that tells the Orchestrator whether a Gatekeeper core system is installed in the cloud or not. If the value is false, the Orchestrator can only search providers in the local cloud.
+
+Let's see the contents of the module:
+
+* eu.arrowhead.core.orchestrator.OrchestratorMain: the main class of the Orchestrator core system is the default implementation of the Spring Boot web server (see Spring Boot documentation). We using annotations to tell Spring this is a Spring Boot application (@SpringBootApplication) and where to search for Spring-managed classes (@ComponentScan), database entities (@EntityScan) and database repositories (@EnableJpaRepositories). And it enables Swagger UI (@EnableSwagger2 annotation)
+* eu.arrowhead.core.orchestrator.OrchestratorApplicationInitListener: it overrides the customInit() method to load the Service Registry query URTs to the Arrowhead context object. It also overrides getRequiredCoreSystemServiceUris() to tell the URI crawler task to load the necessary URIs from the Service Registry: intra-cloud authorization rule checking, token generation, global service discovery (only if the Gatekeeper is installed) and inter-cloud negotiation (only if Gatekeeper is installed). This class also defines 
+some beans which we will use in different matchmaking situations (see later).
+* eu.arrowhead.core.orchestrator.OrchestratorStoreController: it contains the Orchestrator web service endpoints related to storing and accessing orchestration rules. See Orchestration API documentation for details.
+* eu.arrowhead.core.orchestrator.OrchestratorController: it contains the Orchestrator web service endpoints related orchestration process. See Orchestration API documentation for details.
+* eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreDBService: this class implements the higher level database-related methods that handle orchestrator rule creation, modification, deletion and reading.
+* eu.arrowhead.core.orchestrator.matchmaking package: matchmaking is the name of the process when the Orchestrator core system has to select one element (provider, cloud) from multiple suitable entities. Because matchmaking is possible using different strategies, we define an interface for all matchmaking situations and provide one or more implementations for each interface. CloudMatchmakingAlgorithm interface is used when the orchestrator has to choose a cloud when multiple clouds have the providers that are suitable for the consumer. The DefaultCloudMatchmaker simply returns the first preferred cloud. If no preferred cloud for the consumer, it returns the first cloud in the list. The RandomWeightedCloudMatchmaker implementation chooses randomly from the clouds but clouds with higher number of suitable providers have higher chance. This strategy also try to select from the preferred clouds first. An other matchmaking interface is IntraCloudProviderMatchmakingAlgorithm which is used when the orchestrator has to select one result from local providers. The DefaultIntraCloudProviderMatchmaker selects the first (preferred) provider, while the RandomIntraCloudProviderMatchmaker chooses randomly, if no preferred is available. The third matchmaking interface is InterCloudProviderMatchmakingAlgorithm, which selects one from foreign providers. Currently, only the DefaultInterCloudProviderMatchmaker implements this interface and returns the first (preferred) provider from the list.
+* eu.arrowhead.core.orchestrator.security.OSecurityConfig: it's an empty descendant of the DefaultSecurityConfig class. We use @EnableWebSecurity and @Configuration annotations to activate the security.
+* eu.arrowhead.core.orchestrator.security.OrchestratorAccessControlFilter: it is a descendant class of the CoreSystemAccessControlFilter and it enforces authentication requirements of the Orchestrator web services. Only works in secured mode (see @ConditionalOnProperty annotation). Implemented rules:
+
+ - web services are only accessible from the local cloud (inherited through the base class);
+ - management web services (/mgmt appears in the URI) are only accessible to the local system operator (sysop.<cloud>.<operator>.arrowhead.eu);
+ - external service request (marked with the flag externalServiceRequest=true) is only allowed to the local gatekeeper;
+ - in case of other type of dynamic orchestration the requester system's name (in the input JSON) has to match the first part of the requester's common name (in the certificate);
+
+* eu.arrowhead.core.orchestrator.service.OrchestratorDriver: it contains support methods for calling web services of other core systems: query from Service Registry, intra-cloud rule check and token generation from Authorization and global service discovery and inter-cloud negotiation from Gatekeeper.
+* eu.arrowhead.core.orchestrator.service.OrchestratorService: this class implements the various orchestration features by using web services of other core systems (via the OrchestratorDriver class).
+
+  - externalServiceRequest() handles the dynamic orchestration request comes from a different cloud (via the foreign and the local Gatekeepers). The main difference between an external service request and a local request that the first one skips the authorization checks (because that is handled by the local Gatekeeper). This could be a potential security issue so be sure that this version of orchestration is only called from the local Gatekeeper (currently the security filter ensures that). The implementation is pretty straightforward: collecting suitable providers by using Service Registry query; removing non-preferred providers if necessary; converting the result to the expected format; generating tokens if necessary using Authorization's service.
+  - triggerInterCloud() handles the orchestration in other clouds. It basically calls the global service discovery (GSD) and inter-cloud negotiation (ICN) services of the local Gatekeeper. Please note that the GSD can return multiple clouds and the implementation selects one using the appropriate matchmaking algorithm. The ICN only contacts the selected cloud, but can return with multiple providers (from the same cloud). If the matchMaking flag is set, then an other matchmaker will select from the returned providers.
+  - dynamicOrchestration() handles the local dynamic orchestration requests (comes from actual consumers). This methods first tries to find suitable providers in the local cloud, but if it can't (and the cloud configuration and ochestration flags allow it), the search will expand to other clouds (calling the triggerInterCloud() previously mentioned). The steps of the implementations are the following: collecting suitable providers by using Service Registry query; removing providers that the consumer can't use because of authorization rules (by calling the appropriate web service of the Authorization core system); removing non-preferred providers if necessary; select one provider if necessary by using a matchmaker algorithm; converting the result to the expected format; generating tokens if necessary using Authorization's service.
+  - topPriorityEntriesOrchestrationProcess() handles the local store orchestration when only a consumer system id is provided. In that case we have to orchestrate all necessary (local) providers using top priority (1) rules. The steps are the following: obtain the appropriate rules; remove foreign provider-related rules, because this method only works with local providers; query the Service Registry for the actual provider data (and to remove the unavailable providers); query Authorization core system to check permissions; converting the result to the expected format; generating tokens if necessary using Authorization's service.
+  - orchestrationFromStore() handles the store orchestration when a service requirement is specified. It's using all rules related to the service, and returns the one that has the highest priority, is currently working and accessible. Please note that this method works with foreign providers too (if gatekeeper is available in the cloud).
+  
+* eu.arrowhead.core.orchestrator.swagger.OSwaggerConfig: it is a descendant class of DefaultSwaggerConfig. It configures and activates Swagger UI. See Swagger Documentation for details.
+
+9.5 Gatekeeper module
+
+
+
+GW
+
+EH
+
+
+
+
+

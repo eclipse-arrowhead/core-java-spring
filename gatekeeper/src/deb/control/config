@@ -1,0 +1,20 @@
+#!/bin/bash -e
+
+. /usr/share/debconf/confmodule
+
+if logname 2>/dev/null; then
+  USER=$(logname)
+  HOME=$(eval echo "~$USER")
+else
+  USER="root"
+  HOME="/root"
+fi
+
+# Get installation type
+db_input high arrowhead-core-common/db_host || true
+db_input high arrowhead-core-common/mysql_password_gk || true
+db_input high arrowhead-core-common/sr_host || true
+
+# Run dialogs
+db_go || true
+

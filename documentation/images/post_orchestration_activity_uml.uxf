@@ -1,0 +1,114 @@
+<diagram program="umletino" version="14.3.0"><zoom_level>10</zoom_level><help_text>SERVICE REGISTRY DTO</help_text><element><id>UMLObject</id><coordinates><x>30</x><y>0</y><w>450</w><h>1560</h></coordinates><panel_attributes>ORCHESTRATOR
+valign=top
+fg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>70</x><y>70</y><w>30</w><h>70</h></coordinates><panel_attributes>lt=&lt;-
+</panel_attributes><additional_attributes>10;50;10;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>50</x><y>20</y><w>60</w><h>60</h></coordinates><panel_attributes>type=initial
+bg=green</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>60</x><y>500</y><w>40</w><h>40</h></coordinates><panel_attributes>bg=orange
+type=decision
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>90</x><y>120</y><w>160</w><h>40</h></coordinates><panel_attributes>lt=&lt;-
+[Invalid payload]</panel_attributes><additional_attributes>140;20;10;20</additional_attributes></element><element><id>UMLState</id><coordinates><x>230</x><y>120</y><w>120</w><h>40</h></coordinates><panel_attributes>BAD PAYLOAD
+EXCEPTION
+bg=red</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>60</x><y>120</y><w>40</w><h>40</h></coordinates><panel_attributes>bg=orange
+type=decision</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>70</x><y>150</y><w>110</w><h>90</h></coordinates><panel_attributes>lt=&lt;-
+[Valid payload]</panel_attributes><additional_attributes>10;70;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>90</x><y>220</y><w>430</w><h>40</h></coordinates><panel_attributes>lt=&lt;-
+[FLAG: External Service Request = true]</panel_attributes><additional_attributes>410;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>70</x><y>250</y><w>250</w><h>270</h></coordinates><panel_attributes>lt=&lt;-
+[FLAG: External Service Request = false]</panel_attributes><additional_attributes>10;250;10;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>60</x><y>220</y><w>40</w><h>40</h></coordinates><panel_attributes>bg=orange
+type=decision
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>60</x><y>690</y><w>40</w><h>40</h></coordinates><panel_attributes>bg=orange
+type=decision
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>90</x><y>500</y><w>260</w><h>40</h></coordinates><panel_attributes>lt=&lt;-
+[FLAG: Trigger Intercloud = true]</panel_attributes><additional_attributes>240;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>70</x><y>530</y><w>210</w><h>180</h></coordinates><panel_attributes>lt=&lt;-
+[FLAG: Trigger Intercloud = false]</panel_attributes><additional_attributes>10;160;10;10</additional_attributes></element><element><id>UMLObject</id><coordinates><x>730</x><y>0</y><w>240</w><h>1560</h></coordinates><panel_attributes>AUTHORIZATION
+valign=top
+fg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>330</x><y>510</y><w>120</w><h>40</h></coordinates><panel_attributes>CREATE GSD
+QUERY FORM
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>1030</x><y>510</y><w>120</w><h>40</h></coordinates><panel_attributes>GLOBAL SERVICE
+DISCOVERY (GSD)
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>440</x><y>520</y><w>610</w><h>30</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>590;10;10;10</additional_attributes></element><element><id>UMLState</id><coordinates><x>330</x><y>640</y><w>120</w><h>40</h></coordinates><panel_attributes>CREATE ICN
+REQUEST FORM
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>440</x><y>540</y><w>670</w><h>70</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;50;650;50;650;10</additional_attributes></element><element><id>UMLState</id><coordinates><x>1030</x><y>640</y><w>120</w><h>40</h></coordinates><panel_attributes>INTERCLOUD
+NEGOTIATION (ICN)
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>440</x><y>650</y><w>610</w><h>30</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>590;10;10;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>60</x><y>1150</y><w>40</w><h>40</h></coordinates><panel_attributes>bg=orange
+type=decision
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>90</x><y>690</y><w>430</w><h>40</h></coordinates><panel_attributes>lt=&lt;-
+[FLAG: Override Store = false]</panel_attributes><additional_attributes>410;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>70</x><y>720</y><w>180</w><h>90</h></coordinates><panel_attributes>lt=&lt;-
+[FLAG: Override Store = true]</panel_attributes><additional_attributes>10;70;10;10</additional_attributes></element><element><id>UMLObject</id><coordinates><x>80</x><y>960</y><w>140</w><h>40</h></coordinates><panel_attributes>SERVICE REGISTRY
+ENTRIES
+bg=yellow</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>500</x><y>220</y><w>120</w><h>70</h></coordinates><panel_attributes>QUERY
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLObject</id><coordinates><x>320</x><y>260</y><w>140</w><h>40</h></coordinates><panel_attributes>SERVICE REGISTRY
+ENTRIES
+bg=yellow</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>450</x><y>260</y><w>70</w><h>30</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;10;50;10</additional_attributes></element><element><id>UMLObject</id><coordinates><x>970</x><y>0</y><w>240</w><h>1560</h></coordinates><panel_attributes>GATEKEEPER
+valign=top
+fg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>780</x><y>1010</y><w>120</w><h>40</h></coordinates><panel_attributes>AUTHORIZE &amp;
+GENERATE TOKEN
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>70</x><y>1100</y><w>30</w><h>70</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;50;10;10</additional_attributes></element><element><id>UMLSyncBarHorizontal</id><coordinates><x>40</x><y>1100</y><w>80</w><h>20</h></coordinates><panel_attributes>lw=5
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>50</x><y>1040</y><w>810</w><h>90</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;70;10;20;790;20;790;10</additional_attributes></element><element><id>Relation</id><coordinates><x>140</x><y>990</y><w>660</w><h>60</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>640;40;10;40;10;10</additional_attributes></element><element><id>UMLState</id><coordinates><x>40</x><y>790</y><w>120</w><h>40</h></coordinates><panel_attributes>GET STORE
+ENTRIES
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>330</x><y>750</y><w>290</w><h>120</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;100;270;100;270;10</additional_attributes></element><element><id>Relation</id><coordinates><x>140</x><y>930</y><w>30</w><h>50</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;30;10;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>1070</x><y>730</y><w>40</w><h>40</h></coordinates><panel_attributes>bg=orange
+type=decision
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1080</x><y>670</y><w>30</w><h>80</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;60;10;10</additional_attributes></element><element><id>UMLObject</id><coordinates><x>1210</x><y>0</y><w>240</w><h>1560</h></coordinates><panel_attributes>GATEWAY
+valign=top
+fg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1100</x><y>730</y><w>200</w><h>40</h></coordinates><panel_attributes>lt=&lt;-
+[Gateway is mandatory]</panel_attributes><additional_attributes>180;20;10;20</additional_attributes></element><element><id>UMLState</id><coordinates><x>1280</x><y>730</y><w>120</w><h>40</h></coordinates><panel_attributes>CONNECT
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>320</x><y>760</y><w>1030</w><h>350</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;330;1010;330;1010;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1080</x><y>760</y><w>170</w><h>350</h></coordinates><panel_attributes>lt=-
+[Gateway isn't mandatory]</panel_attributes><additional_attributes>10;330;10;10</additional_attributes></element><element><id>UMLState</id><coordinates><x>330</x><y>570</y><w>120</w><h>40</h></coordinates><panel_attributes>CLOUD
+MATCHMAKING
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>380</x><y>600</y><w>30</w><h>60</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;40;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>90</x><y>1150</y><w>260</w><h>40</h></coordinates><panel_attributes>lt=&lt;-
+[FLAG: Only preferred = true]</panel_attributes><additional_attributes>240;20;10;20</additional_attributes></element><element><id>UMLState</id><coordinates><x>330</x><y>1160</y><w>120</w><h>50</h></coordinates><panel_attributes>REMOVE NOT
+PREFERRED
+PROVIDERS
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>330</x><y>330</y><w>120</w><h>40</h></coordinates><panel_attributes>ORCHESTRATION
+RESPONSE
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>360</x><y>400</y><w>60</w><h>60</h></coordinates><panel_attributes>type=final
+bg=green
+fg=black</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>380</x><y>290</y><w>30</w><h>60</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;40;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>380</x><y>360</y><w>30</w><h>60</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;40;10;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>300</x><y>830</y><w>40</w><h>40</h></coordinates><panel_attributes>bg=orange
+type=decision
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>170</x><y>860</y><w>170</w><h>100</h></coordinates><panel_attributes>lt=&lt;-
+Providers found</panel_attributes><additional_attributes>10;80;10;40;150;40;150;10</additional_attributes></element><element><id>UMLSyncBarHorizontal</id><coordinates><x>110</x><y>930</y><w>80</w><h>20</h></coordinates><panel_attributes>lw=5
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>110</x><y>910</y><w>30</w><h>50</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;30;10;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>300</x><y>750</y><w>40</w><h>40</h></coordinates><panel_attributes>bg=orange
+type=decision
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>310</x><y>780</y><w>140</w><h>70</h></coordinates><panel_attributes>lt=&lt;-
+[Providers not found]</panel_attributes><additional_attributes>10;10;10;50</additional_attributes></element><element><id>Relation</id><coordinates><x>130</x><y>530</y><w>220</w><h>190</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>200;10;10;10;10;170;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>130</x><y>710</y><w>210</w><h>60</h></coordinates><panel_attributes>lt=-
+[FLAG: Enable Intercloud = true]</panel_attributes><additional_attributes>10;10;10;30;190;30;190;40</additional_attributes></element><element><id>UMLSyncBarHorizontal</id><coordinates><x>130</x><y>690</y><w>20</w><h>20</h></coordinates><panel_attributes>lw=5
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSyncBarHorizontal</id><coordinates><x>130</x><y>710</y><w>20</w><h>20</h></coordinates><panel_attributes>lw=5
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>330</x><y>900</y><w>120</w><h>40</h></coordinates><panel_attributes>ORCHESTRATION
+RESPONSE
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>360</x><y>960</y><w>60</w><h>60</h></coordinates><panel_attributes>type=final
+bg=green
+fg=black</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>380</x><y>930</y><w>30</w><h>50</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;30;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>330</x><y>760</y><w>260</w><h>50</h></coordinates><panel_attributes>lt=-
+[FLAG: Enable Intercloud = false]</panel_attributes><additional_attributes>60;30;60;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>380</x><y>850</y><w>30</w><h>70</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;50;10;10</additional_attributes></element><element><id>UMLSyncBarHorizontal</id><coordinates><x>380</x><y>850</y><w>20</w><h>20</h></coordinates><panel_attributes>lw=5
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSyncBarHorizontal</id><coordinates><x>380</x><y>830</y><w>20</w><h>20</h></coordinates><panel_attributes>lw=5
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>380</x><y>780</y><w>30</w><h>80</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>10;10;10;60</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>400</x><y>110</y><w>60</w><h>60</h></coordinates><panel_attributes>type=final
+bg=red
+fg=black</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>340</x><y>130</y><w>80</w><h>30</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>60;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>70</x><y>1180</y><w>190</w><h>60</h></coordinates><panel_attributes>lt=-
+[FLAG: Only preferred = false]</panel_attributes><additional_attributes>10;40;10;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>60</x><y>1300</y><w>40</w><h>40</h></coordinates><panel_attributes>bg=orange
+type=decision
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>90</x><y>1300</y><w>260</w><h>40</h></coordinates><panel_attributes>lt=&lt;-
+[FLAG: Matchmaking = true]</panel_attributes><additional_attributes>240;20;10;20</additional_attributes></element><element><id>UMLState</id><coordinates><x>330</x><y>1300</y><w>120</w><h>40</h></coordinates><panel_attributes>PROVIDER
+MATCHMAKING
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSyncBarHorizontal</id><coordinates><x>40</x><y>1250</y><w>80</w><h>20</h></coordinates><panel_attributes>lw=5
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>70</x><y>1250</y><w>30</w><h>70</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;50;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>90</x><y>1200</y><w>320</w><h>80</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;60;10;40;300;40;300;10</additional_attributes></element><element><id>Relation</id><coordinates><x>70</x><y>1210</y><w>30</w><h>70</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;50;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>100</x><y>1390</y><w>30</w><h>60</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;40;10;10</additional_attributes></element><element><id>UMLState</id><coordinates><x>50</x><y>1430</y><w>120</w><h>40</h></coordinates><panel_attributes>ORCHESTRATION
+RESPONSE
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>100</x><y>1460</y><w>30</w><h>50</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;30;10;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>80</x><y>1490</y><w>60</w><h>60</h></coordinates><panel_attributes>type=final
+bg=green
+fg=black</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSyncBarHorizontal</id><coordinates><x>70</x><y>1390</y><w>80</w><h>20</h></coordinates><panel_attributes>lw=5
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>70</x><y>1330</y><w>180</w><h>50</h></coordinates><panel_attributes>lt=-
+[FLAG: Matchmaking = false]</panel_attributes><additional_attributes>10;30;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>130</x><y>1330</y><w>280</w><h>90</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;70;10;50;260;50;260;10</additional_attributes></element><element><id>Relation</id><coordinates><x>70</x><y>1350</y><w>30</w><h>70</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;50;10;10</additional_attributes></element><element><id>UMLObject</id><coordinates><x>190</x><y>1070</y><w>140</w><h>40</h></coordinates><panel_attributes>SERVICE REGISTRY
+ENTRIES
+bg=yellow</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>90</x><y>1080</y><w>120</w><h>50</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;30;10;10;100;10</additional_attributes></element><element><id>UMLState</id><coordinates><x>590</x><y>230</y><w>110</w><h>20</h></coordinates><panel_attributes>FLAG: Metadata search
+bg=orange
+fontsize=9</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>590</x><y>260</y><w>110</w><h>20</h></coordinates><panel_attributes>FLAG: Ping Provider
+bg=orange
+fontsize=9</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>500</x><y>690</y><w>120</w><h>70</h></coordinates><panel_attributes>QUERY
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>590</x><y>700</y><w>110</w><h>20</h></coordinates><panel_attributes>FLAG: Metadata search
+bg=orange
+fontsize=9</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>590</x><y>730</y><w>110</w><h>20</h></coordinates><panel_attributes>FLAG: Ping Provider
+bg=orange
+fontsize=9</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLObject</id><coordinates><x>480</x><y>0</y><w>250</w><h>1560</h></coordinates><panel_attributes>SERVICE  REGISTRY
+valign=top
+fg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>60</x><y>850</y><w>40</w><h>40</h></coordinates><panel_attributes>bg=orange
+type=decision
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>70</x><y>820</y><w>30</w><h>50</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;30;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>70</x><y>880</y><w>120</w><h>60</h></coordinates><panel_attributes>lt=-
+[Local providers]</panel_attributes><additional_attributes>10;10;10;40;50;40</additional_attributes></element><element><id>Relation</id><coordinates><x>220</x><y>650</y><w>130</w><h>40</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>110;10;10;10;10;20</additional_attributes></element><element><id>UMLSyncBarHorizontal</id><coordinates><x>220</x><y>660</y><w>20</w><h>20</h></coordinates><panel_attributes>lw=5
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>90</x><y>850</y><w>160</w><h>40</h></coordinates><panel_attributes>lt=-
+[Foreign providers]</panel_attributes><additional_attributes>140;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>220</x><y>780</y><w>30</w><h>110</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>10;90;10;10</additional_attributes></element><element><id>UMLSyncBarHorizontal</id><coordinates><x>220</x><y>780</y><w>20</w><h>20</h></coordinates><panel_attributes>lw=5
+</panel_attributes><additional_attributes></additional_attributes></element></diagram>

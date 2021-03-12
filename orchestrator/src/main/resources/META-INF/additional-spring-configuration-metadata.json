@@ -1,0 +1,62 @@
+{"properties": [
+  {
+    "name": "sr_address",
+    "type": "java.lang.String",
+    "description": "A description for 'sr_address'"
+  },
+  {
+    "name": "sr_port",
+    "type": "java.lang.Integer",
+    "description": "A description for 'sr_port'"
+  },
+  {
+    "name": "disable.hostname.verifier",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'disable.hostname.verifier'"
+  },
+  {
+    "name": "log_all_request_and_response",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'log_all_request_and_response'"
+  },
+  {
+    "name": "core_system_name",
+    "type": "java.lang.String",
+    "description": "A description for 'core_system_name'"
+  },
+  {
+    "name": "gatekeeper_is_present",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'gatekeeper_is_present'"
+  },
+  {
+    "name": "use_strict_service_intf_name_verifier",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'use_strict_service_intf_name_verifier'"
+  },
+  {
+    "name": "domain.name",
+    "type": "java.lang.String",
+    "description": "A description for 'domain.name'"
+  },
+  {
+    "name": "domain.port",
+    "type": "java.lang.String",
+    "description": "A description for 'domain.port'"
+  },
+  {
+    "name": "enable_qos",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'enable_qos'"
+  },
+  {
+    "name": "qos_reservation_check_interval",
+    "type": "java.lang.Integer",
+    "description": "A description for 'qos_reservation_check_interval'"
+  },
+  {
+    "name": "qos_ping_measurement_cache_threshold",
+    "type": "java.lang.Integer",
+    "description": "A description for 'qos_ping_measurement_cache_threshold'"
+  }
+]}

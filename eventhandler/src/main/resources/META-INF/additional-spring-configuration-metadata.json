@@ -1,0 +1,57 @@
+{"properties": [
+  {
+    "name": "sr_address",
+    "type": "java.lang.String",
+    "description": "A description for 'sr_address'"
+  },
+  {
+    "name": "time_stamp_tolerance_seconds",
+    "type": "java.lang.Long",
+    "description": "A description for 'time_stamp_tolerance_seconds'"
+  },
+  {
+    "name": "event_handler_ttl_scheduled",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'event_handler_ttl_scheduled'"
+  },
+  {
+    "name": "event_handler_ttl_interval",
+    "type": "java.lang.Long",
+    "description": "A description for 'event_handler_ttl_interval'"
+  },
+  {
+    "name": "sr_port",
+    "type": "java.lang.Integer",
+    "description": "A description for 'sr_port'"
+  },
+  {
+    "name": "disable.hostname.verifier",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'disable.hostname.verifier'"
+  },
+  {
+    "name": "log_all_request_and_response",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'log_all_request_and_response'"
+  },
+  {
+    "name": "core_system_name",
+    "type": "java.lang.String",
+    "description": "A description for 'core_system_name'"
+  },
+  {
+    "name": "event_handler_max_express_subscribers",
+    "type": "java.lang.Integer",
+    "description": "A description for 'event_handler_max_express_subscribers'"
+  },
+  {
+    "name": "domain.name",
+    "type": "java.lang.String",
+    "description": "A description for 'domain.name'"
+  },
+  {
+    "name": "domain.port",
+    "type": "java.lang.Integer",
+    "description": "A description for 'domain.port'"
+  }
+]}

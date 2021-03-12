@@ -1,0 +1,37 @@
+{"properties": [
+  {
+    "name": "ca.validity.negative-offest-millis",
+    "type": "java.lang.Long",
+    "description": "The negative offset in milliseconds from the current time for the beginning of the validity of the generated certificates"
+  },
+  {
+    "name": "ca.validity.positive-offest-millis",
+    "type": "java.lang.Long",
+    "description": "The offset in milliseconds from the current time for the end of the validity of the generated certificates"
+  },
+  {
+    "name": "disable.hostname.verifier",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'disable.hostname.verifier'"
+  },
+  {
+    "name": "log_all_request_and_response",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'log_all_request_and_response'"
+  },
+  {
+    "name": "core_system_name",
+    "type": "java.lang.String",
+    "description": "A description for 'core_system_name'"
+  },
+  {
+    "name": "domain.name",
+    "type": "java.lang.String",
+    "description": "A description for 'domain.name'"
+  },
+  {
+    "name": "domain.port",
+    "type": "java.lang.Integer",
+    "description": "A description for 'domain.port'"
+  }
+]}
