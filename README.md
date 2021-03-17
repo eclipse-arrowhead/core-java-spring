@@ -755,7 +755,7 @@ __ServiceQueryForm__ is the input
 | `minVersionRequirement` | Minimum version requirement | no |
 | `pingProviders` | Return only available providers | no |
 
-> **Note:** Valid `interfaceRequirements` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTPS-SECURE-JSON)
+> **Note:** Valid `interfaceRequirements` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTP-SECURE-JSON)
 
 > **Note:** Possible values for `securityRequirements` are:
 > * `NOT_SECURE`
@@ -881,7 +881,7 @@ __ServiceRegistryEntry__ is the input
 | `version` | Version of the Service | no |
 | `interfaces` | List of the interfaces the Service supports | yes |
 
-> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTPS-SECURE-JSON)
+> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTP-SECURE-JSON)
 
 > **Note:** `authenticationInfo` is the public key of the system. In Insecure mode you can omit sending this key.
 
@@ -1138,7 +1138,7 @@ __ServiceRegistryEntry__ is the input
 | `version` | Version of the Service | no |
 | `interfaces` | List of the interfaces the Service supports | yes |
 
-> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTPS-SECURE-JSON)
+> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTP-SECURE-JSON)
 
 > **Note:** Possible values for `secure` are:
 > * `NOT_SECURE` (default value if field is not defined)
@@ -1323,7 +1323,7 @@ __ServiceRegistryEntry__ is the input
 | `version` | Version of the Service | no |
 | `interfaces` | List of the interfaces the Service supports | yes |
 
-> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTPS-SECURE-JSON)
+> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTP-SECURE-JSON)
 
 > **Note:** Possible values for `secure` are:
 > * `NOT_SECURE` (default value if field is not defined)
@@ -1437,7 +1437,7 @@ __ServiceRegistryEntry__ is the input
 | `version` | Version of the Service | no |
 | `interfaces` | List of the interfaces the Service supports | no |
 
-> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTPS-SECURE-JSON)
+> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTP-SECURE-JSON)
 
 > **Note:** Possible values for `secure` are:
 > * `NOT_SECURE` (default value if field is not defined)
