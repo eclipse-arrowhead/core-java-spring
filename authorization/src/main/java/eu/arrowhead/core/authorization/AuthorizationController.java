@@ -96,7 +96,7 @@ public class AuthorizationController {
 	private static final String TOKEN_HTTP_200_MESSAGE = "Tokens returned";
 	private static final String TOKEN_HTTP_400_MESSAGE = "Could not generate tokens";
 	
-	private static final String PUBLIC_KEY_DESCRIPTION = "Returns the public key of the Authorization core service as a Base64 encoded text";
+	private static final String PUBLIC_KEY_DESCRIPTION = "Returns the public key of the Authorization core service as a Base64 encoded JSON string";
 	private static final String PUBLIC_KEY_200_MESSAGE = "Public key returned";
 	
 	private static final String AUTHORIZATION_INTRA_CLOUD_MGMT_URI = CoreCommonConstants.MGMT_URI + "/intracloud";
@@ -624,9 +624,9 @@ public class AuthorizationController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path = CommonConstants.OP_AUTH_KEY_URI)
+	@GetMapping(path = CommonConstants.OP_AUTH_KEY_URI, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String getPublicKey() {
-		return acquireAndConvertPublicKey();
+		return "\"" + acquireAndConvertPublicKey() + "\"";
 	}
 
 	//=================================================================================================
