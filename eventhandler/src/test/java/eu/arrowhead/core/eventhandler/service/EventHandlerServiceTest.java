@@ -681,7 +681,7 @@ public class EventHandlerServiceTest {
 		
 		final Set<Subscription> involvedSubscriptions = getSubscriptionSet(7);
 		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-		request.setTimeStamp("3019-09-27 09:40:34");
+		request.setTimeStamp("3019-09-27T09:40:34Z");
 		
 		when(eventHandlerDBService.getInvolvedSubscriptions(any())).thenReturn(involvedSubscriptions);
 		doNothing().when(eventHandlerDriver).publishEvent(any(),any());
@@ -702,7 +702,7 @@ public class EventHandlerServiceTest {
 		
 		final Set<Subscription> involvedSubscriptions = getSubscriptionSet(7);
 		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-		request.setTimeStamp("1019-09-27 09:40:34");
+		request.setTimeStamp("1019-09-27T09:40:34Z");
 		
 		when(eventHandlerDBService.getInvolvedSubscriptions(any())).thenReturn(involvedSubscriptions);
 		doNothing().when(eventHandlerDriver).publishEvent(any(),any());

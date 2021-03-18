@@ -94,7 +94,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	private static final List<String> inValidTestInterfaces = Arrays.asList("HTTP-NONSECURE-JSON", "HTTP-NONSECURE-XML");
 	private static final String validTestServiceUri = "testServiceUri";
 	private static final ZonedDateTime validTestEndOFValidity = ZonedDateTime.parse("2112-06-30T12:30:40Z[UTC]");
-	private static final String validTestEndOFValidityFormatForRequestDTO = "2112-06-20 12:00:00";
+	private static final String validTestEndOFValidityFormatForRequestDTO = "2112-06-20T12:00:00Z";
 	private static final Map<String, String> validTestMetadataForRequestDTO = Map.of("meta1", "data1",
 		    																		 "meta2", "data2");
 	private static final long validId = 1;

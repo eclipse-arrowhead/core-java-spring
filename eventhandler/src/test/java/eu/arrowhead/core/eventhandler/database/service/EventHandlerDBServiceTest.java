@@ -814,7 +814,7 @@ public class EventHandlerDBServiceTest {
 		ReflectionTestUtils.setField(eventHandlerService, "timeStampTolerance", 120);
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setStartDate("1019-09-27 09:40:34");
+		request.setStartDate("1019-09-27T09:40:34Z");
 		
 		final System system = createSystemForDBMock("systemName");
 		final EventType eventType = createEventTypeForDBMock("eventType");
@@ -843,7 +843,7 @@ public class EventHandlerDBServiceTest {
 		ReflectionTestUtils.setField(eventHandlerService, "timeStampTolerance", 120);
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setEndDate("1019-09-27 09:40:34");
+		request.setEndDate("1019-09-27T09:40:34Z");
 		
 		final System system = createSystemForDBMock("systemName");
 		final EventType eventType = createEventTypeForDBMock("eventType");
@@ -872,8 +872,8 @@ public class EventHandlerDBServiceTest {
 		ReflectionTestUtils.setField(eventHandlerService, "timeStampTolerance", 120);
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setStartDate("3019-09-27 09:40:35");
-		request.setEndDate("3019-09-27 09:40:34");
+		request.setStartDate("3019-09-27T09:40:35Z");
+		request.setEndDate("3019-09-27T09:40:34Z");
 		
 		final System system = createSystemForDBMock("systemName");
 		final EventType eventType = createEventTypeForDBMock("eventType");
@@ -902,8 +902,8 @@ public class EventHandlerDBServiceTest {
 		ReflectionTestUtils.setField(eventHandlerService, "timeStampTolerance", 120);
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setStartDate("3019-09-27 09:40:34");
-		request.setEndDate("3019-09-27 09:40:34");
+		request.setStartDate("3019-09-27T09:40:34Z");
+		request.setEndDate("3019-09-27T09:40:34Z");
 		
 		final System system = createSystemForDBMock("systemName");
 		final EventType eventType = createEventTypeForDBMock("eventType");
