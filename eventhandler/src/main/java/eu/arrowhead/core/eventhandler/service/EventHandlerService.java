@@ -83,7 +83,7 @@ public class EventHandlerService {
 		final SystemRequestDTO subscriber = request.getSubscriberSystem();
 		final Set<SystemResponseDTO> authorizedPublishers = eventHandlerDriver.getAuthorizedPublishers(subscriber);
 		
-		eventHandlerDBService.registerSubscription(request, authorizedPublishers);
+		eventHandlerDBService.forceRegisterSubscription(request, authorizedPublishers);
 	}
 
 	//-------------------------------------------------------------------------------------------------
