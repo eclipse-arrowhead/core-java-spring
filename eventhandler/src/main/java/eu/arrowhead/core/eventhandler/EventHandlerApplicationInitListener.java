@@ -113,33 +113,34 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 		final PublishingQueueWatcherTask publishingQueueWatcherTask = applicationContext.getBean(CoreCommonConstants.EVENT_PUBLISHING_QUEUE_WATCHER_TASK, PublishingQueueWatcherTask.class);
 		publishingQueueWatcherTask.start();
 		
-		int retry = 0;
-		while (retry < max_retry ) {
-			try {
-				
-				updateSubscriberAuthorizations();
-				logger.info("SubscriberAuthorizations are up to date.");
-				break;
-			} catch (final Exception ex) {
-				++retry;
-				logger.info("Unsuccessful update SubscriberAuthorizations. Tries left: " + (max_retry - retry) );
-				
-				if (retry == max_retry) {
+		@SuppressWarnings("unchecked")
+		final Map<String,Object> context = event.getApplicationContext().getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
+		standaloneMode = context.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
+
+		if (!standaloneMode) {
+			int retry = 0;
+			while (retry < max_retry) {
+				try {
+					updateSubscriberAuthorizations();
+					logger.info("SubscriberAuthorizations are up to date.");
+					break;
+				} catch (final Exception ex) {
+					++retry;
+					logger.info("Unsuccessful update SubscriberAuthorizations. Tries left: " + (max_retry - retry));
 					
-					logger.info("EventHandler could not start because of unsuccessful Subscribers Authorization: " + ex);
-					throw ex;
-				
-				}else {
-					
-					try {
-						Thread.sleep( delay_sec * 1000);
-					} catch (final InterruptedException e) {			
-						logger.error(e.getMessage());
+					if (retry == max_retry) {
+						logger.info("EventHandler could not start because of unsuccessful Subscribers Authorization: " + ex);
+						throw ex;
+					} else {
+						try {
+							Thread.sleep(delay_sec * 1000);
+						} catch (final InterruptedException e) {			
+							logger.error(e.getMessage());
+						}
 					}
-				}
-			}		
+				}		
+			}
 		}
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
