@@ -104,7 +104,6 @@ public class Utilities {
 	private static final Logger logger = LogManager.getLogger(Utilities.class);
 	private static final ObjectMapper mapper = new ObjectMapper();
 	static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_INSTANT;
-//	static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
 
 	static {
 	    mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
@@ -405,7 +404,7 @@ public class Utilities {
             while (enumeration.hasMoreElements()) {
                 final Certificate[] chain = keystore.getCertificateChain(enumeration.nextElement());
 
-                if(Objects.nonNull(chain) && chain.length >= 3) {
+                if (Objects.nonNull(chain) && chain.length >= 3) {
                     return (X509Certificate) chain[0];
                 }
             }
@@ -416,7 +415,7 @@ public class Utilities {
         }
     }
 
-//-------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	public static X509Certificate getCloudCertFromKeyStore(final KeyStore keystore) {
 		Assert.notNull(keystore, "Key store is not defined.");
 
@@ -428,8 +427,7 @@ public class Utilities {
 				final String alias = enumeration.nextElement();
                 final X509Certificate certificate = (X509Certificate) keystore.getCertificate(alias);
 
-                if(isCloudCertificate(certificate))
-                {
+                if (isCloudCertificate(certificate)) {
                     return certificate;
                 }
 			}
@@ -450,7 +448,7 @@ public class Utilities {
 
 		try {
             // debian installation with new certificates have a different alias
-			Enumeration<String> enumeration = keystore.aliases();
+			final Enumeration<String> enumeration = keystore.aliases();
 			while (enumeration.hasMoreElements()) {
 				final String alias = enumeration.nextElement();
                 final X509Certificate certificate = (X509Certificate) keystore.getCertificate(alias);
@@ -471,6 +469,7 @@ public class Utilities {
 			throw new ServiceConfigurationError("Getting the root cert from keystore failed...", ex);
 		}
 	}
+	
     //-------------------------------------------------------------------------------------------------
     public static PrivateKey getPrivateKey(final KeyStore keystore, final String keyPass) {
         Assert.notNull(keystore, "Key store is not defined.");
@@ -499,6 +498,7 @@ public class Utilities {
 
         return privateKey;
     }
+    
     //-------------------------------------------------------------------------------------------------
     public static PrivateKey getCloudPrivateKey(final KeyStore keystore, final String keyPass) {
         Assert.notNull(keystore, "Key store is not defined.");
@@ -511,9 +511,9 @@ public class Utilities {
 				final X509Certificate certificate = (X509Certificate) keystore.getCertificate(alias);
 				if (isCloudCertificate(certificate)) {
 					final PrivateKey privateKey = (PrivateKey) keystore.getKey(alias, keyPass.toCharArray());
-            if (privateKey != null) {
+					if (privateKey != null) {
 						logger.debug("Found cloud private key with alias: " + alias);
-                return privateKey;
+						return privateKey;
 					}
 				}
             }
