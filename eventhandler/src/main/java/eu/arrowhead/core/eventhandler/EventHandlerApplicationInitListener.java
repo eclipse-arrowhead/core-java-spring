@@ -60,11 +60,11 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 	// members
 	
 
-	@Value(CoreCommonConstants.$EVENT_HANDLER_MAX_RETRY_CONNECT_AUTH_WD)
-	private int max_retry;
+	@Value(CoreCommonConstants.$EVENTHANDLER_MAX_RETRY_CONNECT_AUTH_WD)
+	private int maxRetry;
 	
-	@Value(CoreCommonConstants.$EVENT_HANDLER_RETRY_CONNECT_AUTH_INTERVAL_SEC_WD)
-	private int delay_sec;
+	@Value(CoreCommonConstants.$EVENTHANDLER_RETRY_CONNECT_AUTH_INTERVAL_SEC_WD)
+	private int delaySec;
 	
 	@Autowired
 	private EventHandlerDBService eventHandlerDBService;
@@ -119,21 +119,21 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 
 		if (!standaloneMode) {
 			int retry = 0;
-			while (retry < max_retry) {
+			while (retry < maxRetry) {
 				try {
 					updateSubscriberAuthorizations();
 					logger.info("SubscriberAuthorizations are up to date.");
 					break;
 				} catch (final Exception ex) {
 					++retry;
-					logger.info("Unsuccessful update SubscriberAuthorizations. Tries left: " + (max_retry - retry));
+					logger.info("Unsuccessful update SubscriberAuthorizations. Tries left: " + (maxRetry - retry));
 					
-					if (retry == max_retry) {
+					if (retry == maxRetry) {
 						logger.info("EventHandler could not start because of unsuccessful Subscribers Authorization: " + ex);
 						throw ex;
 					} else {
 						try {
-							Thread.sleep(delay_sec * 1000);
+							Thread.sleep(delaySec * 1000);
 						} catch (final InterruptedException e) {			
 							logger.error(e.getMessage());
 						}
@@ -205,8 +205,7 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 		
 		final UriComponents authSubscriptionCheckUri = findCoreSystemServiceUri(CoreSystemService.AUTH_CONTROL_SUBSCRIPTION_SERVICE, queryUri);
 		
-		if ( authSubscriptionCheckUri != null) {
-
+		if (authSubscriptionCheckUri != null) {
 			return authSubscriptionCheckUri;
 		}
 		
@@ -248,7 +247,7 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 		logger.debug("createEchoUri started...");
 				
 		final String scheme = queryUri.getScheme();
-		final String echoUriStr = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.ECHO_URI;
+		final String echoUriStr = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.ECHO_URI;
 		return Utilities.createURI(scheme, queryUri.getHost(), queryUri.getPort(), echoUriStr);
 	}
 	
@@ -276,5 +275,4 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 			
 		return null;
 	}
-	
 }
