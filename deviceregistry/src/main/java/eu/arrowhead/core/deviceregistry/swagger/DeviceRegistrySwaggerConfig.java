@@ -30,7 +30,7 @@ public class DeviceRegistrySwaggerConfig extends DefaultSwaggerConfig {
 	
 	//-------------------------------------------------------------------------------------------------
 	public DeviceRegistrySwaggerConfig() {
-		super(CommonConstants.CORE_SYSTEM_DEVICE_REGISTRY);
+		super(CommonConstants.CORE_SYSTEM_DEVICEREGISTRY);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
