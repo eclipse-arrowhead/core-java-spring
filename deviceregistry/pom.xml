@@ -115,7 +115,7 @@
 	                			
 	                			<data>
 	                				<type>file</type>
-	                				<src>${project.basedir}/src/deb/arrowhead-deviceregistry.service</src>
+	                				<src>${project.basedir}/src/deb/arrowhead-device-registry.service</src>
 	                				<mapper>
 	                					<type>perm</type>
 	                					<prefix>/etc/systemd/system</prefix>
