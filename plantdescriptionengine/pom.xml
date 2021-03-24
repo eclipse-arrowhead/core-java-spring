@@ -1,0 +1,157 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                      http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>eu.arrowhead</groupId>
+  <artifactId>arrowhead-plantdescriptionengine</artifactId>
+  <packaging>jar</packaging>
+  <version>0.0.3</version>
+  <name>Arrowhead Plant Description Engine</name>
+  <description>Arrowhead Plant Description Engine core service</description>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.release>11</maven.compiler.release>
+    <kalix.version>0.4.2</kalix.version>
+    <mysql.jdbc.driver>8.0.16</mysql.jdbc.driver>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>${mysql.jdbc.driver}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-api</artifactId>
+        <version>5.7.0</version>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-engine</artifactId>
+        <version>5.7.0</version>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>se.arkalix</groupId>
+        <artifactId>kalix-base</artifactId>
+        <version>${kalix.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>se.arkalix</groupId>
+        <artifactId>kalix-core-plugins</artifactId>
+        <version>${kalix.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>se.arkalix</groupId>
+        <artifactId>kalix-processors</artifactId>
+        <version>${kalix.version}</version>
+        <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-jdk14</artifactId>
+      <version>1.7.30</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>2.14.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>2.14.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-inline</artifactId>
+      <version>3.7.7</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <version>3.7.7</version>
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <plugins>
+        <plugin>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.8.1</version>
+        </plugin>
+        <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>3.2.0</version>
+            <configuration>
+                <descriptorRefs>
+                    <descriptorRef>jar-with-dependencies</descriptorRef>
+                </descriptorRefs>
+
+                <archive>
+                    <manifest>
+                      <mainClass>eu.arrowhead.core.plantdescriptionengine.PdeMain</mainClass>
+                    </manifest>
+                </archive>
+
+            </configuration>
+            <executions>
+                <execution>
+                    <id>make-assembly</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>single</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+
+        <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>2.22.2</version>
+        </plugin>
+        <plugin>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <version>2.22.2</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>0.8.5</version>
+          <configuration>
+            <excludes>
+                <exclude>**/*Dto.*</exclude>
+                <exclude>**/dto/*Builder.*</exclude>
+            </excludes>
+         </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>prepare-agent</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>report</id>
+              <phase>test</phase>
+              <goals>
+                <goal>report</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+    </plugins>
+
+  </build>
+
+</project>
