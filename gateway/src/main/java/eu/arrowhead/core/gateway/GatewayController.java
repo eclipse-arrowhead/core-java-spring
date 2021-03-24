@@ -131,7 +131,7 @@ public class GatewayController {
 	public String getPublicKey() {
 		logger.debug("New public key GET request received...");
 		
-		return acquireAndConvertPublicKey();
+		return "\"" + acquireAndConvertPublicKey() + "\"";
 	}
 	
 	//-------------------------------------------------------------------------------------------------

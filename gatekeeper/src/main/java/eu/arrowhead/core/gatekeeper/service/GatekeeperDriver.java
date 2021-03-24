@@ -297,8 +297,9 @@ public class GatekeeperDriver {
 		
 		final UriComponents publicKeyUri = getGatewayPublicKeyUri();
 		final ResponseEntity<String> response = httpService.sendRequest(publicKeyUri, HttpMethod.GET, String.class);
+		final String encodedKey = Utilities.fromJson(response.getBody(), String.class);
 		
-		return response.getBody();
+		return encodedKey;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
