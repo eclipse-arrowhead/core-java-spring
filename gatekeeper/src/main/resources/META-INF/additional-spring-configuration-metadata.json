@@ -48,5 +48,20 @@
     "name": "domain.port",
     "type": "java.lang.Integer",
     "description": "A description for 'domain.port'"
+  },
+  {
+    "name": "http.client.socket.timeout",
+    "type": "java.lang.Integer",
+    "description": "A description for 'http.client.socket.timeout'"
+  },
+  {
+    "name": "http.client.connection.timeout",
+    "type": "java.lang.Integer",
+    "description": "A description for 'http.client.connection.timeout'"
+  },
+  {
+    "name": "http.client.connection.manager.timeout",
+    "type": "java.lang.Integer",
+    "description": "A description for 'http.client.connection.manager.timeout'"
   }
 ]}
