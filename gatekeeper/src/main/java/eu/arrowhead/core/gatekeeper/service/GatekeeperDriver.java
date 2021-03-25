@@ -410,8 +410,9 @@ public class GatekeeperDriver {
 		
 		final UriComponents publicKeyUri = getQoSMonitorPublicKeyUri();
 		final ResponseEntity<String> response = httpService.sendRequest(publicKeyUri, HttpMethod.GET, String.class);
+		final String encodedKey = Utilities.fromJson(response.getBody(), String.class);
 		
-		return response.getBody();
+		return encodedKey;
 	}
 	
 	//-------------------------------------------------------------------------------------------------

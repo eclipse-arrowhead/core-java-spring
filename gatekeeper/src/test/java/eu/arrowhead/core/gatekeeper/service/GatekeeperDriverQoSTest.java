@@ -208,7 +208,7 @@ public class GatekeeperDriverQoSTest {
 		
 		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
 		when(arrowheadContext.get(anyString())).thenReturn(uri);
-		when(httpService.sendRequest(uri, HttpMethod.GET, String.class)).thenReturn(new ResponseEntity<>("public key", HttpStatus.OK));
+		when(httpService.sendRequest(uri, HttpMethod.GET, String.class)).thenReturn(new ResponseEntity<>("\"public key\"", HttpStatus.OK));
 		
 		testingObject.queryQoSMonitorPublicKey();
 		
