@@ -65,16 +65,6 @@
     "description": "A description for 'ping.available_from_success_percent'"
   },
   {
-    "name": "ping.logMeasurementsToDB",
-    "type": "java.lang.Boolean",
-    "description": "A description for 'ping.logMeasurementsToDB'"
-  },
-  {
-    "name": "ping.logMeasurementsDetailsToDB",
-    "type": "java.lang.Boolean",
-    "description": "A description for 'ping.logMeasurementsDetailsToDB'"
-  },
-  {
     "name": "relay.test.time_to_repeat",
     "type": "java.lang.Byte",
     "description": "A description for 'relay.test.time_to_repeat'"
@@ -138,5 +128,65 @@
     "name": "relay_ping_ttl_interval_minutes",
     "type": "java.lang.Integer",
     "description": "A description for 'relay_ping_ttl_interval_minutes'"
+  },
+  {
+    "name": "relay_echo_ttl_interval_minutes",
+    "type": "java.lang.Integer",
+    "description": "A description for 'relay_echo_ttl_interval_minutes'"
+  },
+  {
+    "name": "relay.test.bad_gateway_retry_min",
+    "type": "java.lang.Integer",
+    "description": "A description for 'relay.test.bad_gateway_retry_min'"
+  },
+  {
+    "name": "default.min_response_time",
+    "type": "java.lang.Integer",
+    "description": "A description for 'default.min_response_time'"
+  },
+  {
+    "name": "default.max_response_time",
+    "type": "java.lang.Integer",
+    "description": "A description for 'default.max_response_time'"
+  },
+  {
+    "name": "default.mean_response_time_with_timeout",
+    "type": "java.lang.Integer",
+    "description": "A description for 'default.mean_response_time_with_timeout'"
+  },
+  {
+    "name": "default.mean_response_time_without_timeout",
+    "type": "java.lang.Integer",
+    "description": "A description for 'default.mean_response_time_without_timeout'"
+  },
+  {
+    "name": "default.jitter_with_timeout",
+    "type": "java.lang.Integer",
+    "description": "A description for 'default.jitter_with_timeout'"
+  },
+  {
+    "name": "default.jitter_without_timeout",
+    "type": "java.lang.Integer",
+    "description": "A description for 'default.jitter_without_timeout'"
+  },
+  {
+    "name": "default.lost_per_measurement_percent",
+    "type": "java.lang.Integer",
+    "description": "A description for 'default.lost_per_measurement_percent'"
+  },
+  {
+    "name": "http.client.socket.timeout",
+    "type": "java.lang.Integer",
+    "description": "A description for 'http.client.socket.timeout'"
+  },
+  {
+    "name": "http.client.connection.timeout",
+    "type": "java.lang.Integer",
+    "description": "A description for 'http.client.connection.timeout'"
+  },
+  {
+    "name": "http.client.connection.manager.timeout",
+    "type": "java.lang.Integer",
+    "description": "A description for 'http.client.connection.manager.timeout'"
   }
 ]}

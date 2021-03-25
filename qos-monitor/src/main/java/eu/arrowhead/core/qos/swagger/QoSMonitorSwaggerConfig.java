@@ -31,7 +31,7 @@ public class QoSMonitorSwaggerConfig extends DefaultSwaggerConfig {
 
 	//-------------------------------------------------------------------------------------------------
 	public QoSMonitorSwaggerConfig() {
-		super(CommonConstants.CORE_SYSTEM_QOS_MONITOR);
+		super(CommonConstants.CORE_SYSTEM_QOSMONITOR);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

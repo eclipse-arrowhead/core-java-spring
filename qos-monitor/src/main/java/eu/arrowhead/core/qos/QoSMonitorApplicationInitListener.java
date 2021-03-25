@@ -77,7 +77,7 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 	private UriComponents createQueryAllUri(final String scheme) {
 		logger.debug("createQueryAllUri started...");
 
-		final String registyUriStr = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_ALL_SERVICE_URI;
+		final String registyUriStr = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_QUERY_ALL_SERVICE_URI;
 
 		return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), registyUriStr);
 	}

@@ -671,7 +671,7 @@ public class RelayEchoTaskTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private PublicKey getPublicKey() {
-		final InputStream publicKeyInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("certificates/qos_monitor.pub");
+		final InputStream publicKeyInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("certificates/qosmonitor.pub");
 		return Utilities.getPublicKeyFromPEMFile(publicKeyInputStream);
 	}
 	

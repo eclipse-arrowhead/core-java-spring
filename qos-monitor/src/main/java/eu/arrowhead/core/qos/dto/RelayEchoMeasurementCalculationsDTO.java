@@ -82,5 +82,4 @@ public class RelayEchoMeasurementCalculationsDTO implements Serializable {
 	public void setReceivedInThisTest(final Integer receivedInThisPing) { this.receivedInThisTest = receivedInThisPing; }
 	public void setLostPerMeasurementPercent(final Integer lostPerMeasurementPercent) { this.lostPerMeasurementPercent = lostPerMeasurementPercent; }
 	public void setMeasuredAt(final ZonedDateTime measuredAt) { this.measuredAt = measuredAt; }
-
 }

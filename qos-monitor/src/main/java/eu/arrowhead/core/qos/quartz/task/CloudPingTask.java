@@ -154,7 +154,6 @@ public class CloudPingTask implements Job {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@SuppressWarnings("unchecked")
 	private boolean checkRequiredCoreSystemServiceUrisAvailable() {
 		logger.debug("checkRequiredCoreSystemServiceUrisAvailable started...");
 		for (final CoreSystemService coreSystemService : REQUIRED_CORE_SERVICES) {
@@ -193,10 +192,8 @@ public class CloudPingTask implements Job {
 
 		final Set<CloudResponseDTO> clouds = new HashSet<>();
 		for (final CloudWithRelaysAndPublicRelaysResponseDTO cloudWithRelay : responseDTO.getData()) {
-
 			if (cloudWithRelay != null && !cloudWithRelay.getOwnCloud()) {
-				if( cloudIsDirectlyAccessable(cloudWithRelay, cloudAccessResponseDTOList)) {
-
+				if (cloudIsDirectlyAccessable(cloudWithRelay, cloudAccessResponseDTOList)) {
 					clouds.add(cloudWithRelay);
 				}
 			}
@@ -206,16 +203,13 @@ public class CloudPingTask implements Job {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private boolean cloudIsDirectlyAccessable(final CloudWithRelaysAndPublicRelaysResponseDTO cloudWithRelay,
-			final List<CloudAccessResponseDTO> cloudAccessResponseDTOList) {
+	private boolean cloudIsDirectlyAccessable(final CloudWithRelaysAndPublicRelaysResponseDTO cloudWithRelay, final List<CloudAccessResponseDTO> cloudAccessResponseDTOList) {
 		logger.debug("cloudIsDirectlyAccessable started...");
 
 		for (final CloudAccessResponseDTO cloudAccessResponseDTO : cloudAccessResponseDTOList) {
-
 			if (cloudAccessResponseDTO != null && cloudAccessResponseDTO.isDirectAccess()) {
-				if ( (cloudWithRelay.getName().equalsIgnoreCase(cloudAccessResponseDTO.getCloudName())) && 
-						(cloudWithRelay.getOperator().equalsIgnoreCase(cloudAccessResponseDTO.getCloudOperator())) ) {
-
+				if ((cloudWithRelay.getName().equalsIgnoreCase(cloudAccessResponseDTO.getCloudName())) && 
+						(cloudWithRelay.getOperator().equalsIgnoreCase(cloudAccessResponseDTO.getCloudOperator()))) {
 					return true;
 				}
 			}
@@ -241,9 +235,7 @@ public class CloudPingTask implements Job {
 				cloudToMeasure = cloudResponseDTO;
 				cloudToMeasureFound = true;
 				break;
-
-			}else {
-
+			} else {
 				ZonedDateTime min = ZonedDateTime.now();
 				for (final QoSInterDirectMeasurement qoSInterMeasurement : measurementList) {
 					if (qoSInterMeasurement.getUpdatedAt().isBefore(min)) {
@@ -286,7 +278,6 @@ public class CloudPingTask implements Job {
 		int meanResponseTimeWithoutTimeoutMembersCount = 0;
 
 		for (final IcmpPingResponse icmpPingResponse : responseList) {
-
 			final boolean successFlag = icmpPingResponse.getSuccessFlag();
 
 			if (successFlag) {
@@ -304,7 +295,6 @@ public class CloudPingTask implements Job {
 				sumOfDurationForMeanResponseTimeWithoutTimeout += duration;
 				sumOfDurationForMeanResponseTimeWithTimeout += duration;
 				++meanResponseTimeWithoutTimeoutMembersCount;
-
 			} else {
 				sumOfDurationForMeanResponseTimeWithTimeout += timeout;
 			}
@@ -319,7 +309,6 @@ public class CloudPingTask implements Job {
 		double sumOfDiffsForJitterWithTimeout = 0;
 		double sumOfDiffsForJitterWithoutTimeout = 0;
 		for (final IcmpPingResponse icmpPingResponse : responseList) {
-
 			final boolean successFlag = icmpPingResponse.getSuccessFlag();
 			final double duration;
 			if (successFlag) {
@@ -331,6 +320,7 @@ public class CloudPingTask implements Job {
 
 			sumOfDiffsForJitterWithTimeout += Math.pow( (duration - meanResponseTimeWithTimeout), 2);
 		}
+		
 		final double jitterWithTimeout = responseList.size() < 1 ? INVALID_CALCULATION_VALUE : Math.sqrt(sumOfDiffsForJitterWithTimeout / responseList.size());
 		final double jitterWithoutTimeout =  meanResponseTimeWithoutTimeoutMembersCount < 1 ? INVALID_CALCULATION_VALUE : Math.sqrt(sumOfDiffsForJitterWithoutTimeout / meanResponseTimeWithoutTimeoutMembersCount );
 
@@ -368,8 +358,7 @@ public class CloudPingTask implements Job {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private PingMeasurementCalculationsDTO handleInterPingMeasurement(final QoSInterDirectMeasurement measurement,
-			final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
+	private PingMeasurementCalculationsDTO handleInterPingMeasurement(final QoSInterDirectMeasurement measurement, final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
 		logger.debug("handelPingMeasurement started...");
 
 		final PingMeasurementCalculationsDTO calculationsDTO = calculatePingMeasurementValues(responseList, aroundNow);
@@ -380,25 +369,19 @@ public class CloudPingTask implements Job {
 			qoSDBService.createInterDirectPingMeasurement(measurement, calculationsDTO, aroundNow);
 
 			if (pingMeasurementProperties.getLogMeasurementsToDB()) {
-
 				final QoSInterDirectPingMeasurementLog measurementLogSaved = qoSDBService.logInterDirectMeasurementToDB(measurement.getAddress(), calculationsDTO, aroundNow);
 
 				if (pingMeasurementProperties.getLogMeasurementsDetailsToDB() && measurementLogSaved != null) {
-
 					qoSDBService.logInterDirectMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
 				}
 			}
-
 		} else {
-
 			qoSDBService.updateInterDirectPingMeasurement(measurement, calculationsDTO, pingMeasurementOptional.get(), aroundNow);
 
-			if(pingMeasurementProperties.getLogMeasurementsToDB()) {
-
+			if (pingMeasurementProperties.getLogMeasurementsToDB()) {
 				final QoSInterDirectPingMeasurementLog measurementLogSaved = qoSDBService.logInterDirectMeasurementToDB(measurement.getAddress(), calculationsDTO, aroundNow);
 
-				if(pingMeasurementProperties.getLogMeasurementsDetailsToDB() && measurementLogSaved != null) {
-
+				if (pingMeasurementProperties.getLogMeasurementsDetailsToDB() && measurementLogSaved != null) {
 					qoSDBService.logInterDirectMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
 				}
 			}
@@ -416,5 +399,4 @@ public class CloudPingTask implements Job {
 
 		return availableFromSuccessPercent <= Math.round(availablePercent);
 	}
-
 }
