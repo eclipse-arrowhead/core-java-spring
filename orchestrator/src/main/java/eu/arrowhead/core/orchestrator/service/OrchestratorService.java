@@ -109,7 +109,7 @@ public class OrchestratorService {
 	@Resource(name = CoreCommonConstants.CLOUD_MATCHMAKER)
 	private CloudMatchmakingAlgorithm cloudMatchmaker;
 	
-	@Resource(name = CoreCommonConstants.QOS_MANAGER)
+	@Resource(name = CoreCommonConstants.QOSMANAGER)
 	private QoSManager qosManager;
 	
 	@Value(CoreCommonConstants.$ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD)
