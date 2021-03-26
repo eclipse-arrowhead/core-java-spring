@@ -19,8 +19,12 @@ import se.arkalix.util.concurrent.Future;
 import java.net.InetSocketAddress;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 public class PingTaskTest {
@@ -32,15 +36,15 @@ public class PingTaskTest {
         final String systemName = "System-xyz";
 
         final HttpClient httpClient = Mockito.mock(HttpClient.class);
-        final var alarmManager = new AlarmManager();
+        final AlarmManager alarmManager = new AlarmManager();
         final ServiceQuery serviceQuery = Mockito.mock(ServiceQuery.class);
         final ServiceDescription service = Mockito.mock(ServiceDescription.class);
-        Set<ServiceDescription> services = Set.of(service);
-        final var resolveResult = Future.success(services);
+        final Set<ServiceDescription> services = Set.of(service);
+        final Future<Set<ServiceDescription>> resolveResult = Future.success(services);
         final MockClientResponse response = new MockClientResponse();
         response.status(HttpStatus.OK);
-        ProviderDescription provider = Mockito.mock(ProviderDescription.class);
-        InetSocketAddress address = new InetSocketAddress("1.1.1.1", 8443);
+        final ProviderDescription provider = Mockito.mock(ProviderDescription.class);
+        final InetSocketAddress address = new InetSocketAddress("1.1.1.1", 8443);
         when(serviceQuery.name("monitorable")).thenReturn(serviceQuery);
         when(serviceQuery.transports(TransportDescriptor.HTTP)).thenReturn(serviceQuery);
         when(serviceQuery.encodings(EncodingDescriptor.JSON)).thenReturn(serviceQuery);
@@ -49,7 +53,7 @@ public class PingTaskTest {
         when(provider.name()).thenReturn(systemName);
         when(provider.socketAddress()).thenReturn(address);
 
-        final var expectedRequest = new HttpClientRequest()
+        final HttpClientRequest expectedRequest = new HttpClientRequest()
             .method(HttpMethod.GET)
             .uri(service.uri() + "/ping")
             .header("accept", "application/json");
@@ -58,7 +62,7 @@ public class PingTaskTest {
             .thenReturn(Future.success(response));
         when(serviceQuery.resolveAll()).thenReturn(resolveResult);
 
-        final var pingTask = new PingTask(serviceQuery, httpClient, alarmManager);
+        final PingTask pingTask = new PingTask(serviceQuery, httpClient, alarmManager);
 
         alarmManager.raiseSystemInactive(systemName);
         assertFalse(alarmManager.getAlarms()
@@ -78,15 +82,15 @@ public class PingTaskTest {
         final String systemName = "System-xyz";
 
         final HttpClient httpClient = Mockito.mock(HttpClient.class);
-        final var alarmManager = new AlarmManager();
+        final AlarmManager alarmManager = new AlarmManager();
         final ServiceQuery serviceQuery = Mockito.mock(ServiceQuery.class);
         final ServiceDescription service = Mockito.mock(ServiceDescription.class);
-        final var error = new Throwable("Some error");
+        final Throwable error = new Throwable("Some error");
         final Future<Set<ServiceDescription>> resolveResult = Future.failure(error);
         final MockClientResponse response = new MockClientResponse();
         response.status(HttpStatus.OK);
 
-        final var expectedRequest = new HttpClientRequest()
+        final HttpClientRequest expectedRequest = new HttpClientRequest()
             .method(HttpMethod.GET)
             .uri(service.uri() + "/ping")
             .header("accept", "application/json");
@@ -95,7 +99,7 @@ public class PingTaskTest {
             .thenReturn(Future.success(response));
         when(serviceQuery.resolveAll()).thenReturn(resolveResult);
 
-        final var pingTask = new PingTask(serviceQuery, httpClient, alarmManager);
+        final PingTask pingTask = new PingTask(serviceQuery, httpClient, alarmManager);
 
         alarmManager.raiseSystemInactive(systemName);
         assertFalse(alarmManager.getAlarms()
@@ -114,17 +118,17 @@ public class PingTaskTest {
 
         final String serviceUri = "some.service.uri";
         final String systemName = "System-xyz";
-        InetSocketAddress address = new InetSocketAddress("1.1.1.1", 8443);
+        final InetSocketAddress address = new InetSocketAddress("1.1.1.1", 8443);
 
         final HttpClient httpClient = Mockito.mock(HttpClient.class);
-        final var alarmManager = new AlarmManager();
+        final AlarmManager alarmManager = new AlarmManager();
         final ServiceQuery serviceQuery = Mockito.mock(ServiceQuery.class);
         final ServiceDescription service = Mockito.mock(ServiceDescription.class);
-        Set<ServiceDescription> services = Set.of(service);
-        final var resolveResult = Future.success(services);
+        final Set<ServiceDescription> services = Set.of(service);
+        final Future<Set<ServiceDescription>> resolveResult = Future.success(services);
         final MockClientResponse response = new MockClientResponse();
         response.status(HttpStatus.OK);
-        ProviderDescription provider = Mockito.mock(ProviderDescription.class);
+        final ProviderDescription provider = Mockito.mock(ProviderDescription.class);
         when(serviceQuery.name("monitorable")).thenReturn(serviceQuery);
         when(serviceQuery.transports(TransportDescriptor.HTTP)).thenReturn(serviceQuery);
         when(serviceQuery.encodings(EncodingDescriptor.JSON)).thenReturn(serviceQuery);
@@ -132,9 +136,9 @@ public class PingTaskTest {
         when(service.uri()).thenReturn(serviceUri);
         when(provider.name()).thenReturn(systemName);
         when(provider.socketAddress()).thenReturn(address);
-        final var error = new Throwable("Some error");
+        final Throwable error = new Throwable("Some error");
 
-        final var expectedRequest = new HttpClientRequest()
+        final HttpClientRequest expectedRequest = new HttpClientRequest()
             .method(HttpMethod.GET)
             .uri(service.uri() + "/ping")
             .header("accept", "application/json");
@@ -142,7 +146,7 @@ public class PingTaskTest {
             .thenReturn(Future.failure(error));
         when(serviceQuery.resolveAll()).thenReturn(resolveResult);
 
-        final var pingTask = new PingTask(serviceQuery, httpClient, alarmManager);
+        final PingTask pingTask = new PingTask(serviceQuery, httpClient, alarmManager);
 
         assertEquals(0, alarmManager.getAlarms().size());
         pingTask.run();

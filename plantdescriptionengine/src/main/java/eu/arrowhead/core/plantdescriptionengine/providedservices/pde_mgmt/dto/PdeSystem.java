@@ -7,6 +7,7 @@ import se.arkalix.dto.DtoWritableAs;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static se.arkalix.dto.DtoEncoding.JSON;
@@ -31,8 +32,9 @@ public interface PdeSystem {
      * @param portName The name of a port.
      * @return The port with the given name, or null if it does not exist.
      */
-    default Port getPort(String portName) {
-        for (var port : ports()) {
+    default Port getPort(final String portName) {
+        Objects.requireNonNull(portName, "Expected port name.");
+        for (final Port port : ports()) {
             if (port.portName().equals(portName)) {
                 return port;
             }
@@ -41,19 +43,19 @@ public interface PdeSystem {
     }
 
     /**
-     * @return The union of service and port metadata. In case of overlaps between
-     * the two sets, service metadata has precedence.
+     * @return The union of service and port metadata. In case of overlaps
+     * between the two sets, service metadata has precedence.
      */
-    default Map<String, String> portMetadata(String portName) {
-        Port port = getPort(portName);
+    default Map<String, String> portMetadata(final String portName) {
+        final Port port = getPort(portName);
         return Metadata.merge(metadata().orElse(null), port.metadata().orElse(null));
     }
 
     /**
      * @return True if the system has a port with the given name.
      */
-    default boolean hasPort(String portName) {
-        for (var port : ports()) {
+    default boolean hasPort(final String portName) {
+        for (final Port port : ports()) {
             if (port.portName().equals(portName)) {
                 return true;
             }

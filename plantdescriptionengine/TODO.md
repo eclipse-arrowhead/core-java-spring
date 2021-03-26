@@ -3,6 +3,9 @@
 ## Monitor service
 * Remove `include` field from DTOs, merge with the included Plant Descriptions.
 
+## Monitorable service
+* Implement
+
 ## Documentation
 * Specify the cases where some fields may not be present (AR Kalix's default
   way of handling missing Optionals).

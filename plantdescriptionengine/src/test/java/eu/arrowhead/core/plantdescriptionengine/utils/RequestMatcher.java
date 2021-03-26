@@ -3,10 +3,12 @@ package eu.arrowhead.core.plantdescriptionengine.utils;
 import org.mockito.ArgumentMatcher;
 import se.arkalix.net.http.client.HttpClientRequest;
 
+import java.util.Objects;
+
 /**
- * Argument matcher used to compare HttpClientRequest arguments.
- * Note that this matcher does not perform a complete comparison between
- * requests: The body is ignored.
+ * Argument matcher used to compare HttpClientRequest arguments. Note that this
+ * matcher does not perform a complete comparison between requests: The body is
+ * ignored.
  */
 public class RequestMatcher implements ArgumentMatcher<HttpClientRequest> {
 
@@ -17,8 +19,9 @@ public class RequestMatcher implements ArgumentMatcher<HttpClientRequest> {
      *
      * @param request Request used for comparisons.
      */
-    public RequestMatcher(HttpClientRequest request) {
-        this.a = request;
+    public RequestMatcher(final HttpClientRequest request) {
+        Objects.requireNonNull(request, "Expected request.");
+        a = request;
     }
 
     /**
@@ -26,7 +29,8 @@ public class RequestMatcher implements ArgumentMatcher<HttpClientRequest> {
      * initialized with.
      */
     @Override
-    public boolean matches(HttpClientRequest b) {
+    public boolean matches(final HttpClientRequest b) {
+        Objects.requireNonNull(b, "Expected request.");
 
         if (!a.uri().equals(b.uri())) {
             return false;

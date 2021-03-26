@@ -5,9 +5,21 @@ import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracke
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.InMemoryPdStore;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.PdStoreException;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.dto.ErrorMessage;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.*;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.ConnectionBuilder;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.ConnectionDto;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystemBuilder;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystemDto;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryBuilder;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryDto;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PortBuilder;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PortDto;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.SystemPortBuilder;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.Connection;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.MonitorPlantDescriptionEntry;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PlantDescriptionEntryList;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PortEntry;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.SystemEntry;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.SystemPort;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockRequest;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockServiceResponse;
 import eu.arrowhead.core.plantdescriptionengine.utils.TestUtils;
@@ -26,9 +38,15 @@ import se.arkalix.net.http.service.HttpServiceResponse;
 
 import java.net.InetSocketAddress;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class GetAllPlantDescriptionsTest {
 
@@ -36,13 +54,13 @@ public class GetAllPlantDescriptionsTest {
     public void shouldRespondWithStoredEntries() throws PdStoreException {
 
         final List<Integer> entryIds = List.of(0, 1, 2, 3);
-        final var pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
+        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
 
         for (final int id : entryIds) {
             pdTracker.put(TestUtils.createEntry(id));
         }
 
-        final var monitorInfo = new MonitorInfo();
+        final MonitorInfo monitorInfo = new MonitorInfo();
 
         final GetAllPlantDescriptions handler = new GetAllPlantDescriptions(monitorInfo, pdTracker);
         final HttpServiceRequest request = new MockRequest();
@@ -52,18 +70,18 @@ public class GetAllPlantDescriptionsTest {
             handler.handle(request, response).ifSuccess(result -> {
                 assertEquals(HttpStatus.OK, response.status().orElse(null));
                 assertTrue(response.body().isPresent());
-                final var entries = (PlantDescriptionEntryList) response.body().get();
+                final PlantDescriptionEntryList entries = (PlantDescriptionEntryList) response.body().get();
                 assertEquals(entryIds.size(), entries.count());
             }).onFailure(Assertions::assertNull);
         } catch (final Exception e) {
-            assertNull(e);
+            fail();
         }
     }
 
     @Test
     public void shouldPreserveConnections() throws PdStoreException {
 
-        final var pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
+        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
 
         final Instant now = Instant.now();
         final List<ConnectionDto> connections = new ArrayList<>();
@@ -95,7 +113,7 @@ public class GetAllPlantDescriptionsTest {
 
         pdTracker.put(entry);
 
-        final var monitorInfo = new MonitorInfo();
+        final MonitorInfo monitorInfo = new MonitorInfo();
 
         final GetAllPlantDescriptions handler = new GetAllPlantDescriptions(monitorInfo, pdTracker);
         final HttpServiceRequest request = new MockRequest();
@@ -104,14 +122,14 @@ public class GetAllPlantDescriptionsTest {
         try {
             handler.handle(request, response).ifSuccess(result -> {
                 assertTrue(response.body().isPresent());
-                final var entries = (PlantDescriptionEntryList) response.body().get();
-                final var retrievedEntry = entries.data().get(0);
+                final PlantDescriptionEntryList entries = (PlantDescriptionEntryList) response.body().get();
+                final MonitorPlantDescriptionEntry retrievedEntry = entries.data().get(0);
                 assertEquals(1, retrievedEntry.connections().size());
 
-                Connection connection = retrievedEntry.connections().get(0);
+                final Connection connection = retrievedEntry.connections().get(0);
 
-                var consumer = connection.consumer();
-                var producer = connection.producer();
+                final SystemPort consumer = connection.consumer();
+                final SystemPort producer = connection.producer();
 
                 assertEquals(consumer.systemId(), consumerSystemId);
                 assertEquals(producer.systemId(), producerSystemId);
@@ -121,14 +139,14 @@ public class GetAllPlantDescriptionsTest {
 
             }).onFailure(Assertions::assertNull);
         } catch (final Exception e) {
-            assertNull(e);
+            fail();
         }
     }
 
     @Test
     public void shouldPreservePorts() throws PdStoreException {
 
-        final var pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
+        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
 
         final Instant now = Instant.now();
         final Map<String, String> metadata = Map.of("a", "b");
@@ -162,7 +180,7 @@ public class GetAllPlantDescriptionsTest {
 
         pdTracker.put(entry);
 
-        final var monitorInfo = new MonitorInfo();
+        final MonitorInfo monitorInfo = new MonitorInfo();
 
         final GetAllPlantDescriptions handler = new GetAllPlantDescriptions(monitorInfo, pdTracker);
         final HttpServiceRequest request = new MockRequest();
@@ -171,12 +189,12 @@ public class GetAllPlantDescriptionsTest {
         try {
             handler.handle(request, response).ifSuccess(result -> {
                 assertTrue(response.body().isPresent());
-                final var entries = (PlantDescriptionEntryList) response.body().get();
-                final var retrievedEntry = entries.data().get(0);
-                final var retrievedSystem = retrievedEntry.systems().get(0);
+                final PlantDescriptionEntryList entries = (PlantDescriptionEntryList) response.body().get();
+                final MonitorPlantDescriptionEntry retrievedEntry = entries.data().get(0);
+                final SystemEntry retrievedSystem = retrievedEntry.systems().get(0);
                 assertEquals(1, retrievedSystem.ports().size());
 
-                final var retrievedPort = retrievedSystem.ports().get(0);
+                final PortEntry retrievedPort = retrievedSystem.ports().get(0);
                 assertEquals(isConsumer, retrievedPort.consumer().orElse(false));
                 assertEquals(metadata, retrievedPort.metadata().orElse(null));
                 assertEquals(portName, retrievedPort.portName());
@@ -184,14 +202,14 @@ public class GetAllPlantDescriptionsTest {
 
             }).onFailure(Assertions::assertNull);
         } catch (final Exception e) {
-            assertNull(e);
+            fail();
         }
     }
 
     @Test
     public void shouldExtendWithMonitorData() throws PdStoreException {
 
-        final var pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
+        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
         final String systemName = "System A";
         final PdeSystemDto system = new PdeSystemBuilder()
             .systemName(systemName)
@@ -210,8 +228,8 @@ public class GetAllPlantDescriptionsTest {
             .build();
 
         pdTracker.put(entry);
-        final var provider = new ProviderDescription(systemName, new InetSocketAddress("0.0.0.0", 5000));
-        ServiceDescription serviceDescription = new ServiceDescription.Builder()
+        final ProviderDescription provider = new ProviderDescription(systemName, new InetSocketAddress("0.0.0.0", 5000));
+        final ServiceDescription serviceDescription = new ServiceDescription.Builder()
             .name("service-name")
             .uri("/abc")
             .security(SecurityDescriptor.NOT_SECURE)
@@ -220,9 +238,9 @@ public class GetAllPlantDescriptionsTest {
             .build();
 
         final String inventoryId = "system_a_inventory_id";
-        JsonObject systemData = new JsonObject(List.of(new JsonPair("a", JsonBoolean.TRUE)));
+        final JsonObject systemData = new JsonObject(List.of(new JsonPair("a", JsonBoolean.TRUE)));
 
-        final var monitorInfo = new MonitorInfo();
+        final MonitorInfo monitorInfo = new MonitorInfo();
         monitorInfo.putInventoryId(serviceDescription, inventoryId);
         monitorInfo.putSystemData(serviceDescription, systemData);
 
@@ -233,22 +251,22 @@ public class GetAllPlantDescriptionsTest {
         try {
             handler.handle(request, response).ifSuccess(result -> {
                 assertTrue(response.body().isPresent());
-                final var returnedEntries = (PlantDescriptionEntryList) response.body().get();
-                final var returnedEntry = returnedEntries.data().get(0);
-                final var returnedSystem = returnedEntry.systems().get(0);
+                final PlantDescriptionEntryList returnedEntries = (PlantDescriptionEntryList) response.body().get();
+                final MonitorPlantDescriptionEntry returnedEntry = returnedEntries.data().get(0);
+                final SystemEntry returnedSystem = returnedEntry.systems().get(0);
                 assertTrue(returnedSystem.inventoryId().isPresent());
                 assertTrue(returnedSystem.systemData().isPresent());
                 assertEquals(returnedSystem.inventoryId().get(), inventoryId);
                 assertEquals(returnedSystem.systemData().get(), systemData);
             }).onFailure(Assertions::assertNull);
         } catch (final Exception e) {
-            assertNull(e);
+            fail();
         }
     }
 
     @Test
     public void shouldSortEntries() throws PdStoreException {
-        final var pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
+        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
 
         final Instant createdAt1 = Instant.parse("2020-05-27T14:48:00.00Z");
         final Instant createdAt2 = Instant.parse("2020-06-27T14:48:00.00Z");
@@ -295,7 +313,7 @@ public class GetAllPlantDescriptionsTest {
 
         final int numEntries = pdTracker.getListDto().count();
 
-        final var monitorInfo = new MonitorInfo();
+        final MonitorInfo monitorInfo = new MonitorInfo();
 
         final GetAllPlantDescriptions handler = new GetAllPlantDescriptions(monitorInfo, pdTracker);
         final HttpServiceRequest idDescendingRequest = new MockRequest.Builder()
@@ -317,12 +335,12 @@ public class GetAllPlantDescriptionsTest {
                 assertEquals(HttpStatus.OK, response1.status().get());
 
                 assertTrue(response1.body().isPresent());
-                final var entries = (PlantDescriptionEntryList) response1.body().get();
+                final PlantDescriptionEntryList entries = (PlantDescriptionEntryList) response1.body().get();
                 assertEquals(numEntries, entries.count());
 
                 int previousId = entries.data().get(0).id();
                 for (int i = 1; i < entries.count(); i++) {
-                    final var entry = entries.data().get(i);
+                    final MonitorPlantDescriptionEntry entry = entries.data().get(i);
                     assertTrue(entry.id() <= previousId);
                     previousId = entry.id();
                 }
@@ -333,12 +351,12 @@ public class GetAllPlantDescriptionsTest {
                 assertEquals(HttpStatus.OK, response2.status().get());
 
                 assertTrue(response2.body().isPresent());
-                final var entries = (PlantDescriptionEntryList) response2.body().get();
+                final PlantDescriptionEntryList entries = (PlantDescriptionEntryList) response2.body().get();
                 assertEquals(numEntries, entries.count());
 
                 Instant previousTimestamp = entries.data().get(0).createdAt();
                 for (int i = 1; i < entries.count(); i++) {
-                    final var entry = entries.data().get(i);
+                    final MonitorPlantDescriptionEntry entry = entries.data().get(i);
                     assertTrue(entry.createdAt().compareTo(previousTimestamp) >= 0);
                     previousTimestamp = entry.createdAt();
                 }
@@ -349,18 +367,18 @@ public class GetAllPlantDescriptionsTest {
                 assertEquals(HttpStatus.OK, response3.status().get());
 
                 assertTrue(response3.body().isPresent());
-                final var entries = (PlantDescriptionEntryList) response3.body().get();
+                final PlantDescriptionEntryList entries = (PlantDescriptionEntryList) response3.body().get();
                 assertEquals(numEntries, entries.count());
 
                 Instant previousTimestamp = entries.data().get(0).updatedAt();
                 for (int i = 1; i < entries.count(); i++) {
-                    final var entry = entries.data().get(i);
+                    final MonitorPlantDescriptionEntry entry = entries.data().get(i);
                     assertTrue(entry.updatedAt().compareTo(previousTimestamp) < 0);
                     previousTimestamp = entry.updatedAt();
                 }
             }).onFailure(Assertions::assertNull);
         } catch (final Exception e) {
-            assertNull(e);
+            fail();
         }
     }
 
@@ -369,13 +387,13 @@ public class GetAllPlantDescriptionsTest {
 
         final List<Integer> entryIds = List.of(0, 1, 2);
         final int activeEntryId = 3;
-        final var pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
+        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
 
         for (final int id : entryIds) {
             pdTracker.put(TestUtils.createEntry(id));
         }
 
-        final var monitorInfo = new MonitorInfo();
+        final MonitorInfo monitorInfo = new MonitorInfo();
         final Instant now = Instant.now();
         pdTracker.put(new PlantDescriptionEntryBuilder()
             .id(activeEntryId)
@@ -397,12 +415,12 @@ public class GetAllPlantDescriptionsTest {
             handler.handle(request, response).ifSuccess(result -> {
                 assertEquals(HttpStatus.OK, response.status().orElse(null));
                 assertTrue(response.body().isPresent());
-                final var entries = (PlantDescriptionEntryList) response.body().get();
+                final PlantDescriptionEntryList entries = (PlantDescriptionEntryList) response.body().get();
                 assertEquals(1, entries.count());
                 assertEquals(entries.data().get(0).id(), activeEntryId, 0);
             }).onFailure(Assertions::assertNull);
         } catch (final Exception e) {
-            assertNull(e);
+            fail();
         }
     }
 
@@ -410,13 +428,13 @@ public class GetAllPlantDescriptionsTest {
     public void shouldPaginate() throws PdStoreException {
 
         final List<Integer> entryIds = Arrays.asList(32, 11, 25, 3, 24, 35);
-        final var pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
+        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
 
-        for (int id : entryIds) {
+        for (final int id : entryIds) {
             pdTracker.put(TestUtils.createEntry(id));
         }
 
-        final var handler = new GetAllPlantDescriptions(new MonitorInfo(), pdTracker);
+        final GetAllPlantDescriptions handler = new GetAllPlantDescriptions(new MonitorInfo(), pdTracker);
         final HttpServiceResponse response = new MockServiceResponse();
         final int page = 1;
         final int itemsPerPage = 2;
@@ -427,7 +445,7 @@ public class GetAllPlantDescriptionsTest {
             handler.handle(request, response).ifSuccess(result -> {
                 assertEquals(HttpStatus.OK, response.status().orElse(null));
                 assertTrue(response.body().isPresent());
-                var entries = (PlantDescriptionEntryList) response.body().get();
+                final PlantDescriptionEntryList entries = (PlantDescriptionEntryList) response.body().get();
                 assertEquals(itemsPerPage, entries.count());
 
                 // Sort the entry ID:s, so that their order will match that of
@@ -435,21 +453,21 @@ public class GetAllPlantDescriptionsTest {
                 Collections.sort(entryIds);
 
                 for (int i = 0; i < itemsPerPage; i++) {
-                    int index = page * itemsPerPage + i;
+                    final int index = page * itemsPerPage + i;
                     assertEquals((int) entryIds.get(index), entries.data().get(i).id());
                 }
 
             }).onFailure(Assertions::assertNull);
-        } catch (Exception e) {
-            assertNull(e);
+        } catch (final Exception e) {
+            fail();
         }
     }
 
     @Test
     public void shouldRejectNegativePage() throws PdStoreException {
 
-        final var pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
-        final var handler = new GetAllPlantDescriptions(new MonitorInfo(), pdTracker);
+        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
+        final GetAllPlantDescriptions handler = new GetAllPlantDescriptions(new MonitorInfo(), pdTracker);
         final HttpServiceResponse response = new MockServiceResponse();
         final int page = -1;
         final int itemsPerPage = 2;
@@ -462,22 +480,22 @@ public class GetAllPlantDescriptionsTest {
             handler.handle(request, response).ifSuccess(result -> {
                 assertEquals(HttpStatus.BAD_REQUEST, response.status().orElse(null));
                 assertTrue(response.body().isPresent());
-                String expectedErrorMessage = "<Query parameter 'page' must be greater than 0, got " + page + ".>";
-                String actualErrorMessage = ((ErrorMessage) response.body().get()).error();
+                final String expectedErrorMessage = "<Query parameter 'page' must be greater than 0, got " + page + ".>";
+                final String actualErrorMessage = ((ErrorMessage) response.body().get()).error();
                 assertEquals(expectedErrorMessage, actualErrorMessage);
 
             }).onFailure(Assertions::assertNull);
-        } catch (Exception e) {
-            assertNull(e);
+        } catch (final Exception e) {
+            fail();
         }
     }
 
     @Test
     public void shouldRequireItemPerPage() throws PdStoreException {
 
-        final var pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
+        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
 
-        final var handler = new GetAllPlantDescriptions(new MonitorInfo(), pdTracker);
+        final GetAllPlantDescriptions handler = new GetAllPlantDescriptions(new MonitorInfo(), pdTracker);
         final HttpServiceResponse response = new MockServiceResponse();
         final int page = 4;
         final HttpServiceRequest request = new MockRequest.Builder()
@@ -488,13 +506,13 @@ public class GetAllPlantDescriptionsTest {
             handler.handle(request, response).ifSuccess(result -> {
                 assertEquals(HttpStatus.BAD_REQUEST, response.status().orElse(null));
                 assertTrue(response.body().isPresent());
-                String expectedErrorMessage = "<Missing parameter 'item_per_page'.>";
-                String actualErrorMessage = ((ErrorMessage) response.body().get()).error();
+                final String expectedErrorMessage = "<Missing parameter 'item_per_page'.>";
+                final String actualErrorMessage = ((ErrorMessage) response.body().get()).error();
                 assertEquals(expectedErrorMessage, actualErrorMessage);
 
             }).onFailure(Assertions::assertNull);
-        } catch (Exception e) {
-            assertNull(e);
+        } catch (final Exception e) {
+            fail();
         }
     }
 

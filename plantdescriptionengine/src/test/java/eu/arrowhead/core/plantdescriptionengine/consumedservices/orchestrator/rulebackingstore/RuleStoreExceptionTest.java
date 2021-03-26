@@ -9,25 +9,25 @@ public class RuleStoreExceptionTest {
 
     @Test
     public void shouldCreateExceptionFromMessage() {
-        String errorMessage = "Lorem Ipsum";
-        final var e = new RuleStoreException(errorMessage);
+        final String errorMessage = "Lorem Ipsum";
+        final RuleStoreException e = new RuleStoreException(errorMessage);
         assertEquals(errorMessage, e.getMessage());
         assertNull(e.getCause());
     }
 
     @Test
     public void shouldCreateExceptionFromThrowable() {
-        var cause = new RuntimeException("ABC");
-        final var e = new RuleStoreException(cause);
+        final RuntimeException cause = new RuntimeException("ABC");
+        final RuleStoreException e = new RuleStoreException(cause);
         assertEquals("java.lang.RuntimeException: ABC", e.getMessage());
     }
 
     @Test
     public void shouldCreateExceptionFromMessageAndThrowable() {
-        String errorMessage = "Lorem Ipsum";
-        String causeMessage = "ABC";
-        var cause = new RuntimeException(causeMessage);
-        final var e = new RuleStoreException(errorMessage, cause);
+        final String errorMessage = "Lorem Ipsum";
+        final String causeMessage = "ABC";
+        final RuntimeException cause = new RuntimeException(causeMessage);
+        final RuleStoreException e = new RuleStoreException(errorMessage, cause);
         assertEquals(errorMessage, e.getMessage());
         assertEquals(causeMessage, e.getCause().getMessage());
     }

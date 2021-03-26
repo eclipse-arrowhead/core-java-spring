@@ -2,6 +2,7 @@ package eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidat
 
 import se.arkalix.net.http.service.HttpServiceRequest;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -17,18 +18,21 @@ public class BooleanParameter extends QueryParameter {
     /**
      * {@inheritDoc}
      */
-    public BooleanParameter(Builder builder) {
-        super(builder);
-        this.defaultValue = builder.defaultValue;
+    public BooleanParameter(final Builder builder) {
+        super(Objects.requireNonNull(builder, "Expected builder."));
+        defaultValue = builder.defaultValue;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void parse(HttpServiceRequest request, QueryParamParser parser, boolean required) {
+    public void parse(final HttpServiceRequest request, final QueryParamParser parser, final boolean required) {
 
-        Optional<String> possibleValue = request.queryParameter(name);
+        Objects.requireNonNull(request, "Expected request.");
+        Objects.requireNonNull(parser, "Expected parser.");
+
+        final Optional<String> possibleValue = request.queryParameter(name);
 
         if (possibleValue.isEmpty()) {
             if (required) {
@@ -40,28 +44,28 @@ public class BooleanParameter extends QueryParameter {
             return;
         }
 
-        for (var param : requiredParameters) {
+        for (final QueryParameter param : requiredParameters) {
             param.parse(request, parser, true);
         }
 
-        String value = possibleValue.get();
-        if (!(value.equals("true") || value.equals("false"))) {
+        final String value = possibleValue.get();
+        if (!(String.valueOf(true).equals(value) || String.valueOf(false).equals(value))) {
             parser.report(new ParseError("Query parameter '" + name + "' must be true or false, got '" + value + "'."));
         }
 
-        parser.put(this, value.equals("true"));
+        parser.put(this, Boolean.valueOf(value));
     }
 
     public static class Builder extends QueryParameter.Builder<Builder> {
 
-        private Boolean defaultValue = null;
+        private Boolean defaultValue;
 
         /**
          * @param value A default value for the constructed parameter.
          * @return This instance.
          */
-        public Builder defaultValue(boolean value) {
-            this.defaultValue = value;
+        public Builder defaultValue(final boolean value) {
+            defaultValue = value;
             return this;
         }
 

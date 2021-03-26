@@ -14,41 +14,46 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Alarm {
 
     // Integer for storing the next alarm ID to be used:
-    private final static AtomicInteger nextId = new AtomicInteger();
+    private static final AtomicInteger nextId = new AtomicInteger();
+    private static final String unknownId = "Unknown";
+
+    public final int id;
     public final String systemName;
     public final String systemId;
-    public final Map<String, String> metadata;
     public final AlarmCause cause;
-    final int id;
-    final Instant raisedAt;
-    boolean acknowledged;
-    Instant updatedAt;
-    Instant clearedAt;
-    Instant acknowledgedAt;
 
-    Alarm(String systemId, String systemName, Map<String, String> metadata, AlarmCause cause) {
+    private final Map<String, String> metadata;
+    private final Instant raisedAt;
+    private boolean acknowledged;
+    private Instant updatedAt;
+    private Instant clearedAt;
+    private Instant acknowledgedAt;
+
+    Alarm(final String systemId, final String systemName, final Map<String, String> metadata, final AlarmCause cause) {
 
         Objects.requireNonNull(cause, "Expected an alarm cause.");
 
-        this.id = nextId.getAndIncrement();
         this.systemId = systemId;
         this.systemName = systemName;
         this.metadata = metadata;
         this.cause = cause;
-        this.acknowledged = false;
-        this.acknowledgedAt = null;
 
+        id = nextId.getAndIncrement();
+        acknowledged = false;
         raisedAt = Instant.now();
-        updatedAt = Instant.now();
-        clearedAt = null;
+        updatedAt = raisedAt;
     }
 
-    protected String description() {
-        String identifier = (systemName == null) ? "System with ID '" + systemId + "'" : "System named '" + systemName + "'";
-        return cause.getDescription(identifier);
-    }
-
-    public boolean matches(String systemId, String systemName, Map<String, String> metadata, AlarmCause cause) {
+    /**
+     * @param systemId   ID of a system or null.
+     * @param systemName Name of a system or null.
+     * @param metadata   A system's metadata, or null.
+     * @param cause      An alarm cause.
+     * @return True if the provided arguments match the data stored in this
+     * alarm instance.
+     */
+    public boolean matches(final String systemId, final String systemName, final Map<String, String> metadata, final AlarmCause cause) {
+        Objects.requireNonNull(cause, "Expected alarm cause.");
         return cause == this.cause &&
             Objects.equals(systemId, this.systemId) &&
             Objects.equals(systemName, this.systemName) &&
@@ -59,19 +64,52 @@ public class Alarm {
      * @return A PdeAlarm DTO based on this alarm data.
      */
     public PdeAlarmDto toPdeAlarm() {
-        AlarmSeverity severity = (clearedAt == null) ? AlarmSeverity.warning : AlarmSeverity.cleared;
-        String systemId = this.systemId == null ? "Unknown" : this.systemId;
+        final AlarmSeverity severity = (clearedAt == null) ? AlarmSeverity.WARNING : AlarmSeverity.CLEARED;
+        final String systemId = this.systemId == null ? unknownId : this.systemId;
         return new PdeAlarmBuilder()
             .id(id)
             .systemId(systemId)
             .systemName(systemName)
             .acknowledged(acknowledged)
-            .severity(severity.toString())
-            .description(description())
+            .severity(severity.toString().toLowerCase())
+            .description(getDescription())
             .raisedAt(raisedAt)
             .updatedAt(updatedAt)
             .clearedAt(clearedAt)
             .acknowledgedAt(acknowledgedAt)
             .build();
+    }
+
+    /**
+     * @return A description of the alarm.
+     */
+    protected String getDescription() {
+        final String identifier = (systemName == null) ? "System with ID '" + systemId + "'" : "System named '" + systemName + "'";
+        return cause.getDescription(identifier);
+    }
+
+    /**
+     * @return Metadata of the system that this alarm refers to.
+     */
+    public Map<String, String> getMetadata() {
+        return metadata;
+    }
+
+    /**
+     * Changes the 'acknowledged' state of this alarm, noting the time at which
+     * this is done.
+     */
+    public void setAcknowledged(final boolean acknowledged) {
+        this.acknowledged = acknowledged;
+        acknowledgedAt = Instant.now();
+        updatedAt = acknowledgedAt;
+    }
+
+    /**
+     * Marks the alarm as cleared, and notes the time at which this is done.
+     */
+    public void setCleared() {
+        clearedAt = Instant.now();
+        updatedAt = clearedAt;
     }
 }

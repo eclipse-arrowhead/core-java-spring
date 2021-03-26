@@ -4,41 +4,36 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Co
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystem;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntry;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Port;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.SystemPort;
 import eu.arrowhead.core.plantdescriptionengine.utils.Metadata;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Class for validating the Plant Descriptions.
  */
 public class PlantDescriptionValidator {
 
-    final Map<Integer, PlantDescriptionEntry> entries;
+    final Map<Integer, ? extends PlantDescriptionEntry> entries;
     final List<String> blacklist = List.of("unknown");
     private final List<String> errors = new ArrayList<>();
-
-    /**
-     * @param systemName Name of a system
-     * @param metadata   Metadata describing a system
-     * @return A string uniquely identifying the system with the given
-     * name / metadata combination.
-     */
-    private String uniqueIdentifier(PdeSystem system) {
-        String systemName = system.systemName().orElse("");
-        Map<String, String> metadata = system.metadata().orElse(null);
-        String result = systemName + "{";
-        if (metadata != null && !metadata.isEmpty()) {
-            result += Metadata.toString(metadata);
-        }
-        return result + "}";
-    }
 
     /**
      * Constructor.
      *
      * @param entries Object mapping ID:s to Plant Description Entries.
      */
-    public PlantDescriptionValidator(Map<Integer, PlantDescriptionEntry> entries) {
+    public PlantDescriptionValidator(final Map<Integer, ? extends PlantDescriptionEntry> entries) {
+
+        Objects.requireNonNull(entries, "Expected entries.");
 
         this.entries = entries;
 
@@ -70,23 +65,38 @@ public class PlantDescriptionValidator {
     }
 
     /**
+     * @param system A Plant Description Entry system.
+     * @return A string uniquely identifying the system with the given name /
+     * metadata combination.
+     */
+    private String uniqueIdentifier(final PdeSystem system) {
+        final String systemName = system.systemName().orElse("");
+        final Map<String, String> metadata = system.metadata().orElse(null);
+        String result = systemName + "{";
+        if (metadata != null && !metadata.isEmpty()) {
+            result += Metadata.toString(metadata);
+        }
+        return result + "}";
+    }
+
+    /**
      * Ensure that each system in every entry is uniquely identifiable, either
      * by a name or by metadata.
      */
     private void ensureIdentifiableSystems() {
-        final var systems = new ArrayList<PdeSystem>();
-        for (var entry : entries.values()) {
+        final ArrayList<PdeSystem> systems = new ArrayList<>();
+        for (final PlantDescriptionEntry entry : entries.values()) {
             systems.addAll(entry.systems());
         }
 
-        Set<String> uniqueIdentifiers = new HashSet<>();
+        final Set<String> uniqueIdentifiers = new HashSet<>();
 
-        for (final var system : systems) {
+        for (final PdeSystem system : systems) {
 
-            Optional<Map<String, String>> metadata = system.metadata();
-            boolean hasMetadata = metadata.isPresent() && !metadata.get().isEmpty();
+            final Optional<Map<String, String>> metadata = system.metadata();
+            final boolean hasMetadata = metadata.isPresent() && !metadata.get().isEmpty();
 
-            String uid = uniqueIdentifier(system);
+            final String uid = uniqueIdentifier(system);
 
             if (!uniqueIdentifiers.add(uid)) {
                 errors.add("System with ID '" + system.systemId() +
@@ -108,7 +118,7 @@ public class PlantDescriptionValidator {
      * Any inclusion cycles originating from the given entry is reported.
      */
     private void checkInclusionCycles() {
-        for (var entry : entries.values()) {
+        for (final PlantDescriptionEntry entry : entries.values()) {
             if (cycleOriginatesAtEntry(entry)) {
                 errors.add("Contains cycle.");
                 return;
@@ -116,18 +126,18 @@ public class PlantDescriptionValidator {
         }
     }
 
-    private boolean cycleOriginatesAtEntry(PlantDescriptionEntry entry) {
+    private boolean cycleOriginatesAtEntry(final PlantDescriptionEntry entry) {
 
-        var visitedEntries = new HashSet<Integer>();
-        var queue = new LinkedList<PlantDescriptionEntry>();
+        final HashSet<Integer> visitedEntries = new HashSet<>();
+        final LinkedList<PlantDescriptionEntry> queue = new LinkedList<>();
 
         queue.add(entry);
-        while (queue.size() > 0) {
-            entry = queue.pop();
-            if (!visitedEntries.add(entry.id())) {
+        while (!queue.isEmpty()) {
+            final PlantDescriptionEntry nextEntry = queue.pop();
+            if (!visitedEntries.add(nextEntry.id())) {
                 return true;
             }
-            for (var included : entry.include()) {
+            for (final Integer included : nextEntry.include()) {
                 queue.add(entries.get(included));
             }
         }
@@ -139,8 +149,8 @@ public class PlantDescriptionValidator {
      * error.
      */
     private void checkSelfReferencing() {
-        for (var entry : entries.values()) {
-            for (int id : entry.include()) {
+        for (final PlantDescriptionEntry entry : entries.values()) {
+            for (final int id : entry.include()) {
                 if (id == entry.id()) {
                     errors.add("Entry includes itself.");
                     return;
@@ -154,8 +164,8 @@ public class PlantDescriptionValidator {
      * present in the Plant Description Tracker, this is reported as an error.
      */
     private void ensureInclusionsExist() {
-        for (var entry : entries.values()) {
-            for (int includedId : entry.include()) {
+        for (final PlantDescriptionEntry entry : entries.values()) {
+            for (final int includedId : entry.include()) {
                 if (!entries.containsKey(includedId)) {
                     errors.add(
                         "Error in include list: Entry '" + includedId + "' is required by entry '" + entry.id() + "'.");
@@ -165,20 +175,20 @@ public class PlantDescriptionValidator {
     }
 
     private void checkForDuplicateInclusions() {
-        for (var entry : entries.values()) {
+        for (final PlantDescriptionEntry entry : entries.values()) {
             final List<Integer> includes = entry.include();
 
             // Check for duplicates
-            HashSet<Integer> uniqueIds = new HashSet<>();
-            HashSet<Integer> duplicates = new HashSet<>();
+            final HashSet<Integer> uniqueIds = new HashSet<>();
+            final HashSet<Integer> duplicates = new HashSet<>();
 
-            for (int id : includes) {
+            for (final int id : includes) {
                 if (!uniqueIds.add(id)) {
                     duplicates.add(id);
                 }
             }
 
-            for (int id : duplicates) {
+            for (final int id : duplicates) {
                 errors.add("Entry with ID '" + id + "' is included more than once.");
             }
         }
@@ -189,15 +199,15 @@ public class PlantDescriptionValidator {
      */
     private void validateConnections() {
 
-        final var systems = new ArrayList<PdeSystem>();
-        final var connections = new ArrayList<Connection>();
+        final ArrayList<PdeSystem> systems = new ArrayList<>();
+        final ArrayList<Connection> connections = new ArrayList<>();
 
-        for (var entry : entries.values()) {
+        for (final PlantDescriptionEntry entry : entries.values()) {
             systems.addAll(entry.systems());
             connections.addAll(entry.connections());
         }
 
-        for (var connection : connections) {
+        for (final Connection connection : connections) {
 
             PdeSystem consumerSystem = null;
             PdeSystem producerSystem = null;
@@ -209,19 +219,19 @@ public class PlantDescriptionValidator {
                 errors.add("A connection has a negative priority.");
             }
 
-            final var producer = connection.producer();
-            final var consumer = connection.consumer();
+            final SystemPort producer = connection.producer();
+            final SystemPort consumer = connection.consumer();
 
             final String producerId = producer.systemId();
             final String consumerId = consumer.systemId();
 
-            for (var system : systems) {
+            for (final PdeSystem system : systems) {
 
-                boolean isProducerSystem = producerId.equals(system.systemId());
-                boolean isConsumerSystem = consumerId.equals(system.systemId());
+                final boolean isProducerSystem = producerId.equals(system.systemId());
+                final boolean isConsumerSystem = consumerId.equals(system.systemId());
 
                 if (isProducerSystem) {
-                    String portName = producer.portName();
+                    final String portName = producer.portName();
                     producerSystem = system;
                     producerPort = system.getPort(portName);
                     if (producerPort == null) {
@@ -230,7 +240,7 @@ public class PlantDescriptionValidator {
                         errors.add("Invalid connection, '" + portName + "' is not a producer port.");
                     }
                 } else if (isConsumerSystem) {
-                    String portName = consumer.portName();
+                    final String portName = consumer.portName();
                     consumerSystem = system;
                     consumerPort = system.getPort(portName);
                     if (consumerPort == null) {
@@ -269,27 +279,28 @@ public class PlantDescriptionValidator {
      * Ensures that all entries' systems ports are unique.
      */
     private void validatePorts() {
-        for (var entry : entries.values()) {
-            for (var system : entry.systems()) {
+        for (final PlantDescriptionEntry entry : entries.values()) {
+            for (final PdeSystem system : entry.systems()) {
                 ensureUniquePorts(system);
             }
 
             // Check that no consumer port has metadata.
-            for (var system : entry.systems()) {
+            for (final PdeSystem system : entry.systems()) {
                 ensureNoConsumerPortMetadata(system);
             }
         }
     }
 
     /**
-     * For each consumer port in the system, ensure that no metadata is present.
+     * For each consumer port in the system, ensure that no metadata is
+     * present.
      *
      * @param system The system whose ports will be validated.
      */
-    private void ensureNoConsumerPortMetadata(PdeSystem system) {
-        for (var port : system.ports()) {
+    private void ensureNoConsumerPortMetadata(final PdeSystem system) {
+        for (final Port port : system.ports()) {
             if (port.consumer().orElse(false)) {
-                boolean hasMetadata = port.metadata().isPresent() && !port.metadata().get().isEmpty();
+                final boolean hasMetadata = port.metadata().isPresent() && !port.metadata().get().isEmpty();
                 if (hasMetadata) {
                     errors.add("Port '" + port.portName() + "' is a consumer port, it must not have any metadata.");
                 }
@@ -309,15 +320,15 @@ public class PlantDescriptionValidator {
      */
     private void ensureUniquePorts(final PdeSystem system) {
 
-        Map<String, Integer> portsPerService = new HashMap<>();
-        Set<String> portNames = new HashSet<>();
+        final Map<String, Integer> portsPerService = new HashMap<>();
+        final Set<String> portNames = new HashSet<>();
 
         // Map serviceDefinitions to lists of metadata:
-        Map<String, List<Map<String, String>>> metadataPerService = new HashMap<>();
+        final Map<String, List<Map<String, String>>> metadataPerService = new HashMap<>();
 
-        for (var port : system.ports()) {
+        for (final Port port : system.ports()) {
 
-            String portName = port.portName();
+            final String portName = port.portName();
             if (portNames.contains(portName)) {
                 errors.add("Duplicate port name '" + portName + "' in system '" + system.systemId() + "'");
             }
@@ -325,7 +336,7 @@ public class PlantDescriptionValidator {
             portNames.add(portName);
 
             final String serviceDefinition = port.serviceDefinition();
-            Integer numPorts = portsPerService.getOrDefault(serviceDefinition, 0);
+            final Integer numPorts = portsPerService.getOrDefault(serviceDefinition, 0);
             portsPerService.put(serviceDefinition, numPorts + 1);
 
             if (!metadataPerService.containsKey(serviceDefinition)) {
@@ -337,10 +348,10 @@ public class PlantDescriptionValidator {
             }
         }
 
-        for (String serviceDefinition : portsPerService.keySet()) {
+        for (final String serviceDefinition : portsPerService.keySet()) {
 
-            int numPorts = portsPerService.getOrDefault(serviceDefinition, 0);
-            int numMetadata = metadataPerService.get(serviceDefinition).size();
+            final int numPorts = portsPerService.getOrDefault(serviceDefinition, 0);
+            final int numMetadata = metadataPerService.get(serviceDefinition).size();
 
             // Ensure that there is metadata to differentiate between ports when
             // multiple ports share service definition:
@@ -350,9 +361,9 @@ public class PlantDescriptionValidator {
             }
 
             // Ensure that the metadata is unique within each serviceDefinition:
-            List<Map<String, String>> serviceMetadata = metadataPerService.get(serviceDefinition);
+            final List<Map<String, String>> serviceMetadata = metadataPerService.get(serviceDefinition);
             if (serviceMetadata.size() > 1) {
-                var uniqueMetadata = new HashSet<>(serviceMetadata);
+                final HashSet<Map<String, String>> uniqueMetadata = new HashSet<>(serviceMetadata);
                 if (uniqueMetadata.size() < serviceMetadata.size()) {
                     errors.add(system.systemId() + " has duplicate metadata for ports with service definition '"
                         + serviceDefinition + "'");
@@ -362,18 +373,19 @@ public class PlantDescriptionValidator {
     }
 
     /**
-     * @return A human-readable description of any errors in the Plant Description.
+     * @return A human-readable description of any errors in the Plant
+     * Description.
      */
     public String getErrorMessage() {
-        List<String> errorMessages = new ArrayList<>();
-        for (String error : errors) {
+        final List<String> errorMessages = new ArrayList<>();
+        for (final String error : errors) {
             errorMessages.add("<" + error + ">");
         }
         return String.join(", ", errorMessages);
     }
 
     public boolean hasError() {
-        return errors.size() > 0;
+        return !errors.isEmpty();
     }
 
 }

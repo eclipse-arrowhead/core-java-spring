@@ -1,5 +1,6 @@
 package eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore;
 
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryDto;
 import eu.arrowhead.core.plantdescriptionengine.utils.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -7,21 +8,22 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Unit test for the
- * {@link eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.FilePdStore}
+ * Unit test for the {@link eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.FilePdStore}
  * class.
  */
 public class FilePdStoreTest {
 
     private final String entryDirectory = "test-temp-data";
 
-    private void deleteDirectory(File dir) {
-        File[] allContents = dir.listFiles();
+    private void deleteDirectory(final File dir) {
+        final File[] allContents = dir.listFiles();
         if (allContents != null) {
-            for (File file : allContents) {
+            for (final File file : allContents) {
                 deleteDirectory(file);
             }
         }
@@ -38,7 +40,7 @@ public class FilePdStoreTest {
     @Test
     public void ShouldReadWithoutEntries() throws PdStoreException {
         final PdStore store = new FilePdStore(entryDirectory);
-        var storedEntries = store.readEntries();
+        final List<PlantDescriptionEntryDto> storedEntries = store.readEntries();
         assertTrue(storedEntries.isEmpty());
     }
 
@@ -47,14 +49,14 @@ public class FilePdStoreTest {
         final PdStore store = new FilePdStore(entryDirectory);
         final List<Integer> entryIds = List.of(1, 2, 3);
 
-        for (int id : entryIds) {
+        for (final int id : entryIds) {
             store.write(TestUtils.createEntry(id));
         }
 
-        var storedEntries = store.readEntries();
+        final List<PlantDescriptionEntryDto> storedEntries = store.readEntries();
         assertEquals(storedEntries.size(), entryIds.size());
 
-        for (final var entry : storedEntries) {
+        for (final PlantDescriptionEntryDto entry : storedEntries) {
             assertTrue(entryIds.contains(entry.id()));
         }
     }
@@ -64,17 +66,17 @@ public class FilePdStoreTest {
         final PdStore store = new FilePdStore(entryDirectory);
         final List<Integer> entryIds = List.of(1, 2, 3);
 
-        for (int id : entryIds) {
+        for (final int id : entryIds) {
             store.write(TestUtils.createEntry(id));
         }
 
-        int id0 = entryIds.get(0);
+        final int id0 = entryIds.get(0);
         store.remove(id0);
 
-        var storedEntries = store.readEntries();
+        final List<PlantDescriptionEntryDto> storedEntries = store.readEntries();
         assertEquals(storedEntries.size(), entryIds.size() - 1);
 
-        for (final var entry : storedEntries) {
+        for (final PlantDescriptionEntryDto entry : storedEntries) {
             assertTrue(entryIds.contains(entry.id()));
             assertNotEquals(entry.id(), id0);
         }

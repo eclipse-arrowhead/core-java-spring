@@ -11,7 +11,7 @@ import java.util.Objects;
  * HttpServiceRequest query parameter. Used in conjunction with QueryParamParser
  * for validating and parsing query parameters.
  */
-public class QueryParameter {
+public abstract class QueryParameter {
 
     protected final String name;
     protected final List<QueryParameter> requiredParameters = new ArrayList<>();
@@ -21,35 +21,34 @@ public class QueryParameter {
      *
      * @param builder Builder instance used to configure the instance.
      */
-    protected QueryParameter(Builder<?> builder) {
-
+    protected QueryParameter(final Builder<?> builder) {
+        Objects.requireNonNull(builder, "Expected builder.");
         Objects.requireNonNull(builder.name, "No name has been set on builder instance.");
 
-        this.name = builder.name;
-        this.requiredParameters.addAll(builder.requiredParameters);
+        name = builder.name;
+        requiredParameters.addAll(builder.requiredParameters);
     }
 
     /**
-     * Validate and parse the query parameter that this instance corresponds to. If
-     * the parameter is present in the request, and it does not violate any of the
-     * requirements imposed by this instance, it is stored in the given parser
-     * object. Any requirement violations are reported using the parser's
+     * Validate and parse the query parameter that this instance corresponds to.
+     * If the parameter is present in the request, and it does not violate any
+     * of the requirements imposed by this instance, it is stored in the given
+     * parser object. Any requirement violations are reported using the parser's
      * {@code report} method.
      *
      * @param request  A HTTP service request.
      * @param parser   A query parameter parser instance.
-     * @param required If true, this method will report an error if the parameter is
-     *                 not present in the request.
+     * @param required If true, this method will report an error if the
+     *                 parameter is not present in the request.
      */
-    public void parse(HttpServiceRequest request, QueryParamParser parser, boolean required) {
-    }
+    public abstract void parse(HttpServiceRequest request, QueryParamParser parser, boolean required);
 
     /**
      * Helper class used for constructing Query Parameters.
      */
     protected abstract static class Builder<T extends Builder<T>> {
         protected final List<QueryParameter> requiredParameters = new ArrayList<>();
-        protected String name = null;
+        protected String name;
 
         public abstract T self();
 
@@ -57,7 +56,8 @@ public class QueryParameter {
          * @param name A name to use for the constructed query parameter.
          * @return This instance.
          */
-        public T name(String name) {
+        public T name(final String name) {
+            Objects.requireNonNull(name, "Expected name.");
             this.name = name;
             return self();
         }
@@ -67,7 +67,8 @@ public class QueryParameter {
          *              constructed is.
          * @return This instance.
          */
-        public T requires(QueryParameter param) {
+        public T requires(final QueryParameter param) {
+            Objects.requireNonNull(param, "Expected param.");
             requiredParameters.add(param);
             return self();
         }

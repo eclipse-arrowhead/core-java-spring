@@ -1,10 +1,19 @@
 package eu.arrowhead.core.plantdescriptionengine.consumedservices.orchestrator;
 
+import eu.arrowhead.core.plantdescriptionengine.consumedservices.orchestrator.dto.StoreRule;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.InMemoryPdStore;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.PdStore;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.PdStoreException;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.*;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.ConnectionBuilder;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.ConnectionDto;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystemBuilder;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystemDto;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryBuilder;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryDto;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PortBuilder;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PortDto;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.SystemPortBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RuleCreatorTest {
 
@@ -22,7 +32,7 @@ public class RuleCreatorTest {
 
     @BeforeEach
     public void initEach() throws PdStoreException {
-        PdStore pdStore = new InMemoryPdStore();
+        final PdStore pdStore = new InMemoryPdStore();
         pdTracker = new PlantDescriptionTracker(pdStore);
     }
 
@@ -77,7 +87,8 @@ public class RuleCreatorTest {
                 .build())
             .build());
 
-        final var entry = new PlantDescriptionEntryBuilder().id(0).plantDescription("Plant Description 1A")
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder().id(0)
+            .plantDescription("Plant Description 1A")
             .createdAt(now)
             .updatedAt(now)
             .active(true)
@@ -87,8 +98,8 @@ public class RuleCreatorTest {
             .build();
 
         pdTracker.put(entry);
-        final var ruleCreator = new RuleCreator(pdTracker);
-        var rule = ruleCreator.createRule(entry.connections().get(0));
+        final RuleCreator ruleCreator = new RuleCreator(pdTracker);
+        final StoreRule rule = ruleCreator.createRule(entry.connections().get(0));
         assertEquals(consumerName, rule.consumerSystem().systemName().orElse(null));
         assertEquals(producerName, rule.providerSystem().systemName().orElse(null));
         assertEquals(producerName, rule.providerSystem().systemName().orElse(null));
@@ -131,7 +142,7 @@ public class RuleCreatorTest {
             .ports(consumerPorts)
             .build();
 
-        final var entryA = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryA = new PlantDescriptionEntryBuilder()
             .id(0)
             .plantDescription("Plant Description A")
             .createdAt(now)
@@ -197,7 +208,7 @@ public class RuleCreatorTest {
                 .build())
             .build();
 
-        final var entryB = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryB = new PlantDescriptionEntryBuilder()
             .id(1)
             .plantDescription("Plant Description B")
             .createdAt(now)
@@ -211,10 +222,10 @@ public class RuleCreatorTest {
         pdTracker.put(entryA);
         pdTracker.put(entryB);
 
-        final var ruleCreator = new RuleCreator(pdTracker);
+        final RuleCreator ruleCreator = new RuleCreator(pdTracker);
 
-        var ruleA = ruleCreator.createRule(connectionA);
-        var ruleB = ruleCreator.createRule(connectionB);
+        final StoreRule ruleA = ruleCreator.createRule(connectionA);
+        final StoreRule ruleB = ruleCreator.createRule(connectionB);
 
         assertEquals(consumerName, ruleA.consumerSystem().systemName().orElse(null));
         assertEquals(producerAName, ruleA.providerSystem().systemName().orElse(null));
@@ -276,7 +287,7 @@ public class RuleCreatorTest {
                 .build())
             .build();
 
-        final var entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
             .id(0)
             .plantDescription("Plant Description A")
             .createdAt(now)
@@ -287,17 +298,19 @@ public class RuleCreatorTest {
 
         pdTracker.put(entry);
 
-        final var ruleCreator = new RuleCreator(pdTracker);
-        var rule = ruleCreator.createRule(connection);
+        final RuleCreator ruleCreator = new RuleCreator(pdTracker);
+        final StoreRule rule = ruleCreator.createRule(connection);
 
         assertTrue(rule.consumerSystem().systemName().isEmpty());
         assertTrue(rule.providerSystem().systemName().isEmpty());
 
-        final var expectedConsumerMetadata = Map.of("x", "y");
+        final Map<String, String> expectedConsumerMetadata = Map.of("x", "y");
         assertEquals(expectedConsumerMetadata, rule.consumerSystem().metadata().orElse(null));
 
-        final var expectedProducerMetadata = Map.of("a", "1", "b", "2");
-        assertEquals(expectedProducerMetadata, rule.providerSystem().metadata().orElse(null));
+        final Map<String, String> expectedSystemMetadata = Map.of("a", "1");
+        final Map<String, String> expectedServiceMetadata = Map.of("b", "2");
+        assertEquals(expectedSystemMetadata, rule.providerSystem().metadata().orElse(null));
+        assertEquals(expectedServiceMetadata, rule.serviceMetadata().orElse(null));
         assertEquals(serviceInterface, rule.serviceInterfaceName());
     }
 

@@ -23,7 +23,7 @@ public class GetPdeAlarm implements HttpRouteHandler {
      *
      * @param alarmManager Object used for managing PDE alarms.
      */
-    public GetPdeAlarm(AlarmManager alarmManager) {
+    public GetPdeAlarm(final AlarmManager alarmManager) {
         Objects.requireNonNull(alarmManager, "Expected Alarm Manager.");
         this.alarmManager = alarmManager;
     }
@@ -33,18 +33,20 @@ public class GetPdeAlarm implements HttpRouteHandler {
      * parameter.
      *
      * @param request  HTTP request object.
-     * @param response HTTP response containing the current
-     *                 PlantDescriptionEntryList.
+     * @param response HTTP response containing the current {@code
+     *                 PlantDescriptionEntryList}.
      */
     @Override
     public Future<HttpServiceResponse> handle(final HttpServiceRequest request, final HttpServiceResponse response) {
+        Objects.requireNonNull(request, "Expected request.");
+        Objects.requireNonNull(response, "Expected response.");
 
-        String idString = request.pathParameter(0);
-        int id;
+        final String idString = request.pathParameter(0);
+        final int id;
 
         try {
             id = Integer.parseInt(idString);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             response.status(HttpStatus.BAD_REQUEST);
             response.body(ErrorMessage.of("'" + idString + "' is not a valid PDE Alarm ID."));
             return Future.success(response);

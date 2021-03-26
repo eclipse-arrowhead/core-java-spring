@@ -15,20 +15,20 @@ public class DtoReadExceptionCatcherTest {
     @Test
     public void shouldReturnAllEntries() {
 
-        final var catcher = new DtoReadExceptionCatcher();
+        final DtoReadExceptionCatcher catcher = new DtoReadExceptionCatcher();
 
-        String message = "Lorem Ipsum";
-        String value = "ABC";
-        int offset = 0;
+        final String message = "Lorem Ipsum";
+        final String value = "ABC";
+        final int offset = 0;
 
-        DtoReadException exception = new DtoReadException(DtoEncoding.JSON, message, value, offset);
-        var request = new MockRequest.Builder().body("Body").build();
-        var response = new MockServiceResponse();
+        final DtoReadException exception = new DtoReadException(DtoEncoding.JSON, message, value, offset);
+        final MockRequest request = new MockRequest.Builder().body("Body").build();
+        final MockServiceResponse response = new MockServiceResponse();
 
         catcher.handle(exception, request, response);
         assertEquals(HttpStatus.BAD_REQUEST, response.status().orElse(null));
         assertTrue(response.body().isPresent());
-        String body = response.body().get().toString();
+        final String body = response.body().get().toString();
 
         assertEquals("ErrorMessage{error='Failed to read JSON; cause: Lorem Ipsum `ABC` at offset 0'}", body);
     }

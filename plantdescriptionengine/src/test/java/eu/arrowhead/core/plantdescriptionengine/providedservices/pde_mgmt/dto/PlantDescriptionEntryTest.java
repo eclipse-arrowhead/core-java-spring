@@ -4,9 +4,14 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PlantDescriptionEntryTest {
 
@@ -44,14 +49,14 @@ public class PlantDescriptionEntryTest {
                 .active(true)
                 .build());
 
-        final var listA = new ArrayList<>(original);
+        final ArrayList<PlantDescriptionEntry> listA = new ArrayList<>(original);
 
         PlantDescriptionEntry.filterByActive(listA, true);
         assertEquals(2, listA.size());
         assertEquals(2, listA.get(0).id());
         assertEquals(4, listA.get(1).id());
 
-        final var listB = new ArrayList<>(original);
+        final ArrayList<PlantDescriptionEntry> listB = new ArrayList<>(original);
 
         PlantDescriptionEntry.filterByActive(listB, false);
         assertEquals(2, listB.size());
@@ -92,7 +97,7 @@ public class PlantDescriptionEntryTest {
             .ports(producerPorts)
             .build();
 
-        final var entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
             .id(1)
             .plantDescription("Plant Description 1A")
             .createdAt(now)
@@ -114,12 +119,12 @@ public class PlantDescriptionEntryTest {
                 .build())
             .build());
 
-        final var newFields = new PlantDescriptionUpdateBuilder()
+        final PlantDescriptionUpdateDto newFields = new PlantDescriptionUpdateBuilder()
             .connections(newConnections)
             .build();
-        final var updated = PlantDescriptionEntry.update(entry, newFields);
+        final PlantDescriptionEntryDto updated = PlantDescriptionEntry.update(entry, newFields);
         assertEquals(1, updated.connections().size());
-        final var connection = updated.connections().get(0);
+        final Connection connection = updated.connections().get(0);
         assertEquals(portName, connection.consumer().portName());
         assertEquals(consumerId, connection.consumer().systemId());
         assertEquals(portName, connection.producer().portName());
@@ -170,7 +175,7 @@ public class PlantDescriptionEntryTest {
                 .build())
             .build());
 
-        final var entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
             .id(1)
             .plantDescription("Plant Description 1A")
             .createdAt(now)
@@ -181,10 +186,10 @@ public class PlantDescriptionEntryTest {
             .connections(connections)
             .build();
 
-        final var newFields = new PlantDescriptionUpdateBuilder()
+        final PlantDescriptionUpdateDto newFields = new PlantDescriptionUpdateBuilder()
             .connections(List.of())
             .build();
-        final var updated = PlantDescriptionEntry.update(entry, newFields);
+        final PlantDescriptionEntryDto updated = PlantDescriptionEntry.update(entry, newFields);
         assertEquals(0, updated.connections().size());
     }
 
@@ -244,7 +249,7 @@ public class PlantDescriptionEntryTest {
                 .build())
             .build());
 
-        final var entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
             .id(1)
             .plantDescription("Plant Description 1A")
             .createdAt(now)
@@ -277,17 +282,17 @@ public class PlantDescriptionEntryTest {
                     .build())
                 .build());
 
-        final var newFields = new PlantDescriptionUpdateBuilder()
+        final PlantDescriptionUpdateDto newFields = new PlantDescriptionUpdateBuilder()
             .connections(newConnections)
             .build();
 
-        final var updated = PlantDescriptionEntry.update(entry, newFields);
+        final PlantDescriptionEntryDto updated = PlantDescriptionEntry.update(entry, newFields);
 
         assertEquals(2, updated.connections().size());
 
 
-        final var connectionB = updated.connections().get(0);
-        final var connectionC = updated.connections().get(1);
+        final Connection connectionB = updated.connections().get(0);
+        final Connection connectionC = updated.connections().get(1);
 
         assertEquals(portNameB, connectionB.consumer().portName());
         assertEquals(portNameA, connectionB.producer().portName());
@@ -298,16 +303,16 @@ public class PlantDescriptionEntryTest {
 
     @Test
     public void shouldSortCorrectly() {
-        int idA = 24;
-        int idB = 65;
-        int idC = 9;
+        final int idA = 24;
+        final int idB = 65;
+        final int idC = 9;
 
-        Instant t1 = Instant.now();
-        Instant t2 = t1.plus(1, ChronoUnit.HOURS);
-        Instant t3 = t1.plus(2, ChronoUnit.HOURS);
-        Instant t4 = t1.plus(3, ChronoUnit.HOURS);
+        final Instant t1 = Instant.now();
+        final Instant t2 = t1.plus(1, ChronoUnit.HOURS);
+        final Instant t3 = t1.plus(2, ChronoUnit.HOURS);
+        final Instant t4 = t1.plus(3, ChronoUnit.HOURS);
 
-        final var entryA = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryA = new PlantDescriptionEntryBuilder()
             .id(idA)
             .plantDescription("A")
             .createdAt(t3)
@@ -315,14 +320,14 @@ public class PlantDescriptionEntryTest {
             .active(false)
             .build();
 
-        final var entryB = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryB = new PlantDescriptionEntryBuilder()
             .id(idB)
             .plantDescription("B")
             .createdAt(t1)
             .updatedAt(t1)
             .active(false)
             .build();
-        final var entryC = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryC = new PlantDescriptionEntryBuilder()
             .id(idC)
             .plantDescription("C")
             .createdAt(t2)
@@ -330,44 +335,27 @@ public class PlantDescriptionEntryTest {
             .active(false)
             .build();
 
-        List<PlantDescriptionEntry> entries = Arrays.asList(entryA, entryB, entryC);
+        final List<PlantDescriptionEntry> entries = Arrays.asList(entryA, entryB, entryC);
 
-        PlantDescriptionEntry.sort(entries, "createdAt", true);
+        PlantDescriptionEntry.sortByCreatedAt(entries, true);
         assertEquals(idB, entries.get(0).id());
         assertEquals(idC, entries.get(1).id());
         assertEquals(idA, entries.get(2).id());
 
-        PlantDescriptionEntry.sort(entries, "updatedAt", true);
+        PlantDescriptionEntry.sortByUpdatedAt(entries, true);
         assertEquals(idB, entries.get(0).id());
         assertEquals(idA, entries.get(1).id());
         assertEquals(idC, entries.get(2).id());
 
-        PlantDescriptionEntry.sort(entries, "id", true);
+        PlantDescriptionEntry.sortById(entries, true);
         assertEquals(idC, entries.get(0).id());
         assertEquals(idA, entries.get(1).id());
         assertEquals(idB, entries.get(2).id());
 
-        PlantDescriptionEntry.sort(entries, "id", false);
+        PlantDescriptionEntry.sortById(entries, false);
         assertEquals(idB, entries.get(0).id());
         assertEquals(idA, entries.get(1).id());
         assertEquals(idC, entries.get(2).id());
-    }
-
-    @Test
-    public void shouldDisallowIncorrectSortField() {
-        final var entry = new PlantDescriptionEntryBuilder()
-            .id(1)
-            .plantDescription("ABC")
-            .createdAt(now)
-            .updatedAt(now)
-            .active(true)
-            .build();
-
-        List<PlantDescriptionEntry> entries = Collections.singletonList(entry);
-
-        Exception exception = assertThrows(IllegalArgumentException.class,
-            () -> PlantDescriptionEntry.sort(entries, "Nonexistent", true));
-        assertEquals("'Nonexistent' is not a valid sort field for Plant Description Entries.", exception.getMessage());
     }
 
     @Test
@@ -439,7 +427,7 @@ public class PlantDescriptionEntryTest {
                     .build())
                 .build());
 
-        final var entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
             .id(1)
             .plantDescription("Plant Description 1A")
             .createdAt(now)
@@ -449,7 +437,7 @@ public class PlantDescriptionEntryTest {
             .connections(connections)
             .build();
 
-        final var deactivated = PlantDescriptionEntry.deactivated(entry);
+        final PlantDescriptionEntry deactivated = PlantDescriptionEntry.deactivated(entry);
         assertTrue(entry.active());
         assertFalse(deactivated.active());
 
@@ -461,8 +449,8 @@ public class PlantDescriptionEntryTest {
 
         // The systems should be identical
         for (int i = 0; i < entry.systems().size(); i++) {
-            final var systemA = entry.systems().get(i);
-            final var systemB = entry.systems().get(i);
+            final PdeSystem systemA = entry.systems().get(i);
+            final PdeSystem systemB = entry.systems().get(i);
             assertEquals(systemA.toString(), systemB.toString());
         }
     }
@@ -516,19 +504,19 @@ public class PlantDescriptionEntryTest {
                 .build())
             .build());
 
-        final var description = new PlantDescriptionBuilder()
+        final PlantDescriptionDto description = new PlantDescriptionBuilder()
             .plantDescription("Plant Description 1A")
             .active(true)
             .systems(List.of(consumerSystem, producerSystem))
             .connections(connections)
             .build();
 
-        int entryId = 123;
-        final var entry = PlantDescriptionEntry.from(description, entryId);
+        final int entryId = 123;
+        final PlantDescriptionEntryDto entry = PlantDescriptionEntry.from(description, entryId);
 
         assertEquals(2, entry.systems().size());
-        final var copiedConsumer = entry.systems().get(0);
-        final var copiedProducer = entry.systems().get(1);
+        final PdeSystem copiedConsumer = entry.systems().get(0);
+        final PdeSystem copiedProducer = entry.systems().get(1);
         assertEquals(consumerId, copiedConsumer.systemId());
         assertEquals(producerId, copiedProducer.systemId());
         assertEquals(consumerName, copiedConsumer.systemName().orElse(null));
@@ -536,7 +524,7 @@ public class PlantDescriptionEntryTest {
         assertEquals(1, consumerSystem.ports().size());
         assertEquals(1, producerSystem.ports().size());
         assertEquals(1, entry.connections().size());
-        final var copiedConnection = entry.connections().get(0);
+        final Connection copiedConnection = entry.connections().get(0);
         assertEquals(consumerPort, copiedConnection.consumer().portName());
         assertEquals(consumerId, copiedConnection.consumer().systemId());
         assertEquals(producerPort, copiedConnection.producer().portName());

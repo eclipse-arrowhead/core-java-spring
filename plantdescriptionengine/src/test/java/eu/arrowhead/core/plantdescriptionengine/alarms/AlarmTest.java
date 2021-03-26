@@ -2,28 +2,31 @@ package eu.arrowhead.core.plantdescriptionengine.alarms;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AlarmTest {
 
     @Test
     public void shouldHaveProperDescriptions() {
-        String systemName = "A";
-        String systemId = "123";
-        Alarm alarmFromNamedSystem = new Alarm(null, systemName, null, AlarmCause.systemNotRegistered);
-        Alarm alarmFromUnnamedSystem = new Alarm(systemId, null, null, AlarmCause.systemNotInDescription);
+        final String systemName = "A";
+        final String systemId = "123";
+        final Alarm alarmFromNamedSystem = new Alarm(null, systemName, null, AlarmCause.SYSTEM_NOT_REGISTERED);
+        final Alarm alarmFromUnnamedSystem = new Alarm(systemId, null, null, AlarmCause.SYSTEM_NOT_IN_DESCRIPTION);
 
         assertEquals("System named '" + systemName + "' cannot be found in the Service Registry.",
-            alarmFromNamedSystem.description());
+            alarmFromNamedSystem.getDescription());
         assertEquals("System with ID '" + systemId + "' is not present in the active Plant Description.",
-            alarmFromUnnamedSystem.description());
+            alarmFromUnnamedSystem.getDescription());
     }
 
     @Test
     public void shouldRejectNullAlarmCause() {
-        Exception exception = assertThrows(RuntimeException.class, () -> new Alarm("XYZ", null, null, null));
+        final Exception exception = assertThrows(RuntimeException.class, () -> new Alarm("XYZ", null, null, null));
         assertEquals("Expected an alarm cause.", exception.getMessage());
     }
 
@@ -32,15 +35,15 @@ public class AlarmTest {
         final String systemName = "ABC";
         final String systemId = "123";
 
-        Alarm alarmA = new Alarm(null, systemName, null, AlarmCause.systemNotRegistered);
-        Alarm alarmB = new Alarm(systemId, null, null, AlarmCause.systemNotRegistered);
-        Alarm alarmC = new Alarm(systemId, systemName, null, AlarmCause.systemNotRegistered);
-        Alarm alarmD = new Alarm(systemId, systemName, Map.of("a", "1"), AlarmCause.systemNotRegistered);
+        final Alarm alarmA = new Alarm(null, systemName, null, AlarmCause.SYSTEM_NOT_REGISTERED);
+        final Alarm alarmB = new Alarm(systemId, null, null, AlarmCause.SYSTEM_NOT_REGISTERED);
+        final Alarm alarmC = new Alarm(systemId, systemName, null, AlarmCause.SYSTEM_NOT_REGISTERED);
+        final Alarm alarmD = new Alarm(systemId, systemName, Map.of("a", "1"), AlarmCause.SYSTEM_NOT_REGISTERED);
 
-        assertTrue(alarmA.matches(null, systemName, null, AlarmCause.systemNotRegistered));
-        assertTrue(alarmB.matches(systemId, null, null, AlarmCause.systemNotRegistered));
-        assertTrue(alarmC.matches(systemId, systemName, null, AlarmCause.systemNotRegistered));
-        assertTrue(alarmD.matches(systemId, systemName, Map.of("a", "1"), AlarmCause.systemNotRegistered));
+        assertTrue(alarmA.matches(null, systemName, null, AlarmCause.SYSTEM_NOT_REGISTERED));
+        assertTrue(alarmB.matches(systemId, null, null, AlarmCause.SYSTEM_NOT_REGISTERED));
+        assertTrue(alarmC.matches(systemId, systemName, null, AlarmCause.SYSTEM_NOT_REGISTERED));
+        assertTrue(alarmD.matches(systemId, systemName, Map.of("a", "1"), AlarmCause.SYSTEM_NOT_REGISTERED));
     }
 
     @Test
@@ -48,18 +51,17 @@ public class AlarmTest {
         final String systemName = "ABC";
         final String systemId = "123";
 
-        Alarm alarmA = new Alarm(null, systemName, null, AlarmCause.systemNotRegistered);
-        Alarm alarmB = new Alarm(systemId, null, null, AlarmCause.systemNotRegistered);
-        Alarm alarmC = new Alarm(systemId, systemName, null, AlarmCause.systemNotRegistered);
-        Alarm alarmD = new Alarm(systemId, systemName, Map.of("x", "y"), AlarmCause.systemNotRegistered);
+        final Alarm alarmA = new Alarm(null, systemName, null, AlarmCause.SYSTEM_NOT_REGISTERED);
+        final Alarm alarmB = new Alarm(systemId, null, null, AlarmCause.SYSTEM_NOT_REGISTERED);
+        final Alarm alarmC = new Alarm(systemId, systemName, null, AlarmCause.SYSTEM_NOT_REGISTERED);
+        final Alarm alarmD = new Alarm(systemId, systemName, Map.of("x", "y"), AlarmCause.SYSTEM_NOT_REGISTERED);
 
-        assertFalse(alarmA.matches("Incorrect name", systemName, null, AlarmCause.systemNotRegistered));
-        assertFalse(alarmB.matches(systemId, "Incorrect ID", null, AlarmCause.systemNotRegistered));
-        assertFalse(alarmC.matches(systemId, systemName, null, AlarmCause.systemNotInDescription));
-        assertFalse(alarmC.matches(null, null, null, AlarmCause.systemNotRegistered));
-        assertFalse(alarmD.matches(null, null, null, AlarmCause.systemNotRegistered));
-        assertFalse(alarmD.matches(null, null, Map.of("x", "z"), AlarmCause.systemNotRegistered));
+        assertFalse(alarmA.matches("Incorrect name", systemName, null, AlarmCause.SYSTEM_NOT_REGISTERED));
+        assertFalse(alarmB.matches(systemId, "Incorrect ID", null, AlarmCause.SYSTEM_NOT_REGISTERED));
+        assertFalse(alarmC.matches(systemId, systemName, null, AlarmCause.SYSTEM_NOT_IN_DESCRIPTION));
+        assertFalse(alarmC.matches(null, null, null, AlarmCause.SYSTEM_NOT_REGISTERED));
+        assertFalse(alarmD.matches(null, null, null, AlarmCause.SYSTEM_NOT_REGISTERED));
+        assertFalse(alarmD.matches(null, null, Map.of("x", "z"), AlarmCause.SYSTEM_NOT_REGISTERED));
     }
-
 
 }

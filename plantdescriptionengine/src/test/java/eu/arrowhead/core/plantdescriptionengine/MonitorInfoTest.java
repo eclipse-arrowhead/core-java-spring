@@ -14,12 +14,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MonitorInfoTest {
 
     private ServiceDescription createServiceDescription(final Map<String, String> metadata) {
-        var provider = new ProviderDescription("Provider-system", new InetSocketAddress("0.0.0.0", 5000));
+        final ProviderDescription provider = new ProviderDescription(
+            "Provider-system",
+            new InetSocketAddress("0.0.0.0", 5000)
+        );
         return new ServiceDescription.Builder()
             .name("service-a")
             .provider(provider)
@@ -37,14 +42,14 @@ public class MonitorInfoTest {
     @Test
     public void shouldMatch() {
 
-        String systemName = "System A";
-        String serviceDefinition = "Service A";
-        Map<String, String> metadata = Map.of("a", "1", "b", "2");
+        final String systemName = "System A";
+        final String serviceDefinition = "Service A";
+        final Map<String, String> metadata = Map.of("a", "1", "b", "2");
 
-        var info = new MonitorInfo.Bundle(systemName, serviceDefinition, metadata, null, null);
+        final MonitorInfo.Bundle info = new MonitorInfo.Bundle(systemName, serviceDefinition, metadata, null, null);
 
-        Map<String, String> systemMetadata = Map.of("a", "1");
-        Map<String, String> serviceMetadata = Map.of("b", "2");
+        final Map<String, String> systemMetadata = Map.of("a", "1");
+        final Map<String, String> serviceMetadata = Map.of("b", "2");
 
         assertTrue(info.matchesPortMetadata(systemMetadata, serviceMetadata));
     }
@@ -52,13 +57,13 @@ public class MonitorInfoTest {
     @Test
     public void shouldNotMatch() {
 
-        String systemName = "System A";
-        String serviceDefinition = "Service A";
-        Map<String, String> metadata = Map.of("a", "1", "b", "2");
-        var info = new MonitorInfo.Bundle(systemName, serviceDefinition, metadata, null, null);
+        final String systemName = "System A";
+        final String serviceDefinition = "Service A";
+        final Map<String, String> metadata = Map.of("a", "1", "b", "2");
+        final MonitorInfo.Bundle info = new MonitorInfo.Bundle(systemName, serviceDefinition, metadata, null, null);
 
-        Map<String, String> systemMetadata = Map.of("a", "x");
-        Map<String, String> serviceMetadata = Map.of("b", "2");
+        final Map<String, String> systemMetadata = Map.of("a", "x");
+        final Map<String, String> serviceMetadata = Map.of("b", "2");
 
         assertFalse(info.matchesPortMetadata(systemMetadata, serviceMetadata));
     }
@@ -66,14 +71,14 @@ public class MonitorInfoTest {
     @Test
     public void subsetShouldMatch() {
 
-        String systemName = "System A";
-        String serviceDefinition = "Service A";
-        Map<String, String> metadata = Map.of("a", "1", "b", "2", "c", "3");
+        final String systemName = "System A";
+        final String serviceDefinition = "Service A";
+        final Map<String, String> metadata = Map.of("a", "1", "b", "2", "c", "3");
 
-        var info = new MonitorInfo.Bundle(systemName, serviceDefinition, metadata, null, null);
+        final MonitorInfo.Bundle info = new MonitorInfo.Bundle(systemName, serviceDefinition, metadata, null, null);
 
-        Map<String, String> systemMetadata = Map.of("a", "1");
-        Map<String, String> serviceMetadata = Map.of("b", "2");
+        final Map<String, String> systemMetadata = Map.of("a", "1");
+        final Map<String, String> serviceMetadata = Map.of("b", "2");
 
         assertTrue(info.matchesPortMetadata(systemMetadata, serviceMetadata));
     }
@@ -81,14 +86,14 @@ public class MonitorInfoTest {
     @Test
     public void supersetShouldNotMatch() {
 
-        String systemName = "System A";
-        String serviceDefinition = "Service A";
-        Map<String, String> metadata = Map.of("a", "1", "b", "2");
+        final String systemName = "System A";
+        final String serviceDefinition = "Service A";
+        final Map<String, String> metadata = Map.of("a", "1", "b", "2");
 
-        var info = new MonitorInfo.Bundle(systemName, serviceDefinition, metadata, null, null);
+        final MonitorInfo.Bundle info = new MonitorInfo.Bundle(systemName, serviceDefinition, metadata, null, null);
 
-        Map<String, String> systemMetadata = Map.of("a", "1");
-        Map<String, String> serviceMetadata = Map.of("b", "2", "c", "3");
+        final Map<String, String> systemMetadata = Map.of("a", "1");
+        final Map<String, String> serviceMetadata = Map.of("b", "2", "c", "3");
 
         assertFalse(info.matchesPortMetadata(systemMetadata, serviceMetadata));
     }
@@ -96,14 +101,14 @@ public class MonitorInfoTest {
     @Test
     public void shouldRequireServiceMetadata() {
 
-        String systemName = "System A";
-        String serviceDefinition = "Service A";
-        Map<String, String> metadata = Map.of("a", "1");
+        final String systemName = "System A";
+        final String serviceDefinition = "Service A";
+        final Map<String, String> metadata = Map.of("a", "1");
 
-        var info = new MonitorInfo.Bundle(systemName, serviceDefinition, metadata, null, null);
+        final MonitorInfo.Bundle info = new MonitorInfo.Bundle(systemName, serviceDefinition, metadata, null, null);
 
-        Map<String, String> systemMetadata = Map.of("a", "1");
-        Map<String, String> serviceMetadata = new HashMap<>();
+        final Map<String, String> systemMetadata = Map.of("a", "1");
+        final Map<String, String> serviceMetadata = new HashMap<>();
 
         assertFalse(info.matchesPortMetadata(systemMetadata, serviceMetadata));
         assertFalse(info.matchesPortMetadata(systemMetadata, null));
@@ -112,11 +117,11 @@ public class MonitorInfoTest {
     @Test
     public void serviceShouldOverrideSystem() {
 
-        String systemName = "System A";
-        String serviceDefinition = "Service A";
-        Map<String, String> metadata = Map.of("a", "1");
+        final String systemName = "System A";
+        final String serviceDefinition = "Service A";
+        final Map<String, String> metadata = Map.of("a", "1");
 
-        var info = new MonitorInfo.Bundle(systemName, serviceDefinition, metadata, null, null);
+        final MonitorInfo.Bundle info = new MonitorInfo.Bundle(systemName, serviceDefinition, metadata, null, null);
 
         Map<String, String> systemMetadata = Map.of("a", "2");
         Map<String, String> serviceMetadata = Map.of("a", "1");
@@ -133,30 +138,30 @@ public class MonitorInfoTest {
     @Test
     public void shouldStoreSystemData() {
 
-        Map<String, String> metadata = Map.of("name", "abc");
-        ServiceDescription serviceDescription = createServiceDescription(metadata);
+        final Map<String, String> metadata = Map.of("name", "abc");
+        final ServiceDescription serviceDescription = createServiceDescription(metadata);
 
-        JsonObject jsonObject = new JsonObject(List.of(new JsonPair("a", JsonBoolean.TRUE)));
+        final JsonObject jsonObject = new JsonObject(List.of(new JsonPair("a", JsonBoolean.TRUE)));
 
-        var monitorInfo = new MonitorInfo();
+        final MonitorInfo monitorInfo = new MonitorInfo();
         monitorInfo.putSystemData(serviceDescription, jsonObject);
 
-        Map<String, String> lookupMetadata = Map.of("name", "abc");
-        var systemInfoList = monitorInfo.getSystemInfo(null, lookupMetadata);
+        final Map<String, String> lookupMetadata = Map.of("name", "abc");
+        final List<MonitorInfo.Bundle> systemInfoList = monitorInfo.getSystemInfo(null, lookupMetadata);
         assertEquals(1, systemInfoList.size());
-        var systemInfo = systemInfoList.get(0);
+        final MonitorInfo.Bundle systemInfo = systemInfoList.get(0);
         assertEquals("{[a: true]}", systemInfo.systemData.toString());
     }
 
     @Test
     public void shouldStoreInventoryId() {
-        Map<String, String> metadataA = Map.of("name", "a");
-        Map<String, String> metadataB = Map.of("name", "b");
-        String systemNameA = "System-a";
-        String systemNameB = "System-b";
+        final Map<String, String> metadataA = Map.of("name", "a");
+        final Map<String, String> metadataB = Map.of("name", "b");
+        final String systemNameA = "System-a";
+        final String systemNameB = "System-b";
 
-        var providerA = new ProviderDescription(systemNameA, new InetSocketAddress("0.0.0.0", 5000));
-        var serviceA = new ServiceDescription.Builder()
+        final ProviderDescription providerA = new ProviderDescription(systemNameA, new InetSocketAddress("0.0.0.0", 5000));
+        final ServiceDescription serviceA = new ServiceDescription.Builder()
             .name("service-a")
             .provider(providerA)
             .uri("/test")
@@ -165,8 +170,8 @@ public class MonitorInfoTest {
             .metadata(metadataA)
             .build();
 
-        var providerB = new ProviderDescription(systemNameB, new InetSocketAddress("0.0.0.0", 5001));
-        var serviceB = new ServiceDescription.Builder()
+        final ProviderDescription providerB = new ProviderDescription(systemNameB, new InetSocketAddress("0.0.0.0", 5001));
+        final ServiceDescription serviceB = new ServiceDescription.Builder()
             .name("service-b")
             .provider(providerB)
             .uri("/test")
@@ -175,70 +180,70 @@ public class MonitorInfoTest {
             .metadata(metadataB)
             .build();
 
-        String inventoryIdA = "id-A";
-        String inventoryIdB = "id-B";
+        final String inventoryIdA = "id-A";
+        final String inventoryIdB = "id-B";
 
-        var monitorInfo = new MonitorInfo();
+        final MonitorInfo monitorInfo = new MonitorInfo();
         monitorInfo.putInventoryId(serviceA, inventoryIdA);
         monitorInfo.putInventoryId(serviceB, inventoryIdB);
 
-        var systemInfoList = monitorInfo.getSystemInfo(serviceB.provider().name(), null);
+        final List<MonitorInfo.Bundle> systemInfoList = monitorInfo.getSystemInfo(serviceB.provider().name(), null);
         assertEquals(1, systemInfoList.size());
-        var systemInfo = systemInfoList.get(0);
+        final MonitorInfo.Bundle systemInfo = systemInfoList.get(0);
         assertEquals(inventoryIdB, systemInfo.inventoryId);
     }
 
     @Test
     public void shouldRetrieveBySystemName() {
 
-        Map<String, String> metadata = Map.of("x", "y");
-        ServiceDescription serviceDescription = createServiceDescription(metadata);
+        final Map<String, String> metadata = Map.of("x", "y");
+        final ServiceDescription serviceDescription = createServiceDescription(metadata);
 
-        String inventoryId = "id-4567";
-        var monitorInfo = new MonitorInfo();
+        final String inventoryId = "id-4567";
+        final MonitorInfo monitorInfo = new MonitorInfo();
         monitorInfo.putInventoryId(serviceDescription, inventoryId);
-        var systemInfoList = monitorInfo.getSystemInfo(serviceDescription.provider().name(), null);
+        final List<MonitorInfo.Bundle> systemInfoList = monitorInfo.getSystemInfo(serviceDescription.provider().name(), null);
         assertEquals(1, systemInfoList.size());
 
-        var systemInfo = systemInfoList.get(0);
+        final MonitorInfo.Bundle systemInfo = systemInfoList.get(0);
         assertEquals(inventoryId, systemInfo.inventoryId);
     }
 
     @Test
     public void shouldOverwriteData() {
 
-        ServiceDescription service = createServiceDescription();
-        var monitorInfo = new MonitorInfo();
+        final ServiceDescription service = createServiceDescription();
+        final MonitorInfo monitorInfo = new MonitorInfo();
 
-        String oldInventoryId = "id-1234";
+        final String oldInventoryId = "id-1234";
         monitorInfo.putInventoryId(service, oldInventoryId);
 
-        String newInventoryId = "id-5678";
+        final String newInventoryId = "id-5678";
         monitorInfo.putInventoryId(service, newInventoryId);
 
-        var systemInfoList = monitorInfo.getSystemInfo(service.provider().name(), null);
+        final List<MonitorInfo.Bundle> systemInfoList = monitorInfo.getSystemInfo(service.provider().name(), null);
         assertEquals(1, systemInfoList.size());
 
-        var systemInfo = systemInfoList.get(0);
+        final MonitorInfo.Bundle systemInfo = systemInfoList.get(0);
         assertEquals(newInventoryId, systemInfo.inventoryId);
     }
 
     @Test
     public void shouldMergeData() {
-        ServiceDescription service = createServiceDescription();
-        var monitorInfo = new MonitorInfo();
+        final ServiceDescription service = createServiceDescription();
+        final MonitorInfo monitorInfo = new MonitorInfo();
 
-        String inventoryId = "xyz";
+        final String inventoryId = "xyz";
         monitorInfo.putInventoryId(service, inventoryId);
 
-        JsonObject systemData = new JsonObject(List.of(new JsonPair("b", JsonBoolean.FALSE)));
+        final JsonObject systemData = new JsonObject(List.of(new JsonPair("b", JsonBoolean.FALSE)));
 
         monitorInfo.putSystemData(service, systemData);
 
-        var systemInfoList = monitorInfo.getSystemInfo(service.provider().name(), null);
+        final List<MonitorInfo.Bundle> systemInfoList = monitorInfo.getSystemInfo(service.provider().name(), null);
         assertEquals(1, systemInfoList.size());
 
-        var systemInfo = systemInfoList.get(0);
+        final MonitorInfo.Bundle systemInfo = systemInfoList.get(0);
         assertEquals(inventoryId, systemInfo.inventoryId);
         assertEquals("{[b: false]}", systemInfo.systemData.toString());
     }

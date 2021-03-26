@@ -1,13 +1,24 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt;
 
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.*;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.ConnectionBuilder;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.ConnectionDto;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystemBuilder;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystemDto;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntry;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryBuilder;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryDto;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PortBuilder;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PortDto;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.SystemPortBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PlantDescriptionValidatorTest {
 
@@ -63,7 +74,7 @@ public class PlantDescriptionValidatorTest {
                 .build())
             .build());
 
-        final var entryA = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryA = new PlantDescriptionEntryBuilder()
             .id(entryIdA)
             .plantDescription("Plant Description A")
             .createdAt(now)
@@ -74,10 +85,10 @@ public class PlantDescriptionValidatorTest {
             .build();
 
         // Second entry
-        int entryIdB = 1;
-        String consumerIdB = "Cons-B";
-        String consumerNameB = "Consumer B";
-        String consumerPortB = "Cons-Port-B";
+        final int entryIdB = 1;
+        final String consumerIdB = "Cons-B";
+        final String consumerNameB = "Consumer B";
+        final String consumerPortB = "Cons-Port-B";
 
         final List<PortDto> consumerPortsB = List.of(new PortBuilder()
             .portName(consumerPortB)
@@ -103,7 +114,7 @@ public class PlantDescriptionValidatorTest {
                 .build())
             .build());
 
-        final var entryB = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryB = new PlantDescriptionEntryBuilder()
             .id(entryIdB)
             .plantDescription("Plant Description B")
             .createdAt(now)
@@ -114,21 +125,21 @@ public class PlantDescriptionValidatorTest {
             .connections(connectionsB)
             .build();
 
-        Map<Integer, PlantDescriptionEntry> entries = Map.of(entryIdA, entryA, entryIdB, entryB);
-        final var validator = new PlantDescriptionValidator(entries);
+        final Map<Integer, PlantDescriptionEntry> entries = Map.of(entryIdA, entryA, entryIdB, entryB);
+        final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
         assertFalse(validator.hasError());
     }
 
     @Test
     public void shouldReportProducerConsumerMismatch() {
 
-        int entryId = 123;
-        String producerId = "Prod-A";
-        String consumerId = "Cons-A";
-        String consumerNameA = "Consumer A";
-        String producerNameA = "Producer A";
-        String consumerPort = "Cons-Port-A";
-        String producerPort = "Prod-Port-A";
+        final int entryId = 123;
+        final String producerId = "Prod-A";
+        final String consumerId = "Cons-A";
+        final String consumerNameA = "Consumer A";
+        final String producerNameA = "Producer A";
+        final String consumerPort = "Cons-Port-A";
+        final String producerPort = "Prod-Port-A";
         final String serviceInterface = "HTTP-SECURE-JSON";
 
         final List<PortDto> consumerPortsA = List.of(new PortBuilder()
@@ -169,7 +180,7 @@ public class PlantDescriptionValidatorTest {
                 .build())
             .build());
 
-        final var entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
             .id(entryId)
             .plantDescription("Plant Description A")
             .createdAt(now)
@@ -179,8 +190,8 @@ public class PlantDescriptionValidatorTest {
             .connections(connections)
             .build();
 
-        Map<Integer, PlantDescriptionEntry> entries = Map.of(entryId, entry);
-        final var validator = new PlantDescriptionValidator(entries);
+        final Map<Integer, PlantDescriptionEntry> entries = Map.of(entryId, entry);
+        final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
         assertTrue(validator.hasError());
         final String errorMessage = "<Invalid connection, '" + consumerPort +
             "' is not a producer port.>, <Invalid connection, '" +
@@ -191,13 +202,13 @@ public class PlantDescriptionValidatorTest {
     @Test
     public void shouldReportServiceInterfaceMismatch() {
 
-        int entryId = 332;
-        String producerId = "Prod-A";
-        String consumerId = "Cons-A";
-        String consumerNameA = "Consumer A";
-        String producerNameA = "Producer A";
-        String consumerPort = "Cons-Port-A";
-        String producerPort = "Prod-Port-A";
+        final int entryId = 332;
+        final String producerId = "Prod-A";
+        final String consumerId = "Cons-A";
+        final String consumerNameA = "Consumer A";
+        final String producerNameA = "Producer A";
+        final String consumerPort = "Cons-Port-A";
+        final String producerPort = "Prod-Port-A";
         final String serviceInterfaceA = "HTTP-SECURE-JSON";
         final String serviceInterfaceB = "HTTP-INSECURE-JSON";
 
@@ -239,7 +250,7 @@ public class PlantDescriptionValidatorTest {
                 .build())
             .build());
 
-        final var entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
             .id(entryId)
             .plantDescription("Plant Description A")
             .createdAt(now)
@@ -249,8 +260,8 @@ public class PlantDescriptionValidatorTest {
             .connections(connections)
             .build();
 
-        Map<Integer, PlantDescriptionEntry> entries = Map.of(entryId, entry);
-        final var validator = new PlantDescriptionValidator(entries);
+        final Map<Integer, PlantDescriptionEntry> entries = Map.of(entryId, entry);
+        final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
         assertTrue(validator.hasError());
         final String errorMessage = "<The service interfaces of ports '" +
             consumerPort + "' and '" + producerPort +
@@ -261,13 +272,13 @@ public class PlantDescriptionValidatorTest {
     @Test
     public void shouldReportServiceDefinitionMismatch() {
 
-        int entryId = 332;
-        String producerId = "Prod-A";
-        String consumerId = "Cons-A";
-        String consumerNameA = "Consumer A";
-        String producerNameA = "Producer A";
-        String consumerPort = "Cons-Port-A";
-        String producerPort = "Prod-Port-A";
+        final int entryId = 332;
+        final String producerId = "Prod-A";
+        final String consumerId = "Cons-A";
+        final String consumerNameA = "Consumer A";
+        final String producerNameA = "Producer A";
+        final String consumerPort = "Cons-Port-A";
+        final String producerPort = "Prod-Port-A";
         final String serviceInterface = "HTTP-SECURE-JSON";
         final String serviceDefinitionA = "Service-A";
         final String serviceDefinitionB = "Service-B";
@@ -310,7 +321,7 @@ public class PlantDescriptionValidatorTest {
                 .build())
             .build());
 
-        final var entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
             .id(entryId)
             .plantDescription("Plant Description A")
             .createdAt(now)
@@ -320,8 +331,8 @@ public class PlantDescriptionValidatorTest {
             .connections(connections)
             .build();
 
-        Map<Integer, PlantDescriptionEntry> entries = Map.of(entryId, entry);
-        final var validator = new PlantDescriptionValidator(entries);
+        final Map<Integer, PlantDescriptionEntry> entries = Map.of(entryId, entry);
+        final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
         assertTrue(validator.hasError());
         final String errorMessage = "<The service definitions of ports '" +
             consumerPort + "' and '" + producerPort +
@@ -354,7 +365,7 @@ public class PlantDescriptionValidatorTest {
             .ports(consumerPorts)
             .build();
 
-        final var entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
             .plantDescription("Plant Description 1A")
             .id(123)
             .active(true)
@@ -363,11 +374,11 @@ public class PlantDescriptionValidatorTest {
             .systems(List.of(consumerSystem))
             .build();
 
-        Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
-        final var validator = new PlantDescriptionValidator(entries);
+        final Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
+        final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
         assertTrue(validator.hasError());
 
-        String expectedErrorMessage = "<Duplicate port name '" + portName + "' in system '" + systemId + "'>";
+        final String expectedErrorMessage = "<Duplicate port name '" + portName + "' in system '" + systemId + "'>";
         assertEquals(expectedErrorMessage, validator.getErrorMessage());
     }
 
@@ -403,7 +414,7 @@ public class PlantDescriptionValidatorTest {
             .ports(ports)
             .build();
 
-        final var entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
             .id(789)
             .plantDescription("Plant Description 1A")
             .active(true)
@@ -412,11 +423,11 @@ public class PlantDescriptionValidatorTest {
             .updatedAt(now)
             .build();
 
-        Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
-        final var validator = new PlantDescriptionValidator(entries);
+        final Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
+        final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
         assertTrue(validator.hasError());
 
-        String expectedErrorMessage = "<" + systemId + " has multiple ports with service definition '"
+        final String expectedErrorMessage = "<" + systemId + " has multiple ports with service definition '"
             + serviceDefinition + "' without metadata.>";
         assertEquals(expectedErrorMessage, validator.getErrorMessage());
     }
@@ -468,7 +479,7 @@ public class PlantDescriptionValidatorTest {
                 .portName(invalidPort)
                 .build())
             .build());
-        final var entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
             .id(42)
             .plantDescription("Plant Description 1A")
             .active(true)
@@ -478,11 +489,11 @@ public class PlantDescriptionValidatorTest {
             .updatedAt(now)
             .build();
 
-        Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
-        final var validator = new PlantDescriptionValidator(entries);
+        final Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
+        final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
         assertTrue(validator.hasError());
 
-        String expectedErrorMessage = "<Connection refers to the missing producer port '" + invalidPort + "'>";
+        final String expectedErrorMessage = "<Connection refers to the missing producer port '" + invalidPort + "'>";
         assertEquals(expectedErrorMessage, validator.getErrorMessage());
     }
 
@@ -490,13 +501,13 @@ public class PlantDescriptionValidatorTest {
     public void shouldReportNegativePriority() {
 
         // First entry
-        int entryIdA = 0;
-        String consumerIdA = "Cons-A";
-        String consumerNameA = "Consumer A";
-        String producerNameA = "Producer A";
-        String consumerPortA = "Cons-Port-A";
-        String producerPortA = "Prod-Port-A";
-        String producerIdA = "Prod-A";
+        final int entryIdA = 0;
+        final String consumerIdA = "Cons-A";
+        final String consumerNameA = "Consumer A";
+        final String producerNameA = "Producer A";
+        final String consumerPortA = "Cons-Port-A";
+        final String producerPortA = "Prod-Port-A";
+        final String producerIdA = "Prod-A";
         final String serviceInterface = "HTTP-SECURE-JSON";
 
         final List<PortDto> consumerPortsA = List.of(new PortBuilder()
@@ -537,7 +548,7 @@ public class PlantDescriptionValidatorTest {
                 .build())
             .build());
 
-        final var entryA = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryA = new PlantDescriptionEntryBuilder()
             .id(entryIdA)
             .plantDescription("Plant Description A")
             .createdAt(now)
@@ -548,10 +559,10 @@ public class PlantDescriptionValidatorTest {
             .build();
 
         // Second entry
-        int entryIdB = 1;
-        String consumerIdB = "Cons-B";
-        String consumerNameB = "Consumer B";
-        String consumerPortB = "Cons-Port-B";
+        final int entryIdB = 1;
+        final String consumerIdB = "Cons-B";
+        final String consumerNameB = "Consumer B";
+        final String consumerPortB = "Cons-Port-B";
 
         final List<PortDto> consumerPortsB = List.of(new PortBuilder()
             .portName(consumerPortB)
@@ -577,7 +588,7 @@ public class PlantDescriptionValidatorTest {
                 .build())
             .build());
 
-        final var entryB = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryB = new PlantDescriptionEntryBuilder()
             .id(entryIdB)
             .plantDescription("Plant Description B")
             .createdAt(now)
@@ -588,8 +599,8 @@ public class PlantDescriptionValidatorTest {
             .connections(connectionsB)
             .build();
 
-        Map<Integer, PlantDescriptionEntry> entries = Map.of(entryIdA, entryA, entryIdB, entryB);
-        final var validator = new PlantDescriptionValidator(entries);
+        final Map<Integer, PlantDescriptionEntry> entries = Map.of(entryIdA, entryA, entryIdB, entryB);
+        final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
         assertTrue(validator.hasError());
         assertEquals("<A connection has a negative priority.>", validator.getErrorMessage());
     }
@@ -643,7 +654,7 @@ public class PlantDescriptionValidatorTest {
                 .build())
             .build());
 
-        final var entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
             .id(89)
             .plantDescription("Plant Description 1A")
             .active(true)
@@ -653,11 +664,11 @@ public class PlantDescriptionValidatorTest {
             .updatedAt(now)
             .build();
 
-        Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
-        final var validator = new PlantDescriptionValidator(entries);
+        final Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
+        final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
         assertTrue(validator.hasError());
 
-        String expectedErrorMessage = "<Connection refers to the missing consumer port '" + invalidPort + "'>";
+        final String expectedErrorMessage = "<Connection refers to the missing consumer port '" + invalidPort + "'>";
         assertEquals(expectedErrorMessage, validator.getErrorMessage());
     }
 
@@ -718,7 +729,7 @@ public class PlantDescriptionValidatorTest {
                     .build())
                 .build()
         );
-        final var entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
             .id(23)
             .plantDescription("Plant Description 1A")
             .active(true)
@@ -728,11 +739,11 @@ public class PlantDescriptionValidatorTest {
             .updatedAt(now)
             .build();
 
-        Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
-        final var validator = new PlantDescriptionValidator(entries);
+        final Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
+        final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
         assertTrue(validator.hasError());
 
-        String expectedErrorMessage = "<A connection refers to the missing system '" + missingId + "'>";
+        final String expectedErrorMessage = "<A connection refers to the missing system '" + missingId + "'>";
         assertEquals(expectedErrorMessage, validator.getErrorMessage());
     }
 
@@ -783,7 +794,7 @@ public class PlantDescriptionValidatorTest {
                 .portName(producerPort)
                 .build())
             .build());
-        final var entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
             .id(23)
             .plantDescription("Plant Description 1A")
             .active(true)
@@ -793,11 +804,11 @@ public class PlantDescriptionValidatorTest {
             .updatedAt(now)
             .build();
 
-        Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
-        final var validator = new PlantDescriptionValidator(entries);
+        final Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
+        final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
         assertTrue(validator.hasError());
 
-        String expectedErrorMessage = "<A connection refers to the missing system '" + missingId + "'>";
+        final String expectedErrorMessage = "<A connection refers to the missing system '" + missingId + "'>";
         assertEquals(expectedErrorMessage, validator.getErrorMessage());
     }
 
@@ -829,7 +840,7 @@ public class PlantDescriptionValidatorTest {
             .ports(ports)
             .build();
 
-        final var entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
             .id(23)
             .plantDescription("Plant Description 1A")
             .active(true)
@@ -838,11 +849,11 @@ public class PlantDescriptionValidatorTest {
             .updatedAt(now)
             .build();
 
-        Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
-        final var validator = new PlantDescriptionValidator(entries);
+        final Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
+        final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
         assertTrue(validator.hasError());
 
-        String expectedErrorMessage = "<" + systemId + " has duplicate metadata for ports with service definition '"
+        final String expectedErrorMessage = "<" + systemId + " has duplicate metadata for ports with service definition '"
             + serviceDefinition + "'>";
         assertEquals(expectedErrorMessage, validator.getErrorMessage());
     }
@@ -850,11 +861,11 @@ public class PlantDescriptionValidatorTest {
     @Test
     public void shouldReportDuplicateInclusions() {
 
-        int entryIdA = 0;
-        int entryIdB = 1;
-        int entryIdC = 2;
+        final int entryIdA = 0;
+        final int entryIdB = 1;
+        final int entryIdC = 2;
 
-        final var entryA = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryA = new PlantDescriptionEntryBuilder()
             .id(entryIdA)
             .plantDescription("Plant Description A")
             .createdAt(now)
@@ -862,7 +873,7 @@ public class PlantDescriptionValidatorTest {
             .active(false)
             .build();
 
-        final var entryB = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryB = new PlantDescriptionEntryBuilder()
             .id(entryIdB)
             .plantDescription("Plant Description B")
             .createdAt(now)
@@ -870,7 +881,7 @@ public class PlantDescriptionValidatorTest {
             .active(false)
             .build();
 
-        final var entryC = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryC = new PlantDescriptionEntryBuilder()
             .id(entryIdC)
             .plantDescription("Plant Description C")
             .createdAt(now)
@@ -879,12 +890,12 @@ public class PlantDescriptionValidatorTest {
             .include(List.of(entryIdA, entryIdA, entryIdB, entryIdB))
             .build();
 
-        Map<Integer, PlantDescriptionEntry> entries = Map.of(entryIdA, entryA, entryIdB, entryB, entryIdC, entryC);
-        final var validator = new PlantDescriptionValidator(entries);
+        final Map<Integer, PlantDescriptionEntry> entries = Map.of(entryIdA, entryA, entryIdB, entryB, entryIdC, entryC);
+        final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
 
         assertTrue(validator.hasError());
 
-        String expectedErrorMessage = "<Entry with ID '" + entryIdA + "' is included more than once.>, "
+        final String expectedErrorMessage = "<Entry with ID '" + entryIdA + "' is included more than once.>, "
             + "<Entry with ID '" + entryIdB + "' is included more than once.>";
         assertEquals(expectedErrorMessage, validator.getErrorMessage());
     }
@@ -892,9 +903,9 @@ public class PlantDescriptionValidatorTest {
     @Test
     public void shouldReportSelfInclusion() {
 
-        int entryId = 344;
+        final int entryId = 344;
 
-        final var entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
             .id(entryId)
             .plantDescription("Plant Description A")
             .createdAt(now)
@@ -903,8 +914,8 @@ public class PlantDescriptionValidatorTest {
             .include(List.of(entryId))
             .build();
 
-        Map<Integer, PlantDescriptionEntry> entries = Map.of(entryId, entry);
-        final var validator = new PlantDescriptionValidator(entries);
+        final Map<Integer, PlantDescriptionEntry> entries = Map.of(entryId, entry);
+        final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
 
         assertTrue(validator.hasError());
         assertEquals("<Entry includes itself.>", validator.getErrorMessage());
@@ -913,11 +924,11 @@ public class PlantDescriptionValidatorTest {
     @Test
     public void shouldReportNonexistentInclusions() {
 
-        int nonExistentA = 23;
-        int nonExistentB = 34;
-        int entryId = 44;
+        final int nonExistentA = 23;
+        final int nonExistentB = 34;
+        final int entryId = 44;
 
-        final var entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
             .id(entryId)
             .plantDescription("Plant Description A")
             .createdAt(now)
@@ -926,11 +937,11 @@ public class PlantDescriptionValidatorTest {
             .include(List.of(nonExistentA, nonExistentB))
             .build();
 
-        Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
-        final var validator = new PlantDescriptionValidator(entries);
+        final Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
+        final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
 
         assertTrue(validator.hasError());
-        String expectedErrorMessage = "<Error in include list: Entry '" + nonExistentA + "' is required by entry '"
+        final String expectedErrorMessage = "<Error in include list: Entry '" + nonExistentA + "' is required by entry '"
             + entryId + "'.>, " + "<Error in include list: Entry '" + nonExistentB + "' is required by entry '"
             + entryId + "'.>";
         assertEquals(expectedErrorMessage, validator.getErrorMessage());
@@ -939,12 +950,12 @@ public class PlantDescriptionValidatorTest {
     @Test
     public void shouldReportIncludeCycles() {
 
-        int entryIdA = 0;
-        int entryIdB = 1;
-        int entryIdC = 2;
-        int entryIdD = 3;
+        final int entryIdA = 0;
+        final int entryIdB = 1;
+        final int entryIdC = 2;
+        final int entryIdD = 3;
 
-        final var entryA = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryA = new PlantDescriptionEntryBuilder()
             .id(entryIdA)
             .plantDescription("Plant Description A")
             .createdAt(now)
@@ -952,7 +963,7 @@ public class PlantDescriptionValidatorTest {
             .active(false)
             .build();
 
-        final var entryB = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryB = new PlantDescriptionEntryBuilder()
             .id(entryIdB)
             .plantDescription("Plant Description B")
             .createdAt(now)
@@ -960,7 +971,7 @@ public class PlantDescriptionValidatorTest {
             .active(false)
             .build();
 
-        final var entryC = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryC = new PlantDescriptionEntryBuilder()
             .id(entryIdC)
             .plantDescription("Plant Description C")
             .createdAt(now)
@@ -969,7 +980,7 @@ public class PlantDescriptionValidatorTest {
             .include(List.of(entryIdA, entryIdB))
             .build();
 
-        final var entryD = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryD = new PlantDescriptionEntryBuilder()
             .id(entryIdD)
             .plantDescription("Plant Description C")
             .createdAt(now)
@@ -978,19 +989,19 @@ public class PlantDescriptionValidatorTest {
             .include(List.of(entryIdB, entryIdC))
             .build();
 
-        Map<Integer, PlantDescriptionEntry> entries = Map.of(entryIdA, entryA, entryIdB, entryB, entryIdC, entryC,
+        final Map<Integer, PlantDescriptionEntry> entries = Map.of(entryIdA, entryA, entryIdB, entryB, entryIdC, entryC,
             entryIdD, entryD);
-        final var validator = new PlantDescriptionValidator(entries);
+        final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
         assertTrue(validator.hasError());
 
-        String expectedErrorMessage = "<Contains cycle.>";
+        final String expectedErrorMessage = "<Contains cycle.>";
         assertEquals(expectedErrorMessage, validator.getErrorMessage());
     }
 
     @Test
     public void shouldReportInvalidSystemId() {
 
-        final var entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
             .id(9)
             .plantDescription("Plant Description A")
             .createdAt(now)
@@ -1004,17 +1015,17 @@ public class PlantDescriptionValidatorTest {
             ))
             .build();
 
-        Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
-        final var validator = new PlantDescriptionValidator(entries);
+        final Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
+        final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
         assertTrue(validator.hasError());
-        String expectedErrorMessage = "<'Unknown' is not a valid system ID.>";
+        final String expectedErrorMessage = "<'Unknown' is not a valid system ID.>";
         assertEquals(expectedErrorMessage, validator.getErrorMessage());
     }
 
     @Test
     public void shouldRequireNameOrMetadata() {
 
-        final var entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
             .id(22)
             .plantDescription("Plant Description A")
             .createdAt(now)
@@ -1027,19 +1038,19 @@ public class PlantDescriptionValidatorTest {
             ))
             .build();
 
-        Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
-        final var validator = new PlantDescriptionValidator(entries);
+        final Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
+        final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
         assertTrue(validator.hasError());
-        String expectedErrorMessage = "<Contains a system with neither a name nor metadata to identify it.>";
+        final String expectedErrorMessage = "<Contains a system with neither a name nor metadata to identify it.>";
         assertEquals(expectedErrorMessage, validator.getErrorMessage());
     }
 
     @Test
     public void shouldReportNonUniqueSystem() {
-        String systemIdB = "Sys-B";
-        String systemName = "XYZ";
-        Map<String, String> metadata = Map.of("a", "1");
-        final var entry = new PlantDescriptionEntryBuilder()
+        final String systemIdB = "Sys-B";
+        final String systemName = "XYZ";
+        final Map<String, String> metadata = Map.of("a", "1");
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
             .id(22)
             .plantDescription("Plant Description A")
             .createdAt(now)
@@ -1059,10 +1070,10 @@ public class PlantDescriptionValidatorTest {
             ))
             .build();
 
-        Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
-        final var validator = new PlantDescriptionValidator(entries);
+        final Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
+        final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
         assertTrue(validator.hasError());
-        String expectedErrorMessage = "<System with ID '" + systemIdB +
+        final String expectedErrorMessage = "<System with ID '" + systemIdB +
             "' cannot be uniquely identified by its name/metadata combination.>";
         assertEquals(expectedErrorMessage, validator.getErrorMessage());
     }
@@ -1070,7 +1081,7 @@ public class PlantDescriptionValidatorTest {
     @Test
     public void shouldTreatEmptyMetadataAsNull() {
 
-        final var entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
             .id(22)
             .plantDescription("Plant Description A")
             .createdAt(now)
@@ -1084,17 +1095,17 @@ public class PlantDescriptionValidatorTest {
             ))
             .build();
 
-        Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
-        final var validator = new PlantDescriptionValidator(entries);
+        final Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
+        final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
         assertTrue(validator.hasError());
-        String expectedErrorMessage = "<Contains a system with neither a name nor metadata to identify it.>";
+        final String expectedErrorMessage = "<Contains a system with neither a name nor metadata to identify it.>";
         assertEquals(expectedErrorMessage, validator.getErrorMessage());
     }
 
     @Test
     public void shouldAcceptSystemWithOnlyMetadata() {
 
-        final var entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
             .id(22)
             .plantDescription("Plant Description A")
             .createdAt(now)
@@ -1108,8 +1119,8 @@ public class PlantDescriptionValidatorTest {
             ))
             .build();
 
-        Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
-        final var validator = new PlantDescriptionValidator(entries);
+        final Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
+        final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
         assertFalse(validator.hasError());
     }
 
@@ -1135,7 +1146,7 @@ public class PlantDescriptionValidatorTest {
                 .build()
         );
 
-        final var entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
             .id(22)
             .plantDescription("Plant Description A")
             .createdAt(now)
@@ -1150,10 +1161,10 @@ public class PlantDescriptionValidatorTest {
             ))
             .build();
 
-        Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
-        final var validator = new PlantDescriptionValidator(entries);
+        final Map<Integer, PlantDescriptionEntry> entries = Map.of(entry.id(), entry);
+        final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
         assertTrue(validator.hasError());
-        String expectedErrorMessage = "<Port '" + portNameB + "' is a consumer port, it must not have any metadata.>";
+        final String expectedErrorMessage = "<Port '" + portNameB + "' is a consumer port, it must not have any metadata.>";
         assertEquals(expectedErrorMessage, validator.getErrorMessage());
     }
 

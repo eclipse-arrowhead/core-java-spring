@@ -8,7 +8,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 
 import static se.arkalix.dto.DtoEncoding.JSON;
 
@@ -31,15 +30,15 @@ public interface PlantDescriptionEntry {
      * @param id          Identifier to be used for the new entry.
      * @return A new plant entry based on the given description.
      */
-    static PlantDescriptionEntryDto from(PlantDescriptionDto description, int id) {
-        List<PdeSystemDto> systems = new ArrayList<>();
-        List<ConnectionDto> connections = new ArrayList<>();
+    static PlantDescriptionEntryDto from(final PlantDescriptionDto description, final int id) {
+        final List<PdeSystemDto> systems = new ArrayList<>();
+        final List<ConnectionDto> connections = new ArrayList<>();
 
-        for (PdeSystem system : description.systems()) {
+        for (final PdeSystem system : description.systems()) {
             systems.add((PdeSystemDto) system);
         }
 
-        for (Connection connection : description.connections()) {
+        for (final Connection connection : description.connections()) {
             connections.add((ConnectionDto) connection);
         }
 
@@ -63,15 +62,15 @@ public interface PlantDescriptionEntry {
      * @param entry A Plant Description Entry.
      * @return A copy of the given entry, with 'active' set to false.
      */
-    static PlantDescriptionEntryDto deactivated(PlantDescriptionEntry entry) {
-        List<PdeSystemDto> systems = new ArrayList<>();
-        List<ConnectionDto> connections = new ArrayList<>();
+    static PlantDescriptionEntryDto deactivated(final PlantDescriptionEntry entry) {
+        final List<PdeSystemDto> systems = new ArrayList<>();
+        final List<ConnectionDto> connections = new ArrayList<>();
 
-        for (PdeSystem system : entry.systems()) {
+        for (final PdeSystem system : entry.systems()) {
             systems.add((PdeSystemDto) system);
         }
 
-        for (Connection connection : entry.connections()) {
+        for (final Connection connection : entry.connections()) {
             connections.add((ConnectionDto) connection);
         }
 
@@ -93,9 +92,9 @@ public interface PlantDescriptionEntry {
      * @return A copy of the target plant description updated with the fields
      * specified in newFields.
      */
-    static PlantDescriptionEntryDto update(PlantDescriptionEntryDto oldEntry, PlantDescriptionUpdateDto newFields) {
+    static PlantDescriptionEntryDto update(final PlantDescriptionEntryDto oldEntry, final PlantDescriptionUpdateDto newFields) {
 
-        var builder = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryBuilder builder = new PlantDescriptionEntryBuilder()
             .id(oldEntry.id())
             .plantDescription(newFields.plantDescription()
                 .orElse(oldEntry.plantDescription()))
@@ -109,14 +108,14 @@ public interface PlantDescriptionEntry {
         // The methods 'systems' and 'connections' return instances of
         // PdeSystem and Connection. This must be cast to their runtime-types
         // before they can be added to the old entry:
-        List<PdeSystemDto> systems = new ArrayList<>();
-        for (PdeSystem system : newFields.systems().orElse(oldEntry.systems())) {
+        final List<PdeSystemDto> systems = new ArrayList<>();
+        for (final PdeSystem system : newFields.systems().orElse(oldEntry.systems())) {
             systems.add((PdeSystemDto) system);
         }
         builder.systems(systems);
 
-        List<ConnectionDto> connections = new ArrayList<>();
-        for (Connection connection : newFields.connections().orElse(oldEntry.connections())) {
+        final List<ConnectionDto> connections = new ArrayList<>();
+        for (final Connection connection : newFields.connections().orElse(oldEntry.connections())) {
             connections.add((ConnectionDto) connection);
         }
         builder.connections(connections);
@@ -124,29 +123,28 @@ public interface PlantDescriptionEntry {
         return builder.build();
     }
 
-    static void sort(List<? extends PlantDescriptionEntry> entries, String sortField, boolean sortAscending) {
-
-        Comparator<PlantDescriptionEntry> comparator;
-        switch (sortField) {
-            case "id":
-                comparator = ID_COMPARATOR;
-                break;
-            case "createdAt":
-                comparator = CREATED_AT_COMPARATOR;
-                break;
-            case "updatedAt":
-                comparator = UPDATED_AT_COMPARATOR;
-                break;
-            default:
-                throw new IllegalArgumentException(
-                    "'" + sortField + "' is not a valid sort field for Plant Description Entries.");
-        }
-
-        if (sortAscending) {
+    private static void sort(
+        final List<? extends PlantDescriptionEntry> entries,
+        final Comparator<? super PlantDescriptionEntry> comparator,
+        final boolean ascending
+    ) {
+        if (ascending) {
             entries.sort(comparator);
         } else {
             entries.sort(comparator.reversed());
         }
+    }
+
+    static void sortById(final List<? extends PlantDescriptionEntry> entries, final boolean ascending) {
+        sort(entries, ID_COMPARATOR, ascending);
+    }
+
+    static void sortByCreatedAt(final List<? extends PlantDescriptionEntry> entries, final boolean ascending) {
+        sort(entries, CREATED_AT_COMPARATOR, ascending);
+    }
+
+    static void sortByUpdatedAt(final List<? extends PlantDescriptionEntry> entries, final boolean ascending) {
+        sort(entries, UPDATED_AT_COMPARATOR, ascending);
     }
 
     /**
@@ -156,7 +154,7 @@ public interface PlantDescriptionEntry {
      * @param active  If true, active entries are removed. If false, inactive
      *                entries are removed.
      */
-    static void filterByActive(List<? extends PlantDescriptionEntry> entries, boolean active) {
+    static void filterByActive(final List<? extends PlantDescriptionEntry> entries, final boolean active) {
         if (active) {
             entries.removeIf(entry -> !entry.active());
         } else {

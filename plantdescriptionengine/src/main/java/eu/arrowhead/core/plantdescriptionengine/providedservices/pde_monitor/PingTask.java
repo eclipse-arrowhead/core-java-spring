@@ -9,6 +9,7 @@ import se.arkalix.net.http.client.HttpClient;
 import se.arkalix.net.http.client.HttpClientRequest;
 import se.arkalix.query.ServiceQuery;
 
+import java.net.InetSocketAddress;
 import java.util.Objects;
 import java.util.TimerTask;
 
@@ -16,11 +17,17 @@ public class PingTask extends TimerTask {
 
     private static final Logger logger = LoggerFactory.getLogger(PingTask.class);
 
+    private static final String PING_PATH = "/ping";
+
     private final ServiceQuery serviceQuery;
     private final HttpClient httpClient;
     private final AlarmManager alarmManager;
 
-    public PingTask(ServiceQuery serviceQuery, HttpClient httpClient, AlarmManager alarmManager) {
+    public PingTask(
+        final ServiceQuery serviceQuery,
+        final HttpClient httpClient,
+        final AlarmManager alarmManager
+    ) {
 
         Objects.requireNonNull(serviceQuery, "Expected service query");
         Objects.requireNonNull(httpClient, "Expected HTTP client");
@@ -42,21 +49,21 @@ public class PingTask extends TimerTask {
     private void ping() {
         serviceQuery.resolveAll()
             .ifSuccess(services -> {
-                for (var service : services) {
+                for (final ServiceDescription service : services) {
                     ping(service);
                 }
             })
             .onFailure(e -> logger.error("Failed to ping monitorable systems.", e));
     }
 
-    private void ping(ServiceDescription service) {
-        final var address = service.provider().socketAddress();
+    private void ping(final ServiceDescription service) {
+        final InetSocketAddress address = service.provider().socketAddress();
         final String providerName = service.provider().name();
         httpClient
             .send(address,
                 new HttpClientRequest()
                     .method(HttpMethod.GET)
-                    .uri(service.uri() + "/ping")
+                    .uri(service.uri() + PING_PATH)
                     .header("accept",
                         "application/json"))
             .ifSuccess(result -> {

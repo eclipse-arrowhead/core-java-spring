@@ -15,14 +15,14 @@ public class PdeMonitorServiceTest {
 
     @Test
     public void shouldProvideService() throws PdStoreException, SSLException {
-        final var pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
+        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
         final HttpClient client = new HttpClient.Builder().build();
 
         final ArSystem arSystem = new ArSystem.Builder()
             .name("Test System")
             .insecure()
             .build();
-        final var service = new PdeMonitorService(arSystem, pdTracker, client, new AlarmManager(), false);
+        final PdeMonitorService service = new PdeMonitorService(arSystem, pdTracker, client, new AlarmManager(), false, 1000, 1000);
 
         service.provide()
             .ifSuccess(Assertions::assertNotNull)
@@ -31,14 +31,14 @@ public class PdeMonitorServiceTest {
 
     @Test
     public void shouldNotAllowSecureService() throws PdStoreException, SSLException {
-        final var pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
+        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
         final HttpClient client = new HttpClient.Builder().build();
 
         final ArSystem arSystem = new ArSystem.Builder()
             .name("Test System")
             .insecure()
             .build();
-        final var service = new PdeMonitorService(arSystem, pdTracker, client, new AlarmManager(), true);
+        final PdeMonitorService service = new PdeMonitorService(arSystem, pdTracker, client, new AlarmManager(), true, 1000, 1000);
 
         service.provide()
             .ifSuccess(Assertions::assertNull)

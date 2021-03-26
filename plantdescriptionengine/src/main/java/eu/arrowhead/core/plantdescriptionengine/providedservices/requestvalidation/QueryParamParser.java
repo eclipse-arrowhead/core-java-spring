@@ -2,10 +2,16 @@ package eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidat
 
 import se.arkalix.net.http.service.HttpServiceRequest;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
- * Class for parsing and validating the query parameters of HttpServiceRequests.
+ * Class for parsing and validating the query parameters of
+ * HttpServiceRequests.
  */
 public class QueryParamParser {
 
@@ -19,40 +25,39 @@ public class QueryParamParser {
     private final List<ParseError> errors = new ArrayList<>();
 
     /**
-     * Constructs an instance of this class. The query parameters of the provided
-     * request are immediately parsed and validated according to the query parameter
-     * requirements specified by the two first arguments.
+     * Constructs an instance of this class. The query parameters of the
+     * provided request are immediately parsed and validated according to the
+     * query parameter requirements specified by the two first arguments.
      * <p>
-     * All of the parameters specified in {@code required} must be present, and all
-     * of their requirements fulfilled, for the request to be considered valid.
+     * All of the parameters specified in {@code required} must be present, and
+     * all of their requirements fulfilled, for the request to be considered
+     * valid.
      * <p>
      * The parameters in {@code accepted} may be left out of the request, but if
      * present, must fulfill their requirements.
      * <p>
      * If the parameters are invalid, a {@code #ParseError} is thrown.
      * <p>
-     * If the parameters are valid, their values will be accessible via the method
-     * {@code getValue}.
+     * If the parameters are valid, their values will be accessible via the
+     * method {@code getValue}.
      *
      * @param required A list of all query parameters that are required for this
-     *                 request to be considered valid, with specific constraints for
-     *                 each one.
-     * @param accepted A list of accepted query parameters
+     *                 request to be considered valid, with specific constraints
+     *                 for each one. May be null.
+     * @param accepted A list of accepted query parameters. May be null.
      * @param request  The head and body of an incoming HTTP request.
      */
-    public QueryParamParser(List<QueryParameter> required, List<QueryParameter> accepted, HttpServiceRequest request)
-        throws ParseError {
+    public QueryParamParser(
+        final List<QueryParameter> required,
+        final List<QueryParameter> accepted,
+        final HttpServiceRequest request
+    ) throws ParseError {
 
-        if (required == null) {
-            required = new ArrayList<>();
-        }
+        Objects.requireNonNull(request, "Expected request.");
 
-        if (accepted == null) {
-            accepted = new ArrayList<>();
-        }
+        this.required = (required == null) ? new ArrayList<>() : required;
+        this.accepted = (accepted == null) ? new ArrayList<>() : accepted;
 
-        this.required = required;
-        this.accepted = accepted;
         parse(request);
 
         if (hasError()) {
@@ -61,7 +66,7 @@ public class QueryParamParser {
     }
 
     public boolean hasError() {
-        return errors.size() > 0;
+        return !errors.isEmpty();
     }
 
     /**
@@ -69,7 +74,7 @@ public class QueryParamParser {
      *
      * @param error The error to report.
      */
-    void report(ParseError error) {
+    void report(final ParseError error) {
         errors.add(error);
     }
 
@@ -78,84 +83,90 @@ public class QueryParamParser {
      *
      * @param request The request to parse.
      */
-    private void parse(HttpServiceRequest request) {
-        for (var param : required) {
+    private void parse(final HttpServiceRequest request) {
+        for (final QueryParameter param : required) {
             param.parse(request, this, true);
         }
-        for (var param : accepted) {
+        for (final QueryParameter param : accepted) {
             param.parse(request, this, false);
         }
     }
 
-    void put(IntParameter key, Integer value) {
+    void put(final IntParameter key, final Integer value) {
         intValues.put(key, value);
     }
 
-    void put(BooleanParameter key, Boolean value) {
+    void put(final BooleanParameter key, final Boolean value) {
         boolValues.put(key, value);
     }
 
-    void put(StringParameter key, String value) {
+    void put(final StringParameter key, final String value) {
         stringValues.put(key, value);
     }
 
     /**
-     * @param param A {@code QueryParam} that has been parse by this instance.
-     * @return An {@code Optional} that contains the value of the query parameter if
-     * it was present in the parsed {@code HttpServiceRequest} or if the
-     * parameter has a default value.
+     * @param param A {@code QueryParam} that has been parsed by this instance.
+     * @return An {@code Optional} that contains the value of the query
+     * parameter if it was present in the parsed {@code HttpServiceRequest} or
+     * if the parameter has a default value.
      */
-    public Optional<Boolean> getValue(BooleanParameter param) {
+    public Optional<Boolean> getValue(final BooleanParameter param) {
+        Objects.requireNonNull(param, "Expected parameter.");
         return Optional.ofNullable(boolValues.get(param));
     }
 
     /**
-     * @param param A {@code QueryParam} that has been parse by this instance.
-     * @return An {@code Optional} that contains the value of the query parameter if
-     * it was present in the parsed {@code HttpServiceRequest} or if the
-     * parameter has a default value.
+     * @param param A {@code QueryParam} that has been parsed by this instance.
+     * @return An {@code Optional} that contains the value of the query
+     * parameter if it was present in the parsed {@code HttpServiceRequest} or
+     * if the parameter has a default value.
      */
-    public Optional<Integer> getValue(IntParameter param) {
+    public Optional<Integer> getValue(final IntParameter param) {
+        Objects.requireNonNull(param, "Expected parameter.");
         return Optional.ofNullable(intValues.get(param));
     }
 
     /**
-     * @param param A {@code QueryParam} that has been parse by this instance.
-     * @return An {@code Optional} that contains the value of the query parameter if
-     * it was present in the parsed {@code HttpServiceRequest} or if the
-     * parameter has a default value.
+     * @param param A {@code QueryParam} that has been parsed by this instance.
+     * @return An {@code Optional} that contains the value of the query
+     * parameter if it was present in the parsed {@code HttpServiceRequest} or
+     * if the parameter has a default value.
      */
-    public Optional<String> getValue(StringParameter param) {
+    public Optional<String> getValue(final StringParameter param) {
+        Objects.requireNonNull(param, "Expected parameter.");
         return Optional.ofNullable(stringValues.get(param));
     }
 
     /**
-     * @param param A {@code QueryParam} that has been parse by this instance.
-     * @return The value of the query parameter. It is the caller's responsibility
-     * to ensure that this value was present in the parsed
-     * {@code HttpServiceRequest} or that the parameter has a default value.
+     * @param param A {@code QueryParam} that has been parsed by this instance.
+     * @return The value of the query parameter. It is the caller's
+     * responsibility to ensure that this value was present in the parsed {@code
+     * HttpServiceRequest} or that the parameter has a default value.
      */
-    public boolean getRequiredValue(BooleanParameter param) {
+    public boolean getRequiredValue(final BooleanParameter param) {
+        Objects.requireNonNull(param, "Expected parameter.");
         return boolValues.get(param);
     }
 
     /**
-     * @param param A {@code QueryParam} that has been parse by this instance.
-     * @return The value of the query parameter. It is the caller's responsibility
-     * to ensure that this value was present in the parsed
-     * {@code HttpServiceRequest} or that the parameter has a default value.
+     * @param param A {@code QueryParam} that has been parsed by this instance.
+     * @return The value of the query parameter. It is the caller's
+     * responsibility to ensure that this value was present in the parsed {@code
+     * HttpServiceRequest} or that the parameter has a default value.
      */
-    public int getRequiredValue(IntParameter param) {
+    public int getRequiredValue(final IntParameter param) {
+        Objects.requireNonNull(param, "Expected parameter.");
         return intValues.get(param);
     }
 
     /**
-     * @param param A {@code QueryParam} that has been parse by this instance.
-     * @return The value of the query parameter. It is the caller's responsibility
-     * to ensure that this value was present in the parsed
-     * {@code HttpServiceRequest} or that the parameter has a default value.
+     * @param param A {@code QueryParam} that has been parsed by this instance.
+     * @return The value of the query parameter. It is the caller's
+     * responsibility to ensure that this value was present in the parsed {@code
+     * HttpServiceRequest} or that the parameter has a default value.
      */
-    public String getRequiredValue(StringParameter param) {
+    public String getRequiredValue(final StringParameter param) {
+        Objects.requireNonNull(param, "Expected parameter.");
         return stringValues.get(param);
     }
 
@@ -164,8 +175,8 @@ public class QueryParamParser {
      * during parsing.
      */
     public ParseError getCompoundError() {
-        List<String> errorMessages = new ArrayList<>();
-        for (ParseError error : errors) {
+        final List<String> errorMessages = new ArrayList<>();
+        for (final ParseError error : errors) {
             errorMessages.add("<" + error.getMessage() + ">");
         }
         return new ParseError(String.join(", ", errorMessages));

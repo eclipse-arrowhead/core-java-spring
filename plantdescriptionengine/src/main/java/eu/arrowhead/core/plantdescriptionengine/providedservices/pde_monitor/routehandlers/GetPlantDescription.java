@@ -4,6 +4,7 @@ import eu.arrowhead.core.plantdescriptionengine.MonitorInfo;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.dto.ErrorMessage;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryDto;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.MonitorPlantDescriptionEntryDto;
 import se.arkalix.net.http.HttpStatus;
 import se.arkalix.net.http.service.HttpRouteHandler;
 import se.arkalix.net.http.service.HttpServiceRequest;
@@ -23,11 +24,12 @@ public class GetPlantDescription implements HttpRouteHandler {
     /**
      * Class constructor
      *
-     * @param monitorInfo Object that stores information on monitorable systems.
+     * @param monitorInfo Object that stores information on monitorable
+     *                    systems.
      * @param pdTracker   Object that stores information on Plant Description
      *                    entries.
      */
-    public GetPlantDescription(MonitorInfo monitorInfo, PlantDescriptionTracker pdTracker) {
+    public GetPlantDescription(final MonitorInfo monitorInfo, final PlantDescriptionTracker pdTracker) {
         Objects.requireNonNull(monitorInfo, "Expected MonitorInfo");
         Objects.requireNonNull(pdTracker, "Expected Plant Description Tracker");
 
@@ -36,22 +38,25 @@ public class GetPlantDescription implements HttpRouteHandler {
     }
 
     /**
-     * Handles an HTTP call to acquire the PlantDescriptionEntry specified by the id
-     * path parameter.
+     * Handles an HTTP call to acquire the PlantDescriptionEntry specified by
+     * the id path parameter.
      *
      * @param request  HTTP request object.
-     * @param response HTTP response containing the current
-     *                 PlantDescriptionEntryList.
+     * @param response HTTP response containing the current {@code
+     *                 PlantDescriptionEntryList}.
      */
     @Override
     public Future<HttpServiceResponse> handle(final HttpServiceRequest request, final HttpServiceResponse response) {
 
-        String idString = request.pathParameter(0);
-        int id;
+        Objects.requireNonNull(request, "Expected request.");
+        Objects.requireNonNull(response, "Expected response.");
+
+        final String idString = request.pathParameter(0);
+        final int id;
 
         try {
             id = Integer.parseInt(idString);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             response.status(HttpStatus.BAD_REQUEST);
             response.body(ErrorMessage.of(idString + " is not a valid Plant Description Entry ID."));
             return Future.success(response);
@@ -65,7 +70,7 @@ public class GetPlantDescription implements HttpRouteHandler {
             return Future.success(response);
         }
 
-        final var extendedEntry = DtoUtils.extend(entry, monitorInfo);
+        final MonitorPlantDescriptionEntryDto extendedEntry = DtoUtils.extend(entry, monitorInfo);
         response.status(HttpStatus.OK).body(extendedEntry);
         return Future.success(response);
     }

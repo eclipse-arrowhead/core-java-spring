@@ -6,7 +6,12 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.dto.ErrorMessag
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PdeAlarm;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PdeAlarmDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PdeAlarmListBuilder;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidation.*;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidation.BooleanParameter;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidation.IntParameter;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidation.ParseError;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidation.QueryParamParser;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidation.QueryParameter;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidation.StringParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.arkalix.net.http.HttpStatus;
@@ -26,6 +31,23 @@ import java.util.Optional;
 public class GetAllPdeAlarms implements HttpRouteHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetAllPdeAlarms.class);
 
+    // Filter fields and values
+    private static final String ACKNOWLEDGED = "acknowledged";
+    private static final String ITEM_PER_PAGE = "item_per_page";
+    private static final String PAGE = "page";
+    private static final String SEVERITY = "severity";
+    private static final String SYSTEM_NAME = "systemName";
+
+    // Sort fields and values
+    private static final String SORT_FIELD = "sort_field";
+    private static final String ID = "id";
+    private static final String RAISED_AT = "raisedAt";
+    private static final String UPDATED_AT = "updatedAt";
+    private static final String CLEARED_AT = "clearedAt";
+    private static final String DIRECTION = "direction";
+    private static final String ASC = "ASC";
+    private static final String DESC = "DESC";
+
     private final AlarmManager alarmManager;
 
     /**
@@ -33,7 +55,7 @@ public class GetAllPdeAlarms implements HttpRouteHandler {
      *
      * @param alarmManager Object used for managing PDE alarms.
      */
-    public GetAllPdeAlarms(AlarmManager alarmManager) {
+    public GetAllPdeAlarms(final AlarmManager alarmManager) {
         Objects.requireNonNull(alarmManager, "Expected Alarm Manager.");
         this.alarmManager = alarmManager;
     }
@@ -47,50 +69,55 @@ public class GetAllPdeAlarms implements HttpRouteHandler {
     @Override
     public Future<HttpServiceResponse> handle(final HttpServiceRequest request, final HttpServiceResponse response) {
 
-        List<String> severityValues = new ArrayList<>();
-        for (var severity : AlarmSeverity.values()) {
-            severityValues.add(severity.toString());
-        }
-        severityValues.add("not_cleared");
+        Objects.requireNonNull(request, "Expected request.");
+        Objects.requireNonNull(response, "Expected response.");
 
-        final var itemPerPageParam = new IntParameter.Builder()
-            .name("item_per_page")
+        final List<String> severityValues = new ArrayList<>();
+        for (final AlarmSeverity severity : AlarmSeverity.values()) {
+            severityValues.add(severity.toString().toLowerCase());
+        }
+
+        // Add value corresponding to all severities that are not CLEARED:
+        severityValues.add(PdeAlarm.NOT_CLEARED);
+
+        final IntParameter itemPerPageParam = new IntParameter.Builder()
+            .name(ITEM_PER_PAGE)
             .min(0)
             .build();
-        final var pageParam = new IntParameter.Builder()
-            .name("page")
+        final IntParameter pageParam = new IntParameter.Builder()
+            .name(PAGE)
             .min(0)
             .requires(itemPerPageParam)
             .build();
 
-        final var sortFieldParam = new StringParameter.Builder()
-            .name("sort_field")
-            .legalValues("id", "raisedAt", "updatedAt")
+        final StringParameter sortFieldParam = new StringParameter.Builder()
+            .name(SORT_FIELD)
+            .legalValues(ID, RAISED_AT, UPDATED_AT, CLEARED_AT)
             .build();
-        final var directionParam = new StringParameter.Builder()
-            .name("direction")
-            .legalValues("ASC", "DESC")
-            .defaultValue("ASC")
+        final StringParameter directionParam = new StringParameter.Builder()
+            .name(DIRECTION)
+            .legalValues(ASC, DESC)
+            .defaultValue(ASC)
             .build();
-        final var systemNameParam = new StringParameter.Builder()
-            .name("systemName")
+        final StringParameter systemNameParam = new StringParameter.Builder()
+            .name(SYSTEM_NAME)
             .build();
-        final var severityParam = new StringParameter.Builder()
-            .name("severity")
+        final StringParameter severityParam = new StringParameter.Builder()
+            .name(SEVERITY)
             .legalValues(severityValues)
             .build();
-        final var acknowledgedParam = new BooleanParameter.Builder()
-            .name("acknowledged")
+        final BooleanParameter acknowledgedParam = new BooleanParameter.Builder()
+            .name(ACKNOWLEDGED)
             .build();
 
         final List<QueryParameter> acceptedParameters = List.of(pageParam, sortFieldParam, directionParam,
             systemNameParam, systemNameParam, severityParam, acknowledgedParam);
 
-        QueryParamParser parser;
+        final QueryParamParser parser;
 
         try {
             parser = new QueryParamParser(null, acceptedParameters, request);
-        } catch (ParseError error) {
+        } catch (final ParseError error) {
             logger.error("Encountered the following error(s) while parsing an HTTP request: " + error.getMessage());
             return Future.success(response.status(HttpStatus.BAD_REQUEST).body(ErrorMessage.of(error.getMessage())));
         }
@@ -100,16 +127,35 @@ public class GetAllPdeAlarms implements HttpRouteHandler {
         final Optional<String> sortField = parser.getValue(sortFieldParam);
         if (sortField.isPresent()) {
             final String sortDirection = parser.getRequiredValue(directionParam);
-            final boolean sortAscending = sortDirection.equals("ASC");
-            PdeAlarm.sort(alarms, sortField.get(), sortAscending);
+            final boolean ascending = ASC.equals(sortDirection);
+
+            switch (sortField.get()) {
+                case ID:
+                    PdeAlarm.sortById(alarms, ascending);
+                    break;
+                case RAISED_AT:
+                    PdeAlarm.sortByRaisedAt(alarms, ascending);
+                    break;
+                case UPDATED_AT:
+                    PdeAlarm.sortByUpdatedAt(alarms, ascending);
+                    break;
+                case CLEARED_AT:
+                    PdeAlarm.sortByClearedAt(alarms, ascending);
+                    break;
+                default:
+                    // We should never reach this case, since the sortField
+                    // param has been validated by the parser.
+                    throw new AssertionError("Encountered the invalid sort field '" + sortField + "'.");
+
+            }
         }
 
         final Optional<Integer> page = parser.getValue(pageParam);
         if (page.isPresent()) {
-            int itemsPerPage = parser.getRequiredValue(itemPerPageParam);
+            final int itemsPerPage = parser.getRequiredValue(itemPerPageParam);
 
-            int from = Math.min(page.get() * itemsPerPage, alarms.size());
-            int to = Math.min(from + itemsPerPage, alarms.size());
+            final int from = Math.min(page.get() * itemsPerPage, alarms.size());
+            final int to = Math.min(from + itemsPerPage, alarms.size());
 
             alarms = alarms.subList(from, to);
         }

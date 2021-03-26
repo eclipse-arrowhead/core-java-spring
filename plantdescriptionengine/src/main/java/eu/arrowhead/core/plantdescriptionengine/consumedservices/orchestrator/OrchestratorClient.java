@@ -1,6 +1,9 @@
 package eu.arrowhead.core.plantdescriptionengine.consumedservices.orchestrator;
 
-import eu.arrowhead.core.plantdescriptionengine.consumedservices.orchestrator.dto.*;
+import eu.arrowhead.core.plantdescriptionengine.consumedservices.orchestrator.dto.StoreEntry;
+import eu.arrowhead.core.plantdescriptionengine.consumedservices.orchestrator.dto.StoreEntryList;
+import eu.arrowhead.core.plantdescriptionengine.consumedservices.orchestrator.dto.StoreEntryListBuilder;
+import eu.arrowhead.core.plantdescriptionengine.consumedservices.orchestrator.dto.StoreEntryListDto;
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.orchestrator.rulebackingstore.RuleStore;
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.orchestrator.rulebackingstore.RuleStoreException;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
@@ -18,17 +21,23 @@ import se.arkalix.util.concurrent.Future;
 import se.arkalix.util.concurrent.Futures;
 
 import java.net.InetSocketAddress;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 public class OrchestratorClient implements PlantDescriptionUpdateListener {
     private static final Logger logger = LoggerFactory.getLogger(OrchestratorClient.class);
 
-    private final HttpClient client;
+    private static final String CREATE_RULE_URI = "/orchestrator/store/flexible";
+    private static final String DELETE_RULE_URI_BASE = "/orchestrator/store/flexible/";
+
+    private final HttpClient httpClient;
     private final InetSocketAddress orchestratorAddress;
     private final RuleStore ruleStore;
     private final PlantDescriptionTracker pdTracker;
     private final RuleCreator ruleCreator;
-    private PlantDescriptionEntry activeEntry = null;
+    private PlantDescriptionEntry activeEntry;
 
     /**
      * Class constructor.
@@ -39,10 +48,10 @@ public class OrchestratorClient implements PlantDescriptionUpdateListener {
      * @param pdTracker  Object used for keeping track of Plant Descriptions.
      */
     public OrchestratorClient(
-        HttpClient httpClient,
-        RuleStore ruleStore,
-        PlantDescriptionTracker pdTracker,
-        InetSocketAddress orchestratorAddress
+        final HttpClient httpClient,
+        final RuleStore ruleStore,
+        final PlantDescriptionTracker pdTracker,
+        final InetSocketAddress orchestratorAddress
     ) {
 
         Objects.requireNonNull(httpClient, "Expected HttpClient");
@@ -50,20 +59,20 @@ public class OrchestratorClient implements PlantDescriptionUpdateListener {
         Objects.requireNonNull(pdTracker, "Expected Plant Description Tracker");
         Objects.requireNonNull(orchestratorAddress, "Expected Orchestrator address");
 
-        this.client = httpClient;
+        this.httpClient = httpClient;
         this.ruleStore = ruleStore;
         this.pdTracker = pdTracker;
-
         this.orchestratorAddress = orchestratorAddress;
-        this.ruleCreator = new RuleCreator(pdTracker);
+
+        ruleCreator = new RuleCreator(pdTracker);
     }
 
     /**
      * Initializes the Orchestrator client.
      *
      * @return A {@code Future} which will complete once Orchestrator rules have
-     * been created for the connections in the active Plant Description
-     * entry (if any).
+     * been created for the connections in the active Plant Description entry
+     * (if any).
      */
     public Future<Void> initialize() {
         pdTracker.addListener(this);
@@ -80,23 +89,23 @@ public class OrchestratorClient implements PlantDescriptionUpdateListener {
     /**
      * Posts Orchestrator rules for the given Plant Description Entry.
      * <p>
-     * For each connection in the given entry, a corresponding rule is posted to the
-     * Orchestrator.
+     * For each connection in the given entry, a corresponding rule is posted to
+     * the Orchestrator.
      *
      * @return A Future which will contain a list of the created rules.
      */
     private Future<StoreEntryListDto> postRules() {
 
-        List<DtoWritable> rules = ruleCreator.createRules();
+        final List<DtoWritable> rules = ruleCreator.createRules();
 
-        if (rules.size() == 0) {
+        if (rules.isEmpty()) {
             return Future.success(emptyRuleList());
         }
 
-        return client
+        return httpClient
             .send(orchestratorAddress,
                 new HttpClientRequest().method(HttpMethod.POST)
-                    .uri("/orchestrator/store/flexible")
+                    .uri(CREATE_RULE_URI)
                     .body(DtoEncoding.JSON, rules)
                     .header("accept", "application/json"))
             .flatMap(response -> response.bodyAsClassIfSuccess(DtoEncoding.JSON, StoreEntryListDto.class));
@@ -115,11 +124,11 @@ public class OrchestratorClient implements PlantDescriptionUpdateListener {
      * @param id The ID of an Orchestrator Store Entry to delete.
      * @return A Future that performs the deletion.
      */
-    private Future<Void> deleteRule(int id) {
-        return client
+    private Future<Void> deleteRule(final int id) {
+        return httpClient
             .send(orchestratorAddress,
                 new HttpClientRequest().method(HttpMethod.DELETE)
-                    .uri("/orchestrator/store/flexible/" + id))
+                    .uri(DELETE_RULE_URI_BASE + id))
             .flatMap(response -> {
                 if (response.status() != HttpStatus.OK) {
                     // TODO: Throw some other type of Exception.
@@ -136,10 +145,10 @@ public class OrchestratorClient implements PlantDescriptionUpdateListener {
      */
     private Future<Void> deleteActiveRules() {
 
-        Set<Integer> rules;
+        final Set<Integer> rules;
         try {
             rules = ruleStore.readRules();
-        } catch (RuleStoreException e) {
+        } catch (final RuleStoreException e) {
             return Future.failure(e);
         }
 
@@ -148,9 +157,9 @@ public class OrchestratorClient implements PlantDescriptionUpdateListener {
         }
 
         // Delete any rules previously created by the Orchestrator client:
-        var deletions = new ArrayList<Future<Void>>();
+        final ArrayList<Future<Void>> deletions = new ArrayList<>();
 
-        for (int rule : rules) {
+        for (final int rule : rules) {
             deletions.add(deleteRule(rule));
         }
 
@@ -168,15 +177,15 @@ public class OrchestratorClient implements PlantDescriptionUpdateListener {
      * @param entry    A Plant Description Entry.
      * @param ruleList The list of Orchestrator rules connected to the entry.
      */
-    private void logEntryActivated(PlantDescriptionEntry entry, StoreEntryList ruleList) {
+    private void logEntryActivated(final PlantDescriptionEntry entry, final StoreEntryList ruleList) {
         Objects.requireNonNull(entry, "Expected Plant Description Entry");
 
-        String entryName = entry.plantDescription();
+        final String entryName = entry.plantDescription();
 
         if (ruleList.count() > 0) {
             String msg = "Orchestrator rules created for Plant Description '" + entryName + "': [";
-            List<String> ids = new ArrayList<>();
-            for (var rule : ruleList.data()) {
+            final List<String> ids = new ArrayList<>();
+            for (final StoreEntry rule : ruleList.data()) {
                 ids.add(rule.id().toString());
             }
             msg += String.join(", ", ids) + "]";
@@ -194,12 +203,13 @@ public class OrchestratorClient implements PlantDescriptionUpdateListener {
      * @param entry The updated entry.
      */
     @Override
-    public void onPlantDescriptionUpdated(PlantDescriptionEntry entry) {
+    public void onPlantDescriptionUpdated(final PlantDescriptionEntry entry) {
+        Objects.requireNonNull(entry, "Expected entry.");
 
-        int numConnections = pdTracker.getActiveConnections().size();
-        boolean wasDeactivated = !entry.active() && activeEntry != null && activeEntry.id() == entry.id();
-        boolean shouldPostRules = entry.active() && numConnections > 0;
-        boolean shouldDeleteCurrentRules = entry.active() || wasDeactivated;
+        final int numConnections = pdTracker.getActiveConnections().size();
+        final boolean wasDeactivated = !entry.active() && activeEntry != null && activeEntry.id() == entry.id();
+        final boolean shouldPostRules = entry.active() && numConnections > 0;
+        final boolean shouldDeleteCurrentRules = entry.active() || wasDeactivated;
 
         final Future<Void> deleteRulesTask = shouldDeleteCurrentRules ? deleteActiveRules() : Future.done();
 
@@ -229,7 +239,8 @@ public class OrchestratorClient implements PlantDescriptionUpdateListener {
      * @param entry The added entry.
      */
     @Override
-    public void onPlantDescriptionAdded(PlantDescriptionEntry entry) {
+    public void onPlantDescriptionAdded(final PlantDescriptionEntry entry) {
+        Objects.requireNonNull(entry, "Expected entry.");
         onPlantDescriptionUpdated(entry);
     }
 
@@ -239,7 +250,8 @@ public class OrchestratorClient implements PlantDescriptionUpdateListener {
      * @param entry The entry that has been removed.
      */
     @Override
-    public void onPlantDescriptionRemoved(PlantDescriptionEntry entry) {
+    public void onPlantDescriptionRemoved(final PlantDescriptionEntry entry) {
+        Objects.requireNonNull(entry, "Expected entry.");
 
         // If the removed Plant Description was not active, there is no more
         // work to be done.

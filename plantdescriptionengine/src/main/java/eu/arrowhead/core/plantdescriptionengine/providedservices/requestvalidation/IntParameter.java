@@ -2,6 +2,7 @@ package eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidat
 
 import se.arkalix.net.http.service.HttpServiceRequest;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -11,25 +12,25 @@ import java.util.Scanner;
  * positive integer. Used in conjunction with QueryParamParser for validating
  * and parsing query parameters.
  */
-public class IntParameter extends QueryParameter {
+public final class IntParameter extends QueryParameter {
 
     private final int minValue;
 
     /**
      * {@inheritDoc}
      */
-    private IntParameter(Builder builder) {
+    private IntParameter(final Builder builder) {
         super(builder);
-        this.minValue = builder.minValue;
+        minValue = builder.minValue;
     }
 
     /**
      * @return True if the provided string is a base 10 integer.
      */
-    private static boolean isInteger(String s) {
-        int radix = 10;
+    private static boolean isInteger(final String s) {
+        final int radix = 10;
         boolean result = false;
-        Scanner scanner = new Scanner(s.trim());
+        final Scanner scanner = new Scanner(s.trim());
 
         if (scanner.hasNextInt(radix)) {
             scanner.nextInt(radix);
@@ -44,9 +45,12 @@ public class IntParameter extends QueryParameter {
      * {@inheritDoc}
      */
     @Override
-    public void parse(HttpServiceRequest request, QueryParamParser parser, boolean required) {
+    public void parse(final HttpServiceRequest request, final QueryParamParser parser, final boolean required) {
 
-        Optional<String> possibleValue = request.queryParameter(name);
+        Objects.requireNonNull(request, "Expected request.");
+        Objects.requireNonNull(parser, "Expected parser.");
+
+        final Optional<String> possibleValue = request.queryParameter(name);
 
         if (possibleValue.isEmpty()) {
             if (required) {
@@ -55,19 +59,20 @@ public class IntParameter extends QueryParameter {
             return;
         }
 
-        for (var param : requiredParameters) {
+        for (final QueryParameter param : requiredParameters) {
             param.parse(request, parser, true);
         }
 
-        String value = possibleValue.get();
+        final String value = possibleValue.get();
 
         if (!isInteger(value)) {
-            parser
-                .report(new ParseError("Query parameter '" + name + "' must be a valid integer, got '" + value + "'."));
+            parser.report(new ParseError(
+                "Query parameter '" + name + "' must be a valid integer, got '" + value + "'."
+            ));
             return;
         }
 
-        int intValue = Integer.parseInt(value);
+        final int intValue = Integer.parseInt(value);
 
         if (intValue < minValue) {
             parser.report(new ParseError(
@@ -87,7 +92,7 @@ public class IntParameter extends QueryParameter {
          * @param i The minimum allowed value for the constructed parameter.
          * @return This instance.
          */
-        public Builder min(int i) {
+        public Builder min(final int i) {
             minValue = i;
             return this;
         }
