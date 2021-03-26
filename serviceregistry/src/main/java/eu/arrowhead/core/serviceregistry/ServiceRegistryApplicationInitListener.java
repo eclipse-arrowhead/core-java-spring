@@ -77,7 +77,7 @@ public class ServiceRegistryApplicationInitListener extends ApplicationInitListe
             final ServiceSecurityType securityType = sslProperties.isSslEnabled() ? ServiceSecurityType.CERTIFICATE : ServiceSecurityType.NOT_SECURE;
             final String serviceInterface = sslProperties.isSslEnabled() ? CommonConstants.HTTP_SECURE_JSON : CommonConstants.HTTP_INSECURE_JSON;
 
-            for (CoreSystemService service : CoreSystem.SERVICE_REGISTRY.getServices()) {
+            for (CoreSystemService service : CoreSystem.SERVICEREGISTRY.getServices()) {
                 final ServiceRegistryRequestDTO registryRequest = new ServiceRegistryRequestDTO();
                 registryRequest.setProviderSystem(systemRequestDTO);
                 registryRequest.setServiceDefinition(service.getServiceDefinition());
@@ -95,7 +95,7 @@ public class ServiceRegistryApplicationInitListener extends ApplicationInitListe
 
     //-------------------------------------------------------------------------------------------------
     private void removeServiceRegistryEntries(final System system) {
-        for (CoreSystemService service : CoreSystem.SERVICE_REGISTRY.getServices()) {
+        for (CoreSystemService service : CoreSystem.SERVICEREGISTRY.getServices()) {
         	try {
 				serviceRegistryDBService.removeServiceRegistry(service.getServiceDefinition(), system.getSystemName(), system.getAddress(), system.getPort());
 			} catch (final Exception ex) {

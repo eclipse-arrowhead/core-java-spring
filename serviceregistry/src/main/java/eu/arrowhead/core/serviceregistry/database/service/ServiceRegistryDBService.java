@@ -93,7 +93,7 @@ public class ServiceRegistryDBService {
 	@Autowired
 	private SSLProperties sslProperties;
 	
-	@Value(CoreCommonConstants.$SERVICE_REGISTRY_PING_TIMEOUT_WD)
+	@Value(CoreCommonConstants.$SERVICEREGISTRY_PING_TIMEOUT_WD)
 	private int pingTimeout;
 	
 	private final Logger logger = LogManager.getLogger(ServiceRegistryDBService.class);

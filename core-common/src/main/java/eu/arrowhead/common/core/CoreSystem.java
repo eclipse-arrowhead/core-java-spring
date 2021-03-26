@@ -27,6 +27,8 @@ public enum CoreSystem {
 	//=================================================================================================
 	// elements
 	
+	// Please create enum values here without underscore, because these values has a direct connection with the certificate's CN which does not support underscores!
+	
 	SERVICEREGISTRY(Defaults.DEFAULT_SERVICEREGISTRY_PORT, List.of(CoreSystemService.SERVICEREGISTRY_REGISTER_SERVICE,
 																	 CoreSystemService.SERVICEREGISTRY_UNREGISTER_SERVICE)),
 	

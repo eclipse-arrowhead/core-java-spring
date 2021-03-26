@@ -38,8 +38,8 @@ public class CoreDefaults {
 	public static final int DEFAULT_SYSTEMREGISTRY_PING_INTERVAL_MINUTES = 60;
 	public static final int DEFAULT_SYSTEMREGISTRY_PING_TIMEOUT_MILLISECONDS = 5000;
 
-	public static final String DEFAULT_OWN_CLOUD_OPERATOR = "default_operator";
-	public static final String DEFAULT_OWN_CLOUD_NAME = "default_insecure_cloud";
+	public static final String DEFAULT_OWN_CLOUD_OPERATOR = "default-operator";
+	public static final String DEFAULT_OWN_CLOUD_NAME = "default-insecure-cloud";
 	
 	public static final String DEFAULT_REQUEST_PARAM_DIRECTION_VALUE = CoreCommonConstants.SORT_ORDER_ASCENDING;
 	

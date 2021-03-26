@@ -81,7 +81,7 @@ public class ServiceRegistryControllerSystemTest {
 	ServiceRegistryDBService serviceRegistryDBService;
 	
 	private static final String SYSTEMS_URL = "/serviceregistry/mgmt/systems/";
-	private static final String REGISTER_SYSTEM_URL = "/serviceregistry/" + CommonConstants.OP_SERVICE_REGISTRY_REGISTER_SYSTEM_URI;
+	private static final String REGISTER_SYSTEM_URL = "/serviceregistry/" + CommonConstants.OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI;
 	private static final String MOCKED_SYSTEM_NAME = "mockedSystemName";
 	private static final String MOCKED_SYSTEM_ADDRESS = "mockedSystemAddress";
 	private static final String MOCKED_SYSTEM_AUTHENTICATION_INFO = "mockedSystemAuthenticationInfo";

@@ -48,7 +48,7 @@ public class ProvidersReachabilityTask implements Job {
 	@Autowired
 	private ServiceRegistryDBService serviceRegistryDBService;
 	
-	@Value(CoreCommonConstants.$SERVICE_REGISTRY_PING_TIMEOUT_WD)
+	@Value(CoreCommonConstants.$SERVICEREGISTRY_PING_TIMEOUT_WD)
 	private int timeout;
 	
 	//=================================================================================================
