@@ -1,10 +1,10 @@
 package eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore;
 
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryDto;
-import eu.arrowhead.core.plantdescriptionengine.utils.DtoWriter;
 import se.arkalix.dto.DtoReadException;
 import se.arkalix.dto.DtoWriteException;
 import se.arkalix.dto.binary.ByteArrayReader;
+import se.arkalix.dto.binary.ByteArrayWriter;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -35,8 +35,8 @@ public class FilePdStore implements PdStore {
     }
 
     /**
-     * @return The file path to use for reading or writing a Plant Description Entry
-     * to disk.
+     * @return The file path to use for reading or writing a Plant Description
+     * Entry to disk.
      */
     private Path getFilePath(final int entryId) {
         return Paths.get(descriptionDirectory, entryId + ".json");
@@ -63,13 +63,13 @@ public class FilePdStore implements PdStore {
                 "Failed to read Plant Descriptions from directory '" + descriptionDirectory + "'."));
         }
 
-        final var result = new ArrayList<PlantDescriptionEntryDto>();
+        final List<PlantDescriptionEntryDto> result = new ArrayList<>();
         for (final File child : directoryListing) {
-            byte[] bytes;
+            final byte[] bytes;
             try {
                 bytes = Files.readAllBytes(child.toPath());
                 result.add(PlantDescriptionEntryDto.readJson(new ByteArrayReader(bytes)));
-            } catch (DtoReadException | IOException e) {
+            } catch (final DtoReadException | IOException e) {
                 throw new PdStoreException(e);
             }
         }
@@ -81,25 +81,31 @@ public class FilePdStore implements PdStore {
      */
     @Override
     public void write(final PlantDescriptionEntryDto entry) throws PdStoreException {
+        Objects.requireNonNull(entry, "Expected entry.");
+
         final Path path = getFilePath(entry.id());
+        final File file;
+
         // Create the file and parent directories, if they do not already exist:
         try {
             Files.createDirectories(path.getParent());
-            final File file = path.toFile();
+            file = path.toFile();
 
             if (!file.exists()) {
                 if (!file.createNewFile()) {
                     throw new PdStoreException("Failed to create file for Plant Description Entries.");
                 }
             }
+        } catch (final IOException e) {
+            throw new PdStoreException("Failed to create Plant Description Entry file.", e);
+        }
 
-            final FileOutputStream out = new FileOutputStream(file);
-            final var writer = new DtoWriter(out);
-
-            entry.writeJson(writer);
-            out.close();
-        } catch (IOException | DtoWriteException e) {
-            throw new PdStoreException("Failed to write Plant Description Entry to file", e);
+        try (final FileOutputStream fileWriter = new FileOutputStream(file)) {
+            final ByteArrayWriter byteArrayWriter = new ByteArrayWriter();
+            entry.writeJson(byteArrayWriter);
+            fileWriter.write(byteArrayWriter.asByteArray());
+        } catch (final DtoWriteException | IOException e) {
+            throw new PdStoreException("Failed to write rule to file", e);
         }
     }
 

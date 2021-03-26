@@ -5,6 +5,7 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Pl
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -30,6 +31,7 @@ public class InMemoryPdStore implements PdStore {
      */
     @Override
     public void write(final PlantDescriptionEntryDto entry) {
+        Objects.requireNonNull(entry, "Expected entry");
         entries.put(entry.id(), entry);
     }
 

@@ -6,11 +6,9 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class PdeAlarmTest {
 
@@ -24,11 +22,11 @@ public class PdeAlarmTest {
         final int idC = 4;
         final int idD = 101;
 
-        Instant t1 = Instant.now();
-        Instant t2 = t1.plus(1, ChronoUnit.HOURS);
-        Instant t3 = t1.plus(2, ChronoUnit.HOURS);
-        Instant t4 = t1.plus(3, ChronoUnit.HOURS);
-        Instant t5 = t1.plus(4, ChronoUnit.HOURS);
+        final Instant t1 = Instant.now();
+        final Instant t2 = t1.plus(1, ChronoUnit.HOURS);
+        final Instant t3 = t1.plus(2, ChronoUnit.HOURS);
+        final Instant t4 = t1.plus(3, ChronoUnit.HOURS);
+        final Instant t5 = t1.plus(4, ChronoUnit.HOURS);
 
         final PdeAlarm alarmA = new PdeAlarmBuilder()
             .id(idA)
@@ -70,56 +68,37 @@ public class PdeAlarmTest {
             .updatedAt(t4)
             .build();
 
-        List<PdeAlarm> alarms = Arrays.asList(alarmA, alarmB, alarmC, alarmD);
+        final List<PdeAlarm> alarms = Arrays.asList(alarmA, alarmB, alarmC, alarmD);
 
-        PdeAlarm.sort(alarms, "id", true);
+        PdeAlarm.sortById(alarms, true);
         assertEquals(idC, alarms.get(0).id());
         assertEquals(idA, alarms.get(1).id());
         assertEquals(idB, alarms.get(2).id());
         assertEquals(idD, alarms.get(3).id());
 
-        PdeAlarm.sort(alarms, "raisedAt", true);
+        PdeAlarm.sortByRaisedAt(alarms, true);
         assertEquals(idB, alarms.get(0).id());
         assertEquals(idC, alarms.get(1).id());
         assertEquals(idA, alarms.get(2).id());
         assertEquals(idD, alarms.get(3).id());
 
-        PdeAlarm.sort(alarms, "updatedAt", true);
+        PdeAlarm.sortByUpdatedAt(alarms, true);
         assertEquals(idB, alarms.get(0).id());
         assertEquals(idA, alarms.get(1).id());
         assertEquals(idC, alarms.get(2).id());
         assertEquals(idD, alarms.get(3).id());
 
-        PdeAlarm.sort(alarms, "clearedAt", true);
+        PdeAlarm.sortByClearedAt(alarms, true);
         assertEquals(idA, alarms.get(0).id());
         assertEquals(idB, alarms.get(1).id());
         assertEquals(idC, alarms.get(2).id());
         assertEquals(idD, alarms.get(3).id());
 
-        PdeAlarm.sort(alarms, "clearedAt", false);
+        PdeAlarm.sortByClearedAt(alarms, false);
         assertEquals(idC, alarms.get(0).id());
         assertEquals(idD, alarms.get(1).id());
         assertEquals(idB, alarms.get(2).id());
         assertEquals(idA, alarms.get(3).id());
-    }
-
-    @Test
-    public void shouldDisallowIncorrectSortField() {
-        final PdeAlarm alarm = new PdeAlarmBuilder()
-            .id(6)
-            .acknowledged(false)
-            .systemId("Some-ID")
-            .severity("warning")
-            .description("Something went wrong")
-            .raisedAt(now)
-            .updatedAt(now)
-            .build();
-
-        List<PdeAlarm> alarms = Collections.singletonList(alarm);
-
-        Exception exception = assertThrows(IllegalArgumentException.class,
-            () -> PdeAlarm.sort(alarms, "Illegal", true));
-        assertEquals("'Illegal' is not a valid sort field for PDE Alarms.", exception.getMessage());
     }
 
     @Test
@@ -168,7 +147,7 @@ public class PdeAlarmTest {
             .updatedAt(now)
             .build();
 
-        List<PdeAlarm> alarms = new ArrayList<>();
+        final List<PdeAlarm> alarms = new ArrayList<>();
         alarms.add(alarmA);
         alarms.add(alarmB);
         alarms.add(alarmC);
@@ -227,13 +206,13 @@ public class PdeAlarmTest {
             .updatedAt(now)
             .build();
 
-        List<PdeAlarm> alarms = new ArrayList<>();
+        final List<PdeAlarm> alarms = new ArrayList<>();
         alarms.add(alarmA);
         alarms.add(alarmB);
         alarms.add(alarmC);
         alarms.add(alarmD);
 
-        PdeAlarm.filterBySeverity(alarms, "not_cleared");
+        PdeAlarm.filterBySeverity(alarms, PdeAlarm.NOT_CLEARED);
 
         assertEquals(3, alarms.size());
         assertEquals(idA, alarms.get(0).id());
@@ -278,7 +257,7 @@ public class PdeAlarmTest {
             .updatedAt(now)
             .build();
 
-        List<PdeAlarm> alarms = new ArrayList<>();
+        final List<PdeAlarm> alarms = new ArrayList<>();
         alarms.add(alarmA);
         alarms.add(alarmB);
         alarms.add(alarmC);
@@ -325,7 +304,7 @@ public class PdeAlarmTest {
             .updatedAt(now)
             .build();
 
-        List<PdeAlarm> alarms = new ArrayList<>();
+        final List<PdeAlarm> alarms = new ArrayList<>();
         alarms.add(alarmA);
         alarms.add(alarmB);
         alarms.add(alarmC);
@@ -389,7 +368,7 @@ public class PdeAlarmTest {
             .updatedAt(now)
             .build();
 
-        List<PdeAlarm> alarms = new ArrayList<>();
+        final List<PdeAlarm> alarms = new ArrayList<>();
         alarms.add(alarmA);
         alarms.add(alarmB);
         alarms.add(alarmC);

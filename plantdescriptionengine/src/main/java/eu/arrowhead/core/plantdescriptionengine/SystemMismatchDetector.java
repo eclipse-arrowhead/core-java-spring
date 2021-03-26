@@ -11,12 +11,12 @@ import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionUpdate
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystem;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntry;
 import eu.arrowhead.core.plantdescriptionengine.utils.Metadata;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class SystemMismatchDetector implements PlantDescriptionUpdateListener, SystemUpdateListener {
@@ -27,8 +27,8 @@ public class SystemMismatchDetector implements PlantDescriptionUpdateListener, S
     private final SystemTracker systemTracker;
     private final AlarmManager alarmManager;
 
-    public SystemMismatchDetector(PlantDescriptionTracker pdTracker, SystemTracker systemTracker,
-                                  AlarmManager alarmManager) {
+    public SystemMismatchDetector(final PlantDescriptionTracker pdTracker, final SystemTracker systemTracker,
+                                  final AlarmManager alarmManager) {
         Objects.requireNonNull(pdTracker, "Expected Plant Description Tracker");
         Objects.requireNonNull(systemTracker, "Expected System Tracker");
         Objects.requireNonNull(alarmManager, "Expected Alarm Manager");
@@ -39,8 +39,9 @@ public class SystemMismatchDetector implements PlantDescriptionUpdateListener, S
     }
 
     /**
-     * Start monitoring Plant Descriptions and registered systems, raising alarms
-     * whenever there is a mismatch, and clearing alarms when issues are solved.
+     * Start monitoring Plant Descriptions and registered systems, raising
+     * alarms whenever there is a mismatch, and clearing alarms when issues are
+     * solved.
      */
     public void run() {
         pdTracker.addListener(this);
@@ -51,31 +52,36 @@ public class SystemMismatchDetector implements PlantDescriptionUpdateListener, S
     }
 
     @Override
-    public void onPlantDescriptionAdded(PlantDescriptionEntry entry) {
+    public void onPlantDescriptionAdded(final PlantDescriptionEntry entry) {
+        Objects.requireNonNull(entry, "Expected entry.");
         logger.debug("Entry '" + entry.plantDescription() + "' added, checking for inconsistencies...");
         updateAlarms();
     }
 
     @Override
-    public void onPlantDescriptionUpdated(PlantDescriptionEntry entry) {
+    public void onPlantDescriptionUpdated(final PlantDescriptionEntry entry) {
+        Objects.requireNonNull(entry, "Expected entry.");
         logger.debug("Entry '" + entry.plantDescription() + "' updated, checking for inconsistencies...");
         updateAlarms();
     }
 
     @Override
-    public void onPlantDescriptionRemoved(PlantDescriptionEntry entry) {
+    public void onPlantDescriptionRemoved(final PlantDescriptionEntry entry) {
+        Objects.requireNonNull(entry, "Expected entry.");
         logger.debug("Entry '" + entry.plantDescription() + "' removed, checking for inconsistencies...");
         updateAlarms();
     }
 
     @Override
-    public void onSystemAdded(SrSystem system) {
+    public void onSystemAdded(final SrSystem system) {
+        Objects.requireNonNull(system, "Expected system.");
         logger.debug("System '" + system.systemName() + "' added, checking for inconsistencies...");
         updateAlarms();
     }
 
     @Override
-    public void onSystemRemoved(SrSystem system) {
+    public void onSystemRemoved(final SrSystem system) {
+        Objects.requireNonNull(system, "Expected system.");
         logger.debug("System '" + system.systemName() + "' removed, checking for inconsistencies...");
         updateAlarms();
     }
@@ -86,15 +92,15 @@ public class SystemMismatchDetector implements PlantDescriptionUpdateListener, S
      * @return True if the two objects represent the same real-world system,
      * false otherwise.
      */
-    private boolean systemsMatch(PdeSystem entrySystem, SrSystem registeredSystem) {
+    private boolean systemsMatch(final PdeSystem entrySystem, final SrSystem registeredSystem) {
 
         if (entrySystem.metadata().isPresent()) {
             if (registeredSystem.metadata().isEmpty()) {
                 return false;
             }
 
-            final var entryMetadata = entrySystem.metadata().get();
-            final var srMetadata = registeredSystem.metadata().get();
+            final Map<String, String> entryMetadata = entrySystem.metadata().get();
+            final Map<String, String> srMetadata = registeredSystem.metadata().get();
 
             if (!Metadata.isSubset(entryMetadata, srMetadata)) {
                 return false;
@@ -107,7 +113,7 @@ public class SystemMismatchDetector implements PlantDescriptionUpdateListener, S
         //    systemName (as per the spec).
 
         if (entrySystem.systemName().isPresent()) {
-            String entryName = entrySystem.systemName().get();
+            final String entryName = entrySystem.systemName().get();
             return entryName.equals(registeredSystem.systemName());
         }
 
@@ -119,17 +125,17 @@ public class SystemMismatchDetector implements PlantDescriptionUpdateListener, S
      * @param system A system retrieved from the Service registry.
      * @return True if the alarm refers to the given system, false otherwise.
      */
-    private boolean alarmMatchesSrSystem(Alarm alarm, SrSystem system) {
+    private boolean alarmMatchesSrSystem(final Alarm alarm, final SrSystem system) {
 
-        boolean namesMatch = alarm.systemName != null && alarm.systemName.equals(system.systemName());
-        boolean metadataMatches = alarm.metadata != null && system.metadata().isPresent() && Metadata
-            .isSubset(alarm.metadata, system.metadata().get());
+        final boolean namesMatch = alarm.systemName != null && alarm.systemName.equals(system.systemName());
+        final boolean metadataMatches = alarm.getMetadata() != null && system.metadata().isPresent() && Metadata
+            .isSubset(alarm.getMetadata(), system.metadata().get());
 
         if (alarm.systemName != null && !namesMatch) {
             return false;
         }
 
-        if (alarm.metadata != null && !metadataMatches) {
+        if (alarm.getMetadata() != null && !metadataMatches) {
             return false;
         }
 
@@ -137,15 +143,18 @@ public class SystemMismatchDetector implements PlantDescriptionUpdateListener, S
     }
 
     /**
-     * @param alarm       An alarm.
-     * @param entrySystem A system in a Plant Description Entry.
+     * @param alarm  An alarm.
+     * @param system A system in a Plant Description Entry.
      * @return True if the alarm refers to the given system, false otherwise.
      */
-    private boolean alarmMatchesPdSystem(Alarm alarm, PdeSystem system) {
+    private boolean alarmMatchesPdSystem(final Alarm alarm, final PdeSystem system) {
 
-        boolean namesMatch = alarm.systemName != null && alarm.systemName.equals(system.systemName().orElse(null));
-        boolean metadataMatches = alarm.metadata != null && system.metadata().isPresent() && Metadata
-            .isSubset(system.metadata().get(), alarm.metadata);
+        final String systemName = system.systemName().orElse(null);
+        final boolean namesMatch = alarm.systemName != null && alarm.systemName.equals(systemName);
+
+        final boolean metadataMatches = alarm.getMetadata() != null &&
+            system.metadata().isPresent() &&
+            Metadata.isSubset(system.metadata().get(), alarm.getMetadata());
 
         if (system.systemName().isPresent()) {
             if (!namesMatch) {
@@ -170,7 +179,7 @@ public class SystemMismatchDetector implements PlantDescriptionUpdateListener, S
     private void updateAlarms() {
         final List<SrSystem> registeredSystems = systemTracker.getSystems();
         final PlantDescriptionEntry activeEntry = pdTracker.activeEntry();
-        List<PdeSystem> pdSystems = new ArrayList<>();
+        final List<PdeSystem> pdSystems = new ArrayList<>();
 
         if (activeEntry != null) {
             pdSystems.addAll(pdTracker.getActiveSystems());
@@ -180,10 +189,10 @@ public class SystemMismatchDetector implements PlantDescriptionUpdateListener, S
         raiseAlarms(registeredSystems, pdSystems);
     }
 
-    private void raiseAlarms(List<SrSystem> registeredSystems, List<PdeSystem> pdSystems) {
-        for (final var entrySystem : pdSystems) {
+    private void raiseAlarms(final List<? extends SrSystem> registeredSystems, final List<? extends PdeSystem> pdSystems) {
+        for (final PdeSystem entrySystem : pdSystems) {
 
-            long numMatches = registeredSystems.stream()
+            final long numMatches = registeredSystems.stream()
                 .filter(registeredSystem -> systemsMatch(entrySystem, registeredSystem)).count();
 
             if (numMatches == 0) {
@@ -207,7 +216,7 @@ public class SystemMismatchDetector implements PlantDescriptionUpdateListener, S
         // For each registered system...
         for (final SrSystem registeredSystem : registeredSystems) {
 
-            boolean presentInPd = pdSystems.stream().anyMatch(entrySystem ->
+            final boolean presentInPd = pdSystems.stream().anyMatch(entrySystem ->
                 systemsMatch(entrySystem, registeredSystem)
             );
 
@@ -223,40 +232,43 @@ public class SystemMismatchDetector implements PlantDescriptionUpdateListener, S
     /**
      * Clear any alarms for which the underlying issue has been resolved.
      *
-     * @param registeredSystems A list of systems found in the Service registry.
-     * @param pdSystems         A list of systems in the active plant description.
+     * @param registeredSystems A list of systems found in the Service
+     *                          registry.
+     * @param pdSystems         A list of systems in the active plant
+     *                          description.
      */
-    private void clearAlarms(List<SrSystem> registeredSystems, List<PdeSystem> pdSystems) {
-        final List<Alarm> notInDescriptionAlarms = alarmManager.getActiveAlarmData(AlarmCause.systemNotInDescription);
+    private void clearAlarms(final List<? extends SrSystem> registeredSystems, final List<? extends PdeSystem> pdSystems) {
+        final List<Alarm> notInDescriptionAlarms = alarmManager.getActiveAlarmData(
+            AlarmCause.SYSTEM_NOT_IN_DESCRIPTION
+        );
 
-        for (final var alarm : notInDescriptionAlarms) {
+        for (final Alarm alarm : notInDescriptionAlarms) {
 
-            boolean presentInRegistry = registeredSystems.stream().anyMatch(system ->
+            final boolean presentInRegistry = registeredSystems.stream().anyMatch(system ->
                 alarmMatchesSrSystem(alarm, system)
             );
 
-            boolean presentInPd = pdSystems.stream().anyMatch(system ->
+            final boolean presentInPd = pdSystems.stream().anyMatch(system ->
                 alarmMatchesPdSystem(alarm, system)
             );
 
             if (!presentInRegistry || presentInPd) {
                 alarmManager.clearAlarm(alarm);
-                continue;
             }
         }
 
         final List<Alarm> notFoundInSrAlarms = alarmManager.getActiveAlarmData(List.of(
-            AlarmCause.systemNotRegistered,
-            AlarmCause.multipleMatches
+            AlarmCause.SYSTEM_NOT_REGISTERED,
+            AlarmCause.MULTIPLE_MATCHES
         ));
 
-        for (final var alarm : notFoundInSrAlarms) {
-            long numMatches = registeredSystems.stream()
+        for (final Alarm alarm : notFoundInSrAlarms) {
+            final long numMatches = registeredSystems.stream()
                 .filter(registeredSystem -> alarmMatchesSrSystem(alarm, registeredSystem))
                 .count();
-            boolean uniqueInSr = numMatches == 1;
+            final boolean uniqueInSr = numMatches == 1;
 
-            boolean presentInPd = pdSystems.stream().anyMatch(system ->
+            final boolean presentInPd = pdSystems.stream().anyMatch(system ->
                 alarmMatchesPdSystem(alarm, system)
             );
 

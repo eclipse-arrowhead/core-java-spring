@@ -12,55 +12,60 @@ import se.arkalix.util.concurrent.FutureProgress;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Mock HttpClientResponse implementation used for testing.
  */
 public class MockClientResponse implements HttpClientResponse {
 
-    private Object _body = null;
+    private Object _body;
     private HttpStatus _status = HttpStatus.IM_A_TEAPOT;
 
     @Override
-    public <R extends DtoReadable> FutureProgress<R> bodyAs(DtoEncoding encoding, Class<R> class_) {
-        @SuppressWarnings("unchecked")
-        R castBody = (R) _body;
+    public <R extends DtoReadable> FutureProgress<R> bodyAs(final DtoEncoding encoding, final Class<R> class_) {
+        Objects.requireNonNull(encoding, "Expected encoding.");
+        Objects.requireNonNull(class_, "Expected class.");
+        @SuppressWarnings("unchecked") final R castBody = (R) _body;
         return new MockFutureProgress<>(castBody);
     }
 
     @Override
     public FutureProgress<byte[]> bodyAsByteArray() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public <R extends DtoReadable> FutureProgress<List<R>> bodyAsList(DtoEncoding encoding, Class<R> class_) {
-        return null;
+    public <R extends DtoReadable> FutureProgress<List<R>> bodyAsList(
+        final DtoEncoding encoding,
+        final Class<R> class_
+    ) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public FutureProgress<? extends InputStream> bodyAsStream() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public FutureProgress<String> bodyAsString() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public FutureProgress<Path> bodyTo(Path path, boolean append) {
-        return null;
+    public FutureProgress<Path> bodyTo(final Path path, final boolean append) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public HttpHeaders headers() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public HttpClientRequest request() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -70,15 +75,17 @@ public class MockClientResponse implements HttpClientResponse {
 
     @Override
     public HttpVersion version() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
-    public MockClientResponse status(HttpStatus status) {
+    public MockClientResponse status(final HttpStatus status) {
+        Objects.requireNonNull(status, "Expected status.");
         _status = status;
         return this;
     }
 
-    public MockClientResponse body(Object data) {
+    public MockClientResponse body(final Object data) {
+        Objects.requireNonNull(data, "Expected data.");
         _body = data;
         return this;
     }

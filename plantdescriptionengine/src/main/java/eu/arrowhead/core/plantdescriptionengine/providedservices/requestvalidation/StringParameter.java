@@ -4,6 +4,7 @@ import se.arkalix.net.http.service.HttpServiceRequest;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -12,7 +13,7 @@ import java.util.Optional;
  * string. Used in conjunction with QueryParamParser for validating and parsing
  * query parameters.
  */
-public class StringParameter extends QueryParameter {
+public final class StringParameter extends QueryParameter {
 
     private final List<String> legalValues;
     private final String defaultValue;
@@ -20,19 +21,22 @@ public class StringParameter extends QueryParameter {
     /**
      * {@inheritDoc}
      */
-    private StringParameter(Builder builder) {
+    private StringParameter(final Builder builder) {
         super(builder);
-        this.legalValues = builder.legalValues;
-        this.defaultValue = builder.defaultValue;
+        legalValues = builder.legalValues;
+        defaultValue = builder.defaultValue;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void parse(HttpServiceRequest request, QueryParamParser parser, boolean required) {
+    public void parse(final HttpServiceRequest request, final QueryParamParser parser, final boolean required) {
 
-        Optional<String> possibleValue = request.queryParameter(name);
+        Objects.requireNonNull(request, "Expected request.");
+        Objects.requireNonNull(parser, "Expected parser.");
+
+        final Optional<String> possibleValue = request.queryParameter(name);
 
         if (possibleValue.isEmpty()) {
             if (required) {
@@ -44,11 +48,11 @@ public class StringParameter extends QueryParameter {
             return;
         }
 
-        for (var param : requiredParameters) {
+        for (final QueryParameter param : requiredParameters) {
             param.parse(request, parser, true);
         }
 
-        String value = possibleValue.get();
+        final String value = possibleValue.get();
 
         if (legalValues != null && !legalValues.contains(value)) {
             parser.report(new ParseError(value + " is not a legal value for parameter " + name + "."));
@@ -59,15 +63,15 @@ public class StringParameter extends QueryParameter {
 
     public static class Builder extends QueryParameter.Builder<Builder> {
 
-        private List<String> legalValues = null;
-        private String defaultValue = null;
+        private List<String> legalValues;
+        private String defaultValue;
 
         /**
          * @param values A list of legal values for the constructed parameter.
          * @return This instance.
          */
-        public Builder legalValues(String... values) {
-            this.legalValues = Arrays.asList(values);
+        public Builder legalValues(final String... values) {
+            legalValues = Arrays.asList(values);
             return this;
         }
 
@@ -75,17 +79,20 @@ public class StringParameter extends QueryParameter {
          * @param values A list of legal values for the constructed parameter.
          * @return This instance.
          */
-        public Builder legalValues(List<String> values) {
-            this.legalValues = values;
+        public Builder legalValues(final List<String> values) {
+            Objects.requireNonNull(values, "Expected values.");
+            legalValues = values;
             return this;
         }
 
         /**
-         * @param s A default value to use for the constructed parameter.
+         * @param defaultValue A default value to use for the constructed
+         *                     parameter.
          * @return This instance.
          */
-        public Builder defaultValue(String s) {
-            this.defaultValue = s;
+        public Builder defaultValue(final String defaultValue) {
+            Objects.requireNonNull(defaultValue, "Expected default value.");
+            this.defaultValue = defaultValue;
             return this;
         }
 

@@ -5,7 +5,10 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PdeSystemTest {
 
@@ -20,11 +23,11 @@ public class PdeSystemTest {
         final String serviceB = "ser-b";
         final String serviceC = "ser-c";
 
-        final var metadataA = Map.of("x", "1");
-        final var metadataB = Map.of("y", "2");
-        final var metadataC = Map.of("z", "3");
+        final Map<String, String> metadataA = Map.of("x", "1");
+        final Map<String, String> metadataB = Map.of("y", "2");
+        final Map<String, String> metadataC = Map.of("z", "3");
 
-        final var serviceInterface = "HTTP-SECURE-JSON";
+        final String serviceInterface = "HTTP-SECURE-JSON";
 
         final List<PortDto> ports = List.of(
             new PortBuilder()
@@ -54,9 +57,9 @@ public class PdeSystemTest {
             .ports(ports)
             .build();
 
-        final var portA = system.getPort(portNameA);
-        final var portB = system.getPort(portNameB);
-        final var nullPort = system.getPort("Nonexistent");
+        final Port portA = system.getPort(portNameA);
+        final Port portB = system.getPort(portNameB);
+        final Port nullPort = system.getPort("Nonexistent");
 
         assertEquals(portNameA, portA.portName());
         assertEquals(portNameB, portB.portName());

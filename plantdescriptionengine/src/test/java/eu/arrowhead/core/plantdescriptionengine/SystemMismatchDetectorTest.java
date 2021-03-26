@@ -3,6 +3,7 @@ package eu.arrowhead.core.plantdescriptionengine;
 import eu.arrowhead.core.plantdescriptionengine.alarms.AlarmManager;
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.SrSystem;
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.SrSystemBuilder;
+import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.SrSystemDto;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.InMemoryPdStore;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.PdStoreException;
@@ -10,6 +11,7 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Pd
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystemDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryBuilder;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryDto;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PdeAlarmDto;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockSystemTracker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +25,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SystemMismatchDetectorTest {
 
@@ -32,7 +36,7 @@ public class SystemMismatchDetectorTest {
     private AlarmManager alarmManager;
     private SystemMismatchDetector detector;
 
-    private SrSystem getSrSystem(String systemName) {
+    private SrSystem getSrSystem(final String systemName) {
         return new SrSystemBuilder()
             .id(0)
             .systemName(systemName)
@@ -46,14 +50,14 @@ public class SystemMismatchDetectorTest {
             .build();
     }
 
-    private PdeSystemDto getSystem(String name, String id) {
+    private PdeSystemDto getSystem(final String name, final String id) {
         return new PdeSystemBuilder()
             .systemId(id)
             .systemName(name)
             .build();
     }
 
-    private PlantDescriptionEntryDto getPdEntry(String... systemNames) {
+    private PlantDescriptionEntryDto getPdEntry(final String... systemNames) {
         final List<PdeSystemDto> systems = Stream.of(systemNames).map(name ->
             new PdeSystemBuilder()
                 .systemId(name + "-ID")
@@ -74,7 +78,7 @@ public class SystemMismatchDetectorTest {
     @BeforeEach
     public void initEach() throws PdStoreException, SSLException {
         pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
-        HttpClient httpClient = new HttpClient.Builder().insecure().build();
+        final HttpClient httpClient = new HttpClient.Builder().insecure().build();
         systemTracker = new MockSystemTracker(httpClient, new InetSocketAddress("0.0.0.0", 5000));
         alarmManager = new AlarmManager();
         detector = new SystemMismatchDetector(pdTracker, systemTracker, alarmManager);
@@ -88,7 +92,7 @@ public class SystemMismatchDetectorTest {
         systemTracker.addSystem(getSrSystem(systemName));
         detector.run();
 
-        final var alarms = alarmManager.getAlarms();
+        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
         assertEquals(0, alarms.size());
     }
 
@@ -129,16 +133,15 @@ public class SystemMismatchDetectorTest {
     //     final var alarms = alarmManager.getAlarms();
     //     assertEquals(0, alarms.size());
     // }
-
     @Test
     public void shouldReportNotRegistered() throws PdStoreException {
         detector.run();
 
         final String systemName = "System A";
         pdTracker.put(getPdEntry(systemName));
-        final var alarms = alarmManager.getAlarms();
+        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
         assertEquals(1, alarms.size());
-        final var alarm = alarms.get(0);
+        final PdeAlarmDto alarm = alarms.get(0);
         assertTrue(alarm.systemName().isPresent());
         assertEquals(systemName, alarm.systemName().get());
         assertFalse(alarm.clearedAt().isPresent());
@@ -155,12 +158,12 @@ public class SystemMismatchDetectorTest {
         final String systemIdA = "Sys-A";
         final String systemNameB = "System B";
 
-        final var system = new PdeSystemBuilder()
+        final PdeSystemDto system = new PdeSystemBuilder()
             .systemId(systemIdA)
             .metadata(Map.of("x", "1"))
             .build();
 
-        final var entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
             .id(1)
             .plantDescription("Plant Description 1A")
             .active(true)
@@ -169,7 +172,7 @@ public class SystemMismatchDetectorTest {
             .updatedAt(Instant.now())
             .build();
 
-        final var srSystem = new SrSystemBuilder()
+        final SrSystemDto srSystem = new SrSystemBuilder()
             .id(0)
             .systemName("System B")
             .address("0.0.0.0")
@@ -184,10 +187,10 @@ public class SystemMismatchDetectorTest {
         systemTracker.addSystem(srSystem);
         pdTracker.put(entry);
 
-        final var alarms = alarmManager.getAlarms();
+        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
         assertEquals(2, alarms.size());
-        final var alarm1 = alarms.get(0);
-        final var alarm2 = alarms.get(1);
+        final PdeAlarmDto alarm1 = alarms.get(0);
+        final PdeAlarmDto alarm2 = alarms.get(1);
 
         assertEquals("System named '" + systemNameB + "' is not present in the active Plant Description.", alarm1
             .description());
@@ -208,9 +211,9 @@ public class SystemMismatchDetectorTest {
 
         detector.run();
 
-        final var alarms = alarmManager.getAlarms();
+        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
         assertEquals(1, alarms.size());
-        final var alarm = alarms.get(0);
+        final PdeAlarmDto alarm = alarms.get(0);
         assertTrue(alarm.systemName().isPresent());
         assertEquals(systemNameB, alarm.systemName().get());
         assertFalse(alarm.clearedAt().isPresent());
@@ -227,10 +230,10 @@ public class SystemMismatchDetectorTest {
         final String systemNameA = "System A";
         final String systemNameB = "System B";
 
-        final var systemA = getSystem(systemNameA, "a");
-        final var systemB = getSystem(systemNameB, "b");
+        final PdeSystemDto systemA = getSystem(systemNameA, "a");
+        final PdeSystemDto systemB = getSystem(systemNameB, "b");
 
-        final var pdeEntry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto pdeEntry = new PlantDescriptionEntryBuilder()
             .id(1)
             .plantDescription("Plant Description 1A")
             .active(true)
@@ -248,9 +251,9 @@ public class SystemMismatchDetectorTest {
         // System B is added, so the alarm should be cleared.
         systemTracker.addSystem(getSrSystem(systemNameB));
 
-        final var alarms = alarmManager.getAlarms();
+        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
         assertEquals(1, alarms.size());
-        final var alarm = alarms.get(0);
+        final PdeAlarmDto alarm = alarms.get(0);
         assertTrue(alarm.systemName().isPresent());
         assertEquals(systemNameB, alarm.systemName().get());
         assertTrue(alarm.clearedAt().isPresent());
@@ -266,7 +269,7 @@ public class SystemMismatchDetectorTest {
         final String systemNameA = "System A";
         final String systemNameB = "System B";
 
-        final var pdeEntry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto pdeEntry = new PlantDescriptionEntryBuilder()
             .id(1)
             .plantDescription("Plant Description 1A")
             .active(true)
@@ -286,10 +289,10 @@ public class SystemMismatchDetectorTest {
         // should be cleared.
         systemTracker.remove(systemNameB);
 
-        final var alarms = alarmManager.getAlarms();
+        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
         assertEquals(2, alarms.size());
-        final var alarmA = alarms.get(0);
-        final var alarmB = alarms.get(1);
+        final PdeAlarmDto alarmA = alarms.get(0);
+        final PdeAlarmDto alarmB = alarms.get(1);
 
         assertTrue(alarmA.systemName().isPresent());
         assertEquals(systemNameA, alarmA.systemName().get());
@@ -304,13 +307,13 @@ public class SystemMismatchDetectorTest {
         detector.run();
 
         final String systemName = "System C";
-        final var entry = getPdEntry(systemName);
+        final PlantDescriptionEntryDto entry = getPdEntry(systemName);
         pdTracker.put(entry);
         pdTracker.remove(entry.id());
 
-        final var alarms = alarmManager.getAlarms();
+        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
         assertEquals(1, alarms.size());
-        final var alarm = alarms.get(0);
+        final PdeAlarmDto alarm = alarms.get(0);
         assertTrue(alarm.systemName().isPresent());
         assertEquals(systemName, alarm.systemName().get());
         assertTrue(alarm.clearedAt().isPresent());
@@ -328,9 +331,9 @@ public class SystemMismatchDetectorTest {
         systemTracker.addSystem(getSrSystem(systemName));
         pdTracker.put(getPdEntry(systemName));
 
-        final var alarms = alarmManager.getAlarms();
+        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
         assertEquals(1, alarms.size());
-        final var alarm = alarms.get(0);
+        final PdeAlarmDto alarm = alarms.get(0);
         assertTrue(alarm.systemName().isPresent());
         assertEquals(systemName, alarm.systemName().get());
         assertTrue(alarm.clearedAt().isPresent());
@@ -349,9 +352,9 @@ public class SystemMismatchDetectorTest {
         systemTracker.addSystem(getSrSystem(systemName));
         systemTracker.remove(systemName);
 
-        final var alarms = alarmManager.getAlarms();
+        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
         assertEquals(1, alarms.size());
-        final var alarm = alarms.get(0);
+        final PdeAlarmDto alarm = alarms.get(0);
         assertTrue(alarm.systemName().isPresent());
         assertEquals(systemName, alarm.systemName().get());
         assertTrue(alarm.clearedAt().isPresent());
@@ -373,7 +376,7 @@ public class SystemMismatchDetectorTest {
         final String systemNameB = "System B";
         final String systemNameC = "System C";
 
-        final var srSystemA = new SrSystemBuilder()
+        final SrSystemDto srSystemA = new SrSystemBuilder()
             .id(0)
             .systemName(systemNameA)
             .metadata(Map.of("x", "1", "y", "2"))
@@ -386,7 +389,7 @@ public class SystemMismatchDetectorTest {
                 .toString())
             .build();
 
-        final var srSystemC = new SrSystemBuilder()
+        final SrSystemDto srSystemC = new SrSystemBuilder()
             .id(0)
             .systemName(systemNameC)
             .metadata(Map.of("x", "1", "y", "2", "z", "3"))
@@ -399,22 +402,22 @@ public class SystemMismatchDetectorTest {
                 .toString())
             .build();
 
-        final var srSystemB = getSrSystem(systemNameB);
+        final SrSystem srSystemB = getSrSystem(systemNameB);
 
-        final var systemA = getSystem(systemNameA, "a");
-        final var systemB = new PdeSystemBuilder()
+        final PdeSystemDto systemA = getSystem(systemNameA, "a");
+        final PdeSystemDto systemB = new PdeSystemBuilder()
             .systemId("Sys-B")
             .systemName(systemNameB)
             .build();
 
         // System with metadata that matches System C in the service registry,
         // but not System A (whose metadata is only a subset).
-        final var systemC = new PdeSystemBuilder()
+        final PdeSystemDto systemC = new PdeSystemBuilder()
             .systemId("Sys-C")
             .metadata(Map.of("x", "1", "y", "2", "z", "3"))
             .build();
 
-        final var entryWithTwoSystems = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryWithTwoSystems = new PlantDescriptionEntryBuilder()
             .id(1)
             .plantDescription("Plant Description 1A")
             .active(true)
@@ -431,7 +434,7 @@ public class SystemMismatchDetectorTest {
 
         detector.run();
 
-        final var entryWithThreeSystems = new PlantDescriptionEntryBuilder().id(1)
+        final PlantDescriptionEntryDto entryWithThreeSystems = new PlantDescriptionEntryBuilder().id(1)
             .plantDescription("Plant Description 1A")
             .active(true)
             .systems(List.of(systemB, systemC, systemA))
@@ -441,9 +444,9 @@ public class SystemMismatchDetectorTest {
 
         pdTracker.put(entryWithThreeSystems);
 
-        final var alarms = alarmManager.getAlarms();
+        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
         assertEquals(1, alarms.size());
-        final var alarm = alarms.get(0);
+        final PdeAlarmDto alarm = alarms.get(0);
         assertTrue(alarm.systemName().isPresent());
         assertEquals(systemNameA, alarm.systemName().get());
         assertTrue(alarm.clearedAt().isPresent());
@@ -458,7 +461,7 @@ public class SystemMismatchDetectorTest {
 
         final String systemNameA = "System A";
 
-        final var entryWithOneSystem = new PlantDescriptionEntryBuilder().id(1)
+        final PlantDescriptionEntryDto entryWithOneSystem = new PlantDescriptionEntryBuilder().id(1)
             .plantDescription("Plant Description 1A")
             .active(true)
             .systems(List.of(getSystem(systemNameA, "a")))
@@ -469,7 +472,7 @@ public class SystemMismatchDetectorTest {
         pdTracker.put(entryWithOneSystem);
 
         final String systemNameB = "System B";
-        final var srSystemB = new SrSystemBuilder()
+        final SrSystemDto srSystemB = new SrSystemBuilder()
             .id(38)
             .systemName(systemNameB)
             .address("0.0.2.1")
@@ -489,12 +492,12 @@ public class SystemMismatchDetectorTest {
 
         detector.run();
 
-        final var systemB = new PdeSystemBuilder()
+        final PdeSystemDto systemB = new PdeSystemBuilder()
             .systemId("b")
             .metadata(Map.of("b", "2")) // Subset of the SR system metadata
             .build();
 
-        final var entryWithTwoSystems = new PlantDescriptionEntryBuilder().id(1)
+        final PlantDescriptionEntryDto entryWithTwoSystems = new PlantDescriptionEntryBuilder().id(1)
             .plantDescription("Plant Description 1A")
             .active(true)
             .systems(List.of(getSystem(systemNameA, "a"), systemB))
@@ -506,9 +509,9 @@ public class SystemMismatchDetectorTest {
 
         // The unnamed system is no longer missing from the active PD.
 
-        final var alarms = alarmManager.getAlarms();
+        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
         assertEquals(1, alarms.size());
-        final var alarm = alarms.get(0);
+        final PdeAlarmDto alarm = alarms.get(0);
         assertTrue(alarm.systemName().isPresent());
         assertEquals(systemNameB, alarm.systemName().get());
         assertTrue(alarm.clearedAt().isPresent());
@@ -522,12 +525,12 @@ public class SystemMismatchDetectorTest {
     public void shouldReportWhenSystemCannotBeUniquelyIdentified() throws PdStoreException {
 
         final String systemId = "System X";
-        final var systemA = new PdeSystemBuilder()
+        final PdeSystemDto systemA = new PdeSystemBuilder()
             .systemId(systemId)
             .metadata(Map.of("a", "1", "b", "2"))
             .build();
 
-        final var entry = new PlantDescriptionEntryBuilder().id(1)
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder().id(1)
             .plantDescription("Plant Description 1A")
             .active(true)
             .systems(List.of(systemA))
@@ -536,7 +539,7 @@ public class SystemMismatchDetectorTest {
             .build();
 
         // System with matching metadata:
-        final var srSystemA = new SrSystemBuilder()
+        final SrSystemDto srSystemA = new SrSystemBuilder()
             .id(0)
             .systemName("System A")
             .metadata(Map.of("a", "1", "b", "2", "c", "3"))
@@ -550,7 +553,7 @@ public class SystemMismatchDetectorTest {
             .build();
 
         // Another system with matching metadata:
-        final var srSystemB = new SrSystemBuilder()
+        final SrSystemDto srSystemB = new SrSystemBuilder()
             .id(0)
             .systemName("System B")
             .metadata(Map.of("a", "1", "b", "2", "d", "4"))
@@ -568,9 +571,9 @@ public class SystemMismatchDetectorTest {
         systemTracker.addSystem(srSystemB);
         detector.run();
 
-        final var alarms = alarmManager.getAlarms();
+        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
         assertEquals(1, alarms.size());
-        final var alarm = alarms.get(0);
+        final PdeAlarmDto alarm = alarms.get(0);
         assertTrue(alarm.systemName().isEmpty());
         assertTrue(alarm.clearedAt().isEmpty());
         assertEquals("warning", alarm.severity());
@@ -584,12 +587,12 @@ public class SystemMismatchDetectorTest {
     public void shouldClearWhenSystemBecomesUnique() throws PdStoreException {
 
         final String systemId = "System X";
-        final var systemA = new PdeSystemBuilder()
+        final PdeSystemDto systemA = new PdeSystemBuilder()
             .systemId(systemId)
             .metadata(Map.of("a", "1", "b", "2"))
             .build();
 
-        final var entry = new PlantDescriptionEntryBuilder().id(1)
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder().id(1)
             .plantDescription("Plant Description 1A")
             .active(true)
             .systems(List.of(systemA))
@@ -598,8 +601,8 @@ public class SystemMismatchDetectorTest {
             .build();
 
         // System with matching metadata:
-        final var systemAMetadata = Map.of("a", "1", "b", "2", "c", "3");
-        final var srSystemA = new SrSystemBuilder()
+        final Map<String, String> systemAMetadata = Map.of("a", "1", "b", "2", "c", "3");
+        final SrSystemDto srSystemA = new SrSystemBuilder()
             .id(0)
             .systemName("System A")
             .metadata(systemAMetadata)
@@ -613,7 +616,7 @@ public class SystemMismatchDetectorTest {
             .build();
 
         // Another system with matching metadata:
-        final var srSystemB = new SrSystemBuilder()
+        final SrSystemDto srSystemB = new SrSystemBuilder()
             .id(0)
             .systemName("System B")
             .metadata(Map.of("a", "1", "b", "2", "d", "4"))
@@ -632,9 +635,9 @@ public class SystemMismatchDetectorTest {
         detector.run();
         systemTracker.remove(srSystemA.systemName(), systemAMetadata);
 
-        final var alarms = alarmManager.getAlarms();
+        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
         assertEquals(1, alarms.size());
-        final var alarm = alarms.get(0);
+        final PdeAlarmDto alarm = alarms.get(0);
         assertTrue(alarm.systemName().isEmpty());
         assertTrue(alarm.clearedAt().isPresent());
         assertEquals("cleared", alarm.severity());

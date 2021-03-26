@@ -16,6 +16,7 @@ import se.arkalix.net.http.service.HttpServiceRequest;
 import se.arkalix.net.http.service.HttpServiceResponse;
 import se.arkalix.util.concurrent.Future;
 
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -37,18 +38,22 @@ public class UpdatePlantDescription implements HttpRouteHandler {
     }
 
     /**
-     * Handles an HTTP request to update the Plant Description Entry specified by
-     * the id parameter with the information in the request body.
+     * Handles an HTTP request to update the Plant Description Entry specified
+     * by the id parameter with the information in the request body.
      *
      * @param request  HTTP request containing a PlantDescriptionUpdate.
      * @param response HTTP response containing the updated entry.
      */
     @Override
     public Future<HttpServiceResponse> handle(final HttpServiceRequest request, final HttpServiceResponse response) {
+
+        Objects.requireNonNull(request, "Expected request.");
+        Objects.requireNonNull(response, "Expected response.");
+
         return request.bodyAs(PlantDescriptionUpdateDto.class)
             .map(newFields -> {
                 final String idString = request.pathParameter(0);
-                int id;
+                final int id;
 
                 try {
                     id = Integer.parseInt(idString);
@@ -71,9 +76,9 @@ public class UpdatePlantDescription implements HttpRouteHandler {
 
                 // Check if the changes to this entry lead to inconsistencies
                 // (e.g. include cycles):
-                final var entries = pdTracker.getEntryMap();
+                final Map<Integer, PlantDescriptionEntry> entries = pdTracker.getEntryMap();
                 entries.put(id, updatedEntry);
-                final var validator = new PlantDescriptionValidator(entries);
+                final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
                 if (validator.hasError()) {
                     return response
                         .status(HttpStatus.BAD_REQUEST)

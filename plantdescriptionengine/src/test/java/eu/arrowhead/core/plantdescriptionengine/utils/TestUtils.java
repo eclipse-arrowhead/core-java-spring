@@ -5,9 +5,13 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Pl
 
 import java.time.Instant;
 
-public class TestUtils {
+public final class TestUtils {
 
-    public static PlantDescriptionEntryDto createEntry(int id, boolean active) {
+    private TestUtils() {
+        throw new AssertionError();
+    }
+
+    public static PlantDescriptionEntryDto createEntry(final int id, final boolean active) {
         final Instant now = Instant.now();
         return new PlantDescriptionEntryBuilder()
             .id(id)
@@ -18,7 +22,7 @@ public class TestUtils {
             .build();
     }
 
-    public static PlantDescriptionEntryDto createEntry(int id) {
+    public static PlantDescriptionEntryDto createEntry(final int id) {
         return createEntry(id, true);
     }
 

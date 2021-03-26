@@ -1,5 +1,6 @@
 package eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry;
 
+import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.SrSystem;
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.SrSystemBuilder;
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.SrSystemListBuilder;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockClientResponse;
@@ -24,20 +25,20 @@ public class SystemTrackerTest {
     @Test
     public void shouldThrowWhenNotInitialized() throws SSLException {
 
-        HttpClient httpClient = new HttpClient.Builder().insecure().build();
-        SystemTracker systemTracker = new SystemTracker(httpClient, new InetSocketAddress("0.0.0.0", 5000));
+        final HttpClient httpClient = new HttpClient.Builder().insecure().build();
+        final SystemTracker systemTracker = new SystemTracker(httpClient, new InetSocketAddress("0.0.0.0", 5000));
 
-        Exception exception = assertThrows(RuntimeException.class, () -> systemTracker.getSystem("System A", null));
+        final Exception exception = assertThrows(RuntimeException.class, () -> systemTracker.getSystem("System A", null));
         assertEquals("SystemTracker has not been initialized.", exception.getMessage());
     }
 
     @Test
     public void shouldFindSystemByName() {
 
-        HttpClient httpClient = Mockito.mock(HttpClient.class);
-        SystemTracker systemTracker = new SystemTracker(httpClient, new InetSocketAddress("0.0.0.0", 5000));
-        String systemName = "Sys-A";
-        int systemId = 92;
+        final HttpClient httpClient = Mockito.mock(HttpClient.class);
+        final SystemTracker systemTracker = new SystemTracker(httpClient, new InetSocketAddress("0.0.0.0", 5000));
+        final String systemName = "Sys-A";
+        final int systemId = 92;
         // Create some fake data for the HttpClient to respond with:
         final MockClientResponse response = new MockClientResponse().status(HttpStatus.OK)
             .body(new SrSystemListBuilder().count(1)
@@ -54,7 +55,7 @@ public class SystemTrackerTest {
 
         systemTracker.start()
             .ifSuccess(result -> {
-                final var system = systemTracker.getSystem(systemName, null);
+                final SrSystem system = systemTracker.getSystem(systemName, null);
                 assertEquals(systemId, system.id());
             })
             .onFailure(Assertions::assertNull);

@@ -3,7 +3,6 @@ package eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistr
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.SrSystem;
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.SrSystemListDto;
 import eu.arrowhead.core.plantdescriptionengine.utils.Metadata;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.arkalix.dto.DtoEncoding;
@@ -13,7 +12,12 @@ import se.arkalix.net.http.client.HttpClientRequest;
 import se.arkalix.util.concurrent.Future;
 
 import java.net.InetSocketAddress;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -29,7 +33,7 @@ public class SystemTracker {
     private final HttpClient httpClient;
     private final InetSocketAddress serviceRegistryAddress;
     private final int pollInterval = 5000;
-    protected boolean initialized = false;
+    protected boolean initialized;
 
     /**
      * Class constructor
@@ -40,8 +44,8 @@ public class SystemTracker {
      */
     public SystemTracker(final HttpClient httpClient, final InetSocketAddress serviceRegistryAddress) {
 
-        Objects.requireNonNull(serviceRegistryAddress, "Expected service registry address");
         Objects.requireNonNull(httpClient, "Expected HTTP client");
+        Objects.requireNonNull(serviceRegistryAddress, "Expected service registry address");
 
         this.httpClient = httpClient;
         this.serviceRegistryAddress = serviceRegistryAddress;
@@ -50,10 +54,10 @@ public class SystemTracker {
     /**
      * @param systemName Name of a system
      * @param metadata   Metadata describing a system
-     * @return A string uniquely identifying the system with the given
-     * name / metadata combination.
+     * @return A string uniquely identifying the system with the given name /
+     * metadata combination.
      */
-    protected String toKey(String systemName, Map<String, String> metadata) {
+    protected String toKey(final String systemName, final Map<String, String> metadata) {
         String result = systemName + "{";
         if (metadata != null && !metadata.isEmpty()) {
             result += Metadata.toString(metadata);
@@ -65,7 +69,7 @@ public class SystemTracker {
      * @param system A system found in the Service Registry.
      * @return A string uniquely identifying the system.
      */
-    protected String toKey(SrSystem system) {
+    protected String toKey(final SrSystem system) {
         return toKey(system.systemName(), system.metadata().orElse(null));
     }
 
@@ -73,7 +77,8 @@ public class SystemTracker {
      * @return A Future which will complete with a list of registered systems.
      * <p>
      * The retrieved systems are stored locally, and can be accessed using
-     * {@link #getSystems()} or {@link #getSystem(String, Map<String>, <String>) }.
+     * {@code #getSystems()} or {@code #getSystem(String, Map<String>, <String>)
+     * }.
      */
     private Future<Void> fetchSystems() {
         return httpClient
@@ -83,12 +88,12 @@ public class SystemTracker {
                     .header("accept", "application/json"))
             .flatMap(response -> response.bodyAsClassIfSuccess(DtoEncoding.JSON, SrSystemListDto.class))
             .flatMap(systemList -> {
-                List<SrSystem> newSystems = systemList.data();
-                List<SrSystem> oldSystems = new ArrayList<>(systems.values());
+                final List<SrSystem> newSystems = systemList.data();
+                final List<SrSystem> oldSystems = new ArrayList<>(systems.values());
 
                 // Replace the stored list of registered systems.
                 systems.clear();
-                for (var system : newSystems) {
+                for (final SrSystem system : newSystems) {
                     systems.put(toKey(system), system);
                 }
                 initialized = true;
@@ -105,13 +110,13 @@ public class SystemTracker {
      *                   Registry.
      * @param newSystems Systems that are present in the Service Registry.
      */
-    private void notifyListeners(List<SrSystem> oldSystems, List<SrSystem> newSystems) {
+    private void notifyListeners(final List<? extends SrSystem> oldSystems, final List<? extends SrSystem> newSystems) {
         // Report removed systems
-        for (var oldSystem : oldSystems) {
-            boolean stillPresent = newSystems.stream()
+        for (final SrSystem oldSystem : oldSystems) {
+            final boolean stillPresent = newSystems.stream()
                 .anyMatch(newSystem -> newSystem.systemName().equals(oldSystem.systemName()));
             if (!stillPresent) {
-                for (var listener : listeners) {
+                for (final SystemUpdateListener listener : listeners) {
                     logger.info("System '" + oldSystem.systemName() + "' has been removed from the Service Registry.");
                     listener.onSystemRemoved(oldSystem);
                 }
@@ -119,12 +124,12 @@ public class SystemTracker {
         }
 
         // Report added systems
-        for (var newSystem : newSystems) {
-            boolean wasPresent = oldSystems.stream()
+        for (final SrSystem newSystem : newSystems) {
+            final boolean wasPresent = oldSystems.stream()
                 .anyMatch(oldSystem -> newSystem.systemName().equals(oldSystem.systemName()));
             if (!wasPresent) {
                 logger.info("System '" + newSystem.systemName() + "' detected in Service Registry.");
-                for (var listener : listeners) {
+                for (final SystemUpdateListener listener : listeners) {
                     listener.onSystemAdded(newSystem);
                 }
             }
@@ -137,27 +142,33 @@ public class SystemTracker {
      *
      * @param listener Object to notify.
      */
-    public void addListener(SystemUpdateListener listener) {
+    public void addListener(final SystemUpdateListener listener) {
+        Objects.requireNonNull(listener, "Expected listener.");
         listeners.add(listener);
     }
 
     /**
      * Retrieves the specified system. Note that the returned data will be stale
-     * if the system in question has changed state since the last call to
-     * {@link #fetchSystems()}.
+     * if the system in question has changed state since the last call to {@link
+     * #fetchSystems()}.
      *
-     * @param systemName Name of a system.
-     * @param metadata   Metadata describing a system.
+     * @param systemName Name of a system. May be null if {@code metadata} is
+     *                   present.
+     * @param metadata   Metadata describing a system. May be null if {@code
+     *                   systemName} is present.
      * @return The desired system, if it is present in the local cache.
      */
 
-    public SrSystem getSystem(String systemName, Map<String, String> metadata) {
+    public SrSystem getSystem(final String systemName, final Map<String, String> metadata) {
+
         if (!initialized) {
             throw new IllegalStateException("SystemTracker has not been initialized.");
         }
-        if (systemName == null) {
-            return null;
+
+        if (systemName == null && metadata == null) {
+            throw new IllegalArgumentException("Either systemName or metadata must be present.");
         }
+
         return systems.get(toKey(systemName, metadata));
     }
 

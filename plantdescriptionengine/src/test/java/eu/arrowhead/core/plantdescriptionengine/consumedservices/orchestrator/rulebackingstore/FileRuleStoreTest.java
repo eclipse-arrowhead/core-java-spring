@@ -13,10 +13,10 @@ public class FileRuleStoreTest {
 
     private final String entryDirectory = "test-temp-data";
 
-    private void deleteDirectory(File dir) {
-        File[] allContents = dir.listFiles();
+    private void deleteDirectory(final File dir) {
+        final File[] allContents = dir.listFiles();
         if (allContents != null) {
-            for (File file : allContents) {
+            for (final File file : allContents) {
                 deleteDirectory(file);
             }
         }
@@ -32,24 +32,24 @@ public class FileRuleStoreTest {
 
     @Test
     public void shouldWriteRules() throws RuleStoreException {
-        final var store = new FileRuleStore(entryDirectory);
+        final FileRuleStore store = new FileRuleStore(entryDirectory);
         final Set<Integer> rules = Set.of(1, 2, 3);
 
         store.setRules(rules);
 
-        var storedRules = store.readRules();
+        final Set<Integer> storedRules = store.readRules();
         assertEquals(rules, storedRules);
     }
 
     @Test
     public void shouldRemoveRules() throws RuleStoreException {
-        final var store = new FileRuleStore(entryDirectory);
+        final FileRuleStore store = new FileRuleStore(entryDirectory);
         final Set<Integer> rules = Set.of(1, 2, 3);
 
         store.setRules(rules);
         store.removeAll();
 
-        var storedRules = store.readRules();
+        final Set<Integer> storedRules = store.readRules();
         assertTrue(storedRules.isEmpty());
     }
 

@@ -16,7 +16,7 @@ import static se.arkalix.dto.DtoEncoding.JSON;
 @DtoToString
 public interface PlantDescriptionEntryList {
 
-    List<PlantDescriptionEntry> data();
+    List<MonitorPlantDescriptionEntry> data();
 
     int count();
 }

@@ -15,8 +15,8 @@ import java.util.Set;
 public interface RuleStore {
 
     /**
-     * @return A set containing the IDs of all Orchestrator rules currently stored
-     * by this instance.
+     * @return A set containing the IDs of all Orchestrator rules currently
+     * stored by this instance.
      */
     Set<Integer> readRules() throws RuleStoreException;
 

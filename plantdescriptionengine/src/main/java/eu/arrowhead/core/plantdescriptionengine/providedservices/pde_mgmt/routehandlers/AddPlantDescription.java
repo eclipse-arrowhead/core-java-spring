@@ -15,6 +15,7 @@ import se.arkalix.net.http.service.HttpServiceRequest;
 import se.arkalix.net.http.service.HttpServiceResponse;
 import se.arkalix.util.concurrent.Future;
 
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -30,7 +31,7 @@ public class AddPlantDescription implements HttpRouteHandler {
      *
      * @param pdTracker Object that keeps track of Plant Description Entries.
      */
-    public AddPlantDescription(PlantDescriptionTracker pdTracker) {
+    public AddPlantDescription(final PlantDescriptionTracker pdTracker) {
         Objects.requireNonNull(pdTracker, "Expected Plant Description Tracker");
         this.pdTracker = pdTracker;
     }
@@ -39,11 +40,14 @@ public class AddPlantDescription implements HttpRouteHandler {
      * Handles an HTTP request to add a new Plant Description to the PDE.
      *
      * @param request  HTTP request object containing a Plant Description.
-     * @param response HTTP response containing the newly created Plant Description
-     *                 entry.
+     * @param response HTTP response containing the newly created Plant
+     *                 Description entry.
      */
     @Override
     public Future<HttpServiceResponse> handle(final HttpServiceRequest request, final HttpServiceResponse response) {
+        Objects.requireNonNull(request, "Expected request.");
+        Objects.requireNonNull(response, "Expected response.");
+
         return request.bodyAs(PlantDescriptionDto.class)
             .map(description -> {
 
@@ -51,9 +55,9 @@ public class AddPlantDescription implements HttpRouteHandler {
 
                 // Check if adding this entry leads to inconsistencies
                 // (e.g. include cycles):
-                final var entries = pdTracker.getEntryMap();
+                final Map<Integer, PlantDescriptionEntry> entries = pdTracker.getEntryMap();
                 entries.put(entry.id(), entry);
-                final var validator = new PlantDescriptionValidator(entries);
+                final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
                 if (validator.hasError()) {
                     return response
                         .status(HttpStatus.BAD_REQUEST)

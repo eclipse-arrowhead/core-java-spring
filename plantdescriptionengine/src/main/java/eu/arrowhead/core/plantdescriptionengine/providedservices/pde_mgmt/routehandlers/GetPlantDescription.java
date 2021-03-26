@@ -23,28 +23,31 @@ public class GetPlantDescription implements HttpRouteHandler {
      *
      * @param pdTracker Object that keeps track of Plant Description Entries.
      */
-    public GetPlantDescription(PlantDescriptionTracker pdTracker) {
+    public GetPlantDescription(final PlantDescriptionTracker pdTracker) {
         Objects.requireNonNull(pdTracker, "Expected Plant Description Tracker");
         this.pdTracker = pdTracker;
     }
 
     /**
-     * Handles an HTTP call to acquire the PlantDescriptionEntry specified by the id
-     * path parameter.
+     * Handles an HTTP call to acquire the PlantDescriptionEntry specified by
+     * the id path parameter.
      *
      * @param request  HTTP request object.
-     * @param response HTTP response containing the current
-     *                 PlantDescriptionEntryList.
+     * @param response HTTP response containing the current {@code
+     *                 PlantDescriptionEntryList}.
      */
     @Override
     public Future<HttpServiceResponse> handle(final HttpServiceRequest request, final HttpServiceResponse response) {
 
-        String idString = request.pathParameter(0);
-        int id;
+        Objects.requireNonNull(request, "Expected request.");
+        Objects.requireNonNull(response, "Expected response.");
+
+        final String idString = request.pathParameter(0);
+        final int id;
 
         try {
             id = Integer.parseInt(idString);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             return Future.success(response.status(HttpStatus.BAD_REQUEST)
                 .body(ErrorMessage.of(idString + " is not a valid Plant Description Entry ID.")));
         }

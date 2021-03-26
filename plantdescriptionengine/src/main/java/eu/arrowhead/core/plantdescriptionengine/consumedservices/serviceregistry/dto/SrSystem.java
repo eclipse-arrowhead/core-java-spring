@@ -35,7 +35,7 @@ public interface SrSystem {
 
     Optional<Map<String, String>> metadata();
 
-    public default InetSocketAddress getAddress() {
+    default InetSocketAddress getAddress() {
         return new InetSocketAddress(address(), port());
     }
 

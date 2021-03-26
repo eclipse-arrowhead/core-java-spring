@@ -12,6 +12,7 @@ import se.arkalix.net.http.client.HttpClient;
 import se.arkalix.net.http.client.HttpClientRequest;
 import se.arkalix.query.ServiceQuery;
 
+import java.net.InetSocketAddress;
 import java.util.Objects;
 import java.util.TimerTask;
 
@@ -19,15 +20,22 @@ public class RetrieveMonitorInfoTask extends TimerTask {
 
     private static final Logger logger = LoggerFactory.getLogger(RetrieveMonitorInfoTask.class);
 
+    private static final String SYSTEM_DATA_PATH = "/systemdata";
+    private static final String INVENTORY_ID_PATH = "/inventoryid";
+
     private final ServiceQuery serviceQuery;
     private final HttpClient httpClient;
     private final MonitorInfo monitorInfo;
 
-    public RetrieveMonitorInfoTask(ServiceQuery serviceQuery, HttpClient httpClient, MonitorInfo monitorInfo) {
+    public RetrieveMonitorInfoTask(
+        final ServiceQuery serviceQuery,
+        final HttpClient httpClient,
+        final MonitorInfo monitorInfo
+    ) {
 
         Objects.requireNonNull(serviceQuery, "Expected service query");
         Objects.requireNonNull(httpClient, "Expected HTTP client");
-        Objects.requireNonNull(monitorInfo, "Expected monitor info");
+        Objects.requireNonNull(monitorInfo, "Expected MonitorInfo");
 
         this.serviceQuery = serviceQuery;
         this.httpClient = httpClient;
@@ -45,7 +53,7 @@ public class RetrieveMonitorInfoTask extends TimerTask {
     private void retrieveMonitorInfo() {
         serviceQuery.resolveAll()
             .ifSuccess(services -> {
-                for (var service : services) {
+                for (final ServiceDescription service : services) {
                     retrieveId(service);
                     retrieveSystemData(service);
                 }
@@ -58,20 +66,19 @@ public class RetrieveMonitorInfoTask extends TimerTask {
      *
      * @param service A monitorable service.
      */
-    private void retrieveId(ServiceDescription service) {
-        final var address = service.provider().socketAddress();
+    private void retrieveId(final ServiceDescription service) {
+        final InetSocketAddress address = service.provider().socketAddress();
 
-        // noinspection SpellCheckingInspection
         httpClient
             .send(address,
                 new HttpClientRequest()
                     .method(HttpMethod.GET)
-                    .uri(service.uri() + "/inventoryid")
+                    .uri(service.uri() + INVENTORY_ID_PATH)
                     .header("accept", "application/json"))
             .flatMap(result -> result.bodyAsClassIfSuccess(DtoEncoding.JSON, InventoryIdDto.class))
             .ifSuccess(inventoryId -> monitorInfo.putInventoryId(service, inventoryId.id()))
             .onFailure(e -> {
-                String errorMessage = "Failed to retrieve inventory ID for system '" + service.provider().name()
+                final String errorMessage = "Failed to retrieve inventory ID for system '" + service.provider().name()
                     + "', service '" + service.name() + "'.";
                 logger.warn(errorMessage, e);
             });
@@ -82,20 +89,19 @@ public class RetrieveMonitorInfoTask extends TimerTask {
      *
      * @param service A monitorable service.
      */
-    private void retrieveSystemData(ServiceDescription service) {
-        final var address = service.provider().socketAddress();
+    private void retrieveSystemData(final ServiceDescription service) {
+        final InetSocketAddress address = service.provider().socketAddress();
 
-        // noinspection SpellCheckingInspection
         httpClient
             .send(address,
                 new HttpClientRequest()
                     .method(HttpMethod.GET)
-                    .uri(service.uri() + "/systemdata")
+                    .uri(service.uri() + SYSTEM_DATA_PATH)
                     .header("accept", "application/json"))
             .flatMap(result -> result.bodyAsClassIfSuccess(DtoEncoding.JSON, SystemDataDto.class))
             .ifSuccess(systemData -> monitorInfo.putSystemData(service, systemData.data()))
             .onFailure(e -> {
-                String errorMessage = "Failed to retrieve system data for system '" + service.provider().name()
+                final String errorMessage = "Failed to retrieve system data for system '" + service.provider().name()
                     + "', service '" + service.name() + "'.";
                 logger.error(errorMessage, e);
             });

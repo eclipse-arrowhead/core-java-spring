@@ -15,6 +15,7 @@ import se.arkalix.net.http.service.HttpServiceRequest;
 import se.arkalix.net.http.service.HttpServiceResponse;
 import se.arkalix.util.concurrent.Future;
 
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -30,7 +31,7 @@ public class ReplacePlantDescription implements HttpRouteHandler {
      *
      * @param pdTracker Object that keeps track of Plant Description Entries.
      */
-    public ReplacePlantDescription(PlantDescriptionTracker pdTracker) {
+    public ReplacePlantDescription(final PlantDescriptionTracker pdTracker) {
         Objects.requireNonNull(pdTracker, "Expected Plant Description Entry map");
         this.pdTracker = pdTracker;
     }
@@ -38,20 +39,24 @@ public class ReplacePlantDescription implements HttpRouteHandler {
     /**
      * Handles an HTTP request to update or create the Plant Description Entry.
      *
-     * @param request  HTTP request containing the ID of the entry to create/update,
-     *                 and a {@code PlantDescriptionUpdate} describing its new
-     *                 state.
+     * @param request  HTTP request containing the ID of the entry to
+     *                 create/update, and a {@code PlantDescriptionUpdate}
+     *                 describing its new state.
      * @param response HTTP response containing the created/updated entry.
      */
     @Override
     public Future<HttpServiceResponse> handle(final HttpServiceRequest request, final HttpServiceResponse response) {
+
+        Objects.requireNonNull(request, "Expected request.");
+        Objects.requireNonNull(response, "Expected response.");
+
         return request.bodyAs(PlantDescriptionDto.class)
             .map(description -> {
-                int id;
+                final int id;
 
                 try {
                     id = Integer.parseInt(request.pathParameter(0));
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     return response
                         .status(HttpStatus.BAD_REQUEST)
                         .body(request.pathParameter(0) + " is not a valid Plant Description Entry ID.");
@@ -61,9 +66,9 @@ public class ReplacePlantDescription implements HttpRouteHandler {
 
                 // Check if introducing this entry leads to inconsistencies
                 // (e.g. include cycles):
-                final var entries = pdTracker.getEntryMap();
+                final Map<Integer, PlantDescriptionEntry> entries = pdTracker.getEntryMap();
                 entries.put(id, entry);
-                final var validator = new PlantDescriptionValidator(entries);
+                final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
                 if (validator.hasError()) {
                     return response
                         .status(HttpStatus.BAD_REQUEST)

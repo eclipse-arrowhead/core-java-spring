@@ -2,7 +2,12 @@ package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt;
 
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.DtoReadExceptionCatcher;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.routehandlers.*;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.routehandlers.AddPlantDescription;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.routehandlers.DeletePlantDescription;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.routehandlers.GetAllPlantDescriptions;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.routehandlers.GetPlantDescription;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.routehandlers.ReplacePlantDescription;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.routehandlers.UpdatePlantDescription;
 import se.arkalix.descriptor.EncodingDescriptor;
 import se.arkalix.dto.DtoReadException;
 import se.arkalix.net.http.service.HttpService;
@@ -16,16 +21,27 @@ import java.util.Objects;
  */
 public class PdeManagementService {
 
+    private static final String SERVICE_NAME = "pde-mgmt";
+    private static final String BASE_PATH = "/pde/mgmt";
+    private static final String GET_ALL_PLANT_DESCRIPTIONS_PATH = "/pd";
+    private static final String GET_PLANT_DESCRIPTION_PATH = "/pd/#id";
+    private static final String ADD_PLANT_DESCRIPTION_PATH = "/pd";
+    private static final String DELETE_PLANT_DESCRIPTION_PATH = "/pd/#id";
+    private static final String REPLACE_PLANT_DESCRIPTION_PATH = "/pd/#id";
+    private static final String UPDATE_PLANT_DESCRIPTION_PATH = "/pd/#id";
+
     private final PlantDescriptionTracker pdTracker;
     private final boolean secure;
 
     /**
      * Class constructor.
      *
-     * @param pdTracker An object that keeps track of Plant Description Entries.
-     * @param secure    Indicates whether the service should run in secure mode.
+     * @param pdTracker An object that keeps track of Plant Description
+     *                  Entries.
+     * @param secure    Indicates whether the service should run in secure
+     *                  mode.
      */
-    public PdeManagementService(PlantDescriptionTracker pdTracker, boolean secure) {
+    public PdeManagementService(final PlantDescriptionTracker pdTracker, final boolean secure) {
 
         Objects.requireNonNull(pdTracker, "Expected AR System");
         Objects.requireNonNull(pdTracker, "Expected plant description map");
@@ -41,16 +57,16 @@ public class PdeManagementService {
      * @return A HTTP Service used to manage Plant Descriptions.
      */
     public HttpService getService() {
-        var service = new HttpService()
-            .name("pde-mgmt")
+        final HttpService service = new HttpService()
+            .name(SERVICE_NAME)
             .encodings(EncodingDescriptor.JSON)
-            .basePath("/pde/mgmt")
-            .get("/pd/#id", new GetPlantDescription(pdTracker))
-            .get("/pd", new GetAllPlantDescriptions(pdTracker))
-            .post("/pd", new AddPlantDescription(pdTracker))
-            .delete("/pd/#id", new DeletePlantDescription(pdTracker))
-            .put("/pd/#id", new ReplacePlantDescription(pdTracker))
-            .patch("/pd/#id", new UpdatePlantDescription(pdTracker))
+            .basePath(BASE_PATH)
+            .get(GET_PLANT_DESCRIPTION_PATH, new GetPlantDescription(pdTracker))
+            .get(GET_ALL_PLANT_DESCRIPTIONS_PATH, new GetAllPlantDescriptions(pdTracker))
+            .post(ADD_PLANT_DESCRIPTION_PATH, new AddPlantDescription(pdTracker))
+            .delete(DELETE_PLANT_DESCRIPTION_PATH, new DeletePlantDescription(pdTracker))
+            .put(REPLACE_PLANT_DESCRIPTION_PATH, new ReplacePlantDescription(pdTracker))
+            .patch(UPDATE_PLANT_DESCRIPTION_PATH, new UpdatePlantDescription(pdTracker))
             .catcher(DtoReadException.class, new DtoReadExceptionCatcher());
 
         if (secure) {

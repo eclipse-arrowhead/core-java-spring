@@ -1,7 +1,17 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.routehandlers;
 
 import eu.arrowhead.core.plantdescriptionengine.MonitorInfo;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.*;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystemBuilder;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystemDto;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntry;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryBuilder;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryDto;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PortBuilder;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PortDto;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.MonitorPlantDescriptionEntry;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.MonitorPlantDescriptionEntryDto;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PortEntry;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.SystemEntry;
 import org.junit.jupiter.api.Test;
 import se.arkalix.description.ProviderDescription;
 import se.arkalix.description.ServiceDescription;
@@ -60,7 +70,7 @@ public class DtoUtilsTest {
             .build();
 
         final Instant now = Instant.now();
-        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntry entry = new PlantDescriptionEntryBuilder()
             .id(1)
             .plantDescription("Plant Description 1A")
             .active(false)
@@ -71,8 +81,8 @@ public class DtoUtilsTest {
             .updatedAt(now)
             .build();
 
-        final var provider = new ProviderDescription(systemName, new InetSocketAddress("0.0.0.0", 5000));
-        ServiceDescription serviceDescription = new ServiceDescription.Builder()
+        final ProviderDescription provider = new ProviderDescription(systemName, new InetSocketAddress("0.0.0.0", 5000));
+        final ServiceDescription serviceDescription = new ServiceDescription.Builder()
             .name(serviceDefinition)
             .metadata(metadata)
             .uri("/abc")
@@ -82,18 +92,18 @@ public class DtoUtilsTest {
             .build();
 
         final String inventoryId = "system_a_inventory_id";
-        JsonObject systemData = new JsonObject(List.of(new JsonPair("a", JsonBoolean.TRUE)));
+        final JsonObject systemData = new JsonObject(List.of(new JsonPair("a", JsonBoolean.TRUE)));
 
-        final var monitorInfo = new MonitorInfo();
+        final MonitorInfo monitorInfo = new MonitorInfo();
         monitorInfo.putInventoryId(serviceDescription, inventoryId);
         monitorInfo.putSystemData(serviceDescription, systemData);
 
-        var extendedEntry = DtoUtils.extend(entry, monitorInfo);
-        var extendedSystem = extendedEntry.systems().get(0);
+        final MonitorPlantDescriptionEntry extendedEntry = DtoUtils.extend(entry, monitorInfo);
+        final SystemEntry extendedSystem = extendedEntry.systems().get(0);
 
-        var extendedPortA = extendedSystem.ports().get(2);
-        var extendedPortB = extendedSystem.ports().get(1);
-        var extendedPortC = extendedSystem.ports().get(0);
+        final PortEntry extendedPortA = extendedSystem.ports().get(2);
+        final PortEntry extendedPortB = extendedSystem.ports().get(1);
+        final PortEntry extendedPortC = extendedSystem.ports().get(0);
 
         assertEquals(inventoryId, extendedPortA.inventoryId().orElse(null));
         assertEquals(systemData, extendedPortA.systemData().orElse(null));
@@ -138,21 +148,20 @@ public class DtoUtilsTest {
             .updatedAt(now)
             .build();
 
-        final var monitorInfo = new MonitorInfo();
+        final MonitorInfo monitorInfo = new MonitorInfo();
 
-        var extendedEntry = DtoUtils.extend(entry, monitorInfo);
-        var extendedSystem = extendedEntry.systems().get(0);
-        var extendedPort = extendedSystem.ports().get(0);
+        final MonitorPlantDescriptionEntryDto extendedEntry = DtoUtils.extend(entry, monitorInfo);
+        final SystemEntry extendedSystem = extendedEntry.systems().get(0);
+        final PortEntry extendedPort = extendedSystem.ports().get(0);
         assertTrue(extendedPort.inventoryId().isEmpty());
         assertTrue(extendedPort.systemData().isEmpty());
         assertEquals(serviceInterface, extendedPort.serviceInterface().orElse(null));
     }
 
     /**
-     * Test that consumer ports are not supplemented with monitor info.
-     * In fact, Plant Descriptions with consumer ports containing metadata are
-     * not allowed. This is enforced by the
-     * {@link eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.PlantDescriptionValidator}.
+     * Test that consumer ports are not supplemented with monitor info. In fact,
+     * Plant Descriptions with consumer ports containing metadata are not
+     * allowed. This is enforced by the {@link eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.PlantDescriptionValidator}.
      */
     @Test
     public void shouldNotAddMonitorDataToConsumerPort() {
@@ -190,8 +199,8 @@ public class DtoUtilsTest {
             .updatedAt(now)
             .build();
 
-        final var provider = new ProviderDescription(systemName, new InetSocketAddress("0.0.0.0", 5000));
-        ServiceDescription serviceDescription = new ServiceDescription.Builder()
+        final ProviderDescription provider = new ProviderDescription(systemName, new InetSocketAddress("0.0.0.0", 5000));
+        final ServiceDescription serviceDescription = new ServiceDescription.Builder()
             .name(serviceDefinition)
             .metadata(metadata)
             .uri("/abc")
@@ -201,15 +210,15 @@ public class DtoUtilsTest {
             .build();
 
         final String inventoryId = "system_a_inventory_id";
-        JsonObject systemData = new JsonObject(List.of(new JsonPair("a", JsonBoolean.TRUE)));
+        final JsonObject systemData = new JsonObject(List.of(new JsonPair("a", JsonBoolean.TRUE)));
 
-        final var monitorInfo = new MonitorInfo();
+        final MonitorInfo monitorInfo = new MonitorInfo();
         monitorInfo.putInventoryId(serviceDescription, inventoryId);
         monitorInfo.putSystemData(serviceDescription, systemData);
 
-        var extendedEntry = DtoUtils.extend(entry, monitorInfo);
-        var extendedSystem = extendedEntry.systems().get(0);
-        var extendedPortA = extendedSystem.ports().get(0);
+        final MonitorPlantDescriptionEntryDto extendedEntry = DtoUtils.extend(entry, monitorInfo);
+        final SystemEntry extendedSystem = extendedEntry.systems().get(0);
+        final PortEntry extendedPortA = extendedSystem.ports().get(0);
 
         assertTrue(extendedPortA.inventoryId().isEmpty());
         assertTrue(extendedPortA.inventoryId().isEmpty());
@@ -246,8 +255,8 @@ public class DtoUtilsTest {
             .updatedAt(now)
             .build();
 
-        final var provider = new ProviderDescription(systemName, new InetSocketAddress("0.0.0.0", 5000));
-        ServiceDescription serviceDescription = new ServiceDescription.Builder()
+        final ProviderDescription provider = new ProviderDescription(systemName, new InetSocketAddress("0.0.0.0", 5000));
+        final ServiceDescription serviceDescription = new ServiceDescription.Builder()
             .name(serviceDefinition)
             .metadata(metadata)
             .uri("/abc")
@@ -257,14 +266,14 @@ public class DtoUtilsTest {
             .build();
 
         final String inventoryId = "system_a_inventory_id";
-        JsonObject systemData = new JsonObject(List.of(new JsonPair("a", JsonBoolean.TRUE)));
+        final JsonObject systemData = new JsonObject(List.of(new JsonPair("a", JsonBoolean.TRUE)));
 
-        final var monitorInfo = new MonitorInfo();
+        final MonitorInfo monitorInfo = new MonitorInfo();
         monitorInfo.putInventoryId(serviceDescription, inventoryId);
         monitorInfo.putSystemData(serviceDescription, systemData);
 
-        final var extendedEntry = DtoUtils.extend(entry, monitorInfo);
-        var extendedSystem = extendedEntry.systems().get(0);
+        final MonitorPlantDescriptionEntryDto extendedEntry = DtoUtils.extend(entry, monitorInfo);
+        final SystemEntry extendedSystem = extendedEntry.systems().get(0);
         assertTrue(extendedSystem.inventoryData().isEmpty());
         assertTrue(extendedSystem.systemData().isEmpty());
     }

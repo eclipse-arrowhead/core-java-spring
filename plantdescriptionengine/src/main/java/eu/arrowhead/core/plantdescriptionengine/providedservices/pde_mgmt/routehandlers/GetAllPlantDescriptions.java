@@ -5,7 +5,12 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.dto.ErrorMessag
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntry;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryListBuilder;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidation.*;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidation.BooleanParameter;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidation.IntParameter;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidation.ParseError;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidation.QueryParamParser;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidation.QueryParameter;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidation.StringParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.arkalix.net.http.HttpStatus;
@@ -25,6 +30,21 @@ public class GetAllPlantDescriptions implements HttpRouteHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GetAllPlantDescriptions.class);
 
+    // Filter fields
+    private static final String ACTIVE = "active";
+    private static final String ITEM_PER_PAGE = "item_per_page";
+    private static final String PAGE = "page";
+
+    // Sort fields and values
+    private static final String SORT_FIELD = "sort_field";
+    private static final String ID = "id";
+    private static final String CREATED_AT = "createdAt";
+    private static final String UPDATED_AT = "updatedAt";
+
+    private static final String DIRECTION = "direction";
+    private static final String ASC = "ASC";
+    private static final String DESC = "DESC";
+
     private final PlantDescriptionTracker pdTracker;
 
     /**
@@ -32,7 +52,7 @@ public class GetAllPlantDescriptions implements HttpRouteHandler {
      *
      * @param pdTracker Object that keeps track of Plant Description Entries.
      */
-    public GetAllPlantDescriptions(PlantDescriptionTracker pdTracker) {
+    public GetAllPlantDescriptions(final PlantDescriptionTracker pdTracker) {
         Objects.requireNonNull(pdTracker, "Expected Plant Description Entry map");
         this.pdTracker = pdTracker;
     }
@@ -42,42 +62,46 @@ public class GetAllPlantDescriptions implements HttpRouteHandler {
      * present in the PDE.
      *
      * @param request  HTTP request object.
-     * @param response HTTP response whose body contains a list of Plant Description
-     *                 entries.
+     * @param response HTTP response whose body contains a list of Plant
+     *                 Description entries.
      */
     @Override
     public Future<HttpServiceResponse> handle(final HttpServiceRequest request, final HttpServiceResponse response) {
-        final var itemPerPageParam = new IntParameter.Builder()
-            .name("item_per_page")
+
+        Objects.requireNonNull(request, "Expected request.");
+        Objects.requireNonNull(response, "Expected response.");
+
+        final IntParameter itemPerPageParam = new IntParameter.Builder()
+            .name(ITEM_PER_PAGE)
             .min(0)
             .build();
-        final var pageParam = new IntParameter.Builder()
-            .name("page")
+        final IntParameter pageParam = new IntParameter.Builder()
+            .name(PAGE)
             .min(0)
             .requires(itemPerPageParam)
             .build();
 
-        final var sortFieldParam = new StringParameter.Builder()
-            .name("sort_field")
-            .legalValues("id", "createdAt", "updatedAt")
+        final StringParameter sortFieldParam = new StringParameter.Builder()
+            .name(SORT_FIELD)
+            .legalValues(ID, CREATED_AT, UPDATED_AT)
             .build();
 
-        final var directionParam = new StringParameter.Builder()
-            .name("direction")
-            .legalValues("ASC", "DESC")
-            .defaultValue("ASC")
+        final StringParameter directionParam = new StringParameter.Builder()
+            .name(DIRECTION)
+            .legalValues(ASC, DESC)
+            .defaultValue(ASC)
             .build();
-        final var activeParam = new BooleanParameter.Builder()
-            .name("active")
+        final BooleanParameter activeParam = new BooleanParameter.Builder()
+            .name(ACTIVE)
             .build();
 
         final List<QueryParameter> acceptedParameters = List.of(pageParam, sortFieldParam, directionParam, activeParam);
 
-        QueryParamParser parser;
+        final QueryParamParser parser;
 
         try {
             parser = new QueryParamParser(null, acceptedParameters, request);
-        } catch (ParseError error) {
+        } catch (final ParseError error) {
             response
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ErrorMessage.of(error.getMessage()));
@@ -90,15 +114,29 @@ public class GetAllPlantDescriptions implements HttpRouteHandler {
         final Optional<String> sortField = parser.getValue(sortFieldParam);
         if (sortField.isPresent()) {
             final String sortDirection = parser.getRequiredValue(directionParam);
-            final boolean sortAscending = (sortDirection.equals("ASC"));
-            PlantDescriptionEntry.sort(entries, sortField.get(), sortAscending);
+            final boolean sortAscending = (ASC.equals(sortDirection));
+            switch (sortField.get()) {
+                case ID:
+                    PlantDescriptionEntry.sortById(entries, sortAscending);
+                    break;
+                case CREATED_AT:
+                    PlantDescriptionEntry.sortByCreatedAt(entries, sortAscending);
+                    break;
+                case UPDATED_AT:
+                    PlantDescriptionEntry.sortByUpdatedAt(entries, sortAscending);
+                    break;
+                default:
+                    // We should never reach this case, since the sortField
+                    // param has been validated by the parser.
+                    throw new AssertionError("Encountered the invalid sort field '" + sortField + "'.");
+            }
         }
 
         final Optional<Integer> page = parser.getValue(pageParam);
         if (page.isPresent()) {
-            int itemsPerPage = parser.getRequiredValue(itemPerPageParam);
-            int from = Math.min(page.get() * itemsPerPage, entries.size());
-            int to = Math.min(from + itemsPerPage, entries.size());
+            final int itemsPerPage = parser.getRequiredValue(itemPerPageParam);
+            final int from = Math.min(page.get() * itemsPerPage, entries.size());
+            final int to = Math.min(from + itemsPerPage, entries.size());
 
             entries = entries.subList(from, to);
         }

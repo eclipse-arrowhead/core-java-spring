@@ -7,26 +7,29 @@ import se.arkalix.net.http.service.HttpServiceRequest;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BooleanParameterTest {
 
     @Test
     public void shouldParseBooleans() throws ParseError {
 
-        final var smartParam = new BooleanParameter.Builder()
+        final BooleanParameter smartParam = new BooleanParameter.Builder()
             .name("smart")
             .build();
-        final var tiredParam = new BooleanParameter.Builder()
+        final BooleanParameter tiredParam = new BooleanParameter.Builder()
             .name("tired")
             .build();
 
         final List<QueryParameter> requiredParameters = List.of(smartParam, tiredParam);
 
-        final var strongParam = new BooleanParameter.Builder()
+        final BooleanParameter strongParam = new BooleanParameter.Builder()
             .name("strong")
             .build();
-        final var fatParam = new BooleanParameter.Builder()
+        final BooleanParameter fatParam = new BooleanParameter.Builder()
             .name("fat")
             .build();
 
@@ -35,7 +38,7 @@ public class BooleanParameterTest {
         final HttpServiceRequest request = new MockRequest.Builder().queryParameters(Map.of("smart", List.of("true"),
             "tired", List.of("false"), "strong", List.of("true"), "fat", List.of("false"))).build();
 
-        final var parser = new QueryParamParser(requiredParameters, acceptedParameters, request);
+        final QueryParamParser parser = new QueryParamParser(requiredParameters, acceptedParameters, request);
 
         assertTrue(parser.getValue(smartParam).orElse(false));
         assertFalse(parser.getValue(tiredParam).orElse(true));
@@ -46,11 +49,11 @@ public class BooleanParameterTest {
     @Test
     public void shouldUseDefaultArgument() throws ParseError {
 
-        final var goodParam = new BooleanParameter.Builder()
+        final BooleanParameter goodParam = new BooleanParameter.Builder()
             .name("good")
             .defaultValue(true)
             .build();
-        final var happyParam = new BooleanParameter.Builder()
+        final BooleanParameter happyParam = new BooleanParameter.Builder()
             .name("happy")
             .defaultValue(false)
             .build();
@@ -61,7 +64,7 @@ public class BooleanParameterTest {
             .queryParameters(Map.of())
             .build();
 
-        final var parser = new QueryParamParser(null, acceptedParameters, request);
+        final QueryParamParser parser = new QueryParamParser(null, acceptedParameters, request);
 
         assertTrue(parser.getValue(goodParam).orElse(false));
         assertFalse(parser.getValue(happyParam).orElse(true));
@@ -76,7 +79,7 @@ public class BooleanParameterTest {
         final HttpServiceRequest request = new MockRequest.Builder().queryParameters(Map.of("cool", List.of("128")))
             .build();
 
-        Exception exception = assertThrows(ParseError.class,
+        final Exception exception = assertThrows(ParseError.class,
             () -> new QueryParamParser(requiredParameters, null, request));
 
         assertEquals("<Query parameter 'cool' must be true or false, got '128'.>", exception.getMessage());
@@ -90,7 +93,7 @@ public class BooleanParameterTest {
                 .name("weekends")
                 .build());
 
-        Exception exception = assertThrows(ParseError.class, () -> {
+        final Exception exception = assertThrows(ParseError.class, () -> {
             final HttpServiceRequest request = new MockRequest.Builder()
                 .queryParameters(Map.of())
                 .build();
@@ -108,7 +111,7 @@ public class BooleanParameterTest {
                 .build())
             .build());
 
-        Exception exception = assertThrows(ParseError.class, () -> {
+        final Exception exception = assertThrows(ParseError.class, () -> {
             final HttpServiceRequest request = new MockRequest.Builder()
                 .queryParameters(Map.of("sort", List.of("true")))
                 .build();

@@ -3,7 +3,13 @@ package eu.arrowhead.core.plantdescriptionengine.consumedservices.orchestrator.r
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Scanner;
@@ -21,19 +27,20 @@ import java.util.Set;
 public class FileRuleStore implements RuleStore {
 
     private static final Logger logger = LoggerFactory.getLogger(RuleStore.class);
+    private static final String ruleFileName = "orchestration_rules.txt";
 
     // File path to the directory for storing the IDs of created Orchestration
     // rules created by the PDE:
-    private final String ruleStoreFile;
+    private final Path ruleStorePath;
 
     /**
      * Class constructor.
      *
-     * @param ruleStoreDirectory File path to the directory for storing rules.
+     * @param ruleDirectory File path to the directory for storing rules.
      */
-    public FileRuleStore(final String ruleStoreDirectory) {
-        Objects.requireNonNull(ruleStoreDirectory, "Expected path to Orchestrator Rule directory");
-        this.ruleStoreFile = ruleStoreDirectory + "/orchestration_rules.txt";
+    public FileRuleStore(final String ruleDirectory) {
+        Objects.requireNonNull(ruleDirectory, "Expected path to Orchestrator Rule directory");
+        ruleStorePath = Paths.get(ruleDirectory, ruleFileName);
     }
 
     /**
@@ -41,18 +48,18 @@ public class FileRuleStore implements RuleStore {
      */
     @Override
     public Set<Integer> readRules() throws RuleStoreException {
-        final File file = new File(ruleStoreFile);
-        final var result = new HashSet<Integer>();
+        final File file = ruleStorePath.toFile();
+        final Set<Integer> result = new HashSet<>();
 
         if (!file.isFile()) {
             return result;
         }
 
-        try (Scanner scanner = new Scanner(file)) {
+        try (final Scanner scanner = new Scanner(file)) {
             while (scanner.hasNextInt()) {
                 result.add(scanner.nextInt());
             }
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             throw new RuleStoreException(e);
         }
         return result;
@@ -62,34 +69,35 @@ public class FileRuleStore implements RuleStore {
      * {@inheritDoc}
      */
     @Override
-    public void setRules(Set<Integer> rules) throws RuleStoreException {
+    public void setRules(final Set<Integer> rules) throws RuleStoreException {
+        Objects.requireNonNull(rules, "Expected rules.");
 
-        final File file = new File(ruleStoreFile);
+        final File file = ruleStorePath.toFile();
+        // Create the file and parent directories, if they do not already
+        // exist:
+        if (!file.getParentFile().exists()) {
+            if (!file.getParentFile().mkdirs()) {
+                throw new RuleStoreException("Failed to create directory for storing Orchestrator rules.");
+            }
+        }
 
         try {
-            // Create the file and parent directories, if they do not already
-            // exist:
-            if (!file.getParentFile().exists()) {
-                if (!file.getParentFile().mkdirs()) {
-                    throw new RuleStoreException("Failed to create directory for storing Orchestrator rules.");
-                }
-            }
-
             if (file.createNewFile()) {
                 logger.info("Created a file for storing Orchestrator rules.");
             }
+        } catch (final IOException e) {
+            throw new RuleStoreException("Failed to create orchestration rule file.", e);
+        }
 
+        try (final BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             // Write each rule ID on a single line:
-            final var writer = new BufferedWriter(new FileWriter(file));
-            for (Integer rule : rules) {
+            for (final Integer rule : rules) {
                 writer.write(rule.toString());
                 writer.newLine();
             }
 
-            writer.close();
-
-        } catch (IOException e) {
-            throw new RuleStoreException("Failed to write orchestration rule to file", e);
+        } catch (final IOException e) {
+            throw new RuleStoreException("Failed to write orchestration rules to file", e);
         }
     }
 
@@ -100,7 +108,7 @@ public class FileRuleStore implements RuleStore {
      */
     @Override
     public void removeAll() throws RuleStoreException {
-        if (!new File(ruleStoreFile).delete()) {
+        if (!ruleStorePath.toFile().delete()) {
             throw new RuleStoreException("Failed to delete orchestration rule directory");
         }
     }

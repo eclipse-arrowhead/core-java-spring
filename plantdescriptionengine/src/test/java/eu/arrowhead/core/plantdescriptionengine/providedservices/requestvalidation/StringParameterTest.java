@@ -15,10 +15,10 @@ public class StringParameterTest {
     @Test
     public void shouldParseParameters() throws ParseError {
 
-        final var scoreParam = new IntParameter.Builder()
+        final IntParameter scoreParam = new IntParameter.Builder()
             .name("score")
             .build();
-        final var episodeParam = new StringParameter.Builder()
+        final StringParameter episodeParam = new StringParameter.Builder()
             .name("episode")
             .legalValues("A New Hope", "The Empire Strikes Back", "Return of the Jedi")
             .requires(scoreParam)
@@ -30,7 +30,7 @@ public class StringParameterTest {
             .queryParameters(Map.of("episode", List.of("The Empire Strikes Back"), "score", List.of("10")))
             .build();
 
-        final var parser = new QueryParamParser(null, acceptedParameters, request);
+        final QueryParamParser parser = new QueryParamParser(null, acceptedParameters, request);
 
         assertEquals("The Empire Strikes Back", parser.getValue(episodeParam).orElse(null));
         assertEquals(10, parser.getValue(scoreParam).orElse(null));
@@ -39,7 +39,7 @@ public class StringParameterTest {
     @Test
     public void shouldUseDefaultArgument() throws ParseError {
 
-        final var episodeParam = new StringParameter.Builder().name("episode")
+        final StringParameter episodeParam = new StringParameter.Builder().name("episode")
             .legalValues("A New Hope", "The Empire Strikes Back", "Return of the Jedi")
             .defaultValue("A new Hope")
             .build();
@@ -50,7 +50,7 @@ public class StringParameterTest {
             .queryParameters(Map.of())
             .build();
 
-        final var parser = new QueryParamParser(null, acceptedParameters, request);
+        final QueryParamParser parser = new QueryParamParser(null, acceptedParameters, request);
 
         assertEquals("A new Hope", parser.getRequiredValue(episodeParam));
     }
@@ -63,7 +63,7 @@ public class StringParameterTest {
             .legalValues("id", "createdAt", "updatedAt")
             .build());
 
-        Exception exception = assertThrows(ParseError.class, () -> {
+        final Exception exception = assertThrows(ParseError.class, () -> {
             final HttpServiceRequest request = new MockRequest.Builder()
                 .queryParameters(Map.of())
                 .build();
@@ -80,7 +80,7 @@ public class StringParameterTest {
                 .build())
             .build());
 
-        Exception exception = assertThrows(ParseError.class, () -> {
+        final Exception exception = assertThrows(ParseError.class, () -> {
             final HttpServiceRequest request = new MockRequest.Builder()
                 .queryParameters(Map.of("name", List.of("Alice")))
                 .build();
@@ -97,7 +97,7 @@ public class StringParameterTest {
             .legalValues("A New Hope", "The Empire Strikes Back", "Return of the Jedi")
             .build());
 
-        Exception exception = assertThrows(ParseError.class, () -> {
+        final Exception exception = assertThrows(ParseError.class, () -> {
             final HttpServiceRequest request = new MockRequest.Builder()
                 .queryParameters(Map.of("episode", List.of("The Rise of Skywalker")))
                 .build();

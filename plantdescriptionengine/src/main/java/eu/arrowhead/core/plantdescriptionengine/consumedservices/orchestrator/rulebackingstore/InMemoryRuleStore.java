@@ -1,6 +1,7 @@
 package eu.arrowhead.core.plantdescriptionengine.consumedservices.orchestrator.rulebackingstore;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -24,7 +25,8 @@ public class InMemoryRuleStore implements RuleStore {
      * {@inheritDoc}
      */
     @Override
-    public void setRules(Set<Integer> newRules) {
+    public void setRules(final Set<Integer> newRules) {
+        Objects.requireNonNull(newRules, "Expected rules.");
         rules = new HashSet<>(newRules);
     }
 
