@@ -92,26 +92,26 @@ public class SystemRegistryDBService {
     private final SecurityUtilities securityUtilities;
     private final CertificateAuthorityDriver caDriver;
 
-    @Value(CoreCommonConstants.$SYSTEM_REGISTRY_PING_TIMEOUT_WD)
+    @Value(CoreCommonConstants.$SYSTEMREGISTRY_PING_TIMEOUT_WD)
     private int pingTimeout;
-
-    @Autowired
-    public SystemRegistryDBService(final SystemRegistryRepository systemRegistryRepository,
-                                   final SystemRepository systemRepository,
-                                   final DeviceRepository deviceRepository,
-                                   final SecurityUtilities securityUtilities,
-                                   final CertificateAuthorityDriver caDriver) {
-        this.systemRegistryRepository = systemRegistryRepository;
-        this.systemRepository = systemRepository;
-        this.deviceRepository = deviceRepository;
-        this.securityUtilities = securityUtilities;
-        this.caDriver = caDriver;
-    }
-
 
     //=================================================================================================
     // methods
 
+    //-------------------------------------------------------------------------------------------------
+    @Autowired
+    public SystemRegistryDBService(final SystemRegistryRepository systemRegistryRepository,
+    		final SystemRepository systemRepository,
+    		final DeviceRepository deviceRepository,
+    		final SecurityUtilities securityUtilities,
+    		final CertificateAuthorityDriver caDriver) {
+    	this.systemRegistryRepository = systemRegistryRepository;
+    	this.systemRepository = systemRepository;
+    	this.deviceRepository = deviceRepository;
+    	this.securityUtilities = securityUtilities;
+    	this.caDriver = caDriver;
+    }
+    
     //-------------------------------------------------------------------------------------------------
     public SystemResponseDTO getSystemById(final long systemId) {
         logger.debug("getSystemById started...");
@@ -341,7 +341,6 @@ public class SystemRegistryDBService {
     @Transactional(rollbackFor = ArrowheadException.class)
     public DeviceResponseDTO updateDeviceByIdResponse(final long id, final String name, final String address, final String macAddress,
                                                       final String authenticationInfo) {
-
         logger.debug("updateDeviceByIdResponse started...");
 
         try {
@@ -685,7 +684,8 @@ public class SystemRegistryDBService {
         }
     }
 
-    public SystemRegistryOnboardingWithNameResponseDTO onboardAndRegisterSystemRegistry(final SystemRegistryOnboardingWithNameRequestDTO request,
+    //-------------------------------------------------------------------------------------------------
+	public SystemRegistryOnboardingWithNameResponseDTO onboardAndRegisterSystemRegistry(final SystemRegistryOnboardingWithNameRequestDTO request,
                                                                                         final String host, final String address) {
         logger.debug("onboardAndRegisterSystemRegistry started...");
 
@@ -710,7 +710,8 @@ public class SystemRegistryDBService {
         return retValue;
     }
 
-    public SystemRegistryOnboardingWithCsrResponseDTO onboardAndRegisterSystemRegistry(final SystemRegistryOnboardingWithCsrRequestDTO request) {
+    //-------------------------------------------------------------------------------------------------
+	public SystemRegistryOnboardingWithCsrResponseDTO onboardAndRegisterSystemRegistry(final SystemRegistryOnboardingWithCsrRequestDTO request) {
 
         logger.debug("onboardAndRegisterDeviceRegistry started...");
         final var signingResponse = signCertificate(request.getCertificateSigningRequest());
@@ -724,6 +725,7 @@ public class SystemRegistryDBService {
 
     //=================================================================================================
     // assistant methods
+	
     //-------------------------------------------------------------------------------------------------
     private System getSystemByNameAndAddressAndPort(final String systemName, final String address, final int port) {
         final String dbSystemName = Utilities.lowerCaseTrim(systemName);
@@ -1158,5 +1160,4 @@ public class SystemRegistryDBService {
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
     }
-
 }

@@ -3,8 +3,8 @@ Description=arrowhead-systemregistry
 After=network.target
 
 [Service]
-WorkingDirectory=/etc/arrowhead/systems/system_registry
-ExecStart=/usr/bin/java -Dlog4j.configurationFile=file:/etc/arrowhead/systems/system_registry/log4j2.xml -jar /usr/share/arrowhead/system_registry/arrowhead-systemregistry.jar
+WorkingDirectory=/etc/arrowhead/systems/systemregistry
+ExecStart=/usr/bin/java -Dlog4j.configurationFile=file:/etc/arrowhead/systems/systemregistry/log4j2.xml -jar /usr/share/arrowhead/systemregistry/arrowhead-systemregistry.jar
 ExecStartPost=/bin/bash -c 'sleep 10'
 TimeoutStopSec=5
 Restart=on-failure

@@ -59,7 +59,7 @@ import org.springframework.web.bind.annotation.RestController;
         allowedHeaders = {HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION}
 )
 @RestController
-@RequestMapping(CommonConstants.SYSTEM_REGISTRY_URI + CoreCommonConstants.MGMT_URI)
+@RequestMapping(CommonConstants.SYSTEMREGISTRY_URI + CoreCommonConstants.MGMT_URI)
 public class SystemRegistryManagementController {
 
     //=================================================================================================
@@ -94,36 +94,36 @@ public class SystemRegistryManagementController {
     private static final String DELETE_SYSTEMS_HTTP_200_MESSAGE = "System definition removed";
     private static final String DELETE_SYSTEMS_HTTP_400_MESSAGE = "Could not remove system definition";
 
-    private static final String SYSTEM_REGISTRY_UPDATE_DESCRIPTION = "Update a system";
-    private static final String SYSTEM_REGISTRY_UPDATE_200_MESSAGE = "System updated";
-    private static final String SYSTEM_REGISTRY_UPDATE_400_MESSAGE = "Could not update system";
-    private static final String SYSTEM_REGISTRY_MERGE_DESCRIPTION = "Merge/Patch a system";
-    private static final String SYSTEM_REGISTRY_MERGE_200_MESSAGE = "System merged";
-    private static final String SYSTEM_REGISTRY_MERGE_400_MESSAGE = "Could not merge system";
+    private static final String SYSTEMREGISTRY_UPDATE_DESCRIPTION = "Update a system";
+    private static final String SYSTEMREGISTRY_UPDATE_200_MESSAGE = "System updated";
+    private static final String SYSTEMREGISTRY_UPDATE_400_MESSAGE = "Could not update system";
+    private static final String SYSTEMREGISTRY_MERGE_DESCRIPTION = "Merge/Patch a system";
+    private static final String SYSTEMREGISTRY_MERGE_200_MESSAGE = "System merged";
+    private static final String SYSTEMREGISTRY_MERGE_400_MESSAGE = "Could not merge system";
 
-    private static final String SYSTEM_REGISTRY_MGMT_BY_ID_URI = "/{" + PATH_VARIABLE_ID + "}";
+    private static final String SYSTEMREGISTRY_MGMT_BY_ID_URI = "/{" + PATH_VARIABLE_ID + "}";
     private static final String PATH_VARIABLE_SYSTEM_NAME = "systemName";
-    private static final String SYSTEM_REGISTRY_MGMT_BY_SYSTEM_NAME_URI = "/systemname" + "/{" + PATH_VARIABLE_SYSTEM_NAME + "}";
-    private static final String GET_SYSTEM_REGISTRY_HTTP_200_MESSAGE = "System Registry entries returned";
-    private static final String GET_SYSTEM_REGISTRY_HTTP_400_MESSAGE = "Could not retrieve system registry entries";
-    private static final String DELETE_SYSTEM_REGISTRY_HTTP_200_MESSAGE = "System Registry entry removed";
-    private static final String DELETE_SYSTEM_REGISTRY_HTTP_400_MESSAGE = "Could not remove system registry entry";
+    private static final String SYSTEMREGISTRY_MGMT_BY_SYSTEM_NAME_URI = "/systemname" + "/{" + PATH_VARIABLE_SYSTEM_NAME + "}";
+    private static final String GET_SYSTEMREGISTRY_HTTP_200_MESSAGE = "System Registry entries returned";
+    private static final String GET_SYSTEMREGISTRY_HTTP_400_MESSAGE = "Could not retrieve system registry entries";
+    private static final String DELETE_SYSTEMREGISTRY_HTTP_200_MESSAGE = "System Registry entry removed";
+    private static final String DELETE_SYSTEMREGISTRY_HTTP_400_MESSAGE = "Could not remove system registry entry";
 
     private final Logger logger = LogManager.getLogger(SystemRegistryManagementController.class);
 
     private final SystemRegistryDBService systemRegistryDBService;
     private final Validation validation;
 
-    @Autowired
-    public SystemRegistryManagementController(final SystemRegistryDBService systemRegistryDBService) {
-        this.systemRegistryDBService = systemRegistryDBService;
-        this.validation = new Validation();
-    }
-
-
     //=================================================================================================
     // methods
 
+    //-------------------------------------------------------------------------------------------------
+    @Autowired
+    public SystemRegistryManagementController(final SystemRegistryDBService systemRegistryDBService) {
+    	this.systemRegistryDBService = systemRegistryDBService;
+    	this.validation = new Validation();
+    }
+    
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Return system by id", response = SystemResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
@@ -159,8 +159,7 @@ public class SystemRegistryManagementController {
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
         logger.debug("getSystems started ...");
 
-        final CoreUtilities.ValidatedPageParams pageParameters = CoreUtilities
-                .validatePageParameters(page, size, direction, CommonConstants.SYSTEM_REGISTRY_URI + DEVICES_URI);
+        final CoreUtilities.ValidatedPageParams pageParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.SYSTEMREGISTRY_URI + DEVICES_URI);
         return systemRegistryDBService.getSystemEntries(pageParameters, sortField);
     }
 
@@ -260,8 +259,7 @@ public class SystemRegistryManagementController {
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
         logger.debug("New DeviceList get request received with page: {} and item_per page: {}", page, size);
 
-        final CoreUtilities.ValidatedPageParams pageParameters = CoreUtilities
-                .validatePageParameters(page, size, direction, CommonConstants.SYSTEM_REGISTRY_URI + DEVICES_URI);
+        final CoreUtilities.ValidatedPageParams pageParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.SYSTEMREGISTRY_URI + DEVICES_URI);
         final DeviceListResponseDTO deviceListResponseDTO = systemRegistryDBService.getDeviceEntries(pageParameters, sortField);
         logger.debug("DeviceList with page: {} and item_per page: {} successfully retrieved", page, size);
 
@@ -284,8 +282,7 @@ public class SystemRegistryManagementController {
 
         validation.validateDevice(dto, DEVICES_URI);
 
-        final DeviceResponseDTO responseDTO = systemRegistryDBService
-                .createDeviceDto(dto.getDeviceName(), dto.getAddress(), dto.getMacAddress(), dto.getAuthenticationInfo());
+        final DeviceResponseDTO responseDTO = systemRegistryDBService.createDeviceDto(dto.getDeviceName(), dto.getAddress(), dto.getMacAddress(), dto.getAuthenticationInfo());
         logger.debug("{} successfully registered.", responseDTO);
 
         return responseDTO;
@@ -308,8 +305,7 @@ public class SystemRegistryManagementController {
         validation.checkId(id, getOrigin(DEVICE_BY_ID_URI));
         validation.validateDevice(dto, getOrigin(DEVICE_BY_ID_URI));
 
-        final DeviceResponseDTO deviceResponseDTO = systemRegistryDBService
-                .updateDeviceByIdResponse(id, dto.getDeviceName(), dto.getAddress(), dto.getMacAddress(), dto.getAuthenticationInfo());
+        final DeviceResponseDTO deviceResponseDTO = systemRegistryDBService.updateDeviceByIdResponse(id, dto.getDeviceName(), dto.getAddress(), dto.getMacAddress(), dto.getAuthenticationInfo());
         logger.debug("Device with id: '{}' successfully updated with definition '{}'.", id, deviceResponseDTO);
 
         return deviceResponseDTO;
@@ -336,8 +332,8 @@ public class SystemRegistryManagementController {
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Return requested system registry entries by the given parameters", response = SystemRegistryListResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = GET_SYSTEM_REGISTRY_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SYSTEM_REGISTRY_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_OK, message = GET_SYSTEMREGISTRY_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SYSTEMREGISTRY_HTTP_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
@@ -350,8 +346,7 @@ public class SystemRegistryManagementController {
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
         logger.debug("New System Registry get request received with page: {} and item_per page: {}", page, size);
 
-        final CoreUtilities.ValidatedPageParams params = CoreUtilities
-                .validatePageParameters(page, size, direction, CommonConstants.SYSTEM_REGISTRY_URI + CoreCommonConstants.MGMT_URI);
+        final CoreUtilities.ValidatedPageParams params = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.SYSTEMREGISTRY_URI + CoreCommonConstants.MGMT_URI);
         final SystemRegistryListResponseDTO systemRegistryEntriesResponse = systemRegistryDBService
                 .getSystemRegistryEntries(params, sortField);
         logger.debug("System Registry entries with page: {} and item_per page: {} successfully retrieved", page, size);
@@ -362,17 +357,17 @@ public class SystemRegistryManagementController {
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Return requested system registry entry", response = SystemRegistryResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = GET_SYSTEM_REGISTRY_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SYSTEM_REGISTRY_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_OK, message = GET_SYSTEMREGISTRY_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SYSTEMREGISTRY_HTTP_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @GetMapping(path = SYSTEM_REGISTRY_MGMT_BY_ID_URI)
+    @GetMapping(path = SYSTEMREGISTRY_MGMT_BY_ID_URI)
     @ResponseBody
     public SystemRegistryResponseDTO getSystemRegistryEntryById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
         logger.debug("New System Registry get request received with id: {}", id);
 
-        validation.checkId(id, getOrigin(SYSTEM_REGISTRY_MGMT_BY_ID_URI));
+        validation.checkId(id, getOrigin(SYSTEMREGISTRY_MGMT_BY_ID_URI));
 
         final SystemRegistryResponseDTO systemRegistryEntryByIdResponse = systemRegistryDBService.getSystemRegistryById(id);
         logger.debug("System Registry entry with id: {} successfully retrieved", id);
@@ -384,12 +379,12 @@ public class SystemRegistryManagementController {
     @ApiOperation(value = "Return requested system registry entries by system definition based on the given parameters", response = SystemRegistryListResponseDTO.class,
             tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = GET_SYSTEM_REGISTRY_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SYSTEM_REGISTRY_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_OK, message = GET_SYSTEMREGISTRY_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SYSTEMREGISTRY_HTTP_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @GetMapping(path = SYSTEM_REGISTRY_MGMT_BY_SYSTEM_NAME_URI)
+    @GetMapping(path = SYSTEMREGISTRY_MGMT_BY_SYSTEM_NAME_URI)
     @ResponseBody
     public SystemRegistryListResponseDTO getSystemRegistryEntriesBySystemName(
             @PathVariable(value = PATH_VARIABLE_SYSTEM_NAME) final String systemName,
@@ -399,7 +394,7 @@ public class SystemRegistryManagementController {
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
         logger.debug("New System Registry get by System Definition request received with page: {} and item_per page: {}", page, size);
 
-        final String origin = CommonConstants.SYSTEM_REGISTRY_URI + SYSTEM_REGISTRY_MGMT_BY_SYSTEM_NAME_URI;
+        final String origin = CommonConstants.SYSTEMREGISTRY_URI + SYSTEMREGISTRY_MGMT_BY_SYSTEM_NAME_URI;
         validation.checkSystemName(systemName, origin);
 
         final CoreUtilities.ValidatedPageParams pageParameters = CoreUtilities.validatePageParameters(page, size, direction, origin);
@@ -413,34 +408,34 @@ public class SystemRegistryManagementController {
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Remove the specified system registry entry", tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_SYSTEM_REGISTRY_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_SYSTEM_REGISTRY_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_SYSTEMREGISTRY_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_SYSTEMREGISTRY_HTTP_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @DeleteMapping(path = SYSTEM_REGISTRY_MGMT_BY_ID_URI)
+    @DeleteMapping(path = SYSTEMREGISTRY_MGMT_BY_ID_URI)
     public void removeSystemRegistryEntryById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
         logger.debug("New System Registry delete request received with id: {}", id);
 
-        validation.checkId(id, SYSTEM_REGISTRY_MGMT_BY_ID_URI);
+        validation.checkId(id, SYSTEMREGISTRY_MGMT_BY_ID_URI);
 
         systemRegistryDBService.removeSystemRegistryEntryById(id);
         logger.debug("System Registry with id: '{}' successfully deleted", id);
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = SYSTEM_REGISTRY_UPDATE_DESCRIPTION, response = SystemRegistryResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = SYSTEMREGISTRY_UPDATE_DESCRIPTION, response = SystemRegistryResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = SYSTEM_REGISTRY_UPDATE_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SYSTEM_REGISTRY_UPDATE_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_OK, message = SYSTEMREGISTRY_UPDATE_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SYSTEMREGISTRY_UPDATE_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @PutMapping(path = SYSTEM_REGISTRY_MGMT_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(path = SYSTEMREGISTRY_MGMT_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
     SystemRegistryResponseDTO updateSystemRegistry(@PathVariable(value = PATH_VARIABLE_ID) final long id, @RequestBody final SystemRegistryRequestDTO request) {
         logger.debug("New system registry update request received");
-        validation.checkSystemRegistryUpdateRequest(id, request, SYSTEM_REGISTRY_MGMT_BY_ID_URI);
+        validation.checkSystemRegistryUpdateRequest(id, request, SYSTEMREGISTRY_MGMT_BY_ID_URI);
 
         final SystemRegistryResponseDTO response = systemRegistryDBService.updateSystemRegistryById(id, request);
         logger.debug("System Registry entry {} is successfully updated with system {} and system {}", id, request.getSystem().getSystemName(),
@@ -449,16 +444,15 @@ public class SystemRegistryManagementController {
         return response;
     }
 
-
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = SYSTEM_REGISTRY_MERGE_DESCRIPTION, response = SystemRegistryResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = SYSTEMREGISTRY_MERGE_DESCRIPTION, response = SystemRegistryResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = SYSTEM_REGISTRY_MERGE_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SYSTEM_REGISTRY_MERGE_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_OK, message = SYSTEMREGISTRY_MERGE_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SYSTEMREGISTRY_MERGE_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @PatchMapping(path = SYSTEM_REGISTRY_MGMT_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(path = SYSTEMREGISTRY_MGMT_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
     SystemRegistryResponseDTO mergeSystemRegistry(@PathVariable(value = PATH_VARIABLE_ID) final long id, @RequestBody final SystemRegistryRequestDTO request) {
         logger.debug("New system registry merge request received");
@@ -515,13 +509,13 @@ public class SystemRegistryManagementController {
         return systemRegistryDBService.mergeSystemResponse(systemId, validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
     }
 
-    //=================================================================================================
-    // assistant methods
-    private String getBaseOrigin() {
-        return CommonConstants.SYSTEM_REGISTRY_URI + CoreCommonConstants.MGMT_URI;
+    //-------------------------------------------------------------------------------------------------
+	private String getBaseOrigin() {
+        return CommonConstants.SYSTEMREGISTRY_URI + CoreCommonConstants.MGMT_URI;
     }
 
-    private String getOrigin(final String postfix) {
+    //-------------------------------------------------------------------------------------------------
+	private String getOrigin(final String postfix) {
         Assert.notNull(postfix, "Internal error: Origin postfix not provided");
         return getBaseOrigin() + postfix;
     }
