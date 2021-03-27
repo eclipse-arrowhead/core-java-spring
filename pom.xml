@@ -25,6 +25,7 @@
   	<modules>
 	    <module>core-common</module>
 	    <module>serviceregistry</module>
+	    <module>configuration</module>
 	    <module>authorization</module>
 	    <module>certificate-authority</module>
 	    <module>orchestrator</module>
