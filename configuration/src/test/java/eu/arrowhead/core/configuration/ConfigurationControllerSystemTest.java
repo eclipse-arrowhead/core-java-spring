@@ -77,8 +77,8 @@ public class ConfigurationControllerSystemTest {
     private ConfigurationDBService configurationDBService;
 
     private static final String CONFIGURATION_ECHO_URI  = "/configuration/echo";
-    private static final String CONFIGUATION_CONF_URI  = "/configuration/conf";
-    private static final String CONFIGUATION_RAWCONF_URI  = "/configuration/rawconf";
+    private static final String CONFIGUATION_CONF_URI  = "/configuration/config";
+    private static final String CONFIGUATION_RAWCONF_URI  = "/configuration/config/raw";
 
     //=================================================================================================
     // methods
@@ -104,9 +104,9 @@ public class ConfigurationControllerSystemTest {
 
     @Test
     public void getConfigurationEntry() throws Exception {
-        when(configurationDBService.getConfigForSystem(any())).thenReturn(VALID_CONF);
+        when(configurationDBService.getConfigForSystem(VALID_SYSTEM_NAME)).thenReturn(VALID_CONF);
 
-        final MvcResult response = this.mockMvc.perform(get("/configuration/conf/" + VALID_SYSTEM_NAME)
+        final MvcResult response = this.mockMvc.perform(get("/configuration/config/" + VALID_SYSTEM_NAME)
                                                .accept(MediaType.APPLICATION_JSON))
                                                .andExpect(status().isOk())
                                                .andReturn();
@@ -117,9 +117,9 @@ public class ConfigurationControllerSystemTest {
 
     @Test
     public void getRawConfigurationEntry() throws Exception {
-        when(configurationDBService.getConfigForSystem(any())).thenReturn(VALID_CONF);
+        when(configurationDBService.getConfigForSystem(VALID_SYSTEM_NAME)).thenReturn(VALID_CONF);
 
-        final MvcResult response = this.mockMvc.perform(get("/configuration/rawconf/" + VALID_SYSTEM_NAME)
+        final MvcResult response = this.mockMvc.perform(get("/configuration/config/raw/" + VALID_SYSTEM_NAME)
                                                .accept(MediaType.TEXT_PLAIN))
                                                .andExpect(status().isOk())
                                                .andReturn();
