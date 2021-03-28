@@ -124,7 +124,6 @@ public class ConfigurationController {
 			if(Utilities.isEmpty(systemName)) {
 				throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_CONFIGURATION_RAWCONF);
 			}
-			logger.debug("rawconfGet for {}", systemName);
 			
 			ConfigurationResponseDTO ret = configurationDBService.getConfigForSystem(systemName);
 			if(ret == null) {
@@ -132,9 +131,9 @@ public class ConfigurationController {
 			}
 			HttpHeaders headers = new HttpHeaders();
 			headers.set("Content-Type", ret.getContentType());
-    		headers.set("Content-Disposition", "attachment; filename=" + ret.getFileName());
+			headers.set("Content-Disposition", "attachment; filename=" + ret.getFileName());
 		
-			ResponseEntity<byte[]> responseEntity = new ResponseEntity<>(Base64.getDecoder().decode(ret.getData()), headers, org.springframework.http.HttpStatus.OK);	
+			final ResponseEntity<byte[]> responseEntity = new ResponseEntity<>(Base64.getDecoder().decode(ret.getData()), headers, org.springframework.http.HttpStatus.OK);	
     		return responseEntity;
 	}
 
@@ -154,7 +153,6 @@ public class ConfigurationController {
 			if(Utilities.isEmpty(systemName)) {
 				throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_CONFIGURATION_RAWCONF);
 			}
-			logger.debug("confGet for {}", systemName);
 			
 			ConfigurationResponseDTO ret = configurationDBService.getConfigForSystem(systemName);
 			if(ret == null) {
@@ -175,7 +173,6 @@ public class ConfigurationController {
 	@GetMapping(path=CONFIG_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public ConfigurationListResponseDTO confListGet(
 			) {
-				logger.debug("confList");
 
 				ConfigurationListResponseDTO ret = configurationDBService.getAllConfigurations();
 
@@ -198,7 +195,6 @@ public class ConfigurationController {
 		validateConfigRequestDTO(systemName, config, origin);
 		final ConfigurationResponseDTO configResponse = configurationDBService.setConfigForSystem(systemName, config);
 		
-		logger.debug("System '{}' is successfully updated with new config {}", systemName, config.toString());
 		return configResponse;
 	}
 
@@ -217,7 +213,6 @@ public class ConfigurationController {
 		
 		final ConfigurationResponseDTO configResponse = configurationDBService.deleteConfigForSystem(systemName);
 		
-		logger.debug("System '{}' is successfully deleted", systemName);
 		return configResponse;
 	}
 
