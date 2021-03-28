@@ -15,10 +15,10 @@ package eu.arrowhead.core.configuration.security;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
-import eu.arrowhead.common.SecurityUtilities;
-import eu.arrowhead.common.dto.shared.CertificateType;
+//import eu.arrowhead.common.SecurityUtilities;
+//import eu.arrowhead.common.dto.shared.CertificateType;
 import eu.arrowhead.common.security.CoreSystemAccessControlFilter;
-import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.core.CoreSystem;
+//import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.exception.AuthException;
 
 import java.util.Map;
@@ -47,14 +47,12 @@ public class ConfigurationAccessControlFilter extends CoreSystemAccessControlFil
 		super.checkClientAuthorized(clientCN, method, requestTarget, requestJSON, queryParams);
 
                 final String cloudCN = getServerCloudCN();
-                System.out.println("target:" + requestTarget);
 
                 if (requestTarget.contains(CoreCommonConstants.MGMT_URI)) {
 			// Only the local System Operator can use these methods
 			checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
                 } else if (requestTarget.contains(CommonConstants.CONFIGURATION_URI + CommonConstants.OP_CONFIGURATION_CONF) || requestTarget.contains(CommonConstants.CONFIGURATION_URI + CommonConstants.OP_CONFIGURATION_RAWCONF)) {
                         final String client = getSystemNameFromURI(requestTarget);
-                        System.out.println("target:" + requestTarget + ", client: " + client);
                         checkIfRequesterSystemNameisEqualsWithClientNameFromCN(client, clientCN);
                 }		
 
