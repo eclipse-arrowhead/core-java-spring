@@ -14,7 +14,6 @@
 
 package eu.arrowhead.core.certificate_authority;
 
-import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.CaCertificate;
 import eu.arrowhead.common.dto.internal.AddTrustedKeyRequestDTO;
@@ -53,9 +52,6 @@ import java.util.List;
 public class CertificateAuthorityService {
 
     private static final Logger logger = LogManager.getLogger(CertificateAuthorityService.class);
-
-    @Autowired
-    private SSLProperties sslProperties;
 
     @Autowired
     private CAProperties caProperties;
