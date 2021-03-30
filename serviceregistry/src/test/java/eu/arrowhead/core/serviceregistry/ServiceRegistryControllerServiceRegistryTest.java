@@ -372,6 +372,20 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRegisterServiceServiceDefinitionWrongFlagTrue() throws Exception {
+		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
+		request.setServiceDefinition("service_definition");
+		
+		final MvcResult result = postRegisterService(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICEREGISTRY_REGISTER_URI, error.getOrigin());
+		Assert.assertEquals("Service definition has invalid format. Service definition only contains letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	// System request DTO validation is tested by an other test class
 	
 	//-------------------------------------------------------------------------------------------------
@@ -506,7 +520,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		
 		deleteUnregisterService(queryStr, status().isBadRequest());
 	}
-
+	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServiceNoSystemNameParameter() throws Exception {
@@ -546,6 +560,20 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void testUnregisterServiceServiceDefinitionWrongFlagTrue() throws Exception {
+		final String queryStr = createQueryStringForUnregister("test_service", "x", "a", 1);
+		
+		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICEREGISTRY_UNREGISTER_URI, error.getOrigin());
+		Assert.assertEquals("Service definition has invalid format. Service definition only contains letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).", error.getErrorMessage());
+	}
+
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void testUnregisterServiceSystemNameEmpty() throws Exception {
 		final String queryStr = createQueryStringForUnregister("s", "", "a", 1);
 		
@@ -555,6 +583,19 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(SERVICEREGISTRY_UNREGISTER_URI, error.getOrigin());
 		Assert.assertEquals("Name of the provider system is blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterServiceSystemNameWrong() throws Exception {
+		final String queryStr = createQueryStringForUnregister("s", "invalid_system", "a", 1);
+		
+		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICEREGISTRY_UNREGISTER_URI, error.getOrigin());
+		Assert.assertEquals("System name has invalid format. System names only contain letters (english alphabet), numbers and dash (-), and have to start with a letter (also cannot end with dash).", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -635,6 +676,20 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testQueryServiceServiceDefinitionRequirementWrongFlagTrue() throws Exception {
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		form.setServiceDefinitionRequirement("invalid_service_definition");
+		
+		final MvcResult result = postQueryService(form, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICEREGISTRY_QUERY_URI, error.getOrigin());
+		Assert.assertEquals("Service definition requirement has invalid format. Service definition only contains letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S2699") // because of false positive in sonar
 	@Test
 	public void testQueryServiceEverythingIsOk() throws Exception {
@@ -686,6 +741,18 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	public void testQueryRegistryBySystemDTONullSysName() throws Exception {
 		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
 		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO(null, "0.0.0.0", 45000, null), status().isBadRequest());
+		
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICEREGISTRY_QUERY_SYSTEM_BY_DTO_URI, error.getOrigin());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryRegistryBySystemDTOWrongSysName() throws Exception {
+		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
+		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO("invalid_system", "0.0.0.0", 45000, null), status().isBadRequest());
 		
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -765,6 +832,20 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Service definition is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testAddServiceServiceDefinitionWrongFlagTrue() throws Exception {
+		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
+		request.setServiceDefinition("service_definition");
+		
+		final MvcResult result = addServiceRegistry(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals("Service definition has invalid format. Service definition only contains letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -889,6 +970,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		Assert.assertEquals("Id must be greater than 0. ", error.getErrorMessage());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUpdateServiceServiceDefinitionNull() throws Exception {
 		final MvcResult result = updateServiceRegistry(new ServiceRegistryRequestDTO(), status().isBadRequest());
@@ -911,6 +993,20 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Service definition is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUpdateServiceServiceDefinitionWrongFlagTrue() throws Exception {
+		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
+		request.setServiceDefinition("service_definition");
+		
+		final MvcResult result = updateServiceRegistry(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals("Service definition has invalid format. Service definition only contains letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1057,6 +1153,41 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Patch request is empty.", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMergeServiceWrongSystemName() throws Exception {
+		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
+		request.setServiceDefinition("s");
+		request.setProviderSystem(getAValidSystemRequestDTO());
+		request.getProviderSystem().setSystemName("invalid_name");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
+		request.setInterfaces(List.of("HTTP-SECURE-XML"));
+		
+		final MvcResult result = mergeServiceRegistry(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals("System name has invalid format. System names only contain letters (english alphabet), numbers and dash (-), and have to start with a letter (also cannot end with dash).", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMergeServiceWrongServiceDefinitionFlagTrue() throws Exception {
+		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
+		request.setServiceDefinition("1s");
+		request.setProviderSystem(getAValidSystemRequestDTO());
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
+		request.setInterfaces(List.of("HTTP-SECURE-XML"));
+		
+		final MvcResult result = mergeServiceRegistry(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals("Service definition has invalid format. Service definition only contains letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------

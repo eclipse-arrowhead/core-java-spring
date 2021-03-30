@@ -71,6 +71,7 @@ public class SecurityUtilities {
 
     //=================================================================================================
     // members
+	
     private final static String SIGNATURE_ALGORITHM = "SHA256WithRSA";
     private static final String X509_FORMAT = "X.509";
     private static final String PKCS8_FORMAT = "PKCS#8";
@@ -83,7 +84,7 @@ public class SecurityUtilities {
     private final SSLProperties sslProperties;
 
     //=================================================================================================
-    // constructors
+    // methods
     
     //-------------------------------------------------------------------------------------------------
 	@Autowired
@@ -329,6 +330,9 @@ public class SecurityUtilities {
         if (Objects.nonNull(keyPair.getPrivate())) { dto.setPrivateKey(Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded())); }
         return dto;
     }
+    
+    //=================================================================================================
+	// assistant methods
 
     //-------------------------------------------------------------------------------------------------
     private KeyPair generateKeyPair() {

@@ -20,6 +20,7 @@ import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -43,6 +44,7 @@ import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.cn.CommonNamePartVerifier;
 import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.internal.ServiceDefinitionRequestDTO;
@@ -148,8 +150,11 @@ public class ServiceRegistryController {
 	private static final String NOT_VALID_PARAMETERS_ERROR_MESSAGE = "Not valid request parameters.";
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = "Id must be greater than 0. ";
 	private static final String SYSTEM_NAME_NULL_ERROR_MESSAGE = " System name must have value ";
+	private static final String SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE = "System name has invalid format. System names only contain letters (english alphabet), numbers and dash (-), and have to start with a letter (also cannot end with dash).";
 	private static final String SYSTEM_ADDRESS_NULL_ERROR_MESSAGE = " System address must have value ";
 	private static final String SYSTEM_PORT_NULL_ERROR_MESSAGE = " System port must have value ";
+	private static final String SERVICE_DEFINITION_WRONG_FORMAT_ERROR_MESSAGE = "Service definition has invalid format. Service definition only contains letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).";
+	private static final String SERVICE_DEFINITION_REQUIREMENT_WRONG_FORMAT_ERROR_MESSAGE = "Service definition requirement has invalid format. Service definition only contains letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).";
 	
 	private static final String SERVICEREGISTRY_MGMT_BY_ID_URI = CoreCommonConstants.MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
 	private static final String PATH_VARIABLE_SERVICE_DEFINITION = "serviceDefinition";
@@ -167,6 +172,12 @@ public class ServiceRegistryController {
 	
 	@Autowired
 	private ServiceInterfaceNameVerifier interfaceNameVerifier;
+	
+	@Autowired
+	private CommonNamePartVerifier cnVerifier;
+	
+	@Value(CoreCommonConstants.$USE_STRICT_SERVICE_DEFINITION_VERIFIER_WD)
+	private boolean useStrictServiceDefinitionVerifier;
 	
 	//=================================================================================================
 	// methods
@@ -248,9 +259,9 @@ public class ServiceRegistryController {
 	@PostMapping(path = SYSTEMS_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(org.springframework.http.HttpStatus.CREATED)
 	@ResponseBody public SystemResponseDTO addSystem(@RequestBody final SystemRequestDTO request) {
-		return callCreateSystem(request);
+		return callCreateSystem(request, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
 	}
-
+	
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return created consumer system ", response = SystemResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses(value = {
@@ -261,8 +272,8 @@ public class ServiceRegistryController {
 	})
 	@PostMapping(path = CommonConstants.OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(org.springframework.http.HttpStatus.CREATED)
-	@ResponseBody public SystemResponseDTO addConsumerSystem(@RequestBody final SystemRequestDTO request) {
-		return callCreateSystem(request);
+	@ResponseBody public SystemResponseDTO registerSystem(@RequestBody final SystemRequestDTO request) {
+		return callCreateSystem(request, CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -277,7 +288,7 @@ public class ServiceRegistryController {
 	@ResponseBody public SystemResponseDTO updateSystem(@PathVariable(value = PATH_VARIABLE_ID) final long systemId, @RequestBody final SystemRequestDTO request) {
 		return callUpdateSystem(request, systemId);
 	}
-
+	
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return system  updated by fields", response = SystemResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
@@ -357,7 +368,7 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path = SERVICES_BY_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public ServiceDefinitionResponseDTO  getServiceDefinitionById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+	@ResponseBody public ServiceDefinitionResponseDTO getServiceDefinitionById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
 		logger.debug("New Service Definition get request received with id: {}", id);
 		
 		if (id < 1) {
@@ -388,13 +399,17 @@ public class ServiceRegistryController {
 			throw new BadPayloadException("Service definition is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
 		}
 		
+		if (useStrictServiceDefinitionVerifier && !cnVerifier.isValid(serviceDefinition)) {
+			throw new BadPayloadException(SERVICE_DEFINITION_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
+		}
+		
 		for (final CoreSystemService coreSystemService : CoreSystemService.values()) {
 			if (coreSystemService.getServiceDefinition().equalsIgnoreCase(serviceDefinition.trim())) {
-				throw new BadPayloadException("serviceDefinition '" + serviceDefinition + "' is a reserved arrowhead core system service.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
+				throw new BadPayloadException("Service definition '" + serviceDefinition + "' is a reserved arrowhead core system service.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
 			}
 		}
 		
-		final ServiceDefinitionResponseDTO serviceDefinitionResponse = serviceRegistryDBService.createServiceDefinitionResponse(serviceDefinition);
+		final ServiceDefinitionResponseDTO serviceDefinitionResponse = serviceRegistryDBService.createServiceDefinitionResponse(serviceDefinition.toLowerCase().trim());
 		logger.debug("{} service definition successfully registered.", serviceDefinition);
 		
 		return serviceDefinitionResponse;
@@ -419,7 +434,11 @@ public class ServiceRegistryController {
 		}		
 		
 		if (Utilities.isEmpty(serviceDefinition)) {
-			throw new BadPayloadException("serviceDefinition is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
+			throw new BadPayloadException("Service definition is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
+		}
+		
+		if (useStrictServiceDefinitionVerifier && !cnVerifier.isValid(serviceDefinition)) {
+			throw new BadPayloadException(SERVICE_DEFINITION_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
 		}
 		
 		for (final CoreSystemService coreSystemService : CoreSystemService.values()) {
@@ -428,7 +447,7 @@ public class ServiceRegistryController {
 			}
 		}
 		
-		final ServiceDefinitionResponseDTO serviceDefinitionResponse = serviceRegistryDBService.updateServiceDefinitionByIdResponse(id, serviceDefinition);
+		final ServiceDefinitionResponseDTO serviceDefinitionResponse = serviceRegistryDBService.updateServiceDefinitionByIdResponse(id, serviceDefinition.toLowerCase().trim());
 		logger.debug("Service definition with id: '{}' successfully updated with definition '{}'.", id, serviceDefinition);
 		
 		return serviceDefinitionResponse;
@@ -670,7 +689,6 @@ public class ServiceRegistryController {
 		return response;
 	}
 	
-
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = SERVICEREGISTRY_MERGE_DESCRIPTION, response = ServiceRegistryResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
@@ -689,7 +707,7 @@ public class ServiceRegistryController {
 	
 		return response;
 	}
-
+	
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = SERVICEREGISTRY_UNREGISTER_DESCRIPTION, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses(value = {
@@ -723,8 +741,11 @@ public class ServiceRegistryController {
 		logger.debug("Service query request received");
 		
 		if (Utilities.isEmpty(form.getServiceDefinitionRequirement())) {
-			throw new BadPayloadException("Service definition requirement is null or blank" , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI +
-										  CommonConstants.OP_SERVICEREGISTRY_QUERY_URI);
+			throw new BadPayloadException("Service definition requirement is null or blank" , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_QUERY_URI);
+		}
+		
+		if (useStrictServiceDefinitionVerifier && !cnVerifier.isValid(form.getServiceDefinitionRequirement())) {
+			throw new BadPayloadException(SERVICE_DEFINITION_REQUIREMENT_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_QUERY_URI);
 		}
 		
 		final ServiceQueryResultDTO result = serviceRegistryDBService.queryRegistry(form);
@@ -804,7 +825,6 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	//TODO testIt
 	@ApiOperation(value = "Return requested service interfaces by the given parameters", response = ServiceInterfacesListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICE_INTERFACES_HTTP_200_MESSAGE),
@@ -842,7 +862,6 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	//TODO testIt
 	@ApiOperation(value = "Return requested service interface", response = ServiceInterfaceResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICE_INTERFACES_HTTP_200_MESSAGE),
@@ -865,7 +884,6 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	//TODO testIt
 	@ApiOperation(value = "Return created service interface", response = ServiceInterfaceResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_SERVICE_INTERFACES_HTTP_201_MESSAGE),
@@ -894,7 +912,6 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	//TODO testIt
 	@ApiOperation(value = "Return updated service interface", response = ServiceInterfaceResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = PUT_SERVICE_INTERFACES_HTTP_200_MESSAGE),
@@ -927,7 +944,6 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	//TODO TestIt
 	@ApiOperation(value = "Return updated service interface", response = ServiceInterfaceResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = PATCH_SERVICE_INTERFACES_HTTP_200_MESSAGE),
@@ -966,13 +982,13 @@ public class ServiceRegistryController {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private SystemResponseDTO callCreateSystem(final SystemRequestDTO request) {
+	private SystemResponseDTO callCreateSystem(final SystemRequestDTO request, final String origin) {
 		logger.debug("callCreateSystem started...");
 		
-		checkSystemRequest(request, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI, true);
+		checkSystemRequest(request, origin, true);
 		
-		final String systemName = request.getSystemName();
-		final String address = request.getAddress();
+		final String systemName = request.getSystemName().toLowerCase().trim();
+		final String address = request.getAddress().toLowerCase().trim();
 		final int port = request.getPort();
 		final String authenticationInfo = request.getAuthenticationInfo();
 		
@@ -985,8 +1001,8 @@ public class ServiceRegistryController {
 		
 		checkSystemPutRequest(request, systemId);
 		
-		final String validatedSystemName = request.getSystemName().toLowerCase();
-		final String validatedAddress = request.getAddress().toLowerCase();
+		final String validatedSystemName = request.getSystemName().toLowerCase().trim();
+		final String validatedAddress = request.getAddress().toLowerCase().trim();
 		final int validatedPort = request.getPort();
 		final String validatedAuthenticationInfo = request.getAuthenticationInfo();
 		
@@ -1000,7 +1016,7 @@ public class ServiceRegistryController {
 		checkSystemMergeRequest(request, systemId);
 		
 		final String validatedSystemName = request.getSystemName() != null ? request.getSystemName().toLowerCase() : "";
-		final String validatedAddress = request.getAddress() != null ? request.getAddress().toLowerCase() : "";
+		final String validatedAddress = request.getAddress() != null ? request.getAddress().toLowerCase().toLowerCase().trim() : "";
 		final Integer validatedPort = request.getPort();
 		final String validatedAuthenticationInfo = request.getAuthenticationInfo();
 		
@@ -1027,6 +1043,10 @@ public class ServiceRegistryController {
 				if (coreSysteam.name().equalsIgnoreCase(request.getSystemName().trim())) {
 					throw new BadPayloadException("System name '" + request.getSystemName() + "' is a reserved arrowhead core system name.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
 				}
+			}
+			
+			if (!cnVerifier.isValid(request.getSystemName())) {
+				throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
 			}
 		}
 		
@@ -1080,6 +1100,10 @@ public class ServiceRegistryController {
 			}			
 		}
 		
+		if (!cnVerifier.isValid(request.getSystemName())) {
+			throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
 		if (Utilities.isEmpty(request.getAddress())) {
 			throw new BadPayloadException(SYSTEM_ADDRESS_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
@@ -1109,6 +1133,10 @@ public class ServiceRegistryController {
 	
 		if (Utilities.isEmpty(request.getServiceDefinition())) {
 			throw new BadPayloadException("Service definition is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (useStrictServiceDefinitionVerifier && !cnVerifier.isValid(request.getServiceDefinition())) {
+			throw new BadPayloadException(SERVICE_DEFINITION_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 	
 		checkSystemRequest(request.getProviderSystem(), origin, checkReservedCoreSystemNames);
@@ -1163,8 +1191,16 @@ public class ServiceRegistryController {
 			throw new BadPayloadException("Service definition is blank", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
+		if (useStrictServiceDefinitionVerifier && !cnVerifier.isValid(serviceDefinition)) {
+			throw new BadPayloadException(SERVICE_DEFINITION_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
 		if (Utilities.isEmpty(providerName)) {
 			throw new BadPayloadException("Name of the provider system is blank", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (!cnVerifier.isValid(providerName)) {
+			throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		if (Utilities.isEmpty(providerAddress)) {
@@ -1203,6 +1239,10 @@ public class ServiceRegistryController {
 		}
 		
 		if (request.getProviderSystem() != null && !Utilities.isEmpty(request.getProviderSystem().getSystemName())) {
+			if (!cnVerifier.isValid(request.getProviderSystem().getSystemName())) {
+				throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			}
+			
 			needChange = true;
 		}
 		
@@ -1237,6 +1277,10 @@ public class ServiceRegistryController {
 		}
 		
 		if (request.getServiceDefinition() != null) {
+			if (useStrictServiceDefinitionVerifier && !cnVerifier.isValid(request.getServiceDefinition())) {
+				throw new BadPayloadException(SERVICE_DEFINITION_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			}
+			
 			needChange = true;
 		}
 		

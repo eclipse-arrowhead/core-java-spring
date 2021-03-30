@@ -53,5 +53,10 @@
     "name": "use_strict_service_intf_name_verifier",
     "type": "java.lang.Boolean",
     "description": "A description for 'use_strict_service_intf_name_verifier'"
+  },
+  {
+    "name": "use_strict_service_definition_verifier",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'use_strict_service_definition_verifier'"
   }
 ]}
