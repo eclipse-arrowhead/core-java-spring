@@ -38,6 +38,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.cn.CommonNamePartVerifier;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
@@ -91,15 +92,22 @@ public class ServiceRegistryDBService {
 	private ServiceInterfaceNameVerifier interfaceNameVerifier;
 	
 	@Autowired
+	private CommonNamePartVerifier cnVerifier;
+	
+	@Autowired
 	private SSLProperties sslProperties;
 	
 	@Value(CoreCommonConstants.$SERVICEREGISTRY_PING_TIMEOUT_WD)
 	private int pingTimeout;
 	
+	@Value(CoreCommonConstants.$USE_STRICT_SERVICE_DEFINITION_VERIFIER_WD)
+	private boolean useStrictServiceDefinitionVerifier;
+	
 	private final Logger logger = LogManager.getLogger(ServiceRegistryDBService.class);
 	
 	private static final String COULD_NOT_DELETE_SYSTEM_ERROR_MESSAGE = "Could not delete System, with given parameters";
 	private static final String PORT_RANGE_ERROR_MESSAGE = "Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".";
+	private static final String INVALID_FORMAT_ERROR_MESSAGE = " has invalid format. Name must match with the following regular expression: " + CommonNamePartVerifier.COMMON_NAME_PART_PATTERN_STRING;
 	
 	//=================================================================================================
 	// methods
@@ -158,7 +166,7 @@ public class ServiceRegistryDBService {
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
-
+	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public SystemResponseDTO createSystemResponse(final String systemName, final String address, final int port, final String authenticationInfo) {
@@ -182,10 +190,12 @@ public class ServiceRegistryDBService {
 		
 		final long validatedSystemId = validateSystemId(systemId);
 		final int validatedPort = validateSystemPort(port);
+		
 		final String validatedSystemName = validateSystemParamString(systemName);
-		if (validatedSystemName.contains(".")) {
-			throw new InvalidParameterException("System name can't contain dot (.)");
+		if (!cnVerifier.isValid(validatedSystemName)) {
+			throw new InvalidParameterException("System name" + INVALID_FORMAT_ERROR_MESSAGE);
 		}
+		
 		final String validatedAddress = validateSystemParamString(address);
 		final String validatedAuthenticationInfo = authenticationInfo;
 		
@@ -215,6 +225,10 @@ public class ServiceRegistryDBService {
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
+	
+	// TODO: cont
+
+
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
@@ -1141,6 +1155,10 @@ public class ServiceRegistryDBService {
 			throw new InvalidParameterException("System name is null or empty");
 		}
 		
+		if (!cnVerifier.isValid(systemName)) {
+			throw new InvalidParameterException("System name" + INVALID_FORMAT_ERROR_MESSAGE);
+		}
+		
 		if (Utilities.isEmpty(address)) {
 			throw new InvalidParameterException("System address is null or empty");
 		}
@@ -1150,9 +1168,6 @@ public class ServiceRegistryDBService {
 		}
 		
 		final String validatedSystemName = systemName.trim().toLowerCase();
-		if (validatedSystemName.contains(".")) {
-			throw new InvalidParameterException("System name can't contain dot (.)");
-		}
 		final String validatedAddress = address.trim().toLowerCase();
 		final String validatedAuthenticationInfo = authenticationInfo;
 		
