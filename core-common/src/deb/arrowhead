@@ -292,7 +292,7 @@ update_system_cert() {
       -e "s/^server\.ssl\.trust-store-password=.*/server.ssl.trust-store-password=${password}/"\
       "${system_dir}/application.properties"
 
-    if [[ "${system}" == "certificate_authority" ]]; then
+    if [[ "${system}" == "certificateauthority" ]]; then
       sed -i \
         -e "s/^cloud\.ssl\.key-store-password=.*/cloud.ssl.key-store-password=${password}/"\
         -e "s/^cloud\.ssl\.key-password=.*/cloud.ssl.key-password=${password}/"\

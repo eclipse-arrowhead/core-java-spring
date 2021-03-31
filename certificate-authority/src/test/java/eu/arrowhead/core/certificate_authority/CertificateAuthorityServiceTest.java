@@ -134,7 +134,6 @@ public class CertificateAuthorityServiceTest {
     public void setUp() {
         caProperties = getCAProperties();
         ReflectionTestUtils.setField(service, "caProperties", caProperties);
-        ReflectionTestUtils.setField(service, "sslProperties", getSslProperties());
         ReflectionTestUtils.setField(service, "certificateDbService", caCertificateDBService);
         ReflectionTestUtils.setField(service, "trustedKeyDbService", caTrustedKeyDBService);
 
@@ -147,20 +146,14 @@ public class CertificateAuthorityServiceTest {
                 .thenReturn(new CaCertificate(CA_CERT_ID));
     }
 
-    private SSLProperties getSslProperties() {
-        final SSLProperties sslProperties = mock(SSLProperties.class);
-        when(sslProperties.getKeyPassword()).thenReturn("123456");
-        when(sslProperties.getKeyStorePassword()).thenReturn("123456");
-        when(sslProperties.getKeyStoreType()).thenReturn("PKCS12");
-        when(sslProperties.getKeyStore()).thenReturn(new ClassPathResource("certificates/certificateauthority.p12"));
-
-        return sslProperties;
-    }
-
     private CAProperties getCAProperties() {
-        final CAProperties caProperties = mock(CAProperties.class);
+        CAProperties caProperties = mock(CAProperties.class);
         when(caProperties.getCertValidityNegativeOffsetMinutes()).thenReturn(1L);
         when(caProperties.getCertValidityPositiveOffsetMinutes()).thenReturn(60L);
+        when(caProperties.getCloudKeyPassword()).thenReturn("123456");
+        when(caProperties.getCloudKeyStorePassword()).thenReturn("123456");
+        when(caProperties.getCloudKeyStoreType()).thenReturn("PKCS12");
+        when(caProperties.getCloudKeyStorePath()).thenReturn(new ClassPathResource("certificates/cloud.p12"));
 
         return caProperties;
     }
