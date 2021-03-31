@@ -33,5 +33,27 @@
     "name": "sr_port",
     "type": "java.lang.Integer",
     "description": "A description for 'sr_port'"
-  }
+  },
+    {
+      "name": "cloud.ssl.key-store-type",
+      "type": "java.lang.String",
+      "description": "The key store type of the cloud certificate."
+    },
+    {
+      "name": "cloud.ssl.key-store",
+      "type": "java.lang.String",
+      "description": "The path to the cloud certificate."
+    },
+    {
+      "name": "cloud.ssl.key-store-password",
+      "type": "java.lang.String",
+      "description": "The password for the cloud key store."
+    },
+    {
+      "name": "cloud.ssl.key-password",
+      "type": "java.lang.String",
+      "description": "The password for the cloud certificate."
+    }
+]}
+
 ]}
