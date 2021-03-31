@@ -10,6 +10,7 @@ import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.FilePdSto
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.PdStore;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.PdeManagementService;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.PdeMonitorService;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitorable.PdeMonitorableService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.arkalix.ArServiceCache;
@@ -225,6 +226,11 @@ public final class PdeMain {
                 final PdStore pdStore = new FilePdStore(plantDescriptionsDirectory);
                 final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(pdStore);
                 final SrSystem orchestrator = systemTracker.getSystem("orchestrator", null);
+
+                if (orchestrator == null) {
+                    throw new RuntimeException("Could not find Orchestrator in the Service Registry.");
+                }
+
                 final OrchestratorClient orchestratorClient = new OrchestratorClient(
                     httpClient,
                     new FileRuleStore(ruleDirectory),
@@ -269,10 +275,16 @@ public final class PdeMain {
                             secureMode
                         );
                         return arSystem.provide(pdeManagementService.getService());
+                    })
+                    .flatMap(mgmtServiceResult -> {
+                        logger.info("The PDE Management service is ready.");
+                        logger.info("Starting the PDE Monitorable service...");
+                        final PdeMonitorableService pdeMonitorableService = new PdeMonitorableService(secureMode);
+                        return arSystem.provide(pdeMonitorableService.getService());
                     });
             })
             .ifSuccess(consumer -> {
-                logger.info("The PDE Management service is ready.");
+                logger.info("The PDE Monitorable service is ready.");
                 logger.info("The Plant Description Engine is up and running.");
             })
             .onFailure(throwable -> {
