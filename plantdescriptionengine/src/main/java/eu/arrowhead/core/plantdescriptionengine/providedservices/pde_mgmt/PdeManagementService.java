@@ -51,10 +51,7 @@ public class PdeManagementService {
     }
 
     /**
-     * Registers this service with an Arrowhead system, eventually making it
-     * accessible to remote Arrowhead systems.
-     *
-     * @return A HTTP Service used to manage Plant Descriptions.
+     * @return An HTTP Service used to manage Plant Descriptions.
      */
     public HttpService getService() {
         final HttpService service = new HttpService()

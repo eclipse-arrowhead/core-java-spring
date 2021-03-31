@@ -14,5 +14,5 @@ import static se.arkalix.dto.DtoEncoding.JSON;
 @DtoWritableAs(JSON)
 @DtoToString
 public interface SystemData {
-    JsonObject data();
+    JsonObject data(); // TODO: Make Optional?
 }
