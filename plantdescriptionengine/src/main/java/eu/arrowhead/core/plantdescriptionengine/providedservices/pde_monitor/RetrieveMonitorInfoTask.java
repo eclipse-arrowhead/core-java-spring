@@ -3,10 +3,12 @@ package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor;
 import eu.arrowhead.core.plantdescriptionengine.MonitorInfo;
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.monitorable.dto.InventoryIdDto;
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.monitorable.dto.SystemDataDto;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import se.arkalix.description.ServiceDescription;
-import se.arkalix.dto.DtoEncoding;
+
+import se.arkalix.ServiceRecord;
+import se.arkalix.codec.json.JsonObject;
 import se.arkalix.net.http.HttpMethod;
 import se.arkalix.net.http.client.HttpClient;
 import se.arkalix.net.http.client.HttpClientRequest;
@@ -53,7 +55,7 @@ public class RetrieveMonitorInfoTask extends TimerTask {
     private void retrieveMonitorInfo() {
         serviceQuery.resolveAll()
             .ifSuccess(services -> {
-                for (final ServiceDescription service : services) {
+                for (final ServiceRecord service : services) {
                     retrieveId(service);
                     retrieveSystemData(service);
                 }
@@ -66,7 +68,7 @@ public class RetrieveMonitorInfoTask extends TimerTask {
      *
      * @param service A monitorable service.
      */
-    private void retrieveId(final ServiceDescription service) {
+    private void retrieveId(final ServiceRecord service) {
         final InetSocketAddress address = service.provider().socketAddress();
 
         httpClient
@@ -75,7 +77,7 @@ public class RetrieveMonitorInfoTask extends TimerTask {
                     .method(HttpMethod.GET)
                     .uri(service.uri() + INVENTORY_ID_PATH)
                     .header("accept", "application/json"))
-            .flatMap(result -> result.bodyAsClassIfSuccess(DtoEncoding.JSON, InventoryIdDto.class))
+            .flatMap(response -> response.bodyToIfSuccess(InventoryIdDto::decodeJson))
             .ifSuccess(inventoryId -> monitorInfo.putInventoryId(service, inventoryId.id().orElse(null)))
             .onFailure(e -> {
                 final String errorMessage = "Failed to retrieve inventory ID for system '" + service.provider().name()
@@ -89,7 +91,7 @@ public class RetrieveMonitorInfoTask extends TimerTask {
      *
      * @param service A monitorable service.
      */
-    private void retrieveSystemData(final ServiceDescription service) {
+    private void retrieveSystemData(final ServiceRecord service) {
         final InetSocketAddress address = service.provider().socketAddress();
 
         httpClient
@@ -98,8 +100,11 @@ public class RetrieveMonitorInfoTask extends TimerTask {
                     .method(HttpMethod.GET)
                     .uri(service.uri() + SYSTEM_DATA_PATH)
                     .header("accept", "application/json"))
-            .flatMap(result -> result.bodyAsClassIfSuccess(DtoEncoding.JSON, SystemDataDto.class))
-            .ifSuccess(systemData -> monitorInfo.putSystemData(service, systemData.data()))
+            .flatMap(result -> result.bodyToIfSuccess(SystemDataDto::decodeJson))
+            .ifSuccess(systemData -> {
+                JsonObject json = systemData.data().orElse(null);
+                monitorInfo.putSystemData(service, json);
+            })
             .onFailure(e -> {
                 final String errorMessage = "Failed to retrieve system data for system '" + service.provider().name()
                     + "', service '" + service.name() + "'.";

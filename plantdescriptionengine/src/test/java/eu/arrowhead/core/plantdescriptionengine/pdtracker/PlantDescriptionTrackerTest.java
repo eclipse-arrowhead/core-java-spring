@@ -4,18 +4,14 @@ import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.InMemoryP
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.PdStore;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.PdStoreException;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Connection;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.ConnectionBuilder;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.ConnectionDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystem;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystemBuilder;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystemDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntry;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryBuilder;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryListDto;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PortBuilder;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PortDto;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.SystemPortBuilder;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.SystemPortDto;
 import eu.arrowhead.core.plantdescriptionengine.utils.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -123,7 +119,7 @@ public class PlantDescriptionTrackerTest {
 
     @Test
     public void shouldTrackActiveEntry() throws PdStoreException {
-        final PlantDescriptionEntryBuilder builder = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto.Builder builder = new PlantDescriptionEntryDto.Builder()
             .include(new ArrayList<>())
             .systems(new ArrayList<>())
             .connections(new ArrayList<>())
@@ -155,7 +151,7 @@ public class PlantDescriptionTrackerTest {
     public void shouldDeactivateEntry() throws PdStoreException {
         final int idA = 1;
         final int idB = 2;
-        final PlantDescriptionEntryBuilder builder = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto.Builder builder = new PlantDescriptionEntryDto.Builder()
             .active(true)
             .createdAt(now)
             .updatedAt(now);
@@ -270,19 +266,19 @@ public class PlantDescriptionTrackerTest {
         final String idB = "Sys-B";
         final String idC = "Sys-C";
 
-        final PdeSystemDto systemA = new PdeSystemBuilder()
+        final PdeSystemDto systemA = new PdeSystemDto.Builder()
             .systemId(idA)
             .build();
 
-        final PdeSystemDto systemB = new PdeSystemBuilder()
+        final PdeSystemDto systemB = new PdeSystemDto.Builder()
             .systemId(idB)
             .build();
 
-        final PdeSystemDto systemC = new PdeSystemBuilder()
+        final PdeSystemDto systemC = new PdeSystemDto.Builder()
             .systemId(idC)
             .build();
 
-        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryDto.Builder()
             .id(1)
             .plantDescription("ABC")
             .createdAt(now)
@@ -301,7 +297,7 @@ public class PlantDescriptionTrackerTest {
     @Test
     public void shouldThrowWhenNoEntryIsActive() throws PdStoreException {
 
-        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryDto.Builder()
             .id(1)
             .plantDescription("ABC")
             .createdAt(now)
@@ -328,19 +324,19 @@ public class PlantDescriptionTrackerTest {
         final String systemIdB = "Sys-B";
         final String systemIdC = "Sys-C";
 
-        final PdeSystemDto systemA = new PdeSystemBuilder()
+        final PdeSystemDto systemA = new PdeSystemDto.Builder()
             .systemId(systemIdA)
             .build();
 
-        final PdeSystemDto systemB = new PdeSystemBuilder()
+        final PdeSystemDto systemB = new PdeSystemDto.Builder()
             .systemId(systemIdB)
             .build();
 
-        final PdeSystemDto systemC = new PdeSystemBuilder()
+        final PdeSystemDto systemC = new PdeSystemDto.Builder()
             .systemId(systemIdC)
             .build();
 
-        final PlantDescriptionEntryDto entryA = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryA = new PlantDescriptionEntryDto.Builder()
             .id(entryIdA)
             .plantDescription("A")
             .createdAt(now)
@@ -349,7 +345,7 @@ public class PlantDescriptionTrackerTest {
             .systems(List.of(systemA, systemB))
             .build();
 
-        final PlantDescriptionEntryDto entryB = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryB = new PlantDescriptionEntryDto.Builder()
             .id(entryIdB)
             .plantDescription("B")
             .createdAt(now)
@@ -358,7 +354,7 @@ public class PlantDescriptionTrackerTest {
             .include(List.of(entryIdA))
             .build();
 
-        final PlantDescriptionEntryDto entryX = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryX = new PlantDescriptionEntryDto.Builder()
             .id(entryIdX)
             .plantDescription("X")
             .createdAt(now)
@@ -366,7 +362,7 @@ public class PlantDescriptionTrackerTest {
             .active(false)
             .build();
 
-        final PlantDescriptionEntryDto entryC = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryC = new PlantDescriptionEntryDto.Builder()
             .id(entryIdC)
             .plantDescription("C")
             .createdAt(now)
@@ -396,19 +392,19 @@ public class PlantDescriptionTrackerTest {
         final String systemIdB = "Sys-B";
         final String systemIdC = "Sys-C";
 
-        final PdeSystemDto systemA = new PdeSystemBuilder()
+        final PdeSystemDto systemA = new PdeSystemDto.Builder()
             .systemId(systemIdA)
             .build();
 
-        final PdeSystemDto systemB = new PdeSystemBuilder()
+        final PdeSystemDto systemB = new PdeSystemDto.Builder()
             .systemId(systemIdB)
             .build();
 
-        final PdeSystemDto systemC = new PdeSystemBuilder()
+        final PdeSystemDto systemC = new PdeSystemDto.Builder()
             .systemId(systemIdC)
             .build();
 
-        final PlantDescriptionEntryDto entryA = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryA = new PlantDescriptionEntryDto.Builder()
             .id(entryIdA)
             .plantDescription("A")
             .createdAt(now)
@@ -417,7 +413,7 @@ public class PlantDescriptionTrackerTest {
             .systems(List.of(systemA, systemB))
             .build();
 
-        final PlantDescriptionEntryDto entryB = new PlantDescriptionEntryBuilder().id(entryIdB)
+        final PlantDescriptionEntryDto entryB = new PlantDescriptionEntryDto.Builder().id(entryIdB)
             .plantDescription("B")
             .createdAt(now)
             .updatedAt(now)
@@ -425,7 +421,7 @@ public class PlantDescriptionTrackerTest {
             .include(List.of(entryIdA))
             .build();
 
-        final PlantDescriptionEntryDto entryC = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryC = new PlantDescriptionEntryDto.Builder()
             .id(entryIdC)
             .plantDescription("C")
             .createdAt(now)
@@ -473,43 +469,43 @@ public class PlantDescriptionTrackerTest {
         final String producerPortA = "Prod-Port-A";
         final String producerIdA = "Prod-A";
 
-        final List<PortDto> consumerPortsA = List.of(new PortBuilder()
+        final List<PortDto> consumerPortsA = List.of(new PortDto.Builder()
             .portName(consumerPortA)
             .serviceInterface("HTTP-SECURE-JSON")
             .serviceDefinition("Monitorable")
             .consumer(true)
             .build());
 
-        final List<PortDto> producerPortsA = List.of(new PortBuilder()
+        final List<PortDto> producerPortsA = List.of(new PortDto.Builder()
             .portName(producerPortA)
             .serviceInterface("HTTP-SECURE-JSON")
             .serviceDefinition("Monitorable")
             .consumer(false)
             .build());
 
-        final PdeSystemDto consumerSystemA = new PdeSystemBuilder()
+        final PdeSystemDto consumerSystemA = new PdeSystemDto.Builder()
             .systemId(consumerIdA)
             .systemName(consumerNameA)
             .ports(consumerPortsA)
             .build();
 
-        final PdeSystemDto producerSystemA = new PdeSystemBuilder().systemId(producerIdA)
+        final PdeSystemDto producerSystemA = new PdeSystemDto.Builder().systemId(producerIdA)
             .systemName(producerNameA)
             .ports(producerPortsA)
             .build();
 
-        final List<ConnectionDto> connectionsA = List.of(new ConnectionBuilder()
-            .consumer(new SystemPortBuilder()
+        final List<ConnectionDto> connectionsA = List.of(new ConnectionDto.Builder()
+            .consumer(new SystemPortDto.Builder()
                 .systemId(consumerIdA)
                 .portName(consumerPortA)
                 .build())
-            .producer(new SystemPortBuilder()
+            .producer(new SystemPortDto.Builder()
                 .systemId(producerIdA)
                 .portName(producerPortA)
                 .build())
             .build());
 
-        final PlantDescriptionEntryDto entryA = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryA = new PlantDescriptionEntryDto.Builder()
             .id(entryIdA)
             .plantDescription("Plant Description A")
             .createdAt(now)
@@ -525,31 +521,31 @@ public class PlantDescriptionTrackerTest {
         final String consumerNameB = "Consumer B";
         final String consumerPortB = "Cons-Port-B";
 
-        final List<PortDto> consumerPortsB = List.of(new PortBuilder()
+        final List<PortDto> consumerPortsB = List.of(new PortDto.Builder()
             .portName(consumerPortB)
             .serviceInterface("HTTP-SECURE-JSON")
             .serviceDefinition("Monitorable")
             .consumer(true)
             .build());
 
-        final PdeSystemDto consumerSystemB = new PdeSystemBuilder()
+        final PdeSystemDto consumerSystemB = new PdeSystemDto.Builder()
             .systemId(consumerIdB)
             .systemName(consumerNameB)
             .ports(consumerPortsB)
             .build();
 
-        final List<ConnectionDto> connectionsB = List.of(new ConnectionBuilder()
-            .consumer(new SystemPortBuilder()
+        final List<ConnectionDto> connectionsB = List.of(new ConnectionDto.Builder()
+            .consumer(new SystemPortDto.Builder()
                 .systemId(consumerIdB)
                 .portName(consumerPortB)
                 .build())
-            .producer(new SystemPortBuilder()
+            .producer(new SystemPortDto.Builder()
                 .systemId(producerIdA)
                 .portName(producerPortA)
                 .build())
             .build());
 
-        final PlantDescriptionEntryDto entryB = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryB = new PlantDescriptionEntryDto.Builder()
             .id(entryIdB)
             .plantDescription("Plant Description B")
             .createdAt(now)
@@ -592,33 +588,33 @@ public class PlantDescriptionTrackerTest {
         final String producerIdA = "Prod-A";
         final String serviceDefinitionA = "SD-A";
 
-        final List<PortDto> consumerPortsA = List.of(new PortBuilder()
+        final List<PortDto> consumerPortsA = List.of(new PortDto.Builder()
             .portName(consumerPortA)
             .serviceInterface("HTTP-SECURE-JSON")
             .serviceDefinition("Service-XYZ")
             .consumer(true)
             .build());
 
-        final List<PortDto> producerPortsA = List.of(new PortBuilder()
+        final List<PortDto> producerPortsA = List.of(new PortDto.Builder()
             .portName(producerPortA)
             .serviceInterface("HTTP-SECURE-JSON")
             .serviceDefinition(serviceDefinitionA)
             .consumer(false)
             .build());
 
-        final PdeSystemDto consumerSystemA = new PdeSystemBuilder()
+        final PdeSystemDto consumerSystemA = new PdeSystemDto.Builder()
             .systemId(consumerIdA)
             .systemName(consumerNameA)
             .ports(consumerPortsA)
             .build();
 
-        final PdeSystemDto producerSystemA = new PdeSystemBuilder()
+        final PdeSystemDto producerSystemA = new PdeSystemDto.Builder()
             .systemId(producerIdA)
             .systemName(producerNameA)
             .ports(producerPortsA)
             .build();
 
-        final PlantDescriptionEntryDto entryA = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryA = new PlantDescriptionEntryDto.Builder()
             .id(entryIdA)
             .plantDescription("Plant Description A")
             .createdAt(now)
@@ -633,20 +629,20 @@ public class PlantDescriptionTrackerTest {
         final String consumerNameB = "Consumer B";
         final String consumerPortB = "Cons-Port-B";
 
-        final List<PortDto> consumerPortsB = List.of(new PortBuilder()
+        final List<PortDto> consumerPortsB = List.of(new PortDto.Builder()
             .portName(consumerPortB)
             .serviceInterface("HTTP-SECURE-JSON")
             .serviceDefinition("Service-ABC")
             .consumer(true)
             .build());
 
-        final PdeSystemDto consumerSystemB = new PdeSystemBuilder()
+        final PdeSystemDto consumerSystemB = new PdeSystemDto.Builder()
             .systemId(consumerIdB)
             .systemName(consumerNameB)
             .ports(consumerPortsB)
             .build();
 
-        final PlantDescriptionEntryDto entryB = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryB = new PlantDescriptionEntryDto.Builder()
             .id(entryIdB)
             .plantDescription("Plant Description B")
             .createdAt(now)
@@ -668,7 +664,7 @@ public class PlantDescriptionTrackerTest {
         final int entryId = 98;
         final String nonexistentPort = "qwerty";
 
-        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryDto.Builder()
             .id(entryId)
             .plantDescription("Plant Description A")
             .createdAt(now)
@@ -695,7 +691,7 @@ public class PlantDescriptionTrackerTest {
 
     @Test
     public void shouldThrowWhenRetrievingMissingSystem() throws PdStoreException {
-        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryDto.Builder()
             .id(123)
             .plantDescription("Plant Description A")
             .createdAt(now)

@@ -5,21 +5,18 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Co
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystem;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntry;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Port;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.ConnectionBuilder;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.ConnectionDto;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.MonitorPlantDescriptionEntryBuilder;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.MonitorPlantDescriptionEntryDto;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PortEntryBuilder;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PortEntryDto;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.SystemEntryBuilder;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.SystemEntryDto;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.SystemPortBuilder;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.SystemPortDto;
+import eu.arrowhead.core.plantdescriptionengine.utils.Metadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public final class DtoUtils {
@@ -42,16 +39,16 @@ public final class DtoUtils {
         final List<ConnectionDto> result = new ArrayList<>();
 
         for (final Connection connection : connections) {
-            final SystemPortDto consumerPort = new SystemPortBuilder()
+            final SystemPortDto consumerPort = new SystemPortDto.Builder()
                 .portName(connection.consumer().portName())
                 .systemId(connection.consumer().systemId())
                 .build();
-            final SystemPortDto producerPort = new SystemPortBuilder()
+            final SystemPortDto producerPort = new SystemPortDto.Builder()
                 .portName(connection.producer().portName())
                 .systemId(connection.producer().systemId())
                 .build();
 
-            final ConnectionDto connectionCopy = new ConnectionBuilder()
+            final ConnectionDto connectionCopy = new ConnectionDto.Builder()
                 .consumer(consumerPort)
                 .producer(producerPort)
                 .build();
@@ -73,8 +70,10 @@ public final class DtoUtils {
      */
     private static SystemEntryDto extend(final PdeSystem system, final MonitorInfo monitorInfo) {
 
-        final List<MonitorInfo.Bundle> systemInfoList = monitorInfo.getSystemInfo(system.systemName().orElse(null),
-            system.metadata().orElse(null));
+        final List<MonitorInfo.Bundle> systemInfoList = monitorInfo.getSystemInfo(
+            system.systemName().orElse(null),
+            system.metadata().orElse(null)
+        );
 
         final List<PortEntryDto> ports = new ArrayList<>();
 
@@ -85,50 +84,48 @@ public final class DtoUtils {
             // 'consumer' defaults to false when no value is set:
             final boolean isConsumer = port.consumer().orElse(false);
 
-            final PortEntryBuilder portBuilder = new PortEntryBuilder()
+            final PortEntryDto.Builder portBuilder = new PortEntryDto.Builder()
                 .portName(port.portName())
                 .serviceInterface(port.serviceInterface().orElse(null))
                 .serviceDefinition(port.serviceDefinition())
                 .consumer(isConsumer)
                 .metadata(port.metadata().orElse(null));
 
-            // Only add monitor info to ports where this system is the
+            // Possibly add monitor info to ports where this system is the
             // provider:
             if (!isConsumer) {
-
-                MonitorInfo.Bundle serviceMonitorInfo = null;
 
                 for (final MonitorInfo.Bundle info : systemInfoList) {
 
                     final boolean matchesServiceDefinition = info.serviceDefinition.equals(port.serviceDefinition());
-                    final boolean matchesPort = info.matchesPortMetadata(
-                        system.metadata().orElse(null),
-                        port.metadata().orElse(null)
-                    );
+                    final boolean matchesPort = port.metadata().isPresent() &&
+                        Metadata.isSubset(port.metadata().get(), info.serviceMetadata);
 
                     if (matchesServiceDefinition && matchesPort) {
-                        serviceMonitorInfo = info;
+
+                        portBuilder.systemData(info.systemData);
+                        portBuilder.inventoryId(info.inventoryId);
+
                         systemInfoList.remove(info);
                         break;
                     }
                 }
 
-                if (serviceMonitorInfo != null) {
-                    portBuilder.systemData(serviceMonitorInfo.systemData);
-                    portBuilder.inventoryId(serviceMonitorInfo.inventoryId);
-                }
             }
 
             ports.add(portBuilder.build());
         }
 
-        final SystemEntryBuilder systemBuilder = new SystemEntryBuilder().systemId(system.systemId())
-            .metadata(system.metadata().orElse(null)).ports(ports);
+        final SystemEntryDto.Builder systemBuilder = new SystemEntryDto.Builder()
+            .systemId(system.systemId())
+            .metadata(system.metadata().orElse(null))
+            .ports(ports);
 
         // If there is any monitor info left, it may belong to the system
         // itself, not a specific port.
         for (final MonitorInfo.Bundle infoBundle : systemInfoList) {
-            if (infoBundle.matchesSystemMetadata(system.metadata().orElse(null))) {
+            final Map<String, String> metadata = system.metadata().orElse(null);
+            if (infoBundle.matchesSystemMetadata(metadata)) {
                 systemBuilder.inventoryId(infoBundle.inventoryId).systemData(infoBundle.systemData);
                 break;
             } else {
@@ -167,7 +164,7 @@ public final class DtoUtils {
 
         final List<ConnectionDto> connections = mgmtToMonitor(entry.connections());
 
-        return new MonitorPlantDescriptionEntryBuilder()
+        return new MonitorPlantDescriptionEntryDto.Builder()
             .id(entry.id())
             .plantDescription(entry.plantDescription())
             .active(entry.active())

@@ -1,15 +1,12 @@
 package eu.arrowhead.core.plantdescriptionengine.utils;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 
 public final class Metadata {
 
-    private Metadata() {
-        throw new AssertionError();
-    }
+    private Metadata() {}
 
     /**
      * Returns
@@ -29,28 +26,6 @@ public final class Metadata {
             }
         }
         return true;
-    }
-
-    /**
-     * @param a A String to String map (system or port metadata) or null.
-     * @param b A String to String map (system or port metadata) or null.
-     * @return The union of maps a and b, where the values in b override the
-     * values of a in case of collisions.
-     */
-    public static Map<String, String> merge(final Map<String, String> a, final Map<String, String> b) {
-        final Map<String, String> result = new HashMap<>();
-        if (a != null) {
-            for (final String key : a.keySet()) {
-                result.put(key, a.get(key));
-            }
-        }
-        if (b != null) {
-            for (final String key : b.keySet()) {
-                result.put(key, b.get(key));
-            }
-        }
-
-        return result;
     }
 
     /**

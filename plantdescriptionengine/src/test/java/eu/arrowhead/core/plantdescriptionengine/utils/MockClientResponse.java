@@ -1,17 +1,15 @@
 package eu.arrowhead.core.plantdescriptionengine.utils;
 
-import se.arkalix.dto.DtoEncoding;
-import se.arkalix.dto.DtoReadable;
+import se.arkalix.codec.Decoder;
+import se.arkalix.net.BodyIncoming;
 import se.arkalix.net.http.HttpHeaders;
 import se.arkalix.net.http.HttpStatus;
 import se.arkalix.net.http.HttpVersion;
+import se.arkalix.net.http.client.HttpClientConnection;
 import se.arkalix.net.http.client.HttpClientRequest;
 import se.arkalix.net.http.client.HttpClientResponse;
-import se.arkalix.util.concurrent.FutureProgress;
+import se.arkalix.util.concurrent.Future;
 
-import java.io.InputStream;
-import java.nio.file.Path;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -23,39 +21,10 @@ public class MockClientResponse implements HttpClientResponse {
     private HttpStatus _status = HttpStatus.IM_A_TEAPOT;
 
     @Override
-    public <R extends DtoReadable> FutureProgress<R> bodyAs(final DtoEncoding encoding, final Class<R> class_) {
-        Objects.requireNonNull(encoding, "Expected encoding.");
-        Objects.requireNonNull(class_, "Expected class.");
-        @SuppressWarnings("unchecked") final R castBody = (R) _body;
-        return new MockFutureProgress<>(castBody);
-    }
-
-    @Override
-    public FutureProgress<byte[]> bodyAsByteArray() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public <R extends DtoReadable> FutureProgress<List<R>> bodyAsList(
-        final DtoEncoding encoding,
-        final Class<R> class_
-    ) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public FutureProgress<? extends InputStream> bodyAsStream() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public FutureProgress<String> bodyAsString() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public FutureProgress<Path> bodyTo(final Path path, final boolean append) {
-        throw new UnsupportedOperationException();
+    public <T> Future<T> bodyTo(final Decoder<T> decoder) {
+        Objects.requireNonNull(decoder, "Expected decoder.");
+        @SuppressWarnings("unchecked") final T castBody = (T) _body;
+        return Future.success(castBody);
     }
 
     @Override
@@ -88,5 +57,20 @@ public class MockClientResponse implements HttpClientResponse {
         Objects.requireNonNull(data, "Expected data.");
         _body = data;
         return this;
+    }
+
+    @Override
+    public BodyIncoming body() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public HttpClientResponse clearHeaders() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public HttpClientConnection connection() {
+        throw new UnsupportedOperationException();
     }
 }

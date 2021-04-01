@@ -1,15 +1,16 @@
 package eu.arrowhead.core.plantdescriptionengine.utils;
 
-import se.arkalix.description.ConsumerDescription;
-import se.arkalix.dto.DtoEncoding;
-import se.arkalix.dto.DtoReadable;
+import se.arkalix.codec.Decoder;
+import se.arkalix.net.BodyIncoming;
 import se.arkalix.net.http.HttpHeaders;
 import se.arkalix.net.http.HttpMethod;
 import se.arkalix.net.http.HttpVersion;
+import se.arkalix.net.http.service.HttpServiceConnection;
 import se.arkalix.net.http.service.HttpServiceRequest;
-import se.arkalix.util.concurrent.FutureProgress;
+import se.arkalix.util.concurrent.Future;
 
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,45 +41,10 @@ public class MockRequest implements HttpServiceRequest {
     }
 
     @Override
-    public <R extends DtoReadable> FutureProgress<R> bodyAs(final DtoEncoding encoding, final Class<R> class_) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public FutureProgress<byte[]> bodyAsByteArray() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public <R extends DtoReadable> FutureProgress<List<R>> bodyAsList(final DtoEncoding encoding, final Class<R> class_) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public FutureProgress<? extends InputStream> bodyAsStream() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public FutureProgress<String> bodyAsString() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public FutureProgress<Path> bodyTo(final Path path, final boolean append) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public <R extends DtoReadable> FutureProgress<R> bodyAs(final Class<R> class_) {
-        @SuppressWarnings("unchecked") final R castBody = (R) body;
-        Objects.requireNonNull(class_, "Expected class.");
-        return new MockFutureProgress<>(castBody);
-    }
-
-    @Override
-    public <R extends DtoReadable> FutureProgress<List<R>> bodyAsList(final Class<R> class_) {
-        throw new UnsupportedOperationException();
+    public <T> Future<T> bodyTo(final Decoder<T> decoder) {
+        Objects.requireNonNull(decoder, "Expected decoder.");
+        @SuppressWarnings("unchecked") final T castBody = (T) body;
+        return Future.success(castBody);
     }
 
     @Override
@@ -107,12 +73,17 @@ public class MockRequest implements HttpServiceRequest {
     }
 
     @Override
-    public ConsumerDescription consumer() {
+    public HttpVersion version() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public HttpVersion version() {
+    public HttpServiceRequest clearHeaders() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public HttpServiceConnection connection() {
         throw new UnsupportedOperationException();
     }
 
@@ -142,6 +113,11 @@ public class MockRequest implements HttpServiceRequest {
         public MockRequest build() {
             return new MockRequest(this);
         }
+    }
+
+    @Override
+    public BodyIncoming body() {
+        throw new UnsupportedOperationException();
     }
 
 }

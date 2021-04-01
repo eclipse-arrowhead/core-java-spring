@@ -3,7 +3,7 @@ package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor;
 import eu.arrowhead.core.plantdescriptionengine.MonitorInfo;
 import eu.arrowhead.core.plantdescriptionengine.alarms.AlarmManager;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.DtoReadExceptionCatcher;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.CodecExceptionCatcher;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.routehandlers.GetAllPdeAlarms;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.routehandlers.GetAllPlantDescriptions;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.routehandlers.GetPdeAlarm;
@@ -11,9 +11,9 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.rou
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.routehandlers.UpdatePdeAlarm;
 import se.arkalix.ArServiceHandle;
 import se.arkalix.ArSystem;
-import se.arkalix.descriptor.EncodingDescriptor;
-import se.arkalix.descriptor.TransportDescriptor;
-import se.arkalix.dto.DtoReadException;
+import se.arkalix.codec.CodecException;
+import se.arkalix.codec.CodecType;
+import se.arkalix.net.ProtocolType;
 import se.arkalix.net.http.client.HttpClient;
 import se.arkalix.net.http.service.HttpService;
 import se.arkalix.query.ServiceQuery;
@@ -90,8 +90,8 @@ public class PdeMonitorService {
 
         final ServiceQuery serviceQuery = arSystem.consume()
             .name(MONITORABLE_SERVICE_NAME)
-            .transports(TransportDescriptor.HTTP)
-            .encodings(EncodingDescriptor.JSON);
+            .codecTypes(CodecType.JSON)
+            .protocolTypes(ProtocolType.HTTP);
 
         pingTask = new PingTask(serviceQuery, httpClient, alarmManager);
         retrieveMonitorInfoTask = new RetrieveMonitorInfoTask(serviceQuery, httpClient, monitorInfo);
@@ -107,20 +107,15 @@ public class PdeMonitorService {
     public Future<ArServiceHandle> provide() {
         final HttpService service = new HttpService()
             .name(MONITOR_SERVICE_NAME)
-            .encodings(EncodingDescriptor.JSON)
+            .codecs(CodecType.JSON)
             .basePath(BASE_PATH)
             .get(GET_ALL_PLANT_DESCRIPTIONS_PATH, new GetAllPlantDescriptions(monitorInfo, pdTracker))
             .get(GET_PLANT_DESCRIPTION_PATH, new GetPlantDescription(monitorInfo, pdTracker))
             .get(GET_ALL_ALARMS_PATH, new GetAllPdeAlarms(alarmManager))
             .get(GET_ALARM_PATH, new GetPdeAlarm(alarmManager))
             .patch(UPDATE_ALARM_PATH, new UpdatePdeAlarm(alarmManager))
-            .catcher(DtoReadException.class, new DtoReadExceptionCatcher());
-
-        if (secure) {
-            service.accessPolicy(AccessPolicy.cloud());
-        } else {
-            service.accessPolicy(AccessPolicy.unrestricted());
-        }
+            .catcher(CodecException.class, new CodecExceptionCatcher())
+            .accessPolicy(secure ? AccessPolicy.cloud() : AccessPolicy.unrestricted());
 
         final Timer timer = new Timer();
 

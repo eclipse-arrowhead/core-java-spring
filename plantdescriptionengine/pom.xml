@@ -13,9 +13,24 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>11</maven.compiler.release>
-    <kalix.version>0.4.2</kalix.version>
+    <kalix.version>0.6.0-SNAPSHOT</kalix.version>
     <mysql.jdbc.driver>8.0.16</mysql.jdbc.driver>
   </properties>
+
+  <profiles>
+    <profile>
+       <id>allow-snapshots</id>
+          <activation><activeByDefault>true</activeByDefault></activation>
+       <repositories>
+         <repository>
+           <id>snapshots-repo</id>
+           <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+           <releases><enabled>false</enabled></releases>
+           <snapshots><enabled>true</enabled></snapshots>
+         </repository>
+       </repositories>
+     </profile>
+  </profiles>
 
   <dependencies>
     <dependency>
@@ -36,6 +51,8 @@
         <version>5.7.0</version>
         <scope>test</scope>
     </dependency>
+
+
     <dependency>
         <groupId>se.arkalix</groupId>
         <artifactId>kalix-base</artifactId>
@@ -48,9 +65,14 @@
     </dependency>
     <dependency>
         <groupId>se.arkalix</groupId>
-        <artifactId>kalix-processors</artifactId>
+        <artifactId>kalix-dto-processor</artifactId>
         <version>${kalix.version}</version>
         <scope>provided</scope>
+    </dependency>
+    <dependency>
+        <groupId>se.arkalix</groupId>
+        <artifactId>kalix-dto</artifactId>
+        <version>${kalix.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -80,6 +102,12 @@
       <artifactId>mockito-junit-jupiter</artifactId>
       <version>3.7.7</version>
       <scope>test</scope>
+    </dependency>
+
+    <dependency>
+        <groupId>com.h2database</groupId>
+        <artifactId>h2</artifactId>
+        <version>1.4.200</version>
     </dependency>
 
   </dependencies>

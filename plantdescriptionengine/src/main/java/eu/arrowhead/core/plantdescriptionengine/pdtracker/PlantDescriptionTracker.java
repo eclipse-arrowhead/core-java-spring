@@ -6,7 +6,6 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Co
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystem;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntry;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryDto;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryListBuilder;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryListDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Port;
 
@@ -153,7 +152,7 @@ public class PlantDescriptionTracker {
      */
     public PlantDescriptionEntryListDto getListDto() {
         final List<PlantDescriptionEntryDto> data = new ArrayList<>(entries.values());
-        return new PlantDescriptionEntryListBuilder()
+        return new PlantDescriptionEntryListDto.Builder()
             .data(data)
             .count(data.size())
             .build();

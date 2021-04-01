@@ -20,28 +20,28 @@ public class PlantDescriptionEntryTest {
     @Test
     public void shouldFilterEntries() {
         final List<PlantDescriptionEntry> original = Arrays.asList(
-            new PlantDescriptionEntryBuilder()
+            new PlantDescriptionEntryDto.Builder()
                 .id(1)
                 .plantDescription("Plant Description 1A")
                 .createdAt(now)
                 .updatedAt(now)
                 .active(false)
                 .build(),
-            new PlantDescriptionEntryBuilder()
+            new PlantDescriptionEntryDto.Builder()
                 .id(2)
                 .plantDescription("Plant Description 1A")
                 .createdAt(now)
                 .updatedAt(now)
                 .active(true)
                 .build(),
-            new PlantDescriptionEntryBuilder()
+            new PlantDescriptionEntryDto.Builder()
                 .id(3)
                 .plantDescription("Plant Description 1A")
                 .createdAt(now)
                 .updatedAt(now)
                 .active(false)
                 .build(),
-            new PlantDescriptionEntryBuilder()
+            new PlantDescriptionEntryDto.Builder()
                 .id(4)
                 .plantDescription("Plant Description 1A")
                 .createdAt(now)
@@ -73,31 +73,31 @@ public class PlantDescriptionEntryTest {
         final String serviceDefinition = "service_a";
         final String serviceInterface = "HTTP-SECURE-JSON";
 
-        final List<PortDto> consumerPorts = List.of(new PortBuilder()
+        final List<PortDto> consumerPorts = List.of(new PortDto.Builder()
             .portName(portName)
             .serviceInterface(serviceInterface)
             .serviceDefinition(serviceDefinition)
             .consumer(true)
             .build());
 
-        final List<PortDto> producerPorts = List.of(new PortBuilder()
+        final List<PortDto> producerPorts = List.of(new PortDto.Builder()
             .portName(portName)
             .serviceInterface(serviceInterface)
             .serviceDefinition(serviceDefinition)
             .consumer(false)
             .build());
 
-        final PdeSystemDto consumerSystem = new PdeSystemBuilder()
+        final PdeSystemDto consumerSystem = new PdeSystemDto.Builder()
             .systemId(consumerId)
             .ports(consumerPorts)
             .build();
 
-        final PdeSystemDto producerSystem = new PdeSystemBuilder()
+        final PdeSystemDto producerSystem = new PdeSystemDto.Builder()
             .systemId(producerId)
             .ports(producerPorts)
             .build();
 
-        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryDto.Builder()
             .id(1)
             .plantDescription("Plant Description 1A")
             .createdAt(now)
@@ -108,18 +108,18 @@ public class PlantDescriptionEntryTest {
             .connections(List.of())
             .build();
 
-        final List<ConnectionDto> newConnections = List.of(new ConnectionBuilder()
-            .consumer(new SystemPortBuilder()
+        final List<ConnectionDto> newConnections = List.of(new ConnectionDto.Builder()
+            .consumer(new SystemPortDto.Builder()
                 .systemId(consumerId)
                 .portName(portName)
                 .build())
-            .producer(new SystemPortBuilder()
+            .producer(new SystemPortDto.Builder()
                 .systemId(producerId)
                 .portName(portName)
                 .build())
             .build());
 
-        final PlantDescriptionUpdateDto newFields = new PlantDescriptionUpdateBuilder()
+        final PlantDescriptionUpdateDto newFields = new PlantDescriptionUpdateDto.Builder()
             .connections(newConnections)
             .build();
         final PlantDescriptionEntryDto updated = PlantDescriptionEntry.update(entry, newFields);
@@ -140,42 +140,42 @@ public class PlantDescriptionEntryTest {
         final String serviceDefinition = "service_a";
         final String serviceInterface = "HTTP-SECURE-JSON";
 
-        final List<PortDto> consumerPorts = List.of(new PortBuilder()
+        final List<PortDto> consumerPorts = List.of(new PortDto.Builder()
             .portName(portName)
             .serviceInterface(serviceInterface)
             .serviceDefinition(serviceDefinition)
             .consumer(true)
             .build());
 
-        final List<PortDto> producerPorts = List.of(new PortBuilder()
+        final List<PortDto> producerPorts = List.of(new PortDto.Builder()
             .portName(portName)
             .serviceInterface(serviceInterface)
             .serviceDefinition(serviceDefinition)
             .consumer(false)
             .build());
 
-        final PdeSystemDto consumerSystem = new PdeSystemBuilder()
+        final PdeSystemDto consumerSystem = new PdeSystemDto.Builder()
             .systemId(consumerId)
             .ports(consumerPorts)
             .build();
 
-        final PdeSystemDto producerSystem = new PdeSystemBuilder()
+        final PdeSystemDto producerSystem = new PdeSystemDto.Builder()
             .systemId(producerId)
             .ports(producerPorts)
             .build();
 
-        final List<ConnectionDto> connections = List.of(new ConnectionBuilder()
-            .consumer(new SystemPortBuilder()
+        final List<ConnectionDto> connections = List.of(new ConnectionDto.Builder()
+            .consumer(new SystemPortDto.Builder()
                 .systemId(consumerId)
                 .portName(portName)
                 .build())
-            .producer(new SystemPortBuilder()
+            .producer(new SystemPortDto.Builder()
                 .systemId(producerId)
                 .portName(portName)
                 .build())
             .build());
 
-        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryDto.Builder()
             .id(1)
             .plantDescription("Plant Description 1A")
             .createdAt(now)
@@ -186,7 +186,7 @@ public class PlantDescriptionEntryTest {
             .connections(connections)
             .build();
 
-        final PlantDescriptionUpdateDto newFields = new PlantDescriptionUpdateBuilder()
+        final PlantDescriptionUpdateDto newFields = new PlantDescriptionUpdateDto.Builder()
             .connections(List.of())
             .build();
         final PlantDescriptionEntryDto updated = PlantDescriptionEntry.update(entry, newFields);
@@ -205,51 +205,51 @@ public class PlantDescriptionEntryTest {
         final String serviceInterface = "HTTP-SECURE-JSON";
 
         final List<PortDto> consumerPorts = List.of(
-            new PortBuilder().portName(portNameA)
+            new PortDto.Builder().portName(portNameA)
                 .serviceDefinition(serviceDefinition)
                 .serviceInterface(serviceInterface)
                 .consumer(true)
                 .build(),
-            new PortBuilder().portName(portNameB)
+            new PortDto.Builder().portName(portNameB)
                 .serviceDefinition(serviceDefinition)
                 .serviceInterface(serviceInterface)
                 .consumer(true)
                 .build(),
-            new PortBuilder().portName(portNameC)
+            new PortDto.Builder().portName(portNameC)
                 .serviceDefinition(serviceDefinition)
                 .serviceInterface(serviceInterface)
                 .consumer(true)
                 .build());
 
-        final List<PortDto> producerPorts = List.of(new PortBuilder()
+        final List<PortDto> producerPorts = List.of(new PortDto.Builder()
             .portName(portNameA)
             .serviceInterface(serviceInterface)
             .serviceDefinition(serviceDefinition)
             .consumer(false)
             .build());
 
-        final PdeSystemDto consumerSystem = new PdeSystemBuilder()
+        final PdeSystemDto consumerSystem = new PdeSystemDto.Builder()
             .systemId(consumerId)
             .ports(consumerPorts)
             .build();
 
-        final PdeSystemDto producerSystem = new PdeSystemBuilder()
+        final PdeSystemDto producerSystem = new PdeSystemDto.Builder()
             .systemId(producerId)
             .ports(producerPorts)
             .build();
 
-        final List<ConnectionDto> connections = List.of(new ConnectionBuilder()
-            .consumer(new SystemPortBuilder()
+        final List<ConnectionDto> connections = List.of(new ConnectionDto.Builder()
+            .consumer(new SystemPortDto.Builder()
                 .systemId(consumerId)
                 .portName(portNameA)
                 .build())
-            .producer(new SystemPortBuilder()
+            .producer(new SystemPortDto.Builder()
                 .systemId(producerId)
                 .portName(portNameA)
                 .build())
             .build());
 
-        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryDto.Builder()
             .id(1)
             .plantDescription("Plant Description 1A")
             .createdAt(now)
@@ -261,28 +261,28 @@ public class PlantDescriptionEntryTest {
             .build();
 
         final List<ConnectionDto> newConnections = List.of(
-            new ConnectionBuilder()
-                .consumer(new SystemPortBuilder()
+            new ConnectionDto.Builder()
+                .consumer(new SystemPortDto.Builder()
                     .systemId(consumerId)
                     .portName(portNameB)
                     .build())
-                .producer(new SystemPortBuilder()
+                .producer(new SystemPortDto.Builder()
                     .systemId(producerId)
                     .portName(portNameA)
                     .build())
                 .build(),
-            new ConnectionBuilder()
-                .consumer(new SystemPortBuilder()
+            new ConnectionDto.Builder()
+                .consumer(new SystemPortDto.Builder()
                     .systemId(consumerId)
                     .portName(portNameC)
                     .build())
-                .producer(new SystemPortBuilder()
+                .producer(new SystemPortDto.Builder()
                     .systemId(producerId)
                     .portName(portNameA)
                     .build())
                 .build());
 
-        final PlantDescriptionUpdateDto newFields = new PlantDescriptionUpdateBuilder()
+        final PlantDescriptionUpdateDto newFields = new PlantDescriptionUpdateDto.Builder()
             .connections(newConnections)
             .build();
 
@@ -312,7 +312,7 @@ public class PlantDescriptionEntryTest {
         final Instant t3 = t1.plus(2, ChronoUnit.HOURS);
         final Instant t4 = t1.plus(3, ChronoUnit.HOURS);
 
-        final PlantDescriptionEntryDto entryA = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryA = new PlantDescriptionEntryDto.Builder()
             .id(idA)
             .plantDescription("A")
             .createdAt(t3)
@@ -320,14 +320,14 @@ public class PlantDescriptionEntryTest {
             .active(false)
             .build();
 
-        final PlantDescriptionEntryDto entryB = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryB = new PlantDescriptionEntryDto.Builder()
             .id(idB)
             .plantDescription("B")
             .createdAt(t1)
             .updatedAt(t1)
             .active(false)
             .build();
-        final PlantDescriptionEntryDto entryC = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryC = new PlantDescriptionEntryDto.Builder()
             .id(idC)
             .plantDescription("C")
             .createdAt(t2)
@@ -370,7 +370,7 @@ public class PlantDescriptionEntryTest {
 
         final String serviceInterface = "HTTP-SECURE-JSON";
 
-        final List<PortDto> consumerPorts = List.of(new PortBuilder()
+        final List<PortDto> consumerPorts = List.of(new PortDto.Builder()
             .portName(consumerPort)
             .serviceInterface(serviceInterface)
             .serviceDefinition("ABC")
@@ -378,14 +378,14 @@ public class PlantDescriptionEntryTest {
             .build());
 
         final List<PortDto> producerPorts = List.of(
-            new PortBuilder()
+            new PortDto.Builder()
                 .portName(producerPortA)
                 .serviceInterface(serviceInterface)
                 .serviceDefinition("service_a")
                 .consumer(false)
                 .metadata(Map.of("x", "8"))
                 .build(),
-            new PortBuilder()
+            new PortDto.Builder()
                 .portName(producerPortB)
                 .serviceInterface(serviceInterface)
                 .serviceDefinition("service_b")
@@ -393,41 +393,41 @@ public class PlantDescriptionEntryTest {
                 .consumer(false)
                 .build());
 
-        final PdeSystemDto consumerSystem = new PdeSystemBuilder()
+        final PdeSystemDto consumerSystem = new PdeSystemDto.Builder()
             .systemId(consumerSystemName)
             .ports(consumerPorts)
             .metadata(Map.of("a", "1"))
             .build();
 
-        final PdeSystemDto producerSystem = new PdeSystemBuilder()
+        final PdeSystemDto producerSystem = new PdeSystemDto.Builder()
             .systemId(producerSystemName)
             .ports(producerPorts)
             .metadata(Map.of("b", "2"))
             .build();
 
         final List<ConnectionDto> connections = List.of(
-            new ConnectionBuilder()
-                .consumer(new SystemPortBuilder()
+            new ConnectionDto.Builder()
+                .consumer(new SystemPortDto.Builder()
                     .systemId(consumerSystemName)
                     .portName(consumerPort)
                     .build())
-                .producer(new SystemPortBuilder()
+                .producer(new SystemPortDto.Builder()
                     .systemId(producerSystemName)
                     .portName(producerPortA)
                     .build())
                 .build(),
-            new ConnectionBuilder()
-                .consumer(new SystemPortBuilder()
+            new ConnectionDto.Builder()
+                .consumer(new SystemPortDto.Builder()
                     .systemId(consumerSystemName)
                     .portName(consumerPort)
                     .build())
-                .producer(new SystemPortBuilder()
+                .producer(new SystemPortDto.Builder()
                     .systemId(producerSystemName)
                     .portName(producerPortB)
                     .build())
                 .build());
 
-        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryDto.Builder()
             .id(1)
             .plantDescription("Plant Description 1A")
             .createdAt(now)
@@ -467,44 +467,44 @@ public class PlantDescriptionEntryTest {
 
         final String serviceInterface = "HTTP-SECURE-JSON";
 
-        final List<PortDto> consumerPorts = List.of(new PortBuilder()
+        final List<PortDto> consumerPorts = List.of(new PortDto.Builder()
             .portName(consumerPort)
             .serviceInterface(serviceInterface)
             .serviceDefinition("Monitorable")
             .consumer(true)
             .build());
 
-        final List<PortDto> producerPorts = List.of(new PortBuilder()
+        final List<PortDto> producerPorts = List.of(new PortDto.Builder()
             .portName(consumerPort)
             .serviceInterface(serviceInterface)
             .serviceDefinition("Monitorable")
             .consumer(false)
             .build());
 
-        final PdeSystemDto consumerSystem = new PdeSystemBuilder()
+        final PdeSystemDto consumerSystem = new PdeSystemDto.Builder()
             .systemId(consumerId)
             .systemName(consumerName)
             .ports(consumerPorts)
             .build();
 
-        final PdeSystemDto producerSystem = new PdeSystemBuilder()
+        final PdeSystemDto producerSystem = new PdeSystemDto.Builder()
             .systemId(producerId)
             .systemName(producerName)
             .ports(producerPorts)
             .build();
 
-        final List<ConnectionDto> connections = List.of(new ConnectionBuilder()
-            .consumer(new SystemPortBuilder()
+        final List<ConnectionDto> connections = List.of(new ConnectionDto.Builder()
+            .consumer(new SystemPortDto.Builder()
                 .systemId(consumerId)
                 .portName(consumerPort)
                 .build())
-            .producer(new SystemPortBuilder()
+            .producer(new SystemPortDto.Builder()
                 .systemId(producerId)
                 .portName(producerPort)
                 .build())
             .build());
 
-        final PlantDescriptionDto description = new PlantDescriptionBuilder()
+        final PlantDescriptionDto description = new PlantDescriptionDto.Builder()
             .plantDescription("Plant Description 1A")
             .active(true)
             .systems(List.of(consumerSystem, producerSystem))

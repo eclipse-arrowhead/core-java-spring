@@ -56,8 +56,8 @@ public class PdeMainTest {
         final InetSocketAddress address = new InetSocketAddress("0.0.0.0", 5000);
         final ArSystem arSystem = PdeMain.createArSystem(appProps, address);
 
-        assertEquals(localPort, arSystem.localPort());
-        assertEquals("pde", arSystem.name());
+        assertEquals(localPort, arSystem.port());
+        assertEquals("plantdescriptionengine", arSystem.name());
         assertFalse(arSystem.isSecure());
     }
 

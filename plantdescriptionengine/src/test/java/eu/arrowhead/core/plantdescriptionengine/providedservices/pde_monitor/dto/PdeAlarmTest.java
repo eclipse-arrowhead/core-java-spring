@@ -28,7 +28,7 @@ public class PdeAlarmTest {
         final Instant t4 = t1.plus(3, ChronoUnit.HOURS);
         final Instant t5 = t1.plus(4, ChronoUnit.HOURS);
 
-        final PdeAlarm alarmA = new PdeAlarmBuilder()
+        final PdeAlarm alarmA = new PdeAlarmDto.Builder()
             .id(idA)
             .systemId("a")
             .acknowledged(false)
@@ -38,7 +38,7 @@ public class PdeAlarmTest {
             .updatedAt(t3)
             .clearedAt(t4)
             .build();
-        final PdeAlarm alarmB = new PdeAlarmBuilder()
+        final PdeAlarm alarmB = new PdeAlarmDto.Builder()
             .id(idB)
             .systemId("b")
             .acknowledged(false)
@@ -48,7 +48,7 @@ public class PdeAlarmTest {
             .updatedAt(t1)
             .clearedAt(t5)
             .build();
-        final PdeAlarm alarmC = new PdeAlarmBuilder()
+        final PdeAlarm alarmC = new PdeAlarmDto.Builder()
             .id(idC)
             .systemId("c")
             .acknowledged(false)
@@ -58,7 +58,7 @@ public class PdeAlarmTest {
             .updatedAt(t4)
             .build();
 
-        final PdeAlarm alarmD = new PdeAlarmBuilder()
+        final PdeAlarm alarmD = new PdeAlarmDto.Builder()
             .id(idD)
             .systemId("d")
             .acknowledged(false)
@@ -109,7 +109,7 @@ public class PdeAlarmTest {
         final int idC = 3;
         final int idD = 4;
 
-        final PdeAlarm alarmA = new PdeAlarmBuilder()
+        final PdeAlarm alarmA = new PdeAlarmDto.Builder()
             .id(idA)
             .acknowledged(false)
             .systemId("A")
@@ -118,7 +118,7 @@ public class PdeAlarmTest {
             .raisedAt(now)
             .updatedAt(now)
             .build();
-        final PdeAlarm alarmB = new PdeAlarmBuilder()
+        final PdeAlarm alarmB = new PdeAlarmDto.Builder()
             .id(idB)
             .acknowledged(false)
             .systemId("B")
@@ -127,7 +127,7 @@ public class PdeAlarmTest {
             .raisedAt(now)
             .updatedAt(now)
             .build();
-        final PdeAlarm alarmC = new PdeAlarmBuilder()
+        final PdeAlarm alarmC = new PdeAlarmDto.Builder()
             .id(idC)
             .acknowledged(false)
             .systemId("C")
@@ -137,7 +137,7 @@ public class PdeAlarmTest {
             .updatedAt(now)
             .clearedAt(now.plus(1, ChronoUnit.HOURS))
             .build();
-        final PdeAlarm alarmD = new PdeAlarmBuilder()
+        final PdeAlarm alarmD = new PdeAlarmDto.Builder()
             .id(idD)
             .acknowledged(false)
             .systemId("D")
@@ -168,7 +168,7 @@ public class PdeAlarmTest {
         final int idC = 3;
         final int idD = 4;
 
-        final PdeAlarm alarmA = new PdeAlarmBuilder()
+        final PdeAlarm alarmA = new PdeAlarmDto.Builder()
             .id(idA)
             .systemId("a")
             .acknowledged(false)
@@ -177,7 +177,7 @@ public class PdeAlarmTest {
             .raisedAt(now)
             .updatedAt(now)
             .build();
-        final PdeAlarm alarmB = new PdeAlarmBuilder()
+        final PdeAlarm alarmB = new PdeAlarmDto.Builder()
             .id(idB)
             .systemId("b")
             .acknowledged(false)
@@ -186,7 +186,7 @@ public class PdeAlarmTest {
             .raisedAt(now)
             .updatedAt(now)
             .build();
-        final PdeAlarm alarmC = new PdeAlarmBuilder()
+        final PdeAlarm alarmC = new PdeAlarmDto.Builder()
             .id(idC)
             .systemId("c")
             .acknowledged(false)
@@ -196,7 +196,7 @@ public class PdeAlarmTest {
             .updatedAt(now)
             .clearedAt(now.plus(1, ChronoUnit.HOURS))
             .build();
-        final PdeAlarm alarmD = new PdeAlarmBuilder()
+        final PdeAlarm alarmD = new PdeAlarmDto.Builder()
             .id(idD)
             .systemId("d")
             .acknowledged(false)
@@ -227,7 +227,7 @@ public class PdeAlarmTest {
         final int idB = 12;
         final int idC = 6;
 
-        final PdeAlarm alarmA = new PdeAlarmBuilder()
+        final PdeAlarm alarmA = new PdeAlarmDto.Builder()
             .id(idA)
             .systemId("A")
             .acknowledged(false)
@@ -237,7 +237,7 @@ public class PdeAlarmTest {
             .updatedAt(now)
             .build();
 
-        final PdeAlarm alarmB = new PdeAlarmBuilder()
+        final PdeAlarm alarmB = new PdeAlarmDto.Builder()
             .id(idB)
             .systemId("B")
             .acknowledged(true)
@@ -247,7 +247,7 @@ public class PdeAlarmTest {
             .updatedAt(now)
             .build();
 
-        final PdeAlarm alarmC = new PdeAlarmBuilder()
+        final PdeAlarm alarmC = new PdeAlarmDto.Builder()
             .id(idC)
             .systemId("C")
             .acknowledged(false)
@@ -274,7 +274,7 @@ public class PdeAlarmTest {
         final int idB = 12;
         final int idC = 6;
 
-        final PdeAlarm alarmA = new PdeAlarmBuilder()
+        final PdeAlarm alarmA = new PdeAlarmDto.Builder()
             .id(idA)
             .systemId("a")
             .acknowledged(false)
@@ -284,7 +284,7 @@ public class PdeAlarmTest {
             .updatedAt(now)
             .build();
 
-        final PdeAlarm alarmB = new PdeAlarmBuilder()
+        final PdeAlarm alarmB = new PdeAlarmDto.Builder()
             .id(idB)
             .systemId("b")
             .acknowledged(true)
@@ -294,7 +294,7 @@ public class PdeAlarmTest {
             .updatedAt(now)
             .build();
 
-        final PdeAlarm alarmC = new PdeAlarmBuilder()
+        final PdeAlarm alarmC = new PdeAlarmDto.Builder()
             .id(idC)
             .systemId("c")
             .acknowledged(false)
@@ -325,7 +325,7 @@ public class PdeAlarmTest {
 
         final String systemA = "Sys-A";
 
-        final PdeAlarm alarmA = new PdeAlarmBuilder()
+        final PdeAlarm alarmA = new PdeAlarmDto.Builder()
             .id(idA)
             .systemName(systemA)
             .systemId("A")
@@ -336,7 +336,7 @@ public class PdeAlarmTest {
             .updatedAt(now)
             .build();
 
-        final PdeAlarm alarmB = new PdeAlarmBuilder()
+        final PdeAlarm alarmB = new PdeAlarmDto.Builder()
             .id(idB)
             .systemName(systemA)
             .systemId("A")
@@ -347,7 +347,7 @@ public class PdeAlarmTest {
             .updatedAt(now)
             .build();
 
-        final PdeAlarm alarmC = new PdeAlarmBuilder()
+        final PdeAlarm alarmC = new PdeAlarmDto.Builder()
             .id(idC)
             .systemName("Sys-B")
             .systemId("B")
@@ -358,7 +358,7 @@ public class PdeAlarmTest {
             .updatedAt(now)
             .build();
 
-        final PdeAlarm alarmD = new PdeAlarmBuilder()
+        final PdeAlarm alarmD = new PdeAlarmDto.Builder()
             .id(idD)
             .systemId("D")
             .acknowledged(false)

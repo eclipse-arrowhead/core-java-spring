@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class FileRuleStoreTest {
 
     private final String entryDirectory = "test-temp-data";
+    private final int plantDescriptionId = 96;
 
     private void deleteDirectory(final File dir) {
         final File[] allContents = dir.listFiles();
@@ -35,9 +36,9 @@ public class FileRuleStoreTest {
         final FileRuleStore store = new FileRuleStore(entryDirectory);
         final Set<Integer> rules = Set.of(1, 2, 3);
 
-        store.setRules(rules);
+        store.setRules(plantDescriptionId, rules);
 
-        final Set<Integer> storedRules = store.readRules();
+        final Set<Integer> storedRules = store.readRules(plantDescriptionId);
         assertEquals(rules, storedRules);
     }
 
@@ -46,10 +47,10 @@ public class FileRuleStoreTest {
         final FileRuleStore store = new FileRuleStore(entryDirectory);
         final Set<Integer> rules = Set.of(1, 2, 3);
 
-        store.setRules(rules);
-        store.removeAll();
+        store.setRules(plantDescriptionId, rules);
+        store.removeRules(plantDescriptionId);
 
-        final Set<Integer> storedRules = store.readRules();
+        final Set<Integer> storedRules = store.readRules(plantDescriptionId);
         assertTrue(storedRules.isEmpty());
     }
 

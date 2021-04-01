@@ -1,10 +1,8 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt;
 
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Connection;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystem;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntry;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Port;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.SystemPort;
 import eu.arrowhead.core.plantdescriptionengine.utils.Metadata;
 
 import java.util.ArrayList;
@@ -14,7 +12,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -25,6 +22,12 @@ public class PlantDescriptionValidator {
     final Map<Integer, ? extends PlantDescriptionEntry> entries;
     final List<String> blacklist = List.of("unknown");
     private final List<String> errors = new ArrayList<>();
+
+    // TODO: Change constructor to:
+    // public PlantDescriptionValidator(final Map<Integer, ? extends PlantDescriptionEntry> existingEntries, final PlantDescriptionEntry newEntry) {
+    // This way, we can implement validateConnections and
+    // ensureIdentifiableSystems properly.
+
 
     /**
      * Constructor.
@@ -84,34 +87,37 @@ public class PlantDescriptionValidator {
      * by a name or by metadata.
      */
     private void ensureIdentifiableSystems() {
-        final ArrayList<PdeSystem> systems = new ArrayList<>();
-        for (final PlantDescriptionEntry entry : entries.values()) {
-            systems.addAll(entry.systems());
-        }
+        // TODO: Implement correctly. The version below did not allow the same
+        // system to be used in separate Plant Descriptions.
+        //
 
-        final Set<String> uniqueIdentifiers = new HashSet<>();
+        // final ArrayList<PdeSystem> systems = new ArrayList<>();
+        // for (final PlantDescriptionEntry entry : entries.values()) {
+        //     systems.addAll(entry.systems());
+        // }
 
-        for (final PdeSystem system : systems) {
+        // final Set<String> uniqueIdentifiers = new HashSet<>();
 
-            final Optional<Map<String, String>> metadata = system.metadata();
-            final boolean hasMetadata = metadata.isPresent() && !metadata.get().isEmpty();
+        // for (final PdeSystem system : systems) {
 
-            final String uid = uniqueIdentifier(system);
+        //     final Optional<Map<String, String>> metadata = system.metadata();
+        //     final boolean hasMetadata = metadata.isPresent() && !metadata.get().isEmpty();
 
-            if (!uniqueIdentifiers.add(uid)) {
-                errors.add("System with ID '" + system.systemId() +
-                    "' cannot be uniquely identified by its name/metadata combination.");
-            }
+        //     final String uid = uniqueIdentifier(system);
 
-            if (system.systemName().isEmpty() && !hasMetadata) {
-                errors.add("Contains a system with neither a name nor metadata to identify it.");
-            }
+        //     if (!uniqueIdentifiers.add(uid)) {
+        //         errors.add("System with ID '" + system.systemId() +
+        //             "' cannot be uniquely identified by its name/metadata combination.");
+        //     }
 
-            if (blacklist.contains(system.systemId().toLowerCase())) {
-                errors.add("'" + system.systemId() + "' is not a valid system ID.");
-            }
-        }
+        //     if (system.systemName().isEmpty() && !hasMetadata) {
+        //         errors.add("Contains a system with neither a name nor metadata to identify it.");
+        //     }
 
+        //     if (blacklist.contains(system.systemId().toLowerCase())) {
+        //         errors.add("'" + system.systemId() + "' is not a valid system ID.");
+        //     }
+        // }
     }
 
     /**
@@ -161,7 +167,7 @@ public class PlantDescriptionValidator {
 
     /**
      * If any of the Plant Description ID:s in the entries' include lists is not
-     * present in the Plant Description Tracker, this is reported as an error.
+     * present in the list of entries, this is reported as an error.
      */
     private void ensureInclusionsExist() {
         for (final PlantDescriptionEntry entry : entries.values()) {
@@ -199,80 +205,83 @@ public class PlantDescriptionValidator {
      */
     private void validateConnections() {
 
-        final ArrayList<PdeSystem> systems = new ArrayList<>();
-        final ArrayList<Connection> connections = new ArrayList<>();
+        // TODO: Only check connections belonging to the active entry and its
+        // included entry.
 
-        for (final PlantDescriptionEntry entry : entries.values()) {
-            systems.addAll(entry.systems());
-            connections.addAll(entry.connections());
-        }
+        // final ArrayList<PdeSystem> systems = new ArrayList<>();
+        // final ArrayList<Connection> connections = new ArrayList<>();
 
-        for (final Connection connection : connections) {
+        // for (final PlantDescriptionEntry entry : entries.values()) {
+        //     systems.addAll(entry.systems());
+        //     connections.addAll(entry.connections());
+        // }
 
-            PdeSystem consumerSystem = null;
-            PdeSystem producerSystem = null;
+        // for (final Connection connection : connections) {
 
-            Port consumerPort = null;
-            Port producerPort = null;
+        //     PdeSystem consumerSystem = null;
+        //     PdeSystem producerSystem = null;
 
-            if (connection.priority().orElse(0) < 0) { // TODO: Check for max value as well.
-                errors.add("A connection has a negative priority.");
-            }
+        //     Port consumerPort = null;
+        //     Port producerPort = null;
 
-            final SystemPort producer = connection.producer();
-            final SystemPort consumer = connection.consumer();
+        //     if (connection.priority().orElse(0) < 0) { // TODO: Check for max value as well.
+        //         errors.add("A connection has a negative priority.");
+        //     }
 
-            final String producerId = producer.systemId();
-            final String consumerId = consumer.systemId();
+        //     final SystemPort producer = connection.producer();
+        //     final SystemPort consumer = connection.consumer();
 
-            for (final PdeSystem system : systems) {
+        //     final String producerId = producer.systemId();
+        //     final String consumerId = consumer.systemId();
 
-                final boolean isProducerSystem = producerId.equals(system.systemId());
-                final boolean isConsumerSystem = consumerId.equals(system.systemId());
+        //     for (final PdeSystem system : systems) {
 
-                if (isProducerSystem) {
-                    final String portName = producer.portName();
-                    producerSystem = system;
-                    producerPort = system.getPort(portName);
-                    if (producerPort == null) {
-                        errors.add("Connection refers to the missing producer port '" + portName + "'");
-                    } else if (producerPort.consumer().orElse(false)) {
-                        errors.add("Invalid connection, '" + portName + "' is not a producer port.");
-                    }
-                } else if (isConsumerSystem) {
-                    final String portName = consumer.portName();
-                    consumerSystem = system;
-                    consumerPort = system.getPort(portName);
-                    if (consumerPort == null) {
-                        errors.add("Connection refers to the missing consumer port '" + portName + "'");
-                    } else if (!consumerPort.consumer().orElse(false)) {
-                        errors.add("Invalid connection, '" + portName + "' is not a consumer port.");
-                    }
-                }
-            }
+        //         final boolean isProducerSystem = producerId.equals(system.systemId());
+        //         final boolean isConsumerSystem = consumerId.equals(system.systemId());
 
-            if (producerSystem == null) {
-                errors.add("A connection refers to the missing system '" + producerId + "'");
-            }
-            if (consumerSystem == null) {
-                errors.add("A connection refers to the missing system '" + consumerId + "'");
-            }
+        //         if (isProducerSystem) {
+        //             final String portName = producer.portName();
+        //             producerSystem = system;
+        //             producerPort = system.getPort(portName);
+        //             if (producerPort == null) {
+        //                 errors.add("Connection refers to the missing producer port '" + portName + "'");
+        //             } else if (producerPort.consumer().orElse(false)) {
+        //                 errors.add("Invalid connection, '" + portName + "' is not a producer port.");
+        //             }
+        //         } else if (isConsumerSystem) {
+        //             final String portName = consumer.portName();
+        //             consumerSystem = system;
+        //             consumerPort = system.getPort(portName);
+        //             if (consumerPort == null) {
+        //                 errors.add("Connection refers to the missing consumer port '" + portName + "'");
+        //             } else if (!consumerPort.consumer().orElse(false)) {
+        //                 errors.add("Invalid connection, '" + portName + "' is not a consumer port.");
+        //             }
+        //         }
+        //     }
 
-            if (producerPort != null && consumerPort != null) {
-                // Ensure that service interfaces match
-                if (!producerPort.serviceInterface().equals(consumerPort.serviceInterface())) {
-                    errors.add("The service interfaces of ports '" +
-                        consumerPort.portName() + "' and '" + producerPort.portName() + "' do not match."
-                    );
-                }
-                // Ensure that service definitions match
-                if (!producerPort.serviceDefinition().equals(consumerPort.serviceDefinition())) {
-                    errors.add("The service definitions of ports '" +
-                        consumerPort.portName() + "' and '" + producerPort.portName() + "' do not match."
-                    );
-                }
-            }
-        }
+        //     if (producerSystem == null) {
+        //         errors.add("A connection refers to the missing system '" + producerId + "'");
+        //     }
+        //     if (consumerSystem == null) {
+        //         errors.add("A connection refers to the missing system '" + consumerId + "'");
+        //     }
+
+        //     if (producerPort != null && consumerPort != null) {
+        //         // Ensure that service interfaces match
+        //         if (!producerPort.serviceInterface().equals(consumerPort.serviceInterface())) {
+        //             errors.add("The service interfaces of ports '" +
+        //                 consumerPort.portName() + "' and '" + producerPort.portName() + "' do not match."
+        //             );
+        //         }
+        //         // Ensure that service definitions match
+        //         if (!producerPort.serviceDefinition().equals(consumerPort.serviceDefinition())) {
+        //             errors.add("The service definitions of ports '" +
+        //                 consumerPort.portName() + "' and '" + producerPort.portName() + "' do not match."
+        //             );
+        //         }
+        //     }
+        // }
     }
 
     /**

@@ -3,8 +3,10 @@ package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.ro
 import eu.arrowhead.core.plantdescriptionengine.MonitorInfo;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.dto.ErrorMessage;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.dto.ErrorMessageDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.MonitorPlantDescriptionEntryDto;
+import se.arkalix.codec.CodecType;
 import se.arkalix.net.http.HttpStatus;
 import se.arkalix.net.http.service.HttpRouteHandler;
 import se.arkalix.net.http.service.HttpServiceRequest;
@@ -57,21 +59,27 @@ public class GetPlantDescription implements HttpRouteHandler {
         try {
             id = Integer.parseInt(idString);
         } catch (final NumberFormatException e) {
-            response.status(HttpStatus.BAD_REQUEST);
-            response.body(ErrorMessage.of(idString + " is not a valid Plant Description Entry ID."));
+            ErrorMessageDto errorMessage = ErrorMessage.of(idString + " is not a valid Plant Description Entry ID.");
+            response
+                .status(HttpStatus.BAD_REQUEST)
+                .body(errorMessage, CodecType.JSON);
             return Future.success(response);
         }
 
         final PlantDescriptionEntryDto entry = pdTracker.get(id);
 
         if (entry == null) {
-            response.body(ErrorMessage.of("Plant Description with ID " + id + " not found."));
-            response.status(HttpStatus.NOT_FOUND);
+            ErrorMessageDto errorMessage = ErrorMessage.of("Plant Description with ID " + id + " not found.");
+            response
+                .status(HttpStatus.NOT_FOUND)
+                .body(errorMessage, CodecType.JSON);
             return Future.success(response);
         }
 
         final MonitorPlantDescriptionEntryDto extendedEntry = DtoUtils.extend(entry, monitorInfo);
-        response.status(HttpStatus.OK).body(extendedEntry);
+        response.status
+            (HttpStatus.OK)
+            .body(extendedEntry, CodecType.JSON);
         return Future.success(response);
     }
 }

@@ -8,7 +8,7 @@ import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.Optional;
 
-import static se.arkalix.dto.DtoEncoding.JSON;
+import static se.arkalix.dto.DtoCodec.JSON;
 
 /**
  * Data Transfer Object (DTO) interface for systems registered in the Service

@@ -1,8 +1,8 @@
 package eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry;
 
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.SrSystem;
-import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.SrSystemBuilder;
-import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.SrSystemListBuilder;
+import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.SrSystemDto;
+import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.SrSystemListDto;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockClientResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,6 @@ import se.arkalix.net.http.client.HttpClient;
 import se.arkalix.net.http.client.HttpClientRequest;
 import se.arkalix.util.concurrent.Future;
 
-import javax.net.ssl.SSLException;
 import java.net.InetSocketAddress;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,7 +22,7 @@ import static org.mockito.Mockito.when;
 public class SystemTrackerTest {
 
     @Test
-    public void shouldThrowWhenNotInitialized() throws SSLException {
+    public void shouldThrowWhenNotInitialized() {
 
         final HttpClient httpClient = new HttpClient.Builder().insecure().build();
         final SystemTracker systemTracker = new SystemTracker(httpClient, new InetSocketAddress("0.0.0.0", 5000));
@@ -41,8 +40,8 @@ public class SystemTrackerTest {
         final int systemId = 92;
         // Create some fake data for the HttpClient to respond with:
         final MockClientResponse response = new MockClientResponse().status(HttpStatus.OK)
-            .body(new SrSystemListBuilder().count(1)
-                .data(new SrSystemBuilder()
+            .body(new SrSystemListDto.Builder().count(1)
+                .data(new SrSystemDto.Builder()
                     .id(systemId)
                     .systemName(systemName)
                     .address("0.0.0.0")

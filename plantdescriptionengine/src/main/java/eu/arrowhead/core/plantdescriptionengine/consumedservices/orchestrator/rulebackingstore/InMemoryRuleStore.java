@@ -1,8 +1,10 @@
 package eu.arrowhead.core.plantdescriptionengine.consumedservices.orchestrator.rulebackingstore;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Backing store that only stores data in memory.
@@ -11,31 +13,31 @@ import java.util.Set;
  */
 public class InMemoryRuleStore implements RuleStore {
 
-    private Set<Integer> rules = new HashSet<>();
+    private Map<Integer, Set<Integer>> rulesPerEntry = new ConcurrentHashMap<>();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Set<Integer> readRules() {
-        return new HashSet<>(rules);
+    public Set<Integer> readRules(final int plantDescriptionId) {
+        return rulesPerEntry.getOrDefault(plantDescriptionId, new HashSet<>());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void setRules(final Set<Integer> newRules) {
+    public void setRules(final int plantDescriptionId, final Set<Integer> newRules) {
         Objects.requireNonNull(newRules, "Expected rules.");
-        rules = new HashSet<>(newRules);
+        rulesPerEntry.put(plantDescriptionId, newRules);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void removeAll() {
-        rules.clear();
+    public void removeRules(final int plantDescriptionId) {
+        rulesPerEntry.remove(plantDescriptionId);
     }
 
 }

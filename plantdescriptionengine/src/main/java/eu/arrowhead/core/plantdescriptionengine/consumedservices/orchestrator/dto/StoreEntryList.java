@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static se.arkalix.dto.DtoEncoding.JSON;
+import static se.arkalix.dto.DtoCodec.JSON;
 
 /**
  * Data Transfer Object (DTO) interface for lists of store entries.

@@ -93,7 +93,16 @@ public class AlarmManager {
         alarm.setAcknowledged(acknowledged);
     }
 
-    private void raiseAlarm(final String systemId, final String systemName, final Map<String, String> metadata, final AlarmCause cause) {
+    /**
+     * Raises an alarm with the given info, unless an alarm with the exact same
+     * parameters is already active.
+     */
+    private void raiseAlarm(
+        final String systemId,
+        final String systemName,
+        final Map<String, String> metadata,
+        final AlarmCause cause
+    ) {
         // TODO: Concurrency handling
 
         // Check if this alarm has already been raised:
@@ -115,6 +124,15 @@ public class AlarmManager {
 
         clearedAlarms.add(alarm);
         activeAlarms.remove(alarm);
+    }
+
+    public void clearAlarm(final int id) {
+        Alarm alarm = getAlarmData(id);
+        if (alarm != null) {
+            alarm.setCleared();
+            clearedAlarms.add(alarm);
+            activeAlarms.remove(alarm);
+        }
     }
 
     /**

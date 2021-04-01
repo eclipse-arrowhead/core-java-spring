@@ -9,6 +9,7 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Pl
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import se.arkalix.codec.CodecType;
 import se.arkalix.net.http.HttpStatus;
 import se.arkalix.net.http.service.HttpRouteHandler;
 import se.arkalix.net.http.service.HttpServiceRequest;
@@ -48,7 +49,7 @@ public class AddPlantDescription implements HttpRouteHandler {
         Objects.requireNonNull(request, "Expected request.");
         Objects.requireNonNull(response, "Expected response.");
 
-        return request.bodyAs(PlantDescriptionDto.class)
+        return request.bodyTo(PlantDescriptionDto::decodeJson)
             .map(description -> {
 
                 final PlantDescriptionEntryDto entry = PlantDescriptionEntry.from(description, pdTracker.getUniqueId());
@@ -61,7 +62,7 @@ public class AddPlantDescription implements HttpRouteHandler {
                 if (validator.hasError()) {
                     return response
                         .status(HttpStatus.BAD_REQUEST)
-                        .body(ErrorMessage.of(validator.getErrorMessage()));
+                        .body(ErrorMessage.of(validator.getErrorMessage()), CodecType.JSON);
                 }
 
                 try {
@@ -70,7 +71,7 @@ public class AddPlantDescription implements HttpRouteHandler {
                     logger.error("Failure when communicating with backing store.", e);
                     return response.status(HttpStatus.INTERNAL_SERVER_ERROR);
                 }
-                return response.status(HttpStatus.CREATED).body(entry);
+                return response.status(HttpStatus.CREATED).body(entry, CodecType.JSON);
             });
     }
 }

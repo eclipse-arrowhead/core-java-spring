@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import static se.arkalix.dto.DtoEncoding.JSON;
+import static se.arkalix.dto.DtoCodec.JSON;
 
 /**
  * Data Transfer Object (DTO) interface for plant descriptions.
@@ -44,7 +44,7 @@ public interface PlantDescriptionEntry {
 
         final Instant now = Instant.now();
 
-        return new PlantDescriptionEntryBuilder()
+        return new PlantDescriptionEntryDto.Builder()
             .id(id)
             .plantDescription(description.plantDescription())
             .active(description.active()
@@ -74,7 +74,7 @@ public interface PlantDescriptionEntry {
             connections.add((ConnectionDto) connection);
         }
 
-        return new PlantDescriptionEntryBuilder()
+        return new PlantDescriptionEntryDto.Builder()
             .id(entry.id())
             .plantDescription(entry.plantDescription())
             .active(false)
@@ -92,9 +92,12 @@ public interface PlantDescriptionEntry {
      * @return A copy of the target plant description updated with the fields
      * specified in newFields.
      */
-    static PlantDescriptionEntryDto update(final PlantDescriptionEntryDto oldEntry, final PlantDescriptionUpdateDto newFields) {
+    static PlantDescriptionEntryDto update(
+        final PlantDescriptionEntryDto oldEntry,
+        final PlantDescriptionUpdateDto newFields
+    ) {
 
-        final PlantDescriptionEntryBuilder builder = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto.Builder builder = new PlantDescriptionEntryDto.Builder()
             .id(oldEntry.id())
             .plantDescription(newFields.plantDescription()
                 .orElse(oldEntry.plantDescription()))

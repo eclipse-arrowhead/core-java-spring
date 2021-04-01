@@ -3,13 +3,14 @@ package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.route
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.PdStoreException;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.dto.ErrorMessage;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.dto.ErrorMessageDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.PlantDescriptionValidator;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntry;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionUpdateDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import se.arkalix.dto.DtoEncoding;
+import se.arkalix.codec.CodecType;
 import se.arkalix.net.http.HttpStatus;
 import se.arkalix.net.http.service.HttpRouteHandler;
 import se.arkalix.net.http.service.HttpServiceRequest;
@@ -50,7 +51,7 @@ public class UpdatePlantDescription implements HttpRouteHandler {
         Objects.requireNonNull(request, "Expected request.");
         Objects.requireNonNull(response, "Expected response.");
 
-        return request.bodyAs(PlantDescriptionUpdateDto.class)
+        return request.bodyTo(PlantDescriptionUpdateDto::decodeJson)
             .map(newFields -> {
                 final String idString = request.pathParameter(0);
                 final int id;
@@ -58,18 +59,20 @@ public class UpdatePlantDescription implements HttpRouteHandler {
                 try {
                     id = Integer.parseInt(idString);
                 } catch (final NumberFormatException e) {
-                    response.status(HttpStatus.BAD_REQUEST);
-                    response.body(DtoEncoding.JSON,
-                        ErrorMessage.of("'" + idString + "' is not a valid Plant Description Entry ID."));
-                    return response.status(HttpStatus.BAD_REQUEST);
+
+                    ErrorMessageDto errorMessage = ErrorMessage.of("'" + idString + "' is not a valid Plant Description Entry ID.");
+                    return response
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body(errorMessage, CodecType.JSON);
                 }
 
                 final PlantDescriptionEntryDto entry = pdTracker.get(id);
 
                 if (entry == null) {
+                    ErrorMessageDto errorMessage = ErrorMessage.of("Plant Description with ID '" + idString + "' not found.");
                     return response
                         .status(HttpStatus.NOT_FOUND)
-                        .body(ErrorMessage.of("Plant Description with ID '" + idString + "' not found."));
+                        .body(errorMessage, CodecType.JSON);
                 }
 
                 final PlantDescriptionEntryDto updatedEntry = PlantDescriptionEntry.update(entry, newFields);
@@ -82,7 +85,7 @@ public class UpdatePlantDescription implements HttpRouteHandler {
                 if (validator.hasError()) {
                     return response
                         .status(HttpStatus.BAD_REQUEST)
-                        .body(ErrorMessage.of(validator.getErrorMessage()));
+                        .body(ErrorMessage.of(validator.getErrorMessage()), CodecType.JSON);
                 }
 
                 try {
@@ -94,7 +97,7 @@ public class UpdatePlantDescription implements HttpRouteHandler {
 
                 return response
                     .status(HttpStatus.OK)
-                    .body(updatedEntry);
+                    .body(updatedEntry, CodecType.JSON);
             });
     }
 }

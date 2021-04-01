@@ -3,6 +3,7 @@ package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.ro
 import eu.arrowhead.core.plantdescriptionengine.alarms.AlarmManager;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.dto.ErrorMessage;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PdeAlarmDto;
+import se.arkalix.codec.CodecType;
 import se.arkalix.net.http.HttpStatus;
 import se.arkalix.net.http.service.HttpRouteHandler;
 import se.arkalix.net.http.service.HttpServiceRequest;
@@ -47,20 +48,24 @@ public class GetPdeAlarm implements HttpRouteHandler {
         try {
             id = Integer.parseInt(idString);
         } catch (final NumberFormatException e) {
-            response.status(HttpStatus.BAD_REQUEST);
-            response.body(ErrorMessage.of("'" + idString + "' is not a valid PDE Alarm ID."));
+            response
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ErrorMessage.of("'" + idString + "' is not a valid PDE Alarm ID."), CodecType.JSON);
             return Future.success(response);
         }
 
         final PdeAlarmDto alarm = alarmManager.getAlarmDto(id);
 
         if (alarm == null) {
-            response.status(HttpStatus.NOT_FOUND);
-            response.body(ErrorMessage.of("PDE Alarm with ID '" + id + "' not found."));
-            return Future.success(response);
+            response
+                .status(HttpStatus.NOT_FOUND)
+                .body(ErrorMessage.of("PDE Alarm with ID '" + id + "' not found."), CodecType.JSON);
+        } else {
+            response
+                .status(HttpStatus.OK)
+                .body(alarm, CodecType.JSON);
         }
 
-        response.status(HttpStatus.OK).body(alarm);
         return Future.success(response);
     }
 }

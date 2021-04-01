@@ -2,9 +2,10 @@ package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.ro
 
 import eu.arrowhead.core.plantdescriptionengine.alarms.AlarmManager;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.dto.ErrorMessage;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.dto.ErrorMessageDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PdeAlarm;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PdeAlarmUpdateDto;
-import se.arkalix.dto.DtoEncoding;
+import se.arkalix.codec.CodecType;
 import se.arkalix.net.http.HttpStatus;
 import se.arkalix.net.http.service.HttpRouteHandler;
 import se.arkalix.net.http.service.HttpServiceRequest;
@@ -43,7 +44,7 @@ public class UpdatePdeAlarm implements HttpRouteHandler {
         Objects.requireNonNull(request, "Expected request.");
         Objects.requireNonNull(response, "Expected response.");
 
-        return request.bodyAs(PdeAlarmUpdateDto.class)
+        return request.bodyTo(PdeAlarmUpdateDto::decodeJson)
             .map(newFields -> {
                 final String idString = request.pathParameter(0);
                 final int id;
@@ -51,16 +52,21 @@ public class UpdatePdeAlarm implements HttpRouteHandler {
                 try {
                     id = Integer.parseInt(idString);
                 } catch (final NumberFormatException e) {
-                    response.status(HttpStatus.BAD_REQUEST);
-                    response.body(DtoEncoding.JSON, ErrorMessage.of("'" + idString + "' is not a valid PDE Alarm ID."));
+
+                    ErrorMessageDto errorMessage = ErrorMessage.of("'" + idString + "' is not a valid PDE Alarm ID.");
+                    response
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body(errorMessage, CodecType.JSON);
+
                     return response.status(HttpStatus.BAD_REQUEST);
                 }
 
                 final PdeAlarm alarm = alarmManager.getAlarmDto(id);
                 if (alarm == null) {
+                    ErrorMessageDto errorMessage = ErrorMessage.of("PDE Alarm with ID '" + idString + "' not found.");
                     return response
                         .status(HttpStatus.NOT_FOUND)
-                        .body(ErrorMessage.of("PDE Alarm with ID '" + idString + "' not found."));
+                        .body(errorMessage, CodecType.JSON);
                 }
 
                 if (newFields.acknowledged().isPresent()) {
@@ -69,7 +75,7 @@ public class UpdatePdeAlarm implements HttpRouteHandler {
 
                 return response
                     .status(HttpStatus.OK)
-                    .body(alarmManager.getAlarmDto(id));
+                    .body(alarmManager.getAlarmDto(id), CodecType.JSON);
 
             });
     }

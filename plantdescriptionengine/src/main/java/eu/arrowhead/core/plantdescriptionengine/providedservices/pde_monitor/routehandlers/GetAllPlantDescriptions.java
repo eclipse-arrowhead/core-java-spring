@@ -5,7 +5,7 @@ import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracke
 import eu.arrowhead.core.plantdescriptionengine.providedservices.dto.ErrorMessage;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntry;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.MonitorPlantDescriptionEntryDto;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PlantDescriptionEntryListBuilder;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PlantDescriptionEntryListDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidation.BooleanParameter;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidation.IntParameter;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidation.ParseError;
@@ -14,6 +14,7 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidati
 import eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidation.StringParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import se.arkalix.codec.CodecType;
 import se.arkalix.net.http.HttpStatus;
 import se.arkalix.net.http.service.HttpRouteHandler;
 import se.arkalix.net.http.service.HttpServiceRequest;
@@ -110,8 +111,11 @@ public class GetAllPlantDescriptions implements HttpRouteHandler {
         } catch (final ParseError error) {
             logger.error("Encountered the following error(s) while parsing an HTTP request: " + error.getMessage());
 
-            return Future.success(response.status(HttpStatus.BAD_REQUEST)
-                .body(ErrorMessage.of(error.getMessage())));
+            response
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ErrorMessage.of(error.getMessage()), CodecType.JSON);
+            return Future.success(response);
+
         }
 
         List<eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryDto> entries = pdTracker
@@ -154,11 +158,14 @@ public class GetAllPlantDescriptions implements HttpRouteHandler {
             extendedEntries.add(DtoUtils.extend(entry, monitorInfo));
         }
 
-        response.status(HttpStatus.OK)
-            .body(new PlantDescriptionEntryListBuilder()
-                .data(extendedEntries)
-                .count(extendedEntries.size())
-                .build());
+        PlantDescriptionEntryListDto result = new PlantDescriptionEntryListDto.Builder()
+            .data(extendedEntries)
+            .count(extendedEntries.size())
+            .build();
+
+        response
+            .status(HttpStatus.OK)
+            .body(result, CodecType.JSON);
 
         return Future.success(response);
     }
