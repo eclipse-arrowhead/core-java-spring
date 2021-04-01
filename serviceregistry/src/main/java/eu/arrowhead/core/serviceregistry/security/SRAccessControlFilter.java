@@ -132,7 +132,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 		}
 		
 		if (!providerName.equalsIgnoreCase(clientName)) {
-			log.debug("Provider system name and certificate common name do not match! Registering denied!");
+			log.debug("Provider system name and certificate common name do not match! Unregistering denied!");
 			throw new AuthException("Provider system name(" + providerName + ") and certificate common name (" + clientCN + ") do not match!", HttpStatus.UNAUTHORIZED.value());
 		}
 	}
