@@ -434,14 +434,20 @@ public class ServiceRegistryDBServiceSystemTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void mergeSystemByIdSystemNameWithDotTest() {
+	public void mergeSystemByIdWrongSystemNameTest() {
 		final String systemName0 = "test.address";
 		final String address0 = "testAddress0";
 		final int port0 = 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
 		
-		serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);		
+		try {
+			serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);		
+		} catch (final InvalidParameterException ex) {
+			Assert.assertEquals("System name has invalid format. Name must match with the following regular expression: " + CommonNamePartVerifier.COMMON_NAME_PART_PATTERN_STRING, ex.getMessage());
+			
+			throw ex;
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------

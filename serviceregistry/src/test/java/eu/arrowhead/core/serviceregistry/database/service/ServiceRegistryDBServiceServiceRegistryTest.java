@@ -37,9 +37,11 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
+import eu.arrowhead.common.cn.CommonNamePartVerifier;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
@@ -87,6 +89,9 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	
 	@Spy
 	private ServiceInterfaceNameVerifier interfaceNameVerifier;
+	
+	@Spy
+	private CommonNamePartVerifier cnVerifier;
 
 	private static final String validTestMetadataStr = "key=value, key2=value2";
 	private static final String jsonInterFace = "HTTP-SECURE-JSON";
@@ -180,6 +185,17 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class) 
+	public void testRegisterServiceResponseServiceDefinitionWrongFlagTrue() {
+		ReflectionTestUtils.setField(serviceRegistryDBService, "useStrictServiceDefinitionVerifier", true);
+		final ServiceRegistryRequestDTO dto = new ServiceRegistryRequestDTO();
+		dto.setServiceDefinition("invalid_service_definition");
+		
+		serviceRegistryDBService.registerServiceResponse(dto);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	// This one also testing that when useStrictServiceDefinitionVerifier is false, the service definition format is not matters
+	@Test(expected = IllegalArgumentException.class) 
 	public void testRegisterServiceResponseProviderSystemNull() {
 		final ServiceRegistryRequestDTO dto = new ServiceRegistryRequestDTO();
 		dto.setServiceDefinition("service_definition");
@@ -192,7 +208,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testRegisterServiceResponseProviderSystemNameNull() {
 		final SystemRequestDTO sysDto = new SystemRequestDTO(); 
 		final ServiceRegistryRequestDTO dto = new ServiceRegistryRequestDTO();
-		dto.setServiceDefinition("service_definition");
+		dto.setServiceDefinition("serviceDefinition");
 		dto.setProviderSystem(sysDto);
 		
 		serviceRegistryDBService.registerServiceResponse(dto);
@@ -204,7 +220,19 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		final SystemRequestDTO sysDto = new SystemRequestDTO(); 
 		sysDto.setSystemName(" ");
 		final ServiceRegistryRequestDTO dto = new ServiceRegistryRequestDTO();
-		dto.setServiceDefinition("service_definition");
+		dto.setServiceDefinition("serviceDefinition");
+		dto.setProviderSystem(sysDto);
+		
+		serviceRegistryDBService.registerServiceResponse(dto);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class) 
+	public void testRegisterServiceResponseProviderSystemNameWrong() {
+		final SystemRequestDTO sysDto = new SystemRequestDTO(); 
+		sysDto.setSystemName("system_name_format_wrong");
+		final ServiceRegistryRequestDTO dto = new ServiceRegistryRequestDTO();
+		dto.setServiceDefinition("serviceDefinition");
 		dto.setProviderSystem(sysDto);
 		
 		serviceRegistryDBService.registerServiceResponse(dto);
@@ -216,7 +244,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		final SystemRequestDTO sysDto = new SystemRequestDTO(); 
 		sysDto.setSystemName("system");
 		final ServiceRegistryRequestDTO dto = new ServiceRegistryRequestDTO();
-		dto.setServiceDefinition("service_definition");
+		dto.setServiceDefinition("serviceDefinition");
 		dto.setProviderSystem(sysDto);
 		
 		serviceRegistryDBService.registerServiceResponse(dto);
@@ -229,7 +257,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		sysDto.setSystemName("system");
 		sysDto.setAddress(" ");
 		final ServiceRegistryRequestDTO dto = new ServiceRegistryRequestDTO();
-		dto.setServiceDefinition("service_definition");
+		dto.setServiceDefinition("serviceDefinition");
 		dto.setProviderSystem(sysDto);
 		
 		serviceRegistryDBService.registerServiceResponse(dto);
@@ -242,7 +270,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		sysDto.setSystemName("system");
 		sysDto.setAddress("localhost");
 		final ServiceRegistryRequestDTO dto = new ServiceRegistryRequestDTO();
-		dto.setServiceDefinition("service_definition");
+		dto.setServiceDefinition("serviceDefinition");
 		dto.setProviderSystem(sysDto);
 		
 		serviceRegistryDBService.registerServiceResponse(dto);
@@ -254,7 +282,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		final String systemName = "system";
 		final String address = "localhost";
 		final int port = 1111;
-		final String serviceDefinitionStr = "service_definition";
+		final String serviceDefinitionStr = "serviceDefinition";
 		
 		final SystemRequestDTO sysDto = new SystemRequestDTO(); 
 		sysDto.setSystemName(systemName);
@@ -278,7 +306,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		final String systemName = "system";
 		final String address = "localhost";
 		final int port = 1111;
-		final String serviceDefinitionStr = "service_definition";
+		final String serviceDefinitionStr = "serviceDefinition";
 		
 		final SystemRequestDTO sysDto = new SystemRequestDTO(); 
 		sysDto.setSystemName(systemName);
@@ -307,8 +335,22 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
+	public void testCreateServiceRegistryServiceDefinitionWrongFormatFlagTrue() {
+		ReflectionTestUtils.setField(serviceRegistryDBService, "useStrictServiceDefinitionVerifier", true);
+		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition("invalid.format"), null, null, null, null, null, 1, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	// this also tests the case when useStrictServiceDefinitionVerifier flag is false, service definition can be anything
+	@Test(expected = IllegalArgumentException.class)
 	public void testCreateServiceRegistryProviderNull() {
-		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), null, null, null, null, null, 1, null);
+		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition("invalid.format"), null, null, null, null, null, 1, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateServiceRegistryProviderNameWrongFormat() {
+		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System("invalid-system.name-", null, 0, null), null, null, null, null, 1, null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -316,7 +358,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testCreateServiceRegistryUniqueConstraintViolation() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.of(new ServiceRegistry()));
 		
-		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System(), null, null, null, null, 1, null);
+		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System("valid-system-name", null, 0, null), null, null, null, null, 1, null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -324,13 +366,14 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testCreateServiceRegistrySecuredButAuthenticationInfoNotSpecified() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
 		
-		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System(), null, null, ServiceSecurityType.CERTIFICATE, null, 1, null);
+		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System("valid-system-name", null, 0, null), null, null, ServiceSecurityType.CERTIFICATE, null, 1, null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testCreateServiceRegistryTryingToRegisterSecuredServiceInInsecureMode() {
 		final System provider = new System();
+		provider.setSystemName("system");
 		provider.setAuthenticationInfo("abcd");
 		
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
@@ -344,7 +387,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testCreateServiceRegistryInterfacesListNull() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
 		
-		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System(), null, null, ServiceSecurityType.NOT_SECURE, null, 1, null);
+		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System("valid-system-name", null, 0, null), null, null, ServiceSecurityType.NOT_SECURE, null, 1, null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -352,7 +395,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testCreateServiceRegistryInterfacesListEmpty() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
 		
-		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System(), null, null, ServiceSecurityType.NOT_SECURE, null, 1, Collections.<String>emptyList());
+		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System("valid-system-name", null, 0, null), null, null, ServiceSecurityType.NOT_SECURE, null, 1, Collections.<String>emptyList());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -360,7 +403,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testCreateServiceRegistryInvalidInterface() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
 		
-		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System(), null, null, ServiceSecurityType.NOT_SECURE, null, 1, List.of("xml"));
+		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System("valid-system-name", null, 0, null), null, null, ServiceSecurityType.NOT_SECURE, null, 1, List.of("xml"));
 	}
 	
 	//=================================================================================================
@@ -647,8 +690,26 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
+	public void testUpdateServiceRegistryServiceDefinitionWrongFlagTrue() {
+		ReflectionTestUtils.setField(serviceRegistryDBService, "useStrictServiceDefinitionVerifier", true);
+		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),	new ServiceDefinition("invalid_service_definition"), getValidTestProvider(), validTestServiceUri, 
+													   validTestEndOFValidity, ServiceSecurityType.NOT_SECURE, validTestMetadataStr, 1, validTestInterfaces);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	// also tests that when useStrictServiceDefinitionVerifier flag is false, then service definition format is not checked 
+	@Test(expected = IllegalArgumentException.class)
 	public void testUpdateServiceRegistryProviderNull() {
-		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),	getValidTestServiceDefinition(), null, validTestServiceUri,
+		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),	new ServiceDefinition("invalid_service_definition"), null, validTestServiceUri,
+																		validTestEndOFValidity,	ServiceSecurityType.NOT_SECURE, validTestMetadataStr, 1, validTestInterfaces);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testUpdateServiceRegistryProviderNameWrong() {
+		final System testProvider = getValidTestProvider();
+		testProvider.setSystemName("invalid_name");
+		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),	getValidTestServiceDefinition(), testProvider, validTestServiceUri,
 																		validTestEndOFValidity,	ServiceSecurityType.NOT_SECURE, validTestMetadataStr, 1, validTestInterfaces);
 	}
 	
@@ -759,6 +820,26 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testMergeServiceByIdResponseNotPresentId() {
 		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.empty());
 		serviceRegistryDBService.mergeServiceByIdResponse(notPresentId, getValidServiceRegistryRequestDTO(new ServiceRegistryRequestDTO()));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected =  IllegalArgumentException.class)
+	public void testMergeServiceByIdResponseServiceDefinitionWrongFlagTrue() {
+		ReflectionTestUtils.setField(serviceRegistryDBService, "useStrictServiceDefinitionVerifier", true);
+		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.of(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0)));
+		final ServiceRegistryRequestDTO request = getValidServiceRegistryRequestDTO(new ServiceRegistryRequestDTO());
+		request.setServiceDefinition("invalid-format-");
+		serviceRegistryDBService.mergeServiceByIdResponse(validId, request);
+	}	
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected =  IllegalArgumentException.class)
+	public void testMergeServiceByIdResponseProviderSystemNameWrong() {
+		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.of(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0)));
+		final ServiceRegistryRequestDTO request = getValidServiceRegistryRequestDTO(new ServiceRegistryRequestDTO());
+		request.setServiceDefinition("invalid-format-"); // this is valid now because useStrictServiceDefinitionVerifier flag is false
+		request.getProviderSystem().setSystemName("invalid_system_name");
+		serviceRegistryDBService.mergeServiceByIdResponse(validId, request);
 	}	
 	
 	//-------------------------------------------------------------------------------------------------
@@ -986,7 +1067,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	private List<ServiceRegistry> getTestProvidersWithMofifyableCollections(final ServiceDefinition definition) {
 		final List<ServiceRegistry> result = new ArrayList<ServiceRegistry>(6);
 		
-		final System provider = new System("test_system", "localhost", 1234, null);
+		final System provider = new System("test-system", "localhost", 1234, null);
 		final String metadataStr = "key=value, key2=value2";
 		
 		final ServiceInterface jsonInterface = new ServiceInterface("HTTP-SECURE-JSON");
@@ -1045,7 +1126,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	
 	//-------------------------------------------------------------------------------------------------		
 	private static SystemRequestDTO getValidSystemReqestDTO(final SystemRequestDTO systemRequestDTO) {
-		systemRequestDTO.setSystemName("test_system");
+		systemRequestDTO.setSystemName("test-system");
 		systemRequestDTO.setAddress("localhost");
 		systemRequestDTO.setPort(1234);
 		systemRequestDTO.setAuthenticationInfo(null);
@@ -1222,7 +1303,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private static System getValidTestProvider() {
-		final System system = new System("test_system", "localhost", 1234, null);
+		final System system = new System("test-system", "localhost", 1234, null);
 		system.setId(1);
 		
 		return system;
@@ -1230,7 +1311,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private static System getValidTestProviderForUniqueConstraintCheck() {
-		final System system = new System("test_system", "localhost", 1234, null);
+		final System system = new System("test-system", "localhost", 1234, null);
 		system.setId(Integer.MAX_VALUE);
 		
 		return system;
@@ -1238,7 +1319,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private static System getValidTestProviderWithAuthenticationInfo() {
-		final System system = new System("test_system", "localhost", 1234, null);
+		final System system = new System("test-system", "localhost", 1234, null);
 		system.setId(1);
 		system.setAuthenticationInfo("authenticationInfo");
 		

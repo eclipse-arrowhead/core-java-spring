@@ -226,10 +226,6 @@ public class ServiceRegistryDBService {
 		}
 	}
 	
-	// TODO: cont
-
-
-	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void removeSystemById(final long id) {		
@@ -266,9 +262,10 @@ public class ServiceRegistryDBService {
 		final long validatedSystemId = validateSystemId(systemId);
 		final Integer validatedPort = validateAllowNullSystemPort(port);
 		final String validatedSystemName = validateAllowNullSystemParamString(systemName);
-		if (validatedSystemName != null && validatedSystemName.contains(".")) {
-			throw new InvalidParameterException("System name can't contain dot (.)");
+		if (validatedSystemName != null && !cnVerifier.isValid(validatedSystemName)) {
+			throw new InvalidParameterException("System name" + INVALID_FORMAT_ERROR_MESSAGE);
 		}
+
 		final String validatedAddress = validateAllowNullSystemParamString(address);
 		final String validatedAuthenticationInfo = authenticationInfo;
 		
@@ -376,6 +373,10 @@ public class ServiceRegistryDBService {
 			throw new InvalidParameterException("serviceDefinition is null or blank");
 		}
 		
+		if (useStrictServiceDefinitionVerifier && !cnVerifier.isValid(serviceDefinition)) {
+			throw new InvalidParameterException("Service definition" + INVALID_FORMAT_ERROR_MESSAGE);
+		}
+		
 		final String validatedServiceDefinition = serviceDefinition.trim().toLowerCase();
 		checkConstraintsOfServiceDefinitionTable(validatedServiceDefinition);
 		final ServiceDefinition serviceDefinitionEntry = new ServiceDefinition(validatedServiceDefinition);
@@ -404,6 +405,10 @@ public class ServiceRegistryDBService {
 		
 		if (Utilities.isEmpty(serviceDefinition)) {
 			throw new InvalidParameterException("serviceDefinition is null or blank");
+		}
+		
+		if (useStrictServiceDefinitionVerifier && !cnVerifier.isValid(serviceDefinition)) {
+			throw new InvalidParameterException("Service definition" + INVALID_FORMAT_ERROR_MESSAGE);
 		}
 		
 		try {
@@ -602,7 +607,7 @@ public class ServiceRegistryDBService {
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
-
+	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public ServiceRegistryResponseDTO updateServiceByIdResponse(final long id, final ServiceRegistryRequestDTO request) {
@@ -665,9 +670,15 @@ public class ServiceRegistryDBService {
 			
 			final String validatedServiceDefinition = !Utilities.isEmpty(request.getServiceDefinition()) ? request.getServiceDefinition().toLowerCase().trim() :
 																										   srEntry.getServiceDefinition().getServiceDefinition();
+			if (useStrictServiceDefinitionVerifier) {
+				Assert.isTrue(cnVerifier.isValid(validatedServiceDefinition), "Service definition" + INVALID_FORMAT_ERROR_MESSAGE);
+			}
+			
 			final String validatedProviderName = (request.getProviderSystem() != null && !Utilities.isEmpty(request.getProviderSystem().getSystemName())) ? 
 																										   request.getProviderSystem().getSystemName().toLowerCase().trim() :
 																										   srEntry.getSystem().getSystemName();
+			Assert.isTrue(cnVerifier.isValid(validatedProviderName), "Provider system name" + INVALID_FORMAT_ERROR_MESSAGE);		
+																										   
 			final String validatedProviderAddress = (request.getProviderSystem() != null && !Utilities.isEmpty(request.getProviderSystem().getAddress())) ? 
 																										   request.getProviderSystem().getAddress().toLowerCase().trim() :
 																										   srEntry.getSystem().getAddress();
@@ -711,7 +722,7 @@ public class ServiceRegistryDBService {
 										   validatedInterfaces);
 		
 			return DTOConverter.convertServiceRegistryToServiceRegistryResponseDTO(srEntry);
-		} catch (final InvalidParameterException ex) {
+		} catch (final InvalidParameterException | IllegalArgumentException ex) {
 			throw ex;
 		} catch (final DateTimeParseException ex) {
 			logger.debug(ex.getMessage(), ex);
@@ -728,7 +739,12 @@ public class ServiceRegistryDBService {
 												 final ServiceSecurityType securityType, final String metadataStr, final int version, final List<String> interfaces) {
 		logger.debug("createServiceRegistry started...");
 		Assert.notNull(serviceDefinition, "Service definition is not specified.");
+		if (useStrictServiceDefinitionVerifier) {
+			Assert.isTrue(cnVerifier.isValid(serviceDefinition.getServiceDefinition()), "Service definition" + INVALID_FORMAT_ERROR_MESSAGE);
+		}
 		Assert.notNull(provider, "Provider is not specified.");
+		Assert.isTrue(cnVerifier.isValid(provider.getSystemName()), "Provider system name" + INVALID_FORMAT_ERROR_MESSAGE);		
+	
 		
 		checkConstraintOfSystemRegistryTable(serviceDefinition, provider);
 		checkSRSecurityValue(securityType, provider.getAuthenticationInfo());
@@ -760,8 +776,12 @@ public class ServiceRegistryDBService {
 		logger.debug("updateServiceRegistry started...");
 		Assert.notNull(srEntry, "ServiceRegistry Entry is not specified.");	
 		Assert.notNull(serviceDefinition, "Service definition is not specified.");
-		Assert.notNull(provider, "Provider is not specified.");		
-		
+		if (useStrictServiceDefinitionVerifier) {
+			Assert.isTrue(cnVerifier.isValid(serviceDefinition.getServiceDefinition()), "Service definition" + INVALID_FORMAT_ERROR_MESSAGE);
+		}
+		Assert.notNull(provider, "Provider is not specified.");
+		Assert.isTrue(cnVerifier.isValid(provider.getSystemName()), "Provider system name" + INVALID_FORMAT_ERROR_MESSAGE);		
+	
 		if (checkServiceRegistryIfUniqueValidationNeeded(srEntry, serviceDefinition, provider)) {
 			checkConstraintOfSystemRegistryTable(serviceDefinition, provider);			
 		}
@@ -771,7 +791,7 @@ public class ServiceRegistryDBService {
 		
 		return setModifiedValuesOfServiceRegistryEntryFields(srEntry, serviceDefinition, provider, serviceUri, endOfValidity, securityType, metadataStr, version, interfaces);
 	}
-
+	
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S3655")
 	@Transactional(rollbackFor = ArrowheadException.class) 
@@ -1252,8 +1272,14 @@ public class ServiceRegistryDBService {
 	private void checkServiceRegistryRequest(final ServiceRegistryRequestDTO request) {
 		logger.debug("checkServiceRegistryRequest started...");
 		Assert.isTrue(!Utilities.isEmpty(request.getServiceDefinition()), "Service definition is not specified.");
+		
+		if (useStrictServiceDefinitionVerifier) {
+			Assert.isTrue(cnVerifier.isValid(request.getServiceDefinition()), "Service definition" + INVALID_FORMAT_ERROR_MESSAGE);
+		}
+		
 		Assert.notNull(request.getProviderSystem(), "Provider system is not specified.");
 		Assert.isTrue(!Utilities.isEmpty(request.getProviderSystem().getSystemName()), "Provider system name is not specified.");
+		Assert.isTrue(cnVerifier.isValid(request.getProviderSystem().getSystemName()), "Provider system name" + INVALID_FORMAT_ERROR_MESSAGE);		
 		Assert.isTrue(!Utilities.isEmpty(request.getProviderSystem().getAddress()), "Provider system address is not specified.");
 		Assert.notNull(request.getProviderSystem().getPort(), "Provider system port is not specified.");
 	}
