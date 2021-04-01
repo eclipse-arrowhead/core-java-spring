@@ -1,8 +1,5 @@
 package eu.arrowhead.core.plantdescriptionengine.consumedservices.orchestrator.dto;
 
-import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.ServiceDefinition;
-import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.ServiceInterface;
-import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.SrSystem;
 import se.arkalix.dto.DtoReadableAs;
 import se.arkalix.dto.DtoToString;
 import se.arkalix.dto.DtoWritableAs;
@@ -10,7 +7,7 @@ import se.arkalix.dto.DtoWritableAs;
 import java.util.Map;
 import java.util.Optional;
 
-import static se.arkalix.dto.DtoEncoding.JSON;
+import static se.arkalix.dto.DtoCodec.JSON;
 
 /**
  * Data Transfer Object (DTO) interface for store entry.
@@ -21,17 +18,15 @@ import static se.arkalix.dto.DtoEncoding.JSON;
 public interface StoreEntry {
     Integer id();
 
-    ServiceDefinition serviceDefinition();
+    String serviceDefinition();
 
-    SrSystem consumerSystem();
+    RuleSystem consumerSystem();
 
-    Boolean foreign();
-
-    SrSystem providerSystem();
+    RuleSystem providerSystem();
 
     Optional<ProviderCloud> providerCloud();
 
-    ServiceInterface serviceInterface();
+    String serviceInterface();
 
     Integer priority();
 

@@ -6,14 +6,11 @@ import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.InMemoryP
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.PdStore;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.PdStoreException;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.dto.ErrorMessage;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystemBuilder;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystemDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescription;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionBuilder;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntry;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryDto;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PortBuilder;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PortDto;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockRequest;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockServiceResponse;
@@ -21,7 +18,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import se.arkalix.net.http.HttpStatus;
-import se.arkalix.net.http.service.HttpServiceResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -41,11 +37,11 @@ public class AddPlantDescriptionTest {
         final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
         final AddPlantDescription handler = new AddPlantDescription(pdTracker);
 
-        final PlantDescription description = new PlantDescriptionBuilder()
+        final PlantDescription description = new PlantDescriptionDto.Builder()
             .plantDescription("Plant Description 1A")
             .build();
 
-        final HttpServiceResponse response = new MockServiceResponse();
+        final MockServiceResponse response = new MockServiceResponse();
         final MockRequest request = new MockRequest.Builder()
             .body(description)
             .build();
@@ -55,17 +51,15 @@ public class AddPlantDescriptionTest {
                 .ifSuccess(result -> {
                     assertTrue(response.status().isPresent());
                     assertEquals(HttpStatus.CREATED, response.status().get());
-                    assertNotNull(response.body());
-                    assertTrue(response.body().isPresent());
 
-                    final PlantDescriptionEntry entry = (PlantDescriptionEntry) response.body().get();
+                    final PlantDescriptionEntry entry = (PlantDescriptionEntry) response.getRawBody();
 
                     assertEquals(entry.plantDescription(), description.plantDescription());
 
                     final PlantDescriptionEntryDto entryInMap = pdTracker.get(entry.id());
                     assertNotNull(entryInMap);
                 })
-                .onFailure(Assertions::assertNull);
+                .onFailure(e -> fail());
         } catch (final Exception e) {
             fail();
         }
@@ -82,32 +76,32 @@ public class AddPlantDescriptionTest {
         final AddPlantDescription handler = new AddPlantDescription(pdTracker);
 
         final List<PortDto> ports = List.of(
-            new PortBuilder()
+            new PortDto.Builder()
                 .portName("port_a")
                 .serviceInterface("HTTP-SECURE-JSON")
                 .serviceDefinition(serviceDefinition)
                 .metadata(metadataA)
                 .build(),
-            new PortBuilder()
+            new PortDto.Builder()
                 .portName("port_b")
                 .serviceInterface("HTTP-SECURE-JSON")
                 .serviceDefinition(serviceDefinition)
                 .metadata(metadataB)
                 .build());
 
-        final PdeSystemDto system = new PdeSystemBuilder()
+        final PdeSystemDto system = new PdeSystemDto.Builder()
             .systemId("system_a")
             .systemName("System A")
             .ports(ports)
             .build();
 
-        final PlantDescriptionDto description = new PlantDescriptionBuilder()
+        final PlantDescriptionDto description = new PlantDescriptionDto.Builder()
             .plantDescription("Plant Description 1A")
             .active(true)
             .systems(List.of(system))
             .build();
 
-        final HttpServiceResponse response = new MockServiceResponse();
+        final MockServiceResponse response = new MockServiceResponse();
         final MockRequest request = new MockRequest.Builder()
             .body(description)
             .build();
@@ -130,32 +124,32 @@ public class AddPlantDescriptionTest {
         final AddPlantDescription handler = new AddPlantDescription(pdTracker);
 
         final List<PortDto> consumerPorts = List.of(
-            new PortBuilder()
+            new PortDto.Builder()
                 .portName(portName)
                 .serviceInterface("HTTP-SECURE-JSON")
                 .serviceDefinition("service_a")
                 .consumer(true)
                 .build(),
-            new PortBuilder()
+            new PortDto.Builder()
                 .portName(portName) // Duplicate port name, should be reported!
                 .serviceInterface("HTTP-SECURE-JSON")
                 .serviceDefinition("service_b")
                 .consumer(true)
                 .build());
 
-        final PdeSystemDto consumerSystem = new PdeSystemBuilder()
+        final PdeSystemDto consumerSystem = new PdeSystemDto.Builder()
             .systemId(systemId)
             .systemName("System A")
             .ports(consumerPorts)
             .build();
 
-        final PlantDescriptionDto description = new PlantDescriptionBuilder()
+        final PlantDescriptionDto description = new PlantDescriptionDto.Builder()
             .plantDescription("Plant Description 1A")
             .active(true)
             .systems(List.of(consumerSystem))
             .build();
 
-        final HttpServiceResponse response = new MockServiceResponse();
+        final MockServiceResponse response = new MockServiceResponse();
         final MockRequest request = new MockRequest.Builder()
             .body(description)
             .build();
@@ -165,8 +159,7 @@ public class AddPlantDescriptionTest {
                 .ifSuccess(result -> {
                     assertEquals(HttpStatus.BAD_REQUEST, response.status().orElse(null));
                     final String expectedErrorMessage = "<Duplicate port name '" + portName + "' in system '" + systemId + "'>";
-                    assertTrue(response.body().isPresent());
-                    final String actualErrorMessage = ((ErrorMessage) response.body().get()).error();
+                    final String actualErrorMessage = ((ErrorMessage) response.getRawBody()).error();
                     assertEquals(expectedErrorMessage, actualErrorMessage);
                 })
                 .onFailure(Assertions::assertNull);
@@ -182,11 +175,11 @@ public class AddPlantDescriptionTest {
         final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(backingStore);
         final AddPlantDescription handler = new AddPlantDescription(pdTracker);
 
-        final PlantDescription description = new PlantDescriptionBuilder()
+        final PlantDescription description = new PlantDescriptionDto.Builder()
             .plantDescription("Plant Description 1A")
             .build();
 
-        final HttpServiceResponse response = new MockServiceResponse();
+        final MockServiceResponse response = new MockServiceResponse();
         final MockRequest request = new MockRequest.Builder().body(description).build();
 
         doThrow(new PdStoreException("Mocked error")).when(backingStore).write(any());

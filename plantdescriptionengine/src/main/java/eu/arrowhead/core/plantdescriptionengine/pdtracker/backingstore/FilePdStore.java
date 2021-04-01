@@ -1,11 +1,7 @@
 package eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore;
 
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryDto;
-import se.arkalix.dto.DtoReadException;
-import se.arkalix.dto.DtoWriteException;
-import se.arkalix.dto.binary.ByteArrayReader;
-import se.arkalix.dto.binary.ByteArrayWriter;
-
+import se.arkalix.io.buf.Buffer;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -17,6 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Class that reads and writes Plant Description Entries to file.
+ */
 public class FilePdStore implements PdStore {
 
     // File path to the directory for storing JSON representations of plant
@@ -68,8 +67,8 @@ public class FilePdStore implements PdStore {
             final byte[] bytes;
             try {
                 bytes = Files.readAllBytes(child.toPath());
-                result.add(PlantDescriptionEntryDto.readJson(new ByteArrayReader(bytes)));
-            } catch (final DtoReadException | IOException e) {
+                result.add(PlantDescriptionEntryDto.decodeJson(Buffer.wrap(bytes)));
+            } catch (final IOException e) {
                 throw new PdStoreException(e);
             }
         }
@@ -101,11 +100,14 @@ public class FilePdStore implements PdStore {
         }
 
         try (final FileOutputStream fileWriter = new FileOutputStream(file)) {
-            final ByteArrayWriter byteArrayWriter = new ByteArrayWriter();
-            entry.writeJson(byteArrayWriter);
-            fileWriter.write(byteArrayWriter.asByteArray());
-        } catch (final DtoWriteException | IOException e) {
-            throw new PdStoreException("Failed to write rule to file", e);
+            final byte[] bytes = new byte[2048]; // TODO: Remove arbitrary limit
+            final Buffer buffer = Buffer.wrap(bytes);
+            buffer.clear();
+            entry.encodeJson(buffer);
+            buffer.close();
+            fileWriter.write(bytes);
+        } catch (final IOException e) {
+            throw new PdStoreException("Failed to write Plant Description Entry to file", e);
         }
     }
 

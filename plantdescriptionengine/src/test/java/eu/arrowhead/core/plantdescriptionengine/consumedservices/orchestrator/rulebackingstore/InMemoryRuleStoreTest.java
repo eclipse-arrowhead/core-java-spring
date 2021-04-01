@@ -9,21 +9,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class InMemoryRuleStoreTest {
 
+    private final int plantDescriptionId = 23;
+
     @Test
     public void shouldReadRules() {
         final InMemoryRuleStore store = new InMemoryRuleStore();
         final Set<Integer> rules = Set.of(1, 2, 3);
-        store.setRules(rules);
-        final Set<Integer> result = store.readRules();
+        store.setRules(plantDescriptionId, rules);
+        final Set<Integer> result = store.readRules(plantDescriptionId);
         assertEquals(rules, result);
     }
 
     @Test
     public void shouldRemoveRules() {
         final InMemoryRuleStore store = new InMemoryRuleStore();
-        store.setRules(Set.of(1, 2, 3));
-        store.removeAll();
-        final Set<Integer> result = store.readRules();
+        store.setRules(plantDescriptionId, Set.of(1, 2, 3));
+        store.removeRules(plantDescriptionId);
+        final Set<Integer> result = store.readRules(plantDescriptionId);
         assertTrue(result.isEmpty());
     }
 

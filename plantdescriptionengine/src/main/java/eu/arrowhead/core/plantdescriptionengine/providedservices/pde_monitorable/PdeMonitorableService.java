@@ -1,15 +1,14 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitorable;
 
-import eu.arrowhead.core.plantdescriptionengine.providedservices.DtoReadExceptionCatcher;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitorable.dto.InventoryIdBuilder;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitorable.dto.PingBuilder;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitorable.dto.SystemDataBuilder;
-import se.arkalix.descriptor.EncodingDescriptor;
-import se.arkalix.dto.DtoReadException;
-import se.arkalix.net.http.HttpStatus;
+import java.util.Objects;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.CodecExceptionCatcher;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitorable.routehandlers.GetInventoryId;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitorable.routehandlers.GetPing;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitorable.routehandlers.GetSystemData;
+import se.arkalix.codec.CodecException;
+import se.arkalix.codec.CodecType;
 import se.arkalix.net.http.service.HttpService;
 import se.arkalix.security.access.AccessPolicy;
-import se.arkalix.util.concurrent.Future;
 
 
 /**
@@ -23,10 +22,21 @@ public class PdeMonitorableService {
     private static final String PING_PATH = "/ping";
     private static final String SYSTEM_DATA_PATH = "/systemdata";
 
+    private final String systemName;
     final boolean secure;
 
-    public PdeMonitorableService(final boolean secure) {
+    /**
+     *
+     * @param systemName Name of the system running the service.
+     * @param secure     Specifies whether or not to run the service in secure
+     *                   mode.
+     */
+    public PdeMonitorableService(final String systemName, final boolean secure) {
+
+        Objects.requireNonNull(systemName, "Expected system name");
+
         this.secure = secure;
+        this.systemName = systemName;
     }
 
     /**
@@ -34,39 +44,15 @@ public class PdeMonitorableService {
      * Engine.
      */
     public HttpService getService() {
-        final HttpService service = new HttpService()
+        return new HttpService()
             .name(SERVICE_NAME)
-            .encodings(EncodingDescriptor.JSON)
+            .codecs(CodecType.JSON)
             .basePath(BASE_PATH)
-            .get(INVENTORY_ID_PATH, (request, response) -> {
-                response
-                    .status(HttpStatus.OK)
-                    .body(new InventoryIdBuilder().build());
-                return Future.done();
-            })
-            .get(SYSTEM_DATA_PATH, (request, response) -> {
-                response
-                    .status(HttpStatus.OK)
-                    .body(new SystemDataBuilder().build());
-                return Future.done();
-            })
-            .get(PING_PATH, (request, response) -> {
-                response
-                    .status(HttpStatus.OK)
-                    .body(new PingBuilder()
-                        .ping(true)
-                        .build());
-                return Future.done();
-            })
-            .catcher(DtoReadException.class, new DtoReadExceptionCatcher());
-
-        if (secure) {
-            service.accessPolicy(AccessPolicy.cloud());
-        } else {
-            service.accessPolicy(AccessPolicy.unrestricted());
-        }
-
-        return service;
+            .get(INVENTORY_ID_PATH, new GetInventoryId())
+            .get(SYSTEM_DATA_PATH, new GetSystemData(systemName))
+            .get(PING_PATH, new GetPing())
+            .catcher(CodecException.class, new CodecExceptionCatcher())
+            .accessPolicy(secure ? AccessPolicy.cloud() : AccessPolicy.unrestricted());
     }
 
 }

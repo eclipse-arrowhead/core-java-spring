@@ -27,8 +27,11 @@ public class SystemMismatchDetector implements PlantDescriptionUpdateListener, S
     private final SystemTracker systemTracker;
     private final AlarmManager alarmManager;
 
-    public SystemMismatchDetector(final PlantDescriptionTracker pdTracker, final SystemTracker systemTracker,
-                                  final AlarmManager alarmManager) {
+    public SystemMismatchDetector(
+        final PlantDescriptionTracker pdTracker,
+        final SystemTracker systemTracker,
+        final AlarmManager alarmManager
+    ) {
         Objects.requireNonNull(pdTracker, "Expected Plant Description Tracker");
         Objects.requireNonNull(systemTracker, "Expected System Tracker");
         Objects.requireNonNull(alarmManager, "Expected Alarm Manager");
@@ -189,7 +192,10 @@ public class SystemMismatchDetector implements PlantDescriptionUpdateListener, S
         raiseAlarms(registeredSystems, pdSystems);
     }
 
-    private void raiseAlarms(final List<? extends SrSystem> registeredSystems, final List<? extends PdeSystem> pdSystems) {
+    private void raiseAlarms(
+        final List<? extends SrSystem> registeredSystems,
+        final List<? extends PdeSystem> pdSystems
+    ) {
         for (final PdeSystem entrySystem : pdSystems) {
 
             final long numMatches = registeredSystems.stream()
@@ -237,7 +243,10 @@ public class SystemMismatchDetector implements PlantDescriptionUpdateListener, S
      * @param pdSystems         A list of systems in the active plant
      *                          description.
      */
-    private void clearAlarms(final List<? extends SrSystem> registeredSystems, final List<? extends PdeSystem> pdSystems) {
+    private void clearAlarms(
+        final List<? extends SrSystem> registeredSystems,
+        final List<? extends PdeSystem> pdSystems
+    ) {
         final List<Alarm> notInDescriptionAlarms = alarmManager.getActiveAlarmData(
             AlarmCause.SYSTEM_NOT_IN_DESCRIPTION
         );

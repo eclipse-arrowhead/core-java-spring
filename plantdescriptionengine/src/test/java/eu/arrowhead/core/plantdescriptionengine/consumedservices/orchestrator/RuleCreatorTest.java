@@ -5,15 +5,12 @@ import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracke
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.InMemoryPdStore;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.PdStore;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.PdStoreException;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.ConnectionBuilder;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.ConnectionDto;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystemBuilder;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystemDto;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryBuilder;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryDto;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PortBuilder;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PortDto;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.SystemPortBuilder;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.SystemPortDto;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -52,42 +49,42 @@ public class RuleCreatorTest {
         final String serviceInterface = "HTTP-SECURE-JSON";
 
         final List<PortDto> consumerPorts = List.of(
-            new PortBuilder()
+            new PortDto.Builder()
                 .portName(consumerPort)
                 .serviceInterface(serviceInterface)
                 .serviceDefinition(serviceDefinitionA)
                 .consumer(true)
                 .build());
         final List<PortDto> producerPorts = List.of(
-            new PortBuilder()
+            new PortDto.Builder()
                 .portName(producerPort)
                 .serviceInterface(serviceInterface)
                 .serviceDefinition(serviceDefinitionA)
                 .consumer(false)
                 .build());
-        final PdeSystemDto consumerSystem = new PdeSystemBuilder()
+        final PdeSystemDto consumerSystem = new PdeSystemDto.Builder()
             .systemId(consumerId)
             .systemName(consumerName)
             .ports(consumerPorts)
             .build();
-        final PdeSystemDto producerSystem = new PdeSystemBuilder()
+        final PdeSystemDto producerSystem = new PdeSystemDto.Builder()
             .systemId(producerId)
             .systemName(producerName)
             .ports(producerPorts)
             .build();
 
-        final List<ConnectionDto> connections = List.of(new ConnectionBuilder()
-            .consumer(new SystemPortBuilder()
+        final List<ConnectionDto> connections = List.of(new ConnectionDto.Builder()
+            .consumer(new SystemPortDto.Builder()
                 .systemId(consumerId)
                 .portName(consumerPort)
                 .build())
-            .producer(new SystemPortBuilder()
+            .producer(new SystemPortDto.Builder()
                 .systemId(producerId)
                 .portName(producerPort)
                 .build())
             .build());
 
-        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder().id(0)
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryDto.Builder().id(0)
             .plantDescription("Plant Description 1A")
             .createdAt(now)
             .updatedAt(now)
@@ -124,25 +121,25 @@ public class RuleCreatorTest {
         final String consumerName = "Consumer System";
         final String serviceInterface = "HTTP-INSECURE-JSON";
         final List<PortDto> consumerPorts = List.of(
-            new PortBuilder().portName(consumerPortA)
+            new PortDto.Builder().portName(consumerPortA)
                 .serviceInterface(serviceInterface)
                 .serviceDefinition(serviceDefinitionX)
                 .consumer(true)
                 .build(),
-            new PortBuilder().portName(consumerPortB)
+            new PortDto.Builder().portName(consumerPortB)
                 .serviceInterface(serviceInterface)
                 .serviceDefinition(serviceDefinitionY)
                 .consumer(true)
                 .build()
         );
 
-        final PdeSystemDto consumerSystemA = new PdeSystemBuilder()
+        final PdeSystemDto consumerSystemA = new PdeSystemDto.Builder()
             .systemId(consumerId)
             .systemName(consumerName)
             .ports(consumerPorts)
             .build();
 
-        final PlantDescriptionEntryDto entryA = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryA = new PlantDescriptionEntryDto.Builder()
             .id(0)
             .plantDescription("Plant Description A")
             .createdAt(now)
@@ -159,7 +156,7 @@ public class RuleCreatorTest {
         final String producerBName = "Prod-B-Name";
 
         final List<PortDto> producerAPorts = List.of(
-            new PortBuilder()
+            new PortDto.Builder()
                 .portName(producerAPort)
                 .serviceInterface(serviceInterface)
                 .serviceDefinition(serviceDefinitionX)
@@ -167,48 +164,48 @@ public class RuleCreatorTest {
                 .build());
 
         final List<PortDto> producerBPorts = List.of(
-            new PortBuilder()
+            new PortDto.Builder()
                 .portName(producerBPort)
                 .serviceInterface(serviceInterface)
                 .serviceDefinition(serviceDefinitionY)
                 .consumer(false)
                 .build());
 
-        final PdeSystemDto producerSystemA = new PdeSystemBuilder()
+        final PdeSystemDto producerSystemA = new PdeSystemDto.Builder()
             .systemId(producerAId)
             .systemName(producerAName)
             .ports(producerAPorts)
             .build();
 
-        final PdeSystemDto producerSystemB = new PdeSystemBuilder()
+        final PdeSystemDto producerSystemB = new PdeSystemDto.Builder()
             .systemId(producerBId)
             .systemName(producerBName)
             .ports(producerBPorts)
             .build();
 
-        final ConnectionDto connectionA = new ConnectionBuilder()
-            .consumer(new SystemPortBuilder()
+        final ConnectionDto connectionA = new ConnectionDto.Builder()
+            .consumer(new SystemPortDto.Builder()
                 .systemId(consumerId)
                 .portName(consumerPortA)
                 .build())
-            .producer(new SystemPortBuilder()
+            .producer(new SystemPortDto.Builder()
                 .systemId(producerAId)
                 .portName(producerAPort)
                 .build())
             .build();
 
-        final ConnectionDto connectionB = new ConnectionBuilder()
-            .consumer(new SystemPortBuilder()
+        final ConnectionDto connectionB = new ConnectionDto.Builder()
+            .consumer(new SystemPortDto.Builder()
                 .systemId(consumerId)
                 .portName(consumerPortB)
                 .build())
-            .producer(new SystemPortBuilder()
+            .producer(new SystemPortDto.Builder()
                 .systemId(producerBId)
                 .portName(producerBPort)
                 .build())
             .build();
 
-        final PlantDescriptionEntryDto entryB = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entryB = new PlantDescriptionEntryDto.Builder()
             .id(1)
             .plantDescription("Plant Description B")
             .createdAt(now)
@@ -243,14 +240,14 @@ public class RuleCreatorTest {
         final String serviceInterface = "HTTP-INSECURE-JSON";
 
         final List<PortDto> consumerAPorts = List.of(
-            new PortBuilder()
+            new PortDto.Builder()
                 .portName(consumerPort)
                 .serviceInterface(serviceInterface)
                 .serviceDefinition(serviceDefinition)
                 .consumer(true)
                 .build());
 
-        final PdeSystemDto consumerSystem = new PdeSystemBuilder()
+        final PdeSystemDto consumerSystem = new PdeSystemDto.Builder()
             .systemId(consumerId)
             .metadata(consumerMetadata)
             .ports(consumerAPorts)
@@ -262,7 +259,7 @@ public class RuleCreatorTest {
         final Map<String, String> producerPortMetadata = Map.of("b", "2");
 
         final List<PortDto> producerPorts = List.of(
-            new PortBuilder()
+            new PortDto.Builder()
                 .portName(producerPort)
                 .metadata(producerPortMetadata)
                 .serviceInterface(serviceInterface)
@@ -270,24 +267,24 @@ public class RuleCreatorTest {
                 .consumer(false)
                 .build());
 
-        final PdeSystemDto producerSystem = new PdeSystemBuilder()
+        final PdeSystemDto producerSystem = new PdeSystemDto.Builder()
             .systemId(producerId)
             .metadata(producerMetadata)
             .ports(producerPorts)
             .build();
 
-        final ConnectionDto connection = new ConnectionBuilder()
-            .consumer(new SystemPortBuilder()
+        final ConnectionDto connection = new ConnectionDto.Builder()
+            .consumer(new SystemPortDto.Builder()
                 .systemId(consumerId)
                 .portName(consumerPort)
                 .build())
-            .producer(new SystemPortBuilder()
+            .producer(new SystemPortDto.Builder()
                 .systemId(producerId)
                 .portName(producerPort)
                 .build())
             .build();
 
-        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryBuilder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryDto.Builder()
             .id(0)
             .plantDescription("Plant Description A")
             .createdAt(now)

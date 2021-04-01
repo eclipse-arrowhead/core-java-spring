@@ -3,9 +3,11 @@ package eu.arrowhead.core.plantdescriptionengine.consumedservices.monitorable.dt
 import se.arkalix.dto.DtoReadableAs;
 import se.arkalix.dto.DtoToString;
 import se.arkalix.dto.DtoWritableAs;
-import se.arkalix.dto.json.value.JsonObject;
+import se.arkalix.codec.json.JsonObject;
 
-import static se.arkalix.dto.DtoEncoding.JSON;
+import java.util.Optional;
+
+import static se.arkalix.dto.DtoCodec.JSON;
 
 /**
  * Data Transfer Object (DTO) interface for System data.
@@ -14,5 +16,5 @@ import static se.arkalix.dto.DtoEncoding.JSON;
 @DtoWritableAs(JSON)
 @DtoToString
 public interface SystemData {
-    JsonObject data(); // TODO: Make Optional?
+    Optional<JsonObject> data();
 }

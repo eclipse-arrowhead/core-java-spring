@@ -1,6 +1,5 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto;
 
-import eu.arrowhead.core.plantdescriptionengine.utils.Metadata;
 import se.arkalix.dto.DtoReadableAs;
 import se.arkalix.dto.DtoToString;
 import se.arkalix.dto.DtoWritableAs;
@@ -10,7 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import static se.arkalix.dto.DtoEncoding.JSON;
+import static se.arkalix.dto.DtoCodec.JSON;
 
 /**
  * Data Transfer Object (DTO) interface for plant description systems.
@@ -40,15 +39,6 @@ public interface PdeSystem {
             }
         }
         return null;
-    }
-
-    /**
-     * @return The union of service and port metadata. In case of overlaps
-     * between the two sets, service metadata has precedence.
-     */
-    default Map<String, String> portMetadata(final String portName) {
-        final Port port = getPort(portName);
-        return Metadata.merge(metadata().orElse(null), port.metadata().orElse(null));
     }
 
     /**

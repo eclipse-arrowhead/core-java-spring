@@ -50,18 +50,24 @@ public class AlarmTest {
     public void shouldNotMatch() {
         final String systemName = "ABC";
         final String systemId = "123";
+        final Map<String, String> metadata = Map.of("x", "1", "y", "2");
+
+        final String incorrectName = "Incorrect name";
+        final String incorrectId = "Incorrect ID";
+        final Map<String, String> incorrectMetadata = Map.of("x", "1", "y", "3");
 
         final Alarm alarmA = new Alarm(null, systemName, null, AlarmCause.SYSTEM_NOT_REGISTERED);
         final Alarm alarmB = new Alarm(systemId, null, null, AlarmCause.SYSTEM_NOT_REGISTERED);
         final Alarm alarmC = new Alarm(systemId, systemName, null, AlarmCause.SYSTEM_NOT_REGISTERED);
-        final Alarm alarmD = new Alarm(systemId, systemName, Map.of("x", "y"), AlarmCause.SYSTEM_NOT_REGISTERED);
+        final Alarm alarmD = new Alarm(systemId, systemName, metadata, AlarmCause.SYSTEM_NOT_REGISTERED);
 
-        assertFalse(alarmA.matches("Incorrect name", systemName, null, AlarmCause.SYSTEM_NOT_REGISTERED));
-        assertFalse(alarmB.matches(systemId, "Incorrect ID", null, AlarmCause.SYSTEM_NOT_REGISTERED));
+        assertFalse(alarmA.matches(incorrectName, systemName, null, AlarmCause.SYSTEM_NOT_REGISTERED));
+        assertFalse(alarmB.matches(systemId, incorrectId, null, AlarmCause.SYSTEM_NOT_REGISTERED));
         assertFalse(alarmC.matches(systemId, systemName, null, AlarmCause.SYSTEM_NOT_IN_DESCRIPTION));
         assertFalse(alarmC.matches(null, null, null, AlarmCause.SYSTEM_NOT_REGISTERED));
         assertFalse(alarmD.matches(null, null, null, AlarmCause.SYSTEM_NOT_REGISTERED));
-        assertFalse(alarmD.matches(null, null, Map.of("x", "z"), AlarmCause.SYSTEM_NOT_REGISTERED));
+        assertFalse(alarmD.matches(null, null, metadata, AlarmCause.SYSTEM_NOT_REGISTERED));
+        assertFalse(alarmD.matches(systemId, systemName, incorrectMetadata, AlarmCause.SYSTEM_NOT_REGISTERED));
     }
 
 }

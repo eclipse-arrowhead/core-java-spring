@@ -1,6 +1,5 @@
 package eu.arrowhead.core.plantdescriptionengine.alarms;
 
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PdeAlarmBuilder;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PdeAlarmDto;
 
 import java.time.Instant;
@@ -66,7 +65,7 @@ public class Alarm {
     public PdeAlarmDto toPdeAlarm() {
         final AlarmSeverity severity = (clearedAt == null) ? AlarmSeverity.WARNING : AlarmSeverity.CLEARED;
         final String systemId = this.systemId == null ? unknownId : this.systemId;
-        return new PdeAlarmBuilder()
+        return new PdeAlarmDto.Builder()
             .id(id)
             .systemId(systemId)
             .systemName(systemName)

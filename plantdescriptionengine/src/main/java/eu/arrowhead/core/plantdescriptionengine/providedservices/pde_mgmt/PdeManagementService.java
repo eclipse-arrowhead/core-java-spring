@@ -1,15 +1,15 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt;
 
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.DtoReadExceptionCatcher;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.CodecExceptionCatcher;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.routehandlers.AddPlantDescription;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.routehandlers.DeletePlantDescription;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.routehandlers.GetAllPlantDescriptions;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.routehandlers.GetPlantDescription;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.routehandlers.ReplacePlantDescription;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.routehandlers.UpdatePlantDescription;
-import se.arkalix.descriptor.EncodingDescriptor;
-import se.arkalix.dto.DtoReadException;
+import se.arkalix.codec.CodecException;
+import se.arkalix.codec.CodecType;
 import se.arkalix.net.http.service.HttpService;
 import se.arkalix.security.access.AccessPolicy;
 
@@ -54,9 +54,9 @@ public class PdeManagementService {
      * @return An HTTP Service used to manage Plant Descriptions.
      */
     public HttpService getService() {
-        final HttpService service = new HttpService()
+        return new HttpService()
             .name(SERVICE_NAME)
-            .encodings(EncodingDescriptor.JSON)
+            .codecs(CodecType.JSON)
             .basePath(BASE_PATH)
             .get(GET_PLANT_DESCRIPTION_PATH, new GetPlantDescription(pdTracker))
             .get(GET_ALL_PLANT_DESCRIPTIONS_PATH, new GetAllPlantDescriptions(pdTracker))
@@ -64,14 +64,8 @@ public class PdeManagementService {
             .delete(DELETE_PLANT_DESCRIPTION_PATH, new DeletePlantDescription(pdTracker))
             .put(REPLACE_PLANT_DESCRIPTION_PATH, new ReplacePlantDescription(pdTracker))
             .patch(UPDATE_PLANT_DESCRIPTION_PATH, new UpdatePlantDescription(pdTracker))
-            .catcher(DtoReadException.class, new DtoReadExceptionCatcher());
-
-        if (secure) {
-            service.accessPolicy(AccessPolicy.cloud());
-        } else {
-            service.accessPolicy(AccessPolicy.unrestricted());
-        }
-        return service;
+            .catcher(CodecException.class, new CodecExceptionCatcher())
+            .accessPolicy(secure ? AccessPolicy.cloud() : AccessPolicy.unrestricted());
     }
 
 }

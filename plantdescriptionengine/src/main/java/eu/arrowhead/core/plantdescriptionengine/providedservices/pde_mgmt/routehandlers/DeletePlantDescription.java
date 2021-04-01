@@ -7,7 +7,7 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.PlantD
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import se.arkalix.dto.DtoEncoding;
+import se.arkalix.codec.CodecType;
 import se.arkalix.net.http.HttpStatus;
 import se.arkalix.net.http.service.HttpRouteHandler;
 import se.arkalix.net.http.service.HttpServiceRequest;
@@ -57,14 +57,14 @@ public class DeletePlantDescription implements HttpRouteHandler {
             final String errMsg = "'" + request.pathParameter(0) + "' is not a valid Plant Description Entry ID.";
             response
                 .status(HttpStatus.BAD_REQUEST)
-                .body(DtoEncoding.JSON, ErrorMessage.of(errMsg));
+                .body(ErrorMessage.of(errMsg), CodecType.JSON);
             return Future.success(response);
         }
 
         if (pdTracker.get(id) == null) {
             response
                 .status(HttpStatus.NOT_FOUND)
-                .body(ErrorMessage.of("Plant Description with ID " + id + " not found."));
+                .body(ErrorMessage.of("Plant Description with ID " + id + " not found."), CodecType.JSON);
             return Future.success(response);
         }
 
@@ -76,7 +76,7 @@ public class DeletePlantDescription implements HttpRouteHandler {
         if (validator.hasError()) {
             response
                 .status(HttpStatus.BAD_REQUEST)
-                .body(ErrorMessage.of(validator.getErrorMessage()));
+                .body(ErrorMessage.of(validator.getErrorMessage()), CodecType.JSON);
             return Future.success(response);
         }
 
@@ -84,12 +84,12 @@ public class DeletePlantDescription implements HttpRouteHandler {
             pdTracker.remove(id);
         } catch (final PdStoreException e) {
             logger.error("Failed to remove Plant Description Entry from backing store", e);
-            response.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErrorMessage.of("Encountered an error while deleting entry file."));
+            response
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ErrorMessage.of("Encountered an error while deleting entry file."), CodecType.JSON);
             return Future.success(response);
         }
 
-        response.status(HttpStatus.OK);
-        return Future.success(response);
+        return Future.success(response.status(HttpStatus.OK));
     }
 }

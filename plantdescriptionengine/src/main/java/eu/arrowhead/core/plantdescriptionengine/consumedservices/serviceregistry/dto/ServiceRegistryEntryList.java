@@ -6,7 +6,7 @@ import se.arkalix.dto.DtoWritableAs;
 
 import java.util.List;
 
-import static se.arkalix.dto.DtoEncoding.JSON;
+import static se.arkalix.dto.DtoCodec.JSON;
 
 /**
  * Data Transfer Object (DTO) interface for lists of systems registered in

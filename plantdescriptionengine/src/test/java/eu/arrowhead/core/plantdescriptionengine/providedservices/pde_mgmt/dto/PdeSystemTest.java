@@ -30,21 +30,21 @@ public class PdeSystemTest {
         final String serviceInterface = "HTTP-SECURE-JSON";
 
         final List<PortDto> ports = List.of(
-            new PortBuilder()
+            new PortDto.Builder()
                 .portName(portNameA)
                 .serviceInterface(serviceInterface)
                 .serviceDefinition(serviceA)
                 .consumer(true)
                 .metadata(metadataA)
                 .build(),
-            new PortBuilder()
+            new PortDto.Builder()
                 .portName(portNameB)
                 .serviceInterface(serviceInterface)
                 .serviceDefinition(serviceB)
                 .metadata(metadataB)
                 .consumer(false)
                 .build(),
-            new PortBuilder()
+            new PortDto.Builder()
                 .portName(portNameC)
                 .serviceInterface(serviceInterface)
                 .serviceDefinition(serviceC)
@@ -52,7 +52,7 @@ public class PdeSystemTest {
                 .consumer(true)
                 .build());
 
-        final PdeSystemDto system = new PdeSystemBuilder()
+        final PdeSystemDto system = new PdeSystemDto.Builder()
             .systemId("Sys-X")
             .ports(ports)
             .build();
@@ -93,26 +93,26 @@ public class PdeSystemTest {
         final String serviceC = "ser-c";
 
         final List<PortDto> ports = List.of(
-            new PortBuilder()
+            new PortDto.Builder()
                 .portName(portNameA)
                 .serviceInterface("HTTP-SECURE-JSON")
                 .serviceDefinition(serviceA)
                 .consumer(true)
                 .build(),
-            new PortBuilder()
+            new PortDto.Builder()
                 .portName(portNameB)
                 .serviceInterface("HTTP-SECURE-JSON")
                 .serviceDefinition(serviceB)
                 .consumer(false)
                 .build(),
-            new PortBuilder()
+            new PortDto.Builder()
                 .portName(portNameC)
                 .serviceInterface("HTTP-SECURE-JSON")
                 .serviceDefinition(serviceC)
                 .consumer(true)
                 .build());
 
-        final PdeSystemDto system = new PdeSystemBuilder()
+        final PdeSystemDto system = new PdeSystemDto.Builder()
             .systemId("Sys-Y")
             .ports(ports)
             .build();

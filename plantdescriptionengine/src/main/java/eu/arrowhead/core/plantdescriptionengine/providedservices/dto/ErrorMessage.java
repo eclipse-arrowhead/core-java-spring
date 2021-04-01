@@ -6,7 +6,7 @@ import se.arkalix.dto.DtoWritableAs;
 
 import java.util.Objects;
 
-import static se.arkalix.dto.DtoEncoding.JSON;
+import static se.arkalix.dto.DtoCodec.JSON;
 
 /**
  * Data Transfer Object (DTO) interface for error messages.
@@ -17,7 +17,7 @@ import static se.arkalix.dto.DtoEncoding.JSON;
 public interface ErrorMessage {
     static ErrorMessageDto of(final String message) {
         Objects.requireNonNull(message, "Expected message.");
-        return new ErrorMessageBuilder().error(message).build();
+        return new ErrorMessageDto.Builder().error(message).build();
     }
 
     String error();

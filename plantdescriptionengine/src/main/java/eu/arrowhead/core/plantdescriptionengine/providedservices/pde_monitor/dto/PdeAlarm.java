@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static se.arkalix.dto.DtoEncoding.JSON;
+import static se.arkalix.dto.DtoCodec.JSON;
 
 /**
  * Data Transfer Object (DTO) interface for PDE alarms.
@@ -45,6 +45,8 @@ public interface PdeAlarm {
 
         return cleared1.get().compareTo(cleared2.get());
     };
+
+    String NOT_CLEARED = "not_cleared";
 
     /**
      * Filters out cleared/uncleared alarms from the given list.
@@ -122,11 +124,6 @@ public interface PdeAlarm {
     static void sortByClearedAt(final List<? extends PdeAlarm> alarms, final boolean ascending) {
         sort(alarms, CLEARED_AT_COMPARATOR, ascending);
     }
-
-    /**
-     * @return A string used to specify that an alarm is not cleared.
-     */
-    static String NOT_CLEARED = "not_cleared";
 
     int id();
 

@@ -3,7 +3,8 @@ package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor;
 import eu.arrowhead.core.plantdescriptionengine.alarms.AlarmManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import se.arkalix.description.ServiceDescription;
+
+import se.arkalix.ServiceRecord;
 import se.arkalix.net.http.HttpMethod;
 import se.arkalix.net.http.client.HttpClient;
 import se.arkalix.net.http.client.HttpClientRequest;
@@ -49,14 +50,14 @@ public class PingTask extends TimerTask {
     private void ping() {
         serviceQuery.resolveAll()
             .ifSuccess(services -> {
-                for (final ServiceDescription service : services) {
+                for (final ServiceRecord service : services) {
                     ping(service);
                 }
             })
             .onFailure(e -> logger.error("Failed to ping monitorable systems.", e));
     }
 
-    private void ping(final ServiceDescription service) {
+    private void ping(final ServiceRecord service) {
         final InetSocketAddress address = service.provider().socketAddress();
         final String providerName = service.provider().name();
         httpClient

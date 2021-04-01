@@ -8,6 +8,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AlarmManagerTest {
@@ -71,6 +72,16 @@ public class AlarmManagerTest {
             }
         }
         assertEquals(1, numCleared);
+    }
+
+    @Test
+    public void shouldNotAllowSetAcknowledgedOnNonexistent() {
+        final int nonexistentId = 32;
+        final AlarmManager alarmManager = new AlarmManager();
+        final Exception exception = assertThrows(IllegalArgumentException.class,
+            () -> alarmManager.setAcknowledged(nonexistentId, true));
+        final String expectedMessage = "There is no alarm with ID " + nonexistentId + ".";
+        assertEquals(expectedMessage, exception.getMessage());
     }
 
 }

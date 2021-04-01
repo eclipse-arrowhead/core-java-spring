@@ -35,14 +35,13 @@ public class GetPlantDescriptionTest {
             .pathParameters(List.of(String.valueOf(nonExistentEntryId)))
             .build();
 
-        final HttpServiceResponse response = new MockServiceResponse();
+        final MockServiceResponse response = new MockServiceResponse();
 
         try {
             handler.handle(request, response).ifSuccess(result -> {
                 assertEquals(HttpStatus.NOT_FOUND, response.status().orElse(null));
                 final String expectedErrorMessage = "Plant Description with ID " + nonExistentEntryId + " not found.";
-                assertTrue(response.body().isPresent());
-                final String actualErrorMessage = ((ErrorMessage) response.body().get()).error();
+                final String actualErrorMessage = ((ErrorMessage) response.getRawBody()).error();
                 assertEquals(expectedErrorMessage, actualErrorMessage);
             }).onFailure(Assertions::assertNull);
         } catch (final Exception e) {
@@ -65,13 +64,12 @@ public class GetPlantDescriptionTest {
             .pathParameters(List.of(String.valueOf(entryId)))
             .build();
 
-        final HttpServiceResponse response = new MockServiceResponse();
+        final MockServiceResponse response = new MockServiceResponse();
 
         try {
             handler.handle(request, response).ifSuccess(result -> {
                 assertEquals(HttpStatus.OK, response.status().orElse(null));
-                assertTrue(response.body().isPresent());
-                final MonitorPlantDescriptionEntry returnedEntry = (MonitorPlantDescriptionEntry) response.body().get();
+                final MonitorPlantDescriptionEntry returnedEntry = (MonitorPlantDescriptionEntry) response.getRawBody();
                 assertEquals(returnedEntry.id(), entryId);
             }).onFailure(Assertions::assertNull);
         } catch (final Exception e) {
@@ -95,7 +93,7 @@ public class GetPlantDescriptionTest {
             .pathParameters(List.of(invalidId))
             .build();
 
-        final HttpServiceResponse response = new MockServiceResponse();
+        final MockServiceResponse response = new MockServiceResponse();
 
         try {
             handler.handle(request, response)
