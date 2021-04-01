@@ -118,7 +118,8 @@ public class SystemRegistryControllerSystemRegistryTest {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void getSystemRegistryEntriesWithoutParameter() throws Exception {
         final SystemRegistryListResponseDTO systemListResponseDTO = new SystemRegistryListResponseDTO(List.of(VALID_SYSTEM_REGISTRY), 1);
         when(systemRegistryDBService.getSystemRegistryEntries(any(), any())).thenReturn(systemListResponseDTO);
@@ -132,7 +133,8 @@ public class SystemRegistryControllerSystemRegistryTest {
         assertEquals(1, responseBody.getCount());
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void getSystemRegistryEntriesWithPageAndSizeParameter() throws Exception {
         final SystemRegistryListResponseDTO systemListResponseDTO = new SystemRegistryListResponseDTO(List.of(VALID_SYSTEM_REGISTRY), 1);
         when(systemRegistryDBService.getSystemRegistryEntries(any(), any())).thenReturn(systemListResponseDTO);
@@ -148,7 +150,8 @@ public class SystemRegistryControllerSystemRegistryTest {
         assertEquals(1, responseBody.getCount());
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void getSystemRegistryEntryById() throws Exception {
         when(systemRegistryDBService.getSystemRegistryById(VALID_SYSTEM_REGISTRY_ID)).thenReturn(VALID_SYSTEM_REGISTRY);
         final MvcResult response = this.mockMvc.perform(get("/systemregistry/mgmt/" + VALID_SYSTEM_REGISTRY_ID)
@@ -160,7 +163,8 @@ public class SystemRegistryControllerSystemRegistryTest {
         assertEquals(VALID_SYSTEM_REGISTRY, responseDTO);
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void getSystemRegistryEntryByIdUnknownId() throws Exception {
         when(systemRegistryDBService.getSystemRegistryById(UNKNOWN_SYSTEM_REGISTRY_ID)).thenThrow(
                 new InvalidParameterException("System Registry with id " + UNKNOWN_SYSTEM_REGISTRY_ID + " not found."));
@@ -171,7 +175,8 @@ public class SystemRegistryControllerSystemRegistryTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void getSystemRegistryEntryByIdNegativeId() throws Exception {
         this.mockMvc.perform(get("/systemregistry/mgmt/" + INVALID_SYSTEM_REGISTRY_ID)
                                      .accept(MediaType.APPLICATION_JSON))
@@ -179,7 +184,8 @@ public class SystemRegistryControllerSystemRegistryTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void getSystemRegistryEntriesBySystemName() throws Exception {
         final SystemRegistryListResponseDTO systemListResponseDTO = new SystemRegistryListResponseDTO(List.of(VALID_SYSTEM_REGISTRY), 1);
         when(systemRegistryDBService.getSystemRegistryEntriesBySystemName(eq(VALID_SYSTEM_NAME), any(), any()))
@@ -194,7 +200,8 @@ public class SystemRegistryControllerSystemRegistryTest {
         assertEquals(1, responseBody.getCount());
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void getSystemRegistryEntriesByUnknownSystemName() throws Exception {
         final SystemRegistryListResponseDTO systemListResponseDTO = new SystemRegistryListResponseDTO(List.of(), 0);
         when(systemRegistryDBService.getSystemRegistryEntriesBySystemName(eq(UNKNOWN_SYSTEM_NAME), any(), any()))
@@ -209,7 +216,8 @@ public class SystemRegistryControllerSystemRegistryTest {
         assertEquals(0, responseBody.getCount());
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void getSystemRegistryEntriesByInvalidSystemName() throws Exception {
         this.mockMvc.perform(get("/systemregistry/mgmt/systemname/" + INVALID_SYSTEM_NAME)
                                      .accept(MediaType.APPLICATION_JSON))
@@ -217,7 +225,8 @@ public class SystemRegistryControllerSystemRegistryTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void removeSystemRegistryEntryByInvalidId() throws Exception {
         this.mockMvc.perform(delete("/systemregistry/mgmt/" + INVALID_SYSTEM_REGISTRY_ID)
                                      .accept(MediaType.APPLICATION_JSON)
@@ -226,7 +235,8 @@ public class SystemRegistryControllerSystemRegistryTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void removeSystemRegistryEntryByUnknownId() throws Exception {
         doThrow(new InvalidParameterException("No system registry with id : " + UNKNOWN_SYSTEM_REGISTRY_ID))
                 .when(systemRegistryDBService)
@@ -239,7 +249,8 @@ public class SystemRegistryControllerSystemRegistryTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void removeSystemRegistryEntryById() throws Exception {
 
         this.mockMvc.perform(delete("/systemregistry/mgmt/" + VALID_SYSTEM_REGISTRY_ID)
@@ -249,7 +260,8 @@ public class SystemRegistryControllerSystemRegistryTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void updateSystemRegistryRequest() throws Exception {
         final SystemRegistryRequestDTO dto = new SystemRegistryRequestDTO(VALID_SYSTEM_REQUEST, VALID_DEVICE_REQUEST, null, null, 1);
         when(systemRegistryDBService.updateSystemRegistryById(eq(VALID_SYSTEM_REGISTRY_ID), any())).thenReturn(VALID_SYSTEM_REGISTRY);
@@ -263,7 +275,8 @@ public class SystemRegistryControllerSystemRegistryTest {
         assertEquals(VALID_SYSTEM_REGISTRY, objectMapper.readValue(result.getResponse().getContentAsString(), SystemRegistryResponseDTO.class));
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void updateSystemRegistryUnknownId() throws Exception {
         final SystemRegistryRequestDTO dto = new SystemRegistryRequestDTO(VALID_SYSTEM_REQUEST, VALID_DEVICE_REQUEST, null, null, 1);
         when(systemRegistryDBService.updateSystemRegistryById(eq(UNKNOWN_SYSTEM_REGISTRY_ID), any()))
@@ -277,7 +290,8 @@ public class SystemRegistryControllerSystemRegistryTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void updateSystemRegistryInvalidId() throws Exception {
         final SystemRegistryRequestDTO dto = new SystemRegistryRequestDTO(VALID_SYSTEM_REQUEST, VALID_DEVICE_REQUEST, null, null, 1);
         this.mockMvc.perform(put("/systemregistry/mgmt/systems/" + INVALID_SYSTEM_REGISTRY_ID)
@@ -288,7 +302,8 @@ public class SystemRegistryControllerSystemRegistryTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void updateSystemRegistryNullPayload() throws Exception {
         when(systemRegistryDBService.updateSystemRegistryById(eq(VALID_SYSTEM_REGISTRY_ID), any())).thenReturn(VALID_SYSTEM_REGISTRY);
         this.mockMvc.perform(put("/systemregistry/mgmt/systems/" + VALID_SYSTEM_ID)
@@ -299,7 +314,8 @@ public class SystemRegistryControllerSystemRegistryTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void mergeSystemWithOneField() throws Exception {
         SystemRegistryRequestDTO dto = null;
         when(systemRegistryDBService.mergeSystemRegistryById(eq(VALID_SYSTEM_REGISTRY_ID), any())).thenReturn(VALID_SYSTEM_REGISTRY);
@@ -341,7 +357,8 @@ public class SystemRegistryControllerSystemRegistryTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void mergeSystemWithEmpty() throws Exception {
         final SystemRegistryRequestDTO dto = new SystemRegistryRequestDTO();
         when(systemRegistryDBService.mergeSystemRegistryById(eq(VALID_SYSTEM_REGISTRY_ID), any())).thenReturn(VALID_SYSTEM_REGISTRY);
@@ -354,7 +371,8 @@ public class SystemRegistryControllerSystemRegistryTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void mergeSystemUnknownId() throws Exception {
         final SystemRegistryRequestDTO dto = new SystemRegistryRequestDTO(VALID_SYSTEM_REQUEST, VALID_DEVICE_REQUEST, DATE_STRING, null, 1);
         when(systemRegistryDBService.mergeSystemRegistryById(eq(UNKNOWN_SYSTEM_REGISTRY_ID), any()))
@@ -368,7 +386,8 @@ public class SystemRegistryControllerSystemRegistryTest {
                     .andReturn();
     }
 
-    @Test
+	//-------------------------------------------------------------------------------------------------
+	@Test
     public void mergeSystemInvalidId() throws Exception {
         final SystemRegistryRequestDTO dto = new SystemRegistryRequestDTO(VALID_SYSTEM_REQUEST, VALID_DEVICE_REQUEST, DATE_STRING, null, 1);
 
@@ -380,7 +399,8 @@ public class SystemRegistryControllerSystemRegistryTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void registerSystemNullPayload() throws Exception {
         when(systemRegistryDBService.registerSystemRegistry(any())).thenReturn(VALID_SYSTEM_REGISTRY);
 
@@ -391,8 +411,22 @@ public class SystemRegistryControllerSystemRegistryTest {
                     .andExpect(status().isBadRequest())
                     .andReturn();
     }
+	
+	//-------------------------------------------------------------------------------------------------
+		@Test
+	    public void registerSystemNameWrong() throws Exception {
+			final SystemRegistryRequestDTO dto = new SystemRegistryRequestDTO(new SystemRequestDTO("invalid.format_", "address", 80, "authenticationInfo"), VALID_DEVICE_REQUEST, DATE_STRING, null, 1);
 
-    @Test
+	        this.mockMvc.perform(post("/systemregistry/register")
+	                                     .accept(MediaType.APPLICATION_JSON)
+	                                     .contentType(MediaType.APPLICATION_JSON)
+	                                     .content(objectMapper.writeValueAsString(dto)))
+	                    .andExpect(status().isBadRequest())
+	                    .andReturn();
+	    }
+
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void registerSystemNullEndOfValidity() throws Exception {
         final SystemRegistryRequestDTO systemRegistryRequestDTO =
                 new SystemRegistryRequestDTO(VALID_SYSTEM_REQUEST, VALID_DEVICE_REQUEST, null, null, 1);
@@ -407,7 +441,8 @@ public class SystemRegistryControllerSystemRegistryTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void registerSystemInvalidEndOfValidity() throws Exception {
         final SystemRegistryRequestDTO systemRegistryRequestDTO =
                 new SystemRegistryRequestDTO(VALID_SYSTEM_REQUEST, VALID_DEVICE_REQUEST, "not parsable", null, 1);
@@ -422,7 +457,8 @@ public class SystemRegistryControllerSystemRegistryTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void unregisterSystemNullSystemName() throws Exception {
         this.mockMvc.perform(delete("/systemregistry/unregister")
                                      .param("system_name", "")
@@ -431,7 +467,8 @@ public class SystemRegistryControllerSystemRegistryTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void unregisterSystemNullPort() throws Exception {
         this.mockMvc.perform(delete("/systemregistry/unregister")
                                      .param("system_name", "system")
@@ -439,10 +476,12 @@ public class SystemRegistryControllerSystemRegistryTest {
                     .andExpect(status().isBadRequest())
                     .andReturn();
     }
+	
     //=================================================================================================
-    // Tests of system registry
+    // assistant methods
 
-    private <T> T readResponse(final MvcResult result, final Class<T> clz) throws IOException {
+    //-------------------------------------------------------------------------------------------------
+	private <T> T readResponse(final MvcResult result, final Class<T> clz) throws IOException {
         return objectMapper.readValue(result.getResponse().getContentAsString(), clz);
     }
 }

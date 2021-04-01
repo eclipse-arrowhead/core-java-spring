@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.cn.CommonNamePartVerifier;
 import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.dto.shared.DeviceRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRegistryOnboardingWithCsrRequestDTO;
@@ -38,12 +39,15 @@ public class Validation {
     private static final String SYSTEM_NAME_NULL_ERROR_MESSAGE = " System name must have value ";
     private static final String SYSTEM_ADDRESS_NULL_ERROR_MESSAGE = " System address must have value ";
     private static final String SYSTEM_PORT_NULL_ERROR_MESSAGE = " System port must have value ";
+	private static final String SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE = "System name has invalid format. System names only contain letters (english alphabet), numbers and dash (-), and have to start with a letter (also cannot end with dash).";
+
 
     private static final String DEVICE_NAME_NULL_ERROR_MESSAGE = " Device name must have value ";
     private static final String DEVICE_ADDRESS_NULL_ERROR_MESSAGE = " Device address must have value ";
     private static final String DEVICE_MAC_ADDRESS_NULL_ERROR_MESSAGE = " Device MAC address must have value ";
 
     private final Logger logger = LogManager.getLogger();
+    private final CommonNamePartVerifier cnVerifier = new CommonNamePartVerifier(); 
 
     public Validation() { super(); }
 
@@ -157,6 +161,10 @@ public class Validation {
 
         if (Utilities.isEmpty(request.getSystemName())) {
             throw new BadPayloadException(SYSTEM_NAME_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+        
+        if (!cnVerifier.isValid(request.getSystemName())) {
+        	throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
 
         if (checkReservedCoreSystemNames) {
