@@ -78,7 +78,7 @@ public class ConfigurationController {
 	
 	//=================================================================================================
 	// members
-	private static final String PATH_VARIABLE_NAME = "name";
+	private static final String PATH_VARIABLE_NAME = "systemName";
 
 	private static final String PUT_CONFIG_MGMT_HTTP_200_MESSAGE = "Configuration updated";
 	private static final String PUT_CONFIG_MGMT_HTTP_400_MESSAGE = "Could not store configration data";
@@ -124,6 +124,7 @@ public class ConfigurationController {
 			if(Utilities.isEmpty(systemName)) {
 				throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_CONFIGURATION_RAWCONF);
 			}
+			systemName = systemName.toLowercase().trim();
 			
 			ConfigurationResponseDTO ret = configurationDBService.getConfigForSystem(systemName);
 			if(ret == null) {
@@ -151,8 +152,9 @@ public class ConfigurationController {
 			) {
 
 			if(Utilities.isEmpty(systemName)) {
-				throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_CONFIGURATION_RAWCONF);
+				throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_CONFIGURATION_CONF);
 			}
+			systemName = systemName.toLowercase().trim();
 			
 			ConfigurationResponseDTO ret = configurationDBService.getConfigForSystem(systemName);
 			if(ret == null) {
@@ -167,14 +169,13 @@ public class ConfigurationController {
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = CoreCommonConstants.SWAGGER_HTTP_404_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path=CONFIG_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public ConfigurationListResponseDTO confListGet(
 			) {
 
-				ConfigurationListResponseDTO ret = configurationDBService.getAllConfigurations();
+				final ConfigurationListResponseDTO ret = configurationDBService.getAllConfigurations();
 
 				return ret;
 			}
@@ -192,8 +193,12 @@ public class ConfigurationController {
 		logger.debug("New configurationStore put request recieved with name: {}", systemName);
 		final String origin = CommonConstants.CONFIGURATION_URI + CONFIG_BY_NAME_MGMT_URI;	
 		
-		validateConfigRequestDTO(systemName, config, origin);
-		final ConfigurationResponseDTO configResponse = configurationDBService.setConfigForSystem(systemName, config);
+		if(Utilities.isEmpty(systemName)) {
+			throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CONFIG_BY_NAME_MGMT_URI);
+		}
+
+		validateConfigRequestDTO(systemName.toLowercase().trim(), config, origin);
+		final ConfigurationResponseDTO configResponse = configurationDBService.setConfigForSystem(systemName.toLowercase().trim(), config);
 		
 		return configResponse;
 	}
@@ -211,7 +216,11 @@ public class ConfigurationController {
 		logger.debug("New configurationStore delete request recieved with name: {}", systemName);
 		final String origin = CommonConstants.CONFIGURATION_URI + CONFIG_BY_NAME_MGMT_URI;	
 		
-		final ConfigurationResponseDTO configResponse = configurationDBService.deleteConfigForSystem(systemName);
+		if(Utilities.isEmpty(systemName)) {
+			throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CONFIG_BY_NAME_MGMT_URI);
+		}
+
+		final ConfigurationResponseDTO configResponse = configurationDBService.deleteConfigForSystem(systemName.toLowercase().trim());
 		
 		return configResponse;
 	}
@@ -224,12 +233,20 @@ public class ConfigurationController {
 
 		try {
 			Assert.notNull(systemName, "systemName is null.");
-			Assert.notNull(dto.getSystemName(), "systemName is null.");
-			Assert.notNull(dto.getFileName(), "filename is null.");
-			Assert.notNull(dto.getContentType(), "contentType is null.");
-			Assert.notNull(dto.getData(), "data is null.");
+			Assert.notNull(dto.getSystemName(), "systemName parameter is missing.");
+			Assert.notNull(dto.getFileName(), "filename is missing.");
+			Assert.notNull(dto.getContentType(), "contentType is missing.");
+			Assert.notNull(dto.getData(), "data is missing.");
+
+			Assert.isTrue(!Utilities.isEmpty(systemName), "systemName is not specified.");
+			Assert.isTrue(!Utilities.isEmpty(dto.getSystemName()), "SystemName parameter is empty.");
+			Assert.isTrue(!Utilities.isEmpty(dto.getFileName()), "fileName is empty.");
+			Assert.isTrue(!Utilities.isEmpty(dto.getContentType()), "contentTyupe is empty.");
+			Assert.isTrue(!Utilities.isEmpty(dto.getData()), "data is empty.");
+
+			Assert.isTrue(systemName.equals(dto.getSystemName()), "request and parameter systemName mismatch");
 		} catch(Exception e){
-			throw new BadPayloadException("Bad payload");
+			throw new BadPayloadException("Bad payload: " + e.getMessage());
 		}
 	}
 	

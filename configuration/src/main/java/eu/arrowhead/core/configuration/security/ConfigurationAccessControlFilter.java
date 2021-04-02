@@ -32,6 +32,8 @@ public class ConfigurationAccessControlFilter extends CoreSystemAccessControlFil
 	
 	//=================================================================================================
         // members
+        final String configurationConfURI = CommonConstants.CONFIGURATION_URI + CommonConstants.OP_CONFIGURATION_CONF;
+        final String configurationRawConfURI = CommonConstants.CONFIGURATION_URI + CommonConstants.OP_CONFIGURATION_RAWCONF;
         
 	//=================================================================================================
 	// assistant methods
@@ -45,7 +47,7 @@ public class ConfigurationAccessControlFilter extends CoreSystemAccessControlFil
                 if (requestTarget.contains(CoreCommonConstants.MGMT_URI)) {
 			// Only the local System Operator can use these methods
 			checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
-                } else if (requestTarget.contains(CommonConstants.CONFIGURATION_URI + CommonConstants.OP_CONFIGURATION_CONF) || requestTarget.contains(CommonConstants.CONFIGURATION_URI + CommonConstants.OP_CONFIGURATION_RAWCONF)) {
+                } else if (requestTarget.contains(configurationConfURI) || requestTarget.contains(configurationRawConfURI)) {
                         final String client = getSystemNameFromURI(requestTarget);
                         checkIfRequesterSystemNameisEqualsWithClientNameFromCN(client, clientCN);
                 }		
@@ -54,8 +56,6 @@ public class ConfigurationAccessControlFilter extends CoreSystemAccessControlFil
 
         //-------------------------------------------------------------------------------------------------
         private String getSystemNameFromURI(final String requestTarget) {
-                final String configurationConfURI = CommonConstants.CONFIGURATION_URI + CommonConstants.OP_CONFIGURATION_CONF;
-                final String configurationRawConfURI = CommonConstants.CONFIGURATION_URI + CommonConstants.OP_CONFIGURATION_RAWCONF;
                 
                 int sysNameStartPosition = requestTarget.indexOf(configurationConfURI);
                 int sysNameStopPosition = -1;
