@@ -124,7 +124,7 @@ public class ConfigurationController {
 			if(Utilities.isEmpty(systemName)) {
 				throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_CONFIGURATION_RAWCONF);
 			}
-			systemName = systemName.toLowercase().trim();
+			systemName = systemName.toLowerCase().trim();
 			
 			ConfigurationResponseDTO ret = configurationDBService.getConfigForSystem(systemName);
 			if(ret == null) {
@@ -154,7 +154,7 @@ public class ConfigurationController {
 			if(Utilities.isEmpty(systemName)) {
 				throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_CONFIGURATION_CONF);
 			}
-			systemName = systemName.toLowercase().trim();
+			systemName = systemName.toLowerCase().trim();
 			
 			ConfigurationResponseDTO ret = configurationDBService.getConfigForSystem(systemName);
 			if(ret == null) {
@@ -197,8 +197,8 @@ public class ConfigurationController {
 			throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CONFIG_BY_NAME_MGMT_URI);
 		}
 
-		validateConfigRequestDTO(systemName.toLowercase().trim(), config, origin);
-		final ConfigurationResponseDTO configResponse = configurationDBService.setConfigForSystem(systemName.toLowercase().trim(), config);
+		validateConfigRequestDTO(systemName.toLowerCase().trim(), config, origin);
+		final ConfigurationResponseDTO configResponse = configurationDBService.setConfigForSystem(systemName.toLowerCase().trim(), config);
 		
 		return configResponse;
 	}
@@ -220,7 +220,7 @@ public class ConfigurationController {
 			throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CONFIG_BY_NAME_MGMT_URI);
 		}
 
-		final ConfigurationResponseDTO configResponse = configurationDBService.deleteConfigForSystem(systemName.toLowercase().trim());
+		final ConfigurationResponseDTO configResponse = configurationDBService.deleteConfigForSystem(systemName.toLowerCase().trim());
 		
 		return configResponse;
 	}

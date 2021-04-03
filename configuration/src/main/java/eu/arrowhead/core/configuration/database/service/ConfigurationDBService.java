@@ -15,6 +15,8 @@ package eu.arrowhead.core.configuration.database.service;
 
 import java.util.Optional;
 import java.util.List;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList; 
 import java.util.Iterator; 
 import java.util.Vector;
@@ -76,8 +78,16 @@ public class ConfigurationDBService {
 
 	
 	//-------------------------------------------------------------------------------------------------
-	public ConfigurationResponseDTO getConfigForSystem(final String systemName) {
+	public ConfigurationResponseDTO getConfigForSystem(String systemName) {
 		logger.debug("getConfigForSystem:");
+
+		if(systemName == null) {
+			return null;
+		}
+		systemName = systemName.toLowerCase().trim();
+		if(systemName.equals("")) {
+			return null;
+		}
 
 		ConfigurationResponseDTO ret = null;
 		
@@ -98,8 +108,8 @@ public class ConfigurationDBService {
 				ret.setSystemName(systemName);
 				ret.setContentType(rs.getString(2));
 				ret.setData(rs.getString(3));
-				ret.setCreatedAt(rs.getString(4));
-				ret.setUpdatedAt(rs.getString(5));
+				ret.setCreatedAt(Utilities.convertZonedDateTimeToUTCString(Utilities.parseLocalStringToUTCZonedDateTime(rs.getString(4))));
+				ret.setUpdatedAt(Utilities.convertZonedDateTimeToUTCString(Utilities.parseLocalStringToUTCZonedDateTime(rs.getString(5))));
 			}
 			
 			rs.close();
@@ -123,6 +133,13 @@ public class ConfigurationDBService {
 	public ConfigurationResponseDTO setConfigForSystem(final String systemName, final ConfigurationRequestDTO conf) {
 		logger.debug("getConfigForSystem:");
 
+		if(systemName == null || conf == null) {
+			return null;
+		}
+		if(systemName.equals("")) {
+			return null;
+		}
+
 		Connection conn = null;
 
 		try {
@@ -130,7 +147,7 @@ public class ConfigurationDBService {
 
 			String sql = "INSERT INTO configuration_data(systemName, fileName, contentType, data) VALUES(?, ?, ?, ?) ON DUPLICATE KEY UPDATE fileName=?, contentType=?, data=?;";
 			PreparedStatement stmt = conn.prepareStatement(sql);
-			stmt.setString(1, systemName);
+			stmt.setString(1, systemName.toLowerCase().trim());
 			stmt.setString(2, conf.getFileName());
 			stmt.setString(3, conf.getContentType());
 			stmt.setString(4, conf.getData());
@@ -172,16 +189,16 @@ public class ConfigurationDBService {
 	
 			ResultSet rs = stmt.executeQuery();
 			
-			List<ConfigurationResponseDTO> data = new ArrayList<ConfigurationResponseDTO>();
-			// fetch the information
-			if (rs.next()) {
+			final List<ConfigurationResponseDTO> data = new ArrayList<ConfigurationResponseDTO>();
+			
+			while (rs.next()) {
 				ConfigurationResponseDTO entry = new ConfigurationResponseDTO();
 				entry.setId(rs.getLong(1));
 				entry.setSystemName(rs.getString(2));
 				entry.setContentType(rs.getString(3));
 				entry.setData(rs.getString(4));
-				entry.setCreatedAt(rs.getString(5));
-				entry.setUpdatedAt(rs.getString(6));
+				entry.setCreatedAt(Utilities.convertZonedDateTimeToUTCString(Utilities.parseLocalStringToUTCZonedDateTime(rs.getString(5))));
+				entry.setUpdatedAt(Utilities.convertZonedDateTimeToUTCString(Utilities.parseLocalStringToUTCZonedDateTime(rs.getString(6))));
 				data.add(entry);
 			}
 			ret.setData(data);
@@ -208,8 +225,15 @@ public class ConfigurationDBService {
 	public ConfigurationResponseDTO deleteConfigForSystem(final String systemName) {
 		logger.debug("deleteConfigForSystem:");
 
+		if(systemName == null) {
+			return null;
+		}
+		if(systemName.equals("")) {
+			return null;
+		}
+
 		// check if config exists
-		ConfigurationResponseDTO ret = getConfigForSystem(systemName);
+		ConfigurationResponseDTO ret = getConfigForSystem(systemName.toLowerCase().trim());
 		if (ret == null) {
 			return null;
 		}
@@ -220,7 +244,7 @@ public class ConfigurationDBService {
 
 			String sql = "DELETE FROM configuration_data WHERE systemName=?;";
 			PreparedStatement stmt = conn.prepareStatement(sql);
-			stmt.setString(1, systemName);
+			stmt.setString(1, systemName.toLowerCase().trim());
 
 			stmt.executeUpdate();
 			stmt.close();
