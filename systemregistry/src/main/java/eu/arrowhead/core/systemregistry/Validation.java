@@ -80,9 +80,13 @@ public class Validation {
             needChange = true;
         }
 
-
         if (!Utilities.isEmpty(request.getSystemName())) {
             needChange = true;
+            
+            if (!cnVerifier.isValid(request.getSystemName())) {
+            	throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+            }
+            
             for (final CoreSystem coreSysteam : CoreSystem.values()) {
                 if (coreSysteam.name().equalsIgnoreCase(request.getSystemName().trim())) {
                     throw new BadPayloadException("System name '" + request.getSystemName() + "' is a reserved arrowhead core system name.",
@@ -239,6 +243,11 @@ public class Validation {
         if (Utilities.isEmpty(systemName)) {
             throw new BadPayloadException("Name of the system is blank", HttpStatus.SC_BAD_REQUEST, origin);
         }
+        
+        if (!cnVerifier.isValid(systemName)) {
+        	throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+
     }
 
 
@@ -303,6 +312,10 @@ public class Validation {
 
             if (!Utilities.isEmpty(system.getSystemName())) {
                 needChange = true;
+                
+                if (!cnVerifier.isValid(request.getSystem().getSystemName())) {
+                	throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+                }
             } else if (!Utilities.isEmpty(system.getAddress())) {
                 needChange = true;
             } else if (Objects.nonNull(system.getPort())) {

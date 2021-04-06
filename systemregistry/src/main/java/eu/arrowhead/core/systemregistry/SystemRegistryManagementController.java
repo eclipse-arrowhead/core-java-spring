@@ -177,7 +177,7 @@ public class SystemRegistryManagementController {
     public SystemResponseDTO addSystem(@RequestBody final SystemRequestDTO request) {
         return callCreateSystem(request);
     }
-
+    
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Return updated system", response = SystemResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
@@ -191,7 +191,7 @@ public class SystemRegistryManagementController {
     public SystemResponseDTO updateSystem(@PathVariable(value = PATH_VARIABLE_ID) final long systemId, @RequestBody final SystemRequestDTO request) {
         return callUpdateSystem(request, systemId);
     }
-
+    
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Return system updated by fields", response = SystemResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
@@ -205,7 +205,7 @@ public class SystemRegistryManagementController {
     public SystemResponseDTO mergeSystem(@PathVariable(value = PATH_VARIABLE_ID) final long systemId, @RequestBody final SystemRequestDTO request) {
         return callMergeSystem(request, systemId);
     }
-
+    
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Remove system", tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
@@ -487,8 +487,8 @@ public class SystemRegistryManagementController {
 
         validation.checkSystemPutRequest(request, systemId, getOrigin(SYSTEMS_URI));
 
-        final String validatedSystemName = request.getSystemName().toLowerCase();
-        final String validatedAddress = request.getAddress().toLowerCase();
+        final String validatedSystemName = request.getSystemName().toLowerCase().trim();
+        final String validatedAddress = request.getAddress().toLowerCase().trim();
         final int validatedPort = request.getPort();
         final String validatedAuthenticationInfo = request.getAuthenticationInfo();
 
@@ -501,8 +501,8 @@ public class SystemRegistryManagementController {
 
         validation.checkSystemMergeRequest(request, systemId, getOrigin(SYSTEMS_URI));
 
-        final String validatedSystemName = request.getSystemName() != null ? request.getSystemName().toLowerCase() : "";
-        final String validatedAddress = request.getAddress() != null ? request.getAddress().toLowerCase() : "";
+        final String validatedSystemName = request.getSystemName() != null ? request.getSystemName().toLowerCase().trim() : "";
+        final String validatedAddress = request.getAddress() != null ? request.getAddress().toLowerCase().trim() : "";
         final Integer validatedPort = request.getPort();
         final String validatedAuthenticationInfo = request.getAuthenticationInfo();
 

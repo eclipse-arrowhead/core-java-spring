@@ -76,6 +76,7 @@ public class SystemRegistryControllerSystemRegistryTest {
     private final static String VALID_SYSTEM_NAME = "system";
     private final static String UNKNOWN_SYSTEM_NAME = "unknown";
     private final static String INVALID_SYSTEM_NAME = "";
+    private final static String WRONG_SYSTEM_NAME = "wrong_system_name";
 
     private static final SystemRequestDTO VALID_SYSTEM_REQUEST =
             new SystemRequestDTO("system", "address", 80, "authenticationInfo");
@@ -220,6 +221,15 @@ public class SystemRegistryControllerSystemRegistryTest {
 	@Test
     public void getSystemRegistryEntriesByInvalidSystemName() throws Exception {
         this.mockMvc.perform(get("/systemregistry/mgmt/systemname/" + INVALID_SYSTEM_NAME)
+                                     .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+    }
+	
+    //-------------------------------------------------------------------------------------------------
+	@Test
+    public void getSystemRegistryEntriesByWrongSystemName() throws Exception {
+        this.mockMvc.perform(get("/systemregistry/mgmt/systemname/" + WRONG_SYSTEM_NAME)
                                      .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isBadRequest())
                     .andReturn();
@@ -370,6 +380,23 @@ public class SystemRegistryControllerSystemRegistryTest {
                     .andExpect(status().isBadRequest())
                     .andReturn();
     }
+	
+   //-------------------------------------------------------------------------------------------------
+	@Test
+    public void mergeSystemWithWrongSystemName() throws Exception {
+        final SystemRegistryRequestDTO dto = new SystemRegistryRequestDTO();
+        SystemRequestDTO system = new SystemRequestDTO();
+        system.setSystemName(WRONG_SYSTEM_NAME);
+		dto.setSystem(system);
+        when(systemRegistryDBService.mergeSystemRegistryById(eq(VALID_SYSTEM_REGISTRY_ID), any())).thenReturn(VALID_SYSTEM_REGISTRY);
+
+        this.mockMvc.perform(patch("/systemregistry/mgmt/" + VALID_SYSTEM_ID)
+                                     .accept(MediaType.APPLICATION_JSON)
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+    }
 
     //-------------------------------------------------------------------------------------------------
 	@Test
@@ -413,17 +440,17 @@ public class SystemRegistryControllerSystemRegistryTest {
     }
 	
 	//-------------------------------------------------------------------------------------------------
-		@Test
-	    public void registerSystemNameWrong() throws Exception {
-			final SystemRegistryRequestDTO dto = new SystemRegistryRequestDTO(new SystemRequestDTO("invalid.format_", "address", 80, "authenticationInfo"), VALID_DEVICE_REQUEST, DATE_STRING, null, 1);
+	@Test
+    public void registerSystemNameWrong() throws Exception {
+		final SystemRegistryRequestDTO dto = new SystemRegistryRequestDTO(new SystemRequestDTO("invalid.format_", "address", 80, "authenticationInfo"), VALID_DEVICE_REQUEST, DATE_STRING, null, 1);
 
-	        this.mockMvc.perform(post("/systemregistry/register")
-	                                     .accept(MediaType.APPLICATION_JSON)
-	                                     .contentType(MediaType.APPLICATION_JSON)
-	                                     .content(objectMapper.writeValueAsString(dto)))
-	                    .andExpect(status().isBadRequest())
-	                    .andReturn();
-	    }
+        this.mockMvc.perform(post("/systemregistry/register")
+                                     .accept(MediaType.APPLICATION_JSON)
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+    }
 
     //-------------------------------------------------------------------------------------------------
 	@Test
@@ -462,6 +489,16 @@ public class SystemRegistryControllerSystemRegistryTest {
     public void unregisterSystemNullSystemName() throws Exception {
         this.mockMvc.perform(delete("/systemregistry/unregister")
                                      .param("system_name", "")
+                                     .param("port", "80"))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+    }
+	
+   //-------------------------------------------------------------------------------------------------
+	@Test
+    public void unregisterSystemWrongSystemName() throws Exception {
+        this.mockMvc.perform(delete("/systemregistry/unregister")
+                                     .param("system_name", "system.name")
                                      .param("port", "80"))
                     .andExpect(status().isBadRequest())
                     .andReturn();
