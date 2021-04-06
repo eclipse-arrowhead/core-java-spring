@@ -134,7 +134,7 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected void customDestroy() {
-		// close connections using listening on advertisement topic
+		// close connections using to listen on advertisement topic
 		relaySubscriberDataContainer.close();
 		
 		// close connections used by web services and gatekeeper tasks
