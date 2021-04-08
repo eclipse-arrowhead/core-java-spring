@@ -13,28 +13,17 @@
  ********************************************************************************/
 package eu.arrowhead.core.datamanager.service;
 
-import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.Vector;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.internal.DTOConverter;
-import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.dto.shared.SenML;
 import eu.arrowhead.core.datamanager.database.service.DataManagerDBService;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ArrayList; 
-import java.util.Iterator; 
-import java.util.Vector;
 
 
 @Service
@@ -42,7 +31,6 @@ public class HistorianService {
 
   //=================================================================================================
   // members
-  //
  
   private final Logger logger = LogManager.getLogger(HistorianService.class);
 
@@ -51,13 +39,6 @@ public class HistorianService {
 
   //=================================================================================================
   // methods
-  
-  //-------------------------------------------------------------------------------------------------
-
-  //-------------------------------------------------------------------------------------------------
-  public HistorianService() {
-  }
-
 
   //-------------------------------------------------------------------------------------------------
   public ArrayList<String> getSystems(){
@@ -65,7 +46,6 @@ public class HistorianService {
 
     return dataManagerDBService.getAllHistorianSystems();
   }
-
   
   //-------------------------------------------------------------------------------------------------
   public ArrayList<String> getServicesFromSystem(final String systemName) {
@@ -90,7 +70,7 @@ public class HistorianService {
   }
 
   //-------------------------------------------------------------------------------------------------
-  public boolean addServiceForSystem(final String systemName, final String serviceName, final String serviceType){
+  public boolean addServiceForSystem(final String systemName, final String serviceName, final String serviceType) {
 
     if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName) || Utilities.isEmpty(serviceType)) {
       return false;
@@ -120,7 +100,7 @@ public class HistorianService {
   }
   
   //-------------------------------------------------------------------------------------------------
-  public Vector<SenML> fetchEndpoint(final String systemName, final String serviceName, double from, double to, final int count) {
+  public Vector<SenML> fetchEndpoint(final String systemName, final String serviceName, final double from, final double to, final int count) {
 
     if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
       return null;
@@ -131,7 +111,7 @@ public class HistorianService {
   }
 
   //-------------------------------------------------------------------------------------------------
-  public Vector<SenML> fetchEndpoint(final String systemName, final String serviceName, double from, double to, final Vector<Integer> counts, final Vector<String> signals) {
+  public Vector<SenML> fetchEndpoint(final String systemName, final String serviceName, final double from, final double to, final Vector<Integer> counts, final Vector<String> signals) {
 
     if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
       return null;
@@ -152,9 +132,4 @@ public class HistorianService {
 
     return dataManagerDBService.fetchSignalsFromEndpoint(systemName, serviceName, from, to, counts, signals);
   }
-
-  
-  //=================================================================================================
-  // assistant methods
-  
 }

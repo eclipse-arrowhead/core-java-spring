@@ -29,9 +29,6 @@ import eu.arrowhead.common.security.CoreSystemAccessControlFilter;
 public class DatamanagerAccessControlFilter extends CoreSystemAccessControlFilter {
 	
 	//=================================================================================================
-        // members
-        
-	//=================================================================================================
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
