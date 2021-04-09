@@ -1,5 +1,5 @@
 
-# Arrowhead Framework 4.2.0
+# Arrowhead Framework 4.3.0
 
 [Arrowhead](http://www.arrowhead.eu/) (and its continuation, [Productive4.0](https://productive40.eu/)) is an ambitious holistic innovation project,
  meant to open the doors to the potentials of Digital Industry and to maintain a leadership position of the industries in Europe. All partners involved will work on creating the capability to efficiently design and integrate hardware and software of Internet of Things (IoT) devices. Linking the real with the digital world takes more than just adding software to the hardware.
@@ -87,20 +87,11 @@ Please be aware, that versions starting from 4.1.3 are __NOT__ backwards compati
 	       * [Client](#ca_endpoints_client)
            * [Private](#ca_endpoints_private)
            * [Management](#ca_endpoints_mgmt)
-    9. **QoS Monitor (Quality of Service Monitor)**
-       * [System Design Description Overview](qos-monitor/documentation/QualityOfServiceMonitor-SysDD.md)
-           * [Services and Use Cases](qos-monitor/documentation/QualityOfServiceMonitor-SysDD.md#services-and-use-cases)  
-       * [Interface Design Description](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md)
-           * [Security](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#security)
-           * [Communication Profile](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#communication-profile)
-               * [Client](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#client-endpoint-description)
-               * [Private](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#private-endpoint-description)
-               * [Management](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#management-endpoint-description)	 
     10. [Onboarding Controller](#onboardingcontroller)
-       * [System Design Description Overview](#onboardingcontroller_sdd)
-       * [Services and Use Cases](#onboardingcontroller_usecases)
-       * [Security](#onboardingcontroller_security)
-       * [Endpoints](#onboardingcontroller_endpoints)
+        * [System Design Description Overview](#onboardingcontroller_sdd)
+        * [Services and Use Cases](#onboardingcontroller_usecases)
+        * [Security](#onboardingcontroller_security)
+        * [Endpoints](#onboardingcontroller_endpoints)
            * [Onboarding](#onboardingcontroller_endpoints_onboarding)
     11. [Device Registry](#deviceregistry)
         * [System Design Description Overview](#deviceregistry_sdd)
