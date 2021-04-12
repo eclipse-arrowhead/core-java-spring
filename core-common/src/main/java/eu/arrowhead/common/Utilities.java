@@ -33,6 +33,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -156,19 +157,19 @@ public class Utilities {
 		}
 
 		final TemporalAccessor tempAcc = dateTimeFormatter.parse(timeStr);
-		final ZoneOffset offset = OffsetDateTime.now().getOffset();
 
-		return ZonedDateTime.ofInstant(Instant.from(tempAcc), offset);
+		return ZonedDateTime.ofInstant(Instant.from(tempAcc), ZoneId.systemDefault());
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:RedundantThrowsDeclarationCheck")
-	public static ZonedDateTime parseLocalStringToUTCZonedDateTime(final String timeStr) throws DateTimeParseException {
+	public static ZonedDateTime parseDBLocalStringToUTCZonedDateTime(final String timeStr) throws DateTimeParseException {
 		if (isEmpty(timeStr)) {
 			return null;
 		}
-
-		final TemporalAccessor tempAcc = dateTimeFormatter.parse(timeStr);
+		
+		final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		final TemporalAccessor tempAcc = formatter.parse(timeStr);
 		final ZonedDateTime parsedDateTime = ZonedDateTime.of(tempAcc.get(ChronoField.YEAR),
 															  tempAcc.get(ChronoField.MONTH_OF_YEAR),
 															  tempAcc.get(ChronoField.DAY_OF_MONTH),
@@ -176,9 +177,9 @@ public class Utilities {
 															  tempAcc.get(ChronoField.MINUTE_OF_HOUR),
 															  tempAcc.get(ChronoField.SECOND_OF_MINUTE),
 															  0,
-															  OffsetDateTime.now().getOffset());
-
-			return ZonedDateTime.ofInstant(parsedDateTime.toInstant(), ZoneOffset.UTC);
+															  ZoneId.systemDefault());
+		
+		return ZonedDateTime.ofInstant(parsedDateTime.toInstant(), ZoneOffset.UTC);
 	}
 
 	//-------------------------------------------------------------------------------------------------

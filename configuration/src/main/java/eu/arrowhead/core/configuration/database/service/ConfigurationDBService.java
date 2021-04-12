@@ -101,8 +101,8 @@ public class ConfigurationDBService {
 				ret.setSystemName(systemName);
 				ret.setContentType(rs.getString(2));
 				ret.setData(rs.getString(3));
-				ret.setCreatedAt(Utilities.convertZonedDateTimeToUTCString(Utilities.parseLocalStringToUTCZonedDateTime(rs.getString(4))));
-				ret.setUpdatedAt(Utilities.convertZonedDateTimeToUTCString(Utilities.parseLocalStringToUTCZonedDateTime(rs.getString(5))));
+				ret.setCreatedAt(Utilities.convertZonedDateTimeToUTCString(Utilities.parseDBLocalStringToUTCZonedDateTime(rs.getString(4))));
+				ret.setUpdatedAt(Utilities.convertZonedDateTimeToUTCString(Utilities.parseDBLocalStringToUTCZonedDateTime(rs.getString(5))));
 			}
 			
 			rs.close();
@@ -194,8 +194,8 @@ public class ConfigurationDBService {
 				entry.setSystemName(rs.getString(2));
 				entry.setContentType(rs.getString(3));
 				entry.setData(rs.getString(4));
-				entry.setCreatedAt(Utilities.convertZonedDateTimeToUTCString(Utilities.parseLocalStringToUTCZonedDateTime(rs.getString(5))));
-				entry.setUpdatedAt(Utilities.convertZonedDateTimeToUTCString(Utilities.parseLocalStringToUTCZonedDateTime(rs.getString(6))));
+				entry.setCreatedAt(Utilities.convertZonedDateTimeToUTCString(Utilities.parseDBLocalStringToUTCZonedDateTime(rs.getString(5))));
+				entry.setUpdatedAt(Utilities.convertZonedDateTimeToUTCString(Utilities.parseDBLocalStringToUTCZonedDateTime(rs.getString(6))));
 				data.add(entry);
 			}
 			ret.setData(data);
