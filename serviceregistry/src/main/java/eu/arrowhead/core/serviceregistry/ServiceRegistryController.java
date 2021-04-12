@@ -465,6 +465,7 @@ public class ServiceRegistryController {
 	@ResponseBody public ServiceDefinitionResponseDTO patchUpdateServiceDefinition(@PathVariable(value = PATH_VARIABLE_ID) final long id,
 																				   @RequestBody final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
 		// Currently ServiceDefinition has only one updateable field, therefore PUT and PATCH do the same
+		
 		return putUpdateServiceDefinition(id, serviceDefinitionRequestDTO);
 	}
 	
