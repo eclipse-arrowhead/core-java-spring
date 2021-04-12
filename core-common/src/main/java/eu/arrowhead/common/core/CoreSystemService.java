@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.core;
 
+import java.util.List;
+
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
@@ -82,7 +84,7 @@ public enum CoreSystemService {
 
     // Configuration services
 	CONFIGURATION_SERVICE(CommonConstants.CORE_SERVICE_CONFIGURATION_CONF, CommonConstants.CONFIGURATION_URI +  CommonConstants.OP_CONFIGURATION_CONF),
-	CONFIGURATION_RAW_SERVICE(CommonConstants.CORE_SERVICE_CONFIGURATION_RAWCONF, CommonConstants.CONFIGURATION_URI +  CommonConstants.OP_CONFIGURATION_RAWCONF),
+	CONFIGURATION_RAW_SERVICE(CommonConstants.CORE_SERVICE_CONFIGURATION_RAWCONF, CommonConstants.CONFIGURATION_URI +  CommonConstants.OP_CONFIGURATION_RAWCONF, List.of(new InterfaceData(CommonConstants.HTTP, CommonConstants.BINARY))),
 	CONFIGURATION_MANAGE_SERVICE(CommonConstants.CORE_SERVICE_CONFIGURATION_CONF, CommonConstants.CONFIGURATION_URI +  CommonConstants.OP_CONFIGURATION_MGMT_MANAGE),
 	
     // Choreographer services
@@ -132,6 +134,7 @@ public enum CoreSystemService {
 	
 	private final String serviceDefinition;
 	private final String serviceUri;
+	private final List<InterfaceData> interfaces;
 	
 	//=================================================================================================
 	// methods
@@ -139,17 +142,52 @@ public enum CoreSystemService {
 	//-------------------------------------------------------------------------------------------------
 	public String getServiceDefinition() { return serviceDefinition; }
 	public String getServiceUri() { return serviceUri; }
-	
+	public List<InterfaceData> getInterfaces() { return interfaces; }
 	
 	//=================================================================================================
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
 	private CoreSystemService(final String serviceDefinition, final String serviceUri) {
+		this(serviceDefinition, serviceUri, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private CoreSystemService(final String serviceDefinition, final String serviceUri, final List<InterfaceData> interfaces) {
 		Assert.isTrue(!Utilities.isEmpty(serviceDefinition), "Service definition is null or blank");
 		Assert.isTrue(!Utilities.isEmpty(serviceUri), "Service URI is null or blank");
 		
 		this.serviceDefinition = serviceDefinition;
 		this.serviceUri = serviceUri;
+		this.interfaces = interfaces == null || interfaces.isEmpty() ? null : interfaces;
+	}
+	
+	//=================================================================================================
+	// nested classes
+	
+	//-------------------------------------------------------------------------------------------------
+	public static class InterfaceData {
+		
+		//=================================================================================================
+		// members
+		
+		private final String protocol;
+		private final String format;
+		
+		//=================================================================================================
+		// methods
+		
+		//-------------------------------------------------------------------------------------------------
+		public InterfaceData(final String protocol, final String format) {
+			Assert.isTrue(!Utilities.isEmpty(protocol), "protocol is invalid");
+			Assert.isTrue(!Utilities.isEmpty(format), "format is invalid");
+			
+			this.protocol = protocol.toUpperCase().trim();
+			this.format = format.toUpperCase().trim();
+		}
+
+		//-------------------------------------------------------------------------------------------------
+		public String getProtocol() { return protocol; }
+		public String getFormat() {	return format; }
 	}
 }

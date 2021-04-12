@@ -22,6 +22,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,7 @@ import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.common.core.CoreSystemService.InterfaceData;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryRequestDTO;
@@ -287,13 +289,31 @@ public abstract class ApplicationInitListener {
 	private ServiceRegistryRequestDTO getCoreSystemServiceRegistryRequestDTO(final SystemRequestDTO coreSystemDTO, final CoreSystemService coreSystemService) {
 		logger.debug("getCoreSystemServiceRegistryRequestDTO started...");
 		
-		final List<String> interfaces = sslProperties.isSslEnabled() ? List.of(CommonConstants.HTTP_SECURE_JSON) : List.of(CommonConstants.HTTP_INSECURE_JSON);
+		final List<String> interfaces = collectInterfaces(coreSystemService);
 		final ServiceRegistryRequestDTO result = new ServiceRegistryRequestDTO();
 		result.setProviderSystem(coreSystemDTO);
 		result.setServiceDefinition(coreSystemService.getServiceDefinition());
 		result.setServiceUri(coreSystemService.getServiceUri());
 		result.setSecure(sslProperties.isSslEnabled() ? ServiceSecurityType.CERTIFICATE.name() : ServiceSecurityType.NOT_SECURE.name());
 		result.setInterfaces(interfaces);
+		
+		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<String> collectInterfaces(final CoreSystemService service) {
+		logger.debug("collectInterfaces started...");
+		
+		final List<InterfaceData> interfaces = service.getInterfaces();
+		if (interfaces == null || interfaces.isEmpty()) {
+			return sslProperties.isSslEnabled() ? List.of(CommonConstants.HTTP_SECURE_JSON) : List.of(CommonConstants.HTTP_INSECURE_JSON);
+		}
+		
+		final String security = sslProperties.isSslEnabled() ? CommonConstants.SECURE_INTF : CommonConstants.INSECURE_INTF;
+		final List<String> result = new ArrayList<>(interfaces.size());
+		for (final InterfaceData interfaceData : interfaces) {
+			result.add(interfaceData.getProtocol() + security + interfaceData.getFormat());
+		}
 		
 		return result;
 	}

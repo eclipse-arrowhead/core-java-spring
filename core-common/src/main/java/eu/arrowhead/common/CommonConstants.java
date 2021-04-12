@@ -128,13 +128,17 @@ public class CommonConstants {
 	public static final String SERVER_PUBLIC_KEY = "server.public.key";
 	public static final String SERVER_PRIVATE_KEY = "server.private.key";
 	public static final String SERVER_CERTIFICATE = "server.certificate";
+	
+	public static final String SECURE_INTF = "-SECURE-";
+	public static final String INSECURE_INTF = "-INSECURE-";
 
 	public static final String HTTPS = "https";
 	public static final String HTTP = "http";
 	public static final String JSON = "JSON";
 	public static final String XML = "XML";
-	public static final String HTTP_SECURE_JSON = HTTP + "-SECURE-" + JSON; 
-	public static final String HTTP_INSECURE_JSON = HTTP + "-INSECURE-" + JSON;
+	public static final String BINARY = "BINARY";
+	public static final String HTTP_SECURE_JSON = HTTP + SECURE_INTF + JSON; 
+	public static final String HTTP_INSECURE_JSON = HTTP + INSECURE_INTF + JSON;
 	public static final String UNKNOWN_ORIGIN = "<unknown>";
 	
 	public static final String SERVICEREGISTRY_ADDRESS = "sr_address";
