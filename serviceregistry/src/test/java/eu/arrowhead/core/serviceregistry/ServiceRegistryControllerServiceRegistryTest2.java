@@ -25,6 +25,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.junit.Before;
@@ -156,9 +158,9 @@ public class ServiceRegistryControllerServiceRegistryTest2 {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServiceServiceDefinitionWrongFlagFalse() throws Exception {
-		final String queryStr = createQueryStringForUnregister("s-1-", "x", "a", 1);
+		final String queryStr = createQueryStringForUnregister("s-1-", "x", "a", 1, "/path");
 		
-		doNothing().when(serviceRegistryDBService).removeServiceRegistry(any(String.class), any(String.class), any(String.class), anyInt());
+		doNothing().when(serviceRegistryDBService).removeServiceRegistry(any(String.class), any(String.class), any(String.class), anyInt(), any(String.class));
 		
 		deleteUnregisterService(queryStr, status().isOk());
 	}
@@ -252,7 +254,7 @@ public class ServiceRegistryControllerServiceRegistryTest2 {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private String createQueryStringForUnregister(final String serviceDefinition, final String providerName, final String providerAddress, final Integer providerPort) {
+	private String createQueryStringForUnregister(final String serviceDefinition, final String providerName, final String providerAddress, final Integer providerPort, final String serviceUri) {
 		final StringBuilder sb = new StringBuilder();
 		
 		if (serviceDefinition != null) {
@@ -269,6 +271,10 @@ public class ServiceRegistryControllerServiceRegistryTest2 {
 		
 		if (providerPort != null) {
 			sb.append(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT).append("=").append(providerPort.intValue()).append("&");
+		}
+		
+		if (serviceUri != null) {
+			sb.append(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_URI).append("=").append(URLEncoder.encode(serviceUri, StandardCharsets.UTF_8)).append("&");
 		}
 		
 		return sb.length() > 0 ? sb.substring(0, sb.length() - 1) : "";
