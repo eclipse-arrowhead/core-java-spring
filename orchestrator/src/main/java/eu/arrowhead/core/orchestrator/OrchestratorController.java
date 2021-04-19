@@ -84,6 +84,9 @@ public class OrchestratorController {
 	
 	private final Logger logger = LogManager.getLogger(OrchestratorController.class);
 	
+	@Value(CoreCommonConstants.$ORCHESTRATOR_USE_FLEXIBLE_STORE_WD)
+	private boolean useFlexibleStore;
+	
 	@Value(CoreCommonConstants.$ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD)
 	private boolean gatekeeperIsPresent;
 	
@@ -155,6 +158,10 @@ public class OrchestratorController {
 		logger.debug("storeOrchestrationProcess started ...");
 		
 		final String origin = CommonConstants.ORCHESTRATOR_URI + OP_ORCH_PROCESS_BY_ID;
+		
+		if (useFlexibleStore) {
+			throw new BadPayloadException("Orchestrator use flexible store!", HttpStatus.SC_BAD_REQUEST, origin);
+		}
 		
     	if (systemId < 1) {
     		throw new BadPayloadException("Consumer system : " + ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);

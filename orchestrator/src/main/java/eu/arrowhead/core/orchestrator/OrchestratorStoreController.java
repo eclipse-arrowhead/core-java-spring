@@ -23,6 +23,7 @@ import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -85,6 +86,7 @@ public class OrchestratorStoreController {
 	private static final String POST_ORCHESTRATOR_STORE_MGMT_MODIFY_HTTP_200_MESSAGE = "OrchestratorStores by requested parameters modified";
 	private static final String POST_ORCHESTRATOR_STORE_MGMT_MODIFY_HTTP_400_MESSAGE = "Could not modify OrchestratorStore by requested parameters";
 	
+	private static final String FLEXIBLE_STORE_ERROR_MESSAGE = "Orchestrator use flexible store!";
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = "Id must be greater than 0. ";
 	private static final String NULL_PARAMETERS_ERROR_MESSAGE = " is null.";
 	private static final String EMPTY_PARAMETERS_ERROR_MESSAGE = " is empty.";
@@ -94,6 +96,9 @@ public class OrchestratorStoreController {
 	
 	@Autowired
 	private OrchestratorStoreDBService orchestratorStoreDBService;
+	
+	@Value(CoreCommonConstants.$ORCHESTRATOR_USE_FLEXIBLE_STORE_WD)
+	private boolean useFlexibleStore;
 	
 	//=================================================================================================
 	// methods
@@ -109,6 +114,10 @@ public class OrchestratorStoreController {
 	@GetMapping(path = ORCHESTRATOR_STORE_MGMT_BY_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public OrchestratorStoreResponseDTO getOrchestratorStoreById(@PathVariable(value = PATH_VARIABLE_ID) final long orchestratorStoreId) {		
 		logger.debug("getOrchestratorStoreById started ...");
+		
+		if (useFlexibleStore) {
+			throw new BadPayloadException(FLEXIBLE_STORE_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, ORCHESTRATOR_STORE_MGMT_BY_ID_URI);
+		}
 		
 		if (orchestratorStoreId < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, ORCHESTRATOR_STORE_MGMT_BY_ID_URI);
@@ -134,6 +143,10 @@ public class OrchestratorStoreController {
 		logger.debug("getOrchestratorStores started ...");
 		logger.debug("New OrchestratorStore get request recieved with page: {} and item_per page: {}", page, size);
 		
+		if (useFlexibleStore) {
+			throw new BadPayloadException(FLEXIBLE_STORE_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
+		}
+		
 		final ValidatedPageParams vpp = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
 		final OrchestratorStoreListResponseDTO orchestratorStoreListResponse = orchestratorStoreDBService.getOrchestratorStoreEntriesResponse(vpp.getValidatedPage(), vpp.getValidatedSize(), 
 																																			  vpp.getValidatedDirection(), sortField);
@@ -158,6 +171,10 @@ public class OrchestratorStoreController {
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
 		logger.debug("getAllTopPriorityOrchestratorStores started ...");
 		logger.debug("New OrchestratorStore get request recieved with page: {} and item_per page: {}", page, size);
+		
+		if (useFlexibleStore) {
+			throw new BadPayloadException(FLEXIBLE_STORE_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_TOP_PRIORITY);
+		}
 		
 		final ValidatedPageParams vpp = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_TOP_PRIORITY);
 		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesResponse(vpp.getValidatedPage(), vpp.getValidatedSize(),
@@ -185,6 +202,10 @@ public class OrchestratorStoreController {
 			@RequestBody final OrchestratorStoreRequestDTO request) {
 		logger.debug("getOrchestratorStoresByConsumer started ...");
 		
+		if (useFlexibleStore) {
+			throw new BadPayloadException(FLEXIBLE_STORE_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER);
+		}
+		
 		final ValidatedPageParams vpp = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER);
 		checkOrchestratorStoreRequestDTOForConsumerIdAndServiceDefinitionName(request, CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER);
 		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(vpp.getValidatedPage(), vpp.getValidatedSize(),
@@ -210,6 +231,10 @@ public class OrchestratorStoreController {
 	@ResponseBody public OrchestratorStoreListResponseDTO addOrchestratorStoreEntries(@RequestBody final List<OrchestratorStoreRequestDTO> request) {
 		logger.debug("getOrchestratorStoresByConsumer started ...");
 		
+		if (useFlexibleStore) {
+			throw new BadPayloadException(FLEXIBLE_STORE_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
+		}
+		
 		checkOrchestratorStoreRequestDTOList(request, CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI );
 		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.createOrchestratorStoresResponse(request);
 		
@@ -228,6 +253,10 @@ public class OrchestratorStoreController {
 	@DeleteMapping(path = ORCHESTRATOR_STORE_MGMT_BY_ID_URI)
 	public void removeOrchestratorStore(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
 		logger.debug("New OrchestratorStore delete request recieved with id: {}", id);
+		
+		if (useFlexibleStore) {
+			throw new BadPayloadException(FLEXIBLE_STORE_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, ORCHESTRATOR_STORE_MGMT_BY_ID_URI);
+		}
 		
 		if (id < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, ORCHESTRATOR_STORE_MGMT_BY_ID_URI);
@@ -248,6 +277,10 @@ public class OrchestratorStoreController {
 	@PostMapping(path = ORCHESTRATOR_STORE_MGMT_MODIFY, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public void modifyPriorities(@RequestBody final OrchestratorStoreModifyPriorityRequestDTO request) {
 		logger.debug("modifyPriorities started ...");
+		
+		if (useFlexibleStore) {
+			throw new BadPayloadException(FLEXIBLE_STORE_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, ORCHESTRATOR_STORE_MGMT_MODIFY);
+		}
 		
 		checkOrchestratorStoreModifyPriorityRequestDTO(request, ORCHESTRATOR_STORE_MGMT_MODIFY );
 		orchestratorStoreDBService.modifyOrchestratorStorePriorityResponse(request);

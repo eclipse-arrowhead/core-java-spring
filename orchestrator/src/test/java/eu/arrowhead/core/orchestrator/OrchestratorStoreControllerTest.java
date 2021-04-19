@@ -38,6 +38,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -74,6 +75,9 @@ public class OrchestratorStoreControllerTest {
 	private MockMvc mockMvc;
 	
 	@Autowired
+	private OrchestratorStoreController controller;
+	
+	@Autowired
 	private ObjectMapper objectMapper;
 	
 	@MockBean(name = "mockOrchestratorStoreDBService") 
@@ -94,6 +98,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoreByIdOkTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		final OrchestratorStoreResponseDTO dto = getOrchestratorStoreResponseDTOForTest();
 		when(orchestratorStoreDBService.getOrchestratorStoreByIdResponse(anyLong())).thenReturn(dto);
 		
@@ -104,7 +109,17 @@ public class OrchestratorStoreControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void getOrchestratorStoreByIdFlexibleStoreEnabledTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", true);
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/1")
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void getOrchestratorStoreByIdWithInvalidIdTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/0")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
@@ -116,6 +131,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresOkTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		
 		when(orchestratorStoreDBService.getOrchestratorStoreEntriesResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(dto);
@@ -127,7 +143,17 @@ public class OrchestratorStoreControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void getOrchestratorStoresFlexibleStoreEnabledTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", true);
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void getOrchestratorStoresInvalidDirectionParamTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		
 		when(orchestratorStoreDBService.getOrchestratorStoreEntriesResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(dto);
@@ -141,6 +167,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresNullPageParamTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
 					.param(CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, "1")
 					.accept(MediaType.APPLICATION_JSON))
@@ -150,6 +177,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresNullItemPerPageParamTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
 					.param(CoreCommonConstants.REQUEST_PARAM_PAGE, "1")
 					.accept(MediaType.APPLICATION_JSON))
@@ -159,6 +187,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresNullItemPerPageParamAndNullPageParamTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isOk());
@@ -170,6 +199,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getAllTopPriorityOrchestratorStoresOkTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(dto);
@@ -181,7 +211,17 @@ public class OrchestratorStoreControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void getAllTopPriorityOrchestratorStoresFlexibleStoreEnabledTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", true);
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority")
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void getAllTopPriorityOrchestratorStoresInvalidDirectionParamTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(dto);
@@ -195,6 +235,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getAllTopPriorityOrchestratorStoresNullPageParamTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority")
 					.param(CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, "1")
 					.accept(MediaType.APPLICATION_JSON))
@@ -204,6 +245,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getAllTopPriorityOrchestratorStoresNullItemPerPageParamTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority")
 					.param(CoreCommonConstants.REQUEST_PARAM_PAGE, "1")
 					.accept(MediaType.APPLICATION_JSON))
@@ -213,6 +255,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getAllTopPriorityOrchestratorStoresNullItemPerPageParamAndNullPageParamTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isOk());
@@ -225,6 +268,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresByConsumerOkTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any(), any())).thenReturn(dto);
@@ -239,7 +283,19 @@ public class OrchestratorStoreControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void getOrchestratorStoresByConsumerFlexibleStoreEnabledTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", true);
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(getLocalOrchestratorStoreRequestDTOForTest()))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void getOrchestratorStoresByConsumerInvalidDirectionParamTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any(), any())).thenReturn(dto);
@@ -253,6 +309,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresByConsumerNullPageParamTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER)
 					.param(CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, "1")
 					.accept(MediaType.APPLICATION_JSON))
@@ -262,6 +319,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresByConsumerNullItemPerPageParamTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER)
 					.param(CoreCommonConstants.REQUEST_PARAM_PAGE, "1")
 					.accept(MediaType.APPLICATION_JSON))
@@ -271,6 +329,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresByConsumerNullItemPerPageParamAndNullPageParamTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any(), any())).thenReturn(dto);
@@ -285,6 +344,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresByConsumerNullIRequestTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any(), any())).thenReturn(dto);
@@ -300,6 +360,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresByConsumerNullConsumerSystemIdTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any(), any())).thenReturn(dto);
@@ -317,6 +378,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresByConsumerNullerviceDefinitionIdTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any(), any())).thenReturn(dto);
@@ -337,6 +399,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void addOrchestratorStoreEntriesOkTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		
 		when(orchestratorStoreDBService.createOrchestratorStoresResponse(any())).thenReturn(dto);
@@ -351,7 +414,20 @@ public class OrchestratorStoreControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void addOrchestratorStoreEntriesFlexibleStoreEnabledTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", true);
+		final List<OrchestratorStoreRequestDTO> request =  getLocalOrchestratorStoreRequestDTOListForTest(3);
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(request))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void addOrchestratorStoreEntriesNullRequestTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		
 		when(orchestratorStoreDBService.createOrchestratorStoresResponse(any())).thenReturn(dto);
@@ -367,6 +443,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void addOrchestratorStoreEntriesNullPiorityTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		
 		when(orchestratorStoreDBService.createOrchestratorStoresResponse(any())).thenReturn(dto);
@@ -382,6 +459,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void addOrchestratorStoreEntriesNullServiceIntrfaceTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		
 		when(orchestratorStoreDBService.createOrchestratorStoresResponse(any())).thenReturn(dto);
@@ -397,6 +475,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void addOrchestratorStoreEntriesListElementsNullTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		
 		when(orchestratorStoreDBService.createOrchestratorStoresResponse(any())).thenReturn(dto);
@@ -415,6 +494,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void removeOrchestratorStoreOkTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		this.mockMvc.perform(delete(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/1")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isOk());
@@ -422,7 +502,17 @@ public class OrchestratorStoreControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void removeOrchestratorStoreFlexibleStoreEnabledTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", true);
+		this.mockMvc.perform(delete(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/1")
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void removeOrchestratorStoreInvalidIdTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		this.mockMvc.perform(delete(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/0")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
@@ -434,6 +524,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void modifyPrioritiesOkTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		final OrchestratorStoreModifyPriorityRequestDTO request = getOrchestratorStoreModifyPriorityRequestDTO(3);
 		
 		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/modify_priorities")
@@ -445,7 +536,21 @@ public class OrchestratorStoreControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void modifyPrioritiesFlexibleStoreEnabledTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", true);
+		final OrchestratorStoreModifyPriorityRequestDTO request = getOrchestratorStoreModifyPriorityRequestDTO(3);
+		
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/modify_priorities")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(request))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void modifyPrioritiesNullRequestTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		final OrchestratorStoreModifyPriorityRequestDTO request = null;
 		
 		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/modify_priorities")
@@ -458,6 +563,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void modifyPrioritiesEmptyMapTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		final OrchestratorStoreModifyPriorityRequestDTO request = getOrchestratorStoreModifyPriorityRequestDTOWithEmptyMap();
 		
 		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/modify_priorities")
