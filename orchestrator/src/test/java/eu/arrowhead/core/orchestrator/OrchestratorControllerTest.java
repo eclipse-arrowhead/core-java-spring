@@ -563,6 +563,7 @@ public class OrchestratorControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getStoreOchestrationProcessResponseOkTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		final OrchestrationResponseDTO dto =  new OrchestrationResponseDTO();
 		when(orchestratorService.storeOchestrationProcessResponse(anyLong())).thenReturn(dto);
 		
@@ -573,7 +574,24 @@ public class OrchestratorControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void getStoreOchestrationProcessResponseFlexibleStoreEnabledTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", true);
+		final MvcResult result = this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS_URI + "/1")
+											 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isBadRequest())
+											 .andReturn();
+		
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS_URI + "/{" + CoreCommonConstants.COMMON_FIELD_NAME_ID + "}", error.getOrigin());
+		Assert.assertEquals("Orchestrator use flexible store!", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void getStoreOchestrationProcessResponseByInvalidIdTest() throws Exception {
+		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		final OrchestrationResponseDTO dto =  new OrchestrationResponseDTO();
 		when(orchestratorService.storeOchestrationProcessResponse(anyLong())).thenReturn(dto);
 		
