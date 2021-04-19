@@ -144,9 +144,9 @@ public class ArrowheadDriver {
         String unregisterUriStr = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_URI;
 
         MultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>(4);
-        queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME, List.of(entity.getId()));
-        queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS, List.of(myIpAddress));
-        queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT, List.of(String.valueOf(translatorPort)));
+        queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME, List.of(entity.getId()));
+        queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS, List.of(myIpAddress));
+        queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT, List.of(String.valueOf(translatorPort)));
         queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION, List.of(getServiceDefinition(entity.getType(), serviceName)));
 
         return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), queryMap, unregisterUriStr);

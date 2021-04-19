@@ -30,7 +30,9 @@ public enum CoreSystem {
 	// Please create enum values here without underscore, because these values has a direct connection with the certificate's CN which does not support underscores!
 	
 	SERVICEREGISTRY(Defaults.DEFAULT_SERVICEREGISTRY_PORT, List.of(CoreSystemService.SERVICEREGISTRY_REGISTER_SERVICE,
-																	 CoreSystemService.SERVICEREGISTRY_UNREGISTER_SERVICE)),
+																	 CoreSystemService.SERVICEREGISTRY_UNREGISTER_SERVICE,
+																	 CoreSystemService.SERVICEREGISTRY_REGISTER_SYSTEM,
+																	 CoreSystemService.SERVICEREGISTRY_UNREGISTER_SYSTEM)),
 	
     SYSTEMREGISTRY(Defaults.DEFAULT_SYSTEMREGISTRY_PORT, List.of(CoreSystemService.SYSTEMREGISTRY_REGISTER_SERVICE,
     															   CoreSystemService.SYSTEMREGISTRY_UNREGISTER_SERVICE,
@@ -102,7 +104,9 @@ public enum CoreSystem {
 																				
 	TRANSLATOR(Defaults.DEFAULT_TRANSLATOR_PORT, List.of(CoreSystemService.TRANSLATOR_SERVICE,
 												   CoreSystemService.TRANSLATOR_FIWARE_SERVICE,
-												   CoreSystemService.TRANSLATOR_PLUGIN_SERVICE));
+												   CoreSystemService.TRANSLATOR_PLUGIN_SERVICE)),
+	
+	PLANT_DESCRIPTION_ENGINE(Defaults.DEFAULT_PLANT_DESCRIPTION_ENGINE_PORT, List.of()); //TODO add PDE services
 	
 	//=================================================================================================
 	// members

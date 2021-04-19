@@ -41,6 +41,7 @@ public class Defaults {
 	public static final int DEFAULT_CERTIFICATEAUTHORITY_PORT = 8448;
     public static final int DEFAULT_CONFIGURATION_PORT = 8459;
 	public static final int DEFAULT_TRANSLATOR_PORT = 8462;
+	public static final int DEFAULT_PLANT_DESCRIPTION_ENGINE_PORT = 8432;
 
     // HTTP client defaults
     public static final int DEFAULT_CONNECTION_TIMEOUT = 30000;

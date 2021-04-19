@@ -474,7 +474,7 @@ public class SRAccessControlFilterTest {
 
 	//-------------------------------------------------------------------------------------------------
 	private void deleteUnregister(final String systemName, final String certificatePath, final ResultMatcher matcher) throws Exception {
-		this.mockMvc.perform(delete(SERVICEREGISTRY_UNREGISTER + "?" + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME + "=" + systemName)
+		this.mockMvc.perform(delete(SERVICEREGISTRY_UNREGISTER + "?" + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME + "=" + systemName)
 			    	.secure(true)
 			    	.with(x509(certificatePath)))
 					.andExpect(matcher);

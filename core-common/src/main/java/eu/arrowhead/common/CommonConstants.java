@@ -101,6 +101,8 @@ public class CommonConstants {
 
 	public static final String CORE_SERVICE_SERVICEREGISTRY_REGISTER = "service-register";
 	public static final String CORE_SERVICE_SERVICEREGISTRY_UNREGISTER = "service-unregister";
+	public static final String CORE_SERVICE_SERVICEREGISTRY_REGISTER_SYSTEM = "register-system";
+	public static final String CORE_SERVICE_SERVICEREGISTRY_UNREGISTER_SYSTEM = "unregister-system";
 
 	public static final String CORE_SERVICE_SYSTEMREGISTRY_REGISTER = "system-register";
 	public static final String CORE_SERVICE_SYSTEMREGISTRY_UNREGISTER = "system-unregister";
@@ -158,12 +160,13 @@ public class CommonConstants {
 
 	public static final String SERVICEREGISTRY_URI = "/serviceregistry";
 	public static final String OP_SERVICEREGISTRY_REGISTER_URI = "/register";
-	public static final String OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI = "/register-system";
 	public static final String OP_SERVICEREGISTRY_UNREGISTER_URI = "/unregister";
+	public static final String OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI = "/register-system";
+	public static final String OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI = "/unregister-system";
 	public static final String OP_SERVICEREGISTRY_QUERY_URI = "/query";	
-	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME = "system_name";
-	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS = "address";
-	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT = "port";
+	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME = "system_name";
+	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS = "address";
+	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT = "port";
 	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION = "service_definition";
 
 	public static final String SYSTEMREGISTRY_URI = "/systemregistry";
