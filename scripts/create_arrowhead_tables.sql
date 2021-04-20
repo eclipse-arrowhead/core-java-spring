@@ -259,6 +259,21 @@ CREATE TABLE IF NOT EXISTS `foreign_system` (
   CONSTRAINT `foreign_cloud` FOREIGN KEY (`provider_cloud_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE IF NOT EXISTS `orchestrator_store_flexible` (
+`id` bigint(20) NOT NULL AUTO_INCREMENT,
+`consumer_system_name` varchar(255),
+`provider_system_name` varchar(255),
+`consumer_system_metadata` mediumtext,
+`provider_system_metadata` mediumtext,
+`service_metadata` mediumtext,
+`service_interface_name` varchar(255),
+`service_definition_name` varchar(255) NOT NULL,
+`priority` int(11) NOT NULL DEFAULT 2147483647,
+`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 -- Logs
 
 CREATE TABLE IF NOT EXISTS `logs` (
