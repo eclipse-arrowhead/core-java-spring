@@ -152,6 +152,8 @@ public class CoreCommonConstants {
 	public static final String GATEWAY_MATCHMAKER = "gatewayMatchmaker";
 	public static final String CLOUD_MATCHMAKER = "cloudMatchmaker";
 	
+	public static final String PING_PROVIDER = "pingProvider";
+	
 	public static final int TOP_PRIORITY = 1;
 	
 	public static final String QOSMANAGER = "qosManager";

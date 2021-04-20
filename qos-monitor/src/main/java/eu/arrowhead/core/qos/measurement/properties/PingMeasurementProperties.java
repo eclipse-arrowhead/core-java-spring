@@ -34,7 +34,7 @@ public class PingMeasurementProperties {
 	private int availableFromSuccessPercent;
 	private boolean logMeasurementsToDB;
 	private boolean logMeasurementsDetailsToDB;
-	
+
 	//=================================================================================================
 	// methods
 
@@ -63,7 +63,7 @@ public class PingMeasurementProperties {
 	public int getAvailableFromSuccessPercent() { return availableFromSuccessPercent; }
 	public boolean getLogMeasurementsToDB() { return logMeasurementsToDB; }
 	public boolean getLogMeasurementsDetailsToDB() {return logMeasurementsDetailsToDB; }
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public void setTimeToRepeat(final int timeToRepeat) { this.timeToRepeat = timeToRepeat; }
 	public void setTimeout(final int timeout) { this.timeout = timeout; }
