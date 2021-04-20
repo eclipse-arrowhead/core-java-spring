@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.logging.log4j.Logger;
-import org.icmp4j.IcmpPingResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -68,6 +67,7 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
+import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.dto.PingMeasurementCalculationsDTO;
 import eu.arrowhead.core.qos.measurement.properties.PingMeasurementProperties;
 import eu.arrowhead.core.qos.service.PingService;

@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.hibernate.HibernateException;
-import org.icmp4j.IcmpPingResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -58,6 +57,7 @@ import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.dto.PingMeasurementCalculationsDTO;
 
 @RunWith(SpringRunner.class)

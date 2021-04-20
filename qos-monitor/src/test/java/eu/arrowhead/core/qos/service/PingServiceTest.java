@@ -24,7 +24,6 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.icmp4j.IcmpPingResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -37,6 +36,7 @@ import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
+import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.measurement.properties.PingMeasurementProperties;
 
 @RunWith(SpringRunner.class)
@@ -78,7 +78,7 @@ public class PingServiceTest {
 		
 		final List<IcmpPingResponse> responseList = pingService.getPingResponseList("invalid"); //IcmpPingUtil.executePingRequest(request) throws RuntimeException
 		assertEquals(1, responseList.size());
-		assertFalse(responseList.get(0).getSuccessFlag());
+		assertFalse(responseList.get(0).isSuccessFlag());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
