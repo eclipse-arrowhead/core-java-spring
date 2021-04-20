@@ -225,10 +225,9 @@ public abstract class ApplicationInitListener {
 		
 		final UriComponents queryUri = createQueryUri(scheme);
 		final UriComponents registerUri = createRegisterUri(scheme);
-		
 		final SystemRequestDTO coreSystemDTO = getCoreSystemRequestDTO();
+
 		for (final CoreSystemService coreService : coreSystem.getServices()) {
-			
 			final ServiceQueryFormDTO queryForm = new ServiceQueryFormDTO.Builder(coreService.getServiceDefinition()).build();
 			final ResponseEntity<ServiceQueryResultDTO> queryResponse = httpService.sendRequest(queryUri, HttpMethod.POST, ServiceQueryResultDTO.class, queryForm);
 			for (final ServiceRegistryResponseDTO result : queryResponse.getBody().getServiceQueryData()) { // old, possibly obsolete entries

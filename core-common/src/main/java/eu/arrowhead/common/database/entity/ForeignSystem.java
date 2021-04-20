@@ -61,6 +61,9 @@ public class ForeignSystem {
 	@Column(nullable = true, length = CoreDefaults.VARCHAR_EXTENDED)
 	private String authenticationInfo;
 	
+	@Column(nullable = true, columnDefinition = "MEDIUMTEXT")
+	private String metadata;
+	
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
 	
@@ -74,12 +77,13 @@ public class ForeignSystem {
 	public ForeignSystem() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public ForeignSystem(final Cloud providerCloud, final String systemName, final String address, final int port, final String authenticationInfo) {
+	public ForeignSystem(final Cloud providerCloud, final String systemName, final String address, final int port, final String authenticationInfo, final String metadata) {
 		this.providerCloud = providerCloud;
 		this.systemName = systemName;
 		this.address = address;
 		this.port = port;
 		this.authenticationInfo = authenticationInfo;
+		this.metadata = metadata;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -102,6 +106,7 @@ public class ForeignSystem {
 	public String getAddress() { return address; }
 	public int getPort() { return port; }
 	public String getAuthenticationInfo() { return authenticationInfo; }
+	public String getMetadata() { return metadata; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
@@ -112,6 +117,7 @@ public class ForeignSystem {
 	public void setAddress(final String address) { this.address = address; }
 	public void setPort(final int port) { this.port = port; }
 	public void setAuthenticationInfo(final String authenticationInfo) { this.authenticationInfo = authenticationInfo; }
+	public void setMetadata(final String metadata) { this.metadata = metadata; }
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 	
