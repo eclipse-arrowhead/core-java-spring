@@ -216,6 +216,7 @@ public class EventHandlerDBService {
 				subscriptionPublisherConnectionRepository.deleteInBatch(involvedPublisherSystems);
 				subscriptionRepository.refresh(subscriptionEntry);			
 				subscriptionRepository.delete(subscriptionEntry);
+				subscriptionRepository.flush();
 			}
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
@@ -238,8 +239,10 @@ public class EventHandlerDBService {
 				final Set<SubscriptionPublisherConnection> involvedPublisherSystems = subscriptionPublisherConnectionRepository.findBySubscriptionEntry(subscriptionEntry);
 				
 				subscriptionPublisherConnectionRepository.deleteInBatch(involvedPublisherSystems);
+				subscriptionPublisherConnectionRepository.flush();
 				subscriptionRepository.refresh(subscriptionEntry);			
 				subscriptionRepository.delete(subscriptionEntry);
+				subscriptionRepository.flush();
 			}
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
@@ -263,6 +266,19 @@ public class EventHandlerDBService {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public void forceRegisterSubscription(final SubscriptionRequestDTO request, final Set<SystemResponseDTO> authorizedPublishers) {
+		logger.debug("forceRegisterSubscription started ...");
+		
+		if (request == null) {
+			throw new InvalidParameterException("SubscriptionRequestDTO" + NULL_ERROR_MESSAGE);
+		}
+		
+		deleteSubscription(request.getEventType(), request.getSubscriberSystem());
+		registerSubscription(request, authorizedPublishers);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -367,7 +383,7 @@ public class EventHandlerDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Transactional( rollbackFor = ArrowheadException.class )	
+	@Transactional(rollbackFor = ArrowheadException.class)	
 	public void removeSubscriptionEntries(final List<Subscription> toBeRemoved) {
 		logger.debug( "removeSubscriptionEntries started..." );
 		

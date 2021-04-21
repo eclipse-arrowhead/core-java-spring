@@ -521,7 +521,7 @@ public class AuthorizationControllerTokenTest {
 	//-------------------------------------------------------------------------------------------------
 	private MvcResult getPublicKey(final ResultMatcher matcher) throws Exception {
 		return this.mockMvc.perform(get((AUTH_PUBLIC_KEY_URI))
-						   .accept(MediaType.TEXT_PLAIN))
+						   .accept(MediaType.APPLICATION_JSON))
 						   .andExpect(matcher)
 						   .andReturn();
 	}

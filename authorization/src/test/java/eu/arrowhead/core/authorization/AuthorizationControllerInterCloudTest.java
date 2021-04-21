@@ -86,7 +86,7 @@ public class AuthorizationControllerInterCloudTest {
 	@MockBean(name = "mockAuthorizationDBService")
 	private AuthorizationDBService authorizationDBService;
 	
-	private static final ZonedDateTime zdTime = Utilities.parseUTCStringToLocalZonedDateTime("2222-12-12 12:00:00");
+	private static final ZonedDateTime zdTime = Utilities.parseUTCStringToLocalZonedDateTime("2222-12-12T12:00:00Z");
 	
 	//-------------------------------------------------------------------------------------------------
 	@Before

@@ -14,6 +14,14 @@
 
 package eu.arrowhead.core.systemregistry;
 
+import java.time.format.DateTimeParseException;
+import java.util.Objects;
+
+import org.apache.http.HttpStatus;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.web.bind.annotation.RequestBody;
+
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystem;
@@ -23,14 +31,6 @@ import eu.arrowhead.common.dto.shared.SystemRegistryOnboardingWithNameRequestDTO
 import eu.arrowhead.common.dto.shared.SystemRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
-import org.apache.http.HttpStatus;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
-
-import java.time.format.DateTimeParseException;
-import java.util.Objects;
 
 public class Validation {
 
@@ -220,7 +220,7 @@ public class Validation {
                 Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
             } catch (final DateTimeParseException ex) {
                 throw new BadPayloadException(
-                        "End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.",
+                        "End of validity is specified in the wrong format. Please provide UTC time using ISO-8601 format.",
                         HttpStatus.SC_BAD_REQUEST, origin);
             }
         }

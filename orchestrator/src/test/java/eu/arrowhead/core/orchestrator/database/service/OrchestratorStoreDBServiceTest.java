@@ -1328,12 +1328,12 @@ public class OrchestratorStoreDBServiceTest {
 	}
 	//-------------------------------------------------------------------------------------------------
 	private ZonedDateTime getUpdatedAtForTest() {
-		return Utilities.parseUTCStringToLocalZonedDateTime("2019-07-04 14:43:19");
+		return Utilities.parseUTCStringToLocalZonedDateTime("2019-07-04T14:43:19Z");
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private ZonedDateTime getCreatedAtForTest() {
-		return Utilities.parseUTCStringToLocalZonedDateTime("2019-07-04 14:43:19");
+		return Utilities.parseUTCStringToLocalZonedDateTime("2019-07-04T14:43:19Z");
 	}
 	
 	//-------------------------------------------------------------------------------------------------

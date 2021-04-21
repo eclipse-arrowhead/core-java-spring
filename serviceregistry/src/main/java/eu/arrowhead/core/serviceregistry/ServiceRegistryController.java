@@ -1118,7 +1118,7 @@ public class ServiceRegistryController {
 			try {
 				Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
 			} catch (final DateTimeParseException ex) {
-				throw new BadPayloadException("End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.",
+				throw new BadPayloadException("End of validity is specified in the wrong format. Please provide UTC time using ISO-8601 format.",
 											  HttpStatus.SC_BAD_REQUEST, origin);
 			}
 		}

@@ -387,7 +387,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(SERVICE_REGISTRY_REGISTER_URI, error.getOrigin());
-		Assert.assertEquals("End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.", error.getErrorMessage());
+		Assert.assertEquals("End of validity is specified in the wrong format. Please provide UTC time using ISO-8601 format.", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -396,7 +396,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setSecure(ServiceSecurityType.CERTIFICATE.name());
 		
 		final MvcResult result = postRegisterService(request, status().isBadRequest());
@@ -413,7 +413,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setSecure("invalidSecurityTypeValue");
 		
 		final MvcResult result = postRegisterService(request, status().isBadRequest());
@@ -430,7 +430,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		
 		final MvcResult result = postRegisterService(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -446,7 +446,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(Collections.<String>emptyList());
 		
 		final MvcResult result = postRegisterService(request, status().isBadRequest());
@@ -465,7 +465,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(List.of(intf));
 		
 		final MvcResult result = postRegisterService(request, status().isBadRequest());
@@ -482,7 +482,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(List.of("HTTP-SECURE-XML"));
 		
 		when(serviceRegistryDBService.registerServiceResponse(request)).thenReturn(new ServiceRegistryResponseDTO());
@@ -783,7 +783,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
-		Assert.assertEquals("End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.", error.getErrorMessage());
+		Assert.assertEquals("End of validity is specified in the wrong format. Please provide UTC time using ISO-8601 format.", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -792,7 +792,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setSecure(ServiceSecurityType.CERTIFICATE.name());
 		
 		final MvcResult result = addServiceRegistry(request, status().isBadRequest());
@@ -809,7 +809,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		
 		final MvcResult result = addServiceRegistry(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -825,7 +825,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(Collections.<String>emptyList());
 		
 		final MvcResult result = addServiceRegistry(request, status().isBadRequest());
@@ -844,7 +844,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(List.of(intf));
 		
 		final MvcResult result = addServiceRegistry(request, status().isBadRequest());
@@ -861,7 +861,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(List.of("HTTP-SECURE-XML"));
 		
 		when(serviceRegistryDBService.registerServiceResponse(request)).thenReturn(new ServiceRegistryResponseDTO());
@@ -929,7 +929,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
-		Assert.assertEquals("End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.", error.getErrorMessage());
+		Assert.assertEquals("End of validity is specified in the wrong format. Please provide UTC time using ISO-8601 format.", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -938,7 +938,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setSecure(ServiceSecurityType.CERTIFICATE.name());
 		
 		final MvcResult result = updateServiceRegistry(request, status().isBadRequest());
@@ -955,7 +955,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		
 		final MvcResult result = updateServiceRegistry(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -971,7 +971,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(Collections.<String>emptyList());
 		
 		final MvcResult result = updateServiceRegistry(request, status().isBadRequest());
@@ -990,7 +990,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(List.of(intf));
 		
 		final MvcResult result = updateServiceRegistry(request, status().isBadRequest());
@@ -1007,7 +1007,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(List.of("HTTP-SECURE-XML"));
 		
 		when(serviceRegistryDBService.updateServiceByIdResponse(anyLong(), any(ServiceRegistryRequestDTO.class))).thenReturn(new ServiceRegistryResponseDTO());
@@ -1024,7 +1024,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(List.of("HTTP-SECURE-XML"));
 		
 		final MvcResult result = mergeServiceRegistryWithInValidId(new ServiceRegistryRequestDTO(), status().isBadRequest());
@@ -1065,7 +1065,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(List.of("HTTP-SECURE-XML"));
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();

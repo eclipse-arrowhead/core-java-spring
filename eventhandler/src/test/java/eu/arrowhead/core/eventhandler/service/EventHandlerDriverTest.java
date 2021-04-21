@@ -480,7 +480,7 @@ public class EventHandlerDriverTest {
 		ReflectionTestUtils.setField(eventHandlerDriver, "httpService", httpService);
 		
 		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-		request.setTimeStamp("3019-09-27 09:40:34");
+		request.setTimeStamp("3019-09-27T09:40:34Z");
 		final Set<Subscription> involvedSubscriptions = Set.of(createSubscriptionForDBMock(1, "eventType", "subscriberName"));
 
 		try {
@@ -511,7 +511,7 @@ public class EventHandlerDriverTest {
 		ReflectionTestUtils.setField(eventHandlerDriver, "httpService", httpService);
 		
 		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-		request.setTimeStamp("1019-09-27 09:40:34");
+		request.setTimeStamp("1019-09-27T09:40:34Z");
 		final Set<Subscription> involvedSubscriptions = Set.of(createSubscriptionForDBMock(1, "eventType", "subscriberName"));
 
 		try {

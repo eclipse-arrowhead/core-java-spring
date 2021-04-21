@@ -31,13 +31,12 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -104,8 +103,8 @@ public class Utilities {
 
 	private static final Logger logger = LogManager.getLogger(Utilities.class);
 	private static final ObjectMapper mapper = new ObjectMapper();
-	private static final String dateTimePattern = "yyyy-MM-dd HH:mm:ss";
-	static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(dateTimePattern);
+	static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_INSTANT;
+//	static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
 
 	static {
 	    mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
@@ -146,8 +145,7 @@ public class Utilities {
 			return null;
 		}
 
-		final LocalDateTime localDateTime = LocalDateTime.ofInstant(time.toInstant(), ZoneOffset.UTC);
-		return dateTimeFormatter.format(localDateTime);
+		return dateTimeFormatter.format(time.toInstant());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -158,17 +156,9 @@ public class Utilities {
 		}
 
 		final TemporalAccessor tempAcc = dateTimeFormatter.parse(timeStr);
-		final ZonedDateTime parsedDateTime = ZonedDateTime.of(tempAcc.get(ChronoField.YEAR),
-															  tempAcc.get(ChronoField.MONTH_OF_YEAR),
-															  tempAcc.get(ChronoField.DAY_OF_MONTH),
-															  tempAcc.get(ChronoField.HOUR_OF_DAY),
-															  tempAcc.get(ChronoField.MINUTE_OF_HOUR),
-															  tempAcc.get(ChronoField.SECOND_OF_MINUTE),
-															  0,
-															  ZoneOffset.UTC);
-
 		final ZoneOffset offset = OffsetDateTime.now().getOffset();
-		return ZonedDateTime.ofInstant(parsedDateTime.toInstant(), offset);
+
+		return ZonedDateTime.ofInstant(Instant.from(tempAcc), offset);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -633,9 +623,6 @@ public class Utilities {
 		return isCloudCommonName(commonName);
 	}
 
-	//-------------------------------------------------------------------------------------------------
-	public static String getDatetimePattern() { return dateTimePattern; }
-	
 	//-------------------------------------------------------------------------------------------------
 	public static void createExceptionFromErrorMessageDTO(final ErrorMessageDTO dto) {
 		Assert.notNull(dto, "Error message object is null.");

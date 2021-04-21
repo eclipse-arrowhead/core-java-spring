@@ -171,7 +171,7 @@ public class GatewayControllerTest {
 		
 		Assert.assertEquals(activeSessions.size(), responseBody.getCount());
 		Assert.assertEquals(size, responseBody.getData().size());
-		Assert.assertEquals("2019-01-06 01:01:01", responseBody.getData().get(0).getSessionStartedAt());
+		Assert.assertEquals("2019-01-06T01:01:01Z", responseBody.getData().get(0).getSessionStartedAt());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -223,7 +223,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -260,7 +260,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -297,7 +297,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -334,7 +334,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -371,7 +371,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -408,7 +408,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -445,7 +445,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -482,7 +482,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -519,7 +519,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue(null);
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -556,7 +556,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("   ");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -593,7 +593,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue(null);
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -630,7 +630,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("   ");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -667,7 +667,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue(null);
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -704,7 +704,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("   ");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -815,7 +815,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -852,7 +852,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -889,7 +889,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -926,7 +926,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -963,7 +963,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01Z01:01:01T");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -1000,7 +1000,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -1037,7 +1037,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -1074,7 +1074,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -1113,7 +1113,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -1150,7 +1150,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -1187,7 +1187,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -1224,7 +1224,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -1261,7 +1261,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -1300,7 +1300,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -1337,7 +1337,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -1374,7 +1374,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -1411,7 +1411,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -1448,7 +1448,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -1485,7 +1485,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -1522,7 +1522,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -1559,7 +1559,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -1596,7 +1596,7 @@ public class GatewayControllerTest {
 		request.setRequestControlQueue("test-request-control-queue");
 		request.setResponseQueue("test-response-queue");
 		request.setResponseControlQueue("test-response-control-queue");
-		request.setSessionStartedAt("2019-01-01 01:01:01");
+		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
 		final MvcResult result = getCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -3388,7 +3388,7 @@ public class GatewayControllerTest {
 	private void fillActiveSessions() {
 		for (int i = 1; i <= 31; ++i) {
 			final ActiveSessionDTO activeSessionDTO = new ActiveSessionDTO();
-			activeSessionDTO.setSessionStartedAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.of(2019, 1, i, 1, 1, 1, 1, ZoneOffset.UTC)));
+			activeSessionDTO.setSessionStartedAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.of(2019, 1, i, 1, 1, 1, 0, ZoneOffset.UTC)));
 			activeSessions.put("test-key-" + i, activeSessionDTO);
 		}
 	}
