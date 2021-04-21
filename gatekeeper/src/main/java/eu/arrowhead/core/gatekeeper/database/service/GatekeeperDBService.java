@@ -35,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.cn.CommonNamePartVerifier;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
@@ -62,6 +63,7 @@ public class GatekeeperDBService {
 	// members
 	
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = "Id must be greater than 0.";
+	private static final String INVALID_FORMAT_ERROR_MESSAGE = " has invalid format. Name must match with the following regular expression: " + CommonNamePartVerifier.COMMON_NAME_PART_PATTERN_STRING;
 	
 	@Autowired
 	private CloudRepository cloudRepository;
@@ -74,6 +76,9 @@ public class GatekeeperDBService {
 	
 	@Autowired
 	private CloudGatewayRelayRepository cloudGatewayRelayRepository;
+	
+	@Autowired
+	private CommonNamePartVerifier cnVerifier;
 	
 	private final Logger logger = LogManager.getLogger(GatekeeperDBService.class);
 	
@@ -676,13 +681,17 @@ public class GatekeeperDBService {
 		}
 		operator = operator.toLowerCase().trim();
 		
+		if (!cnVerifier.isValid(operator)) {
+			throw new InvalidParameterException("Operator" + INVALID_FORMAT_ERROR_MESSAGE);
+		}
+		
 		if (Utilities.isEmpty(name)) {
 			throw new InvalidParameterException("Name is empty");
 		}
 		name = name.toLowerCase().trim();
 		
-		if (operator.contains(".") || name.contains(".")) {
-			throw new InvalidParameterException("Cloud operator and name can't contain dot (.)");
+		if (!cnVerifier.isValid(name)) {
+			throw new InvalidParameterException("Name" + INVALID_FORMAT_ERROR_MESSAGE);
 		}
 		
 		secure = secure == null ? false : secure;

@@ -176,7 +176,7 @@ public class UriCrawlerTask implements Job {
 		logger.debug("createEchoUri started...");
 				
 		final String scheme = queryUri.getScheme();
-		final String echoUriStr = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.ECHO_URI;
+		final String echoUriStr = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.ECHO_URI;
 		return Utilities.createURI(scheme, queryUri.getHost(), queryUri.getPort(), echoUriStr);
 	}
 	

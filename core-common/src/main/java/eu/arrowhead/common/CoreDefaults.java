@@ -25,21 +25,22 @@ public class CoreDefaults {
 	
 	public static final boolean DEFAULT_LOG_ALL_REQUEST_AND_RESPONSE = false;
 	public static final boolean DEFAULT_USE_STRICT_SERVICE_INTF_NAME_VERIFIER = false;
+	public static final boolean DEFAULT_USE_STRICT_SERVICE_DEFINITION_VERIFIER = true;
 	public static final int DEFAULT_URI_CRAWLER_INTERVAL = 30;
 	public static final int DEFAULT_AUTH_TOKEN_TTL_IN_MINUTES = -1; // never expires
 	public static final int DEFAULT_AUTH_TOKEN_TTL_IN_MINUTES_WITH_QOS_ENABLED = 60; // when QoS enabled, we want to make sure that tokens expires eventually
 	
-	public static final boolean DEFAULT_SERVICE_REGISTRY_PING_SCHEDULED = false;
-	public static final int DEFAULT_SERVICE_REGISTRY_PING_INTERVAL_MINUTES = 60;
-	public static final int DEFAULT_SERVICE_REGISTRY_PING_TIMEOUT_MILLISECONDS = 5000;
-	public static final boolean DEFAULT_SERVICE_REGISTRY_TTL_SCHEDULED = false;
-	public static final int DEFAULT_SERVICE_REGISTRY_TTL_INTERVAL_MINUTES = 13;
+	public static final boolean DEFAULT_SERVICEREGISTRY_PING_SCHEDULED = false;
+	public static final int DEFAULT_SERVICEREGISTRY_PING_INTERVAL_MINUTES = 60;
+	public static final int DEFAULT_SERVICEREGISTRY_PING_TIMEOUT_MILLISECONDS = 5000;
+	public static final boolean DEFAULT_SERVICEREGISTRY_TTL_SCHEDULED = false;
+	public static final int DEFAULT_SERVICEREGISTRY_TTL_INTERVAL_MINUTES = 13;
 
-	public static final int DEFAULT_SYSTEM_REGISTRY_PING_INTERVAL_MINUTES = 60;
-	public static final int DEFAULT_SYSTEM_REGISTRY_PING_TIMEOUT_MILLISECONDS = 5000;
+	public static final int DEFAULT_SYSTEMREGISTRY_PING_INTERVAL_MINUTES = 60;
+	public static final int DEFAULT_SYSTEMREGISTRY_PING_TIMEOUT_MILLISECONDS = 5000;
 
-	public static final String DEFAULT_OWN_CLOUD_OPERATOR = "default_operator";
-	public static final String DEFAULT_OWN_CLOUD_NAME = "default_insecure_cloud";
+	public static final String DEFAULT_OWN_CLOUD_OPERATOR = "default-operator";
+	public static final String DEFAULT_OWN_CLOUD_NAME = "default-insecure-cloud";
 	
 	public static final String DEFAULT_REQUEST_PARAM_DIRECTION_VALUE = CoreCommonConstants.SORT_ORDER_ASCENDING;
 	
@@ -58,13 +59,13 @@ public class CoreDefaults {
 	public static final int DEFAULT_GATEWAY_MAX_PORT = 8100;
 	public static final int DEFAULT_GATEWAY_PROVIDER_SIDE_MAX_REQUEST_PER_SOCKET = 50;
 	
-	public static final boolean DEFAULT_EVENT_HANDLER_TTL_SCHEDULED = false;
-	public static final int DEFAULT_EVENT_HANDLER_TTL_INTERVAL_MINUTES = 17;
-	public static final int DEFAULT_EVENT_HANDLER_MAX_RETRY_CONNECT_AUTH = 3;
-	public static final int DEFAULT_EVENT_HANDLER_RETRY_CONNECT_AUTH_INTERVAL_SEC = 10;
+	public static final boolean DEFAULT_EVENTHANDLER_TTL_SCHEDULED = false;
+	public static final int DEFAULT_EVENTHANDLER_TTL_INTERVAL_MINUTES = 17;
+	public static final int DEFAULT_EVENTHANDLER_MAX_RETRY_CONNECT_AUTH = 3;
+	public static final int DEFAULT_EVENTHANDLER_RETRY_CONNECT_AUTH_INTERVAL_SEC = 10;
 	
 	public static final long DEFAULT_TIME_STAMP_TOLERANCE_SECONDS = 120;
-	public static final int DEFAULT_EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS = 10;
+	public static final int DEFAULT_EVENTHANDLER_MAX_EXPRESS_SUBSCRIBERS = 10;
 	
 	public static final int DEFAULT_PING_TTL_INTERVAL_MINUTES = 10;	
 	public static final int DEFAULT_CLOUD_PING_TTL_INTERVAL_MINUTES = 10;

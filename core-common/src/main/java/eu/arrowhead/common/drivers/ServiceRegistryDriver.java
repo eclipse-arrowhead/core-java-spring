@@ -37,21 +37,30 @@ import java.util.List;
 
 @Service
 public class ServiceRegistryDriver extends AbstractDriver {
+	
+	//=================================================================================================
+	// members
 
     private final Logger logger = LogManager.getLogger(ServiceRegistryDriver.class);
+    
+    //=================================================================================================
+	// methods
 
-    @Autowired
+    //-------------------------------------------------------------------------------------------------
+	@Autowired
     public ServiceRegistryDriver(final DriverUtilities driverUtilities, final HttpService httpService) {
         super(driverUtilities, httpService);
     }
 
-    public UriComponents findCoreSystemService(final CoreSystemService service) throws DriverUtilities.DriverException {
+    //-------------------------------------------------------------------------------------------------
+	public UriComponents findCoreSystemService(final CoreSystemService service) throws DriverUtilities.DriverException {
         logger.traceEntry("findCoreSystemService:{}", service);
         Assert.notNull(service, "CoreSystemService must not be null");
         return logger.traceExit(driverUtilities.findUriByServiceRegistry(service));
     }
 
-    public ServiceQueryResultDTO queryRegistry(final ServiceQueryFormDTO form) {
+    //-------------------------------------------------------------------------------------------------
+	public ServiceQueryResultDTO queryRegistry(final ServiceQueryFormDTO form) {
         logger.traceEntry("queryRegistry: {}", form);
         Assert.notNull(form, "ServiceQueryFormDTO must not be null");
 
@@ -61,27 +70,29 @@ public class ServiceRegistryDriver extends AbstractDriver {
         return logger.traceExit(httpEntity.getBody());
     }
 
-    public ServiceRegistryResponseDTO registerService(final ServiceRegistryRequestDTO request) throws DriverUtilities.DriverException {
+    //-------------------------------------------------------------------------------------------------
+	public ServiceRegistryResponseDTO registerService(final ServiceRegistryRequestDTO request) throws DriverUtilities.DriverException {
         logger.traceEntry("registerService: {}", request);
         Assert.notNull(request, "ServiceRegistryRequestDTO must not be null");
 
-        final UriComponents uri = driverUtilities.findUriByOrchestrator(CoreSystemService.SERVICE_REGISTRY_REGISTER_SERVICE);
+        final UriComponents uri = driverUtilities.findUriByOrchestrator(CoreSystemService.SERVICEREGISTRY_REGISTER_SERVICE);
         final ResponseEntity<ServiceRegistryResponseDTO> httpEntity = httpService
                 .sendRequest(uri, HttpMethod.POST, ServiceRegistryResponseDTO.class, request);
         return logger.traceExit(httpEntity.getBody());
     }
 
-    public void unregisterService(final String serviceDefinition, final String providerName,
+    //-------------------------------------------------------------------------------------------------
+	public void unregisterService(final String serviceDefinition, final String providerName,
                                   final String providerAddress, final int providerPort)
             throws DriverUtilities.DriverException {
 
         logger.traceEntry("unregisterService: {}, {}, {}, {}", serviceDefinition, providerName, providerAddress, providerPort);
-        final UriComponents uri = driverUtilities.findUriByOrchestrator(CoreSystemService.SERVICE_REGISTRY_UNREGISTER_SERVICE);
+        final UriComponents uri = driverUtilities.findUriByOrchestrator(CoreSystemService.SERVICEREGISTRY_UNREGISTER_SERVICE);
         final MultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>(4);
-        queryMap.put(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION, List.of(serviceDefinition));
-        queryMap.put(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME, List.of(providerName));
-        queryMap.put(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS, List.of(providerAddress));
-        queryMap.put(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT, List.of(String.valueOf(providerPort)));
+        queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION, List.of(serviceDefinition));
+        queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME, List.of(providerName));
+        queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS, List.of(providerAddress));
+        queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT, List.of(String.valueOf(providerPort)));
 
         final UriComponents unregisterUri = UriComponentsBuilder.newInstance().uriComponents(uri)
                                                                 .queryParams(queryMap).build();

@@ -7,7 +7,7 @@ set -e
 
 . /usr/share/debconf/confmodule
 
-SYSTEM_NAME="certificate_authority"
+SYSTEM_NAME="certificateauthority"
 
 # summary of how this script can be called:
 #        * <postrm> `remove'

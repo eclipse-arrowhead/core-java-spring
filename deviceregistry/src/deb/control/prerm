@@ -5,7 +5,7 @@
 
 set -e
 
-PKG_NAME="arrowhead-deviceregistry"
+PKG_NAME="arrowhead-device-registry"
 
 # summary of how this script can be called:
 #        * <prerm> `remove'

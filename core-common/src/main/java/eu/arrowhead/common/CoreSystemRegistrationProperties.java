@@ -38,10 +38,10 @@ public class CoreSystemRegistrationProperties {
 	
 	private CoreSystem coreSystem;
 	
-	@Value(CommonConstants.$SERVICE_REGISTRY_ADDRESS_WD)
+	@Value(CommonConstants.$SERVICEREGISTRY_ADDRESS_WD)
 	private String serviceRegistryAddress;
 	
-	@Value(CommonConstants.$SERVICE_REGISTRY_PORT_WD)
+	@Value(CommonConstants.$SERVICEREGISTRY_PORT_WD)
 	private int serviceRegistryPort;
 
 	@Value(CoreCommonConstants.$SERVER_ADDRESS)

@@ -15,6 +15,7 @@
 package eu.arrowhead.core.serviceregistry.database.service;
 
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -23,10 +24,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -35,6 +40,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.cn.CommonNamePartVerifier;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -51,8 +57,24 @@ public class ServiceRegistryDBServiceSystemTest {
 	@Mock
 	private SystemRepository systemRepository;
 	
+	@Mock
+	private CommonNamePartVerifier cnVerifier;
+	
+	private CommonNamePartVerifier realVerifier = new CommonNamePartVerifier();
+	
 	//=================================================================================================
 	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	@Before
+	public void setUp() {
+		when(cnVerifier.isValid(any(String.class))).thenAnswer(new Answer<Boolean>() {
+			@Override
+			public Boolean answer(final InvocationOnMock invocation) throws Throwable {
+				return realVerifier.isValid(invocation.getArgument(0));
+			}
+		});
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
@@ -151,13 +173,19 @@ public class ServiceRegistryDBServiceSystemTest {
 	public void createSystemSystemNameEmptyStringTest() {
 		serviceRegistryDBService.createSystem("", "x", 1, "x");
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void createSystemSystemNameWithDotTest() {
-		serviceRegistryDBService.createSystem("x.y", "x", 1, "x");
+	public void createSystemSystemNameWrongTest() {
+		try {
+			serviceRegistryDBService.createSystem("invalid_system", "x", 1, "x");
+		} catch (final InvalidParameterException ex) {
+			Assert.assertEquals("System name has invalid format. Name must match with the following regular expression: " + CommonNamePartVerifier.COMMON_NAME_PART_PATTERN_STRING, ex.getMessage());			
+			
+			throw ex;
+		}
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void createSystemAddressEmptyStringTest() {
@@ -265,14 +293,20 @@ public class ServiceRegistryDBServiceSystemTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void updateSystemByIdSystemNameWithDotTest() {
-		final String systemName0 = "test.name";
+	public void updateSystemByIdInvalidSystemNameTest() {
+		final String systemName0 = "test_name";
 		final String address0 = "testAddress0";
 		final int port0 = 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
 		
-		serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		try {
+			serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		} catch (final InvalidParameterException ex) {
+			Assert.assertEquals("System name has invalid format. Name must match with the following regular expression: " + CommonNamePartVerifier.COMMON_NAME_PART_PATTERN_STRING, ex.getMessage());			
+			
+			throw ex;
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -400,14 +434,20 @@ public class ServiceRegistryDBServiceSystemTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void mergeSystemByIdSystemNameWithDotTest() {
+	public void mergeSystemByIdWrongSystemNameTest() {
 		final String systemName0 = "test.address";
 		final String address0 = "testAddress0";
 		final int port0 = 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
 		
-		serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);		
+		try {
+			serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);		
+		} catch (final InvalidParameterException ex) {
+			Assert.assertEquals("System name has invalid format. Name must match with the following regular expression: " + CommonNamePartVerifier.COMMON_NAME_PART_PATTERN_STRING, ex.getMessage());
+			
+			throw ex;
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------

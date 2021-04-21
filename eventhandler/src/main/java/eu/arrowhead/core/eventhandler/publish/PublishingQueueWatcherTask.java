@@ -56,7 +56,7 @@ public class PublishingQueueWatcherTask extends Thread {
 	@Value(CoreCommonConstants.$TIME_STAMP_TOLERANCE_SECONDS_WD)
 	private long timeStampTolerance;
 	
-	@Value(CoreCommonConstants.$EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS_WD)
+	@Value(CoreCommonConstants.$EVENTHANDLER_MAX_EXPRESS_SUBSCRIBERS_WD)
 	private int maxExpressSubscribers;
 	
 	@Resource(name = CoreCommonConstants.EVENT_PUBLISHING_EXPRESS_EXECUTOR)

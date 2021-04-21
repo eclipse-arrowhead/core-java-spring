@@ -38,7 +38,7 @@ public class PublishRequestFixedExecutor {
 	//=================================================================================================
 	// members
 	
-	@Value(CoreCommonConstants.$EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS_WD)
+	@Value(CoreCommonConstants.$EVENTHANDLER_MAX_EXPRESS_SUBSCRIBERS_WD)
 	private int maxExpressSubscribers;
 	
 	private static final int MAX_THREAD_POOL_SIZE = 20;
@@ -54,7 +54,6 @@ public class PublishRequestFixedExecutor {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------	
-	
 	@PostConstruct
 	public void init() {
 		logger.debug("PublishRequestFixedExecutor.init started...");

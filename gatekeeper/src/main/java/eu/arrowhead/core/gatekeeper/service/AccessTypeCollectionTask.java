@@ -55,7 +55,8 @@ public class AccessTypeCollectionTask implements Runnable {
 	// methods
 		
 	//-------------------------------------------------------------------------------------------------
-	public AccessTypeCollectionTask(final GatekeeperRelayClient relayClient, final Session session, final String recipientCloudName, final String recipientCloudOperator, final String recipientCloudCN, final String recipientCloudPublicKey, final BlockingQueue<ErrorWrapperDTO> queue) {
+	public AccessTypeCollectionTask(final GatekeeperRelayClient relayClient, final Session session, final String recipientCloudName, final String recipientCloudOperator, final String recipientCloudCN, final String recipientCloudPublicKey,
+									final BlockingQueue<ErrorWrapperDTO> queue) {
 		Assert.notNull(relayClient, "relayClient is null");
 		Assert.notNull(session, "session is null");
 		Assert.isTrue(!Utilities.isEmpty(recipientCloudName), "recipientCloudName is empty");

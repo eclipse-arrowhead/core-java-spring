@@ -13,39 +13,40 @@
  ********************************************************************************/
 package eu.arrowhead.core.datamanager.service;
 
-import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
-import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.internal.DTOConverter;
-import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.cn.CommonNamePartVerifier;
 import eu.arrowhead.common.dto.shared.SenML;
-import eu.arrowhead.core.datamanager.database.service.DataManagerDBService;
-
-import java.util.List;
-import java.util.ArrayList; 
-import java.util.Iterator; 
-import java.util.Vector;
-
 
 @Service
 public class ProxyService {
 
     //=================================================================================================
     // members
-    //
-
+	
+	private static final String INVALID_FORMAT_ERROR_MESSAGE = " has invalid format. Name must match with the following regular expression: " + CommonNamePartVerifier.COMMON_NAME_PART_PATTERN_STRING;
+ 
     private final Logger logger = LogManager.getLogger(ProxyService.class);
 
     private List<ProxyElement> endpoints = new ArrayList<>();
-
+    
+    @Autowired
+    private CommonNamePartVerifier cnVerifier;
+    
+	@Value(CoreCommonConstants.$USE_STRICT_SERVICE_DEFINITION_VERIFIER_WD)
+	private boolean useStrictServiceDefinitionVerifier;
 
     //=================================================================================================
     // methods
@@ -59,11 +60,11 @@ public class ProxyService {
     public List<String> getAllSystems() {
       logger.debug("getAllSystems...");
 
-      List<String> res = new ArrayList<>();
-      Iterator<ProxyElement> pei = endpoints.iterator();
+      final List<String> res = new ArrayList<>();
+      final Iterator<ProxyElement> pei = endpoints.iterator();
 
       while (pei.hasNext()) {
-        ProxyElement pe = pei.next();
+        final ProxyElement pe = pei.next();
 
         if (!systemExists(res, pe.getSystemName())) {
           res.add(pe.getSystemName());
@@ -76,7 +77,7 @@ public class ProxyService {
     private boolean systemExists(final List <String> systems, final String systemName) {
       logger.debug("systemExists...");
 
-      if(Utilities.isEmpty(systemName)){
+      if (Utilities.isEmpty(systemName)) {
         return false;
       }
 
@@ -84,9 +85,9 @@ public class ProxyService {
         return false;
       }
 
-      Iterator<String> sysi = systems.iterator();
+      final Iterator<String> sysi = systems.iterator();
       while (sysi.hasNext()) {
-        String tmpSystemName = sysi.next();
+        final String tmpSystemName = sysi.next();
         if (tmpSystemName.equals(systemName)) {
           return true;
         }
@@ -99,16 +100,18 @@ public class ProxyService {
     public ArrayList<ProxyElement> getEndpointsFromSystem(final String systemName) {
       logger.debug("getEndpointsFromSystem...");
 
-      if(Utilities.isEmpty(systemName)) {
+      if (Utilities.isEmpty(systemName)) {
         return null;
       }
+      
+      final String _systemName = systemName.toLowerCase().trim();
 
-      ArrayList<ProxyElement> res = new ArrayList<>();
-      Iterator<ProxyElement> pei = endpoints.iterator();
+      final ArrayList<ProxyElement> res = new ArrayList<>();
+      final Iterator<ProxyElement> pei = endpoints.iterator();
 
       while (pei.hasNext()) {
-        ProxyElement pe = pei.next();
-        if (systemName.equals(pe.getSystemName())) {
+        final ProxyElement pe = pei.next();
+        if (_systemName.equals(pe.getSystemName())) {
           res.add(pe);
         }
       }
@@ -120,15 +123,17 @@ public class ProxyService {
     public boolean deleteAllEndpointsForSystem(final String systemName) {
       logger.debug("deleteAllEndpointsForSystem...");
 
-      if(Utilities.isEmpty(systemName)) {
+      if (Utilities.isEmpty(systemName)) {
         return false;
       }
+      
+      final String _systemName = systemName.toLowerCase().trim();
 
-      Iterator<ProxyElement> pei = endpoints.iterator();
+      final Iterator<ProxyElement> pei = endpoints.iterator();
 
       while (pei.hasNext()) {
-        ProxyElement pe = pei.next();
-        if (systemName.equals(pe.getSystemName())) {
+        final ProxyElement pe = pei.next();
+        if (_systemName.equals(pe.getSystemName())) {
           pei.remove();
         }
       }
@@ -140,16 +145,18 @@ public class ProxyService {
     public ArrayList<String> getEndpointsNamesFromSystem(final String systemName) {
       logger.debug("getEndpointsNamesFromSystem started ...");
 
-      if(Utilities.isEmpty(systemName)) {
+      if (Utilities.isEmpty(systemName)) {
         return null;
       }
+      
+      final String _systemName = systemName.toLowerCase().trim();
 
-      ArrayList<String> res = new ArrayList<>();
-      Iterator<ProxyElement> pei = endpoints.iterator();
+      final ArrayList<String> res = new ArrayList<>();
+      final Iterator<ProxyElement> pei = endpoints.iterator();
 
       while (pei.hasNext()) {
-        ProxyElement pe = pei.next();
-        if (systemName.equals(pe.getSystemName())) {
+        final ProxyElement pe = pei.next();
+        if (_systemName.equals(pe.getSystemName())) {
           res.add(pe.getServiceName());
         }
       }
@@ -164,8 +171,12 @@ public class ProxyService {
       if (e == null) {
         return false;
       }
+      
+      if (!validateAndNormalizeProxyElement(e)) {
+    	  return false;
+      }
 
-      for(ProxyElement tmp: endpoints) {
+      for (final ProxyElement tmp: endpoints) {
         if (tmp.getServiceName().equals(e.getServiceName())) {
           return false;
         }
@@ -176,18 +187,41 @@ public class ProxyService {
     }
 
     //-------------------------------------------------------------------------------------------------
+	private boolean validateAndNormalizeProxyElement(final ProxyElement e) {
+		try {
+			Assert.isTrue(!Utilities.isEmpty(e.getSystemName()), "System name is blank");
+			Assert.isTrue(cnVerifier.isValid(e.getSystemName()), "System name" + INVALID_FORMAT_ERROR_MESSAGE);
+			Assert.isTrue(!Utilities.isEmpty(e.getServiceName()), "Service name is blank");
+			
+			if (useStrictServiceDefinitionVerifier) {
+				Assert.isTrue(cnVerifier.isValid(e.getServiceName()), "Service name" + INVALID_FORMAT_ERROR_MESSAGE);
+			}
+			
+			e.setSystemName(e.getSystemName().toLowerCase().trim());
+			e.setServiceName(e.getServiceName().toLowerCase().trim());
+			
+			return true;
+		} catch (final IllegalArgumentException ex) {
+			logger.debug("Invalid input: " + ex.getMessage());
+			return false;
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
     public ProxyElement getEndpointFromService(final String systemName, final String serviceName) {
       logger.debug("getEndpointFromService...");
 
-      if(Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
+      if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
         return null;
       }
+      
+      final String _serviceName = serviceName.toLowerCase().trim();
 
-      Iterator<ProxyElement> pei = endpoints.iterator();
+      final Iterator<ProxyElement> pei = endpoints.iterator();
 
       while (pei.hasNext()) {
-        ProxyElement currpe = pei.next();
-        if (serviceName.equals(currpe.getServiceName())) {
+        final ProxyElement currpe = pei.next();
+        if (_serviceName.equals(currpe.getServiceName())) {
           return currpe;
         }
       }
@@ -199,19 +233,22 @@ public class ProxyService {
     public boolean updateEndpointFromService(final String systemName, final String serviceName, final Vector<SenML> message) {
       logger.debug("updateEndpointFromService...");
 
-      if(Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
+      if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
         return false;
       }
 
       if (message == null) {
         return false;
       }
+      
+      final String _systemName = systemName.toLowerCase().trim();
+      final String _serviceName = serviceName.toLowerCase().trim();
 
-      Iterator<ProxyElement> pei = endpoints.iterator();
+      final Iterator<ProxyElement> pei = endpoints.iterator();
 
       while (pei.hasNext()) {
-        ProxyElement pe = pei.next();
-        if (systemName.equals(pe.getSystemName()) && serviceName.equals(pe.getServiceName())) {
+        final ProxyElement pe = pei.next();
+        if (_systemName.equals(pe.getSystemName()) && _serviceName.equals(pe.getServiceName())) {
           pe.setMessage(message);
           return true;
         }
@@ -223,15 +260,18 @@ public class ProxyService {
     public boolean deleteEndpointFromService(final String systemName, final String serviceName) {
       logger.debug("deleteEndpointFromService...");
 
-      if(Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
+      if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
         return false;
       }
+      
+      final String _systemName = systemName.toLowerCase().trim();
+      final String _serviceName = serviceName.toLowerCase().trim();
 
-      Iterator<ProxyElement> pei = endpoints.iterator();
+      final Iterator<ProxyElement> pei = endpoints.iterator();
 
       while (pei.hasNext()) {
-        ProxyElement pe = pei.next();
-        if (systemName.equals(pe.getSystemName()) && serviceName.equals(pe.getServiceName())) {
+        final ProxyElement pe = pei.next();
+        if (_systemName.equals(pe.getSystemName()) && _serviceName.equals(pe.getServiceName())) {
           pei.remove();
           return true;
         }
@@ -239,9 +279,4 @@ public class ProxyService {
 
       return false;
     }
-
-
-    //=================================================================================================
-    // assistant methods
-
 }

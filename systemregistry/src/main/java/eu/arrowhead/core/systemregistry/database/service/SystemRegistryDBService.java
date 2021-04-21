@@ -19,6 +19,7 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.SecurityUtilities;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.cn.CommonNamePartVerifier;
 import eu.arrowhead.common.database.entity.Device;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.entity.SystemRegistry;
@@ -83,6 +84,8 @@ public class SystemRegistryDBService {
     private static final String COULD_NOT_DELETE_SYSTEM_ERROR_MESSAGE = "Could not delete System, with given parameters";
     private static final String COULD_NOT_DELETE_DEVICE_ERROR_MESSAGE = "Could not delete Device, with given parameters";
     private static final String PORT_RANGE_ERROR_MESSAGE = "Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".";
+	private static final String INVALID_FORMAT_ERROR_MESSAGE = " has invalid format. Name must match with the following regular expression: " + CommonNamePartVerifier.COMMON_NAME_PART_PATTERN_STRING;
+
 
     private final Logger logger = LogManager.getLogger(SystemRegistryDBService.class);
 
@@ -91,27 +94,30 @@ public class SystemRegistryDBService {
     private final DeviceRepository deviceRepository;
     private final SecurityUtilities securityUtilities;
     private final CertificateAuthorityDriver caDriver;
+    private final CommonNamePartVerifier cnVerifier;
 
-    @Value(CoreCommonConstants.$SYSTEM_REGISTRY_PING_TIMEOUT_WD)
+    @Value(CoreCommonConstants.$SYSTEMREGISTRY_PING_TIMEOUT_WD)
     private int pingTimeout;
-
-    @Autowired
-    public SystemRegistryDBService(final SystemRegistryRepository systemRegistryRepository,
-                                   final SystemRepository systemRepository,
-                                   final DeviceRepository deviceRepository,
-                                   final SecurityUtilities securityUtilities,
-                                   final CertificateAuthorityDriver caDriver) {
-        this.systemRegistryRepository = systemRegistryRepository;
-        this.systemRepository = systemRepository;
-        this.deviceRepository = deviceRepository;
-        this.securityUtilities = securityUtilities;
-        this.caDriver = caDriver;
-    }
-
 
     //=================================================================================================
     // methods
 
+    //-------------------------------------------------------------------------------------------------
+    @Autowired
+    public SystemRegistryDBService(final SystemRegistryRepository systemRegistryRepository,
+    							   final SystemRepository systemRepository,
+    							   final DeviceRepository deviceRepository,
+    							   final SecurityUtilities securityUtilities,
+    							   final CertificateAuthorityDriver caDriver,
+    							   final CommonNamePartVerifier cnVerifier) {
+    	this.systemRegistryRepository = systemRegistryRepository;
+    	this.systemRepository = systemRepository;
+    	this.deviceRepository = deviceRepository;
+    	this.securityUtilities = securityUtilities;
+    	this.caDriver = caDriver;
+    	this.cnVerifier = cnVerifier;
+    }
+    
     //-------------------------------------------------------------------------------------------------
     public SystemResponseDTO getSystemById(final long systemId) {
         logger.debug("getSystemById started...");
@@ -179,8 +185,8 @@ public class SystemRegistryDBService {
         final long validatedSystemId = validateId(systemId);
         final int validatedPort = validateSystemPort(port);
         final String validatedSystemName = validateParamString(systemName);
-        if (validatedSystemName.contains(".")) {
-            throw new InvalidParameterException("System name can't contain dot (.)");
+        if (!cnVerifier.isValid(validatedSystemName)) {
+        	throw new InvalidParameterException("System name" + INVALID_FORMAT_ERROR_MESSAGE);
         }
         final String validatedAddress = validateParamString(address);
 
@@ -247,8 +253,8 @@ public class SystemRegistryDBService {
         final long validatedSystemId = validateId(systemId);
         final Integer validatedPort = validateAllowNullSystemPort(port);
         final String validatedSystemName = validateAllowNullParamString(systemName);
-        if (validatedSystemName != null && validatedSystemName.contains(".")) {
-            throw new InvalidParameterException("System name can't contain dot (.)");
+        if (validatedSystemName != null && !cnVerifier.isValid(validatedSystemName)) {
+            throw new InvalidParameterException("System name" + INVALID_FORMAT_ERROR_MESSAGE);
         }
         final String validatedAddress = validateAllowNullParamString(address);
 
@@ -341,7 +347,6 @@ public class SystemRegistryDBService {
     @Transactional(rollbackFor = ArrowheadException.class)
     public DeviceResponseDTO updateDeviceByIdResponse(final long id, final String name, final String address, final String macAddress,
                                                       final String authenticationInfo) {
-
         logger.debug("updateDeviceByIdResponse started...");
 
         try {
@@ -444,7 +449,6 @@ public class SystemRegistryDBService {
         checkSystemRegistryRequest(request);
 
         try {
-
             final ZonedDateTime endOfValidity = getZonedDateTime(request);
             final String metadataStr = Utilities.map2Text(request.getMetadata());
             final int version = (request.getVersion() != null) ? request.getVersion() : 1;
@@ -455,8 +459,7 @@ public class SystemRegistryDBService {
             return DTOConverter.convertSystemRegistryToSystemRegistryResponseDTO(srEntry);
         } catch (final DateTimeParseException ex) {
             logger.debug(ex.getMessage(), ex);
-            throw new InvalidParameterException(
-                    "End of validity is specified in the wrong format. Please provide UTC time using ISO-8601 format.", ex);
+            throw new InvalidParameterException("End of validity is specified in the wrong format. Please provide UTC time using ISO-8601 format.", ex);
         } catch (final InvalidParameterException ex) {
             throw ex;
         } catch (final Exception ex) {
@@ -533,7 +536,7 @@ public class SystemRegistryDBService {
             updateSrEntry = updateSystemRegistry(srEntry, systemDb, deviceDb, endOfValidity, validatedMetadataStr, validatedVersion);
 
             return DTOConverter.convertSystemRegistryToSystemRegistryResponseDTO(updateSrEntry);
-        } catch (final InvalidParameterException ex) {
+        } catch (final InvalidParameterException | IllegalArgumentException ex) {
             throw ex;
         } catch (final DateTimeParseException ex) {
             logger.debug(ex.getMessage(), ex);
@@ -544,18 +547,19 @@ public class SystemRegistryDBService {
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
     }
-
+    
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
     public SystemRegistryListResponseDTO getSystemRegistryEntriesBySystemName(final String systemName, final CoreUtilities.ValidatedPageParams pageParameters,
                                                                               final String sortField) {
         logger.debug("getSystemRegistryEntriesBySystemName is started...");
+        Assert.notNull(systemName, "System name is null.");
 
         if (!System.SORTABLE_FIELDS_BY.contains(sortField)) {
             throw new InvalidParameterException("Sortable field with reference '" + sortField + "' is not available");
         }
 
-        final List<System> systemList = systemRepository.findBySystemName(systemName);
+        final List<System> systemList = systemRepository.findBySystemName(systemName.toLowerCase().trim());
         final PageRequest pageRequest = PageRequest.of(pageParameters.getValidatedPage(), pageParameters.getValidatedSize(),
                                                        pageParameters.getValidatedDirection(), sortField);
 
@@ -685,7 +689,8 @@ public class SystemRegistryDBService {
         }
     }
 
-    public SystemRegistryOnboardingWithNameResponseDTO onboardAndRegisterSystemRegistry(final SystemRegistryOnboardingWithNameRequestDTO request,
+    //-------------------------------------------------------------------------------------------------
+	public SystemRegistryOnboardingWithNameResponseDTO onboardAndRegisterSystemRegistry(final SystemRegistryOnboardingWithNameRequestDTO request,
                                                                                         final String host, final String address) {
         logger.debug("onboardAndRegisterSystemRegistry started...");
 
@@ -710,7 +715,8 @@ public class SystemRegistryDBService {
         return retValue;
     }
 
-    public SystemRegistryOnboardingWithCsrResponseDTO onboardAndRegisterSystemRegistry(final SystemRegistryOnboardingWithCsrRequestDTO request) {
+    //-------------------------------------------------------------------------------------------------
+	public SystemRegistryOnboardingWithCsrResponseDTO onboardAndRegisterSystemRegistry(final SystemRegistryOnboardingWithCsrRequestDTO request) {
 
         logger.debug("onboardAndRegisterDeviceRegistry started...");
         final var signingResponse = signCertificate(request.getCertificateSigningRequest());
@@ -724,6 +730,7 @@ public class SystemRegistryDBService {
 
     //=================================================================================================
     // assistant methods
+	
     //-------------------------------------------------------------------------------------------------
     private System getSystemByNameAndAddressAndPort(final String systemName, final String address, final int port) {
         final String dbSystemName = Utilities.lowerCaseTrim(systemName);
@@ -834,6 +841,10 @@ public class SystemRegistryDBService {
         logger.debug("validateNonNullSystemParameters started...");
 
         validateNonNullParameters(systemName, address);
+        
+        if (!cnVerifier.isValid(systemName)) {
+        	throw new InvalidParameterException("System name" + INVALID_FORMAT_ERROR_MESSAGE);
+        }
 
         if (port <= CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
             throw new InvalidParameterException(PORT_RANGE_ERROR_MESSAGE);
@@ -1037,6 +1048,7 @@ public class SystemRegistryDBService {
 
         Assert.notNull(request.getSystem(), "System is not specified.");
         Assert.isTrue(Utilities.notEmpty(request.getSystem().getSystemName()), "System name is not specified.");
+        Assert.isTrue(cnVerifier.isValid(request.getSystem().getSystemName()), "System name" + INVALID_FORMAT_ERROR_MESSAGE);
         Assert.isTrue(Utilities.notEmpty(request.getSystem().getAddress()), "System address is not specified.");
         Assert.notNull(request.getSystem().getPort(), "System port is not specified.");
 
@@ -1076,6 +1088,7 @@ public class SystemRegistryDBService {
     //-------------------------------------------------------------------------------------------------
     private System mergeSystem(final SystemRequestDTO request, final System system) {
         final String name = Utilities.firstNotNullIfExists(request.getSystemName(), system.getSystemName());
+        Assert.isTrue(cnVerifier.isValid(name), "System name" + INVALID_FORMAT_ERROR_MESSAGE);
         final String address = Utilities.firstNotNullIfExists(request.getAddress(), system.getAddress());
         final int port = request.getPort() > 0 ? request.getPort() : system.getPort();
         final String authenticationInfo = Utilities.firstNotNullIfExists(request.getAuthenticationInfo(), system.getAuthenticationInfo());
@@ -1158,5 +1171,4 @@ public class SystemRegistryDBService {
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
     }
-
 }

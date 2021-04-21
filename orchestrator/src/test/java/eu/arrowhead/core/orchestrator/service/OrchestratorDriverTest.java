@@ -328,8 +328,8 @@ public class OrchestratorDriverTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testQueryServiceRegistryBySystemIdOk() {
-		final UriComponents queryBySystemIdUriBeforeExpand = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443, CommonConstants.SERVICE_REGISTRY_URI +
-																	 CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI);
+		final UriComponents queryBySystemIdUriBeforeExpand = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443, CommonConstants.SERVICEREGISTRY_URI +
+																	 CoreCommonConstants.OP_SERVICEREGISTRY_QUERY_BY_SYSTEM_ID_URI);
 		final UriComponents queryBySystemIdUriForTestRequest = queryBySystemIdUriBeforeExpand.expand(Map.of(CoreCommonConstants.COMMON_FIELD_NAME_ID, String.valueOf(1)));
 		
 		final SystemResponseDTO responseDTO = new SystemResponseDTO();
@@ -370,8 +370,8 @@ public class OrchestratorDriverTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testQueryServiceRegistryBySystemRequestDTOOk() {
-		final UriComponents queryBySystemDTOUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443, CommonConstants.SERVICE_REGISTRY_URI +
-																	  CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI);
+		final UriComponents queryBySystemDTOUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443, CommonConstants.SERVICEREGISTRY_URI +
+																	  CoreCommonConstants.OP_SERVICEREGISTRY_QUERY_BY_SYSTEM_DTO_URI);
 		
 		final SystemResponseDTO responseDTO = new SystemResponseDTO();
 		final SystemRequestDTO requestDTO = new SystemRequestDTO();
@@ -555,8 +555,8 @@ public class OrchestratorDriverTest {
 	@Test
 	public void testGetIntraPingMeasurementOk() {
 		final int systemId = 23;
-		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT + 
-				 									  CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT_SUFFIX).expand(systemId);
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTRA_PING_MEASUREMENT + 
+				 									  CommonConstants.OP_QOSMONITOR_INTRA_PING_MEASUREMENT_SUFFIX).expand(systemId);
 		Assert.assertTrue(uri.toString().contains("/measurements/intracloud/ping"));
 		
 		final QoSIntraPingMeasurementResponseDTO responseDTO = new QoSIntraPingMeasurementResponseDTO();
@@ -590,7 +590,7 @@ public class OrchestratorDriverTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetIntraPingMedianMeasurementOk() {
-		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT)
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTRA_PING_MEDIAN_MEASUREMENT)
 										   .expand(QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT.name());
 		Assert.assertTrue(uri.toString().contains("/measurements/intracloud/ping_median"));
 		
@@ -625,7 +625,7 @@ public class OrchestratorDriverTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetInterDirectPingMeasurementOk() {
-		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT);
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTER_DIRECT_PING_MEASUREMENT);
 		Assert.assertTrue(uri.toString().contains("/measurements/intercloud/ping"));
 		
 		final CloudSystemFormDTO requestDTO = new CloudSystemFormDTO();
@@ -661,7 +661,7 @@ public class OrchestratorDriverTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetInterRelayEchoMeasurementOk() {
-		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT);
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENT);
 		Assert.assertTrue(uri.toString().contains("/measurements/intercloud/relay_echo"));
 		
 		final CloudRequestDTO requestDTO = new CloudRequestDTO();

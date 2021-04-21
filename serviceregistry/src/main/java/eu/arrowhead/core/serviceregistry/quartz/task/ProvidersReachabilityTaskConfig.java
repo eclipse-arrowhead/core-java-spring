@@ -42,10 +42,10 @@ public class ProvidersReachabilityTaskConfig {
 	@Autowired
     private ApplicationContext applicationContext; //NOSONAR
 	
-	@Value(CoreCommonConstants.$SERVICE_REGISTRY_PING_SCHEDULED_WD)
+	@Value(CoreCommonConstants.$SERVICEREGISTRY_PING_SCHEDULED_WD)
 	private boolean pingScheduled;
 	
-	@Value(CoreCommonConstants.$SERVICE_REGISTRY_PING_INTERVAL_WD)
+	@Value(CoreCommonConstants.$SERVICEREGISTRY_PING_INTERVAL_WD)
 	private int pingInterval;
 	
 	private static final int SCHEDULER_DELAY = 10;

@@ -7,7 +7,8 @@ set -e
 
 . /usr/share/debconf/confmodule
 
-SYSTEM_NAME="certificate_authority"
+SYSTEM_NAME="certificateauthority"
+MYSQL_USER="certificate_authority"
 PKG_NAME="arrowhead-certificate-authority"
 
 # summary of how this script can be called:
@@ -48,7 +49,7 @@ case "$1" in
     fi
 
     echo "Configuring MySQL database..." >&2
-    ah_db_tables_and_user ${SYSTEM_NAME} ${SYSTEM_NAME}_privileges.sql ${system_passwd}
+    ah_db_tables_and_user ${MYSQL_USER} ${MYSQL_USER}_privileges.sql ${system_passwd}
 
     if [ ! -d "${SYSTEM_DIR}" ]; then
       mkdir -p ${SYSTEM_DIR}
@@ -59,7 +60,12 @@ case "$1" in
       domain_name=${OWN_IP}
     fi
 
-    ah_ca_keystore ${SYSTEM_NAME}
+    ah_cert_signed_system ${SYSTEM_NAME}
+
+    # certificate authority needs the cloud private key
+    cloud_file_name="${AH_CLOUD_NAME}.p12"
+    cloud_file_path="${AH_CLOUDS_DIR}/${cloud_file_name}"
+    cp ${cloud_file_path} "${SYSTEM_DIR}/${cloud_file_name}"
 
     if [ ! -d "${AH_SYSTEMS_DIR}/sysop" ]; then
       mkdir -p ${AH_SYSTEMS_DIR}/sysop
@@ -80,8 +86,12 @@ case "$1" in
       -e "\#^.*server\.ssl\.key-store-password=#s#.*\$#server.ssl.key-store-password=${AH_PASS_CERT}#" \
       -e "\#^.*server\.ssl\.key-password=#s#.*\$#server.ssl.key-password=${AH_PASS_CERT}#" \
       -e "\#^.*server\.ssl\.trust-store=#s#.*\$#server.ssl.trust-store=file:${AH_CONF_DIR}/truststore.p12#" \
-      -e "\#^.*server\.ssl\.trust-store-password=#s#.*\$#server.ssl.trust-store-password=${AH_PASS_CERT}#" > ${SYSTEM_DIR}/application.properties
-
+      -e "\#^.*server\.ssl\.trust-store-password=#s#.*\$#server.ssl.trust-store-password=${AH_PASS_CERT}#" \
+      -e "s/^cloud\.ssl\.key-store-password=.*/cloud.ssl.key-store-password=${AH_PASS_CERT}/"\
+      -e "s/^cloud\.ssl\.key-password=.*/cloud.ssl.key-password=${AH_PASS_CERT}/"\
+      -e "s/^cloud\.ssl\.key-store=.*/cloud.ssl.key-store=classpath:certificates/${cloud_file_name}.p12/"\
+      > ${SYSTEM_DIR}/application.properties
+#cloud.ssl.key-store=classpath:certificates/cloud.p12
     rm ${SYSTEM_DIR}/application.properties.orig
     chown arrowhead:arrowhead ${SYSTEM_DIR}/application.properties
     chmod 640 ${SYSTEM_DIR}/application.properties

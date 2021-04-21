@@ -41,7 +41,7 @@ public class CertificateAuthorityUtilsTest {
 
     @Test(expected = ServiceConfigurationError.class)
     public void testGetKeystoreNull() {
-        CertificateAuthorityUtils.getKeyStore(null);
+        CertificateAuthorityUtils.getCertificateAuthorityKeyStore(null);
     }
 
     @Test(expected = BadPayloadException.class)

@@ -32,11 +32,12 @@ import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.time.Instant;
-import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -104,7 +105,6 @@ public class Utilities {
 	private static final Logger logger = LogManager.getLogger(Utilities.class);
 	private static final ObjectMapper mapper = new ObjectMapper();
 	static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_INSTANT;
-//	static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
 
 	static {
 	    mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
@@ -156,9 +156,29 @@ public class Utilities {
 		}
 
 		final TemporalAccessor tempAcc = dateTimeFormatter.parse(timeStr);
-		final ZoneOffset offset = OffsetDateTime.now().getOffset();
 
-		return ZonedDateTime.ofInstant(Instant.from(tempAcc), offset);
+		return ZonedDateTime.ofInstant(Instant.from(tempAcc), ZoneId.systemDefault());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:RedundantThrowsDeclarationCheck")
+	public static ZonedDateTime parseDBLocalStringToUTCZonedDateTime(final String timeStr) throws DateTimeParseException {
+		if (isEmpty(timeStr)) {
+			return null;
+		}
+		
+		final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		final TemporalAccessor tempAcc = formatter.parse(timeStr);
+		final ZonedDateTime parsedDateTime = ZonedDateTime.of(tempAcc.get(ChronoField.YEAR),
+															  tempAcc.get(ChronoField.MONTH_OF_YEAR),
+															  tempAcc.get(ChronoField.DAY_OF_MONTH),
+															  tempAcc.get(ChronoField.HOUR_OF_DAY),
+															  tempAcc.get(ChronoField.MINUTE_OF_HOUR),
+															  tempAcc.get(ChronoField.SECOND_OF_MINUTE),
+															  0,
+															  ZoneId.systemDefault());
+		
+		return ZonedDateTime.ofInstant(parsedDateTime.toInstant(), ZoneOffset.UTC);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -405,7 +425,7 @@ public class Utilities {
             while (enumeration.hasMoreElements()) {
                 final Certificate[] chain = keystore.getCertificateChain(enumeration.nextElement());
 
-                if(Objects.nonNull(chain) && chain.length >= 3) {
+                if (Objects.nonNull(chain) && chain.length >= 3) {
                     return (X509Certificate) chain[0];
                 }
             }
@@ -416,7 +436,7 @@ public class Utilities {
         }
     }
 
-//-------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	public static X509Certificate getCloudCertFromKeyStore(final KeyStore keystore) {
 		Assert.notNull(keystore, "Key store is not defined.");
 
@@ -428,8 +448,7 @@ public class Utilities {
 				final String alias = enumeration.nextElement();
                 final X509Certificate certificate = (X509Certificate) keystore.getCertificate(alias);
 
-                if(isCloudCertificate(certificate))
-                {
+                if (isCloudCertificate(certificate)) {
                     return certificate;
                 }
 			}
@@ -450,7 +469,7 @@ public class Utilities {
 
 		try {
             // debian installation with new certificates have a different alias
-			Enumeration<String> enumeration = keystore.aliases();
+			final Enumeration<String> enumeration = keystore.aliases();
 			while (enumeration.hasMoreElements()) {
 				final String alias = enumeration.nextElement();
                 final X509Certificate certificate = (X509Certificate) keystore.getCertificate(alias);
@@ -471,6 +490,7 @@ public class Utilities {
 			throw new ServiceConfigurationError("Getting the root cert from keystore failed...", ex);
 		}
 	}
+	
     //-------------------------------------------------------------------------------------------------
     public static PrivateKey getPrivateKey(final KeyStore keystore, final String keyPass) {
         Assert.notNull(keystore, "Key store is not defined.");
@@ -499,6 +519,7 @@ public class Utilities {
 
         return privateKey;
     }
+    
     //-------------------------------------------------------------------------------------------------
     public static PrivateKey getCloudPrivateKey(final KeyStore keystore, final String keyPass) {
         Assert.notNull(keystore, "Key store is not defined.");
@@ -511,9 +532,9 @@ public class Utilities {
 				final X509Certificate certificate = (X509Certificate) keystore.getCertificate(alias);
 				if (isCloudCertificate(certificate)) {
 					final PrivateKey privateKey = (PrivateKey) keystore.getKey(alias, keyPass.toCharArray());
-            if (privateKey != null) {
+					if (privateKey != null) {
 						logger.debug("Found cloud private key with alias: " + alias);
-                return privateKey;
+						return privateKey;
 					}
 				}
             }

@@ -78,7 +78,7 @@ public class OnboardingController {
     private static final String CSR_NULL_ERROR_MESSAGE = " CertificateSigningRequest must have value ";
 
     private final Logger logger = LogManager.getLogger(OnboardingController.class);
-    private final OnboardingService onboardingDBService;
+    private final OnboardingService onboardingService;
     private final SSLProperties sslProperties;
 
 
@@ -89,8 +89,8 @@ public class OnboardingController {
     private Optional<String> sharedSecret;
 
     @Autowired
-    public OnboardingController(final OnboardingService onboardingDBService, final SSLProperties sslProperties) {
-        this.onboardingDBService = onboardingDBService;
+    public OnboardingController(final OnboardingService onboardingService, final SSLProperties sslProperties) {
+        this.onboardingService = onboardingService;
         this.sslProperties = sslProperties;
     }
 
@@ -129,7 +129,7 @@ public class OnboardingController {
 
         final String host = httpServletRequest.getRemoteHost();
         final String address = httpServletRequest.getRemoteAddr();
-        return onboardingDBService.onboarding(onboardingRequest, host, address);
+        return onboardingService.onboarding(onboardingRequest, host, address);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -153,7 +153,7 @@ public class OnboardingController {
 
         final String host = httpServletRequest.getRemoteHost();
         final String address = httpServletRequest.getRemoteAddr();
-        return onboardingDBService.onboarding(onboardingRequest, host, address);
+        return onboardingService.onboarding(onboardingRequest, host, address);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -174,7 +174,7 @@ public class OnboardingController {
         authenticateCertificate(httpServletRequest);
         verifyRequest(onboardingRequest, CommonConstants.ONBOARDING_URI + OP_ONBOARDING_WITH_CERTIFICATE_AND_CSR);
 
-        return onboardingDBService.onboarding(onboardingRequest);
+        return onboardingService.onboarding(onboardingRequest);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -195,7 +195,7 @@ public class OnboardingController {
         authenticateSharedSecret(authorization);
         verifyRequest(onboardingRequest, CommonConstants.ONBOARDING_URI + OP_ONBOARDING_WITH_SHARED_SECRET_AND_CSR);
 
-        return onboardingDBService.onboarding(onboardingRequest);
+        return onboardingService.onboarding(onboardingRequest);
     }
 
     //=================================================================================================
