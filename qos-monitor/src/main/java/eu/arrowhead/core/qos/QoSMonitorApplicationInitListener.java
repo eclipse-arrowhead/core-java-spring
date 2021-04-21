@@ -44,7 +44,7 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 	private boolean gatekeeperIsPresent;
 
 	@Value(CoreCommonConstants.$QOS_PING_PROVIDER_IS_EXTERNAL_WD)
-	private boolean pingProviderIsExternal;
+	private boolean pingProviderIsExternal; //TODO MAKE IT ENUM
 
 	//=================================================================================================
 	// methods
@@ -52,9 +52,10 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 	//-------------------------------------------------------------------------------------------------
 	@Bean(CoreCommonConstants.PING_PROVIDER)
 	public PingProviderManager getPingProvider() {
-		if(pingProviderIsExternal){
+		if(pingProviderIsExternal){ //TODO MAKE IT SWITCH
 			return new ExternalPingProvider();
 		}else{
+			//TODO log warning to stdout and log ...
 			return new DummyPingProvider();
 		}
 

@@ -7,10 +7,21 @@ import eu.arrowhead.core.qos.service.ping.provider.PingProviderManager;
 
 public class ExternalPingProvider implements PingProviderManager{
 
+	//=================================================================================================
+	// methods
+
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public List<IcmpPingResponse> ping(final String address) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public void init() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

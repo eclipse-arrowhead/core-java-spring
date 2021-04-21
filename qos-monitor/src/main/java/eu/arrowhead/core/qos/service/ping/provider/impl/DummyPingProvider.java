@@ -18,7 +18,9 @@ public class DummyPingProvider implements PingProviderManager{
 
 	//=================================================================================================
 	// members
-
+	
+	//-------------------------------------------------------------------------------------------------
+	
 	private static final String EMPTY_OR_NULL_ERROR_MESSAGE = " is empty or null";
 	private static final String DUMMY_PING_PROVIDER_ERROR_MESSAGE = "This is the dummy ping provider's normal ping response";
 
@@ -48,7 +50,7 @@ public class DummyPingProvider implements PingProviderManager{
 			for (int count = 0; count < pingMeasurementProperties.getTimeToRepeat(); count ++) {
 				IcmpPingResponse response;
 				try {
-
+					//TODO REMOVE IT or RETURN 0 or SET DEFAULT DUMMY VALUE and  ERROR and SUCCESS TRUE
 					if(1>0) {
 						throw new Exception(DUMMY_PING_PROVIDER_ERROR_MESSAGE);
 					}
@@ -69,5 +71,12 @@ public class DummyPingProvider implements PingProviderManager{
 		}
 
 		return responseList;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public void init() {
+		// TODO Auto-generated method stub
+		
 	}
 }
