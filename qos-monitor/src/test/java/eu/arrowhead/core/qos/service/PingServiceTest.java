@@ -70,18 +70,6 @@ public class PingServiceTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testGetPingResponseListInvalidAddress() {
-		when(pingMeasurementProperties.getTimeToRepeat()).thenReturn(1);
-		when(pingMeasurementProperties.getTimeout()).thenReturn(2000);
-		when(pingMeasurementProperties.getPacketSize()).thenReturn(32);
-		
-		final List<IcmpPingResponse> responseList = pingService.getPingResponseList("invalid"); //IcmpPingUtil.executePingRequest(request) throws RuntimeException
-		assertEquals(1, responseList.size());
-		assertFalse(responseList.get(0).isSuccessFlag());
-	}
-	
-	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testGetMedianIntraPingMeasurementNullAttribute() {
 		pingService.getMedianIntraPingMeasurement(null);
