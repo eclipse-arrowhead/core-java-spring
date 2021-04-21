@@ -56,11 +56,11 @@ public class OrchestratorStoreFlexible {
 	@Column(nullable = true)
 	private String serviceInterfaceName;
 	
-	@Column(nullable = true)
+	@Column(nullable = false)
 	private String serviceDefinitionName;
 	
-	@Column(nullable = true)
-	private Integer priority = Integer.MAX_VALUE;
+	@Column(nullable = false)
+	private int priority = Integer.MAX_VALUE;
 	
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
@@ -84,7 +84,7 @@ public class OrchestratorStoreFlexible {
 		this.serviceMetadata = serviceMetadata;
 		this.serviceInterfaceName = serviceInterfaceName;
 		this.serviceDefinitionName = serviceDefinitionName;
-		this.priority = priority;
+		this.priority = priority == null ? Integer.MAX_VALUE : priority;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -109,7 +109,7 @@ public class OrchestratorStoreFlexible {
 	public String getServiceMetadata() { return serviceMetadata; }
 	public String getServiceInterfaceName() { return serviceInterfaceName; }
 	public String getServiceDefinitionName() { return serviceDefinitionName; }
-	public Integer getPriority() { return priority; }
+	public int getPriority() { return priority; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
@@ -122,7 +122,7 @@ public class OrchestratorStoreFlexible {
 	public void setServiceMetadata(final String serviceMetadata) { this.serviceMetadata = serviceMetadata; }
 	public void setServiceInterfaceName(final String serviceInterfaceName) { this.serviceInterfaceName = serviceInterfaceName; }
 	public void setServiceDefinitionName(final String serviceDefinitionName) { this.serviceDefinitionName = serviceDefinitionName; }
-	public void setPriority(final Integer priority) { this.priority = priority; }
+	public void setPriority(final int priority) { this.priority = priority; }
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 	

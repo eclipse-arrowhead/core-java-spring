@@ -44,7 +44,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 	private static final CoreSystem[] allowedCoreSystemsForQueryBySystemId = { CoreSystem.ORCHESTRATOR };
 	private static final CoreSystem[] allowedCoreSystemsForQueryBySystemDTO = { CoreSystem.ORCHESTRATOR };
 	private static final CoreSystem[] allowedCoreSystemsForQueryAll = { CoreSystem.QOSMONITOR, CoreSystem.GATEKEEPER };
-	private static final CoreSystem[] allowedCoreSystemsForRegisterSystem = { CoreSystem.PLANT_DESCRIPTION_ENGINE};
+	private static final CoreSystem[] allowedCoreSystemsForRegisterSystem = { CoreSystem.PLANTDESCRIPTIONENGINE};
 	
 	private static final String ID_PATH_VARIABLE = "{" + CommonConstants.COMMON_FIELD_NAME_ID + "}"; 
 	
