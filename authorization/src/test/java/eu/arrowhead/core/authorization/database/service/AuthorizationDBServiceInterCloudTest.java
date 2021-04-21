@@ -333,7 +333,7 @@ public class AuthorizationDBServiceInterCloudTest {
 	private Page<AuthorizationInterCloud> createPageForMockingAuthorizationInterCloudRepository(final int numberOfRequestedEntry) {
 		final List<AuthorizationInterCloud> entries = new ArrayList<>(numberOfRequestedEntry);
 		final Cloud cloud = getValidTestCloud();
-		final System provider = new System("testSystem", "testAddr", 2000, "TOKEN");
+		final System provider = new System("testSystem", "testAddr", 2000, "TOKEN", null);
 		provider.setId(1);
 		for (int i = 1; i <= numberOfRequestedEntry; ++i) {			
 			final ServiceDefinition serviceDefinition = new ServiceDefinition("testService" + i);
