@@ -20,7 +20,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.CoreCommonConstants;
@@ -30,7 +29,7 @@ import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.dto.IcmpPingResponse;
-import eu.arrowhead.core.qos.service.ping.provider.PingProviderManager;
+import eu.arrowhead.core.qos.service.ping.monitor.PingMonitorManager;
 
 @Service
 public class PingService {
@@ -44,7 +43,7 @@ public class PingService {
 	private QoSDBService qosDBService;
 
 	@Autowired
-	private ApplicationContext appContext;
+	private PingMonitorManager pingMonitorManager;
 
 	@Value(CoreCommonConstants.$QOS_DEFAULT_REFERENCE_MIN_RESPONSE_TIME_WD)
 	private int defaultReferenceMinResponseTime;
@@ -81,8 +80,8 @@ public class PingService {
 			throw new InvalidParameterException("Address" + EMPTY_OR_NULL_ERROR_MESSAGE);
 		}
 
-		final PingProviderManager pingProvider = appContext.getBean(CoreCommonConstants.PING_PROVIDER, PingProviderManager.class);
-		final List<IcmpPingResponse> responseList = pingProvider.ping(address);
+		//TODO implement error handling
+		final List<IcmpPingResponse> responseList = pingMonitorManager.ping(address);
 
 		return responseList;
 	}

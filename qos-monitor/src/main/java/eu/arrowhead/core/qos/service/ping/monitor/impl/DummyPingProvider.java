@@ -1,4 +1,4 @@
-package eu.arrowhead.core.qos.service.ping.provider.impl;
+package eu.arrowhead.core.qos.service.ping.monitor.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,9 +12,9 @@ import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.dto.IcmpPingRequest;
 import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.measurement.properties.PingMeasurementProperties;
-import eu.arrowhead.core.qos.service.ping.provider.PingProviderManager;
+import eu.arrowhead.core.qos.service.ping.monitor.PingMonitorManager;
 
-public class DummyPingProvider implements PingProviderManager{
+public class DummyPingProvider implements PingMonitorManager{
 
 	//=================================================================================================
 	// members

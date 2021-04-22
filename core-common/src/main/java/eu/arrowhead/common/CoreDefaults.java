@@ -84,7 +84,7 @@ public class CoreDefaults {
 	public static final int DEFAULT_QOS_DEFAULT_REFERENCE_LOST_PER_MEASUREMENT_PERCENT = 0;
 	public static final boolean DEFAULT_QOS_ENABLED_RELAY_TASK = false;
 	public static final boolean DEFAULT_QOS_IS_GATEKEEPER_PRESENT = false;
-	public static final boolean DEFAULT_QOS_PING_PROVIDER_IS_EXTERNAL = false;
+	public static final String DEFAULT_QOS_MONITOR_PROVIDER_TYPE = "dummy";
 	
 	public static final int DEFAULT_RELAY_TEST_BAD_GATEWAY_RETRY_MIN = 30; //in minutes
 	public static final byte DEFAULT_RELAY_TEST_TIME_TO_REPEAT = 35;

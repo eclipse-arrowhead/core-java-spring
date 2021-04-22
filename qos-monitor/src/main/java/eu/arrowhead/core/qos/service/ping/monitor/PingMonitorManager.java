@@ -1,18 +1,19 @@
-package eu.arrowhead.core.qos.service.ping.provider;
+package eu.arrowhead.core.qos.service.ping.monitor;
 
 import java.util.List;
 
 import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 
-public interface PingProviderManager {//RENAME anything but PINGPROVIDER conflict with sr query
+public interface PingMonitorManager {//RENAME anything but PINGPROVIDER conflict with sr query
 
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public List<IcmpPingResponse> ping(final String address);//TODO throw SPECIALIZED EXEPTION
+	public List<IcmpPingResponse> ping(final String address);//TODO throw SPECIALIZED EXCEPTION
 	//TODO 
-	// check if provider orchestrated 
+	// start loop
+	// check if provider orchestrated and active
 	// if not orchestrat 
 	// if yes ping
 	// if pingprovider not available log

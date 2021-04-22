@@ -30,9 +30,11 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
-import eu.arrowhead.core.qos.service.ping.provider.PingProviderManager;
-import eu.arrowhead.core.qos.service.ping.provider.impl.DummyPingProvider;
-import eu.arrowhead.core.qos.service.ping.provider.impl.ExternalPingProvider;
+import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.core.qos.measurement.properties.MonitorProviderType;
+import eu.arrowhead.core.qos.service.ping.monitor.PingMonitorManager;
+import eu.arrowhead.core.qos.service.ping.monitor.impl.DummyPingProvider;
+import eu.arrowhead.core.qos.service.ping.monitor.impl.ExternalPingProvider;
 
 @Component
 public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
@@ -43,20 +45,23 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 	@Value(CoreCommonConstants.$QOS_IS_GATEKEEPER_PRESENT_WD)
 	private boolean gatekeeperIsPresent;
 
-	@Value(CoreCommonConstants.$QOS_PING_PROVIDER_IS_EXTERNAL_WD)
-	private boolean pingProviderIsExternal; //TODO MAKE IT ENUM
-
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	@Bean(CoreCommonConstants.PING_PROVIDER)
-	public PingProviderManager getPingProvider() {
-		if(pingProviderIsExternal){ //TODO MAKE IT SWITCH
-			return new ExternalPingProvider();
-		}else{
-			//TODO log warning to stdout and log ...
+	@Bean(CoreCommonConstants.PING_MONITOR)
+	public PingMonitorManager getPingProvider(@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_TYPE_WD) final MonitorProviderType monitorType) {
+		logger.debug("getPingProvider started...");
+
+		switch (monitorType) {
+		case DUMMY:
 			return new DummyPingProvider();
+		case DEFAULT:
+			return new DummyPingProvider();
+		case EXTERNAL:
+			return new ExternalPingProvider();
+		default:
+			throw new InvalidParameterException("Not implemented monitor type: " + monitorType.name());
 		}
 
 	}
@@ -67,6 +72,8 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
+		logger.debug("getRequiredCoreSystemServiceUris started...");
+
 		final List<CoreSystemService> result = new ArrayList<>(5);
 
 		if (gatekeeperIsPresent) {
