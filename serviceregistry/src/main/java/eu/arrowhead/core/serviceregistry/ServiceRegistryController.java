@@ -336,7 +336,7 @@ public class ServiceRegistryController {
 											   @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT) final Integer port) { //TODO junit
 		logger.debug("System removal request received");
 		
-		checkUnregisterSystemParameters(systemName, address, port);;
+		checkUnregisterSystemParameters(systemName, address, port);
 		serviceRegistryDBService.removeSystemByNameAndAddressAndPort(systemName, address, port);		
 		logger.debug("{} successfully removed itself", systemName);
 	}
