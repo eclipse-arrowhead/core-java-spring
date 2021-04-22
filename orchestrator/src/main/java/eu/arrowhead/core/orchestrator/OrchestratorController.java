@@ -14,6 +14,8 @@
 
 package eu.arrowhead.core.orchestrator;
 
+import java.util.List;
+
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,18 +24,22 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.internal.OrchestratorStoreFlexibleListResponseDTO;
+import eu.arrowhead.common.dto.internal.OrchestratorStoreFlexibleRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSReservationListResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSReservationRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSTemporaryLockRequestDTO;
@@ -45,6 +51,7 @@ import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.shared.PreferredProviderDataDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreFlexibleDBService;
 import eu.arrowhead.core.orchestrator.service.OrchestratorService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -70,6 +77,10 @@ public class OrchestratorController {
 	private static final String POST_ORCHESTRATIOR_DESCRIPTION = "Start Orchestration process.";
 	private static final String POST_ORCHESTRATOR_HTTP_200_MESSAGE = "Returns possible providers of the specified service.";
 	private static final String POST_ORCHESTRATOR_HTTP_400_MESSAGE = "Could not run the orchestration process";
+	private static final String POST_ORCHESTRATOR_FLEXIBLE_STORE_HTTP_201_MESSAGE = "Created flexible store rules returned.";
+	private static final String POST_ORCHESTRATOR_FLEXIBLE_STORE_HTTP_400_MESSAGE = "Could not create flexible store rules.";
+	private static final String DELETE_ORCHESTRATOR_FLEXIBLE_STORE_HTTP_200_MESSAGE = "Flexible store rule(s) removed";
+	private static final String DELETE_ORCHESTRATOR_FLEXIBLE_STORE_HTTP_400_MESSAGE = "Could not remove flexible store rule(s)";
 	private static final String GET_ORCHESTRATOR_QOS_ENABLED_HTTP_200_MESSAGE = "QoS Monitor flag returned";
 	private static final String GET_ORCHESTRATOR_QOS_RESERVATIONS_HTTP_200_MESSAGE = "QoS Reservations returned";
 	private static final String POST_ORCHESTRATOR_QOS_TEMPORARY_LOCK_HTTP_200_MESSAGE = "Locked Orchestration results (Provider-Service) returned";
@@ -95,6 +106,9 @@ public class OrchestratorController {
 	
 	@Autowired
 	private OrchestratorService orchestratorService;
+	
+	@Autowired
+	private OrchestratorStoreFlexibleDBService orchestratorStoreFlexibleDBService;
 	
 	//=================================================================================================
 	// methods
@@ -169,6 +183,71 @@ public class OrchestratorController {
 		
 		return orchestratorService.storeOchestrationProcessResponse(systemId);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Creates the given flexible store rules", response = OrchestratorStoreFlexibleListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_ORCHESTRATOR_FLEXIBLE_STORE_HTTP_201_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_ORCHESTRATOR_FLEXIBLE_STORE_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
+	@PostMapping(path = CommonConstants.OP_ORCH_CREATE_FLEXIBLE_STORE_RULES_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public OrchestratorStoreFlexibleListResponseDTO createFlexibleStoreRule(@RequestBody final List<OrchestratorStoreFlexibleRequestDTO> requestList) { //TODO junit
+		logger.debug("createFlexibleStoreRule started ...");
+		
+		final String origin = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_CREATE_FLEXIBLE_STORE_RULES_URI;
+		if (!useFlexibleStore) {
+			throw new BadPayloadException("Orchestrator don't use flexible store!", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		checkOrchestratorStoreFlexibleRequestDTOList(requestList, origin);
+		
+		return orchestratorStoreFlexibleDBService.createOrchestratorStoreFlexibleResponse(requestList);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Remove flexible store rule by id", tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_ORCHESTRATOR_FLEXIBLE_STORE_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_ORCHESTRATOR_FLEXIBLE_STORE_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@DeleteMapping(path = CommonConstants.OP_ORCH_REMOVE_FLEXIBLE_STORE_RULE_URI)
+	public void removeFlexibleStoreRuleById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+		logger.debug("removeFlexibleStoreRuleById started...");
+		
+		final String origin = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_REMOVE_FLEXIBLE_STORE_RULE_URI;
+		if (!useFlexibleStore) {
+			throw new BadPayloadException("Orchestrator don't use flexible store!", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		if (id < 1) {
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		orchestratorStoreFlexibleDBService.deleteOrchestratorStoreFlexibleById(id);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Remove all flexible store rule", tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_ORCHESTRATOR_FLEXIBLE_STORE_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_ORCHESTRATOR_FLEXIBLE_STORE_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@DeleteMapping(path = CommonConstants.OP_ORCH_CLEAN_FLEXIBLE_STORE_URI)
+	public void cleanFlexibleStore() {
+		logger.debug("removeFlexibleStoreRuleById started...");
+		
+		final String origin = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_REMOVE_FLEXIBLE_STORE_RULE_URI;
+		if (!useFlexibleStore) {
+			throw new BadPayloadException("Orchestrator don't use flexible store!", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		orchestratorStoreFlexibleDBService.deleteAllOrchestratorStoreFlexible();
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return QoS Monitor enabled flag.", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
@@ -233,6 +312,8 @@ public class OrchestratorController {
 
 	//-------------------------------------------------------------------------------------------------	
 	private void checkOrchestratorFormRequestDTO(final OrchestrationFormRequestDTO request, final String origin) {
+		logger.debug("checkOrchestratorFormRequestDTO started...");
+		
 		if (request == null) {
 			throw new BadPayloadException("Request" + NULL_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
@@ -259,6 +340,41 @@ public class OrchestratorController {
 				if (provider.getProviderCloud() != null) {
 					checkCloudRequestDTO(provider.getProviderCloud(), origin);
 				}
+			}
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	private void checkOrchestratorStoreFlexibleRequestDTOList(final List<OrchestratorStoreFlexibleRequestDTO> dtoList, final String origin) {
+		logger.debug("checkOrchestratorStoreFlexibleRequestDTOList started...");
+		
+		if (dtoList == null) {
+			throw new BadPayloadException("Request list" + NULL_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		for (final OrchestratorStoreFlexibleRequestDTO dto : dtoList) {
+			if (dto == null) {
+				throw new BadPayloadException("Request list contains null element", HttpStatus.SC_BAD_REQUEST, origin);
+			}
+			
+			if (dto.getConsumerSystem() == null) {
+				throw new BadPayloadException("Request list contains an element without consumer system describer", HttpStatus.SC_BAD_REQUEST, origin);
+			} else {
+				if(Utilities.isEmpty(dto.getConsumerSystem().getSystemName()) && (dto.getConsumerSystem().getMetadata() == null || dto.getConsumerSystem().getMetadata().isEmpty())) {
+					throw new BadPayloadException("Request list contains an element in which consumerSystemName and consumerSystemMetadata are both empty", HttpStatus.SC_BAD_REQUEST, origin);
+				}
+			}
+			
+			if (dto.getProviderSystem() == null) {
+				throw new BadPayloadException("Request list contains an element without provider system describer", HttpStatus.SC_BAD_REQUEST, origin);
+			} else {
+				if(Utilities.isEmpty(dto.getProviderSystem().getSystemName()) && (dto.getProviderSystem().getMetadata() == null || dto.getProviderSystem().getMetadata().isEmpty())) {
+					throw new BadPayloadException("Request list contains an element in which providerSystemName and consumerSystemMetadata are both empty", HttpStatus.SC_BAD_REQUEST, origin);
+				}
+			}
+			
+			if (Utilities.isEmpty(dto.getServiceDefinitionName())) {
+				throw new BadPayloadException("Request list contains an element without serviceDefinition", HttpStatus.SC_BAD_REQUEST, origin);
 			}
 		}
 	}

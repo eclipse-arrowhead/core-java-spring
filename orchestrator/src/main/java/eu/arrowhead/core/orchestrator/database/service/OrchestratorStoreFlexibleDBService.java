@@ -55,9 +55,9 @@ public class OrchestratorStoreFlexibleDBService {
 			Assert.notNull(dto, "OrchestratorStoreFlexibleRequestDTO is null");
 			final OrchestratorStoreFlexible candidate = new OrchestratorStoreFlexible(dto.getConsumerSystem().getSystemName(),
 																					  dto.getProviderSystem().getSystemName(),
-																					  dto.getConsumerSystem().getMetadata(),
-																					  dto.getProviderSystem().getMetadata(),
-																					  dto.getServiceMetadata(),
+																					  Utilities.map2Text(dto.getConsumerSystem().getMetadata()),
+																					  Utilities.map2Text(dto.getProviderSystem().getMetadata()),
+																					  Utilities.map2Text(dto.getServiceMetadata()),
 																					  dto.getServiceInterfaceName(),
 																					  dto.getServiceDefinitionName(),
 																					  dto.getPriority());

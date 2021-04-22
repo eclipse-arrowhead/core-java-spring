@@ -15,6 +15,7 @@
 package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
+import java.util.Map;
 
 public class SystemDescriberDTO implements Serializable {
 	
@@ -24,7 +25,7 @@ public class SystemDescriberDTO implements Serializable {
 	private static final long serialVersionUID = 8527918606848411923L;
 	
 	private String systemName;
-	private String metadata;
+	private Map<String,String> metadata;
 	
 	//=================================================================================================
 	// methods
@@ -33,16 +34,16 @@ public class SystemDescriberDTO implements Serializable {
 	public SystemDescriberDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public SystemDescriberDTO(final String systemName, final String metadata) {
+	public SystemDescriberDTO(final String systemName, final  Map<String,String> metadata) {
 		this.systemName = systemName;
 		this.metadata = metadata;
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	public String getSystemName() { return systemName; }
-	public String getMetadata() { return metadata; }
+	public  Map<String,String> getMetadata() { return metadata; }
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setSystemName(final String systemName) { this.systemName = systemName; }
-	public void setMetadata(final String metadata) { this.metadata = metadata; }	
+	public void setMetadata(final  Map<String,String> metadata) { this.metadata = metadata; }	
 }

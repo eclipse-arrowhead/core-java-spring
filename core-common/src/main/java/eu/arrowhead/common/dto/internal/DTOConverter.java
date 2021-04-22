@@ -541,11 +541,11 @@ public class DTOConverter {
 		Assert.notNull(entry, "OrchestratorStoreFlexible entry is null");
 		
 		return new OrchestratorStoreFlexibleResponseDTO(entry.getId(),
-														new SystemDescriberDTO(entry.getConsumerSystemName(), entry.getConsumerSystemMetadata()),
-														new SystemDescriberDTO(entry.getProviderSystemName(), entry.getProviderSystemMetadata()),
+														new SystemDescriberDTO(entry.getConsumerSystemName(), Utilities.text2Map(entry.getConsumerSystemMetadata())),
+														new SystemDescriberDTO(entry.getProviderSystemName(), Utilities.text2Map(entry.getProviderSystemMetadata())),
 														entry.getServiceDefinitionName(),
 														entry.getServiceInterfaceName(),
-														entry.getServiceMetadata(),
+														Utilities.text2Map(entry.getServiceMetadata()),
 														entry.getPriority(),
 														Utilities.convertZonedDateTimeToUTCString(entry.getCreatedAt()),
 														Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));

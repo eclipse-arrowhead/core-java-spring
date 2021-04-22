@@ -15,6 +15,7 @@
 package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
+import java.util.Map;
 
 public class OrchestratorStoreFlexibleResponseDTO implements Serializable {
 
@@ -28,7 +29,7 @@ public class OrchestratorStoreFlexibleResponseDTO implements Serializable {
 	private SystemDescriberDTO providerSystem;
 	private String serviceDefinition;
 	private String serviceInterface;
-	private String serviceMetadata;
+	private Map<String,String> serviceMetadata;
 	private int priority;
 	private String createdAt;	
 	private String updatedAt;
@@ -41,7 +42,7 @@ public class OrchestratorStoreFlexibleResponseDTO implements Serializable {
 	
 	//-------------------------------------------------------------------------------------------------
 	public OrchestratorStoreFlexibleResponseDTO(final long id, final SystemDescriberDTO consumerSystem, final SystemDescriberDTO providerSystem, final String serviceDefinition,
-												final String serviceInterface, final String serviceMetadata, final int priority, final String createdAt, final String updatedAt) {
+												final String serviceInterface, final Map<String,String> serviceMetadata, final int priority, final String createdAt, final String updatedAt) {
 		this.id = id;
 		this.consumerSystem = consumerSystem;
 		this.providerSystem = providerSystem;
@@ -59,7 +60,7 @@ public class OrchestratorStoreFlexibleResponseDTO implements Serializable {
 	public SystemDescriberDTO getProviderSystem() { return providerSystem; }
 	public String getServiceDefinition() { return serviceDefinition; }
 	public String getServiceInterface() { return serviceInterface; }
-	public String getServiceMetadata() { return serviceMetadata; }
+	public Map<String,String> getServiceMetadata() { return serviceMetadata; }
 	public int getPriority() { return priority; }
 	public String getCreatedAt() { return createdAt; }
 	public String getUpdatedAt() { return updatedAt; }
@@ -70,7 +71,7 @@ public class OrchestratorStoreFlexibleResponseDTO implements Serializable {
 	public void setProviderSystem(final SystemDescriberDTO providerSystem) { this.providerSystem = providerSystem; }
 	public void setServiceDefinition(final String serviceDefinition) { this.serviceDefinition = serviceDefinition; }
 	public void setServiceInterface(final String serviceInterface) { this.serviceInterface = serviceInterface; }
-	public void setServiceMetadata(final String serviceMetadata) { this.serviceMetadata = serviceMetadata; }
+	public void setServiceMetadata(final Map<String,String> serviceMetadata) { this.serviceMetadata = serviceMetadata; }
 	public void setPriority(final int priority) { this.priority = priority; }
 	public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }

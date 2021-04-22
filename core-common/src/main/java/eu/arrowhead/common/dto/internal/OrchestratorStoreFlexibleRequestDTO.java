@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import java.util.Map;
+
 public class OrchestratorStoreFlexibleRequestDTO {
 	
 	//=================================================================================================
@@ -23,7 +25,7 @@ public class OrchestratorStoreFlexibleRequestDTO {
 	private SystemDescriberDTO providerSystem;
 	private String serviceDefinitionName;
 	private String serviceInterfaceName;
-	private String serviceMetadata;
+	private Map<String,String> serviceMetadata;
 	private Integer priority;
 	
 	//=================================================================================================
@@ -34,7 +36,7 @@ public class OrchestratorStoreFlexibleRequestDTO {
 	
 	//-------------------------------------------------------------------------------------------------
 	public OrchestratorStoreFlexibleRequestDTO(final SystemDescriberDTO consumerSystem, final SystemDescriberDTO providerSystem, final String serviceDefinitionName,
-											   final String serviceInterfaceName, final String serviceMetadata, final Integer priority) {
+											   final String serviceInterfaceName, final  Map<String,String> serviceMetadata, final Integer priority) {
 		this.consumerSystem = consumerSystem;
 		this.providerSystem = providerSystem;
 		this.serviceDefinitionName = serviceDefinitionName;
@@ -48,7 +50,7 @@ public class OrchestratorStoreFlexibleRequestDTO {
 	public SystemDescriberDTO getProviderSystem() { return providerSystem; }
 	public String getServiceDefinitionName() { return serviceDefinitionName; }
 	public String getServiceInterfaceName() { return serviceInterfaceName; }
-	public String getServiceMetadata() { return serviceMetadata; }
+	public Map<String,String> getServiceMetadata() { return serviceMetadata; }
 	public Integer getPriority() { return priority; }
 
 	//-------------------------------------------------------------------------------------------------
@@ -56,6 +58,6 @@ public class OrchestratorStoreFlexibleRequestDTO {
 	public void setProviderSystem(final SystemDescriberDTO providerSystem) { this.providerSystem = providerSystem; }
 	public void setServiceDefinitionName(final String serviceDefinitionName) { this.serviceDefinitionName = serviceDefinitionName; }
 	public void setServiceInterfaceName(final String serviceInterfaceName) { this.serviceInterfaceName = serviceInterfaceName; }
-	public void setServiceMetadata(final String serviceMetadata) { this.serviceMetadata = serviceMetadata; }
+	public void setServiceMetadata(final Map<String,String> serviceMetadata) { this.serviceMetadata = serviceMetadata; }
 	public void setPriority(final Integer priority) { this.priority = priority; }	
 }
