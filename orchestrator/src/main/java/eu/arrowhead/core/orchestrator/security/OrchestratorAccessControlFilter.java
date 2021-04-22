@@ -50,6 +50,11 @@ public class OrchestratorAccessControlFilter extends CoreSystemAccessControlFilt
 			// Only the local Gatekeeper can use these methods
 			final CoreSystem[] allowedCoreSystems = { CoreSystem.GATEKEEPER };
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystems, requestTarget);
+		} else if (requestTarget.contains(CommonConstants.OP_ORCH_CREATE_FLEXIBLE_STORE_RULES_URI) || requestTarget.contains(CommonConstants.OP_ORCH_REMOVE_FLEXIBLE_STORE_RULE_URI) ||
+				   requestTarget.contains(CommonConstants.OP_ORCH_CLEAN_FLEXIBLE_STORE_URI)) { //TODO junit
+			// Only the local PlantDescriptionEngine can use these methods
+			final CoreSystem[] allowedCoreSystems = { CoreSystem.PLANTDESCRIPTIONENGINE };
+			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystems, requestTarget);
 		} else if (Utilities.isEmpty(requestJSON)) {
 			// If request body is empty (example: GET..../orchestrator/{systemId}), than everybody in the local cloud can use these methods => no further check is necessary
 		} else {
