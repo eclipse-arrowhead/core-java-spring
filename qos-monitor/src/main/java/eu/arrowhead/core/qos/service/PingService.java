@@ -26,6 +26,7 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.dto.IcmpPingResponse;
@@ -80,10 +81,17 @@ public class PingService {
 			throw new InvalidParameterException("Address" + EMPTY_OR_NULL_ERROR_MESSAGE);
 		}
 
-		//TODO implement error handling
-		final List<IcmpPingResponse> responseList = pingMonitorManager.ping(address);
+		try {
 
-		return responseList;
+			final List<IcmpPingResponse> responseList = pingMonitorManager.ping(address);
+			return responseList;
+
+		} catch (final ArrowheadException ex) {
+			logger.info(ex);
+
+			throw ex;
+		}
+
 	}
 
 	//-------------------------------------------------------------------------------------------------

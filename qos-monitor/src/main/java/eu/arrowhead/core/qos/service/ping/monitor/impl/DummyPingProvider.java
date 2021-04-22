@@ -5,27 +5,22 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.dto.IcmpPingRequest;
 import eu.arrowhead.core.qos.dto.IcmpPingResponse;
-import eu.arrowhead.core.qos.measurement.properties.PingMeasurementProperties;
-import eu.arrowhead.core.qos.service.ping.monitor.PingMonitorManager;
+import eu.arrowhead.core.qos.service.ping.monitor.AbstractPingMonitor;
 
-public class DummyPingProvider implements PingMonitorManager{
+public class DummyPingProvider extends AbstractPingMonitor{
 
 	//=================================================================================================
 	// members
-	
+
 	//-------------------------------------------------------------------------------------------------
-	
+
 	private static final String EMPTY_OR_NULL_ERROR_MESSAGE = " is empty or null";
 	private static final String DUMMY_PING_PROVIDER_ERROR_MESSAGE = "This is the dummy ping provider's normal ping response";
-
-	@Autowired
-	private PingMeasurementProperties pingMeasurementProperties;
 
 	protected Logger logger = LogManager.getLogger(DummyPingProvider.class);
 

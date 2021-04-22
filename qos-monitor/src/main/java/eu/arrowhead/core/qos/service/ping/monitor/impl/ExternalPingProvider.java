@@ -3,9 +3,9 @@ package eu.arrowhead.core.qos.service.ping.monitor.impl;
 import java.util.List;
 
 import eu.arrowhead.core.qos.dto.IcmpPingResponse;
-import eu.arrowhead.core.qos.service.ping.monitor.PingMonitorManager;
+import eu.arrowhead.core.qos.service.ping.monitor.AbstractPingMonitor;
 
-public class ExternalPingProvider implements PingMonitorManager{
+public class ExternalPingProvider extends AbstractPingMonitor{
 
 	//=================================================================================================
 	// methods
