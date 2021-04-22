@@ -169,7 +169,7 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public SystemResponseDTO createSystemResponse(final String systemName, final String address, final int port, final String authenticationInfo) {
+	public SystemResponseDTO createSystemResponse(final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) {
 		logger.debug("createSystemResponse started...");
 		
 		return DTOConverter.convertSystemToSystemResponseDTO(createSystem(systemName, address, port, authenticationInfo));
@@ -177,7 +177,7 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public SystemResponseDTO updateSystemResponse(final long systemId, final String systemName, final String address, final int port, final String authenticationInfo) {
+	public SystemResponseDTO updateSystemResponse(final long systemId, final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) {
 		logger.debug("updateSystemResponse started...");
 		
 		return DTOConverter.convertSystemToSystemResponseDTO(updateSystem(systemId, systemName, address, port, authenticationInfo));
@@ -248,7 +248,7 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public SystemResponseDTO mergeSystemResponse(final long systemId, final String systemName, final String address, final Integer port, final String authenticationInfo) {		
+	public SystemResponseDTO mergeSystemResponse(final long systemId, final String systemName, final String address, final Integer port, final String authenticationInfo, final Map<String,String> metadata) {		
 		logger.debug("mergeSystemResponse started...");
 
 		return DTOConverter.convertSystemToSystemResponseDTO(mergeSystem(systemId, systemName, address, port, authenticationInfo));

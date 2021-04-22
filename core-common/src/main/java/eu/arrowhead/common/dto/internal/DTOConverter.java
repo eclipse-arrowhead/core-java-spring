@@ -193,6 +193,7 @@ public class DTOConverter {
 			final String systemName = srEntry.getSystem().getSystemName();
 			final String systemAddress = srEntry.getSystem().getAddress();
 			final int systemPort = srEntry.getSystem().getPort();
+			final Map<String,String> systemMetadata = Utilities.text2Map(srEntry.getSystem().getMetadata());
 			final long serviceDefinitionId = srEntry.getServiceDefinition().getId();
 			final String serviceDefinition = srEntry.getServiceDefinition().getServiceDefinition();		
 			
@@ -200,7 +201,7 @@ public class DTOConverter {
 			if (servicesBySystemId.containsKey(systemId)) {
 				servicesBySystemId.get(systemId).getServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
 			} else {
-				final ServicesGroupedBySystemsResponseDTO dto = new ServicesGroupedBySystemsResponseDTO(systemId, systemName, systemAddress, systemPort, new ArrayList<>());
+				final ServicesGroupedBySystemsResponseDTO dto = new ServicesGroupedBySystemsResponseDTO(systemId, systemName, systemAddress, systemPort, systemMetadata, new ArrayList<>());
 				dto.getServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
 				servicesBySystemId.put(systemId, dto);
 			}

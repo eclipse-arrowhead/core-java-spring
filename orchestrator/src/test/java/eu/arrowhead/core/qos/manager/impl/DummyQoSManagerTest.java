@@ -82,7 +82,7 @@ public class DummyQoSManagerTest {
 		final List<OrchestrationResultDTO> result = new ArrayList<>();
 		for (int i = 0; i < 3; ++i) {
 			final OrchestrationResultDTO dto = new OrchestrationResultDTO();
-			final SystemResponseDTO system = new SystemResponseDTO(i, "System" + i, "localhost", 3000 + i, null, null, null);
+			final SystemResponseDTO system = new SystemResponseDTO(i, "System" + i, "localhost", 3000 + i, null, null, null, null);
 			dto.setProvider(system);
 			result.add(dto);
 		}
