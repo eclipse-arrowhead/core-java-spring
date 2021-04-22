@@ -81,21 +81,21 @@ public class OnboardingController {
     private final OnboardingService onboardingService;
     private final SSLProperties sslProperties;
 
-
     @Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
     private Map<String, Object> arrowheadContext;
 
     @Value(value = "${sharedSecret:#{null}}")
     private Optional<String> sharedSecret;
 
-    @Autowired
-    public OnboardingController(final OnboardingService onboardingService, final SSLProperties sslProperties) {
-        this.onboardingService = onboardingService;
-        this.sslProperties = sslProperties;
-    }
-
     //=================================================================================================
     // methods
+
+    //-------------------------------------------------------------------------------------------------
+    @Autowired
+    public OnboardingController(final OnboardingService onboardingService, final SSLProperties sslProperties) {
+    	this.onboardingService = onboardingService;
+    	this.sslProperties = sslProperties;
+    }
 
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Return an echo message with the purpose of testing the core device availability", response = String.class, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
@@ -249,7 +249,7 @@ public class OnboardingController {
         byte[] bytes;
         try {
             bytes = Base64.getDecoder().decode(authInfo);
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             logger.error(e.getMessage());
             throw new ArrowheadException("Unable to decode authorization header");
         }

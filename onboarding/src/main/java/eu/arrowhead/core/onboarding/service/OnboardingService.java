@@ -54,7 +54,6 @@ public class OnboardingService {
     private final CertificateAuthorityDriver caDriver;
     private final SecurityUtilities securityUtilities;
 
-
     //=================================================================================================
     // methods
     
@@ -82,7 +81,7 @@ public class OnboardingService {
         try {
             certificateSigningRequest = securityUtilities.createCertificateSigningRequest(creationRequestDTO.getCommonName(), keyPair,
                                                                                           CertificateType.AH_ONBOARDING, host, address);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.error(e.getMessage(), e);
             throw new ArrowheadException("Unable to create certificate signing request: " + e.getMessage());
         }
