@@ -33,6 +33,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Service
@@ -83,16 +85,17 @@ public class ServiceRegistryDriver extends AbstractDriver {
 
     //-------------------------------------------------------------------------------------------------
 	public void unregisterService(final String serviceDefinition, final String providerName,
-                                  final String providerAddress, final int providerPort)
+                                  final String providerAddress, final int providerPort, final String serviceUri)
             throws DriverUtilities.DriverException {
 
-        logger.traceEntry("unregisterService: {}, {}, {}, {}", serviceDefinition, providerName, providerAddress, providerPort);
+        logger.traceEntry("unregisterService: {}, {}, {}, {}, {}", serviceDefinition, providerName, providerAddress, providerPort, serviceUri);
         final UriComponents uri = driverUtilities.findUriByOrchestrator(CoreSystemService.SERVICEREGISTRY_UNREGISTER_SERVICE);
-        final MultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>(4);
+        final MultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>(5);
         queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION, List.of(serviceDefinition));
         queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME, List.of(providerName));
         queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS, List.of(providerAddress));
         queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT, List.of(String.valueOf(providerPort)));
+        queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_URI, List.of(URLEncoder.encode(serviceUri, StandardCharsets.UTF_8)));
 
         final UriComponents unregisterUri = UriComponentsBuilder.newInstance().uriComponents(uri)
                                                                 .queryParams(queryMap).build();
