@@ -32,7 +32,7 @@ public class OrchestratorStoreFlexible {
 	//=================================================================================================
 	// members
 	
-	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt");
+	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "priority", "updatedAt", "createdAt");
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -21,6 +21,9 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -44,6 +47,35 @@ public class OrchestratorStoreFlexibleDBService {
 	
 	//=================================================================================================
 	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	public OrchestratorStoreFlexibleListResponseDTO getOrchestratorStoreFlexibleEntriesResponse(final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getOrchestratorStoreFlexibleEntriesResponse started...");
+		
+		Page<OrchestratorStoreFlexible> entries = getOrchestratorStoreFlexibleEntries(page, size, direction, sortField);
+		return DTOConverter.convertOrchestratorStoreFlexibleEntryListToOrchestratorStoreFlexibleListResponseDTO(entries, entries.getTotalElements());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Page<OrchestratorStoreFlexible> getOrchestratorStoreFlexibleEntries(final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getOrchestratorStoreFlexibleEntries started...");
+		
+		final int validatedPage = page < 0 ? 0 : page;
+		final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size; 		
+		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
+		final String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		
+		if (!OrchestratorStoreFlexible.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
+			throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
+		}
+		
+		try {
+			return orchestratorStoreFlexibleRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public OrchestratorStoreFlexibleListResponseDTO createOrchestratorStoreFlexibleResponse(final List<OrchestratorStoreFlexibleRequestDTO> requestList) { //TODO junit

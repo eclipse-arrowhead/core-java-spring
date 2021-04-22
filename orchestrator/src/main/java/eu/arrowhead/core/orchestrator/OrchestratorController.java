@@ -187,7 +187,7 @@ public class OrchestratorController {
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Creates the given flexible store rules", response = OrchestratorStoreFlexibleListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = POST_ORCHESTRATOR_FLEXIBLE_STORE_HTTP_201_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_ORCHESTRATOR_FLEXIBLE_STORE_HTTP_201_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_ORCHESTRATOR_FLEXIBLE_STORE_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
@@ -215,7 +215,7 @@ public class OrchestratorController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@DeleteMapping(path = CommonConstants.OP_ORCH_REMOVE_FLEXIBLE_STORE_RULE_URI)
-	public void removeFlexibleStoreRuleById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+	public void removeFlexibleStoreRuleById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {  //TODO junit
 		logger.debug("removeFlexibleStoreRuleById started...");
 		
 		final String origin = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_REMOVE_FLEXIBLE_STORE_RULE_URI;
@@ -238,7 +238,7 @@ public class OrchestratorController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@DeleteMapping(path = CommonConstants.OP_ORCH_CLEAN_FLEXIBLE_STORE_URI)
-	public void cleanFlexibleStore() {
+	public void cleanFlexibleStore() {  //TODO junit
 		logger.debug("removeFlexibleStoreRuleById started...");
 		
 		final String origin = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_REMOVE_FLEXIBLE_STORE_RULE_URI;
