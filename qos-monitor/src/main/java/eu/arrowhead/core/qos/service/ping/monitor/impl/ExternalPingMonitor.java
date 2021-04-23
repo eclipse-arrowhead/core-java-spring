@@ -1,11 +1,12 @@
 package eu.arrowhead.core.qos.service.ping.monitor.impl;
 
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
@@ -16,6 +17,8 @@ import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.core.qos.dto.IcmpPingRequest;
+import eu.arrowhead.core.qos.dto.IcmpPingRequestACK;
 import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.service.QoSMonitorDriver;
 import eu.arrowhead.core.qos.service.ping.monitor.AbstractPingMonitor;
@@ -26,6 +29,8 @@ public class ExternalPingMonitor extends AbstractPingMonitor{
 	// members
 
 	//-------------------------------------------------------------------------------------------------
+	private static final int ICMP_TTL = 255;
+
 	private final OrchestrationResultDTO cachedPingMonitorProvider = null;
 
 	@Autowired
@@ -64,6 +69,60 @@ public class ExternalPingMonitor extends AbstractPingMonitor{
 
 	//=================================================================================================
 	// assistant methods
+
+	//-------------------------------------------------------------------------------------------------
+	private UUID requestExternalMeasurement() {
+		logger.debug("requestExternalMeasurement started...");
+
+		UUID startedExternalMeasurementProcessId = null;
+		do {
+
+			try {
+				final IcmpPingRequestACK acknowledgedMeasurmentRequest = driver.requestExternalPingMonitorService(getPingMonitorProvidersServiceUri(), createIcmpPingRequest());
+				validateAcknowledgedMeasurmentRequest(acknowledgedMeasurmentRequest);
+
+				// TODO persist ack event
+				startedExternalMeasurementProcessId = acknowledgedMeasurmentRequest.getExternalMeasurementUuid();
+
+			} catch (final ArrowheadException ex) {
+				logger.info(ex);
+			}
+
+		}while(startedExternalMeasurementProcessId != null);
+
+		return startedExternalMeasurementProcessId;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void validateAcknowledgedMeasurmentRequest(final IcmpPingRequestACK acknowledgedMeasurmentRequest) {
+		logger.debug("validateAcknowledgedMeasurmentRequest started...");
+
+		try {
+			Assert.notNull(acknowledgedMeasurmentRequest, "IcmpPingRequestACK is null");
+			Assert.notNull(acknowledgedMeasurmentRequest.getAckOk(), "IcmpPingRequestACK.ackOk is null");
+			Assert.isTrue(acknowledgedMeasurmentRequest.getAckOk().equalsIgnoreCase("OK"), "IcmpPingRequestACK is null");
+		
+			
+		} catch (final Exception ex) {
+			logger.warn("External pingMonitorProvider replied invalid ack : " + ex);
+
+			throw new ArrowheadException("External pingMonitorProvider replied invalid ack", ex);
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private IcmpPingRequest createIcmpPingRequest() {
+		logger.debug("createIcmpPingRequest started...");
+
+		final IcmpPingRequest request = new IcmpPingRequest();
+		request.setHost(cachedPingMonitorProvider.getProvider().getAddress());
+		request.setPacketSize(pingMeasurementProperties.getPacketSize());
+		request.setTimeout(pingMeasurementProperties.getTimeout());
+		request.setTimeToRepeat(pingMeasurementProperties.getTimeToRepeat());
+		request.setTtl(ICMP_TTL);
+
+		return request;
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	private UriComponents getPingMonitorProvidersServiceUri() {

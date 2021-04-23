@@ -41,6 +41,8 @@ import eu.arrowhead.common.dto.internal.SystemAddressSetRelayResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.http.HttpService;
+import eu.arrowhead.core.qos.dto.IcmpPingRequest;
+import eu.arrowhead.core.qos.dto.IcmpPingRequestACK;
 
 @Component
 public class QoSMonitorDriver {
@@ -162,6 +164,23 @@ public class QoSMonitorDriver {
 			throw ex;
 		}
 		
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public IcmpPingRequestACK requestExternalPingMonitorService(final UriComponents externalPingMonitorUri, final IcmpPingRequest request) {
+		logger.debug("requestExternalPingMonitorService started...");
+
+		Assert.notNull(request, "IcmpPingRequest is null.");
+		Assert.notNull(request, "externalPingMonitorUri is null.");
+
+		try {
+			final ResponseEntity<IcmpPingRequestACK> response = httpService.sendRequest(externalPingMonitorUri, HttpMethod.POST, IcmpPingRequestACK.class, request);
+
+			return response.getBody();
+		} catch (final ArrowheadException ex) {
+			logger.debug("Exception: " + ex.getMessage());
+			throw ex;
+		}
 	}
 
 	//=================================================================================================
