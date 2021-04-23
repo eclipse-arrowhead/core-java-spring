@@ -1,15 +1,21 @@
 package eu.arrowhead.core.qos.service.ping.monitor.impl;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.util.UriComponents;
 
+import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceSecurityType;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.service.QoSMonitorDriver;
 import eu.arrowhead.core.qos.service.ping.monitor.AbstractPingMonitor;
@@ -20,10 +26,13 @@ public class ExternalPingMonitor extends AbstractPingMonitor{
 	// members
 
 	//-------------------------------------------------------------------------------------------------
-	private final OrchestrationResponseDTO cachedPingMonitorProvider = null;
+	private final OrchestrationResultDTO cachedPingMonitorProvider = null;
 
 	@Autowired
 	private QoSMonitorDriver driver;
+
+	@Autowired
+	protected SSLProperties sslProperties;
 
 	protected Logger logger = LogManager.getLogger(ExternalPingMonitor.class);
 
@@ -34,8 +43,8 @@ public class ExternalPingMonitor extends AbstractPingMonitor{
 	@Override
 	public List<IcmpPingResponse> ping(final String address) {
 		
-		if (cachedPingMonitorProvider != null && providerIsAlive()){
-
+		if (cachedPingMonitorProvider != null){
+			//TODO request pingMonitoringService from external provider
 		}else {
 			try {
 				initPingMonitorProvider();
@@ -51,26 +60,36 @@ public class ExternalPingMonitor extends AbstractPingMonitor{
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
-	private boolean providerIsAlive() {
-		logger.debug("providerIsAlive started...");
-		try {
-			final UriComponents providerEchoUri = getProviderEchoUri();
-			//TODO implement driver.echoProvider()
-		} catch (final ArrowheadException ex) {
-			logger.debug("providerIsAlive thow: " + ex);
+	private UriComponents getPingMonitorProvidersServiceUri() {
+		logger.debug("getPingMonitorProvidersServiceUri started...");
 
-			return false;
+		final SystemResponseDTO provider = cachedPingMonitorProvider.getProvider();
+		final ServiceSecurityType securityType = cachedPingMonitorProvider.getSecure();
+		final String path = cachedPingMonitorProvider.getServiceUri();
+
+		switch (securityType) {
+		case NOT_SECURE:
+			return createHttpUri(provider, path);
+		case CERTIFICATE:
+			return createHttpsUri(provider, path);
+		case TOKEN:
+			throw new InvalidParameterException("TOKEN security is not supported yet, for PingMonitor Providers. ");
+		default:
+			throw new InvalidParameterException("Not supported ServiceSecurityType: " + securityType);
 		}
-		return false;
+
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private UriComponents getProviderEchoUri() {
-		logger.debug("getProviderEchoUri started...");
+	private UriComponents createHttpUri(final SystemResponseDTO provider, final String path) {
 
-		
-		Utilities.createURI(null, null, 0, null);
-		return null;
+		return Utilities.createURI(CommonConstants.HTTP, provider.getAddress(), provider.getPort(), path );
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents createHttpsUri(final SystemResponseDTO provider, final String path) {
+
+		return Utilities.createURI(CommonConstants.HTTPS, provider.getAddress(), provider.getPort(), path );
 	}
 
 	//-------------------------------------------------------------------------------------------------
