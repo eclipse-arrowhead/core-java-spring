@@ -42,9 +42,15 @@ public class ExternalPingMonitor extends AbstractPingMonitor{
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public List<IcmpPingResponse> ping(final String address) {
-		
+
 		if (cachedPingMonitorProvider != null){
 			//TODO request pingMonitoringService from external provider
+			// TODO send request with pingMeasurementProperties, expect http 200 "ok - measurement uuid" as answer
+			// listen on eventQueue for event sequence: 
+			// 1.) mesaurmentRequestReceived payload = measurement uuid,
+			// 2.) mesaurmentStarted payload = measurement uuid,
+			// 3.) mesurementFinished payload = measurment uuid, List<IcmpPingResponse>
+			// --- feature TODO create pingMonitorProvider profile table, base on the events above
 		}else {
 			try {
 				initPingMonitorProvider();
