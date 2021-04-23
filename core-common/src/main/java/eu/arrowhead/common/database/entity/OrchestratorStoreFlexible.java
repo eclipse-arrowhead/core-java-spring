@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2019 AITIA
+ * Copyright (c) 2021 AITIA
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -129,7 +129,14 @@ public class OrchestratorStoreFlexible {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "OrchestratorStoreFlexible [id = " + id + "]";
+		final String consumerName = consumerSystemName == null ? "null" : consumerSystemName;
+		final String providerName = providerSystemName == null ? "null" : providerSystemName;
+		final String consumerMeta = consumerSystemMetadata == null ? "null" : consumerSystemMetadata;
+		final String providerMeta = providerSystemMetadata == null ? "null" : providerSystemMetadata;
+		final String serviceMeta = serviceMetadata == null ? "null" :  serviceMetadata;
+		final String interfaceName = serviceInterfaceName == null ? "null" :  serviceInterfaceName;
+		return "OrchestratorStoreFlexible [id = " + id + "consumerName = " + consumerName + "providerName = " + providerName + "consumerMeta = " + consumerMeta +
+			   "providerMeta = " + providerMeta + "serviceMeta = " + serviceMeta + "interfaceName = " + interfaceName + "serviceDef = " + serviceDefinitionName + "priority = " + priority + "]";
 	}
 
 	//-------------------------------------------------------------------------------------------------

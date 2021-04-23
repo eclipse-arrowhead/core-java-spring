@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2019 AITIA
+ * Copyright (c) 2021 AITIA
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -21,6 +21,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
@@ -30,34 +31,47 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.cn.CommonNamePartVerifier;
 import eu.arrowhead.common.database.entity.OrchestratorStoreFlexible;
 import eu.arrowhead.common.database.repository.OrchestratorStoreFlexibleRepository;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.OrchestratorStoreFlexibleListResponseDTO;
 import eu.arrowhead.common.dto.internal.OrchestratorStoreFlexibleRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
 
 @Service
 public class OrchestratorStoreFlexibleDBService {
 
 	private static final Logger logger = LogManager.getLogger(OrchestratorStoreFlexibleDBService.class);
+	private static final String SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE = "System name has invalid format. System names only contain letters (english alphabet), numbers and dash (-), and have to start with a letter (also cannot end with dash).";
+	private static final String SERVICE_DEFINITION_WRONG_FORMAT_ERROR_MESSAGE = "Service definition has invalid format. Service definition only contains letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).";
+	
+	@Value(CoreCommonConstants.$USE_STRICT_SERVICE_DEFINITION_VERIFIER_WD)
+	private boolean useStrictServiceDefinitionVerifier;
 	
 	@Autowired
 	private OrchestratorStoreFlexibleRepository orchestratorStoreFlexibleRepository;
+	
+	@Autowired
+	private CommonNamePartVerifier cnVerifier;
+	
+	@Autowired
+	private ServiceInterfaceNameVerifier interfaceNameVerifier;
 	
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public OrchestratorStoreFlexibleListResponseDTO getOrchestratorStoreFlexibleEntriesResponse(final int page, final int size, final Direction direction, final String sortField) {
+	public OrchestratorStoreFlexibleListResponseDTO getOrchestratorStoreFlexibleEntriesResponse(final int page, final int size, final Direction direction, final String sortField) { //TODO junit
 		logger.debug("getOrchestratorStoreFlexibleEntriesResponse started...");
 		
-		Page<OrchestratorStoreFlexible> entries = getOrchestratorStoreFlexibleEntries(page, size, direction, sortField);
+		final Page<OrchestratorStoreFlexible> entries = getOrchestratorStoreFlexibleEntries(page, size, direction, sortField);
 		return DTOConverter.convertOrchestratorStoreFlexibleEntryListToOrchestratorStoreFlexibleListResponseDTO(entries, entries.getTotalElements());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public Page<OrchestratorStoreFlexible> getOrchestratorStoreFlexibleEntries(final int page, final int size, final Direction direction, final String sortField) {
+	public Page<OrchestratorStoreFlexible> getOrchestratorStoreFlexibleEntries(final int page, final int size, final Direction direction, final String sortField) { //TODO junit
 		logger.debug("getOrchestratorStoreFlexibleEntries started...");
 		
 		final int validatedPage = page < 0 ? 0 : page;
@@ -78,6 +92,7 @@ public class OrchestratorStoreFlexibleDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
 	public OrchestratorStoreFlexibleListResponseDTO createOrchestratorStoreFlexibleResponse(final List<OrchestratorStoreFlexibleRequestDTO> requestList) { //TODO junit
 		logger.debug("createOrchestratorStoreFlexibleResponse started...");
 		Assert.notNull(requestList, "OrchestratorStoreFlexible requestList is null");
@@ -93,6 +108,7 @@ public class OrchestratorStoreFlexibleDBService {
 																					  dto.getServiceInterfaceName(),
 																					  dto.getServiceDefinitionName(),
 																					  dto.getPriority());
+			normalizeEntity(candidate);
 			validateEntity(candidate);
 			candidates.add(candidate);
 		}
@@ -102,21 +118,25 @@ public class OrchestratorStoreFlexibleDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
 	public OrchestratorStoreFlexible createOrchestratorStoreFlexible(final String consumerSystemName, final String providerSystemName, final String consumerSystemMetadata, final String providerSystemMetadata,
 			 														 final String serviceMetadata, final String serviceInterfaceName, final String serviceDefinitionName, final Integer priority) { //TODO junit
 		logger.debug("createOrchestratorStoreFlexible started...");
 		final OrchestratorStoreFlexible candidate = new OrchestratorStoreFlexible(consumerSystemName, providerSystemName, consumerSystemMetadata, providerSystemMetadata, serviceMetadata,
 																				  serviceInterfaceName, serviceDefinitionName, priority);
+		normalizeEntity(candidate);
 		validateEntity(candidate);
 		return saveEntityList(List.of(candidate)).get(0);
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
 	public List<OrchestratorStoreFlexible> createOrchestratorStoreFlexible(final List<OrchestratorStoreFlexible> candidates) { //TODO junit
 		logger.debug("createOrchestratorStoreFlexible started...");
 		Assert.notNull(candidates, "OrchestratorStoreFlexible candidate list is null");
 		
 		for (final OrchestratorStoreFlexible candidate : candidates) {
+			normalizeEntity(candidate);
 			validateEntity(candidate);
 		}
 		
@@ -131,6 +151,7 @@ public class OrchestratorStoreFlexibleDBService {
 		try {
 			if (orchestratorStoreFlexibleRepository.existsById(id)) {
 				orchestratorStoreFlexibleRepository.deleteById(id);
+				orchestratorStoreFlexibleRepository.flush();
 			}
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
@@ -145,6 +166,7 @@ public class OrchestratorStoreFlexibleDBService {
 		
 		try {
 			orchestratorStoreFlexibleRepository.deleteAll();
+			orchestratorStoreFlexibleRepository.flush();
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -155,31 +177,69 @@ public class OrchestratorStoreFlexibleDBService {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
+	private void normalizeEntity(final OrchestratorStoreFlexible entity) {
+		logger.debug("normalizeEntity started...");
+		
+		if (!Utilities.isEmpty(entity.getConsumerSystemName())) {
+			entity.setConsumerSystemName(entity.getConsumerSystemName().toLowerCase().trim());			
+		}
+		if (!Utilities.isEmpty(entity.getProviderSystemName())) {
+			entity.setProviderSystemName(entity.getProviderSystemName().toLowerCase().trim());			
+		}
+		if (!Utilities.isEmpty(entity.getServiceDefinitionName())) {
+			entity.setServiceDefinitionName(entity.getServiceDefinitionName().toLowerCase().trim());
+		}
+		if (!Utilities.isEmpty(entity.getServiceInterfaceName())) {
+			entity.setServiceInterfaceName(entity.getServiceInterfaceName().toUpperCase().trim());
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	private void validateEntity(final OrchestratorStoreFlexible entity) {
 		logger.debug("validateEntity started...");
 		
 		if (entity == null) {
 			throw new InvalidParameterException("OrchestratorStoreFlexible entity is null");
 		}
+		
 		if (Utilities.isEmpty(entity.getConsumerSystemName()) && Utilities.isEmpty(entity.getConsumerSystemMetadata())) {
 			throw new InvalidParameterException("consumerSystemName and consumerSystemMetadata are both empty");
 		}
+		if (!Utilities.isEmpty(entity.getConsumerSystemName()) && !cnVerifier.isValid(entity.getConsumerSystemName())) {
+			throw new InvalidParameterException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE);
+		}
+		
 		if (Utilities.isEmpty(entity.getProviderSystemName()) && Utilities.isEmpty(entity.getProviderSystemMetadata())) {
 			throw new InvalidParameterException("providerSystemName and providerSystemMetadata are both null");
 		}
+		if (!Utilities.isEmpty(entity.getProviderSystemName()) && !cnVerifier.isValid(entity.getProviderSystemName())) {
+			throw new InvalidParameterException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE);
+		}
+		
 		if (Utilities.isEmpty(entity.getServiceDefinitionName())) {
 			throw new InvalidParameterException("serviceDefinitionName is empty");
+		} else if (useStrictServiceDefinitionVerifier && !cnVerifier.isValid(entity.getServiceDefinitionName())) {
+			throw new InvalidParameterException(SERVICE_DEFINITION_WRONG_FORMAT_ERROR_MESSAGE);
+		}
+		
+		if (!Utilities.isEmpty(entity.getServiceInterfaceName()) && !interfaceNameVerifier.isValid(entity.getServiceInterfaceName())) {
+			throw new InvalidParameterException("Specified interface name is not valid: " + entity.getServiceInterfaceName());
+		}
+		
+		if (entity.getPriority() < 0) {
+			throw new InvalidParameterException("Priority must be a positive number");
 		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Transactional(rollbackFor = ArrowheadException.class)
 	private List<OrchestratorStoreFlexible> saveEntityList(final List<OrchestratorStoreFlexible> candidates) {
 		logger.debug("saveEntityList started...");
 		Assert.notNull(candidates, "OrchestratorStoreFlexible list is null");
 		
 		try {
-			return orchestratorStoreFlexibleRepository.saveAll(candidates);
+			final List<OrchestratorStoreFlexible> saved = orchestratorStoreFlexibleRepository.saveAll(candidates);
+			orchestratorStoreFlexibleRepository.flush();
+			return saved;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);

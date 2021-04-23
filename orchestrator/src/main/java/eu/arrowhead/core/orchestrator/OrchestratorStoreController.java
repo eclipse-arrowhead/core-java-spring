@@ -43,6 +43,7 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
+import eu.arrowhead.common.cn.CommonNamePartVerifier;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.OrchestratorStoreFlexibleListResponseDTO;
@@ -52,6 +53,7 @@ import eu.arrowhead.common.dto.internal.OrchestratorStoreModifyPriorityRequestDT
 import eu.arrowhead.common.dto.internal.OrchestratorStoreRequestDTO;
 import eu.arrowhead.common.dto.internal.OrchestratorStoreResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
 import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreDBService;
 import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreFlexibleDBService;
 import io.swagger.annotations.Api;
@@ -103,6 +105,8 @@ public class OrchestratorStoreController {
 	private static final String NULL_PARAMETERS_ERROR_MESSAGE = " is null.";
 	private static final String EMPTY_PARAMETERS_ERROR_MESSAGE = " is empty.";
 	private static final String MODIFY_PRIORITY_MAP_PRIORITY_DUPLICATION_ERROR_MESSAGE = "PriorityMap has duplicated priority value";
+	private static final String SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE = "System name has invalid format. System names only contain letters (english alphabet), numbers and dash (-), and have to start with a letter (also cannot end with dash).";
+	private static final String SERVICE_DEFINITION_WRONG_FORMAT_ERROR_MESSAGE = "Service definition has invalid format. Service definition only contains letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).";
 	
 	private final Logger logger = LogManager.getLogger(OrchestratorStoreController.class);
 	
@@ -114,6 +118,15 @@ public class OrchestratorStoreController {
 	
 	@Value(CoreCommonConstants.$ORCHESTRATOR_USE_FLEXIBLE_STORE_WD)
 	private boolean useFlexibleStore;
+	
+	@Value(CoreCommonConstants.$USE_STRICT_SERVICE_DEFINITION_VERIFIER_WD)
+	private boolean useStrictServiceDefinitionVerifier;
+	
+	@Autowired
+	private CommonNamePartVerifier cnVerifier;
+	
+	@Autowired
+	private ServiceInterfaceNameVerifier interfaceNameVerifier;
 	
 	//=================================================================================================
 	// methods
@@ -526,21 +539,37 @@ public class OrchestratorStoreController {
 			if (dto.getConsumerSystem() == null) {
 				throw new BadPayloadException("Request list contains an element without consumer system describer", HttpStatus.SC_BAD_REQUEST, origin);
 			} else {
-				if(Utilities.isEmpty(dto.getConsumerSystem().getSystemName()) && (dto.getConsumerSystem().getMetadata() == null || dto.getConsumerSystem().getMetadata().isEmpty())) {
+				if (Utilities.isEmpty(dto.getConsumerSystem().getSystemName()) && Utilities.isEmpty(dto.getConsumerSystem().getMetadata())) {
 					throw new BadPayloadException("Request list contains an element in which consumerSystemName and consumerSystemMetadata are both empty", HttpStatus.SC_BAD_REQUEST, origin);
+				}
+				if (!Utilities.isEmpty(dto.getConsumerSystem().getSystemName()) && !cnVerifier.isValid(dto.getConsumerSystem().getSystemName())) {
+					throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 				}
 			}
 			
 			if (dto.getProviderSystem() == null) {
 				throw new BadPayloadException("Request list contains an element without provider system describer", HttpStatus.SC_BAD_REQUEST, origin);
 			} else {
-				if(Utilities.isEmpty(dto.getProviderSystem().getSystemName()) && (dto.getProviderSystem().getMetadata() == null || dto.getProviderSystem().getMetadata().isEmpty())) {
+				if (Utilities.isEmpty(dto.getProviderSystem().getSystemName()) && Utilities.isEmpty(dto.getProviderSystem().getMetadata())) {
 					throw new BadPayloadException("Request list contains an element in which providerSystemName and consumerSystemMetadata are both empty", HttpStatus.SC_BAD_REQUEST, origin);
+				}
+				if (!Utilities.isEmpty(dto.getProviderSystem().getSystemName()) && !cnVerifier.isValid(dto.getProviderSystem().getSystemName())) {
+					throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 				}
 			}
 			
 			if (Utilities.isEmpty(dto.getServiceDefinitionName())) {
 				throw new BadPayloadException("Request list contains an element without serviceDefinition", HttpStatus.SC_BAD_REQUEST, origin);
+			} else if (useStrictServiceDefinitionVerifier && !cnVerifier.isValid(dto.getServiceDefinitionName())) {
+				throw new BadPayloadException(SERVICE_DEFINITION_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			}
+			
+			if (!Utilities.isEmpty(dto.getServiceInterfaceName()) && !interfaceNameVerifier.isValid(dto.getServiceInterfaceName())) {
+				throw new BadPayloadException("Specified interface name is not valid: " + dto.getServiceInterfaceName(), HttpStatus.SC_BAD_REQUEST, origin);
+			}
+			
+			if (dto.getPriority() != null && dto.getPriority() < 0) {
+				throw new BadPayloadException("Priority must be a positive number", HttpStatus.SC_BAD_REQUEST, origin);
 			}
 		}
 	}

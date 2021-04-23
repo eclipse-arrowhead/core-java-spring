@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2019 AITIA
+ * Copyright (c) 2021 AITIA
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -41,7 +41,7 @@ public class SystemDescriberDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	public String getSystemName() { return systemName; }
-	public  Map<String,String> getMetadata() { return metadata; }
+	public Map<String,String> getMetadata() { return metadata; }
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setSystemName(final String systemName) { this.systemName = systemName; }
