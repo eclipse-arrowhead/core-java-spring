@@ -106,5 +106,7 @@ public class ExternalPingMonitor extends AbstractPingMonitor{
 		// matadatareq.. fill with shema
 		// enableIntercloud false
 
+		//if service orchestrated subscribe to all events from pingmonitor
+		// as monitoringRequestReceivedEvent, monitoringStratedEvent, monitoringFinishedEvent, serviceErrorEvent 
 	}
 }
