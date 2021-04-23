@@ -79,10 +79,10 @@ public class SystemRegistryControllerSystemRegistryTest {
     private final static String WRONG_SYSTEM_NAME = "wrong_system_name";
 
     private static final SystemRequestDTO VALID_SYSTEM_REQUEST =
-            new SystemRequestDTO("system", "address", 80, "authenticationInfo");
+            new SystemRequestDTO("system", "address", 80, "authenticationInfo", null);
     private final static SystemResponseDTO VALID_SYSTEM =
             new SystemResponseDTO(VALID_SYSTEM_ID, VALID_SYSTEM_NAME, "address", 80,
-                                  "authenticationInfo", DATE_STRING, DATE_STRING);
+                                  "authenticationInfo", null, DATE_STRING, DATE_STRING);
 
     private final static DeviceRequestDTO VALID_DEVICE_REQUEST =
             new DeviceRequestDTO(VALID_DEVICE_NAME, "address", "AA:AA:AA:AA:AA:AA", "authenticationInfo");
@@ -442,7 +442,7 @@ public class SystemRegistryControllerSystemRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
     public void registerSystemNameWrong() throws Exception {
-		final SystemRegistryRequestDTO dto = new SystemRegistryRequestDTO(new SystemRequestDTO("invalid.format_", "address", 80, "authenticationInfo"), VALID_DEVICE_REQUEST, DATE_STRING, null, 1);
+		final SystemRegistryRequestDTO dto = new SystemRegistryRequestDTO(new SystemRequestDTO("invalid.format_", "address", 80, "authenticationInfo", null), VALID_DEVICE_REQUEST, DATE_STRING, null, 1);
 
         this.mockMvc.perform(post("/systemregistry/register")
                                      .accept(MediaType.APPLICATION_JSON)

@@ -342,7 +342,7 @@ public class SRAccessControlFilterTest {
 	public void testQueryRegistryBySystemDTOOrchestrator() throws Exception {
 		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
 		
-		postQueryBySystemDTO(new SystemRequestDTO("system", "0.0.0.0", 5000, null), "certificates/orchestrator.pem", status().isOk());
+		postQueryBySystemDTO(new SystemRequestDTO("system", "0.0.0.0", 5000, null, null), "certificates/orchestrator.pem", status().isOk());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -351,7 +351,7 @@ public class SRAccessControlFilterTest {
 	public void testQueryRegistryBySystemDTONotAllowedCoreSys() throws Exception {
 		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
 		
-		postQueryBySystemDTO(new SystemRequestDTO("system", "0.0.0.0", 5000, null), "certificates/gateway.pem", status().isUnauthorized());
+		postQueryBySystemDTO(new SystemRequestDTO("system", "0.0.0.0", 5000, null, null), "certificates/gateway.pem", status().isUnauthorized());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -360,7 +360,7 @@ public class SRAccessControlFilterTest {
 	public void testQueryRegistryBySystemDTOAppSys() throws Exception {
 		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
 		
-		postQueryBySystemDTO(new SystemRequestDTO("system", "0.0.0.0", 5000, null), "certificates/provider.pem", status().isUnauthorized());
+		postQueryBySystemDTO(new SystemRequestDTO("system", "0.0.0.0", 5000, null, null), "certificates/provider.pem", status().isUnauthorized());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -407,7 +407,8 @@ public class SRAccessControlFilterTest {
 				"sysop",//systemName,
 				"localhost", //address
 				12345,//port,
-				null);//authenticationInfo);
+				null, //authenticationInfo
+				null); // metadata
 		postRegisterSystem(systemRequestDTO, "certificates/valid.pem", status().isCreated());
 	}
 
@@ -419,7 +420,8 @@ public class SRAccessControlFilterTest {
 				"not_sysop",//systemName,
 				"localhost", //address
 				12345,//port,
-				null);//authenticationInfo);
+				null, //authenticationInfo
+				null); // metadata
 		postRegisterSystem(systemRequestDTO, "certificates/valid.pem", status().isUnauthorized());
 	}
 
@@ -431,7 +433,8 @@ public class SRAccessControlFilterTest {
 				null,//systemName,
 				"localhost", //address
 				12345,//port,
-				null);//authenticationInfo);
+				null, //authenticationInfo
+				null); // metadata
 		postRegisterSystem(systemRequestDTO, "certificates/valid.pem", status().isBadRequest());
 	}
 
@@ -443,7 +446,8 @@ public class SRAccessControlFilterTest {
 				"   ",//systemName,
 				"localhost", //address
 				12345,//port,
-				null);//authenticationInfo);
+				null, //authenticationInfo
+				null); // metadata
 		postRegisterSystem(systemRequestDTO, "certificates/valid.pem", status().isBadRequest());
 	}
 

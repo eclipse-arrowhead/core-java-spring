@@ -742,7 +742,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testQueryRegistryBySystemDTOOk() throws Exception {
 		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
-		postQuerySystemsByDTO(new SystemRequestDTO("name", "0.0.0.0", 45000, null), status().isOk());
+		postQuerySystemsByDTO(new SystemRequestDTO("name", "0.0.0.0", 45000, null, null), status().isOk());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -750,7 +750,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testQueryRegistryBySystemDTONullSysName() throws Exception {
 		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
-		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO(null, "0.0.0.0", 45000, null), status().isBadRequest());
+		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO(null, "0.0.0.0", 45000, null, null), status().isBadRequest());
 		
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -762,7 +762,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testQueryRegistryBySystemDTOWrongSysName() throws Exception {
 		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
-		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO("invalid_system", "0.0.0.0", 45000, null), status().isBadRequest());
+		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO("invalid_system", "0.0.0.0", 45000, null, null), status().isBadRequest());
 		
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -774,7 +774,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testQueryRegistryBySystemDTONullAddress() throws Exception {
 		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
-		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO("name", null, 45000, null), status().isBadRequest());
+		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO("name", null, 45000, null, null), status().isBadRequest());
 		
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -786,7 +786,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testQueryRegistryBySystemDTONullPort() throws Exception {
 		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
-		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO("name", "0.0.0.0", null, null), status().isBadRequest());
+		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO("name", "0.0.0.0", null, null, null), status().isBadRequest());
 		
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -798,7 +798,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testQueryRegistryBySystemDTOInvalidPort() throws Exception {
 		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
-		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO("name", "0.0.0.0", CommonConstants.SYSTEM_PORT_RANGE_MAX + 1, null), status().isBadRequest());
+		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO("name", "0.0.0.0", CommonConstants.SYSTEM_PORT_RANGE_MAX + 1, null, null), status().isBadRequest());
 		
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -1372,7 +1372,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		}
 		
 		for (int i = 1; i <= amountOfSystem; ++i) {										
-			final System system = new System("testSystem" + i, "testAddress" + i, i * 1000, null);
+			final System system = new System("testSystem" + i, "testAddress" + i, i * 1000, null, null);
 			system.setId(i);
 			system.setCreatedAt(timeStamp);
 			system.setUpdatedAt(timeStamp);			
