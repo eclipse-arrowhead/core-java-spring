@@ -33,8 +33,8 @@ import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.measurement.properties.MonitorProviderType;
 import eu.arrowhead.core.qos.service.ping.monitor.PingMonitorManager;
-import eu.arrowhead.core.qos.service.ping.monitor.impl.DummyPingProvider;
-import eu.arrowhead.core.qos.service.ping.monitor.impl.ExternalPingProvider;
+import eu.arrowhead.core.qos.service.ping.monitor.impl.DummyPingMonitor;
+import eu.arrowhead.core.qos.service.ping.monitor.impl.ExternalPingMonitor;
 
 @Component
 public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
@@ -45,21 +45,24 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 	@Value(CoreCommonConstants.$QOS_IS_GATEKEEPER_PRESENT_WD)
 	private boolean gatekeeperIsPresent;
 
+	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_TYPE_WD)
+	private MonitorProviderType monitorType;
+
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
 	@Bean(CoreCommonConstants.PING_MONITOR)
-	public PingMonitorManager getPingProvider(@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_TYPE_WD) final MonitorProviderType monitorType) {
-		logger.debug("getPingProvider started...");
+	public PingMonitorManager getPingMonitor() {
+		logger.debug("getPingMonitor started...");
 
 		switch (monitorType) {
 		case DUMMY:
-			return new DummyPingProvider();
+			return new DummyPingMonitor();
 		case DEFAULT:
-			return new DummyPingProvider();
+			return new DummyPingMonitor();
 		case EXTERNAL:
-			return new ExternalPingProvider();
+			return new ExternalPingMonitor();
 		default:
 			throw new InvalidParameterException("Not implemented monitor type: " + monitorType.name());
 		}
@@ -82,6 +85,8 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 			result.add(CoreSystemService.GATEKEEPER_COLLECT_SYSTEM_ADDRESSES);
 			result.add(CoreSystemService.GATEKEEPER_RELAY_TEST_SERVICE);
 			result.add(CoreSystemService.GATEKEEPER_GET_CLOUD_SERVICE);
+		}if (monitorType.equals(MonitorProviderType.EXTERNAL)) {
+			result.add(CoreSystemService.ORCHESTRATION_SERVICE);
 		}
 
 		return result;

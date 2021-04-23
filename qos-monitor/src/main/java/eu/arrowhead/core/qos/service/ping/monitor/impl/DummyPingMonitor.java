@@ -12,7 +12,7 @@ import eu.arrowhead.core.qos.dto.IcmpPingRequest;
 import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.service.ping.monitor.AbstractPingMonitor;
 
-public class DummyPingProvider extends AbstractPingMonitor{
+public class DummyPingMonitor extends AbstractPingMonitor{
 
 	//=================================================================================================
 	// members
@@ -22,7 +22,7 @@ public class DummyPingProvider extends AbstractPingMonitor{
 	private static final String EMPTY_OR_NULL_ERROR_MESSAGE = " is empty or null";
 	private static final String DUMMY_PING_PROVIDER_ERROR_MESSAGE = "This is the dummy ping provider's normal ping response";
 
-	protected Logger logger = LogManager.getLogger(DummyPingProvider.class);
+	protected Logger logger = LogManager.getLogger(DummyPingMonitor.class);
 
 	//=================================================================================================
 	// methods
@@ -68,10 +68,4 @@ public class DummyPingProvider extends AbstractPingMonitor{
 		return responseList;
 	}
 
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	public void init() {
-		// TODO Auto-generated method stub
-		
-	}
 }
