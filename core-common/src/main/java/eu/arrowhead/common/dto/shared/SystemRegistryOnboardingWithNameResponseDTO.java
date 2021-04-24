@@ -14,6 +14,9 @@
 
 package eu.arrowhead.common.dto.shared;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.Serializable;
 import java.util.Map;
 
@@ -32,6 +35,16 @@ public class SystemRegistryOnboardingWithNameResponseDTO extends SystemRegistryO
                                                        final String updatedAt,
                                                        final CertificateCreationResponseDTO certificateResponse) {
         super(id, system, provider, endOfValidity, metadata, version, createdAt, updatedAt, certificateResponse);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
     }
 
     // this class exist to keep the structure of <operation>RequestDTO, <operation>ResponseDTO

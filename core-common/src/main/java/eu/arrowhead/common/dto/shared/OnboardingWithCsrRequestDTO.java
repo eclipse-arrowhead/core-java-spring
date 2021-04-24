@@ -16,6 +16,8 @@ package eu.arrowhead.common.dto.shared;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -67,11 +69,13 @@ public class OnboardingWithCsrRequestDTO implements Serializable {
         return Objects.equals(certificateSigningRequest, other.certificateSigningRequest);
     }
 
+    //-------------------------------------------------------------------------------------------------
     @Override
     public String toString() {
-        return new StringJoiner(", ", OnboardingWithCsrRequestDTO.class.getSimpleName() + "[", "]")
-                .add("certificateSigningRequest='" + certificateSigningRequest + "'")
-                .add("parent=" + super.toString())
-                .toString();
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
     }
 }

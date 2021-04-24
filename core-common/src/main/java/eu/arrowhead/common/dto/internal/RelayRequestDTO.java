@@ -14,6 +14,9 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.Serializable;
 
 public class RelayRequestDTO implements Serializable {
@@ -57,6 +60,16 @@ public class RelayRequestDTO implements Serializable {
 	public void setSecure(final boolean secure) { this.secure = secure; }
 	public void setExclusive(final boolean exclusive) { this.exclusive = exclusive; }
 	public void setType(final String type) { this.type = type; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Override

@@ -16,6 +16,8 @@ package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
@@ -61,4 +63,14 @@ public class GeneralAdvertisementMessageDTO implements Serializable {
 	public void setSenderPublicKey(final String senderPublicKey) { this.senderPublicKey = senderPublicKey; }
 	public void setRecipientCN(final String recipientCN) { this.recipientCN = recipientCN; }
 	public void setSessionId(final String sessionId) { this.sessionId = sessionId; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

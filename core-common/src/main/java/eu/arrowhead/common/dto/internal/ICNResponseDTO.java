@@ -16,6 +16,8 @@ package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 
 public class ICNResponseDTO extends OrchestrationResponseDTO implements Serializable {
@@ -24,4 +26,14 @@ public class ICNResponseDTO extends OrchestrationResponseDTO implements Serializ
 	// members
 
 	private static final long serialVersionUID = 419607094931834994L;
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

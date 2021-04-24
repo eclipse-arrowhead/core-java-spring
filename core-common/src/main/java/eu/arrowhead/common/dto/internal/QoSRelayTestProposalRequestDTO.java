@@ -16,6 +16,8 @@ package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
@@ -58,4 +60,14 @@ public class QoSRelayTestProposalRequestDTO implements Serializable {
 	public void setRelay(final RelayRequestDTO relay) { this.relay = relay; }
 	public void setSenderQoSMonitorPublicKey(final String senderQoSMonitorPublicKey) { this.senderQoSMonitorPublicKey = senderQoSMonitorPublicKey; }
 	public void setRequesterCloud(final CloudRequestDTO requesterCloud) { this.requesterCloud = requesterCloud; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

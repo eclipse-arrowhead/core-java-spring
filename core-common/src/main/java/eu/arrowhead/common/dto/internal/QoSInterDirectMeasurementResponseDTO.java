@@ -18,6 +18,8 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 
 public class QoSInterDirectMeasurementResponseDTO implements Serializable {
@@ -75,5 +77,15 @@ public class QoSInterDirectMeasurementResponseDTO implements Serializable {
 	@JsonIgnore
 	public boolean hasRecord() {
 		return id != null;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
 	}
 }

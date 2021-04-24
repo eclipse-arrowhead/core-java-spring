@@ -14,6 +14,9 @@
 
 package eu.arrowhead.common.dto.shared;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class OnboardingWithNameResponseDTO extends OnboardingResponseDTO {
 
     //=================================================================================================
@@ -28,6 +31,16 @@ public class OnboardingWithNameResponseDTO extends OnboardingResponseDTO {
                                          final CertificateCreationResponseDTO onboardingCertificate, final String intermediateCertificate,
                                          final String rootCertificate) {
         super(deviceRegistry, systemRegistry, serviceRegistry, orchestrationService, onboardingCertificate, intermediateCertificate, rootCertificate);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
     }
 
     // this class exist to keep the structure of <operation>RequestDTO, <operation>ResponseDTO

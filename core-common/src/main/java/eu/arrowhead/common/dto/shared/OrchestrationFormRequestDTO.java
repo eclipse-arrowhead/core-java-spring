@@ -22,6 +22,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.dto.shared.OrchestrationFlags.Flag;
@@ -135,6 +137,16 @@ public class OrchestrationFormRequestDTO implements Serializable {
 		this.setCommands(builder.commands);
 		this.setQosRequirements(builder.qosRequirements);
 	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 	
 	//=================================================================================================
 	// nested classes
@@ -232,6 +244,16 @@ public class OrchestrationFormRequestDTO implements Serializable {
 		//-------------------------------------------------------------------------------------------------
 		public OrchestrationFormRequestDTO build() {
 			return new OrchestrationFormRequestDTO(this).validateCrossParameterConstraints();
+		}
+
+		//-------------------------------------------------------------------------------------------------
+		@Override
+		public String toString() {
+			try {
+				return new ObjectMapper().writeValueAsString(this);
+			} catch (final JsonProcessingException ex) {
+				return "toString failure";
+			}
 		}
 	}
 }

@@ -20,6 +20,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.ExceptionType;
 
@@ -78,11 +80,15 @@ public class ErrorMessageDTO implements Serializable, ErrorWrapperDTO {
 	public void setErrorCode(final int errorCode) { this.errorCode = errorCode; }
 	public void setExceptionType(final ExceptionType exceptionType) { this.exceptionType = exceptionType; }
 	public void setOrigin(final String origin) { this.origin = origin; }
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "ErrorMessageDTO [errorMessage = " + errorMessage + ", errorCode = " + errorCode + ", exceptionType = " + exceptionType + ", origin = " + origin + "]";
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------

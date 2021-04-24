@@ -16,6 +16,8 @@ package eu.arrowhead.common.dto.internal;
 
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 
@@ -42,6 +44,14 @@ public class QoSReservationRequestDTO extends QoSTemporaryLockRequestDTO {
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setSelected(final OrchestrationResultDTO selected) { this.selected = selected; }
-	
-	
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

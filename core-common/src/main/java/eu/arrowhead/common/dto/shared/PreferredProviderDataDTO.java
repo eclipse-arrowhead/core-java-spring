@@ -17,6 +17,8 @@ package eu.arrowhead.common.dto.shared;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class PreferredProviderDataDTO implements Serializable {
 	
@@ -56,11 +58,15 @@ public class PreferredProviderDataDTO implements Serializable {
 	public boolean isValid() {
 		return isLocal() || isGlobal();
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-	  return "PreferredProvider{" + "providerSystem=" + providerSystem + ", providerCloud=" + providerCloud + '}';
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------

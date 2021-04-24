@@ -14,6 +14,9 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.Serializable;
 
 public class CloudRelayFormDTO implements Serializable {
@@ -44,5 +47,15 @@ public class CloudRelayFormDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	public void setCloud(final CloudResponseDTO cloud) { this.cloud = cloud; }
-	public void setRelay(final RelayResponseDTO relay) { this.relay = relay; }	
+	public void setRelay(final RelayResponseDTO relay) { this.relay = relay; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

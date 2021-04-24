@@ -19,6 +19,8 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @JsonInclude(Include.NON_NULL)
 public class ServiceRegistryGroupedResponseDTO implements Serializable {
@@ -57,5 +59,15 @@ public class ServiceRegistryGroupedResponseDTO implements Serializable {
 	public void setServicesGroupedByServiceDefinition(final List<ServicesGroupedByServiceDefinitionResponseDTO> servicesGroupedByServiceDefinition) {
 		this.servicesGroupedByServiceDefinition = servicesGroupedByServiceDefinition;
 	}
-	public void setAutoCompleteData(final AutoCompleteDataResponseDTO autoCompleteData) { this.autoCompleteData = autoCompleteData; }	
+	public void setAutoCompleteData(final AutoCompleteDataResponseDTO autoCompleteData) { this.autoCompleteData = autoCompleteData; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

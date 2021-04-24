@@ -14,6 +14,9 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.Serializable;
 
 public class GatewayProviderConnectionResponseDTO implements Serializable {
@@ -49,4 +52,14 @@ public class GatewayProviderConnectionResponseDTO implements Serializable {
 	public void setQueueId(final String queueId) { this.queueId = queueId; }
 	public void setPeerName(final String peerName) { this.peerName = peerName; }
 	public void setProviderGWPublicKey(final String providerGWPublicKey) { this.providerGWPublicKey = providerGWPublicKey; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }
