@@ -48,6 +48,7 @@ import eu.arrowhead.common.database.entity.DeviceRegistry;
 import eu.arrowhead.common.database.entity.EventType;
 import eu.arrowhead.common.database.entity.ForeignSystem;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
+import eu.arrowhead.common.database.entity.OrchestratorStoreFlexible;
 import eu.arrowhead.common.database.entity.QoSInterDirectMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterDirectPingMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterRelayEchoMeasurement;
@@ -535,7 +536,33 @@ public class DTOConverter {
 
 		return new OrchestratorStoreListResponseDTO(entries, totalElements);
 	}
-
+	
+	//-------------------------------------------------------------------------------------------------
+	public static OrchestratorStoreFlexibleResponseDTO convertOrchestratorStoreFlexibleEntryToOrchestratorStoreFlexibleResponseDTO(final OrchestratorStoreFlexible entry) { //TODO junit
+		Assert.notNull(entry, "OrchestratorStoreFlexible entry is null");
+		
+		return new OrchestratorStoreFlexibleResponseDTO(entry.getId(),
+														new SystemDescriberDTO(entry.getConsumerSystemName(), Utilities.text2Map(entry.getConsumerSystemMetadata())),
+														new SystemDescriberDTO(entry.getProviderSystemName(), Utilities.text2Map(entry.getProviderSystemMetadata())),
+														entry.getServiceDefinitionName(),
+														entry.getServiceInterfaceName(),
+														Utilities.text2Map(entry.getServiceMetadata()),
+														entry.getPriority(),
+														Utilities.convertZonedDateTimeToUTCString(entry.getCreatedAt()),
+														Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static OrchestratorStoreFlexibleListResponseDTO convertOrchestratorStoreFlexibleEntryListToOrchestratorStoreFlexibleListResponseDTO(final Iterable<OrchestratorStoreFlexible> entries, final long totalElements) { //TODO junit
+		Assert.notNull(entries, "OrchestratorStoreFlexible list is null");
+		
+		final List<OrchestratorStoreFlexibleResponseDTO> data = new ArrayList<>();
+		for (final OrchestratorStoreFlexible entry : entries) {
+			data.add(convertOrchestratorStoreFlexibleEntryToOrchestratorStoreFlexibleResponseDTO(entry));
+		}
+		return new OrchestratorStoreFlexibleListResponseDTO(data, totalElements);
+	}
+	
 	//-------------------------------------------------------------------------------------------------
 	public static SystemRequestDTO convertSystemToSystemRequestDTO(final System system) {
 		Assert.notNull(system, "System is null");

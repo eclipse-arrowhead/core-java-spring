@@ -30,7 +30,9 @@ public enum CoreSystem {
 	// Please create enum values here without underscore, because these values has a direct connection with the certificate's CN which does not support underscores!
 	
 	SERVICEREGISTRY(Defaults.DEFAULT_SERVICEREGISTRY_PORT, List.of(CoreSystemService.SERVICEREGISTRY_REGISTER_SERVICE,
-																	 CoreSystemService.SERVICEREGISTRY_UNREGISTER_SERVICE)),
+																	 CoreSystemService.SERVICEREGISTRY_UNREGISTER_SERVICE,
+																	 CoreSystemService.SERVICEREGISTRY_REGISTER_SYSTEM,
+																	 CoreSystemService.SERVICEREGISTRY_UNREGISTER_SYSTEM)),
 	
     SYSTEMREGISTRY(Defaults.DEFAULT_SYSTEMREGISTRY_PORT, List.of(CoreSystemService.SYSTEMREGISTRY_REGISTER_SERVICE,
     															   CoreSystemService.SYSTEMREGISTRY_UNREGISTER_SERVICE,
@@ -54,6 +56,9 @@ public enum CoreSystem {
 															   CoreSystemService.AUTH_CONTROL_SUBSCRIPTION_SERVICE)),
 	
 	ORCHESTRATOR(Defaults.DEFAULT_ORCHESTRATOR_PORT, List.of(CoreSystemService.ORCHESTRATION_SERVICE,
+															 CoreSystemService.ORCHESTRATION_CREATE_FLEXIBLE_STORE_RULES_SERVICE,
+															 CoreSystemService.ORCHESTRATION_REMOVE_FLEXIBLE_STORE_RULE_SERVICE,
+															 CoreSystemService.ORCHESTRATION_CLEAN_FLEXIBLE_STORE_SERVICE,
 															 CoreSystemService.ORCHESTRATION_QOS_ENABLED_SERVICE,
 															 CoreSystemService.ORCHESTRATION_QOS_RESERVATIONS_SERVICE,
 															 CoreSystemService.ORCHESTRATION_QOS_TEMPORARY_LOCK_SERVICE,
@@ -102,7 +107,9 @@ public enum CoreSystem {
 																				
 	TRANSLATOR(Defaults.DEFAULT_TRANSLATOR_PORT, List.of(CoreSystemService.TRANSLATOR_SERVICE,
 												   CoreSystemService.TRANSLATOR_FIWARE_SERVICE,
-												   CoreSystemService.TRANSLATOR_PLUGIN_SERVICE));
+												   CoreSystemService.TRANSLATOR_PLUGIN_SERVICE)),
+	
+	PLANTDESCRIPTIONENGINE(Defaults.DEFAULT_PLANT_DESCRIPTION_ENGINE_PORT, List.of()); //TODO add PDE services
 	
 	//=================================================================================================
 	// members

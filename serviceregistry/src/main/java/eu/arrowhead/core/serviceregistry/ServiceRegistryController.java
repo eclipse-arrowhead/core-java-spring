@@ -264,7 +264,7 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return created consumer system ", response = SystemResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiOperation(value = "Return created application system ", response = SystemResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_SYSTEM_HTTP_201_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_SYSTEM_HTTP_400_MESSAGE),
@@ -321,6 +321,25 @@ public class ServiceRegistryController {
 		
 		serviceRegistryDBService.removeSystemById(id);
 		logger.debug("System with id: '{}' successfully deleted", id);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Unregister the given system", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_SYSTEM_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_SYSTEM_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@DeleteMapping(path = CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI)
+	@ResponseBody public void unregisterSystem(@RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME) final String systemName,
+											   @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS) final String address,
+											   @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT) final Integer port) { //TODO junit
+		logger.debug("System removal request received");
+		
+		checkUnregisterSystemParameters(systemName, address, port);
+		serviceRegistryDBService.removeSystemByNameAndAddressAndPort(systemName, address, port);		
+		logger.debug("{} successfully removed itself", systemName);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -720,9 +739,9 @@ public class ServiceRegistryController {
 	})
 	@DeleteMapping(path = CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_URI)
 	public void unregisterService(@RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION) final String serviceDefinition,
-								  @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME) final String providerName,
-								  @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS) final String providerAddress,
-								  @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT) final int providerPort,
+								  @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME) final String providerName,
+								  @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS) final String providerAddress,
+								  @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT) final int providerPort,
 								  @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_URI) final String serviceUri) {
 		logger.debug("Service removal request received");
 		checkUnregisterServiceParameters(serviceDefinition, providerName, providerAddress, providerPort);
@@ -1192,6 +1211,29 @@ public class ServiceRegistryController {
 			if (!interfaceNameVerifier.isValid(intf)) {
 				throw new BadPayloadException("Specified interface name is not valid: " + intf, HttpStatus.SC_BAD_REQUEST, origin);
 			}
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkUnregisterSystemParameters(final String systemName, final String address, final int port) {
+		// parameters can't be null, but can be empty
+		logger.debug("checkUnregisterSystemParameters started...");
+		
+		final String origin = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI;
+		if (Utilities.isEmpty(systemName)) {
+			throw new BadPayloadException("Name of the application system is blank", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (!cnVerifier.isValid(systemName)) {
+			throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (Utilities.isEmpty(address)) {
+			throw new BadPayloadException("Address of the application system is blank", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 	}
 	

@@ -249,6 +249,33 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
+	public void removeSystemByNameAndAddressAndPort(final String systemName, final String address, final int port) { //TODO junit	
+		logger.debug("removeSystemByNameAndAddressAndPort started...");
+		Assert.isTrue(!Utilities.isEmpty(systemName), "systemName is not specified.");
+		Assert.isTrue(!Utilities.isEmpty(address), "address is not specified.");
+		Assert.notNull(port, "port is not specified");
+		
+		final String validatedSystemName = systemName.toLowerCase().trim();
+		final String validatedSystemAddress = address.toLowerCase().trim();
+		
+		try {
+			final Optional<System> optional = systemRepository.findBySystemNameAndAddressAndPort(validatedSystemName, validatedSystemAddress, port);
+			if (optional.isEmpty()) {
+				throw new InvalidParameterException("System not exists: " + validatedSystemName + " " + validatedSystemAddress + " " + port);
+			} else {
+				systemRepository.deleteById(optional.get().getId());
+				systemRepository.flush();
+			}
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
 	public SystemResponseDTO mergeSystemResponse(final long systemId, final String systemName, final String address, final Integer port, final String authenticationInfo, final Map<String,String> metadata) {		
 		logger.debug("mergeSystemResponse started...");
 

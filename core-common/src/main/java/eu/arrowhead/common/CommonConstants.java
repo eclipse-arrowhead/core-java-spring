@@ -52,6 +52,9 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_AUTH_CONTROL_SUBSCRIPTION = "authorization-control-subscription";
 	
 	public static final String CORE_SERVICE_ORCH_PROCESS = "orchestration-service";
+	public static final String CORE_SERVICE_ORCH_CREATE_FLEXIBLE_STORE_RULES = "orchestration-create-flexible-store-rules";
+	public static final String CORE_SERVICE_ORCH_REMOVE_FLEXIBLE_STORE_RULE = "orchestration-remove-flexible-store-rule";
+	public static final String CORE_SERVICE_ORCH_CLEAN_FLEXIBLE_STORE = "orchestration-clean-flexible-store";
 	public static final String CORE_SERVICE_ORCH_QOS_ENABLED = "orchestration-qos-enabled";
 	public static final String CORE_SERVICE_ORCH_QOS_RESERVATIONS = "orchestration-qos-reservations";
 	public static final String CORE_SERVICE_ORCH_QOS_TEMPORARY_LOCK = "orchestration-qos-temporary-lock";
@@ -101,6 +104,8 @@ public class CommonConstants {
 
 	public static final String CORE_SERVICE_SERVICEREGISTRY_REGISTER = "service-register";
 	public static final String CORE_SERVICE_SERVICEREGISTRY_UNREGISTER = "service-unregister";
+	public static final String CORE_SERVICE_SERVICEREGISTRY_REGISTER_SYSTEM = "register-system";
+	public static final String CORE_SERVICE_SERVICEREGISTRY_UNREGISTER_SYSTEM = "unregister-system";
 
 	public static final String CORE_SERVICE_SYSTEMREGISTRY_REGISTER = "system-register";
 	public static final String CORE_SERVICE_SYSTEMREGISTRY_UNREGISTER = "system-unregister";
@@ -158,12 +163,13 @@ public class CommonConstants {
 
 	public static final String SERVICEREGISTRY_URI = "/serviceregistry";
 	public static final String OP_SERVICEREGISTRY_REGISTER_URI = "/register";
-	public static final String OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI = "/register-system";
 	public static final String OP_SERVICEREGISTRY_UNREGISTER_URI = "/unregister";
+	public static final String OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI = "/register-system";
+	public static final String OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI = "/unregister-system";
 	public static final String OP_SERVICEREGISTRY_QUERY_URI = "/query";	
-	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME = "system_name";
-	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS = "address";
-	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT = "port";
+	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME = "system_name";
+	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS = "address";
+	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT = "port";
 	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION = "service_definition";
 	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_URI = "service_uri";
 
@@ -204,6 +210,9 @@ public class CommonConstants {
 
 	public static final String ORCHESTRATOR_URI = "/orchestrator";
 	public static final String OP_ORCH_PROCESS_URI = "/orchestration";
+	public static final String OP_ORCH_CREATE_FLEXIBLE_STORE_RULES_URI = "/store/flexible";
+	public static final String OP_ORCH_REMOVE_FLEXIBLE_STORE_RULE_URI = "/store/flexible" + "/{" + COMMON_FIELD_NAME_ID + "}";
+	public static final String OP_ORCH_CLEAN_FLEXIBLE_STORE_URI = "/store/flexible/all";
 	public static final String OP_ORCH_QOS_ENABLED_URI = "/qos_enabled";
 	public static final String OP_ORCH_QOS_RESERVATIONS_URI = "/qos_reservations";
 	public static final String OP_ORCH_QOS_TEMPORARY_LOCK_URI = "/qos_temporary_lock";

@@ -64,6 +64,8 @@ public class CoreCommonConstants {
 	public static final String OP_SERVICEREGISTRY_QUERY_ALL_SERVICE_URI = "/query/all";
 		
 	public static final String ORCHESTRATOR_STORE_MGMT_URI = "/mgmt/store";
+	public static final String ORCHESTRATOR_STORE_FLEXIBLE_MGMT_URI = "/mgmt/store/flexible";
+	public static final String ORCHESTRATOR_STORE_FLEXIBLE_BY_ID_MGMT_URI = ORCHESTRATOR_STORE_FLEXIBLE_MGMT_URI + "/{" + COMMON_FIELD_NAME_ID + "}";
 	
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
@@ -135,6 +137,8 @@ public class CoreCommonConstants {
     public static final String AUTHORIZATION_IS_EVENTHANDLER_PRESENT = "eventhandler_is_present";
     public static final String $AUTHORIZATION_IS_EVENTHANDLER_PRESENT_WD = "${" + AUTHORIZATION_IS_EVENTHANDLER_PRESENT + ":" + CoreDefaults.DEFAULT_AUTHORIZATION_IS_EVENTHANDLER_PRESENT + "}";
 	
+    public static final String ORCHESTRATOR_USE_FLEXIBLE_STORE = "use_flexible_store";
+    public static final String $ORCHESTRATOR_USE_FLEXIBLE_STORE_WD = "${" + ORCHESTRATOR_USE_FLEXIBLE_STORE + ":" + CoreDefaults.DEFAULT_ORCHESTRATOR_USE_FLEXIBLE_STORE + "}";
 	public static final String ORCHESTRATOR_IS_GATEKEEPER_PRESENT = "gatekeeper_is_present";
 	public static final String $ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD = "${" + ORCHESTRATOR_IS_GATEKEEPER_PRESENT + ":" + CoreDefaults.DEFAULT_ORCHESTRATOR_IS_GATEKEEPER_PRESENT + "}";
 

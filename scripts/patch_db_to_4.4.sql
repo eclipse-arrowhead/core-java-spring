@@ -14,3 +14,21 @@ ALTER TABLE `system_` ADD COLUMN `metadata` mediumtext NULL;
 ALTER TABLE `service_registry` MODIFY `metadata` mediumtext NULL;
 ALTER TABLE `subscription` MODIFY `filter_meta_data` mediumtext NULL;
 ALTER TABLE `foreign_system` ADD COLUMN `metadata` mediumtext NULL;
+
+CREATE TABLE IF NOT EXISTS `orchestrator_store_flexible` (
+`id` bigint(20) NOT NULL AUTO_INCREMENT,
+`consumer_system_name` varchar(255),
+`provider_system_name` varchar(255),
+`consumer_system_metadata` mediumtext,
+`provider_system_metadata` mediumtext,
+`service_metadata` mediumtext,
+`service_interface_name` varchar(255),
+`service_definition_name` varchar(255) NOT NULL,
+`priority` int(11) NOT NULL DEFAULT 2147483647,
+`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+GRANT ALL PRIVILEGES ON `arrowhead`.`orchestrator_store_flexible` TO 'orchestrator'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`orchestrator_store_flexible` TO 'orchestrator'@'%';
+FLUSH PRIVILEGES;

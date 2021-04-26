@@ -91,9 +91,9 @@ public class ServiceRegistryDriver extends AbstractDriver {
         final UriComponents uri = driverUtilities.findUriByOrchestrator(CoreSystemService.SERVICEREGISTRY_UNREGISTER_SERVICE);
         final MultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>(5);
         queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION, List.of(serviceDefinition));
-        queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME, List.of(providerName));
-        queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS, List.of(providerAddress));
-        queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT, List.of(String.valueOf(providerPort)));
+        queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME, List.of(providerName));
+        queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS, List.of(providerAddress));
+        queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT, List.of(String.valueOf(providerPort)));
         queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_URI, List.of(serviceUri));
 
         final UriComponents unregisterUri = UriComponentsBuilder.newInstance().uriComponents(uri)

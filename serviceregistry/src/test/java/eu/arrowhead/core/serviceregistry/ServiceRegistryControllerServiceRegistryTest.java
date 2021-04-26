@@ -1408,15 +1408,15 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		}
 		
 		if (providerName != null) {
-			sb.append(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME).append("=").append(providerName).append("&");
+			sb.append(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME).append("=").append(providerName).append("&");
 		}
 		
 		if (providerAddress != null) {
-			sb.append(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS).append("=").append(providerAddress).append("&");
+			sb.append(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS).append("=").append(providerAddress).append("&");
 		}
 		
 		if (providerPort != null) {
-			sb.append(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT).append("=").append(providerPort.intValue()).append("&");
+			sb.append(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT).append("=").append(providerPort.intValue()).append("&");
 		}
 		
 		if (serviceUri != null) {
