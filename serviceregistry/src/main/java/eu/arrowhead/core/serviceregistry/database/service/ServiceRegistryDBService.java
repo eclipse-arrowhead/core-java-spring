@@ -276,7 +276,6 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public SystemResponseDTO mergeSystemResponse(final long systemId, final String systemName, final String address, final Integer port, final String authenticationInfo) {		
 	public SystemResponseDTO mergeSystemResponse(final long systemId, final String systemName, final String address, final Integer port, final String authenticationInfo, final Map<String,String> metadata) {		
 		logger.debug("mergeSystemResponse started...");
 

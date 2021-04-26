@@ -14,7 +14,6 @@ ALTER TABLE `system_` ADD COLUMN `metadata` mediumtext NULL;
 ALTER TABLE `service_registry` MODIFY `metadata` mediumtext NULL;
 ALTER TABLE `subscription` MODIFY `filter_meta_data` mediumtext NULL;
 ALTER TABLE `foreign_system` ADD COLUMN `metadata` mediumtext NULL;
-ALTER TABLE `service_registry` ADD CONSTRAINT `service_registry_system` FOREIGN KEY (`system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE;
 
 CREATE TABLE IF NOT EXISTS `orchestrator_store_flexible` (
 `id` bigint(20) NOT NULL AUTO_INCREMENT,
