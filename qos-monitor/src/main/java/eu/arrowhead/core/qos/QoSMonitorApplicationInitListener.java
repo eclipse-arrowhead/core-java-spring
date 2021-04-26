@@ -87,6 +87,8 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 			result.add(CoreSystemService.GATEKEEPER_GET_CLOUD_SERVICE);
 		}if (monitorType.equals(MonitorProviderType.EXTERNAL)) {
 			result.add(CoreSystemService.ORCHESTRATION_SERVICE);
+			result.add(CoreSystemService.EVENT_SUBSCRIBE_SERVICE);
+			result.add(CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE);
 		}
 
 		return result;
