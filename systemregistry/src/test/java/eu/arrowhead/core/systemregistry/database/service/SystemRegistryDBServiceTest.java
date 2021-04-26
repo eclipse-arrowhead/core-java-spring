@@ -27,7 +27,6 @@ import org.mockito.Spy;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.SecurityUtilities;
-import eu.arrowhead.common.cn.CommonNamePartVerifier;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.entity.SystemRegistry;
 import eu.arrowhead.common.database.repository.DeviceRepository;
@@ -37,6 +36,7 @@ import eu.arrowhead.common.drivers.CertificateAuthorityDriver;
 import eu.arrowhead.common.dto.shared.SystemRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 
 @RunWith (SpringRunner.class)
 public class SystemRegistryDBServiceTest {

@@ -27,8 +27,8 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.cn.CommonNamePartVerifier;
 import eu.arrowhead.common.dto.shared.SenML;
+import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 
 @Service
 public class ProxyService {

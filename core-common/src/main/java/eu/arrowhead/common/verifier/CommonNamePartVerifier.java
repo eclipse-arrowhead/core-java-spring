@@ -12,7 +12,7 @@
  *   Arrowhead Consortia - conceptualization
  ********************************************************************************/
 
-package eu.arrowhead.common.cn;
+package eu.arrowhead.common.verifier;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

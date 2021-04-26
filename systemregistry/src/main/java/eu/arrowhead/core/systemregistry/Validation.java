@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.cn.CommonNamePartVerifier;
 import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.dto.shared.DeviceRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRegistryOnboardingWithCsrRequestDTO;
@@ -32,6 +31,7 @@ import eu.arrowhead.common.dto.shared.SystemRegistryOnboardingWithNameRequestDTO
 import eu.arrowhead.common.dto.shared.SystemRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 
 public class Validation {
 
