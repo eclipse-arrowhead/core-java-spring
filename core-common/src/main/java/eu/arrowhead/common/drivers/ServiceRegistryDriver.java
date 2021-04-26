@@ -82,7 +82,7 @@ public class ServiceRegistryDriver extends AbstractDriver {
         return logger.traceExit(httpEntity.getBody());
     }
 
-    //-------------------------------------------------------------------------------------------------
+   //-------------------------------------------------------------------------------------------------
 	public void unregisterService(final String serviceDefinition, final String providerName,
                                   final String providerAddress, final int providerPort, final String serviceUri)
             throws DriverUtilities.DriverException {

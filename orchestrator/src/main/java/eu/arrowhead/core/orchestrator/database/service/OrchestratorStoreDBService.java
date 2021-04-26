@@ -920,7 +920,7 @@ public class OrchestratorStoreDBService {
 		
 		final Optional<ForeignSystem> foreignSystemOptional = foreignSystemRepository.findBySystemNameAndAddressAndPortAndProviderCloud(systemName, address, validPort, providerCloud);
 		if (foreignSystemOptional.isEmpty()) {
-			return foreignSystemRepository.saveAndFlush(new ForeignSystem(providerCloud, systemName, address, validPort, providerSystemRequestDTO.getAuthenticationInfo())).getId();
+			return foreignSystemRepository.saveAndFlush(new ForeignSystem(providerCloud, systemName, address, validPort, providerSystemRequestDTO.getAuthenticationInfo(), Utilities.map2Text(providerSystemRequestDTO.getMetadata()))).getId();
 		}
 		
 		return foreignSystemOptional.get().getId();

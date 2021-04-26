@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -53,6 +54,7 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.dto.internal.DTOConverter;
@@ -196,7 +198,7 @@ public class ServiceRegistryControllerSystemTest {
 		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
 		final SystemRequestDTO request = createValidSystemRequestDTO();
 		
-		when(serviceRegistryDBService.createSystemResponse(anyString(), anyString(), anyInt(), anyString())).thenReturn(systemResponseDTO);
+		when(serviceRegistryDBService.createSystemResponse(anyString(), anyString(), anyInt(), anyString(), any())).thenReturn(systemResponseDTO);
 		
 		final MvcResult response = this.mockMvc.perform(post(SYSTEMS_URL)
 											   .contentType(MediaType.APPLICATION_JSON)
@@ -327,7 +329,7 @@ public class ServiceRegistryControllerSystemTest {
 		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
 		final SystemRequestDTO request = createValidSystemRequestDTO();
 	
-		when(serviceRegistryDBService.createSystemResponse(anyString(), anyString(), anyInt(), anyString())).thenReturn(systemResponseDTO);
+		when(serviceRegistryDBService.createSystemResponse(anyString(), anyString(), anyInt(), anyString(), any())).thenReturn(systemResponseDTO);
 	
 		final MvcResult response = this.mockMvc.perform(post(REGISTER_SYSTEM_URL)
 												.contentType(MediaType.APPLICATION_JSON)
@@ -460,7 +462,7 @@ public class ServiceRegistryControllerSystemTest {
 		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
 		final SystemRequestDTO request = createValidSystemRequestDTO();
 		
-		when(serviceRegistryDBService.updateSystemResponse(anyLong(), anyString(), anyString(), anyInt(), anyString())).thenReturn(systemResponseDTO);
+		when(serviceRegistryDBService.updateSystemResponse(anyLong(), anyString(), anyString(), anyInt(), anyString(), any())).thenReturn(systemResponseDTO);
 		
 		final MvcResult response = this.mockMvc.perform(put(SYSTEMS_URL + validSystemId)
 											   .contentType(MediaType.APPLICATION_JSON)
@@ -523,7 +525,7 @@ public class ServiceRegistryControllerSystemTest {
 		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
 		final SystemRequestDTO request = createValidSystemRequestDTO();
 
-		when(serviceRegistryDBService.mergeSystemResponse(anyLong(), anyString(), anyString(), anyInt(), anyString())).thenReturn(systemResponseDTO);
+		when(serviceRegistryDBService.mergeSystemResponse(anyLong(), anyString(), anyString(), anyInt(), anyString(), any())).thenReturn(systemResponseDTO);
 		
 		final MvcResult response = this.mockMvc.perform(patch(SYSTEMS_URL + validSystemId)
 											  .contentType(MediaType.APPLICATION_JSON)
@@ -544,7 +546,7 @@ public class ServiceRegistryControllerSystemTest {
 		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
 		final SystemRequestDTO request = createNullPortSystemRequestDTO();
 		
-		when(serviceRegistryDBService.mergeSystemResponse(anyLong(), anyString(), anyString(), isNull(), anyString())).thenReturn(systemResponseDTO);
+		when(serviceRegistryDBService.mergeSystemResponse(anyLong(), anyString(), anyString(), isNull(), anyString(), any())).thenReturn(systemResponseDTO);
 		
 		this.mockMvc.perform(patch(SYSTEMS_URL + validSystemId)
 					.contentType(MediaType.APPLICATION_JSON)
@@ -587,7 +589,7 @@ public class ServiceRegistryControllerSystemTest {
 		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
 		final SystemRequestDTO request = createNullSystemNameSystemRequestDTO();
 
-		when(serviceRegistryDBService.mergeSystemResponse(anyLong(), anyString(), anyString(), anyInt(), anyString())).thenReturn(systemResponseDTO);
+		when(serviceRegistryDBService.mergeSystemResponse(anyLong(), anyString(), anyString(), anyInt(), anyString(), any())).thenReturn(systemResponseDTO);
 		
 		final MvcResult response = this.mockMvc.perform(patch(SYSTEMS_URL + validSystemId)
 											   .contentType(MediaType.APPLICATION_JSON)
@@ -608,7 +610,7 @@ public class ServiceRegistryControllerSystemTest {
 		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
 		final SystemRequestDTO request = createEmptySystemNameSystemRequestDTO();
 		
-		when(serviceRegistryDBService.mergeSystemResponse(anyLong(), anyString(), anyString(), anyInt(), anyString())).thenReturn(systemResponseDTO);
+		when(serviceRegistryDBService.mergeSystemResponse(anyLong(), anyString(), anyString(), anyInt(), anyString(), any())).thenReturn(systemResponseDTO);
 		
 		final MvcResult response = this.mockMvc.perform(patch(SYSTEMS_URL + validSystemId)
 											   .contentType(MediaType.APPLICATION_JSON)
@@ -644,7 +646,7 @@ public class ServiceRegistryControllerSystemTest {
 		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
 		final SystemRequestDTO request = createWrongSystemNameSystemRequestDTO();
 		
-		when(serviceRegistryDBService.mergeSystemResponse(anyLong(), anyString(), anyString(), anyInt(), anyString())).thenReturn(systemResponseDTO);
+		when(serviceRegistryDBService.mergeSystemResponse(anyLong(), anyString(), anyString(), anyInt(), anyString(), any())).thenReturn(systemResponseDTO);
 		
 		this.mockMvc.perform(patch(SYSTEMS_URL + validSystemId)
 					.contentType(MediaType.APPLICATION_JSON)
@@ -661,7 +663,7 @@ public class ServiceRegistryControllerSystemTest {
 		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
 		final SystemRequestDTO request = createNullAddressSystemRequestDTO();
 		
-		when(serviceRegistryDBService.mergeSystemResponse(anyLong(), anyString(), anyString(), anyInt(), anyString())).thenReturn(systemResponseDTO);
+		when(serviceRegistryDBService.mergeSystemResponse(anyLong(), anyString(), anyString(), anyInt(), anyString(), any())).thenReturn(systemResponseDTO);
 		
 		final MvcResult response = this.mockMvc.perform(patch(SYSTEMS_URL + validSystemId)
 											   .contentType(MediaType.APPLICATION_JSON)
@@ -682,7 +684,7 @@ public class ServiceRegistryControllerSystemTest {
 		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
 		final SystemRequestDTO request = createEmptyAddressSystemRequestDTO();
 		
-		when(serviceRegistryDBService.mergeSystemResponse(anyLong(), anyString(), anyString(), anyInt(), anyString())).thenReturn(systemResponseDTO);
+		when(serviceRegistryDBService.mergeSystemResponse(anyLong(), anyString(), anyString(), anyInt(), anyString(), any())).thenReturn(systemResponseDTO);
 		
 		final MvcResult response = this.mockMvc.perform(patch(SYSTEMS_URL + validSystemId)
 											   .contentType(MediaType.APPLICATION_JSON)
@@ -723,7 +725,7 @@ public class ServiceRegistryControllerSystemTest {
 		final List<System> systemList = new ArrayList<>(amountOfEntry);
 		
 		for (int i = 0; i < amountOfEntry; ++i) {
-			final System system = new System(MOCKED_SYSTEM_NAME + i, MOCKED_SYSTEM_ADDRESS, i, MOCKED_SYSTEM_AUTHENTICATION_INFO );
+			final System system = new System(MOCKED_SYSTEM_NAME + i, MOCKED_SYSTEM_ADDRESS, i, MOCKED_SYSTEM_AUTHENTICATION_INFO, Utilities.map2Text(Map.of("key", "value")));
 			system.setId(i);
 			final ZonedDateTime timeStamp = ZonedDateTime.now();
 			system.setCreatedAt(timeStamp);
@@ -743,7 +745,7 @@ public class ServiceRegistryControllerSystemTest {
 		final Integer port = 1;
 		final String authenticationInfo = MOCKED_SYSTEM_AUTHENTICATION_INFO;
 		
-		final System system = new System(systemName, address, port, authenticationInfo);
+		final System system = new System(systemName, address, port, authenticationInfo, Utilities.map2Text(Map.of("key", "value")));
 		
 		system.setId(1);
 		
@@ -767,6 +769,7 @@ public class ServiceRegistryControllerSystemTest {
 		systemRequestDTO.setAddress(address);
 		systemRequestDTO.setPort(port);
 		systemRequestDTO.setAuthenticationInfo(authenticationInfo);
+		systemRequestDTO.setMetadata(Map.of("key", "value"));
 		
 		return systemRequestDTO;
 	}

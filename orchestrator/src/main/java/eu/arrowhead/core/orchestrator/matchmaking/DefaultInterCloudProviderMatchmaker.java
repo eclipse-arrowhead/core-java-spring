@@ -67,6 +67,6 @@ public class DefaultInterCloudProviderMatchmaker implements InterCloudProviderMa
 		}
 		
 		logger.debug("no match was found between preferred providers, the first one is selected.");
-		return  new OrchestrationResponseDTO(List.of(icnResultDTO.getResponse().get(0)));
+		return new OrchestrationResponseDTO(List.of(icnResultDTO.getResponse().get(0)));
 	}
 }

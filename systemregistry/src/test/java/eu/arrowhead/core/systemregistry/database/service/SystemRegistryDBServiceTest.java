@@ -77,7 +77,7 @@ public class SystemRegistryDBServiceTest {
 		final String authenticationInfo0 = null;
 		
 		try {
-			systemRegistryDBService.createSystem(systemName0, address0, port0, authenticationInfo0);
+			systemRegistryDBService.createSystem(systemName0, address0, port0, authenticationInfo0, null);
 		} catch (final InvalidParameterException ex) {
 			Assert.assertEquals("System name has invalid format. Name must match with the following regular expression: " + CommonNamePartVerifier.COMMON_NAME_PART_PATTERN_STRING, ex.getMessage());			
 			
@@ -95,7 +95,7 @@ public class SystemRegistryDBServiceTest {
 		final String authenticationInfo0 = null;
 		
 		try {
-			systemRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+			systemRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0, null);
 		} catch (final InvalidParameterException ex) {
 			Assert.assertEquals("System name has invalid format. Name must match with the following regular expression: " + CommonNamePartVerifier.COMMON_NAME_PART_PATTERN_STRING, ex.getMessage());			
 			
@@ -113,7 +113,7 @@ public class SystemRegistryDBServiceTest {
 		final String authenticationInfo0 = null;
 		
 		try {
-			systemRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+			systemRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0, null);
 		} catch (final InvalidParameterException ex) {
 			Assert.assertEquals("System name has invalid format. Name must match with the following regular expression: " + CommonNamePartVerifier.COMMON_NAME_PART_PATTERN_STRING, ex.getMessage());			
 			

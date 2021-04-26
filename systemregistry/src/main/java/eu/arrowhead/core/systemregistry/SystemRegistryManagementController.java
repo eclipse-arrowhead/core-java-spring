@@ -33,6 +33,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+
+import java.util.Map;
+
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -473,12 +476,13 @@ public class SystemRegistryManagementController {
 
         validation.checkSystemRequest(request, getOrigin(SYSTEMS_URI), true);
 
-        final String systemName = request.getSystemName();
-        final String address = request.getAddress();
+        final String systemName = request.getSystemName().toLowerCase().trim();
+        final String address = request.getAddress().toLowerCase().trim();
         final int port = request.getPort();
         final String authenticationInfo = request.getAuthenticationInfo();
+        final Map<String,String> metadata = request.getMetadata();
 
-        return systemRegistryDBService.createSystemDto(systemName, address, port, authenticationInfo);
+        return systemRegistryDBService.createSystemDto(systemName, address, port, authenticationInfo, metadata);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -491,8 +495,9 @@ public class SystemRegistryManagementController {
         final String validatedAddress = request.getAddress().toLowerCase().trim();
         final int validatedPort = request.getPort();
         final String validatedAuthenticationInfo = request.getAuthenticationInfo();
+        final Map<String,String> metadata = request.getMetadata();
 
-        return systemRegistryDBService.updateSystemDto(systemId, validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
+        return systemRegistryDBService.updateSystemDto(systemId, validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo, metadata);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -505,8 +510,9 @@ public class SystemRegistryManagementController {
         final String validatedAddress = request.getAddress() != null ? request.getAddress().toLowerCase().trim() : "";
         final Integer validatedPort = request.getPort();
         final String validatedAuthenticationInfo = request.getAuthenticationInfo();
+        final Map<String,String> metadata = request.getMetadata();
 
-        return systemRegistryDBService.mergeSystemResponse(systemId, validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
+        return systemRegistryDBService.mergeSystemResponse(systemId, validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo, metadata);
     }
 
     //-------------------------------------------------------------------------------------------------

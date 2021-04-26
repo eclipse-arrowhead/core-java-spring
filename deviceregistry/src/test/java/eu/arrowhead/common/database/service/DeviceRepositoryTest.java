@@ -14,9 +14,9 @@
 
 package eu.arrowhead.common.database.service;
 
-import eu.arrowhead.common.database.entity.Device;
-import eu.arrowhead.common.database.entity.System;
-import eu.arrowhead.common.database.repository.DeviceRepository;
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,8 +26,8 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.List;
-import java.util.Optional;
+import eu.arrowhead.common.database.entity.Device;
+import eu.arrowhead.common.database.repository.DeviceRepository;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest

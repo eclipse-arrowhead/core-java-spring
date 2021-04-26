@@ -39,7 +39,7 @@ public class RandomIntraCloudProviderMatchmaker implements IntraCloudProviderMat
 
 	//-------------------------------------------------------------------------------------------------
 	/** 
-	 * This algorithm returns the first (preferred) provider.
+	 * This algorithm returns the first preferred provider or a random if a preferred provider can't be selected.
 	 */
 	@Override
 	public OrchestrationResultDTO doMatchmaking(final List<OrchestrationResultDTO> orList, final IntraCloudProviderMatchmakingParameters params) {

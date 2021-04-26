@@ -14,14 +14,10 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import java.io.Serializable;
-
 public class ChoreographerRunPlanRequestDTO {
 
     //=================================================================================================
     // members
-
-    private static final long serialVersionUID = -4337560592612039357L;
 
     private long id;
 

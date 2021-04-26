@@ -1657,12 +1657,12 @@ public class QoSDBServiceIntraTest {
 
 	//-------------------------------------------------------------------------------------------------
 	private System getSystemForTest() {
-
 		final System system = new System(
 				"testSystem",
 				"address",
 				12345,
-				"authenticationInfo");
+				"authenticationInfo",
+				null);
 
 		return system;
 	}

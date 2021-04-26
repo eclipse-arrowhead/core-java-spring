@@ -154,10 +154,10 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public System createSystem(final String systemName, final String address, final int port, final String authenticationInfo) {		
+	public System createSystem(final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) {		
 		logger.debug("createSystem started...");
 		
-		final System system = validateNonNullSystemParameters(systemName, address, port, authenticationInfo);
+		final System system = validateNonNullSystemParameters(systemName, address, port, authenticationInfo, metadata);
 		
 		try {
 			return systemRepository.saveAndFlush(system);
@@ -169,23 +169,23 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public SystemResponseDTO createSystemResponse(final String systemName, final String address, final int port, final String authenticationInfo) {
+	public SystemResponseDTO createSystemResponse(final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) {
 		logger.debug("createSystemResponse started...");
 		
-		return DTOConverter.convertSystemToSystemResponseDTO(createSystem(systemName, address, port, authenticationInfo));
+		return DTOConverter.convertSystemToSystemResponseDTO(createSystem(systemName, address, port, authenticationInfo, metadata));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public SystemResponseDTO updateSystemResponse(final long systemId, final String systemName, final String address, final int port, final String authenticationInfo) {
+	public SystemResponseDTO updateSystemResponse(final long systemId, final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) {
 		logger.debug("updateSystemResponse started...");
 		
-		return DTOConverter.convertSystemToSystemResponseDTO(updateSystem(systemId, systemName, address, port, authenticationInfo));
+		return DTOConverter.convertSystemToSystemResponseDTO(updateSystem(systemId, systemName, address, port, authenticationInfo, metadata));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public System updateSystem(final long systemId, final String systemName, final String address, final int port, final String authenticationInfo) {	
+	public System updateSystem(final long systemId, final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) {	
 		logger.debug("updateSystem started...");
 		
 		final long validatedSystemId = validateSystemId(systemId);
@@ -216,6 +216,7 @@ public class ServiceRegistryDBService {
 			system.setAddress(validatedAddress);
 			system.setPort(validatedPort);
 			system.setAuthenticationInfo(validatedAuthenticationInfo);
+			system.setMetadata(Utilities.map2Text(metadata));
 			
 			return systemRepository.saveAndFlush(system);
 		} catch (final InvalidParameterException ex) {
@@ -275,15 +276,15 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public SystemResponseDTO mergeSystemResponse(final long systemId, final String systemName, final String address, final Integer port, final String authenticationInfo) {		
+	public SystemResponseDTO mergeSystemResponse(final long systemId, final String systemName, final String address, final Integer port, final String authenticationInfo, final Map<String,String> metadata) {		
 		logger.debug("mergeSystemResponse started...");
 
-		return DTOConverter.convertSystemToSystemResponseDTO(mergeSystem(systemId, systemName, address, port, authenticationInfo));
+		return DTOConverter.convertSystemToSystemResponseDTO(mergeSystem(systemId, systemName, address, port, authenticationInfo, metadata));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public System mergeSystem(final long systemId, final String systemName, final String address, final Integer port, final String authenticationInfo) {		
+	public System mergeSystem(final long systemId, final String systemName, final String address, final Integer port, final String authenticationInfo, final Map<String,String> metadata) {		
 		logger.debug("mergeSystem started...");
 		
 		final long validatedSystemId = validateSystemId(systemId);
@@ -324,6 +325,10 @@ public class ServiceRegistryDBService {
 			
 			if (!Utilities.isEmpty(validatedAuthenticationInfo)) {
 				system.setAuthenticationInfo(validatedAuthenticationInfo);
+			}
+			
+			if (metadata != null) {
+				system.setMetadata(Utilities.map2Text(metadata));
 			}
 			
 			return systemRepository.saveAndFlush(system);
@@ -616,7 +621,7 @@ public class ServiceRegistryDBService {
 		
 		try {
 			final ServiceDefinition serviceDefinition = findOrCreateServiceDefinition(validatedServiceDefinition);
-			final System provider = findOrCreateSystem(validatedProviderName, validatedProviderAddress, validatedProviderPort, request.getProviderSystem().getAuthenticationInfo());
+			final System provider = findOrCreateSystem(validatedProviderName, validatedProviderAddress, validatedProviderPort, request.getProviderSystem().getAuthenticationInfo(), request.getProviderSystem().getMetadata());
 														
 			final ZonedDateTime endOfValidity = Utilities.isEmpty(request.getEndOfValidity()) ? null : Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
 			final String metadataStr = Utilities.map2Text(request.getMetadata());
@@ -662,7 +667,7 @@ public class ServiceRegistryDBService {
 			final String validatedServiceUri = request.getServiceUri() == null ? "" : request.getServiceUri().trim();
 			
 			final ServiceDefinition serviceDefinition = findOrCreateServiceDefinition(validatedServiceDefinition); 
-			final System provider = findOrCreateSystem(validatedProviderName, validatedProviderAddress, validatedProviderPort, request.getProviderSystem().getAuthenticationInfo());
+			final System provider = findOrCreateSystem(validatedProviderName, validatedProviderAddress, validatedProviderPort, request.getProviderSystem().getAuthenticationInfo(), request.getProviderSystem().getMetadata());
 			final ZonedDateTime endOfValidity = Utilities.isEmpty(request.getEndOfValidity()) ? null : Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
 			final String metadataStr = Utilities.map2Text(request.getMetadata());
 			final int version = request.getVersion() == null ? 1 : request.getVersion().intValue();
@@ -721,13 +726,24 @@ public class ServiceRegistryDBService {
 			if (request.getProviderSystem() != null) {
 				final Optional<System> optProvider = systemRepository.findBySystemNameAndAddressAndPort(validatedProviderName, validatedProviderAddress, validatedProviderPort);
 				if (optProvider.isPresent()) {
-					provider = optProvider.get();					
+					provider = optProvider.get();	
+					boolean needSave = false;
 					if (!Objects.equals(request.getProviderSystem().getAuthenticationInfo(), provider.getAuthenticationInfo())) { // authentication info has changed
 						provider.setAuthenticationInfo(request.getProviderSystem().getAuthenticationInfo());
+						needSave = true;
+					}
+					
+					final String providerMetadataStr = Utilities.map2Text(request.getProviderSystem().getMetadata());
+					if (!Objects.equals(providerMetadataStr, provider.getMetadata())) {
+						provider.setMetadata(providerMetadataStr);
+						needSave = true;
+					}
+					
+					if (needSave) {
 						provider = systemRepository.saveAndFlush(provider);
 					}
 				} else {
-					provider = createSystem(validatedProviderName, validatedProviderAddress, validatedProviderPort, request.getProviderSystem().getAuthenticationInfo());
+					provider = createSystem(validatedProviderName, validatedProviderAddress, validatedProviderPort, request.getProviderSystem().getAuthenticationInfo(), request.getProviderSystem().getMetadata());
 				}
 			} else {
 				provider = srEntry.getSystem();
@@ -1199,7 +1215,7 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private System validateNonNullSystemParameters(final String systemName, final String address, final int port, final String authenticationInfo) {
+	private System validateNonNullSystemParameters(final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) {
 		logger.debug("validateNonNullSystemParameters started...");
 		
 		if (Utilities.isEmpty(systemName)) {
@@ -1224,7 +1240,7 @@ public class ServiceRegistryDBService {
 		
 		checkConstraintsOfSystemTable(validatedSystemName, validatedAddress, port);
 		
-		return new System(validatedSystemName, validatedAddress, port, validatedAuthenticationInfo);
+		return new System(validatedSystemName, validatedAddress, port, validatedAuthenticationInfo, Utilities.map2Text(metadata));
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -1381,18 +1397,30 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private System findOrCreateSystem(final String systemName, final String address, final int port, final String authenticationInfo) {
+	private System findOrCreateSystem(final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) {
 		final Optional<System> optProvider = systemRepository.findBySystemNameAndAddressAndPort(systemName.toLowerCase().trim(), address.toLowerCase().trim(), port);
 		System provider;
 		if (optProvider.isPresent()) {
 			provider = optProvider.get();
+			boolean needSave = false;
 			if (!Objects.equals(authenticationInfo, provider.getAuthenticationInfo())) { // authentication info has changed
 				provider.setAuthenticationInfo(authenticationInfo);
+				needSave = true;
+			}
+			
+			final String metadataStr = Utilities.map2Text(metadata);
+			if (!Objects.equals(metadataStr, provider.getMetadata())) {
+				provider.setMetadata(metadataStr);
+				needSave = true;
+			}
+			
+			if (needSave) {
 				provider = systemRepository.saveAndFlush(provider);
 			}
 		} else {
-			provider = createSystem(systemName, address, port, authenticationInfo);
+			provider = createSystem(systemName, address, port, authenticationInfo, metadata);
 		}
+		
 		return provider;
 	}
 

@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.Assert;
@@ -110,7 +111,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int port0 = 0;
 		final String authenticationInfo0 = null;
 		
-		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
 		
 		final List<System> systemsList = new ArrayList<>();
 		systemsList.add(system);
@@ -140,7 +141,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int port0 = 0;
 		final String authenticationInfo0 = null;
 		
-		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
 		
 		final List<System> systemsList = new ArrayList<>();
 		systemsList.add(system);
@@ -159,26 +160,26 @@ public class ServiceRegistryDBServiceSystemTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void createSystemSystemNameNullTest() {
-		serviceRegistryDBService.createSystem(null, "x", 1, "x");
+		serviceRegistryDBService.createSystem(null, "x", 1, "x", Map.of("systemkey", "systemvalue"));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void createSystemAddressNullTest() {
-		serviceRegistryDBService.createSystem("x", null, 1, "x");
+		serviceRegistryDBService.createSystem("x", null, 1, "x", Map.of("systemkey", "systemvalue"));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void createSystemSystemNameEmptyStringTest() {
-		serviceRegistryDBService.createSystem("", "x", 1, "x");
+		serviceRegistryDBService.createSystem("", "x", 1, "x", Map.of("systemkey", "systemvalue"));
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void createSystemSystemNameWrongTest() {
 		try {
-			serviceRegistryDBService.createSystem("invalid_system", "x", 1, "x");
+			serviceRegistryDBService.createSystem("invalid_system", "x", 1, "x", Map.of("systemkey", "systemvalue"));
 		} catch (final InvalidParameterException ex) {
 			Assert.assertEquals("System name has invalid format. Name must match with the following regular expression: " + CommonNamePartVerifier.COMMON_NAME_PART_PATTERN_STRING, ex.getMessage());			
 			
@@ -189,7 +190,7 @@ public class ServiceRegistryDBServiceSystemTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void createSystemAddressEmptyStringTest() {
-		serviceRegistryDBService.createSystem("x", "", 1, "x");
+		serviceRegistryDBService.createSystem("x", "", 1, "x", Map.of("systemkey", "systemvalue"));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -198,11 +199,11 @@ public class ServiceRegistryDBServiceSystemTest {
 		final String systemName = "alreadyexiststest";
 		final String address = "alreadyexiststest";
 		final int port = 1;
-		final Optional<System> system = Optional.of(new System(systemName, address, port, null));
+		final Optional<System> system = Optional.of(new System(systemName, address, port, null, "systemkey=systemvalue"));
 		
 		when(systemRepository.findBySystemNameAndAddressAndPort(eq(systemName), eq(address), eq(port))).thenReturn(system);
 		
-		serviceRegistryDBService.createSystem(systemName, address, port, null);
+		serviceRegistryDBService.createSystem(systemName, address, port, null, Map.of("systemkey", "systemvalue"));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -211,11 +212,11 @@ public class ServiceRegistryDBServiceSystemTest {
 		final String systemName = "alreadyexiststest";
 		final String address = "alreadyexiststest";
 		final int port = 1;
-		final Optional<System> system = Optional.of(new System(systemName, address, port, null));
+		final Optional<System> system = Optional.of(new System(systemName, address, port, null, "systemkey=systemvalue"));
 		
 		when(systemRepository.findBySystemNameAndAddressAndPort(eq(systemName), eq(address), eq(port))).thenReturn(system);
 		
-		serviceRegistryDBService.createSystem(" "+systemName+" ", " "+address+" ", port, null);
+		serviceRegistryDBService.createSystem(" "+systemName+" ", " "+address+" ", port, null, Map.of("systemkey", "systemvalue"));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -224,11 +225,11 @@ public class ServiceRegistryDBServiceSystemTest {
 		final String systemName = "alreadyexiststest";
 		final String address = "alreadyexiststest";
 		final int port = 1;
-		final Optional<System> system = Optional.of(new System(systemName, address, port, null));
+		final Optional<System> system = Optional.of(new System(systemName, address, port, null, "systemkey=systemvalue"));
 
 		when(systemRepository.findBySystemNameAndAddressAndPort(eq(systemName), eq(address), eq(port))).thenReturn(system);
 		
-		serviceRegistryDBService.createSystem(systemName.toUpperCase(), address.toUpperCase(), port, null);
+		serviceRegistryDBService.createSystem(systemName.toUpperCase(), address.toUpperCase(), port, null, Map.of("systemkey", "systemvalue"));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -240,7 +241,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final long testId0 = 0;
 		final String authenticationInfo0 = null;
 		
-		serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0, Map.of("systemkey", "systemvalue"));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -252,7 +253,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
 		
-		serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0, Map.of("systemkey", "systemvalue"));
 	}	
 	
 	//-------------------------------------------------------------------------------------------------
@@ -264,7 +265,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
 		
-		serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0, Map.of("systemkey", "systemvalue"));
 	}	
 	
 	//-------------------------------------------------------------------------------------------------
@@ -276,7 +277,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
 		
-		serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0, Map.of("systemkey", "systemvalue"));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -288,7 +289,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
 		
-		serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0, Map.of("systemkey", "systemvalue"));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -301,7 +302,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final String authenticationInfo0 = null;
 		
 		try {
-			serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+			serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0, Map.of("systemkey", "systemvalue"));
 		} catch (final InvalidParameterException ex) {
 			Assert.assertEquals("System name has invalid format. Name must match with the following regular expression: " + CommonNamePartVerifier.COMMON_NAME_PART_PATTERN_STRING, ex.getMessage());			
 			
@@ -318,7 +319,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
 		
-		serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0, Map.of("systemkey", "systemvalue"));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -330,7 +331,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
 		
-		serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0, Map.of("systemkey", "systemvalue"));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -342,7 +343,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final long testId0 = 0;
 		final String authenticationInfo0 = null;
 		
-		serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0, Map.of("systemkey", "systemvalue"));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -354,7 +355,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
 		
-		serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0, Map.of("systemkey", "systemvalue"));
 	}	
 	
 	//-------------------------------------------------------------------------------------------------
@@ -366,7 +367,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
 		
-		serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0, Map.of("systemkey", "systemvalue"));
 	}	
 	
 	//-------------------------------------------------------------------------------------------------
@@ -377,14 +378,14 @@ public class ServiceRegistryDBServiceSystemTest {
 		final Integer port0 = null;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
-		final System system = new System(systemName0, address0, 1, authenticationInfo0);
+		final System system = new System(systemName0, address0, 1, authenticationInfo0, "systemkey=systemvalue");
 		final Optional<System> systemOptional = Optional.of(system);
 
 		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
 		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
 		
 		try {
-			serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+			serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0, Map.of("systemkey", "systemvalue"));
 		} catch (final IllegalArgumentException ex) {
 			fail();
 		}	
@@ -398,14 +399,14 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int port0 = CommonConstants.SYSTEM_PORT_RANGE_MAX - 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
-		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
 		final Optional<System> systemOptional = Optional.of(system);
 
 		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
 		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
 		
 		try {
-			serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+			serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0, Map.of("systemkey", "systemvalue"));
 		} catch (final InvalidParameterException ex) {
 			fail();
 		}	
@@ -419,14 +420,14 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int port0 = 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
-		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
 		final Optional<System> systemOptional = Optional.of(system);
 
 		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
 		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
 		
 		try {
-			serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+			serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0, Map.of("systemkey", "systemvalue"));
 		} catch (final InvalidParameterException ex) {
 			fail();
 		}		
@@ -442,7 +443,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final String authenticationInfo0 = null;
 		
 		try {
-			serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);		
+			serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0, Map.of("systemkey", "systemvalue"));		
 		} catch (final InvalidParameterException ex) {
 			Assert.assertEquals("System name has invalid format. Name must match with the following regular expression: " + CommonNamePartVerifier.COMMON_NAME_PART_PATTERN_STRING, ex.getMessage());
 			
@@ -458,14 +459,14 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int port0 = CommonConstants.SYSTEM_PORT_RANGE_MAX - 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
-		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
 		final Optional<System> systemOptional = Optional.of(system);
 
 		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
 		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
 		
 		try {
-			serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+			serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0, Map.of("systemkey", "systemvalue"));
 		} catch (final InvalidParameterException ex) {
 			fail();
 		}		
@@ -479,14 +480,14 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int port0 = 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
-		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
 		final Optional<System> systemOptional = Optional.of(system);
 
 		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
 		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
 		
 		try {
-			serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+			serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0, Map.of("systemkey", "systemvalue"));
 		} catch (final InvalidParameterException ex) {
 			fail();
 		}
@@ -500,14 +501,14 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int port0 = 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
-		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
 		final Optional<System> systemOptional = Optional.of(system);
 
 		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
 		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
 		
 		try {
-			serviceRegistryDBService.mergeSystem(testId0, "mergeTestName", null, null, null);
+			serviceRegistryDBService.mergeSystem(testId0, "mergeTestName", null, null, null, null);
 		} catch (final IllegalArgumentException ex) {
 			fail();
 		}
@@ -521,14 +522,14 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int port0 = 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
-		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
 		final Optional<System> systemOptional = Optional.of(system);
 
 		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
 		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
 		
 		try {
-			serviceRegistryDBService.mergeSystem(testId0, null, "mergeTestAddress", null, null);
+			serviceRegistryDBService.mergeSystem(testId0, null, "mergeTestAddress", null, null, null);
 		} catch (final IllegalArgumentException ex) {
 			fail();
 		}
@@ -542,14 +543,14 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int port0 = 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
-		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
 		final Optional<System> systemOptional = Optional.of(system);
 
 		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
 		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
 		
 		try {
-			serviceRegistryDBService.mergeSystem(testId0, null, null, 1, null);
+			serviceRegistryDBService.mergeSystem(testId0, null, null, 1, null, null);
 		} catch (final IllegalArgumentException ex) {
 			fail();
 		}
@@ -563,18 +564,40 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int port0 = 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
-		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
 		final Optional<System> systemOptional = Optional.of(system);
 
 		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
 		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
 		
 		try {
-			serviceRegistryDBService.mergeSystem(testId0, null, null, null, "testAuthenticationInfo");
+			serviceRegistryDBService.mergeSystem(testId0, null, null, null, "testAuthenticationInfo", null);
 		} catch (final IllegalArgumentException ex) {
 			fail();
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void mergeSystemByIdSingleParameterMetadataTest() {
+		final String systemName0 = "testSystemName0";
+		final String address0 = "testAddress0";
+		final int port0 = 1;
+		final long testId0 = 1;
+		final String authenticationInfo0 = null;
+		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
+		final Optional<System> systemOptional = Optional.of(system);
+
+		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
+		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
+		
+		try {
+			serviceRegistryDBService.mergeSystem(testId0, null, null, null, null, Map.of("systemkey", "systemvalue2"));
+		} catch (final IllegalArgumentException ex) {
+			fail();
+		}
+	}
+
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -584,14 +607,14 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int port0 = 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
-		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
 		final Optional<System> systemOptional = Optional.of(system);
 
 		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
 		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
 		
 		try {
-			serviceRegistryDBService.mergeSystem(testId0, null, null, null, null);
+			serviceRegistryDBService.mergeSystem(testId0, null, null, null, null, null);
 		} catch (final IllegalArgumentException ex) {
 			fail();
 		}

@@ -737,7 +737,7 @@ public class OrchestratorStoreControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private SystemResponseDTO getSystemResponseDTOForTest() {
-		return new SystemResponseDTO(getIdForTest(), "systemName", "address", 12345, "authenticationInfo", "2019-07-04 14:43:19", "2019-07-04 14:43:19");
+		return new SystemResponseDTO(getIdForTest(), "systemName", "address", 12345, "authenticationInfo", null, "2019-07-04 14:43:19", "2019-07-04 14:43:19");
 	}
 	
 	//-------------------------------------------------------------------------------------------------

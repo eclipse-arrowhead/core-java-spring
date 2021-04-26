@@ -1378,7 +1378,7 @@ public class OrchestratorStoreDBServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private System getSystemForTest() {
-		final System system = new System("systemName", "address", 1234, null);
+		final System system = new System("systemName", "address", 1234, null, null);
 		system.setId(getIdForTest());
 		system.setCreatedAt(getCreatedAtForTest());
 		system.setUpdatedAt(getUpdatedAtForTest());
@@ -1388,7 +1388,7 @@ public class OrchestratorStoreDBServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private ForeignSystem getForeignSystemForTest() {
-		final ForeignSystem system = new ForeignSystem(getForeignProviderCloudForTest(), "systemName", "address", 1234, null);
+		final ForeignSystem system = new ForeignSystem(getForeignProviderCloudForTest(), "systemName", "address", 1234, null, null);
 		system.setId(getIdForTest());
 		system.setCreatedAt(getCreatedAtForTest());
 		system.setUpdatedAt(getUpdatedAtForTest());
