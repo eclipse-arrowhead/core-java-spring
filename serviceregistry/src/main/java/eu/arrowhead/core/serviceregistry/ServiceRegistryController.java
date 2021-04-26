@@ -721,12 +721,13 @@ public class ServiceRegistryController {
 	public void unregisterService(@RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION) final String serviceDefinition,
 								  @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME) final String providerName,
 								  @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS) final String providerAddress,
-								  @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT) final int providerPort) {
+								  @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT) final int providerPort,
+								  @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_URI) final String serviceUri) {
 		logger.debug("Service removal request received");
 		checkUnregisterServiceParameters(serviceDefinition, providerName, providerAddress, providerPort);
 		
-		serviceRegistryDBService.removeServiceRegistry(serviceDefinition, providerName, providerAddress, providerPort);
-		logger.debug("{} successfully removed its service {}", providerName, serviceDefinition);
+		serviceRegistryDBService.removeServiceRegistry(serviceDefinition, providerName, providerAddress, providerPort, serviceUri);
+		logger.debug("{} successfully removed its service {} ({})", providerName, serviceDefinition, serviceUri);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1141,6 +1142,10 @@ public class ServiceRegistryController {
 		}
 	
 		checkSystemRequest(request.getProviderSystem(), origin, checkReservedCoreSystemNames);
+		
+		if (request.getServiceUri() == null) {
+			request.setServiceUri("");
+		}
 		
 		if (!Utilities.isEmpty(request.getEndOfValidity())) {
 			try {

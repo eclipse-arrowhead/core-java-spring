@@ -165,6 +165,7 @@ public class CommonConstants {
 	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS = "address";
 	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT = "port";
 	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION = "service_definition";
+	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_URI = "service_uri";
 
 	public static final String SYSTEMREGISTRY_URI = "/systemregistry";
 	public static final String OP_SYSTEMREGISTRY_REGISTER_URI = "/register";
