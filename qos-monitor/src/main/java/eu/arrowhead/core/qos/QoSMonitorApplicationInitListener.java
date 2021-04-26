@@ -105,6 +105,11 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 
 		final UriComponents queryAll = createQueryAllUri(scheme);
 		context.put(CoreCommonConstants.SR_QUERY_ALL, queryAll);
+
+		//TODO 
+		//if (monitorType.equals(MonitorProviderType.EXTERNAL)) {
+		// ## request Orch echo && EventHandler echo and log warning if service not active ...
+		//}
 	}
 
 	//-------------------------------------------------------------------------------------------------
