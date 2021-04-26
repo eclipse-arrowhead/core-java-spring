@@ -881,7 +881,7 @@ public class GatekeeperServiceICNTest {
 		request.setPreferredGatewayRelays(List.of(relay));
 		
 		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
-		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null));
+		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null, null));
 		resultDTO.setService(new ServiceDefinitionResponseDTO(1, "test-service", null, null));
 		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(resultDTO));
 		when(gatekeeperDriver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(orchestrationResponse);
@@ -908,7 +908,7 @@ public class GatekeeperServiceICNTest {
 		request.setPreferredGatewayRelays(List.of(relay));
 		
 		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
-		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null));
+		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null, null));
 		resultDTO.setService(new ServiceDefinitionResponseDTO(1, "test-service", null, null));
 		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(resultDTO));
 		when(gatekeeperDriver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(orchestrationResponse);
@@ -940,7 +940,7 @@ public class GatekeeperServiceICNTest {
 		request.setConsumerGatewayPublicKey("consumerGWPublicKey");
 		
 		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
-		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null));
+		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null, null));
 		resultDTO.setService(new ServiceDefinitionResponseDTO(1, "test-service", null, null));
 		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(resultDTO));
 		when(gatekeeperDriver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(orchestrationResponse);
@@ -973,10 +973,10 @@ public class GatekeeperServiceICNTest {
 		request.setConsumerGatewayPublicKey("consumerGWPublicKey");
 		
 		final OrchestrationResultDTO selectedResult = new OrchestrationResultDTO();
-		selectedResult.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null));
+		selectedResult.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null, null));
 		selectedResult.setService(new ServiceDefinitionResponseDTO(1, "test-service", null, null));
 		final OrchestrationResultDTO otherResult = new OrchestrationResultDTO();
-		otherResult.setProvider(new SystemResponseDTO(2, "test-sys", "0.0.0.0", 78058, null, null, null));
+		otherResult.setProvider(new SystemResponseDTO(2, "test-sys", "0.0.0.0", 78058, null, null, null, null));
 		otherResult.setService(new ServiceDefinitionResponseDTO(1, "test-service", null, null));
 		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(selectedResult, otherResult));
 		when(gatekeeperDriver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(orchestrationResponse);
@@ -1045,7 +1045,7 @@ public class GatekeeperServiceICNTest {
 		request.getCommands().put(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY, "15");
 		
 		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
-		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null));
+		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null, null));
 		resultDTO.setService(new ServiceDefinitionResponseDTO(1, "test-service", null, null));
 		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(resultDTO));
 		
@@ -1075,7 +1075,7 @@ public class GatekeeperServiceICNTest {
 		request.getNegotiationFlags().put(Flag.ENABLE_QOS, true);
 		
 		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
-		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null));
+		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null, null));
 		resultDTO.setService(new ServiceDefinitionResponseDTO(1, "test-service", null, null));
 		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(resultDTO));
 		
@@ -1106,7 +1106,7 @@ public class GatekeeperServiceICNTest {
 		request.getNegotiationFlags().put(Flag.ENABLE_QOS, false);
 		
 		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
-		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null));
+		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null, null));
 		resultDTO.setService(new ServiceDefinitionResponseDTO(1, "test-service", null, null));
 		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(resultDTO));
 		
@@ -1142,7 +1142,7 @@ public class GatekeeperServiceICNTest {
 		request.getNegotiationFlags().put(Flag.ENABLE_QOS, false);
 		
 		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
-		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null));
+		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null, null));
 		resultDTO.setService(new ServiceDefinitionResponseDTO(1, "test-service", null, null));
 		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(resultDTO));
 		
@@ -1175,7 +1175,7 @@ public class GatekeeperServiceICNTest {
 		request.getCommands().put(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY, "15");
 		
 		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
-		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null));
+		resultDTO.setProvider(new SystemResponseDTO(1, "test-sys", "0.0.0.0", 50058, null, null, null, null));
 		resultDTO.setService(new ServiceDefinitionResponseDTO(1, "test-service", null, null));
 		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(resultDTO));
 		

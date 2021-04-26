@@ -16,6 +16,7 @@ package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -28,12 +29,13 @@ public class ServicesGroupedBySystemsResponseDTO implements Serializable {
 	//=================================================================================================
 	// members
 	
-	private static final long serialVersionUID = -6701946599623393658L;
+	private static final long serialVersionUID = -4474878334182894044L;
 	
 	private long systemId;
 	private String systemName;
 	private String address;
 	private int port;
+	private Map<String,String> metadata;
 	private List<ServiceRegistryResponseDTO> services;
 		
 	//=================================================================================================
@@ -43,11 +45,12 @@ public class ServicesGroupedBySystemsResponseDTO implements Serializable {
 	public ServicesGroupedBySystemsResponseDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ServicesGroupedBySystemsResponseDTO(final long systemId, final String systemName, final String address, final int port, final List<ServiceRegistryResponseDTO> services) {
+	public ServicesGroupedBySystemsResponseDTO(final long systemId, final String systemName, final String address, final int port, final Map<String,String> metadata, final List<ServiceRegistryResponseDTO> services) {
 		this.systemId = systemId;
 		this.systemName = systemName;
 		this.address = address;
 		this.port = port;
+		this.metadata = metadata;
 		this.services = services;
 	}
 
@@ -56,6 +59,7 @@ public class ServicesGroupedBySystemsResponseDTO implements Serializable {
 	public String getSystemName() {return systemName;}
 	public String getAddress() {return address;}
 	public int getPort() {return port;}
+	public Map<String,String> getMetadata() { return metadata; }
 	public List<ServiceRegistryResponseDTO> getServices() {return services;}
 
 	//-------------------------------------------------------------------------------------------------
@@ -63,5 +67,6 @@ public class ServicesGroupedBySystemsResponseDTO implements Serializable {
 	public void setSystemName(final String systemName) {this.systemName = systemName;}
 	public void setAddress(final String address) {this.address = address;}
 	public void setPort(final int port) {this.port = port;}
-	public void setServices(final List<ServiceRegistryResponseDTO> services) {this.services = services;}	
+	public void setMetadata(Map<String,String> metadata) { this.metadata = metadata; }	
+	public void setServices(final List<ServiceRegistryResponseDTO> services) {this.services = services;}
 }

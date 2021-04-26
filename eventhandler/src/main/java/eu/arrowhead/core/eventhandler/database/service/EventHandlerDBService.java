@@ -133,13 +133,11 @@ public class EventHandlerDBService {
 		try {
 			subscriptions = subscriptionRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
 		
-			if ( subscriptions == null || subscriptions.getContent() == null) {
-				
+			if (subscriptions == null || subscriptions.getContent() == null) {
 				return List.of();
 			}
 			
 			return subscriptions.getContent();
-		
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -283,7 +281,7 @@ public class EventHandlerDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public Subscription updateSubscription( final long id, final SubscriptionRequestDTO request, final Set<SystemResponseDTO> authorizedPublishers) {
+	public Subscription updateSubscription(final long id, final SubscriptionRequestDTO request, final Set<SystemResponseDTO> authorizedPublishers) {
 		logger.debug("updateSubscription started ...");
 		
 		try {
@@ -365,17 +363,16 @@ public class EventHandlerDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)	
-	public void updateSubscriberAuthorization( final List<Subscription> involvedSubscriptions, final Set<SystemResponseDTO> authorizedPublishers ) {
+	public void updateSubscriberAuthorization(final List<Subscription> involvedSubscriptions, final Set<SystemResponseDTO> authorizedPublishers) {
 		logger.debug("updateSubscriberAuthorization started ...");
 		
 		for (final Subscription subscriptionEntry : involvedSubscriptions) {
-					
 			final Optional<Subscription> subcriptionOptional = subscriptionRepository.findById(subscriptionEntry.getId());
 			if (subcriptionOptional.isPresent()) {
 				final Subscription subscription = subcriptionOptional.get();
 				
 				updateSubscriptionEntryPublisherConnections(subscription, authorizedPublishers);
-			}else {
+			} else {
 				logger.debug("SubscriberSystem" + NOT_IN_DB_ERROR_MESSAGE);
 			}
 			
@@ -598,7 +595,7 @@ public class EventHandlerDBService {
 			}
 		} else {
 			for (final SystemResponseDTO systemResponseDTO : authorizedPublishers) {
-				final System system = new System(systemResponseDTO.getSystemName(),	systemResponseDTO.getAddress(),	systemResponseDTO.getPort(), systemResponseDTO.getAuthenticationInfo());
+				final System system = new System(systemResponseDTO.getSystemName(),	systemResponseDTO.getAddress(),	systemResponseDTO.getPort(), systemResponseDTO.getAuthenticationInfo(), Utilities.map2Text(systemResponseDTO.getMetadata()));
 				system.setId(systemResponseDTO.getId());
 						
 				final SubscriptionPublisherConnection conn = new SubscriptionPublisherConnection(subscriptionEntry, system);
@@ -653,7 +650,7 @@ public class EventHandlerDBService {
 			}
 			
 			for (final SystemResponseDTO systemResponseDTO : authorizedPublishers) {
-				final System system = new System(systemResponseDTO.getSystemName(),	systemResponseDTO.getAddress(),	systemResponseDTO.getPort(), systemResponseDTO.getAuthenticationInfo());
+				final System system = new System(systemResponseDTO.getSystemName(),	systemResponseDTO.getAddress(),	systemResponseDTO.getPort(), systemResponseDTO.getAuthenticationInfo(), Utilities.map2Text(systemResponseDTO.getMetadata()));
 				system.setId(systemResponseDTO.getId());
 						
 				final SubscriptionPublisherConnection conn = new SubscriptionPublisherConnection(subscriptionEntry, system);

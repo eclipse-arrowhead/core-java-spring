@@ -80,8 +80,8 @@ public class RandomIntraCloudProviderMatchmakerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void doMatchmakingNoPreferredMatch() {
-		final SystemResponseDTO system1 = new SystemResponseDTO(1, "system1", "localhost", 1234, null, null, null);
-		final SystemResponseDTO system2 = new SystemResponseDTO(1, "system2", "localhost", 4567, null, null, null);
+		final SystemResponseDTO system1 = new SystemResponseDTO(1, "system1", "localhost", 1234, null, null, null, null);
+		final SystemResponseDTO system2 = new SystemResponseDTO(1, "system2", "localhost", 4567, null, null, null, null);
 		final OrchestrationResultDTO dto1 = new OrchestrationResultDTO();
 		dto1.setVersion(1);
 		dto1.setProvider(system1);
@@ -111,8 +111,8 @@ public class RandomIntraCloudProviderMatchmakerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void doMatchmakingPreferredMatch() {
-		final SystemResponseDTO system1 = new SystemResponseDTO(1, "system1", "localhost", 1234, null, null, null);
-		final SystemResponseDTO system2 = new SystemResponseDTO(1, "system2", "localhost", 4567, null, null, null);
+		final SystemResponseDTO system1 = new SystemResponseDTO(1, "system1", "localhost", 1234, null, null, null, null);
+		final SystemResponseDTO system2 = new SystemResponseDTO(1, "system2", "localhost", 4567, null, null, null, null);
 		final OrchestrationResultDTO dto1 = new OrchestrationResultDTO();
 		dto1.setVersion(1);
 		dto1.setProvider(system1);

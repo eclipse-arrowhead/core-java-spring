@@ -97,7 +97,7 @@ public class DTOConverter {
 	public static SystemResponseDTO convertSystemToSystemResponseDTO(final System system) {
 		Assert.notNull(system, "System is null");
 		
-		return new SystemResponseDTO(system.getId(), system.getSystemName(), system.getAddress(), system.getPort(), system.getAuthenticationInfo(),
+		return new SystemResponseDTO(system.getId(), system.getSystemName(), system.getAddress(), system.getPort(), system.getAuthenticationInfo(), Utilities.text2Map(system.getMetadata()),
 									 Utilities.convertZonedDateTimeToUTCString(system.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(system.getUpdatedAt()));		
 	}
 	
@@ -194,6 +194,7 @@ public class DTOConverter {
 			final String systemName = srEntry.getSystem().getSystemName();
 			final String systemAddress = srEntry.getSystem().getAddress();
 			final int systemPort = srEntry.getSystem().getPort();
+			final Map<String,String> systemMetadata = Utilities.text2Map(srEntry.getSystem().getMetadata());
 			final long serviceDefinitionId = srEntry.getServiceDefinition().getId();
 			final String serviceDefinition = srEntry.getServiceDefinition().getServiceDefinition();		
 			
@@ -201,7 +202,7 @@ public class DTOConverter {
 			if (servicesBySystemId.containsKey(systemId)) {
 				servicesBySystemId.get(systemId).getServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
 			} else {
-				final ServicesGroupedBySystemsResponseDTO dto = new ServicesGroupedBySystemsResponseDTO(systemId, systemName, systemAddress, systemPort, new ArrayList<>());
+				final ServicesGroupedBySystemsResponseDTO dto = new ServicesGroupedBySystemsResponseDTO(systemId, systemName, systemAddress, systemPort, systemMetadata, new ArrayList<>());
 				dto.getServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
 				servicesBySystemId.put(systemId, dto);
 			}
@@ -571,6 +572,7 @@ public class DTOConverter {
 		systemRequestDTO.setSystemName(system.getSystemName());
 		systemRequestDTO.setPort(system.getPort());
 		systemRequestDTO.setAuthenticationInfo(systemRequestDTO.getAuthenticationInfo());
+		systemRequestDTO.setMetadata(Utilities.text2Map(system.getMetadata()));
 		
 		return systemRequestDTO;
 	}
@@ -584,6 +586,7 @@ public class DTOConverter {
 		result.setAddress(response.getAddress());
 		result.setPort(response.getPort());
 		result.setAuthenticationInfo(response.getAuthenticationInfo());
+		result.setMetadata(response.getMetadata());
 		
 		return result;
 	}
@@ -759,7 +762,7 @@ public class DTOConverter {
 	public static SystemResponseDTO convertForeignSystemToSystemResponseDTO(final ForeignSystem foreignSystem) {
 		Assert.notNull(foreignSystem, "ForeignSystem is null");
 		
-		return new SystemResponseDTO(foreignSystem.getId(), foreignSystem.getSystemName(), foreignSystem.getAddress(), foreignSystem.getPort(), foreignSystem.getAuthenticationInfo(),
+		return new SystemResponseDTO(foreignSystem.getId(), foreignSystem.getSystemName(), foreignSystem.getAddress(), foreignSystem.getPort(), foreignSystem.getAuthenticationInfo(), Utilities.text2Map(foreignSystem.getMetadata()),
 									 Utilities.convertZonedDateTimeToUTCString(foreignSystem.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(foreignSystem.getUpdatedAt()));		
 	}
 
@@ -1121,8 +1124,7 @@ public class DTOConverter {
     }
 
     //-------------------------------------------------------------------------------------------------
-    public static List<ChoreographerStepResponseDTO> collectStepsFromAction(
-            final Set<ChoreographerStep> steps) {
+    public static List<ChoreographerStepResponseDTO> collectStepsFromAction(final Set<ChoreographerStep> steps) {
         Assert.notNull(steps, "Steps list is null.");
 
         final List<ChoreographerStepResponseDTO> result = new ArrayList<>(steps.size());
@@ -1135,8 +1137,7 @@ public class DTOConverter {
     }
 
     //-------------------------------------------------------------------------------------------------
-    public static List<String> collectFirstStepNamesFromAction(
-            final Set<ChoreographerStep> steps) {
+    public static List<String> collectFirstStepNamesFromAction(final Set<ChoreographerStep> steps) {
         Assert.notNull(steps, "Steps list is null.");
         final List<String> result = new ArrayList<>(steps.size());
         for (final ChoreographerStep step : steps) {
@@ -1147,8 +1148,7 @@ public class DTOConverter {
     }
 
     //-------------------------------------------------------------------------------------------------
-    public static List<ChoreographerActionResponseDTO> collectActionsFromPlan(
-            final Set<ChoreographerAction> actions) {
+    public static List<ChoreographerActionResponseDTO> collectActionsFromPlan(final Set<ChoreographerAction> actions) {
         Assert.notNull(actions, "Action list is null.");
         final List<ChoreographerActionResponseDTO> result = new ArrayList<>(actions.size());
         for (final ChoreographerAction action : actions) {
@@ -1159,13 +1159,42 @@ public class DTOConverter {
         return result;
     }
 
-    public static String collectNextActionNameFromAction(final ChoreographerAction nextAction) {
+    //-------------------------------------------------------------------------------------------------
+	public static String collectNextActionNameFromAction(final ChoreographerAction nextAction) {
         if (nextAction != null) {
             return nextAction.getName();
         }
 
         return null;
     }
+    
+	// -------------------------------------------------------------------------------------------------
+	public static IssuedCertificatesResponseDTO convertCaCertificateListToIssuedCertificatesResponseDTO(
+			final Page<CaCertificate> certificateEntryList) {
+		Assert.notNull(certificateEntryList, "certificateEntryList is null");
+
+		final long count = certificateEntryList.getTotalElements();
+		final IssuedCertificatesResponseDTO certificatesResponseDTO = new IssuedCertificatesResponseDTO();
+		certificatesResponseDTO.setCount(count);
+		certificatesResponseDTO.setIssuedCertificates(
+				certificateEntryListToCertificatesResponseDTOList(certificateEntryList.getContent()));
+
+		return certificatesResponseDTO;
+	}
+	
+	// -------------------------------------------------------------------------------------------------
+	public static TrustedKeysResponseDTO convertCaTrustedKeyListToTrustedKeysResponseDTO(
+			final Page<CaTrustedKey> trustedKeyEntryList) {
+		Assert.notNull(trustedKeyEntryList, "trustedKeyEntryList is null");
+
+		final long count = trustedKeyEntryList.getTotalElements();
+		final TrustedKeysResponseDTO trustedKeysResponseDTO = new TrustedKeysResponseDTO();
+		trustedKeysResponseDTO.setCount(count);
+		trustedKeysResponseDTO
+				.setTrustedKeys(trustedKeyEntryListToTrustedKeysResponseDTOList(trustedKeyEntryList.getContent()));
+
+		return trustedKeysResponseDTO;
+	}
 	
 	//=================================================================================================
 	// assistant methods
@@ -1271,20 +1300,6 @@ public class DTOConverter {
     }
 	
 	// -------------------------------------------------------------------------------------------------
-	public static TrustedKeysResponseDTO convertCaTrustedKeyListToTrustedKeysResponseDTO(
-			final Page<CaTrustedKey> trustedKeyEntryList) {
-		Assert.notNull(trustedKeyEntryList, "trustedKeyEntryList is null");
-
-		final long count = trustedKeyEntryList.getTotalElements();
-		final TrustedKeysResponseDTO trustedKeysResponseDTO = new TrustedKeysResponseDTO();
-		trustedKeysResponseDTO.setCount(count);
-		trustedKeysResponseDTO
-				.setTrustedKeys(trustedKeyEntryListToTrustedKeysResponseDTOList(trustedKeyEntryList.getContent()));
-
-		return trustedKeysResponseDTO;
-	}
-
-	// -------------------------------------------------------------------------------------------------
 	private static List<TrustedKeyDTO> trustedKeyEntryListToTrustedKeysResponseDTOList(final List<CaTrustedKey> trustedKeyList) {
 		final List<TrustedKeyDTO> trustedKeyDTOs = new ArrayList<>(trustedKeyList.size());
 
@@ -1296,20 +1311,6 @@ public class DTOConverter {
 		}
 
 		return trustedKeyDTOs;
-	}
-
-	// -------------------------------------------------------------------------------------------------
-	public static IssuedCertificatesResponseDTO convertCaCertificateListToIssuedCertificatesResponseDTO(
-			final Page<CaCertificate> certificateEntryList) {
-		Assert.notNull(certificateEntryList, "certificateEntryList is null");
-
-		final long count = certificateEntryList.getTotalElements();
-		final IssuedCertificatesResponseDTO certificatesResponseDTO = new IssuedCertificatesResponseDTO();
-		certificatesResponseDTO.setCount(count);
-		certificatesResponseDTO.setIssuedCertificates(
-				certificateEntryListToCertificatesResponseDTOList(certificateEntryList.getContent()));
-
-		return certificatesResponseDTO;
 	}
 
 	// -------------------------------------------------------------------------------------------------
@@ -1343,6 +1344,7 @@ public class DTOConverter {
 		return certificateDTOs;
 	}
 
+	//-------------------------------------------------------------------------------------------------
 	private static IssuedCertificateStatus getStatus(final ZonedDateTime now, final ZonedDateTime validAfter,
 													 final ZonedDateTime validBefore, final ZonedDateTime revokedAt) {
 		Assert.notNull(now, "now cannot be null");
@@ -1357,5 +1359,4 @@ public class DTOConverter {
 		}
 		return IssuedCertificateStatus.GOOD;
 	}
-
 }

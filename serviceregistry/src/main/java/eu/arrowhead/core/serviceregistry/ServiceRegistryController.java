@@ -15,6 +15,7 @@
 package eu.arrowhead.core.serviceregistry;
 
 import java.time.format.DateTimeParseException;
+import java.util.Map;
 
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
@@ -1012,8 +1013,9 @@ public class ServiceRegistryController {
 		final String address = request.getAddress().toLowerCase().trim();
 		final int port = request.getPort();
 		final String authenticationInfo = request.getAuthenticationInfo();
+		final Map<String,String> metadata = request.getMetadata();
 		
-		return serviceRegistryDBService.createSystemResponse(systemName, address, port, authenticationInfo);
+		return serviceRegistryDBService.createSystemResponse(systemName, address, port, authenticationInfo, metadata);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1026,8 +1028,9 @@ public class ServiceRegistryController {
 		final String validatedAddress = request.getAddress().toLowerCase().trim();
 		final int validatedPort = request.getPort();
 		final String validatedAuthenticationInfo = request.getAuthenticationInfo();
+		final Map<String,String> metadata = request.getMetadata();
 		
-		return serviceRegistryDBService.updateSystemResponse(systemId, validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
+		return serviceRegistryDBService.updateSystemResponse(systemId, validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo, metadata);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1040,8 +1043,9 @@ public class ServiceRegistryController {
 		final String validatedAddress = request.getAddress() != null ? request.getAddress().toLowerCase().toLowerCase().trim() : "";
 		final Integer validatedPort = request.getPort();
 		final String validatedAuthenticationInfo = request.getAuthenticationInfo();
+		final Map<String,String> metadata = request.getMetadata();
 		
-		return serviceRegistryDBService.mergeSystemResponse(systemId, validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
+		return serviceRegistryDBService.mergeSystemResponse(systemId, validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo, metadata);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -1082,6 +1086,10 @@ public class ServiceRegistryController {
 		}
 		
 		if (request.getAuthenticationInfo() != null) {
+			needChange = true;
+		}
+		
+		if (request.getMetadata() != null) {
 			needChange = true;
 		}
 		
@@ -1305,6 +1313,10 @@ public class ServiceRegistryController {
 		}
 		
 		if (request.getProviderSystem() != null && request.getProviderSystem().getAuthenticationInfo() != null) {
+			needChange = true;
+		}
+		
+		if (request.getProviderSystem() != null && request.getProviderSystem().getMetadata() != null) {
 			needChange = true;
 		}
 		

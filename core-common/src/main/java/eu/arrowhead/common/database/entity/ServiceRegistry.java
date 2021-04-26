@@ -73,7 +73,7 @@ public class ServiceRegistry {
 	@Enumerated(EnumType.STRING)
 	private ServiceSecurityType secure = ServiceSecurityType.NOT_SECURE;
 	
-	@Column(nullable = true, columnDefinition = "TEXT")
+	@Column(nullable = true, columnDefinition = "MEDIUMTEXT")
 	private String metadata;
 	
 	@Column(nullable = true)

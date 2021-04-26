@@ -795,11 +795,11 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final ServiceInterfaceResponseDTO serviceInterfaceResponseDTO = new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null);
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(List.of(serviceInterfaceResponseDTO));
 		final ServiceRegistryResponseDTO srEntry2 = new ServiceRegistryResponseDTO();
-		srEntry2.setProvider(new SystemResponseDTO(2, "d", "e", 6, null, null, null));
+		srEntry2.setProvider(new SystemResponseDTO(2, "d", "e", 6, null, null, null, null));
 		srEntry2.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry2.setInterfaces(List.of(serviceInterfaceResponseDTO));
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -835,11 +835,11 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinition = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinition);
 		srEntry.setInterfaces(interfaces);
 		final ServiceRegistryResponseDTO srEntry2 = new ServiceRegistryResponseDTO();
-		srEntry2.setProvider(new SystemResponseDTO(2, "d", "e", 6, null, null, null));
+		srEntry2.setProvider(new SystemResponseDTO(2, "d", "e", 6, null, null, null, null));
 		srEntry2.setServiceDefinition(serviceDefinition);
 		srEntry2.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -873,7 +873,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinition = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinition);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -925,7 +925,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -978,7 +978,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1031,7 +1031,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1085,7 +1085,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1140,7 +1140,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1220,7 +1220,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1270,7 +1270,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1337,7 +1337,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1417,7 +1417,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1496,7 +1496,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1576,7 +1576,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1657,7 +1657,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1737,7 +1737,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1815,7 +1815,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1896,7 +1896,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1977,7 +1977,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2050,7 +2050,7 @@ public class OrchestratorServiceTest {
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null), 
 																	 new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-XML", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2109,7 +2109,7 @@ public class OrchestratorServiceTest {
 		consumerSystem.setPort(1234);
 		
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2177,7 +2177,7 @@ public class OrchestratorServiceTest {
 		consumerSystem.setPort(1234);
 		
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2238,7 +2238,7 @@ public class OrchestratorServiceTest {
 		consumerSystem.setPort(1234);
 		
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2298,7 +2298,7 @@ public class OrchestratorServiceTest {
 		consumerSystem.setPort(1234);
 		
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2359,7 +2359,7 @@ public class OrchestratorServiceTest {
 		consumerSystem.setPort(1234);
 		
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2422,7 +2422,7 @@ public class OrchestratorServiceTest {
 		consumerSystem.setPort(1234);
 		
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2484,7 +2484,7 @@ public class OrchestratorServiceTest {
 		consumerSystem.setPort(1234);
 		
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2545,7 +2545,7 @@ public class OrchestratorServiceTest {
 		consumerSystem.setPort(1234);
 		
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2604,7 +2604,7 @@ public class OrchestratorServiceTest {
 		consumerSystem.setPort(1234);
 		
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2661,7 +2661,7 @@ public class OrchestratorServiceTest {
 		consumerSystem.setPort(1234);
 		
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2727,7 +2727,7 @@ public class OrchestratorServiceTest {
 		consumerSystem.setPort(1234);
 		
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2791,7 +2791,7 @@ public class OrchestratorServiceTest {
 		consumerSystem.setPort(1234);
 		
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2850,7 +2850,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
