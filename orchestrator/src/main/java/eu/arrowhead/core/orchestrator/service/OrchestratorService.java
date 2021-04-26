@@ -112,6 +112,9 @@ public class OrchestratorService {
 	@Resource(name = CoreCommonConstants.QOSMANAGER)
 	private QoSManager qosManager;
 	
+	@Value(CoreCommonConstants.$ORCHESTRATOR_USE_FLEXIBLE_STORE_WD)
+	private boolean useFlexibleStore;
+	
 	@Value(CoreCommonConstants.$ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD)
 	private boolean gateKeeperIsPresent;
 	
@@ -254,8 +257,19 @@ public class OrchestratorService {
 	    return new OrchestrationResponseDTO(orList);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public OrchestrationResponseDTO orchestrationFromStore(final OrchestrationFormRequestDTO orchestrationFormRequestDTO) { //TODO junit
+		logger.debug("orchestrationFromStore started ...");		
+		
+		if (useFlexibleStore) {
+			return orchestrationFromFlexibleStore(orchestrationFormRequestDTO);
+		} else {
+			return orchestrationFromOriginalStore(orchestrationFormRequestDTO);
+		}
+	}
+
 	//-------------------------------------------------------------------------------------------------	
-	public OrchestrationResponseDTO orchestrationFromStore(final OrchestrationFormRequestDTO orchestrationFormRequestDTO) {
+	public OrchestrationResponseDTO orchestrationFromOriginalStore(final OrchestrationFormRequestDTO orchestrationFormRequestDTO) {
 		logger.debug("orchestrationFromStore started ...");		
 		
 		if (orchestrationFormRequestDTO == null) {
@@ -1079,5 +1093,43 @@ public class OrchestratorService {
 		}	
 
         return new OrchestrationResponseDTO(icnResultDTO.getResponse());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private OrchestrationResponseDTO orchestrationFromFlexibleStore(final OrchestrationFormRequestDTO orchestrationFormRequestDTO) {
+		// TODO continue
+		
+		// check flags - intercloud related flag are not supported yet
+		// validation - cross, requester system, service def
+		
+		// find rules
+		// a) use service def and requester system name => add all to the rules list
+		// b) use service def where consumer metadata is available: for every such rule
+		//     1) create a union of metadata (using the requester system metadata, if any)
+		//     2) using SR find systems the match this union (new service in SR) => if the result contains the requester system, then this rule is valid => add to the rules list
+		// sorting rules by priority
+		
+		// find SR records
+		// for every rule,
+		//	   1) use query with service def, service intf (if any), service metadata (if any), ping flag, security (if any), version (if any)
+		//     2) if rule has provider name, we filter every provider that not match 
+		// 	   3) filter returned records with preferred providers (if any)
+		//     4) filter returned records with provider metadata
+		//     5) add results to the list (if not contain it already)
+		
+		// WE SKIP the authorization (for now?)
+		
+		// matchmaking (if necessary)
+		// token generation (if necessary)
+		// return
+		
+		// Questions:
+		// * One or more query to SR to find consumers based on metadata?
+		// * One or more query to SR to find SR for rules?
+		// * What about rules with name and metadata? Maybe we don't want to allow that case.
+		// * Interface requirements in rule selection?
+		// * QOS?
+		
+		return null;
 	}
 }
