@@ -39,7 +39,6 @@ import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.ExceptionType;
-import eu.arrowhead.relay.RelayCryptographer;
 
 @RunWith(SpringRunner.class)
 public class RelayCryptographerEncodeTest {

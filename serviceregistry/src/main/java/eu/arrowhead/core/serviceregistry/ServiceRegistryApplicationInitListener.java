@@ -72,7 +72,7 @@ public class ServiceRegistryApplicationInitListener extends ApplicationInitListe
 
             final String authInfo = sslProperties.isSslEnabled() ? Base64.getEncoder().encodeToString(publicKey.getEncoded()) : null;
             final SystemRequestDTO systemRequestDTO = new SystemRequestDTO(name, coreSystemRegistrationProperties.getCoreSystemDomainName(),
-                                                                           coreSystemRegistrationProperties.getCoreSystemDomainPort(), authInfo);
+                                                                           coreSystemRegistrationProperties.getCoreSystemDomainPort(), authInfo, null);
 
             final ServiceSecurityType securityType = sslProperties.isSslEnabled() ? ServiceSecurityType.CERTIFICATE : ServiceSecurityType.NOT_SECURE;
             final String serviceInterface = sslProperties.isSslEnabled() ? CommonConstants.HTTP_SECURE_JSON : CommonConstants.HTTP_INSECURE_JSON;

@@ -14,13 +14,13 @@
 
 package eu.arrowhead.common.dto.internal;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import eu.arrowhead.common.dto.shared.DeviceRegistryResponseDTO;
-import eu.arrowhead.common.dto.shared.SystemRegistryResponseDTO;
-
 import java.io.Serializable;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+import eu.arrowhead.common.dto.shared.DeviceRegistryResponseDTO;
 
 @JsonInclude(Include.NON_NULL)
 public class DeviceRegistryListResponseDTO implements Serializable {

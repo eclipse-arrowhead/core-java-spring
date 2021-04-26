@@ -162,24 +162,24 @@ public class SystemRegistryDBService {
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public SystemResponseDTO createSystemDto(final String systemName, final String address, final int port, final String authenticationInfo) {
+    public SystemResponseDTO createSystemDto(final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) {
         logger.debug("createSystemResponse started...");
 
-        return DTOConverter.convertSystemToSystemResponseDTO(createSystem(systemName, address, port, authenticationInfo));
+        return DTOConverter.convertSystemToSystemResponseDTO(createSystem(systemName, address, port, authenticationInfo, metadata));
     }
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
     public SystemResponseDTO updateSystemDto(final long systemId, final String systemName, final String address, final int port,
-                                             final String authenticationInfo) {
+                                             final String authenticationInfo, final Map<String,String> metadata) {
         logger.debug("updateSystemResponse started...");
 
-        return DTOConverter.convertSystemToSystemResponseDTO(updateSystem(systemId, systemName, address, port, authenticationInfo));
+        return DTOConverter.convertSystemToSystemResponseDTO(updateSystem(systemId, systemName, address, port, authenticationInfo, metadata));
     }
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public System updateSystem(final long systemId, final String systemName, final String address, final int port, final String authenticationInfo) {
+    public System updateSystem(final long systemId, final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) {
         logger.debug("updateSystem started...");
 
         final long validatedSystemId = validateId(systemId);
@@ -206,6 +206,7 @@ public class SystemRegistryDBService {
             system.setAddress(validatedAddress);
             system.setPort(validatedPort);
             system.setAuthenticationInfo(authenticationInfo);
+            system.setMetadata(Utilities.map2Text(metadata));
 
             return systemRepository.saveAndFlush(system);
         } catch (final InvalidParameterException ex) {
@@ -239,15 +240,15 @@ public class SystemRegistryDBService {
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
     public SystemResponseDTO mergeSystemResponse(final long systemId, final String systemName, final String address, final Integer port,
-                                                 final String authenticationInfo) {
+                                                 final String authenticationInfo, final Map<String,String> metadata) {
         logger.debug("mergeSystemResponse started...");
 
-        return DTOConverter.convertSystemToSystemResponseDTO(mergeSystem(systemId, systemName, address, port, authenticationInfo));
+        return DTOConverter.convertSystemToSystemResponseDTO(mergeSystem(systemId, systemName, address, port, authenticationInfo, metadata));
     }
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public System mergeSystem(final long systemId, final String systemName, final String address, final Integer port, final String authenticationInfo) {
+    public System mergeSystem(final long systemId, final String systemName, final String address, final Integer port, final String authenticationInfo, final Map<String,String> metadata) {
         logger.debug("mergeSystem started...");
 
         final long validatedSystemId = validateId(systemId);
@@ -287,6 +288,10 @@ public class SystemRegistryDBService {
             if (Utilities.notEmpty(authenticationInfo)) {
                 system.setAuthenticationInfo(authenticationInfo);
             }
+            
+            if (metadata != null) {
+            	system.setMetadata(Utilities.map2Text(metadata));
+            }
 
             return systemRepository.saveAndFlush(system);
         } catch (final InvalidParameterException ex) {
@@ -299,7 +304,7 @@ public class SystemRegistryDBService {
 
 
     //-------------------------------------------------------------------------------------------------
-    public DeviceResponseDTO getDeviceById(long deviceId) {
+    public DeviceResponseDTO getDeviceById(final long deviceId) {
         logger.debug("getDeviceById started...");
 
         try {
@@ -676,10 +681,10 @@ public class SystemRegistryDBService {
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public System createSystem(final String systemName, final String address, final int port, final String authenticationInfo) {
+    public System createSystem(final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) {
         logger.debug("createSystem started...");
 
-        final System system = validateNonNullSystemParameters(systemName, address, port, authenticationInfo);
+        final System system = validateNonNullSystemParameters(systemName, address, port, authenticationInfo, metadata);
 
         try {
             return systemRepository.saveAndFlush(system);
@@ -701,7 +706,7 @@ public class SystemRegistryDBService {
         try {
             certificateSigningRequest = securityUtilities
                     .createCertificateSigningRequest(creationRequestDTO.getCommonName(), keyPair, CertificateType.AH_SYSTEM, host, address);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.error(e.getMessage(), e);
             throw new ArrowheadException("Unable to create certificate signing request: " + e.getMessage());
         }
@@ -789,8 +794,7 @@ public class SystemRegistryDBService {
 
         final Map<String, String> map = new HashMap<>();
 
-        metadata.forEach((k, v) ->
-                         {
+        metadata.forEach((k, v) -> {
                              if (Objects.nonNull(v)) {
                                  map.put(k.trim(), v.trim());
                              }
@@ -837,7 +841,7 @@ public class SystemRegistryDBService {
     }
 
     //-------------------------------------------------------------------------------------------------
-    private System validateNonNullSystemParameters(final String systemName, final String address, final int port, final String authenticationInfo) {
+    private System validateNonNullSystemParameters(final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) {
         logger.debug("validateNonNullSystemParameters started...");
 
         validateNonNullParameters(systemName, address);
@@ -855,7 +859,7 @@ public class SystemRegistryDBService {
 
         checkConstraintsOfSystemTable(validatedSystemName, validatedAddress, port);
 
-        return new System(validatedSystemName, validatedAddress, port, authenticationInfo);
+        return new System(validatedSystemName, validatedAddress, port, authenticationInfo, Utilities.map2Text(metadata));
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -969,15 +973,16 @@ public class SystemRegistryDBService {
     }
 
     //-------------------------------------------------------------------------------------------------
-    private System findOrCreateSystem(SystemRequestDTO requestSystemDto) {
+    private System findOrCreateSystem(final SystemRequestDTO requestSystemDto) {
         return findOrCreateSystem(requestSystemDto.getSystemName(),
                                   requestSystemDto.getAddress(),
                                   requestSystemDto.getPort(),
-                                  requestSystemDto.getAuthenticationInfo());
+                                  requestSystemDto.getAuthenticationInfo(),
+                                  requestSystemDto.getMetadata());
     }
 
     //-------------------------------------------------------------------------------------------------
-    private System findOrCreateSystem(final String name, final String address, final int port, final String authenticationInfo) {
+    private System findOrCreateSystem(final String name, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) {
 
         final String validatedName = Utilities.lowerCaseTrim(name);
         final String validatedAddress = Utilities.lowerCaseTrim(address);
@@ -987,20 +992,23 @@ public class SystemRegistryDBService {
 
         if (optSystem.isPresent()) {
             provider = optSystem.get();
+            final String metadataStr = Utilities.map2Text(metadata);
             if (!Objects.equals(authenticationInfo, provider.getAuthenticationInfo()) ||
-                    !Objects.equals(validatedAddress, provider.getAddress())) { // authentication info or system has changed
+                !Objects.equals(validatedAddress, provider.getAddress()) || 
+                !Objects.equals(metadataStr, provider.getMetadata())) { // authentication info or system has changed
                 provider.setAuthenticationInfo(authenticationInfo);
                 provider.setAddress(validatedAddress);
+                provider.setMetadata(metadataStr);
                 provider = systemRepository.saveAndFlush(provider);
             }
         } else {
-            provider = createSystem(validatedName, validatedAddress, port, authenticationInfo);
+            provider = createSystem(validatedName, validatedAddress, port, authenticationInfo, metadata);
         }
         return provider;
     }
 
     //-------------------------------------------------------------------------------------------------
-    private Device findOrCreateDevice(DeviceRequestDTO requestDeviceDto) {
+    private Device findOrCreateDevice(final DeviceRequestDTO requestDeviceDto) {
         return findOrCreateDevice(requestDeviceDto.getDeviceName(),
                                   requestDeviceDto.getAddress(),
                                   requestDeviceDto.getMacAddress(),
@@ -1008,7 +1016,7 @@ public class SystemRegistryDBService {
     }
 
     //-------------------------------------------------------------------------------------------------
-    private Device findOrCreateDevice(String deviceName, String address, String macAddress, String authenticationInfo) {
+    private Device findOrCreateDevice(final String deviceName, final String address, final String macAddress, final String authenticationInfo) {
 
         final String validateName = Utilities.lowerCaseTrim(deviceName);
         final String validateAddress = Utilities.lowerCaseTrim(address);
@@ -1082,6 +1090,7 @@ public class SystemRegistryDBService {
         final String address = Utilities.firstNotNullIfExists(request.getAddress(), device.getAddress());
         final String macAddress = Utilities.firstNotNullIfExists(request.getDeviceName(), device.getDeviceName());
         final String authenticationInfo = Utilities.firstNotNullIfExists(request.getAuthenticationInfo(), device.getAuthenticationInfo());
+        
         return findOrCreateDevice(name, address, macAddress, authenticationInfo);
     }
 
@@ -1092,7 +1101,9 @@ public class SystemRegistryDBService {
         final String address = Utilities.firstNotNullIfExists(request.getAddress(), system.getAddress());
         final int port = request.getPort() > 0 ? request.getPort() : system.getPort();
         final String authenticationInfo = Utilities.firstNotNullIfExists(request.getAuthenticationInfo(), system.getAuthenticationInfo());
-        return findOrCreateSystem(name, address, port, authenticationInfo);
+        final Map<String,String> metadata = request.getMetadata() != null ? request.getMetadata() : Utilities.text2Map(system.getMetadata());
+        
+        return findOrCreateSystem(name, address, port, authenticationInfo, metadata);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -1134,7 +1145,7 @@ public class SystemRegistryDBService {
     }
 
     //-------------------------------------------------------------------------------------------------
-    private ZonedDateTime getZonedDateTime(SystemRegistryRequestDTO request) {
+    private ZonedDateTime getZonedDateTime(final SystemRegistryRequestDTO request) {
         return Utilities.isEmpty(request.getEndOfValidity()) ? null : Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
     }
 

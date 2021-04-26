@@ -259,7 +259,7 @@ public class EventHandlerService {
 	}	
 	
 	//-------------------------------------------------------------------------------------------------
-	private void validateDateLimits( SubscriptionRequestDTO request ) {
+	private void validateDateLimits(final SubscriptionRequestDTO request) {
 		logger.debug("validateDateLimits started...");
 		
 		final ZonedDateTime now  = ZonedDateTime.now();

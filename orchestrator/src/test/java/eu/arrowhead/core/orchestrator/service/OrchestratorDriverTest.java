@@ -682,7 +682,7 @@ public class OrchestratorDriverTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private OrchestrationResultDTO getOrchestrationResultDTO(final int index) {
-		final SystemResponseDTO provider = new SystemResponseDTO(index, "system" + index, "127.0.0." + index, 1200 + index, null, null, null); 
+		final SystemResponseDTO provider = new SystemResponseDTO(index, "system" + index, "127.0.0." + index, 1200 + index, null, null, null, null); 
 		final ServiceDefinitionResponseDTO service = new ServiceDefinitionResponseDTO(index, "service" + index, null, null);
 		final List<ServiceInterfaceResponseDTO> intfs = new ArrayList<>(1);
 		intfs.add(new ServiceInterfaceResponseDTO(1, "HTTP-SECURE-JSON", null, null));
@@ -699,8 +699,8 @@ public class OrchestratorDriverTest {
 		final List<ServiceInterfaceResponseDTO> intfs2 = new ArrayList<>(1);
 		intfs2.add(interface1);
 		intfs2.add(new ServiceInterfaceResponseDTO(2, "HTTP-SECURE-XML", null, null));
-		final SystemResponseDTO provider1 = new SystemResponseDTO(1, "system1", "127.0.0.1", 1201, null, null, null); 
-		final SystemResponseDTO provider2 = new SystemResponseDTO(2, "system2", "127.0.0.2", 1202, null, null, null);
+		final SystemResponseDTO provider1 = new SystemResponseDTO(1, "system1", "127.0.0.1", 1201, null, null, null, null); 
+		final SystemResponseDTO provider2 = new SystemResponseDTO(2, "system2", "127.0.0.2", 1202, null, null, null, null);
 		
 		final ServiceRegistryResponseDTO dto1 = new ServiceRegistryResponseDTO();
 		dto1.setId(1);

@@ -54,7 +54,7 @@ public class DTOUtilitiesTest {
 		request.setAddress("localhost");
 		request.setPort(1234);
 		
-		final SystemResponseDTO response = new SystemResponseDTO(1, "name", "localhost", 1234, null, null, null);
+		final SystemResponseDTO response = new SystemResponseDTO(1, "name", "localhost", 1234, null, null, null, null);
 		
 		Assert.assertEquals(true, DTOUtilities.equalsSystemInResponseAndRequest(response, request));
 	}
@@ -67,7 +67,7 @@ public class DTOUtilitiesTest {
 		request.setAddress("localhost  ");
 		request.setPort(1234);
 		
-		final SystemResponseDTO response = new SystemResponseDTO(1, " nAme", "\tlocalhost", 1234, null, null, null);
+		final SystemResponseDTO response = new SystemResponseDTO(1, " nAme", "\tlocalhost", 1234, null, null, null, null);
 		
 		Assert.assertEquals(true, DTOUtilities.equalsSystemInResponseAndRequest(response, request));
 	}

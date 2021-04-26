@@ -65,7 +65,7 @@ public class ServiceEndOfValidityCheckTaskTest {
 		
 		final ZonedDateTime now = ZonedDateTime.now();		
 		final ServiceDefinition serviceDefinition = new ServiceDefinition("testService");
-		final System testSystem = new System("testSystem", "testAddress", 1, "testAuthenticationInfo");
+		final System testSystem = new System("testSystem", "testAddress", 1, "testAuthenticationInfo", null);
 		
 		final ServiceRegistry pastTTL = new ServiceRegistry(serviceDefinition, testSystem, "testUri", now.minusMinutes(10), ServiceSecurityType.TOKEN, "", 1);
 		pastTTL.setId(1);

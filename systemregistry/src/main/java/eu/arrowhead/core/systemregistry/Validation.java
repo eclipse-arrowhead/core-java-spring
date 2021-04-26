@@ -20,7 +20,6 @@ import java.util.Objects;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
@@ -109,6 +108,10 @@ public class Validation {
 
         if (request.getAuthenticationInfo() != null) {
             needChange = true;
+        }
+        
+        if (request.getMetadata() != null) {
+        	needChange = true;
         }
 
         if (!needChange) {
@@ -282,7 +285,7 @@ public class Validation {
     }
 
     //-------------------------------------------------------------------------------------------------
-    void validateDevice(@RequestBody final DeviceRequestDTO deviceRequestDto, final String origin) {
+    void validateDevice(final DeviceRequestDTO deviceRequestDto, final String origin) {
         if (Utilities.isEmpty(deviceRequestDto.getDeviceName())) {
             throw new BadPayloadException("Device name is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
         }
@@ -330,9 +333,10 @@ public class Validation {
                 needChange = true;
             } else if (Objects.nonNull(system.getAuthenticationInfo())) {
                 needChange = true;
+            } else if (Objects.nonNull(system.getMetadata())) {
+            	needChange = true;
             }
         }
-
 
         if (request.getEndOfValidity() != null) {
             needChange = true;

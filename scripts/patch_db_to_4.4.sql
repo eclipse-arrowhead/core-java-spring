@@ -9,3 +9,8 @@ ALTER TABLE `service_registry` DROP INDEX `service_registry_pair`;
 ALTER TABLE `service_registry` ADD CONSTRAINT `service_registry_triplet` UNIQUE (`service_id`,`system_id`, `service_uri`);
 ALTER TABLE `service_registry` ADD CONSTRAINT `service_registry_service` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE;
 ALTER TABLE `service_registry` ADD CONSTRAINT `service_registry_system` FOREIGN KEY (`system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE;
+
+ALTER TABLE `system_` ADD COLUMN `metadata` mediumtext NULL;
+ALTER TABLE `service_registry` MODIFY `metadata` mediumtext NULL;
+ALTER TABLE `subscription` MODIFY `filter_meta_data` mediumtext NULL;
+ALTER TABLE `foreign_system` ADD COLUMN `metadata` mediumtext NULL;

@@ -52,7 +52,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.CaCertificate;
 import eu.arrowhead.common.dto.internal.AddTrustedKeyRequestDTO;
@@ -264,7 +263,8 @@ public class CertificateAuthorityServiceTest {
     public void testSignCertificateValidBase64DerCsr() throws IOException {
         final CertificateSigningRequestDTO request = buildRequest("certificates/consumer.csr");
 
-        final CertificateSigningResponseDTO response = service.signCertificate(request, SIGN_REQUESTER_VALID);
+        @SuppressWarnings("unused")
+		final CertificateSigningResponseDTO response = service.signCertificate(request, SIGN_REQUESTER_VALID);
 
         verify(caCertificateDBService).saveCertificateInfo(eq(CONSUMER_CN), any(), eq(SIGN_REQUESTER_VALID), any(), any());
     }
