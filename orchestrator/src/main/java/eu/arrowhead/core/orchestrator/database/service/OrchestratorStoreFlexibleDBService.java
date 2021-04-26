@@ -226,7 +226,7 @@ public class OrchestratorStoreFlexibleDBService {
 			throw new InvalidParameterException("Specified interface name is not valid: " + entity.getServiceInterfaceName());
 		}
 		
-		if (entity.getPriority() < 0) {
+		if (entity.getPriority() <= 0) {
 			throw new InvalidParameterException("Priority must be a positive number");
 		}
 	}

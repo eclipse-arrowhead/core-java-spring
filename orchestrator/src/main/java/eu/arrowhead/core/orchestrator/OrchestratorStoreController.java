@@ -568,7 +568,7 @@ public class OrchestratorStoreController {
 				throw new BadPayloadException("Specified interface name is not valid: " + dto.getServiceInterfaceName(), HttpStatus.SC_BAD_REQUEST, origin);
 			}
 			
-			if (dto.getPriority() != null && dto.getPriority() < 0) {
+			if (dto.getPriority() != null && dto.getPriority() <= 0) {
 				throw new BadPayloadException("Priority must be a positive number", HttpStatus.SC_BAD_REQUEST, origin);
 			}
 		}
