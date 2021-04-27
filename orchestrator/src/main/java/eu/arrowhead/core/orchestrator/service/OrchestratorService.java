@@ -1096,17 +1096,15 @@ public class OrchestratorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private OrchestrationResponseDTO orchestrationFromFlexibleStore(final OrchestrationFormRequestDTO orchestrationFormRequestDTO) {
+	private OrchestrationResponseDTO orchestrationFromFlexibleStore(final OrchestrationFormRequestDTO request) {
 		logger.debug("orchestrationFromFlexibleStore started ...");
 		
+		validateFlexibleStoreRequest(request);
 		// TODO continue
-		
-		// check flags - intercloud, QOS related flags are not supported yet
-		// validation - cross, requester system, service def
 		
 		// query system from SR by name, address, port => existence check 
 		
-		// find rules (if request contains service intf requirements then for every query we need an additional where clause: service_intf is null or service_intf IN (request's service interface requirements))
+		// find rules (if request contains service intf requirements then for every query we need post-processing: service_intf is null or service_intf IN (request's service interface requirements))
 		// a) use service def and requester system name and metadata is empty => add all to the rules list
 		// b) use service def where consumer metadata is available: for every such rule
 		//     0) if consumer system name is not empty and not equals to requester name => drop it
@@ -1129,11 +1127,40 @@ public class OrchestratorService {
 		// return
 		
 		// Questions:
-		// * One or more query to SR to find SR for rules? Yes
+		// * One or more query to SR to find SR for rules? One query
 		// * What about rules with name and metadata? Can be both.
 		// * Interface requirements in rule selection? filter rules
 		// * QOS? 5.0
 		
 		return null;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void validateFlexibleStoreRequest(final OrchestrationFormRequestDTO request) {
+		logger.debug("orchestrationFormRequestDTO started ...");
+		
+		if (request == null) {
+			throw new InvalidParameterException("Request" + NULL_PARAMETER_ERROR_MESSAGE);
+		}
+		
+		// in this version of Flexible Store Orchestration some flags are not supported
+		checkUnsupportedFlags(request.getOrchestrationFlags());
+		
+		checkSystemRequestDTO(request.getRequesterSystem(), false); // consumer
+		checkServiceRequestForm(request, false);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void checkUnsupportedFlags(final OrchestrationFlags flags) {
+		logger.debug("checkUnsupportedFlags started ...");
+		Assert.notNull(flags, "Flags map" + NULL_PARAMETER_ERROR_MESSAGE);
+		
+		if (flags.getOrDefault(Flag.ENABLE_INTER_CLOUD, false) || flags.getOrDefault(Flag.TRIGGER_INTER_CLOUD, false)) {
+			throw new InvalidParameterException("Intercloud mode is not supported yet.");
+		}
+		
+		if (flags.getOrDefault(Flag.ENABLE_QOS, false)) {
+			throw new InvalidParameterException("Quality of Service requirements is not supported yet.");
+		}
 	}
 }

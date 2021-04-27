@@ -105,7 +105,9 @@ public class OrchestrationFormRequestDTO implements Serializable {
         if (orchestrationFlags.get(Flag.ONLY_PREFERRED)) {
         	for (final Iterator<PreferredProviderDataDTO> it = preferredProviders.iterator(); it.hasNext();) {
 				final PreferredProviderDataDTO provider = it.next();
-				if (!provider.isValid()) {
+				if (orchestrationFlags.get(Flag.ENABLE_INTER_CLOUD) && !provider.isValid()) {
+					it.remove();
+				} else if (!provider.isLocal()) {
 					it.remove();
 				}
 			}
