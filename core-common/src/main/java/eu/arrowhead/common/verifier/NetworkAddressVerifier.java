@@ -21,6 +21,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.exception.InvalidParameterException;
 
 @Component
 public class NetworkAddressVerifier {
@@ -30,7 +31,7 @@ public class NetworkAddressVerifier {
 	
 	public static final String IPV4_REGEX_STRING = "\\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b";
 	public static final String IPV6_REGEX_STRING = "\\A(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\\z";
-	public static final String DOMAIN_NAME_REGEX_STRING = "^((?!-)[A-Za-z0-9-]{1, 63}(?<!-)\\.)+[A-Za-z]{2, 6}$"; //https://www.geeksforgeeks.org/how-to-validate-a-domain-name-using-regular-expression/
+	public static final String DOMAIN_NAME_REGEX_STRING = "^((?!-)[A-Za-z0-9-]{1, 63}(?<!-)\\.)+[A-Za-z]{2, 6}$";
 	
 	private static final Pattern ipv4Pattern;
 	private static final Pattern ipv6Pattern;
@@ -42,67 +43,125 @@ public class NetworkAddressVerifier {
 		domainNamePattern = Pattern.compile(DOMAIN_NAME_REGEX_STRING);
 	}
 	
+	// TODO from props
+	private boolean allowSelfAddressing;
+	
+	// TODO from props
+	private boolean allowNonRoutableAddressing;
+	
 	private final Logger logger = LogManager.getLogger(NetworkAddressVerifier.class);
 	
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public boolean isValid(final String address) { //TODO junit
+	public void verify(final String address) throws InvalidParameterException { //TODO junit
+		logger.debug("verify started...");
+		
 		if (Utilities.isEmpty(address)) {
-			logger.debug("Newtwork address is empty");
-			return false;
+			throw new InvalidParameterException("Newtwork address is empty");
 		}
 		
-		final String candidate = address.trim();
+		final String candidate = address.toLowerCase().trim();
 		if (ipv4Pattern.matcher(candidate).matches()) {
-			return validateIPV4(candidate);
+			verifyIPV4(candidate);
 		}
 		if (ipv6Pattern.matcher(candidate).matches()) {
-			return validateIPV6(candidate);
+			verifyIPV6(candidate);
 		}
 		if (domainNamePattern.matcher(candidate).matches()) {
-			return validateDomainName(candidate);
+			verifyDomainName(candidate);
 		}
 		
-		return validate(candidate);
+		verifyNoType(candidate);
 	}
 	
 	//=================================================================================================
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private boolean validateIPV4(final String address) {
-		//TODO
+	private void verifyIPV4(final String candidate) {
+		logger.debug("verifyIPV4 started...");
 		
-		// Filter out IP placeholder(default route) (0.0.0.0)
-		// Filter out loopback (127.0.0.0 - 127.255.255.255)
-		// Filter out APIPA (Automatic Private IP Address: 169.254.?.?)
+		if (!allowSelfAddressing) {			
+			// Filter out IP placeholder(default route) (0.0.0.0)
+			if (candidate.equalsIgnoreCase("0.0.0.0")) {
+				throw new InvalidParameterException(candidate + " ipv4 newtwork address is invalid: self-addressing is disabled");
+			}
+			
+			// Filter out loopback (127.0.0.0 - 127.255.255.255)
+			if (candidate.startsWith("127")) {
+				throw new InvalidParameterException(candidate + " ipv4 newtwork address is invalid: self-addressing is disabled");
+			}
+		}
+		
+		if (!allowNonRoutableAddressing) {
+			// Filter out APIPA (Automatic Private IP Address: 169.254.?.?)
+			if (candidate.startsWith("169.254")) {
+				throw new InvalidParameterException(candidate + " ipv4 newtwork address is invalid: non-routable-addressing is disabled");
+			}
+		}
+		
 		// Filter out local broadcast (255.255.255.255)
-		// Filter out directed broadcast (cannot determine it without the subnet mask)
-		// Filter out multicast (Class D: 244.0.0.0 - 239.255.255.255)
-		return false;
+		if (candidate.equalsIgnoreCase("255.255.255.255")) {
+			throw new InvalidParameterException(candidate + " ipv4 newtwork address is invalid: local broadcast address is denied");
+		}
+		
+		// Could not filter out directed broadcast (cannot determine it without the subnet mask)
+
+		// Filter out multicast (Class D: 224.0.0.0 - 239.255.255.255)
+		final String[] octets = candidate.split("\\.");
+		final Integer firstOctet = Integer.valueOf(octets[0]);
+		if (firstOctet >= 224 && firstOctet <= 239) {
+			throw new InvalidParameterException(candidate + " ipv4 newtwork address is invalid: multicast addresses are denied");
+		}		
+		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private boolean validateIPV6(final String address) {
-		//TODO
-		// Filter out anycast
-		// Filter out multicast (prefix ff00::/8)
-		return false;
+	private void verifyIPV6(final String candidate) {
+		logger.debug("verifyIPV6 started...");
+		
+		if (!allowSelfAddressing) {
+			// Filter out unspecified address (0:0:0:0:0:0:0:0)
+			// Filter out loopback address (0:0:0:0:0:0:0:1)			
+			if (candidate.equalsIgnoreCase("0:0:0:0:0:0:0:0") || candidate.equalsIgnoreCase("0:0:0:0:0:0:0:1")) {
+				throw new InvalidParameterException(candidate + " ipv6 newtwork address is invalid: self-addressing is disabled");
+			}			
+		}
+
+		if (!allowNonRoutableAddressing) {
+			// Filter out link-local addresses (prefix fe80)
+			if (candidate.startsWith("fe80")) {
+				throw new InvalidParameterException(candidate + " ipv6 newtwork address is invalid: non-routable-addressing is disabled");
+			}
+		}
+		
+		// Filter out multicast (prefix ff)
+		if (candidate.startsWith("ff")) {
+			throw new InvalidParameterException(candidate + " ipv6 newtwork address is invalid: multicast addresses are denied");
+		}
+		
+		// Could not filter out anycast addresses (indistinguishable from other unicast addresses)
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private boolean validateDomainName(final String address) {
-		//TODO
-		return false;
+	private void verifyDomainName(final String candidate) {
+		logger.debug("verifyDomainName started...");
+		//TODO maybe should use some kind of white-list
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private boolean validate(final String address) {
-		//TODO
-		// Filter out 'localhost'
-		// Filter out 'loopback'
-		return false;
+	private void verifyNoType(final String candidate) {
+		logger.debug("verifyNoType started...");
+		
+		if (!allowSelfAddressing) {
+			// Filter out 'localhost' and 'loopback'
+			if (candidate.equalsIgnoreCase("localhost") || candidate.equalsIgnoreCase("loopback")) {
+				throw new InvalidParameterException(candidate + " no-type newtwork address is invalid: self-addressing is disabled");
+			}
+		}
+		
+		// TODO clarify the effects to docker		
 	}
 }
