@@ -1097,24 +1097,29 @@ public class OrchestratorService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private OrchestrationResponseDTO orchestrationFromFlexibleStore(final OrchestrationFormRequestDTO orchestrationFormRequestDTO) {
+		logger.debug("orchestrationFromFlexibleStore started ...");
+		
 		// TODO continue
 		
-		// check flags - intercloud related flag are not supported yet
+		// check flags - intercloud, QOS related flags are not supported yet
 		// validation - cross, requester system, service def
 		
-		// find rules
-		// a) use service def and requester system name => add all to the rules list
+		// query system from SR by name, address, port => existence check 
+		
+		// find rules (if request contains service intf requirements then for every query we need an additional where clause: service_intf is null or service_intf IN (request's service interface requirements))
+		// a) use service def and requester system name and metadata is empty => add all to the rules list
 		// b) use service def where consumer metadata is available: for every such rule
-		//     1) create a union of metadata (using the requester system metadata, if any)
-		//     2) using SR find systems the match this union (new service in SR) => if the result contains the requester system, then this rule is valid => add to the rules list
-		// sorting rules by priority
+		//     0) if consumer system name is not empty and not equals to requester name => drop it
+		//     1) create a union of system metadata and requester metadata (once)
+		//     2) if consumer metadata (from store) is part of the metadata of union, then this rule is valid => add to the rules list
+		// sorting rules by priority (secondary sort field: id)
 		
 		// find SR records
 		// for every rule,
-		//	   1) use query with service def, service intf (if any), service metadata (if any), ping flag, security (if any), version (if any)
+		//	   1) use query with service def, rule's service intf (if any), service metadata (if any, if metadata_search flag is true, then merge the two metadata_requirements before query), ping flag, security (if any), version (if any)
 		//     2) if rule has provider name, we filter every provider that not match 
 		// 	   3) filter returned records with preferred providers (if any)
-		//     4) filter returned records with provider metadata
+		//     4) filter returned records with provider metadata 
 		//     5) add results to the list (if not contain it already)
 		
 		// WE SKIP the authorization (for now?)
@@ -1124,11 +1129,10 @@ public class OrchestratorService {
 		// return
 		
 		// Questions:
-		// * One or more query to SR to find consumers based on metadata?
-		// * One or more query to SR to find SR for rules?
-		// * What about rules with name and metadata? Maybe we don't want to allow that case.
-		// * Interface requirements in rule selection?
-		// * QOS?
+		// * One or more query to SR to find SR for rules? Yes
+		// * What about rules with name and metadata? Can be both.
+		// * Interface requirements in rule selection? filter rules
+		// * QOS? 5.0
 		
 		return null;
 	}
