@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.Utilities;
@@ -43,6 +44,9 @@ public class NetworkAddressVerifier {
 		domainNamePattern = Pattern.compile(DOMAIN_NAME_REGEX_STRING);
 	}
 	
+	@Autowired
+	private CommonNamePartVerifier cnVerifier;
+	
 	// TODO from props
 	private boolean allowSelfAddressing;
 	
@@ -59,7 +63,7 @@ public class NetworkAddressVerifier {
 		logger.debug("verify started...");
 		
 		if (Utilities.isEmpty(address)) {
-			throw new InvalidParameterException("Newtwork address is empty");
+			throw new InvalidParameterException("network address is empty");
 		}
 		
 		final String candidate = address.toLowerCase().trim();
@@ -86,25 +90,25 @@ public class NetworkAddressVerifier {
 		if (!allowSelfAddressing) {			
 			// Filter out IP placeholder(default route) (0.0.0.0)
 			if (candidate.equalsIgnoreCase("0.0.0.0")) {
-				throw new InvalidParameterException(candidate + " ipv4 newtwork address is invalid: self-addressing is disabled");
+				throw new InvalidParameterException(candidate + " ipv4 network address is invalid: self-addressing is disabled");
 			}
 			
 			// Filter out loopback (127.0.0.0 - 127.255.255.255)
 			if (candidate.startsWith("127")) {
-				throw new InvalidParameterException(candidate + " ipv4 newtwork address is invalid: self-addressing is disabled");
+				throw new InvalidParameterException(candidate + " ipv4 network address is invalid: self-addressing is disabled");
 			}
 		}
 		
 		if (!allowNonRoutableAddressing) {
 			// Filter out APIPA (Automatic Private IP Address: 169.254.?.?)
 			if (candidate.startsWith("169.254")) {
-				throw new InvalidParameterException(candidate + " ipv4 newtwork address is invalid: non-routable-addressing is disabled");
+				throw new InvalidParameterException(candidate + " ipv4 network address is invalid: non-routable-addressing is disabled");
 			}
 		}
 		
 		// Filter out local broadcast (255.255.255.255)
 		if (candidate.equalsIgnoreCase("255.255.255.255")) {
-			throw new InvalidParameterException(candidate + " ipv4 newtwork address is invalid: local broadcast address is denied");
+			throw new InvalidParameterException(candidate + " ipv4 network address is invalid: local broadcast address is denied");
 		}
 		
 		// Could not filter out directed broadcast (cannot determine it without the subnet mask)
@@ -113,7 +117,7 @@ public class NetworkAddressVerifier {
 		final String[] octets = candidate.split("\\.");
 		final Integer firstOctet = Integer.valueOf(octets[0]);
 		if (firstOctet >= 224 && firstOctet <= 239) {
-			throw new InvalidParameterException(candidate + " ipv4 newtwork address is invalid: multicast addresses are denied");
+			throw new InvalidParameterException(candidate + " ipv4 network address is invalid: multicast addresses are denied");
 		}		
 		
 	}
@@ -123,23 +127,22 @@ public class NetworkAddressVerifier {
 		logger.debug("verifyIPV6 started...");
 		
 		if (!allowSelfAddressing) {
-			// Filter out unspecified address (0:0:0:0:0:0:0:0)
-			// Filter out loopback address (0:0:0:0:0:0:0:1)			
+			// Filter out unspecified address (0:0:0:0:0:0:0:0) and loopback address (0:0:0:0:0:0:0:1)			
 			if (candidate.equalsIgnoreCase("0:0:0:0:0:0:0:0") || candidate.equalsIgnoreCase("0:0:0:0:0:0:0:1")) {
-				throw new InvalidParameterException(candidate + " ipv6 newtwork address is invalid: self-addressing is disabled");
+				throw new InvalidParameterException(candidate + " ipv6 network address is invalid: self-addressing is disabled");
 			}			
 		}
 
 		if (!allowNonRoutableAddressing) {
 			// Filter out link-local addresses (prefix fe80)
 			if (candidate.startsWith("fe80")) {
-				throw new InvalidParameterException(candidate + " ipv6 newtwork address is invalid: non-routable-addressing is disabled");
+				throw new InvalidParameterException(candidate + " ipv6 network address is invalid: non-routable-addressing is disabled");
 			}
 		}
 		
 		// Filter out multicast (prefix ff)
 		if (candidate.startsWith("ff")) {
-			throw new InvalidParameterException(candidate + " ipv6 newtwork address is invalid: multicast addresses are denied");
+			throw new InvalidParameterException(candidate + " ipv6 network address is invalid: multicast addresses are denied");
 		}
 		
 		// Could not filter out anycast addresses (indistinguishable from other unicast addresses)
@@ -148,17 +151,21 @@ public class NetworkAddressVerifier {
 	//-------------------------------------------------------------------------------------------------
 	private void verifyDomainName(final String candidate) {
 		logger.debug("verifyDomainName started...");
-		//TODO maybe should use some kind of white-list
+		//TODO maybe we should offer some kind of white-listing possibility in future versions
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private void verifyNoType(final String candidate) {
 		logger.debug("verifyNoType started...");
 		
+		if (cnVerifier.isValid(candidate)) {
+			throw new InvalidParameterException(candidate + " no-type network address is invalid: only letters (english alphabet), numbers and dash (-) are allowed and have to start with a letter (also cannot end with dash).");
+		}
+		
 		if (!allowSelfAddressing) {
 			// Filter out 'localhost' and 'loopback'
 			if (candidate.equalsIgnoreCase("localhost") || candidate.equalsIgnoreCase("loopback")) {
-				throw new InvalidParameterException(candidate + " no-type newtwork address is invalid: self-addressing is disabled");
+				throw new InvalidParameterException(candidate + " no-type network address is invalid: self-addressing is disabled");
 			}
 		}
 		
