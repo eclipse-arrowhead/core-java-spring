@@ -64,7 +64,9 @@ import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
+import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.common.verifier.ServiceInterfaceNameVerifier;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 import io.swagger.annotations.Api;
@@ -176,6 +178,9 @@ public class ServiceRegistryController {
 	
 	@Autowired
 	private CommonNamePartVerifier cnVerifier;
+	
+	@Autowired
+	private NetworkAddressVerifier networkAddressVerifier;
 	
 	@Value(CoreCommonConstants.$USE_STRICT_SERVICE_DEFINITION_VERIFIER_WD)
 	private boolean useStrictServiceDefinitionVerifier;
@@ -1059,8 +1064,13 @@ public class ServiceRegistryController {
 		boolean needChange = false;
 		if (!Utilities.isEmpty(request.getAddress())) {
 			needChange = true;
-		}
-		
+			
+			try {			
+				networkAddressVerifier.verify(request.getAddress());
+			} catch (final InvalidParameterException ex) {
+				throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
+			}
+		}		
 		
 		if (!Utilities.isEmpty(request.getSystemName())) {
 			needChange = true;
@@ -1133,8 +1143,10 @@ public class ServiceRegistryController {
 			throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		if (Utilities.isEmpty(request.getAddress())) {
-			throw new BadPayloadException(SYSTEM_ADDRESS_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		try {			
+			networkAddressVerifier.verify(request.getAddress());
+		} catch (final InvalidParameterException ex) {
+			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		if (request.getPort() == null) {
@@ -1228,8 +1240,10 @@ public class ServiceRegistryController {
 			throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		if (Utilities.isEmpty(address)) {
-			throw new BadPayloadException("Address of the application system is blank", HttpStatus.SC_BAD_REQUEST, origin);
+		try {
+			networkAddressVerifier.verify(address);
+		} catch (final InvalidParameterException ex) {
+			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
@@ -1259,8 +1273,10 @@ public class ServiceRegistryController {
 			throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		if (Utilities.isEmpty(providerAddress)) {
-			throw new BadPayloadException("Address of the provider system is blank", HttpStatus.SC_BAD_REQUEST, origin);
+		try {
+			networkAddressVerifier.verify(providerAddress);
+		} catch (final Exception ex) {
+			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		if (providerPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || providerPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
@@ -1292,6 +1308,12 @@ public class ServiceRegistryController {
 		boolean needChange = false;
 		if (request.getProviderSystem() != null && !Utilities.isEmpty(request.getProviderSystem().getAddress())) {
 			needChange = true;
+			
+			try {
+				networkAddressVerifier.verify(request.getProviderSystem().getAddress());
+			} catch (final Exception ex) {
+				throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, origin);
+			}
 		}
 		
 		if (request.getProviderSystem() != null && !Utilities.isEmpty(request.getProviderSystem().getSystemName())) {

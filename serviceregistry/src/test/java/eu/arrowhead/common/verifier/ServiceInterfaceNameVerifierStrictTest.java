@@ -12,7 +12,7 @@
  *   Arrowhead Consortia - conceptualization
  ********************************************************************************/
 
-package eu.arrowhead.common.intf;
+package eu.arrowhead.common.verifier;
 
 import org.junit.Assert;
 import org.junit.Before;

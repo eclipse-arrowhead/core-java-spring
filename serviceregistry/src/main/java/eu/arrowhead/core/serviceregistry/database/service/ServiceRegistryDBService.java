@@ -65,6 +65,7 @@ import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
+import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.common.verifier.ServiceInterfaceNameVerifier;
 
 @Service
@@ -93,6 +94,9 @@ public class ServiceRegistryDBService {
 	
 	@Autowired
 	private CommonNamePartVerifier cnVerifier;
+	
+	@Autowired
+	private NetworkAddressVerifier networkAddressVerifier;
 	
 	@Autowired
 	private SSLProperties sslProperties;
@@ -197,6 +201,7 @@ public class ServiceRegistryDBService {
 		}
 		
 		final String validatedAddress = validateSystemParamString(address);
+		networkAddressVerifier.verify(validatedAddress);
 		final String validatedAuthenticationInfo = authenticationInfo;
 		
 		
@@ -295,6 +300,9 @@ public class ServiceRegistryDBService {
 		}
 
 		final String validatedAddress = validateAllowNullSystemParamString(address);
+		if (validatedAddress != null) {
+			networkAddressVerifier.verify(validatedAddress);
+		}
 		final String validatedAuthenticationInfo = authenticationInfo;
 		
 		try {
@@ -716,6 +724,8 @@ public class ServiceRegistryDBService {
 			final String validatedProviderAddress = (request.getProviderSystem() != null && !Utilities.isEmpty(request.getProviderSystem().getAddress())) ? 
 																										   request.getProviderSystem().getAddress().toLowerCase().trim() :
 																										   srEntry.getSystem().getAddress();
+			networkAddressVerifier.verify(validatedProviderAddress);
+																										   
 			final int validatedProviderPort = (request.getProviderSystem() != null && request.getProviderSystem().getPort() != null) ? request.getProviderSystem().getPort().intValue() :
 																																	   srEntry.getSystem().getPort();
 			
@@ -788,7 +798,12 @@ public class ServiceRegistryDBService {
 			Assert.isTrue(cnVerifier.isValid(serviceDefinition.getServiceDefinition()), "Service definition" + INVALID_FORMAT_ERROR_MESSAGE);
 		}
 		Assert.notNull(provider, "Provider is not specified.");
-		Assert.isTrue(cnVerifier.isValid(provider.getSystemName()), "Provider system name" + INVALID_FORMAT_ERROR_MESSAGE);		
+		Assert.isTrue(cnVerifier.isValid(provider.getSystemName()), "Provider system name" + INVALID_FORMAT_ERROR_MESSAGE);
+		try {
+			networkAddressVerifier.verify(provider.getAddress());
+		} catch (final InvalidParameterException ex) {
+			throw new IllegalArgumentException(ex.getMessage());
+		}
 	
 		
 		final String validatedServiceUri = Utilities.isEmpty(serviceUri) ? "" : serviceUri.trim();
@@ -825,7 +840,12 @@ public class ServiceRegistryDBService {
 			Assert.isTrue(cnVerifier.isValid(serviceDefinition.getServiceDefinition()), "Service definition" + INVALID_FORMAT_ERROR_MESSAGE);
 		}
 		Assert.notNull(provider, "Provider is not specified.");
-		Assert.isTrue(cnVerifier.isValid(provider.getSystemName()), "Provider system name" + INVALID_FORMAT_ERROR_MESSAGE);		
+		Assert.isTrue(cnVerifier.isValid(provider.getSystemName()), "Provider system name" + INVALID_FORMAT_ERROR_MESSAGE);
+		try {
+			networkAddressVerifier.verify(provider.getAddress());
+		} catch (final InvalidParameterException ex) {
+			throw new IllegalArgumentException(ex.getMessage());
+		}
 	
 		final String validatedServiceUri = Utilities.isEmpty(serviceUri) ? "" : serviceUri.trim();
 		if (checkServiceRegistryIfUniqueValidationNeeded(srEntry, serviceDefinition, provider, validatedServiceUri)) {
@@ -1226,9 +1246,7 @@ public class ServiceRegistryDBService {
 			throw new InvalidParameterException("System name" + INVALID_FORMAT_ERROR_MESSAGE);
 		}
 		
-		if (Utilities.isEmpty(address)) {
-			throw new InvalidParameterException("System address is null or empty");
-		}
+		networkAddressVerifier.verify(address);
 		
 		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
 			throw new InvalidParameterException(PORT_RANGE_ERROR_MESSAGE);
@@ -1327,7 +1345,11 @@ public class ServiceRegistryDBService {
 		Assert.notNull(request.getProviderSystem(), "Provider system is not specified.");
 		Assert.isTrue(!Utilities.isEmpty(request.getProviderSystem().getSystemName()), "Provider system name is not specified.");
 		Assert.isTrue(cnVerifier.isValid(request.getProviderSystem().getSystemName()), "Provider system name" + INVALID_FORMAT_ERROR_MESSAGE);		
-		Assert.isTrue(!Utilities.isEmpty(request.getProviderSystem().getAddress()), "Provider system address is not specified.");
+		try {
+			networkAddressVerifier.verify(request.getProviderSystem().getAddress());
+		} catch (final InvalidParameterException ex) {
+			throw new IllegalArgumentException(ex.getMessage());
+		}
 		Assert.notNull(request.getProviderSystem().getPort(), "Provider system port is not specified.");
 	}
 	

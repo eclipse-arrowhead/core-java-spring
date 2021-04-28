@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -52,6 +53,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -84,6 +86,8 @@ import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ExceptionType;
+import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 
 @RunWith(SpringRunner.class)
@@ -116,6 +120,9 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@MockBean(name = "mockServiceRegistryDBService") 
 	private ServiceRegistryDBService serviceRegistryDBService;
 	
+	@MockBean
+	private NetworkAddressVerifier networkAddressVerifier;
+	
 	//=================================================================================================
 	// methods
 	
@@ -123,6 +130,8 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Before
 	public void setup() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+		ReflectionTestUtils.setField(networkAddressVerifier, "allowSelfAddressing", true);
+		ReflectionTestUtils.setField(networkAddressVerifier, "allowNonRoutableAddressing", true);
 	}
 
 	//=================================================================================================
@@ -612,13 +621,14 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testUnregisterServiceAddressEmpty() throws Exception {
 		final String queryStr = createQueryStringForUnregister("s", "x", "", 1, "/path");
+		doThrow(new InvalidParameterException("test msg")).when(networkAddressVerifier).verify(anyString());
 		
 		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(SERVICEREGISTRY_UNREGISTER_URI, error.getOrigin());
-		Assert.assertEquals("Address of the provider system is blank", error.getErrorMessage());
+		Assert.assertEquals("test msg", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -773,7 +783,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@SuppressWarnings("squid:S2699") // because of false positive in sonar
 	@Test
 	public void testQueryRegistryBySystemDTONullAddress() throws Exception {
-		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
+		doThrow(new InvalidParameterException("test msg")).when(networkAddressVerifier).verify(any());
 		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO("name", null, 45000, null, null), status().isBadRequest());
 		
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);

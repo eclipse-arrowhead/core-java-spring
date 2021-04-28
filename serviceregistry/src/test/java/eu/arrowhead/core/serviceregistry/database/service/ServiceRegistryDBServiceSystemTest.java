@@ -31,6 +31,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.data.domain.Page;
@@ -38,6 +39,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
@@ -45,6 +47,7 @@ import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
+import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 
 @RunWith (SpringRunner.class)
 public class ServiceRegistryDBServiceSystemTest {
@@ -58,23 +61,19 @@ public class ServiceRegistryDBServiceSystemTest {
 	@Mock
 	private SystemRepository systemRepository;
 	
-	@Mock
+	@Spy
 	private CommonNamePartVerifier cnVerifier;
 	
-	private CommonNamePartVerifier realVerifier = new CommonNamePartVerifier();
+	@Spy
+	private NetworkAddressVerifier networkAddressVerifier;
 	
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
 	@Before
-	public void setUp() {
-		when(cnVerifier.isValid(any(String.class))).thenAnswer(new Answer<Boolean>() {
-			@Override
-			public Boolean answer(final InvocationOnMock invocation) throws Throwable {
-				return realVerifier.isValid(invocation.getArgument(0));
-			}
-		});
+	public void setup() {
+		ReflectionTestUtils.setField(networkAddressVerifier, "cnVerifier", cnVerifier);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
