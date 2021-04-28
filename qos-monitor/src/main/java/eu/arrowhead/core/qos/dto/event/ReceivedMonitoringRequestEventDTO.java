@@ -9,6 +9,7 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.util.Assert;
 
+import eu.arrowhead.core.qos.QosMonitorConstants;
 import eu.arrowhead.core.qos.service.event.QosMonitorEventType;
 
 public class ReceivedMonitoringRequestEventDTO implements Serializable{
@@ -20,7 +21,7 @@ public class ReceivedMonitoringRequestEventDTO implements Serializable{
 
 	private QosMonitorEventType eventType;
 	private String payload;
-	private Map<String, UUID> metaData;
+	private Map<String, String> metaData;
 	private ZonedDateTime timeStamp;
 
 	//=================================================================================================
@@ -32,13 +33,13 @@ public class ReceivedMonitoringRequestEventDTO implements Serializable{
 	//-------------------------------------------------------------------------------------------------
 	public QosMonitorEventType getEventType() {	return eventType; }
 	public String getPayload() { return payload; }
-	public Map<String, UUID> getMetaData() { return metaData; }
+	public Map<String, String> getMetaData() { return metaData; }
 	public ZonedDateTime getTimeStamp() { return timeStamp; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setEventType(final QosMonitorEventType eventType) { this.eventType = eventType; }
 	public void setPayload(final String payload) { this.payload = payload; }
-	public void setMetaData( final Map<String, UUID> metaData ) { this.metaData = metaData; }
+	public void setMetaData( final Map<String, String> metaData ) { this.metaData = metaData; }
 	public void setTimeStamp(final ZonedDateTime timeStamp) { this.timeStamp = timeStamp; }
 
 	//=================================================================================================
@@ -49,8 +50,8 @@ public class ReceivedMonitoringRequestEventDTO implements Serializable{
 	private void validateFields() {
 
 		Assert.isTrue(eventType.equals(QosMonitorEventType.RECEIVED_MONITORING_REQUEST), "Event type must be: RECEIVED_MONITORING_REQUEST");
-		Assert.isTrue(payload.equalsIgnoreCase("RECEIVED_MONITORING_REQUEST"), "Payload must be: RECEIVED_MONITORING_REQUEST");
-		Assert.isTrue(metaData.containsKey("processID"), "Meta data must contain: processID");
-		Assert.isTrue(metaData.keySet().size() == 1, "Meta data must contain a single key");
+		Assert.isTrue(payload.equalsIgnoreCase(QosMonitorConstants.RECEIVED_MONITORING_REQUEST_EVENT_PAYLOAD_SCHEMA), "Payload must be: " + QosMonitorConstants.RECEIVED_MONITORING_REQUEST_EVENT_PAYLOAD_SCHEMA);
+		Assert.isTrue(metaData.containsKey(QosMonitorConstants.PROCESS_ID_KEY), "Meta data must contain: " + QosMonitorConstants.PROCESS_ID_KEY);
+		Assert.isTrue(metaData.keySet().size() == QosMonitorConstants.RECEIVED_MONITORING_REQUEST_EVENT_PAYLOAD_METADATA_SIZE, "Meta data keys quantity is not valid");
 	}
 }

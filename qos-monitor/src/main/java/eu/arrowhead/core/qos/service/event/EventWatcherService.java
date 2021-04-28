@@ -101,10 +101,10 @@ public class EventWatcherService {
 		Assert.isTrue(!Utilities.isEmpty(event.getTimeStamp()), "Event timeStamp is empty");
 
 		final InteruptedMonitoringMeasurementEventDTO validEvent = new InteruptedMonitoringMeasurementEventDTO();
-		validEvent.setEventType(QosMonitorEventType.INTERUPTED_MONITORING_MEASUREMENT.name());
+		validEvent.setEventType(QosMonitorEventType.INTERUPTED_MONITORING_MEASUREMENT);
 		validEvent.setMetaData(event.getMetaData());
 		validEvent.setPayload(event.getPayload());
-		validEvent.setTimeStamp(event.getTimeStamp());
+		validEvent.setTimeStamp(Utilities.parseUTCStringToLocalZonedDateTime(event.getTimeStamp()));
 
 		return validEvent;
 	}
