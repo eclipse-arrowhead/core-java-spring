@@ -37,6 +37,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
+import eu.arrowhead.common.database.entity.OrchestratorStoreFlexible;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
@@ -96,6 +97,9 @@ public class OrchestratorService {
 	
 	@Autowired
 	private OrchestratorDriver orchestratorDriver;
+	
+	@Autowired
+	private OrchestratorFlexibleDriver orchestratorFlexibleDriver;
 	
 	@Autowired
 	private OrchestratorStoreDBService orchestratorStoreDBService;
@@ -1100,18 +1104,19 @@ public class OrchestratorService {
 		logger.debug("orchestrationFromFlexibleStore started ...");
 		
 		validateFlexibleStoreRequest(request);
+		
+		// query system from Service Registry 
+		final SystemResponseDTO consumerSystem = orchestratorFlexibleDriver.queryConsumerSystem(request.getRequesterSystem());
+
+		// collect matching rules
+		final List<OrchestratorStoreFlexible> rules = orchestratorFlexibleDriver.collectAndSortMatchingRules(request, consumerSystem);
+		if (rules.isEmpty()) {
+			return new OrchestrationResponseDTO();
+		}
+
 		// TODO continue
-		
-		// query system from SR by name, address, port => existence check 
-		
-		// find rules (if request contains service intf requirements then for every query we need post-processing: service_intf is null or service_intf IN (request's service interface requirements))
-		// a) use service def and requester system name and metadata is empty => add all to the rules list
-		// b) use service def where consumer metadata is available: for every such rule
-		//     0) if consumer system name is not empty and not equals to requester name => drop it
-		//     1) create a union of system metadata and requester metadata (once)
-		//     2) if consumer metadata (from store) is part of the metadata of union, then this rule is valid => add to the rules list
-		// sorting rules by priority (secondary sort field: id)
-		
+
+
 		// find SR records
 		// for every rule,
 		//	   1) use query with service def, rule's service intf (if any), service metadata (if any, if metadata_search flag is true, then merge the two metadata_requirements before query), ping flag, security (if any), version (if any)

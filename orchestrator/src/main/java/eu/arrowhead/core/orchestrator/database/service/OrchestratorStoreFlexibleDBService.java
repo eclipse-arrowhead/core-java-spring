@@ -173,6 +173,29 @@ public class OrchestratorStoreFlexibleDBService {
 		}
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public List<OrchestratorStoreFlexible> getMatchedRulesByServiceDefinitionAndConsumerName(final String serviceDefinition, final String consumerSystemName) { // TODO: unit test
+		logger.debug("getMatchedRulesByServiceDefinitionAndConsumerName started...");
+		
+		if (Utilities.isEmpty(serviceDefinition)) {
+			throw new InvalidParameterException("Service definition is empty");
+		}
+		
+		if (Utilities.isEmpty(consumerSystemName)) {
+			throw new InvalidParameterException("Consumer system name is empty");
+		}
+		
+		final String _serviceDefinition = serviceDefinition.toLowerCase().trim();
+		final String _consumerSystemName = consumerSystemName.toLowerCase().trim();
+		
+		try {
+			return orchestratorStoreFlexibleRepository.findByServiceDefinitionNameAndConsumerSystemNameAndConsumerSystemMetadataIsNull(_serviceDefinition, _consumerSystemName);
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -191,6 +214,16 @@ public class OrchestratorStoreFlexibleDBService {
 		}
 		if (!Utilities.isEmpty(entity.getServiceInterfaceName())) {
 			entity.setServiceInterfaceName(entity.getServiceInterfaceName().toUpperCase().trim());
+		}
+		
+		if (Utilities.isEmpty(entity.getConsumerSystemMetadata())) {
+			entity.setConsumerSystemMetadata(null);
+		}
+		if (Utilities.isEmpty(entity.getProviderSystemMetadata())) {
+			entity.setProviderSystemMetadata(null);
+		}
+		if (Utilities.isEmpty(entity.getServiceMetadata())) {
+			entity.setServiceMetadata(null);
 		}
 	}
 	
