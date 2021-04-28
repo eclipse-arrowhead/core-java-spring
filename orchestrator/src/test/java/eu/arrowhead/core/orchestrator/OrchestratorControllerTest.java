@@ -85,7 +85,7 @@ public class OrchestratorControllerTest {
 	private ObjectMapper objectMapper;
 	
 	@MockBean(name = "mockOrchestratorService") 
-	OrchestratorService orchestratorService;
+	private OrchestratorService orchestratorService;
 	
 	//=================================================================================================
 	// methods
@@ -520,7 +520,7 @@ public class OrchestratorControllerTest {
 		
 		when(orchestratorService.externalServiceRequest(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO());
 		when(orchestratorService.triggerInterCloud(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO())));
-		when(orchestratorService.orchestrationFromOriginalStore(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO(),
+		when(orchestratorService.orchestrationFromStore(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO(),
 																																				 new OrchestrationResultDTO())));
 		when(orchestratorService.dynamicOrchestration(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO(),
 																																				new OrchestrationResultDTO(),
