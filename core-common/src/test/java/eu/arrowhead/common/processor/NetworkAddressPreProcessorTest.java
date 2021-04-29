@@ -74,9 +74,50 @@ public class NetworkAddressPreProcessorTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testIPv6_8() { //Unprocessable abbreviation .NetworkAddressVerifier will filter it out
-		final String result = processor.normalize("::db8::");
-		System.out.println(result);
+	public void testIPv6_8() { //Unprocessable abbreviation. NetworkAddressVerifier will filter it out
+		final String result = processor.normalize("::db8::");		
 		Assert.assertEquals("::db8::", result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testIPv6_IPv4_Hybrid_1() {
+		final String result = processor.normalize("2001:0db8:0000:0000:0000:ff00:192.0.2.128");
+		Assert.assertEquals("2001:0db8:0000:0000:0000:ff00:c000:0280", result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testIPv6_IPv4_Hybrid_2() {
+		final String result = processor.normalize("::ffff:192.0.2.128");
+		Assert.assertEquals("0000:0000:0000:0000:0000:ffff:c000:0280", result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testIPv6_IPv4_Hybrid_3() { //Unprocessable IPv6-IPv4 hybrid. NetworkAddressVerifier will filter it out
+		final String result = processor.normalize("::ffff:192.0.2");
+		Assert.assertEquals("::ffff:192.0.2", result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testIPv6_IPv4_Hybrid_4() { //Unprocessable IPv6-IPv4 hybrid. NetworkAddressVerifier will filter it out
+		final String result = processor.normalize("::ffff:192.0.2.128.6");
+		Assert.assertEquals("::ffff:192.0.2.128.6", result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testIPv6_IPv4_Hybrid_5() { //Unprocessable IPv6-IPv4 hybrid. NetworkAddressVerifier will filter it out
+		final String result = processor.normalize("::ffff:192.0.ff00.128");
+		Assert.assertEquals("::ffff:192.0.ff00.128", result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testIPv6_IPv4_Hybrid_6() { //Unprocessable IPv6-IPv4 hybrid. NetworkAddressVerifier will filter it out
+		final String result = processor.normalize("::ffff:192.0.2.128::");
+		Assert.assertEquals("::ffff:c000:0280::", result);
 	}
 }
