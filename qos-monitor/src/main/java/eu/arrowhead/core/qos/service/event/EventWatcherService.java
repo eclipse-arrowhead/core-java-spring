@@ -18,6 +18,7 @@ import eu.arrowhead.common.dto.shared.EventDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.dto.IcmpPingResponse;
+import eu.arrowhead.core.qos.dto.event.EventDTOConverter;
 import eu.arrowhead.core.qos.dto.event.FinishedMonitoringMeasurementEventDTO;
 import eu.arrowhead.core.qos.dto.event.InteruptedMonitoringMeasurementEventDTO;
 import eu.arrowhead.core.qos.dto.event.ReceivedMonitoringRequestEventDTO;
@@ -63,28 +64,25 @@ public class EventWatcherService {
 			throw new InvalidParameterException("Event" + NULL_ERROR_MESSAGE);
 		}
 
-		Assert.isTrue(!Utilities.isEmpty(event.getPayload()), "Event payload is empty");
-		Assert.isTrue(!Utilities.isEmpty(event.getTimeStamp()), "Event timeStamp is empty");
-
 		try {
 			final QosMonitorEventType eventType = QosMonitorEventType.valueOf(event.getEventType());
 
 			switch (eventType) {
 			case RECEIVED_MONITORING_REQUEST:
-				final ReceivedMonitoringRequestEventDTO validReceivedMonitoringRequestEvent = convertToReceivedMonitoringRequestEvent(event);
-				receivedMonitoringRequestEventQueue.put(validReceivedMonitoringRequestEvent);
+				final ReceivedMonitoringRequestEventDTO validReceivedRequestEvent = EventDTOConverter.convertToReceivedMonitoringRequestEvent(event);
+				receivedMonitoringRequestEventQueue.put(validReceivedRequestEvent);
 				break;
 			case STARTED_MONITORING_MEASUREMENT:
-				final StartedMonitoringMeasurementEventDTO validStartedMonitoringMeasurementEvent = convertToStartedMonitoringMeasurementEvent(event);
-				startedMonitoringMeasurementEventQueue.put(validStartedMonitoringMeasurementEvent);
+				final StartedMonitoringMeasurementEventDTO validStartedEvent = EventDTOConverter.convertToStartedMonitoringMeasurementEvent(event);
+				startedMonitoringMeasurementEventQueue.put(validStartedEvent);
 				break;
 			case FINISHED_MONITORING_MEASUREMENT:
-				final FinishedMonitoringMeasurementEventDTO validFinishedMonitoringMeasurementEvent = convertToFinishedMonitoringMeasurementEvent(event);
-				finishedMonitoringMeasurementEventQueue.put(validFinishedMonitoringMeasurementEvent);
+				final FinishedMonitoringMeasurementEventDTO validFinishEvent = EventDTOConverter.convertToFinishedMonitoringMeasurementEvent(event);
+				finishedMonitoringMeasurementEventQueue.put(validFinishEvent);
 				break;
 			case INTERUPTED_MONITORING_MEASUREMENT:
-				final InteruptedMonitoringMeasurementEventDTO validInteruptedMonitoringMeasurementEvent = convertToInteruptedMonitoringMeasurementEvent(event);
-				interuptedMonitoringMeasurementEventQueue.put(validInteruptedMonitoringMeasurementEvent);
+				final InteruptedMonitoringMeasurementEventDTO validInteruptEvent = EventDTOConverter.convertToInteruptedMonitoringMeasurementEvent(event);
+				interuptedMonitoringMeasurementEventQueue.put(validInteruptEvent);
 				break;
 			default:
 				throw new InvalidParameterException(eventType + NOT_SUPPORTED_EVENT_TYPE);
@@ -107,70 +105,4 @@ public class EventWatcherService {
 
 	//-------------------------------------------------------------------------------------------------
 
-	//TODO Move converters to separate class
-	private InteruptedMonitoringMeasurementEventDTO convertToInteruptedMonitoringMeasurementEvent(final EventDTO event) {
-		logger.debug("convertToInteruptedMonitoringMeasurementEvent started...");
-
-		final InteruptedMonitoringMeasurementEventDTO validEvent = new InteruptedMonitoringMeasurementEventDTO();
-		validEvent.setEventType(QosMonitorEventType.INTERUPTED_MONITORING_MEASUREMENT);
-		validEvent.setMetaData(event.getMetaData());
-		validEvent.setPayload(event.getPayload());
-		validEvent.setTimeStamp(Utilities.parseUTCStringToLocalZonedDateTime(event.getTimeStamp()));
-
-		return validEvent;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private FinishedMonitoringMeasurementEventDTO convertToFinishedMonitoringMeasurementEvent(final EventDTO event) {
-		logger.debug("convertToFinishedMonitoringMeasurementEvent started...");
-
-		final FinishedMonitoringMeasurementEventDTO validEvent = new FinishedMonitoringMeasurementEventDTO();
-		validEvent.setEventType(QosMonitorEventType.FINISHED_MONITORING_MEASUREMENT);
-		validEvent.setMetaData(event.getMetaData());
-		validEvent.setPayload(convertToIcmpPingResponse(event.getPayload()));
-		validEvent.setTimeStamp(Utilities.parseUTCStringToLocalZonedDateTime(event.getTimeStamp()));
-
-		return validEvent;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private List<IcmpPingResponse> convertToIcmpPingResponse(final String payload) {
-		logger.debug("convertToIcmpPingResponse started...");
-
-		try {
-			final List<IcmpPingResponse> validResponse = Arrays.asList(mapper.readValue(payload, IcmpPingResponse.class));
-
-			return validResponse;
-
-		} catch (final IOException e) {
-
-			throw new InvalidParameterException("Invalid IcmpPingResponse");
-		}
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private StartedMonitoringMeasurementEventDTO convertToStartedMonitoringMeasurementEvent(final EventDTO event) {
-		logger.debug("convertToStartedMonitoringMeasurementEvent started...");
-
-		final StartedMonitoringMeasurementEventDTO validEvent = new StartedMonitoringMeasurementEventDTO();
-		validEvent.setEventType(QosMonitorEventType.STARTED_MONITORING_MEASUREMENT);
-		validEvent.setMetaData(event.getMetaData());
-		validEvent.setPayload(event.getPayload());
-		validEvent.setTimeStamp(Utilities.parseUTCStringToLocalZonedDateTime(event.getTimeStamp()));
-
-		return validEvent;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private ReceivedMonitoringRequestEventDTO convertToReceivedMonitoringRequestEvent(final EventDTO event) {
-		logger.debug("convertToReceivedMonitoringRequestEvent started...");
-
-		final ReceivedMonitoringRequestEventDTO validEvent = new ReceivedMonitoringRequestEventDTO();
-		validEvent.setEventType(QosMonitorEventType.RECEIVED_MONITORING_REQUEST);
-		validEvent.setMetaData(event.getMetaData());
-		validEvent.setPayload(event.getPayload());
-		validEvent.setTimeStamp(Utilities.parseUTCStringToLocalZonedDateTime(event.getTimeStamp()));
-
-		return validEvent;
-	}
 }
