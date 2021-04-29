@@ -1114,12 +1114,11 @@ public class OrchestratorService {
 			return new OrchestrationResponseDTO();
 		}
 
+		final Map<OrchestratorStoreFlexible,ServiceQueryResultDTO> queryResults = orchestratorFlexibleDriver.queryServiceRegistry(request, rules);
 		// TODO continue
-
 
 		// find SR records
 		// for every rule,
-		//	   1) use query with service def, rule's service intf (if any), service metadata (if any, if metadata_search flag is true, then merge the two metadata_requirements before query), ping flag, security (if any), version (if any)
 		//     2) if rule has provider name, we filter every provider that not match 
 		// 	   3) filter returned records with preferred providers (if any)
 		//     4) filter returned records with provider metadata 

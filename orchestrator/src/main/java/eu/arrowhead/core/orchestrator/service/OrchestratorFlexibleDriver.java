@@ -17,8 +17,10 @@ package eu.arrowhead.core.orchestrator.service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,9 +31,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.OrchestratorStoreFlexible;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreFlexibleDBService;
@@ -48,7 +52,7 @@ public class OrchestratorFlexibleDriver { //TODO unit tests
 	@Autowired
 	private OrchestratorDriver driver;
 	
-	private Comparator<OrchestratorStoreFlexible> ruleComparator = getRuleComparator();
+	private final Comparator<OrchestratorStoreFlexible> ruleComparator = getRuleComparator();
 	
 	private static final Logger logger = LogManager.getLogger(OrchestratorFlexibleDriver.class);
 
@@ -74,23 +78,47 @@ public class OrchestratorFlexibleDriver { //TODO unit tests
 		final List<String> normalizedInterfaceRequirements = normalizeInterfaceNames(requestedService.getInterfaceRequirements());
 		
 		List<OrchestratorStoreFlexible> nameBasedRules = dbService.getMatchedRulesByServiceDefinitionAndConsumerName(requestedService.getServiceDefinitionRequirement(), consumerSystem.getSystemName());
-		if (needInterfaceFilter) {
-			//TODO: continue
+		if (needInterfaceFilter && !nameBasedRules.isEmpty()) {
+			nameBasedRules = filterByInterfaces(nameBasedRules, normalizedInterfaceRequirements);
+		}
+		rules.addAll(nameBasedRules);
+		
+		final Map<String,String> currentConsumerMetadata = createMetadataMerge(originalRequest.getRequesterSystem().getMetadata(), consumerSystem.getMetadata());
+		List<OrchestratorStoreFlexible> metadataBasedRules = dbService.getMatchedRulesByServiceDefinitionAndNonNullConsumerMetadata(requestedService.getServiceDefinitionRequirement());
+		if (needInterfaceFilter && !metadataBasedRules.isEmpty()) {
+			metadataBasedRules = filterByInterfaces(metadataBasedRules, normalizedInterfaceRequirements);
 		}
 		
-		// find rules (if request contains service intf requirements then for every query we need post-processing: service_intf is null or service_intf IN (request's service interface requirements))
-		// a) use service def and requester system name and metadata is empty => add all to the rules list
-		// b) use service def where consumer metadata is available: for every such rule
-		//     0) if consumer system name is not empty and not equals to requester name => drop it
-		//     1) create a union of system metadata and requester metadata (once)
-		//     2) if consumer metadata (from store) is part of the metadata of union, then this rule is valid => add to the rules list
-
+		for (final OrchestratorStoreFlexible rule : metadataBasedRules) {
+			if (!Utilities.isEmpty(rule.getConsumerSystemName()) && !rule.getConsumerSystemName().equals(consumerSystem.getSystemName())) {
+				// name matching failed
+				continue;
+			}
+			
+			if (isMetadataMatch(rule.getConsumerSystemMetadata(), currentConsumerMetadata)) {
+				rules.add(rule);
+			}
+		}
+		
 		// sorting rules by priority and id 
 		final List<OrchestratorStoreFlexible> result = new ArrayList<>(rules);
 		Collections.sort(result, ruleComparator);
 		
 		return result;
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	/* default */ Map<OrchestratorStoreFlexible,ServiceQueryResultDTO> queryServiceRegistry(final OrchestrationFormRequestDTO request, final List<OrchestratorStoreFlexible> rules) {
+		logger.debug("queryServiceRegistry started ...");
+		
+		//TODO: continue
+		
+		// for every rule,
+		//	   1) use query with service def, rule's service intf (if any), service metadata (if any, if metadata_search flag is true, then merge the two metadata_requirements before query), ping flag, security (if any), version (if any)
+
+		return null;
+	}
+
 	
 	//=================================================================================================
 	// assistant methods
@@ -104,7 +132,7 @@ public class OrchestratorFlexibleDriver { //TODO unit tests
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public List<String> normalizeInterfaceNames(final List<String> interfaceNames) { 
+	private List<String> normalizeInterfaceNames(final List<String> interfaceNames) { 
 		logger.debug("normalizeInterfaceNames started...");
 		
 		if (interfaceNames == null) {
@@ -113,4 +141,55 @@ public class OrchestratorFlexibleDriver { //TODO unit tests
 		
 		return interfaceNames.parallelStream().filter(Objects::nonNull).filter(e -> !e.isBlank()).map(e -> e.toUpperCase().trim()).collect(Collectors.toList());
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<OrchestratorStoreFlexible> filterByInterfaces(final List<OrchestratorStoreFlexible> candidates, final List<String> interfaceNames) {
+		logger.debug("filterByInterfaces started...");
+		
+		final List<OrchestratorStoreFlexible> result = new ArrayList<>();
+		for (final OrchestratorStoreFlexible rule : candidates) {
+			if (Utilities.isEmpty(rule.getServiceInterfaceName()) || interfaceNames.contains(rule.getServiceInterfaceName())) {
+				result.add(rule);
+			}
+		}
+		
+		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	// primary takes precedence if there is any key match
+	private Map<String,String> createMetadataMerge(final Map<String,String> primary, final Map<String,String> secondary) {
+		logger.debug("createMetadataMerge started...");
+		
+		final Map<String,String> _primary = normalizeMetadata(primary);
+		final Map<String,String> _secondary = normalizeMetadata(secondary);
+		
+		final Map<String,String> result = new HashMap<>(_secondary);
+		result.putAll(_primary);
+		
+		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	// throws IllegalStateException if two keys are identical after trim
+	@SuppressWarnings("squid:RedundantThrowsDeclarationCheck")
+	private Map<String,String> normalizeMetadata(final Map<String,String> metadata) throws IllegalStateException { 
+		logger.debug("normalizeMetadata started...");
+		if (metadata == null) {
+			return Map.of();
+		}
+		
+		return metadata.entrySet().parallelStream().filter(e -> e.getValue() != null).collect(Collectors.toMap(e -> e.getKey().trim(),
+																	  		 								   e -> e.getValue().trim()));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private boolean isMetadataMatch(final String metadataFromRule, final Map<String,String> currentMetadata) {
+		logger.debug("isMetadataMatch started...");
+		
+		final Map<String,String> _metadataFromRule = normalizeMetadata(Utilities.text2Map(metadataFromRule));
+		
+		return currentMetadata.entrySet().containsAll(_metadataFromRule.entrySet());
+	}
+
 }

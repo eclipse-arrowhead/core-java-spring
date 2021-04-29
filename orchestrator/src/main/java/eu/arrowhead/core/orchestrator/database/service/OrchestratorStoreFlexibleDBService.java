@@ -196,6 +196,24 @@ public class OrchestratorStoreFlexibleDBService {
 		}
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public List<OrchestratorStoreFlexible> getMatchedRulesByServiceDefinitionAndNonNullConsumerMetadata(final String serviceDefinition) { // TODO: unit test
+		logger.debug("getMatchedRulesByServiceDefinitionAndNonNullConsumerMetadata started...");
+		
+		if (Utilities.isEmpty(serviceDefinition)) {
+			throw new InvalidParameterException("Service definition is empty");
+		}
+		
+		final String _serviceDefinition = serviceDefinition.toLowerCase().trim();
+		
+		try {
+			return orchestratorStoreFlexibleRepository.findByServiceDefinitionNameAndConsumerMetadataIsNotNull(_serviceDefinition);
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	

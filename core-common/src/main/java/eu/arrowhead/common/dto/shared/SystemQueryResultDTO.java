@@ -33,27 +33,27 @@ public class SystemQueryResultDTO implements Serializable {
 	private List<SystemRegistryResponseDTO> systemQueryData = new ArrayList<>();
 	private int unfilteredHits = 0;
 
-
 	//=================================================================================================
 	// constructors
-	public SystemQueryResultDTO(final List<SystemRegistryResponseDTO> systemQueryData, final int unfilteredHits)
-	{
+
+	//-------------------------------------------------------------------------------------------------
+	public SystemQueryResultDTO(final List<SystemRegistryResponseDTO> systemQueryData, final int unfilteredHits) {
 		this.systemQueryData = systemQueryData;
 		this.unfilteredHits = unfilteredHits;
 	}
 
-
 	//=================================================================================================
 	// methods
-	//-------------------------------------------------------------------------------------------------
 
+	//-------------------------------------------------------------------------------------------------
 	public List<SystemRegistryResponseDTO> getSystemQueryData() { return systemQueryData; }
 	public int getUnfilteredHits() { return unfilteredHits; }
-	//-------------------------------------------------------------------------------------------------
 
+	//-------------------------------------------------------------------------------------------------
 	public void setSystemQueryData(final List<SystemRegistryResponseDTO> systemQueryData) { this.systemQueryData = systemQueryData; }
 	public void setUnfilteredHits(final int unfilteredHits) { this.unfilteredHits = unfilteredHits; }
 
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
 		return new StringJoiner(", ", SystemQueryResultDTO.class.getSimpleName() + "[", "]")
