@@ -90,7 +90,7 @@ case "$1" in
       -e "\#^.*cloud\.ssl\.key-password=#s#.*\$#cloud.ssl.key-password=${AH_PASS_CERT}#" \
       -e "\#^.*cloud\.ssl\.key-store=#s#.*\$#cloud.ssl.key-store=file:${SYSTEM_DIR}/${cloud_file_name}#" \
       > ${SYSTEM_DIR}/application.properties
-#cloud.ssl.key-store=classpath:certificates/cloud.p12
+
     rm ${SYSTEM_DIR}/application.properties.orig
     chown arrowhead:arrowhead ${SYSTEM_DIR}/application.properties
     chown arrowhead:arrowhead ${SYSTEM_DIR}/${cloud_file_name}
