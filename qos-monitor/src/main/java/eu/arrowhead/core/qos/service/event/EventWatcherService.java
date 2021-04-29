@@ -1,23 +1,14 @@
 package eu.arrowhead.core.qos.service.event;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-
 import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.EventDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.dto.event.EventDTOConverter;
 import eu.arrowhead.core.qos.dto.event.FinishedMonitoringMeasurementEventDTO;
 import eu.arrowhead.core.qos.dto.event.InteruptedMonitoringMeasurementEventDTO;
@@ -36,8 +27,6 @@ public class EventWatcherService {
 
 	private static final String NULL_ERROR_MESSAGE = " is null";
 	private static final String NOT_SUPPORTED_EVENT_TYPE = " is not a supported event type. ";
-
-	private static final ObjectMapper mapper = new ObjectMapper();
 
 	@Resource
 	private ReceivedMonitoringRequestEventQueue receivedMonitoringRequestEventQueue;
