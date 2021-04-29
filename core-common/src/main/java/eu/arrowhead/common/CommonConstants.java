@@ -106,6 +106,7 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_SERVICEREGISTRY_UNREGISTER = "service-unregister";
 	public static final String CORE_SERVICE_SERVICEREGISTRY_REGISTER_SYSTEM = "register-system";
 	public static final String CORE_SERVICE_SERVICEREGISTRY_UNREGISTER_SYSTEM = "unregister-system";
+	public static final String CORE_SERVICE_SERVICEREGISTRY_PULL_SYSTEMS = "pull-systems";
 
 	public static final String CORE_SERVICE_SYSTEMREGISTRY_REGISTER = "system-register";
 	public static final String CORE_SERVICE_SYSTEMREGISTRY_UNREGISTER = "system-unregister";
@@ -166,6 +167,7 @@ public class CommonConstants {
 	public static final String OP_SERVICEREGISTRY_UNREGISTER_URI = "/unregister";
 	public static final String OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI = "/register-system";
 	public static final String OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI = "/unregister-system";
+	public static final String OP_SERVICEREGISTRY_PULL_SYSTEMS_URI = "/pull-systems";
 	public static final String OP_SERVICEREGISTRY_QUERY_URI = "/query";	
 	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME = "system_name";
 	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS = "address";

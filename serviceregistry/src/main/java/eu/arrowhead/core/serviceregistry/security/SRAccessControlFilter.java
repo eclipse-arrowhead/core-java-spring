@@ -45,6 +45,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 	private static final CoreSystem[] allowedCoreSystemsForQueryBySystemDTO = { CoreSystem.ORCHESTRATOR };
 	private static final CoreSystem[] allowedCoreSystemsForQueryAll = { CoreSystem.QOSMONITOR, CoreSystem.GATEKEEPER };
 	private static final CoreSystem[] allowedCoreSystemsForRegisterSystem = { CoreSystem.PLANTDESCRIPTIONENGINE};
+	private static final CoreSystem[] allowedCoreSystemsForPullSystems = { CoreSystem.PLANTDESCRIPTIONENGINE};
 	
 	private static final String ID_PATH_VARIABLE = "{" + CommonConstants.COMMON_FIELD_NAME_ID + "}"; 
 	
@@ -91,6 +92,9 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 				// An application system can only register/unregister its own system!
 				checkIfApplicationSystemIsRegisteringOwnSystem(clientCN, cloudCN, requestJSON, requestTarget);				
 			}
+		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICEREGISTRY_PULL_SYSTEMS_URI)) {
+			// Only dedicated core systems can use this service
+			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForPullSystems, requestTarget);
 		}
 	}
 
