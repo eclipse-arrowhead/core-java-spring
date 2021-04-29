@@ -108,7 +108,7 @@ public class SystemRegistryDBServiceTest {
 		try {
 			systemRegistryDBService.createSystem(systemName0, address0, port0, authenticationInfo0, null);
 		} catch (final InvalidParameterException ex) {
-			Assert.assertEquals("0.0.0.0 ipv4 network address is invalid: self-addressing is disabled", ex.getMessage());			
+			Assert.assertEquals("0.0.0.0 ipv4 network address is invalid: placeholder address is denied", ex.getMessage());			
 			
 			throw ex;
 		}
@@ -144,7 +144,7 @@ public class SystemRegistryDBServiceTest {
 		try {
 			systemRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0, null);
 		} catch (final InvalidParameterException ex) {
-			Assert.assertEquals("0.0.0.0 ipv4 network address is invalid: self-addressing is disabled", ex.getMessage());
+			Assert.assertEquals("0.0.0.0 ipv4 network address is invalid: placeholder address is denied", ex.getMessage());
 			
 			throw ex;
 		}
@@ -180,7 +180,7 @@ public class SystemRegistryDBServiceTest {
 		try {
 			systemRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0, null);
 		} catch (final InvalidParameterException ex) {
-			Assert.assertEquals("0.0.0.0 ipv4 network address is invalid: self-addressing is disabled", ex.getMessage());
+			Assert.assertEquals("0.0.0.0 ipv4 network address is invalid: placeholder address is denied", ex.getMessage());
 			
 			throw ex;
 		}
@@ -215,7 +215,7 @@ public class SystemRegistryDBServiceTest {
 		try {
 			systemRegistryDBService.registerSystemRegistry(request);
 		} catch (final IllegalArgumentException ex) {
-			Assert.assertEquals("0.0.0.0 ipv4 network address is invalid: self-addressing is disabled", ex.getMessage());
+			Assert.assertEquals("0.0.0.0 ipv4 network address is invalid: placeholder address is denied", ex.getMessage());
 			
 			throw ex;
 		}
@@ -250,7 +250,7 @@ public class SystemRegistryDBServiceTest {
 		try {
 			systemRegistryDBService.updateSystemRegistryById(1, request);
 		} catch (final IllegalArgumentException ex) {
-			Assert.assertEquals("0.0.0.0 ipv4 network address is invalid: self-addressing is disabled", ex.getMessage());
+			Assert.assertEquals("0.0.0.0 ipv4 network address is invalid: placeholder address is denied", ex.getMessage());
 			
 			throw ex;
 		}
@@ -293,7 +293,7 @@ public class SystemRegistryDBServiceTest {
 		try {
 			systemRegistryDBService.mergeSystemRegistryById(1, request);
 		} catch (final InvalidParameterException ex) {
-			Assert.assertEquals("0.0.0.0 ipv4 network address is invalid: self-addressing is disabled", ex.getMessage());
+			Assert.assertEquals("0.0.0.0 ipv4 network address is invalid: placeholder address is denied", ex.getMessage());
 			
 			throw ex;
 		}

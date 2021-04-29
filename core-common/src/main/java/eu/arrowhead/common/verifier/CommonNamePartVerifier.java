@@ -29,7 +29,7 @@ public class CommonNamePartVerifier {
 	//=================================================================================================
 	// members
 	
-	public static final String COMMON_NAME_PART_PATTERN_STRING = "^[A-Za-z](?:[0-9A-Za-z-]*[0-9A-Za-z])?$";
+	public static final String COMMON_NAME_PART_PATTERN_STRING = "^[A-Za-z](?:[0-9A-Za-z-]{1,61})?[0-9A-Za-z]$";
 	private static final Pattern commonNamePartPattern;
 	
 	static {

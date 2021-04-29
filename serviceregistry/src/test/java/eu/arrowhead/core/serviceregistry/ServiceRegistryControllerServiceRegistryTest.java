@@ -393,7 +393,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(SERVICEREGISTRY_REGISTER_URI, error.getOrigin());
-		Assert.assertEquals("Service definition has invalid format. Service definition only contains letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).", error.getErrorMessage());
+		Assert.assertEquals("Service definition has invalid format. Service definition only contains maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -403,7 +403,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testRegisterServiceEndOfValidityInvalid() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("invalid date");
 		
@@ -419,7 +419,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testRegisterServiceSecuredButWithoutAuthenticationInfo() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setSecure(ServiceSecurityType.CERTIFICATE.name());
@@ -436,7 +436,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testRegisterServiceWithInvalidSecureValue() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setSecure("invalidSecurityTypeValue");
@@ -453,7 +453,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testRegisterServiceInterfaceListNull() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		
@@ -469,7 +469,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testRegisterServiceInterfaceListEmpty() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(Collections.<String>emptyList());
@@ -488,7 +488,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final String intf = "XML";
 		
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(List.of(intf));
@@ -505,7 +505,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testRegisterServiceEverythingIsOk() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(List.of("HTTP-SECURE-XML"));
@@ -527,7 +527,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServiceNoServiceDefinitionParameter() throws Exception {
-		final String queryStr = createQueryStringForUnregister(null, "x", "a", 1, "/path");
+		final String queryStr = createQueryStringForUnregister(null, "pn", "a", 1, "/path");
 		
 		deleteUnregisterService(queryStr, status().isBadRequest());
 	}
@@ -535,7 +535,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServiceNoSystemNameParameter() throws Exception {
-		final String queryStr = createQueryStringForUnregister("s", null, "a", 1, "/path");
+		final String queryStr = createQueryStringForUnregister("ss", null, "a", 1, "/path");
 		
 		deleteUnregisterService(queryStr, status().isBadRequest());
 	}
@@ -543,7 +543,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServiceNoAddressParameter() throws Exception {
-		final String queryStr = createQueryStringForUnregister("s", "x", null, 1, "/path");
+		final String queryStr = createQueryStringForUnregister("sd", "pn", null, 1, "/path");
 		
 		deleteUnregisterService(queryStr, status().isBadRequest());
 	}
@@ -551,7 +551,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServiceNoPortParameter() throws Exception {
-		final String queryStr = createQueryStringForUnregister("s", "x", "a", null, "/path");
+		final String queryStr = createQueryStringForUnregister("sd", "pn", "a", null, "/path");
 		
 		deleteUnregisterService(queryStr, status().isBadRequest());
 	}
@@ -559,7 +559,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServiceNoServiceUriParameter() throws Exception {
-		final String queryStr = createQueryStringForUnregister("s", "x", "a", 1, null);
+		final String queryStr = createQueryStringForUnregister("sd", "pn", "a", 1, null);
 		
 		deleteUnregisterService(queryStr, status().isBadRequest());
 	}
@@ -567,7 +567,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServiceServiceDefinitionEmpty() throws Exception {
-		final String queryStr = createQueryStringForUnregister("", "x", "a", 1, "/path");
+		final String queryStr = createQueryStringForUnregister("", "pn", "a", 1, "/path");
 		
 		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -580,21 +580,21 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServiceServiceDefinitionWrongFlagTrue() throws Exception {
-		final String queryStr = createQueryStringForUnregister("test_service", "x", "a", 1, "/path");
+		final String queryStr = createQueryStringForUnregister("test_service", "pn", "a", 1, "/path");
 		
 		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(SERVICEREGISTRY_UNREGISTER_URI, error.getOrigin());
-		Assert.assertEquals("Service definition has invalid format. Service definition only contains letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).", error.getErrorMessage());
+		Assert.assertEquals("Service definition has invalid format. Service definition only contains maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).", error.getErrorMessage());
 	}
 
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServiceSystemNameEmpty() throws Exception {
-		final String queryStr = createQueryStringForUnregister("s", "", "a", 1, "/path");
+		final String queryStr = createQueryStringForUnregister("sd", "", "a", 1, "/path");
 		
 		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -607,20 +607,20 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServiceSystemNameWrong() throws Exception {
-		final String queryStr = createQueryStringForUnregister("s", "invalid_system", "a", 1, "/path");
+		final String queryStr = createQueryStringForUnregister("sd", "invalid_system", "a", 1, "/path");
 		
 		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(SERVICEREGISTRY_UNREGISTER_URI, error.getOrigin());
-		Assert.assertEquals("System name has invalid format. System names only contain letters (english alphabet), numbers and dash (-), and have to start with a letter (also cannot end with dash).", error.getErrorMessage());
+		Assert.assertEquals("System name has invalid format. System names only contain maximum 63 character of letters (english alphabet), numbers and dash (-), and have to start with a letter (also cannot end with dash).", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServiceAddressEmpty() throws Exception {
-		final String queryStr = createQueryStringForUnregister("s", "x", "", 1, "/path");
+		final String queryStr = createQueryStringForUnregister("sd", "pn", "", 1, "/path");
 		doThrow(new InvalidParameterException("test msg")).when(networkAddressVerifier).verify(anyString());
 		
 		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
@@ -634,7 +634,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServicePortNumberTooLow() throws Exception {
-		final String queryStr = createQueryStringForUnregister("s", "x", "a", -1, "/path");
+		final String queryStr = createQueryStringForUnregister("sd", "pn", "a", -1, "/path");
 		
 		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -647,7 +647,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServicePortNumberTooHigh() throws Exception {
-		final String queryStr = createQueryStringForUnregister("s", "x", "a", 66000, "/path");
+		final String queryStr = createQueryStringForUnregister("sd", "pn", "a", 66000, "/path");
 		
 		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -660,7 +660,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServiceEverythingIsOk() throws Exception {
-		final String queryStr = createQueryStringForUnregister("s", "x", "a", 1, "/path");
+		final String queryStr = createQueryStringForUnregister("sd", "pn", "a", 1, "/path");
 		
 		doNothing().when(serviceRegistryDBService).removeServiceRegistry(any(String.class), any(String.class), any(String.class), anyInt(), any(String.class));
 		
@@ -706,7 +706,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(SERVICEREGISTRY_QUERY_URI, error.getOrigin());
-		Assert.assertEquals("Service definition requirement has invalid format. Service definition only contains letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).", error.getErrorMessage());
+		Assert.assertEquals("Service definition requirement has invalid format. Service definition only contains maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -865,7 +865,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
-		Assert.assertEquals("Service definition has invalid format. Service definition only contains letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).", error.getErrorMessage());
+		Assert.assertEquals("Service definition has invalid format. Service definition only contains maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -875,7 +875,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testAddServiceEndOfValidityInvalid() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("ser");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("invalid date");
 		
@@ -891,7 +891,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testAddServiceSecuredButWithoutAuthenticationInfo() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setSecure(ServiceSecurityType.CERTIFICATE.name());
@@ -908,7 +908,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testAddServiceInterfaceListNull() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		
@@ -924,7 +924,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testAddServiceInterfaceListEmpty() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(Collections.<String>emptyList());
@@ -943,7 +943,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final String intf = "XML";
 		
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(List.of(intf));
@@ -960,7 +960,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testAddServiceEverythingIsOk() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(List.of("HTTP-SECURE-XML"));
@@ -977,7 +977,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testUpdateServiceInValidId() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12 13:51:30");
 		request.setInterfaces(List.of("HTTP-SECURE-XML"));
@@ -1026,7 +1026,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
-		Assert.assertEquals("Service definition has invalid format. Service definition only contains letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).", error.getErrorMessage());
+		Assert.assertEquals("Service definition has invalid format. Service definition only contains maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1036,7 +1036,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testUpdateServiceEndOfValidityInvalid() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("invalid date");
 		
@@ -1052,7 +1052,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testUpdateServiceSecuredButWithoutAuthenticationInfo() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setSecure(ServiceSecurityType.CERTIFICATE.name());
@@ -1069,7 +1069,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testUpdateServiceInterfaceListNull() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		
@@ -1085,7 +1085,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testUpdateServiceInterfaceListEmpty() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(Collections.<String>emptyList());
@@ -1104,7 +1104,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final String intf = "XML";
 		
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(List.of(intf));
@@ -1121,7 +1121,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testUpdateServiceEverythingIsOk() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(List.of("HTTP-SECURE-XML"));
@@ -1138,7 +1138,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testMergeServiceInvalidId() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(List.of("HTTP-SECURE-XML"));
@@ -1179,7 +1179,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testMergeServiceWrongSystemName() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.getProviderSystem().setSystemName("invalid_name");
 		request.setEndOfValidity("2019-06-12T13:51:30Z");
@@ -1190,7 +1190,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
-		Assert.assertEquals("System name has invalid format. System names only contain letters (english alphabet), numbers and dash (-), and have to start with a letter (also cannot end with dash).", error.getErrorMessage());
+		Assert.assertEquals("System name has invalid format. System names only contain maximum 63 character of letters (english alphabet), numbers and dash (-), and have to start with a letter (also cannot end with dash).", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1207,14 +1207,14 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
-		Assert.assertEquals("Service definition has invalid format. Service definition only contains letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).", error.getErrorMessage());
+		Assert.assertEquals("Service definition has invalid format. Service definition only contains maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testMergeServiceEverythingIsOk() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(List.of("HTTP-SECURE-XML"));
@@ -1348,7 +1348,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	private SystemRequestDTO getAValidSystemRequestDTO() {
 		final SystemRequestDTO result = new SystemRequestDTO();
-		result.setSystemName("x");
+		result.setSystemName("sys");
 		result.setAddress("localhost");
 		result.setPort(1234);
 		

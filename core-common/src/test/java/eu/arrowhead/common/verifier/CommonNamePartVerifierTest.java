@@ -12,7 +12,7 @@
  *   Arrowhead Consortia - conceptualization
  ********************************************************************************/
 
-package eu.arrowhead.common.cn;
+package eu.arrowhead.common.verifier;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -64,6 +64,13 @@ public class CommonNamePartVerifierTest {
 	@Test
 	public void testInvalid4() {
 		final boolean valid = verifier.isValid("1invalid-label");
+		Assert.assertFalse(valid);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInvalid5() {
+		final boolean valid = verifier.isValid("invalid-length-fgkfgnfdg65465fgfhghnkfdg61541fdgfdshhsdhsabgkjhk"); //64 character long instead of the maximum 63
 		Assert.assertFalse(valid);
 	}
 }

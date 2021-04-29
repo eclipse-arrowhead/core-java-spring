@@ -34,15 +34,12 @@ public class NetworkAddressVerifier {
 	
 	public static final String IPV4_REGEX_STRING = "\\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b";
 	public static final String IPV6_REGEX_STRING = "\\A(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\\z";
-	public static final String DOMAIN_NAME_REGEX_STRING = "^((?!-)[A-Za-z0-9-]{1,63}(?<!-)\\.)+[A-Za-z]{2,6}$";	
 	private static final Pattern ipv4Pattern;
 	private static final Pattern ipv6Pattern;
-	private static final Pattern domainNamePattern;
 	
 	static {
 		ipv4Pattern = Pattern.compile(IPV4_REGEX_STRING);
 		ipv6Pattern = Pattern.compile(IPV6_REGEX_STRING);
-		domainNamePattern = Pattern.compile(DOMAIN_NAME_REGEX_STRING);
 	}
 	
 	private static final String IPV4_PLACEHOLDER = "0.0.0.0";
@@ -52,8 +49,8 @@ public class NetworkAddressVerifier {
 	private static final int IPV4_MULTICAST_1ST_OCTET_START = 224;
 	private static final int IPV4_MULTICAST_1ST_OCTET_END = 239;
 	
-	private static final String IPV6_UNSPECIFIED = "0:0:0:0:0:0:0:0";
-	private static final String IPV6_LOOPBACK = "0:0:0:0:0:0:0:1";
+	private static final String IPV6_UNSPECIFIED = "0000:0000:0000:0000:0000:0000:0000:0000";
+	private static final String IPV6_LOOPBACK = "0000:0000:0000:0000:0000:0000:0000:0001";
 	private static final String IPV6_LINK_LOCAL_PREFIX = "fe80";
 	private static final String IPV6_MULTICAST_PREFIX = "ff";
 	
@@ -89,8 +86,6 @@ public class NetworkAddressVerifier {
 		} else if (ipv6Pattern.matcher(candidate).matches()) {
 			verifyIPV6(candidate);
 			
-		} else if (domainNamePattern.matcher(candidate).matches()) {
-			verifyDomainName(candidate);
 		} else {
 			verifyNoType(candidate);			
 		}		
@@ -104,8 +99,8 @@ public class NetworkAddressVerifier {
 		logger.debug("verifyIPV4 started...");
 		
 		if (!allowSelfAddressing) {			
-			// Filter out IP placeholder(default route) (0.0.0.0) and loopback (127.0.0.0 - 127.255.255.255)
-			if (candidate.equalsIgnoreCase(IPV4_PLACEHOLDER) || candidate.startsWith(IPV4_LOOPBACK_1ST_OCTET)) {
+			// Filter out loopback (127.0.0.0 - 127.255.255.255)
+			if (candidate.startsWith(IPV4_LOOPBACK_1ST_OCTET)) {
 				throw new InvalidParameterException(candidate + " ipv4 network address is invalid: self-addressing is disabled");
 			}
 		}
@@ -115,6 +110,11 @@ public class NetworkAddressVerifier {
 			if (candidate.startsWith(IPV4_APIPA_1ST_AND_2ND_OCTET)) {
 				throw new InvalidParameterException(candidate + " ipv4 network address is invalid: non-routable-addressing is disabled");
 			}
+		}
+		
+		// Filter out IP placeholder(default route) (0.0.0.0)
+		if (candidate.equalsIgnoreCase(IPV4_PLACEHOLDER)) {
+			throw new InvalidParameterException(candidate + " ipv4 network address is invalid: placeholder address is denied");
 		}
 		
 		// Filter out local broadcast (255.255.255.255)
@@ -138,8 +138,8 @@ public class NetworkAddressVerifier {
 		logger.debug("verifyIPV6 started...");
 		
 		if (!allowSelfAddressing) {
-			// Filter out unspecified address (0:0:0:0:0:0:0:0) and loopback address (0:0:0:0:0:0:0:1)			
-			if (candidate.equalsIgnoreCase(IPV6_UNSPECIFIED) || candidate.equalsIgnoreCase(IPV6_LOOPBACK)) {
+			// Filter out loopback address (0:0:0:0:0:0:0:1)			
+			if (candidate.equalsIgnoreCase(IPV6_LOOPBACK)) {
 				throw new InvalidParameterException(candidate + " ipv6 network address is invalid: self-addressing is disabled");
 			}			
 		}
@@ -151,6 +151,11 @@ public class NetworkAddressVerifier {
 			}
 		}
 		
+		// Filter out unspecified address (0:0:0:0:0:0:0:1)			
+		if (candidate.equalsIgnoreCase(IPV6_UNSPECIFIED)) {
+			throw new InvalidParameterException(candidate + " ipv6 network address is invalid: unspecified address is denied");
+		}
+		
 		// Filter out multicast (prefix ff)
 		if (candidate.startsWith(IPV6_MULTICAST_PREFIX)) {
 			throw new InvalidParameterException(candidate + " ipv6 network address is invalid: multicast addresses are denied");
@@ -160,18 +165,15 @@ public class NetworkAddressVerifier {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void verifyDomainName(final String candidate) {
-		logger.debug("verifyDomainName started...");
-		//TODO maybe we should offer some kind of white-listing possibility in future versions
-	}
-	
-	//-------------------------------------------------------------------------------------------------
 	private void verifyNoType(final String candidate) {
 		logger.debug("verifyNoType started...");
 		
-		if (!cnVerifier.isValid(candidate)) {
-			throw new InvalidParameterException(candidate + " no-type network address is invalid: only letters (english alphabet), numbers and dash (-) are allowed and have to start with a letter (also cannot end with dash).");
-		}
+		final String[] parts = candidate.split("\\.");
+		for (String part : parts) {
+			if (!cnVerifier.isValid(part)) {
+				throw new InvalidParameterException(candidate + " no-type network address is invalid: dot(.) separated parts can contain only letters (english alphabet), numbers and dash (-) and have to start with a letter (also cannot end with dash). A part can contain maximum 63 character");
+			}			
+		}		
 		
 		if (!allowSelfAddressing) {
 			// Filter out 'localhost' and 'loopback'
