@@ -30,6 +30,7 @@ public class ExternalPingMonitor extends AbstractPingMonitor{
 
 	//-------------------------------------------------------------------------------------------------
 	private static final int ICMP_TTL = 255;
+	private static final int OVERHEAD_MULTIPLIER = 2;
 
 	private final OrchestrationResultDTO cachedPingMonitorProvider = null;
 
@@ -49,9 +50,41 @@ public class ExternalPingMonitor extends AbstractPingMonitor{
 	public List<IcmpPingResponse> ping(final String address) {
 
 		if (cachedPingMonitorProvider != null){
+
+			final int timeOut = calculateTimeOut();
+			final UUID measurementProcessId = requestExternalMeasurement();
+
+			final long startTime = System.currentTimeMillis();
+			final long meausermentExpiryTime = startTime + timeOut;
+
+			boolean measurmentRequestConfirmed = false;
+			boolean measurmentStartedConfirmed = false;
+
+			while(System.currentTimeMillis() < meausermentExpiryTime) {
+
+				checkInterupts(measurementProcessId);
+
+				if(!measurmentRequestConfirmed) {
+					if(!checkMeasurmentRequestConfirmed(measurementProcessId)) {
+						break;
+					}
+				}
+
+				if(!measurmentStartedConfirmed) {
+					if(!checkMeasurmentStartedConfirmed(measurementProcessId)) {
+						break;
+					}
+				}
+
+				//TODO implement measurment finish check and handling ...
+			}
 			//TODO request pingMonitoringService from external provider
 			// TODO send request with pingMeasurementProperties, expect http 200 "ok - measurement uuid" as answer
-			// listen on eventQueue for event sequence: 
+
+			//TODO calculate timeOut 
+			// 
+			
+			// in while loop listen on eventQueue for event sequence: 
 			// 1.) mesaurmentRequestReceived payload = measurement uuid,
 			// 2.) mesaurmentStarted payload = measurement uuid,
 			// 3.) mesurementFinished payload = measurment uuid, List<IcmpPingResponse>
@@ -69,6 +102,24 @@ public class ExternalPingMonitor extends AbstractPingMonitor{
 
 	//=================================================================================================
 	// assistant methods
+
+	//-------------------------------------------------------------------------------------------------
+	private boolean checkMeasurmentStartedConfirmed(final UUID measurementProcessId) {
+		// TODO Implement method logic
+		return false;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private boolean checkMeasurmentRequestConfirmed(final UUID measurementProcessId) {
+		// TODO Implement method logic
+		return false;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void checkInterupts(final UUID measurementProcessId) {
+		/// TODO Implement method logic
+		
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	private UUID requestExternalMeasurement() {
@@ -155,6 +206,15 @@ public class ExternalPingMonitor extends AbstractPingMonitor{
 	private UriComponents createHttpsUri(final SystemResponseDTO provider, final String path) {
 
 		return Utilities.createURI(CommonConstants.HTTPS, provider.getAddress(), provider.getPort(), path );
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private int calculateTimeOut() {
+
+		final int singlePingTimeOut = pingMeasurementProperties.getTimeout();
+		final int timesToRepeatPing = pingMeasurementProperties.getTimeToRepeat();
+
+		return singlePingTimeOut * timesToRepeatPing * OVERHEAD_MULTIPLIER;
 	}
 
 	//-------------------------------------------------------------------------------------------------
