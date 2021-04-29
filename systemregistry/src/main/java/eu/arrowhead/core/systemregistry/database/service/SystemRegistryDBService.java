@@ -50,6 +50,7 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
+import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
@@ -96,6 +97,7 @@ public class SystemRegistryDBService {
     private final SecurityUtilities securityUtilities;
     private final CertificateAuthorityDriver caDriver;
     private final CommonNamePartVerifier cnVerifier;
+    private final NetworkAddressVerifier networkAddressVerifier;
 
     @Value(CoreCommonConstants.$SYSTEMREGISTRY_PING_TIMEOUT_WD)
     private int pingTimeout;
@@ -110,13 +112,15 @@ public class SystemRegistryDBService {
     							   final DeviceRepository deviceRepository,
     							   final SecurityUtilities securityUtilities,
     							   final CertificateAuthorityDriver caDriver,
-    							   final CommonNamePartVerifier cnVerifier) {
+    							   final CommonNamePartVerifier cnVerifier,
+    							   final NetworkAddressVerifier networkAddressVerifier) {
     	this.systemRegistryRepository = systemRegistryRepository;
     	this.systemRepository = systemRepository;
     	this.deviceRepository = deviceRepository;
     	this.securityUtilities = securityUtilities;
     	this.caDriver = caDriver;
     	this.cnVerifier = cnVerifier;
+    	this.networkAddressVerifier = networkAddressVerifier;
     }
     
     //-------------------------------------------------------------------------------------------------
@@ -190,6 +194,7 @@ public class SystemRegistryDBService {
         	throw new InvalidParameterException("System name" + INVALID_FORMAT_ERROR_MESSAGE);
         }
         final String validatedAddress = validateParamString(address);
+        networkAddressVerifier.verify(validatedAddress);
 
         try {
             final Optional<System> systemOptional = systemRepository.findById(validatedSystemId);
@@ -259,6 +264,9 @@ public class SystemRegistryDBService {
             throw new InvalidParameterException("System name" + INVALID_FORMAT_ERROR_MESSAGE);
         }
         final String validatedAddress = validateAllowNullParamString(address);
+        if (!Utilities.isEmpty(validatedAddress)) {
+        	networkAddressVerifier.verify(validatedAddress);
+		}
 
         try {
             final Optional<System> systemOptional = systemRepository.findById(validatedSystemId);
@@ -894,9 +902,7 @@ public class SystemRegistryDBService {
             throw new InvalidParameterException("Name is null or empty");
         }
 
-        if (Utilities.isEmpty(address)) {
-            throw new InvalidParameterException("Address is null or empty");
-        }
+        networkAddressVerifier.verify(address);
 
         if (name.contains(".")) {
             throw new InvalidParameterException("Name can't contain dot (.)");
@@ -1058,12 +1064,20 @@ public class SystemRegistryDBService {
         Assert.notNull(request.getSystem(), "System is not specified.");
         Assert.isTrue(Utilities.notEmpty(request.getSystem().getSystemName()), "System name is not specified.");
         Assert.isTrue(cnVerifier.isValid(request.getSystem().getSystemName()), "System name" + INVALID_FORMAT_ERROR_MESSAGE);
-        Assert.isTrue(Utilities.notEmpty(request.getSystem().getAddress()), "System address is not specified.");
+        try {
+			networkAddressVerifier.verify(request.getSystem().getAddress());
+		} catch (final InvalidParameterException ex) {
+			throw new IllegalArgumentException(ex.getMessage());
+		}
         Assert.notNull(request.getSystem().getPort(), "System port is not specified.");
 
         Assert.notNull(request.getProvider(), "Provider Device is not specified.");
         Assert.isTrue(Utilities.notEmpty(request.getProvider().getDeviceName()), "Provider Device name is not specified.");
-        Assert.isTrue(Utilities.notEmpty(request.getProvider().getAddress()), "Provider Device address is not specified.");
+        try {
+			networkAddressVerifier.verify(request.getProvider().getAddress());
+		} catch (final InvalidParameterException ex) {
+			throw new IllegalArgumentException(ex.getMessage());
+		}
         Assert.isTrue(Utilities.notEmpty(request.getProvider().getMacAddress()), "Provider Device MAC is not specified.");
     }
 
@@ -1089,6 +1103,7 @@ public class SystemRegistryDBService {
     private Device mergeDevice(final DeviceRequestDTO request, final Device device) {
         final String name = Utilities.firstNotNullIfExists(request.getDeviceName(), device.getDeviceName());
         final String address = Utilities.firstNotNullIfExists(request.getAddress(), device.getAddress());
+        networkAddressVerifier.verify(address);
         final String macAddress = Utilities.firstNotNullIfExists(request.getDeviceName(), device.getDeviceName());
         final String authenticationInfo = Utilities.firstNotNullIfExists(request.getAuthenticationInfo(), device.getAuthenticationInfo());
         
@@ -1100,6 +1115,7 @@ public class SystemRegistryDBService {
         final String name = Utilities.firstNotNullIfExists(request.getSystemName(), system.getSystemName());
         Assert.isTrue(cnVerifier.isValid(name), "System name" + INVALID_FORMAT_ERROR_MESSAGE);
         final String address = Utilities.firstNotNullIfExists(request.getAddress(), system.getAddress());
+        networkAddressVerifier.verify(address);
         final int port = request.getPort() > 0 ? request.getPort() : system.getPort();
         final String authenticationInfo = Utilities.firstNotNullIfExists(request.getAuthenticationInfo(), system.getAuthenticationInfo());
         final Map<String,String> metadata = request.getMetadata() != null ? request.getMetadata() : Utilities.text2Map(system.getMetadata());

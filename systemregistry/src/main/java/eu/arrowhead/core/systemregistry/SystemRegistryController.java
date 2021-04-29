@@ -42,6 +42,9 @@ import eu.arrowhead.common.dto.shared.SystemRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
+import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.core.systemregistry.database.service.SystemRegistryDBService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -80,15 +83,17 @@ public class SystemRegistryController {
 
     private final SystemRegistryDBService systemRegistryDBService;
     private final Validation validation;
+    private final NetworkAddressVerifier networkAddressVerifier; // cannot put into Validation.class as it must be a bean
 
     //=================================================================================================
     // methods
 
     //-------------------------------------------------------------------------------------------------
     @Autowired
-    public SystemRegistryController(final SystemRegistryDBService systemRegistryDBService) {
+    public SystemRegistryController(final SystemRegistryDBService systemRegistryDBService, final NetworkAddressVerifier networkAddressVerifier) {
     	this.systemRegistryDBService = systemRegistryDBService;
     	this.validation = new Validation();
+    	this.networkAddressVerifier = networkAddressVerifier;
     }
     
     //-------------------------------------------------------------------------------------------------
@@ -117,7 +122,13 @@ public class SystemRegistryController {
     @ResponseBody
     public SystemRegistryResponseDTO registerSystem(@RequestBody final SystemRegistryRequestDTO request) {
         logger.debug("New system registration request received");
-        validation.checkSystemRegistryRequest(request, getOrigin(CommonConstants.OP_SYSTEMREGISTRY_REGISTER_URI), false);
+        validation.checkSystemRegistryRequest(request, getOrigin(CommonConstants.OP_SYSTEMREGISTRY_REGISTER_URI), false);        
+        try {			
+			networkAddressVerifier.verify(request.getSystem().getAddress());
+			networkAddressVerifier.verify(request.getProvider().getAddress());
+		} catch (final InvalidParameterException ex) {
+			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, getOrigin(CommonConstants.OP_SYSTEMREGISTRY_REGISTER_URI));
+		}
 
         final SystemRegistryResponseDTO response = systemRegistryDBService.registerSystemRegistry(request);
         logger.debug("{} successfully registers its system {}", request.getSystem().getSystemName(), request.getSystem());
@@ -139,6 +150,11 @@ public class SystemRegistryController {
                                  @RequestParam(CommonConstants.OP_SYSTEMREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT) final int port) {
         logger.debug("System removal request received");
         validation.checkUnregisterSystemParameters(systemName, address, port, getOrigin(CommonConstants.OP_SYSTEMREGISTRY_UNREGISTER_URI));
+        try {			
+			networkAddressVerifier.verify(address);
+		} catch (final InvalidParameterException ex) {
+			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, getOrigin(CommonConstants.OP_SYSTEMREGISTRY_UNREGISTER_URI));
+		}
 
         systemRegistryDBService.removeSystemRegistryByNameAndAddressAndPort(systemName, address, port);
         logger.debug("{} successfully removed", systemName);
@@ -198,6 +214,11 @@ public class SystemRegistryController {
         logger.debug("System query by systemRequestDTO request received");
 
         validation.checkSystemRequest(request, CommonConstants.SYSTEMREGISTRY_URI + CoreCommonConstants.OP_SYSTEMREGISTRY_QUERY_BY_SYSTEM_ID_URI, false);
+        try {			
+			networkAddressVerifier.verify(request.getAddress());
+		} catch (final InvalidParameterException ex) {
+			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, CommonConstants.SYSTEMREGISTRY_URI + CoreCommonConstants.OP_SYSTEMREGISTRY_QUERY_BY_SYSTEM_ID_URI);
+		}
 
         final String systemName = request.getSystemName();
         final String address = request.getAddress();

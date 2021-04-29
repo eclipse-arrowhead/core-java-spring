@@ -19,10 +19,12 @@ import eu.arrowhead.common.dto.internal.SystemListResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.core.systemregistry.database.service.SystemRegistryDBService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -80,6 +82,9 @@ public class SystemRegistryControllerSystemTest {
 
     @MockBean(name = "mockSystemRegistryDBService")
     private SystemRegistryDBService systemRegistryDBService;
+    
+    @Spy
+    private NetworkAddressVerifier networkAddressVerifier;
 
     //=================================================================================================
     // methods
@@ -267,6 +272,20 @@ public class SystemRegistryControllerSystemTest {
                     .andExpect(status().isBadRequest())
                     .andReturn();
     }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+    public void createSystemRequestInvalidAddress() throws Exception {
+        final SystemRequestDTO dto = new SystemRequestDTO("system", "0.0.0.0", 80, "authenticationInfo", null);
+        when(systemRegistryDBService.createSystemDto(anyString(), anyString(), anyInt(), anyString(), any())).thenReturn(VALID_SYSTEM);
+
+        this.mockMvc.perform(post("/systemregistry/mgmt/systems")
+                                     .accept(MediaType.APPLICATION_JSON)
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+    }
 
     //-------------------------------------------------------------------------------------------------
 	@Test
@@ -412,6 +431,18 @@ public class SystemRegistryControllerSystemTest {
                     .andExpect(status().isBadRequest())
                     .andReturn();
     }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+    public void updateSystemRequestInvalidAddress() throws Exception {
+        final SystemRequestDTO dto = new SystemRequestDTO("system", "0.0.0.0", 80, "authenticationInfo", null);
+        this.mockMvc.perform(put("/systemregistry/mgmt/systems/" + VALID_SYSTEM_ID)
+                                     .accept(MediaType.APPLICATION_JSON)
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+    }
 
     //-------------------------------------------------------------------------------------------------
 	@Test
@@ -530,6 +561,19 @@ public class SystemRegistryControllerSystemTest {
         final SystemRequestDTO dto = new SystemRequestDTO("system", "address", 80, "authenticationInfo", null);
 
         this.mockMvc.perform(patch("/systemregistry/mgmt/systems/" + NEGATIVE_SYSTEM_ID)
+                                     .accept(MediaType.APPLICATION_JSON)
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+    }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+    public void mergeSystemInvalidAddress() throws Exception {
+        final SystemRequestDTO dto = new SystemRequestDTO("system", "0.0.0.0", 80, "authenticationInfo", null);
+
+        this.mockMvc.perform(patch("/systemregistry/mgmt/systems/" + VALID_SYSTEM_ID)
                                      .accept(MediaType.APPLICATION_JSON)
                                      .contentType(MediaType.APPLICATION_JSON)
                                      .content(objectMapper.writeValueAsString(dto)))
