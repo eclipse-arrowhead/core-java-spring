@@ -87,13 +87,14 @@ case "$1" in
       -e "\#^.*server\.ssl\.key-password=#s#.*\$#server.ssl.key-password=${AH_PASS_CERT}#" \
       -e "\#^.*server\.ssl\.trust-store=#s#.*\$#server.ssl.trust-store=file:${AH_CONF_DIR}/truststore.p12#" \
       -e "\#^.*server\.ssl\.trust-store-password=#s#.*\$#server.ssl.trust-store-password=${AH_PASS_CERT}#" \
-      -e "s/^cloud\.ssl\.key-store-password=.*/cloud.ssl.key-store-password=${AH_PASS_CERT}/"\
-      -e "s/^cloud\.ssl\.key-password=.*/cloud.ssl.key-password=${AH_PASS_CERT}/"\
-      -e "s/^cloud\.ssl\.key-store=.*/cloud.ssl.key-store=classpath:certificates/${cloud_file_name}.p12/"\
+	  -e "\#^.*cloud\.ssl\.key-store-password=#s#.*\$#cloud.ssl.key-store-password=${AH_PASS_CERT}#" \
+      -e "\#^.*cloud\.ssl\.key-password=#s#.*\$#cloud.ssl.key-password=${AH_PASS_CERT}#" \
+      -e "\#^.*cloud\.ssl\.key-store=#s#.*\$#cloud.ssl.key-store=file:${SYSTEM_DIR}/${cloud_file_name}#" \
       > ${SYSTEM_DIR}/application.properties
-#cloud.ssl.key-store=classpath:certificates/cloud.p12
+
     rm ${SYSTEM_DIR}/application.properties.orig
     chown arrowhead:arrowhead ${SYSTEM_DIR}/application.properties
+	chown arrowhead:arrowhead ${SYSTEM_DIR}/${cloud_file_name}
     chmod 640 ${SYSTEM_DIR}/application.properties
 
     echo "Starting ${PKG_NAME}..." >&2
