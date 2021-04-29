@@ -163,7 +163,7 @@ public class ExternalPingMonitor extends AbstractPingMonitor{
 
 		
 		//TODO try sr with timeout, trz orch with time out -> exit if uncussess
-		//orch service pingprovider with time - finish int if uncucesss, 
+		//orch service pingprovider with time - finish int if unscucesss, 
 		//in orhcestrator flags
 		// metadatasearch true
 		//matchmaking true
@@ -172,6 +172,6 @@ public class ExternalPingMonitor extends AbstractPingMonitor{
 		// enableIntercloud false
 
 		//if service orchestrated subscribe to all events from pingmonitor
-		// as monitoringRequestReceivedEvent, monitoringStratedEvent, monitoringFinishedEvent, serviceErrorEvent 
+		// as monitoringRequestReceivedEvent, monitoringStratedEvent, monitoringFinishedEvent, interuptedMonitoringProcessEvent 
 	}
 }
