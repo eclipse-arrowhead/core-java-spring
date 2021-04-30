@@ -33,7 +33,7 @@ public class NetworkAddressVerifier {
 	// members
 	
 	public static final String IPV4_REGEX_STRING = "\\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b";
-	public static final String IPV6_REGEX_STRING = "\\A(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\\z";
+	public static final String IPV6_REGEX_STRING = "^([0-9a-fA-F]{4}:){7}[0-9a-fA-F]{4}$";
 	private static final Pattern ipv4Pattern;
 	private static final Pattern ipv6Pattern;
 	
@@ -79,7 +79,7 @@ public class NetworkAddressVerifier {
 			throw new InvalidParameterException("network address is empty");
 		}
 		
-		final String candidate = address.toLowerCase().trim();
+		final String candidate = address.trim();
 		if (ipv4Pattern.matcher(candidate).matches()) {
 			verifyIPV4(candidate);
 			
@@ -138,7 +138,7 @@ public class NetworkAddressVerifier {
 		logger.debug("verifyIPV6 started...");
 		
 		if (!allowSelfAddressing) {
-			// Filter out loopback address (0:0:0:0:0:0:0:1)			
+			// Filter out loopback address (0000:0000:0000:0000:0000:0000:0000:0001)			
 			if (candidate.equalsIgnoreCase(IPV6_LOOPBACK)) {
 				throw new InvalidParameterException(candidate + " ipv6 network address is invalid: self-addressing is disabled");
 			}			
@@ -151,7 +151,7 @@ public class NetworkAddressVerifier {
 			}
 		}
 		
-		// Filter out unspecified address (0:0:0:0:0:0:0:1)			
+		// Filter out unspecified address (0000:0000:0000:0000:0000:0000:0000:0000)			
 		if (candidate.equalsIgnoreCase(IPV6_UNSPECIFIED)) {
 			throw new InvalidParameterException(candidate + " ipv6 network address is invalid: unspecified address is denied");
 		}
