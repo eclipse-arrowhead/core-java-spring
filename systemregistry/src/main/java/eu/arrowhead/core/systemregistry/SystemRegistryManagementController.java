@@ -31,6 +31,7 @@ import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.processor.NetworkAddressPreProcessor;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.core.systemregistry.database.service.SystemRegistryDBService;
 import io.swagger.annotations.Api;
@@ -120,6 +121,7 @@ public class SystemRegistryManagementController {
 
     private final SystemRegistryDBService systemRegistryDBService;
     private final Validation validation;
+    private final NetworkAddressPreProcessor networkAddressPreProcessor;
     private final NetworkAddressVerifier networkAddressVerifier; // cannot put into Validation.class as it must be a bean
 
     //=================================================================================================
@@ -127,9 +129,10 @@ public class SystemRegistryManagementController {
 
     //-------------------------------------------------------------------------------------------------
     @Autowired
-    public SystemRegistryManagementController(final SystemRegistryDBService systemRegistryDBService, final NetworkAddressVerifier networkAddressVerifier) {
+    public SystemRegistryManagementController(final SystemRegistryDBService systemRegistryDBService, final NetworkAddressPreProcessor networkAddressPreProcessor, final NetworkAddressVerifier networkAddressVerifier) {
     	this.systemRegistryDBService = systemRegistryDBService;
     	this.validation = new Validation();
+    	this.networkAddressPreProcessor = networkAddressPreProcessor;
     	this.networkAddressVerifier = networkAddressVerifier;
     }
     
@@ -446,8 +449,8 @@ public class SystemRegistryManagementController {
         logger.debug("New system registry update request received");
         validation.checkSystemRegistryUpdateRequest(id, request, getOrigin(SYSTEMREGISTRY_MGMT_BY_ID_URI));
         try {			
-			networkAddressVerifier.verify(request.getSystem().getAddress());
-			networkAddressVerifier.verify(request.getProvider().getAddress());
+			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(request.getSystem().getAddress()));
+			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(request.getProvider().getAddress()));
 		} catch (final InvalidParameterException ex) {
 			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, getOrigin(SYSTEMREGISTRY_MGMT_BY_ID_URI));
 		}
@@ -474,14 +477,14 @@ public class SystemRegistryManagementController {
         validation.checkSystemRegistryMergeRequest(id, request, getOrigin(SYSTEMREGISTRY_MGMT_BY_ID_URI));
         if (request.getSystem() != null && !Utilities.isEmpty(request.getSystem().getAddress())) {
         	try {			
-    			networkAddressVerifier.verify(request.getSystem().getAddress());
+    			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(request.getSystem().getAddress()));
     		} catch (final InvalidParameterException ex) {
     			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, getOrigin(SYSTEMREGISTRY_MGMT_BY_ID_URI));
     		}
 		}
         if (request.getProvider() != null && !Utilities.isEmpty(request.getProvider().getAddress())) {
         	try {			
-    			networkAddressVerifier.verify(request.getProvider().getAddress());
+    			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(request.getProvider().getAddress()));
     		} catch (final InvalidParameterException ex) {
     			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, getOrigin(SYSTEMREGISTRY_MGMT_BY_ID_URI));
     		}
@@ -502,7 +505,7 @@ public class SystemRegistryManagementController {
 
         validation.checkSystemRequest(request, getOrigin(SYSTEMS_URI), true);
         try {			
-			networkAddressVerifier.verify(request.getAddress());
+			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(request.getAddress()));
 		} catch (final InvalidParameterException ex) {
 			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, getOrigin(SYSTEMS_URI));
 		}
@@ -522,7 +525,7 @@ public class SystemRegistryManagementController {
 
         validation.checkSystemPutRequest(request, systemId, getOrigin(SYSTEMS_URI));
         try {			
-			networkAddressVerifier.verify(request.getAddress());
+			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(request.getAddress()));
 		} catch (final InvalidParameterException ex) {
 			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, getOrigin(SYSTEMS_URI));
 		}
@@ -543,14 +546,14 @@ public class SystemRegistryManagementController {
         validation.checkSystemMergeRequest(request, systemId, getOrigin(SYSTEMS_URI));
 
         final String validatedSystemName = request.getSystemName() != null ? request.getSystemName().toLowerCase().trim() : "";
-        final String validatedAddress = request.getAddress() != null ? request.getAddress().toLowerCase().trim() : "";
+        final String validatedAddress = !Utilities.isEmpty(request.getAddress()) ? networkAddressPreProcessor.normalize(request.getAddress().toLowerCase().trim()) : "";
         final Integer validatedPort = request.getPort();
         final String validatedAuthenticationInfo = request.getAuthenticationInfo();
         final Map<String,String> metadata = request.getMetadata();
         
         if (!Utilities.isEmpty(validatedAddress)) {
         	try {			
-    			networkAddressVerifier.verify(request.getAddress());
+    			networkAddressVerifier.verify(validatedAddress);
     		} catch (final InvalidParameterException ex) {
     			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, getOrigin(SYSTEMS_URI));
     		}

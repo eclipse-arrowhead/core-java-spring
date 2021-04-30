@@ -14,6 +14,31 @@
 
 package eu.arrowhead.core.systemregistry.database.service;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.security.KeyPair;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
+import org.apache.http.HttpStatus;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
+
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.CoreUtilities;
@@ -49,33 +74,9 @@ import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.processor.NetworkAddressPreProcessor;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
-
-import org.apache.http.HttpStatus;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
-
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.security.KeyPair;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeParseException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 
 @Service
 public class SystemRegistryDBService {
@@ -97,6 +98,7 @@ public class SystemRegistryDBService {
     private final SecurityUtilities securityUtilities;
     private final CertificateAuthorityDriver caDriver;
     private final CommonNamePartVerifier cnVerifier;
+    private final NetworkAddressPreProcessor networkAddressPreProcessor;
     private final NetworkAddressVerifier networkAddressVerifier;
 
     @Value(CoreCommonConstants.$SYSTEMREGISTRY_PING_TIMEOUT_WD)
@@ -113,6 +115,7 @@ public class SystemRegistryDBService {
     							   final SecurityUtilities securityUtilities,
     							   final CertificateAuthorityDriver caDriver,
     							   final CommonNamePartVerifier cnVerifier,
+    							   final NetworkAddressPreProcessor networkAddressPreProcessor,
     							   final NetworkAddressVerifier networkAddressVerifier) {
     	this.systemRegistryRepository = systemRegistryRepository;
     	this.systemRepository = systemRepository;
@@ -120,6 +123,7 @@ public class SystemRegistryDBService {
     	this.securityUtilities = securityUtilities;
     	this.caDriver = caDriver;
     	this.cnVerifier = cnVerifier;
+    	this.networkAddressPreProcessor = networkAddressPreProcessor;
     	this.networkAddressVerifier = networkAddressVerifier;
     }
     
@@ -193,7 +197,7 @@ public class SystemRegistryDBService {
         if (!cnVerifier.isValid(validatedSystemName)) {
         	throw new InvalidParameterException("System name" + INVALID_FORMAT_ERROR_MESSAGE);
         }
-        final String validatedAddress = validateParamString(address);
+        final String validatedAddress = networkAddressPreProcessor.normalize(address);
         networkAddressVerifier.verify(validatedAddress);
 
         try {
@@ -263,7 +267,7 @@ public class SystemRegistryDBService {
         if (validatedSystemName != null && !cnVerifier.isValid(validatedSystemName)) {
             throw new InvalidParameterException("System name" + INVALID_FORMAT_ERROR_MESSAGE);
         }
-        final String validatedAddress = validateAllowNullParamString(address);
+        final String validatedAddress = networkAddressPreProcessor.normalize(address);
         if (!Utilities.isEmpty(validatedAddress)) {
         	networkAddressVerifier.verify(validatedAddress);
 		}
@@ -278,7 +282,7 @@ public class SystemRegistryDBService {
 
             if (checkSystemIfUniqueValidationNeeded(system, validatedSystemName, validatedAddress, validatedPort)) {
                 checkConstraintsOfSystemTable(validatedSystemName != null ? validatedSystemName : system.getSystemName(),
-                                              validatedAddress != null ? validatedAddress : system.getAddress(),
+                                              !Utilities.isEmpty(validatedAddress) ? validatedAddress : system.getAddress(),
                                               validatedPort != null ? validatedPort : system.getPort());
             }
 
@@ -748,7 +752,7 @@ public class SystemRegistryDBService {
     //-------------------------------------------------------------------------------------------------
     private System getSystemByNameAndAddressAndPort(final String systemName, final String address, final int port) {
         final String dbSystemName = Utilities.lowerCaseTrim(systemName);
-        final String dbAddress = Utilities.lowerCaseTrim(address);
+        final String dbAddress = networkAddressPreProcessor.normalize(address);
         final Optional<System> optionalSystem = systemRepository.findBySystemNameAndAddressAndPort(dbSystemName, dbAddress, port);
         return optionalSystem.orElseThrow(() -> new InvalidParameterException(
                 "System entry with name '" + dbSystemName + "', address '" + dbAddress + "' and port '" + port + "' does not exist"));
@@ -853,7 +857,9 @@ public class SystemRegistryDBService {
     private System validateNonNullSystemParameters(final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) {
         logger.debug("validateNonNullSystemParameters started...");
 
-        validateNonNullParameters(systemName, address);
+        final String normalizedAddress = networkAddressPreProcessor.normalize(address);
+        
+        validateNonNullParameters(systemName, normalizedAddress);
         
         if (!cnVerifier.isValid(systemName)) {
         	throw new InvalidParameterException("System name" + INVALID_FORMAT_ERROR_MESSAGE);
@@ -864,7 +870,7 @@ public class SystemRegistryDBService {
         }
 
         final String validatedSystemName = Utilities.lowerCaseTrim(systemName);
-        final String validatedAddress = Utilities.lowerCaseTrim(address);
+        final String validatedAddress = normalizedAddress;
 
         checkConstraintsOfSystemTable(validatedSystemName, validatedAddress, port);
 
@@ -875,14 +881,15 @@ public class SystemRegistryDBService {
     private Device validateNonNullDeviceParameters(final String deviceName, final String address, final String macAddress, final String authenticationInfo) {
         logger.debug("validateNonNullDeviceParameters started...");
 
-        validateNonNullParameters(deviceName, address);
+        final String normalizedAddress = networkAddressPreProcessor.normalize(address);
+        validateNonNullParameters(deviceName, normalizedAddress);
 
         if (Utilities.isEmpty(macAddress)) {
             throw new InvalidParameterException("MAC address is null or empty");
         }
 
         final String validatedDeviceName = Utilities.lowerCaseTrim(deviceName);
-        final String validatedAddress = Utilities.lowerCaseTrim(address);
+        final String validatedAddress = normalizedAddress;
         final String validatedMacAddress = Utilities.lowerCaseTrim(macAddress);
 
         if (!Utilities.isValidMacAddress(validatedMacAddress)) {
@@ -992,7 +999,8 @@ public class SystemRegistryDBService {
     private System findOrCreateSystem(final String name, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) {
 
         final String validatedName = Utilities.lowerCaseTrim(name);
-        final String validatedAddress = Utilities.lowerCaseTrim(address);
+        final String validatedAddress = networkAddressPreProcessor.normalize(address);
+        networkAddressVerifier.verify(validatedAddress);
 
         final Optional<System> optSystem = systemRepository.findBySystemNameAndAddressAndPort(validatedName, validatedAddress, port);
         System provider;
@@ -1026,7 +1034,8 @@ public class SystemRegistryDBService {
     private Device findOrCreateDevice(final String deviceName, final String address, final String macAddress, final String authenticationInfo) {
 
         final String validateName = Utilities.lowerCaseTrim(deviceName);
-        final String validateAddress = Utilities.lowerCaseTrim(address);
+        final String validateAddress = networkAddressPreProcessor.normalize(address);
+        networkAddressVerifier.verify(validateAddress);
         final String validatedMacAddress = Utilities.lowerCaseTrim(macAddress);
 
         if (!Utilities.isValidMacAddress(validatedMacAddress)) {
@@ -1052,7 +1061,9 @@ public class SystemRegistryDBService {
 
     //-------------------------------------------------------------------------------------------------
     private Device createDevice(final String name, final String address, final String macAddress, final String authenticationInfo) {
-        final Device device = new Device(name, address, macAddress, authenticationInfo);
+    	final String normalizedAddress = networkAddressPreProcessor.normalize(address);
+    	networkAddressVerifier.verify(normalizedAddress);
+        final Device device = new Device(name, normalizedAddress, macAddress, authenticationInfo);
         return deviceRepository.saveAndFlush(device);
     }
 
@@ -1102,7 +1113,7 @@ public class SystemRegistryDBService {
     //-------------------------------------------------------------------------------------------------
     private Device mergeDevice(final DeviceRequestDTO request, final Device device) {
         final String name = Utilities.firstNotNullIfExists(request.getDeviceName(), device.getDeviceName());
-        final String address = Utilities.firstNotNullIfExists(request.getAddress(), device.getAddress());
+        final String address = Utilities.firstNotNullIfExists(networkAddressPreProcessor.normalize(request.getAddress()), device.getAddress());
         networkAddressVerifier.verify(address);
         final String macAddress = Utilities.firstNotNullIfExists(request.getDeviceName(), device.getDeviceName());
         final String authenticationInfo = Utilities.firstNotNullIfExists(request.getAuthenticationInfo(), device.getAuthenticationInfo());
@@ -1114,7 +1125,7 @@ public class SystemRegistryDBService {
     private System mergeSystem(final SystemRequestDTO request, final System system) {
         final String name = Utilities.firstNotNullIfExists(request.getSystemName(), system.getSystemName());
         Assert.isTrue(cnVerifier.isValid(name), "System name" + INVALID_FORMAT_ERROR_MESSAGE);
-        final String address = Utilities.firstNotNullIfExists(request.getAddress(), system.getAddress());
+        final String address = Utilities.firstNotNullIfExists(networkAddressPreProcessor.normalize(request.getAddress()), system.getAddress());
         networkAddressVerifier.verify(address);
         final int port = request.getPort() > 0 ? request.getPort() : system.getPort();
         final String authenticationInfo = Utilities.firstNotNullIfExists(request.getAuthenticationInfo(), system.getAuthenticationInfo());

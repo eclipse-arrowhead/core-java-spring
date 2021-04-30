@@ -38,6 +38,7 @@ import eu.arrowhead.common.drivers.CertificateAuthorityDriver;
 import eu.arrowhead.common.dto.shared.SystemRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.processor.NetworkAddressPreProcessor;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 
@@ -67,6 +68,9 @@ public class SystemRegistryDBServiceTest {
 	
 	@Spy
     private CommonNamePartVerifier cnVerifier;
+	
+	@Spy
+    private NetworkAddressPreProcessor networkAddressPreProcessor;
 	
 	@Spy
     private NetworkAddressVerifier networkAddressVerifier;

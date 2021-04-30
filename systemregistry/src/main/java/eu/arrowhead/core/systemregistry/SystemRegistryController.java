@@ -44,6 +44,7 @@ import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.processor.NetworkAddressPreProcessor;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.core.systemregistry.database.service.SystemRegistryDBService;
 import io.swagger.annotations.Api;
@@ -83,6 +84,7 @@ public class SystemRegistryController {
 
     private final SystemRegistryDBService systemRegistryDBService;
     private final Validation validation;
+    private final NetworkAddressPreProcessor networkAddressPreProcessor;
     private final NetworkAddressVerifier networkAddressVerifier; // cannot put into Validation.class as it must be a bean
 
     //=================================================================================================
@@ -90,9 +92,10 @@ public class SystemRegistryController {
 
     //-------------------------------------------------------------------------------------------------
     @Autowired
-    public SystemRegistryController(final SystemRegistryDBService systemRegistryDBService, final NetworkAddressVerifier networkAddressVerifier) {
+    public SystemRegistryController(final SystemRegistryDBService systemRegistryDBService, final NetworkAddressPreProcessor networkAddressPreProcessor, final NetworkAddressVerifier networkAddressVerifier) {
     	this.systemRegistryDBService = systemRegistryDBService;
     	this.validation = new Validation();
+    	this.networkAddressPreProcessor = networkAddressPreProcessor;
     	this.networkAddressVerifier = networkAddressVerifier;
     }
     
@@ -124,8 +127,8 @@ public class SystemRegistryController {
         logger.debug("New system registration request received");
         validation.checkSystemRegistryRequest(request, getOrigin(CommonConstants.OP_SYSTEMREGISTRY_REGISTER_URI), false);        
         try {			
-			networkAddressVerifier.verify(request.getSystem().getAddress());
-			networkAddressVerifier.verify(request.getProvider().getAddress());
+			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(request.getSystem().getAddress()));
+			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(request.getProvider().getAddress()));
 		} catch (final InvalidParameterException ex) {
 			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, getOrigin(CommonConstants.OP_SYSTEMREGISTRY_REGISTER_URI));
 		}
@@ -151,7 +154,7 @@ public class SystemRegistryController {
         logger.debug("System removal request received");
         validation.checkUnregisterSystemParameters(systemName, address, port, getOrigin(CommonConstants.OP_SYSTEMREGISTRY_UNREGISTER_URI));
         try {			
-			networkAddressVerifier.verify(address);
+			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(address));
 		} catch (final InvalidParameterException ex) {
 			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, getOrigin(CommonConstants.OP_SYSTEMREGISTRY_UNREGISTER_URI));
 		}
@@ -215,7 +218,7 @@ public class SystemRegistryController {
 
         validation.checkSystemRequest(request, CommonConstants.SYSTEMREGISTRY_URI + CoreCommonConstants.OP_SYSTEMREGISTRY_QUERY_BY_SYSTEM_ID_URI, false);
         try {			
-			networkAddressVerifier.verify(request.getAddress());
+			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(request.getAddress()));
 		} catch (final InvalidParameterException ex) {
 			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, CommonConstants.SYSTEMREGISTRY_URI + CoreCommonConstants.OP_SYSTEMREGISTRY_QUERY_BY_SYSTEM_ID_URI);
 		}
