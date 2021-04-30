@@ -306,6 +306,14 @@ public class CommonConstants {
 	public static final String $CA_CERT_VALIDITY_NEG_OFFSET_MINUTES = "${" + CA_CERT_VALIDITY_NEG_OFFSET_MINUTES + ":" + Defaults.DEFAULT_CA_CERT_VALIDITY_NEG_OFFSET_MINUTES + "}";
 	public static final String CA_CERT_VALIDITY_POS_OFFSET_MINUTES = "ca.validity.positive-offest-minutes";
 	public static final String $CA_CERT_VALIDITY_POS_OFFSET_MINUTES = "${" + CA_CERT_VALIDITY_POS_OFFSET_MINUTES + ":" + Defaults.DEFAULT_CA_CERT_VALIDITY_POS_OFFSET_MINUTES + "}";
+	public static final String CA_CERT_KEYSTORE_TYPE = "cloud.ssl.key-store-type";
+	public static final String $CA_CERT_KEYSTORE_TYPE = "${" + CA_CERT_KEYSTORE_TYPE + "}";
+	public static final String CA_CERT_KEYSTORE_PATH = "cloud.ssl.key-store";
+	public static final String $CA_CERT_KEYSTORE_PATH = "${" + CA_CERT_KEYSTORE_PATH + "}";
+	public static final String CA_CERT_KEYSTORE_PASSWORD = "cloud.ssl.key-store-password"; //NOSONAR it is not a password
+	public static final String $CA_CERT_KEYSTORE_PASSWORD = "${" + CA_CERT_KEYSTORE_PASSWORD + "}"; //NOSONAR it is not a password
+	public static final String CA_CERT_KEY_PASSWORD = "cloud.ssl.key-password"; //NOSONAR it is not a password
+	public static final String $CA_CERT_KEY_PASSWORD = "${" + CA_CERT_KEY_PASSWORD + "}"; //NOSONAR it is not a password
 
 	public static final String JWT_CLAIM_CONSUMER_ID = "cid";
 	public static final String JWT_CLAIM_SERVICE_ID = "sid";

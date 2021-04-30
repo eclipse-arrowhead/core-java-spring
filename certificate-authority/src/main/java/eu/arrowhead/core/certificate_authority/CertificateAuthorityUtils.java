@@ -79,7 +79,7 @@ public class CertificateAuthorityUtils {
     private static final String PROVIDER = "BC";
     private static final String SIGNATURE_ALGORITHM = "SHA256withRSA";
 
-    static KeyStore getKeyStore(SSLProperties sslProperties) {
+    static KeyStore getCertificateAuthorityKeyStore(SSLProperties sslProperties) {
         if (sslProperties == null) {
             throw new ServiceConfigurationError("sslProperties cannot be null");
         }
@@ -87,11 +87,27 @@ public class CertificateAuthorityUtils {
             final KeyStore keystore = KeyStore.getInstance(sslProperties.getKeyStoreType());
             keystore.load(sslProperties.getKeyStore()
                                        .getInputStream(),
-                    sslProperties.getKeyStorePassword()
-                                 .toCharArray());
+                          sslProperties.getKeyStorePassword()
+                                       .toCharArray());
             return keystore;
         } catch (KeyStoreException | IOException | CertificateException | NoSuchAlgorithmException e) {
             throw new ServiceConfigurationError("Cannot open keystore: " + e.getMessage());
+        }
+    }
+
+    static KeyStore getCloudKeyStore(CAProperties caProperties) {
+        if (caProperties == null) {
+            throw new ServiceConfigurationError("caProperties cannot be null");
+        }
+        try {
+            final KeyStore keystore = KeyStore.getInstance(caProperties.getCloudKeyStoreType());
+            keystore.load(caProperties.getCloudKeyStorePath()
+                                       .getInputStream(),
+                          caProperties.getCloudKeyStorePassword()
+                                       .toCharArray());
+            return keystore;
+        } catch (KeyStoreException | IOException | CertificateException | NoSuchAlgorithmException e) {
+            throw new ServiceConfigurationError("Cannot open cloud keystore: " + e.getMessage());
         }
     }
 
