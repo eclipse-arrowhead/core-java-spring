@@ -24,6 +24,7 @@ import eu.arrowhead.core.qos.dto.IcmpPingRequest;
 import eu.arrowhead.core.qos.dto.IcmpPingRequestACK;
 import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.dto.event.FinishedMonitoringMeasurementEventDTO;
+import eu.arrowhead.core.qos.dto.event.InteruptedMonitoringMeasurementEventDTO;
 import eu.arrowhead.core.qos.dto.event.ReceivedMonitoringRequestEventDTO;
 import eu.arrowhead.core.qos.dto.event.StartedMonitoringMeasurementEventDTO;
 import eu.arrowhead.core.qos.service.QoSMonitorDriver;
@@ -161,20 +162,81 @@ public class ExternalPingMonitor extends AbstractPingMonitor{
 
 	//-------------------------------------------------------------------------------------------------
 	private StartedMonitoringMeasurementEventDTO checkMeasurmentStartedConfirmed(final UUID measurementProcessId) {
-		// TODO Implement method logic
-		return null;
+		logger.debug("checkMeasurmentStartedConfirmed statred...");
+
+		try {
+
+			final StartedMonitoringMeasurementEventDTO event = startedMonitoringMeasurementEventQueue.poll();
+			if(event != null) {
+				final UUID uuid = UUID.fromString(event.getMetaData().get(QosMonitorConstants.PROCESS_ID_KEY));
+				if(uuid.equals(measurementProcessId)) {
+					return event;
+				}else {
+					throw new ArrowheadException("Invalid measurementProcessId. ");
+				}
+			}else {
+				return null;
+			}
+
+		} catch (final InterruptedException ex) {
+
+			throw new ArrowheadException("Exeption during startedMonitoringMeasurementEventQueue poll : " + ex);
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	private ReceivedMonitoringRequestEventDTO  checkMeasurmentRequestConfirmed(final UUID measurementProcessId) {
-		// TODO Implement method logic
-		return null;
+		logger.debug("checkMeasurmentRequestConfirmed statred...");
+
+		try {
+
+			final ReceivedMonitoringRequestEventDTO event = receivedMonitoringRequestEventQueue.poll();
+			if(event != null) {
+				final UUID uuid = UUID.fromString(event.getMetaData().get(QosMonitorConstants.PROCESS_ID_KEY));
+				if(uuid.equals(measurementProcessId)) {
+					return event;
+				}else {
+					throw new ArrowheadException("Invalid measurementProcessId. ");
+				}
+			}else {
+				return null;
+			}
+
+		} catch (final InterruptedException ex) {
+
+			throw new ArrowheadException("Exeption during receivedMonitoringRequestEventQueue poll : " + ex);
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	private void checkInterupts(final UUID measurementProcessId) {
-		/// TODO Implement method logic
-		
+		logger.debug("checkInterupts statred...");
+
+		try {
+
+			final InteruptedMonitoringMeasurementEventDTO event = interuptedMonitoringMeasurementEventQueue.poll();
+			if(event != null) {
+				final UUID uuid = UUID.fromString(event.getMetaData().get(QosMonitorConstants.PROCESS_ID_KEY));
+				if(uuid.equals(measurementProcessId)) {
+
+					final String suspectedRootCauses = event.getMetaData().get(QosMonitorConstants.INTERUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_ROOT_CAUSE_KEY);
+					final String exeptionInExternalMonitoring = event.getMetaData().get(QosMonitorConstants.INTERUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_EXCEPTION_KEY);
+
+					logger.warn("Exception in external monitoring process: " + exeptionInExternalMonitoring);
+					logger.warn("Self clamed root cause of external monitoring process exception: " + suspectedRootCauses);
+
+					throw new ArrowheadException("Interupt in external monitoring process. ");
+				}else {
+					return;
+				}
+			}else {
+				return;
+			}
+
+		} catch (final InterruptedException ex) {
+
+			throw new ArrowheadException("Exeption during interuptedMonitoringMeasurementEventQueue poll : " + ex);
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
