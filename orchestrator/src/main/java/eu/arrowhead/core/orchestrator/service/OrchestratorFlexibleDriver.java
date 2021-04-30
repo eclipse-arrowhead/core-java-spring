@@ -25,6 +25,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,11 +35,18 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.OrchestratorStoreFlexible;
+import eu.arrowhead.common.dto.internal.DTOUtilities;
+import eu.arrowhead.common.dto.shared.OrchestrationFlags;
+import eu.arrowhead.common.dto.shared.OrchestrationFlags.Flag;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.shared.PreferredProviderDataDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultListDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreFlexibleDBService;
 
 @Service
@@ -70,6 +79,10 @@ public class OrchestratorFlexibleDriver { //TODO unit tests
 	//-------------------------------------------------------------------------------------------------
 	/* default */ List<OrchestratorStoreFlexible> collectAndSortMatchingRules(final OrchestrationFormRequestDTO originalRequest, final SystemResponseDTO consumerSystem) {
 		logger.debug("collectAndSortMatchingRules started ...");
+		Assert.notNull(originalRequest, "Original request is null.");
+		Assert.notNull(originalRequest.getRequestedService(), "Requested service is null.");
+		Assert.notNull(consumerSystem, "Consumer system is null.");
+		Assert.isTrue(!Utilities.isEmpty(consumerSystem.getSystemName()), "Consumer system name is null or blank.");
 		
 		final Set<OrchestratorStoreFlexible> rules = new HashSet<>();
 		
@@ -108,21 +121,43 @@ public class OrchestratorFlexibleDriver { //TODO unit tests
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	/* default */ Map<OrchestratorStoreFlexible,ServiceQueryResultDTO> queryServiceRegistry(final OrchestrationFormRequestDTO request, final List<OrchestratorStoreFlexible> rules) {
+	/* default */ List<Pair<OrchestratorStoreFlexible,ServiceQueryResultDTO>> queryServiceRegistry(final OrchestrationFormRequestDTO request, final List<OrchestratorStoreFlexible> rules) {
 		logger.debug("queryServiceRegistry started ...");
+		Assert.notNull(request, "Request is null");
+		Assert.notNull(rules, "Rules list is null");
 		
-		//TODO: continue
+		if (rules.isEmpty()) {
+			return List.of();
+		}
 		
-		// for every rule,
-		//	   1) use query with service def, rule's service intf (if any), service metadata (if any, if metadata_search flag is true, then merge the two metadata_requirements before query), ping flag, security (if any), version (if any)
+		final List<ServiceQueryFormDTO> forms = createServiceQueryForms(request, rules);
+		final ServiceQueryResultListDTO response = driver.multiQueryServiceRegistry(forms);
 
-		return null;
+		return convertQueryResponse(rules, response);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	/* default */ List<ServiceRegistryResponseDTO> filterSRResultsByProviderRequirements(final List<Pair<OrchestratorStoreFlexible,ServiceQueryResultDTO>> queryDataWithRules, final List<PreferredProviderDataDTO> onlyPreferredProviders) {
+		logger.debug("filterSRResultsByProviderRequirements started ...");
+		Assert.notNull(queryDataWithRules, "Query data is null.");
+		
+		final List<ServiceRegistryResponseDTO> result = new ArrayList<>();
+		
+		for (final Pair<OrchestratorStoreFlexible,ServiceQueryResultDTO> pair : queryDataWithRules) {
+			final List<ServiceRegistryResponseDTO> ruleResult = filterSRResultsByProviderRequirements(pair.getKey(), pair.getValue(), onlyPreferredProviders);
+			for (final ServiceRegistryResponseDTO srEntry : ruleResult) {
+				if (!result.contains(srEntry)) { // don't want duplicates in result
+					result.add(srEntry);
+				}
+			}
+		}
 
+		return result;
+	}
 	
 	//=================================================================================================
 	// assistant methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private Comparator<OrchestratorStoreFlexible> getRuleComparator() {
 		logger.debug("getRuleComparator started ...");
@@ -192,4 +227,109 @@ public class OrchestratorFlexibleDriver { //TODO unit tests
 		return currentMetadata.entrySet().containsAll(_metadataFromRule.entrySet());
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	private List<ServiceQueryFormDTO> createServiceQueryForms(final OrchestrationFormRequestDTO request, final List<OrchestratorStoreFlexible> rules) {
+		logger.debug("createServiceQueryForms started...");
+		
+		final List<ServiceQueryFormDTO> result = new ArrayList<>(rules.size());
+		for (final OrchestratorStoreFlexible rule : rules) {
+			result.add(createServiceQueryForm(request, rule));
+		}
+		
+		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private ServiceQueryFormDTO createServiceQueryForm(final OrchestrationFormRequestDTO request, final OrchestratorStoreFlexible rule) {
+		logger.debug("createServiceQueryForm started...");
+		Assert.notNull(rule, "Rule is null");
+
+		final ServiceQueryFormDTO requestedService = request.getRequestedService();
+		Assert.notNull(requestedService, "Requested service is null");
+		Assert.isTrue(!Utilities.isEmpty(requestedService.getServiceDefinitionRequirement()), "Requested service definition is null or blank");
+		
+		final OrchestrationFlags orchestrationFlags = request.getOrchestrationFlags();
+		Assert.notNull(orchestrationFlags, "Flags object is null");
+
+		Map<String,String> finalMetadataRequirement = Utilities.text2Map(rule.getServiceMetadata());
+		if (orchestrationFlags.getOrDefault(Flag.METADATA_SEARCH, false) && !Utilities.isEmpty(requestedService.getMetadataRequirements())) {
+			finalMetadataRequirement = createMetadataMerge(requestedService.getMetadataRequirements(), finalMetadataRequirement);
+		} else {
+			finalMetadataRequirement = normalizeMetadata(finalMetadataRequirement);
+		}
+		
+		return new ServiceQueryFormDTO.Builder(requestedService.getServiceDefinitionRequirement()) // from original request
+									  .interfaces(rule.getServiceInterfaceName()) // from rule
+									  .metadata(finalMetadataRequirement) // from rule (and from the original request too if the metadata search flag is set)
+									  .pingProviders(orchestrationFlags.getOrDefault(Flag.PING_PROVIDERS, false)) // from flag
+									  .security(requestedService.getSecurityRequirements()) // from the original request
+									  .version(requestedService.getVersionRequirement()) // from the original request
+									  .version(requestedService.getMinVersionRequirement(), requestedService.getMaxVersionRequirement()) // from the original request
+									  .build();
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private List<Pair<OrchestratorStoreFlexible,ServiceQueryResultDTO>> convertQueryResponse(final List<OrchestratorStoreFlexible> rules, final ServiceQueryResultListDTO response) {
+		logger.debug("convertQueryResponse started...");
+		
+		if (rules.size() > response.getResults().size()) {
+			throw new ArrowheadException("Service Registry does not handle all query forms.");
+		}
+		
+		final List<Pair<OrchestratorStoreFlexible,ServiceQueryResultDTO>> result = new ArrayList<>(rules.size());
+		for (int i = 0; i < rules.size(); ++i) {
+			result.add(new ImmutablePair<>(rules.get(i), response.getResults().get(i)));
+		}
+		
+		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<ServiceRegistryResponseDTO> filterSRResultsByProviderRequirements(final OrchestratorStoreFlexible rule, final ServiceQueryResultDTO srResult, final List<PreferredProviderDataDTO> onlyPreferredProviders) {
+		logger.debug("filterSRResultsByProviderRequirements started...");
+		Assert.notNull(rule, "Rule is null");
+		Assert.notNull(srResult, "Service Registry query result is null");
+		
+		final List<ServiceRegistryResponseDTO> queryData = srResult.getServiceQueryData();
+		if (queryData == null || queryData.isEmpty()) {
+			return List.of();
+		}
+		
+		final boolean onlyPreferred = onlyPreferredProviders != null;
+		
+		final List<ServiceRegistryResponseDTO> result = new ArrayList<>();
+		for (final ServiceRegistryResponseDTO srEntry : queryData) {
+			// if rule has a provider name, we drop every provider that does not match
+			if (rule.getProviderSystemName() != null && !rule.getProviderSystemName().equals(srEntry.getProvider().getSystemName())) {
+				continue;
+			}
+			
+			// filter not-preferred providers (only preferred flag is set)
+			if (onlyPreferred && !isPreferredProvider(srEntry.getProvider(), onlyPreferredProviders)) {
+				continue;
+			}
+			
+			// filter by provider metadata
+			if (rule.getProviderSystemMetadata() != null && !isMetadataMatch(rule.getProviderSystemMetadata(), srEntry.getProvider().getMetadata())) {
+				continue;
+			}
+			
+			result.add(srEntry);
+		}
+		
+		return result;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private boolean isPreferredProvider(final SystemResponseDTO provider, final List<PreferredProviderDataDTO> onlyPreferredProviders) {
+		logger.debug("isPreferredProvider started...");
+		
+		for (final PreferredProviderDataDTO preferredProviderDataDTO : onlyPreferredProviders) {
+			if (DTOUtilities.equalsSystemInResponseAndRequest(provider, preferredProviderDataDTO.getProviderSystem())) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
 }

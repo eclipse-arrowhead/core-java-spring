@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -155,7 +156,7 @@ public class OrchestratorService {
 		}
 
 		
-		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(queryData, request);
+		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(queryData);
 		orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem()); // to reduce the number of results before token generation
 		
 		if (qosEnabled && flags.get(Flag.ENABLE_QOS)) {
@@ -250,7 +251,7 @@ public class OrchestratorService {
 			return new OrchestrationResponseDTO(); // empty response
 		}
 		
-		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(crossCheckedEntryList, orchestrationFormRequestDTO);
+		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(crossCheckedEntryList);
 		orList = qosManager.filterReservedProviders(orList, orchestrationFormRequestDTO.getRequesterSystem()); // to reduce the number of results before token generation
 
 	    // Generate the authorization tokens if it is requested based on the service security (modifies the orList)
@@ -364,7 +365,7 @@ public class OrchestratorService {
 			}
 		}
 
-		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(queryData, request);
+		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(queryData);
 		orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem());
 		if (orList.isEmpty()) {
 			if (isInterCloudOrchestrationPossible(flags)) {
@@ -684,7 +685,7 @@ public class OrchestratorService {
 	
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<OrchestrationResultDTO> compileOrchestrationResponse(final List<ServiceRegistryResponseDTO> srList, final OrchestrationFormRequestDTO request) {
+	private List<OrchestrationResultDTO> compileOrchestrationResponse(final List<ServiceRegistryResponseDTO> srList) {
 		logger.debug("compileOrchestrationResponse started...");
 		
 		final List<OrchestrationResultDTO> orList = new ArrayList<>(srList.size());
@@ -692,8 +693,8 @@ public class OrchestratorService {
 			final OrchestrationResultDTO result = new OrchestrationResultDTO(entry.getProvider(), entry.getServiceDefinition(), entry.getServiceUri(), entry.getSecure(), entry.getMetadata(), 
 																			 entry.getInterfaces(), entry.getVersion());
 
-			if(result.getMetadata() == null ) {
-				result.setMetadata( new HashMap<>());
+			if (result.getMetadata() == null) {
+				result.setMetadata(new HashMap<>());
 			}
 			result.setWarnings(calculateOrchestratorWarnings(entry));
 			
@@ -1006,7 +1007,7 @@ public class OrchestratorService {
 		final Long providerSystemId = orchestratorStore.getProviderSystemId();
 		for (final ServiceRegistryResponseDTO serviceRegistryResponseDTO : authorizedLocalServiceRegistryEntries) {
 			if (serviceRegistryResponseDTO.getProvider().getId() == providerSystemId) {
-				List<OrchestrationResultDTO> orList = compileOrchestrationResponse(List.of(serviceRegistryResponseDTO), request);
+				List<OrchestrationResultDTO> orList = compileOrchestrationResponse(List.of(serviceRegistryResponseDTO));
 			    // Generate the authorization tokens if it is requested based on the service security (modifies the orList)
 			    orList = orchestratorDriver.generateAuthTokens(request, orList);
 
@@ -1100,6 +1101,7 @@ public class OrchestratorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	// Please note that the current implementation does not support intercloud orchestration, QoS requirements and provider reservation 
 	private OrchestrationResponseDTO orchestrationFromFlexibleStore(final OrchestrationFormRequestDTO request) {
 		logger.debug("orchestrationFromFlexibleStore started ...");
 		
@@ -1114,29 +1116,48 @@ public class OrchestratorService {
 			return new OrchestrationResponseDTO();
 		}
 
-		final Map<OrchestratorStoreFlexible,ServiceQueryResultDTO> queryResults = orchestratorFlexibleDriver.queryServiceRegistry(request, rules);
-		// TODO continue
+		final OrchestrationFlags flags = request.getOrchestrationFlags();
+		
+		// querying Service Registry
+		final List<Pair<OrchestratorStoreFlexible,ServiceQueryResultDTO>> queryDataWithRules = orchestratorFlexibleDriver.queryServiceRegistry(request, rules);
+		
+		final List<PreferredProviderDataDTO> localProviders = request.getPreferredProviders().stream().filter(p -> p.isLocal()).collect(Collectors.toList());
+		
+		List<PreferredProviderDataDTO> onlyPreferredProviders = null;
+		if (flags.getOrDefault(Flag.ONLY_PREFERRED, false)) {
+			onlyPreferredProviders = localProviders; 
+			if (onlyPreferredProviders.isEmpty()) {
+				throw new InvalidParameterException("There is no valid (local) preferred provider, but \"" + Flag.ONLY_PREFERRED + "\" is set to true");
+			}
+		}
+		
+		// filter Service Registry results by provider requirements (coming from the rules)
+		final List<ServiceRegistryResponseDTO> queryData = orchestratorFlexibleDriver.filterSRResultsByProviderRequirements(queryDataWithRules, onlyPreferredProviders);
+		if (queryData.isEmpty()) {
+			return new OrchestrationResponseDTO();
+		}
+		
+		// WE SKIP the authorization (for now, it is the responsibility of the PDE to make sure consumers have right to use the providers that the rules offer them)
+		
+		// convert Service Registry results to orchestration responses
+		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(queryData);
 
-		// find SR records
-		// for every rule,
-		//     2) if rule has provider name, we filter every provider that not match 
-		// 	   3) filter returned records with preferred providers (if any)
-		//     4) filter returned records with provider metadata 
-		//     5) add results to the list (if not contain it already)
+		// If matchmaking is requested, we pick out 1 ServiceRegistryEntry entity from the list.
+		if (flags.get(Flag.MATCHMAKING)) {
+			final IntraCloudProviderMatchmakingParameters params = new IntraCloudProviderMatchmakingParameters(localProviders);
+			// set additional parameters here if you use a different matchmaking algorithm
+			final OrchestrationResultDTO selected = intraCloudProviderMatchmaker.doMatchmaking(orList, params);
+			orList.clear();
+			orList.add(selected);
+		}
 		
-		// WE SKIP the authorization (for now?)
+		// all the filtering is done
+		logger.debug("flexible store ochestration finished with {} service providers.", queryData.size());
 		
-		// matchmaking (if necessary)
-		// token generation (if necessary)
-		// return
-		
-		// Questions:
-		// * One or more query to SR to find SR for rules? One query
-		// * What about rules with name and metadata? Can be both.
-		// * Interface requirements in rule selection? filter rules
-		// * QOS? 5.0
-		
-		return null;
+		// Generate the authorization tokens if it is requested based on the service security (modifies the orList)
+		orList = orchestratorDriver.generateAuthTokens(request, orList);
+
+	    return new OrchestrationResponseDTO(orList);
 	}
 
 	//-------------------------------------------------------------------------------------------------
