@@ -17,6 +17,9 @@ package eu.arrowhead.core.serviceregistry.database.service;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.ZonedDateTime;
@@ -57,7 +60,9 @@ import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.processor.NetworkAddressPreProcessor;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.common.verifier.ServiceInterfaceNameVerifier;
@@ -94,6 +99,9 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	
 	@Spy
 	private CommonNamePartVerifier cnVerifier;
+	
+	@Spy
+	private NetworkAddressPreProcessor networkAddressPreProcessor;
 	
 	@Spy
 	private NetworkAddressVerifier networkAddressVerifier;
@@ -275,6 +283,26 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class) 
+	public void testRegisterServiceResponseProviderSystemAddressPreProcessAndVerify() {
+		final SystemRequestDTO sysDto = new SystemRequestDTO(); 
+		sysDto.setSystemName("system");
+		sysDto.setAddress("address");
+		sysDto.setPort(5000);
+		final ServiceRegistryRequestDTO dto = new ServiceRegistryRequestDTO();
+		dto.setServiceDefinition("serviceDefinition");
+		dto.setProviderSystem(sysDto);
+		
+		try {
+			serviceRegistryDBService.registerServiceResponse(dto);			
+		} catch (final ArrowheadException ex) {
+			verify(networkAddressPreProcessor, times(2)).normalize(eq("address"));
+			verify(networkAddressVerifier, times(2)).verify(eq("address"));
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class) 
 	public void testRegisterServiceResponseProviderSystemPortNull() {
 		final SystemRequestDTO sysDto = new SystemRequestDTO(); 
@@ -418,6 +446,23 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System("valid-system-name", null, 0, null, null), null, null, ServiceSecurityType.NOT_SECURE, null, 1, List.of("xml"));
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCreateServiceRegistryProviderAddressVerify() {
+		final System provider = new System();
+		provider.setSystemName("system");
+		provider.setAddress("192.168.1.103");
+		provider.setAuthenticationInfo("abcd");
+		
+		try {
+			serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), provider, null, null, ServiceSecurityType.CERTIFICATE, null, 1, null);			
+		} catch (final InvalidParameterException ex) {
+			verify(networkAddressVerifier, times(1)).verify(eq("192.168.1.103"));
+			throw ex;
+		}
+		
+	}
+	
 	//=================================================================================================
 	// Tests of removeServiceRegistry
 
@@ -456,6 +501,17 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testRemoveServiceRegistryProviderSystemAddressEmpty() {
 		serviceRegistryDBService.removeServiceRegistry("ServiceDefinition", "System", " ", 1, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testRemoveServiceRegistryProviderSystemAddressPreProcessing() {
+		try {
+			serviceRegistryDBService.removeServiceRegistry("ServiceDefinition", "System", "address", 1, null);			
+		} catch (final InvalidParameterException ex) {
+			verify(networkAddressPreProcessor, times(1)).normalize(eq("address"));
+			throw ex;
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -726,6 +782,22 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testUpdateServiceRegistryProviderAddressVerify() {
+		final System testProvider = getValidTestProvider();
+		testProvider.setAddress("::fsghfs::");
+		
+		try {
+			serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),	getValidTestServiceDefinition(), testProvider, validTestServiceUri,
+														  validTestEndOFValidity, ServiceSecurityType.NOT_SECURE, validTestMetadataStr, 1, validTestInterfaces);
+			
+		} catch (final IllegalArgumentException ex) {
+			verify(networkAddressVerifier, times(1)).verify("::fsghfs::");
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testUpdateServiceRegistryUniqueConstraintViolation() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystemAndServiceUri(any(ServiceDefinition.class), any(System.class), any(String.class))).thenReturn(Optional.of(new ServiceRegistry()));
@@ -901,6 +973,24 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		when(serviceInterfaceRepository.findByInterfaceName(any(String.class))).thenReturn(Optional.empty());
 		
 		serviceRegistryDBService.mergeServiceByIdResponse(validId, getValidServiceRegistryRequestDTOWithNullProviderSystem(new ServiceRegistryRequestDTO()));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
+	@Test
+	public void testMergeServiceByIdResponseProviderSystemAddressPreProcessingAndVerify() {
+		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.of(getTestProvidersWithMofifyableCollections(new ServiceDefinition("testServiceDefinition")).get(0)));
+		when(serviceDefinitionRepository.findByServiceDefinition(any(String.class))).thenReturn(Optional.of(getValidTestServiceDefinition()));
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(String.class), any(String.class), anyInt())).thenReturn(Optional.of(getValidTestProvider()));
+		when(serviceRegistryRepository.saveAndFlush(any(ServiceRegistry.class))).thenReturn(getValidServiceRegistry(new ServiceRegistry()));
+		when(serviceInterfaceRepository.findByInterfaceName(any(String.class))).thenReturn(Optional.empty());
+		
+		try {
+			serviceRegistryDBService.mergeServiceByIdResponse(validId, getValidServiceRegistryRequestDTO(new ServiceRegistryRequestDTO()));			
+		} catch (final IllegalArgumentException ex) {
+			verify(networkAddressPreProcessor, times(1)).normalize(eq("192.168.1.103"));
+			verify(networkAddressVerifier, times(1)).verify(eq("192.168.1.103"));
+		}		
 	}
 	
 	//-------------------------------------------------------------------------------------------------

@@ -15,9 +15,10 @@
 package eu.arrowhead.core.serviceregistry.database.service;
 
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -32,8 +33,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -46,6 +45,7 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.processor.NetworkAddressPreProcessor;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 
@@ -63,6 +63,9 @@ public class ServiceRegistryDBServiceSystemTest {
 	
 	@Spy
 	private CommonNamePartVerifier cnVerifier;
+	
+	@Spy
+	private NetworkAddressPreProcessor networkAddressPreProcessor;
 	
 	@Spy
 	private NetworkAddressVerifier networkAddressVerifier;
@@ -188,8 +191,14 @@ public class ServiceRegistryDBServiceSystemTest {
 
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void createSystemAddressEmptyStringTest() {
-		serviceRegistryDBService.createSystem("x", "", 1, "x", Map.of("systemkey", "systemvalue"));
+	public void createSystemAddressEmptyStringAndPreProcessingAndVerifyTest() {
+		try {
+			serviceRegistryDBService.createSystem("xyz", "", 1, "x", Map.of("systemkey", "systemvalue"));			
+		} catch (final InvalidParameterException ex) {
+			verify(networkAddressPreProcessor, times(1)).normalize(eq(""));
+			verify(networkAddressVerifier, times(1)).verify(eq(""));
+			throw ex;
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -323,14 +332,20 @@ public class ServiceRegistryDBServiceSystemTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void updateSystemByIdEmptyAddressTest() {
+	public void updateSystemByIdEmptyAddressWithPreProcessingAndVerifyTest() {
 		final String systemName0 = "testSystem0";
 		final String address0 = "              ";
 		final int port0 = 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
 		
-		serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0, Map.of("systemkey", "systemvalue"));
+		try {
+			serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0, Map.of("systemkey", "systemvalue"));			
+		} catch (final InvalidParameterException ex) {
+			verify(networkAddressPreProcessor, times(1)).normalize("              ");
+			verify(networkAddressVerifier, times(1)).verify("");
+			throw ex;
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -468,7 +483,7 @@ public class ServiceRegistryDBServiceSystemTest {
 			serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0, Map.of("systemkey", "systemvalue"));
 		} catch (final InvalidParameterException ex) {
 			fail();
-		}		
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -490,6 +505,30 @@ public class ServiceRegistryDBServiceSystemTest {
 		} catch (final InvalidParameterException ex) {
 			fail();
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void mergeSystemByIdAddressPreProcessingAndVerifyTest() {
+		final String systemName0 = "testSystem0";
+		final String address0 = "address";
+		final int port0 = 1;
+		final long testId0 = 1;
+		final String authenticationInfo0 = null;
+		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
+		final Optional<System> systemOptional = Optional.of(system);
+
+		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
+		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
+		
+		try {
+			serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0, Map.of("systemkey", "systemvalue"));
+		} catch (final InvalidParameterException ex) {
+			fail();
+		}
+		
+		verify(networkAddressPreProcessor, times(1)).normalize(eq("address"));
+		verify(networkAddressVerifier, times(1)).verify(eq("address"));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
