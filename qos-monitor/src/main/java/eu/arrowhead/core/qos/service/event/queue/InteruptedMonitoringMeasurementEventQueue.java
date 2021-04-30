@@ -24,4 +24,9 @@ public class InteruptedMonitoringMeasurementEventQueue {
 	public InteruptedMonitoringMeasurementEventDTO take() throws InterruptedException {
 		return finishedMonitoringMeasurementEventQueue.take();
 	}
+
+	//-------------------------------------------------------------------------------------------------
+	public InteruptedMonitoringMeasurementEventDTO poll() throws InterruptedException {
+		return finishedMonitoringMeasurementEventQueue.poll();
+	}
 }

@@ -3,6 +3,8 @@ package eu.arrowhead.core.qos.service.ping.monitor.impl;
 import java.util.List;
 import java.util.UUID;
 
+import javax.annotation.Resource;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +19,18 @@ import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.core.qos.QosMonitorConstants;
 import eu.arrowhead.core.qos.dto.IcmpPingRequest;
 import eu.arrowhead.core.qos.dto.IcmpPingRequestACK;
 import eu.arrowhead.core.qos.dto.IcmpPingResponse;
+import eu.arrowhead.core.qos.dto.event.FinishedMonitoringMeasurementEventDTO;
+import eu.arrowhead.core.qos.dto.event.ReceivedMonitoringRequestEventDTO;
+import eu.arrowhead.core.qos.dto.event.StartedMonitoringMeasurementEventDTO;
 import eu.arrowhead.core.qos.service.QoSMonitorDriver;
+import eu.arrowhead.core.qos.service.event.queue.FinishedMonitoringMeasurementEventQueue;
+import eu.arrowhead.core.qos.service.event.queue.InteruptedMonitoringMeasurementEventQueue;
+import eu.arrowhead.core.qos.service.event.queue.ReceivedMonitoringRequestEventQueue;
+import eu.arrowhead.core.qos.service.event.queue.StartedMonitoringMeasurementEventQueue;
 import eu.arrowhead.core.qos.service.ping.monitor.AbstractPingMonitor;
 
 public class ExternalPingMonitor extends AbstractPingMonitor{
@@ -40,6 +50,18 @@ public class ExternalPingMonitor extends AbstractPingMonitor{
 	@Autowired
 	protected SSLProperties sslProperties;
 
+	@Resource
+	private ReceivedMonitoringRequestEventQueue receivedMonitoringRequestEventQueue;
+
+	@Resource
+	private StartedMonitoringMeasurementEventQueue startedMonitoringMeasurementEventQueue;
+
+	@Resource
+	private FinishedMonitoringMeasurementEventQueue finishedMonitoringMeasurementEventQueue;
+
+	@Resource
+	private InteruptedMonitoringMeasurementEventQueue interuptedMonitoringMeasurementEventQueue;
+
 	protected Logger logger = LogManager.getLogger(ExternalPingMonitor.class);
 
 	//=================================================================================================
@@ -48,6 +70,7 @@ public class ExternalPingMonitor extends AbstractPingMonitor{
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public List<IcmpPingResponse> ping(final String address) {
+		logger.debug("ping statred...");
 
 		if (cachedPingMonitorProvider != null){
 
@@ -60,34 +83,39 @@ public class ExternalPingMonitor extends AbstractPingMonitor{
 			boolean measurmentRequestConfirmed = false;
 			boolean measurmentStartedConfirmed = false;
 
+			ReceivedMonitoringRequestEventDTO receivedMonitoringRequestEventDTO;
+			StartedMonitoringMeasurementEventDTO startedMonitoringMeasurementEventDTO;
+
 			while(System.currentTimeMillis() < meausermentExpiryTime) {
 
 				checkInterupts(measurementProcessId);
 
 				if(!measurmentRequestConfirmed) {
-					if(!checkMeasurmentRequestConfirmed(measurementProcessId)) {
+					receivedMonitoringRequestEventDTO = checkMeasurmentRequestConfirmed(measurementProcessId);
+					if( receivedMonitoringRequestEventDTO != null) {
+						measurmentRequestConfirmed = true;
+					}else {
 						break;
 					}
 				}
 
 				if(!measurmentStartedConfirmed) {
-					if(!checkMeasurmentStartedConfirmed(measurementProcessId)) {
+					startedMonitoringMeasurementEventDTO = checkMeasurmentStartedConfirmed(measurementProcessId);
+					if(startedMonitoringMeasurementEventDTO != null) {
+						measurmentStartedConfirmed = true;
+					}else {
 						break;
 					}
 				}
 
-				//TODO implement measurment finish check and handling ...
-			}
-			//TODO request pingMonitoringService from external provider
-			// TODO send request with pingMeasurementProperties, expect http 200 "ok - measurement uuid" as answer
+				final FinishedMonitoringMeasurementEventDTO measurmentResult = tryToGetMeasurementResult(measurementProcessId);
+				if(measurmentResult != null) {
+					logger.info("External Ping Measurement finished: " + measurementProcessId);
 
-			//TODO calculate timeOut 
-			// 
-			
-			// in while loop listen on eventQueue for event sequence: 
-			// 1.) mesaurmentRequestReceived payload = measurement uuid,
-			// 2.) mesaurmentStarted payload = measurement uuid,
-			// 3.) mesurementFinished payload = measurment uuid, List<IcmpPingResponse>
+					return measurmentResult.getPayload();
+				}
+
+			}
 			// --- feature TODO create pingMonitorProvider profile table, base on the events above
 		}else {
 			try {
@@ -104,15 +132,43 @@ public class ExternalPingMonitor extends AbstractPingMonitor{
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
-	private boolean checkMeasurmentStartedConfirmed(final UUID measurementProcessId) {
-		// TODO Implement method logic
-		return false;
+	private FinishedMonitoringMeasurementEventDTO tryToGetMeasurementResult(final UUID measurementProcessId) {
+		logger.debug("tryToGetMeasurementResult statred...");
+
+		try {
+
+			final FinishedMonitoringMeasurementEventDTO event = finishedMonitoringMeasurementEventQueue.poll();
+			if(event != null) {
+				final UUID uuid = UUID.fromString(event.getMetaData().get(QosMonitorConstants.PROCESS_ID_KEY));
+				if(uuid.equals(measurementProcessId)) {
+					return event;
+				}else {
+					throw new ArrowheadException("Invalid measurementProcessId. ");
+				}
+			}else {
+				return null;
+			}
+
+		} catch (final ArrowheadException ex) {
+
+			throw new InvalidParameterException("Invalid finished ping monitoring measurement : " + ex);
+		} catch (final Exception ex) {
+
+			throw new ArrowheadException("Exeption during finishedMonitoringMeasurementEventQueue poll : " + ex);
+		}
+
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private boolean checkMeasurmentRequestConfirmed(final UUID measurementProcessId) {
+	private StartedMonitoringMeasurementEventDTO checkMeasurmentStartedConfirmed(final UUID measurementProcessId) {
 		// TODO Implement method logic
-		return false;
+		return null;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private ReceivedMonitoringRequestEventDTO  checkMeasurmentRequestConfirmed(final UUID measurementProcessId) {
+		// TODO Implement method logic
+		return null;
 	}
 
 	//-------------------------------------------------------------------------------------------------
