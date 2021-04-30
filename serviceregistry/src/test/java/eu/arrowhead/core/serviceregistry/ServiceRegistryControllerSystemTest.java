@@ -22,6 +22,8 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -64,6 +66,7 @@ import eu.arrowhead.common.dto.internal.SystemListResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.processor.NetworkAddressPreProcessor;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 
@@ -85,6 +88,9 @@ public class ServiceRegistryControllerSystemTest {
 	
 	@MockBean(name = "mockServiceRegistryDBService") 
 	private ServiceRegistryDBService serviceRegistryDBService;
+	
+	@MockBean
+	private NetworkAddressPreProcessor networkAddressPreProcessor;
 	
 	@MockBean
 	private NetworkAddressVerifier networkAddressVerifier;
@@ -318,12 +324,15 @@ public class ServiceRegistryControllerSystemTest {
 					.content(objectMapper.writeValueAsBytes(request))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
+		
+		verify(networkAddressPreProcessor, times(1)).normalize(any());
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
 	@Test
 	public void addSystemTestWithEmptyAddressDefinition() throws Exception {
 		final SystemRequestDTO request = createEmptyAddressSystemRequestDTO();
+		when(networkAddressPreProcessor.normalize(any())).thenReturn("");
 		doThrow(new InvalidParameterException("test msg")).when(networkAddressVerifier).verify(anyString());
 		
 		this.mockMvc.perform(post(SYSTEMS_URL)
@@ -331,6 +340,8 @@ public class ServiceRegistryControllerSystemTest {
 					.content(objectMapper.writeValueAsBytes(request))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
+		
+		verify(networkAddressPreProcessor, times(1)).normalize(any());
 	}
 
 	//-------------------------------------------------------------------------------------------------	
@@ -451,12 +462,15 @@ public class ServiceRegistryControllerSystemTest {
 					.content(objectMapper.writeValueAsBytes(request))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
+		
+		verify(networkAddressPreProcessor, times(1)).normalize(any());
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
 	@Test
 	public void registerSystemTestWithEmptyAddressDefinition() throws Exception {
 		final SystemRequestDTO request = createEmptyAddressSystemRequestDTO();
+		when(networkAddressPreProcessor.normalize(any())).thenReturn("");
 		doThrow(new InvalidParameterException("test msg")).when(networkAddressVerifier).verify(anyString());
 	
 		this.mockMvc.perform(post(REGISTER_SYSTEM_URL)
@@ -464,6 +478,8 @@ public class ServiceRegistryControllerSystemTest {
 					.content(objectMapper.writeValueAsBytes(request))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
+		
+		verify(networkAddressPreProcessor, times(1)).normalize(any());
 	}
 
 	//-------------------------------------------------------------------------------------------------	

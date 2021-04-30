@@ -65,6 +65,7 @@ import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.processor.NetworkAddressPreProcessor;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.common.verifier.ServiceInterfaceNameVerifier;
@@ -177,6 +178,9 @@ public class ServiceRegistryController {
 	
 	@Autowired
 	private CommonNamePartVerifier cnVerifier;
+	
+	@Autowired
+	private NetworkAddressPreProcessor networkAddressPreProcessor;
 	
 	@Autowired
 	private NetworkAddressVerifier networkAddressVerifier;
@@ -1065,7 +1069,7 @@ public class ServiceRegistryController {
 			needChange = true;
 			
 			try {			
-				networkAddressVerifier.verify(request.getAddress());
+				networkAddressVerifier.verify(networkAddressPreProcessor.normalize(request.getAddress()));
 			} catch (final InvalidParameterException ex) {
 				throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
 			}
@@ -1143,7 +1147,7 @@ public class ServiceRegistryController {
 		}
 		
 		try {			
-			networkAddressVerifier.verify(request.getAddress());
+			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(request.getAddress()));
 		} catch (final InvalidParameterException ex) {
 			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, origin);
 		}
@@ -1240,7 +1244,7 @@ public class ServiceRegistryController {
 		}
 		
 		try {
-			networkAddressVerifier.verify(address);
+			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(address));
 		} catch (final InvalidParameterException ex) {
 			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, origin);
 		}
@@ -1273,7 +1277,7 @@ public class ServiceRegistryController {
 		}
 		
 		try {
-			networkAddressVerifier.verify(providerAddress);
+			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(providerAddress));
 		} catch (final Exception ex) {
 			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, origin);
 		}
@@ -1309,7 +1313,7 @@ public class ServiceRegistryController {
 			needChange = true;
 			
 			try {
-				networkAddressVerifier.verify(request.getProviderSystem().getAddress());
+				networkAddressVerifier.verify(networkAddressPreProcessor.normalize(request.getProviderSystem().getAddress()));
 			} catch (final Exception ex) {
 				throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, origin);
 			}

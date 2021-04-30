@@ -87,6 +87,7 @@ import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.processor.NetworkAddressPreProcessor;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 
@@ -119,6 +120,9 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	
 	@MockBean(name = "mockServiceRegistryDBService") 
 	private ServiceRegistryDBService serviceRegistryDBService;
+	
+	@MockBean
+	private NetworkAddressPreProcessor networkAddressPreProcessor;
 	
 	@MockBean
 	private NetworkAddressVerifier networkAddressVerifier;
@@ -621,6 +625,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testUnregisterServiceAddressEmpty() throws Exception {
 		final String queryStr = createQueryStringForUnregister("sd", "pn", "", 1, "/path");
+		when(networkAddressPreProcessor.normalize(anyString())).thenReturn("");
 		doThrow(new InvalidParameterException("test msg")).when(networkAddressVerifier).verify(anyString());
 		
 		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
