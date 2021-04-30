@@ -63,7 +63,7 @@ public class ExternalPingMonitor extends AbstractPingMonitor{
 	@Resource
 	private InteruptedMonitoringMeasurementEventQueue interuptedMonitoringMeasurementEventQueue;
 
-	protected Logger logger = LogManager.getLogger(ExternalPingMonitor.class);
+	private Logger logger = LogManager.getLogger(ExternalPingMonitor.class);
 
 	//=================================================================================================
 	// methods
@@ -339,7 +339,6 @@ public class ExternalPingMonitor extends AbstractPingMonitor{
 	private void initPingMonitorProvider() {
 		logger.debug("initPingMonitorProvider started...");
 
-		
 		//TODO try sr with timeout, trz orch with time out -> exit if uncussess
 		//orch service pingprovider with time - finish int if unscucesss, 
 		//in orhcestrator flags

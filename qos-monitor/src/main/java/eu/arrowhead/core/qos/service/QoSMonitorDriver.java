@@ -39,6 +39,8 @@ import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.internal.SystemAddressSetRelayResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.qos.dto.IcmpPingRequest;
@@ -55,7 +57,8 @@ public class QoSMonitorDriver {
 	private static final String GATEKEEPER_COLLECT_ACCESS_TYPES_URI_KEY = CoreSystemService.GATEKEEPER_COLLECT_ACCESS_TYPES.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEKEEPER_GET_CLOUD_URI_KEY = CoreSystemService.GATEKEEPER_GET_CLOUD_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEKEEPER_INIT_RELAY_TEST_URI_KEY = CoreSystemService.GATEKEEPER_RELAY_TEST_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
-	
+	private static final String ORCHESTRATION_PROCESS_URI_KEY = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+
 	public static final String KEY_CALCULATED_SERVICE_TIME_FRAME = "QoSCalculatedServiceTimeFrame";
 
 	private static final Logger logger = LogManager.getLogger(QoSMonitorDriver.class);
@@ -183,9 +186,21 @@ public class QoSMonitorDriver {
 		}
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	public OrchestrationResponseDTO queryOrchestrator(final OrchestrationFormRequestDTO form) {
+		logger.debug("queryOrchestrator started...");
+
+		Assert.notNull(form, "form is null.");
+
+		final UriComponents orchestrationProcessUri = getOrchestrationProcessUri();
+		final ResponseEntity<OrchestrationResponseDTO> response = httpService.sendRequest(orchestrationProcessUri, HttpMethod.POST, OrchestrationResponseDTO.class, form);
+
+		return response.getBody();
+	}
+
 	//=================================================================================================
 	// assistant methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private UriComponents getQueryAllUri() {
 		logger.debug("getQueryUri started...");
@@ -275,5 +290,20 @@ public class QoSMonitorDriver {
 		}
 		
 		throw new ArrowheadException("QoS Monitor can't find gatekeeper init_relay_test URI.");
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getOrchestrationProcessUri() {
+		logger.debug("getOrchestrationProcessUri started...");
+
+		if (arrowheadContext.containsKey(ORCHESTRATION_PROCESS_URI_KEY)) {
+			try {
+				return (UriComponents) arrowheadContext.get(ORCHESTRATION_PROCESS_URI_KEY);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("QoS Monitor can't find orchestration process URI.");
+			}
+		}
+
+		throw new ArrowheadException("QoS Monitor can't find orchestration process URI.");
 	}
 }
