@@ -20,21 +20,21 @@ public class NetworkAddressPreProcessor {
 	//-------------------------------------------------------------------------------------------------
 	public String normalize(final String address) {
 		logger.debug("normalize started...");
-		final String candidate = address.toLowerCase().trim();
+		final String candidate = address.trim();
 		
 		// Simple string
 		if (!candidate.contains(".") && !candidate.contains(":")) {
 			return candidate;
 		
-		// IPv4 or domain name
+		// Possible IPv4 or domain name
 		} else if(candidate.contains(".") && !candidate.contains(":")) {
 			return candidate;
 		
-		// IPv6
+		// Possible IPv6
 		} else if (!candidate.contains(".") && candidate.contains(":")) {
 			return normalizeIPv6(candidate);
 			
-		// IPv6-IPv4 hybrid
+		// Possible IPv6-IPv4 hybrid
 		} else {
 			return normalizeIPv6IPv4Hybrid(candidate);
 		}
@@ -92,6 +92,10 @@ public class NetworkAddressPreProcessor {
 			return candidate; //NetworkAddressVerifier will filter it out
 		}
 		
+		if (groups.size() != 8) {
+			return candidate; //not IPv6
+		}
+		
 		String normalized = ""; 
 		for (final String group : groups) {
 			if (Utilities.isEmpty(normalized)) {
@@ -100,7 +104,7 @@ public class NetworkAddressPreProcessor {
 				normalized = normalized + ":" + group;				
 			}
 		}
-		return normalized;
+		return normalized.toLowerCase();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -112,7 +116,7 @@ public class NetworkAddressPreProcessor {
 		final String[] ip4parts = ip4str.split("\\.");
 		
 		if (ip4parts.length != 4) {
-			logger.debug("unprocessable IPv6-IPv4 hybrid. Invalid IPv4 part: " + candidate);
+			logger.debug("unprocessable IPv6-IPv4 hybrid. Invalid IPv4 part: " + ip4str);
 			return candidate; //NetworkAddressVerifier will filter it out
 		}
 		
@@ -121,6 +125,11 @@ public class NetworkAddressPreProcessor {
 		for (int i = 0; i < 4; i++) {
 			try {
 				final int octet = Integer.parseInt(ip4parts[i]);
+				if (octet > 255 || octet < 0) {
+					logger.debug("unprocessable IPv6-IPv4 hybrid. Invalid IPv4 part: " + ip4str);
+					return candidate; //NetworkAddressVerifier will filter it out
+				}
+				
 				final String hex = Integer.toHexString(octet);
 				if (hex.length() == 1) {
 					ip4HexBuilder.append("0");
@@ -130,7 +139,7 @@ public class NetworkAddressPreProcessor {
 					ip4HexBuilder.append(":");
 				}
 			} catch (final NumberFormatException ex) {
-				logger.debug("unprocessable IPv6-IPv4 hybrid. Not number octet: " + candidate);
+				logger.debug("unprocessable IPv6-IPv4 hybrid. Not number octet: " + ip4str);
 				return candidate; //NetworkAddressVerifier will filter it out
 			}
 		}
