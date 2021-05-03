@@ -1020,7 +1020,7 @@ public class ServiceRegistryDBService {
 		try {
 			final Optional<System> systemOptional = systemRepository.findBySystemNameAndAddressAndPort(validatedSystemName, validatedAddress, validatedPort);
 			if (systemOptional.isEmpty()) {
-				throw new InvalidParameterException("No system with name: " + systemName + ", validatedSystemName: " +  validatedAddress + " and port: " + validatedPort);
+				throw new InvalidParameterException("No system with validatedSystemName: " + systemName + ", validatedAddress: " +  validatedAddress + " and port: " + validatedPort);
 			}
 			
 			return DTOConverter.convertSystemToSystemResponseDTO(systemOptional.get());

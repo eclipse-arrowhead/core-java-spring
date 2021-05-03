@@ -48,35 +48,35 @@ public class NetworkAddressPreProcessorTest {
 	@Test
 	public void testSimpleString_0() {
 		final String result = processor.normalize("simPleString064withoutDotOrColon");
-		Assert.assertEquals("simPleString064withoutDotOrColon", result);
+		Assert.assertEquals("simplestring064withoutdotorcolon", result);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testSimpleString_1() {
 		final String result = processor.normalize("  simPleString064withoutDotOrColon   ");
-		Assert.assertEquals("simPleString064withoutDotOrColon", result);
+		Assert.assertEquals("simplestring064withoutdotorcolon", result);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testStringWithDot() {
 		final String result = processor.normalize("String.with.Dot.abc");
-		Assert.assertEquals("String.with.Dot.abc", result);
+		Assert.assertEquals("string.with.dot.abc", result);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testStringWithColon() {
 		final String result = processor.normalize("String:with:Colon:abc");
-		Assert.assertEquals("String:with:Colon:abc", result);
+		Assert.assertEquals("string:with:colon:abc", result);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testStringWithDotAndColon() {
 		final String result = processor.normalize("String::with.Dot:Colon.");
-		Assert.assertEquals("String::with.Dot:Colon.", result);
+		Assert.assertEquals("string::with.dot:colon.", result);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -103,15 +103,15 @@ public class NetworkAddressPreProcessorTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testIPv6_3() {
-		final String result = processor.normalize("2001:db8:0:::ff00::8329");
-		Assert.assertEquals("2001:0db8:0000:0000:0000:ff00:0000:8329", result);
+		final String result = processor.normalize("2001:db8:0:::ff00::8329"); //Unprocessable abbreviation. NetworkAddressVerifier will filter it out
+		Assert.assertEquals("2001:db8:0:::ff00::8329", result);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testIPv6_4() {
-		final String result = processor.normalize("::db8:0::0:ff00:42:8329");
-		Assert.assertEquals("0000:0db8:0000:0000:0000:ff00:0042:8329", result);
+		final String result = processor.normalize("::db8:0::0:ff00:42:8329"); //Unprocessable abbreviation. NetworkAddressVerifier will filter it out
+		Assert.assertEquals("::db8:0::0:ff00:42:8329", result);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -124,8 +124,8 @@ public class NetworkAddressPreProcessorTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testIPv6_6() {
-		final String result = processor.normalize("db8:0::0:ff00:42:8329::");
-		Assert.assertEquals("0db8:0000:0000:0000:ff00:0042:8329:0000", result);
+		final String result = processor.normalize("db8:0::0:ff00:42:8329::"); //Unprocessable abbreviation. NetworkAddressVerifier will filter it out
+		Assert.assertEquals("db8:0::0:ff00:42:8329::", result);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -140,6 +140,34 @@ public class NetworkAddressPreProcessorTest {
 	public void testIPv6_8() { //Unprocessable abbreviation. NetworkAddressVerifier will filter it out
 		final String result = processor.normalize("::db8::");		
 		Assert.assertEquals("::db8::", result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testIPv6_9() {
+		final String result = processor.normalize("2001:0db8::ff00:0042:8329");
+		Assert.assertEquals("2001:0db8:0000:0000:0000:ff00:0042:8329", result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testIPv6_10() {
+		final String result = processor.normalize("2001:0db8:9e52:8a63::ff00:0042:8329"); 
+		Assert.assertEquals("2001:0db8:9e52:8a63:0000:ff00:0042:8329", result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testIPv6_11() {
+		final String result = processor.normalize("a345:2001:0db8:9e52:8a63::ff00:0042:8329"); //Invalid. NetworkAddressVerifier will filter it out
+		Assert.assertEquals("a345:2001:0db8:9e52:8a63::ff00:0042:8329", result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testIPv6_IPv4_Hybrid_0() {
+		final String result = processor.normalize("2001:0db8::ff00:192.0.2.128");
+		Assert.assertEquals("2001:0db8:0000:0000:0000:ff00:c000:0280", result);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

@@ -169,7 +169,7 @@ public class NetworkAddressVerifier {
 		logger.debug("verifyNoType started...");
 		
 		final String[] parts = candidate.split("\\.");
-		for (String part : parts) {
+		for (final String part : parts) {
 			if (!cnVerifier.isValid(part)) {
 				throw new InvalidParameterException(candidate + " no-type network address is invalid: dot(.) separated parts can contain only letters (english alphabet), numbers and dash (-) and have to start with a letter (also cannot end with dash). A part can contain maximum 63 character");
 			}			

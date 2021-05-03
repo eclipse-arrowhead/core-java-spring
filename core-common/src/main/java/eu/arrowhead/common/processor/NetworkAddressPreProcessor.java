@@ -16,6 +16,7 @@ package eu.arrowhead.common.processor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,24 +33,36 @@ public class NetworkAddressPreProcessor {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
+	
+	private static final String DOT = ".";
+	private static final String COLON = ":";
+	private static final String DOUBLE_COLON = "::";
+	private static final int IPV6_GROUP_LENGTH = 4;
+	private static final int IPV6_SIZE = 8;
+	
+	
+	//=================================================================================================
+	// methods
+
+	//-------------------------------------------------------------------------------------------------
 	public String normalize(final String address) {
 		logger.debug("normalize started...");
 		
 		if (Utilities.isEmpty(address)) {
 			return "";
 		}
-		final String candidate = address.trim();
+		final String candidate = address.toLowerCase().trim();
 		
 		// Simple string
-		if (!candidate.contains(".") && !candidate.contains(":")) {
+		if (!candidate.contains(DOT) && !candidate.contains(COLON)) {
 			return candidate;
 		
 		// Possible IPv4 or domain name
-		} else if(candidate.contains(".") && !candidate.contains(":")) {
+		} else if (candidate.contains(DOT) && !candidate.contains(COLON)) {
 			return candidate;
 		
 		// Possible IPv6
-		} else if (!candidate.contains(".") && candidate.contains(":")) {
+		} else if (!candidate.contains(DOT) && candidate.contains(COLON)) {
 			return normalizeIPv6(candidate);
 			
 		// Possible IPv6-IPv4 hybrid
@@ -64,80 +77,75 @@ public class NetworkAddressPreProcessor {
 	//-------------------------------------------------------------------------------------------------
 	private String normalizeIPv6(final String candidate) {
 		logger.debug("normalizeIPv6 started...");
-		final List<String> groups = new ArrayList<>(8);
 		
-		final String[] split = candidate.split(":");
-		for (final String part : split) {
-			String group = part;
-			if (group.length() < 4) {
-				for (int i = 0; i < (4 - part.length()); i++) {
+		if (candidate.split(DOUBLE_COLON, -1).length > 2) { //More than one double colon is present
+			return candidate; // not IPv6
+		}
+		
+		final List<String> groups = new ArrayList<>(8);
+		int lastAbbreviatedGroupIdx = -1;
+		
+		final String[] split = candidate.split(COLON, -1); // -1 is present in order to not trim trailing empty strings
+		for (int i = 0; i < split.length; i++) {
+			String group = split[i];
+			
+			// Handle double colons
+			if (Utilities.isEmpty(group)) {
+				lastAbbreviatedGroupIdx = i;
+				group = "0000";
+				
+			//Add leading zeroes
+			} else if (group.length() < IPV6_GROUP_LENGTH) {
+				final int candidateGroupLength = group.length();
+				for (int j = 0; j < (IPV6_GROUP_LENGTH - candidateGroupLength); j++) {
 					group = "0" + group;
 				}
-			} 
-			groups.add(group);
+			}
+			
+			groups.add(group);			
 		}
 		
-		if (candidate.startsWith("::") && !candidate.endsWith("::")) {
-			final int size = groups.size();
-			if (size > 8) {
-				for (int i = 0; i < (size - 8); i++) {
-					groups.remove(0);
-				}
+		final int candidateSize = groups.size();
+		if (lastAbbreviatedGroupIdx == -1) {
+			
+			//Handle invalid size
+			if (candidateSize != IPV6_SIZE) {
+				return candidate; //not IPv6
 			}
-			if (size < 8) {
-				for (int i = 0; i < (8 - size); i++) {
-					groups.add(0, "0000");
-				}
+		} else {
+			//Handle invalid size
+			if (candidateSize > IPV6_SIZE) {
+				return candidate; //not IPv6
 			}
-		}
-		
-		if (candidate.endsWith("::") && !candidate.startsWith("::")) {
-			final int size = groups.size();
-			if (size > 8) {
-				for (int i = 0; i < (size - 8); i++) {
-					groups.remove(groups.size() - 1);
-				}
-			}
-			if (size < 8) {
-				for (int i = 0; i < (8 - size); i++) {
-					groups.add("0000");
-				}
+			
+			for (int i = 0; i < (IPV6_SIZE - candidateSize); i++) {
+				groups.add(lastAbbreviatedGroupIdx, "0000");
 			}
 		}
 		
-		if (candidate.endsWith("::") && candidate.startsWith("::")) {
-			logger.debug("unprocessable abbreviation of IPv6. (leading and trailing '::') " + candidate);
-			return candidate; //NetworkAddressVerifier will filter it out
+		//Assemble final string address
+		final StringJoiner normalized = new StringJoiner(COLON);
+		for (final String group : groups) {			
+			normalized.add(group);
 		}
-		
-		if (groups.size() != 8) {
-			return candidate; //not IPv6
-		}
-		
-		String normalized = ""; 
-		for (final String group : groups) {
-			if (Utilities.isEmpty(normalized)) {
-				normalized = group;
-			} else {
-				normalized = normalized + ":" + group;				
-			}
-		}
-		return normalized.toLowerCase();
+		return normalized.toString();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private String normalizeIPv6IPv4Hybrid(final String candidate) {
 		logger.debug("normalizeIPv6IPv4Hybrid started...");
 		
-		final String[] split = candidate.split(":");
+		final String[] split = candidate.split(COLON);
 		final String ip4str = split[split.length - 1];
 		final String[] ip4parts = ip4str.split("\\.");
 		
+		//handle invalid IPv4 size
 		if (ip4parts.length != 4) {
 			logger.debug("unprocessable IPv6-IPv4 hybrid. Invalid IPv4 part: " + ip4str);
 			return candidate; //NetworkAddressVerifier will filter it out
 		}
 		
+		//transform IPv4 to Hexadecimal
 		final StringBuilder ip4HexBuilder = new StringBuilder();
 		
 		for (int i = 0; i < 4; i++) {
@@ -154,7 +162,7 @@ public class NetworkAddressPreProcessor {
 				}
 				ip4HexBuilder.append(hex);
 				if (i == 1) {
-					ip4HexBuilder.append(":");
+					ip4HexBuilder.append(COLON);
 				}
 			} catch (final NumberFormatException ex) {
 				logger.debug("unprocessable IPv6-IPv4 hybrid. Not number octet: " + ip4str);
