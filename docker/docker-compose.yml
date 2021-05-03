@@ -76,7 +76,7 @@ services:
 
   certificateauthority:
     container_name: certificateauthority
-    image: svetlint/certificateauthority:latest
+    image: svetlint/certificate-authority:latest
     depends_on:
       - mysql
     volumes:
