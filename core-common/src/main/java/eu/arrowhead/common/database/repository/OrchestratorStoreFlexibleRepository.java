@@ -28,5 +28,5 @@ public interface OrchestratorStoreFlexibleRepository extends RefreshableReposito
 	
 	//-------------------------------------------------------------------------------------------------
 	public List<OrchestratorStoreFlexible> findByServiceDefinitionNameAndConsumerSystemNameAndConsumerSystemMetadataIsNull(final String serviceDefinitionName, final String consumerSystemName);
-	public List<OrchestratorStoreFlexible> findByServiceDefinitionNameAndConsumerMetadataIsNotNull(final String serviceDefinitionName);
+	public List<OrchestratorStoreFlexible> findByServiceDefinitionNameAndConsumerSystemMetadataIsNotNull(final String serviceDefinitionName);
 }

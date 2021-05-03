@@ -207,7 +207,7 @@ public class OrchestratorStoreFlexibleDBService {
 		final String _serviceDefinition = serviceDefinition.toLowerCase().trim();
 		
 		try {
-			return orchestratorStoreFlexibleRepository.findByServiceDefinitionNameAndConsumerMetadataIsNotNull(_serviceDefinition);
+			return orchestratorStoreFlexibleRepository.findByServiceDefinitionNameAndConsumerSystemMetadataIsNotNull(_serviceDefinition);
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
