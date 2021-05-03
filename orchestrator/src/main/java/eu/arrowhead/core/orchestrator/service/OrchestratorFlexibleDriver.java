@@ -41,6 +41,7 @@ import eu.arrowhead.common.dto.shared.OrchestrationFlags.Flag;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.PreferredProviderDataDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO.Builder;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultListDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
@@ -258,14 +259,23 @@ public class OrchestratorFlexibleDriver { //TODO unit tests
 			finalMetadataRequirement = normalizeMetadata(finalMetadataRequirement);
 		}
 		
-		return new ServiceQueryFormDTO.Builder(requestedService.getServiceDefinitionRequirement()) // from original request
-									  .interfaces(rule.getServiceInterfaceName()) // from rule
-									  .metadata(finalMetadataRequirement) // from rule (and from the original request too if the metadata search flag is set)
-									  .pingProviders(orchestrationFlags.getOrDefault(Flag.PING_PROVIDERS, false)) // from flag
-									  .security(requestedService.getSecurityRequirements()) // from the original request
-									  .version(requestedService.getVersionRequirement()) // from the original request
-									  .version(requestedService.getMinVersionRequirement(), requestedService.getMaxVersionRequirement()) // from the original request
-									  .build();
+		Builder builder = new ServiceQueryFormDTO.Builder(requestedService.getServiceDefinitionRequirement()) // from original request
+									  			 .metadata(finalMetadataRequirement) // from rule (and from the original request too if the metadata search flag is set)
+									  			 .pingProviders(orchestrationFlags.getOrDefault(Flag.PING_PROVIDERS, false)) // from flag
+									  			 .version(requestedService.getVersionRequirement()) // from the original request
+									  			 .version(requestedService.getMinVersionRequirement(), requestedService.getMaxVersionRequirement()); // from the original request
+		
+		if (rule.getServiceInterfaceName() != null) {
+			builder = builder.interfaces(rule.getServiceInterfaceName()); // from rule
+			
+		}
+		
+		if (requestedService.getSecurityRequirements() != null && !requestedService.getSecurityRequirements().isEmpty()) {
+			builder = builder.security(requestedService.getSecurityRequirements()); // from the original request
+			
+		}
+		
+		return builder.build();
 	}
 
 	//-------------------------------------------------------------------------------------------------
