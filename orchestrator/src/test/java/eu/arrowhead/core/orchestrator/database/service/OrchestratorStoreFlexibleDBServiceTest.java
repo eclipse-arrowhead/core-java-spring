@@ -31,7 +31,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.CoreCommonConstants;
-import eu.arrowhead.common.cn.CommonNamePartVerifier;
 import eu.arrowhead.common.database.entity.OrchestratorStoreFlexible;
 import eu.arrowhead.common.database.repository.OrchestratorStoreFlexibleRepository;
 import eu.arrowhead.common.dto.internal.OrchestratorStoreFlexibleListResponseDTO;
@@ -39,7 +38,8 @@ import eu.arrowhead.common.dto.internal.OrchestratorStoreFlexibleRequestDTO;
 import eu.arrowhead.common.dto.internal.SystemDescriberDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
+import eu.arrowhead.common.verifier.CommonNamePartVerifier;
+import eu.arrowhead.common.verifier.ServiceInterfaceNameVerifier;
 
 @RunWith(SpringRunner.class)
 public class OrchestratorStoreFlexibleDBServiceTest {
