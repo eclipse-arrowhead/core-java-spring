@@ -12,7 +12,7 @@
  *   Arrowhead Consortia - conceptualization
  ********************************************************************************/
 
-package eu.arrowhead.common.cn;
+package eu.arrowhead.common.verifier;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,6 +29,7 @@ public class CommonNamePartVerifier {
 	//=================================================================================================
 	// members
 	
+	public static final int COMMON_NAME_PART_MAX_LENGTH = 63;
 	public static final String COMMON_NAME_PART_PATTERN_STRING = "^[A-Za-z](?:[0-9A-Za-z-]*[0-9A-Za-z])?$";
 	private static final Pattern commonNamePartPattern;
 	
@@ -49,8 +50,11 @@ public class CommonNamePartVerifier {
 		}
 		
 		final String candidate = name.trim();
-		final Matcher matcher = commonNamePartPattern.matcher(candidate);
+		if (candidate.length() > COMMON_NAME_PART_MAX_LENGTH) {
+			return false;
+		}
 		
+		final Matcher matcher = commonNamePartPattern.matcher(candidate);
 		final boolean match = matcher.matches();
 		if (match) {
 			logger.debug("CN part {} validation result: {}", candidate, match);

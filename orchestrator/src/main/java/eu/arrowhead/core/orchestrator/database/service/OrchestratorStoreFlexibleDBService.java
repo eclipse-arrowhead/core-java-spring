@@ -30,7 +30,6 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.cn.CommonNamePartVerifier;
 import eu.arrowhead.common.database.entity.OrchestratorStoreFlexible;
 import eu.arrowhead.common.database.repository.OrchestratorStoreFlexibleRepository;
 import eu.arrowhead.common.dto.internal.DTOConverter;
@@ -38,7 +37,8 @@ import eu.arrowhead.common.dto.internal.OrchestratorStoreFlexibleListResponseDTO
 import eu.arrowhead.common.dto.internal.OrchestratorStoreFlexibleRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
+import eu.arrowhead.common.verifier.CommonNamePartVerifier;
+import eu.arrowhead.common.verifier.ServiceInterfaceNameVerifier;
 
 @Service
 public class OrchestratorStoreFlexibleDBService {

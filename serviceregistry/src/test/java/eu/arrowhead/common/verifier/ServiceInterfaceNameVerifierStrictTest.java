@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2021 AITIA
+ * Copyright (c) 2019 AITIA
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -12,56 +12,56 @@
  *   Arrowhead Consortia - conceptualization
  ********************************************************************************/
 
-package eu.arrowhead.common.cn;
+package eu.arrowhead.common.verifier;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import eu.arrowhead.common.verifier.ServiceInterfaceNameVerifier;
+import eu.arrowhead.core.serviceregistry.ServiceRegistryMain;
 
 @RunWith(SpringRunner.class)
-public class CommonNamePartVerifierTest {
+@SpringBootTest(classes = ServiceRegistryMain.class)
+@ContextConfiguration
+public class ServiceInterfaceNameVerifierStrictTest {
 
 	//=================================================================================================
 	// members
-
-	private CommonNamePartVerifier verifier = new CommonNamePartVerifier();
+	
+	@Autowired
+	private ServiceInterfaceNameVerifier verifier;
 	
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testValid() {
-		final boolean valid = verifier.isValid("valid-label");
-		Assert.assertTrue(valid);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testInvalid1() {
-		final boolean valid = verifier.isValid("invalid_label");
-		Assert.assertFalse(valid);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testInvalid2() {
-		final boolean valid = verifier.isValid("invalid-label-1-");
-		Assert.assertFalse(valid);
+	@Before
+	public void setUp() {
+		ReflectionTestUtils.setField(verifier, ServiceInterfaceNameVerifier.FIELD_STRICT_MODE, true);
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testInvalid3() {
-		final boolean valid = verifier.isValid("invalid.label-2");
-		Assert.assertFalse(valid);
+	public void testIsValidUnknownProtocol() {
+		Assert.assertFalse(verifier.isValid("unique_protocol-SECURE-JSON"));
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testInvalid4() {
-		final boolean valid = verifier.isValid("1invalid-label");
-		Assert.assertFalse(valid);
+	public void testIsValidUnknownFormat() {
+		Assert.assertFalse(verifier.isValid("HTTP-SECURE-unique-format"));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testIsValidGood() {
+		Assert.assertTrue(verifier.isValid("HTTP-SECURE-XML"));
 	}
 }

@@ -19,7 +19,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
 import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
+import eu.arrowhead.common.verifier.ServiceInterfaceNameVerifier;
 
 @RunWith (SpringRunner.class)
 public class ServiceRegistryDBServiceServiceInterfaceTest {

@@ -12,7 +12,7 @@
  *   Arrowhead Consortia - conceptualization
  ********************************************************************************/
 
-package eu.arrowhead.common.intf;
+package eu.arrowhead.common.verifier;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -24,13 +24,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
+import eu.arrowhead.common.verifier.ServiceInterfaceNameVerifier;
 import eu.arrowhead.core.serviceregistry.ServiceRegistryMain;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ServiceRegistryMain.class)
 @ContextConfiguration
-public class ServiceInterfaceNameVerifierStrictTest {
+public class ServiceInterfaceNameVerifierNormalTest {
 
 	//=================================================================================================
 	// members
@@ -44,24 +44,42 @@ public class ServiceInterfaceNameVerifierStrictTest {
 	//-------------------------------------------------------------------------------------------------
 	@Before
 	public void setUp() {
-		ReflectionTestUtils.setField(verifier, ServiceInterfaceNameVerifier.FIELD_STRICT_MODE, true);
+		ReflectionTestUtils.setField(verifier, ServiceInterfaceNameVerifier.FIELD_STRICT_MODE, false);
 	}
-
+	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testIsValidUnknownProtocol() {
-		Assert.assertFalse(verifier.isValid("unique_protocol-SECURE-JSON"));
+	public void testIsValidNull() {
+		Assert.assertFalse(verifier.isValid(null));
 	}
-
+	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testIsValidUnknownFormat() {
-		Assert.assertFalse(verifier.isValid("HTTP-SECURE-unique-format"));
+	public void testIsValidEmpty() {
+		Assert.assertFalse(verifier.isValid("   "));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testIsValidNoMatch() {
+		Assert.assertFalse(verifier.isValid("json"));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testIsValidNoWrongSeparator() {
+		Assert.assertFalse(verifier.isValid("http_secure_json"));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testIsValidGood() {
-		Assert.assertTrue(verifier.isValid("HTTP-SECURE-XML"));
+		Assert.assertTrue(verifier.isValid("unique_protocol-insecure-unique_format"));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testIsValidGood2() {
+		Assert.assertTrue(verifier.isValid("unique_protocol-SECURE-unique_format"));
 	}
 }

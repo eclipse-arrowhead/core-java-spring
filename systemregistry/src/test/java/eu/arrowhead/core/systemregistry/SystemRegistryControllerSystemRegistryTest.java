@@ -23,10 +23,12 @@ import eu.arrowhead.common.dto.shared.SystemRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.core.systemregistry.database.service.SystemRegistryDBService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -108,6 +110,9 @@ public class SystemRegistryControllerSystemRegistryTest {
 
     @MockBean(name = "mockSystemRegistryDBService")
     private SystemRegistryDBService systemRegistryDBService;
+    
+    @Spy
+    private NetworkAddressVerifier networkAddressVerifier;
 
     //=================================================================================================
     // methods
@@ -311,6 +316,32 @@ public class SystemRegistryControllerSystemRegistryTest {
                     .andExpect(status().isBadRequest())
                     .andReturn();
     }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+    public void updateSystemRegistryInvalidSystemAddress() throws Exception {
+		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO("system", "0.0.0.0", 80, "authenticationInfo", null);
+        final SystemRegistryRequestDTO dto = new SystemRegistryRequestDTO(systemRequestDTO, VALID_DEVICE_REQUEST, null, null, 1);
+        this.mockMvc.perform(put("/systemregistry/mgmt/systems/" + INVALID_SYSTEM_REGISTRY_ID)
+                                     .accept(MediaType.APPLICATION_JSON)
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+    }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+    public void updateSystemRegistryInvalidDeviceAddress() throws Exception {
+		final DeviceRequestDTO deviceRequestDTO = new DeviceRequestDTO(VALID_DEVICE_NAME, "0.0.0.0", "AA:AA:AA:AA:AA:AA", "authenticationInfo");
+        final SystemRegistryRequestDTO dto = new SystemRegistryRequestDTO(VALID_SYSTEM_REQUEST, deviceRequestDTO, null, null, 1);
+        this.mockMvc.perform(put("/systemregistry/mgmt/systems/" + INVALID_SYSTEM_REGISTRY_ID)
+                                     .accept(MediaType.APPLICATION_JSON)
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+    }
 
     //-------------------------------------------------------------------------------------------------
 	@Test
@@ -425,6 +456,34 @@ public class SystemRegistryControllerSystemRegistryTest {
                     .andExpect(status().isBadRequest())
                     .andReturn();
     }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+    public void mergeSystemInvalidSystemAddress() throws Exception {
+		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO("system", "0.0.0.0", 80, "authenticationInfo", null);
+        final SystemRegistryRequestDTO dto = new SystemRegistryRequestDTO(systemRequestDTO, VALID_DEVICE_REQUEST, DATE_STRING, null, 1);
+
+        this.mockMvc.perform(patch("/systemregistry/mgmt/" + VALID_SYSTEM_REGISTRY_ID)
+                                     .accept(MediaType.APPLICATION_JSON)
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+    }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+    public void mergeSystemInvalidDeviceAddress() throws Exception {
+		final DeviceRequestDTO deviceRequestDTO = new DeviceRequestDTO(VALID_DEVICE_NAME, "0.0.0.0", "AA:AA:AA:AA:AA:AA", "authenticationInfo");
+        final SystemRegistryRequestDTO dto = new SystemRegistryRequestDTO(VALID_SYSTEM_REQUEST, deviceRequestDTO, DATE_STRING, null, 1);
+
+        this.mockMvc.perform(patch("/systemregistry/mgmt/" + VALID_SYSTEM_REGISTRY_ID)
+                                     .accept(MediaType.APPLICATION_JSON)
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+    }
 
     //-------------------------------------------------------------------------------------------------
 	@Test
@@ -443,6 +502,32 @@ public class SystemRegistryControllerSystemRegistryTest {
 	@Test
     public void registerSystemNameWrong() throws Exception {
 		final SystemRegistryRequestDTO dto = new SystemRegistryRequestDTO(new SystemRequestDTO("invalid.format_", "address", 80, "authenticationInfo", null), VALID_DEVICE_REQUEST, DATE_STRING, null, 1);
+
+        this.mockMvc.perform(post("/systemregistry/register")
+                                     .accept(MediaType.APPLICATION_JSON)
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+    }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+    public void registerSystemAddressWrong() throws Exception {
+		final SystemRegistryRequestDTO dto = new SystemRegistryRequestDTO(new SystemRequestDTO(VALID_SYSTEM_NAME, "0.0.0.0", 80, "authenticationInfo", null), VALID_DEVICE_REQUEST, DATE_STRING, null, 1);
+
+        this.mockMvc.perform(post("/systemregistry/register")
+                                     .accept(MediaType.APPLICATION_JSON)
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+    }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+    public void registerDeviceAddressWrong() throws Exception {
+		final SystemRegistryRequestDTO dto = new SystemRegistryRequestDTO(VALID_SYSTEM_REQUEST, new DeviceRequestDTO(VALID_DEVICE_NAME, "0.0.0.0", "AA:AA:AA:AA:AA:AA", "authenticationInfo"), DATE_STRING, null, 1);
 
         this.mockMvc.perform(post("/systemregistry/register")
                                      .accept(MediaType.APPLICATION_JSON)

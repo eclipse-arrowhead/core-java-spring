@@ -70,7 +70,7 @@ import eu.arrowhead.common.dto.internal.TokenGenerationResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
+import eu.arrowhead.common.verifier.ServiceInterfaceNameVerifier;
 import eu.arrowhead.core.authorization.database.service.AuthorizationDBService;
 import eu.arrowhead.core.authorization.token.TokenGenerationService;
 import io.swagger.annotations.Api;
