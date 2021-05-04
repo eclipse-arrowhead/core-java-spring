@@ -50,7 +50,7 @@ public class CommonNamePartVerifier {
 		}
 		
 		final String candidate = name.trim();
-		if (candidate.length() >= COMMON_NAME_PART_MAX_LENGTH) {
+		if (candidate.length() > COMMON_NAME_PART_MAX_LENGTH) {
 			return false;
 		}
 		
