@@ -31,7 +31,6 @@ import org.mockito.Spy;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import eu.arrowhead.common.cn.CommonNamePartVerifier;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.database.repository.CloudGatekeeperRelayRepository;
@@ -41,6 +40,7 @@ import eu.arrowhead.common.database.repository.RelayRepository;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 
 @RunWith(SpringRunner.class)
 public class GatekeeperDBServiceCloudTest {

@@ -33,7 +33,7 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
+import eu.arrowhead.common.verifier.ServiceInterfaceNameVerifier;
 
 // works only in secure mode
 @Service

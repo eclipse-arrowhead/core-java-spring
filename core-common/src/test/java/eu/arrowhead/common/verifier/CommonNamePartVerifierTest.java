@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2019 AITIA
+ * Copyright (c) 2021 AITIA
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -12,74 +12,65 @@
  *   Arrowhead Consortia - conceptualization
  ********************************************************************************/
 
-package eu.arrowhead.common.intf;
+package eu.arrowhead.common.verifier;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 
-import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
-import eu.arrowhead.core.serviceregistry.ServiceRegistryMain;
+import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = ServiceRegistryMain.class)
-@ContextConfiguration
-public class ServiceInterfaceNameVerifierNormalTest {
+public class CommonNamePartVerifierTest {
 
 	//=================================================================================================
 	// members
-	
-	@Autowired
-	private ServiceInterfaceNameVerifier verifier;
+
+	private CommonNamePartVerifier verifier = new CommonNamePartVerifier();
 	
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	@Before
-	public void setUp() {
-		ReflectionTestUtils.setField(verifier, ServiceInterfaceNameVerifier.FIELD_STRICT_MODE, false);
+	@Test
+	public void testValid() {
+		final boolean valid = verifier.isValid("valid-label");
+		Assert.assertTrue(valid);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testIsValidNull() {
-		Assert.assertFalse(verifier.isValid(null));
+	public void testInvalid1() {
+		final boolean valid = verifier.isValid("invalid_label");
+		Assert.assertFalse(valid);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testIsValidEmpty() {
-		Assert.assertFalse(verifier.isValid("   "));
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testIsValidNoMatch() {
-		Assert.assertFalse(verifier.isValid("json"));
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testIsValidNoWrongSeparator() {
-		Assert.assertFalse(verifier.isValid("http_secure_json"));
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testIsValidGood() {
-		Assert.assertTrue(verifier.isValid("unique_protocol-insecure-unique_format"));
+	public void testInvalid2() {
+		final boolean valid = verifier.isValid("invalid-label-1-");
+		Assert.assertFalse(valid);
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testIsValidGood2() {
-		Assert.assertTrue(verifier.isValid("unique_protocol-SECURE-unique_format"));
+	public void testInvalid3() {
+		final boolean valid = verifier.isValid("invalid.label-2");
+		Assert.assertFalse(valid);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInvalid4() {
+		final boolean valid = verifier.isValid("1invalid-label");
+		Assert.assertFalse(valid);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInvalid5() {
+		final boolean valid = verifier.isValid("invalid-length-fgkfgnfdg65465fgfhghnkfdg61541fdgfdshhsdhsabgkjhk"); //64 character long instead of the maximum 63
+		Assert.assertFalse(valid);
 	}
 }

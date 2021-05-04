@@ -35,10 +35,10 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import eu.arrowhead.common.cn.CommonNamePartVerifier;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 
 @RunWith (SpringRunner.class)
 public class ServiceRegistryDBServiceServiceDefinitionTest {

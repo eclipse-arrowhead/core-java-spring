@@ -55,7 +55,7 @@ import eu.arrowhead.common.dto.internal.OrchestratorStoreRequestDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
+import eu.arrowhead.common.verifier.ServiceInterfaceNameVerifier;
 
 @RunWith(SpringRunner.class)
 public class OrchestratorStoreDBServiceTest {
