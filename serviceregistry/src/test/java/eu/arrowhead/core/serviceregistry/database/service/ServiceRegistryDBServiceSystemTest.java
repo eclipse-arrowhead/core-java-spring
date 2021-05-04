@@ -14,9 +14,12 @@
 
 package eu.arrowhead.core.serviceregistry.database.service;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,10 +29,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.hibernate.HibernateException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -44,6 +49,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.SystemRepository;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.processor.NetworkAddressPreProcessor;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
@@ -664,5 +670,85 @@ public class ServiceRegistryDBServiceSystemTest {
 		when(systemRepository.existsById(anyLong())).thenReturn(false);
 		
 		serviceRegistryDBService.removeSystemById(0);
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	@Test
+	public void removeSystemByNameAndAddressAndPortTestOk() {
+		final long id = 5;
+		final String name = "consumer" ;
+		final String address = "address";
+		final int port = 5550;
+		final System entity = new System(name, address, port, null, null);
+		entity.setId(id);
+		
+		final ArgumentCaptor<String> strCaptor = ArgumentCaptor.forClass(String.class);
+		final ArgumentCaptor<Integer> intCaptor = ArgumentCaptor.forClass(Integer.class);
+		when(systemRepository.findBySystemNameAndAddressAndPort(strCaptor.capture(), strCaptor.capture(), intCaptor.capture())).thenReturn(Optional.of(entity));
+		doNothing().when(systemRepository).deleteById(anyLong());
+		doNothing().when(systemRepository).flush();
+		
+		serviceRegistryDBService.removeSystemByNameAndAddressAndPort(name, address, port);
+		
+		assertEquals(name, strCaptor.getAllValues().get(0));
+		assertEquals(address, strCaptor.getAllValues().get(1));
+		assertEquals(port, intCaptor.getValue().intValue());
+		
+		verify(systemRepository, times(1)).findBySystemNameAndAddressAndPort(eq(name), eq(address), eq(port));
+		verify(systemRepository, times(1)).deleteById(eq(id));
+		verify(systemRepository, times(1)).flush();
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	@Test(expected = InvalidParameterException.class)
+	public void removeSystemByNameAndAddressAndPortTestSystemNotExists() {
+		final String name = "consumer" ;
+		final String address = "address";
+		final int port = 5550;
+		
+		final ArgumentCaptor<String> strCaptor = ArgumentCaptor.forClass(String.class);
+		final ArgumentCaptor<Integer> intCaptor = ArgumentCaptor.forClass(Integer.class);
+		when(systemRepository.findBySystemNameAndAddressAndPort(strCaptor.capture(), strCaptor.capture(), intCaptor.capture())).thenReturn(Optional.empty());
+		doNothing().when(systemRepository).deleteById(anyLong());
+		doNothing().when(systemRepository).flush();
+		
+		try {
+			serviceRegistryDBService.removeSystemByNameAndAddressAndPort(name, address, port);			
+		} catch (final InvalidParameterException ex) {
+			assertEquals(name, strCaptor.getAllValues().get(0));
+			assertEquals(address, strCaptor.getAllValues().get(1));
+			assertEquals(port, intCaptor.getValue().intValue());
+			
+			verify(systemRepository, times(1)).findBySystemNameAndAddressAndPort(eq(name), eq(address), eq(port));
+			verify(systemRepository, never()).deleteById(anyLong());
+			verify(systemRepository, never()).flush();
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	@Test(expected = ArrowheadException.class)
+	public void removeSystemByNameAndAddressAndPortTestDBException() {
+		final String name = "consumer" ;
+		final String address = "address";
+		final int port = 5550;
+		
+		final ArgumentCaptor<String> strCaptor = ArgumentCaptor.forClass(String.class);
+		final ArgumentCaptor<Integer> intCaptor = ArgumentCaptor.forClass(Integer.class);
+		when(systemRepository.findBySystemNameAndAddressAndPort(strCaptor.capture(), strCaptor.capture(), intCaptor.capture())).thenThrow(new HibernateException("test"));
+		
+		try {
+			serviceRegistryDBService.removeSystemByNameAndAddressAndPort(name, address, port);			
+		} catch (final ArrowheadException ex) {
+			assertEquals(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG, ex.getMessage());
+			assertEquals(name, strCaptor.getAllValues().get(0));
+			assertEquals(address, strCaptor.getAllValues().get(1));
+			assertEquals(port, intCaptor.getValue().intValue());
+			
+			verify(systemRepository, times(1)).findBySystemNameAndAddressAndPort(eq(name), eq(address), eq(port));
+			verify(systemRepository, never()).deleteById(anyLong());
+			verify(systemRepository, never()).flush();
+			throw ex;
+		}		
 	}
 }

@@ -258,7 +258,7 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public void removeSystemByNameAndAddressAndPort(final String systemName, final String address, final int port) { //TODO junit	
+	public void removeSystemByNameAndAddressAndPort(final String systemName, final String address, final int port) {
 		logger.debug("removeSystemByNameAndAddressAndPort started...");
 		Assert.isTrue(!Utilities.isEmpty(systemName), "systemName is not specified.");
 		Assert.isTrue(!Utilities.isEmpty(address), "address is not specified.");
