@@ -977,7 +977,7 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ServiceQueryResultListDTO multiQueryRegistry(final ServiceQueryFormListDTO forms) { //TODO: junit
+	public ServiceQueryResultListDTO multiQueryRegistry(final ServiceQueryFormListDTO forms) { 
 		logger.debug("multiQueryRegistry is started...");
 		Assert.notNull(forms, "Form list is null.");
 		Assert.notNull(forms.getForms(), "Form list is null.");

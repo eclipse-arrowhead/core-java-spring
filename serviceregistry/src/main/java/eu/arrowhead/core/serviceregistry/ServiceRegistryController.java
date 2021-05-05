@@ -829,7 +829,7 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PostMapping(path = CoreCommonConstants.OP_SERVICEREGISTRY_MULTI_QUERY_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public ServiceQueryResultListDTO multiQueryRegistry(@RequestBody final ServiceQueryFormListDTO forms) { //TODO: junit
+	@ResponseBody public ServiceQueryResultListDTO multiQueryRegistry(@RequestBody final ServiceQueryFormListDTO forms) { 
 		logger.debug("Service multi query request received");
 		
 		checkQueryFormList(forms);

@@ -51,6 +51,7 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
@@ -76,6 +77,7 @@ public class SRAccessControlFilterTest {
 	private static final String SERVICEREGISTRY_REGISTER_SYSTEM = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI;
 	private static final String SERVICEREGISTRY_UNREGISTER = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_URI;
 	private static final String SERVICEREGISTRY_QUERY = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_QUERY_URI;
+	private static final String SERVICEREGISTRY_MULTI_QUERY = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_MULTI_QUERY_URI;
 	private static final String SERVICEREGISTRY_QUERY_BY_SYSTEM_ID = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_QUERY_BY_SYSTEM_ID_URI;
 	private static final String SERVICEREGISTRY_QUERY_BY_SYSTEM_DTO = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_QUERY_BY_SYSTEM_DTO_URI;
 	private static final String SERVICEREGISTRY_QUERY_ALL = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_QUERY_ALL_SERVICE_URI;
@@ -450,6 +452,21 @@ public class SRAccessControlFilterTest {
 				null); // metadata
 		postRegisterSystem(systemRequestDTO, "certificates/valid.pem", status().isBadRequest());
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testMultiQueryOrchestratorAllowedCoreSystemClient() throws Exception {
+		// Filter enables the access but we use ill-formed input to make sure DB operation is never happened (without mocking it)
+		postMultiQuery(new ServiceQueryFormListDTO(), "certificates/orchestrator.pem", status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testMultiQueryUnauthorizedClient() throws Exception {
+		postMultiQuery(new ServiceQueryFormListDTO(), "certificates/provider.pem", status().isUnauthorized());
+	}
 
 	//=================================================================================================
 	// assistant methods
@@ -487,6 +504,17 @@ public class SRAccessControlFilterTest {
 	//-------------------------------------------------------------------------------------------------
 	private void postQuery(final ServiceQueryFormDTO form, final String certificatePath, final ResultMatcher matcher) throws Exception {
 		this.mockMvc.perform(post(SERVICEREGISTRY_QUERY)
+			    	.secure(true)
+			    	.with(x509(certificatePath))
+			    	.contentType(MediaType.APPLICATION_JSON)
+			    	.content(objectMapper.writeValueAsBytes(form))
+			    	.accept(MediaType.APPLICATION_JSON))
+					.andExpect(matcher);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void postMultiQuery(final ServiceQueryFormListDTO form, final String certificatePath, final ResultMatcher matcher) throws Exception {
+		this.mockMvc.perform(post(SERVICEREGISTRY_MULTI_QUERY)
 			    	.secure(true)
 			    	.with(x509(certificatePath))
 			    	.contentType(MediaType.APPLICATION_JSON)

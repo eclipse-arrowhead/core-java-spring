@@ -79,7 +79,9 @@ import eu.arrowhead.common.dto.internal.ServicesGroupedByServiceDefinitionRespon
 import eu.arrowhead.common.dto.internal.ServicesGroupedBySystemsResponseDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultListDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceSecurityType;
@@ -105,6 +107,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	private static final String SERVICEREGISTRY_QUERY_SYSTEM_BY_ID_URI = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_QUERY_BY_SYSTEM_ID_URI;
 	private static final String SERVICEREGISTRY_QUERY_SYSTEM_BY_DTO_URI = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_QUERY_BY_SYSTEM_DTO_URI;
 	private static final String SERVICEREGISTRY_QUERY_ALL_URI = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_QUERY_ALL_SERVICE_URI;
+	private static final String SERVICEREGISTRY_MULTI_QUERY_URI = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_MULTI_QUERY_URI;
 
 	private static final String SERVICEREGISTRY_MGMT_URI = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.MGMT_URI;
 	private static final String SERVICEREGISTRY_MGMT_SERVICEDEF_URI = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.MGMT_URI + "/servicedef";
@@ -1235,6 +1238,97 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	}
 	
 	//=================================================================================================
+	// Tests of multiQueryRegistry
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMultiQueryServiceFormListNull() throws Exception {
+		ServiceQueryFormListDTO forms = new ServiceQueryFormListDTO();
+		ReflectionTestUtils.setField(forms, "forms", null);
+		final MvcResult result = postMultiQueryService(forms, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICEREGISTRY_MULTI_QUERY_URI, error.getOrigin());
+		Assert.assertEquals("Form list is null", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMultiQueryServiceFormListEmpty() throws Exception {
+		final MvcResult result = postMultiQueryService(new ServiceQueryFormListDTO(), status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICEREGISTRY_MULTI_QUERY_URI, error.getOrigin());
+		Assert.assertEquals("Form list is null", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMultiQueryServiceAFormIsNull() throws Exception {
+		final List<ServiceQueryFormDTO> forms = new ArrayList<>();
+		forms.add(null);
+		final MvcResult result = postMultiQueryService(new ServiceQueryFormListDTO(forms), status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICEREGISTRY_MULTI_QUERY_URI, error.getOrigin());
+		Assert.assertEquals("A form is null", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMultiQueryServiceServiceDefinitionRequirementNull() throws Exception {
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		final MvcResult result = postMultiQueryService(new ServiceQueryFormListDTO(List.of(form)), status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICEREGISTRY_MULTI_QUERY_URI, error.getOrigin());
+		Assert.assertEquals("Service definition requirement is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMultiQueryServiceServiceDefinitionRequirementEmpty() throws Exception {
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		form.setServiceDefinitionRequirement("");
+		final MvcResult result = postMultiQueryService(new ServiceQueryFormListDTO(List.of(form)), status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICEREGISTRY_MULTI_QUERY_URI, error.getOrigin());
+		Assert.assertEquals("Service definition requirement is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMultiQueryServiceServiceDefinitionRequirementWrong() throws Exception {
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		form.setServiceDefinitionRequirement("123-");
+		final MvcResult result = postMultiQueryService(new ServiceQueryFormListDTO(List.of(form)), status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICEREGISTRY_MULTI_QUERY_URI, error.getOrigin());
+		Assert.assertEquals("Service definition requirement has invalid format. Service definition only contains maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).",
+							error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testMultiQueryServiceEverythingIsOk() throws Exception {
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		form.setServiceDefinitionRequirement("testservice");
+		
+		when(serviceRegistryDBService.multiQueryRegistry(any(ServiceQueryFormListDTO.class))).thenReturn(new ServiceQueryResultListDTO());
+		
+		postMultiQueryService(new ServiceQueryFormListDTO(List.of(form)), status().isOk());
+	}
+	
+	//=================================================================================================
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
@@ -1319,6 +1413,16 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		return this.mockMvc.perform(post(SERVICEREGISTRY_QUERY_URI)
 						   .contentType(MediaType.APPLICATION_JSON)
 						   .content(objectMapper.writeValueAsBytes(form))
+						   .accept(MediaType.APPLICATION_JSON))
+						   .andExpect(matcher)
+						   .andReturn();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MvcResult postMultiQueryService(final ServiceQueryFormListDTO forms, final ResultMatcher matcher) throws Exception {
+		return this.mockMvc.perform(post(SERVICEREGISTRY_MULTI_QUERY_URI)
+						   .contentType(MediaType.APPLICATION_JSON)
+						   .content(objectMapper.writeValueAsBytes(forms))
 						   .accept(MediaType.APPLICATION_JSON))
 						   .andExpect(matcher)
 						   .andReturn();
