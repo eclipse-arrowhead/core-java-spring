@@ -45,7 +45,6 @@ import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.cn.CommonNamePartVerifier;
 import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.internal.ServiceDefinitionRequestDTO;
@@ -67,7 +66,11 @@ import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
+import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.processor.NetworkAddressPreProcessor;
+import eu.arrowhead.common.verifier.CommonNamePartVerifier;
+import eu.arrowhead.common.verifier.NetworkAddressVerifier;
+import eu.arrowhead.common.verifier.ServiceInterfaceNameVerifier;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -153,11 +156,10 @@ public class ServiceRegistryController {
 	private static final String NOT_VALID_PARAMETERS_ERROR_MESSAGE = "Not valid request parameters.";
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = "Id must be greater than 0. ";
 	private static final String SYSTEM_NAME_NULL_ERROR_MESSAGE = " System name must have value ";
-	private static final String SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE = "System name has invalid format. System names only contain letters (english alphabet), numbers and dash (-), and have to start with a letter (also cannot end with dash).";
-	private static final String SYSTEM_ADDRESS_NULL_ERROR_MESSAGE = " System address must have value ";
+	private static final String SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE = "System name has invalid format. System names only contain maximum 63 character of letters (english alphabet), numbers and dash (-), and have to start with a letter (also cannot end with dash).";
 	private static final String SYSTEM_PORT_NULL_ERROR_MESSAGE = " System port must have value ";
-	private static final String SERVICE_DEFINITION_WRONG_FORMAT_ERROR_MESSAGE = "Service definition has invalid format. Service definition only contains letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).";
-	private static final String SERVICE_DEFINITION_REQUIREMENT_WRONG_FORMAT_ERROR_MESSAGE = "Service definition requirement has invalid format. Service definition only contains letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).";
+	private static final String SERVICE_DEFINITION_WRONG_FORMAT_ERROR_MESSAGE = "Service definition has invalid format. Service definition only contains maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).";
+	private static final String SERVICE_DEFINITION_REQUIREMENT_WRONG_FORMAT_ERROR_MESSAGE = "Service definition requirement has invalid format. Service definition only contains maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).";
 	
 	private static final String SERVICEREGISTRY_MGMT_BY_ID_URI = CoreCommonConstants.MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
 	private static final String PATH_VARIABLE_SERVICE_DEFINITION = "serviceDefinition";
@@ -178,6 +180,12 @@ public class ServiceRegistryController {
 	
 	@Autowired
 	private CommonNamePartVerifier cnVerifier;
+	
+	@Autowired
+	private NetworkAddressPreProcessor networkAddressPreProcessor;
+	
+	@Autowired
+	private NetworkAddressVerifier networkAddressVerifier;
 	
 	@Value(CoreCommonConstants.$USE_STRICT_SERVICE_DEFINITION_VERIFIER_WD)
 	private boolean useStrictServiceDefinitionVerifier;
@@ -1115,8 +1123,13 @@ public class ServiceRegistryController {
 		boolean needChange = false;
 		if (!Utilities.isEmpty(request.getAddress())) {
 			needChange = true;
-		}
-		
+			
+			try {			
+				networkAddressVerifier.verify(networkAddressPreProcessor.normalize(request.getAddress()));
+			} catch (final InvalidParameterException ex) {
+				throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
+			}
+		}		
 		
 		if (!Utilities.isEmpty(request.getSystemName())) {
 			needChange = true;
@@ -1189,8 +1202,10 @@ public class ServiceRegistryController {
 			throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		if (Utilities.isEmpty(request.getAddress())) {
-			throw new BadPayloadException(SYSTEM_ADDRESS_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		try {			
+			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(request.getAddress()));
+		} catch (final InvalidParameterException ex) {
+			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		if (request.getPort() == null) {
@@ -1284,8 +1299,10 @@ public class ServiceRegistryController {
 			throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		if (Utilities.isEmpty(address)) {
-			throw new BadPayloadException("Address of the application system is blank", HttpStatus.SC_BAD_REQUEST, origin);
+		try {
+			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(address));
+		} catch (final InvalidParameterException ex) {
+			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
@@ -1315,8 +1332,10 @@ public class ServiceRegistryController {
 			throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		if (Utilities.isEmpty(providerAddress)) {
-			throw new BadPayloadException("Address of the provider system is blank", HttpStatus.SC_BAD_REQUEST, origin);
+		try {
+			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(providerAddress));
+		} catch (final Exception ex) {
+			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		if (providerPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || providerPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
@@ -1348,6 +1367,12 @@ public class ServiceRegistryController {
 		boolean needChange = false;
 		if (request.getProviderSystem() != null && !Utilities.isEmpty(request.getProviderSystem().getAddress())) {
 			needChange = true;
+			
+			try {
+				networkAddressVerifier.verify(networkAddressPreProcessor.normalize(request.getProviderSystem().getAddress()));
+			} catch (final Exception ex) {
+				throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, origin);
+			}
 		}
 		
 		if (request.getProviderSystem() != null && !Utilities.isEmpty(request.getProviderSystem().getSystemName())) {

@@ -29,11 +29,11 @@ import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.cn.CommonNamePartVerifier;
 import eu.arrowhead.common.dto.shared.ConfigurationListResponseDTO;
 import eu.arrowhead.common.dto.shared.ConfigurationRequestDTO;
 import eu.arrowhead.common.dto.shared.ConfigurationResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 
 
 @Service

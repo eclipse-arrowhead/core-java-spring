@@ -342,7 +342,7 @@ public class SRAccessControlFilterTest {
 	public void testQueryRegistryBySystemDTOOrchestrator() throws Exception {
 		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
 		
-		postQueryBySystemDTO(new SystemRequestDTO("system", "0.0.0.0", 5000, null, null), "certificates/orchestrator.pem", status().isOk());
+		postQueryBySystemDTO(new SystemRequestDTO("system", "testaddress", 5000, null, null), "certificates/orchestrator.pem", status().isOk());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -405,7 +405,7 @@ public class SRAccessControlFilterTest {
 
 		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO(
 				"sysop",//systemName,
-				"localhost", //address
+				"192.168.1.103", //address
 				12345,//port,
 				null, //authenticationInfo
 				null); // metadata
@@ -418,7 +418,7 @@ public class SRAccessControlFilterTest {
 
 		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO(
 				"not_sysop",//systemName,
-				"localhost", //address
+				"192.168.1.103", //address
 				12345,//port,
 				null, //authenticationInfo
 				null); // metadata

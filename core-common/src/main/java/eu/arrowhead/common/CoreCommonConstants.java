@@ -102,6 +102,10 @@ public class CoreCommonConstants {
 	public static final String $USE_STRICT_SERVICE_INTF_NAME_VERIFIER_WD = "${" + USE_STRICT_SERVICE_INTF_NAME_VERIFIER + ":" + CoreDefaults.DEFAULT_USE_STRICT_SERVICE_INTF_NAME_VERIFIER + "}";
 	public static final String USE_STRICT_SERVICE_DEFINITION_VERIFIER = "use_strict_service_definition_verifier";
 	public static final String $USE_STRICT_SERVICE_DEFINITION_VERIFIER_WD = "${" + USE_STRICT_SERVICE_DEFINITION_VERIFIER + ":" + CoreDefaults.DEFAULT_USE_STRICT_SERVICE_DEFINITION_VERIFIER + "}";
+	public static final String ALLOW_SELF_ADDRESSING = "allow_self_addressing";
+	public static final String $ALLOW_SELF_ADDRESSING_WD = "${" + ALLOW_SELF_ADDRESSING + ":" + CoreDefaults.DEFAULT_ALLOW_SELF_ADDRESSING + "}";
+	public static final String ALLOW_NON_ROUTABLE_ADDRESSING = "allow_non_routable_addressing";
+	public static final String $ALLOW_NON_ROUTABLE_ADDRESSING_WD = "${" + ALLOW_NON_ROUTABLE_ADDRESSING + ":" + CoreDefaults.DEFAULT_ALLOW_NON_ROUTABLE_ADDRESSING + "}";
 	public static final String URI_CRAWLER_INTERVAL = "uri_crawler_interval"; // in seconds
 	public static final String $URI_CRAWLER_INTERVAL_WD = "${" + URI_CRAWLER_INTERVAL + ":" + CoreDefaults.DEFAULT_URI_CRAWLER_INTERVAL + "}";
 	public static final String AUTH_TOKEN_TTL_IN_MINUTES = "auth_token_ttl_in_minutes";
