@@ -14,7 +14,6 @@
 
 package eu.arrowhead.core.orchestrator.database.service;
 
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +36,7 @@ import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.OrchestratorStoreFlexibleListResponseDTO;
 import eu.arrowhead.common.dto.internal.OrchestratorStoreFlexibleRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 import eu.arrowhead.common.verifier.ServiceInterfaceNameVerifier;
 
@@ -174,7 +174,7 @@ public class OrchestratorStoreFlexibleDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public List<OrchestratorStoreFlexible> getMatchedRulesByServiceDefinitionAndConsumerName(final String serviceDefinition, final String consumerSystemName) { // TODO: unit test
+	public List<OrchestratorStoreFlexible> getMatchedRulesByServiceDefinitionAndConsumerName(final String serviceDefinition, final String consumerSystemName) {
 		logger.debug("getMatchedRulesByServiceDefinitionAndConsumerName started...");
 		
 		if (Utilities.isEmpty(serviceDefinition)) {
@@ -197,7 +197,7 @@ public class OrchestratorStoreFlexibleDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public List<OrchestratorStoreFlexible> getMatchedRulesByServiceDefinitionAndNonNullConsumerMetadata(final String serviceDefinition) { // TODO: unit test
+	public List<OrchestratorStoreFlexible> getMatchedRulesByServiceDefinitionAndNonNullConsumerMetadata(final String serviceDefinition) { 
 		logger.debug("getMatchedRulesByServiceDefinitionAndNonNullConsumerMetadata started...");
 		
 		if (Utilities.isEmpty(serviceDefinition)) {
