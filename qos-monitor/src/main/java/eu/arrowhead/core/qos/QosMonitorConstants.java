@@ -25,6 +25,8 @@ public class QosMonitorConstants {
 	public static final String INTERUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_ROOT_CAUSE_KEY = "ROOT_CAUSE";
 	public static final String INTERUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_EXCEPTION_KEY = "EXCEPTION";
 
+	public static final String EXTERNAL_PING_MONITORING_SERVICE_INTERFACE = "HTTP-SECURE-JSON";
+	public static final String EXTERNAL_PING_MONITORING_SERVICE_DEFINITION = "EXTERNALPINGSERVICE";
 	//=================================================================================================
 	// assistant methods
 

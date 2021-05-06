@@ -150,4 +150,5 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 
 		return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), registyUriStr);
 	}
+
 }
