@@ -75,7 +75,10 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 			} else {
 				// Public core system services are allowed to query directly by the local systems
 				checkIfRequestedServiceIsAPublicCoreSystemService(requestJSON);
-			}			
+			}
+		} else if (requestTarget.endsWith(CoreCommonConstants.OP_SERVICEREGISTRY_MULTI_QUERY_URI)) {
+			// Only dedicated core systems can use this service
+			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForQuery, requestTarget);
 		} else if (requestTarget.contains(CoreCommonConstants.OP_SERVICEREGISTRY_QUERY_BY_SYSTEM_ID_URI.replace(ID_PATH_VARIABLE, ""))) {
 			// Only dedicated core systems can use this service
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForQueryBySystemId, requestTarget);

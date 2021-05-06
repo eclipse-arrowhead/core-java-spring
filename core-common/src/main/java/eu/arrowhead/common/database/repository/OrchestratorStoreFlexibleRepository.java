@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.database.repository;
 
+import java.util.List;
+
 import org.springframework.stereotype.Repository;
 
 import eu.arrowhead.common.database.entity.OrchestratorStoreFlexible;
@@ -21,4 +23,10 @@ import eu.arrowhead.common.database.entity.OrchestratorStoreFlexible;
 @Repository
 public interface OrchestratorStoreFlexibleRepository extends RefreshableRepository<OrchestratorStoreFlexible,Long> {
 
+	//=================================================================================================
+	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<OrchestratorStoreFlexible> findByServiceDefinitionNameAndConsumerSystemNameAndConsumerSystemMetadataIsNull(final String serviceDefinitionName, final String consumerSystemName);
+	public List<OrchestratorStoreFlexible> findByServiceDefinitionNameAndConsumerSystemMetadataIsNotNull(final String serviceDefinitionName);
 }

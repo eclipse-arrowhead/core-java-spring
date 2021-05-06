@@ -1154,7 +1154,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
-		final OrchestrationResponseDTO result = testingObject.orchestrationFromStore(request);
+		final OrchestrationResponseDTO result = testingObject.orchestrationFromOriginalStore(request);
 		
 		Assert.assertNotNull(result);
 		Assert.assertTrue(!result.getResponse().isEmpty());
@@ -1175,7 +1175,7 @@ public class OrchestratorServiceTest {
 	public void testOrchestrationFromStoreWithSystemIdParameterByNullRequest() {
 		final OrchestrationFormRequestDTO request = null;
 
-		testingObject.orchestrationFromStore(request);
+		testingObject.orchestrationFromOriginalStore(request);
 				
 	}
 	
@@ -1285,7 +1285,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
-		final OrchestrationResponseDTO result = testingObject.orchestrationFromStore(request);
+		final OrchestrationResponseDTO result = testingObject.orchestrationFromOriginalStore(request);
 		
 		Assert.assertNotNull(result);
 		Assert.assertTrue(!result.getResponse().isEmpty());
@@ -1370,7 +1370,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
-		testingObject.orchestrationFromStore(request);
+		testingObject.orchestrationFromOriginalStore(request);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1449,7 +1449,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
-		testingObject.orchestrationFromStore(request);		
+		testingObject.orchestrationFromOriginalStore(request);		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1528,7 +1528,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
-		testingObject.orchestrationFromStore(request);		
+		testingObject.orchestrationFromOriginalStore(request);		
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -1608,7 +1608,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
-		testingObject.orchestrationFromStore(request);		
+		testingObject.orchestrationFromOriginalStore(request);		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1689,7 +1689,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
-		testingObject.orchestrationFromStore(request);		
+		testingObject.orchestrationFromOriginalStore(request);		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1769,7 +1769,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
-		testingObject.orchestrationFromStore(request);		
+		testingObject.orchestrationFromOriginalStore(request);		
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -1847,7 +1847,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
-		final OrchestrationResponseDTO result = testingObject.orchestrationFromStore(request);
+		final OrchestrationResponseDTO result = testingObject.orchestrationFromOriginalStore(request);
 		
 		Assert.assertNotNull(result);
 		Assert.assertTrue(!result.getResponse().isEmpty());
@@ -1928,7 +1928,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
-		final OrchestrationResponseDTO result = testingObject.orchestrationFromStore(request);
+		final OrchestrationResponseDTO result = testingObject.orchestrationFromOriginalStore(request);
 		
 		Assert.assertNotNull(result);
 		Assert.assertTrue(result.getResponse().isEmpty());
@@ -2010,7 +2010,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
-		final OrchestrationResponseDTO result = testingObject.orchestrationFromStore(request);
+		final OrchestrationResponseDTO result = testingObject.orchestrationFromOriginalStore(request);
 		
 		Assert.assertNotNull(result);
 		Assert.assertTrue(result.getResponse().isEmpty());
