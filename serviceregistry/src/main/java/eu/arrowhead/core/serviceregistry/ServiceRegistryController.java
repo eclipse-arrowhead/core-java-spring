@@ -344,7 +344,7 @@ public class ServiceRegistryController {
 	@DeleteMapping(path = CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI)
 	@ResponseBody public void unregisterSystem(@RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME) final String systemName,
 											   @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS) final String address,
-											   @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT) final Integer port) { //TODO junit
+											   @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT) final Integer port) {
 		logger.debug("System removal request received");
 		
 		checkUnregisterSystemParameters(systemName, address, port);
@@ -364,7 +364,7 @@ public class ServiceRegistryController {
 	@ResponseBody public SystemListResponseDTO pullSystems(@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
 														   @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
 														   @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
-														   @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) { // TODO junit
+														   @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
 		logger.debug("pullSystems started ...");
 		
 		final int validatedPage;
