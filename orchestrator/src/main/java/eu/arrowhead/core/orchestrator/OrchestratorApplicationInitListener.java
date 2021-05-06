@@ -121,11 +121,23 @@ public class OrchestratorApplicationInitListener extends ApplicationInitListener
 		final Map<String,Object> context = appContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
 		
 		final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
+		final UriComponents multiQuerydUri = createMultiQueryUri(scheme);
+		context.put(CoreCommonConstants.SR_MULTI_QUERY_URI, multiQuerydUri);
+
 		final UriComponents querySystemByIdUri = createQuerySystemByIdUri(scheme);
 		context.put(CoreCommonConstants.SR_QUERY_BY_SYSTEM_ID_URI, querySystemByIdUri);
 		
 		final UriComponents querySystemByDTOUri = createQuerySystemByDTOUri(scheme);
 		context.put(CoreCommonConstants.SR_QUERY_BY_SYSTEM_DTO_URI, querySystemByDTOUri);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents createMultiQueryUri(final String scheme) {
+		logger.debug("createMultiQueryUri started...");
+		
+		final String registyUriStr = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_MULTI_QUERY_URI;
+		
+		return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(),	registyUriStr);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

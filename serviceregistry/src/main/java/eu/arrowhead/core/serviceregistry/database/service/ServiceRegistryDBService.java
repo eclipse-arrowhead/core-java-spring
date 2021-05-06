@@ -57,7 +57,9 @@ import eu.arrowhead.common.dto.internal.SystemListResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultListDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceSecurityType;
@@ -972,6 +974,22 @@ public class ServiceRegistryDBService {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ServiceQueryResultListDTO multiQueryRegistry(final ServiceQueryFormListDTO forms) { //TODO: junit
+		logger.debug("multiQueryRegistry is started...");
+		Assert.notNull(forms, "Form list is null.");
+		Assert.notNull(forms.getForms(), "Form list is null.");
+		Assert.isTrue(!forms.getForms().isEmpty(), "Form list is empty.");
+
+		final List<ServiceQueryResultDTO> result = new ArrayList<>(forms.getForms().size());
+		for (final ServiceQueryFormDTO form : forms.getForms()) {
+			final ServiceQueryResultDTO queryResult = queryRegistry(form);
+			result.add(queryResult);
+		}
+		
+		return new ServiceQueryResultListDTO(result);
 	}
 
 	//-------------------------------------------------------------------------------------------------

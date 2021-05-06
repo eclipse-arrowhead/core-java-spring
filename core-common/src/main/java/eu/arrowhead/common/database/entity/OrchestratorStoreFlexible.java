@@ -135,8 +135,8 @@ public class OrchestratorStoreFlexible {
 		final String providerMeta = providerSystemMetadata == null ? "null" : providerSystemMetadata;
 		final String serviceMeta = serviceMetadata == null ? "null" :  serviceMetadata;
 		final String interfaceName = serviceInterfaceName == null ? "null" :  serviceInterfaceName;
-		return "OrchestratorStoreFlexible [id = " + id + "consumerName = " + consumerName + "providerName = " + providerName + "consumerMeta = " + consumerMeta +
-			   "providerMeta = " + providerMeta + "serviceMeta = " + serviceMeta + "interfaceName = " + interfaceName + "serviceDef = " + serviceDefinitionName + "priority = " + priority + "]";
+		return "OrchestratorStoreFlexible [id = " + id + ", consumerName = " + consumerName + ", providerName = " + providerName + ", consumerMeta = {" + consumerMeta +
+			   "}, providerMeta = {" + providerMeta + "}, serviceMeta = {" + serviceMeta + "}, interfaceName = " + interfaceName + ", serviceDef = " + serviceDefinitionName + ", priority = " + priority + "]";
 	}
 
 	//-------------------------------------------------------------------------------------------------

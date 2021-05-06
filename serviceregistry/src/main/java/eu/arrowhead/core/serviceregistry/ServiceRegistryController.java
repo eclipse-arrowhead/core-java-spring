@@ -57,7 +57,9 @@ import eu.arrowhead.common.dto.internal.SystemListResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultListDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceSecurityType;
@@ -805,7 +807,7 @@ public class ServiceRegistryController {
 		logger.debug("Service query request received");
 		
 		if (Utilities.isEmpty(form.getServiceDefinitionRequirement())) {
-			throw new BadPayloadException("Service definition requirement is null or blank" , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_QUERY_URI);
+			throw new BadPayloadException("Service definition requirement is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_QUERY_URI);
 		}
 		
 		if (useStrictServiceDefinitionVerifier && !cnVerifier.isValid(form.getServiceDefinitionRequirement())) {
@@ -814,6 +816,26 @@ public class ServiceRegistryController {
 		
 		final ServiceQueryResultDTO result = serviceRegistryDBService.queryRegistry(form);
 		logger.debug("Return {} providers for service {}", result.getServiceQueryData().size(), form.getServiceDefinitionRequirement());
+		
+		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = SERVICEREGISTRY_QUERY_DESCRIPTION, response = ServiceQueryResultDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = SERVICEREGISTRY_QUERY_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SERVICEREGISTRY_QUERY_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = CoreCommonConstants.OP_SERVICEREGISTRY_MULTI_QUERY_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public ServiceQueryResultListDTO multiQueryRegistry(@RequestBody final ServiceQueryFormListDTO forms) { //TODO: junit
+		logger.debug("Service multi query request received");
+		
+		checkQueryFormList(forms);
+		
+		final ServiceQueryResultListDTO result = serviceRegistryDBService.multiQueryRegistry(forms);
+		logger.debug("Return providers for multiple services");
 		
 		return result;
 	}
@@ -1413,6 +1435,29 @@ public class ServiceRegistryController {
 		
 		if (!needChange) {
 			throw new BadPayloadException("Patch request is empty." , HttpStatus.SC_BAD_REQUEST, origin);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkQueryFormList(final ServiceQueryFormListDTO forms) {
+		logger.debug("checkQueryFormList started...");
+		
+		if (forms == null || forms.getForms() == null || forms.getForms().isEmpty()) {
+			throw new BadPayloadException("Form list is null", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_MULTI_QUERY_URI);
+		}
+		
+		for (final ServiceQueryFormDTO form : forms.getForms()) {
+			if (form == null) {
+				throw new BadPayloadException("A form is null", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_MULTI_QUERY_URI);
+			}
+			
+			if (Utilities.isEmpty(form.getServiceDefinitionRequirement())) {
+				throw new BadPayloadException("Service definition requirement is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_MULTI_QUERY_URI);
+			}
+			
+			if (useStrictServiceDefinitionVerifier && !cnVerifier.isValid(form.getServiceDefinitionRequirement())) {
+				throw new BadPayloadException(SERVICE_DEFINITION_REQUIREMENT_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_MULTI_QUERY_URI);
+			}
 		}
 	}
 }

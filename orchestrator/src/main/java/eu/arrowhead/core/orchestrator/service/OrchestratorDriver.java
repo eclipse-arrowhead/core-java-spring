@@ -62,7 +62,9 @@ import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultListDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
@@ -127,6 +129,18 @@ public class OrchestratorDriver {
 		
 		final UriComponents queryUri = getQueryUri();
 		final ResponseEntity<ServiceQueryResultDTO> response = httpService.sendRequest(queryUri, HttpMethod.POST, ServiceQueryResultDTO.class, form);
+		
+		return response.getBody();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ServiceQueryResultListDTO multiQueryServiceRegistry(final List<ServiceQueryFormDTO> forms) { //TODO: junit
+		logger.debug("multiQueryServiceRegistry started...");
+		Assert.notNull(forms, "Form list is null.");
+		Assert.isTrue(!forms.isEmpty(), "Form list is empty.");
+		
+		final UriComponents queryUri = getMultiQueryUri();
+		final ResponseEntity<ServiceQueryResultListDTO> response = httpService.sendRequest(queryUri, HttpMethod.POST, ServiceQueryResultListDTO.class, new ServiceQueryFormListDTO(forms));
 		
 		return response.getBody();
 	}
@@ -289,6 +303,21 @@ public class OrchestratorDriver {
 		}
 		
 		throw new ArrowheadException("Orchestrator can't find Service Registry Query URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getMultiQueryUri() {
+		logger.debug("getMultiQueryUri started...");
+		
+		if (arrowheadContext.containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI)) {
+			try {
+				return (UriComponents) arrowheadContext.get(CoreCommonConstants.SR_MULTI_QUERY_URI);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Orchestrator can't find Service Registry Multi Query URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Orchestrator can't find Service Registry Multi Query URI.");
 	}
 	
 	//-------------------------------------------------------------------------------------------------
