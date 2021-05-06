@@ -1662,7 +1662,8 @@ public class QoSDBServiceIntraTest {
 				"testSystem",
 				"address",
 				12345,
-				"authenticationInfo");
+				"authenticationInfo",
+				"");
 
 		return system;
 	}

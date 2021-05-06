@@ -2175,7 +2175,8 @@ public class PingTaskTest {
 				"testSystem",
 				"address",
 				12345,
-				"authenticationInfo");
+				"authenticationInfo",
+				"");
 
 		return system;
 	}
@@ -2187,7 +2188,8 @@ public class PingTaskTest {
 				"testSystem",
 				null,
 				12345,
-				"authenticationInfo");
+				"authenticationInfo",
+				"");
 
 		return system;
 	}
@@ -2207,7 +2209,8 @@ public class PingTaskTest {
 				"testSystem",
 				"   ",
 				12345,
-				"authenticationInfo");
+				"authenticationInfo",
+				"");
 
 		return system;
 	}

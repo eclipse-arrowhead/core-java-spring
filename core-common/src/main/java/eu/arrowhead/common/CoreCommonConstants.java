@@ -162,6 +162,8 @@ public class CoreCommonConstants {
 	public static final String GATEWAY_MATCHMAKER = "gatewayMatchmaker";
 	public static final String CLOUD_MATCHMAKER = "cloudMatchmaker";
 	
+	public static final String PING_MONITOR = "pingMonitor";
+	
 	public static final int TOP_PRIORITY = 1;
 	
 	public static final String QOSMANAGER = "qosManager";
@@ -188,6 +190,8 @@ public class CoreCommonConstants {
 	public static final String $QOS_ENABLED_RELAY_TASK_WD =  "${" + QOS_ENABLED_RELAY_TASK + ":" + CoreDefaults.DEFAULT_QOS_ENABLED_RELAY_TASK + "}";
 	public static final String QOS_IS_GATEKEEPER_PRESENT = "gatekeeper_is_present";
 	public static final String $QOS_IS_GATEKEEPER_PRESENT_WD = "${" + QOS_IS_GATEKEEPER_PRESENT + ":" + CoreDefaults.DEFAULT_QOS_IS_GATEKEEPER_PRESENT + "}";
+	public static final String QOS_MONITOR_PROVIDER_TYPE = "monitor_provider_type";
+	public static final String $QOS_MONITOR_PROVIDER_TYPE_WD = "${" + QOS_MONITOR_PROVIDER_TYPE + ":" + CoreDefaults.DEFAULT_QOS_MONITOR_PROVIDER_TYPE + "}";
 	
 	public static final String NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS = "no_gatekeeper_relay_request_handler_workers";
 	public static final String $NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS_WD = "${" + NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + ":" + 
