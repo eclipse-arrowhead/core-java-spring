@@ -67,7 +67,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 			checkProviderAccessAndReservationsToRegister(clientCN, requestJSON, requestTarget);
 		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_URI)) {
 			// A provider system can only unregister its own services!
-			checkProviderAccessToDeregister(clientCN, queryParams, requestTarget);
+			checkApplicationSystemAccessToDeregister(clientCN, queryParams, requestTarget);
 		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICEREGISTRY_QUERY_URI)) {
 			if (isClientACoreSystem(clientCN, cloudCN)) {
 				// Only dedicated core systems can use this service without limitation but every core system can query info about its own services
@@ -85,12 +85,19 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 		} else if (requestTarget.endsWith(CoreCommonConstants.OP_SERVICEREGISTRY_QUERY_ALL_SERVICE_URI)) {
 			// Only dedicated core systems can use this service
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForQueryAll, requestTarget);
-		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI) || requestTarget.endsWith(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI)) {
+		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI)) {
 			if (isClientACoreSystem(clientCN, cloudCN)) {
 				checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForRegisterSystem, requestTarget);
 			} else {
-				// An application system can only register/unregister its own system!
+				// An application system can only register its own system!
 				checkIfApplicationSystemIsRegisteringOwnSystem(clientCN, cloudCN, requestJSON, requestTarget);				
+			}
+		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI)) {
+			if (isClientACoreSystem(clientCN, cloudCN)) {
+				checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForRegisterSystem, requestTarget);
+			} else {
+				// An application system can only unregister its own system!
+				checkApplicationSystemAccessToDeregister(clientCN, queryParams, requestTarget);	
 			}
 		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICEREGISTRY_PULL_SYSTEMS_URI)) {
 			// Only dedicated core systems can use this service
@@ -131,7 +138,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void checkProviderAccessToDeregister(final String clientCN, final Map<String,String[]> queryParams, final String requestTarget) {
+	private void checkApplicationSystemAccessToDeregister(final String clientCN, final Map<String,String[]> queryParams, final String requestTarget) {
 		final String clientName = getClientNameFromCN(clientCN);
 		
 		final String providerName = queryParams.getOrDefault(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME, new String[] { "" })[0];
