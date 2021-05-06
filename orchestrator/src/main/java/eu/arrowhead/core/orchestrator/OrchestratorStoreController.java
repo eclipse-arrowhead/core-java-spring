@@ -328,7 +328,7 @@ public class OrchestratorStoreController {
 	@ResponseBody public OrchestratorStoreFlexibleListResponseDTO getOrchestratorFlexibleStoreRules(@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
 																									@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
 																									@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
-																									@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) { //TODO junit
+																									@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
 		logger.debug("getOrchestratorFlexibleStoreRules started ...");
 		logger.debug("New OrchestratorStoreFlexible get request recieved with page: {} and item_per page: {}", page, size);
 		
@@ -353,7 +353,7 @@ public class OrchestratorStoreController {
 	})
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
 	@PostMapping(path = CoreCommonConstants.ORCHESTRATOR_STORE_FLEXIBLE_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public OrchestratorStoreFlexibleListResponseDTO addOrchestratorFlexibleStoreRules(@RequestBody final List<OrchestratorStoreFlexibleRequestDTO> requestList) { //TODO junit
+	@ResponseBody public OrchestratorStoreFlexibleListResponseDTO addOrchestratorFlexibleStoreRules(@RequestBody final List<OrchestratorStoreFlexibleRequestDTO> requestList) {
 		logger.debug("addOrchestratorFlexibleStoreRules started ...");
 		
 		final String origin = CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_FLEXIBLE_MGMT_URI;
@@ -376,7 +376,7 @@ public class OrchestratorStoreController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@DeleteMapping(path = CoreCommonConstants.ORCHESTRATOR_STORE_FLEXIBLE_BY_ID_MGMT_URI)
-	public void removeOrchestratorFlexibleStoreRuleById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {  //TODO junit
+	public void removeOrchestratorFlexibleStoreRuleById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
 		logger.debug("removeOrchestratorFlexibleStoreRuleById started...");
 		
 		final String origin = CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_FLEXIBLE_BY_ID_MGMT_URI;

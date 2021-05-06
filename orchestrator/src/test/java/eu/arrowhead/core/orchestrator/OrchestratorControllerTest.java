@@ -691,7 +691,7 @@ public class OrchestratorControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void createFlexibleStoreRuleOkWithFlagFalseTest() throws Exception {
+	public void createFlexibleStoreRuleWithFlagFalseTest() throws Exception {
 		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		final OrchestratorStoreFlexibleRequestDTO requestDTO = new OrchestratorStoreFlexibleRequestDTO(new SystemDescriberDTO(null, Map.of("k1", "v1")),
 																									   new SystemDescriberDTO(null, Map.of("k2", "v2")),
@@ -705,11 +705,13 @@ public class OrchestratorControllerTest {
 				   .content(objectMapper.writeValueAsBytes(List.of(requestDTO)))
 				   .accept(MediaType.APPLICATION_JSON))
 				   .andExpect(status().isBadRequest());
+		
+		verify(orchestratorStoreFlexibleDBService, never()).createOrchestratorStoreFlexibleResponse(any());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void createFlexibleStoreRuleOkWithInvalidConsumerDescriptorTest() throws Exception {
+	public void createFlexibleStoreRuleWithInvalidConsumerDescriptorTest() throws Exception {
 		ReflectionTestUtils.setField(controller, "useFlexibleStore", true);
 		final OrchestratorStoreFlexibleRequestDTO requestDTO = new OrchestratorStoreFlexibleRequestDTO(new SystemDescriberDTO(null, null),
 																									   new SystemDescriberDTO(null, Map.of("k2", "v2")),
@@ -723,11 +725,13 @@ public class OrchestratorControllerTest {
 				   .content(objectMapper.writeValueAsBytes(List.of(requestDTO)))
 				   .accept(MediaType.APPLICATION_JSON))
 				   .andExpect(status().isBadRequest());
+		
+		verify(orchestratorStoreFlexibleDBService, never()).createOrchestratorStoreFlexibleResponse(any());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void createFlexibleStoreRuleOkWithInvalidProviderDescriptorTest() throws Exception {
+	public void createFlexibleStoreRuleWithInvalidProviderDescriptorTest() throws Exception {
 		ReflectionTestUtils.setField(controller, "useFlexibleStore", true);
 		final OrchestratorStoreFlexibleRequestDTO requestDTO = new OrchestratorStoreFlexibleRequestDTO(new SystemDescriberDTO(null, Map.of("k1", "v1")),
 																									   new SystemDescriberDTO(null, null),
@@ -741,11 +745,13 @@ public class OrchestratorControllerTest {
 				   .content(objectMapper.writeValueAsBytes(List.of(requestDTO)))
 				   .accept(MediaType.APPLICATION_JSON))
 				   .andExpect(status().isBadRequest());
+		
+		verify(orchestratorStoreFlexibleDBService, never()).createOrchestratorStoreFlexibleResponse(any());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void createFlexibleStoreRuleOkWithInvalidConsumerNameTest() throws Exception {
+	public void createFlexibleStoreRuleWithInvalidConsumerNameTest() throws Exception {
 		ReflectionTestUtils.setField(controller, "useFlexibleStore", true);
 		final OrchestratorStoreFlexibleRequestDTO requestDTO = new OrchestratorStoreFlexibleRequestDTO(new SystemDescriberDTO("-invalid", Map.of("k1", "v1")),
 																									   new SystemDescriberDTO(null, Map.of("k2", "v2")),
@@ -759,11 +765,13 @@ public class OrchestratorControllerTest {
 				   .content(objectMapper.writeValueAsBytes(List.of(requestDTO)))
 				   .accept(MediaType.APPLICATION_JSON))
 				   .andExpect(status().isBadRequest());
+		
+		verify(orchestratorStoreFlexibleDBService, never()).createOrchestratorStoreFlexibleResponse(any());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void createFlexibleStoreRuleOkWithInvalidProviderNameTest() throws Exception {
+	public void createFlexibleStoreRuleWithInvalidProviderNameTest() throws Exception {
 		ReflectionTestUtils.setField(controller, "useFlexibleStore", true);
 		final OrchestratorStoreFlexibleRequestDTO requestDTO = new OrchestratorStoreFlexibleRequestDTO(new SystemDescriberDTO(null, Map.of("k1", "v1")),
 																									   new SystemDescriberDTO("-invalid", Map.of("k2", "v2")),
@@ -777,11 +785,13 @@ public class OrchestratorControllerTest {
 				   .content(objectMapper.writeValueAsBytes(List.of(requestDTO)))
 				   .accept(MediaType.APPLICATION_JSON))
 				   .andExpect(status().isBadRequest());
+		
+		verify(orchestratorStoreFlexibleDBService, never()).createOrchestratorStoreFlexibleResponse(any());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void createFlexibleStoreRuleOkWithInvalidInterfaceNameTest() throws Exception {
+	public void createFlexibleStoreRuleWithInvalidInterfaceNameTest() throws Exception {
 		ReflectionTestUtils.setField(controller, "useFlexibleStore", true);
 		final OrchestratorStoreFlexibleRequestDTO requestDTO = new OrchestratorStoreFlexibleRequestDTO(new SystemDescriberDTO(null, Map.of("k1", "v1")),
 																									   new SystemDescriberDTO(null, Map.of("k2", "v2")),
@@ -795,6 +805,8 @@ public class OrchestratorControllerTest {
 				   .content(objectMapper.writeValueAsBytes(List.of(requestDTO)))
 				   .accept(MediaType.APPLICATION_JSON))
 				   .andExpect(status().isBadRequest());
+		
+		verify(orchestratorStoreFlexibleDBService, never()).createOrchestratorStoreFlexibleResponse(any());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -802,7 +814,7 @@ public class OrchestratorControllerTest {
 	public void removeFlexibleStoreRuleByIdOkTest() throws Exception {
 		ReflectionTestUtils.setField(controller, "useFlexibleStore", true);
 		
-		ArgumentCaptor<Long> captor = ArgumentCaptor.forClass(Long.class);
+		final ArgumentCaptor<Long> captor = ArgumentCaptor.forClass(Long.class);
 		doNothing().when(orchestratorStoreFlexibleDBService).deleteOrchestratorStoreFlexibleById(captor.capture());
 		
 		this.mockMvc.perform(delete(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_REMOVE_FLEXIBLE_STORE_RULE_URI.replace("{id}", "5"))
@@ -817,12 +829,14 @@ public class OrchestratorControllerTest {
 	public void removeFlexibleStoreRuleByIdFlagFalseTest() throws Exception {
 		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		
-		ArgumentCaptor<Long> captor = ArgumentCaptor.forClass(Long.class);
+		final ArgumentCaptor<Long> captor = ArgumentCaptor.forClass(Long.class);
 		doNothing().when(orchestratorStoreFlexibleDBService).deleteOrchestratorStoreFlexibleById(captor.capture());
 		
 		this.mockMvc.perform(delete(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_REMOVE_FLEXIBLE_STORE_RULE_URI.replace("{id}", "5"))
 				   .accept(MediaType.APPLICATION_JSON))
 				   .andExpect(status().isBadRequest());
+		
+		verify(orchestratorStoreFlexibleDBService, never()).deleteOrchestratorStoreFlexibleById(anyLong());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -844,7 +858,7 @@ public class OrchestratorControllerTest {
 	public void cleanFlexibleStoreRuleFlagFalseTest() throws Exception {
 		ReflectionTestUtils.setField(controller, "useFlexibleStore", false);
 		
-		ArgumentCaptor<Long> captor = ArgumentCaptor.forClass(Long.class);
+		final ArgumentCaptor<Long> captor = ArgumentCaptor.forClass(Long.class);
 		doNothing().when(orchestratorStoreFlexibleDBService).deleteOrchestratorStoreFlexibleById(captor.capture());
 		
 		this.mockMvc.perform(delete(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_CLEAN_FLEXIBLE_STORE_URI)
