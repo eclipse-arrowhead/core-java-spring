@@ -144,15 +144,15 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 	private void checkApplicationSystemAccessToDeregister(final String clientCN, final Map<String,String[]> queryParams, final String requestTarget) {
 		final String clientName = getClientNameFromCN(clientCN);
 		
-		final String providerName = queryParams.getOrDefault(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME, new String[] { "" })[0];
-		if (Utilities.isEmpty(providerName)) {
-			log.debug("Provider name is not set in the query parameters when use {}", requestTarget);
+		final String appSysName = queryParams.getOrDefault(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME, new String[] { "" })[0];
+		if (Utilities.isEmpty(appSysName)) {
+			log.debug("Application system name is not set in the query parameters when use {}", requestTarget);
 			return; // we can't continue the check and the endpoint will throw BadPayloadException
 		}
 		
-		if (!providerName.equalsIgnoreCase(clientName)) {
-			log.debug("Provider system name and certificate common name do not match! Unregistering denied!");
-			throw new AuthException("Provider system name(" + providerName + ") and certificate common name (" + clientCN + ") do not match!", HttpStatus.UNAUTHORIZED.value());
+		if (!appSysName.equalsIgnoreCase(clientName)) {
+			log.debug("Application system name and certificate common name do not match! Unregistering denied!");
+			throw new AuthException("Application system name (" + appSysName + ") and certificate common name (" + clientCN + ") do not match!", HttpStatus.UNAUTHORIZED.value());
 		}
 	}
 	
