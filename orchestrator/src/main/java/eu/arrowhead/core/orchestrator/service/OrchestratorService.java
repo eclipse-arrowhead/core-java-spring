@@ -1107,20 +1107,7 @@ public class OrchestratorService {
 		
 		validateFlexibleStoreRequest(request);
 		
-		// query system from Service Registry 
-		final SystemResponseDTO consumerSystem = orchestratorFlexibleDriver.queryConsumerSystem(request.getRequesterSystem());
-
-		// collect matching rules
-		final List<OrchestratorStoreFlexible> rules = orchestratorFlexibleDriver.collectAndSortMatchingRules(request, consumerSystem);
-		if (rules.isEmpty()) {
-			return new OrchestrationResponseDTO();
-		}
-
 		final OrchestrationFlags flags = request.getOrchestrationFlags();
-		
-		// querying Service Registry
-		final List<Pair<OrchestratorStoreFlexible,ServiceQueryResultDTO>> queryDataWithRules = orchestratorFlexibleDriver.queryServiceRegistry(request, rules);
-		
 		final List<PreferredProviderDataDTO> localProviders = request.getPreferredProviders().stream().filter(p -> p.isLocal()).collect(Collectors.toList());
 		
 		List<PreferredProviderDataDTO> onlyPreferredProviders = null;
@@ -1130,6 +1117,18 @@ public class OrchestratorService {
 				throw new InvalidParameterException("There is no valid (local) preferred provider, but \"" + Flag.ONLY_PREFERRED + "\" is set to true");
 			}
 		}
+		
+		// query system from Service Registry 
+		final SystemResponseDTO consumerSystem = orchestratorFlexibleDriver.queryConsumerSystem(request.getRequesterSystem());
+
+		// collect matching rules
+		final List<OrchestratorStoreFlexible> rules = orchestratorFlexibleDriver.collectAndSortMatchingRules(request, consumerSystem);
+		if (rules.isEmpty()) {
+			return new OrchestrationResponseDTO();
+		}
+		
+		// querying Service Registry
+		final List<Pair<OrchestratorStoreFlexible,ServiceQueryResultDTO>> queryDataWithRules = orchestratorFlexibleDriver.queryServiceRegistry(request, rules);
 		
 		// filter Service Registry results by provider requirements (coming from the rules)
 		final List<ServiceRegistryResponseDTO> queryData = orchestratorFlexibleDriver.filterSRResultsByProviderRequirements(queryDataWithRules, onlyPreferredProviders);
