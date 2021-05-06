@@ -52,6 +52,6 @@ public class EventDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public void setEventType(final String eventType) { this.eventType = eventType; }
 	public void setMetaData( final Map<String,String> metaData ) { this.metaData = metaData; }
-	public void setPayload(final String startDate) { this.payload = startDate; }
-	public void setTimeStamp(final String endDate) { this.timeStamp = endDate; }
+	public void setPayload(final String payload) { this.payload = payload; }
+	public void setTimeStamp(final String timeStamp) { this.timeStamp = timeStamp; }
 }
