@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponents;
@@ -29,15 +30,72 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.core.qos.measurement.properties.MonitorProviderType;
+import eu.arrowhead.core.qos.service.event.queue.FinishedMonitoringMeasurementEventQueue;
+import eu.arrowhead.core.qos.service.event.queue.InteruptedMonitoringMeasurementEventQueue;
+import eu.arrowhead.core.qos.service.event.queue.ReceivedMonitoringRequestEventQueue;
+import eu.arrowhead.core.qos.service.event.queue.StartedMonitoringMeasurementEventQueue;
+import eu.arrowhead.core.qos.service.ping.monitor.PingMonitorManager;
+import eu.arrowhead.core.qos.service.ping.monitor.impl.DummyPingMonitor;
+import eu.arrowhead.core.qos.service.ping.monitor.impl.ExternalPingMonitor;
 
 @Component
 public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
-	
+
 	//=================================================================================================
 	// members
-	
+
 	@Value(CoreCommonConstants.$QOS_IS_GATEKEEPER_PRESENT_WD)
 	private boolean gatekeeperIsPresent;
+
+	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_TYPE_WD)
+	private MonitorProviderType monitorType;
+
+	//=================================================================================================
+	// methods
+
+	//-------------------------------------------------------------------------------------------------
+	@Bean(QosMonitorConstants.RECEIVED_MONITORING_REQUEST_QUEUE)
+	public ReceivedMonitoringRequestEventQueue getReceivedMonitoringRequestEventQueue() {
+		return new ReceivedMonitoringRequestEventQueue();
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Bean(QosMonitorConstants.STARTED_MONITORING_MEASUREMENT_QUEUE)
+	public StartedMonitoringMeasurementEventQueue getStartedMonitoringMeasurementEventQueue() {
+		return new StartedMonitoringMeasurementEventQueue();
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Bean(QosMonitorConstants.INTERUPTED_MONITORING_MEASUREMENT_QUEUE)
+	public InteruptedMonitoringMeasurementEventQueue getInteruptedMonitoringMeasurementEventQueue() {
+		return new InteruptedMonitoringMeasurementEventQueue();
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Bean(QosMonitorConstants.FINISHED_MONITORING_MEASUREMENT_QUEUE)
+	public FinishedMonitoringMeasurementEventQueue getFinishedMonitoringMeasurementEventQueue() {
+		return new FinishedMonitoringMeasurementEventQueue();
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Bean(CoreCommonConstants.PING_MONITOR)
+	public PingMonitorManager getPingMonitor() {
+		logger.debug("getPingMonitor started...");
+
+		switch (monitorType) {
+		case DUMMY:
+			return new DummyPingMonitor();
+		case DEFAULT:
+			return new DummyPingMonitor();
+		case EXTERNAL:
+			return new ExternalPingMonitor();
+		default:
+			throw new InvalidParameterException("Not implemented monitor type: " + monitorType.name());
+		}
+
+	}
 
 	//=================================================================================================
 	// assistant methods
@@ -45,14 +103,20 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
+		logger.debug("getRequiredCoreSystemServiceUris started...");
+
 		final List<CoreSystemService> result = new ArrayList<>(5);
-		
+
 		if (gatekeeperIsPresent) {
 			result.add(CoreSystemService.GATEKEEPER_PULL_CLOUDS); 
 			result.add(CoreSystemService.GATEKEEPER_COLLECT_ACCESS_TYPES);
 			result.add(CoreSystemService.GATEKEEPER_COLLECT_SYSTEM_ADDRESSES);
 			result.add(CoreSystemService.GATEKEEPER_RELAY_TEST_SERVICE);
 			result.add(CoreSystemService.GATEKEEPER_GET_CLOUD_SERVICE);
+		}if (monitorType.equals(MonitorProviderType.EXTERNAL)) {
+			result.add(CoreSystemService.ORCHESTRATION_SERVICE);
+			result.add(CoreSystemService.EVENT_SUBSCRIBE_SERVICE);
+			result.add(CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE);
 		}
 
 		return result;
@@ -71,6 +135,11 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 
 		final UriComponents queryAll = createQueryAllUri(scheme);
 		context.put(CoreCommonConstants.SR_QUERY_ALL, queryAll);
+
+		//TODO 
+		//if (monitorType.equals(MonitorProviderType.EXTERNAL)) {
+		// ## request Orch echo && EventHandler echo and log warning if service not active ...
+		//}
 	}
 
 	//-------------------------------------------------------------------------------------------------

@@ -130,7 +130,7 @@ public class RelayEchoTask implements Job {
 		}		
 		
 		if (!checkRequiredCoreSystemServiceUrisAvailable()) {
-			logger.debug("FINISHED: Relay Echo task. Required Core System Sevice URIs aren't available");
+			logger.debug("FINISHED: Relay Echo task. Reqired Core System Sevice URIs aren't available");
 			return;
 		}
 		

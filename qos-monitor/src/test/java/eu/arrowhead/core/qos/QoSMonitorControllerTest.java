@@ -445,7 +445,7 @@ public class QoSMonitorControllerTest {
 	@Test
 	public void getMgmtInterDirectPingMeasurementByCloudAndSystemTest() throws Exception {
 		final CloudResponseDTO cloud = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "fddddbvf", null, null);
-		final SystemResponseDTO system = new SystemResponseDTO(1L, "test-sys", "1.1.1.1", 10000, "dlaswefg", null, null, null);
+		final SystemResponseDTO system = new SystemResponseDTO(1L, "test-sys", "1.1.1.1", 10000, "dlaswefg", null, null);
 		final CloudSystemFormDTO requestDTO = new CloudSystemFormDTO(cloud, system);
 		
 		final QoSInterDirectPingMeasurementResponseDTO responseDTO = getInterDirectPingMeasurementResponseDTOForTest();
@@ -466,7 +466,7 @@ public class QoSMonitorControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getMgmtInterDirectPingMeasurementByCloudAndSystemWithNullCloudTest() throws Exception {
-		final SystemResponseDTO system = new SystemResponseDTO(1L, "test-sys", "1.1.1.1", 10000, "dlaswefg", null, null, null);
+		final SystemResponseDTO system = new SystemResponseDTO(1L, "test-sys", "1.1.1.1", 10000, "dlaswefg", null, null);
 		final CloudSystemFormDTO requestDTO = new CloudSystemFormDTO(null, system);
 		
 		final QoSInterDirectPingMeasurementResponseDTO responseDTO = getInterDirectPingMeasurementResponseDTOForTest();
@@ -509,7 +509,7 @@ public class QoSMonitorControllerTest {
 	@Test
 	public void getMgmtInterDirectPingMeasurementByCloudAndSystemWithNullCloudOperatorTest() throws Exception {
 		final CloudResponseDTO cloud = new CloudResponseDTO(1L, null, "test-n", true, true, false, "fddddbvf", null, null);
-		final SystemResponseDTO system = new SystemResponseDTO(1L, "test-sys", "1.1.1.1", 10000, "dlaswefg", null, null, null);
+		final SystemResponseDTO system = new SystemResponseDTO(1L, "test-sys", "1.1.1.1", 10000, "dlaswefg", null, null);
 		final CloudSystemFormDTO requestDTO = new CloudSystemFormDTO(cloud, system);
 		
 		final QoSInterDirectPingMeasurementResponseDTO responseDTO = getInterDirectPingMeasurementResponseDTOForTest();
@@ -531,7 +531,7 @@ public class QoSMonitorControllerTest {
 	@Test
 	public void getMgmtInterDirectPingMeasurementByCloudAndSystemWithNullCloudNameTest() throws Exception {
 		final CloudResponseDTO cloud = new CloudResponseDTO(1L, "test-op", null, true, true, false, "fddddbvf", null, null);
-		final SystemResponseDTO system = new SystemResponseDTO(1L, "test-sys", "1.1.1.1", 10000, "dlaswefg", null, null, null);
+		final SystemResponseDTO system = new SystemResponseDTO(1L, "test-sys", "1.1.1.1", 10000, "dlaswefg", null, null);
 		final CloudSystemFormDTO requestDTO = new CloudSystemFormDTO(cloud, system);
 		
 		final QoSInterDirectPingMeasurementResponseDTO responseDTO = getInterDirectPingMeasurementResponseDTOForTest();
@@ -553,7 +553,7 @@ public class QoSMonitorControllerTest {
 	@Test
 	public void getMgmtInterDirectPingMeasurementByCloudAndSystemWithNullSystemAddressTest() throws Exception {
 		final CloudResponseDTO cloud = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "fddddbvf", null, null);
-		final SystemResponseDTO system = new SystemResponseDTO(1L, "test-sys", null, 10000, "dlaswefg", null, null, null);
+		final SystemResponseDTO system = new SystemResponseDTO(1L, "test-sys", null, 10000, "dlaswefg", null, null);
 		final CloudSystemFormDTO requestDTO = new CloudSystemFormDTO(cloud, system);
 		
 		final QoSInterDirectPingMeasurementResponseDTO responseDTO = getInterDirectPingMeasurementResponseDTOForTest();
@@ -1724,7 +1724,6 @@ public class QoSMonitorControllerTest {
 				"localhost",//system.getAddress(), 
 				12345,//system.getPort(), 
 				"authinfo",//system.getAuthenticationInfo(),
-				null, // metadata
 				Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()),
 				Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 

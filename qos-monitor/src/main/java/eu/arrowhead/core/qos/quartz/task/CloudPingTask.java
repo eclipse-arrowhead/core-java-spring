@@ -27,7 +27,6 @@ import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.icmp4j.IcmpPingResponse;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -55,6 +54,7 @@ import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
+import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.dto.PingMeasurementCalculationsDTO;
 import eu.arrowhead.core.qos.measurement.properties.InterPingMeasurementProperties;
 import eu.arrowhead.core.qos.service.PingService;
@@ -278,7 +278,7 @@ public class CloudPingTask implements Job {
 		int meanResponseTimeWithoutTimeoutMembersCount = 0;
 
 		for (final IcmpPingResponse icmpPingResponse : responseList) {
-			final boolean successFlag = icmpPingResponse.getSuccessFlag();
+			final boolean successFlag = icmpPingResponse.isSuccessFlag();
 
 			if (successFlag) {
 				++receivedInThisPing;
@@ -309,7 +309,7 @@ public class CloudPingTask implements Job {
 		double sumOfDiffsForJitterWithTimeout = 0;
 		double sumOfDiffsForJitterWithoutTimeout = 0;
 		for (final IcmpPingResponse icmpPingResponse : responseList) {
-			final boolean successFlag = icmpPingResponse.getSuccessFlag();
+			final boolean successFlag = icmpPingResponse.isSuccessFlag();
 			final double duration;
 			if (successFlag) {
 				 duration = icmpPingResponse.getDuration();

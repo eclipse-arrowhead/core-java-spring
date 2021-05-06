@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.hibernate.HibernateException;
-import org.icmp4j.IcmpPingResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -63,6 +62,7 @@ import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.dto.PingMeasurementCalculationsDTO;
 
 @RunWith(SpringRunner.class)
@@ -1657,12 +1657,12 @@ public class QoSDBServiceIntraTest {
 
 	//-------------------------------------------------------------------------------------------------
 	private System getSystemForTest() {
+
 		final System system = new System(
 				"testSystem",
 				"address",
 				12345,
-				"authenticationInfo",
-				null);
+				"authenticationInfo");
 
 		return system;
 	}
