@@ -1,21 +1,23 @@
 package eu.arrowhead.core.qos.dto.externalMonitor;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import eu.arrowhead.common.CoreCommonConstants;
-import eu.arrowhead.common.CoreSystemRegistrationProperties;
 import eu.arrowhead.common.dto.internal.ServiceDefinitionRequestDTO;
 import eu.arrowhead.common.dto.internal.ServiceInterfaceRequestDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationFlags.Flag;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
-import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
+import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.core.qos.QosMonitorConstants;
+import eu.arrowhead.core.qos.service.event.QosMonitorEventType;
 
 public class ExternalMonitorOrchestrationRequestFactory {
 
@@ -43,9 +45,13 @@ public class ExternalMonitorOrchestrationRequestFactory {
 		final SystemRequestDTO requester = createExternalMonitorSystemRequestDTO();
 		final ServiceQueryFormDTO requestedService = createExternalPingMonitorServiceQueryFormDTO();
 
-		final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO();
-		orchestrationForm.setRequesterSystem(requester);
-		orchestrationForm.setRequestedService(requestedService);
+		final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO.Builder( requester )
+				.requestedService(requestedService)
+				.flag(Flag.ENABLE_INTER_CLOUD, false)
+				.flag(Flag.MATCHMAKING, false)
+				.flag(Flag.ENABLE_QOS, false)
+				.flag(Flag.OVERRIDE_STORE, true)
+				.build();
 
 		return orchestrationForm;
 	}
@@ -84,14 +90,44 @@ public class ExternalMonitorOrchestrationRequestFactory {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	public HashMap<String, String> createExternalPingMonitorServiceMetadataRequirements() {
+		logger.debug("createExternalPingMonitorServiceMetadataRequirements started...");
+
+		final HashMap<String, String> externalPingMonitorServiceMetadataRequirements = new HashMap();
+		externalPingMonitorServiceMetadataRequirements.put("serviceDataExchangeDescription", "https-request-and-https-costume-ack-response-followed-by-event-sequence");
+		externalPingMonitorServiceMetadataRequirements.put("https-request", "externalPingMonitoringRequest.json.schema");
+		externalPingMonitorServiceMetadataRequirements.put("https-response", "externalPingMonitoringACKResponse.json.schema");
+		externalPingMonitorServiceMetadataRequirements.put("normalEventSequenceList", 
+				QosMonitorEventType.RECEIVED_MONITORING_REQUEST.name() + "," +
+				QosMonitorEventType.STARTED_MONITORING_MEASUREMENT.name() + "," +
+				QosMonitorEventType.FINISHED_MONITORING_MEASUREMENT.name() + ",");
+		externalPingMonitorServiceMetadataRequirements.put("optinalEvent", QosMonitorEventType.INTERUPTED_MONITORING_MEASUREMENT.name());
+		externalPingMonitorServiceMetadataRequirements.put("optinalEventOccurrence", "anytime");
+		externalPingMonitorServiceMetadataRequirements.put(QosMonitorEventType.RECEIVED_MONITORING_REQUEST.name() + "payloadSchema", 
+				QosMonitorEventType.RECEIVED_MONITORING_REQUEST.name() + "json.schema");
+		externalPingMonitorServiceMetadataRequirements.put(QosMonitorEventType.STARTED_MONITORING_MEASUREMENT.name() + "payloadSchema", 
+				QosMonitorEventType.STARTED_MONITORING_MEASUREMENT.name() + "json.schema");
+		externalPingMonitorServiceMetadataRequirements.put(QosMonitorEventType.FINISHED_MONITORING_MEASUREMENT.name() + "payloadSchema", 
+				QosMonitorEventType.FINISHED_MONITORING_MEASUREMENT.name() + "json.schema");
+		externalPingMonitorServiceMetadataRequirements.put(QosMonitorEventType.INTERUPTED_MONITORING_MEASUREMENT.name() + "payloadSchema", 
+				QosMonitorEventType.INTERUPTED_MONITORING_MEASUREMENT.name() + "json.schema");
+		externalPingMonitorServiceMetadataRequirements.put("echoServiceIsAMust", "false");
+
+		return externalPingMonitorServiceMetadataRequirements;
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	public ServiceQueryFormDTO createExternalPingMonitorServiceQueryFormDTO() {
 		logger.debug("createExternalPingMonitorServiceQueryFormDTO started...");
 
-		final ServiceDefinitionRequestDTO serviceDefinition = createExternalPingMonitorServiceDefinitionRequestDTO();
-		final ServiceInterfaceRequestDTO serviceInterface = createExternalPingMonitorServiceInterfaceRequestDTO();
+		final HashMap<String, String> metadata = createExternalPingMonitorServiceMetadataRequirements();
 
 		final ServiceQueryFormDTO externalPingMonitorServiceQueryForm = new ServiceQueryFormDTO();
-		//TODO fill form here
+		externalPingMonitorServiceQueryForm.setInterfaceRequirements(List.of(QosMonitorConstants.EXTERNAL_PING_MONITORING_SERVICE_INTERFACE));
+		externalPingMonitorServiceQueryForm.setServiceDefinitionRequirement(QosMonitorConstants.EXTERNAL_PING_MONITORING_SERVICE_DEFINITION);
+		externalPingMonitorServiceQueryForm.setSecurityRequirements(List.of(ServiceSecurityType.CERTIFICATE));
+		externalPingMonitorServiceQueryForm.setMetadataRequirements(metadata);
+		externalPingMonitorServiceQueryForm.setPingProviders(false);
 
 		return externalPingMonitorServiceQueryForm;
 	}
