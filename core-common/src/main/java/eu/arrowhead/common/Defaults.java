@@ -20,6 +20,12 @@ public class Defaults {
 	// members
 	
 	public static final boolean DEFAULT_SSL_SERVER_ENABLED = true;
+	public static final String DEFAULT_KEYSTORE_TYPE = "PKCS12";
+	public static final String DEFAULT_KEYSTORE_PATH = "";
+	public static final String DEFAULT_KEYSTORE_PASSWORD = "";
+	public static final String DEFAULT_KEY_PASSWORD = "";
+	public static final String DEFAULT_TRUSTSTORE_PATH = "";
+	public static final String DEFAULT_TRUSTSTORE_PASSWORD ="";
 	public static final boolean DEFAULT_DISABLE_HOSTNAME_VERIFIER = false;
 	public static final boolean DEFAULT_LOG_ALL_REQUEST_AND_RESPONSE = false;
 	public static final int DEFAULT_URI_CRAWLER_INTERVAL = 30;
