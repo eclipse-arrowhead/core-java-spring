@@ -251,6 +251,8 @@ public class OrchestratorFlexibleDriver { //TODO unit tests
 		
 		final OrchestrationFlags orchestrationFlags = request.getOrchestrationFlags();
 		Assert.notNull(orchestrationFlags, "Flags object is null");
+		
+		//TODO: continue tests from here
 
 		Map<String,String> finalMetadataRequirement = Utilities.text2Map(rule.getServiceMetadata());
 		if (orchestrationFlags.getOrDefault(Flag.METADATA_SEARCH, false) && !Utilities.isEmpty(requestedService.getMetadataRequirements())) {
