@@ -198,6 +198,8 @@ public class CoreCommonConstants {
 	public static final String $QOS_MONITOR_PROVIDER_PORT_WD = "${" + QOS_MONITOR_PROVIDER_PORT + ":" + CoreDefaults.DEFAULT_QOS_MONITOR_PROVIDER_PORT + "}";
 	public static final String QOS_MONITOR_PROVIDER_PATH = "monitor_provider_path";
 	public static final String $QOS_MONITOR_PROVIDER_PATH_WD = "${" + QOS_MONITOR_PROVIDER_PATH + ":" + CoreDefaults.DEFAULT_QOS_MONITOR_PROVIDER_PATH + "}";
+	public static final String QOS_MONITOR_PROVIDER_SCHEME = "monitor_provider_scheme";
+	public static final String $QOS_MONITOR_PROVIDER_SCHEME_WD = "${" + QOS_MONITOR_PROVIDER_SCHEME + ":" + CoreDefaults.DEFAULT_QOS_MONITOR_PROVIDER_SCHEME + "}";
 	
 	public static final String NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS = "no_gatekeeper_relay_request_handler_workers";
 	public static final String $NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS_WD = "${" + NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + ":" + 

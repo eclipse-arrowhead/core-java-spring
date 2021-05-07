@@ -37,8 +37,9 @@ import eu.arrowhead.core.qos.service.event.queue.InteruptedMonitoringMeasurement
 import eu.arrowhead.core.qos.service.event.queue.ReceivedMonitoringRequestEventQueue;
 import eu.arrowhead.core.qos.service.event.queue.StartedMonitoringMeasurementEventQueue;
 import eu.arrowhead.core.qos.service.ping.monitor.PingMonitorManager;
+import eu.arrowhead.core.qos.service.ping.monitor.impl.DefaultExternalPingMonitor;
 import eu.arrowhead.core.qos.service.ping.monitor.impl.DummyPingMonitor;
-import eu.arrowhead.core.qos.service.ping.monitor.impl.ExternalPingMonitor;
+import eu.arrowhead.core.qos.service.ping.monitor.impl.OrchetratedExternalPingMonitor;
 
 @Component
 public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
@@ -87,10 +88,10 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 		switch (monitorType) {
 		case DUMMY:
 			return new DummyPingMonitor();
-		case DEFAULT:
-			return new DummyPingMonitor();
-		case EXTERNAL:
-			return new ExternalPingMonitor();
+		case DEFAULTEXTERNAL:
+			return new DefaultExternalPingMonitor();
+		case ORCHESTRATEDEXTERNAL:
+			return new OrchetratedExternalPingMonitor();
 		default:
 			throw new InvalidParameterException("Not implemented monitor type: " + monitorType.name());
 		}
@@ -113,7 +114,10 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 			result.add(CoreSystemService.GATEKEEPER_COLLECT_SYSTEM_ADDRESSES);
 			result.add(CoreSystemService.GATEKEEPER_RELAY_TEST_SERVICE);
 			result.add(CoreSystemService.GATEKEEPER_GET_CLOUD_SERVICE);
-		}if (monitorType.equals(MonitorProviderType.EXTERNAL)) {
+		}if (monitorType.equals(MonitorProviderType.DEFAULTEXTERNAL)) {
+			result.add(CoreSystemService.EVENT_SUBSCRIBE_SERVICE);
+			result.add(CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE);
+		}if (monitorType.equals(MonitorProviderType.ORCHESTRATEDEXTERNAL)) {
 			result.add(CoreSystemService.ORCHESTRATION_SERVICE);
 			result.add(CoreSystemService.EVENT_SUBSCRIBE_SERVICE);
 			result.add(CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE);
@@ -136,10 +140,6 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 		final UriComponents queryAll = createQueryAllUri(scheme);
 		context.put(CoreCommonConstants.SR_QUERY_ALL, queryAll);
 
-		//TODO 
-		//if (monitorType.equals(MonitorProviderType.EXTERNAL)) {
-		// ## request Orch echo && EventHandler echo and log warning if service not active ...
-		//}
 	}
 
 	//-------------------------------------------------------------------------------------------------

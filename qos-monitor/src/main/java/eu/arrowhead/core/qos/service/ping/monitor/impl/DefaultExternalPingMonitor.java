@@ -34,7 +34,7 @@ import eu.arrowhead.core.qos.service.event.queue.ReceivedMonitoringRequestEventQ
 import eu.arrowhead.core.qos.service.event.queue.StartedMonitoringMeasurementEventQueue;
 import eu.arrowhead.core.qos.service.ping.monitor.AbstractPingMonitor;
 
-public class ExternalPingMonitor extends AbstractPingMonitor{
+public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 
 	//=================================================================================================
 	// members
@@ -63,7 +63,7 @@ public class ExternalPingMonitor extends AbstractPingMonitor{
 	@Resource
 	private InteruptedMonitoringMeasurementEventQueue interuptedMonitoringMeasurementEventQueue;
 
-	private Logger logger = LogManager.getLogger(ExternalPingMonitor.class);
+	private Logger logger = LogManager.getLogger(DefaultExternalPingMonitor.class);
 
 	//=================================================================================================
 	// methods
@@ -339,16 +339,7 @@ public class ExternalPingMonitor extends AbstractPingMonitor{
 	private void initPingMonitorProvider() {
 		logger.debug("initPingMonitorProvider started...");
 
-		//TODO try sr with timeout, trz orch with time out -> exit if uncussess
-		//orch service pingprovider with time - finish int if unscucesss, 
-		//in orhcestrator flags
-		// metadatasearch true
-		//matchmaking true
-		//
-		// matadatareq.. fill with shema
-		// enableIntercloud false
-
-		//if service orchestrated subscribe to all events from pingmonitor
-		// as monitoringRequestReceivedEvent, monitoringStratedEvent, monitoringFinishedEvent, interuptedMonitoringProcessEvent 
+		//TODO try echo eventhandler whit timeout and throw exception if not available
+		//TODO try echo fixed pingMonitorProvider and log warning if not available
 	}
 }

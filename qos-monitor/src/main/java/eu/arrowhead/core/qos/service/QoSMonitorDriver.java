@@ -22,6 +22,7 @@ import javax.annotation.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -60,6 +61,18 @@ public class QoSMonitorDriver {
 	private static final String ORCHESTRATION_PROCESS_URI_KEY = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 
 	public static final String KEY_CALCULATED_SERVICE_TIME_FRAME = "QoSCalculatedServiceTimeFrame";
+
+	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_ADDRESS_WD)
+	private String fixedExternalPingMonitorAddress;
+
+	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_PORT_WD)
+	private int fixedExternalPingMonitorPort;
+
+	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_PATH_WD)
+	private String fixedExternalPingMonitorPath;
+
+	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_SCHEME_WD)
+	private String fixedExternalPingMonitorScheme;
 
 	private static final Logger logger = LogManager.getLogger(QoSMonitorDriver.class);
 
@@ -187,6 +200,24 @@ public class QoSMonitorDriver {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	public IcmpPingRequestACK requestExternalPingMonitorService(final IcmpPingRequest request) {
+		logger.debug("requestExternalPingMonitorService started...");
+
+		Assert.notNull(request, "IcmpPingRequest is null.");
+
+		final UriComponents externalPingMonitorUri = createFixedPingMonitorProviderUri();
+
+		try {
+			final ResponseEntity<IcmpPingRequestACK> response = httpService.sendRequest(externalPingMonitorUri, HttpMethod.POST, IcmpPingRequestACK.class, request);
+
+			return response.getBody();
+		} catch (final ArrowheadException ex) {
+			logger.debug("Exception: " + ex.getMessage());
+			throw ex;
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	public OrchestrationResponseDTO queryOrchestrator(final OrchestrationFormRequestDTO form) {
 		logger.debug("queryOrchestrator started...");
 
@@ -196,6 +227,18 @@ public class QoSMonitorDriver {
 		final ResponseEntity<OrchestrationResponseDTO> response = httpService.sendRequest(orchestrationProcessUri, HttpMethod.POST, OrchestrationResponseDTO.class, form);
 
 		return response.getBody();
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	/*default*/ void checkFixedPingMonitorProviderEchoUri() {
+		logger.debug("checkFixedPingMonitorProviderEchoUri started...");
+
+		final UriComponents echoUri = createFixedPingMonitorProviderEchoUri();
+		try {
+			httpService.sendRequest(echoUri, HttpMethod.GET, String.class);
+		} catch (final ArrowheadException ex) {
+			throw new ArrowheadException("EventHandler can't access Service Registry.");
+		}
 	}
 
 	//=================================================================================================
@@ -305,5 +348,19 @@ public class QoSMonitorDriver {
 		}
 
 		throw new ArrowheadException("QoS Monitor can't find orchestration process URI.");
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents createFixedPingMonitorProviderUri() {
+		logger.debug("createFixedPingMonitorProviderUri started...");
+
+		return Utilities.createURI(fixedExternalPingMonitorScheme, fixedExternalPingMonitorAddress, fixedExternalPingMonitorPort, fixedExternalPingMonitorPath);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents createFixedPingMonitorProviderEchoUri() {
+		logger.debug("createFixedPingMonitorProviderEchoUri started...");
+
+		return Utilities.createURI(fixedExternalPingMonitorScheme, fixedExternalPingMonitorAddress, fixedExternalPingMonitorPort, CommonConstants.ECHO_URI);
 	}
 }

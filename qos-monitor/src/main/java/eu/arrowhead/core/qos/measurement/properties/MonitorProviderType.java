@@ -7,7 +7,7 @@ public enum MonitorProviderType {
 
 	//-------------------------------------------------------------------------------------------------
 	DUMMY,
-	DEFAULT,
-	EXTERNAL;
+	DEFAULTEXTERNAL,
+	ORCHESTRATEDEXTERNAL;
 
 }
