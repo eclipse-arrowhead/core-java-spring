@@ -14,9 +14,15 @@
 
 package eu.arrowhead.common;
 
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
+
+import eu.arrowhead.common.exception.InvalidParameterException;
 
 @Component
 public class SSLProperties {
@@ -27,23 +33,28 @@ public class SSLProperties {
 	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
 	private boolean sslEnabled;
 	
-	@Value(CommonConstants.$KEYSTORE_TYPE)
+	@Value(CommonConstants.$KEYSTORE_TYPE_WD)
 	private String keyStoreType;
 	
-	@Value(CommonConstants.$KEYSTORE_PATH)
+	@Value(CommonConstants.$KEYSTORE_PATH_WD)
+	private String keyStorePath;	
 	private Resource keyStore;
 	
-	@Value(CommonConstants.$KEYSTORE_PASSWORD)
+	@Value(CommonConstants.$KEYSTORE_PASSWORD_WD)
 	private String keyStorePassword;
 	
-	@Value(CommonConstants.$KEY_PASSWORD)
+	@Value(CommonConstants.$KEY_PASSWORD_WD)
 	private String keyPassword;
 	
-	@Value(CommonConstants.$TRUSTSTORE_PATH)
+	@Value(CommonConstants.$TRUSTSTORE_PATH_WD)
+	private String trustStorePath;
 	private Resource trustStore;
 	
-	@Value(CommonConstants.$TRUSTSTORE_PASSWORD)
+	@Value(CommonConstants.$TRUSTSTORE_PASSWORD_WD)
 	private String trustStorePassword;
+	
+	@Autowired
+	private ResourceLoader resourceLoader;
 	
 	//=================================================================================================
 	// methods
@@ -56,4 +67,38 @@ public class SSLProperties {
 	public String getKeyPassword() { return keyPassword; }
 	public Resource getTrustStore() { return trustStore; }
 	public String getTrustStorePassword() { return trustStorePassword; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@PostConstruct
+	private void validate() {
+		if (sslEnabled) {
+			if (Utilities.isEmpty(keyStoreType)) {
+				throw new InvalidParameterException("keyStoreType is missing");
+			}
+			
+			if (Utilities.isEmpty(keyStorePath)) {
+				throw new InvalidParameterException("keyStorePath is missing");
+			} else {
+				keyStore = resourceLoader.getResource(keyStorePath);
+			}
+			
+			if (Utilities.isEmpty(keyStorePassword)) {
+				throw new InvalidParameterException("keyStorePassword is missing");
+			}
+			
+			if (Utilities.isEmpty(keyPassword)) {
+				throw new InvalidParameterException("keyPassword is missing");
+			}
+			
+			if (Utilities.isEmpty(trustStorePath)) {
+				throw new InvalidParameterException("trustStorePath is missing");
+			} else {
+				trustStore = resourceLoader.getResource(trustStorePath);
+			}
+			
+			if (Utilities.isEmpty(trustStorePassword)) {
+				throw new InvalidParameterException("trustStorePassword is missing");
+			}
+		}
+	}
 }
