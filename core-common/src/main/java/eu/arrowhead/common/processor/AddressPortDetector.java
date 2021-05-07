@@ -1,8 +1,6 @@
 package eu.arrowhead.common.processor;
 
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -11,18 +9,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.CoreCommonConstants;
-import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.common.processor.model.IpPortDetectionResult;
+import eu.arrowhead.common.processor.model.AddressPortDetectionResult;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 
 @Component
-public class IpPortDetector {
+public class AddressPortDetector {
 
 	//=================================================================================================
 	// methods
 	
-	@Value(CoreCommonConstants.$USE_IP_PORT_DETECTOR_WD)
+	@Value(CoreCommonConstants.$USE_ADDRESS_PORT_DETECTOR_WD)
 	private boolean useDetector;
 	
 	@Autowired
@@ -34,19 +31,17 @@ public class IpPortDetector {
 	private static final String HEADER_FORWARDED = "forwarded";
 	
 	//-------------------------------------------------------------------------------------------------
-	public IpPortDetectionResult detect(final HttpServletRequest servletReuest) { // TODO junit
-		IpPortDetectionResult result = new IpPortDetectionResult();
+	public AddressPortDetectionResult detect(final HttpServletRequest servletRequest) { // TODO junit
+		AddressPortDetectionResult result = new AddressPortDetectionResult();
 		
-		if (!useDetector || servletReuest == null) {
+		if (!useDetector || servletRequest == null) {
 			result.setSkipped(true);
-			result.setDetectionMessage("IP-Port detection process was skipped");
+			result.setDetectionMessage("Address-Port detection process was skipped");
 			return result;
 		}		
-		final Map<String, String> headerMap = createHeaderMap(servletReuest);
-		
-		boolean detected = detectByHeaderForwarded(headerMap, result);
+		boolean detected = detectByHeaderForwarded(servletRequest, result);
 		if (!detected) {
-			detected = detectByHeaderXForwardedFor(headerMap, result);
+			detected = detectByHeaderXForwarded(servletRequest, result);
 		}
 		
 		if (detected) {
@@ -64,29 +59,17 @@ public class IpPortDetector {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private boolean detectByHeaderForwarded(final Map<String, String> headerMap, final IpPortDetectionResult result) {
+	private boolean detectByHeaderForwarded(final HttpServletRequest servletRequest, final AddressPortDetectionResult result) {
 		//https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded
 		//https://tools.ietf.org/html/rfc7230#section-3.2
+		final Enumeration<String> headers = servletRequest.getHeaders(HEADER_FORWARDED);
 		return false;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private boolean detectByHeaderXForwardedFor(final Map<String, String> headerMap, final IpPortDetectionResult result) {
-		
+	private boolean detectByHeaderXForwarded(final HttpServletRequest servletRequest, final AddressPortDetectionResult result) {
+		//https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
+		//https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-Host
 		return false;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private Map<String, String> createHeaderMap(final HttpServletRequest request) {
-		final Map<String, String> headerMap = new HashMap<>();
-		
-        final Enumeration<String> headerNames = request.getHeaderNames();
-        while (headerNames.hasMoreElements()) {
-            final String key = (String) headerNames.nextElement();
-            final String value = request.getHeader(key);
-            headerMap.put(key.toLowerCase(), value);
-        }
-        
-        return headerMap;
 	}
 }

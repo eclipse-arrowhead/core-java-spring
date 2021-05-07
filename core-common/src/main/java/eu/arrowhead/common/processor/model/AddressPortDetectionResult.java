@@ -1,6 +1,6 @@
 package eu.arrowhead.common.processor.model;
 
-public class IpPortDetectionResult {
+public class AddressPortDetectionResult {
 	
 	//=================================================================================================
 	// members
@@ -16,7 +16,7 @@ public class IpPortDetectionResult {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public IpPortDetectionResult() {}
+	public AddressPortDetectionResult() {}
 
 	//-------------------------------------------------------------------------------------------------
 	public boolean isSkipped() { return skipped; }

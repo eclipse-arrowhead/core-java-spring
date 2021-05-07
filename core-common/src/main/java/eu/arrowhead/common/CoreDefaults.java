@@ -26,7 +26,7 @@ public class CoreDefaults {
 	public static final boolean DEFAULT_LOG_ALL_REQUEST_AND_RESPONSE = false;
 	public static final boolean DEFAULT_USE_STRICT_SERVICE_INTF_NAME_VERIFIER = false;
 	public static final boolean DEFAULT_USE_STRICT_SERVICE_DEFINITION_VERIFIER = true;
-	public static final boolean DEFAULT_USE_IP_PORT_DETECTOR = false;
+	public static final boolean DEFAULT_USE_ADDRESS_PORT_DETECTOR = false;
 	public static final boolean DEFAULT_ALLOW_SELF_ADDRESSING = false;
 	public static final boolean DEFAULT_ALLOW_NON_ROUTABLE_ADDRESSING = false;	
 	public static final int DEFAULT_URI_CRAWLER_INTERVAL = 30;

@@ -69,9 +69,9 @@ import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.common.processor.IpPortDetector;
+import eu.arrowhead.common.processor.AddressPortDetector;
 import eu.arrowhead.common.processor.NetworkAddressPreProcessor;
-import eu.arrowhead.common.processor.model.IpPortDetectionResult;
+import eu.arrowhead.common.processor.model.AddressPortDetectionResult;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.common.verifier.ServiceInterfaceNameVerifier;
@@ -186,7 +186,7 @@ public class ServiceRegistryController {
 	private CommonNamePartVerifier cnVerifier;
 	
 	@Autowired
-	private IpPortDetector ipPortDetector;
+	private AddressPortDetector addressPortDetector;
 	
 	@Autowired
 	private NetworkAddressPreProcessor networkAddressPreProcessor;
@@ -1212,7 +1212,7 @@ public class ServiceRegistryController {
 		try {			
 			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(dto.getAddress()));
 		} catch (final InvalidParameterException ex) {
-			final IpPortDetectionResult detectionResult = ipPortDetector.detect(servletRequest);
+			final AddressPortDetectionResult detectionResult = addressPortDetector.detect(servletRequest);
 			if (detectionResult.isSkipped()) {
 				throw new BadPayloadException(ex.getMessage() + " " + detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);				
 			}
