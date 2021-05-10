@@ -306,17 +306,17 @@ public class CommonConstants {
 	public static final String SERVER_SSL_ENABLED = "server.ssl.enabled";
 	public static final String $SERVER_SSL_ENABLED_WD = "${" + SERVER_SSL_ENABLED + ":" + Defaults.DEFAULT_SSL_SERVER_ENABLED + "}";
 	public static final String KEYSTORE_TYPE = "server.ssl.key-store-type";
-	public static final String $KEYSTORE_TYPE = "${" + KEYSTORE_TYPE + "}";
+	public static final String $KEYSTORE_TYPE_WD = "${" + KEYSTORE_TYPE + ":" + Defaults.DEFAULT_KEYSTORE_TYPE + "}";
 	public static final String KEYSTORE_PATH = "server.ssl.key-store";
-	public static final String $KEYSTORE_PATH = "${" + KEYSTORE_PATH + "}";
+	public static final String $KEYSTORE_PATH_WD = "${" + KEYSTORE_PATH + ":" + Defaults.DEFAULT_KEYSTORE_PATH + "}";
 	public static final String KEYSTORE_PASSWORD = "server.ssl.key-store-password"; //NOSONAR it is not a password
-	public static final String $KEYSTORE_PASSWORD = "${" + KEYSTORE_PASSWORD + "}"; //NOSONAR it is not a password
+	public static final String $KEYSTORE_PASSWORD_WD = "${" + KEYSTORE_PASSWORD + ":" + Defaults.DEFAULT_KEYSTORE_PASSWORD + "}"; //NOSONAR it is not a password
 	public static final String KEY_PASSWORD = "server.ssl.key-password"; //NOSONAR it is not a password
-	public static final String $KEY_PASSWORD = "${" + KEY_PASSWORD + "}"; //NOSONAR it is not a password
+	public static final String $KEY_PASSWORD_WD = "${" + KEY_PASSWORD + ":" + Defaults.DEFAULT_KEY_PASSWORD + "}"; //NOSONAR it is not a password
 	public static final String TRUSTSTORE_PATH = "server.ssl.trust-store";
-	public static final String $TRUSTSTORE_PATH = "${" + TRUSTSTORE_PATH + "}";
+	public static final String $TRUSTSTORE_PATH_WD = "${" + TRUSTSTORE_PATH + ":" + Defaults.DEFAULT_TRUSTSTORE_PATH + "}";
 	public static final String TRUSTSTORE_PASSWORD = "server.ssl.trust-store-password"; //NOSONAR it is not a password
-	public static final String $TRUSTSTORE_PASSWORD = "${" + TRUSTSTORE_PASSWORD + "}"; //NOSONAR it is not a password
+	public static final String $TRUSTSTORE_PASSWORD_WD = "${" + TRUSTSTORE_PASSWORD + ":" + Defaults.DEFAULT_TRUSTSTORE_PATH + "}"; //NOSONAR it is not a password
 	public static final String DISABLE_HOSTNAME_VERIFIER = "disable.hostname.verifier";
 	public static final String $DISABLE_HOSTNAME_VERIFIER_WD = "${" + DISABLE_HOSTNAME_VERIFIER + ":" + Defaults.DEFAULT_DISABLE_HOSTNAME_VERIFIER + "}";
 	

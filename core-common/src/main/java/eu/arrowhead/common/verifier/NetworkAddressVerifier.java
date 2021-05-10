@@ -72,7 +72,7 @@ public class NetworkAddressVerifier {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public void verify(final String address) throws InvalidParameterException { //TODO junit
+	public void verify(final String address) throws InvalidParameterException {
 		logger.debug("verify started...");
 		
 		if (Utilities.isEmpty(address)) {
