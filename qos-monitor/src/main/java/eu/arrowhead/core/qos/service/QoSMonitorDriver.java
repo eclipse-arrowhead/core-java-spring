@@ -16,6 +16,7 @@ package eu.arrowhead.core.qos.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 
@@ -42,10 +43,13 @@ import eu.arrowhead.common.dto.internal.SystemAddressSetRelayResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
+import eu.arrowhead.common.dto.shared.SubscriptionRequestDTO;
+import eu.arrowhead.common.dto.shared.SubscriptionResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.qos.dto.IcmpPingRequest;
 import eu.arrowhead.core.qos.dto.IcmpPingRequestACK;
+import eu.arrowhead.core.qos.service.event.QosMonitorEventType;
 
 @Component
 public class QoSMonitorDriver {
@@ -53,12 +57,17 @@ public class QoSMonitorDriver {
 	//=================================================================================================
 	// members
 
+	private static final long SLEEP_PERIOD = TimeUnit.SECONDS.toMillis(15);
+	private static final int MAX_RETRIES = 10;
+
 	private static final String GATEKEEPER_PULL_CLOUDS_URI_KEY = CoreSystemService.GATEKEEPER_PULL_CLOUDS.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_URI_KEY = CoreSystemService.GATEKEEPER_COLLECT_SYSTEM_ADDRESSES.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEKEEPER_COLLECT_ACCESS_TYPES_URI_KEY = CoreSystemService.GATEKEEPER_COLLECT_ACCESS_TYPES.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEKEEPER_GET_CLOUD_URI_KEY = CoreSystemService.GATEKEEPER_GET_CLOUD_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEKEEPER_INIT_RELAY_TEST_URI_KEY = CoreSystemService.GATEKEEPER_RELAY_TEST_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String ORCHESTRATION_PROCESS_URI_KEY = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String EVENT_SUBSCRIBE_URI_KEY = CoreSystemService.EVENT_SUBSCRIBE_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String EVENT_UNSUBSCRIBE_URI_KEY = CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 
 	public static final String KEY_CALCULATED_SERVICE_TIME_FRAME = "QoSCalculatedServiceTimeFrame";
 
@@ -237,7 +246,29 @@ public class QoSMonitorDriver {
 		try {
 			httpService.sendRequest(echoUri, HttpMethod.GET, String.class);
 		} catch (final ArrowheadException ex) {
-			throw new ArrowheadException("EventHandler can't access Service Registry.");
+			throw new ArrowheadException("QoS Monitor can't access External Qos Monitor provider at : " + echoUri );
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	/*default*/ void subscribeToExternalPingMonitorEvents(final SubscriptionRequestDTO subscriptionTemplate) {
+		logger.debug("subscribeToExternalPingMonitorEvents started...");
+
+		final UriComponents subscriptionUri = getEventHandlerSubscribeUri();
+		try {
+			for (QosMonitorEventType externalPingMonitorEventType : QosMonitorEventType.values()) {
+				subscriptionTemplate.setEventType(externalPingMonitorEventType.name());
+
+				final ResponseEntity<SubscriptionResponseDTO> response = httpService.sendRequest(subscriptionUri, HttpMethod.POST, SubscriptionResponseDTO.class, subscriptionTemplate);
+
+				final SubscriptionResponseDTO subscriptionResponse = response.getBody();
+				Assert.isTrue(subscriptionResponse.getEventType().getEventTypeName().equalsIgnoreCase(externalPingMonitorEventType.name()), "Invalid subscriptionResponse event type.");
+
+				rest();
+
+			}
+		} catch (final ArrowheadException ex) {
+			throw new ArrowheadException("QoS Monitor can't access EventHandler.");
 		}
 	}
 
@@ -362,5 +393,44 @@ public class QoSMonitorDriver {
 		logger.debug("createFixedPingMonitorProviderEchoUri started...");
 
 		return Utilities.createURI(fixedExternalPingMonitorScheme, fixedExternalPingMonitorAddress, fixedExternalPingMonitorPort, CommonConstants.ECHO_URI);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getEventHandlerSubscribeUri() {
+		logger.debug("getEventHandlerSubscribeUri started...");
+
+		if (arrowheadContext.containsKey(EVENT_SUBSCRIBE_URI_KEY)) {
+			try {
+				return (UriComponents) arrowheadContext.get(EVENT_SUBSCRIBE_URI_KEY);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("QoS Monitor can't find Event Handler subscribe URI.");
+			}
+		}
+
+		throw new ArrowheadException("QoS Monitor can't find Event Handler subscribe URI.");
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getEventHandlerUnsubscribeUri() {
+		logger.debug("getEventHandlerUnsubscribeUri started...");
+
+		if (arrowheadContext.containsKey(EVENT_UNSUBSCRIBE_URI_KEY)) {
+			try {
+				return (UriComponents) arrowheadContext.get(EVENT_UNSUBSCRIBE_URI_KEY);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("QoS Monitor can't find Event Handler unsubscribe URI.");
+			}
+		}
+
+		throw new ArrowheadException("QoS Monitor can't find Event Handler unsubscribe URI.");
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void rest() {
+		try {
+			Thread.sleep(SLEEP_PERIOD);
+		} catch (InterruptedException e) {
+			logger.warn(e.getMessage());
+		}
 	}
 }

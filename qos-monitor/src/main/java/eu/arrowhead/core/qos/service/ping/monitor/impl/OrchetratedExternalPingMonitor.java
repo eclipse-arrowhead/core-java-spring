@@ -76,7 +76,7 @@ public class OrchetratedExternalPingMonitor extends AbstractPingMonitor{
 		if (cachedPingMonitorProvider != null){
 
 			final int timeOut = calculateTimeOut();
-			final UUID measurementProcessId = requestExternalMeasurement();
+			final UUID measurementProcessId = requestExternalMeasurement(address);
 
 			final long startTime = System.currentTimeMillis();
 			final long meausermentExpiryTime = startTime + timeOut;
@@ -240,14 +240,14 @@ public class OrchetratedExternalPingMonitor extends AbstractPingMonitor{
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private UUID requestExternalMeasurement() {
+	private UUID requestExternalMeasurement(final String address) {
 		logger.debug("requestExternalMeasurement started...");
 
 		UUID startedExternalMeasurementProcessId = null;
 		do {
 
 			try {
-				final IcmpPingRequestACK acknowledgedMeasurmentRequest = driver.requestExternalPingMonitorService(getPingMonitorProvidersServiceUri(), createIcmpPingRequest());
+				final IcmpPingRequestACK acknowledgedMeasurmentRequest = driver.requestExternalPingMonitorService(getPingMonitorProvidersServiceUri(), createIcmpPingRequest(address));
 				validateAcknowledgedMeasurmentRequest(acknowledgedMeasurmentRequest);
 
 				// TODO persist ack event
@@ -280,11 +280,11 @@ public class OrchetratedExternalPingMonitor extends AbstractPingMonitor{
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private IcmpPingRequest createIcmpPingRequest() {
+	private IcmpPingRequest createIcmpPingRequest(final String address) {
 		logger.debug("createIcmpPingRequest started...");
 
 		final IcmpPingRequest request = new IcmpPingRequest();
-		request.setHost(cachedPingMonitorProvider.getProvider().getAddress());
+		request.setHost(address);
 		request.setPacketSize(pingMeasurementProperties.getPacketSize());
 		request.setTimeout(pingMeasurementProperties.getTimeout());
 		request.setTimeToRepeat(pingMeasurementProperties.getTimeToRepeat());

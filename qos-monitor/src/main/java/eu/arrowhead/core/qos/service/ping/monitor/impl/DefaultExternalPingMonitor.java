@@ -9,14 +9,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
-import org.springframework.web.util.UriComponents;
 
-import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.SSLProperties;
-import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
-import eu.arrowhead.common.dto.shared.ServiceSecurityType;
-import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.QosMonitorConstants;
@@ -42,8 +36,6 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	//-------------------------------------------------------------------------------------------------
 	private static final int ICMP_TTL = 255;
 	private static final int OVERHEAD_MULTIPLIER = 2;
-
-	private final OrchestrationResultDTO cachedPingMonitorProvider = null;
 
 	@Autowired
 	private QoSMonitorDriver driver;
@@ -73,57 +65,47 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	public List<IcmpPingResponse> ping(final String address) {
 		logger.debug("ping statred...");
 
-		if (cachedPingMonitorProvider != null){
+		final int timeOut = calculateTimeOut();
+		final UUID measurementProcessId = requestExternalMeasurement(address);
 
-			final int timeOut = calculateTimeOut();
-			final UUID measurementProcessId = requestExternalMeasurement();
+		final long startTime = System.currentTimeMillis();
+		final long meausermentExpiryTime = startTime + timeOut;
 
-			final long startTime = System.currentTimeMillis();
-			final long meausermentExpiryTime = startTime + timeOut;
+		boolean measurmentRequestConfirmed = false;
+		boolean measurmentStartedConfirmed = false;
 
-			boolean measurmentRequestConfirmed = false;
-			boolean measurmentStartedConfirmed = false;
+		ReceivedMonitoringRequestEventDTO receivedMonitoringRequestEventDTO;
+		StartedMonitoringMeasurementEventDTO startedMonitoringMeasurementEventDTO;
 
-			ReceivedMonitoringRequestEventDTO receivedMonitoringRequestEventDTO;
-			StartedMonitoringMeasurementEventDTO startedMonitoringMeasurementEventDTO;
+		while(System.currentTimeMillis() < meausermentExpiryTime) {
 
-			while(System.currentTimeMillis() < meausermentExpiryTime) {
+			checkInterupts(measurementProcessId);
 
-				checkInterupts(measurementProcessId);
-
-				if(!measurmentRequestConfirmed) {
-					receivedMonitoringRequestEventDTO = checkMeasurmentRequestConfirmed(measurementProcessId);
-					if( receivedMonitoringRequestEventDTO != null) {
-						measurmentRequestConfirmed = true;
-					}else {
-						break;
-					}
+			if(!measurmentRequestConfirmed) {
+				receivedMonitoringRequestEventDTO = checkMeasurmentRequestConfirmed(measurementProcessId);
+				if( receivedMonitoringRequestEventDTO != null) {
+					measurmentRequestConfirmed = true;
+				}else {
+					break;
 				}
-
-				if(!measurmentStartedConfirmed) {
-					startedMonitoringMeasurementEventDTO = checkMeasurmentStartedConfirmed(measurementProcessId);
-					if(startedMonitoringMeasurementEventDTO != null) {
-						measurmentStartedConfirmed = true;
-					}else {
-						break;
-					}
-				}
-
-				final FinishedMonitoringMeasurementEventDTO measurmentResult = tryToGetMeasurementResult(measurementProcessId);
-				if(measurmentResult != null) {
-					logger.info("External Ping Measurement finished: " + measurementProcessId);
-
-					return measurmentResult.getPayload();
-				}
-
 			}
-			// --- feature TODO create pingMonitorProvider profile table, base on the events above
-		}else {
-			try {
-				initPingMonitorProvider();
-			} catch (final Exception ex) {
-				// TODO: handle exception
+
+			if(!measurmentStartedConfirmed) {
+				startedMonitoringMeasurementEventDTO = checkMeasurmentStartedConfirmed(measurementProcessId);
+				if(startedMonitoringMeasurementEventDTO != null) {
+					measurmentStartedConfirmed = true;
+				}else {
+					break;
+				}
 			}
+
+			final FinishedMonitoringMeasurementEventDTO measurmentResult = tryToGetMeasurementResult(measurementProcessId);
+			if(measurmentResult != null) {
+				logger.info("External Ping Measurement finished: " + measurementProcessId);
+
+				return measurmentResult.getPayload();
+			}
+
 		}
 
 		return null;
@@ -240,14 +222,14 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private UUID requestExternalMeasurement() {
+	private UUID requestExternalMeasurement(final String address) {
 		logger.debug("requestExternalMeasurement started...");
 
 		UUID startedExternalMeasurementProcessId = null;
 		do {
 
 			try {
-				final IcmpPingRequestACK acknowledgedMeasurmentRequest = driver.requestExternalPingMonitorService(getPingMonitorProvidersServiceUri(), createIcmpPingRequest());
+				final IcmpPingRequestACK acknowledgedMeasurmentRequest = driver.requestExternalPingMonitorService( createIcmpPingRequest(address) );
 				validateAcknowledgedMeasurmentRequest(acknowledgedMeasurmentRequest);
 
 				// TODO persist ack event
@@ -270,8 +252,7 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 			Assert.notNull(acknowledgedMeasurmentRequest, "IcmpPingRequestACK is null");
 			Assert.notNull(acknowledgedMeasurmentRequest.getAckOk(), "IcmpPingRequestACK.ackOk is null");
 			Assert.isTrue(acknowledgedMeasurmentRequest.getAckOk().equalsIgnoreCase("OK"), "IcmpPingRequestACK is null");
-		
-			
+
 		} catch (final Exception ex) {
 			logger.warn("External pingMonitorProvider replied invalid ack : " + ex);
 
@@ -280,50 +261,17 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private IcmpPingRequest createIcmpPingRequest() {
+	private IcmpPingRequest createIcmpPingRequest(final String address) {
 		logger.debug("createIcmpPingRequest started...");
 
 		final IcmpPingRequest request = new IcmpPingRequest();
-		request.setHost(cachedPingMonitorProvider.getProvider().getAddress());
+		request.setHost(address);
 		request.setPacketSize(pingMeasurementProperties.getPacketSize());
 		request.setTimeout(pingMeasurementProperties.getTimeout());
 		request.setTimeToRepeat(pingMeasurementProperties.getTimeToRepeat());
 		request.setTtl(ICMP_TTL);
 
 		return request;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private UriComponents getPingMonitorProvidersServiceUri() {
-		logger.debug("getPingMonitorProvidersServiceUri started...");
-
-		final SystemResponseDTO provider = cachedPingMonitorProvider.getProvider();
-		final ServiceSecurityType securityType = cachedPingMonitorProvider.getSecure();
-		final String path = cachedPingMonitorProvider.getServiceUri();
-
-		switch (securityType) {
-		case NOT_SECURE:
-			return createHttpUri(provider, path);
-		case CERTIFICATE:
-			return createHttpsUri(provider, path);
-		case TOKEN:
-			throw new InvalidParameterException("TOKEN security is not supported yet, for PingMonitor Providers. ");
-		default:
-			throw new InvalidParameterException("Not supported ServiceSecurityType: " + securityType);
-		}
-
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private UriComponents createHttpUri(final SystemResponseDTO provider, final String path) {
-
-		return Utilities.createURI(CommonConstants.HTTP, provider.getAddress(), provider.getPort(), path );
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private UriComponents createHttpsUri(final SystemResponseDTO provider, final String path) {
-
-		return Utilities.createURI(CommonConstants.HTTPS, provider.getAddress(), provider.getPort(), path );
 	}
 
 	//-------------------------------------------------------------------------------------------------
