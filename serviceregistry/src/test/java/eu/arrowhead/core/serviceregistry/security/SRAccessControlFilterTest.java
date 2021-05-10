@@ -76,6 +76,8 @@ public class SRAccessControlFilterTest {
 	private static final String SERVICEREGISTRY_REGISTER = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_REGISTER_URI;
 	private static final String SERVICEREGISTRY_REGISTER_SYSTEM = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI;
 	private static final String SERVICEREGISTRY_UNREGISTER = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_URI;
+	private static final String SERVICEREGISTRY_UNREGISTER_SYSTEM = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI;
+	private static final String SERVICEREGISTRY_PULL_SYSTEMS = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_PULL_SYSTEMS_URI;
 	private static final String SERVICEREGISTRY_QUERY = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_QUERY_URI;
 	private static final String SERVICEREGISTRY_MULTI_QUERY = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_MULTI_QUERY_URI;
 	private static final String SERVICEREGISTRY_QUERY_BY_SYSTEM_ID = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_QUERY_BY_SYSTEM_ID_URI;
@@ -454,6 +456,72 @@ public class SRAccessControlFilterTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRegisterSystemWithPlantDescriptionEngine() throws Exception {
+		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO(
+				"consumer",//systemName,
+				"localhost", //address
+				12345,//port,
+				null, //authenticationInfo
+				null); // metadata
+		postRegisterSystem(systemRequestDTO, "certificates/plantdescriptionengine.pem", status().isCreated());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRegisterSystemWithNotPlantDescriptionEngine() throws Exception {
+		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO(
+				"consumer",//systemName,
+				"localhost", //address
+				12345,//port,
+				null, //authenticationInfo
+				null); // metadata
+		postRegisterSystem(systemRequestDTO, "certificates/gatekeeper.pem", status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterSystemWithSystemNameMatchSystemNameInCertifiacte() throws Exception {
+		deleteUnregisterSystem("sysop", "address", 5555, "certificates/valid.pem", status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterSystemWithSystemNameNotMatchSystemNameInCertifiacte() throws Exception {
+		deleteUnregisterSystem("notsysop", "address", 5555, "certificates/valid.pem", status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUNregisterSystemWithEmptySystemName() throws Exception {
+		deleteUnregisterSystem("   ", "address", 5555, "certificates/valid.pem", status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterSystemWithPlantDescriptionEngine() throws Exception {
+		deleteUnregisterSystem("consumer", "address", 5555, "certificates/plantdescriptionengine.pem", status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterSystemWithNotPlantDescriptionEngine() throws Exception {
+		deleteUnregisterSystem("consumer", "address", 5555, "certificates/gatekeeper.pem", status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testPullSystemsWithPlantDescriptionEngine() throws Exception {
+		getPullSystems("certificates/plantdescriptionengine.pem", status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testPullSystemsWithNotPlantDescriptionEngine() throws Exception {
+		getPullSystems("certificates/gatekeeper.pem", status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S2699") // because of false positive in sonar
 	@Test
 	public void testMultiQueryOrchestratorAllowedCoreSystemClient() throws Exception {
@@ -498,6 +566,27 @@ public class SRAccessControlFilterTest {
 		this.mockMvc.perform(delete(SERVICEREGISTRY_UNREGISTER + "?" + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME + "=" + systemName)
 			    	.secure(true)
 			    	.with(x509(certificatePath)))
+					.andExpect(matcher);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void deleteUnregisterSystem(final String systemName, final String address, final int port, final String certificatePath, final ResultMatcher matcher) throws Exception {
+		this.mockMvc.perform(delete(SERVICEREGISTRY_UNREGISTER_SYSTEM)
+					.secure(true)
+					.with(x509(certificatePath))
+					.param(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME, systemName)
+					.param(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS, address)
+					.param(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT, String.valueOf(port))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(matcher);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void getPullSystems(final String certificatePath, final ResultMatcher matcher) throws Exception {
+		this.mockMvc.perform(get(SERVICEREGISTRY_PULL_SYSTEMS)
+					.secure(true)
+					.with(x509(certificatePath))
+					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(matcher);
 	}
 	

@@ -51,7 +51,7 @@ public class OrchestratorAccessControlFilter extends CoreSystemAccessControlFilt
 			final CoreSystem[] allowedCoreSystems = { CoreSystem.GATEKEEPER };
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystems, requestTarget);
 		} else if (requestTarget.contains(CommonConstants.OP_ORCH_CREATE_FLEXIBLE_STORE_RULES_URI) || requestTarget.contains(CommonConstants.OP_ORCH_REMOVE_FLEXIBLE_STORE_RULE_URI) ||
-				   requestTarget.contains(CommonConstants.OP_ORCH_CLEAN_FLEXIBLE_STORE_URI)) { //TODO junit
+				   requestTarget.contains(CommonConstants.OP_ORCH_CLEAN_FLEXIBLE_STORE_URI)) {
 			// Only the local PlantDescriptionEngine can use these methods
 			final CoreSystem[] allowedCoreSystems = { CoreSystem.PLANTDESCRIPTIONENGINE };
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystems, requestTarget);

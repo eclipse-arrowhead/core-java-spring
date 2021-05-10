@@ -538,7 +538,7 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static OrchestratorStoreFlexibleResponseDTO convertOrchestratorStoreFlexibleEntryToOrchestratorStoreFlexibleResponseDTO(final OrchestratorStoreFlexible entry) { //TODO junit
+	public static OrchestratorStoreFlexibleResponseDTO convertOrchestratorStoreFlexibleEntryToOrchestratorStoreFlexibleResponseDTO(final OrchestratorStoreFlexible entry) {
 		Assert.notNull(entry, "OrchestratorStoreFlexible entry is null");
 		
 		return new OrchestratorStoreFlexibleResponseDTO(entry.getId(),
@@ -553,7 +553,7 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static OrchestratorStoreFlexibleListResponseDTO convertOrchestratorStoreFlexibleEntryListToOrchestratorStoreFlexibleListResponseDTO(final Iterable<OrchestratorStoreFlexible> entries, final long totalElements) { //TODO junit
+	public static OrchestratorStoreFlexibleListResponseDTO convertOrchestratorStoreFlexibleEntryListToOrchestratorStoreFlexibleListResponseDTO(final Iterable<OrchestratorStoreFlexible> entries, final long totalElements) {
 		Assert.notNull(entries, "OrchestratorStoreFlexible list is null");
 		
 		final List<OrchestratorStoreFlexibleResponseDTO> data = new ArrayList<>();

@@ -63,7 +63,7 @@ public class OrchestratorStoreFlexibleDBService {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public OrchestratorStoreFlexibleListResponseDTO getOrchestratorStoreFlexibleEntriesResponse(final int page, final int size, final Direction direction, final String sortField) { //TODO junit
+	public OrchestratorStoreFlexibleListResponseDTO getOrchestratorStoreFlexibleEntriesResponse(final int page, final int size, final Direction direction, final String sortField) {
 		logger.debug("getOrchestratorStoreFlexibleEntriesResponse started...");
 		
 		final Page<OrchestratorStoreFlexible> entries = getOrchestratorStoreFlexibleEntries(page, size, direction, sortField);
@@ -71,7 +71,7 @@ public class OrchestratorStoreFlexibleDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public Page<OrchestratorStoreFlexible> getOrchestratorStoreFlexibleEntries(final int page, final int size, final Direction direction, final String sortField) { //TODO junit
+	public Page<OrchestratorStoreFlexible> getOrchestratorStoreFlexibleEntries(final int page, final int size, final Direction direction, final String sortField) {
 		logger.debug("getOrchestratorStoreFlexibleEntries started...");
 		
 		final int validatedPage = page < 0 ? 0 : page;
@@ -93,7 +93,7 @@ public class OrchestratorStoreFlexibleDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public OrchestratorStoreFlexibleListResponseDTO createOrchestratorStoreFlexibleResponse(final List<OrchestratorStoreFlexibleRequestDTO> requestList) { //TODO junit
+	public OrchestratorStoreFlexibleListResponseDTO createOrchestratorStoreFlexibleResponse(final List<OrchestratorStoreFlexibleRequestDTO> requestList) {
 		logger.debug("createOrchestratorStoreFlexibleResponse started...");
 		Assert.notNull(requestList, "OrchestratorStoreFlexible requestList is null");
 		
@@ -120,7 +120,7 @@ public class OrchestratorStoreFlexibleDBService {
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public OrchestratorStoreFlexible createOrchestratorStoreFlexible(final String consumerSystemName, final String providerSystemName, final String consumerSystemMetadata, final String providerSystemMetadata,
-			 														 final String serviceMetadata, final String serviceInterfaceName, final String serviceDefinitionName, final Integer priority) { //TODO junit
+			 														 final String serviceMetadata, final String serviceInterfaceName, final String serviceDefinitionName, final Integer priority) {
 		logger.debug("createOrchestratorStoreFlexible started...");
 		final OrchestratorStoreFlexible candidate = new OrchestratorStoreFlexible(consumerSystemName, providerSystemName, consumerSystemMetadata, providerSystemMetadata, serviceMetadata,
 																				  serviceInterfaceName, serviceDefinitionName, priority);
@@ -131,7 +131,7 @@ public class OrchestratorStoreFlexibleDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public List<OrchestratorStoreFlexible> createOrchestratorStoreFlexible(final List<OrchestratorStoreFlexible> candidates) { //TODO junit
+	public List<OrchestratorStoreFlexible> createOrchestratorStoreFlexible(final List<OrchestratorStoreFlexible> candidates) {
 		logger.debug("createOrchestratorStoreFlexible started...");
 		Assert.notNull(candidates, "OrchestratorStoreFlexible candidate list is null");
 		
@@ -145,7 +145,7 @@ public class OrchestratorStoreFlexibleDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public void deleteOrchestratorStoreFlexibleById(final long id) { //TODO junit
+	public void deleteOrchestratorStoreFlexibleById(final long id) {
 		logger.debug("deleteOrchestratorStoreFlexibleById started...");
 		
 		try {
@@ -161,7 +161,7 @@ public class OrchestratorStoreFlexibleDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public void deleteAllOrchestratorStoreFlexible() { //TODO junit
+	public void deleteAllOrchestratorStoreFlexible() {
 		logger.debug("deleteAllOrchestratorStoreFlexible started...");
 		
 		try {
@@ -261,7 +261,7 @@ public class OrchestratorStoreFlexibleDBService {
 		}
 		
 		if (Utilities.isEmpty(entity.getProviderSystemName()) && Utilities.isEmpty(entity.getProviderSystemMetadata())) {
-			throw new InvalidParameterException("providerSystemName and providerSystemMetadata are both null");
+			throw new InvalidParameterException("providerSystemName and providerSystemMetadata are both empty");
 		}
 		if (!Utilities.isEmpty(entity.getProviderSystemName()) && !cnVerifier.isValid(entity.getProviderSystemName())) {
 			throw new InvalidParameterException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE);

@@ -24,6 +24,8 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -41,6 +43,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -481,7 +484,129 @@ public class ServiceRegistryControllerSystemTest {
 		
 		verify(networkAddressPreProcessor, times(1)).normalize(any());
 	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	@Test
+	public void unregisterSystemOk() throws Exception {
+		final String systemName = "consumer";
+		final String address = "address";
+		final int port = 5000;
+		
+		final ArgumentCaptor<String> strCaptor = ArgumentCaptor.forClass(String.class);
+		final ArgumentCaptor<Integer> intCaptor = ArgumentCaptor.forClass(Integer.class);
+		doNothing().when(serviceRegistryDBService).removeSystemByNameAndAddressAndPort(strCaptor.capture(), strCaptor.capture(), intCaptor.capture());
+		
+		this.mockMvc.perform(delete(CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI)
+					.param(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME, systemName)
+					.param(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS, address)
+					.param(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT, String.valueOf(port))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
+		
+		assertEquals(systemName, strCaptor.getAllValues().get(0));
+		assertEquals(address, strCaptor.getAllValues().get(1));
+		assertEquals(port, intCaptor.getValue().intValue());
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	@Test
+	public void unregisterSystemInvalidSystemNname() throws Exception {
+		final String systemName = "-consumer";
+		final String address = "address";
+		final int port = 5000;
+		
+		this.mockMvc.perform(delete(CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI)
+					.param(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME, systemName)
+					.param(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS, address)
+					.param(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT, String.valueOf(port))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+		
+		verify(serviceRegistryDBService, never()).removeSystemByNameAndAddressAndPort(anyString(), anyString(), anyInt());
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	@Test
+	public void unregisterSystemInvalidAddress() throws Exception {
+		final String systemName = "consumer";
+		final String address = "-address";
+		final int port = 5000;
+		
+		doThrow(new InvalidParameterException("test")).when(networkAddressVerifier).verify(any());
+		
+		this.mockMvc.perform(delete(CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI)
+					.param(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME, systemName)
+					.param(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS, address)
+					.param(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT, String.valueOf(port))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+		
+		verify(serviceRegistryDBService, never()).removeSystemByNameAndAddressAndPort(anyString(), anyString(), anyInt());
+	}
 
+	//-------------------------------------------------------------------------------------------------	
+	@Test
+	public void pullSystemsTestWithoutParameter() throws Exception  {
+		final Page<System> systemEntryList = createSystemPageForDBMocking(5);
+		final SystemListResponseDTO systemEntriesDTO = DTOConverter.convertSystemEntryListToSystemListResponseDTO(systemEntryList);
+
+		when(serviceRegistryDBService.getSystemEntries(anyInt(), anyInt(), any(), any())).thenReturn(systemEntriesDTO);
+		
+		final MvcResult response = this.mockMvc.perform(get(CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_PULL_SYSTEMS_URI)
+						 					   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
+		final SystemListResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), SystemListResponseDTO.class);
+
+		assertEquals(5, responseBody.getCount());
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	@Test
+	public void pullSystemsTestWithPageAndSizeParameter() throws Exception {
+		final Page<System> systemEntryList = createSystemPageForDBMocking(5);
+		final SystemListResponseDTO systemEntriesDTO = DTOConverter.convertSystemEntryListToSystemListResponseDTO(systemEntryList);
+		
+		when(serviceRegistryDBService.getSystemEntries(anyInt(), anyInt(), any(), any())).thenReturn(systemEntriesDTO);
+		
+		final MvcResult response = this.mockMvc.perform(get(CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_PULL_SYSTEMS_URI)
+											   .param(PAGE, "0")
+											   .param(ITEM_PER_PAGE, "5")
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
+		final SystemListResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), SystemListResponseDTO.class);
+		
+		assertEquals(5, responseBody.getCount());
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	@Test
+	public void pullSystemsTestWithNullPageButDefinedSizeParameter() throws Exception {
+		this.mockMvc.perform(get(CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_PULL_SYSTEMS_URI)
+					.param(ITEM_PER_PAGE, "1")
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	@Test 
+	public void pullSystemsTestWithDefinedPageButNullSizeParameter() throws Exception {
+		this.mockMvc.perform(get(CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_PULL_SYSTEMS_URI)
+					.param(PAGE, "0")
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	@Test
+	public void pullSystemsTestWithInvalidSortDirectionFlagParameter() throws Exception {
+		this.mockMvc.perform(get(CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_PULL_SYSTEMS_URI)
+					.param("direction", "invalid")
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
 	//-------------------------------------------------------------------------------------------------	
 	@Test
 	public void updateSystemByIdTestWithValidId() throws Exception  {
@@ -503,7 +628,7 @@ public class ServiceRegistryControllerSystemTest {
 
 		Assert.assertTrue(0 < responseBody.getId());	
 	}
-	
+		
 	//-------------------------------------------------------------------------------------------------	
 	@Test
 	public void updateSystemByIdTestWithInvalidId() throws Exception  {

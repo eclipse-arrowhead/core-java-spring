@@ -207,7 +207,7 @@ public class OrchestratorController {
 	})
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
 	@PostMapping(path = CommonConstants.OP_ORCH_CREATE_FLEXIBLE_STORE_RULES_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public OrchestratorStoreFlexibleListResponseDTO createFlexibleStoreRule(@RequestBody final List<OrchestratorStoreFlexibleRequestDTO> requestList) { //TODO junit
+	@ResponseBody public OrchestratorStoreFlexibleListResponseDTO createFlexibleStoreRule(@RequestBody final List<OrchestratorStoreFlexibleRequestDTO> requestList) {
 		logger.debug("createFlexibleStoreRule started ...");
 		
 		final String origin = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_CREATE_FLEXIBLE_STORE_RULES_URI;
@@ -228,7 +228,7 @@ public class OrchestratorController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@DeleteMapping(path = CommonConstants.OP_ORCH_REMOVE_FLEXIBLE_STORE_RULE_URI)
-	public void removeFlexibleStoreRuleById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {  //TODO junit
+	public void removeFlexibleStoreRuleById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
 		logger.debug("removeFlexibleStoreRuleById started...");
 		
 		final String origin = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_REMOVE_FLEXIBLE_STORE_RULE_URI;
@@ -251,7 +251,7 @@ public class OrchestratorController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@DeleteMapping(path = CommonConstants.OP_ORCH_CLEAN_FLEXIBLE_STORE_URI)
-	public void cleanFlexibleStore() {  //TODO junit
+	public void cleanFlexibleStore() {
 		logger.debug("removeFlexibleStoreRuleById started...");
 		
 		final String origin = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_REMOVE_FLEXIBLE_STORE_RULE_URI;

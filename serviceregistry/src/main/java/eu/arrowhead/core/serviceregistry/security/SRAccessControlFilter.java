@@ -40,7 +40,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 	
 	private static final CoreSystem[] allowedCoreSystemsForQuery = { CoreSystem.ORCHESTRATOR, CoreSystem.GATEKEEPER, CoreSystem.CERTIFICATEAUTHORITY, CoreSystem.EVENTHANDLER,
 																	 CoreSystem.AUTHORIZATION, CoreSystem.QOSMONITOR, CoreSystem.ONBOARDINGCONTROLLER, CoreSystem.DEVICEREGISTRY,
-															         CoreSystem.SYSTEMREGISTRY };
+															         CoreSystem.SYSTEMREGISTRY, CoreSystem.PLANTDESCRIPTIONENGINE };
 	private static final CoreSystem[] allowedCoreSystemsForQueryBySystemId = { CoreSystem.ORCHESTRATOR };
 	private static final CoreSystem[] allowedCoreSystemsForQueryBySystemDTO = { CoreSystem.ORCHESTRATOR };
 	private static final CoreSystem[] allowedCoreSystemsForQueryAll = { CoreSystem.QOSMONITOR, CoreSystem.GATEKEEPER };
@@ -67,7 +67,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 			checkProviderAccessAndReservationsToRegister(clientCN, requestJSON, requestTarget);
 		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_URI)) {
 			// A provider system can only unregister its own services!
-			checkProviderAccessToDeregister(clientCN, queryParams, requestTarget);
+			checkApplicationSystemAccessToDeregister(clientCN, queryParams, requestTarget);
 		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICEREGISTRY_QUERY_URI)) {
 			if (isClientACoreSystem(clientCN, cloudCN)) {
 				// Only dedicated core systems can use this service without limitation but every core system can query info about its own services
@@ -88,12 +88,19 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 		} else if (requestTarget.endsWith(CoreCommonConstants.OP_SERVICEREGISTRY_QUERY_ALL_SERVICE_URI)) {
 			// Only dedicated core systems can use this service
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForQueryAll, requestTarget);
-		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI) || requestTarget.endsWith(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI)) {
+		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI)) {
 			if (isClientACoreSystem(clientCN, cloudCN)) {
 				checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForRegisterSystem, requestTarget);
 			} else {
-				// An application system can only register/unregister its own system!
+				// An application system can only register its own system!
 				checkIfApplicationSystemIsRegisteringOwnSystem(clientCN, cloudCN, requestJSON, requestTarget);				
+			}
+		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI)) {
+			if (isClientACoreSystem(clientCN, cloudCN)) {
+				checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForRegisterSystem, requestTarget);
+			} else {
+				// An application system can only unregister its own system!
+				checkApplicationSystemAccessToDeregister(clientCN, queryParams, requestTarget);	
 			}
 		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICEREGISTRY_PULL_SYSTEMS_URI)) {
 			// Only dedicated core systems can use this service
@@ -134,18 +141,18 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void checkProviderAccessToDeregister(final String clientCN, final Map<String,String[]> queryParams, final String requestTarget) {
+	private void checkApplicationSystemAccessToDeregister(final String clientCN, final Map<String,String[]> queryParams, final String requestTarget) {
 		final String clientName = getClientNameFromCN(clientCN);
 		
-		final String providerName = queryParams.getOrDefault(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME, new String[] { "" })[0];
-		if (Utilities.isEmpty(providerName)) {
-			log.debug("Provider name is not set in the query parameters when use {}", requestTarget);
+		final String appSysName = queryParams.getOrDefault(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME, new String[] { "" })[0];
+		if (Utilities.isEmpty(appSysName)) {
+			log.debug("Application system name is not set in the query parameters when use {}", requestTarget);
 			return; // we can't continue the check and the endpoint will throw BadPayloadException
 		}
 		
-		if (!providerName.equalsIgnoreCase(clientName)) {
-			log.debug("Provider system name and certificate common name do not match! Unregistering denied!");
-			throw new AuthException("Provider system name(" + providerName + ") and certificate common name (" + clientCN + ") do not match!", HttpStatus.UNAUTHORIZED.value());
+		if (!appSysName.equalsIgnoreCase(clientName)) {
+			log.debug("Application system name and certificate common name do not match! Unregistering denied!");
+			throw new AuthException("Application system name (" + appSysName + ") and certificate common name (" + clientCN + ") do not match!", HttpStatus.UNAUTHORIZED.value());
 		}
 	}
 	
