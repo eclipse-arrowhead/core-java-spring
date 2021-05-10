@@ -14,6 +14,8 @@ import org.springframework.web.util.UriComponents;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
@@ -27,6 +29,7 @@ import eu.arrowhead.core.qos.dto.event.FinishedMonitoringMeasurementEventDTO;
 import eu.arrowhead.core.qos.dto.event.InteruptedMonitoringMeasurementEventDTO;
 import eu.arrowhead.core.qos.dto.event.ReceivedMonitoringRequestEventDTO;
 import eu.arrowhead.core.qos.dto.event.StartedMonitoringMeasurementEventDTO;
+import eu.arrowhead.core.qos.dto.externalMonitor.ExternalMonitorOrchestrationRequestFactory;
 import eu.arrowhead.core.qos.service.QoSMonitorDriver;
 import eu.arrowhead.core.qos.service.event.queue.FinishedMonitoringMeasurementEventQueue;
 import eu.arrowhead.core.qos.service.event.queue.InteruptedMonitoringMeasurementEventQueue;
@@ -43,7 +46,7 @@ public class OrchetratedExternalPingMonitor extends AbstractPingMonitor{
 	private static final int ICMP_TTL = 255;
 	private static final int OVERHEAD_MULTIPLIER = 2;
 
-	private final OrchestrationResultDTO cachedPingMonitorProvider = null;
+	private OrchestrationResultDTO cachedPingMonitorProvider = null;
 
 	@Autowired
 	private QoSMonitorDriver driver;
@@ -63,7 +66,10 @@ public class OrchetratedExternalPingMonitor extends AbstractPingMonitor{
 	@Resource
 	private InteruptedMonitoringMeasurementEventQueue interuptedMonitoringMeasurementEventQueue;
 
-	private Logger logger = LogManager.getLogger(OrchetratedExternalPingMonitor.class);
+	@Autowired
+	private ExternalMonitorOrchestrationRequestFactory orchestrationRequestFactory;
+
+	private final Logger logger = LogManager.getLogger(OrchetratedExternalPingMonitor.class);
 
 	//=================================================================================================
 	// methods
@@ -75,55 +81,60 @@ public class OrchetratedExternalPingMonitor extends AbstractPingMonitor{
 
 		if (cachedPingMonitorProvider != null){
 
-			final int timeOut = calculateTimeOut();
-			final UUID measurementProcessId = requestExternalMeasurement(address);
+			logger.info("starting external ping Monitoring service measurement: " + cachedPingMonitorProvider.getProvider().toString());
 
-			final long startTime = System.currentTimeMillis();
-			final long meausermentExpiryTime = startTime + timeOut;
-
-			boolean measurmentRequestConfirmed = false;
-			boolean measurmentStartedConfirmed = false;
-
-			ReceivedMonitoringRequestEventDTO receivedMonitoringRequestEventDTO;
-			StartedMonitoringMeasurementEventDTO startedMonitoringMeasurementEventDTO;
-
-			while(System.currentTimeMillis() < meausermentExpiryTime) {
-
-				checkInterupts(measurementProcessId);
-
-				if(!measurmentRequestConfirmed) {
-					receivedMonitoringRequestEventDTO = checkMeasurmentRequestConfirmed(measurementProcessId);
-					if( receivedMonitoringRequestEventDTO != null) {
-						measurmentRequestConfirmed = true;
-					}else {
-						break;
-					}
-				}
-
-				if(!measurmentStartedConfirmed) {
-					startedMonitoringMeasurementEventDTO = checkMeasurmentStartedConfirmed(measurementProcessId);
-					if(startedMonitoringMeasurementEventDTO != null) {
-						measurmentStartedConfirmed = true;
-					}else {
-						break;
-					}
-				}
-
-				final FinishedMonitoringMeasurementEventDTO measurmentResult = tryToGetMeasurementResult(measurementProcessId);
-				if(measurmentResult != null) {
-					logger.info("External Ping Measurement finished: " + measurementProcessId);
-
-					return measurmentResult.getPayload();
-				}
-
-			}
-			// --- feature TODO create pingMonitorProvider profile table, base on the events above
 		}else {
 			try {
 				initPingMonitorProvider();
 			} catch (final Exception ex) {
-				// TODO: handle exception
+
+				logger.warn("Unsuccesfull ping measurement: because of >> Unsuccesfull external ping Monitor provider orchestration!");
+
+				return null;
 			}
+		}
+
+		final int timeOut = calculateTimeOut();
+		final UUID measurementProcessId = requestExternalMeasurement(address);
+
+		final long startTime = System.currentTimeMillis();
+		final long meausermentExpiryTime = startTime + timeOut;
+
+		boolean measurmentRequestConfirmed = false;
+		boolean measurmentStartedConfirmed = false;
+
+		ReceivedMonitoringRequestEventDTO receivedMonitoringRequestEventDTO;
+		StartedMonitoringMeasurementEventDTO startedMonitoringMeasurementEventDTO;
+
+		while(System.currentTimeMillis() < meausermentExpiryTime) {
+
+			checkInterupts(measurementProcessId);
+
+			if(!measurmentRequestConfirmed) {
+				receivedMonitoringRequestEventDTO = checkMeasurmentRequestConfirmed(measurementProcessId);
+				if( receivedMonitoringRequestEventDTO != null) {
+					measurmentRequestConfirmed = true;
+				}else {
+					break;
+				}
+			}
+
+			if(!measurmentStartedConfirmed) {
+				startedMonitoringMeasurementEventDTO = checkMeasurmentStartedConfirmed(measurementProcessId);
+				if(startedMonitoringMeasurementEventDTO != null) {
+					measurmentStartedConfirmed = true;
+				}else {
+					break;
+				}
+			}
+
+			final FinishedMonitoringMeasurementEventDTO measurmentResult = tryToGetMeasurementResult(measurementProcessId);
+			if(measurmentResult != null) {
+				logger.info("External Ping Measurement finished: " + measurementProcessId);
+
+				return measurmentResult.getPayload();
+			}
+
 		}
 
 		return null;
@@ -339,16 +350,20 @@ public class OrchetratedExternalPingMonitor extends AbstractPingMonitor{
 	private void initPingMonitorProvider() {
 		logger.debug("initPingMonitorProvider started...");
 
-		//TODO try sr with timeout, trz orch with time out -> exit if uncussess
-		//orch service pingprovider with time - finish int if unscucesss, 
-		//in orhcestrator flags
-		// metadatasearch true
-		//matchmaking true
-		//
-		// matadatareq.. fill with shema
-		// enableIntercloud false
+		final OrchestrationFormRequestDTO request = orchestrationRequestFactory.createExternalMonitorOrchestrationRequest();
+		final OrchestrationResponseDTO result = driver.queryOrchestrator(request);
 
-		//if service orchestrated subscribe to all events from pingmonitor
-		// as monitoringRequestReceivedEvent, monitoringStratedEvent, monitoringFinishedEvent, interuptedMonitoringProcessEvent 
+		cachedPingMonitorProvider = selectProvider(result);
+
+		driver.subscribeToExternalPingMonitorEvents();
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private OrchestrationResultDTO selectProvider(final OrchestrationResponseDTO result) {
+		logger.debug("selectProvider started...");
+
+		//TODO implement more sofisticated provider selection strategy
+		return result.getResponse().get(0);
 	}
 }

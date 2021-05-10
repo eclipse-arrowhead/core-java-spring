@@ -1,13 +1,21 @@
 package eu.arrowhead.core.qos.dto.externalMonitor;
 
+import java.security.PublicKey;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.dto.internal.ServiceDefinitionRequestDTO;
 import eu.arrowhead.common.dto.internal.ServiceInterfaceRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFlags.Flag;
@@ -17,19 +25,26 @@ import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.core.qos.QosMonitorConstants;
 
+@Service
 public class ExternalMonitorOrchestrationRequestFactory {
 
 	//=================================================================================================
 	// members
+
+	@Autowired
+	protected SSLProperties sslProperties;
 
 	@Value(CoreCommonConstants.$CORE_SYSTEM_NAME)
 	private String coreSystemName;
 
 	@Value(CoreCommonConstants.$SERVER_ADDRESS)
 	private String coreSystemAddress;
-
+	
 	@Value(CoreCommonConstants.$SERVER_PORT)
 	private int coreSystemPort;
+
+	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
+	private Map<String,Object> arrowheadContext;
 
 	private Logger logger = LogManager.getLogger(ExternalMonitorOrchestrationRequestFactory.class);
 
@@ -58,13 +73,18 @@ public class ExternalMonitorOrchestrationRequestFactory {
 	public SystemRequestDTO createExternalMonitorSystemRequestDTO() {
 		logger.debug("createExternalMonitorSystemRequestDTO started...");
 
-		final SystemRequestDTO requester = new SystemRequestDTO();
-		requester.setSystemName(coreSystemName);
-		requester.setAddress(coreSystemAddress);
-		requester.setPort(coreSystemPort);
-		requester.setMetadata(Map.of());
+		final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
 
-		return requester;
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName(coreSystemName);
+		system.setAddress(coreSystemAddress);
+		system.setPort(coreSystemPort);
+		system.setMetadata(null);
+		if (sslProperties.isSslEnabled()) {
+			system.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+		}
+
+		return system;
 	}
 
 	//-------------------------------------------------------------------------------------------------

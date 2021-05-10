@@ -250,9 +250,30 @@ public class QoSMonitorDriver {
 		Assert.notNull(form, "form is null.");
 
 		final UriComponents orchestrationProcessUri = getOrchestrationProcessUri();
-		final ResponseEntity<OrchestrationResponseDTO> response = httpService.sendRequest(orchestrationProcessUri, HttpMethod.POST, OrchestrationResponseDTO.class, form);
+		int count = 0;
 
-		return response.getBody();
+		while ( count < MAX_RETRIES) {
+
+			rest();
+
+			try {
+
+				final ResponseEntity<OrchestrationResponseDTO> response = httpService.sendRequest(orchestrationProcessUri, HttpMethod.POST, OrchestrationResponseDTO.class, form);
+
+				return response.getBody();
+
+			} catch (final Exception ex) {
+				logger.warn("QoS Monitor can't access Orchestrator.");
+
+				count++;
+
+				if (count < MAX_RETRIES) {
+					logger.warn("Retrying to access Orchestrator.");
+				}
+			}
+		}
+
+		throw new ArrowheadException("QoS Monitor can't access Orchestrator.");
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -262,9 +283,8 @@ public class QoSMonitorDriver {
 		final UriComponents echoUri = createFixedPingMonitorProviderEchoUri();
 
 		int count = 0;
-		boolean echo = false;
 
-		while ( !echo && count < MAX_RETRIES) {
+		while ( count < MAX_RETRIES) {
 
 			rest();
 
@@ -272,7 +292,7 @@ public class QoSMonitorDriver {
 
 				httpService.sendRequest(echoUri, HttpMethod.GET, String.class);
 
-				echo = true;
+				return;
 
 			} catch (final Exception ex) {
 				logger.warn("QoS Monitor can't access Fixed External Qos Monitor provider at : " + echoUri );
