@@ -51,7 +51,7 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreFlexibleDBService;
 
 @Service
-public class OrchestratorFlexibleDriver { //TODO unit tests
+public class OrchestratorFlexibleDriver { 
 	
 	//=================================================================================================
 	// members
@@ -145,6 +145,7 @@ public class OrchestratorFlexibleDriver { //TODO unit tests
 		final List<ServiceRegistryResponseDTO> result = new ArrayList<>();
 		
 		for (final Pair<OrchestratorStoreFlexible,ServiceQueryResultDTO> pair : queryDataWithRules) {
+			Assert.notNull(pair, "Query data is null.");
 			final List<ServiceRegistryResponseDTO> ruleResult = filterSRResultsByProviderRequirements(pair.getKey(), pair.getValue(), onlyPreferredProviders);
 			for (final ServiceRegistryResponseDTO srEntry : ruleResult) {
 				if (!result.contains(srEntry)) { // don't want duplicates in result
@@ -252,8 +253,6 @@ public class OrchestratorFlexibleDriver { //TODO unit tests
 		final OrchestrationFlags orchestrationFlags = request.getOrchestrationFlags();
 		Assert.notNull(orchestrationFlags, "Flags object is null");
 		
-		//TODO: continue tests from here
-
 		Map<String,String> finalMetadataRequirement = Utilities.text2Map(rule.getServiceMetadata());
 		if (orchestrationFlags.getOrDefault(Flag.METADATA_SEARCH, false) && !Utilities.isEmpty(requestedService.getMetadataRequirements())) {
 			finalMetadataRequirement = createMetadataMerge(requestedService.getMetadataRequirements(), finalMetadataRequirement);
