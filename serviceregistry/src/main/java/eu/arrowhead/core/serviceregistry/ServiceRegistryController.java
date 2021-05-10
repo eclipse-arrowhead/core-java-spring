@@ -1216,7 +1216,7 @@ public class ServiceRegistryController {
 			if (detectionResult.isSkipped()) {
 				throw new BadPayloadException(ex.getMessage() + " " + detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);				
 			}
-			if (!detectionResult.isDetectedSuccess()) {
+			if (!detectionResult.isDetectionSuccess()) {
 				throw new BadPayloadException(detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);
 			} else {
 				dto.setAddress(detectionResult.getDetectedAddress());

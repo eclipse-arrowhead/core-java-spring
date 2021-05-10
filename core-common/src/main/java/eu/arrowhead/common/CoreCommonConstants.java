@@ -104,6 +104,8 @@ public class CoreCommonConstants {
 	public static final String $USE_STRICT_SERVICE_DEFINITION_VERIFIER_WD = "${" + USE_STRICT_SERVICE_DEFINITION_VERIFIER + ":" + CoreDefaults.DEFAULT_USE_STRICT_SERVICE_DEFINITION_VERIFIER + "}";
 	public static final String USE_ADDRESS_PORT_DETECTOR = "use_address_port_detector";
 	public static final String $USE_ADDRESS_PORT_DETECTOR_WD = "${" + USE_ADDRESS_PORT_DETECTOR + ":" + CoreDefaults.DEFAULT_USE_ADDRESS_PORT_DETECTOR + "}";
+	public static final String FILTER_PROXY_ADDRESSES = "filter_proxy_addresses";
+	public static final String $FILTER_PROXY_ADDRESSES = "${" + "filter_proxy_addresses" + "}";
 	public static final String ALLOW_SELF_ADDRESSING = "allow_self_addressing";
 	public static final String $ALLOW_SELF_ADDRESSING_WD = "${" + ALLOW_SELF_ADDRESSING + ":" + CoreDefaults.DEFAULT_ALLOW_SELF_ADDRESSING + "}";
 	public static final String ALLOW_NON_ROUTABLE_ADDRESSING = "allow_non_routable_addressing";
