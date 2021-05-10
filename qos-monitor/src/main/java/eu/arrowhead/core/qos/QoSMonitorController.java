@@ -62,6 +62,7 @@ import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.EventDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
@@ -69,6 +70,7 @@ import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.service.PingService;
 import eu.arrowhead.core.qos.service.RelayTestService;
+import eu.arrowhead.core.qos.service.event.EventWatcherService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -156,6 +158,9 @@ public class QoSMonitorController {
 	
 	@Autowired
 	private RelayTestService relayTestService;
+
+	@Autowired
+	private EventWatcherService eventWatcherService;
 
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
@@ -471,6 +476,27 @@ public class QoSMonitorController {
 		
 		logger.debug("initRelayTest finished...");
 	}
+
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Listens on external ping monitor events", 
+				  tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CONNECT_HTTP_201_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CONNECT_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_GATEWAY, message = POST_CONNECT_HTTP_502_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@ResponseStatus(value = org.springframework.http.HttpStatus.ACCEPTED)
+	@PostMapping(path = QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI, consumes = MediaType.APPLICATION_JSON_VALUE)
+	public void pingMonitorNotification(@RequestBody final EventDTO request) {
+		logger.debug("pingMonitorNotification started...");
+
+		validateEvent(request, CommonConstants.QOSMONITOR_URI + QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI);
+		eventWatcherService.putEventToQueue(request);
+
+		logger.debug("pingMonitorNotification finished...");
+	}
 	
 	//=================================================================================================
 	// assistant methods
@@ -681,6 +707,27 @@ public class QoSMonitorController {
 		
 		if (Utilities.isEmpty(request.getAttribute())) {
 			throw new BadPayloadException("attribute is null or empty", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void validateEvent(final EventDTO request, final String origin) {
+		logger.debug("validateEvent started...");
+
+		if (request == null) {
+			throw new BadPayloadException("QoSBestRelayRequestDTO is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+
+		if (Utilities.isEmpty(request.getEventType())) {
+			throw new BadPayloadException("EventType is null or empty", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+
+		if (Utilities.isEmpty(request.getPayload())) {
+			throw new BadPayloadException("Payload is null or empty", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+
+		if (Utilities.isEmpty(request.getTimeStamp())) {
+			throw new BadPayloadException("TimeStamp is null or empty", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 	}
 }
