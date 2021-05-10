@@ -1,7 +1,6 @@
 package eu.arrowhead.common.processor;
 
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -36,8 +35,8 @@ public class AddressPortDetector {
 	private boolean useDetector;
 	
 	@Value(CoreCommonConstants.$FILTER_PROXY_ADDRESSES)
-	private String[] proxyAddressList;
-	private final Set<String> proxyAddressSet = new HashSet<>();
+	private String[] filterProxyAddressList;
+	private final Set<String> filterProxyAddressSet = new HashSet<>();
 	
 	@Autowired
 	private NetworkAddressPreProcessor networkAddressPreProcessor;
@@ -50,8 +49,11 @@ public class AddressPortDetector {
 	
 	private static final String COMMA = ",";
 	private static final String COLON = ":";
+	private static final String SEMI_COLON = ";";
+	private static final String DOUBLE_QUOTE = "\"";
 	private static final String SQUARE_BRACKET_OPEN = "[";
 	private static final String SQUARE_BRACKET_CLOSE = "]";
+	private static final String EQUAL_SIGN = "]";
 	private static final int MAX_PORT_LENGTH = 5;
 	
 	private final Logger logger = LogManager.getLogger(AddressPortDetector.class);
@@ -90,8 +92,8 @@ public class AddressPortDetector {
 	//-------------------------------------------------------------------------------------------------
 	@PostConstruct
 	private void init() {
-		for (final String addr : proxyAddressList) {
-			proxyAddressSet.add(networkAddressPreProcessor.normalize(addr));
+		for (final String addr : filterProxyAddressList) {
+			filterProxyAddressSet.add(networkAddressPreProcessor.normalize(addr));
 		}
 	}
 	
@@ -100,7 +102,7 @@ public class AddressPortDetector {
 		final String remoteAddr = networkAddressPreProcessor.normalize(servletRequest.getRemoteAddr());
 		final int remotePort = servletRequest.getRemotePort();
 		
-		if (Utilities.isEmpty(remoteAddr) || proxyAddressSet.contains(remoteAddr)) {
+		if (Utilities.isEmpty(remoteAddr) || filterProxyAddressSet.contains(remoteAddr)) {
 			return false;
 		} else {
 			result.setDetectedAddress(remoteAddr);
@@ -122,9 +124,35 @@ public class AddressPortDetector {
 		//https://tools.ietf.org/html/rfc7230#section-3.2
 		final List<String> headerValues = Collections.list(servletRequest.getHeaders(HEADER_FORWARDED));
 		for (int i = headerValues.size() - 1; i >= 0; i--) {
-			final String[] subValues = headerValues.get(i).split(COMMA);
+			
+			final String[] subValues = headerValues.get(i).split(SEMI_COLON);
 			for (int j = subValues.length - 1; j >= 0; j--) {
-				
+				final String[] pairs = subValues[j].split(COLON);
+				if (pairs[j].toLowerCase().startsWith("for")) {
+					final String[] split = pairs[j].split(EQUAL_SIGN);
+					if (Utilities.isEmpty(split[1])) {
+						return false;
+					}
+					
+					final Entry<String, Integer> addressPort = processAddressAndPort(split[1]);
+					final String address = networkAddressPreProcessor.normalize(addressPort.getKey());
+					final Integer port = addressPort.getValue();
+					
+					if (port == null) {
+						if (filterProxyAddressSet.contains(address)) {
+							continue;
+						}
+						return false;
+						
+					}
+					
+					if (!filterProxyAddressSet.contains(address)) {
+						result.setDetectionSuccess(true);
+						result.setDetectedAddress(address);
+						result.setDetectedPort(addressPort.getValue());
+						return true;
+					}
+				}
 			}
 		}
 		
@@ -147,14 +175,14 @@ public class AddressPortDetector {
 				final Integer port = addressPort.getValue();
 				
 				if (port == null) {
-					if (proxyAddressSet.contains(address)) {
+					if (filterProxyAddressSet.contains(address)) {
 						continue;
 					}
 					return false;
 					
 				}
 				
-				if (!proxyAddressSet.contains(address)) {
+				if (!filterProxyAddressSet.contains(address)) {
 					result.setDetectionSuccess(true);
 					result.setDetectedAddress(address);
 					result.setDetectedPort(addressPort.getValue());
@@ -167,7 +195,8 @@ public class AddressPortDetector {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Entry<String,Integer> processAddressAndPort(final String candidate) {
+	private Entry<String,Integer> processAddressAndPort(final String value) {
+		final String candidate = value.replace(DOUBLE_QUOTE, "").replace(SQUARE_BRACKET_OPEN, "").replace(SQUARE_BRACKET_CLOSE, "");
 		String strPort = "";
 		int strPortStartIdx = candidate.length();
 		for (int i = candidate.length() - 1 ; i >= 0 ; i--) {
@@ -189,8 +218,7 @@ public class AddressPortDetector {
 			}
 		}
 		
-		String address = candidate.substring(0, Math.max(0, strPortStartIdx - 1));
-		address = address.replace(SQUARE_BRACKET_OPEN, "").replace(SQUARE_BRACKET_CLOSE, "");
+		final String address = candidate.substring(0, Math.max(0, strPortStartIdx - 1));
 		return Map.entry(address, port);
 	}
 }
