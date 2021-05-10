@@ -27,6 +27,8 @@ public class QosMonitorConstants {
 
 	public static final String EXTERNAL_PING_MONITORING_SERVICE_INTERFACE = "HTTP-SECURE-JSON";
 	public static final String EXTERNAL_PING_MONITORING_SERVICE_DEFINITION = "EXTERNALPINGSERVICE";
+
+	public static final String EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI = "/externalpingmonitorevent";
 	//=================================================================================================
 	// assistant methods
 

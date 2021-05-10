@@ -14,6 +14,8 @@
 
 package eu.arrowhead.core.qos.service;
 
+import java.security.PublicKey;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +34,7 @@ import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.internal.CloudAccessListResponseDTO;
@@ -45,8 +48,10 @@ import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.shared.SubscriptionRequestDTO;
 import eu.arrowhead.common.dto.shared.SubscriptionResponseDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.http.HttpService;
+import eu.arrowhead.core.qos.QosMonitorConstants;
 import eu.arrowhead.core.qos.dto.IcmpPingRequest;
 import eu.arrowhead.core.qos.dto.IcmpPingRequestACK;
 import eu.arrowhead.core.qos.service.event.QosMonitorEventType;
@@ -87,6 +92,18 @@ public class QoSMonitorDriver {
 
 	@Autowired
 	private HttpService httpService;
+
+	@Autowired
+	protected SSLProperties sslProperties;
+
+	@Value(CoreCommonConstants.$CORE_SYSTEM_NAME)
+	private String coreSystemName;
+
+	@Value(CoreCommonConstants.$SERVER_ADDRESS)
+	private String coreSystemAddress;
+	
+	@Value(CoreCommonConstants.$SERVER_PORT)
+	private int coreSystemPort;
 
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
@@ -239,37 +256,75 @@ public class QoSMonitorDriver {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	/*default*/ void checkFixedPingMonitorProviderEchoUri() {
+	public void checkFixedPingMonitorProviderEchoUri() {
 		logger.debug("checkFixedPingMonitorProviderEchoUri started...");
 
 		final UriComponents echoUri = createFixedPingMonitorProviderEchoUri();
-		try {
-			httpService.sendRequest(echoUri, HttpMethod.GET, String.class);
-		} catch (final ArrowheadException ex) {
-			throw new ArrowheadException("QoS Monitor can't access External Qos Monitor provider at : " + echoUri );
+
+		int count = 0;
+		boolean echo = false;
+
+		while ( !echo && count < MAX_RETRIES) {
+
+			rest();
+
+			try {
+
+				httpService.sendRequest(echoUri, HttpMethod.GET, String.class);
+
+				echo = true;
+
+			} catch (final Exception ex) {
+				logger.warn("QoS Monitor can't access Fixed External Qos Monitor provider at : " + echoUri );
+
+				count++;
+
+			}
 		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	/*default*/ void subscribeToExternalPingMonitorEvents(final SubscriptionRequestDTO subscriptionTemplate) {
+	public void subscribeToExternalPingMonitorEvents() {
 		logger.debug("subscribeToExternalPingMonitorEvents started...");
 
+		final SubscriptionRequestDTO subscriptionTemplate = getSubscriptionRequestDTOTemplateForFixedExternalPingMonitor();
 		final UriComponents subscriptionUri = getEventHandlerSubscribeUri();
-		try {
-			for (QosMonitorEventType externalPingMonitorEventType : QosMonitorEventType.values()) {
-				subscriptionTemplate.setEventType(externalPingMonitorEventType.name());
 
-				final ResponseEntity<SubscriptionResponseDTO> response = httpService.sendRequest(subscriptionUri, HttpMethod.POST, SubscriptionResponseDTO.class, subscriptionTemplate);
+		int count = 0;
+		boolean subscribedToAll = false; 
 
-				final SubscriptionResponseDTO subscriptionResponse = response.getBody();
-				Assert.isTrue(subscriptionResponse.getEventType().getEventTypeName().equalsIgnoreCase(externalPingMonitorEventType.name()), "Invalid subscriptionResponse event type.");
+		while ( !subscribedToAll && count < MAX_RETRIES) {
+			try {
+				for (final QosMonitorEventType externalPingMonitorEventType : QosMonitorEventType.values()) {
+					subscriptionTemplate.setEventType(externalPingMonitorEventType.name());
 
-				rest();
+					rest();
 
+					final ResponseEntity<SubscriptionResponseDTO> response = httpService.sendRequest(subscriptionUri, HttpMethod.POST, SubscriptionResponseDTO.class, subscriptionTemplate);
+
+					final SubscriptionResponseDTO subscriptionResponse = response.getBody();
+					Assert.isTrue(subscriptionResponse.getEventType().getEventTypeName().equalsIgnoreCase(externalPingMonitorEventType.name()), "Invalid subscriptionResponse event type.");
+
+				}
+
+				subscribedToAll = true;
+
+			} catch (final Exception ex) {
+				logger.warn("QoS Monitor can't access EventHandler.");
+
+				count++;
+
+				if (count < MAX_RETRIES) {
+					logger.warn("Retrying to access EventHandler.");
+				}
 			}
-		} catch (final ArrowheadException ex) {
-			throw new ArrowheadException("QoS Monitor can't access EventHandler.");
 		}
+
+		if (!subscribedToAll) {
+
+			throw new ArrowheadException("QoS Monitor can't subscribe to required events.");
+		}
+
 	}
 
 	//=================================================================================================
@@ -426,10 +481,40 @@ public class QoSMonitorDriver {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	private SubscriptionRequestDTO getSubscriptionRequestDTOTemplateForFixedExternalPingMonitor() {
+		logger.debug("getSubscriptionRequestDTOForFixedExternalPingMonitor started...");
+
+		final SubscriptionRequestDTO requestTemplate = new SubscriptionRequestDTO();
+		requestTemplate.setMatchMetaData(false);
+		requestTemplate.setNotifyUri(QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI);
+		requestTemplate.setSubscriberSystem(getQosMonitorSystemRequestDTO());
+
+		return requestTemplate;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private SystemRequestDTO getQosMonitorSystemRequestDTO() {
+		logger.debug("getQosMonitorSystemRequestDTO started...");
+
+		final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
+
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName(coreSystemName);
+		system.setAddress(coreSystemAddress);
+		system.setPort(coreSystemPort);
+		system.setMetadata(null);
+		if (sslProperties.isSslEnabled()) {
+			system.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+		}
+
+		return system;
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	private void rest() {
 		try {
 			Thread.sleep(SLEEP_PERIOD);
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			logger.warn(e.getMessage());
 		}
 	}

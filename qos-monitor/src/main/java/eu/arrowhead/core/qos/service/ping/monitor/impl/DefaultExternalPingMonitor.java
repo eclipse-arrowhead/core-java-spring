@@ -61,6 +61,12 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
+	public DefaultExternalPingMonitor() {
+
+		initPingMonitorProvider();
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public List<IcmpPingResponse> ping(final String address) {
 		logger.debug("ping statred...");
@@ -85,6 +91,9 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 				receivedMonitoringRequestEventDTO = checkMeasurmentRequestConfirmed(measurementProcessId);
 				if( receivedMonitoringRequestEventDTO != null) {
 					measurmentRequestConfirmed = true;
+
+					logger.info("EVENT: External Ping Measurement request confirmed : " + measurementProcessId);
+
 				}else {
 					break;
 				}
@@ -94,6 +103,9 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 				startedMonitoringMeasurementEventDTO = checkMeasurmentStartedConfirmed(measurementProcessId);
 				if(startedMonitoringMeasurementEventDTO != null) {
 					measurmentStartedConfirmed = true;
+
+					logger.info("EVENT: External Ping Measurement started : " + measurementProcessId);
+
 				}else {
 					break;
 				}
@@ -101,7 +113,7 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 
 			final FinishedMonitoringMeasurementEventDTO measurmentResult = tryToGetMeasurementResult(measurementProcessId);
 			if(measurmentResult != null) {
-				logger.info("External Ping Measurement finished: " + measurementProcessId);
+				logger.info("EVENT: External Ping Measurement finished: " + measurementProcessId);
 
 				return measurmentResult.getPayload();
 			}
@@ -201,6 +213,8 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 				final UUID uuid = UUID.fromString(event.getMetaData().get(QosMonitorConstants.PROCESS_ID_KEY));
 				if(uuid.equals(measurementProcessId)) {
 
+					logger.info("EVENT: External Ping Measurement interupted : " + measurementProcessId);
+
 					final String suspectedRootCauses = event.getMetaData().get(QosMonitorConstants.INTERUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_ROOT_CAUSE_KEY);
 					final String exeptionInExternalMonitoring = event.getMetaData().get(QosMonitorConstants.INTERUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_EXCEPTION_KEY);
 
@@ -232,8 +246,9 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 				final IcmpPingRequestACK acknowledgedMeasurmentRequest = driver.requestExternalPingMonitorService( createIcmpPingRequest(address) );
 				validateAcknowledgedMeasurmentRequest(acknowledgedMeasurmentRequest);
 
-				// TODO persist ack event
 				startedExternalMeasurementProcessId = acknowledgedMeasurmentRequest.getExternalMeasurementUuid();
+
+				logger.info("IcmpPingRequestACK rceived, with process id: " + startedExternalMeasurementProcessId);
 
 			} catch (final ArrowheadException ex) {
 				logger.info(ex);
@@ -287,7 +302,7 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	private void initPingMonitorProvider() {
 		logger.debug("initPingMonitorProvider started...");
 
-		//TODO try echo eventhandler whit timeout and throw exception if not available
-		//TODO try echo fixed pingMonitorProvider and log warning if not available
+		driver.checkFixedPingMonitorProviderEchoUri();
+		driver.subscribeToExternalPingMonitorEvents();
 	}
 }
