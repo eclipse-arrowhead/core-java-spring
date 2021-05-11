@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class FilePdStoreTest {
 
     private final String entryDirectory = "test-temp-data";
+    private final int maxPdBytes = 200000;
 
     private void deleteDirectory(final File dir) {
         final File[] allContents = dir.listFiles();
@@ -39,14 +40,14 @@ public class FilePdStoreTest {
 
     @Test
     public void ShouldReadWithoutEntries() throws PdStoreException {
-        final PdStore store = new FilePdStore(entryDirectory);
+        final PdStore store = new FilePdStore(entryDirectory, maxPdBytes);
         final List<PlantDescriptionEntryDto> storedEntries = store.readEntries();
         assertTrue(storedEntries.isEmpty());
     }
 
     @Test
     public void ShouldWriteEntries() throws PdStoreException {
-        final PdStore store = new FilePdStore(entryDirectory);
+        final PdStore store = new FilePdStore(entryDirectory, maxPdBytes);
         final List<Integer> entryIds = List.of(1, 2, 3);
 
         for (final int id : entryIds) {
@@ -63,7 +64,7 @@ public class FilePdStoreTest {
 
     @Test
     public void ShouldRemoveEntries() throws PdStoreException {
-        final PdStore store = new FilePdStore(entryDirectory);
+        final PdStore store = new FilePdStore(entryDirectory, maxPdBytes);
         final List<Integer> entryIds = List.of(1, 2, 3);
 
         for (final int id : entryIds) {

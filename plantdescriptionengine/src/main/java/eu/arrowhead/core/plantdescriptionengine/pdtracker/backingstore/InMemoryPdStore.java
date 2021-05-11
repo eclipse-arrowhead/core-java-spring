@@ -18,26 +18,17 @@ public class InMemoryPdStore implements PdStore {
     // ID-to-entry map:
     private final Map<Integer, PlantDescriptionEntryDto> entries = new ConcurrentHashMap<>();
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public List<PlantDescriptionEntryDto> readEntries() {
         return new ArrayList<>(entries.values());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void write(final PlantDescriptionEntryDto entry) {
         Objects.requireNonNull(entry, "Expected entry");
         entries.put(entry.id(), entry);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void remove(final int id) {
         entries.remove(id);

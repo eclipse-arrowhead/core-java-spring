@@ -24,6 +24,6 @@ public class GetInventoryIdTest {
             final InventoryId inventoryId = (InventoryId) response.getRawBody();
             assertTrue(inventoryId.id().isEmpty());
         })
-        .onFailure(e -> fail());
+            .onFailure(e -> fail());
     }
 }

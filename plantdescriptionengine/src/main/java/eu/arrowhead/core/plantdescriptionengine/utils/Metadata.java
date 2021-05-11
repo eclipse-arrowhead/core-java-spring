@@ -6,7 +6,8 @@ import java.util.TreeMap;
 
 public final class Metadata {
 
-    private Metadata() {}
+    private Metadata() {
+    }
 
     /**
      * Returns

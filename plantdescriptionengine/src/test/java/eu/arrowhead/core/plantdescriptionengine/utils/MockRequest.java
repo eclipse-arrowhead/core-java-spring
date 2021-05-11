@@ -9,9 +9,6 @@ import se.arkalix.net.http.service.HttpServiceConnection;
 import se.arkalix.net.http.service.HttpServiceRequest;
 import se.arkalix.util.concurrent.Future;
 
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -87,6 +84,11 @@ public class MockRequest implements HttpServiceRequest {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public BodyIncoming body() {
+        throw new UnsupportedOperationException();
+    }
+
     public static class Builder {
         private List<String> pathParameters = new ArrayList<>();
         private Object body;
@@ -113,11 +115,6 @@ public class MockRequest implements HttpServiceRequest {
         public MockRequest build() {
             return new MockRequest(this);
         }
-    }
-
-    @Override
-    public BodyIncoming body() {
-        throw new UnsupportedOperationException();
     }
 
 }

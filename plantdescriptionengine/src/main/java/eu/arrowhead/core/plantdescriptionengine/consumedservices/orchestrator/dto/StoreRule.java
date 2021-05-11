@@ -25,7 +25,7 @@ public interface StoreRule {
 
     String serviceInterfaceName();
 
-    Optional<Map<String, String>> serviceMetadata();
+    Map<String, String> serviceMetadata();
 
     Optional<Integer> priority();
 }

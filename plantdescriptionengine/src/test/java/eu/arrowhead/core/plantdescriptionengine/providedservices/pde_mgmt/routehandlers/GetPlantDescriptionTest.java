@@ -69,8 +69,7 @@ public class GetPlantDescriptionTest {
                     assertEquals(HttpStatus.OK, response.status().orElse(null));
                     final PlantDescriptionEntry returnedEntry = (PlantDescriptionEntry) response.getRawBody();
                     assertEquals(returnedEntry
-                        .id(), entryId, 0); // TODO: Add 'equals' method to entries and do a proper
-                    // comparison?
+                        .id(), entryId, 0); // TODO: Add 'equals' method to entries and do a proper comparison?
                 })
                 .onFailure(Assertions::assertNull);
         } catch (final Exception e) {

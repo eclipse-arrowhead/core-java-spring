@@ -3,6 +3,7 @@ package eu.arrowhead.core.plantdescriptionengine.alarms;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PdeAlarmDto;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -16,10 +17,10 @@ public class Alarm {
     private static final AtomicInteger nextId = new AtomicInteger();
     private static final String unknownId = "Unknown";
 
-    public final int id;
-    public final String systemName;
-    public final String systemId;
-    public final AlarmCause cause;
+    private final int id;
+    private final String systemName;
+    private final String systemId;
+    private final AlarmCause cause;
 
     private final Map<String, String> metadata;
     private final Instant raisedAt;
@@ -31,6 +32,7 @@ public class Alarm {
     Alarm(final String systemId, final String systemName, final Map<String, String> metadata, final AlarmCause cause) {
 
         Objects.requireNonNull(cause, "Expected an alarm cause.");
+        Objects.requireNonNull(metadata, "Expected metadata.");
 
         this.systemId = systemId;
         this.systemName = systemName;
@@ -53,10 +55,11 @@ public class Alarm {
      */
     public boolean matches(final String systemId, final String systemName, final Map<String, String> metadata, final AlarmCause cause) {
         Objects.requireNonNull(cause, "Expected alarm cause.");
+        final Map<String, String> nonNullMetadata = metadata == null ? Collections.emptyMap() : metadata;
         return cause == this.cause &&
             Objects.equals(systemId, this.systemId) &&
             Objects.equals(systemName, this.systemName) &&
-            Objects.equals(metadata, this.metadata);
+            Objects.equals(nonNullMetadata, this.metadata);
     }
 
     /**
@@ -88,13 +91,6 @@ public class Alarm {
     }
 
     /**
-     * @return Metadata of the system that this alarm refers to.
-     */
-    public Map<String, String> getMetadata() {
-        return metadata;
-    }
-
-    /**
      * Changes the 'acknowledged' state of this alarm, noting the time at which
      * this is done.
      */
@@ -110,5 +106,29 @@ public class Alarm {
     public void setCleared() {
         clearedAt = Instant.now();
         updatedAt = clearedAt;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getSystemName() {
+        return systemName;
+    }
+
+    public String getSystemId() {
+        return systemId;
+    }
+
+    public AlarmCause getCause() {
+        return cause;
+    }
+
+    /**
+     * @return Metadata of the system that this alarm refers to. If no metadata
+     * is present, an empty Map is returned; never null.
+     */
+    public Map<String, String> getMetadata() {
+        return metadata;
     }
 }

@@ -32,15 +32,6 @@ public class FileRuleStore implements RuleStore {
     private final String ruleDirectory;
 
     /**
-     * @param plantDescriptionId Plant Description ID
-     * @return File for storing Orchestration rules for the specified Plant
-     *         Description.
-     */
-    private File getRuleFile(final int plantDescriptionId) {
-        return Paths.get(ruleDirectory, String.valueOf(plantDescriptionId)).toFile();
-    }
-
-    /**
      * Class constructor.
      *
      * @param ruleDirectory File path to the directory for storing rules.
@@ -51,10 +42,16 @@ public class FileRuleStore implements RuleStore {
     }
 
     /**
-     * {@inheritDoc}
+     * @param plantDescriptionId Plant Description ID
+     * @return File for storing Orchestration rules for the specified Plant
+     * Description.
      */
+    private File getRuleFile(final int plantDescriptionId) {
+        return Paths.get(ruleDirectory, String.valueOf(plantDescriptionId)).toFile();
+    }
+
     @Override
-    public void setRules(final int plantDescriptionId, final Set<Integer> rules) throws RuleStoreException {
+    public void writeRules(final int plantDescriptionId, final Set<Integer> rules) throws RuleStoreException {
         Objects.requireNonNull(rules, "Expected rules.");
 
         final File file = getRuleFile(plantDescriptionId);
@@ -87,9 +84,6 @@ public class FileRuleStore implements RuleStore {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Set<Integer> readRules(final int plantDescriptionId) throws RuleStoreException {
         final File file = getRuleFile(plantDescriptionId);
@@ -109,9 +103,6 @@ public class FileRuleStore implements RuleStore {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void removeRules(final int plantDescriptionId) throws RuleStoreException {
         final File file = getRuleFile(plantDescriptionId);

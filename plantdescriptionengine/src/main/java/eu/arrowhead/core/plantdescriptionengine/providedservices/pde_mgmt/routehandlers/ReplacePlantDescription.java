@@ -82,6 +82,7 @@ public class ReplacePlantDescription implements HttpRouteHandler {
                     logger.error("Failed to write Plant Description Entry update to backing store.", e);
                     return response.status(HttpStatus.INTERNAL_SERVER_ERROR);
                 }
+
                 return response
                     .status(HttpStatus.CREATED)
                     .body(entry, CodecType.JSON);

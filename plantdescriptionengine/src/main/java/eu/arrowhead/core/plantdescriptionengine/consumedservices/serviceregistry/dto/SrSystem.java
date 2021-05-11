@@ -21,7 +21,7 @@ public interface SrSystem {
 
     Integer id();
 
-    String systemName();
+    String systemName(); // TODO: Should this be optional?
 
     String address();
 
@@ -33,7 +33,7 @@ public interface SrSystem {
 
     Optional<String> updatedAt();
 
-    Optional<Map<String, String>> metadata();
+    Map<String, String> metadata();
 
     default InetSocketAddress getAddress() {
         return new InetSocketAddress(address(), port());

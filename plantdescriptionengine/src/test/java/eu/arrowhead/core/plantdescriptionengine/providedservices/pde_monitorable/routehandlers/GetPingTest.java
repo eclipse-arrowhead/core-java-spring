@@ -24,7 +24,7 @@ public class GetPingTest {
             final Ping ping = (Ping) response.getRawBody();
             assertTrue(ping.ping());
         })
-        .onFailure(e -> fail());
+            .onFailure(e -> fail());
 
     }
 }

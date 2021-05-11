@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 public final class DtoUtils {
@@ -72,7 +71,7 @@ public final class DtoUtils {
 
         final List<MonitorInfo.Bundle> systemInfoList = monitorInfo.getSystemInfo(
             system.systemName().orElse(null),
-            system.metadata().orElse(null)
+            system.metadata()
         );
 
         final List<PortEntryDto> ports = new ArrayList<>();
@@ -89,7 +88,7 @@ public final class DtoUtils {
                 .serviceInterface(port.serviceInterface().orElse(null))
                 .serviceDefinition(port.serviceDefinition())
                 .consumer(isConsumer)
-                .metadata(port.metadata().orElse(null));
+                .metadata(port.metadata());
 
             // Possibly add monitor info to ports where this system is the
             // provider:
@@ -98,8 +97,7 @@ public final class DtoUtils {
                 for (final MonitorInfo.Bundle info : systemInfoList) {
 
                     final boolean matchesServiceDefinition = info.serviceDefinition.equals(port.serviceDefinition());
-                    final boolean matchesPort = port.metadata().isPresent() &&
-                        Metadata.isSubset(port.metadata().get(), info.serviceMetadata);
+                    final boolean matchesPort = Metadata.isSubset(port.metadata(), info.serviceMetadata);
 
                     if (matchesServiceDefinition && matchesPort) {
 
@@ -118,14 +116,13 @@ public final class DtoUtils {
 
         final SystemEntryDto.Builder systemBuilder = new SystemEntryDto.Builder()
             .systemId(system.systemId())
-            .metadata(system.metadata().orElse(null))
+            .metadata(system.metadata())
             .ports(ports);
 
         // If there is any monitor info left, it may belong to the system
         // itself, not a specific port.
         for (final MonitorInfo.Bundle infoBundle : systemInfoList) {
-            final Map<String, String> metadata = system.metadata().orElse(null);
-            if (infoBundle.matchesSystemMetadata(metadata)) {
+            if (infoBundle.matchesSystemMetadata(system.metadata())) {
                 systemBuilder.inventoryId(infoBundle.inventoryId).systemData(infoBundle.systemData);
                 break;
             } else {

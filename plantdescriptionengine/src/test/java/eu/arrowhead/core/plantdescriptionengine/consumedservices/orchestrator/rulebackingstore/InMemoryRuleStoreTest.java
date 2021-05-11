@@ -15,7 +15,7 @@ public class InMemoryRuleStoreTest {
     public void shouldReadRules() {
         final InMemoryRuleStore store = new InMemoryRuleStore();
         final Set<Integer> rules = Set.of(1, 2, 3);
-        store.setRules(plantDescriptionId, rules);
+        store.writeRules(plantDescriptionId, rules);
         final Set<Integer> result = store.readRules(plantDescriptionId);
         assertEquals(rules, result);
     }
@@ -23,7 +23,7 @@ public class InMemoryRuleStoreTest {
     @Test
     public void shouldRemoveRules() {
         final InMemoryRuleStore store = new InMemoryRuleStore();
-        store.setRules(plantDescriptionId, Set.of(1, 2, 3));
+        store.writeRules(plantDescriptionId, Set.of(1, 2, 3));
         store.removeRules(plantDescriptionId);
         final Set<Integer> result = store.readRules(plantDescriptionId);
         assertTrue(result.isEmpty());

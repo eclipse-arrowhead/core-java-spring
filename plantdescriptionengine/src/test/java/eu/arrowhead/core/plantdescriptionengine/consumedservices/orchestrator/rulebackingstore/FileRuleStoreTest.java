@@ -36,7 +36,7 @@ public class FileRuleStoreTest {
         final FileRuleStore store = new FileRuleStore(entryDirectory);
         final Set<Integer> rules = Set.of(1, 2, 3);
 
-        store.setRules(plantDescriptionId, rules);
+        store.writeRules(plantDescriptionId, rules);
 
         final Set<Integer> storedRules = store.readRules(plantDescriptionId);
         assertEquals(rules, storedRules);
@@ -47,7 +47,7 @@ public class FileRuleStoreTest {
         final FileRuleStore store = new FileRuleStore(entryDirectory);
         final Set<Integer> rules = Set.of(1, 2, 3);
 
-        store.setRules(plantDescriptionId, rules);
+        store.writeRules(plantDescriptionId, rules);
         store.removeRules(plantDescriptionId);
 
         final Set<Integer> storedRules = store.readRules(plantDescriptionId);

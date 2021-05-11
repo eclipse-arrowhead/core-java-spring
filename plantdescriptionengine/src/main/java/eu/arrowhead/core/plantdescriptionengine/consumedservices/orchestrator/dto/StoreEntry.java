@@ -30,7 +30,7 @@ public interface StoreEntry {
 
     Integer priority();
 
-    Optional<Map<String, String>> attribute();
+    Map<String, String> attribute();
 
     String createdAt();
 

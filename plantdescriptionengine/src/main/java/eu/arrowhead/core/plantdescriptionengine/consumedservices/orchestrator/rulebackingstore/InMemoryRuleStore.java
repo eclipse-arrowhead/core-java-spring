@@ -13,28 +13,19 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class InMemoryRuleStore implements RuleStore {
 
-    private Map<Integer, Set<Integer>> rulesPerEntry = new ConcurrentHashMap<>();
+    private final Map<Integer, Set<Integer>> rulesPerEntry = new ConcurrentHashMap<>();
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Set<Integer> readRules(final int plantDescriptionId) {
         return rulesPerEntry.getOrDefault(plantDescriptionId, new HashSet<>());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void setRules(final int plantDescriptionId, final Set<Integer> newRules) {
+    public void writeRules(final int plantDescriptionId, final Set<Integer> newRules) {
         Objects.requireNonNull(newRules, "Expected rules.");
         rulesPerEntry.put(plantDescriptionId, newRules);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void removeRules(final int plantDescriptionId) {
         rulesPerEntry.remove(plantDescriptionId);

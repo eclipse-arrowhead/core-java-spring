@@ -18,18 +18,12 @@ public final class StringParameter extends QueryParameter {
     private final List<String> legalValues;
     private final String defaultValue;
 
-    /**
-     * {@inheritDoc}
-     */
     private StringParameter(final Builder builder) {
         super(builder);
         legalValues = builder.legalValues;
         defaultValue = builder.defaultValue;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void parse(final HttpServiceRequest request, final QueryParamParser parser, final boolean required) {
 

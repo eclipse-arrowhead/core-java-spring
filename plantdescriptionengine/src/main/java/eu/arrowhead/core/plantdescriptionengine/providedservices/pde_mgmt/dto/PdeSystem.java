@@ -23,7 +23,7 @@ public interface PdeSystem {
 
     Optional<String> systemName();
 
-    Optional<Map<String, String>> metadata();
+    Map<String, String> metadata();
 
     List<Port> ports();
 

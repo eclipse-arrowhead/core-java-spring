@@ -23,10 +23,11 @@ public interface Port {
 
     Optional<String> serviceInterface();
 
-    Optional<Map<String, String>> metadata();
+    Map<String, String> metadata();
 
     /**
      * Indicates whether this port is used to consume or produce services.
+     * When false or not present, the port is assumed to be a producer.
      */
     Optional<Boolean> consumer();
 }

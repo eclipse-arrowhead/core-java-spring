@@ -20,7 +20,7 @@ public interface PlantDescription {
 
     Optional<Boolean> active();
 
-    Optional<List<Integer>> include();
+    List<Integer> include();
 
     List<PdeSystem> systems();
 

@@ -15,17 +15,11 @@ public class BooleanParameter extends QueryParameter {
 
     private final Boolean defaultValue;
 
-    /**
-     * {@inheritDoc}
-     */
     public BooleanParameter(final Builder builder) {
         super(Objects.requireNonNull(builder, "Expected builder."));
         defaultValue = builder.defaultValue;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void parse(final HttpServiceRequest request, final QueryParamParser parser, final boolean required) {
 

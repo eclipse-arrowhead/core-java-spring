@@ -6,7 +6,6 @@ import se.arkalix.SystemRecord;
 import se.arkalix.codec.json.JsonObject;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -49,7 +48,7 @@ public class MonitorInfo {
         Objects.requireNonNull(service, "Expected inventory ID");
 
         final String systemName = service.provider().name();
-        final Map<String, String> serviceNetadata = service.metadata();
+        final Map<String, String> serviceMetadata = service.metadata();
         final Map<String, String> systemMetadata = service.provider().metadata();
 
         final String key = toKey(service);
@@ -60,7 +59,7 @@ public class MonitorInfo {
             systemName,
             service.name(),
             systemMetadata,
-            serviceNetadata,
+            serviceMetadata,
             systemData,
             inventoryId
         );

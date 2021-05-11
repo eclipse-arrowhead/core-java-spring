@@ -22,6 +22,7 @@ import se.arkalix.core.plugin.or.OrchestrationStrategy;
 import se.arkalix.net.http.client.HttpClient;
 import se.arkalix.security.identity.OwnedIdentity;
 import se.arkalix.security.identity.TrustStore;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -41,7 +42,7 @@ public final class PdeMain {
     private static final Logger logger = LoggerFactory.getLogger(PdeMain.class);
 
     private static final String PDE_SYSTEM_NAME = "plantdescriptionengine";
-    private static final String APP_PROPS_FILENAME=  "application.properties";
+    private static final String APP_PROPS_FILENAME = "application.properties";
 
     /**
      * Helper method for retrieving required properties. If the specified
@@ -96,17 +97,17 @@ public final class PdeMain {
      */
     static ArSystem createArSystem(final Properties appProps, final InetSocketAddress serviceRegistryAddress) {
 
+        final String pdeHostname = getProp(appProps, "server.hostname");
         final int pdePort = Integer.parseInt(getProp(appProps, "server.port"));
 
         final OrchestrationStrategy strategy = new OrchestrationStrategy(
             new OrchestrationPattern().isIncludingService(true)
-                .option(OrchestrationOption.METADATA_SEARCH, false)
                 .option(OrchestrationOption.PING_PROVIDERS, true)
                 .option(OrchestrationOption.OVERRIDE_STORE, false));
 
         final ArSystem.Builder systemBuilder = new ArSystem.Builder()
             .serviceCache(ArServiceRecordCache.withEntryLifetimeLimit(Duration.ZERO))
-            .localPort(pdePort)
+            .localHostnamePort(pdeHostname, pdePort)
             .plugins(new HttpJsonCloudPlugin.Builder()
                 .orchestrationStrategy(strategy)
                 .serviceRegistrySocketAddress(serviceRegistryAddress)
@@ -294,20 +295,21 @@ public final class PdeMain {
         final String serviceRegistryIp = getProp(appProps, "service_registry.address");
         final int serviceRegistryPort = Integer.parseInt(getProp(appProps, "service_registry.port"));
         final InetSocketAddress serviceRegistryAddress = new InetSocketAddress(serviceRegistryIp, serviceRegistryPort);
+        final int systemPollInterval = Integer.parseInt(getProp(appProps, "system_poll_interval"));
 
         final HttpClient httpClient = createHttpClient(appProps);
+        final SystemTracker systemTracker = new SystemTracker(httpClient, serviceRegistryAddress, systemPollInterval);
 
-        final SystemTracker systemTracker = new SystemTracker(httpClient, serviceRegistryAddress);
-
-        logger.info("Start polling Service Registry for systems...");
+        logger.info("Contacting Service Registry...");
         systemTracker.start()
             .flatMap(result -> {
 
                 final String ruleDirectory = getProp(appProps, "orchestration_rules");
                 final String plantDescriptionsDirectory = getProp(appProps, "plant_descriptions");
-                final PdStore pdStore = new FilePdStore(plantDescriptionsDirectory);
+                final int maxPdBytes = Integer.parseInt(getProp(appProps, "plant_description_max_size"));
+                final PdStore pdStore = new FilePdStore(plantDescriptionsDirectory, maxPdBytes);
                 final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(pdStore);
-                final SrSystem orchestrator = systemTracker.getSystem("orchestrator", null);
+                final SrSystem orchestrator = systemTracker.getSystem("orchestrator");
 
                 if (orchestrator == null) {
                     throw new RuntimeException("Could not find Orchestrator in the Service Registry.");

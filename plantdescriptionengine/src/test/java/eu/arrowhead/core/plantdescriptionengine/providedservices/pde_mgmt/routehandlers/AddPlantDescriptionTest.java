@@ -14,6 +14,7 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Pl
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PortDto;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockRequest;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockServiceResponse;
+import eu.arrowhead.core.plantdescriptionengine.utils.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -191,7 +193,41 @@ public class AddPlantDescriptionTest {
         } catch (final Exception e) {
             fail();
         }
+    }
 
+    @Test
+    public void shouldDeactivateOldActive() throws PdStoreException {
+        final int initiallyActiveId = 18;
+
+        final PlantDescriptionEntryDto initiallyActiveEntry = TestUtils.createEntry(initiallyActiveId);
+        final PlantDescriptionDto newDescription = new PlantDescriptionDto.Builder()
+            .plantDescription("XYZ")
+            .active(true)
+            .build();
+
+        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
+        final AddPlantDescription handler = new AddPlantDescription(pdTracker);
+
+        pdTracker.put(initiallyActiveEntry);
+
+        final MockRequest request = new MockRequest.Builder()
+            .body(newDescription)
+            .build();
+
+        final MockServiceResponse response = new MockServiceResponse();
+
+        try {
+            handler.handle(request, response).ifSuccess(result -> {
+
+                final PlantDescriptionEntryDto newEntry = (PlantDescriptionEntryDto) response.getRawBody();
+                final int newId = newEntry.id();
+                assertFalse(pdTracker.get(initiallyActiveId).active());
+                assertTrue(pdTracker.get(newId).active());
+
+            }).onFailure(Assertions::assertNull);
+        } catch (final Exception e) {
+            fail();
+        }
     }
 
 }

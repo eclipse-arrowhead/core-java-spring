@@ -19,7 +19,6 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto
 import eu.arrowhead.core.plantdescriptionengine.utils.MockRequest;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockServiceResponse;
 import eu.arrowhead.core.plantdescriptionengine.utils.TestUtils;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import se.arkalix.ServiceInterface;
@@ -31,6 +30,7 @@ import se.arkalix.codec.json.JsonPair;
 import se.arkalix.net.http.HttpStatus;
 import se.arkalix.net.http.service.HttpServiceRequest;
 import se.arkalix.security.access.AccessPolicyType;
+
 import java.net.InetSocketAddress;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -190,7 +190,7 @@ public class GetAllPlantDescriptionsTest {
 
                 final PortEntry retrievedPort = retrievedSystem.ports().get(0);
                 assertEquals(isConsumer, retrievedPort.consumer().orElse(false));
-                assertEquals(metadata, retrievedPort.metadata().orElse(null));
+                assertEquals(metadata, retrievedPort.metadata());
                 assertEquals(portName, retrievedPort.portName());
                 assertEquals(serviceDefinition, retrievedPort.serviceDefinition());
 
@@ -232,7 +232,7 @@ public class GetAllPlantDescriptionsTest {
             .build();
 
         final String inventoryId = "system_a_inventory_id";
-        final JsonObject systemData = new JsonObject(List.of(new JsonPair("a", JsonBoolean.TRUE)));
+        final JsonObject systemData = new JsonObject(new JsonPair("a", JsonBoolean.TRUE));
 
         final MonitorInfo monitorInfo = new MonitorInfo();
         monitorInfo.putInventoryId(ServiceRecord, inventoryId);

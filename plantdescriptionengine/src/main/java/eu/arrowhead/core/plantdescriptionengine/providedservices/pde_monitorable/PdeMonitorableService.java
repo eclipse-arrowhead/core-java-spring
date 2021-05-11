@@ -1,6 +1,5 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitorable;
 
-import java.util.Objects;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.CodecExceptionCatcher;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitorable.routehandlers.GetInventoryId;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitorable.routehandlers.GetPing;
@@ -9,6 +8,8 @@ import se.arkalix.codec.CodecException;
 import se.arkalix.codec.CodecType;
 import se.arkalix.net.http.service.HttpService;
 import se.arkalix.security.access.AccessPolicy;
+
+import java.util.Objects;
 
 
 /**
@@ -21,12 +22,10 @@ public class PdeMonitorableService {
     private static final String INVENTORY_ID_PATH = "/inventoryid";
     private static final String PING_PATH = "/ping";
     private static final String SYSTEM_DATA_PATH = "/systemdata";
-
-    private final String systemName;
     final boolean secure;
+    private final String systemName;
 
     /**
-     *
      * @param systemName Name of the system running the service.
      * @param secure     Specifies whether or not to run the service in secure
      *                   mode.

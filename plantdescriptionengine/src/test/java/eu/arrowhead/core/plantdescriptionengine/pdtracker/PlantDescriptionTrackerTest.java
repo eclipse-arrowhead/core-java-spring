@@ -163,10 +163,25 @@ public class PlantDescriptionTrackerTest {
             .build();
 
         pdTracker.put(entryA);
-
         assertTrue(pdTracker.get(idA).active());
+
         pdTracker.put(entryB);
         assertFalse(pdTracker.get(idA).active());
+        assertTrue(pdTracker.get(idB).active());
+
+        // Check that the change is reflected in the backing store as well:
+        final List<PlantDescriptionEntryDto> entries = store.readEntries();
+        PlantDescriptionEntryDto storedEntryA = entries.stream()
+            .filter(entry -> entry.id() == idA)
+            .findAny()
+            .orElse(null);
+        PlantDescriptionEntryDto storedEntryB = entries.stream()
+            .filter(entry -> entry.id() == idB)
+            .findAny()
+            .orElse(null);
+
+        assertFalse(storedEntryA.active());
+        assertTrue(storedEntryB.active());
     }
 
     @Test
@@ -228,6 +243,7 @@ public class PlantDescriptionTrackerTest {
 
         pdTracker.addListener(listener);
         pdTracker.put(TestUtils.createEntry(idA));
+
         // "Update" the entry by putting an identical copy in the tracker.
         pdTracker.put(TestUtils.createEntry(idA));
 
@@ -742,15 +758,18 @@ public class PlantDescriptionTrackerTest {
         }
 
         @Override
-        public void onPlantDescriptionUpdated(final PlantDescriptionEntry entry) {
-            lastUpdated = entry;
-            numUpdated++;
-        }
-
-        @Override
         public void onPlantDescriptionRemoved(final PlantDescriptionEntry entry) {
             lastRemoved = entry;
             numRemoved++;
+        }
+
+        @Override
+        public void onPlantDescriptionUpdated(
+            PlantDescriptionEntry updatedEntry,
+            PlantDescriptionEntry oldEntry
+        ) {
+            lastUpdated = updatedEntry;
+            numUpdated++;
         }
     }
 
