@@ -102,8 +102,8 @@ public class CoreCommonConstants {
 	public static final String $USE_STRICT_SERVICE_INTF_NAME_VERIFIER_WD = "${" + USE_STRICT_SERVICE_INTF_NAME_VERIFIER + ":" + CoreDefaults.DEFAULT_USE_STRICT_SERVICE_INTF_NAME_VERIFIER + "}";
 	public static final String USE_STRICT_SERVICE_DEFINITION_VERIFIER = "use_strict_service_definition_verifier";
 	public static final String $USE_STRICT_SERVICE_DEFINITION_VERIFIER_WD = "${" + USE_STRICT_SERVICE_DEFINITION_VERIFIER + ":" + CoreDefaults.DEFAULT_USE_STRICT_SERVICE_DEFINITION_VERIFIER + "}";
-	public static final String USE_ADDRESS_PORT_DETECTOR = "use_address_port_detector";
-	public static final String $USE_ADDRESS_PORT_DETECTOR_WD = "${" + USE_ADDRESS_PORT_DETECTOR + ":" + CoreDefaults.DEFAULT_USE_ADDRESS_PORT_DETECTOR + "}";
+	public static final String USE_NETWORK_ADDRRESS_DETECTOR = "use_network_address_detector";
+	public static final String $USE_NETWORK_ADDRESS_DETECTOR_WD = "${" + USE_NETWORK_ADDRRESS_DETECTOR + ":" + CoreDefaults.DEFAULT_USE_NETWORK_ADDRESS_DETECTOR + "}";
 	public static final String FILTER_PROXY_ADDRESSES = "filter_proxy_addresses";
 	public static final String $FILTER_PROXY_ADDRESSES = "${" + "filter_proxy_addresses" + "}";
 	public static final String ALLOW_SELF_ADDRESSING = "allow_self_addressing";

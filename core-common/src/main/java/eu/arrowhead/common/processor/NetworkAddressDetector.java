@@ -1,16 +1,14 @@
 package eu.arrowhead.common.processor;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,18 +18,16 @@ import org.springframework.stereotype.Component;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.common.processor.model.AddressPortDetectionResult;
+import eu.arrowhead.common.processor.model.AddressDetectionResult;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 
 @Component
-public class AddressPortDetector {
+public class NetworkAddressDetector {
 	
-	//If the core system is running behind a load balancer proxy for example, than it would detect the IP-Port of the proxy
-
 	//=================================================================================================
 	// methods
 	
-	@Value(CoreCommonConstants.$USE_ADDRESS_PORT_DETECTOR_WD)
+	@Value(CoreCommonConstants.$USE_NETWORK_ADDRESS_DETECTOR_WD)
 	private boolean useDetector;
 	
 	@Value(CoreCommonConstants.$FILTER_PROXY_ADDRESSES)
@@ -47,6 +43,7 @@ public class AddressPortDetector {
 	private static final String HEADER_FORWARDED = "forwarded";
 	private static final String HEADER_X_FORWARDED_FOR = "x-forwarded-for";
 	
+	private static final String DOT = ".";
 	private static final String COMMA = ",";
 	private static final String COLON = ":";
 	private static final String SEMI_COLON = ";";
@@ -54,13 +51,14 @@ public class AddressPortDetector {
 	private static final String SQUARE_BRACKET_OPEN = "[";
 	private static final String SQUARE_BRACKET_CLOSE = "]";
 	private static final String EQUAL_SIGN = "]";
-	private static final int MAX_PORT_LENGTH = 5;
+	private static final int IPV4_DOT_NUMBER = 3;
 	
-	private final Logger logger = LogManager.getLogger(AddressPortDetector.class);
+	private final Logger logger = LogManager.getLogger(NetworkAddressDetector.class);
 	
 	//-------------------------------------------------------------------------------------------------
-	public AddressPortDetectionResult detect(final HttpServletRequest servletRequest) { // TODO junit
-		final AddressPortDetectionResult result = new AddressPortDetectionResult();
+	public AddressDetectionResult detect(final HttpServletRequest servletRequest) { // TODO junit
+		logger.debug("detect started...");
+		final AddressDetectionResult result = new AddressDetectionResult();
 		
 		if (!useDetector || servletRequest == null) {
 			result.setSkipped(true);
@@ -98,28 +96,28 @@ public class AddressPortDetector {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private boolean retrieveFromConnector(final HttpServletRequest servletRequest, final AddressPortDetectionResult result) {
-		final String remoteAddr = networkAddressPreProcessor.normalize(servletRequest.getRemoteAddr());
-		final int remotePort = servletRequest.getRemotePort();
+	private boolean retrieveFromConnector(final HttpServletRequest servletRequest, final AddressDetectionResult result) {
+		String remoteAddr = networkAddressPreProcessor.normalize(servletRequest.getRemoteAddr());
+		
+		if (remoteAddr.equals(NetworkAddressVerifier.IPV4_PLACEHOLDER) ||
+			remoteAddr.startsWith(NetworkAddressVerifier.IPV4_LOOPBACK_1ST_OCTET) ||
+			remoteAddr.equals(NetworkAddressVerifier.IPV6_LOOPBACK) ||
+			remoteAddr.equals(NetworkAddressVerifier.IPV6_UNSPECIFIED)) {
+			
+			remoteAddr = networkAddressPreProcessor.normalize(servletRequest.getLocalAddr());
+		}
 		
 		if (Utilities.isEmpty(remoteAddr) || filterProxyAddressSet.contains(remoteAddr)) {
 			return false;
 		} else {
 			result.setDetectedAddress(remoteAddr);
-		}
-		
-		if (remotePort <= 0) {
-			return false;
-		} else {
-			result.setDetectedPort(remotePort);
-		}
-		
-		result.setDetectionSuccess(true);
-		return true;
+			result.setDetectionSuccess(true);
+			return true;
+		}		
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private boolean detectByHeaderForwarded(final HttpServletRequest servletRequest, final AddressPortDetectionResult result) {
+	private boolean detectByHeaderForwarded(final HttpServletRequest servletRequest, final AddressDetectionResult result) {
 		//https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded
 		//https://tools.ietf.org/html/rfc7230#section-3.2
 		final List<String> headerValues = Collections.list(servletRequest.getHeaders(HEADER_FORWARDED));
@@ -134,22 +132,10 @@ public class AddressPortDetector {
 						return false;
 					}
 					
-					final Entry<String, Integer> addressPort = processAddressAndPort(split[1]);
-					final String address = networkAddressPreProcessor.normalize(addressPort.getKey());
-					final Integer port = addressPort.getValue();
-					
-					if (port == null) {
-						if (filterProxyAddressSet.contains(address)) {
-							continue;
-						}
-						return false;
-						
-					}
-					
+					final String address = processAddress(split[1]);
 					if (!filterProxyAddressSet.contains(address)) {
 						result.setDetectionSuccess(true);
 						result.setDetectedAddress(address);
-						result.setDetectedPort(addressPort.getValue());
 						return true;
 					}
 				}
@@ -160,7 +146,7 @@ public class AddressPortDetector {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private boolean detectByHeaderXForwardedFor(final HttpServletRequest servletRequest, final AddressPortDetectionResult result) {
+	private boolean detectByHeaderXForwardedFor(final HttpServletRequest servletRequest, final AddressDetectionResult result) {
 		//https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
 		final List<String> headerValues = Collections.list(servletRequest.getHeaders(HEADER_X_FORWARDED_FOR));
 		for (int i = headerValues.size() - 1; i >= 0; i--) {
@@ -170,22 +156,10 @@ public class AddressPortDetector {
 					return false;
 				}
 				
-				final Entry<String, Integer> addressPort = processAddressAndPort(subValues[j]);
-				final String address = networkAddressPreProcessor.normalize(addressPort.getKey());
-				final Integer port = addressPort.getValue();
-				
-				if (port == null) {
-					if (filterProxyAddressSet.contains(address)) {
-						continue;
-					}
-					return false;
-					
-				}
-				
+				final String address = processAddress(subValues[j]);
 				if (!filterProxyAddressSet.contains(address)) {
 					result.setDetectionSuccess(true);
 					result.setDetectedAddress(address);
-					result.setDetectedPort(addressPort.getValue());
 					return true;
 				}				
 			}
@@ -195,30 +169,35 @@ public class AddressPortDetector {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Entry<String,Integer> processAddressAndPort(final String value) {
-		final String candidate = value.replace(DOUBLE_QUOTE, "").replace(SQUARE_BRACKET_OPEN, "").replace(SQUARE_BRACKET_CLOSE, "");
-		String strPort = "";
-		int strPortStartIdx = candidate.length();
-		for (int i = candidate.length() - 1 ; i >= 0 ; i--) {
-			final String character = String.valueOf(candidate.charAt(i));
-			if (!NumberUtils.isCreatable(character)) {
+	private String processAddress(final String value) {
+		final StringBuilder sb = new StringBuilder();
+		int dotCtn = 0;
+		final List<Integer> colonIdxList = new ArrayList<>();
+		for (int i = 0; i < value.length(); i++) {
+			final String ch = String.valueOf(value.charAt(i));
+			
+			if (DOUBLE_QUOTE.equals(ch) || SQUARE_BRACKET_OPEN.equals(ch)) {
+				continue;
+			}
+			if (SQUARE_BRACKET_CLOSE.equals(ch)) {
 				break;
-			} else {
-				strPort = character + strPort;
-				strPortStartIdx = i;
 			}
+			if (DOT.equals(ch)) {
+				dotCtn++;
+			}
+			if (COLON.equals(ch)) {
+				colonIdxList.add(i);
+			}
+			sb.append(ch);
 		}
 		
-		Integer port = null;
-		if (!Utilities.isEmpty(strPort) && strPort.length() <= MAX_PORT_LENGTH) {		
-			try {
-				port = NumberUtils.createInteger(strPort);				
-			} catch (final NumberFormatException ex) {
-				logger.debug(ex);
-			}
+		String address;
+		if (dotCtn == IPV4_DOT_NUMBER && colonIdxList.size() == 1) {
+			address = sb.substring(0, Math.max(0, colonIdxList.get(0) - 1));
+		} else {
+			address = sb.toString();			
 		}
 		
-		final String address = candidate.substring(0, Math.max(0, strPortStartIdx - 1));
-		return Map.entry(address, port);
+		return networkAddressPreProcessor.normalize(address);
 	}
 }

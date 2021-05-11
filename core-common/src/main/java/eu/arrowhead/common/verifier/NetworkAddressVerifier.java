@@ -42,15 +42,15 @@ public class NetworkAddressVerifier {
 		ipv6Pattern = Pattern.compile(IPV6_REGEX_STRING);
 	}
 	
-	private static final String IPV4_PLACEHOLDER = "0.0.0.0";
-	private static final String IPV4_LOOPBACK_1ST_OCTET = "127";
+	public static final String IPV4_PLACEHOLDER = "0.0.0.0";
+	public static final String IPV4_LOOPBACK_1ST_OCTET = "127";
 	private static final String IPV4_APIPA_1ST_AND_2ND_OCTET = "169.254";
 	private static final String IPV4_LOCAL_BROADCAST = "255.255.255.255";
 	private static final int IPV4_MULTICAST_1ST_OCTET_START = 224;
 	private static final int IPV4_MULTICAST_1ST_OCTET_END = 239;
 	
-	private static final String IPV6_UNSPECIFIED = "0000:0000:0000:0000:0000:0000:0000:0000";
-	private static final String IPV6_LOOPBACK = "0000:0000:0000:0000:0000:0000:0000:0001";
+	public static final String IPV6_UNSPECIFIED = "0000:0000:0000:0000:0000:0000:0000:0000";
+	public static final String IPV6_LOOPBACK = "0000:0000:0000:0000:0000:0000:0000:0001";
 	private static final String IPV6_LINK_LOCAL_PREFIX = "fe80";
 	private static final String IPV6_MULTICAST_PREFIX = "ff";
 	

@@ -69,9 +69,9 @@ import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.common.processor.AddressPortDetector;
+import eu.arrowhead.common.processor.NetworkAddressDetector;
 import eu.arrowhead.common.processor.NetworkAddressPreProcessor;
-import eu.arrowhead.common.processor.model.AddressPortDetectionResult;
+import eu.arrowhead.common.processor.model.AddressDetectionResult;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.common.verifier.ServiceInterfaceNameVerifier;
@@ -186,13 +186,13 @@ public class ServiceRegistryController {
 	private CommonNamePartVerifier cnVerifier;
 	
 	@Autowired
-	private AddressPortDetector addressPortDetector;
-	
-	@Autowired
 	private NetworkAddressPreProcessor networkAddressPreProcessor;
 	
 	@Autowired
 	private NetworkAddressVerifier networkAddressVerifier;
+	
+	@Autowired
+	private NetworkAddressDetector networkAddressDetector;
 	
 	@Value(CoreCommonConstants.$USE_STRICT_SERVICE_DEFINITION_VERIFIER_WD)
 	private boolean useStrictServiceDefinitionVerifier;
@@ -349,13 +349,14 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@DeleteMapping(path = CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI)
-	@ResponseBody public void unregisterSystem(@RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME) final String systemName,
-											   @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS) final String address,
-											   @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT) final Integer port) {
+	@ResponseBody public void unregisterSystem(final HttpServletRequest servletRequest,
+											   @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME) final String systemName,
+											   @RequestParam(name = CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS, required = false) final String address,
+											   @RequestParam(name = CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT) final int port) {
 		logger.debug("System removal request received");
 		
-		checkUnregisterSystemParameters(systemName, address, port);
-		serviceRegistryDBService.removeSystemByNameAndAddressAndPort(systemName, address, port);		
+		final String checkedAddress = checkUnregisterSystemParameters(servletRequest, systemName, address, port);
+		serviceRegistryDBService.removeSystemByNameAndAddressAndPort(systemName, checkedAddress, port);		
 		logger.debug("{} successfully removed itself", systemName);
 	}
 	
@@ -789,15 +790,16 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@DeleteMapping(path = CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_URI)
-	public void unregisterService(@RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION) final String serviceDefinition,
+	public void unregisterService(final HttpServletRequest servletRequest, 
+								  @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION) final String serviceDefinition,
 								  @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME) final String providerName,
-								  @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS) final String providerAddress,
+								  @RequestParam(name = CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS, required = false) final String providerAddress,
 								  @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT) final int providerPort,
 								  @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_URI) final String serviceUri) {
 		logger.debug("Service removal request received");
-		checkUnregisterServiceParameters(serviceDefinition, providerName, providerAddress, providerPort);
+		final String checkedAddress = checkUnregisterServiceParameters(servletRequest, serviceDefinition, providerName, providerAddress, providerPort);
 		
-		serviceRegistryDBService.removeServiceRegistry(serviceDefinition, providerName, providerAddress, providerPort, serviceUri);
+		serviceRegistryDBService.removeServiceRegistry(serviceDefinition, providerName, checkedAddress, providerPort, serviceUri);
 		logger.debug("{} successfully removed its service {} ({})", providerName, serviceDefinition, serviceUri);
 	}
 	
@@ -1209,21 +1211,6 @@ public class ServiceRegistryController {
 			throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		try {			
-			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(dto.getAddress()));
-		} catch (final InvalidParameterException ex) {
-			final AddressPortDetectionResult detectionResult = addressPortDetector.detect(servletRequest);
-			if (detectionResult.isSkipped()) {
-				throw new BadPayloadException(ex.getMessage() + " " + detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);				
-			}
-			if (!detectionResult.isDetectionSuccess()) {
-				throw new BadPayloadException(detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);
-			} else {
-				dto.setAddress(detectionResult.getDetectedAddress());
-				dto.setPort(detectionResult.getDetectedPort());
-			}
-		}
-		
 		if (dto.getPort() == null) {
 			throw new BadPayloadException(SYSTEM_PORT_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
@@ -1231,6 +1218,20 @@ public class ServiceRegistryController {
 		final int validatedPort = dto.getPort();
 		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
 			throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		try {			
+			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(dto.getAddress()));
+		} catch (final InvalidParameterException ex) {
+			final AddressDetectionResult detectionResult = networkAddressDetector.detect(servletRequest);
+			if (detectionResult.isSkipped()) {
+				throw new BadPayloadException(ex.getMessage() + " " + detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);				
+			}
+			if (!detectionResult.isDetectionSuccess()) {
+				throw new BadPayloadException(detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);
+			} else {
+				dto.setAddress(detectionResult.getDetectedAddress());
+			}
 		}
 	}
 	
@@ -1302,9 +1303,9 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkUnregisterSystemParameters(final String systemName, final String address, final int port) {
+	private String checkUnregisterSystemParameters(final HttpServletRequest servletRequest, final String systemName, final String address, final int port) {
 		// parameters can't be null, but can be empty
-		logger.debug("checkUnregisterSystemParameters started...");
+		logger.debug("checkUnregisterSystemParameters started...");		
 		
 		final String origin = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI;
 		if (Utilities.isEmpty(systemName)) {
@@ -1314,20 +1315,31 @@ public class ServiceRegistryController {
 		if (!cnVerifier.isValid(systemName)) {
 			throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
-		
-		try {
-			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(address));
-		} catch (final InvalidParameterException ex) {
-			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, origin);
-		}
-		
+
 		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
 			throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
 		}
+		
+		String checkedAddress = address;
+		try {
+			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(checkedAddress));
+		} catch (final InvalidParameterException ex) {
+			final AddressDetectionResult detectionResult = networkAddressDetector.detect(servletRequest);
+			if (detectionResult.isSkipped()) {
+				throw new BadPayloadException(ex.getMessage() + " " + detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);				
+			}
+			if (!detectionResult.isDetectionSuccess()) {
+				throw new BadPayloadException(detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);
+			} else {
+				checkedAddress = detectionResult.getDetectedAddress();
+			}
+		}
+		
+		return checkedAddress;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkUnregisterServiceParameters(final String serviceDefinition, final String providerName, final String providerAddress, final int providerPort) {
+	private String checkUnregisterServiceParameters(final HttpServletRequest servletRequest, final String serviceDefinition, final String providerName, final String providerAddress, final int providerPort) {
 		// parameters can't be null, but can be empty
 		logger.debug("checkUnregisterServiceParameters started...");
 		
@@ -1347,16 +1359,27 @@ public class ServiceRegistryController {
 		if (!cnVerifier.isValid(providerName)) {
 			throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
-		
-		try {
-			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(providerAddress));
-		} catch (final Exception ex) {
-			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, origin);
-		}
-		
+
 		if (providerPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || providerPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
 			throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
 		}
+		
+		String checkedAddress = providerAddress;
+		try {
+			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(checkedAddress));
+		} catch (final InvalidParameterException ex) {
+			final AddressDetectionResult detectionResult = networkAddressDetector.detect(servletRequest);
+			if (detectionResult.isSkipped()) {
+				throw new BadPayloadException(ex.getMessage() + " " + detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);				
+			}
+			if (!detectionResult.isDetectionSuccess()) {
+				throw new BadPayloadException(detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);
+			} else {
+				checkedAddress = detectionResult.getDetectedAddress();
+			}
+		}		
+		
+		return checkedAddress;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
