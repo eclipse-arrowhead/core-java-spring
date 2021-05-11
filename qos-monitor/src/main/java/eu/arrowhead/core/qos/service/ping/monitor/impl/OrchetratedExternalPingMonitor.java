@@ -266,7 +266,7 @@ public class OrchetratedExternalPingMonitor extends AbstractPingMonitor{
 				validateAcknowledgedMeasurmentRequest(acknowledgedMeasurmentRequest);
 
 				startedExternalMeasurementProcessId = acknowledgedMeasurmentRequest.getExternalMeasurementUuid();
-				logger.info("IcmpPingRequestACK rceived, with process id: " + startedExternalMeasurementProcessId);
+				logger.info("IcmpPingRequestACK received, with process id: " + startedExternalMeasurementProcessId);
 
 			} catch (final ArrowheadException ex) {
 				logger.info(ex);
