@@ -250,30 +250,17 @@ public class QoSMonitorDriver {
 		Assert.notNull(form, "form is null.");
 
 		final UriComponents orchestrationProcessUri = getOrchestrationProcessUri();
-		int count = 0;
+		try {
 
-		while ( count < MAX_RETRIES) {
+			final ResponseEntity<OrchestrationResponseDTO> response = httpService.sendRequest(orchestrationProcessUri, HttpMethod.POST, OrchestrationResponseDTO.class, form);
 
-			rest();
+			return response.getBody();
 
-			try {
+		} catch (final Exception ex) {
 
-				final ResponseEntity<OrchestrationResponseDTO> response = httpService.sendRequest(orchestrationProcessUri, HttpMethod.POST, OrchestrationResponseDTO.class, form);
-
-				return response.getBody();
-
-			} catch (final Exception ex) {
-				logger.warn("QoS Monitor can't access Orchestrator.");
-
-				count++;
-
-				if (count < MAX_RETRIES) {
-					logger.warn("Retrying to access Orchestrator.");
-				}
-			}
+			throw new ArrowheadException("QoS Monitor can't access Orchestrator.");
 		}
 
-		throw new ArrowheadException("QoS Monitor can't access Orchestrator.");
 	}
 
 	//-------------------------------------------------------------------------------------------------
