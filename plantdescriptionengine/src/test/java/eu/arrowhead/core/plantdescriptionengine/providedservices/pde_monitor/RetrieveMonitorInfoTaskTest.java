@@ -7,7 +7,6 @@ import eu.arrowhead.core.plantdescriptionengine.utils.MockClientResponse;
 import eu.arrowhead.core.plantdescriptionengine.utils.RequestMatcher;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
 import se.arkalix.ServiceRecord;
 import se.arkalix.SystemRecord;
 import se.arkalix.codec.json.JsonBoolean;
@@ -51,7 +50,7 @@ public class RetrieveMonitorInfoTaskTest {
                 .id("ABC")
                 .build());
 
-        final JsonObject systemData = new JsonObject(List.of(new JsonPair("a", JsonBoolean.TRUE)));
+        final JsonObject systemData = new JsonObject(new JsonPair("a", JsonBoolean.TRUE));
         final MockClientResponse systemDataResponse = new MockClientResponse()
             .status(HttpStatus.OK)
             .body(new SystemDataDto.Builder()
@@ -60,9 +59,6 @@ public class RetrieveMonitorInfoTaskTest {
         final SystemRecord provider = Mockito.mock(SystemRecord.class);
         final InetSocketAddress address = new InetSocketAddress("1.1.1.1", 8443);
         when(serviceQuery.name("monitorable")).thenReturn(serviceQuery);
-        // TODO: The lines below do not work with ar:kalix 0.6
-        // when(serviceQuery.transports(TransportDescriptor.HTTP)).thenReturn(serviceQuery);
-        // when(serviceQuery.encodings(EncodingDescriptor.JSON)).thenReturn(serviceQuery);
         when(service.provider()).thenReturn(provider);
         when(service.uri()).thenReturn(serviceUri);
         when(provider.name()).thenReturn(systemName);
@@ -125,7 +121,7 @@ public class RetrieveMonitorInfoTaskTest {
         final Set<ServiceRecord> services = Set.of(service);
         final Future<Set<ServiceRecord>> resolveResult = Future.success(services);
 
-        final JsonObject systemData = new JsonObject(List.of(new JsonPair("a", JsonBoolean.TRUE)));
+        final JsonObject systemData = new JsonObject(new JsonPair("a", JsonBoolean.TRUE));
         final MockClientResponse systemDataResponse = new MockClientResponse()
             .status(HttpStatus.OK)
             .body(new SystemDataDto.Builder()
@@ -134,9 +130,6 @@ public class RetrieveMonitorInfoTaskTest {
         final SystemRecord provider = Mockito.mock(SystemRecord.class);
         final InetSocketAddress address = new InetSocketAddress("1.1.1.1", 8443);
         when(serviceQuery.name("monitorable")).thenReturn(serviceQuery);
-        // TODO: The lines below do not work with ar:kalix 0.6
-        // when(serviceQuery.transports(TransportDescriptor.HTTP)).thenReturn(serviceQuery);
-        // when(serviceQuery.encodings(EncodingDescriptor.JSON)).thenReturn(serviceQuery);
         when(service.provider()).thenReturn(provider);
         when(service.uri()).thenReturn(serviceUri);
         when(provider.name()).thenReturn(systemName);
@@ -189,9 +182,6 @@ public class RetrieveMonitorInfoTaskTest {
         final SystemRecord provider = Mockito.mock(SystemRecord.class);
         final InetSocketAddress address = new InetSocketAddress("1.1.1.1", 8443);
         when(serviceQuery.name("monitorable")).thenReturn(serviceQuery);
-        // TODO: The lines below do not work with ar:kalix 0.6
-        // when(serviceQuery.transports(TransportDescriptor.HTTP)).thenReturn(serviceQuery);
-        // when(serviceQuery.encodings(EncodingDescriptor.JSON)).thenReturn(serviceQuery);
         when(service.provider()).thenReturn(provider);
         when(service.uri()).thenReturn(serviceUri);
         when(provider.name()).thenReturn(systemName);

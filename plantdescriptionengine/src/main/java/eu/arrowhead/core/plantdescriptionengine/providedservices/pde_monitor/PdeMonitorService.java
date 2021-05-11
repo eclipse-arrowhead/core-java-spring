@@ -93,7 +93,7 @@ public class PdeMonitorService {
             .codecTypes(CodecType.JSON)
             .protocolTypes(ProtocolType.HTTP);
 
-        pingTask = new PingTask(serviceQuery, httpClient, alarmManager);
+        pingTask = new PingTask(serviceQuery, httpClient, alarmManager, pdTracker);
         retrieveMonitorInfoTask = new RetrieveMonitorInfoTask(serviceQuery, httpClient, monitorInfo);
     }
 

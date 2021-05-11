@@ -266,7 +266,7 @@ public class GetAllPdeAlarmsTest {
         final AlarmManager alarmManager = new AlarmManager();
 
         for (int i = 0; i < 10; i++) {
-            alarmManager.raiseSystemInactive("System-" + i);
+            alarmManager.raiseNoPingResponse("System-" + i);
         }
 
         final ArrayList<Integer> ids = new ArrayList<>();
@@ -375,8 +375,8 @@ public class GetAllPdeAlarmsTest {
 
         alarmManager.raiseSystemNotRegistered(systemIdA, systemNameA, null);
         alarmManager.raiseSystemNotRegistered(systemIdB, systemNameB, null);
-        alarmManager.raiseSystemInactive(systemNameC);
-        alarmManager.clearSystemInactive(systemNameC);
+        alarmManager.raiseNoPingResponse(systemNameC);
+        alarmManager.clearNoPingResponse(systemNameC);
 
         final GetAllPdeAlarms handler = new GetAllPdeAlarms(alarmManager);
 

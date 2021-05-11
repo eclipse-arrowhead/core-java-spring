@@ -96,37 +96,63 @@ public class SystemMismatchDetectorTest {
      * No alarm should be raised if two systems have the same system name, as
      * long as there is metadata available to differentiate between them.
      */
-    // TODO: Add this test
-    // @Test
-    // public void shouldAllowSameSystemName() throws PdStoreException {
+    @Test
+    public void shouldAllowSameSystemName() throws PdStoreException {
 
-    //     final var systemName = "System A";
-    //     final var systemA1 = new PdeSystemDto.Builder()
-    //         .systemId("systemA1")
-    //         .systemName(systemName)
-    //         .metadata(Map.of("x", "1"))
-    //         .build();
-    //     final var systemA2 = new PdeSystemDto.Builder()
-    //         .systemId("systemA2")
-    //         .systemName(systemName)
-    //         .build();
+        Map<String, String> metadataA = Map.of("x", "1");
+        Map<String, String> metadataB = Map.of("y", "1");
 
-    //     final var entry = new PlantDescriptionEntryDto.Builder()
-    //         .id(1)
-    //         .plantDescription("Plant Description 1A")
-    //         .active(true)
-    //         .systems(List.of(systemA1, systemA2))
-    //         .createdAt(Instant.now())
-    //         .updatedAt(Instant.now())
-    //         .build();
+        final var systemName = "System A";
+        final var systemA1 = new PdeSystemDto.Builder()
+            .systemId("systemA1")
+            .systemName(systemName)
+            .metadata(metadataA)
+            .build();
+        final var systemA2 = new PdeSystemDto.Builder()
+            .systemId("systemA2")
+            .systemName(systemName)
+            .metadata(metadataB)
+            .build();
 
-    //     pdTracker.put(entry);
-    //     systemTracker.addSystem(getSrSystem(systemName));
-    //     detector.run();
+        final var entry = new PlantDescriptionEntryDto.Builder()
+            .id(1)
+            .plantDescription("Plant Description 1A")
+            .active(true)
+            .systems(List.of(systemA1, systemA2))
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
 
-    //     final var alarms = alarmManager.getAlarms();
-    //     assertEquals(0, alarms.size());
-    // }
+        Instant now = Instant.now();
+
+        SrSystem srSystemA = new SrSystemDto.Builder()
+            .id(0)
+            .systemName(systemName)
+            .address("0.0.0.0")
+            .port(5000)
+            .metadata(metadataA)
+            .createdAt(now.toString())
+            .updatedAt(now.toString())
+            .build();
+        SrSystem srSystemB = new SrSystemDto.Builder()
+            .id(1)
+            .systemName(systemName)
+            .address("0.0.0.1")
+            .port(5001)
+            .metadata(metadataB)
+            .createdAt(now.toString())
+            .updatedAt(now.toString())
+            .build();
+
+        pdTracker.put(entry);
+        systemTracker.addSystem(srSystemA);
+        systemTracker.addSystem(srSystemB);
+        detector.run();
+
+        final var alarms = alarmManager.getAlarms();
+        assertEquals(0, alarms.size());
+    }
+
     @Test
     public void shouldReportNotRegistered() throws PdStoreException {
         detector.run();

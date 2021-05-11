@@ -18,7 +18,7 @@ public class CodecExceptionCatcher implements HttpCatcherHandler<CodecException>
         CodecException throwable,
         HttpServiceRequest request,
         HttpServiceResponse response
-    ) throws Exception {
+    ) {
         Objects.requireNonNull(throwable, "Expected throwable.");
         Objects.requireNonNull(request, "Expected request.");
         Objects.requireNonNull(response, "Expected response.");

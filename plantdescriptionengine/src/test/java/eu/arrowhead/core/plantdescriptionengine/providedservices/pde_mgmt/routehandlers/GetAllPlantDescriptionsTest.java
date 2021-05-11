@@ -161,7 +161,7 @@ public class GetAllPlantDescriptionsTest {
                     previousTimestamp = entry.updatedAt();
                 }
             })
-            .onFailure(e -> fail());
+                .onFailure(e -> fail());
 
         } catch (final Exception e) {
             fail();

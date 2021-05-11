@@ -8,6 +8,7 @@ import se.arkalix.codec.json.JsonBoolean;
 import se.arkalix.codec.json.JsonObject;
 import se.arkalix.codec.json.JsonPair;
 import se.arkalix.security.access.AccessPolicyType;
+
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +46,7 @@ public class MonitorInfoTest {
         final Map<String, String> metadata = Map.of("name", "abc");
         final ServiceRecord ServiceRecord = createServiceRecord(metadata);
 
-        final JsonObject systemData = new JsonObject(List.of(new JsonPair("a", JsonBoolean.TRUE)));
+        final JsonObject systemData = new JsonObject(new JsonPair("a", JsonBoolean.TRUE));
         final MonitorInfo monitorInfo = new MonitorInfo();
         monitorInfo.putSystemData(ServiceRecord, systemData);
 

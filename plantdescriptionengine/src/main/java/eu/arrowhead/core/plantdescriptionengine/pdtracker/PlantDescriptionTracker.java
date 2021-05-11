@@ -82,28 +82,42 @@ public class PlantDescriptionTracker {
     public void put(final PlantDescriptionEntryDto entry) throws PdStoreException {
         Objects.requireNonNull(entry, "Expected entry.");
 
-        backingStore.write(entry);
+        final PlantDescriptionEntry previouslyActiveEntry;
+        final boolean anotherEntryWasActive;
+        final boolean isNew;
+        final PlantDescriptionEntry oldEntry;
+        final PlantDescriptionEntryDto deactivatedEntry;
 
-        final boolean isNew = !entries.containsKey(entry.id());
-        final PlantDescriptionEntry currentlyActive = activeEntry();
+        synchronized (this) {
 
-        final boolean anotherEntryIsActive = (currentlyActive != null && currentlyActive.id() != entry.id());
-        if (entry.active() && anotherEntryIsActive) {
-            // Deactivate the currently active entry:
-            final PlantDescriptionEntryDto deactivatedEntry = PlantDescriptionEntry.deactivated(currentlyActive);
-            entries.put(deactivatedEntry.id(), deactivatedEntry);
-            for (final PlantDescriptionUpdateListener listener : listeners) {
-                listener.onPlantDescriptionUpdated(deactivatedEntry);
+            backingStore.write(entry);
+
+            previouslyActiveEntry = activeEntry();
+            anotherEntryWasActive = previouslyActiveEntry != null && previouslyActiveEntry.id() != entry.id();
+            isNew = !entries.containsKey(entry.id());
+            oldEntry = isNew ? null : entries.get(entry.id());
+            entries.put(entry.id(), entry);
+
+            if (entry.active() && anotherEntryWasActive) {
+                deactivatedEntry = PlantDescriptionEntry.deactivated(previouslyActiveEntry);
+                entries.put(deactivatedEntry.id(), deactivatedEntry);
+                backingStore.write(deactivatedEntry);
+            } else {
+                deactivatedEntry = null;
             }
         }
 
-        entries.put(entry.id(), entry);
+        if (deactivatedEntry != null) {
+            for (final PlantDescriptionUpdateListener listener : listeners) {
+                listener.onPlantDescriptionUpdated(deactivatedEntry, previouslyActiveEntry);
+            }
+        }
 
         for (final PlantDescriptionUpdateListener listener : listeners) {
             if (isNew) {
                 listener.onPlantDescriptionAdded(entry);
             } else {
-                listener.onPlantDescriptionUpdated(entry);
+                listener.onPlantDescriptionUpdated(entry, oldEntry);
             }
         }
     }
@@ -201,9 +215,6 @@ public class PlantDescriptionTracker {
             return result;
         }
 
-        // TODO: In what order do we want entries to be investigated? If we
-        // don't allow duplicate systems, which we probably shouldn't, the order
-        // doesn't matter.
         for (final int i : entry.include()) {
             final PlantDescriptionEntry includedEntry = get(i);
             result = getSystem(includedEntry, systemId);
@@ -271,8 +282,8 @@ public class PlantDescriptionTracker {
         final PlantDescriptionEntry entry = get(entryId);
 
         Objects.requireNonNull(
-            entry, "Plant Description with ID " + entryId + " is not present in the Plant Description Tracker."
-        );
+            entry, "Plant Description with ID " + entryId
+                + " is not present in the Plant Description Tracker.");
 
         final List<Connection> connections = new ArrayList<>(entry.connections());
 

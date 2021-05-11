@@ -14,29 +14,31 @@ import java.util.Set;
 public interface RuleStore {
 
     /**
-     * @param plantDescriptionId ID of a Plant Description.
+     * @param plantDescriptionId ID of the Plant Description whose rules should
+     *                           be read.
      * @return A set containing the IDs of all Orchestrator rules known to exist
-     *         for the specified Plant Description.
-     * @throws RuleStoreException
+     * for the specified Plant Description.
+     * @throws RuleStoreException If an exception occurs when reading rules.
      */
     Set<Integer> readRules(int plantDescriptionId) throws RuleStoreException;
 
 
     /**
      * Replaces the current set of rules for the given Plant Description with
-     * the provided set.
+     * the provided ones.
      *
-     * @param PlantDescriptionId ID of a Plant Description.
-     * @param rules Rules to set.
-     * @throws RuleStoreException
+     * @param plantDescriptionId ID of the Plant Description whose rules should
+     *                           be written.
+     * @throws RuleStoreException If an exception occurs when writing rules.
      */
-    void setRules(int plantDescriptionId, Set<Integer> rules) throws RuleStoreException;
+    void writeRules(int plantDescriptionId, Set<Integer> rules) throws RuleStoreException;
 
     /**
      * Removes all rules belonging to the specified Plant Description.
      *
-     * @param plantDescriptionId ID of a Plant Description.
-     * @throws RuleStoreException
+     * @param plantDescriptionId ID of the Plant Description whose rules should
+     *                           be removed.
+     * @throws RuleStoreException If an exception occurs when removing rules.
      */
     void removeRules(int plantDescriptionId) throws RuleStoreException;
 

@@ -19,5 +19,5 @@ public interface RuleSystem {
 
     Optional<String> systemName();
 
-    Optional<Map<String, String>> metadata();
+    Map<String, String> metadata();
 }

@@ -70,8 +70,8 @@ public class PdeSystemTest {
         assertTrue(portA.consumer().orElse(false));
         assertFalse(portB.consumer().orElse(true));
 
-        assertEquals(metadataA, portA.metadata().orElse(null));
-        assertEquals(metadataB, portB.metadata().orElse(null));
+        assertEquals(metadataA, portA.metadata());
+        assertEquals(metadataB, portB.metadata());
 
         assertEquals(serviceA, portA.serviceDefinition());
         assertEquals(serviceB, portB.serviceDefinition());

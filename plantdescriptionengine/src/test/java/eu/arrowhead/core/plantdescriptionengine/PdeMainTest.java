@@ -34,9 +34,9 @@ public class PdeMainTest {
         final File keyStoreFile = new File(Objects.requireNonNull(classLoader.getResource("crypto/keystore.p12")).getFile());
         final String keyStorePath = keyStoreFile.getAbsolutePath();
 
-        final int localPort = 8000;
+        final int port = 8000;
         final Properties appProps = new Properties();
-        appProps.setProperty("server.port", Integer.toString(localPort));
+        appProps.setProperty("server.port", Integer.toString(port));
         appProps.setProperty("server.ssl.enabled", "true");
         appProps.setProperty("server.ssl.pde.key-store", keyStorePath);
         appProps.setProperty("server.ssl.pde.trust-store", keyStorePath);
@@ -49,23 +49,27 @@ public class PdeMainTest {
 
     @Test
     public void shouldCreateArSystem() {
-        final int localPort = 8000;
+        final String hostname = "localhost";
+        final int port = 8000;
         final Properties appProps = new Properties();
-        appProps.setProperty("server.port", Integer.toString(localPort));
+        appProps.setProperty("server.hostname", hostname);
+        appProps.setProperty("server.port", Integer.toString(port));
         appProps.setProperty("server.ssl.enabled", "false");
         final InetSocketAddress address = new InetSocketAddress("0.0.0.0", 5000);
         final ArSystem arSystem = PdeMain.createArSystem(appProps, address);
 
-        assertEquals(localPort, arSystem.port());
+        assertEquals(port, arSystem.port());
         assertEquals("plantdescriptionengine", arSystem.name());
         assertFalse(arSystem.isSecure());
     }
 
     @Test
     public void shouldReportMissingField() {
-        final int localPort = 8000;
+        final String hostname = "localhost";
+        final int port = 8000;
         final Properties appProps = new Properties();
-        appProps.setProperty("server.port", Integer.toString(localPort));
+        appProps.setProperty("server.hostname", hostname);
+        appProps.setProperty("server.port", Integer.toString(port));
         appProps.setProperty("server.ssl.enabled", "true");
         final Exception exception = assertThrows(IllegalArgumentException.class,
             () -> PdeMain.createArSystem(appProps, new InetSocketAddress("0.0.0.0", 5000)));
@@ -80,9 +84,11 @@ public class PdeMainTest {
         final File keyStoreFile = new File(Objects.requireNonNull(classLoader.getResource("crypto/keystore.p12")).getFile());
         final String keyStorePath = keyStoreFile.getAbsolutePath();
 
-        final int localPort = 8000;
+        final String hostname = "localhost";
+        final int port = 8000;
         final Properties appProps = new Properties();
-        appProps.setProperty("server.port", Integer.toString(localPort));
+        appProps.setProperty("server.hostname", hostname);
+        appProps.setProperty("server.port", Integer.toString(port));
         appProps.setProperty("server.ssl.enabled", "true");
         appProps.setProperty("server.ssl.pde.key-store", keyStorePath);
         appProps.setProperty("server.ssl.pde.trust-store", keyStorePath);

@@ -1,6 +1,5 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitorable.routehandlers;
 
-import java.util.Objects;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitorable.dto.PingDto;
 import se.arkalix.codec.CodecType;
 import se.arkalix.net.http.HttpStatus;
@@ -8,6 +7,8 @@ import se.arkalix.net.http.service.HttpRouteHandler;
 import se.arkalix.net.http.service.HttpServiceRequest;
 import se.arkalix.net.http.service.HttpServiceResponse;
 import se.arkalix.util.concurrent.Future;
+
+import java.util.Objects;
 
 public class GetPing implements HttpRouteHandler {
 

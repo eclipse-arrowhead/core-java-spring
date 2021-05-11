@@ -32,8 +32,8 @@ public class AlarmManagerTest {
         final String systemName = "System A";
         final AlarmManager alarmManager = new AlarmManager();
 
-        alarmManager.raiseSystemInactive(systemName);
-        alarmManager.raiseSystemInactive(systemName);
+        alarmManager.raiseNoPingResponse(systemName);
+        alarmManager.raiseNoPingResponse(systemName);
 
         final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
         final PdeAlarmDto alarm = alarms.get(0);
@@ -50,15 +50,15 @@ public class AlarmManagerTest {
 
         final AlarmManager alarmManager = new AlarmManager();
 
-        alarmManager.raiseSystemInactive(systemNameA);
-        alarmManager.raiseSystemInactive(systemNameB);
+        alarmManager.raiseNoPingResponse(systemNameA);
+        alarmManager.raiseNoPingResponse(systemNameB);
 
         assertEquals(2, alarmManager.getAlarms().size());
         for (final PdeAlarmDto alarm : alarmManager.getAlarms()) {
             assertTrue(alarm.clearedAt().isEmpty());
         }
 
-        alarmManager.clearSystemInactive(systemNameA);
+        alarmManager.clearNoPingResponse(systemNameA);
 
         final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
         assertEquals(2, alarms.size());

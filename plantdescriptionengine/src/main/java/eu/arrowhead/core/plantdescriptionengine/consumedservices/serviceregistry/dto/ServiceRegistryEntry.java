@@ -29,7 +29,7 @@ public interface ServiceRegistryEntry {
 
     String secure();
 
-    Optional<Map<String, String>> metadata();
+    Map<String, String> metadata();
 
     Integer version();
 

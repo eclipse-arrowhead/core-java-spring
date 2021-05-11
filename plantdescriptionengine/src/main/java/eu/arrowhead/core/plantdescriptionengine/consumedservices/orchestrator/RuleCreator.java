@@ -49,13 +49,13 @@ public class RuleCreator {
         final StoreRuleDto.Builder builder = new StoreRuleDto.Builder()
             .consumerSystem(new RuleSystemDto.Builder()
                 .systemName(consumer.systemName().orElse(null))
-                .metadata(consumer.metadata().orElse(null))
+                .metadata(consumer.metadata())
                 .build())
             .providerSystem(new RuleSystemDto.Builder()
                 .systemName(provider.systemName().orElse(null))
-                .metadata(provider.metadata().orElse(null))
+                .metadata(provider.metadata())
                 .build())
-            .serviceMetadata(producerPort.metadata().orElse(null))
+            .serviceMetadata(producerPort.metadata())
             .serviceInterfaceName(producerPort.serviceInterface().orElse(DEFAULT_SERVICE_INTERFACE))
             .serviceDefinitionName(producerPort.serviceDefinition());
 

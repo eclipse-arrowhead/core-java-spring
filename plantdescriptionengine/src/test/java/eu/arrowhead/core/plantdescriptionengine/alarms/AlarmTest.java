@@ -2,6 +2,7 @@ package eu.arrowhead.core.plantdescriptionengine.alarms;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -15,8 +16,9 @@ public class AlarmTest {
     public void shouldHaveProperDescriptions() {
         final String systemName = "A";
         final String systemId = "123";
-        final Alarm alarmFromNamedSystem = new Alarm(null, systemName, null, AlarmCause.SYSTEM_NOT_REGISTERED);
-        final Alarm alarmFromUnnamedSystem = new Alarm(systemId, null, null, AlarmCause.SYSTEM_NOT_IN_DESCRIPTION);
+        final Map<String, String> metadata = Collections.emptyMap();
+        final Alarm alarmFromNamedSystem = new Alarm(null, systemName, metadata, AlarmCause.SYSTEM_NOT_REGISTERED);
+        final Alarm alarmFromUnnamedSystem = new Alarm(systemId, null, metadata, AlarmCause.SYSTEM_NOT_IN_DESCRIPTION);
 
         assertEquals("System named '" + systemName + "' cannot be found in the Service Registry.",
             alarmFromNamedSystem.getDescription());
@@ -35,12 +37,13 @@ public class AlarmTest {
         final String systemName = "ABC";
         final String systemId = "123";
 
-        final Alarm alarmA = new Alarm(null, systemName, null, AlarmCause.SYSTEM_NOT_REGISTERED);
-        final Alarm alarmB = new Alarm(systemId, null, null, AlarmCause.SYSTEM_NOT_REGISTERED);
-        final Alarm alarmC = new Alarm(systemId, systemName, null, AlarmCause.SYSTEM_NOT_REGISTERED);
+        final Alarm alarmA = new Alarm(null, systemName, Collections.emptyMap(), AlarmCause.SYSTEM_NOT_REGISTERED);
+        final Alarm alarmB = new Alarm(systemId, null, Collections.emptyMap(), AlarmCause.SYSTEM_NOT_REGISTERED);
+        final Alarm alarmC = new Alarm(systemId, systemName, Collections.emptyMap(), AlarmCause.SYSTEM_NOT_REGISTERED);
         final Alarm alarmD = new Alarm(systemId, systemName, Map.of("a", "1"), AlarmCause.SYSTEM_NOT_REGISTERED);
 
         assertTrue(alarmA.matches(null, systemName, null, AlarmCause.SYSTEM_NOT_REGISTERED));
+        assertTrue(alarmB.matches(systemId, null, Collections.emptyMap(), AlarmCause.SYSTEM_NOT_REGISTERED));
         assertTrue(alarmB.matches(systemId, null, null, AlarmCause.SYSTEM_NOT_REGISTERED));
         assertTrue(alarmC.matches(systemId, systemName, null, AlarmCause.SYSTEM_NOT_REGISTERED));
         assertTrue(alarmD.matches(systemId, systemName, Map.of("a", "1"), AlarmCause.SYSTEM_NOT_REGISTERED));
@@ -52,16 +55,16 @@ public class AlarmTest {
         final String systemId = "123";
         final Map<String, String> metadata = Map.of("x", "1", "y", "2");
 
-        final String incorrectName = "Incorrect name";
+        final String wrongName = "Incorrect name";
         final String incorrectId = "Incorrect ID";
         final Map<String, String> incorrectMetadata = Map.of("x", "1", "y", "3");
 
-        final Alarm alarmA = new Alarm(null, systemName, null, AlarmCause.SYSTEM_NOT_REGISTERED);
-        final Alarm alarmB = new Alarm(systemId, null, null, AlarmCause.SYSTEM_NOT_REGISTERED);
-        final Alarm alarmC = new Alarm(systemId, systemName, null, AlarmCause.SYSTEM_NOT_REGISTERED);
+        final Alarm alarmA = new Alarm(null, systemName, Collections.emptyMap(), AlarmCause.SYSTEM_NOT_REGISTERED);
+        final Alarm alarmB = new Alarm(systemId, null, Collections.emptyMap(), AlarmCause.SYSTEM_NOT_REGISTERED);
+        final Alarm alarmC = new Alarm(systemId, systemName, Collections.emptyMap(), AlarmCause.SYSTEM_NOT_REGISTERED);
         final Alarm alarmD = new Alarm(systemId, systemName, metadata, AlarmCause.SYSTEM_NOT_REGISTERED);
 
-        assertFalse(alarmA.matches(incorrectName, systemName, null, AlarmCause.SYSTEM_NOT_REGISTERED));
+        assertFalse(alarmA.matches(wrongName, systemName, null, AlarmCause.SYSTEM_NOT_REGISTERED));
         assertFalse(alarmB.matches(systemId, incorrectId, null, AlarmCause.SYSTEM_NOT_REGISTERED));
         assertFalse(alarmC.matches(systemId, systemName, null, AlarmCause.SYSTEM_NOT_IN_DESCRIPTION));
         assertFalse(alarmC.matches(null, null, null, AlarmCause.SYSTEM_NOT_REGISTERED));

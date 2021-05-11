@@ -1,6 +1,5 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitorable.routehandlers;
 
-import java.util.Objects;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitorable.dto.SystemDataDto;
 import se.arkalix.codec.CodecType;
 import se.arkalix.codec.json.JsonObject;
@@ -12,12 +11,15 @@ import se.arkalix.net.http.service.HttpServiceRequest;
 import se.arkalix.net.http.service.HttpServiceResponse;
 import se.arkalix.util.concurrent.Future;
 
+import java.util.Objects;
+
 public class GetSystemData implements HttpRouteHandler {
 
     final String systemName;
 
     /**
      * Class constructor.
+     *
      * @param systemName Name of the system providing this service.
      */
     public GetSystemData(final String systemName) {

@@ -65,9 +65,6 @@ public class SqlRuleStore implements RuleStore {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Set<Integer> readRules(final int plantDescriptionId) throws RuleStoreException {
         ensureInitialized();
@@ -76,7 +73,7 @@ public class SqlRuleStore implements RuleStore {
             final Set<Integer> result = new HashSet<>();
             final PreparedStatement statement = connection.prepareStatement(SQL_SELECT_RULES);
             statement.setInt(1, plantDescriptionId);
-            final ResultSet resultSet =statement.executeQuery();
+            final ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
                 result.add(resultSet.getInt(ID));
@@ -89,11 +86,8 @@ public class SqlRuleStore implements RuleStore {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void setRules(final int plantDescriptionId, final Set<Integer> rules) throws RuleStoreException {
+    public void writeRules(final int plantDescriptionId, final Set<Integer> rules) throws RuleStoreException {
         Objects.requireNonNull(rules, "Expected rules.");
         ensureInitialized();
 
@@ -110,11 +104,6 @@ public class SqlRuleStore implements RuleStore {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @throws RuleStoreException
-     */
     @Override
     public void removeRules(final int plantDescriptionId) throws RuleStoreException {
         ensureInitialized();

@@ -68,8 +68,8 @@ public class DeletePlantDescription implements HttpRouteHandler {
             return Future.success(response);
         }
 
-        // Check if the removal of this entry leads to inconsistencies (e.g.
-        // dangling include references):
+        // Check whether the remaining Plant Description entries are still valid
+        // if this one is removed:
         final Map<Integer, PlantDescriptionEntry> entries = pdTracker.getEntryMap();
         entries.remove(id);
         final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);

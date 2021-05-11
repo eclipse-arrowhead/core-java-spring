@@ -21,9 +21,11 @@ import org.mockito.Mockito;
 import se.arkalix.net.http.HttpStatus;
 import se.arkalix.net.http.service.HttpServiceRequest;
 
+import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -195,6 +197,52 @@ public class UpdatePlantDescriptionTest {
             handler.handle(request, response)
                 .ifSuccess(result -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.status().orElse(null)))
                 .onFailure(Assertions::assertNull);
+        } catch (final Exception e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void shouldDeactivateOldActive() throws PdStoreException {
+
+        final Instant now = Instant.now();
+
+        final int initiallyActiveId = 23;
+        final int initiallyInactiveId = 24;
+
+        final PlantDescriptionEntryDto initiallyActiveEntry = TestUtils.createEntry(initiallyActiveId);
+        final PlantDescriptionEntryDto initiallyInactiveEntry = new PlantDescriptionEntryDto.Builder()
+            .id(initiallyInactiveId)
+            .plantDescription("XYZ")
+            .active(false)
+            .createdAt(now)
+            .updatedAt(now)
+            .build();
+
+        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
+        final UpdatePlantDescription handler = new UpdatePlantDescription(pdTracker);
+
+        final PlantDescriptionUpdateDto update = new PlantDescriptionUpdateDto.Builder()
+            .active(true)
+            .build();
+
+        pdTracker.put(initiallyActiveEntry);
+        pdTracker.put(initiallyInactiveEntry);
+
+        // Create a request for activating the inactive Plant Description.
+        final HttpServiceRequest request = new MockRequest.Builder()
+            .pathParameters(List.of(String.valueOf(initiallyInactiveId)))
+            .body(update)
+            .build();
+
+        final MockServiceResponse response = new MockServiceResponse();
+
+        try {
+            handler.handle(request, response).ifSuccess(result -> {
+                assertFalse(pdTracker.get(initiallyActiveId).active());
+                assertTrue(pdTracker.get(initiallyInactiveId).active());
+
+            }).onFailure(Assertions::assertNull);
         } catch (final Exception e) {
             fail();
         }

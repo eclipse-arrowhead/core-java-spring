@@ -16,9 +16,6 @@ public final class IntParameter extends QueryParameter {
 
     private final int minValue;
 
-    /**
-     * {@inheritDoc}
-     */
     private IntParameter(final Builder builder) {
         super(builder);
         minValue = builder.minValue;
@@ -41,9 +38,6 @@ public final class IntParameter extends QueryParameter {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void parse(final HttpServiceRequest request, final QueryParamParser parser, final boolean required) {
 

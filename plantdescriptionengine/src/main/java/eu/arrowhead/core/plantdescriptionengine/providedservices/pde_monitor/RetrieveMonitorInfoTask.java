@@ -3,10 +3,8 @@ package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor;
 import eu.arrowhead.core.plantdescriptionengine.MonitorInfo;
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.monitorable.dto.InventoryIdDto;
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.monitorable.dto.SystemDataDto;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import se.arkalix.ServiceRecord;
 import se.arkalix.codec.json.JsonObject;
 import se.arkalix.net.http.HttpMethod;

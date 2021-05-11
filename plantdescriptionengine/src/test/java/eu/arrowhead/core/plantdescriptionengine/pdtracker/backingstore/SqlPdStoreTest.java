@@ -30,15 +30,14 @@ public class SqlPdStoreTest {
 
     private final String DRIVER_CLASS_NAME = "org.h2.Driver";
     private final String CONNECTION_URL = "jdbc:h2:mem:testdb";
-
     private final String USERNAME = "root";
     private final String PASSWORD = "password";
-
+    private final int maxPdBytes = 200000;
     SqlPdStore store;
 
     @BeforeEach
     public void createStore() throws PdStoreException {
-        store = new SqlPdStore();
+        store = new SqlPdStore(maxPdBytes);
         store.init(DRIVER_CLASS_NAME, CONNECTION_URL, USERNAME, PASSWORD);
     }
 
@@ -50,7 +49,7 @@ public class SqlPdStoreTest {
     @Test
     public void shouldRequireInitialization() {
         final Exception exception = assertThrows(IllegalStateException.class,
-            () -> new SqlPdStore().readEntries());
+            () -> new SqlPdStore(maxPdBytes).readEntries());
         assertEquals("SqlPdStore has not been initialized.", exception.getMessage());
     }
 
@@ -177,7 +176,7 @@ public class SqlPdStoreTest {
         final var retrievedConsumerPort = retrievedConsumer.ports().get(0);
         assertEquals(consumerPort, retrievedConsumerPort.portName());
         assertEquals(true, retrievedConsumerPort.consumer().orElse(false));
-        assertEquals(consumerPortMetadata, retrievedConsumerPort.metadata().orElse(null));
+        assertEquals(consumerPortMetadata, retrievedConsumerPort.metadata());
 
         final PdeSystem retrievedProducer = retrievedEntry.systems().get(1);
         assertEquals(producerName, retrievedProducer.systemName().orElse(null));

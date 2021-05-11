@@ -3,7 +3,8 @@ package eu.arrowhead.core.plantdescriptionengine.alarms;
 import java.util.Objects;
 
 public enum AlarmCause {
-    SYSTEM_INACTIVE("appears to be inactive."),
+    NOT_MONITORABLE("cannot be monitored."),
+    NO_PING_RESPONSE("does not respond when pinged."),
     SYSTEM_NOT_REGISTERED("cannot be found in the Service Registry."),
     SYSTEM_NOT_IN_DESCRIPTION("is not present in the active Plant Description."),
     MULTIPLE_MATCHES("cannot be uniquely identified in the Service Registry.");

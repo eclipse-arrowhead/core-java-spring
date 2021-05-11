@@ -10,7 +10,6 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Pd
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PortDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.SystemPortDto;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -302,12 +301,12 @@ public class RuleCreatorTest {
         assertTrue(rule.providerSystem().systemName().isEmpty());
 
         final Map<String, String> expectedConsumerMetadata = Map.of("x", "y");
-        assertEquals(expectedConsumerMetadata, rule.consumerSystem().metadata().orElse(null));
+        assertEquals(expectedConsumerMetadata, rule.consumerSystem().metadata());
 
         final Map<String, String> expectedSystemMetadata = Map.of("a", "1");
         final Map<String, String> expectedServiceMetadata = Map.of("b", "2");
-        assertEquals(expectedSystemMetadata, rule.providerSystem().metadata().orElse(null));
-        assertEquals(expectedServiceMetadata, rule.serviceMetadata().orElse(null));
+        assertEquals(expectedSystemMetadata, rule.providerSystem().metadata());
+        assertEquals(expectedServiceMetadata, rule.serviceMetadata());
         assertEquals(serviceInterface, rule.serviceInterfaceName());
     }
 
