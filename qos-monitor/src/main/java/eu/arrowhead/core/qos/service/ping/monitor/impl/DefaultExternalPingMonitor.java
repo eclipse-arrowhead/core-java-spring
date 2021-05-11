@@ -37,8 +37,6 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	private static final int ICMP_TTL = 255;
 	private static final int OVERHEAD_MULTIPLIER = 2;
 
-	private static final int MAX_RETRY = 3;
-
 	@Autowired
 	private QoSMonitorDriver driver;
 
@@ -241,28 +239,20 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	private UUID requestExternalMeasurement(final String address) {
 		logger.debug("requestExternalMeasurement started...");
 
-		UUID startedExternalMeasurementProcessId = null;
+		try {
+			final IcmpPingRequestACK acknowledgedMeasurmentRequest = driver.requestExternalPingMonitorService(createIcmpPingRequest(address));
+			validateAcknowledgedMeasurmentRequest(acknowledgedMeasurmentRequest);
 
-		int count = 0;
-		do {
+			final UUID startedExternalMeasurementProcessId = acknowledgedMeasurmentRequest.getExternalMeasurementUuid();
+			logger.info("IcmpPingRequestACK received, with process id: " + startedExternalMeasurementProcessId);
 
-			try {
-				final IcmpPingRequestACK acknowledgedMeasurmentRequest = driver.requestExternalPingMonitorService( createIcmpPingRequest(address));
-				validateAcknowledgedMeasurmentRequest(acknowledgedMeasurmentRequest);
+			return startedExternalMeasurementProcessId;
 
-				startedExternalMeasurementProcessId = acknowledgedMeasurmentRequest.getExternalMeasurementUuid();
-				logger.info("IcmpPingRequestACK received, with process id: " + startedExternalMeasurementProcessId);
+		} catch (final Exception ex) {
+			logger.info(ex);
 
-			} catch (final ArrowheadException ex) {
-				logger.info(ex);
-
-				initPingMonitorProvider();
-				count++;
-			}
-
-		}while(startedExternalMeasurementProcessId == null && count < MAX_RETRY);
-
-		return startedExternalMeasurementProcessId;
+			throw new ArrowheadException("External Ping Monitor is not available at: " + address );
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
