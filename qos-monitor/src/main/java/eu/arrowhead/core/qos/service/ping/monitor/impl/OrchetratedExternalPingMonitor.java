@@ -75,6 +75,13 @@ public class OrchetratedExternalPingMonitor extends AbstractPingMonitor{
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
+	public OrchetratedExternalPingMonitor() {
+
+		init();
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public List<IcmpPingResponse> ping(final String address) {
 		logger.debug("ping statred...");
@@ -358,10 +365,32 @@ public class OrchetratedExternalPingMonitor extends AbstractPingMonitor{
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	private void init() {
+		logger.debug("init started...");
+
+		try {
+
+			final OrchestrationFormRequestDTO request = orchestrationRequestFactory.createExternalMonitorOrchestrationRequest();
+			final OrchestrationResponseDTO result = driver.queryOrchestrator(request);
+
+			cachedPingMonitorProvider = selectProvider(result);
+
+		} catch (final Exception ex) {
+			logger.warn("Exception in external ping monitor orchestration: " + ex);
+
+			cachedPingMonitorProvider = null;
+
+		}
+
+		driver.subscribeToExternalPingMonitorEvents();
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	private OrchestrationResultDTO selectProvider(final OrchestrationResponseDTO result) {
 		logger.debug("selectProvider started...");
 
-		//TODO implement more sofisticated provider selection strategy
+		//TODO implement more sophisticated provider selection strategy
 		return result.getResponse().get(0);
 	}
 }
