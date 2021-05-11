@@ -321,7 +321,7 @@ public class OrchestratorFlexibleDriver {
 			}
 			
 			// filter by provider metadata
-			if (rule.getProviderSystemMetadata() != null && !isMetadataMatch(rule.getProviderSystemMetadata(), srEntry.getProvider().getMetadata())) {
+			if (rule.getProviderSystemMetadata() != null && !isMetadataMatch(rule.getProviderSystemMetadata(), normalizeMetadata(srEntry.getProvider().getMetadata()))) {
 				continue;
 			}
 			
