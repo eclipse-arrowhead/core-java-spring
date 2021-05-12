@@ -28,6 +28,10 @@ cd ../../datamanager/target
 nohup java -jar $(find . -maxdepth 1 -name arrowhead-datamanager-\*.jar | sort | tail -n1) &> sout_datamanager.log &
 echo DataManager started
 
+cd ../../timemanager/target
+nohup java -jar $(find . -maxdepth 1 -name arrowhead-timemanager-\*.jar | sort | tail -n1) &> sout_timemanager.log &
+echo TimeManager started
+
 cd ../../gatekeeper/target
 nohup java -jar $(find . -maxdepth 1 -name arrowhead-gatekeeper-\*.jar | sort | tail -n1) &> sout_gk.log &
 echo Gatekeeper started

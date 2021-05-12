@@ -70,7 +70,9 @@ public enum CoreSystem {
 															   CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE,
 															   CoreSystemService.EVENT_PUBLISH_AUTH_UPDATE_SERVICE)),
 
-        DATAMANAGER(Defaults.DEFAULT_DATAMANAGER_PORT, List.of(CoreSystemService.PROXY_SERVICE, CoreSystemService.HISTORIAN_SERVICE)),
+    DATAMANAGER(Defaults.DEFAULT_DATAMANAGER_PORT, List.of(CoreSystemService.PROXY_SERVICE, CoreSystemService.HISTORIAN_SERVICE)),
+
+	TIMEMANAGER(Defaults.DEFAULT_TIMEMANAGER_PORT, List.of(CoreSystemService.TIME_SERVICE)),
 	
 	GATEWAY(Defaults.DEFAULT_GATEWAY_PORT, List.of(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE,
 												   CoreSystemService.GATEWAY_PROVIDER_SERVICE,

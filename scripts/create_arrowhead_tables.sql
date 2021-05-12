@@ -351,6 +351,8 @@ CREATE TABLE IF NOT EXISTS `dmhist_entries` (
   CONSTRAINT `message_id_fk` FOREIGN KEY(`mid`) REFERENCES `dmhist_messages`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- TimeManager
+
 -- Choreographer
 
 CREATE TABLE IF NOT EXISTS `choreographer_plan` (
