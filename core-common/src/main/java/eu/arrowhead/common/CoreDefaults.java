@@ -27,6 +27,7 @@ public class CoreDefaults {
 	public static final boolean DEFAULT_USE_STRICT_SERVICE_INTF_NAME_VERIFIER = false;
 	public static final boolean DEFAULT_USE_STRICT_SERVICE_DEFINITION_VERIFIER = true;
 	public static final boolean DEFAULT_USE_NETWORK_ADDRESS_DETECTOR = false;
+	public static final String DEFAULT_FILTER_PROXY_ADDRESSES = "";
 	public static final boolean DEFAULT_ALLOW_SELF_ADDRESSING = false;
 	public static final boolean DEFAULT_ALLOW_NON_ROUTABLE_ADDRESSING = false;	
 	public static final int DEFAULT_URI_CRAWLER_INTERVAL = 30;

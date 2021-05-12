@@ -30,7 +30,7 @@ public class NetworkAddressDetector {
 	@Value(CoreCommonConstants.$USE_NETWORK_ADDRESS_DETECTOR_WD)
 	private boolean useDetector;
 	
-	@Value(CoreCommonConstants.$FILTER_PROXY_ADDRESSES)
+	@Value(CoreCommonConstants.$FILTER_PROXY_ADDRESSES_WD)
 	private String[] filterProxyAddressList;
 	private final Set<String> filterProxyAddressSet = new HashSet<>();
 	

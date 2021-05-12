@@ -105,7 +105,7 @@ public class CoreCommonConstants {
 	public static final String USE_NETWORK_ADDRRESS_DETECTOR = "use_network_address_detector";
 	public static final String $USE_NETWORK_ADDRESS_DETECTOR_WD = "${" + USE_NETWORK_ADDRRESS_DETECTOR + ":" + CoreDefaults.DEFAULT_USE_NETWORK_ADDRESS_DETECTOR + "}";
 	public static final String FILTER_PROXY_ADDRESSES = "filter_proxy_addresses";
-	public static final String $FILTER_PROXY_ADDRESSES = "${" + "filter_proxy_addresses" + "}";
+	public static final String $FILTER_PROXY_ADDRESSES_WD = "${" + "filter_proxy_addresses" + ":" + CoreDefaults.DEFAULT_FILTER_PROXY_ADDRESSES + "}";
 	public static final String ALLOW_SELF_ADDRESSING = "allow_self_addressing";
 	public static final String $ALLOW_SELF_ADDRESSING_WD = "${" + ALLOW_SELF_ADDRESSING + ":" + CoreDefaults.DEFAULT_ALLOW_SELF_ADDRESSING + "}";
 	public static final String ALLOW_NON_ROUTABLE_ADDRESSING = "allow_non_routable_addressing";

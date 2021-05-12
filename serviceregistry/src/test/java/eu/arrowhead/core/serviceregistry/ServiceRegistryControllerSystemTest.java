@@ -69,7 +69,9 @@ import eu.arrowhead.common.dto.internal.SystemListResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.processor.NetworkAddressDetector;
 import eu.arrowhead.common.processor.NetworkAddressPreProcessor;
+import eu.arrowhead.common.processor.model.AddressDetectionResult;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 
@@ -97,6 +99,9 @@ public class ServiceRegistryControllerSystemTest {
 	
 	@MockBean
 	private NetworkAddressVerifier networkAddressVerifier;
+	
+	@MockBean
+	private NetworkAddressDetector networkAddressDetector;
 	
 	private static final String SYSTEMS_URL = "/serviceregistry/mgmt/systems/";
 	private static final String REGISTER_SYSTEM_URL = "/serviceregistry" + CommonConstants.OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI;
@@ -321,6 +326,9 @@ public class ServiceRegistryControllerSystemTest {
 	public void addSystemTestWithNullAddressDefinition() throws Exception {
 		final SystemRequestDTO request = createNullAddressSystemRequestDTO();
 		doThrow(new InvalidParameterException("test msg")).when(networkAddressVerifier).verify(any());
+		final AddressDetectionResult addressDetectionResult = new AddressDetectionResult();
+		addressDetectionResult.setSkipped(true);
+		when(networkAddressDetector.detect(any())).thenReturn(addressDetectionResult);
 		
 		this.mockMvc.perform(post(SYSTEMS_URL)
 					.contentType(MediaType.APPLICATION_JSON)
@@ -337,6 +345,9 @@ public class ServiceRegistryControllerSystemTest {
 		final SystemRequestDTO request = createEmptyAddressSystemRequestDTO();
 		when(networkAddressPreProcessor.normalize(any())).thenReturn("");
 		doThrow(new InvalidParameterException("test msg")).when(networkAddressVerifier).verify(anyString());
+		final AddressDetectionResult addressDetectionResult = new AddressDetectionResult();
+		addressDetectionResult.setSkipped(true);
+		when(networkAddressDetector.detect(any())).thenReturn(addressDetectionResult);
 		
 		this.mockMvc.perform(post(SYSTEMS_URL)
 					.contentType(MediaType.APPLICATION_JSON)
@@ -459,6 +470,9 @@ public class ServiceRegistryControllerSystemTest {
 	public void registerSystemTestWithNullAddressDefinition() throws Exception {
 		final SystemRequestDTO request = createNullAddressSystemRequestDTO();
 		doThrow(new InvalidParameterException("test msg")).when(networkAddressVerifier).verify(any());
+		final AddressDetectionResult addressDetectionResult = new AddressDetectionResult();
+		addressDetectionResult.setSkipped(true);
+		when(networkAddressDetector.detect(any())).thenReturn(addressDetectionResult);
 	
 		this.mockMvc.perform(post(REGISTER_SYSTEM_URL)
 					.contentType(MediaType.APPLICATION_JSON)
@@ -471,10 +485,35 @@ public class ServiceRegistryControllerSystemTest {
 	
 	//-------------------------------------------------------------------------------------------------	
 	@Test
+	public void registerSystemTestWithNullAddressDefinitionDetectionEnabled() throws Exception {
+		final SystemRequestDTO request = createNullAddressSystemRequestDTO();
+		doThrow(new InvalidParameterException("test msg")).when(networkAddressVerifier).verify(any());
+		final AddressDetectionResult addressDetectionResult = new AddressDetectionResult();
+		addressDetectionResult.setDetectionSuccess(true);
+		addressDetectionResult.setDetectedAddress("address");
+		when(networkAddressDetector.detect(any())).thenReturn(addressDetectionResult);
+		final ArgumentCaptor<String> addrCaptor = ArgumentCaptor.forClass(String.class);
+		when(serviceRegistryDBService.createSystemResponse(anyString(), addrCaptor.capture(), anyInt(), anyString(), any())).thenReturn(new SystemResponseDTO());
+	
+		this.mockMvc.perform(post(REGISTER_SYSTEM_URL)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(request))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isCreated());
+		
+		verify(networkAddressPreProcessor, times(1)).normalize(any());
+		assertEquals("address", addrCaptor.getValue());
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	@Test
 	public void registerSystemTestWithEmptyAddressDefinition() throws Exception {
 		final SystemRequestDTO request = createEmptyAddressSystemRequestDTO();
 		when(networkAddressPreProcessor.normalize(any())).thenReturn("");
 		doThrow(new InvalidParameterException("test msg")).when(networkAddressVerifier).verify(anyString());
+		final AddressDetectionResult addressDetectionResult = new AddressDetectionResult();
+		addressDetectionResult.setSkipped(true);
+		when(networkAddressDetector.detect(any())).thenReturn(addressDetectionResult);
 	
 		this.mockMvc.perform(post(REGISTER_SYSTEM_URL)
 					.contentType(MediaType.APPLICATION_JSON)
@@ -483,6 +522,29 @@ public class ServiceRegistryControllerSystemTest {
 					.andExpect(status().isBadRequest());
 		
 		verify(networkAddressPreProcessor, times(1)).normalize(any());
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	@Test
+	public void registerSystemTestWithEmptyAddressDefinitionDetectionEnabled() throws Exception {
+		final SystemRequestDTO request = createEmptyAddressSystemRequestDTO();
+		when(networkAddressPreProcessor.normalize(any())).thenReturn("");
+		doThrow(new InvalidParameterException("test msg")).when(networkAddressVerifier).verify(anyString());
+		final AddressDetectionResult addressDetectionResult = new AddressDetectionResult();
+		addressDetectionResult.setDetectionSuccess(true);
+		addressDetectionResult.setDetectedAddress("address");
+		when(networkAddressDetector.detect(any())).thenReturn(addressDetectionResult);
+		final ArgumentCaptor<String> addrCaptor = ArgumentCaptor.forClass(String.class);
+		when(serviceRegistryDBService.createSystemResponse(anyString(), addrCaptor.capture(), anyInt(), anyString(), any())).thenReturn(new SystemResponseDTO());
+	
+		this.mockMvc.perform(post(REGISTER_SYSTEM_URL)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(request))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isCreated());
+		
+		verify(networkAddressPreProcessor, times(1)).normalize(any());
+		assertEquals("address", addrCaptor.getValue());
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
@@ -533,6 +595,9 @@ public class ServiceRegistryControllerSystemTest {
 		final int port = 5000;
 		
 		doThrow(new InvalidParameterException("test")).when(networkAddressVerifier).verify(any());
+		final AddressDetectionResult addressDetectionResult = new AddressDetectionResult();
+		addressDetectionResult.setSkipped(true);
+		when(networkAddressDetector.detect(any())).thenReturn(addressDetectionResult);
 		
 		this.mockMvc.perform(delete(CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI)
 					.param(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME, systemName)
@@ -542,6 +607,31 @@ public class ServiceRegistryControllerSystemTest {
 					.andExpect(status().isBadRequest());
 		
 		verify(serviceRegistryDBService, never()).removeSystemByNameAndAddressAndPort(anyString(), anyString(), anyInt());
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	@Test
+	public void unregisterSystemInvalidAddressDetectionEnabled() throws Exception {
+		final String systemName = "consumer";
+		final String address = "-invalid_address";
+		final int port = 5000;
+		
+		doThrow(new InvalidParameterException("test")).when(networkAddressVerifier).verify(any());
+		final AddressDetectionResult addressDetectionResult = new AddressDetectionResult();
+		addressDetectionResult.setDetectionSuccess(true);
+		addressDetectionResult.setDetectedAddress("address");
+		when(networkAddressDetector.detect(any())).thenReturn(addressDetectionResult);
+		final ArgumentCaptor<String> addrCaptor = ArgumentCaptor.forClass(String.class);
+		doNothing().when(serviceRegistryDBService).removeSystemByNameAndAddressAndPort(anyString(), addrCaptor.capture(), anyInt());
+		
+		this.mockMvc.perform(delete(CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI)
+					.param(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME, systemName)
+					.param(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS, address)
+					.param(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT, String.valueOf(port))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
+		
+		assertEquals("address", addrCaptor.getValue());
 	}
 
 	//-------------------------------------------------------------------------------------------------	
