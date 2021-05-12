@@ -174,7 +174,7 @@ public class OrchestratorStoreFlexibleDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public List<OrchestratorStoreFlexible> getMatchedRulesByServiceDefinitionAndConsumerName(final String serviceDefinition, final String consumerSystemName) { // TODO: unit test
+	public List<OrchestratorStoreFlexible> getMatchedRulesByServiceDefinitionAndConsumerName(final String serviceDefinition, final String consumerSystemName) {
 		logger.debug("getMatchedRulesByServiceDefinitionAndConsumerName started...");
 		
 		if (Utilities.isEmpty(serviceDefinition)) {
@@ -197,7 +197,7 @@ public class OrchestratorStoreFlexibleDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public List<OrchestratorStoreFlexible> getMatchedRulesByServiceDefinitionAndNonNullConsumerMetadata(final String serviceDefinition) { // TODO: unit test
+	public List<OrchestratorStoreFlexible> getMatchedRulesByServiceDefinitionAndNonNullConsumerMetadata(final String serviceDefinition) { 
 		logger.debug("getMatchedRulesByServiceDefinitionAndNonNullConsumerMetadata started...");
 		
 		if (Utilities.isEmpty(serviceDefinition)) {

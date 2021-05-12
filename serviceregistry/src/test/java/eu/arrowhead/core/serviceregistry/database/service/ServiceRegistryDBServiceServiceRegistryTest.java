@@ -17,6 +17,7 @@ package eu.arrowhead.core.serviceregistry.database.service;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -56,6 +57,7 @@ import eu.arrowhead.common.database.repository.ServiceRegistryInterfaceConnectio
 import eu.arrowhead.common.database.repository.ServiceRegistryRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.ServiceSecurityType;
@@ -1063,6 +1065,53 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		serviceRegistryDBService.mergeServiceByIdResponse(validId, getValidServiceRegistryRequestDTOWithNullServiceUri(new ServiceRegistryRequestDTO()));
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testMultiQueryParameterNull() {
+		try {
+			serviceRegistryDBService.multiQueryRegistry(null);
+		} catch (final IllegalArgumentException ex) {
+			Assert.assertEquals("Form list is null.", ex.getMessage());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testMultiQueryFormListNull() {
+		try {
+			final ServiceQueryFormListDTO forms = new ServiceQueryFormListDTO();
+			ReflectionTestUtils.setField(forms, "forms", null);
+			serviceRegistryDBService.multiQueryRegistry(forms);
+		} catch (final IllegalArgumentException ex) {
+			Assert.assertEquals("Form list is null.", ex.getMessage());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testMultiQueryFormListEmpty() {
+		try {
+			final ServiceQueryFormListDTO forms = new ServiceQueryFormListDTO();
+			serviceRegistryDBService.multiQueryRegistry(forms);
+		} catch (final IllegalArgumentException ex) {
+			Assert.assertEquals("Form list is empty.", ex.getMessage());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMultiQueryCallsNormalQuery() {
+		when(serviceDefinitionRepository.findByServiceDefinition(anyString())).thenReturn(Optional.of(new ServiceDefinition("test"))); // this is called by normal query
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO.Builder("test").build();
+		final ServiceQueryFormListDTO forms = new ServiceQueryFormListDTO(List.of(form));
+		serviceRegistryDBService.multiQueryRegistry(forms);
+		
+		verify(serviceDefinitionRepository).findByServiceDefinition("test");
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -1234,7 +1283,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------		
-	private static SystemRequestDTO getValidSystemReqestDTO(final SystemRequestDTO systemRequestDTO) {
+	private SystemRequestDTO getValidSystemReqestDTO(final SystemRequestDTO systemRequestDTO) {
 		systemRequestDTO.setSystemName("test-system");
 		systemRequestDTO.setAddress("192.168.1.103");
 		systemRequestDTO.setPort(1234);
@@ -1244,7 +1293,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private static ServiceRegistryRequestDTO getValidServiceRegistryRequestDTO(final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
+	private ServiceRegistryRequestDTO getValidServiceRegistryRequestDTO(final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
 		final ServiceDefinition validTestServiceDefinition = new ServiceDefinition("validTestServiceDefinition");
 		validTestServiceDefinition.setId(1);
 		
@@ -1256,7 +1305,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private static ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithInvalidEndOfValidityFormat(final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
+	private ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithInvalidEndOfValidityFormat(final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
 		final ServiceDefinition validTestServiceDefinition = new ServiceDefinition("validTestServiceDefinition");
 		validTestServiceDefinition.setId(1);
 		
@@ -1268,7 +1317,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private static ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithNullServiceDefinition(final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
+	private ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithNullServiceDefinition(final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
 		serviceRegistryRequestDTO.setServiceDefinition(null);
 		serviceRegistryRequestDTO.setProviderSystem(getValidSystemReqestDTO(new SystemRequestDTO()));
 		serviceRegistryRequestDTO.setEndOfValidity(validTestEndOFValidityFormatForRequestDTO);
@@ -1282,7 +1331,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private static ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithNullProviderSystem(final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
+	private ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithNullProviderSystem(final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
 		serviceRegistryRequestDTO.setServiceDefinition("validTestServiceDefinition");
 		serviceRegistryRequestDTO.setProviderSystem(null);
 		serviceRegistryRequestDTO.setEndOfValidity(validTestEndOFValidityFormatForRequestDTO);
@@ -1296,7 +1345,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private static ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithNullEndOfValidity(final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
+	private ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithNullEndOfValidity(final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
 		serviceRegistryRequestDTO.setServiceDefinition("validTestServiceDefinition");
 		serviceRegistryRequestDTO.setProviderSystem(getValidSystemReqestDTO(new SystemRequestDTO()));
 		serviceRegistryRequestDTO.setEndOfValidity(null);
@@ -1310,7 +1359,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private static ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithNullInterfaces(final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
+	private ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithNullInterfaces(final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
 		serviceRegistryRequestDTO.setServiceDefinition("validTestServiceDefinition");
 		serviceRegistryRequestDTO.setProviderSystem(getValidSystemReqestDTO(new SystemRequestDTO()));
 		serviceRegistryRequestDTO.setEndOfValidity(validTestEndOFValidityFormatForRequestDTO);
@@ -1324,7 +1373,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private static ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithNullMetadata(final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
+	private ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithNullMetadata(final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
 		serviceRegistryRequestDTO.setServiceDefinition("validTestServiceDefinition");
 		serviceRegistryRequestDTO.setProviderSystem(getValidSystemReqestDTO(new SystemRequestDTO()));
 		serviceRegistryRequestDTO.setEndOfValidity(validTestEndOFValidityFormatForRequestDTO);
@@ -1338,7 +1387,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private static ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithNullServiceSecurityType(final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
+	private ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithNullServiceSecurityType(final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
 		serviceRegistryRequestDTO.setServiceDefinition("validTestServiceDefinition");
 		serviceRegistryRequestDTO.setProviderSystem(getValidSystemReqestDTO(new SystemRequestDTO()));
 		serviceRegistryRequestDTO.setEndOfValidity(validTestEndOFValidityFormatForRequestDTO);
@@ -1352,7 +1401,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private static ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithNullServiceUri(final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
+	private ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithNullServiceUri(final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
 		serviceRegistryRequestDTO.setServiceDefinition("validTestServiceDefinition");
 		serviceRegistryRequestDTO.setProviderSystem(getValidSystemReqestDTO(new SystemRequestDTO()));
 		serviceRegistryRequestDTO.setEndOfValidity(validTestEndOFValidityFormatForRequestDTO);
@@ -1366,7 +1415,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private static ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithEmptyServiceDefinition(final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
+	private ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithEmptyServiceDefinition(final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
 		serviceRegistryRequestDTO.setServiceDefinition(" ");
 		serviceRegistryRequestDTO.setProviderSystem(getValidSystemReqestDTO(new SystemRequestDTO()));
 		serviceRegistryRequestDTO.setEndOfValidity(validTestEndOFValidityFormatForRequestDTO);
@@ -1380,7 +1429,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private static ServiceRegistry getValidServiceRegistry(final ServiceRegistry serviceRegistry) {
+	private ServiceRegistry getValidServiceRegistry(final ServiceRegistry serviceRegistry) {
 		final ServiceRegistryInterfaceConnection validServiceRegistryInterfaceConnection = new ServiceRegistryInterfaceConnection( serviceRegistry, new ServiceInterface(jsonInterFace));
 
 		final Set<ServiceRegistryInterfaceConnection> validTestIntefacesSet = new HashSet<>();
@@ -1403,7 +1452,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private static ServiceDefinition getValidTestServiceDefinition() {
+	private ServiceDefinition getValidTestServiceDefinition() {
 		final ServiceDefinition validTestServiceDefinition = new ServiceDefinition("validTestServiceDefinition");
 		validTestServiceDefinition.setId(1);
 		
@@ -1411,7 +1460,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private static System getValidTestProvider() {
+	private System getValidTestProvider() {
 		final System system = new System("test-system", "192.168.1.103", 1234, null, "systemkey=systemvalue");
 		system.setId(1);
 		
@@ -1419,7 +1468,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private static System getValidTestProviderForUniqueConstraintCheck() {
+	private System getValidTestProviderForUniqueConstraintCheck() {
 		final System system = new System("test-system", "192.168.1.103", 1234, null, "systemkey=systemvalue");
 		system.setId(Integer.MAX_VALUE);
 		
@@ -1427,7 +1476,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private static System getValidTestProviderWithAuthenticationInfo() {
+	private System getValidTestProviderWithAuthenticationInfo() {
 		final System system = new System("test-system", "192.168.1.103", 1234, null, "systemkey=systemvalue");
 		system.setId(1);
 		system.setAuthenticationInfo("authenticationInfo");

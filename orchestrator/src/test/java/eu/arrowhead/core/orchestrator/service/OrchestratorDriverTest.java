@@ -15,7 +15,9 @@
 package eu.arrowhead.core.orchestrator.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -64,6 +66,8 @@ import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultListDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
@@ -675,6 +679,69 @@ public class OrchestratorDriverTest {
 		
 		Assert.assertNotNull(result);
 		Assert.assertTrue(result.getCount() == 1);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class) 
+	public void testMultiQueryServiceRegistryFormListNull() {
+		try {
+			orchestratorDriver.multiQueryServiceRegistry(null);
+		} catch (final IllegalArgumentException ex) {
+			Assert.assertEquals("Form list is null.", ex.getMessage());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class) 
+	public void testMultiQueryServiceRegistryFormListEmpty() {
+		try {
+			orchestratorDriver.multiQueryServiceRegistry(List.of());
+		} catch (final IllegalArgumentException ex) {
+			Assert.assertEquals("Form list is empty.", ex.getMessage());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class) 
+	public void testMultiQueryServiceRegistryURINotFound() {
+		when(arrowheadContext.containsKey(anyString())).thenReturn(false);
+		try {
+			orchestratorDriver.multiQueryServiceRegistry(List.of(new ServiceQueryFormDTO()));
+		} catch (final ArrowheadException ex) {
+			Assert.assertEquals("Orchestrator can't find Service Registry Multi Query URI.", ex.getMessage());
+			verify(arrowheadContext).containsKey(anyString());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class) 
+	public void testMultiQueryServiceRegistryURIWrongType() {
+		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
+		when(arrowheadContext.get(anyString())).thenReturn("invalid");
+		try {
+			orchestratorDriver.multiQueryServiceRegistry(List.of(new ServiceQueryFormDTO()));
+		} catch (final ArrowheadException ex) {
+			verify(arrowheadContext).containsKey(anyString());
+			verify(arrowheadContext).get(anyString());
+			Assert.assertEquals("Orchestrator can't find Service Registry Multi Query URI.", ex.getMessage());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMultiQueryServiceRegistryOk() {
+		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
+		when(arrowheadContext.get(anyString())).thenReturn(Utilities.createURI("http", "localhost", 1234, "/test"));
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(ServiceQueryResultListDTO.class), any(ServiceQueryFormListDTO.class))).thenReturn(new ResponseEntity<ServiceQueryResultListDTO>(new ServiceQueryResultListDTO(), HttpStatus.OK));
+
+		orchestratorDriver.multiQueryServiceRegistry(List.of(new ServiceQueryFormDTO()));
+		verify(arrowheadContext).containsKey(anyString());
+		verify(arrowheadContext).get(anyString());
+		verify(httpService).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(ServiceQueryResultListDTO.class), any(ServiceQueryFormListDTO.class));
 	}
 	
 	//=================================================================================================
