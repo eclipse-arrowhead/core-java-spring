@@ -1228,7 +1228,7 @@ public class ServiceRegistryController {
 				throw new BadPayloadException(ex.getMessage() + " " + detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);				
 			}
 			if (!detectionResult.isDetectionSuccess()) {
-				throw new BadPayloadException(detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);
+				throw new BadPayloadException(ex.getMessage() + " " + detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);
 			} else {
 				dto.setAddress(detectionResult.getDetectedAddress());
 			}
@@ -1329,7 +1329,7 @@ public class ServiceRegistryController {
 				throw new BadPayloadException(ex.getMessage() + " " + detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);				
 			}
 			if (!detectionResult.isDetectionSuccess()) {
-				throw new BadPayloadException(detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);
+				throw new BadPayloadException(ex.getMessage() + " " + detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);
 			} else {
 				checkedAddress = detectionResult.getDetectedAddress();
 			}
@@ -1373,7 +1373,7 @@ public class ServiceRegistryController {
 				throw new BadPayloadException(ex.getMessage() + " " + detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);				
 			}
 			if (!detectionResult.isDetectionSuccess()) {
-				throw new BadPayloadException(detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);
+				throw new BadPayloadException(ex.getMessage() + " " + detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);	
 			} else {
 				checkedAddress = detectionResult.getDetectedAddress();
 			}

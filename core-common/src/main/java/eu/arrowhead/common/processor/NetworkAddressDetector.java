@@ -50,7 +50,7 @@ public class NetworkAddressDetector {
 	private static final String DOUBLE_QUOTE = "\"";
 	private static final String SQUARE_BRACKET_OPEN = "[";
 	private static final String SQUARE_BRACKET_CLOSE = "]";
-	private static final String EQUAL_SIGN = "]";
+	private static final String EQUAL_SIGN = "=";
 	private static final int IPV4_DOT_NUMBER = 3;
 	
 	private final Logger logger = LogManager.getLogger(NetworkAddressDetector.class);
@@ -77,14 +77,16 @@ public class NetworkAddressDetector {
 		if (detected) {
 			try {
 				networkAddressVerifier.verify(result.getDetectedAddress()); // already normalized with NetworkAddressPreProcessor
+				return result;
 			} catch (final InvalidParameterException ex) {
 				result.setDetectionSuccess(false);
 				result.setDetectionMessage("Detected address is invalid! " + ex.getMessage());
 				return result;
 			}
-		}
-		
-		return result;
+		} else {
+			result.setDetectionMessage("Network address detection was unsuccessful.");
+			return result;
+		}		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -123,16 +125,23 @@ public class NetworkAddressDetector {
 		final List<String> headerValues = Collections.list(servletRequest.getHeaders(HEADER_FORWARDED));
 		for (int i = headerValues.size() - 1; i >= 0; i--) {
 			
-			final String[] subValues = headerValues.get(i).split(SEMI_COLON);
+			String[] subValues = new String[1];
+			if (headerValues.get(i).contains(SEMI_COLON)) {
+				subValues = headerValues.get(i).split(SEMI_COLON);
+			} else if (headerValues.get(i).contains(COMMA)) {
+				subValues = headerValues.get(i).split(COMMA);
+			} else {
+				subValues[0] = headerValues.get(i);
+			}
+			
 			for (int j = subValues.length - 1; j >= 0; j--) {
-				final String[] pairs = subValues[j].split(COLON);
-				if (pairs[j].toLowerCase().startsWith("for")) {
-					final String[] split = pairs[j].split(EQUAL_SIGN);
-					if (Utilities.isEmpty(split[1])) {
+				final String[] pair = subValues[j].split(EQUAL_SIGN);
+				if (pair[0].toLowerCase().trim().startsWith("for")) {
+					if (Utilities.isEmpty(pair[1])) {
 						return false;
 					}
 					
-					final String address = processAddress(split[1]);
+					final String address = processAddress(pair[1]);
 					if (!filterProxyAddressSet.contains(address)) {
 						result.setDetectionSuccess(true);
 						result.setDetectedAddress(address);
@@ -193,7 +202,7 @@ public class NetworkAddressDetector {
 		
 		String address;
 		if (dotCtn == IPV4_DOT_NUMBER && colonIdxList.size() == 1) {
-			address = sb.substring(0, Math.max(0, colonIdxList.get(0) - 1));
+			address = sb.substring(0, Math.max(0, colonIdxList.get(0)));
 		} else {
 			address = sb.toString();			
 		}
