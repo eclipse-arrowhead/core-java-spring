@@ -126,33 +126,30 @@ public class NetworkAddressDetector {
 		final List<String> headerValues = Collections.list(servletRequest.getHeaders(HEADER_FORWARDED));
 		for (int i = headerValues.size() - 1; i >= 0; i--) {
 			
-			String[] subValues = new String[1];
-			if (headerValues.get(i).contains(String.valueOf(SEMI_COLON))) {
-				subValues = headerValues.get(i).split(String.valueOf(SEMI_COLON));
-			} else if (headerValues.get(i).contains(String.valueOf(COMMA))) {
-				subValues = headerValues.get(i).split(String.valueOf(COMMA));
-			} else {
-				subValues[0] = headerValues.get(i);
-			}
-			
-			for (int j = subValues.length - 1; j >= 0; j--) {
-				final String[] pair = subValues[j].split(String.valueOf(EQUAL_SIGN));
-				if (pair[0].toLowerCase().trim().startsWith("for")) {
-					if (Utilities.isEmpty(pair[1])) {
-						return false;
-					}
+			final String[] elements = headerValues.get(i).split(String.valueOf(COMMA));
+			for (int j = elements.length - 1; j >= 0; j--) {
+				
+				final String[] subValues = elements[j].split(String.valueOf(SEMI_COLON));
+				for (int k = subValues.length - 1; k >= 0; k--) {
 					
-					final String address = processAddress(pair[1]);
-					if (address.equalsIgnoreCase(HEADER_FORWARDED_UNKNOWN_VALUE)) {
-						return false;
+					final String[] pair = subValues[k].split(String.valueOf(EQUAL_SIGN));
+					if (pair[0].toLowerCase().trim().startsWith("for")) {
+						if (Utilities.isEmpty(pair[1])) {
+							return false;
+						}
+						
+						final String address = processAddress(pair[1]);
+						if (address.equalsIgnoreCase(HEADER_FORWARDED_UNKNOWN_VALUE)) {
+							return false;
+						}
+						if (!filterProxyAddressSet.contains(address)) {
+							result.setDetectionSuccess(true);
+							result.setDetectedAddress(address);
+							return true;
+						}
 					}
-					if (!filterProxyAddressSet.contains(address)) {
-						result.setDetectionSuccess(true);
-						result.setDetectedAddress(address);
-						return true;
-					}
-				}
-			}
+				}				
+			}			
 		}
 		
 		return false;
