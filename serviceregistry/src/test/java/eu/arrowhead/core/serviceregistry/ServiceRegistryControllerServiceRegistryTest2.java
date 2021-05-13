@@ -51,7 +51,9 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultListDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
@@ -71,7 +73,7 @@ public class ServiceRegistryControllerServiceRegistryTest2 {
 	private static final String SERVICEREGISTRY_UNREGISTER_URI = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_URI;
 	private static final String SERVICEREGISTRY_QUERY_URI = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_QUERY_URI;
 	private static final String SERVICEREGISTRY_MGMT_URI = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.MGMT_URI;
-
+	private static final String SERVICEREGISTRY_MULTI_QUERY_URI = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_MULTI_QUERY_URI;
 	
 	@Autowired
 	private WebApplicationContext wac;
@@ -177,6 +179,18 @@ public class ServiceRegistryControllerServiceRegistryTest2 {
 		postQueryService(form, status().isOk());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testMultiQueryServiceServiceRequirementWrongFlagFalse() throws Exception {
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		form.setServiceDefinitionRequirement("test_service");
+		
+		when(serviceRegistryDBService.multiQueryRegistry(any(ServiceQueryFormListDTO.class))).thenReturn(new ServiceQueryResultListDTO());
+		
+		postMultiQueryService(new ServiceQueryFormListDTO(List.of(form)), status().isOk());
+	}
+	
 	//=================================================================================================
 	// assistant methods
 
@@ -251,6 +265,16 @@ public class ServiceRegistryControllerServiceRegistryTest2 {
 		result.setPort(1234);
 		
 		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MvcResult postMultiQueryService(final ServiceQueryFormListDTO forms, final ResultMatcher matcher) throws Exception {
+		return this.mockMvc.perform(post(SERVICEREGISTRY_MULTI_QUERY_URI)
+						   .contentType(MediaType.APPLICATION_JSON)
+						   .content(objectMapper.writeValueAsBytes(forms))
+						   .accept(MediaType.APPLICATION_JSON))
+						   .andExpect(matcher)
+						   .andReturn();
 	}
 	
 	//-------------------------------------------------------------------------------------------------

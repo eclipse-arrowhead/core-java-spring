@@ -1110,6 +1110,8 @@ public class OrchestratorService {
 		final OrchestrationFlags flags = request.getOrchestrationFlags();
 		final List<PreferredProviderDataDTO> localProviders = request.getPreferredProviders().stream().filter(p -> p.isLocal()).collect(Collectors.toList());
 		
+		//TODO: continue tests from here
+		
 		List<PreferredProviderDataDTO> onlyPreferredProviders = null;
 		if (flags.getOrDefault(Flag.ONLY_PREFERRED, false)) {
 			onlyPreferredProviders = localProviders; 

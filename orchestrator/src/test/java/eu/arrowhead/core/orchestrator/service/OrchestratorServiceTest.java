@@ -3159,4 +3159,76 @@ public class OrchestratorServiceTest {
 		final QoSReservationRequestDTO request = new QoSReservationRequestDTO(selectedResult, requesterSystem, List.of(new OrchestrationResultDTO()));		
 		testingObject.confirmProviderReservation(request);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testOrchestrationFromFlexibleStoreNullRequest() {
+		ReflectionTestUtils.setField(testingObject, "useFlexibleStore", true);
+		try {
+			testingObject.orchestrationFromStore(null);
+		} catch (final InvalidParameterException ex) {
+			Assert.assertEquals("Request is null.", ex.getMessage());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testOrchestrationFromFlexibleStoreFlagObjectNull() {
+		ReflectionTestUtils.setField(testingObject, "useFlexibleStore", true);
+		try {
+			final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+			ReflectionTestUtils.setField(request, "orchestrationFlags", null);
+			testingObject.orchestrationFromStore(request);
+		} catch (final IllegalArgumentException ex) {
+			Assert.assertEquals("Flags map is null.", ex.getMessage());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testOrchestrationFromFlexibleStoreIntercloudNotSupported1() {
+		ReflectionTestUtils.setField(testingObject, "useFlexibleStore", true);
+		try {
+			final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+			request.getOrchestrationFlags().put(Flag.ENABLE_INTER_CLOUD, true);
+			testingObject.orchestrationFromStore(request);
+		} catch (final InvalidParameterException ex) {
+			Assert.assertEquals("Intercloud mode is not supported yet.", ex.getMessage());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testOrchestrationFromFlexibleStoreIntercloudNotSupported2() {
+		ReflectionTestUtils.setField(testingObject, "useFlexibleStore", true);
+		try {
+			final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+			request.getOrchestrationFlags().put(Flag.TRIGGER_INTER_CLOUD, true);
+			testingObject.orchestrationFromStore(request);
+		} catch (final InvalidParameterException ex) {
+			Assert.assertEquals("Intercloud mode is not supported yet.", ex.getMessage());
+			throw ex;
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testOrchestrationFromFlexibleStoreQoSNotSupported2() {
+		ReflectionTestUtils.setField(testingObject, "useFlexibleStore", true);
+		try {
+			final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+			request.getOrchestrationFlags().put(Flag.ENABLE_QOS, true);
+			testingObject.orchestrationFromStore(request);
+		} catch (final InvalidParameterException ex) {
+			Assert.assertEquals("Quality of Service requirements is not supported yet.", ex.getMessage());
+			throw ex;
+		}
+	}
+	
+	// checkSystemRequestDTO() and checkServiceRequestForm() used in dynamic orchestration too and tested there
+	
+	
 }

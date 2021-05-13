@@ -58,5 +58,15 @@
     "name": "use_strict_service_definition_verifier",
     "type": "java.lang.Boolean",
     "description": "A description for 'use_strict_service_definition_verifier'"
+  },
+  {
+    "name": "allow_self_addressing",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'allow_self_addressing'"
+  },
+  {
+    "name": "allow_non_routable_addressing",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'allow_non_routable_addressing'"
   }
 ]}

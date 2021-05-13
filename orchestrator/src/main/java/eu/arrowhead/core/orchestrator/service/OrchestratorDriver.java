@@ -134,7 +134,7 @@ public class OrchestratorDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ServiceQueryResultListDTO multiQueryServiceRegistry(final List<ServiceQueryFormDTO> forms) { //TODO: junit
+	public ServiceQueryResultListDTO multiQueryServiceRegistry(final List<ServiceQueryFormDTO> forms) { 
 		logger.debug("multiQueryServiceRegistry started...");
 		Assert.notNull(forms, "Form list is null.");
 		Assert.isTrue(!forms.isEmpty(), "Form list is empty.");
