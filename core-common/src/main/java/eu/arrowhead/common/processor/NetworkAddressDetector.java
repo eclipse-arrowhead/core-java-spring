@@ -41,16 +41,17 @@ public class NetworkAddressDetector {
 	private NetworkAddressVerifier networkAddressVerifier;
 	
 	private static final String HEADER_FORWARDED = "forwarded";
+	private static final String HEADER_FORWARDED_UNKNOWN_VALUE = "unknown";
 	private static final String HEADER_X_FORWARDED_FOR = "x-forwarded-for";
 	
-	private static final String DOT = ".";
-	private static final String COMMA = ",";
-	private static final String COLON = ":";
-	private static final String SEMI_COLON = ";";
-	private static final String DOUBLE_QUOTE = "\"";
-	private static final String SQUARE_BRACKET_OPEN = "[";
-	private static final String SQUARE_BRACKET_CLOSE = "]";
-	private static final String EQUAL_SIGN = "=";
+	private static final char DOT = '.';
+	private static final char COMMA = ',';
+	private static final char COLON = ':';
+	private static final char SEMI_COLON = ';';
+	private static final char DOUBLE_QUOTE = '"';
+	private static final char SQUARE_BRACKET_OPEN = '[';
+	private static final char SQUARE_BRACKET_CLOSE = ']';
+	private static final char EQUAL_SIGN = '=';
 	private static final int IPV4_DOT_NUMBER = 3;
 	
 	private final Logger logger = LogManager.getLogger(NetworkAddressDetector.class);
@@ -62,7 +63,7 @@ public class NetworkAddressDetector {
 		
 		if (!useDetector || servletRequest == null) {
 			result.setSkipped(true);
-			result.setDetectionMessage("Address-Port detection process was skipped");
+			result.setDetectionMessage("Address detection process was skipped");
 			return result;
 		}
 		boolean detected = retrieveFromConnector(servletRequest, result);
@@ -126,22 +127,25 @@ public class NetworkAddressDetector {
 		for (int i = headerValues.size() - 1; i >= 0; i--) {
 			
 			String[] subValues = new String[1];
-			if (headerValues.get(i).contains(SEMI_COLON)) {
-				subValues = headerValues.get(i).split(SEMI_COLON);
-			} else if (headerValues.get(i).contains(COMMA)) {
-				subValues = headerValues.get(i).split(COMMA);
+			if (headerValues.get(i).contains(String.valueOf(SEMI_COLON))) {
+				subValues = headerValues.get(i).split(String.valueOf(SEMI_COLON));
+			} else if (headerValues.get(i).contains(String.valueOf(COMMA))) {
+				subValues = headerValues.get(i).split(String.valueOf(COMMA));
 			} else {
 				subValues[0] = headerValues.get(i);
 			}
 			
 			for (int j = subValues.length - 1; j >= 0; j--) {
-				final String[] pair = subValues[j].split(EQUAL_SIGN);
+				final String[] pair = subValues[j].split(String.valueOf(EQUAL_SIGN));
 				if (pair[0].toLowerCase().trim().startsWith("for")) {
 					if (Utilities.isEmpty(pair[1])) {
 						return false;
 					}
 					
 					final String address = processAddress(pair[1]);
+					if (address.equalsIgnoreCase(HEADER_FORWARDED_UNKNOWN_VALUE)) {
+						return false;
+					}
 					if (!filterProxyAddressSet.contains(address)) {
 						result.setDetectionSuccess(true);
 						result.setDetectedAddress(address);
@@ -159,7 +163,7 @@ public class NetworkAddressDetector {
 		//https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
 		final List<String> headerValues = Collections.list(servletRequest.getHeaders(HEADER_X_FORWARDED_FOR));
 		for (int i = headerValues.size() - 1; i >= 0; i--) {
-			final String[] subValues = headerValues.get(i).split(COMMA);
+			final String[] subValues = headerValues.get(i).split(String.valueOf(COMMA));
 			for (int j = subValues.length - 1; j >= 0; j--) {
 				if (Utilities.isEmpty(subValues[j])) {
 					return false;
@@ -183,18 +187,18 @@ public class NetworkAddressDetector {
 		int dotCtn = 0;
 		final List<Integer> colonIdxList = new ArrayList<>();
 		for (int i = 0; i < value.length(); i++) {
-			final String ch = String.valueOf(value.charAt(i));
+			final char ch = value.charAt(i);
 			
-			if (DOUBLE_QUOTE.equals(ch) || SQUARE_BRACKET_OPEN.equals(ch)) {
+			if (ch == DOUBLE_QUOTE || ch == SQUARE_BRACKET_OPEN) {
 				continue;
 			}
-			if (SQUARE_BRACKET_CLOSE.equals(ch)) {
+			if (ch == SQUARE_BRACKET_CLOSE) {
 				break;
 			}
-			if (DOT.equals(ch)) {
+			if (ch == DOT) {
 				dotCtn++;
 			}
-			if (COLON.equals(ch)) {
+			if (ch == COLON) {
 				colonIdxList.add(i);
 			}
 			sb.append(ch);
@@ -202,7 +206,7 @@ public class NetworkAddressDetector {
 		
 		String address;
 		if (dotCtn == IPV4_DOT_NUMBER && colonIdxList.size() == 1) {
-			address = sb.substring(0, Math.max(0, colonIdxList.get(0)));
+			address = sb.substring(0, colonIdxList.get(0));
 		} else {
 			address = sb.toString();			
 		}

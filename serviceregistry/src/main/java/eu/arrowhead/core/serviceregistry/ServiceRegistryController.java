@@ -304,7 +304,7 @@ public class ServiceRegistryController {
 	})	
 	@PutMapping(path = SYSTEMS_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public SystemResponseDTO updateSystem(@PathVariable(value = PATH_VARIABLE_ID) final long systemId, @RequestBody final SystemRequestDTO request) {
-		return callUpdateSystem(null, request, systemId);
+		return callUpdateSystem(request, systemId);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -713,12 +713,12 @@ public class ServiceRegistryController {
 	})
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
 	@PostMapping(path = CommonConstants.OP_SERVICEREGISTRY_REGISTER_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public ServiceRegistryResponseDTO registerService(final HttpServletRequest servletRequest, @RequestBody final ServiceRegistryRequestDTO request) {
+	@ResponseBody public ServiceRegistryResponseDTO registerService(final HttpServletRequest servletRequest, @RequestBody final ServiceRegistryRequestDTO dto) {
 		logger.debug("New service registration request received");
-		checkServiceRegistryRequest(servletRequest, request, false);
+		checkServiceRegistryRequest(servletRequest, dto, false);
 		
-		final ServiceRegistryResponseDTO response = serviceRegistryDBService.registerServiceResponse(request);
-		logger.debug("{} successfully registers its service {}", request.getProviderSystem().getSystemName(), request.getServiceDefinition());
+		final ServiceRegistryResponseDTO response = serviceRegistryDBService.registerServiceResponse(dto);
+		logger.debug("{} successfully registers its service {}", dto.getProviderSystem().getSystemName(), dto.getServiceDefinition());
 	
 		return response;
 	}
@@ -1092,7 +1092,7 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private SystemResponseDTO callUpdateSystem(final HttpServletRequest servletRequest, final SystemRequestDTO dto, final long systemId) {
+	private SystemResponseDTO callUpdateSystem(final SystemRequestDTO dto, final long systemId) {
 		logger.debug("callUpdateSystem started...");
 		
 		checkSystemPutRequest(dto, systemId);
