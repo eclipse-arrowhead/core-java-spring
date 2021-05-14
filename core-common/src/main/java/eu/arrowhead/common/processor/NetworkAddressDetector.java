@@ -52,6 +52,7 @@ public class NetworkAddressDetector {
 	private static final char SQUARE_BRACKET_OPEN = '[';
 	private static final char SQUARE_BRACKET_CLOSE = ']';
 	private static final char EQUAL_SIGN = '=';
+	private static final char EMPTY = ' ';
 	private static final int IPV4_DOT_NUMBER = 3;
 	
 	private final Logger logger = LogManager.getLogger(NetworkAddressDetector.class);
@@ -186,7 +187,7 @@ public class NetworkAddressDetector {
 		for (int i = 0; i < value.length(); i++) {
 			final char ch = value.charAt(i);
 			
-			if (ch == DOUBLE_QUOTE || ch == SQUARE_BRACKET_OPEN) {
+			if (ch == DOUBLE_QUOTE || ch == SQUARE_BRACKET_OPEN || ch == EMPTY) {
 				continue;
 			}
 			if (ch == SQUARE_BRACKET_CLOSE) {
