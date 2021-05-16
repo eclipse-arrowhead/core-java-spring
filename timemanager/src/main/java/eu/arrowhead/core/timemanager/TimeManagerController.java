@@ -112,7 +112,7 @@ public class TimeManagerController {
 			) {
 		logger.debug("timeGet");
 
-        TimeManagerTimeResponseDTO resp = null;
+        TimeManagerTimeResponseDTO resp = new TimeManagerTimeResponseDTO();
 		return resp;
 	}
 

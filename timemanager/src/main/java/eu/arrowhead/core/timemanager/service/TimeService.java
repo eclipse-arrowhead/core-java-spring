@@ -28,10 +28,10 @@ import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.timemanager.database.service.TimeManagerDBService;
 
-import java.util.List;
-import java.util.ArrayList; 
-import java.util.Iterator; 
-import java.util.Vector;
+//import java.util.List;
+//import java.util.ArrayList; 
+//import java.util.Iterator; 
+//import java.util.Vector;
 
 
 @Service
