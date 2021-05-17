@@ -122,7 +122,7 @@ public class OrchetratedExternalPingMonitor extends AbstractPingMonitor{
 				if( receivedMonitoringRequestEventDTO != null) {
 					measurmentRequestConfirmed = true;
 				}else {
-					break;
+					//TODO rest & continue;
 				}
 			}
 
@@ -131,7 +131,7 @@ public class OrchetratedExternalPingMonitor extends AbstractPingMonitor{
 				if(startedMonitoringMeasurementEventDTO != null) {
 					measurmentStartedConfirmed = true;
 				}else {
-					break;
+					//TODO rest & continue;
 				}
 			}
 
@@ -140,6 +140,8 @@ public class OrchetratedExternalPingMonitor extends AbstractPingMonitor{
 				logger.info("External Ping Measurement finished: " + measurementProcessId);
 
 				return measurmentResult.getPayload();
+			}else {
+				//TODO rest & continue;
 			}
 
 		}

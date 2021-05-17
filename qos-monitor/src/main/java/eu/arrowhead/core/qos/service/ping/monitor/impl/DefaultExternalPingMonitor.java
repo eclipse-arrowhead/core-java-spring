@@ -95,7 +95,7 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 					logger.info("EVENT: External Ping Measurement request confirmed : " + measurementProcessId);
 
 				}else {
-					break;
+					//TODO rest & continue;
 				}
 			}
 
@@ -107,7 +107,7 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 					logger.info("EVENT: External Ping Measurement started : " + measurementProcessId);
 
 				}else {
-					break;
+					//TODO rest & continue;
 				}
 			}
 
@@ -116,6 +116,8 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 				logger.info("EVENT: External Ping Measurement finished: " + measurementProcessId);
 
 				return measurmentResult.getPayload();
+			}else {
+				//TODO rest & continue;
 			}
 
 		}
