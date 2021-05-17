@@ -290,7 +290,7 @@ public class ServiceRegistryController {
 	})
 	@PostMapping(path = CommonConstants.OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(org.springframework.http.HttpStatus.CREATED)
-	@ResponseBody public SystemResponseDTO registerSystem(final HttpServletRequest servletRequest, @RequestBody final SystemRequestDTO dto) { // TODO junit
+	@ResponseBody public SystemResponseDTO registerSystem(final HttpServletRequest servletRequest, @RequestBody final SystemRequestDTO dto) {
 		return callCreateSystem(servletRequest, dto, CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI);
 	}
 
