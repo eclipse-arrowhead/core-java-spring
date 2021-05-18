@@ -15,6 +15,7 @@
 package eu.arrowhead.core.qos;
 
 import java.security.PublicKey;
+import java.time.format.DateTimeParseException;
 import java.util.Base64;
 import java.util.Map;
 
@@ -71,6 +72,7 @@ import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.service.PingService;
 import eu.arrowhead.core.qos.service.RelayTestService;
 import eu.arrowhead.core.qos.service.event.EventWatcherService;
+import eu.arrowhead.core.qos.service.event.QosMonitorEventType;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -149,6 +151,10 @@ public class QoSMonitorController {
 	private static final String POST_CONNECT_HTTP_201_MESSAGE = "Connection created";
 	private static final String POST_CONNECT_HTTP_400_MESSAGE = "Could not create connection";
 	private static final String POST_CONNECT_HTTP_502_MESSAGE = "Error occured when initialize relay communication.";
+
+	private static final String EXTERNAL_PING_MONITOR_NOTIFICATION_DESCRIPTION = "Listens on external ping monitor events";
+	private static final String EXTERNAL_PING_MONITOR_NOTIFICATION_HTTP_200_MESSAGE = "External ping monitor event received";
+	private static final String EXTERNAL_PING_MONITOR_NOTIFICATION_HTTP_400_MESSAGE = "External ping monitor event has incorrect format";
 
 	@Autowired
 	private QoSDBService qosDBService;
@@ -478,14 +484,11 @@ public class QoSMonitorController {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Listens on external ping monitor events", 
+	@ApiOperation(value = EXTERNAL_PING_MONITOR_NOTIFICATION_DESCRIPTION, 
 				  tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CONNECT_HTTP_201_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CONNECT_HTTP_400_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_GATEWAY, message = POST_CONNECT_HTTP_502_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+			@ApiResponse(code = HttpStatus.SC_OK, message = EXTERNAL_PING_MONITOR_NOTIFICATION_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = EXTERNAL_PING_MONITOR_NOTIFICATION_HTTP_400_MESSAGE)
 	})
 	@ResponseStatus(value = org.springframework.http.HttpStatus.ACCEPTED)
 	@PostMapping(path = QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -722,6 +725,10 @@ public class QoSMonitorController {
 			throw new BadPayloadException("EventType is null or empty", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 
+		if (!checkExternalPingMonitoringNotificationEventType(request.getEventType())) {
+			throw new BadPayloadException("EventType is null or empty", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+
 		if (Utilities.isEmpty(request.getPayload())) {
 			throw new BadPayloadException("Payload is null or empty", HttpStatus.SC_BAD_REQUEST, origin);
 		}
@@ -729,5 +736,25 @@ public class QoSMonitorController {
 		if (Utilities.isEmpty(request.getTimeStamp())) {
 			throw new BadPayloadException("TimeStamp is null or empty", HttpStatus.SC_BAD_REQUEST, origin);
 		}
+
+		try {
+			Utilities.parseUTCStringToLocalZonedDateTime(request.getTimeStamp());
+		} catch (final DateTimeParseException ex) {
+			throw new BadPayloadException("TimeStamp format is not accepted as : " + request.getTimeStamp(), HttpStatus.SC_BAD_REQUEST, origin);
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private boolean checkExternalPingMonitoringNotificationEventType(final String eventType) {
+		logger.debug("checkExternalPingMonitoringNotificationEventType started...");
+
+		for (QosMonitorEventType type : QosMonitorEventType.values()) {
+			if (eventType.equalsIgnoreCase(type.name())) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }
