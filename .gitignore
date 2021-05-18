@@ -4,6 +4,7 @@
 .apt_generated
 .factorypath
 .sts4-cache
+.bin/
 
 ### IntelliJ IDEA ###
 .idea
