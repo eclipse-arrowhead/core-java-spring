@@ -201,8 +201,8 @@
   },
   {
   "name": "monitor_provider_scheme",
-  "type": "java.lang.String",
-  "description": "A description for 'monitor_provider_scheme'"
+  "type": "java.lang.Boolean",
+  "description": "A description for 'monitor_provider_secure'"
   },
   {
   "name": "monitor_provider_path",

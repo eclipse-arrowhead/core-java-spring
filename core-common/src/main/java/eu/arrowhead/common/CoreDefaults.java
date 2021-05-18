@@ -91,7 +91,7 @@ public class CoreDefaults {
 	public static final String DEFAULT_QOS_MONITOR_PROVIDER_ADDRESS = "127.0.0.1";
 	public static final int DEFAULT_QOS_MONITOR_PROVIDER_PORT = 9017;
 	public static final String DEFAULT_QOS_MONITOR_PROVIDER_PATH = "/pingmonitor";
-	public static final String DEFAULT_QOS_MONITOR_PROVIDER_SCHEME = "https";
+	public static final boolean DEFAULT_QOS_MONITOR_PROVIDER_SECURE = true;
 	
 	public static final int DEFAULT_RELAY_TEST_BAD_GATEWAY_RETRY_MIN = 30; //in minutes
 	public static final byte DEFAULT_RELAY_TEST_TIME_TO_REPEAT = 35;

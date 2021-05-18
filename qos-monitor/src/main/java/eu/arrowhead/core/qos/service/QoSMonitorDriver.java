@@ -85,8 +85,8 @@ public class QoSMonitorDriver {
 	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_PATH_WD)
 	private String fixedExternalPingMonitorPath;
 
-	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_SCHEME_WD)
-	private String fixedExternalPingMonitorScheme;
+	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_SECURE_WD)
+	private boolean pingMonitorSecure;
 
 	private static final Logger logger = LogManager.getLogger(QoSMonitorDriver.class);
 
@@ -447,14 +447,14 @@ public class QoSMonitorDriver {
 	private UriComponents createFixedPingMonitorProviderUri() {
 		logger.debug("createFixedPingMonitorProviderUri started...");
 
-		return Utilities.createURI(fixedExternalPingMonitorScheme, fixedExternalPingMonitorAddress, fixedExternalPingMonitorPort, fixedExternalPingMonitorPath);
+		return Utilities.createURI(pingMonitorSecure ? CommonConstants.HTTPS : CommonConstants.HTTP, fixedExternalPingMonitorAddress, fixedExternalPingMonitorPort, fixedExternalPingMonitorPath);
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	private UriComponents createFixedPingMonitorProviderEchoUri() {
 		logger.debug("createFixedPingMonitorProviderEchoUri started...");
 
-		return Utilities.createURI(fixedExternalPingMonitorScheme, fixedExternalPingMonitorAddress, fixedExternalPingMonitorPort, CommonConstants.ECHO_URI);
+		return Utilities.createURI(pingMonitorSecure ? CommonConstants.HTTPS : CommonConstants.HTTP, fixedExternalPingMonitorAddress, fixedExternalPingMonitorPort, CommonConstants.ECHO_URI);
 	}
 
 	//-------------------------------------------------------------------------------------------------
