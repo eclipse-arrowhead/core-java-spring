@@ -106,7 +106,7 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
 		logger.debug("getRequiredCoreSystemServiceUris started...");
 
-		final List<CoreSystemService> result = new ArrayList<>(5);
+		final List<CoreSystemService> result = new ArrayList<>(8);
 
 		if (gatekeeperIsPresent) {
 			result.add(CoreSystemService.GATEKEEPER_PULL_CLOUDS); 
@@ -114,10 +114,12 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 			result.add(CoreSystemService.GATEKEEPER_COLLECT_SYSTEM_ADDRESSES);
 			result.add(CoreSystemService.GATEKEEPER_RELAY_TEST_SERVICE);
 			result.add(CoreSystemService.GATEKEEPER_GET_CLOUD_SERVICE);
-		}if (monitorType.equals(MonitorProviderType.DEFAULTEXTERNAL)) {
+		}
+
+		if (monitorType.equals(MonitorProviderType.DEFAULTEXTERNAL)) {
 			result.add(CoreSystemService.EVENT_SUBSCRIBE_SERVICE);
 			result.add(CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE);
-		}if (monitorType.equals(MonitorProviderType.ORCHESTRATEDEXTERNAL)) {
+		}else if (monitorType.equals(MonitorProviderType.ORCHESTRATEDEXTERNAL)) {
 			result.add(CoreSystemService.ORCHESTRATION_SERVICE);
 			result.add(CoreSystemService.EVENT_SUBSCRIBE_SERVICE);
 			result.add(CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE);
