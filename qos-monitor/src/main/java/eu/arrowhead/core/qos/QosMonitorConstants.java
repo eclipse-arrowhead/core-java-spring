@@ -8,7 +8,7 @@ public class QosMonitorConstants {
 	public static final String RECEIVED_MONITORING_REQUEST_QUEUE = "ReceivedMonitoringRequestEventQueue";
 	public static final String STARTED_MONITORING_MEASUREMENT_QUEUE = "StartedMonitoringMeasurementEventQueue";
 	public static final String FINISHED_MONITORING_MEASUREMENT_QUEUE = "FinishedMonitoringMeasurementEventQueue";
-	public static final String INTERUPTED_MONITORING_MEASUREMENT_QUEUE = "InteruptedMonitoringMeasurementEventQueue";
+	public static final String INTERRUPTED_MONITORING_MEASUREMENT_QUEUE = "InteruptedMonitoringMeasurementEventQueue";
 
 	public static final String PROCESS_ID_KEY = "processID";
 
@@ -20,10 +20,10 @@ public class QosMonitorConstants {
 
 	public static final int FINISHED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_SIZE = 1;
 
-	public static final String INTERUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_SCHEMA = "INTERUPTED";
-	public static final int INTERUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_MAX_SIZE = 3;
-	public static final String INTERUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_ROOT_CAUSE_KEY = "ROOT_CAUSE";
-	public static final String INTERUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_EXCEPTION_KEY = "EXCEPTION";
+	public static final String INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_SCHEMA = "INTERRUPTED";
+	public static final int INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_MAX_SIZE = 3;
+	public static final String INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_ROOT_CAUSE_KEY = "ROOT_CAUSE";
+	public static final String INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_EXCEPTION_KEY = "EXCEPTION";
 
 	public static final String EXTERNAL_PING_MONITORING_SERVICE_INTERFACE = "HTTP-SECURE-JSON";
 	public static final String EXTERNAL_PING_MONITORING_SERVICE_DEFINITION = "EXTERNALPINGSERVICE";
