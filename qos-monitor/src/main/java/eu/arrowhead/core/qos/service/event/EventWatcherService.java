@@ -11,7 +11,7 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.dto.event.EventDTOConverter;
 import eu.arrowhead.core.qos.dto.event.FinishedMonitoringMeasurementEventDTO;
-import eu.arrowhead.core.qos.dto.event.InteruptedMonitoringMeasurementEventDTO;
+import eu.arrowhead.core.qos.dto.event.InterruptedMonitoringMeasurementEventDTO;
 import eu.arrowhead.core.qos.dto.event.ReceivedMonitoringRequestEventDTO;
 import eu.arrowhead.core.qos.dto.event.StartedMonitoringMeasurementEventDTO;
 import eu.arrowhead.core.qos.service.event.queue.FinishedMonitoringMeasurementEventQueue;
@@ -70,7 +70,7 @@ public class EventWatcherService {
 				finishedMonitoringMeasurementEventQueue.put(validFinishEvent);
 				break;
 			case INTERUPTED_MONITORING_MEASUREMENT:
-				final InteruptedMonitoringMeasurementEventDTO validInteruptEvent = EventDTOConverter.convertToInteruptedMonitoringMeasurementEvent(event);
+				final InterruptedMonitoringMeasurementEventDTO validInteruptEvent = EventDTOConverter.convertToInteruptedMonitoringMeasurementEvent(event);
 				interuptedMonitoringMeasurementEventQueue.put(validInteruptEvent);
 				break;
 			default:

@@ -34,13 +34,13 @@ public class EventDTOConverter {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public static InteruptedMonitoringMeasurementEventDTO convertToInteruptedMonitoringMeasurementEvent(final EventDTO event) {
+	public static InterruptedMonitoringMeasurementEventDTO convertToInteruptedMonitoringMeasurementEvent(final EventDTO event) {
 		logger.debug("convertToInteruptedMonitoringMeasurementEvent started...");
 
 		Assert.isTrue(!Utilities.isEmpty(event.getPayload()), "Event payload is empty");
 		Assert.isTrue(!Utilities.isEmpty(event.getTimeStamp()), "Event timeStamp is empty");
 
-		final InteruptedMonitoringMeasurementEventDTO validEvent = new InteruptedMonitoringMeasurementEventDTO();
+		final InterruptedMonitoringMeasurementEventDTO validEvent = new InterruptedMonitoringMeasurementEventDTO();
 		validEvent.setEventType(QosMonitorEventType.INTERUPTED_MONITORING_MEASUREMENT);
 		validEvent.setMetaData(event.getMetaData());
 		validEvent.setPayload(event.getPayload());

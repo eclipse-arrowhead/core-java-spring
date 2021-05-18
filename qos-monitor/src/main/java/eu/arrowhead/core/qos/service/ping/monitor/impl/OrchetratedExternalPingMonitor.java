@@ -26,7 +26,7 @@ import eu.arrowhead.core.qos.dto.IcmpPingRequest;
 import eu.arrowhead.core.qos.dto.IcmpPingRequestACK;
 import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.dto.event.FinishedMonitoringMeasurementEventDTO;
-import eu.arrowhead.core.qos.dto.event.InteruptedMonitoringMeasurementEventDTO;
+import eu.arrowhead.core.qos.dto.event.InterruptedMonitoringMeasurementEventDTO;
 import eu.arrowhead.core.qos.dto.event.ReceivedMonitoringRequestEventDTO;
 import eu.arrowhead.core.qos.dto.event.StartedMonitoringMeasurementEventDTO;
 import eu.arrowhead.core.qos.dto.externalMonitor.ExternalMonitorOrchestrationRequestFactory;
@@ -234,7 +234,7 @@ public class OrchetratedExternalPingMonitor extends AbstractPingMonitor{
 
 		try {
 
-			final InteruptedMonitoringMeasurementEventDTO event = interuptedMonitoringMeasurementEventQueue.poll();
+			final InterruptedMonitoringMeasurementEventDTO event = interuptedMonitoringMeasurementEventQueue.poll();
 			if(event != null) {
 				final UUID uuid = UUID.fromString(event.getMetaData().get(QosMonitorConstants.PROCESS_ID_KEY));
 				if(uuid.equals(measurementProcessId)) {

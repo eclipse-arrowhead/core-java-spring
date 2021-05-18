@@ -3,30 +3,30 @@ package eu.arrowhead.core.qos.service.event.queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import eu.arrowhead.core.qos.dto.event.InteruptedMonitoringMeasurementEventDTO;
+import eu.arrowhead.core.qos.dto.event.InterruptedMonitoringMeasurementEventDTO;
 
 public class InteruptedMonitoringMeasurementEventQueue {
 
 	//=================================================================================================
 	// members
 
-	private static final BlockingQueue<InteruptedMonitoringMeasurementEventDTO> finishedMonitoringMeasurementEventQueue = new LinkedBlockingQueue<>();
+	private static final BlockingQueue<InterruptedMonitoringMeasurementEventDTO> finishedMonitoringMeasurementEventQueue = new LinkedBlockingQueue<>();
 
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------	
-	public void put(final InteruptedMonitoringMeasurementEventDTO toPut) throws InterruptedException {
+	public void put(final InterruptedMonitoringMeasurementEventDTO toPut) throws InterruptedException {
 		finishedMonitoringMeasurementEventQueue.put(toPut);
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public InteruptedMonitoringMeasurementEventDTO take() throws InterruptedException {
+	public InterruptedMonitoringMeasurementEventDTO take() throws InterruptedException {
 		return finishedMonitoringMeasurementEventQueue.take();
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public InteruptedMonitoringMeasurementEventDTO poll() throws InterruptedException {
+	public InterruptedMonitoringMeasurementEventDTO poll() throws InterruptedException {
 		return finishedMonitoringMeasurementEventQueue.poll();
 	}
 }

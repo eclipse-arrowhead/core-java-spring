@@ -12,7 +12,7 @@ import org.springframework.util.Assert;
 import eu.arrowhead.core.qos.QosMonitorConstants;
 import eu.arrowhead.core.qos.service.event.QosMonitorEventType;
 
-public class InteruptedMonitoringMeasurementEventDTO implements Serializable{
+public class InterruptedMonitoringMeasurementEventDTO implements Serializable{
 
 	//=================================================================================================
 	// members
@@ -29,7 +29,7 @@ public class InteruptedMonitoringMeasurementEventDTO implements Serializable{
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public InteruptedMonitoringMeasurementEventDTO() {}
+	public InterruptedMonitoringMeasurementEventDTO() {}
 
 	//-------------------------------------------------------------------------------------------------
 	public QosMonitorEventType getEventType() {	return eventType; }
@@ -51,8 +51,8 @@ public class InteruptedMonitoringMeasurementEventDTO implements Serializable{
 	private void validateFields() {
 
 		Assert.isTrue(eventType.equals(QosMonitorEventType.INTERUPTED_MONITORING_MEASUREMENT), "Event type must be: INTERUPTED_MONITORING_MEASUREMENT");
-		Assert.isTrue(payload.equalsIgnoreCase(QosMonitorConstants.INTERUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_SCHEMA), "Payload must be: " + QosMonitorConstants.INTERUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_SCHEMA);
+		Assert.isTrue(payload.equalsIgnoreCase(QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_SCHEMA), "Payload must be: " + QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_SCHEMA);
 		Assert.isTrue(metaData.containsKey(QosMonitorConstants.PROCESS_ID_KEY), "Meta data must contain: " + QosMonitorConstants.PROCESS_ID_KEY);
-		Assert.isTrue( (metaData.keySet().size() < QosMonitorConstants.INTERUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_MAX_SIZE + 1), "Meta data keys quantity is not valid");
+		Assert.isTrue( (metaData.keySet().size() < QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_MAX_SIZE + 1), "Meta data keys quantity is not valid");
 	}
 }
