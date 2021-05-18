@@ -69,7 +69,7 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@Bean(QosMonitorConstants.INTERUPTED_MONITORING_MEASUREMENT_QUEUE)
+	@Bean(QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_QUEUE)
 	public InteruptedMonitoringMeasurementEventQueue getInteruptedMonitoringMeasurementEventQueue() {
 		return new InteruptedMonitoringMeasurementEventQueue();
 	}

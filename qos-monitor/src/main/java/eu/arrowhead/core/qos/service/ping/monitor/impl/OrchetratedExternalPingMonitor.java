@@ -239,8 +239,8 @@ public class OrchetratedExternalPingMonitor extends AbstractPingMonitor{
 				final UUID uuid = UUID.fromString(event.getMetaData().get(QosMonitorConstants.PROCESS_ID_KEY));
 				if(uuid.equals(measurementProcessId)) {
 
-					final String suspectedRootCauses = event.getMetaData().get(QosMonitorConstants.INTERUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_ROOT_CAUSE_KEY);
-					final String exeptionInExternalMonitoring = event.getMetaData().get(QosMonitorConstants.INTERUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_EXCEPTION_KEY);
+					final String suspectedRootCauses = event.getMetaData().get(QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_ROOT_CAUSE_KEY);
+					final String exeptionInExternalMonitoring = event.getMetaData().get(QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_EXCEPTION_KEY);
 
 					logger.warn("Exception in external monitoring process: " + exeptionInExternalMonitoring);
 					logger.warn("Self clamed root cause of external monitoring process exception: " + suspectedRootCauses);
