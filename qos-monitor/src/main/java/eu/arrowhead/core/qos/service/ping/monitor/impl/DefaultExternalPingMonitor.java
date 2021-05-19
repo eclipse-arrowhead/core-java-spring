@@ -14,8 +14,8 @@ import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.QosMonitorConstants;
-import eu.arrowhead.core.qos.dto.IcmpPingRequest;
 import eu.arrowhead.core.qos.dto.IcmpPingRequestACK;
+import eu.arrowhead.core.qos.dto.IcmpPingRequestDTO;
 import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.dto.event.FinishedMonitoringMeasurementEventDTO;
 import eu.arrowhead.core.qos.dto.event.InterruptedMonitoringMeasurementEventDTO;
@@ -274,13 +274,13 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private IcmpPingRequest createIcmpPingRequest(final String address) {
+	private IcmpPingRequestDTO createIcmpPingRequest(final String address) {
 		logger.debug("createIcmpPingRequest started...");
 
-		final IcmpPingRequest request = new IcmpPingRequest();
+		final IcmpPingRequestDTO request = new IcmpPingRequestDTO();
 		request.setHost(address);
 		request.setPacketSize(pingMeasurementProperties.getPacketSize());
-		request.setTimeout(pingMeasurementProperties.getTimeout());
+		request.setTimeout(Long.valueOf(pingMeasurementProperties.getTimeout()));
 		request.setTimeToRepeat(pingMeasurementProperties.getTimeToRepeat());
 		request.setTtl(ICMP_TTL);
 

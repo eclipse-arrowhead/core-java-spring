@@ -52,8 +52,8 @@ import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.qos.QosMonitorConstants;
-import eu.arrowhead.core.qos.dto.IcmpPingRequest;
 import eu.arrowhead.core.qos.dto.IcmpPingRequestACK;
+import eu.arrowhead.core.qos.dto.IcmpPingRequestDTO;
 import eu.arrowhead.core.qos.service.event.QosMonitorEventType;
 
 @Component
@@ -209,7 +209,7 @@ public class QoSMonitorDriver {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public IcmpPingRequestACK requestExternalPingMonitorService(final UriComponents externalPingMonitorUri, final IcmpPingRequest request) {
+	public IcmpPingRequestACK requestExternalPingMonitorService(final UriComponents externalPingMonitorUri, final IcmpPingRequestDTO request) {
 		logger.debug("requestExternalPingMonitorService started...");
 
 		Assert.notNull(request, "IcmpPingRequest is null.");
@@ -226,7 +226,7 @@ public class QoSMonitorDriver {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public IcmpPingRequestACK requestExternalPingMonitorService(final IcmpPingRequest request) {
+	public IcmpPingRequestACK requestExternalPingMonitorService(final IcmpPingRequestDTO request) {
 		logger.debug("requestExternalPingMonitorService started...");
 
 		Assert.notNull(request, "IcmpPingRequest is null.");
