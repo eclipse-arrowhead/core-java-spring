@@ -54,7 +54,7 @@ public class DummyPingMonitor extends AbstractPingMonitor{
 					response = new IcmpPingResponse();
 					response.setErrorMessage(ex.getMessage());
 					response.setSuccessFlag(false);
-					response.setThrowable(ex);
+					response.setThrowable(ex.toString());
 
 					responseList.add(response);
 				}

@@ -318,7 +318,7 @@ public class QoSDBService {
 			measurementLogDetails.setSuccessFlag(icmpPingResponse.isSuccessFlag());
 			measurementLogDetails.setTimeoutFlag(icmpPingResponse.isTimeoutFlag());
 			measurementLogDetails.setErrorMessage(icmpPingResponse.getErrorMessage());
-			measurementLogDetails.setThrowable(icmpPingResponse.getThrowable() == null ? null : icmpPingResponse.getThrowable().toString());
+			measurementLogDetails.setThrowable(icmpPingResponse.getThrowable() == null ? null : icmpPingResponse.getThrowable());
 			measurementLogDetails.setSize(icmpPingResponse.getSize());
 			measurementLogDetails.setTtl(icmpPingResponse.getTtl());
 			measurementLogDetails.setRtt(icmpPingResponse.getRtt());
@@ -661,7 +661,7 @@ public class QoSDBService {
 			measurementLogDetails.setSuccessFlag(icmpPingResponse.isSuccessFlag());
 			measurementLogDetails.setTimeoutFlag(icmpPingResponse.isTimeoutFlag());
 			measurementLogDetails.setErrorMessage(icmpPingResponse.getErrorMessage());
-			measurementLogDetails.setThrowable(icmpPingResponse.getThrowable() == null ? null : icmpPingResponse.getThrowable().toString());
+			measurementLogDetails.setThrowable(icmpPingResponse.getThrowable() == null ? null : icmpPingResponse.getThrowable());
 			measurementLogDetails.setSize(icmpPingResponse.getSize());
 			measurementLogDetails.setTtl(icmpPingResponse.getTtl());
 			measurementLogDetails.setRtt(icmpPingResponse.getRtt());

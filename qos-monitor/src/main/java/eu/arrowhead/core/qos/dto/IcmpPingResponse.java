@@ -12,7 +12,7 @@ public class IcmpPingResponse implements Serializable{
 	private boolean successFlag;
 	private boolean timeoutFlag;
 	private String errorMessage;
-	private Throwable throwable;
+	private String throwable;
 	private String host;
 	private int size;
 	private int rtt;
@@ -29,7 +29,7 @@ public class IcmpPingResponse implements Serializable{
 	public boolean isSuccessFlag() { return successFlag; }
 	public boolean isTimeoutFlag() { return timeoutFlag; }
 	public String getErrorMessage() { return errorMessage; }
-	public Throwable getThrowable() { return throwable; }
+	public String getThrowable() { return throwable; }
 	public String getHost() { return host; }
 	public int getSize() { return size; }
 	public int getRtt() { return rtt; }
@@ -40,7 +40,7 @@ public class IcmpPingResponse implements Serializable{
 	public void setSuccessFlag(final boolean successFlag) { this.successFlag = successFlag; }
 	public void setTimeoutFlag(final boolean timeoutFlag) { this.timeoutFlag = timeoutFlag; }
 	public void setErrorMessage(final String errorMessage) { this.errorMessage = errorMessage; }
-	public void setThrowable(final Throwable throwable) { this.throwable = throwable; }
+	public void setThrowable(final String throwable) { this.throwable = throwable; }
 	public void setHost(final String host) { this.host = host; }
 	public void setSize(final int size) { this.size = size; }
 	public void setRtt(final int rtt) { this.rtt = rtt; }
