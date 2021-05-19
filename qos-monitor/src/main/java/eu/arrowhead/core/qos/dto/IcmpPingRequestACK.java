@@ -25,6 +25,6 @@ public class IcmpPingRequestACK implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	public void setAckOk(final String ackOk) { this.ackOk = ackOk; }
-	public void setExternalMeasurementUuid(UUID externalMeasurementUuid) { this.externalMeasurementUuid = externalMeasurementUuid; }
+	public void setExternalMeasurementUuid(final UUID externalMeasurementUuid) { this.externalMeasurementUuid = externalMeasurementUuid; }
 
 }
