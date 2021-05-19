@@ -45,6 +45,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -89,7 +90,9 @@ import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.processor.NetworkAddressDetector;
 import eu.arrowhead.common.processor.NetworkAddressPreProcessor;
+import eu.arrowhead.common.processor.model.AddressDetectionResult;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 
@@ -129,6 +132,9 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	
 	@MockBean
 	private NetworkAddressVerifier networkAddressVerifier;
+	
+	@MockBean
+	private NetworkAddressDetector networkAddressDetector;
 	
 	//=================================================================================================
 	// methods
@@ -551,8 +557,31 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testUnregisterServiceNoAddressParameter() throws Exception {
 		final String queryStr = createQueryStringForUnregister("sd", "pn", null, 1, "/path");
+		when(networkAddressPreProcessor.normalize(any())).thenReturn("");
+		doThrow(new InvalidParameterException("test msg")).when(networkAddressVerifier).verify(anyString());
+		final AddressDetectionResult addressDetectionResult = new AddressDetectionResult();
+		addressDetectionResult.setSkipped(true);
+		addressDetectionResult.setDetectionMessage("detection skipped");
+		when(networkAddressDetector.detect(any())).thenReturn(addressDetectionResult);
 		
 		deleteUnregisterService(queryStr, status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterServiceNoAddressParameterDetectionEnabled() throws Exception {
+		final String queryStr = createQueryStringForUnregister("sd", "pn", null, 1, "/path");
+		when(networkAddressPreProcessor.normalize(any())).thenReturn("");
+		doThrow(new InvalidParameterException("test msg")).when(networkAddressVerifier).verify(anyString());
+		final AddressDetectionResult addressDetectionResult = new AddressDetectionResult();
+		addressDetectionResult.setDetectionSuccess(true);
+		addressDetectionResult.setDetectedAddress("address");
+		when(networkAddressDetector.detect(any())).thenReturn(addressDetectionResult);
+		final ArgumentCaptor<String> addrCaptor = ArgumentCaptor.forClass(String.class);
+		doNothing().when(serviceRegistryDBService).removeServiceRegistry(anyString(), anyString(), addrCaptor.capture(), anyInt(), anyString());
+		
+		deleteUnregisterService(queryStr, status().isOk());
+		assertEquals("address", addrCaptor.getValue());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -630,13 +659,35 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final String queryStr = createQueryStringForUnregister("sd", "pn", "", 1, "/path");
 		when(networkAddressPreProcessor.normalize(anyString())).thenReturn("");
 		doThrow(new InvalidParameterException("test msg")).when(networkAddressVerifier).verify(anyString());
+		final AddressDetectionResult addressDetectionResult = new AddressDetectionResult();
+		addressDetectionResult.setSkipped(true);
+		addressDetectionResult.setDetectionMessage("detection skipped");
+		when(networkAddressDetector.detect(any())).thenReturn(addressDetectionResult);
 		
 		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(SERVICEREGISTRY_UNREGISTER_URI, error.getOrigin());
-		Assert.assertEquals("test msg", error.getErrorMessage());
+		Assert.assertEquals("test msg detection skipped", error.getErrorMessage());
+	}
+	
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterServiceAddressEmptyDetectionEnabled() throws Exception {
+		final String queryStr = createQueryStringForUnregister("sd", "pn", "", 1, "/path");
+		when(networkAddressPreProcessor.normalize(anyString())).thenReturn("");
+		doThrow(new InvalidParameterException("test msg")).when(networkAddressVerifier).verify(anyString());
+		final AddressDetectionResult addressDetectionResult = new AddressDetectionResult();
+		addressDetectionResult.setDetectionSuccess(true);
+		addressDetectionResult.setDetectedAddress("address");
+		when(networkAddressDetector.detect(any())).thenReturn(addressDetectionResult);
+		final ArgumentCaptor<String> addrCaptor = ArgumentCaptor.forClass(String.class);
+		doNothing().when(serviceRegistryDBService).removeServiceRegistry(anyString(), anyString(), addrCaptor.capture(), anyInt(), anyString());
+		
+		deleteUnregisterService(queryStr, status().isOk());
+		Assert.assertEquals("address", addrCaptor.getValue());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -792,6 +843,9 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testQueryRegistryBySystemDTONullAddress() throws Exception {
 		doThrow(new InvalidParameterException("test msg")).when(networkAddressVerifier).verify(any());
+		final AddressDetectionResult addressDetectionResult = new AddressDetectionResult();
+		addressDetectionResult.setSkipped(true);
+		when(networkAddressDetector.detect(any())).thenReturn(addressDetectionResult);
 		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO("name", null, 45000, null, null), status().isBadRequest());
 		
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
