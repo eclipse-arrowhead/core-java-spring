@@ -1,20 +1,20 @@
 package eu.arrowhead.core.qos.dto.event;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.EventDTO;
+import eu.arrowhead.common.dto.shared.IcmpPingResponseDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.service.event.QosMonitorEventType;
 
 public class EventDTOConverter {
@@ -66,13 +66,13 @@ public class EventDTOConverter {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public static List<IcmpPingResponse> convertToIcmpPingResponse(final String payload) {
+	public static List<IcmpPingResponseDTO> convertToIcmpPingResponse(final String payload) {
 		logger.debug("convertToIcmpPingResponse started...");
 
 		Assert.isTrue(!Utilities.isEmpty(payload), "Payload is empty");
 
 		try {
-			final List<IcmpPingResponse> validResponse = Arrays.asList(mapper.readValue(payload, IcmpPingResponse.class));
+			final List<IcmpPingResponseDTO> validResponse = mapper.readValue(payload, new TypeReference<List<IcmpPingResponseDTO>>(){});
 
 			return validResponse;
 

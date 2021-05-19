@@ -11,11 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.SSLProperties;
+import eu.arrowhead.common.dto.shared.IcmpPingRequestACK;
+import eu.arrowhead.common.dto.shared.IcmpPingRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.QosMonitorConstants;
-import eu.arrowhead.core.qos.dto.IcmpPingRequestACK;
-import eu.arrowhead.core.qos.dto.IcmpPingRequestDTO;
+import eu.arrowhead.core.qos.dto.IcmpPingDTOConverter;
 import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.dto.event.FinishedMonitoringMeasurementEventDTO;
 import eu.arrowhead.core.qos.dto.event.InterruptedMonitoringMeasurementEventDTO;
@@ -115,7 +116,7 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 			if(measurmentResult != null) {
 				logger.info("EVENT: External Ping Measurement finished: " + measurementProcessId);
 
-				return measurmentResult.getPayload();
+				return IcmpPingDTOConverter.convertPingMeasurementResult(measurmentResult.getPayload());
 			}else {
 				//TODO rest & continue;
 			}

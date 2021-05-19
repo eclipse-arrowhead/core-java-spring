@@ -9,8 +9,8 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.util.Assert;
 
+import eu.arrowhead.common.dto.shared.IcmpPingResponseDTO;
 import eu.arrowhead.core.qos.QosMonitorConstants;
-import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.service.event.QosMonitorEventType;
 
 public class FinishedMonitoringMeasurementEventDTO implements Serializable {
@@ -21,7 +21,7 @@ public class FinishedMonitoringMeasurementEventDTO implements Serializable {
 	private static final long serialVersionUID = -2664998954640775578L;
 
 	private QosMonitorEventType eventType;
-	private List<IcmpPingResponse> payload;
+	private List<IcmpPingResponseDTO> payload;
 	private Map<String,String> metaData;
 	private ZonedDateTime timeStamp;
 
@@ -33,13 +33,13 @@ public class FinishedMonitoringMeasurementEventDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	public QosMonitorEventType getEventType() {	return eventType; }
-	public List<IcmpPingResponse> getPayload() { return payload; }
+	public List<IcmpPingResponseDTO> getPayload() { return payload; }
 	public Map<String,String> getMetaData() { return metaData; }
 	public ZonedDateTime getTimeStamp() { return timeStamp; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setEventType(final QosMonitorEventType eventType) { this.eventType = eventType; }
-	public void setPayload(final List<IcmpPingResponse> payload) { this.payload = payload; }
+	public void setPayload(final List<IcmpPingResponseDTO> payload) { this.payload = payload; }
 	public void setMetaData( final Map<String,String> metaData ) { this.metaData = metaData; }
 	public void setTimeStamp(final ZonedDateTime timeStamp) { this.timeStamp = timeStamp; }
 

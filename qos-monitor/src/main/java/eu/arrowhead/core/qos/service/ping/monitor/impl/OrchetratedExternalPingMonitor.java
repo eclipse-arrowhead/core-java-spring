@@ -14,6 +14,8 @@ import org.springframework.web.util.UriComponents;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.shared.IcmpPingRequestACK;
+import eu.arrowhead.common.dto.shared.IcmpPingRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
@@ -22,8 +24,7 @@ import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.QosMonitorConstants;
-import eu.arrowhead.core.qos.dto.IcmpPingRequestACK;
-import eu.arrowhead.core.qos.dto.IcmpPingRequestDTO;
+import eu.arrowhead.core.qos.dto.IcmpPingDTOConverter;
 import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.dto.event.FinishedMonitoringMeasurementEventDTO;
 import eu.arrowhead.core.qos.dto.event.InterruptedMonitoringMeasurementEventDTO;
@@ -139,7 +140,7 @@ public class OrchetratedExternalPingMonitor extends AbstractPingMonitor{
 			if(measurmentResult != null) {
 				logger.info("External Ping Measurement finished: " + measurementProcessId);
 
-				return measurmentResult.getPayload();
+				return IcmpPingDTOConverter.convertPingMeasurementResult(measurmentResult.getPayload());
 			}else {
 				//TODO rest & continue;
 			}
@@ -395,4 +396,5 @@ public class OrchetratedExternalPingMonitor extends AbstractPingMonitor{
 		//TODO implement more sophisticated provider selection strategy
 		return result.getResponse().get(0);
 	}
+
 }

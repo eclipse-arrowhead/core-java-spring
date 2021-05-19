@@ -1,4 +1,4 @@
-package eu.arrowhead.core.qos.dto;
+package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
 
