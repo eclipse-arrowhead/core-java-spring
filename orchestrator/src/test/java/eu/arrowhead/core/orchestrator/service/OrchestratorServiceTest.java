@@ -17,7 +17,9 @@ package eu.arrowhead.core.orchestrator.service;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,6 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,10 +37,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.database.entity.OrchestratorStore;
+import eu.arrowhead.common.database.entity.OrchestratorStoreFlexible;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.System;
@@ -91,6 +98,9 @@ public class OrchestratorServiceTest {
 	
 	@Mock
 	private OrchestratorDriver orchestratorDriver;
+	
+	@Mock
+	private OrchestratorFlexibleDriver orchestratorFlexibleDriver;
 	
 	@Mock
 	private OrchestratorStoreDBService orchestratorStoreDBService;
@@ -3228,7 +3238,120 @@ public class OrchestratorServiceTest {
 		}
 	}
 	
-	// checkSystemRequestDTO() and checkServiceRequestForm() used in dynamic orchestration too and tested there
+	// checkSystemRequestDTO() and checkServiceRequestForm() used in dynamic orchestration too and are tested there
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = BadPayloadException.class)
+	public void testOrchestrationFromFlexibleStoreOnlyCloudPreferred() {
+		ReflectionTestUtils.setField(testingObject, "useFlexibleStore", true);
+		try {
+			final SystemRequestDTO consumer = new SystemRequestDTO("testconsumer", "localhost", 1234, null, null);
+			final ServiceQueryFormDTO queryForm = new ServiceQueryFormDTO.Builder("testservice")
+																		 .build();
+			
+			final PreferredProviderDataDTO preferredProvider = new PreferredProviderDataDTO();
+			preferredProvider.setProviderSystem(new SystemRequestDTO("testprovider", "localhost", 5678, null, null));
+			preferredProvider.setProviderCloud(new CloudRequestDTO());
+			final List<PreferredProviderDataDTO> preferredProviderList = new ArrayList<>(1);
+			preferredProviderList.add(preferredProvider);
+			
+			final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+			request.setRequesterSystem(consumer);
+			request.setRequestedService(queryForm);
+			request.setPreferredProviders(preferredProviderList);
+			request.getOrchestrationFlags().put(Flag.ONLY_PREFERRED, true);
+			testingObject.orchestrationFromStore(request);
+		} catch (final BadPayloadException ex) {
+			Assert.assertEquals("There is no valid preferred provider, but \"" + Flag.ONLY_PREFERRED + "\" is set to true", ex.getMessage());
+			throw ex;
+		}
+	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationFromFlexibleStoreNoMatchedRules() {
+		ReflectionTestUtils.setField(testingObject, "useFlexibleStore", true);
+		final SystemRequestDTO consumer = new SystemRequestDTO("testconsumer", "localhost", 1234, null, null);
+		final ServiceQueryFormDTO queryForm = new ServiceQueryFormDTO.Builder("testservice")
+																	 .build();
+		
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setRequesterSystem(consumer);
+		request.setRequestedService(queryForm);
+		
+		when(orchestratorFlexibleDriver.queryConsumerSystem(any(SystemRequestDTO.class))).thenReturn(new SystemResponseDTO());
+		when(orchestratorFlexibleDriver.collectAndSortMatchingRules(any(OrchestrationFormRequestDTO.class), any(SystemResponseDTO.class))).thenReturn(List.of());
+		
+		final OrchestrationResponseDTO response = testingObject.orchestrationFromStore(request);
+		Assert.assertEquals(0, response.getResponse().size());
+		verify(orchestratorFlexibleDriver).queryConsumerSystem(any(SystemRequestDTO.class));
+		verify(orchestratorFlexibleDriver).collectAndSortMatchingRules(any(OrchestrationFormRequestDTO.class), any(SystemResponseDTO.class));
+		verify(orchestratorFlexibleDriver, never()).queryServiceRegistry(any(OrchestrationFormRequestDTO.class), anyList());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationFromFlexibleStoreNoMatchedResultByProviderRequirements() {
+		ReflectionTestUtils.setField(testingObject, "useFlexibleStore", true);
+		final SystemRequestDTO consumer = new SystemRequestDTO("testconsumer", "localhost", 1234, null, null);
+		final ServiceQueryFormDTO queryForm = new ServiceQueryFormDTO.Builder("testservice")
+																	 .build();
+		
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setRequesterSystem(consumer);
+		request.setRequestedService(queryForm);
+		
+		when(orchestratorFlexibleDriver.queryConsumerSystem(any(SystemRequestDTO.class))).thenReturn(new SystemResponseDTO());
+		when(orchestratorFlexibleDriver.collectAndSortMatchingRules(any(OrchestrationFormRequestDTO.class), any(SystemResponseDTO.class))).thenReturn(List.of(new OrchestratorStoreFlexible()));
+		final List<Pair<OrchestratorStoreFlexible,ServiceQueryResultDTO>> queryWithRules = List.of(new ImmutablePair<>(new OrchestratorStoreFlexible(), new ServiceQueryResultDTO()));
+		when(orchestratorFlexibleDriver.queryServiceRegistry(any(OrchestrationFormRequestDTO.class), anyList())).thenReturn(queryWithRules);
+		when(orchestratorFlexibleDriver.filterSRResultsByProviderRequirements(anyList(), any())).thenReturn(List.of());
+		
+		final OrchestrationResponseDTO response = testingObject.orchestrationFromStore(request);
+		Assert.assertEquals(0, response.getResponse().size());
+		verify(orchestratorFlexibleDriver).queryConsumerSystem(any(SystemRequestDTO.class));
+		verify(orchestratorFlexibleDriver).collectAndSortMatchingRules(any(OrchestrationFormRequestDTO.class), any(SystemResponseDTO.class));
+		verify(orchestratorFlexibleDriver).queryServiceRegistry(any(OrchestrationFormRequestDTO.class), anyList());
+		verify(orchestratorFlexibleDriver).filterSRResultsByProviderRequirements(anyList(), any());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationFromFlexibleStoreWithMatchmaking() {
+		ReflectionTestUtils.setField(testingObject, "useFlexibleStore", true);
+		final SystemRequestDTO consumer = new SystemRequestDTO("testconsumer", "localhost", 1234, null, null);
+		final ServiceQueryFormDTO queryForm = new ServiceQueryFormDTO.Builder("testservice")
+																	 .build();
+		
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setRequesterSystem(consumer);
+		request.setRequestedService(queryForm);
+		request.getOrchestrationFlags().put(Flag.MATCHMAKING, true);
+		
+		when(orchestratorFlexibleDriver.queryConsumerSystem(any(SystemRequestDTO.class))).thenReturn(new SystemResponseDTO());
+		when(orchestratorFlexibleDriver.collectAndSortMatchingRules(any(OrchestrationFormRequestDTO.class), any(SystemResponseDTO.class))).thenReturn(List.of(new OrchestratorStoreFlexible()));
+		final List<Pair<OrchestratorStoreFlexible,ServiceQueryResultDTO>> queryWithRules = List.of(new ImmutablePair<>(new OrchestratorStoreFlexible(), new ServiceQueryResultDTO()));
+		when(orchestratorFlexibleDriver.queryServiceRegistry(any(OrchestrationFormRequestDTO.class), anyList())).thenReturn(queryWithRules);
+		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
+		srEntry.setProvider(new SystemResponseDTO());
+		srEntry.setServiceDefinition(new ServiceDefinitionResponseDTO());
+		srEntry.setInterfaces(List.of(new ServiceInterfaceResponseDTO()));
+		when(orchestratorFlexibleDriver.filterSRResultsByProviderRequirements(anyList(), any())).thenReturn(List.of(srEntry));
+		when(intraCloudProviderMatchmaker.doMatchmaking(anyList(), any(IntraCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResultDTO());
+		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), anyList())).thenAnswer(new Answer<List<OrchestrationResultDTO>>() {
+			@SuppressWarnings("unchecked")
+			public List<OrchestrationResultDTO> answer(final InvocationOnMock invocation) throws Throwable {
+				return (List<OrchestrationResultDTO>) invocation.getArgument(1);
+			}
+		});
+		
+		final OrchestrationResponseDTO response = testingObject.orchestrationFromStore(request);
+		Assert.assertEquals(1, response.getResponse().size());
+		verify(orchestratorFlexibleDriver).queryConsumerSystem(any(SystemRequestDTO.class));
+		verify(orchestratorFlexibleDriver).collectAndSortMatchingRules(any(OrchestrationFormRequestDTO.class), any(SystemResponseDTO.class));
+		verify(orchestratorFlexibleDriver).queryServiceRegistry(any(OrchestrationFormRequestDTO.class), anyList());
+		verify(orchestratorFlexibleDriver).filterSRResultsByProviderRequirements(anyList(), any());
+		verify(intraCloudProviderMatchmaker).doMatchmaking(anyList(), any(IntraCloudProviderMatchmakingParameters.class));
+		verify(orchestratorDriver).generateAuthTokens(any(OrchestrationFormRequestDTO.class), anyList());
+	}
 }
