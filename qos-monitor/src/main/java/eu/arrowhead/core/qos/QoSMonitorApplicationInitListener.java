@@ -17,6 +17,7 @@ package eu.arrowhead.core.qos;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -30,11 +31,11 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.common.dto.shared.ReceivedMonitoringRequestEventDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.measurement.properties.MonitorProviderType;
 import eu.arrowhead.core.qos.service.event.queue.FinishedMonitoringMeasurementEventQueue;
 import eu.arrowhead.core.qos.service.event.queue.InteruptedMonitoringMeasurementEventQueue;
-import eu.arrowhead.core.qos.service.event.queue.ReceivedMonitoringRequestEventQueue;
 import eu.arrowhead.core.qos.service.event.queue.StartedMonitoringMeasurementEventQueue;
 import eu.arrowhead.core.qos.service.ping.monitor.PingMonitorManager;
 import eu.arrowhead.core.qos.service.ping.monitor.impl.DefaultExternalPingMonitor;
@@ -58,8 +59,8 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 
 	//-------------------------------------------------------------------------------------------------
 	@Bean(QosMonitorConstants.RECEIVED_MONITORING_REQUEST_QUEUE)
-	public ReceivedMonitoringRequestEventQueue getReceivedMonitoringRequestEventQueue() {
-		return new ReceivedMonitoringRequestEventQueue();
+	public LinkedBlockingQueue<ReceivedMonitoringRequestEventDTO> getReceivedMonitoringRequestEventQueue() {
+		return new LinkedBlockingQueue<>();
 	}
 
 	//-------------------------------------------------------------------------------------------------

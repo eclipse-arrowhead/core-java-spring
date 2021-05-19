@@ -44,7 +44,7 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	@Autowired
 	protected SSLProperties sslProperties;
 
-	@Resource
+	@Resource(name = QosMonitorConstants.RECEIVED_MONITORING_REQUEST_QUEUE)
 	private ReceivedMonitoringRequestEventQueue receivedMonitoringRequestEventQueue;
 
 	@Resource
@@ -84,8 +84,9 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 		ReceivedMonitoringRequestEventDTO receivedMonitoringRequestEventDTO;
 		StartedMonitoringMeasurementEventDTO startedMonitoringMeasurementEventDTO;
 
+		//TODO externalize block to class
 		while(System.currentTimeMillis() < meausermentExpiryTime) {
-
+			//TODO empty checked queues at each iteration and all queues on successs
 			checkInterupts(measurementProcessId);
 
 			if(!measurmentRequestConfirmed) {
