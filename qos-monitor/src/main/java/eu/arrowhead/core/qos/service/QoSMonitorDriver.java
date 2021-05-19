@@ -48,13 +48,13 @@ import eu.arrowhead.common.dto.shared.IcmpPingRequestACK;
 import eu.arrowhead.common.dto.shared.IcmpPingRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
+import eu.arrowhead.common.dto.shared.QosMonitorEventType;
 import eu.arrowhead.common.dto.shared.SubscriptionRequestDTO;
 import eu.arrowhead.common.dto.shared.SubscriptionResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.qos.QosMonitorConstants;
-import eu.arrowhead.core.qos.service.event.QosMonitorEventType;
 
 @Component
 public class QoSMonitorDriver {

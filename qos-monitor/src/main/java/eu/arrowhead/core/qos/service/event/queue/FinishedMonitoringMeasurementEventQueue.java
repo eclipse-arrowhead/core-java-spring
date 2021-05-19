@@ -3,7 +3,7 @@ package eu.arrowhead.core.qos.service.event.queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import eu.arrowhead.core.qos.dto.event.FinishedMonitoringMeasurementEventDTO;
+import eu.arrowhead.common.dto.shared.FinishedMonitoringMeasurementEventDTO;
 
 public class FinishedMonitoringMeasurementEventQueue {
 

@@ -3,7 +3,7 @@ package eu.arrowhead.core.qos.service.event.queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import eu.arrowhead.core.qos.dto.event.ReceivedMonitoringRequestEventDTO;
+import eu.arrowhead.common.dto.shared.ReceivedMonitoringRequestEventDTO;
 
 public class ReceivedMonitoringRequestEventQueue {
 

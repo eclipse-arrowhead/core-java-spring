@@ -13,9 +13,14 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.EventDTO;
+import eu.arrowhead.common.dto.shared.FinishedMonitoringMeasurementEventDTO;
 import eu.arrowhead.common.dto.shared.IcmpPingResponseDTO;
+import eu.arrowhead.common.dto.shared.InterruptedMonitoringMeasurementEventDTO;
+import eu.arrowhead.common.dto.shared.QosMonitorEventType;
+import eu.arrowhead.common.dto.shared.ReceivedMonitoringRequestEventDTO;
+import eu.arrowhead.common.dto.shared.StartedMonitoringMeasurementEventDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.core.qos.service.event.QosMonitorEventType;
+import eu.arrowhead.core.qos.QosMonitorConstants;
 
 public class EventDTOConverter {
 
@@ -116,7 +121,43 @@ public class EventDTOConverter {
 
 	//=================================================================================================
 	// assistant methods
-	
+
+	//-------------------------------------------------------------------------------------------------
+	private void validateFinishedMonitoringMeasurementEventDTOFields(final FinishedMonitoringMeasurementEventDTO event) {
+
+		Assert.isTrue(event.getEventType().equals(QosMonitorEventType.FINISHED_MONITORING_MEASUREMENT), "Event type must be: FINISHED_MONITORING_MEASUREMENT");
+		Assert.isTrue(event.getMetaData().containsKey(QosMonitorConstants.PROCESS_ID_KEY), "Meta data must contain: " + QosMonitorConstants.PROCESS_ID_KEY);
+		Assert.isTrue(event.getMetaData().keySet().size() == QosMonitorConstants.FINISHED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_SIZE, "Meta data keys quantity is not valid");
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void validateInterruptedMonitoringMeasurementEventDTOFields(final InterruptedMonitoringMeasurementEventDTO event) {
+
+		Assert.isTrue(event.getEventType().equals(QosMonitorEventType.INTERUPTED_MONITORING_MEASUREMENT), "Event type must be: INTERUPTED_MONITORING_MEASUREMENT");
+		Assert.isTrue(event.getPayload().equalsIgnoreCase(QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_SCHEMA), "Payload must be: " + QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_SCHEMA);
+		Assert.isTrue(event.getMetaData().containsKey(QosMonitorConstants.PROCESS_ID_KEY), "Meta data must contain: " + QosMonitorConstants.PROCESS_ID_KEY);
+		Assert.isTrue( (event.getMetaData().keySet().size() < QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_MAX_SIZE + 1), "Meta data keys quantity is not valid");
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void validateReceivedMonitoringRequestEventDTOFields(final ReceivedMonitoringRequestEventDTO event) {
+
+		Assert.isTrue(event.getEventType().equals(QosMonitorEventType.RECEIVED_MONITORING_REQUEST), "Event type must be: RECEIVED_MONITORING_REQUEST");
+		Assert.isTrue(event.getPayload().equalsIgnoreCase(QosMonitorConstants.RECEIVED_MONITORING_REQUEST_EVENT_PAYLOAD_SCHEMA), "Payload must be: " + QosMonitorConstants.RECEIVED_MONITORING_REQUEST_EVENT_PAYLOAD_SCHEMA);
+		Assert.isTrue(event.getMetaData().containsKey(QosMonitorConstants.PROCESS_ID_KEY), "Meta data must contain: " + QosMonitorConstants.PROCESS_ID_KEY);
+		Assert.isTrue(event.getMetaData().keySet().size() == QosMonitorConstants.RECEIVED_MONITORING_REQUEST_EVENT_PAYLOAD_METADATA_SIZE, "Meta data keys quantity is not valid");
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void validateStartedMonitoringMeasurementEventDTOFields(final StartedMonitoringMeasurementEventDTO event) {
+
+		Assert.isTrue(event.getEventType().equals(QosMonitorEventType.STARTED_MONITORING_MEASUREMENT), "Event type must be: " + QosMonitorEventType.STARTED_MONITORING_MEASUREMENT.name());
+		Assert.isTrue(event.getPayload().equalsIgnoreCase(QosMonitorConstants.STARTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_SCHEMA), "Payload must be: " + QosMonitorConstants.STARTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_SCHEMA);
+		Assert.isTrue(event.getMetaData().containsKey(QosMonitorConstants.PROCESS_ID_KEY), "Meta data must contain: " + QosMonitorConstants.PROCESS_ID_KEY);
+		Assert.isTrue(event.getMetaData().keySet().size() == QosMonitorConstants.STARTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_SIZE, "Meta data keys quantity is not valid");
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	private EventDTOConverter() {
 		throw new UnsupportedOperationException();

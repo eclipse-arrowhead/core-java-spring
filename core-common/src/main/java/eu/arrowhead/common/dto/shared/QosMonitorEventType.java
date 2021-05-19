@@ -1,4 +1,4 @@
-package eu.arrowhead.core.qos.service.event;
+package eu.arrowhead.common.dto.shared;
 
 public enum QosMonitorEventType {
 
