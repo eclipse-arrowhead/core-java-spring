@@ -534,7 +534,8 @@ public class GatewayServiceTest {
 		
 		Assert.assertEquals("queueId", response.getQueueId());
 		Assert.assertEquals("peerName", response.getPeerName());
-		final String key = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq5Jq4tOeFoLqxOqtYcujbCNZina3iuV9+/o8D1R9D0HvgnmlgPlqWwjDSxV7m7SGJpuc/rRXJ85OzqV3rwRHO8A8YWXiabj8EdgEIyqg4SOgTN7oZ7MQUisTpwtWn9K14se4dHt/YE9mUW4en19p/yPUDwdw3ECMJHamy/O+Mh6rbw6AFhYvz6F5rXYB8svkenOuG8TSBFlRkcjdfqQqtl4xlHgmlDNWpHsQ3eFAO72mKQjm2ZhWI1H9CLrJf1NQs2GnKXgHBOM5ET61fEHWN8axGGoSKfvTed5vhhX7l5uwxM+AKQipLNNKjEaQYnyX3TL9zL8I7y+QkhzDa7/5kQIDAQAB";
+		final String key = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA5r6P+DeDvSwMe5qWGlCoX94oNedSu7fdRpueJ9mNKfTgKwRHE8eOwVOf9By/LecfgRnlT+sf8qZbW3GG9jc+3xOPB+Q+NKJcVvLiU+nay6XZD/IbKaOcZz/pKWlQ+J6OoMQuoLSIA+IaVLuuP8Dlj8GJjKZyAxv643B16US2d6QxrkadQ/oKcnCVyBC/SnRAGALt0MHMTrY+MCU1dGqXb0i+aFmhcbMjBDYApni9bIUdOWy7+BlhnUdDATOenFBni94xZ8Or6cupYmKZLtv6rkvV/YkXM7N4m9avmTHGMU1BUVEbSjJ/6aqiTdBPaenHd6WNeFpgIoreG1vHTWpGeQIDAQAB"; 
+		
 		Assert.assertEquals(key, response.getProviderGWPublicKey());
 	}
 
