@@ -39,7 +39,7 @@ import eu.arrowhead.core.qos.service.event.queue.StartedMonitoringMeasurementEve
 import eu.arrowhead.core.qos.service.ping.monitor.PingMonitorManager;
 import eu.arrowhead.core.qos.service.ping.monitor.impl.DefaultExternalPingMonitor;
 import eu.arrowhead.core.qos.service.ping.monitor.impl.DummyPingMonitor;
-import eu.arrowhead.core.qos.service.ping.monitor.impl.OrchetratedExternalPingMonitor;
+import eu.arrowhead.core.qos.service.ping.monitor.impl.OrchestratedExternalPingMonitor;
 
 @Component
 public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
@@ -91,7 +91,7 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 		case DEFAULTEXTERNAL:
 			return new DefaultExternalPingMonitor();
 		case ORCHESTRATEDEXTERNAL:
-			return new OrchetratedExternalPingMonitor();
+			return new OrchestratedExternalPingMonitor();
 		default:
 			throw new InvalidParameterException("Not implemented monitor type: " + monitorType.name());
 		}

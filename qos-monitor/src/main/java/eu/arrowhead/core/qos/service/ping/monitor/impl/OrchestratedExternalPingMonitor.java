@@ -38,7 +38,7 @@ import eu.arrowhead.core.qos.service.event.queue.ReceivedMonitoringRequestEventQ
 import eu.arrowhead.core.qos.service.event.queue.StartedMonitoringMeasurementEventQueue;
 import eu.arrowhead.core.qos.service.ping.monitor.AbstractPingMonitor;
 
-public class OrchetratedExternalPingMonitor extends AbstractPingMonitor{
+public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 
 	//=================================================================================================
 	// members
@@ -70,13 +70,13 @@ public class OrchetratedExternalPingMonitor extends AbstractPingMonitor{
 	@Autowired
 	private ExternalMonitorOrchestrationRequestFactory orchestrationRequestFactory;
 
-	private final Logger logger = LogManager.getLogger(OrchetratedExternalPingMonitor.class);
+	private final Logger logger = LogManager.getLogger(OrchestratedExternalPingMonitor.class);
 
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public OrchetratedExternalPingMonitor() {
+	public OrchestratedExternalPingMonitor() {
 
 		init();
 
