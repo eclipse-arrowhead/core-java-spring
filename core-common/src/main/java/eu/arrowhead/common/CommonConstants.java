@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.common;
 
 import java.util.List;
@@ -117,10 +131,17 @@ public static final String CORE_SERVICE_QOS_MONITOR_PUBLIC_KEY = "qos-monitor-pu
 
 	public static final String HTTPS = "https";
 	public static final String HTTP = "http";
+	public static final String WSS = "wss";
+	public static final String WS = "ws";
 	public static final String JSON = "JSON";
 	public static final String XML = "XML";
+	public static final String CBOR = "CBOR";
+	public static final String EXI = "EXI";
+	public static final String CSV = "CSV";
 	public static final String HTTP_SECURE_JSON = HTTP + "-SECURE-" + JSON; 
 	public static final String HTTP_INSECURE_JSON = HTTP + "-INSECURE-" + JSON;
+	public static final String WS_SECURE_JSON = WS + "-SECURE-" + JSON;
+	public static final String WS_INSECURE_JSON = WS + "-INSECURE-" + JSON;
 	public static final String UNKNOWN_ORIGIN = "<unknown>";
 	
 	public static final String SERVICE_REGISTRY_ADDRESS = "sr_address";
@@ -295,6 +316,14 @@ public static final String CORE_SERVICE_QOS_MONITOR_PUBLIC_KEY = "qos-monitor-pu
 	public static final String $CA_CERT_VALIDITY_NEG_OFFSET_MINUTES = "${" + CA_CERT_VALIDITY_NEG_OFFSET_MINUTES + ":" + Defaults.DEFAULT_CA_CERT_VALIDITY_NEG_OFFSET_MINUTES + "}";
 	public static final String CA_CERT_VALIDITY_POS_OFFSET_MINUTES = "ca.validity.positive-offest-minutes";
 	public static final String $CA_CERT_VALIDITY_POS_OFFSET_MINUTES = "${" + CA_CERT_VALIDITY_POS_OFFSET_MINUTES + ":" + Defaults.DEFAULT_CA_CERT_VALIDITY_POS_OFFSET_MINUTES + "}";
+	public static final String CA_CERT_KEYSTORE_TYPE = "cloud.ssl.key-store-type";
+	public static final String $CA_CERT_KEYSTORE_TYPE = "${" + CA_CERT_KEYSTORE_TYPE + "}";
+	public static final String CA_CERT_KEYSTORE_PATH = "cloud.ssl.key-store";
+	public static final String $CA_CERT_KEYSTORE_PATH = "${" + CA_CERT_KEYSTORE_PATH + "}";
+	public static final String CA_CERT_KEYSTORE_PASSWORD = "cloud.ssl.key-store-password"; //NOSONAR it is not a password
+	public static final String $CA_CERT_KEYSTORE_PASSWORD = "${" + CA_CERT_KEYSTORE_PASSWORD + "}"; //NOSONAR it is not a password
+	public static final String CA_CERT_KEY_PASSWORD = "cloud.ssl.key-password"; //NOSONAR it is not a password
+	public static final String $CA_CERT_KEY_PASSWORD = "${" + CA_CERT_KEY_PASSWORD + "}"; //NOSONAR it is not a password
 
 	public static final String JWT_CLAIM_CONSUMER_ID = "cid";
 	public static final String JWT_CLAIM_SERVICE_ID = "sid";

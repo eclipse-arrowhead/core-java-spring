@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2020 Evopro
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Evopro - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.certificate_authority;
 
 import eu.arrowhead.common.SSLProperties;
@@ -119,7 +133,6 @@ public class CertificateAuthorityServiceTest {
     public void setUp() {
         caProperties = getCAProperties();
         ReflectionTestUtils.setField(service, "caProperties", caProperties);
-        ReflectionTestUtils.setField(service, "sslProperties", getSslProperties());
         ReflectionTestUtils.setField(service, "certificateDbService", caCertificateDBService);
         ReflectionTestUtils.setField(service, "trustedKeyDbService", caTrustedKeyDBService);
 
@@ -132,20 +145,14 @@ public class CertificateAuthorityServiceTest {
                 .thenReturn(new CaCertificate(CA_CERT_ID));
     }
 
-    private SSLProperties getSslProperties() {
-        SSLProperties sslProperties = mock(SSLProperties.class);
-        when(sslProperties.getKeyPassword()).thenReturn("123456");
-        when(sslProperties.getKeyStorePassword()).thenReturn("123456");
-        when(sslProperties.getKeyStoreType()).thenReturn("PKCS12");
-        when(sslProperties.getKeyStore()).thenReturn(new ClassPathResource("certificates/certificate_authority.p12"));
-
-        return sslProperties;
-    }
-
     private CAProperties getCAProperties() {
         CAProperties caProperties = mock(CAProperties.class);
         when(caProperties.getCertValidityNegativeOffsetMinutes()).thenReturn(1L);
         when(caProperties.getCertValidityPositiveOffsetMinutes()).thenReturn(60L);
+        when(caProperties.getCloudKeyPassword()).thenReturn("123456");
+        when(caProperties.getCloudKeyStorePassword()).thenReturn("123456");
+        when(caProperties.getCloudKeyStoreType()).thenReturn("PKCS12");
+        when(caProperties.getCloudKeyStorePath()).thenReturn(new ClassPathResource("certificates/cloud.p12"));
 
         return caProperties;
     }
