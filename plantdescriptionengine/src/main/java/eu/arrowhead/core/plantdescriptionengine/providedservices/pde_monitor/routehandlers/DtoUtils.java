@@ -1,6 +1,7 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.routehandlers;
 
 import eu.arrowhead.core.plantdescriptionengine.MonitorInfo;
+import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Connection;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystem;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntry;
@@ -141,25 +142,33 @@ public final class DtoUtils {
      * @param entry       The source entry on which the new one will be based.
      * @param monitorInfo Object used for keeping track of inventory data of
      *                    monitorable systems.
+     * @param pdTracker   An object that keeps track of Plant Description
+     *                    Entries.
      * @return A PlantDescriptionEntry with all the information contained in the
      * {@code entry} argument, supplemented with any relevant info in the {@code
      * monitorInfo} argument.
      */
     public static MonitorPlantDescriptionEntryDto extend(
         final PlantDescriptionEntry entry,
-        final MonitorInfo monitorInfo
+        final MonitorInfo monitorInfo,
+        final PlantDescriptionTracker pdTracker
     ) {
 
         Objects.requireNonNull(entry, "Expected entry.");
         Objects.requireNonNull(monitorInfo, "Expected MonitorInfo.");
 
+        // Get all systems and connections, also ones that are included from
+        // other Plant Descriptions:
+        final List<PdeSystem> originalSystems = pdTracker.getAllSystems(entry);
+        final List<Connection> originalConnections = pdTracker.getAllConnections(entry.id());
+
         final List<SystemEntryDto> systems = new ArrayList<>();
 
-        for (final PdeSystem system : entry.systems()) {
+        for (final PdeSystem system : originalSystems) {
             systems.add(extend(system, monitorInfo));
         }
 
-        final List<ConnectionDto> connections = mgmtToMonitor(entry.connections());
+        final List<ConnectionDto> connections = mgmtToMonitor(originalConnections);
 
         return new MonitorPlantDescriptionEntryDto.Builder()
             .id(entry.id())

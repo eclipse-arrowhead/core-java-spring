@@ -29,7 +29,7 @@ public class MonitorInfo {
             ",serviceUri=" + service.uri();
 
         if (metadata != null) {
-            result += ",metadata=" + Metadata.toString(metadata);
+            result += ",metadata={" + Metadata.toString(metadata);
         }
 
         return result + "}";

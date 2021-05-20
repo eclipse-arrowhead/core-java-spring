@@ -45,7 +45,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -209,7 +208,6 @@ public class OrchestratorClientTest {
         final PlantDescriptionEntryDto entry = createEntry();
         pdTracker.put(entry);
 
-        // Create some fake data for the HttpClient to respond with:
         final MockClientResponse response = new MockClientResponse();
         final int ruleId = 39;
         response.status(HttpStatus.CREATED)
@@ -249,7 +247,6 @@ public class OrchestratorClientTest {
 
     @Test
     public void shouldNotCreateRulesForPdWithoutConnections() throws PdStoreException {
-
         final PlantDescriptionEntryDto entry = new PlantDescriptionEntryDto.Builder()
             .id(0)
             .plantDescription("Plant Description 1A")
@@ -262,9 +259,12 @@ public class OrchestratorClientTest {
 
         pdTracker.put(entry);
 
+        when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class)))
+            .thenReturn(Future.success(new MockClientResponse()));
+
         orchestratorClient.initialize()
             .ifSuccess(result -> {
-                verify(httpClient, never()).send(any(), any());
+                verify(httpClient, times(1)).send(any(), any());
                 assertTrue(ruleStore.readRules(entry.id()).isEmpty());
             })
             .onFailure(e -> fail());
@@ -280,7 +280,9 @@ public class OrchestratorClientTest {
 
         ruleStore.writeRules(activeEntry.id(), Set.of(ruleId));
 
-        // Create some fake data for the HttpClient to respond with:
+        final MockClientResponse pingResponse = new MockClientResponse();
+        pingResponse.status(HttpStatus.OK);
+
         final MockClientResponse deletionResponse = new MockClientResponse();
         deletionResponse.status(HttpStatus.OK);
 
@@ -290,7 +292,11 @@ public class OrchestratorClientTest {
         creationResponse.body(createSingleRuleStoreList(newRuleId, producerRuleSystem, consumerRuleSystem));
 
         when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class))).thenReturn(
-            Future.success(deletionResponse), Future.success(creationResponse), Future.success(deletionResponse));
+            Future.success(pingResponse),
+            Future.success(deletionResponse),
+            Future.success(creationResponse),
+            Future.success(deletionResponse)
+        );
 
         orchestratorClient.initialize()
             .ifSuccess(result -> {
@@ -301,7 +307,7 @@ public class OrchestratorClientTest {
                 final ArgumentCaptor<InetSocketAddress> addressCaptor = ArgumentCaptor.forClass(InetSocketAddress.class);
                 final ArgumentCaptor<HttpClientRequest> requestCaptor = ArgumentCaptor.forClass(HttpClientRequest.class);
 
-                verify(httpClient, times(3)).send(addressCaptor.capture(), requestCaptor.capture());
+                verify(httpClient, times(4)).send(addressCaptor.capture(), requestCaptor.capture());
 
                 final InetSocketAddress capturedAddress = addressCaptor.getValue();
                 final HttpClientRequest capturedRequest = requestCaptor.getValue();
@@ -328,6 +334,10 @@ public class OrchestratorClientTest {
         final String errorMessage = "Mocked exception";
         doThrow(new RuleStoreException(errorMessage)).when(ruleStore).readRules(activeEntry.id());
 
+        final MockClientResponse pingResponse = new MockClientResponse();
+        when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class)))
+            .thenReturn(Future.success(pingResponse));
+
         // We need to reinstantiate this with the mock rule store.
         orchestratorClient = new OrchestratorClient(httpClient, ruleStore, pdTracker, orchestratorSrSystem
             .getAddress());
@@ -349,7 +359,9 @@ public class OrchestratorClientTest {
         final int ruleId = 65;
         ruleStore.writeRules(entry.id(), Set.of(ruleId));
 
-        // Create some fake data for the HttpClient to respond with:
+        final MockClientResponse pingResponse = new MockClientResponse();
+        pingResponse.status(HttpStatus.OK);
+
         final MockClientResponse deletionResponse = new MockClientResponse();
         deletionResponse.status(HttpStatus.OK);
 
@@ -359,7 +371,11 @@ public class OrchestratorClientTest {
         creationResponse.body(createSingleRuleStoreList(newRuleId, producerRuleSystem, consumerRuleSystem));
 
         when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class))).thenReturn(
-            Future.success(deletionResponse), Future.success(creationResponse), Future.success(deletionResponse));
+            Future.success(pingResponse),
+            Future.success(deletionResponse),
+            Future.success(creationResponse),
+            Future.success(deletionResponse)
+        );
 
         orchestratorClient.initialize()
             .ifSuccess(result -> {
@@ -380,7 +396,7 @@ public class OrchestratorClientTest {
                 final ArgumentCaptor<InetSocketAddress> addressCaptor = ArgumentCaptor.forClass(InetSocketAddress.class);
                 final ArgumentCaptor<HttpClientRequest> requestCaptor = ArgumentCaptor.forClass(HttpClientRequest.class);
 
-                verify(httpClient, times(3)).send(addressCaptor.capture(), requestCaptor.capture());
+                verify(httpClient, times(4)).send(addressCaptor.capture(), requestCaptor.capture());
 
                 final InetSocketAddress capturedAddress = addressCaptor.getValue();
                 final HttpClientRequest capturedRequest = requestCaptor.getValue();
@@ -425,7 +441,9 @@ public class OrchestratorClientTest {
             orchestratorSrSystem.getAddress()
         );
 
-        // Create some fake data for the HttpClient to respond with:
+        final MockClientResponse pingResponse = new MockClientResponse();
+        pingResponse.status(HttpStatus.OK);
+
         final MockClientResponse deletionResponse = new MockClientResponse();
         deletionResponse.status(HttpStatus.OK);
 
@@ -435,7 +453,11 @@ public class OrchestratorClientTest {
         creationResponse.body(createSingleRuleStoreList(newRuleId, producerRuleSystem, consumerRuleSystem));
 
         when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class)))
-            .thenReturn(Future.success(deletionResponse), Future.success(creationResponse));
+            .thenReturn(
+                Future.success(pingResponse),
+                Future.success(deletionResponse),
+                Future.success(creationResponse)
+            );
 
         orchestratorClient.initialize()
             .ifSuccess(result -> {
@@ -455,6 +477,11 @@ public class OrchestratorClientTest {
 
         final OrchestratorClient orchestratorClient = new OrchestratorClient(httpClient, ruleStore, pdTracker, orchestratorSrSystem
             .getAddress());
+
+        final MockClientResponse pingResponse = new MockClientResponse();
+        when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class)))
+            .thenReturn(Future.success(pingResponse));
+
         orchestratorClient.initialize()
             .ifSuccess(result -> {
                 assertTrue(ruleStore.readRules(inactiveEntry.id()).isEmpty());
@@ -473,7 +500,9 @@ public class OrchestratorClientTest {
         final int ruleId = 512;
         ruleStore.writeRules(activeEntry.id(), Set.of(ruleId));
 
-        // Create some fake data for the HttpClient to respond with:
+        final MockClientResponse pingResponse = new MockClientResponse();
+        pingResponse.status(HttpStatus.OK);
+
         final MockClientResponse deletionResponse = new MockClientResponse();
         deletionResponse.status(HttpStatus.OK);
 
@@ -483,7 +512,11 @@ public class OrchestratorClientTest {
         creationResponse.body(createSingleRuleStoreList(newRuleId, producerRuleSystem, consumerRuleSystem));
 
         when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class))).thenReturn(
-            Future.success(deletionResponse), Future.success(creationResponse), Future.success(deletionResponse));
+            Future.success(pingResponse),
+            Future.success(deletionResponse),
+            Future.success(creationResponse),
+            Future.success(deletionResponse)
+        );
 
         orchestratorClient.initialize()
             .ifSuccess(result -> {
@@ -515,14 +548,14 @@ public class OrchestratorClientTest {
         pdTracker.put(entryA);
         pdTracker.put(entryB);
 
-        // Create some fake data for the HttpClient to respond with:
-        final MockClientResponse deletionResponse = new MockClientResponse();
-        deletionResponse.status(HttpStatus.OK);
+        final MockClientResponse pingResponse = new MockClientResponse();
+        when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class)))
+            .thenReturn(Future.success(pingResponse));
 
         orchestratorClient.initialize()
             .ifSuccess(result -> {
                 pdTracker.put(entryB);
-                verify(httpClient, never()).send(any(), any());
+                verify(httpClient, times(1)).send(any(), any());
                 assertTrue(ruleStore.readRules(entryA.id()).isEmpty());
                 assertTrue(ruleStore.readRules(entryB.id()).isEmpty());
             })
@@ -548,7 +581,8 @@ public class OrchestratorClientTest {
             orchestratorSrSystem.getAddress()
         );
 
-        // Create some fake data for the HttpClient to respond with:
+        final MockClientResponse pingResponse = new MockClientResponse();
+
         final MockClientResponse deletionResponse = new MockClientResponse();
         deletionResponse.status(HttpStatus.OK);
 
@@ -562,7 +596,10 @@ public class OrchestratorClientTest {
         creationResponse.body(createSingleRuleStoreList(newRuleId, producerRuleSystem, consumerRuleSystem));
 
         when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class))).thenReturn(
-            Future.success(deletionResponse), Future.success(creationResponse), Future.success(deletionResponse),
+            Future.success(pingResponse),
+            Future.success(deletionResponse),
+            Future.success(creationResponse),
+            Future.success(deletionResponse),
             // An error occurs when POSTing new rules:
             Future.failure(new RuntimeException("Some error")));
 
@@ -583,7 +620,9 @@ public class OrchestratorClientTest {
         pdTracker.put(activeEntry);
         ruleStore.writeRules(activeEntry.id(), Set.of(65));
 
-        // Create some fake data for the HttpClient to respond with:
+        final MockClientResponse pingResponse = new MockClientResponse();
+        pingResponse.status(HttpStatus.OK);
+
         final MockClientResponse deletionResponse = new MockClientResponse();
         deletionResponse.status(HttpStatus.OK);
 
@@ -598,7 +637,11 @@ public class OrchestratorClientTest {
         failedDeletionResponse.status(HttpStatus.INTERNAL_SERVER_ERROR);
 
         when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class))).thenReturn(
-            Future.success(deletionResponse), Future.success(creationResponse), Future.success(failedDeletionResponse));
+            Future.success(pingResponse),
+            Future.success(deletionResponse),
+            Future.success(creationResponse),
+            Future.success(failedDeletionResponse)
+        );
 
         orchestratorClient.initialize()
             .ifSuccess(result -> {

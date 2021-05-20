@@ -1,7 +1,9 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor;
 
+import eu.arrowhead.core.plantdescriptionengine.Constants;
 import eu.arrowhead.core.plantdescriptionengine.alarms.AlarmManager;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Connection;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystem;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntry;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Port;
@@ -16,12 +18,14 @@ import se.arkalix.net.http.client.HttpClientRequest;
 import se.arkalix.query.ServiceQuery;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TimerTask;
-import java.util.stream.Collectors;
 
 public class PingTask extends TimerTask {
 
@@ -40,7 +44,7 @@ public class PingTask extends TimerTask {
         final ServiceQuery serviceQuery,
         final HttpClient httpClient,
         final AlarmManager alarmManager,
-        PlantDescriptionTracker pdTracker
+        final PlantDescriptionTracker pdTracker
     ) {
 
         Objects.requireNonNull(serviceQuery, "Expected service query");
@@ -70,7 +74,7 @@ public class PingTask extends TimerTask {
         // TODO: Maybe this should be done per expected monitorable service
         // (i.e. per port with service definition 'monitorable'), not per
         // system?
-        List<PdeSystem> expectedMonitorableSystems = getMonitorableSystems();
+        List<PdeSystem> expectedMonitorableSystems = getMonitoredSystems();
         for (PdeSystem system : expectedMonitorableSystems) {
 
             boolean hasMonitorableService = detectedMonitorableServices.stream()
@@ -98,26 +102,45 @@ public class PingTask extends TimerTask {
         return metadataMatch && nameMatch;
     }
 
-    private boolean isMonitorable(final PdeSystem system) {
-        for (Port port : system.ports()) {
-            boolean isConsumer = port.consumer().orElse(false);
-            if (!isConsumer && port.serviceDefinition().equals(MONITORABLE_SERVICE_NAME)) {
-                return true;
-            }
-        }
-        return false;
-    }
+    private List<PdeSystem> getMonitoredSystems() {
+        final List<PdeSystem> result = new ArrayList<>();
+        final PlantDescriptionEntry activeEntry = pdTracker.activeEntry();
 
-    private List<PdeSystem> getMonitorableSystems() {
-        PlantDescriptionEntry activeEntry = pdTracker.activeEntry();
         if (activeEntry == null) {
             return Collections.emptyList();
         }
 
-        return activeEntry.systems()
-            .stream()
-            .filter(this::isMonitorable)
-            .collect(Collectors.toList());
+        final List<PdeSystem> activeSystems = pdTracker.getActiveSystems();
+        final Map<String, Port> monitorablePortBySystemId = new HashMap<>();
+        final Map<String, PdeSystem> systemById = new HashMap<>();
+
+        for (final var system : activeSystems) {
+            systemById.put(system.systemId(), system);
+            for (var port : system.ports()) {
+                if (port.serviceDefinition().equals(MONITORABLE_SERVICE_NAME)) {
+                    monitorablePortBySystemId.put(system.systemId(), port);
+                }
+            }
+        }
+
+        List<Connection> activeConnections = activeEntry.connections();
+        for (final Connection connection : activeConnections) {
+
+            final String producerId = connection.producer().systemId();
+            final Port producerPort = monitorablePortBySystemId.get(producerId);
+            final String consumerId = connection.consumer().systemId();
+            final PdeSystem consumer = systemById.get(consumerId);
+            final String consumerName = consumer.systemName().orElse(null);
+
+            boolean consumerIsPde = Constants.PDE_SYSTEM_NAME.equals(consumerName);
+            boolean isMonitorableService = producerPort.serviceDefinition().equals(MONITORABLE_SERVICE_NAME);
+
+            if (consumerIsPde && isMonitorableService) {
+                result.add(systemById.get(producerId));
+            }
+        }
+
+        return result;
     }
 
     private void ping(final ServiceRecord service) {

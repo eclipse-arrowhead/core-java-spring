@@ -76,7 +76,7 @@ public class GetPlantDescription implements HttpRouteHandler {
             return Future.success(response);
         }
 
-        final MonitorPlantDescriptionEntryDto extendedEntry = DtoUtils.extend(entry, monitorInfo);
+        final MonitorPlantDescriptionEntryDto extendedEntry = DtoUtils.extend(entry, monitorInfo, pdTracker);
         response.status
             (HttpStatus.OK)
             .body(extendedEntry, CodecType.JSON);

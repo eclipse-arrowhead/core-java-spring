@@ -35,14 +35,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Properties;
 
 public final class PdeMain {
 
     private static final Logger logger = LoggerFactory.getLogger(PdeMain.class);
-
-    private static final String PDE_SYSTEM_NAME = "plantdescriptionengine";
-    private static final String APP_PROPS_FILENAME = "application.properties";
 
     /**
      * Helper method for retrieving required properties. If the specified
@@ -67,20 +65,22 @@ public final class PdeMain {
      */
     static HttpClient createHttpClient(final Properties appProps) {
 
-        final boolean secureMode = Boolean.parseBoolean(getProp(appProps, "server.ssl.enabled"));
+        Objects.requireNonNull(appProps, "Expected application properties.");
+
+        final boolean secureMode = Boolean.parseBoolean(getProp(appProps, PropertyNames.SSL_ENABLED));
         if (!secureMode) {
             return new HttpClient.Builder().insecure().build();
         }
 
         final OwnedIdentity identity = loadIdentity(
-            getProp(appProps, "server.ssl.pde.key-store"),
-            getProp(appProps, "server.ssl.pde.key-password").toCharArray(),
-            getProp(appProps, "server.ssl.pde.key-store-password").toCharArray()
+            getProp(appProps, PropertyNames.KEY_STORE),
+            getProp(appProps, PropertyNames.KEY_PASSWORD).toCharArray(),
+            getProp(appProps, PropertyNames.KEY_STORE_PASSWORD).toCharArray()
         );
 
         final TrustStore trustStore = loadTrustStore(
-            getProp(appProps, "server.ssl.pde.trust-store"),
-            getProp(appProps, "server.ssl.pde.trust-store-password").toCharArray()
+            getProp(appProps, PropertyNames.TRUST_STORE),
+            getProp(appProps, PropertyNames.TRUST_STORE_PASSWORD).toCharArray()
         );
 
         return new HttpClient.Builder()
@@ -97,8 +97,11 @@ public final class PdeMain {
      */
     static ArSystem createArSystem(final Properties appProps, final InetSocketAddress serviceRegistryAddress) {
 
-        final String pdeHostname = getProp(appProps, "server.hostname");
-        final int pdePort = Integer.parseInt(getProp(appProps, "server.port"));
+        Objects.requireNonNull(appProps, "Expected application properties.");
+        Objects.requireNonNull(serviceRegistryAddress, "Expected service registry address.");
+
+        final String pdeHostname = getProp(appProps, PropertyNames.SERVER_HOSTNAME);
+        final int pdePort = Integer.parseInt(getProp(appProps, PropertyNames.SERVER_PORT));
 
         final OrchestrationStrategy strategy = new OrchestrationStrategy(
             new OrchestrationPattern().isIncludingService(true)
@@ -113,18 +116,18 @@ public final class PdeMain {
                 .serviceRegistrySocketAddress(serviceRegistryAddress)
                 .build());
 
-        final boolean secureMode = Boolean.parseBoolean(getProp(appProps, "server.ssl.enabled"));
+        final boolean secureMode = Boolean.parseBoolean(getProp(appProps, PropertyNames.SSL_ENABLED));
 
         if (secureMode) {
-            final String trustStorePath = getProp(appProps, "server.ssl.pde.trust-store");
-            final char[] trustStorePassword = getProp(appProps, "server.ssl.pde.trust-store-password").toCharArray();
-            final String keyStorePath = getProp(appProps, "server.ssl.pde.key-store");
-            final char[] keyPassword = getProp(appProps, "server.ssl.pde.key-password").toCharArray();
-            final char[] keyStorePassword = getProp(appProps, "server.ssl.pde.key-store-password").toCharArray();
+            final String trustStorePath = getProp(appProps, PropertyNames.TRUST_STORE);
+            final char[] trustStorePassword = getProp(appProps, PropertyNames.TRUST_STORE_PASSWORD).toCharArray();
+            final String keyStorePath = getProp(appProps, PropertyNames.KEY_STORE);
+            final char[] keyPassword = getProp(appProps, PropertyNames.KEY_PASSWORD).toCharArray();
+            final char[] keyStorePassword = getProp(appProps, PropertyNames.KEY_STORE_PASSWORD).toCharArray();
             systemBuilder.identity(loadIdentity(keyStorePath, keyPassword, keyStorePassword))
                 .trustStore(loadTrustStore(trustStorePath, trustStorePassword));
         } else {
-            systemBuilder.name(PDE_SYSTEM_NAME).insecure();
+            systemBuilder.name(Constants.PDE_SYSTEM_NAME).insecure();
         }
 
         return systemBuilder.build();
@@ -150,7 +153,7 @@ public final class PdeMain {
         try {
             keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
         } catch (KeyStoreException e) {
-            logger.error("Failed to load identity keystore", e);
+            logger.error("Failed to load identity keystore.", e);
             System.exit(74);
         }
 
@@ -160,14 +163,14 @@ public final class PdeMain {
             try (FileInputStream in = new FileInputStream(keyStoreFile)) {
                 keyStore.load(in, password);
             } catch (NoSuchAlgorithmException | CertificateException | IOException e) {
-                logger.error("Failed to read keystore from file", e);
+                logger.error("Failed to read keystore from working directory.", e);
                 System.exit(74);
             }
         } else {
             try (InputStream in = ClassLoader.getSystemResourceAsStream(path)) {
                 keyStore.load(in, password);
             } catch (NoSuchAlgorithmException | CertificateException | IOException e) {
-                logger.error("Failed to load keystore from resources", e);
+                logger.error("Failed to load keystore from resources directory.", e);
                 System.exit(74);
             }
         }
@@ -240,7 +243,7 @@ public final class PdeMain {
             trustStore = TrustStore.from(keyStore);
         } catch (KeyStoreException e) {
             logger.error("Failed to read trust store", e);
-            System.exit(1);
+            System.exit(74);
         }
 
         Arrays.fill(password, '\0');
@@ -251,26 +254,26 @@ public final class PdeMain {
     /**
      * Loads application properties.
      * <p>
-     * It first searches the current working directory for a file called
-     * application.properties. If not found, the application.properties file
-     * from the resources directory is used instead. If neither can be read, the
+     * It first searches the current working directory for an application
+     * properties file. If it does not exist, an application file from the
+     * resources directory is used instead. If neither can be found, the
      * application is terminated.
      */
     private static Properties loadAppProps() {
         final Properties appProps = new Properties();
-        File appPropsFile = new File(APP_PROPS_FILENAME);
+        File appPropsFile = new File(PropertyNames.FILENAME);
 
         if (appPropsFile.isFile()) {
             try (FileInputStream in = new FileInputStream(appPropsFile)) {
                 appProps.load(in);
             } catch (final IOException e) {
-                logger.error("Failed reading " + APP_PROPS_FILENAME + " from current directory.", e);
+                logger.error("Failed reading " + PropertyNames.FILENAME + " from current directory.", e);
             }
         } else {
             try {
-                appProps.load(ClassLoader.getSystemResourceAsStream(APP_PROPS_FILENAME));
+                appProps.load(ClassLoader.getSystemResourceAsStream(PropertyNames.FILENAME));
             } catch (IOException e) {
-                logger.error("Failed reading " + APP_PROPS_FILENAME + " from system resources.", e);
+                logger.error("Failed reading " + PropertyNames.FILENAME + " from system resources.", e);
             }
         }
 
@@ -292,10 +295,10 @@ public final class PdeMain {
 
         final Properties appProps = loadAppProps();
 
-        final String serviceRegistryIp = getProp(appProps, "service_registry.address");
-        final int serviceRegistryPort = Integer.parseInt(getProp(appProps, "service_registry.port"));
+        final String serviceRegistryIp = getProp(appProps, PropertyNames.SERVICE_REGISTRY_ADDRESS);
+        final int serviceRegistryPort = Integer.parseInt(getProp(appProps, PropertyNames.SERVICE_REGISTRY_PORT));
         final InetSocketAddress serviceRegistryAddress = new InetSocketAddress(serviceRegistryIp, serviceRegistryPort);
-        final int systemPollInterval = Integer.parseInt(getProp(appProps, "system_poll_interval"));
+        final int systemPollInterval = Integer.parseInt(getProp(appProps, PropertyNames.SYSTEM_POLL_INTERVAL));
 
         final HttpClient httpClient = createHttpClient(appProps);
         final SystemTracker systemTracker = new SystemTracker(httpClient, serviceRegistryAddress, systemPollInterval);
@@ -304,12 +307,12 @@ public final class PdeMain {
         systemTracker.start()
             .flatMap(result -> {
 
-                final String ruleDirectory = getProp(appProps, "orchestration_rules");
-                final String plantDescriptionsDirectory = getProp(appProps, "plant_descriptions");
-                final int maxPdBytes = Integer.parseInt(getProp(appProps, "plant_description_max_size"));
+                final String ruleDirectory = getProp(appProps, PropertyNames.ORCHESTRATION_RULES);
+                final String plantDescriptionsDirectory = getProp(appProps, PropertyNames.PD_DIRECTORY);
+                final int maxPdBytes = Integer.parseInt(getProp(appProps, PropertyNames.PD_MAX_SIZE));
                 final PdStore pdStore = new FilePdStore(plantDescriptionsDirectory, maxPdBytes);
                 final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(pdStore);
-                final SrSystem orchestrator = systemTracker.getSystem("orchestrator");
+                final SrSystem orchestrator = systemTracker.getSystem(Constants.ORCHESTRATOR_SYSTEM_NAME);
 
                 if (orchestrator == null) {
                     throw new RuntimeException("Could not find Orchestrator in the Service Registry.");
@@ -323,7 +326,7 @@ public final class PdeMain {
                 );
 
                 final ArSystem arSystem = createArSystem(appProps, serviceRegistryAddress);
-                final boolean secureMode = Boolean.parseBoolean(getProp(appProps, "server.ssl.enabled"));
+                final boolean secureMode = Boolean.parseBoolean(getProp(appProps, PropertyNames.SSL_ENABLED));
                 final AlarmManager alarmManager = new AlarmManager();
 
                 logger.info("Initializing the Orchestrator client...");
@@ -338,8 +341,8 @@ public final class PdeMain {
                         );
                         mismatchDetector.run();
                         logger.info("Starting the PDE Monitor service...");
-                        final int pingInterval = Integer.parseInt(getProp(appProps, "ping_interval"));
-                        final int fetchInterval = Integer.parseInt(getProp(appProps, "fetch_interval"));
+                        final int pingInterval = Integer.parseInt(getProp(appProps, PropertyNames.PING_INTERVAL));
+                        final int fetchInterval = Integer.parseInt(getProp(appProps, PropertyNames.FETCH_INTERVAL));
                         return new PdeMonitorService(
                             arSystem,
                             pdTracker,
@@ -362,10 +365,7 @@ public final class PdeMain {
                     .flatMap(mgmtServiceResult -> {
                         logger.info("The PDE Management service is ready.");
                         logger.info("Starting the PDE Monitorable service...");
-                        final PdeMonitorableService pdeMonitorableService = new PdeMonitorableService(
-                            PDE_SYSTEM_NAME,
-                            secureMode
-                        );
+                        final PdeMonitorableService pdeMonitorableService = new PdeMonitorableService(secureMode);
                         return arSystem.provide(pdeMonitorableService.getService());
                     });
             })

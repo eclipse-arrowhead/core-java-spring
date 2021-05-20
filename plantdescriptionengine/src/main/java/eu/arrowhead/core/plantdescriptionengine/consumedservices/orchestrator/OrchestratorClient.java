@@ -9,6 +9,7 @@ import eu.arrowhead.core.plantdescriptionengine.consumedservices.orchestrator.ru
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionUpdateListener;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntry;
+import eu.arrowhead.core.plantdescriptionengine.utils.RetryFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.arkalix.codec.CodecType;
@@ -28,6 +29,7 @@ import java.util.Set;
 public class OrchestratorClient implements PlantDescriptionUpdateListener {
     private static final Logger logger = LoggerFactory.getLogger(OrchestratorClient.class);
 
+    private static final String ECHO_URI = "/orchestrator/echo";
     private static final String CREATE_RULE_URI = "/orchestrator/store/flexible";
     private static final String DELETE_RULE_URI_BASE = "/orchestrator/store/flexible/";
 
@@ -76,26 +78,42 @@ public class OrchestratorClient implements PlantDescriptionUpdateListener {
         pdTracker.addListener(this);
         PlantDescriptionEntry activeEntry = pdTracker.activeEntry();
 
+        final int retryDelayMillis = 15000;
+        final int maxRetries = 3;
+        final String retryMessage = "Failed to connect to Orchestrator client, retrying in "
+            + retryDelayMillis / 1000 +
+            " seconds.";
+
+        final RetryFuture retrier = new RetryFuture(retryDelayMillis, maxRetries, retryMessage);
+
+        // If there is no active Plant Description entry, simply ping the
+        // orchestrator.
         if (activeEntry == null) {
-            return Future.done();
+            return retrier.run(this::pingOrchestrator);
         }
 
-        return deleteRules(activeEntry.id())
-            .flatMap(deletionResult -> postRules().flatMap(createdRules -> {
+        // If there is an active Plant Description entry, ping the orchestrator
+        // and then update orchestration rules.
+        return retrier.run(this::pingOrchestrator)
+            .flatMap(response -> deleteRules(activeEntry.id()))
+            .flatMap(deletionResult -> postRules())
+            .flatMap(createdRules -> {
                 ruleStore.writeRules(activeEntry.id(), createdRules.getIds());
                 logger.info("Created rules for Plant Description Entry '" + activeEntry.plantDescription() + "'.");
                 return Future.done();
-            }));
+            });
     }
 
-    /**
-     * Posts Orchestrator rules for the given Plant Description Entry.
-     * <p>
-     * For each connection in the given entry, a corresponding rule is posted to
-     * the Orchestrator.
-     *
-     * @return A Future which will contain a list of the created rules.
-     */
+    private Future<Void> pingOrchestrator() {
+        return httpClient
+            .send(orchestratorAddress,
+                new HttpClientRequest()
+                    .method(HttpMethod.GET)
+                    .uri(ECHO_URI)
+                    .header("accept", "application/json"))
+            .flatMap(response -> Future.done());
+    }
+
     private Future<StoreEntryListDto> postRules() {
 
         final List<StoreRuleDto> rules = ruleCreator.createRules();
@@ -162,10 +180,8 @@ public class OrchestratorClient implements PlantDescriptionUpdateListener {
             return Future.done();
         }
 
-        // TODO: Previously, the deletion tasks were created before the call
-        // to Futures.serialize. Deletions of multiple rules did not work that
-        // way. Investigate why.
-        return Futures.serialize(rules.stream().map(this::deleteRule))
+        return Futures.serialize(rules.stream()
+            .map(this::deleteRule))
             .flatMap(result -> {
                 ruleStore.removeRules(plantDescriptionId);
                 logger.info(

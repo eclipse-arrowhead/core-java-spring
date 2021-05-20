@@ -8,11 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PdeMonitorableServiceTest {
 
-    final String systemName = "abc";
-
     @Test
     public void shouldCreateInSecureService() {
-        HttpService service = new PdeMonitorableService(systemName, false).getService();
+        HttpService service = new PdeMonitorableService(false).getService();
         final String expectedBasePath = "/pde/monitorable";
         final String expectedName = "monitorable";
 
@@ -23,7 +21,7 @@ public class PdeMonitorableServiceTest {
 
     @Test
     public void shouldCreateSecureService() {
-        HttpService service = new PdeMonitorableService(systemName, true).getService();
+        HttpService service = new PdeMonitorableService(true).getService();
         assertEquals(AccessPolicy.cloud(), service.accessPolicy());
     }
 }

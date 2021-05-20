@@ -44,6 +44,8 @@ public class RuleCreatorTest {
         final String consumerPort = "port_1";
         final String producerPort = "port_2";
 
+        final int priority = 3;
+
         final String serviceDefinitionA = "service_a";
         final String serviceInterface = "HTTP-SECURE-JSON";
 
@@ -81,6 +83,7 @@ public class RuleCreatorTest {
                 .systemId(producerId)
                 .portName(producerPort)
                 .build())
+            .priority(priority)
             .build());
 
         final PlantDescriptionEntryDto entry = new PlantDescriptionEntryDto.Builder().id(0)
@@ -101,6 +104,7 @@ public class RuleCreatorTest {
         assertEquals(producerName, rule.providerSystem().systemName().orElse(null));
         assertEquals(producerSystem.ports().get(0).serviceDefinition(), rule.serviceDefinitionName());
         assertEquals(serviceInterface, rule.serviceInterfaceName());
+        assertEquals(priority, rule.priority().orElse(null));
     }
 
     /**

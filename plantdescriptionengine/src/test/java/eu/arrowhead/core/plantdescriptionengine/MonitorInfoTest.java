@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import se.arkalix.ServiceInterface;
 import se.arkalix.ServiceRecord;
 import se.arkalix.SystemRecord;
+import se.arkalix._internal.DefaultSystemRecord;
 import se.arkalix.codec.json.JsonBoolean;
 import se.arkalix.codec.json.JsonObject;
 import se.arkalix.codec.json.JsonPair;
@@ -21,18 +22,21 @@ public class MonitorInfoTest {
 
     private final String providerSystemName = "Provider-system";
 
-    private ServiceRecord createServiceRecord(final Map<String, String> metadata) {
-        final SystemRecord provider = SystemRecord.from(
+    private ServiceRecord createServiceRecord(final Map<String, String> systemMetadata) {
+
+        final SystemRecord provider = new DefaultSystemRecord(
             providerSystemName,
-            new InetSocketAddress("0.0.0.0", 5000)
-        );
+            null,
+            new InetSocketAddress("0.0.0.0", 5000),
+            systemMetadata);
+
         return new ServiceRecord.Builder()
             .name("service-a")
             .provider(provider)
             .uri("/test")
             .accessPolicyType(AccessPolicyType.NOT_SECURE)
             .interfaces(ServiceInterface.HTTP_SECURE_JSON)
-            .metadata(metadata)
+            .metadata(systemMetadata)
             .build();
     }
 
@@ -51,6 +55,22 @@ public class MonitorInfoTest {
         monitorInfo.putSystemData(ServiceRecord, systemData);
 
         final List<MonitorInfo.Bundle> systemInfoList = monitorInfo.getSystemInfo(providerSystemName, null);
+        assertEquals(1, systemInfoList.size());
+        final MonitorInfo.Bundle systemInfo = systemInfoList.get(0);
+        assertEquals("{[a: true]}", systemInfo.systemData.toString());
+    }
+
+    @Test
+    public void shouldRetrieveSystemDataWithMetadata() {
+
+        final Map<String, String> metadata = Map.of("name", "abc");
+        final ServiceRecord ServiceRecord = createServiceRecord(metadata);
+
+        final JsonObject systemData = new JsonObject(new JsonPair("a", JsonBoolean.TRUE));
+        final MonitorInfo monitorInfo = new MonitorInfo();
+        monitorInfo.putSystemData(ServiceRecord, systemData);
+
+        final List<MonitorInfo.Bundle> systemInfoList = monitorInfo.getSystemInfo(null, metadata);
         assertEquals(1, systemInfoList.size());
         final MonitorInfo.Bundle systemInfo = systemInfoList.get(0);
         assertEquals("{[a: true]}", systemInfo.systemData.toString());

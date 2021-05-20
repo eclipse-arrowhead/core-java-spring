@@ -1,8 +1,10 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.routehandlers;
 
 import eu.arrowhead.core.plantdescriptionengine.MonitorInfo;
+import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
+import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.InMemoryPdStore;
+import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.PdStoreException;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystemDto;
-import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntry;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PortDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.MonitorPlantDescriptionEntry;
@@ -30,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class DtoUtilsTest {
 
     @Test
-    public void shouldExtendWithMonitorData() {
+    public void shouldExtendWithMonitorData() throws PdStoreException {
 
         final String systemName = "System A";
 
@@ -67,7 +69,7 @@ public class DtoUtilsTest {
             .build();
 
         final Instant now = Instant.now();
-        final PlantDescriptionEntry entry = new PlantDescriptionEntryDto.Builder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryDto.Builder()
             .id(1)
             .plantDescription("Plant Description 1A")
             .active(false)
@@ -95,7 +97,10 @@ public class DtoUtilsTest {
         monitorInfo.putInventoryId(ServiceRecord, inventoryId);
         monitorInfo.putSystemData(ServiceRecord, systemData);
 
-        final MonitorPlantDescriptionEntry extendedEntry = DtoUtils.extend(entry, monitorInfo);
+        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
+        pdTracker.put(entry);
+
+        final MonitorPlantDescriptionEntry extendedEntry = DtoUtils.extend(entry, monitorInfo, pdTracker);
         final SystemEntry extendedSystem = extendedEntry.systems().get(0);
 
         final PortEntry extendedPortA = extendedSystem.ports().get(2);
@@ -113,7 +118,7 @@ public class DtoUtilsTest {
     }
 
     @Test
-    public void shouldExtendWithoutMonitorData() {
+    public void shouldExtendWithoutMonitorData() throws PdStoreException {
 
         final String systemName = "System A";
 
@@ -147,7 +152,10 @@ public class DtoUtilsTest {
 
         final MonitorInfo monitorInfo = new MonitorInfo();
 
-        final MonitorPlantDescriptionEntryDto extendedEntry = DtoUtils.extend(entry, monitorInfo);
+        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
+        pdTracker.put(entry);
+
+        final MonitorPlantDescriptionEntryDto extendedEntry = DtoUtils.extend(entry, monitorInfo, pdTracker);
         final SystemEntry extendedSystem = extendedEntry.systems().get(0);
         final PortEntry extendedPort = extendedSystem.ports().get(0);
         assertTrue(extendedPort.inventoryId().isEmpty());
@@ -159,9 +167,10 @@ public class DtoUtilsTest {
      * Test that consumer ports are not supplemented with monitor info. In fact,
      * Plant Descriptions with consumer ports containing metadata are not
      * allowed. This is enforced by the {@link eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.PlantDescriptionValidator}.
+     * @throws PdStoreException
      */
     @Test
-    public void shouldNotAddMonitorDataToConsumerPort() {
+    public void shouldNotAddMonitorDataToConsumerPort() throws PdStoreException {
 
         final String systemName = "System A";
 
@@ -213,7 +222,10 @@ public class DtoUtilsTest {
         monitorInfo.putInventoryId(ServiceRecord, inventoryId);
         monitorInfo.putSystemData(ServiceRecord, systemData);
 
-        final MonitorPlantDescriptionEntryDto extendedEntry = DtoUtils.extend(entry, monitorInfo);
+        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
+        pdTracker.put(entry);
+
+        final MonitorPlantDescriptionEntryDto extendedEntry = DtoUtils.extend(entry, monitorInfo, pdTracker);
         final SystemEntry extendedSystem = extendedEntry.systems().get(0);
         final PortEntry extendedPortA = extendedSystem.ports().get(0);
 
@@ -225,9 +237,10 @@ public class DtoUtilsTest {
      * In this test, the MonitorInfo instance contains data that can not be
      * matched to the system itself, since its metadata differs from that of the
      * system.
+     * @throws PdStoreException
      */
     @Test
-    public void shouldNotMatchInfoToSystem() {
+    public void shouldNotMatchInfoToSystem() throws PdStoreException {
 
         final String systemName = "System A";
 
@@ -268,7 +281,10 @@ public class DtoUtilsTest {
         monitorInfo.putInventoryId(ServiceRecord, inventoryId);
         monitorInfo.putSystemData(ServiceRecord, systemData);
 
-        final MonitorPlantDescriptionEntryDto extendedEntry = DtoUtils.extend(entry, monitorInfo);
+        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
+        pdTracker.put(entry);
+
+        final MonitorPlantDescriptionEntryDto extendedEntry = DtoUtils.extend(entry, monitorInfo, pdTracker);
         final SystemEntry extendedSystem = extendedEntry.systems().get(0);
         assertTrue(extendedSystem.inventoryData().isEmpty());
         assertTrue(extendedSystem.systemData().isEmpty());

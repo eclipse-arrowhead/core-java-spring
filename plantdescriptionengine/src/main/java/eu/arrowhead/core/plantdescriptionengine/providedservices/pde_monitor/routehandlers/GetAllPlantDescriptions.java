@@ -155,7 +155,7 @@ public class GetAllPlantDescriptions implements HttpRouteHandler {
         // monitorable services:
         final List<MonitorPlantDescriptionEntryDto> extendedEntries = new ArrayList<>();
         for (final PlantDescriptionEntry entry : entries) {
-            extendedEntries.add(DtoUtils.extend(entry, monitorInfo));
+            extendedEntries.add(DtoUtils.extend(entry, monitorInfo, pdTracker));
         }
 
         PlantDescriptionEntryListDto result = new PlantDescriptionEntryListDto.Builder()

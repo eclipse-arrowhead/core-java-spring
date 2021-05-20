@@ -53,7 +53,12 @@ public class Alarm {
      * @return True if the provided arguments match the data stored in this
      * alarm instance.
      */
-    public boolean matches(final String systemId, final String systemName, final Map<String, String> metadata, final AlarmCause cause) {
+    public boolean matches(
+        final String systemId,
+        final String systemName,
+        final Map<String, String> metadata,
+        final AlarmCause cause
+    ) {
         Objects.requireNonNull(cause, "Expected alarm cause.");
         final Map<String, String> nonNullMetadata = metadata == null ? Collections.emptyMap() : metadata;
         return cause == this.cause &&
@@ -91,11 +96,10 @@ public class Alarm {
     }
 
     /**
-     * Changes the 'acknowledged' state of this alarm, noting the time at which
-     * this is done.
+     * Marks the alarm as acknowledged, noting the time at which this is done.
      */
-    public void setAcknowledged(final boolean acknowledged) {
-        this.acknowledged = acknowledged;
+    public void acknowledge() {
+        this.acknowledged = true;
         acknowledgedAt = Instant.now();
         updatedAt = acknowledgedAt;
     }

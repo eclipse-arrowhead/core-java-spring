@@ -9,9 +9,6 @@ import se.arkalix.codec.CodecType;
 import se.arkalix.net.http.service.HttpService;
 import se.arkalix.security.access.AccessPolicy;
 
-import java.util.Objects;
-
-
 /**
  * This service enables monitoring Plant Description Engine core system.
  */
@@ -23,19 +20,13 @@ public class PdeMonitorableService {
     private static final String PING_PATH = "/ping";
     private static final String SYSTEM_DATA_PATH = "/systemdata";
     final boolean secure;
-    private final String systemName;
 
     /**
-     * @param systemName Name of the system running the service.
-     * @param secure     Specifies whether or not to run the service in secure
-     *                   mode.
+     * @param secure Specifies whether or not to run the service in secure
+     *               mode.
      */
-    public PdeMonitorableService(final String systemName, final boolean secure) {
-
-        Objects.requireNonNull(systemName, "Expected system name");
-
+    public PdeMonitorableService(final boolean secure) {
         this.secure = secure;
-        this.systemName = systemName;
     }
 
     /**
@@ -48,7 +39,7 @@ public class PdeMonitorableService {
             .codecs(CodecType.JSON)
             .basePath(BASE_PATH)
             .get(INVENTORY_ID_PATH, new GetInventoryId())
-            .get(SYSTEM_DATA_PATH, new GetSystemData(systemName))
+            .get(SYSTEM_DATA_PATH, new GetSystemData())
             .get(PING_PATH, new GetPing())
             .catcher(CodecException.class, new CodecExceptionCatcher())
             .accessPolicy(secure ? AccessPolicy.cloud() : AccessPolicy.unrestricted());

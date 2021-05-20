@@ -27,7 +27,7 @@ public class SqlPdStore implements PdStore {
     // TODO: We store Plant Descriptions in their raw JSON form.
     // In the future, we'll want to create separate tables for each subfield
     // of a Plant Description.
-    private final String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS plant_description (id INT, plant_description TEXT);";
+    private final String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS plant_description (id INT, plant_description MEDIUMTEXT);";
     private final String SQL_SELECT_ALL = "select * from plant_description;";
     private final String SQL_INSERT_PD = "INSERT INTO plant_description(id, plant_description) VALUES(?, ?);";
     private final String SQL_DELETE_ONE = "DELETE FROM plant_description where id=?;";

@@ -55,7 +55,7 @@ public class PlantDescriptionTracker {
             maxId = Math.max(maxId, entry.id());
             entries.put(entry.id(), entry);
         }
-        nextId.set(Math.round(maxId + 1));
+        nextId.set(maxId + 1);
     }
 
     /**
@@ -252,14 +252,14 @@ public class PlantDescriptionTracker {
      * @return A list of all systems in the specified entry, as well as all
      * systems in its chain of included entries.
      */
-    private List<PdeSystem> getSystems(final PlantDescriptionEntry entry) {
+    public List<PdeSystem> getAllSystems(final PlantDescriptionEntry entry) { // TODO: Pass ID instead?
         Objects.requireNonNull(entry, "Expected Plant Description Entry");
 
         final List<PdeSystem> systems = new ArrayList<>(entry.systems());
 
         for (final int i : entry.include()) {
             final PlantDescriptionEntry includedEntry = get(i);
-            systems.addAll(getSystems(includedEntry));
+            systems.addAll(getAllSystems(includedEntry));
         }
 
         return systems;
@@ -270,7 +270,7 @@ public class PlantDescriptionTracker {
      * in its chain of included entries.
      */
     public List<PdeSystem> getActiveSystems() {
-        return getSystems(activeEntry());
+        return getAllSystems(activeEntry());
     }
 
     /**
@@ -278,7 +278,7 @@ public class PlantDescriptionTracker {
      * @return All connections in the specified Plant Description Entry and its
      * chain of included entries.
      */
-    private List<Connection> getAllConnections(final int entryId) {
+    public List<Connection> getAllConnections(final int entryId) {
         final PlantDescriptionEntry entry = get(entryId);
 
         Objects.requireNonNull(

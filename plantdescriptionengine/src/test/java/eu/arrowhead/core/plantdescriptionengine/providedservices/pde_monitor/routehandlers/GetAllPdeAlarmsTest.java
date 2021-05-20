@@ -209,7 +209,7 @@ public class GetAllPdeAlarmsTest {
         alarmManager.raiseSystemNotRegistered(systemIdA, systemNameA, null);
         alarmManager.raiseSystemNotRegistered(systemIdC, systemNameC, null);
 
-        alarmManager.setAcknowledged(systemBAlarmId, true); // This changes the 'updatedAt' field
+        alarmManager.acknowledge(systemBAlarmId); // This changes the 'updatedAt' field
 
         final GetAllPdeAlarms handler = new GetAllPdeAlarms(alarmManager);
 
@@ -418,8 +418,8 @@ public class GetAllPdeAlarmsTest {
 
         final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
 
-        alarmManager.setAcknowledged(alarms.get(0).id(), true);
-        alarmManager.setAcknowledged(alarms.get(1).id(), true);
+        alarmManager.acknowledge(alarms.get(0).id());
+        alarmManager.acknowledge(alarms.get(1).id());
 
         final GetAllPdeAlarms handler = new GetAllPdeAlarms(alarmManager);
 

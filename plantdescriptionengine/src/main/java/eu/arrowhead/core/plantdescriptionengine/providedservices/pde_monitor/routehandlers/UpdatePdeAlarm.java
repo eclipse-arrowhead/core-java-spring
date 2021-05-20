@@ -70,7 +70,18 @@ public class UpdatePdeAlarm implements HttpRouteHandler {
                 }
 
                 if (newFields.acknowledged().isPresent()) {
-                    alarmManager.setAcknowledged(id, newFields.acknowledged().get());
+                    boolean alreadyAcknowledged = alarm.acknowledged();
+                    boolean newAcknowledgedValue = newFields.acknowledged().get();
+                    if (!alreadyAcknowledged && newAcknowledgedValue) {
+                        alarmManager.acknowledge(id);
+                    } else if (alreadyAcknowledged && !newAcknowledgedValue) {
+                        ErrorMessageDto errorMessage = ErrorMessage.of(
+                            "Cannot unacknowledge an acknowledged alarm."
+                        );
+                        return response
+                            .status(HttpStatus.BAD_REQUEST)
+                            .body(errorMessage, CodecType.JSON);
+                    }
                 }
 
                 return response

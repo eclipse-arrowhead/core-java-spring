@@ -79,7 +79,7 @@ public class AlarmManagerTest {
         final int nonexistentId = 32;
         final AlarmManager alarmManager = new AlarmManager();
         final Exception exception = assertThrows(IllegalArgumentException.class,
-            () -> alarmManager.setAcknowledged(nonexistentId, true));
+            () -> alarmManager.acknowledge(nonexistentId));
         final String expectedMessage = "There is no alarm with ID " + nonexistentId + ".";
         assertEquals(expectedMessage, exception.getMessage());
     }

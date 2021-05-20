@@ -3,6 +3,7 @@ package eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistr
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.SrSystem;
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.SrSystemListDto;
 import eu.arrowhead.core.plantdescriptionengine.utils.Metadata;
+import eu.arrowhead.core.plantdescriptionengine.utils.RetryFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.arkalix.net.http.HttpMethod;
@@ -183,18 +184,31 @@ public class SystemTracker {
      * Registry has been stored.
      */
     public Future<Void> start() {
-        return fetchSystems().flatMap(result -> {
-            // Periodically poll the Service Registry for systems.
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    fetchSystems()
-                        .onFailure(error -> logger.error("Failed to retrieve registered systems", error));
-                }
-            }, pollInterval, pollInterval);
+        final int retryDelayMillis = 15000;
+        final int maxRetries = 3;
+        final String retryMessage = "Failed to connect to Service registry, retrying in "
+            + retryDelayMillis / 1000 +
+            " seconds.";
 
-            return Future.done();
-        });
+        final RetryFuture retrier = new RetryFuture(retryDelayMillis, maxRetries, retryMessage);
+
+        return retrier.run(this::fetchSystems)
+            .flatMap(result -> {
+                startSystemFetchLoop();
+                return Future.done();
+            });
+    }
+
+    private void startSystemFetchLoop() {
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                fetchSystems()
+                    .onFailure(error -> logger.error(
+                        "Failed to retrieve registered systems",
+                        error));
+            }
+        }, pollInterval, pollInterval);
     }
 
 }

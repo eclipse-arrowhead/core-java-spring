@@ -1,5 +1,6 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitorable.routehandlers;
 
+import eu.arrowhead.core.plantdescriptionengine.Constants;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitorable.dto.SystemData;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockRequest;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockServiceResponse;
@@ -15,8 +16,7 @@ public class GetSystemDataTest {
 
     @Test
     public void shouldReturnNullSystemData() {
-        final String systemName = "xyz";
-        final GetSystemData handler = new GetSystemData(systemName);
+        final GetSystemData handler = new GetSystemData();
         final MockRequest request = new MockRequest();
         final MockServiceResponse response = new MockServiceResponse();
 
@@ -26,7 +26,7 @@ public class GetSystemDataTest {
             final SystemData systemData = (SystemData) response.getRawBody();
             assertTrue(systemData.data().isPresent());
             final JsonObject json = systemData.data().get();
-            assertEquals("{[name: " + systemName + "]}", json.toString());
+            assertEquals("{[name: " + Constants.PDE_SYSTEM_NAME + "]}", json.toString());
         })
             .onFailure(e -> fail());
 

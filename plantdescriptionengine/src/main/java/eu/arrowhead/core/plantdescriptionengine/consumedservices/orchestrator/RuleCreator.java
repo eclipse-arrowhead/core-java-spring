@@ -57,7 +57,8 @@ public class RuleCreator {
                 .build())
             .serviceMetadata(producerPort.metadata())
             .serviceInterfaceName(producerPort.serviceInterface().orElse(DEFAULT_SERVICE_INTERFACE))
-            .serviceDefinitionName(producerPort.serviceDefinition());
+            .serviceDefinitionName(producerPort.serviceDefinition())
+            .priority(connection.priority().orElse(null));
 
         return builder.build();
     }

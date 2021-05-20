@@ -20,7 +20,7 @@ public class PdeMainTest {
     public void shouldCreateInsecureHttpClient() {
 
         final Properties appProps = new Properties();
-        appProps.setProperty("server.ssl.enabled", "false");
+        appProps.setProperty(PropertyNames.SSL_ENABLED, "false");
 
         final HttpClient pdeClient = PdeMain.createHttpClient(appProps);
         assertFalse(pdeClient.isSecure());
@@ -36,13 +36,14 @@ public class PdeMainTest {
 
         final int port = 8000;
         final Properties appProps = new Properties();
-        appProps.setProperty("server.port", Integer.toString(port));
-        appProps.setProperty("server.ssl.enabled", "true");
-        appProps.setProperty("server.ssl.pde.key-store", keyStorePath);
-        appProps.setProperty("server.ssl.pde.trust-store", keyStorePath);
-        appProps.setProperty("server.ssl.pde.key-password", "123456");
-        appProps.setProperty("server.ssl.pde.trust-store-password", "123456");
-        appProps.setProperty("server.ssl.pde.key-store-password", "123456");
+        appProps.setProperty(PropertyNames.SERVER_PORT, Integer.toString(port));
+        appProps.setProperty(PropertyNames.SSL_ENABLED, "true");
+        appProps.setProperty(PropertyNames.KEY_STORE, keyStorePath);
+        appProps.setProperty(PropertyNames.TRUST_STORE, keyStorePath);
+        appProps.setProperty(PropertyNames.KEY_PASSWORD, "123456");
+        appProps.setProperty(PropertyNames.TRUST_STORE_PASSWORD, "123456");
+        appProps.setProperty(PropertyNames.KEY_STORE_PASSWORD, "123456");
+
         final HttpClient client = PdeMain.createHttpClient(appProps);
         assertTrue(client.isSecure());
     }
@@ -52,14 +53,14 @@ public class PdeMainTest {
         final String hostname = "localhost";
         final int port = 8000;
         final Properties appProps = new Properties();
-        appProps.setProperty("server.hostname", hostname);
-        appProps.setProperty("server.port", Integer.toString(port));
-        appProps.setProperty("server.ssl.enabled", "false");
+        appProps.setProperty(PropertyNames.SERVER_HOSTNAME, hostname);
+        appProps.setProperty(PropertyNames.SERVER_PORT, Integer.toString(port));
+        appProps.setProperty(PropertyNames.SSL_ENABLED, "false");
         final InetSocketAddress address = new InetSocketAddress("0.0.0.0", 5000);
         final ArSystem arSystem = PdeMain.createArSystem(appProps, address);
 
         assertEquals(port, arSystem.port());
-        assertEquals("plantdescriptionengine", arSystem.name());
+        assertEquals(Constants.PDE_SYSTEM_NAME, arSystem.name());
         assertFalse(arSystem.isSecure());
     }
 
@@ -68,12 +69,12 @@ public class PdeMainTest {
         final String hostname = "localhost";
         final int port = 8000;
         final Properties appProps = new Properties();
-        appProps.setProperty("server.hostname", hostname);
-        appProps.setProperty("server.port", Integer.toString(port));
-        appProps.setProperty("server.ssl.enabled", "true");
+        appProps.setProperty(PropertyNames.SERVER_HOSTNAME, hostname);
+        appProps.setProperty(PropertyNames.SERVER_PORT, Integer.toString(port));
+        appProps.setProperty(PropertyNames.SSL_ENABLED, "true");
         final Exception exception = assertThrows(IllegalArgumentException.class,
             () -> PdeMain.createArSystem(appProps, new InetSocketAddress("0.0.0.0", 5000)));
-        assertEquals("Missing field 'server.ssl.pde.trust-store' in application properties.", exception.getMessage());
+        assertEquals("Missing field '" + PropertyNames.TRUST_STORE + "' in application properties.", exception.getMessage());
     }
 
     @Test
@@ -87,14 +88,14 @@ public class PdeMainTest {
         final String hostname = "localhost";
         final int port = 8000;
         final Properties appProps = new Properties();
-        appProps.setProperty("server.hostname", hostname);
-        appProps.setProperty("server.port", Integer.toString(port));
-        appProps.setProperty("server.ssl.enabled", "true");
-        appProps.setProperty("server.ssl.pde.key-store", keyStorePath);
-        appProps.setProperty("server.ssl.pde.trust-store", keyStorePath);
-        appProps.setProperty("server.ssl.pde.key-password", "123456");
-        appProps.setProperty("server.ssl.pde.trust-store-password", "123456");
-        appProps.setProperty("server.ssl.pde.key-store-password", "123456");
+        appProps.setProperty(PropertyNames.SERVER_HOSTNAME, hostname);
+        appProps.setProperty(PropertyNames.SERVER_PORT, Integer.toString(port));
+        appProps.setProperty(PropertyNames.SSL_ENABLED, "true");
+        appProps.setProperty(PropertyNames.KEY_STORE, keyStorePath);
+        appProps.setProperty(PropertyNames.TRUST_STORE, keyStorePath);
+        appProps.setProperty(PropertyNames.KEY_PASSWORD, "123456");
+        appProps.setProperty(PropertyNames.TRUST_STORE_PASSWORD, "123456");
+        appProps.setProperty(PropertyNames.KEY_STORE_PASSWORD, "123456");
         final ArSystem system = PdeMain.createArSystem(appProps, new InetSocketAddress("0.0.0.0", 5000));
         assertTrue(system.isSecure());
     }

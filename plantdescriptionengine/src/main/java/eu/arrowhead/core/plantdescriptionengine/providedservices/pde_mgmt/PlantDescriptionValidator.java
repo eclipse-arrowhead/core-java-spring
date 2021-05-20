@@ -91,7 +91,7 @@ public class PlantDescriptionValidator {
     private void validate(final List<PdeSystem> systems) {
         for (final PdeSystem system : systems) {
             checkIfIdentifiable(system);
-            ensureLegalSystemName(system);
+            ensureLegalSystemId(system);
         }
     }
 
@@ -107,12 +107,7 @@ public class PlantDescriptionValidator {
         }
     }
 
-    /**
-     * Report an error if the given system's name is illegal.
-     *
-     * @param system A system to validate.
-     */
-    private void ensureLegalSystemName(final PdeSystem system) {
+    private void ensureLegalSystemId(final PdeSystem system) {
         if (blacklist.contains(system.systemId().toLowerCase())) {
             errors.add("'" + system.systemId() + "' is not a valid system ID.");
         }

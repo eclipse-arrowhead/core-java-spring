@@ -19,8 +19,8 @@
             ]
         },
         {
-            "systemName": "test_system",
-            "systemId": "test_system",
+            "systemName": "testsystem",
+            "systemId": "testsystem",
             "ports": [
                 {
                     "portName": "monitorable",
@@ -30,15 +30,15 @@
             ]
         },
         {
-            "systemName": "test_system_2",
-            "systemId": "test_system_2",
+            "systemName": "testsystem2",
+            "systemId": "testsystem2",
             "ports": [
                 {
                     "portName": "monitorable",
                     "serviceDefinition": "monitorable",
                     "consumer": false,
                     "metadata": {
-                        "name": "test_system_2_1"
+                        "name": "testsystem2_1"
                     }
                 },
                 {
@@ -46,7 +46,7 @@
                     "serviceDefinition": "monitorable",
                     "consumer": false,
                     "metadata": {
-                        "name": "test_system_2_2"
+                        "name": "testsystem2_2"
                     }
                 }
             ]
@@ -59,7 +59,7 @@
                 "portName": "monitorable"
             },
             "producer": {
-                "systemId": "test_system",
+                "systemId": "testsystem",
                 "portName": "monitorable"
             }
         },
@@ -69,7 +69,7 @@
                 "portName": "monitorable"
             },
             "producer": {
-                "systemId": "test_system_2",
+                "systemId": "testsystem2",
                 "portName": "monitorable"
             }
         },
@@ -79,7 +79,7 @@
                 "portName": "monitorable"
             },
             "producer": {
-                "systemId": "test_system_2",
+                "systemId": "testsystem2",
                 "portName": "monitorable2"
             }
         }

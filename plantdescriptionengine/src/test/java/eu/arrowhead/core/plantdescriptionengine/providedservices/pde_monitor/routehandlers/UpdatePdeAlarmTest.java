@@ -53,6 +53,40 @@ public class UpdatePdeAlarmTest {
     }
 
     @Test
+    public void shouldNotUnacknowledgeAlarm() {
+
+        final String systemNameA = "System A";
+
+        final AlarmManager alarmManager = new AlarmManager();
+
+        alarmManager.raiseSystemNotInDescription(systemNameA, null);
+        final PdeAlarm alarm = alarmManager.getAlarms().get(0);
+        alarmManager.acknowledge(alarm.id());
+
+        final HttpServiceRequest request = new MockRequest.Builder()
+            .pathParameters(List.of(String.valueOf(alarm.id())))
+            .body(new PdeAlarmUpdateDto.Builder()
+                .acknowledged(false)
+                .build())
+            .build();
+        final MockServiceResponse response = new MockServiceResponse();
+        final UpdatePdeAlarm handler = new UpdatePdeAlarm(alarmManager);
+
+        try {
+            handler.handle(request, response).ifSuccess(result -> {
+                System.out.println(response.status());
+                System.out.println(response.getRawBody());
+                assertEquals(HttpStatus.BAD_REQUEST, response.status().orElse(null));
+                final ErrorMessage errorMessage = (ErrorMessage) response.getRawBody();
+                String expectedErrorMessage = "Cannot unacknowledge an acknowledged alarm.";
+                assertEquals(expectedErrorMessage, errorMessage.error());
+            }).onFailure(Assertions::assertNull);
+        } catch (final Exception e) {
+            fail();
+        }
+    }
+
+    @Test
     public void shouldRejectInvalidId() {
 
         final String invalidEntryId = "Invalid ID";

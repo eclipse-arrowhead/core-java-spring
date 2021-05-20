@@ -32,9 +32,10 @@ public class AlarmManager {
      * @return A list containing all PDE alarms.
      */
     public List<PdeAlarmDto> getAlarms() {
-        final List<PdeAlarmDto> result = new ArrayList<>();
 
-        final List<Alarm> allAlarms = new ArrayList<>();
+        int size = activeAlarms.size() + clearedAlarms.size();
+        final List<PdeAlarmDto> result = new ArrayList<>(size);
+        final List<Alarm> allAlarms = new ArrayList<>(size);
         allAlarms.addAll(activeAlarms);
         allAlarms.addAll(clearedAlarms);
 
@@ -82,16 +83,16 @@ public class AlarmManager {
     }
 
     /**
-     * @param id           ID of an alarm.
-     * @param acknowledged The new value to assign to the alarm's acknowledged
-     *                     field.
+     * Marks the specified alarm as acknowledged.
+     *
+     * @param id ID of an alarm.
      */
-    public void setAcknowledged(final int id, final boolean acknowledged) throws IllegalArgumentException {
+    public void acknowledge(final int id) throws IllegalArgumentException {
         final Alarm alarm = getAlarmData(id);
         if (alarm == null) {
             throw new IllegalArgumentException("There is no alarm with ID " + id + ".");
         }
-        alarm.setAcknowledged(acknowledged);
+        alarm.acknowledge();
     }
 
     /**
