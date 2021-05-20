@@ -263,7 +263,7 @@ public class OrchestratorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public OrchestrationResponseDTO orchestrationFromStore(final OrchestrationFormRequestDTO orchestrationFormRequestDTO) { //TODO junit
+	public OrchestrationResponseDTO orchestrationFromStore(final OrchestrationFormRequestDTO orchestrationFormRequestDTO) { 
 		logger.debug("orchestrationFromStore started ...");		
 		
 		if (useFlexibleStore) {
@@ -1110,12 +1110,10 @@ public class OrchestratorService {
 		final OrchestrationFlags flags = request.getOrchestrationFlags();
 		final List<PreferredProviderDataDTO> localProviders = request.getPreferredProviders().stream().filter(p -> p.isLocal()).collect(Collectors.toList());
 		
-		//TODO: continue tests from here
-		
 		List<PreferredProviderDataDTO> onlyPreferredProviders = null;
 		if (flags.getOrDefault(Flag.ONLY_PREFERRED, false)) {
 			onlyPreferredProviders = localProviders; 
-			if (onlyPreferredProviders.isEmpty()) {
+			if (onlyPreferredProviders.isEmpty()) { // never happened while intercloud is unsupported
 				throw new InvalidParameterException("There is no valid (local) preferred provider, but \"" + Flag.ONLY_PREFERRED + "\" is set to true");
 			}
 		}

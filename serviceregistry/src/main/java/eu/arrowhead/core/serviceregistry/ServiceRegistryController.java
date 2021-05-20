@@ -17,6 +17,8 @@ package eu.arrowhead.core.serviceregistry;
 import java.time.format.DateTimeParseException;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -67,7 +69,9 @@ import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.processor.NetworkAddressDetector;
 import eu.arrowhead.common.processor.NetworkAddressPreProcessor;
+import eu.arrowhead.common.processor.model.AddressDetectionResult;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.common.verifier.ServiceInterfaceNameVerifier;
@@ -187,6 +191,9 @@ public class ServiceRegistryController {
 	@Autowired
 	private NetworkAddressVerifier networkAddressVerifier;
 	
+	@Autowired
+	private NetworkAddressDetector networkAddressDetector;
+	
 	@Value(CoreCommonConstants.$USE_STRICT_SERVICE_DEFINITION_VERIFIER_WD)
 	private boolean useStrictServiceDefinitionVerifier;
 	
@@ -270,7 +277,7 @@ public class ServiceRegistryController {
 	@PostMapping(path = SYSTEMS_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(org.springframework.http.HttpStatus.CREATED)
 	@ResponseBody public SystemResponseDTO addSystem(@RequestBody final SystemRequestDTO request) {
-		return callCreateSystem(request, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
+		return callCreateSystem(null, request, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -283,8 +290,8 @@ public class ServiceRegistryController {
 	})
 	@PostMapping(path = CommonConstants.OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(org.springframework.http.HttpStatus.CREATED)
-	@ResponseBody public SystemResponseDTO registerSystem(@RequestBody final SystemRequestDTO request) {
-		return callCreateSystem(request, CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI);
+	@ResponseBody public SystemResponseDTO registerSystem(final HttpServletRequest servletRequest, @RequestBody final SystemRequestDTO dto) {
+		return callCreateSystem(servletRequest, dto, CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -342,13 +349,14 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@DeleteMapping(path = CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI)
-	@ResponseBody public void unregisterSystem(@RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME) final String systemName,
-											   @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS) final String address,
-											   @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT) final Integer port) {
+	@ResponseBody public void unregisterSystem(final HttpServletRequest servletRequest,
+											   @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME) final String systemName,
+											   @RequestParam(name = CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS, required = false) final String address,
+											   @RequestParam(name = CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT) final int port) {
 		logger.debug("System removal request received");
 		
-		checkUnregisterSystemParameters(systemName, address, port);
-		serviceRegistryDBService.removeSystemByNameAndAddressAndPort(systemName, address, port);		
+		final String checkedAddress = checkUnregisterSystemParameters(servletRequest, systemName, address, port);
+		serviceRegistryDBService.removeSystemByNameAndAddressAndPort(systemName, checkedAddress, port);		
 		logger.debug("{} successfully removed itself", systemName);
 	}
 	
@@ -705,12 +713,12 @@ public class ServiceRegistryController {
 	})
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
 	@PostMapping(path = CommonConstants.OP_SERVICEREGISTRY_REGISTER_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public ServiceRegistryResponseDTO registerService(@RequestBody final ServiceRegistryRequestDTO request) {
+	@ResponseBody public ServiceRegistryResponseDTO registerService(final HttpServletRequest servletRequest, @RequestBody final ServiceRegistryRequestDTO dto) {
 		logger.debug("New service registration request received");
-		checkServiceRegistryRequest(request, false);
+		checkServiceRegistryRequest(servletRequest, dto, false);
 		
-		final ServiceRegistryResponseDTO response = serviceRegistryDBService.registerServiceResponse(request);
-		logger.debug("{} successfully registers its service {}", request.getProviderSystem().getSystemName(), request.getServiceDefinition());
+		final ServiceRegistryResponseDTO response = serviceRegistryDBService.registerServiceResponse(dto);
+		logger.debug("{} successfully registers its service {}", dto.getProviderSystem().getSystemName(), dto.getServiceDefinition());
 	
 		return response;
 	}
@@ -727,7 +735,7 @@ public class ServiceRegistryController {
 	@PostMapping(path = CoreCommonConstants.MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody ServiceRegistryResponseDTO addServiceRegistry(@RequestBody final ServiceRegistryRequestDTO request) {
 		logger.debug("New service registration request received");
-		checkServiceRegistryRequest(request, CoreCommonConstants.MGMT_URI, true);
+		checkServiceRegistryRequest(null, request, CoreCommonConstants.MGMT_URI, true);
 		
 		final ServiceRegistryResponseDTO response = serviceRegistryDBService.registerServiceResponse(request);
 		logger.debug("{}'s service {} is successfully registered", request.getProviderSystem().getSystemName(), request.getServiceDefinition());
@@ -782,15 +790,16 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@DeleteMapping(path = CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_URI)
-	public void unregisterService(@RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION) final String serviceDefinition,
+	public void unregisterService(final HttpServletRequest servletRequest, 
+								  @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION) final String serviceDefinition,
 								  @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME) final String providerName,
-								  @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS) final String providerAddress,
+								  @RequestParam(name = CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS, required = false) final String providerAddress,
 								  @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT) final int providerPort,
 								  @RequestParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_URI) final String serviceUri) {
 		logger.debug("Service removal request received");
-		checkUnregisterServiceParameters(serviceDefinition, providerName, providerAddress, providerPort);
+		final String checkedAddress = checkUnregisterServiceParameters(servletRequest, serviceDefinition, providerName, providerAddress, providerPort);
 		
-		serviceRegistryDBService.removeServiceRegistry(serviceDefinition, providerName, providerAddress, providerPort, serviceUri);
+		serviceRegistryDBService.removeServiceRegistry(serviceDefinition, providerName, checkedAddress, providerPort, serviceUri);
 		logger.debug("{} successfully removed its service {} ({})", providerName, serviceDefinition, serviceUri);
 	}
 	
@@ -875,7 +884,7 @@ public class ServiceRegistryController {
 	@ResponseBody public SystemResponseDTO queryRegistryBySystemDTO(@RequestBody final SystemRequestDTO request) {
 		logger.debug("Service query by systemRequestDTO request received");
 
-		checkSystemRequest(request, CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_QUERY_BY_SYSTEM_DTO_URI, false);
+		checkSystemRequest(null, request, CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_QUERY_BY_SYSTEM_DTO_URI, false);
 		
 		final String systemName = request.getSystemName();
 		final String address = request.getAddress();
@@ -1068,31 +1077,31 @@ public class ServiceRegistryController {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private SystemResponseDTO callCreateSystem(final SystemRequestDTO request, final String origin) {
+	private SystemResponseDTO callCreateSystem(final HttpServletRequest servletRequest, final SystemRequestDTO dto, final String origin) {
 		logger.debug("callCreateSystem started...");
 		
-		checkSystemRequest(request, origin, true);
+		checkSystemRequest(servletRequest, dto, origin, true);
 		
-		final String systemName = request.getSystemName().toLowerCase().trim();
-		final String address = request.getAddress().toLowerCase().trim();
-		final int port = request.getPort();
-		final String authenticationInfo = request.getAuthenticationInfo();
-		final Map<String,String> metadata = request.getMetadata();
+		final String systemName = dto.getSystemName().toLowerCase().trim();
+		final String address = dto.getAddress().toLowerCase().trim();
+		final int port = dto.getPort();
+		final String authenticationInfo = dto.getAuthenticationInfo();
+		final Map<String,String> metadata = dto.getMetadata();
 		
 		return serviceRegistryDBService.createSystemResponse(systemName, address, port, authenticationInfo, metadata);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private SystemResponseDTO callUpdateSystem(final SystemRequestDTO request, final long systemId) {
+	private SystemResponseDTO callUpdateSystem(final SystemRequestDTO dto, final long systemId) {
 		logger.debug("callUpdateSystem started...");
 		
-		checkSystemPutRequest(request, systemId);
+		checkSystemPutRequest(dto, systemId);
 		
-		final String validatedSystemName = request.getSystemName().toLowerCase().trim();
-		final String validatedAddress = request.getAddress().toLowerCase().trim();
-		final int validatedPort = request.getPort();
-		final String validatedAuthenticationInfo = request.getAuthenticationInfo();
-		final Map<String,String> metadata = request.getMetadata();
+		final String validatedSystemName = dto.getSystemName().toLowerCase().trim();
+		final String validatedAddress = dto.getAddress().toLowerCase().trim();
+		final int validatedPort = dto.getPort();
+		final String validatedAuthenticationInfo = dto.getAuthenticationInfo();
+		final Map<String,String> metadata = dto.getMetadata();
 		
 		return serviceRegistryDBService.updateSystemResponse(systemId, validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo, metadata);
 	}
@@ -1168,86 +1177,94 @@ public class ServiceRegistryController {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void checkSystemPutRequest(final SystemRequestDTO request, final long systemId) {
+	private void checkSystemPutRequest(final SystemRequestDTO dto, final long systemId) {
 		logger.debug("checkSystemPutRequest started...");
 		
 		if (systemId <= 0) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
 		
-		checkSystemRequest(request, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI, true);
+		checkSystemRequest(null, dto, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI, true);
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void checkSystemRequest(final SystemRequestDTO request, final String origin, final boolean checkReservedCoreSystemNames) {
+	private void checkSystemRequest(final HttpServletRequest servletRequest, final SystemRequestDTO dto, final String origin, final boolean checkReservedCoreSystemNames) {
 		logger.debug("checkSystemRequest started...");
 		
-		if (request == null) {
+		if (dto == null) {
 			throw new BadPayloadException("System is null.", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		if (Utilities.isEmpty(request.getSystemName())) {
+		if (Utilities.isEmpty(dto.getSystemName())) {
 			throw new BadPayloadException(SYSTEM_NAME_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		if (checkReservedCoreSystemNames) {
 			for (final CoreSystem coreSysteam : CoreSystem.values()) {
-				if (coreSysteam.name().equalsIgnoreCase(request.getSystemName().trim())) {
-					throw new BadPayloadException("System name '" + request.getSystemName() + "' is a reserved arrowhead core system name.", HttpStatus.SC_BAD_REQUEST, origin);
+				if (coreSysteam.name().equalsIgnoreCase(dto.getSystemName().trim())) {
+					throw new BadPayloadException("System name '" + dto.getSystemName() + "' is a reserved arrowhead core system name.", HttpStatus.SC_BAD_REQUEST, origin);
 				}
 			}			
 		}
 		
-		if (!cnVerifier.isValid(request.getSystemName())) {
+		if (!cnVerifier.isValid(dto.getSystemName())) {
 			throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		try {			
-			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(request.getAddress()));
-		} catch (final InvalidParameterException ex) {
-			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, origin);
-		}
-		
-		if (request.getPort() == null) {
+		if (dto.getPort() == null) {
 			throw new BadPayloadException(SYSTEM_PORT_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		final int validatedPort = request.getPort();
+		final int validatedPort = dto.getPort();
 		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
 			throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		try {			
+			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(dto.getAddress()));
+		} catch (final InvalidParameterException ex) {
+			final AddressDetectionResult detectionResult = networkAddressDetector.detect(servletRequest);
+			if (detectionResult.isSkipped()) {
+				throw new BadPayloadException(ex.getMessage() + " " + detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);				
+			}
+			if (!detectionResult.isDetectionSuccess()) {
+				throw new BadPayloadException(ex.getMessage() + " " + detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);
+			} else {
+				dto.setAddress(detectionResult.getDetectedAddress());
+			}
 		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkServiceRegistryRequest(final ServiceRegistryRequestDTO request, final boolean checkReservedCoreSystemNames) {
+	private void checkServiceRegistryRequest(final HttpServletRequest servletRequest, final ServiceRegistryRequestDTO dto, final boolean checkReservedCoreSystemNames) {
 		logger.debug("checkServiceRegistryRequest started...");
 
 		final String origin = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_REGISTER_URI;
 
-		checkServiceRegistryRequest(request, origin, checkReservedCoreSystemNames);
+		checkServiceRegistryRequest(servletRequest, dto, origin, checkReservedCoreSystemNames);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkServiceRegistryRequest(final ServiceRegistryRequestDTO request, final String origin, final boolean checkReservedCoreSystemNames) {
+	private void checkServiceRegistryRequest(final HttpServletRequest servlerRequest, final ServiceRegistryRequestDTO dto, final String origin, final boolean checkReservedCoreSystemNames) {
 		logger.debug("checkServiceRegistryRequest started...");
 	
-		if (Utilities.isEmpty(request.getServiceDefinition())) {
+		if (Utilities.isEmpty(dto.getServiceDefinition())) {
 			throw new BadPayloadException("Service definition is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		if (useStrictServiceDefinitionVerifier && !cnVerifier.isValid(request.getServiceDefinition())) {
+		if (useStrictServiceDefinitionVerifier && !cnVerifier.isValid(dto.getServiceDefinition())) {
 			throw new BadPayloadException(SERVICE_DEFINITION_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 	
-		checkSystemRequest(request.getProviderSystem(), origin, checkReservedCoreSystemNames);
+		checkSystemRequest(servlerRequest, dto.getProviderSystem(), origin, checkReservedCoreSystemNames);
 		
-		if (request.getServiceUri() == null) {
-			request.setServiceUri("");
+		if (dto.getServiceUri() == null) {
+			dto.setServiceUri("");
 		}
 		
-		if (!Utilities.isEmpty(request.getEndOfValidity())) {
+		if (!Utilities.isEmpty(dto.getEndOfValidity())) {
 			try {
-				Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
+				Utilities.parseUTCStringToLocalZonedDateTime(dto.getEndOfValidity().trim());
 			} catch (final DateTimeParseException ex) {
 				throw new BadPayloadException("End of validity is specified in the wrong format. Please provide UTC time using ISO-8601 format.",
 											  HttpStatus.SC_BAD_REQUEST, origin);
@@ -1255,9 +1272,9 @@ public class ServiceRegistryController {
 		}
 		
 		ServiceSecurityType securityType = null;
-		if (request.getSecure() != null) {
+		if (dto.getSecure() != null) {
 			for (final ServiceSecurityType type : ServiceSecurityType.values()) {
-				if (type.name().equalsIgnoreCase(request.getSecure())) {
+				if (type.name().equalsIgnoreCase(dto.getSecure())) {
 					securityType = type;
 					break;
 				}
@@ -1270,15 +1287,15 @@ public class ServiceRegistryController {
 			securityType = ServiceSecurityType.NOT_SECURE;
 		}
 		
-		if (securityType != ServiceSecurityType.NOT_SECURE && request.getProviderSystem().getAuthenticationInfo() == null) {
+		if (securityType != ServiceSecurityType.NOT_SECURE && dto.getProviderSystem().getAuthenticationInfo() == null) {
 			throw new BadPayloadException("Security type is in conflict with the availability of the authentication info.", HttpStatus.SC_BAD_REQUEST, origin); 
 		}
 		
-		if (request.getInterfaces() == null || request.getInterfaces().isEmpty()) {
+		if (dto.getInterfaces() == null || dto.getInterfaces().isEmpty()) {
 			throw new BadPayloadException("Interfaces list is null or empty.", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		for (final String intf : request.getInterfaces()) {
+		for (final String intf : dto.getInterfaces()) {
 			if (!interfaceNameVerifier.isValid(intf)) {
 				throw new BadPayloadException("Specified interface name is not valid: " + intf, HttpStatus.SC_BAD_REQUEST, origin);
 			}
@@ -1286,9 +1303,9 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkUnregisterSystemParameters(final String systemName, final String address, final int port) {
+	private String checkUnregisterSystemParameters(final HttpServletRequest servletRequest, final String systemName, final String address, final int port) {
 		// parameters can't be null, but can be empty
-		logger.debug("checkUnregisterSystemParameters started...");
+		logger.debug("checkUnregisterSystemParameters started...");		
 		
 		final String origin = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI;
 		if (Utilities.isEmpty(systemName)) {
@@ -1298,20 +1315,31 @@ public class ServiceRegistryController {
 		if (!cnVerifier.isValid(systemName)) {
 			throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
-		
-		try {
-			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(address));
-		} catch (final InvalidParameterException ex) {
-			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, origin);
-		}
-		
+
 		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
 			throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
 		}
+		
+		String checkedAddress = address;
+		try {
+			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(checkedAddress));
+		} catch (final InvalidParameterException ex) {
+			final AddressDetectionResult detectionResult = networkAddressDetector.detect(servletRequest);
+			if (detectionResult.isSkipped()) {
+				throw new BadPayloadException(ex.getMessage() + " " + detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);				
+			}
+			if (!detectionResult.isDetectionSuccess()) {
+				throw new BadPayloadException(ex.getMessage() + " " + detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);
+			} else {
+				checkedAddress = detectionResult.getDetectedAddress();
+			}
+		}
+		
+		return checkedAddress;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkUnregisterServiceParameters(final String serviceDefinition, final String providerName, final String providerAddress, final int providerPort) {
+	private String checkUnregisterServiceParameters(final HttpServletRequest servletRequest, final String serviceDefinition, final String providerName, final String providerAddress, final int providerPort) {
 		// parameters can't be null, but can be empty
 		logger.debug("checkUnregisterServiceParameters started...");
 		
@@ -1331,16 +1359,27 @@ public class ServiceRegistryController {
 		if (!cnVerifier.isValid(providerName)) {
 			throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
-		
-		try {
-			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(providerAddress));
-		} catch (final Exception ex) {
-			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, origin);
-		}
-		
+
 		if (providerPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || providerPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
 			throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
 		}
+		
+		String checkedAddress = providerAddress;
+		try {
+			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(checkedAddress));
+		} catch (final InvalidParameterException ex) {
+			final AddressDetectionResult detectionResult = networkAddressDetector.detect(servletRequest);
+			if (detectionResult.isSkipped()) {
+				throw new BadPayloadException(ex.getMessage() + " " + detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);				
+			}
+			if (!detectionResult.isDetectionSuccess()) {
+				throw new BadPayloadException(ex.getMessage() + " " + detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);	
+			} else {
+				checkedAddress = detectionResult.getDetectedAddress();
+			}
+		}		
+		
+		return checkedAddress;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1351,7 +1390,7 @@ public class ServiceRegistryController {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		checkServiceRegistryRequest(request, origin, true);
+		checkServiceRegistryRequest(null, request, origin, true);
 		
 	}
 	
