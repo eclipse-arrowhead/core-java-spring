@@ -1,5 +1,27 @@
 package eu.arrowhead.core.certificate_authority;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.InvalidKeyException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Date;
+import java.util.List;
+import java.util.ServiceConfigurationError;
+import javax.servlet.http.HttpServletRequest;
+
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystem;
@@ -36,28 +58,6 @@ import org.bouncycastle.pkcs.PKCSException;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
 import org.springframework.util.Assert;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
-import java.util.ServiceConfigurationError;
-
 public class CertificateAuthorityUtils {
 
     private static final Logger logger = LogManager.getLogger(CertificateAuthorityService.class);
@@ -65,7 +65,7 @@ public class CertificateAuthorityUtils {
     private static final String PROVIDER = "BC";
     private static final String SIGNATURE_ALGORITHM = "SHA256withRSA";
 
-    static KeyStore getKeyStore(SSLProperties sslProperties) {
+    static KeyStore getCertificateAuthorityKeyStore(SSLProperties sslProperties) {
         if (sslProperties == null) {
             throw new ServiceConfigurationError("sslProperties cannot be null");
         }
@@ -73,11 +73,27 @@ public class CertificateAuthorityUtils {
             final KeyStore keystore = KeyStore.getInstance(sslProperties.getKeyStoreType());
             keystore.load(sslProperties.getKeyStore()
                                        .getInputStream(),
-                    sslProperties.getKeyStorePassword()
-                                 .toCharArray());
+                          sslProperties.getKeyStorePassword()
+                                       .toCharArray());
             return keystore;
         } catch (KeyStoreException | IOException | CertificateException | NoSuchAlgorithmException e) {
             throw new ServiceConfigurationError("Cannot open keystore: " + e.getMessage());
+        }
+    }
+
+    static KeyStore getCloudKeyStore(CAProperties caProperties) {
+        if (caProperties == null) {
+            throw new ServiceConfigurationError("caProperties cannot be null");
+        }
+        try {
+            final KeyStore keystore = KeyStore.getInstance(caProperties.getCloudKeyStoreType());
+            keystore.load(caProperties.getCloudKeyStorePath()
+                                      .getInputStream(),
+                          caProperties.getCloudKeyStorePassword()
+                                      .toCharArray());
+            return keystore;
+        } catch (KeyStoreException | IOException | CertificateException | NoSuchAlgorithmException e) {
+            throw new ServiceConfigurationError("Cannot open cloud keystore: " + e.getMessage());
         }
     }
 

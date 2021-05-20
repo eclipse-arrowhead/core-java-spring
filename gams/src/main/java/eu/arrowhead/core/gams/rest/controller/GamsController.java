@@ -3,13 +3,14 @@ package eu.arrowhead.core.gams.rest.controller;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
-import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.GamsInstance;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
-import eu.arrowhead.core.gams.Validation;
-import eu.arrowhead.core.gams.database.entities.GamsInstance;
+import eu.arrowhead.core.gams.Constants;
+import eu.arrowhead.core.gams.RestValidation;
 import eu.arrowhead.core.gams.rest.dto.CreateInstanceRequest;
 import eu.arrowhead.core.gams.rest.dto.GamsInstanceDto;
 import eu.arrowhead.core.gams.service.InstanceService;
+import eu.arrowhead.core.gams.utility.Converter;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -27,9 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import static eu.arrowhead.core.gams.Constants.PATH_ROOT;
-
-@Api(tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
+@Api(tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT, CoreCommonConstants.SWAGGER_TAG_ALL})
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS,
         allowedHeaders = {HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION}
 )
@@ -40,14 +39,14 @@ public class GamsController {
     //=================================================================================================
     // members
 
-    private static final String CREATE_INSTANCE_URI = PATH_ROOT;
+    private static final String CREATE_INSTANCE_URI = Constants.PATH_ROOT;
     private static final String CREATE_INSTANCE_DESCRIPTION = "Create new GAMS instance";
     private static final String CREATE_INSTANCE_SUCCESS = "New GAMS instance created";
     private static final String CREATE_INSTANCE_CONFLICT = "GAMS instance exists already";
     private static final String CREATE_INSTANCE_BAD_REQUEST = "Unable to create new GAMS instance";
 
     private final Logger logger = LogManager.getLogger(GamsController.class);
-    private final Validation validation = new Validation();
+    private final RestValidation validation = new RestValidation();
 
     private final InstanceService instanceService;
 
@@ -67,7 +66,7 @@ public class GamsController {
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @GetMapping(path = CommonConstants.ECHO_URI)
-    public String echoOnboarding() {
+    public String echo() {
         return "Got it!";
     }
 
@@ -88,7 +87,7 @@ public class GamsController {
         validation.verify(createInstanceRequest, createOrigin(CREATE_INSTANCE_URI));
         final GamsInstance instance = instanceService.create(createInstanceRequest);
 
-        return new GamsInstanceDto(instance.getName(), instance.getUidAsString(), Utilities.convertZonedDateTimeToUTCString(instance.getCreatedAt()));
+        return Converter.convert(instance);
     }
 
     //-------------------------------------------------------------------------------------------------

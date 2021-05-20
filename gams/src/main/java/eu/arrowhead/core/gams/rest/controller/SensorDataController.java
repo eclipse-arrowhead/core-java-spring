@@ -1,13 +1,19 @@
 package eu.arrowhead.core.gams.rest.controller;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
+import javax.servlet.http.HttpServletRequest;
+
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.GamsInstance;
+import eu.arrowhead.common.database.entity.Sensor;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
-import eu.arrowhead.core.gams.Validation;
-import eu.arrowhead.core.gams.database.entities.GamsInstance;
-import eu.arrowhead.core.gams.database.entities.Sensor;
+import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.core.gams.Constants;
+import eu.arrowhead.core.gams.RestValidation;
 import eu.arrowhead.core.gams.rest.dto.PublishSensorDataRequest;
 import eu.arrowhead.core.gams.service.InstanceService;
 import eu.arrowhead.core.gams.service.MapeKService;
@@ -29,34 +35,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.ZonedDateTime;
-
-import static eu.arrowhead.core.gams.Constants.PARAMETER_SENSOR;
-import static eu.arrowhead.core.gams.Constants.PARAMETER_UID;
-import static eu.arrowhead.core.gams.Constants.PATH_PARAMETER_SENSOR;
-import static eu.arrowhead.core.gams.Constants.PATH_PARAMETER_UID;
-import static eu.arrowhead.core.gams.Constants.PATH_SENSOR;
-
 @Api(tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS,
         allowedHeaders = {HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION}
 )
 @RestController
-@RequestMapping(CommonConstants.GAMS_URI + PATH_PARAMETER_UID)
+@RequestMapping(CommonConstants.GAMS_URI + Constants.PATH_PARAMETER_UID)
 public class SensorDataController {
 
     //=================================================================================================
     // members
-    private static final String QUALIFY_SENSOR_URI = PATH_SENSOR + PATH_PARAMETER_SENSOR;
-
-    private static final String PUBLISH_SENSOR_URI = QUALIFY_SENSOR_URI;
+    private static final String PUBLISH_SENSOR_UID_URI = Constants.PATH_SENSOR + Constants.PATH_PARAMETER_SENSOR;
+    private static final String PUBLISH_SENSOR_ADDRESS_URI = Constants.PATH_ADDRESS;
     private static final String PUBLISH_SENSOR_DESCRIPTION = "Publish sensor data to an instance";
     private static final String PUBLISH_SENSOR_SUCCESS = "Sensor data published";
     private static final String PUBLISH_SENSOR_BAD_REQUEST = "Unable to publish sensor";
     private static final String PUBLISH_SENSOR_NOT_FOUND = "Sensor or instance not found";
 
     private final Logger logger = LogManager.getLogger(SensorDataController.class);
-    private final Validation validation = new Validation();
+    private final RestValidation validation = new RestValidation();
 
     private final InstanceService instanceService;
     private final SensorService sensorService;
@@ -82,21 +79,57 @@ public class SensorDataController {
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response = ErrorMessageDTO.class),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response = ErrorMessageDTO.class)
     })
-    @PostMapping(PUBLISH_SENSOR_URI)
+    @PostMapping(PUBLISH_SENSOR_UID_URI)
     @ResponseBody
-    public void publish(@PathVariable(PARAMETER_UID) final String instanceUid,
-                        @PathVariable(PARAMETER_SENSOR) final String sensorUid,
-                        @RequestBody final PublishSensorDataRequest request) {
+    public void publish(@PathVariable(Constants.PARAMETER_UID) final String instanceUid,
+                        @PathVariable(Constants.PARAMETER_SENSOR) final String sensorUid,
+                        @RequestBody final PublishSensorDataRequest request,
+                        final HttpServletRequest servletRequest) {
         logger.debug("publish started ...");
-        final String origin = CommonConstants.GAMS_URI + "/" + instanceUid + PATH_SENSOR + "/" + sensorUid;
+        final String origin = CommonConstants.GAMS_URI + "/" + instanceUid + Constants.PATH_SENSOR + "/" + sensorUid;
 
         validation.verify(request, origin);
 
         final GamsInstance instance = instanceService.findByUid(instanceUid);
-        final Sensor sensor = sensorService.findByUid(sensorUid);
-        validation.verifyEquals(sensor.getInstance(), instance, origin);
+        final Sensor sensor = sensorService.findSensorByUid(sensorUid);
+        publish(instance, sensor, request, servletRequest.getRemoteAddr(), origin);
+    }
 
-        final ZonedDateTime timestamp = Utilities.parseUTCStringToLocalZonedDateTime(request.getTimestamp());
-        mapeKService.monitor(instance, sensor, timestamp, request.getData());
+    //-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = PUBLISH_SENSOR_DESCRIPTION, response = Void.class,
+            tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_OK, message = PUBLISH_SENSOR_SUCCESS),
+            @ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = PUBLISH_SENSOR_NOT_FOUND, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUBLISH_SENSOR_BAD_REQUEST, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response = ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response = ErrorMessageDTO.class)
+    })
+    @PostMapping(PUBLISH_SENSOR_ADDRESS_URI)
+    @ResponseBody
+    public void publish(@PathVariable(Constants.PARAMETER_UID) final String instanceUid,
+                        @RequestBody final PublishSensorDataRequest request,
+                        final HttpServletRequest servletRequest) {
+        logger.debug("publish started ...");
+        final String origin = CommonConstants.GAMS_URI + "/" + instanceUid + Constants.PATH_ADDRESS + "/" + servletRequest.getRemoteAddr();
+
+        validation.verify(request, origin);
+
+        final GamsInstance instance = instanceService.findByUid(instanceUid);
+        final Sensor sensor = sensorService.findSensorByAddress(instance, servletRequest.getRemoteAddr());
+        publish(instance, sensor, request, servletRequest.getRemoteAddr(), origin);
+    }
+
+    private void publish(final GamsInstance instance, final Sensor sensor, final PublishSensorDataRequest request, final String address, final String origin) {
+        validation.verifyEquals(sensor.getInstance(), instance, origin);
+        validation.verify(request, origin);
+
+        final ZonedDateTime timestamp;
+        try {
+            timestamp = Utilities.parseUTCStringToLocalZonedDateTime(request.getTimestamp());
+            mapeKService.publish(sensor, timestamp, request.getData(), address);
+        } catch (DateTimeParseException e) {
+            throw new InvalidParameterException(e.getMessage());
+        }
     }
 }

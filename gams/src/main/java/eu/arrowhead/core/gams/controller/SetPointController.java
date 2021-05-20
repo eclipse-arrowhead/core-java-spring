@@ -5,14 +5,15 @@ import org.springframework.util.Assert;
 
 /**
  * A SetPoint controller has two set points on which it switches the output.
- * It returns a positive number if the input is below the lower set point and a negative if the number exceeds the upper set point. It returns 0 in all other cases.
- * If the lower set point and the upper set point is the same, it acts as a BangBangController.
+ * It returns a positive number if the input exceeds the upper set point and a negative if the number is below the lower set point. It returns 0 in all other
+ * cases.
+ * If the lower set point and the upper set point is the same, it acts similar to a BangBangController where a positive output equals to the "on" state.
  */
 public class SetPointController<T extends Number> {
 
     private final boolean inverse;
-    private final long lowerSetPoint;
-    private final long upperSetPoint;
+    private final MathHelper.MathHelperDto<T> lowerSetPoint;
+    private final MathHelper.MathHelperDto<T> upperSetPoint;
 
     public SetPointController(final T setPoint) {
         this(false, setPoint, setPoint);
@@ -29,23 +30,36 @@ public class SetPointController<T extends Number> {
     public SetPointController(final boolean inverse, final T lowerSetPoint, final T upperSetPoint) {
         super();
         this.inverse = inverse;
-        this.lowerSetPoint = MathHelper.convert(lowerSetPoint);
-        this.upperSetPoint = MathHelper.convert(upperSetPoint);
+        this.lowerSetPoint = MathHelper.convertWithPrecision(lowerSetPoint);
+        this.upperSetPoint = MathHelper.convertWithPrecision(upperSetPoint);
 
-        if (this.lowerSetPoint > this.upperSetPoint) { throw new IllegalArgumentException("lowerSetPoint must not be greater than upperSetPoint"); }
+        if (this.lowerSetPoint.output > this.upperSetPoint.output) {
+            throw new IllegalArgumentException("lowerSetPoint must not be greater than upperSetPoint");
+        }
     }
 
-    public long evaluate(final T inputT) {
-        Assert.notNull(inputT, "input is null");
+    public static <T extends Number> SetPointController<T> create (final boolean inverse, final T lowerSetPoint, final T upperSetPoint) {
+        return new SetPointController<>(inverse, lowerSetPoint, upperSetPoint);
+    }
 
-        final long input = MathHelper.convert(inputT);
+    public double evaluate(final T inputT) {
+        Assert.notNull(inputT, "number is null");
+
+        final MathHelper.MathHelperDto<T> number = MathHelper.convertWithPrecision(inputT);
         final long result;
 
-        if (input < lowerSetPoint) { result = Math.subtractExact(lowerSetPoint, input); }
-        else if (input > upperSetPoint) { result = Math.subtractExact(upperSetPoint, input); }
-        else { result = 0; }
+        if (number.output < lowerSetPoint.output) {
+            result = Math.subtractExact(number.output, lowerSetPoint.output);
+        } else if (number.output > upperSetPoint.output) {
+            result = Math.subtractExact(number.output, upperSetPoint.output);
+        } else {
+            result = 0;
+        }
 
-        if (inverse) { return Math.negateExact(result); }
-        else { return result; }
+        if (inverse) {
+            return number.convertResult(Math.negateExact(result)).doubleValue();
+        } else {
+            return number.convertResult(result).doubleValue();
+        }
     }
 }

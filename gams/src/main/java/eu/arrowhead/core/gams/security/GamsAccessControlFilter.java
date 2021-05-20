@@ -29,7 +29,7 @@ public class GamsAccessControlFilter extends CoreSystemAccessControlFilter {
     @Override
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
         if (request instanceof HttpServletRequest) {
-            log.debug("Checking access in OnboardingAccessControlFilter...");
+            log.debug("Checking access in GamsAccessControlFilter...");
             try {
                 final MultiReadRequestWrapper requestWrapper = new MultiReadRequestWrapper((HttpServletRequest) request);
                 final String requestTarget = Utilities.stripEndSlash(requestWrapper.getRequestURL().toString());

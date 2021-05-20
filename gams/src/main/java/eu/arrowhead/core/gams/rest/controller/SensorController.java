@@ -3,16 +3,17 @@ package eu.arrowhead.core.gams.rest.controller;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.database.entity.GamsInstance;
+import eu.arrowhead.common.database.entity.Sensor;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
-import eu.arrowhead.core.gams.Validation;
-import eu.arrowhead.core.gams.database.entities.GamsInstance;
-import eu.arrowhead.core.gams.database.entities.Sensor;
+import eu.arrowhead.core.gams.Constants;
+import eu.arrowhead.core.gams.RestValidation;
 import eu.arrowhead.core.gams.rest.dto.CreateSensorRequest;
 import eu.arrowhead.core.gams.rest.dto.GamsInstanceDto;
-import eu.arrowhead.core.gams.rest.dto.PublishSensorDataRequest;
 import eu.arrowhead.core.gams.rest.dto.SensorDto;
 import eu.arrowhead.core.gams.service.InstanceService;
 import eu.arrowhead.core.gams.service.SensorService;
+import eu.arrowhead.core.gams.utility.Converter;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -30,31 +31,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import static eu.arrowhead.core.gams.Constants.PARAMETER_SENSOR;
-import static eu.arrowhead.core.gams.Constants.PARAMETER_UID;
-import static eu.arrowhead.core.gams.Constants.PATH_PARAMETER_SENSOR;
-import static eu.arrowhead.core.gams.Constants.PATH_PARAMETER_UID;
-import static eu.arrowhead.core.gams.Constants.PATH_ROOT;
-import static eu.arrowhead.core.gams.Constants.PATH_SENSOR;
-
 @Api(tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS,
         allowedHeaders = {HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION}
 )
 @RestController
-@RequestMapping(CommonConstants.GAMS_URI + PATH_PARAMETER_UID)
+@RequestMapping(CommonConstants.GAMS_URI + Constants.PATH_PARAMETER_UID)
 public class SensorController {
 
     //=================================================================================================
     // members
-    private static final String CREATE_SENSOR_URI = PATH_ROOT;
+    private static final String CREATE_SENSOR_URI = Constants.PATH_ROOT;
     private static final String CREATE_SENSOR_DESCRIPTION = "Register a sensor to an instance";
     private static final String CREATE_SENSOR_SUCCESS = "New sensor registered";
     private static final String CREATE_SENSOR_CONFLICT = "Sensor registered to gams instance already";
     private static final String CREATE_SENSOR_BAD_REQUEST = "Unable to register sensor";
 
     private final Logger logger = LogManager.getLogger(SensorController.class);
-    private final Validation validation = new Validation();
+    private final RestValidation validation = new RestValidation();
 
     private final InstanceService instanceService;
     private final SensorService sensorService;
@@ -80,7 +74,7 @@ public class SensorController {
     })
     @PostMapping(CREATE_SENSOR_URI)
     @ResponseBody
-    public SensorDto create(@PathVariable(PARAMETER_UID) final String instanceUid, @RequestBody final CreateSensorRequest createSensorRequest) {
+    public SensorDto create(@PathVariable(Constants.PARAMETER_UID) final String instanceUid, @RequestBody final CreateSensorRequest createSensorRequest) {
         logger.debug("create started ...");
         final String origin = CommonConstants.GAMS_URI + "/" + instanceUid;
 
@@ -88,6 +82,6 @@ public class SensorController {
 
         final GamsInstance instance = instanceService.findByUid(instanceUid);
         final Sensor sensor = sensorService.create(instance, createSensorRequest);
-        return new SensorDto(sensor.getUidAsString(), sensor.getName(), sensor.getType());
+        return Converter.convert(sensor);
     }
 }

@@ -7,13 +7,15 @@ import java.util.StringJoiner;
 public class SensorDataDto implements Serializable {
 
     private String uid;
+    private String address;
     private String timestamp;
     private Object data;
 
     public SensorDataDto() { super(); }
 
-    public SensorDataDto(final String uid, final String timestamp, final Object data) {
+    public SensorDataDto(final String uid, final String address, final String timestamp, final Object data) {
         this.uid = uid;
+        this.address = address;
         this.timestamp = timestamp;
         this.data = data;
     }
@@ -24,6 +26,14 @@ public class SensorDataDto implements Serializable {
 
     public void setUid(String uid) {
         this.uid = uid;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(final String address) {
+        this.address = address;
     }
 
     public String getTimestamp() {

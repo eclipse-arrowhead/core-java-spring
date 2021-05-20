@@ -1,22 +1,30 @@
 package eu.arrowhead.core.gams.rest.dto;
 
 import java.io.Serializable;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.StringJoiner;
 
 public class SensorDto implements Serializable {
     private String uid;
+    private String address;
     private String name;
     private SensorType type;
+    private Long retentionTime;
+    private ChronoUnit timeUnit;
 
     public SensorDto() {
         super();
     }
 
-    public SensorDto(final String uid, final String name, final SensorType type) {
+    public SensorDto(final String uid, final String address, final String name, final SensorType type, final Long retentionTime,
+                     final ChronoUnit timeUnit) {
+        this.address = address;
         this.name = name;
         this.uid = uid;
         this.type = type;
+        this.retentionTime = retentionTime;
+        this.timeUnit = timeUnit;
     }
 
     public String getName() {
@@ -35,6 +43,14 @@ public class SensorDto implements Serializable {
         this.uid = uid;
     }
 
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(final String address) {
+        this.address = address;
+    }
+
     public SensorType getType() {
         return type;
     }
@@ -43,27 +59,47 @@ public class SensorDto implements Serializable {
         this.type = type;
     }
 
+    public Long getRetentionTime() {
+        return retentionTime;
+    }
+
+    public void setRetentionTime(final Long retentionTime) {
+        this.retentionTime = retentionTime;
+    }
+
+    public ChronoUnit getTimeUnit() {
+        return timeUnit;
+    }
+
+    public void setTimeUnit(final ChronoUnit timeUnit) {
+        this.timeUnit = timeUnit;
+    }
+
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        SensorDto sensorDto = (SensorDto) o;
-        return Objects.equals(name, sensorDto.name) &&
-                Objects.equals(uid, sensorDto.uid) &&
-                type == sensorDto.type;
+    public boolean equals(final Object o) {
+        if (this == o) { return true; }
+        if (o == null || getClass() != o.getClass()) { return false; }
+        final SensorDto sensorDto = (SensorDto) o;
+        return Objects.equals(uid, sensorDto.uid) &&
+                Objects.equals(name, sensorDto.name) &&
+                type == sensorDto.type &&
+                Objects.equals(retentionTime, sensorDto.retentionTime) &&
+                timeUnit == sensorDto.timeUnit;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, uid, type);
+        return Objects.hash(uid, name, type, retentionTime, timeUnit);
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", SensorDto.class.getSimpleName() + "[", "]")
-                .add("name='" + name + "'")
                 .add("uid='" + uid + "'")
+                .add("name='" + name + "'")
                 .add("type=" + type)
+                .add("retentionTime=" + retentionTime)
+                .add("timeUnit=" + timeUnit)
                 .toString();
     }
 }
