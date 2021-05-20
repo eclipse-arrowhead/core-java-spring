@@ -1,8 +1,8 @@
 File list:
 
-Arrowhead DataManager G4.1.3 SysDD.docx - DataManager System design description 
-Arrowhead Historian Service G4.1.3 IDD.docx - Historian Interface design description
-Arrowhead Historian Service G4.1.3 SD.docx - Historian Service descrption
-Arrowhead Proxy Service G4.1.3 IDD.docx - Proxy Interface design description
-Arrowhead Proxy Service G4.1.3 SD.docx - Proxy Service descrption
+Arrowhead DataManager SysD.pdf - DataManager System design 
+Arrowhead Historian Service IDD.pdf - Historian Interface design description
+Arrowhead Historian Service SD.pdf - Historian Service description
+Arrowhead Proxy Service IDD.pdf - Proxy Interface design description
+Arrowhead Proxy Service SD.pdf - Proxy Service description
 Readme.txt - This file
