@@ -214,22 +214,6 @@ public class QoSMonitorDriver {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public IcmpPingRequestACK requestExternalPingMonitorService(final IcmpPingRequestDTO request, final UriComponents externalPingMonitorUri) {
-		logger.debug("requestExternalPingMonitorService started...");
-
-		Assert.notNull(request, "IcmpPingRequest is null.");
-
-		try {
-			final ResponseEntity<IcmpPingRequestACK> response = httpService.sendRequest(externalPingMonitorUri, HttpMethod.POST, IcmpPingRequestACK.class, request);
-
-			return response.getBody();
-		} catch (final ArrowheadException ex) {
-			logger.debug("Exception: " + ex.getMessage());
-			throw ex;
-		}
-	}
-
-	//-------------------------------------------------------------------------------------------------
 	public OrchestrationResponseDTO queryOrchestrator(final OrchestrationFormRequestDTO form) {
 		logger.debug("queryOrchestrator started...");
 
@@ -250,8 +234,8 @@ public class QoSMonitorDriver {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public void checkFixedPingMonitorProviderEchoUri(final UriComponents echoUri) {
-		logger.debug("checkFixedPingMonitorProviderEchoUri started...");
+	public void checkPingMonitorProviderEchoUri(final UriComponents echoUri) {
+		logger.debug("checkPingMonitorProviderEchoUri started...");
 
 		int count = 0;
 
@@ -266,7 +250,7 @@ public class QoSMonitorDriver {
 				return;
 
 			} catch (final Exception ex) {
-				logger.warn("QoS Monitor can't access Fixed External Qos Monitor provider at : " + echoUri );
+				logger.warn("QoS Monitor can't access External Qos Monitor provider at : " + echoUri );
 
 				count++;
 
@@ -278,7 +262,7 @@ public class QoSMonitorDriver {
 	public void subscribeToExternalPingMonitorEvents() {
 		logger.debug("subscribeToExternalPingMonitorEvents started...");
 
-		final SubscriptionRequestDTO subscriptionTemplate = getSubscriptionRequestDTOTemplateForFixedExternalPingMonitor();
+		final SubscriptionRequestDTO subscriptionTemplate = getSubscriptionRequestDTOTemplateForExternalPingMonitor();
 		final UriComponents subscriptionUri = getEventHandlerSubscribeUri();
 
 		int count = 0;
@@ -458,8 +442,8 @@ public class QoSMonitorDriver {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private SubscriptionRequestDTO getSubscriptionRequestDTOTemplateForFixedExternalPingMonitor() {
-		logger.debug("getSubscriptionRequestDTOForFixedExternalPingMonitor started...");
+	private SubscriptionRequestDTO getSubscriptionRequestDTOTemplateForExternalPingMonitor() {
+		logger.debug("getSubscriptionRequestDTOForExternalPingMonitor started...");
 
 		final SubscriptionRequestDTO requestTemplate = new SubscriptionRequestDTO();
 		requestTemplate.setMatchMetaData(false);

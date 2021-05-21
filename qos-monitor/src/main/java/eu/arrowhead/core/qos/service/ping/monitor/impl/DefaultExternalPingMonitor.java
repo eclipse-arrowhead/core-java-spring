@@ -62,13 +62,13 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	private InteruptedMonitoringMeasurementEventQueue interuptedMonitoringMeasurementEventQueue;
 
 	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_ADDRESS_WD)
-	private String fixedExternalPingMonitorAddress;
+	private String externalPingMonitorAddress;
 
 	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_PORT_WD)
-	private int fixedExternalPingMonitorPort;
+	private int externalPingMonitorPort;
 
 	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_PATH_WD)
-	private String fixedExternalPingMonitorPath;
+	private String externalPingMonitorPath;
 
 	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_SECURE_WD)
 	private boolean pingMonitorSecure;
@@ -262,7 +262,7 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 
 		try {
 
-			final IcmpPingRequestACK acknowledgedMeasurmentRequest = driver.requestExternalPingMonitorService(createIcmpPingRequest(address), createFixedPingMonitorProviderUri());
+			final IcmpPingRequestACK acknowledgedMeasurmentRequest = driver.requestExternalPingMonitorService(createPingMonitorProviderUri(), createIcmpPingRequest(address));
 			validateAcknowledgedMeasurmentRequest(acknowledgedMeasurmentRequest);
 
 			final UUID startedExternalMeasurementProcessId = acknowledgedMeasurmentRequest.getExternalMeasurementUuid();
@@ -317,24 +317,24 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private UriComponents createFixedPingMonitorProviderUri() {
-		logger.debug("createFixedPingMonitorProviderUri started...");
+	private UriComponents createPingMonitorProviderUri() {
+		logger.debug("createPingMonitorProviderUri started...");
 
-		return Utilities.createURI(pingMonitorSecure ? CommonConstants.HTTPS : CommonConstants.HTTP, fixedExternalPingMonitorAddress, fixedExternalPingMonitorPort, fixedExternalPingMonitorPath);
+		return Utilities.createURI(pingMonitorSecure ? CommonConstants.HTTPS : CommonConstants.HTTP, externalPingMonitorAddress, externalPingMonitorPort, externalPingMonitorPath);
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private UriComponents createFixedPingMonitorProviderEchoUri() {
-		logger.debug("createFixedPingMonitorProviderEchoUri started...");
+	private UriComponents createPingMonitorProviderEchoUri() {
+		logger.debug("createPingMonitorProviderEchoUri started...");
 
-		return Utilities.createURI(pingMonitorSecure ? CommonConstants.HTTPS : CommonConstants.HTTP, fixedExternalPingMonitorAddress, fixedExternalPingMonitorPort, CommonConstants.ECHO_URI);
+		return Utilities.createURI(pingMonitorSecure ? CommonConstants.HTTPS : CommonConstants.HTTP, externalPingMonitorAddress, externalPingMonitorPort, CommonConstants.ECHO_URI);
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	private void initPingMonitorProvider() {
 		logger.debug("initPingMonitorProvider started...");
 
-		driver.checkFixedPingMonitorProviderEchoUri(createFixedPingMonitorProviderEchoUri());
+		driver.checkPingMonitorProviderEchoUri(createPingMonitorProviderEchoUri());
 		driver.subscribeToExternalPingMonitorEvents();
 	}
 }
