@@ -34,7 +34,6 @@ import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
-import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.internal.CloudAccessListResponseDTO;
@@ -81,15 +80,15 @@ public class QoSMonitorDriver {
 	@Autowired
 	private HttpService httpService;
 
-	@Autowired
-	protected SSLProperties sslProperties;
+	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
+	private boolean sslEnabled;
 
 	@Value(CoreCommonConstants.$CORE_SYSTEM_NAME)
 	private String coreSystemName;
 
 	@Value(CoreCommonConstants.$SERVER_ADDRESS)
 	private String coreSystemAddress;
-	
+
 	@Value(CoreCommonConstants.$SERVER_PORT)
 	private int coreSystemPort;
 
@@ -464,7 +463,7 @@ public class QoSMonitorDriver {
 		system.setAddress(coreSystemAddress);
 		system.setPort(coreSystemPort);
 		system.setMetadata(null);
-		if (sslProperties.isSslEnabled()) {
+		if (sslEnabled) {
 			system.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
 		}
 
