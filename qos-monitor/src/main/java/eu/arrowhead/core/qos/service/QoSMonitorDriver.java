@@ -18,6 +18,7 @@ import java.security.PublicKey;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
@@ -94,6 +95,8 @@ public class QoSMonitorDriver {
 
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
+
+	private final SystemRequestDTO requester = getQosMonitorSystemRequestDTO();
 
 	//=================================================================================================
 	// methods
@@ -259,10 +262,10 @@ public class QoSMonitorDriver {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public void subscribeToExternalPingMonitorEvents() {
+	public void subscribeToExternalPingMonitorEvents(final SystemRequestDTO pingMonitorProvider) {
 		logger.debug("subscribeToExternalPingMonitorEvents started...");
 
-		final SubscriptionRequestDTO subscriptionTemplate = getSubscriptionRequestDTOTemplateForExternalPingMonitor();
+		final SubscriptionRequestDTO subscriptionRequest = getSubscriptionRequestDTOForExternalPingMonitor(pingMonitorProvider);
 		final UriComponents subscriptionUri = getEventHandlerSubscribeUri();
 
 		int count = 0;
@@ -271,9 +274,9 @@ public class QoSMonitorDriver {
 		while ( !subscribedToAll && count < MAX_RETRIES) {
 			try {
 				for (final QosMonitorEventType externalPingMonitorEventType : QosMonitorEventType.values()) {
-					subscriptionTemplate.setEventType(externalPingMonitorEventType.name());
+					subscriptionRequest.setEventType(externalPingMonitorEventType.name());
 
-					final ResponseEntity<SubscriptionResponseDTO> response = httpService.sendRequest(subscriptionUri, HttpMethod.POST, SubscriptionResponseDTO.class, subscriptionTemplate);
+					final ResponseEntity<SubscriptionResponseDTO> response = httpService.sendRequest(subscriptionUri, HttpMethod.POST, SubscriptionResponseDTO.class, subscriptionRequest);
 
 					final SubscriptionResponseDTO subscriptionResponse = response.getBody();
 					Assert.isTrue(subscriptionResponse.getEventType().getEventTypeName().equalsIgnoreCase(externalPingMonitorEventType.name()), "Invalid subscriptionResponse event type.");
@@ -442,13 +445,17 @@ public class QoSMonitorDriver {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private SubscriptionRequestDTO getSubscriptionRequestDTOTemplateForExternalPingMonitor() {
+	private SubscriptionRequestDTO getSubscriptionRequestDTOForExternalPingMonitor(final SystemRequestDTO provider) {
 		logger.debug("getSubscriptionRequestDTOForExternalPingMonitor started...");
 
 		final SubscriptionRequestDTO requestTemplate = new SubscriptionRequestDTO();
 		requestTemplate.setMatchMetaData(false);
 		requestTemplate.setNotifyUri(QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI);
-		requestTemplate.setSubscriberSystem(getQosMonitorSystemRequestDTO());
+		requestTemplate.setSubscriberSystem(requester);
+	
+		if(provider != null) {
+			requestTemplate.setSources(Set.of(provider));
+		}
 
 		return requestTemplate;
 	}

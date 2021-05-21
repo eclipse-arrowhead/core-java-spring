@@ -1,5 +1,7 @@
 package eu.arrowhead.core.qos.service.ping.monitor.impl;
 
+import java.security.PublicKey;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,6 +24,7 @@ import eu.arrowhead.common.dto.shared.IcmpPingRequestDTO;
 import eu.arrowhead.common.dto.shared.InterruptedMonitoringMeasurementEventDTO;
 import eu.arrowhead.common.dto.shared.ReceivedMonitoringRequestEventDTO;
 import eu.arrowhead.common.dto.shared.StartedMonitoringMeasurementEventDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.QosMonitorConstants;
@@ -61,6 +64,8 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	@Resource
 	private InteruptedMonitoringMeasurementEventQueue interuptedMonitoringMeasurementEventQueue;
 
+	private String externalPingMonitorName;
+
 	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_ADDRESS_WD)
 	private String externalPingMonitorAddress;
 
@@ -72,6 +77,10 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 
 	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_SECURE_WD)
 	private boolean pingMonitorSecure;
+
+	private String externalPingMonitorAuthInfo;
+
+	private final SystemRequestDTO pingMonitorSystem = getPingMonitorSystemRequestDTO();
 
 	private Logger logger = LogManager.getLogger(DefaultExternalPingMonitor.class);
 
@@ -331,10 +340,26 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	private SystemRequestDTO getPingMonitorSystemRequestDTO() {
+		logger.debug("getPingMonitorSystemRequestDTO started...");
+
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName(externalPingMonitorName);
+		system.setAddress(externalPingMonitorAddress);
+		system.setPort(externalPingMonitorPort);
+		system.setMetadata(null);
+		if (pingMonitorSecure) {
+			system.setAuthenticationInfo(externalPingMonitorAuthInfo);
+		}
+
+		return system;
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	private void initPingMonitorProvider() {
 		logger.debug("initPingMonitorProvider started...");
 
 		driver.checkPingMonitorProviderEchoUri(createPingMonitorProviderEchoUri());
-		driver.subscribeToExternalPingMonitorEvents();
+		driver.subscribeToExternalPingMonitorEvents(pingMonitorSystem);
 	}
 }

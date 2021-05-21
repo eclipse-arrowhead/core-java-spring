@@ -24,6 +24,7 @@ import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.ReceivedMonitoringRequestEventDTO;
 import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 import eu.arrowhead.common.dto.shared.StartedMonitoringMeasurementEventDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -355,6 +356,24 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	private SystemRequestDTO getPingMonitorSystemRequestDTO() {
+		logger.debug("getPingMonitorSystemRequestDTO started...");
+
+		Assert.notNull(cachedPingMonitorProvider.getProvider(), "Cached Provider is null");
+
+		final SystemResponseDTO provider = cachedPingMonitorProvider.getProvider();
+
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName(provider.getSystemName());
+		system.setAddress(provider.getAddress());
+		system.setPort(provider.getPort());
+		system.setMetadata(provider.getMetadata());
+		system.setAuthenticationInfo(provider.getAuthenticationInfo());
+
+		return system;
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	private void initPingMonitorProvider() {
 		logger.debug("initPingMonitorProvider started...");
 
@@ -363,7 +382,7 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 
 		cachedPingMonitorProvider = selectProvider(result);
 
-		driver.subscribeToExternalPingMonitorEvents();
+		driver.subscribeToExternalPingMonitorEvents(getPingMonitorSystemRequestDTO());
 
 	}
 
@@ -385,7 +404,7 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 
 		}
 
-		driver.subscribeToExternalPingMonitorEvents();
+		driver.subscribeToExternalPingMonitorEvents(getPingMonitorSystemRequestDTO());
 
 	}
 

@@ -196,6 +196,8 @@ public class CoreCommonConstants {
 	public static final String $QOS_IS_GATEKEEPER_PRESENT_WD = "${" + QOS_IS_GATEKEEPER_PRESENT + ":" + CoreDefaults.DEFAULT_QOS_IS_GATEKEEPER_PRESENT + "}";
 	public static final String QOS_MONITOR_PROVIDER_TYPE = "monitor_provider_type";
 	public static final String $QOS_MONITOR_PROVIDER_TYPE_WD = "${" + QOS_MONITOR_PROVIDER_TYPE + ":" + CoreDefaults.DEFAULT_QOS_MONITOR_PROVIDER_TYPE + "}";
+	public static final String QOS_MONITOR_PROVIDER_NAME = "monitor_provider_name";
+	public static final String $QOS_MONITOR_PROVIDER_NAME_WD = "${" + QOS_MONITOR_PROVIDER_NAME + ":" + CoreDefaults.DEFAULT_QOS_MONITOR_PROVIDER_NAME + "}";
 	public static final String QOS_MONITOR_PROVIDER_ADDRESS = "monitor_provider_address";
 	public static final String $QOS_MONITOR_PROVIDER_ADDRESS_WD = "${" + QOS_MONITOR_PROVIDER_ADDRESS + ":" + CoreDefaults.DEFAULT_QOS_MONITOR_PROVIDER_ADDRESS + "}";
 	public static final String QOS_MONITOR_PROVIDER_PORT = "monitor_provider_port";
@@ -204,6 +206,8 @@ public class CoreCommonConstants {
 	public static final String $QOS_MONITOR_PROVIDER_PATH_WD = "${" + QOS_MONITOR_PROVIDER_PATH + ":" + CoreDefaults.DEFAULT_QOS_MONITOR_PROVIDER_PATH + "}";
 	public static final String QOS_MONITOR_PROVIDER_SECURE = "monitor_provider_secure";
 	public static final String $QOS_MONITOR_PROVIDER_SECURE_WD = "${" + QOS_MONITOR_PROVIDER_SECURE + ":" + CoreDefaults.DEFAULT_QOS_MONITOR_PROVIDER_SECURE + "}";
+	public static final String QOS_MONITOR_PROVIDER_AUTHINFO = "monitor_provider_authinfo";
+	public static final String $QOS_MONITOR_PROVIDER_AUTHINFO_WD = "${" + QOS_MONITOR_PROVIDER_AUTHINFO + ":" + CoreDefaults.DEFAULT_QOS_MONITOR_PROVIDER_AUTHINFO + "}";
 	
 	public static final String NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS = "no_gatekeeper_relay_request_handler_workers";
 	public static final String $NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS_WD = "${" + NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + ":" + 
