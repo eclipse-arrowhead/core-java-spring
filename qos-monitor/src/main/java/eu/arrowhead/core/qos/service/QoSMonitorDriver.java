@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
 
@@ -56,7 +56,7 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.qos.QosMonitorConstants;
 
-@Component
+@Service
 public class QoSMonitorDriver {
 
 	//=================================================================================================
@@ -95,8 +95,6 @@ public class QoSMonitorDriver {
 
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
-
-	private final SystemRequestDTO requester = getQosMonitorSystemRequestDTO();
 
 	//=================================================================================================
 	// methods
@@ -286,12 +284,12 @@ public class QoSMonitorDriver {
 				subscribedToAll = true;
 
 			} catch (final Exception ex) {
-				logger.warn("QoS Monitor can't access EventHandler.");
+				logger.debug("QoS Monitor can't access EventHandler : " + ex.getMessage());
 
 				count++;
 
 				if (count < MAX_RETRIES) {
-					logger.warn("Retrying to access EventHandler.");
+					logger.debug("Retrying to access EventHandler.");
 
 					rest();
 				}
@@ -301,6 +299,51 @@ public class QoSMonitorDriver {
 		if (!subscribedToAll) {
 
 			throw new ArrowheadException("QoS Monitor can't subscribe to required events.");
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public void unsubscribeFromPingMonitorEvents() {
+		logger.debug("unSubscribeFromPingMonitorEvents started...");
+
+
+
+		int count = 0;
+		boolean unsubscribedFromAll = false; 
+
+		while ( !unsubscribedFromAll && count < MAX_RETRIES) {
+			try {
+				for (final QosMonitorEventType externalPingMonitorEventType : QosMonitorEventType.values()) {
+
+					final UriComponents unsubscriptionUri = getEventHandlerUnsubscribeUri().expand(Map.of(
+							CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_EVENT_TYPE, externalPingMonitorEventType.name(),
+							CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_SYSTEM_NAME, coreSystemName,
+							CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_ADDRESS, coreSystemAddress,
+							CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_PORT, coreSystemPort));
+
+					httpService.sendRequest(unsubscriptionUri, HttpMethod.POST, SubscriptionResponseDTO.class);
+
+				}
+
+				unsubscribedFromAll = true;
+
+			} catch (final Exception ex) {
+				logger.debug("QoS Monitor can't access EventHandler: " + ex.getMessage());
+
+				count++;
+
+				if (count < MAX_RETRIES) {
+					logger.debug("Retrying to access EventHandler.");
+
+					rest();
+				}
+			}
+		}
+
+		if (!unsubscribedFromAll) {
+
+			logger.debug("QoS Monitor can't unsubscribe from some required events.");
 		}
 
 	}
@@ -451,7 +494,7 @@ public class QoSMonitorDriver {
 		final SubscriptionRequestDTO requestTemplate = new SubscriptionRequestDTO();
 		requestTemplate.setMatchMetaData(false);
 		requestTemplate.setNotifyUri(QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI);
-		requestTemplate.setSubscriberSystem(requester);
+		requestTemplate.setSubscriberSystem(getQosMonitorSystemRequestDTO());//requester);
 	
 		if(provider != null) {
 			requestTemplate.setSources(Set.of(provider));

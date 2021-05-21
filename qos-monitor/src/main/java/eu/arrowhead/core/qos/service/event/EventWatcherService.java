@@ -1,5 +1,7 @@
 package eu.arrowhead.core.qos.service.event;
 
+import java.util.concurrent.LinkedBlockingQueue;
+
 import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
@@ -14,11 +16,8 @@ import eu.arrowhead.common.dto.shared.ReceivedMonitoringRequestEventDTO;
 import eu.arrowhead.common.dto.shared.StartedMonitoringMeasurementEventDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.core.qos.QosMonitorConstants;
 import eu.arrowhead.core.qos.dto.event.EventDTOConverter;
-import eu.arrowhead.core.qos.service.event.queue.FinishedMonitoringMeasurementEventQueue;
-import eu.arrowhead.core.qos.service.event.queue.InteruptedMonitoringMeasurementEventQueue;
-import eu.arrowhead.core.qos.service.event.queue.ReceivedMonitoringRequestEventQueue;
-import eu.arrowhead.core.qos.service.event.queue.StartedMonitoringMeasurementEventQueue;
 
 @Service
 public class EventWatcherService {
@@ -29,17 +28,17 @@ public class EventWatcherService {
 	private static final String NULL_ERROR_MESSAGE = " is null";
 	private static final String NOT_SUPPORTED_EVENT_TYPE = " is not a supported event type. ";
 
-	@Resource
-	private ReceivedMonitoringRequestEventQueue receivedMonitoringRequestEventQueue;
+	@Resource( name = QosMonitorConstants.RECEIVED_MONITORING_REQUEST_QUEUE)
+	private LinkedBlockingQueue<ReceivedMonitoringRequestEventDTO> receivedMonitoringRequestEventQueue;
 
-	@Resource
-	private StartedMonitoringMeasurementEventQueue startedMonitoringMeasurementEventQueue;
+	@Resource( name = QosMonitorConstants.STARTED_MONITORING_MEASUREMENT_QUEUE)
+	private LinkedBlockingQueue<StartedMonitoringMeasurementEventDTO> startedMonitoringMeasurementEventQueue;
 
-	@Resource
-	private FinishedMonitoringMeasurementEventQueue finishedMonitoringMeasurementEventQueue;
+	@Resource( name = QosMonitorConstants.FINISHED_MONITORING_MEASUREMENT_QUEUE)
+	private LinkedBlockingQueue<FinishedMonitoringMeasurementEventDTO> finishedMonitoringMeasurementEventQueue;
 
-	@Resource
-	private InteruptedMonitoringMeasurementEventQueue interuptedMonitoringMeasurementEventQueue;
+	@Resource( name = QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_QUEUE)
+	private LinkedBlockingQueue<InterruptedMonitoringMeasurementEventDTO> interuptedMonitoringMeasurementEventQueue;
 
 	protected Logger logger = LogManager.getLogger(EventWatcherService.class);
 

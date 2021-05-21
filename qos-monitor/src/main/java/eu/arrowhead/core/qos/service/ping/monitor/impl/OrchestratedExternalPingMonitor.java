@@ -2,6 +2,7 @@ package eu.arrowhead.core.qos.service.ping.monitor.impl;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.annotation.Resource;
 
@@ -33,10 +34,6 @@ import eu.arrowhead.core.qos.dto.IcmpPingDTOConverter;
 import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.dto.externalMonitor.ExternalMonitorOrchestrationRequestFactory;
 import eu.arrowhead.core.qos.service.QoSMonitorDriver;
-import eu.arrowhead.core.qos.service.event.queue.FinishedMonitoringMeasurementEventQueue;
-import eu.arrowhead.core.qos.service.event.queue.InteruptedMonitoringMeasurementEventQueue;
-import eu.arrowhead.core.qos.service.event.queue.ReceivedMonitoringRequestEventQueue;
-import eu.arrowhead.core.qos.service.event.queue.StartedMonitoringMeasurementEventQueue;
 import eu.arrowhead.core.qos.service.ping.monitor.AbstractPingMonitor;
 
 public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
@@ -56,17 +53,17 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 	@Autowired
 	protected SSLProperties sslProperties;
 
-	@Resource
-	private ReceivedMonitoringRequestEventQueue receivedMonitoringRequestEventQueue;
+	@Resource(name = QosMonitorConstants.RECEIVED_MONITORING_REQUEST_QUEUE)
+	private LinkedBlockingQueue<ReceivedMonitoringRequestEventDTO> receivedMonitoringRequestEventQueue;
 
-	@Resource
-	private StartedMonitoringMeasurementEventQueue startedMonitoringMeasurementEventQueue;
+	@Resource(name = QosMonitorConstants.STARTED_MONITORING_MEASUREMENT_QUEUE)
+	private LinkedBlockingQueue<StartedMonitoringMeasurementEventDTO> startedMonitoringMeasurementEventQueue;
 
-	@Resource
-	private FinishedMonitoringMeasurementEventQueue finishedMonitoringMeasurementEventQueue;
+	@Resource(name = QosMonitorConstants.FINISHED_MONITORING_MEASUREMENT_QUEUE)
+	private LinkedBlockingQueue<FinishedMonitoringMeasurementEventDTO> finishedMonitoringMeasurementEventQueue;
 
-	@Resource
-	private InteruptedMonitoringMeasurementEventQueue interuptedMonitoringMeasurementEventQueue;
+	@Resource(name = QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_QUEUE)
+	private LinkedBlockingQueue<InterruptedMonitoringMeasurementEventDTO> interuptedMonitoringMeasurementEventQueue;
 
 	@Autowired
 	private ExternalMonitorOrchestrationRequestFactory orchestrationRequestFactory;
@@ -186,23 +183,16 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 	private StartedMonitoringMeasurementEventDTO checkMeasurmentStartedConfirmed(final UUID measurementProcessId) {
 		logger.debug("checkMeasurmentStartedConfirmed statred...");
 
-		try {
-
-			final StartedMonitoringMeasurementEventDTO event = startedMonitoringMeasurementEventQueue.poll();
-			if(event != null) {
-				final UUID uuid = UUID.fromString(event.getMetadata().get(QosMonitorConstants.PROCESS_ID_KEY));
-				if(uuid.equals(measurementProcessId)) {
-					return event;
-				}else {
-					throw new ArrowheadException("Invalid measurementProcessId. ");
-				}
+		final StartedMonitoringMeasurementEventDTO event = startedMonitoringMeasurementEventQueue.poll();
+		if(event != null) {
+			final UUID uuid = UUID.fromString(event.getMetadata().get(QosMonitorConstants.PROCESS_ID_KEY));
+			if(uuid.equals(measurementProcessId)) {
+				return event;
 			}else {
-				return null;
+				throw new ArrowheadException("Invalid measurementProcessId. ");
 			}
-
-		} catch (final InterruptedException ex) {
-
-			throw new ArrowheadException("Exeption during startedMonitoringMeasurementEventQueue poll : " + ex);
+		}else {
+			return null;
 		}
 	}
 
@@ -210,23 +200,16 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 	private ReceivedMonitoringRequestEventDTO  checkMeasurmentRequestConfirmed(final UUID measurementProcessId) {
 		logger.debug("checkMeasurmentRequestConfirmed statred...");
 
-		try {
-
-			final ReceivedMonitoringRequestEventDTO event = receivedMonitoringRequestEventQueue.poll();
-			if(event != null) {
-				final UUID uuid = UUID.fromString(event.getMetadata().get(QosMonitorConstants.PROCESS_ID_KEY));
-				if(uuid.equals(measurementProcessId)) {
-					return event;
-				}else {
-					throw new ArrowheadException("Invalid measurementProcessId. ");
-				}
+		final ReceivedMonitoringRequestEventDTO event = receivedMonitoringRequestEventQueue.poll();
+		if(event != null) {
+			final UUID uuid = UUID.fromString(event.getMetadata().get(QosMonitorConstants.PROCESS_ID_KEY));
+			if(uuid.equals(measurementProcessId)) {
+				return event;
 			}else {
-				return null;
+				throw new ArrowheadException("Invalid measurementProcessId. ");
 			}
-
-		} catch (final InterruptedException ex) {
-
-			throw new ArrowheadException("Exeption during receivedMonitoringRequestEventQueue poll : " + ex);
+		}else {
+			return null;
 		}
 	}
 
@@ -234,30 +217,23 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 	private void checkInterupts(final UUID measurementProcessId) {
 		logger.debug("checkInterupts statred...");
 
-		try {
+		final InterruptedMonitoringMeasurementEventDTO event = interuptedMonitoringMeasurementEventQueue.poll();
+		if(event != null) {
+			final UUID uuid = UUID.fromString(event.getMetadata().get(QosMonitorConstants.PROCESS_ID_KEY));
+			if(uuid.equals(measurementProcessId)) {
 
-			final InterruptedMonitoringMeasurementEventDTO event = interuptedMonitoringMeasurementEventQueue.poll();
-			if(event != null) {
-				final UUID uuid = UUID.fromString(event.getMetadata().get(QosMonitorConstants.PROCESS_ID_KEY));
-				if(uuid.equals(measurementProcessId)) {
+				final String suspectedRootCauses = event.getMetadata().get(QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_ROOT_CAUSE_KEY);
+				final String exeptionInExternalMonitoring = event.getMetadata().get(QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_EXCEPTION_KEY);
 
-					final String suspectedRootCauses = event.getMetadata().get(QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_ROOT_CAUSE_KEY);
-					final String exeptionInExternalMonitoring = event.getMetadata().get(QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_EXCEPTION_KEY);
+				logger.warn("Exception in external monitoring process: " + exeptionInExternalMonitoring);
+				logger.warn("Self clamed root cause of external monitoring process exception: " + suspectedRootCauses);
 
-					logger.warn("Exception in external monitoring process: " + exeptionInExternalMonitoring);
-					logger.warn("Self clamed root cause of external monitoring process exception: " + suspectedRootCauses);
-
-					throw new ArrowheadException("Interupt in external monitoring process. ");
-				}else {
-					return;
-				}
+				throw new ArrowheadException("Interupt in external monitoring process. ");
 			}else {
 				return;
 			}
-
-		} catch (final InterruptedException ex) {
-
-			throw new ArrowheadException("Exeption during interuptedMonitoringMeasurementEventQueue poll : " + ex);
+		}else {
+			return;
 		}
 	}
 
@@ -382,6 +358,7 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 
 		cachedPingMonitorProvider = selectProvider(result);
 
+		driver.unsubscribeFromPingMonitorEvents();
 		driver.subscribeToExternalPingMonitorEvents(getPingMonitorSystemRequestDTO());
 
 	}
@@ -404,6 +381,7 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 
 		}
 
+		driver.unsubscribeFromPingMonitorEvents();
 		driver.subscribeToExternalPingMonitorEvents(getPingMonitorSystemRequestDTO());
 
 	}
