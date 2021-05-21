@@ -226,6 +226,7 @@ public class QoSMonitorDriver {
 			return response.getBody();
 
 		} catch (final Exception ex) {
+			logger.debug("QoS Monitor can't access Orchestrator : " + ex.getMessage());
 
 			throw new ArrowheadException("QoS Monitor can't access Orchestrator.");
 		}
