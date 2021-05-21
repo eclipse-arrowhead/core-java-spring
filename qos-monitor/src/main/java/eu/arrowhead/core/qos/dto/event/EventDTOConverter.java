@@ -1,6 +1,7 @@
 package eu.arrowhead.core.qos.dto.event;
 
 import java.io.IOException;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -42,6 +43,7 @@ public class EventDTOConverter {
 	public static InterruptedMonitoringMeasurementEventDTO convertToInteruptedMonitoringMeasurementEvent(final EventDTO event) {
 		logger.debug("convertToInteruptedMonitoringMeasurementEvent started...");
 
+		Assert.notNull(event, "Event is null");
 		Assert.isTrue(!Utilities.isEmpty(event.getPayload()), "Event payload is empty");
 		Assert.isTrue(!Utilities.isEmpty(event.getTimeStamp()), "Event timeStamp is empty");
 
@@ -49,7 +51,14 @@ public class EventDTOConverter {
 		validEvent.setEventType(QosMonitorEventType.INTERUPTED_MONITORING_MEASUREMENT);
 		validEvent.setMetaData(event.getMetaData());
 		validEvent.setPayload(event.getPayload());
-		validEvent.setTimeStamp(Utilities.parseUTCStringToLocalZonedDateTime(event.getTimeStamp()));
+		try {
+			validEvent.setTimeStamp(Utilities.parseUTCStringToLocalZonedDateTime(event.getTimeStamp()));
+		} catch (final DateTimeParseException ex) {
+
+			throw new InvalidParameterException("Event timestap has invalid format.", ex);
+		}
+
+		validateInterruptedMonitoringMeasurementEventDTOFields(validEvent);
 
 		return validEvent;
 	}
@@ -58,6 +67,7 @@ public class EventDTOConverter {
 	public static FinishedMonitoringMeasurementEventDTO convertToFinishedMonitoringMeasurementEvent(final EventDTO event) {
 		logger.debug("convertToFinishedMonitoringMeasurementEvent started...");
 
+		Assert.notNull(event, "Event is null");
 		Assert.isTrue(!Utilities.isEmpty(event.getPayload()), "Event payload is empty");
 		Assert.isTrue(!Utilities.isEmpty(event.getTimeStamp()), "Event timeStamp is empty");
 
@@ -65,7 +75,14 @@ public class EventDTOConverter {
 		validEvent.setEventType(QosMonitorEventType.FINISHED_MONITORING_MEASUREMENT);
 		validEvent.setMetaData(event.getMetaData());
 		validEvent.setPayload(convertToIcmpPingResponse(event.getPayload()));
-		validEvent.setTimeStamp(Utilities.parseUTCStringToLocalZonedDateTime(event.getTimeStamp()));
+		try {
+			validEvent.setTimeStamp(Utilities.parseUTCStringToLocalZonedDateTime(event.getTimeStamp()));
+		} catch (final DateTimeParseException ex) {
+
+			throw new InvalidParameterException("Event timestap has invalid format.", ex);
+		}
+
+		validateFinishedMonitoringMeasurementEventDTOFields(validEvent);
 
 		return validEvent;
 	}
@@ -74,6 +91,7 @@ public class EventDTOConverter {
 	public static List<IcmpPingResponseDTO> convertToIcmpPingResponse(final String payload) {
 		logger.debug("convertToIcmpPingResponse started...");
 
+		Assert.notNull(payload, "Payload is null");
 		Assert.isTrue(!Utilities.isEmpty(payload), "Payload is empty");
 
 		try {
@@ -91,6 +109,7 @@ public class EventDTOConverter {
 	public static StartedMonitoringMeasurementEventDTO convertToStartedMonitoringMeasurementEvent(final EventDTO event) {
 		logger.debug("convertToStartedMonitoringMeasurementEvent started...");
 
+		Assert.notNull(event, "Event is null");
 		Assert.isTrue(!Utilities.isEmpty(event.getPayload()), "Event payload is empty");
 		Assert.isTrue(!Utilities.isEmpty(event.getTimeStamp()), "Event timeStamp is empty");
 
@@ -98,7 +117,14 @@ public class EventDTOConverter {
 		validEvent.setEventType(QosMonitorEventType.STARTED_MONITORING_MEASUREMENT);
 		validEvent.setMetaData(event.getMetaData());
 		validEvent.setPayload(event.getPayload());
-		validEvent.setTimeStamp(Utilities.parseUTCStringToLocalZonedDateTime(event.getTimeStamp()));
+		try {
+			validEvent.setTimeStamp(Utilities.parseUTCStringToLocalZonedDateTime(event.getTimeStamp()));
+		} catch (final DateTimeParseException ex) {
+
+			throw new InvalidParameterException("Event timestap has invalid format.", ex);
+		}
+
+		validateStartedMonitoringMeasurementEventDTOFields(validEvent);
 
 		return validEvent;
 	}
@@ -107,6 +133,7 @@ public class EventDTOConverter {
 	public static ReceivedMonitoringRequestEventDTO convertToReceivedMonitoringRequestEvent(final EventDTO event) {
 		logger.debug("convertToReceivedMonitoringRequestEvent started...");
 
+		Assert.notNull(event, "Event is null");
 		Assert.isTrue(!Utilities.isEmpty(event.getPayload()), "Event payload is empty");
 		Assert.isTrue(!Utilities.isEmpty(event.getTimeStamp()), "Event timeStamp is empty");
 
@@ -114,7 +141,14 @@ public class EventDTOConverter {
 		validEvent.setEventType(QosMonitorEventType.RECEIVED_MONITORING_REQUEST);
 		validEvent.setMetaData(event.getMetaData());
 		validEvent.setPayload(event.getPayload());
-		validEvent.setTimeStamp(Utilities.parseUTCStringToLocalZonedDateTime(event.getTimeStamp()));
+		try {
+			validEvent.setTimeStamp(Utilities.parseUTCStringToLocalZonedDateTime(event.getTimeStamp()));
+		} catch (final DateTimeParseException ex) {
+
+			throw new InvalidParameterException("Event timestap has invalid format.", ex);
+		}
+
+		validateReceivedMonitoringRequestEventDTOFields(validEvent);
 
 		return validEvent;
 	}
@@ -123,7 +157,7 @@ public class EventDTOConverter {
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
-	private void validateFinishedMonitoringMeasurementEventDTOFields(final FinishedMonitoringMeasurementEventDTO event) {
+	private static void validateFinishedMonitoringMeasurementEventDTOFields(final FinishedMonitoringMeasurementEventDTO event) {
 
 		Assert.isTrue(event.getEventType().equals(QosMonitorEventType.FINISHED_MONITORING_MEASUREMENT), "Event type must be: FINISHED_MONITORING_MEASUREMENT");
 		Assert.isTrue(event.getMetaData().containsKey(QosMonitorConstants.PROCESS_ID_KEY), "Meta data must contain: " + QosMonitorConstants.PROCESS_ID_KEY);
@@ -131,7 +165,7 @@ public class EventDTOConverter {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void validateInterruptedMonitoringMeasurementEventDTOFields(final InterruptedMonitoringMeasurementEventDTO event) {
+	private static void validateInterruptedMonitoringMeasurementEventDTOFields(final InterruptedMonitoringMeasurementEventDTO event) {
 
 		Assert.isTrue(event.getEventType().equals(QosMonitorEventType.INTERUPTED_MONITORING_MEASUREMENT), "Event type must be: INTERUPTED_MONITORING_MEASUREMENT");
 		Assert.isTrue(event.getPayload().equalsIgnoreCase(QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_SCHEMA), "Payload must be: " + QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_SCHEMA);
@@ -141,7 +175,7 @@ public class EventDTOConverter {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void validateReceivedMonitoringRequestEventDTOFields(final ReceivedMonitoringRequestEventDTO event) {
+	private static void validateReceivedMonitoringRequestEventDTOFields(final ReceivedMonitoringRequestEventDTO event) {
 
 		Assert.isTrue(event.getEventType().equals(QosMonitorEventType.RECEIVED_MONITORING_REQUEST), "Event type must be: RECEIVED_MONITORING_REQUEST");
 		Assert.isTrue(event.getPayload().equalsIgnoreCase(QosMonitorConstants.RECEIVED_MONITORING_REQUEST_EVENT_PAYLOAD_SCHEMA), "Payload must be: " + QosMonitorConstants.RECEIVED_MONITORING_REQUEST_EVENT_PAYLOAD_SCHEMA);
@@ -150,7 +184,7 @@ public class EventDTOConverter {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void validateStartedMonitoringMeasurementEventDTOFields(final StartedMonitoringMeasurementEventDTO event) {
+	private static void validateStartedMonitoringMeasurementEventDTOFields(final StartedMonitoringMeasurementEventDTO event) {
 
 		Assert.isTrue(event.getEventType().equals(QosMonitorEventType.STARTED_MONITORING_MEASUREMENT), "Event type must be: " + QosMonitorEventType.STARTED_MONITORING_MEASUREMENT.name());
 		Assert.isTrue(event.getPayload().equalsIgnoreCase(QosMonitorConstants.STARTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_SCHEMA), "Payload must be: " + QosMonitorConstants.STARTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_SCHEMA);
