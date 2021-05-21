@@ -14,7 +14,7 @@ public class FinishedMonitoringMeasurementEventDTO implements Serializable {
 
 	private QosMonitorEventType eventType;
 	private List<IcmpPingResponseDTO> payload;
-	private Map<String,String> metaData;
+	private Map<String,String> metadata;
 	private ZonedDateTime timeStamp;
 
 	//=================================================================================================
@@ -26,13 +26,13 @@ public class FinishedMonitoringMeasurementEventDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public QosMonitorEventType getEventType() {	return eventType; }
 	public List<IcmpPingResponseDTO> getPayload() { return payload; }
-	public Map<String,String> getMetaData() { return metaData; }
+	public Map<String,String> getMetadata() { return metadata; }
 	public ZonedDateTime getTimeStamp() { return timeStamp; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setEventType(final QosMonitorEventType eventType) { this.eventType = eventType; }
 	public void setPayload(final List<IcmpPingResponseDTO> payload) { this.payload = payload; }
-	public void setMetaData( final Map<String,String> metaData ) { this.metaData = metaData; }
+	public void setMetadata( final Map<String,String> metadata ) { this.metadata = metadata; }
 	public void setTimeStamp(final ZonedDateTime timeStamp) { this.timeStamp = timeStamp; }
 
 }

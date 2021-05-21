@@ -161,7 +161,7 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 
 			final FinishedMonitoringMeasurementEventDTO event = finishedMonitoringMeasurementEventQueue.poll();
 			if(event != null) {
-				final UUID uuid = UUID.fromString(event.getMetaData().get(QosMonitorConstants.PROCESS_ID_KEY));
+				final UUID uuid = UUID.fromString(event.getMetadata().get(QosMonitorConstants.PROCESS_ID_KEY));
 				if(uuid.equals(measurementProcessId)) {
 					return event;
 				}else {
@@ -189,7 +189,7 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 
 			final StartedMonitoringMeasurementEventDTO event = startedMonitoringMeasurementEventQueue.poll();
 			if(event != null) {
-				final UUID uuid = UUID.fromString(event.getMetaData().get(QosMonitorConstants.PROCESS_ID_KEY));
+				final UUID uuid = UUID.fromString(event.getMetadata().get(QosMonitorConstants.PROCESS_ID_KEY));
 				if(uuid.equals(measurementProcessId)) {
 					return event;
 				}else {
@@ -213,7 +213,7 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 
 			final ReceivedMonitoringRequestEventDTO event = receivedMonitoringRequestEventQueue.poll();
 			if(event != null) {
-				final UUID uuid = UUID.fromString(event.getMetaData().get(QosMonitorConstants.PROCESS_ID_KEY));
+				final UUID uuid = UUID.fromString(event.getMetadata().get(QosMonitorConstants.PROCESS_ID_KEY));
 				if(uuid.equals(measurementProcessId)) {
 					return event;
 				}else {
@@ -237,11 +237,11 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 
 			final InterruptedMonitoringMeasurementEventDTO event = interuptedMonitoringMeasurementEventQueue.poll();
 			if(event != null) {
-				final UUID uuid = UUID.fromString(event.getMetaData().get(QosMonitorConstants.PROCESS_ID_KEY));
+				final UUID uuid = UUID.fromString(event.getMetadata().get(QosMonitorConstants.PROCESS_ID_KEY));
 				if(uuid.equals(measurementProcessId)) {
 
-					final String suspectedRootCauses = event.getMetaData().get(QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_ROOT_CAUSE_KEY);
-					final String exeptionInExternalMonitoring = event.getMetaData().get(QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_EXCEPTION_KEY);
+					final String suspectedRootCauses = event.getMetadata().get(QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_ROOT_CAUSE_KEY);
+					final String exeptionInExternalMonitoring = event.getMetadata().get(QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_EXCEPTION_KEY);
 
 					logger.warn("Exception in external monitoring process: " + exeptionInExternalMonitoring);
 					logger.warn("Self clamed root cause of external monitoring process exception: " + suspectedRootCauses);
