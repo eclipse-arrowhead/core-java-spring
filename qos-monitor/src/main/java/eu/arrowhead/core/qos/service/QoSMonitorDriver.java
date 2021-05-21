@@ -305,8 +305,6 @@ public class QoSMonitorDriver {
 				for (final QosMonitorEventType externalPingMonitorEventType : QosMonitorEventType.values()) {
 					subscriptionTemplate.setEventType(externalPingMonitorEventType.name());
 
-					rest();
-
 					final ResponseEntity<SubscriptionResponseDTO> response = httpService.sendRequest(subscriptionUri, HttpMethod.POST, SubscriptionResponseDTO.class, subscriptionTemplate);
 
 					final SubscriptionResponseDTO subscriptionResponse = response.getBody();
@@ -323,6 +321,8 @@ public class QoSMonitorDriver {
 
 				if (count < MAX_RETRIES) {
 					logger.warn("Retrying to access EventHandler.");
+
+					rest();
 				}
 			}
 		}
