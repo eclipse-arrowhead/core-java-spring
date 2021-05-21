@@ -8,9 +8,14 @@ import javax.annotation.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.Assert;
+import org.springframework.web.util.UriComponents;
 
+import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.FinishedMonitoringMeasurementEventDTO;
 import eu.arrowhead.common.dto.shared.IcmpPingRequestACK;
 import eu.arrowhead.common.dto.shared.IcmpPingRequestDTO;
@@ -55,6 +60,18 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 
 	@Resource
 	private InteruptedMonitoringMeasurementEventQueue interuptedMonitoringMeasurementEventQueue;
+
+	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_ADDRESS_WD)
+	private String fixedExternalPingMonitorAddress;
+
+	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_PORT_WD)
+	private int fixedExternalPingMonitorPort;
+
+	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_PATH_WD)
+	private String fixedExternalPingMonitorPath;
+
+	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_SECURE_WD)
+	private boolean pingMonitorSecure;
 
 	private Logger logger = LogManager.getLogger(DefaultExternalPingMonitor.class);
 
@@ -244,7 +261,8 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 		logger.debug("requestExternalMeasurement started...");
 
 		try {
-			final IcmpPingRequestACK acknowledgedMeasurmentRequest = driver.requestExternalPingMonitorService(createIcmpPingRequest(address));
+
+			final IcmpPingRequestACK acknowledgedMeasurmentRequest = driver.requestExternalPingMonitorService(createIcmpPingRequest(address), createFixedPingMonitorProviderUri());
 			validateAcknowledgedMeasurmentRequest(acknowledgedMeasurmentRequest);
 
 			final UUID startedExternalMeasurementProcessId = acknowledgedMeasurmentRequest.getExternalMeasurementUuid();
@@ -299,10 +317,24 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	private UriComponents createFixedPingMonitorProviderUri() {
+		logger.debug("createFixedPingMonitorProviderUri started...");
+
+		return Utilities.createURI(pingMonitorSecure ? CommonConstants.HTTPS : CommonConstants.HTTP, fixedExternalPingMonitorAddress, fixedExternalPingMonitorPort, fixedExternalPingMonitorPath);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents createFixedPingMonitorProviderEchoUri() {
+		logger.debug("createFixedPingMonitorProviderEchoUri started...");
+
+		return Utilities.createURI(pingMonitorSecure ? CommonConstants.HTTPS : CommonConstants.HTTP, fixedExternalPingMonitorAddress, fixedExternalPingMonitorPort, CommonConstants.ECHO_URI);
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	private void initPingMonitorProvider() {
 		logger.debug("initPingMonitorProvider started...");
 
-		driver.checkFixedPingMonitorProviderEchoUri();
+		driver.checkFixedPingMonitorProviderEchoUri(createFixedPingMonitorProviderEchoUri());
 		driver.subscribeToExternalPingMonitorEvents();
 	}
 }

@@ -76,18 +76,6 @@ public class QoSMonitorDriver {
 
 	public static final String KEY_CALCULATED_SERVICE_TIME_FRAME = "QoSCalculatedServiceTimeFrame";
 
-	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_ADDRESS_WD)
-	private String fixedExternalPingMonitorAddress;
-
-	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_PORT_WD)
-	private int fixedExternalPingMonitorPort;
-
-	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_PATH_WD)
-	private String fixedExternalPingMonitorPath;
-
-	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_SECURE_WD)
-	private boolean pingMonitorSecure;
-
 	private static final Logger logger = LogManager.getLogger(QoSMonitorDriver.class);
 
 	@Autowired
@@ -226,12 +214,10 @@ public class QoSMonitorDriver {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public IcmpPingRequestACK requestExternalPingMonitorService(final IcmpPingRequestDTO request) {
+	public IcmpPingRequestACK requestExternalPingMonitorService(final IcmpPingRequestDTO request, final UriComponents externalPingMonitorUri) {
 		logger.debug("requestExternalPingMonitorService started...");
 
 		Assert.notNull(request, "IcmpPingRequest is null.");
-
-		final UriComponents externalPingMonitorUri = createFixedPingMonitorProviderUri();
 
 		try {
 			final ResponseEntity<IcmpPingRequestACK> response = httpService.sendRequest(externalPingMonitorUri, HttpMethod.POST, IcmpPingRequestACK.class, request);
@@ -264,10 +250,8 @@ public class QoSMonitorDriver {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public void checkFixedPingMonitorProviderEchoUri() {
+	public void checkFixedPingMonitorProviderEchoUri(final UriComponents echoUri) {
 		logger.debug("checkFixedPingMonitorProviderEchoUri started...");
-
-		final UriComponents echoUri = createFixedPingMonitorProviderEchoUri();
 
 		int count = 0;
 
@@ -441,20 +425,6 @@ public class QoSMonitorDriver {
 		}
 
 		throw new ArrowheadException("QoS Monitor can't find orchestration process URI.");
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private UriComponents createFixedPingMonitorProviderUri() {
-		logger.debug("createFixedPingMonitorProviderUri started...");
-
-		return Utilities.createURI(pingMonitorSecure ? CommonConstants.HTTPS : CommonConstants.HTTP, fixedExternalPingMonitorAddress, fixedExternalPingMonitorPort, fixedExternalPingMonitorPath);
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private UriComponents createFixedPingMonitorProviderEchoUri() {
-		logger.debug("createFixedPingMonitorProviderEchoUri started...");
-
-		return Utilities.createURI(pingMonitorSecure ? CommonConstants.HTTPS : CommonConstants.HTTP, fixedExternalPingMonitorAddress, fixedExternalPingMonitorPort, CommonConstants.ECHO_URI);
 	}
 
 	//-------------------------------------------------------------------------------------------------
