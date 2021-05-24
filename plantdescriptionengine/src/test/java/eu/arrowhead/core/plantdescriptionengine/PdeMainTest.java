@@ -4,9 +4,7 @@ import org.junit.jupiter.api.Test;
 import se.arkalix.ArSystem;
 import se.arkalix.net.http.client.HttpClient;
 
-import java.io.File;
 import java.net.InetSocketAddress;
-import java.util.Objects;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -16,87 +14,77 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PdeMainTest {
 
-    @Test
-    public void shouldCreateInsecureHttpClient() {
+    final private static InetSocketAddress serviceRegistryAddress = new InetSocketAddress("0.0.0.0", 5000);
+    final private static String port = "8000";
+    final private String hostname = "localhost";
 
+    private Properties getInsecureAppProps() {
         final Properties appProps = new Properties();
+        appProps.setProperty(PropertyNames.SERVER_HOSTNAME, hostname);
+        appProps.setProperty(PropertyNames.SERVER_PORT, port);
         appProps.setProperty(PropertyNames.SSL_ENABLED, "false");
+        return appProps;
+    }
 
-        final HttpClient pdeClient = PdeMain.createHttpClient(appProps);
-        assertFalse(pdeClient.isSecure());
+    private Properties getSecureAppProps() {
+        final Properties appProps = new Properties();
+        appProps.setProperty(PropertyNames.SERVER_HOSTNAME, hostname);
+        appProps.setProperty(PropertyNames.SERVER_PORT, port);
+        appProps.setProperty(PropertyNames.SSL_ENABLED, "true");
+        appProps.setProperty(PropertyNames.KEY_STORE, "certificates/plantdescriptionengine.p12");
+        appProps.setProperty(PropertyNames.TRUST_STORE, "certificates/truststore.p12");
+        appProps.setProperty(PropertyNames.KEY_PASSWORD, "123456");
+        appProps.setProperty(PropertyNames.TRUST_STORE_PASSWORD, "123456");
+        appProps.setProperty(PropertyNames.KEY_STORE_PASSWORD, "123456");
+        return appProps;
+    }
+
+    private Properties getAppPropsWithMissingTrustStore() {
+        final Properties appProps = new Properties();
+        appProps.setProperty(PropertyNames.SERVER_HOSTNAME, hostname);
+        appProps.setProperty(PropertyNames.SERVER_PORT, port);
+        appProps.setProperty(PropertyNames.SSL_ENABLED, "true");
+        return appProps;
     }
 
     @Test
     public void shouldCreateSecureHttpClient() {
-
-        final ClassLoader classLoader = getClass().getClassLoader();
-
-        final File keyStoreFile = new File(Objects.requireNonNull(classLoader.getResource("crypto/keystore.p12")).getFile());
-        final String keyStorePath = keyStoreFile.getAbsolutePath();
-
-        final int port = 8000;
-        final Properties appProps = new Properties();
-        appProps.setProperty(PropertyNames.SERVER_PORT, Integer.toString(port));
-        appProps.setProperty(PropertyNames.SSL_ENABLED, "true");
-        appProps.setProperty(PropertyNames.KEY_STORE, keyStorePath);
-        appProps.setProperty(PropertyNames.TRUST_STORE, keyStorePath);
-        appProps.setProperty(PropertyNames.KEY_PASSWORD, "123456");
-        appProps.setProperty(PropertyNames.TRUST_STORE_PASSWORD, "123456");
-        appProps.setProperty(PropertyNames.KEY_STORE_PASSWORD, "123456");
-
+        final Properties appProps = getSecureAppProps();
         final HttpClient client = PdeMain.createHttpClient(appProps);
         assertTrue(client.isSecure());
     }
 
     @Test
-    public void shouldCreateArSystem() {
-        final String hostname = "localhost";
-        final int port = 8000;
-        final Properties appProps = new Properties();
-        appProps.setProperty(PropertyNames.SERVER_HOSTNAME, hostname);
-        appProps.setProperty(PropertyNames.SERVER_PORT, Integer.toString(port));
-        appProps.setProperty(PropertyNames.SSL_ENABLED, "false");
-        final InetSocketAddress address = new InetSocketAddress("0.0.0.0", 5000);
-        final ArSystem arSystem = PdeMain.createArSystem(appProps, address);
-
-        assertEquals(port, arSystem.port());
-        assertEquals(Constants.PDE_SYSTEM_NAME, arSystem.name());
-        assertFalse(arSystem.isSecure());
+    public void shouldCreateInSecureHttpClient() {
+        final Properties appProps = getInsecureAppProps();
+        final HttpClient client = PdeMain.createHttpClient(appProps);
+        assertFalse(client.isSecure());
     }
 
     @Test
     public void shouldReportMissingField() {
-        final String hostname = "localhost";
-        final int port = 8000;
-        final Properties appProps = new Properties();
-        appProps.setProperty(PropertyNames.SERVER_HOSTNAME, hostname);
-        appProps.setProperty(PropertyNames.SERVER_PORT, Integer.toString(port));
-        appProps.setProperty(PropertyNames.SSL_ENABLED, "true");
+        final Properties appProps = getAppPropsWithMissingTrustStore();
         final Exception exception = assertThrows(IllegalArgumentException.class,
-            () -> PdeMain.createArSystem(appProps, new InetSocketAddress("0.0.0.0", 5000)));
-        assertEquals("Missing field '" + PropertyNames.TRUST_STORE + "' in application properties.", exception.getMessage());
+            () -> PdeMain.createArSystem(appProps, serviceRegistryAddress));
+        assertEquals(
+            "Missing field '" + PropertyNames.TRUST_STORE + "' in application properties.",
+            exception.getMessage()
+        );
     }
 
     @Test
     public void shouldCreateSecureSystem() {
-
-        final ClassLoader classLoader = getClass().getClassLoader();
-
-        final File keyStoreFile = new File(Objects.requireNonNull(classLoader.getResource("crypto/keystore.p12")).getFile());
-        final String keyStorePath = keyStoreFile.getAbsolutePath();
-
-        final String hostname = "localhost";
-        final int port = 8000;
-        final Properties appProps = new Properties();
-        appProps.setProperty(PropertyNames.SERVER_HOSTNAME, hostname);
-        appProps.setProperty(PropertyNames.SERVER_PORT, Integer.toString(port));
-        appProps.setProperty(PropertyNames.SSL_ENABLED, "true");
-        appProps.setProperty(PropertyNames.KEY_STORE, keyStorePath);
-        appProps.setProperty(PropertyNames.TRUST_STORE, keyStorePath);
-        appProps.setProperty(PropertyNames.KEY_PASSWORD, "123456");
-        appProps.setProperty(PropertyNames.TRUST_STORE_PASSWORD, "123456");
-        appProps.setProperty(PropertyNames.KEY_STORE_PASSWORD, "123456");
-        final ArSystem system = PdeMain.createArSystem(appProps, new InetSocketAddress("0.0.0.0", 5000));
+        final Properties appProps = getSecureAppProps();
+        final ArSystem system = PdeMain.createArSystem(appProps, serviceRegistryAddress);
+        assertEquals(ApiConstants.PDE_SYSTEM_NAME, system.name());
         assertTrue(system.isSecure());
+    }
+
+    @Test
+    public void shouldInsecureSystem() {
+        final Properties appProps = getInsecureAppProps();
+        final ArSystem arSystem = PdeMain.createArSystem(appProps, serviceRegistryAddress);
+        assertEquals(ApiConstants.PDE_SYSTEM_NAME, arSystem.name());
+        assertFalse(arSystem.isSecure());
     }
 }

@@ -35,7 +35,6 @@ import se.arkalix.util.concurrent.Future;
 
 import java.net.InetSocketAddress;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -173,7 +172,6 @@ public class OrchestratorClientTest {
             .createdAt(now)
             .updatedAt(now)
             .active(true)
-            .include(new ArrayList<>())
             .systems(List.of(consumerSystem, producerSystem))
             .connections(connections)
             .build();

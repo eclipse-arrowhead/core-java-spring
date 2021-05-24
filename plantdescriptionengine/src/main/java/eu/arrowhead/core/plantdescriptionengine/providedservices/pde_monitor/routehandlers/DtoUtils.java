@@ -1,6 +1,7 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.routehandlers;
 
 import eu.arrowhead.core.plantdescriptionengine.MonitorInfo;
+import eu.arrowhead.core.plantdescriptionengine.MonitorInfoTracker;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Connection;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystem;
@@ -28,7 +29,7 @@ public final class DtoUtils {
 
     /**
      * Converts the provided list of {@link eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Connection}
-     * to a list of {@link eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.Connection}
+     * to a list of {@link eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.ConnectionDto}
      * objects.
      *
      * @param connections A list of connections adhering to the mgmt package
@@ -36,7 +37,7 @@ public final class DtoUtils {
      * @return A list of connections adhering to the monitor package format.
      */
     private static List<ConnectionDto> mgmtToMonitor(final List<? extends Connection> connections) {
-        final List<ConnectionDto> result = new ArrayList<>();
+        final List<ConnectionDto> result = new ArrayList<>(connections.size());
 
         for (final Connection connection : connections) {
             final SystemPortDto consumerPort = new SystemPortDto.Builder()
@@ -52,6 +53,7 @@ public final class DtoUtils {
                 .consumer(consumerPort)
                 .producer(producerPort)
                 .build();
+
             result.add(connectionCopy);
         }
         return result;
@@ -60,17 +62,17 @@ public final class DtoUtils {
     /**
      * Returns a Plant Description Entry System supplemented with monitor info.
      *
-     * @param system      The source system which will be supplemented with
-     *                    monitor info.
-     * @param monitorInfo Object used for keeping track of inventory data of
-     *                    monitorable systems.
+     * @param system             The source system which will be supplemented
+     *                           with monitor info.
+     * @param monitorInfoTracker Object used for keeping track of monitor info
+     *                           of Arrowhead systems.
      * @return A Plant Description Entry System with all the information
      * contained in the {@code system} argument, supplemented with any relevant
-     * info in the {@code monitorInfo} argument.
+     * monitor info.
      */
-    private static SystemEntryDto extend(final PdeSystem system, final MonitorInfo monitorInfo) {
+    private static SystemEntryDto extend(final PdeSystem system, final MonitorInfoTracker monitorInfoTracker) {
 
-        final List<MonitorInfo.Bundle> systemInfoList = monitorInfo.getSystemInfo(
+        final List<MonitorInfo> monitorInfoList = monitorInfoTracker.getSystemInfo(
             system.systemName().orElse(null),
             system.metadata()
         );
@@ -95,7 +97,7 @@ public final class DtoUtils {
             // provider:
             if (!isConsumer) {
 
-                for (final MonitorInfo.Bundle info : systemInfoList) {
+                for (final MonitorInfo info : monitorInfoList) {
 
                     final boolean matchesServiceDefinition = info.serviceDefinition.equals(port.serviceDefinition());
                     final boolean matchesPort = Metadata.isSubset(port.metadata(), info.serviceMetadata);
@@ -105,7 +107,7 @@ public final class DtoUtils {
                         portBuilder.systemData(info.systemData);
                         portBuilder.inventoryId(info.inventoryId);
 
-                        systemInfoList.remove(info);
+                        monitorInfoList.remove(info);
                         break;
                     }
                 }
@@ -122,9 +124,9 @@ public final class DtoUtils {
 
         // If there is any monitor info left, it may belong to the system
         // itself, not a specific port.
-        for (final MonitorInfo.Bundle infoBundle : systemInfoList) {
-            if (infoBundle.matchesSystemMetadata(system.metadata())) {
-                systemBuilder.inventoryId(infoBundle.inventoryId).systemData(infoBundle.systemData);
+        for (final MonitorInfo info : monitorInfoList) {
+            if (info.matchesSystemMetadata(system.metadata())) {
+                systemBuilder.inventoryId(info.inventoryId).systemData(info.systemData);
                 break;
             } else {
                 logger.warn("Unmatched data in MonitorInfo");
@@ -139,23 +141,24 @@ public final class DtoUtils {
      * This function is the glue between the mgmt and monitor packages, letting
      * data flow from one one to the other.
      *
-     * @param entry       The source entry on which the new one will be based.
-     * @param monitorInfo Object used for keeping track of inventory data of
-     *                    monitorable systems.
-     * @param pdTracker   An object that keeps track of Plant Description
-     *                    Entries.
+     * @param entry              The source entry on which the new one will be
+     *                           based.
+     * @param monitorInfoTracker Object used for keeping track of monitor info
+     *                           of Arrowhead systems.
+     * @param pdTracker          An object that keeps track of Plant Description
+     *                           Entries.
      * @return A PlantDescriptionEntry with all the information contained in the
      * {@code entry} argument, supplemented with any relevant info in the {@code
      * monitorInfo} argument.
      */
     public static MonitorPlantDescriptionEntryDto extend(
         final PlantDescriptionEntry entry,
-        final MonitorInfo monitorInfo,
+        final MonitorInfoTracker monitorInfoTracker,
         final PlantDescriptionTracker pdTracker
     ) {
 
         Objects.requireNonNull(entry, "Expected entry.");
-        Objects.requireNonNull(monitorInfo, "Expected MonitorInfo.");
+        Objects.requireNonNull(monitorInfoTracker, "Expected MonitorInfoTracker.");
 
         // Get all systems and connections, also ones that are included from
         // other Plant Descriptions:
@@ -165,7 +168,7 @@ public final class DtoUtils {
         final List<SystemEntryDto> systems = new ArrayList<>();
 
         for (final PdeSystem system : originalSystems) {
-            systems.add(extend(system, monitorInfo));
+            systems.add(extend(system, monitorInfoTracker));
         }
 
         final List<ConnectionDto> connections = mgmtToMonitor(originalConnections);

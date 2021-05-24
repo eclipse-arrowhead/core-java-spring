@@ -45,14 +45,16 @@ public final class Metadata {
         // Use a tree map to get the keys in sorted order.
         final Map<String, String> sorted = new TreeMap<>(metadata);
 
+        stringBuilder.append("{");
         for (final Map.Entry<String, String> entry : sorted.entrySet()) {
-            if (stringBuilder.length() > 0) {
-                stringBuilder.append(",");
+            if (stringBuilder.length() > 1) {
+                stringBuilder.append(", ");
             }
             stringBuilder.append(entry.getKey());
             stringBuilder.append("=");
             stringBuilder.append(entry.getValue());
         }
+        stringBuilder.append("}");
         return stringBuilder.toString();
     }
 

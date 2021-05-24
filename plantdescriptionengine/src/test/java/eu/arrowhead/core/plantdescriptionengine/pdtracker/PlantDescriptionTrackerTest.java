@@ -17,7 +17,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,6 +56,24 @@ public class PlantDescriptionTrackerTest {
         final List<PlantDescriptionEntryDto> storedEntries = newPdTracker.getEntries();
 
         assertEquals(3, storedEntries.size());
+    }
+
+    @Test
+    public void shouldWriteEntriesToBackingStore() throws PdStoreException {
+        final List<Integer> entryIds = List.of(23, 42, 888);
+
+        for (final int id : entryIds) {
+            pdTracker.put(TestUtils.createEntry(id));
+        }
+
+        final List<PlantDescriptionEntryDto> entries = store.readEntries();
+
+        for (final int id : entryIds) {
+            final var entry = entries.stream().filter(e -> e.id() == id).findAny();
+            assertTrue(entry.isPresent());
+        }
+
+
     }
 
     @Test
@@ -120,9 +137,6 @@ public class PlantDescriptionTrackerTest {
     @Test
     public void shouldTrackActiveEntry() throws PdStoreException {
         final PlantDescriptionEntryDto.Builder builder = new PlantDescriptionEntryDto.Builder()
-            .include(new ArrayList<>())
-            .systems(new ArrayList<>())
-            .connections(new ArrayList<>())
             .createdAt(now)
             .updatedAt(now);
         final PlantDescriptionEntryDto activeEntry = builder
@@ -168,20 +182,6 @@ public class PlantDescriptionTrackerTest {
         pdTracker.put(entryB);
         assertFalse(pdTracker.get(idA).active());
         assertTrue(pdTracker.get(idB).active());
-
-        // Check that the change is reflected in the backing store as well:
-        final List<PlantDescriptionEntryDto> entries = store.readEntries();
-        PlantDescriptionEntryDto storedEntryA = entries.stream()
-            .filter(entry -> entry.id() == idA)
-            .findAny()
-            .orElse(null);
-        PlantDescriptionEntryDto storedEntryB = entries.stream()
-            .filter(entry -> entry.id() == idB)
-            .findAny()
-            .orElse(null);
-
-        assertFalse(storedEntryA.active());
-        assertTrue(storedEntryB.active());
     }
 
     @Test
@@ -479,23 +479,24 @@ public class PlantDescriptionTrackerTest {
         // First entry
         final int entryIdA = 0;
         final String consumerIdA = "Cons-A";
-        final String consumerNameA = "Consumer A";
-        final String producerNameA = "Producer A";
+        final String consumerNameA = "consa";
+        final String producerNameA = "proda";
         final String consumerPortA = "Cons-Port-A";
         final String producerPortA = "Prod-Port-A";
         final String producerIdA = "Prod-A";
+        final String serviceDefinition = "monitorable";
 
         final List<PortDto> consumerPortsA = List.of(new PortDto.Builder()
             .portName(consumerPortA)
             .serviceInterface("HTTP-SECURE-JSON")
-            .serviceDefinition("Monitorable")
+            .serviceDefinition(serviceDefinition)
             .consumer(true)
             .build());
 
         final List<PortDto> producerPortsA = List.of(new PortDto.Builder()
             .portName(producerPortA)
             .serviceInterface("HTTP-SECURE-JSON")
-            .serviceDefinition("Monitorable")
+            .serviceDefinition(serviceDefinition)
             .consumer(false)
             .build());
 
@@ -534,13 +535,13 @@ public class PlantDescriptionTrackerTest {
         // Second entry
         final int entryIdB = 1;
         final String consumerIdB = "Cons-B";
-        final String consumerNameB = "Consumer B";
+        final String consumerNameB = "consb";
         final String consumerPortB = "Cons-Port-B";
 
         final List<PortDto> consumerPortsB = List.of(new PortDto.Builder()
             .portName(consumerPortB)
             .serviceInterface("HTTP-SECURE-JSON")
-            .serviceDefinition("Monitorable")
+            .serviceDefinition("monitorable")
             .consumer(true)
             .build());
 
@@ -597,8 +598,8 @@ public class PlantDescriptionTrackerTest {
         // First entry
         final int entryIdA = 0;
         final String consumerIdA = "Cons-A";
-        final String consumerNameA = "Consumer A";
-        final String producerNameA = "Producer A";
+        final String consumerNameA = "consa";
+        final String producerNameA = "proda";
         final String consumerPortA = "Cons-Port-A";
         final String producerPortA = "Prod-Port-A";
         final String producerIdA = "Prod-A";
@@ -642,13 +643,13 @@ public class PlantDescriptionTrackerTest {
         // Second entry
         final int entryIdB = 1;
         final String consumerIdB = "Cons-B";
-        final String consumerNameB = "Consumer B";
+        final String consumerNameB = "consb";
         final String consumerPortB = "Cons-Port-B";
 
         final List<PortDto> consumerPortsB = List.of(new PortDto.Builder()
             .portName(consumerPortB)
             .serviceInterface("HTTP-SECURE-JSON")
-            .serviceDefinition("Service-ABC")
+            .serviceDefinition("temperature")
             .consumer(true)
             .build());
 

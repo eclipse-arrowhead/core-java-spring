@@ -1,6 +1,6 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.routehandlers;
 
-import eu.arrowhead.core.plantdescriptionengine.MonitorInfo;
+import eu.arrowhead.core.plantdescriptionengine.MonitorInfoTracker;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.dto.ErrorMessage;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.dto.ErrorMessageDto;
@@ -21,21 +21,21 @@ import java.util.Objects;
 public class GetPlantDescription implements HttpRouteHandler {
 
     private final PlantDescriptionTracker pdTracker;
-    private final MonitorInfo monitorInfo;
+    private final MonitorInfoTracker monitorInfoTracker;
 
     /**
      * Class constructor
      *
-     * @param monitorInfo Object that stores information on monitorable
-     *                    systems.
-     * @param pdTracker   Object that stores information on Plant Description
-     *                    entries.
+     * @param monitorInfoTracker Object that stores information on monitorable
+     *                           systems.
+     * @param pdTracker          Object that stores information on Plant
+     *                           Description entries.
      */
-    public GetPlantDescription(final MonitorInfo monitorInfo, final PlantDescriptionTracker pdTracker) {
-        Objects.requireNonNull(monitorInfo, "Expected MonitorInfo");
+    public GetPlantDescription(final MonitorInfoTracker monitorInfoTracker, final PlantDescriptionTracker pdTracker) {
+        Objects.requireNonNull(monitorInfoTracker, "Expected MonitorInfo");
         Objects.requireNonNull(pdTracker, "Expected Plant Description Tracker");
 
-        this.monitorInfo = monitorInfo;
+        this.monitorInfoTracker = monitorInfoTracker;
         this.pdTracker = pdTracker;
     }
 
@@ -76,7 +76,7 @@ public class GetPlantDescription implements HttpRouteHandler {
             return Future.success(response);
         }
 
-        final MonitorPlantDescriptionEntryDto extendedEntry = DtoUtils.extend(entry, monitorInfo, pdTracker);
+        final MonitorPlantDescriptionEntryDto extendedEntry = DtoUtils.extend(entry, monitorInfoTracker, pdTracker);
         response.status
             (HttpStatus.OK)
             .body(extendedEntry, CodecType.JSON);

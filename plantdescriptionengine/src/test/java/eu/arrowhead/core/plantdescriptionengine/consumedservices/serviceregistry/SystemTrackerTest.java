@@ -4,6 +4,7 @@ import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.SrSystemDto;
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.SrSystemListDto;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockClientResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import se.arkalix.net.http.HttpStatus;
@@ -22,30 +23,28 @@ import static org.mockito.Mockito.when;
 
 public class SystemTrackerTest {
 
-    @Test
-    public void shouldThrowWhenNotInitialized() {
+    private HttpClient httpClient;
+    private SystemTracker systemTracker;
 
-        final HttpClient httpClient = new HttpClient.Builder().insecure().build();
-        final SystemTracker systemTracker = new SystemTracker(
+    @BeforeEach
+    public void initEach() {
+        httpClient = Mockito.mock(HttpClient.class);
+        systemTracker = new SystemTracker(
             httpClient,
             new InetSocketAddress("0.0.0.0", 5000),
             5000
         );
+    }
 
-        final Exception exception = assertThrows(RuntimeException.class, () -> systemTracker.getSystem("System A"));
+    @Test
+    public void shouldThrowWhenNotInitialized() {
+        final Exception exception = assertThrows(RuntimeException.class, () -> systemTracker.getSystem("abc"));
         assertEquals("SystemTracker has not been initialized.", exception.getMessage());
     }
 
     @Test
     public void shouldFindSystemByName() {
-
-        final HttpClient httpClient = Mockito.mock(HttpClient.class);
-        final SystemTracker systemTracker = new SystemTracker(
-            httpClient,
-            new InetSocketAddress("0.0.0.0", 5000),
-            5000
-        );
-        final String systemName = "Sys-A";
+        final String systemName = "abc";
         final int systemId = 92;
         // Create some fake data for the HttpClient to respond with:
         final MockClientResponse response = new MockClientResponse().status(HttpStatus.OK)
@@ -71,13 +70,6 @@ public class SystemTrackerTest {
 
     @Test
     public void shouldFindSystemsByMetadata() {
-
-        final HttpClient httpClient = Mockito.mock(HttpClient.class);
-        final SystemTracker systemTracker = new SystemTracker(
-            httpClient,
-            new InetSocketAddress("0.0.0.0", 5000),
-            5000
-        );
         final String systemName = "Sys-A";
         final int systemId1 = 92;
         final int systemId2 = 93;
@@ -116,9 +108,6 @@ public class SystemTrackerTest {
                 assertEquals(systemId1, retrievedSystem1.id());
                 assertEquals(systemId2, retrievedSystem2.id());
             })
-            .onFailure(e -> {
-                e.printStackTrace();
-                fail();
-            });
+            .onFailure(e -> fail());
     }
 }

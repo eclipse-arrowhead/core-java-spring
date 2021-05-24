@@ -1,5 +1,6 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitorable;
 
+import eu.arrowhead.core.plantdescriptionengine.ApiConstants;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.CodecExceptionCatcher;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitorable.routehandlers.GetInventoryId;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitorable.routehandlers.GetPing;
@@ -14,11 +15,6 @@ import se.arkalix.security.access.AccessPolicy;
  */
 public class PdeMonitorableService {
 
-    private static final String SERVICE_NAME = "monitorable";
-    private static final String BASE_PATH = "/pde/monitorable";
-    private static final String INVENTORY_ID_PATH = "/inventoryid";
-    private static final String PING_PATH = "/ping";
-    private static final String SYSTEM_DATA_PATH = "/systemdata";
     final boolean secure;
 
     /**
@@ -35,12 +31,12 @@ public class PdeMonitorableService {
      */
     public HttpService getService() {
         return new HttpService()
-            .name(SERVICE_NAME)
+            .name(ApiConstants.MONITORABLE_SERVICE_NAME)
             .codecs(CodecType.JSON)
-            .basePath(BASE_PATH)
-            .get(INVENTORY_ID_PATH, new GetInventoryId())
-            .get(SYSTEM_DATA_PATH, new GetSystemData())
-            .get(PING_PATH, new GetPing())
+            .basePath(ApiConstants.MONITORABLE_BASE_PATH)
+            .get(ApiConstants.MONITORABLE_ID_PATH, new GetInventoryId())
+            .get(ApiConstants.MONITORABLE_SYSTEM_DATA_PATH, new GetSystemData())
+            .get(ApiConstants.MONITORABLE_PING_PATH, new GetPing())
             .catcher(CodecException.class, new CodecExceptionCatcher())
             .accessPolicy(secure ? AccessPolicy.cloud() : AccessPolicy.unrestricted());
     }

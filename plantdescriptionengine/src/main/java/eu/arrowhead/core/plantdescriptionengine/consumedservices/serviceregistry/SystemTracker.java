@@ -1,5 +1,6 @@
 package eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry;
 
+import eu.arrowhead.core.plantdescriptionengine.ApiConstants;
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.SrSystem;
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.SrSystemListDto;
 import eu.arrowhead.core.plantdescriptionengine.utils.Metadata;
@@ -19,6 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
 
 /**
  * Object used to keep track of registered Arrowhead systems.
@@ -28,7 +30,6 @@ public class SystemTracker {
     // List of instances that need to be informed when systems are added or
     // removed from the service registry.
     private final List<SystemUpdateListener> listeners = new ArrayList<>();
-    private final String SYSTEMS_URI = "/serviceregistry/pull-systems";
     private final HttpClient httpClient;
     private final InetSocketAddress serviceRegistryAddress;
     private final int pollInterval;
@@ -71,8 +72,8 @@ public class SystemTracker {
             .send(serviceRegistryAddress,
                 new HttpClientRequest()
                     .method(HttpMethod.GET)
-                    .uri(SYSTEMS_URI)
-                    .header("accept", "application/json"))
+                    .uri(ApiConstants.SERVICE_REGISTRY_SYSTEMS_PATH)
+                    .header(ApiConstants.HEADER_ACCEPT, ApiConstants.APPLICATION_JSON))
             .flatMap(response -> response.bodyToIfSuccess(SrSystemListDto::decodeJson))
             .flatMap(systemList -> {
                 List<SrSystem> oldSystems = Collections.unmodifiableList(systems);
@@ -138,7 +139,6 @@ public class SystemTracker {
      * @param metadata   Metadata describing a system.
      * @return The desired system, if it is present in the local cache.
      */
-
     public SrSystem getSystem(final String systemName, final Map<String, String> metadata) {
         Objects.requireNonNull(systemName, "Expected system name.");
         Objects.requireNonNull(metadata, "Expected metadata.");
@@ -147,14 +147,60 @@ public class SystemTracker {
             throw new IllegalStateException("SystemTracker has not been initialized.");
         }
 
-        // TODO: Throw an Exception if more than one match is found?
-        for (final SrSystem system : systems) {
-            if (systemName.equals(system.systemName()) && Metadata.isSubset(metadata, system.metadata())) {
-                return system;
-            }
+        final List<SrSystem> matchingSystems = systems.stream()
+            .filter(system -> systemName.equals(system.systemName()) && Metadata.isSubset(metadata, system.metadata()))
+            .collect(Collectors.toList());
+
+        if (matchingSystems.size() > 1) {
+            throw new IllegalArgumentException("More than one system matches the given arguments.");
+        } else if (matchingSystems.size() == 0) {
+            return null;
         }
 
-        return null;
+        return matchingSystems.get(0);
+    }
+
+    /**
+     * Returns a {@code Future} containing the desired system.
+     * If not found, the request is repeated a number of times, with a delay
+     * between each attempt. If no match is found after the last attempt, the
+     * resulting {@code Future} fails.
+     * Note that the returned data will be stale if the system in question has
+     * changed state since the last call to {@link #fetchSystems()}.
+     *
+     * @param systemName Name of a system.
+     * @param metadata   Metadata describing a system.
+     * @return A {@code Future} containing the desired system, if it is present in the local cache.
+     */
+    public Future<SrSystem> getSystemWithRetries(final String systemName, final Map<String, String> metadata) {
+        Objects.requireNonNull(systemName, "Expected system name.");
+        Objects.requireNonNull(metadata, "Expected metadata.");
+
+        final String retryMessage = "Could not find system '" + systemName + "'" +
+            ((metadata.isEmpty()) ? "" : " with metadata " + metadata) +
+            " in service registry, retrying in "
+            + ApiConstants.CORE_SYSTEM_RETRY_DELAY / 1000 +
+            " seconds.";
+
+        final RetryFuture retrier = new RetryFuture(
+            ApiConstants.CORE_SYSTEM_RETRY_DELAY,
+            ApiConstants.CORE_SYSTEM_MAX_RETRIES,
+            retryMessage);
+
+        return retrier.run(() -> {
+            final SrSystem system = getSystem(systemName, metadata);
+            if (system == null) {
+                return Future.failure(new Throwable("Could not find system " +
+                    systemName + " with metadata " + metadata +
+                    " in the service registry."));
+            } else {
+                return Future.success(system);
+            }
+        });
+    }
+
+    public Future<SrSystem> getSystemWithRetries(final String systemName) {
+        return getSystemWithRetries(systemName, Collections.emptyMap());
     }
 
     /**
@@ -204,9 +250,7 @@ public class SystemTracker {
             @Override
             public void run() {
                 fetchSystems()
-                    .onFailure(error -> logger.error(
-                        "Failed to retrieve registered systems",
-                        error));
+                    .onFailure(error -> logger.error("Failed to retrieve registered systems", error));
             }
         }, pollInterval, pollInterval);
     }

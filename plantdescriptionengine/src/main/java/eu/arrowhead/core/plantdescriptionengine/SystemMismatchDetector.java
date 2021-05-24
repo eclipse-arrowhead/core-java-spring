@@ -111,7 +111,7 @@ public class SystemMismatchDetector implements PlantDescriptionUpdateListener, S
 
         if (entrySystem.systemName().isPresent()) {
             final String entryName = entrySystem.systemName().get();
-            return systemNamesEqual(entryName, registeredSystem.systemName());
+            return entryName.equals(registeredSystem.systemName());
         }
 
         return true;
@@ -126,7 +126,7 @@ public class SystemMismatchDetector implements PlantDescriptionUpdateListener, S
 
         final String alarmSystemName = alarm.getSystemName();
         final Map<String, String> alarmMetadata = alarm.getMetadata();
-        final boolean namesMatch = alarmSystemName != null && systemNamesEqual(alarmSystemName, system.systemName());
+        final boolean namesMatch = alarmSystemName != null && alarmSystemName.equals(system.systemName());
         final boolean metadataMatches = Metadata.isSubset(alarmMetadata, system.metadata());
 
         if (alarmSystemName != null && !namesMatch) {
@@ -149,7 +149,7 @@ public class SystemMismatchDetector implements PlantDescriptionUpdateListener, S
 
         String alarmSystemName = alarm.getSystemName();
         if (alarmSystemName != null && system.systemName().isPresent()) {
-            if (!systemNamesEqual(alarmSystemName, system.systemName().get())) {
+            if (!alarmSystemName.equals(system.systemName().get())) {
                 return false;
             }
         }
@@ -270,11 +270,4 @@ public class SystemMismatchDetector implements PlantDescriptionUpdateListener, S
             }
         }
     }
-
-    private boolean systemNamesEqual(final String nameA, final String nameB) {
-        Objects.requireNonNull(nameA, "Expected a system name as first argument");
-        Objects.requireNonNull(nameB, "Expected a system name as second argument");
-        return nameA.trim().equalsIgnoreCase(nameB.trim());
-    }
-
 }

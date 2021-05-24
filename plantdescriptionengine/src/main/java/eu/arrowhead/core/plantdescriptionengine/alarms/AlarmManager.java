@@ -14,6 +14,8 @@ public class AlarmManager {
     private final List<Alarm> activeAlarms = new ArrayList<>();
     private final List<Alarm> clearedAlarms = new ArrayList<>();
 
+    private final Object lock = new Object();
+
     /**
      * @param id The ID of a PDE Alarm.
      * @return Data describing the alarm with the given ID if it exists, null
@@ -98,23 +100,28 @@ public class AlarmManager {
     /**
      * Raises an alarm with the given info, unless an alarm with the exact same
      * parameters is already active.
+     *
+     * @return Newly created or previously existing alarm that matches the given
+     * parameters.
      */
-    private void raiseAlarm(
+    private Alarm raiseAlarm(
         final String systemId,
         final String systemName,
         final Map<String, String> metadata,
         final AlarmCause cause
     ) {
-        synchronized (this) {
+        synchronized (lock) {
             final Map<String, String> nonNullMetadata = metadata == null ? Collections.emptyMap() : metadata;
 
             // Check if this alarm has already been raised:
             for (final Alarm alarm : activeAlarms) {
                 if (alarm.matches(systemId, systemName, nonNullMetadata, cause)) {
-                    return;
+                    return alarm;
                 }
             }
-            activeAlarms.add(new Alarm(systemId, systemName, nonNullMetadata, cause));
+            final Alarm newAlarm = new Alarm(systemId, systemName, nonNullMetadata, cause);
+            activeAlarms.add(newAlarm);
+            return newAlarm;
         }
     }
 
@@ -181,41 +188,13 @@ public class AlarmManager {
      * @param systemName Name of a Plant Description system, or null.
      * @param metadata   Metadata of a Plant Description system, or null.
      */
-    public void raiseSystemNotMonitorable(
+    public Alarm raiseSystemNotMonitorable(
         final String systemId,
         final String systemName,
         final Map<String, String> metadata
     ) {
         Objects.requireNonNull(systemId, "Expected system ID");
-        raiseAlarm(systemId, systemName, metadata, AlarmCause.NOT_MONITORABLE);
-    }
-
-    /**
-     * Clear any alarms indicating that the system matching the given arguments
-     * does not provide a 'Monitorable' service.
-     *
-     * @param systemId   ID of a Plant Description system.
-     * @param systemName Name of a Plant Description system, or null.
-     * @param metadata   Metadata of a Plant Description system, or null.
-     */
-    public void clearSystemNotMonitorable(
-        final String systemId,
-        final String systemName,
-        final Map<String, String> metadata
-    ) {
-        Objects.requireNonNull(systemId, "Expected system ID");
-        final List<Alarm> cleared = activeAlarms.stream()
-            .filter(alarm ->
-                alarm.getCause() == AlarmCause.NOT_MONITORABLE &&
-                    Objects.equals(systemId, alarm.getSystemId()) &&
-                    Objects.equals(systemName, alarm.getSystemName()) &&
-                    Objects.equals(metadata, alarm.getMetadata())
-            )
-            .collect(Collectors.toList());
-
-        for (final Alarm alarm : cleared) {
-            clearAlarm(alarm);
-        }
+        return raiseAlarm(systemId, systemName, metadata, AlarmCause.NOT_MONITORABLE);
     }
 
     /**

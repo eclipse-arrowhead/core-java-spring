@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -73,6 +74,18 @@ public class MetadataTest {
 
         assertFalse(Metadata.isSubset(b, a));
         assertFalse(Metadata.isSubset(c, a));
+    }
+
+    @Test
+    public void shouldCreateStringRepresentation() {
+        Map<String, String> metadata = Map.of(
+            "name", "alice",
+            "age", "32",
+            "height", "169"
+        );
+
+        final String expected = "{age=32, height=169, name=alice}";
+        assertEquals(expected, Metadata.toString(metadata));
     }
 
 }

@@ -67,6 +67,10 @@ public class Alarm {
             Objects.equals(nonNullMetadata, this.metadata);
     }
 
+    public boolean matches(final Alarm other) {
+        return matches(other.systemId, other.systemName, other.metadata, other.cause);
+    }
+
     /**
      * @return A PdeAlarm DTO based on this alarm data.
      */

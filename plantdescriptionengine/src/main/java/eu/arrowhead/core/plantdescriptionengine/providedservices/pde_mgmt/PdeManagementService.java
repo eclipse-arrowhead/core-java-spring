@@ -1,5 +1,6 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt;
 
+import eu.arrowhead.core.plantdescriptionengine.ApiConstants;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.CodecExceptionCatcher;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.routehandlers.AddPlantDescription;
@@ -20,15 +21,6 @@ import java.util.Objects;
  * Description Engine (PDE) core system.
  */
 public class PdeManagementService {
-
-    private static final String SERVICE_NAME = "pde-mgmt";
-    private static final String BASE_PATH = "/pde/mgmt";
-    private static final String GET_ALL_PLANT_DESCRIPTIONS_PATH = "/pd";
-    private static final String GET_PLANT_DESCRIPTION_PATH = "/pd/#id";
-    private static final String ADD_PLANT_DESCRIPTION_PATH = "/pd";
-    private static final String DELETE_PLANT_DESCRIPTION_PATH = "/pd/#id";
-    private static final String REPLACE_PLANT_DESCRIPTION_PATH = "/pd/#id";
-    private static final String UPDATE_PLANT_DESCRIPTION_PATH = "/pd/#id";
 
     private final PlantDescriptionTracker pdTracker;
     private final boolean secure;
@@ -55,15 +47,15 @@ public class PdeManagementService {
      */
     public HttpService getService() {
         return new HttpService()
-            .name(SERVICE_NAME)
+            .name(ApiConstants.MGMT_SERVICE_NAME)
             .codecs(CodecType.JSON)
-            .basePath(BASE_PATH)
-            .get(GET_PLANT_DESCRIPTION_PATH, new GetPlantDescription(pdTracker))
-            .get(GET_ALL_PLANT_DESCRIPTIONS_PATH, new GetAllPlantDescriptions(pdTracker))
-            .post(ADD_PLANT_DESCRIPTION_PATH, new AddPlantDescription(pdTracker))
-            .delete(DELETE_PLANT_DESCRIPTION_PATH, new DeletePlantDescription(pdTracker))
-            .put(REPLACE_PLANT_DESCRIPTION_PATH, new ReplacePlantDescription(pdTracker))
-            .patch(UPDATE_PLANT_DESCRIPTION_PATH, new UpdatePlantDescription(pdTracker))
+            .basePath(ApiConstants.MGMT_BASE_PATH)
+            .get(ApiConstants.MGMT_PD_PATH, new GetPlantDescription(pdTracker))
+            .get(ApiConstants.MGMT_PDS_PATH, new GetAllPlantDescriptions(pdTracker))
+            .post(ApiConstants.MGMT_PDS_PATH, new AddPlantDescription(pdTracker))
+            .delete(ApiConstants.MGMT_PD_PATH, new DeletePlantDescription(pdTracker))
+            .put(ApiConstants.MGMT_PD_PATH, new ReplacePlantDescription(pdTracker))
+            .patch(ApiConstants.MGMT_PD_PATH, new UpdatePlantDescription(pdTracker))
             .catcher(CodecException.class, new CodecExceptionCatcher())
             .accessPolicy(secure ? AccessPolicy.cloud() : AccessPolicy.unrestricted());
     }

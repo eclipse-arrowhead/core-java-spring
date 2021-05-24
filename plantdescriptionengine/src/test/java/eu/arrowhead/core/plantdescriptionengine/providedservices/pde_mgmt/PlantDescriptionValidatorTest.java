@@ -32,23 +32,24 @@ public class PlantDescriptionValidatorTest {
         final int entryIdA = 0;
         final String producerIdA = "Prod-A";
         final String consumerIdA = "Cons-A";
-        final String consumerNameA = "Consumer A";
-        final String producerNameA = "Producer A";
+        final String consumerNameA = "cons";
+        final String producerNameA = "prod";
         final String consumerPortA = "Cons-Port-A";
         final String producerPortA = "Prod-Port-A";
         final String serviceInterface = "HTTP-SECURE-JSON";
+        final String serviceDefinition = "monitorable";
 
         final List<PortDto> consumerPortsA = List.of(new PortDto.Builder()
             .portName(consumerPortA)
             .serviceInterface(serviceInterface)
-            .serviceDefinition("Monitorable")
+            .serviceDefinition(serviceDefinition)
             .consumer(true)
             .build());
 
         final List<PortDto> producerPortsA = List.of(new PortDto.Builder()
             .portName(producerPortA)
             .serviceInterface("HTTP-SECURE-JSON")
-            .serviceDefinition("Monitorable")
+            .serviceDefinition(serviceDefinition)
             .consumer(false)
             .build());
 
@@ -88,13 +89,13 @@ public class PlantDescriptionValidatorTest {
         // Second entry
         final int entryIdB = 1;
         final String consumerIdB = "Cons-B";
-        final String consumerNameB = "Consumer B";
+        final String consumerNameB = "consb";
         final String consumerPortB = "Cons-Port-B";
 
         final List<PortDto> consumerPortsB = List.of(new PortDto.Builder()
             .portName(consumerPortB)
             .serviceInterface(serviceInterface)
-            .serviceDefinition("Monitorable")
+            .serviceDefinition("monitorable")
             .consumer(true)
             .build());
 
@@ -136,23 +137,24 @@ public class PlantDescriptionValidatorTest {
         final int entryId = 123;
         final String producerId = "Prod-A";
         final String consumerId = "Cons-A";
-        final String consumerNameA = "Consumer A";
-        final String producerNameA = "Producer A";
+        final String consumerNameA = "cons";
+        final String producerNameA = "prod";
         final String consumerPort = "Cons-Port-A";
         final String producerPort = "Prod-Port-A";
         final String serviceInterface = "HTTP-SECURE-JSON";
+        final String serviceDefinition = "monitorable";
 
         final List<PortDto> consumerPortsA = List.of(new PortDto.Builder()
             .portName(consumerPort)
             .serviceInterface(serviceInterface)
-            .serviceDefinition("Monitorable")
+            .serviceDefinition(serviceDefinition)
             .consumer(true)
             .build());
 
         final List<PortDto> producerPortsA = List.of(new PortDto.Builder()
             .portName(producerPort)
             .serviceInterface(serviceInterface)
-            .serviceDefinition("Monitorable")
+            .serviceDefinition(serviceDefinition)
             .consumer(false)
             .build());
 
@@ -202,24 +204,25 @@ public class PlantDescriptionValidatorTest {
         final int entryId = 332;
         final String producerId = "Prod-A";
         final String consumerId = "Cons-A";
-        final String consumerNameA = "Consumer A";
-        final String producerNameA = "Producer A";
+        final String consumerNameA = "cons";
+        final String producerNameA = "prod";
         final String consumerPort = "Cons-Port-A";
         final String producerPort = "Prod-Port-A";
         final String serviceInterfaceA = "HTTP-SECURE-JSON";
         final String serviceInterfaceB = "HTTP-INSECURE-JSON";
+        final String serviceDefinition = "monitorable";
 
         final List<PortDto> consumerPortsA = List.of(new PortDto.Builder()
             .portName(consumerPort)
             .serviceInterface(serviceInterfaceA)
-            .serviceDefinition("Monitorable")
+            .serviceDefinition(serviceDefinition)
             .consumer(true)
             .build());
 
         final List<PortDto> producerPortsA = List.of(new PortDto.Builder()
             .portName(producerPort)
             .serviceInterface(serviceInterfaceB)
-            .serviceDefinition("Monitorable")
+            .serviceDefinition(serviceDefinition)
             .consumer(false)
             .build());
 
@@ -271,13 +274,13 @@ public class PlantDescriptionValidatorTest {
         final int entryId = 332;
         final String producerId = "Prod-A";
         final String consumerId = "Cons-A";
-        final String consumerNameA = "Consumer A";
-        final String producerNameA = "Producer A";
+        final String consumerNameA = "cons";
+        final String producerNameA = "prod";
         final String consumerPort = "Cons-Port-A";
         final String producerPort = "Prod-Port-A";
         final String serviceInterface = "HTTP-SECURE-JSON";
-        final String serviceDefinitionA = "Service-A";
-        final String serviceDefinitionB = "Service-B";
+        final String serviceDefinitionA = "temperature";
+        final String serviceDefinitionB = "brightness";
 
         final List<PortDto> consumerPortsA = List.of(new PortDto.Builder()
             .portName(consumerPort)
@@ -358,7 +361,7 @@ public class PlantDescriptionValidatorTest {
 
         final PdeSystemDto consumerSystem = new PdeSystemDto.Builder()
             .systemId(systemId)
-            .systemName("System XYZ")
+            .systemName("xyz")
             .ports(consumerPorts)
             .build();
 
@@ -453,13 +456,13 @@ public class PlantDescriptionValidatorTest {
 
         final PdeSystemDto consumerSystem = new PdeSystemDto.Builder()
             .systemId(consumerId)
-            .systemName("Consumer X")
+            .systemName("cons")
             .ports(consumerPorts)
             .build();
 
         final PdeSystemDto producerSystem = new PdeSystemDto.Builder()
             .systemId(producerId)
-            .systemName("Producer Y")
+            .systemName("prod")
             .ports(producerPorts)
             .build();
 
@@ -496,24 +499,25 @@ public class PlantDescriptionValidatorTest {
         // First entry
         final int entryIdA = 0;
         final String consumerIdA = "Cons-A";
-        final String consumerNameA = "Consumer A";
-        final String producerNameA = "Producer A";
+        final String consumerNameA = "consa";
+        final String producerNameA = "proda";
         final String consumerPortA = "Cons-Port-A";
         final String producerPortA = "Prod-Port-A";
         final String producerIdA = "Prod-A";
         final String serviceInterface = "HTTP-SECURE-JSON";
+        final String serviceDefinition = "monitorable";
 
         final List<PortDto> consumerPortsA = List.of(new PortDto.Builder()
             .portName(consumerPortA)
             .serviceInterface(serviceInterface)
-            .serviceDefinition("Monitorable")
+            .serviceDefinition(serviceDefinition)
             .consumer(true)
             .build());
 
         final List<PortDto> producerPortsA = List.of(new PortDto.Builder()
             .portName(producerPortA)
             .serviceInterface(serviceInterface)
-            .serviceDefinition("Monitorable")
+            .serviceDefinition(serviceDefinition)
             .consumer(false)
             .build());
 
@@ -554,13 +558,13 @@ public class PlantDescriptionValidatorTest {
         // Second entry
         final int entryIdB = 1;
         final String consumerIdB = "Cons-B";
-        final String consumerNameB = "Consumer B";
+        final String consumerNameB = "consb";
         final String consumerPortB = "Cons-Port-B";
 
         final List<PortDto> consumerPortsB = List.of(new PortDto.Builder()
             .portName(consumerPortB)
             .serviceInterface(serviceInterface)
-            .serviceDefinition("Monitorable")
+            .serviceDefinition("monitorable")
             .consumer(true)
             .build());
 
@@ -625,13 +629,13 @@ public class PlantDescriptionValidatorTest {
 
         final PdeSystemDto consumerSystem = new PdeSystemDto.Builder()
             .systemId(consumerId)
-            .systemName("Consumer A")
+            .systemName("cons")
             .ports(consumerPorts)
             .build();
 
         final PdeSystemDto producerSystem = new PdeSystemDto.Builder()
             .systemId(producerId)
-            .systemName("Consumer B")
+            .systemName("consb")
             .ports(producerPorts)
             .build();
 
@@ -690,13 +694,13 @@ public class PlantDescriptionValidatorTest {
 
         final PdeSystemDto consumerSystem = new PdeSystemDto.Builder()
             .systemId(consumerId)
-            .systemName("Consumer I")
+            .systemName("cons")
             .ports(consumerPorts)
             .build();
 
         final PdeSystemDto producerSystem = new PdeSystemDto.Builder()
             .systemId(producerId)
-            .systemName("Producer J")
+            .systemName("prod")
             .ports(producerPorts)
             .build();
 
@@ -764,13 +768,13 @@ public class PlantDescriptionValidatorTest {
 
         final PdeSystemDto consumerSystem = new PdeSystemDto.Builder()
             .systemId(consumerId)
-            .systemName("Consumer A")
+            .systemName("cons")
             .ports(consumerPorts)
             .build();
 
         final PdeSystemDto producerSystem = new PdeSystemDto.Builder()
             .systemId(producerId)
-            .systemName("Producer B")
+            .systemName("prod")
             .ports(producerPorts)
             .build();
 
@@ -825,7 +829,7 @@ public class PlantDescriptionValidatorTest {
 
         final PdeSystemDto producerSystem = new PdeSystemDto.Builder()
             .systemId(systemId)
-            .systemName("Producer Y")
+            .systemName("prod")
             .ports(ports)
             .build();
 
@@ -990,7 +994,7 @@ public class PlantDescriptionValidatorTest {
             .systems(List.of(
                 new PdeSystemDto.Builder()
                     .systemId("Unknown")
-                    .systemName("System XYZ")
+                    .systemName("xyz")
                     .build()
             ))
             .build();
@@ -1102,19 +1106,20 @@ public class PlantDescriptionValidatorTest {
     public void shouldNotAcceptConsumerMetadata() {
         final String portNameB = "Port-B";
         final String serviceInterface = "HTTP-SECURE-JSON";
+        final String serviceDefinition = "monitorable";
 
         final List<PortDto> ports = List.of(
             new PortDto.Builder()
                 .portName("PortA")
                 .serviceInterface(serviceInterface)
-                .serviceDefinition("Monitorable")
+                .serviceDefinition(serviceDefinition)
                 .consumer(true)
                 .metadata(Map.of()) // An empty metadata object is okay.
                 .build(),
             new PortDto.Builder()
                 .portName(portNameB)
                 .serviceInterface(serviceInterface)
-                .serviceDefinition("Monitorable")
+                .serviceDefinition(serviceDefinition)
                 .consumer(true)
                 .metadata(Map.of("x", "y")) // Not okay on a consumer.
                 .build()

@@ -38,6 +38,8 @@ public class PlantDescriptionTracker {
     // Integer for storing the next plant description entry ID to be used:
     private final AtomicInteger nextId = new AtomicInteger();
 
+    private final Object lock = new Object();
+
     /**
      * Class constructor.
      *
@@ -88,7 +90,9 @@ public class PlantDescriptionTracker {
         final PlantDescriptionEntry oldEntry;
         final PlantDescriptionEntryDto deactivatedEntry;
 
-        synchronized (this) {
+        // TODO: This synchronization is not enough: Inconsistencies can appear
+        // when the update listeners are running.
+        synchronized (lock) {
 
             backingStore.write(entry);
 

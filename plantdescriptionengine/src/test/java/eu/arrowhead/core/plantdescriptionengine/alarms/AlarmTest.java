@@ -20,10 +20,14 @@ public class AlarmTest {
         final Alarm alarmFromNamedSystem = new Alarm(null, systemName, metadata, AlarmCause.SYSTEM_NOT_REGISTERED);
         final Alarm alarmFromUnnamedSystem = new Alarm(systemId, null, metadata, AlarmCause.SYSTEM_NOT_IN_DESCRIPTION);
 
-        assertEquals("System named '" + systemName + "' cannot be found in the Service Registry.",
-            alarmFromNamedSystem.getDescription());
-        assertEquals("System with ID '" + systemId + "' is not present in the active Plant Description.",
-            alarmFromUnnamedSystem.getDescription());
+        assertEquals(
+            "System named '" + systemName + "' cannot be found in the Service Registry.",
+            alarmFromNamedSystem.getDescription()
+        );
+        assertEquals(
+            "System with ID '" + systemId + "' is not present in the active Plant Description.",
+            alarmFromUnnamedSystem.getDescription()
+        );
     }
 
     @Test

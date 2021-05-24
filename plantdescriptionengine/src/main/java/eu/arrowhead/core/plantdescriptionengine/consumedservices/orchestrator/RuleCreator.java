@@ -1,5 +1,6 @@
 package eu.arrowhead.core.plantdescriptionengine.consumedservices.orchestrator;
 
+import eu.arrowhead.core.plantdescriptionengine.ApiConstants;
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.orchestrator.dto.RuleSystemDto;
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.orchestrator.dto.StoreRuleDto;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
@@ -16,8 +17,6 @@ import java.util.Objects;
  * Plant Descriptions.
  */
 public class RuleCreator {
-
-    private final String DEFAULT_SERVICE_INTERFACE = "HTTP-SECURE-JSON";
 
     private final PlantDescriptionTracker pdTracker;
 
@@ -56,7 +55,8 @@ public class RuleCreator {
                 .metadata(provider.metadata())
                 .build())
             .serviceMetadata(producerPort.metadata())
-            .serviceInterfaceName(producerPort.serviceInterface().orElse(DEFAULT_SERVICE_INTERFACE))
+            .serviceInterfaceName(producerPort.serviceInterface()
+                .orElse(ApiConstants.DEFAULT_SERVICE_INTERFACE))
             .serviceDefinitionName(producerPort.serviceDefinition())
             .priority(connection.priority().orElse(null));
 

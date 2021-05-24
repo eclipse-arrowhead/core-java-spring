@@ -1,6 +1,7 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor;
 
-import eu.arrowhead.core.plantdescriptionengine.MonitorInfo;
+import eu.arrowhead.core.plantdescriptionengine.ApiConstants;
+import eu.arrowhead.core.plantdescriptionengine.MonitorInfoTracker;
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.monitorable.dto.InventoryIdDto;
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.monitorable.dto.SystemDataDto;
 import org.slf4j.Logger;
@@ -25,21 +26,21 @@ public class RetrieveMonitorInfoTask extends TimerTask {
 
     private final ServiceQuery serviceQuery;
     private final HttpClient httpClient;
-    private final MonitorInfo monitorInfo;
+    private final MonitorInfoTracker monitorInfoTracker;
 
     public RetrieveMonitorInfoTask(
         final ServiceQuery serviceQuery,
         final HttpClient httpClient,
-        final MonitorInfo monitorInfo
+        final MonitorInfoTracker monitorInfoTracker
     ) {
 
         Objects.requireNonNull(serviceQuery, "Expected service query");
         Objects.requireNonNull(httpClient, "Expected HTTP client");
-        Objects.requireNonNull(monitorInfo, "Expected MonitorInfo");
+        Objects.requireNonNull(monitorInfoTracker, "Expected MonitorInfoTracker");
 
         this.serviceQuery = serviceQuery;
         this.httpClient = httpClient;
-        this.monitorInfo = monitorInfo;
+        this.monitorInfoTracker = monitorInfoTracker;
     }
 
     @Override
@@ -74,9 +75,9 @@ public class RetrieveMonitorInfoTask extends TimerTask {
                 new HttpClientRequest()
                     .method(HttpMethod.GET)
                     .uri(service.uri() + INVENTORY_ID_PATH)
-                    .header("accept", "application/json"))
+                    .header(ApiConstants.HEADER_ACCEPT, ApiConstants.APPLICATION_JSON))
             .flatMap(response -> response.bodyToIfSuccess(InventoryIdDto::decodeJson))
-            .ifSuccess(inventoryId -> monitorInfo.putInventoryId(service, inventoryId.id().orElse(null)))
+            .ifSuccess(inventoryId -> monitorInfoTracker.putInventoryId(service, inventoryId.id().orElse(null)))
             .onFailure(e -> {
                 final String errorMessage = "Failed to retrieve inventory ID for system '" + service.provider().name()
                     + "', service '" + service.name() + "'.";
@@ -97,11 +98,11 @@ public class RetrieveMonitorInfoTask extends TimerTask {
                 new HttpClientRequest()
                     .method(HttpMethod.GET)
                     .uri(service.uri() + SYSTEM_DATA_PATH)
-                    .header("accept", "application/json"))
+                    .header(ApiConstants.HEADER_ACCEPT, ApiConstants.APPLICATION_JSON))
             .flatMap(result -> result.bodyToIfSuccess(SystemDataDto::decodeJson))
             .ifSuccess(systemData -> {
                 JsonObject json = systemData.data().orElse(null);
-                monitorInfo.putSystemData(service, json);
+                monitorInfoTracker.putSystemData(service, json);
             })
             .onFailure(e -> {
                 final String errorMessage = "Failed to retrieve system data for system '" + service.provider().name()

@@ -103,7 +103,6 @@ public class PlantDescriptionEntryTest {
             .createdAt(now)
             .updatedAt(now)
             .active(true)
-            .include(new ArrayList<>())
             .systems(List.of(consumerSystem, producerSystem))
             .connections(List.of())
             .build();
@@ -181,7 +180,6 @@ public class PlantDescriptionEntryTest {
             .createdAt(now)
             .updatedAt(now)
             .active(true)
-            .include(new ArrayList<>())
             .systems(List.of(consumerSystem, producerSystem))
             .connections(connections)
             .build();
@@ -255,7 +253,6 @@ public class PlantDescriptionEntryTest {
             .createdAt(now)
             .updatedAt(now)
             .active(true)
-            .include(new ArrayList<>())
             .systems(List.of(consumerSystem, producerSystem))
             .connections(connections)
             .build();
@@ -460,24 +457,24 @@ public class PlantDescriptionEntryTest {
 
         final String consumerId = "Sys-A";
         final String producerId = "Sys-B";
-        final String consumerName = "System A";
-        final String producerName = "System B";
+        final String consumerName = "sysa";
+        final String producerName = "sysb";
         final String consumerPort = "PortA";
         final String producerPort = "PortB";
-
+        final String serviceDefinition = "monitorable";
         final String serviceInterface = "HTTP-SECURE-JSON";
 
         final List<PortDto> consumerPorts = List.of(new PortDto.Builder()
             .portName(consumerPort)
             .serviceInterface(serviceInterface)
-            .serviceDefinition("Monitorable")
+            .serviceDefinition(serviceDefinition)
             .consumer(true)
             .build());
 
         final List<PortDto> producerPorts = List.of(new PortDto.Builder()
             .portName(consumerPort)
             .serviceInterface(serviceInterface)
-            .serviceDefinition("Monitorable")
+            .serviceDefinition(serviceDefinition)
             .consumer(false)
             .build());
 

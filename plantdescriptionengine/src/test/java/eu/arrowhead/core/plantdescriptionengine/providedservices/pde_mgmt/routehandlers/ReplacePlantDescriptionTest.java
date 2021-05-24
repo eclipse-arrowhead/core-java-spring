@@ -16,12 +16,12 @@ import eu.arrowhead.core.plantdescriptionengine.utils.MockRequest;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockServiceResponse;
 import eu.arrowhead.core.plantdescriptionengine.utils.TestUtils;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import se.arkalix.net.http.HttpStatus;
 import se.arkalix.net.http.service.HttpServiceRequest;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,12 +32,19 @@ import static org.mockito.Mockito.doThrow;
 
 public class ReplacePlantDescriptionTest {
 
-    @Test
-    public void shouldCreateEntry() throws PdStoreException {
+    private PlantDescriptionTracker pdTracker;
+    private ReplacePlantDescription handler;
+    private MockServiceResponse response;
 
-        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
-        final ReplacePlantDescription handler = new ReplacePlantDescription(pdTracker);
-        final MockServiceResponse response = new MockServiceResponse();
+    @BeforeEach
+    public void initEach() throws PdStoreException {
+        pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
+        handler = new ReplacePlantDescription(pdTracker);
+        response = new MockServiceResponse();
+    }
+
+    @Test
+    public void shouldCreateEntry() {
 
         final PlantDescription description = new PlantDescriptionDto.Builder()
             .plantDescription("Plant Description 1A")
@@ -51,7 +58,7 @@ public class ReplacePlantDescriptionTest {
 
         try {
             handler.handle(request, response).ifSuccess(result -> {
-                assertEquals(HttpStatus.CREATED, response.status().orElse(null));
+                assertEquals(HttpStatus.OK, response.status().orElse(null));
                 assertNotNull(response.getRawBody());
 
                 final PlantDescriptionEntry entry = (PlantDescriptionEntry) response.getRawBody();
@@ -68,8 +75,6 @@ public class ReplacePlantDescriptionTest {
     @Test
     public void shouldReplaceExistingEntry() throws PdStoreException {
 
-        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
-        final ReplacePlantDescription handler = new ReplacePlantDescription(pdTracker);
         final int entryId = 87;
 
         final PlantDescriptionEntryDto entry = TestUtils.createEntry(entryId);
@@ -78,7 +83,6 @@ public class ReplacePlantDescriptionTest {
             .plantDescription(newName)
             .active(true)
             .build();
-        final MockServiceResponse response = new MockServiceResponse();
         final HttpServiceRequest request = new MockRequest.Builder()
             .pathParameters(List.of(String.valueOf(entryId)))
             .body(description)
@@ -90,7 +94,7 @@ public class ReplacePlantDescriptionTest {
 
         try {
             handler.handle(request, response).ifSuccess(result -> {
-                assertEquals(HttpStatus.CREATED, response.status().orElse(null));
+                assertEquals(HttpStatus.OK, response.status().orElse(null));
 
                 final PlantDescriptionEntry returnedEntry = (PlantDescriptionEntry) response.getRawBody();
                 assertEquals(returnedEntry.plantDescription(), newName);
@@ -102,16 +106,12 @@ public class ReplacePlantDescriptionTest {
     }
 
     @Test
-    public void shouldRejectInvalidId() throws PdStoreException {
-        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
-        final ReplacePlantDescription handler = new ReplacePlantDescription(pdTracker);
+    public void shouldRejectInvalidId() {
         final String invalidEntryId = "InvalidId";
 
         final HttpServiceRequest request = new MockRequest.Builder()
             .pathParameters(List.of(invalidEntryId))
             .build();
-
-        final MockServiceResponse response = new MockServiceResponse();
 
         try {
             handler.handle(request, response)
@@ -133,9 +133,6 @@ public class ReplacePlantDescriptionTest {
         final String systemId = "system_a";
         final String portName = "port_a";
 
-        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
-        final ReplacePlantDescription handler = new ReplacePlantDescription(pdTracker);
-
         pdTracker.put(TestUtils.createEntry(entryId));
 
         final List<PortDto> consumerPorts = List.of(
@@ -154,7 +151,7 @@ public class ReplacePlantDescriptionTest {
 
         final PdeSystemDto consumerSystem = new PdeSystemDto.Builder()
             .systemId(systemId)
-            .systemName("System A")
+            .systemName("abc")
             .ports(consumerPorts)
             .build();
 
@@ -162,11 +159,8 @@ public class ReplacePlantDescriptionTest {
             .plantDescription("Plant Description 1A")
             .active(true)
             .systems(List.of(consumerSystem))
-            .include(new ArrayList<>())
-            .connections(new ArrayList<>())
             .build();
 
-        final MockServiceResponse response = new MockServiceResponse();
         final MockRequest request = new MockRequest.Builder()
             .pathParameters(List.of(String.valueOf(entryId)))
             .body(description)
@@ -195,7 +189,6 @@ public class ReplacePlantDescriptionTest {
             .plantDescription("Plant Description 1A")
             .build();
 
-        final MockServiceResponse response = new MockServiceResponse();
         final HttpServiceRequest request = new MockRequest.Builder()
             .pathParameters(List.of("87"))
             .body(description)

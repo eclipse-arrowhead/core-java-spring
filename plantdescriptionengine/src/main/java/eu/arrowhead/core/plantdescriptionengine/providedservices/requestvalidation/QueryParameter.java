@@ -13,6 +13,23 @@ import java.util.Objects;
  */
 public abstract class QueryParameter {
 
+    // Strings used as keys/values in query parameters.
+    public static final String ACTIVE = "active";
+    public static final String ITEM_PER_PAGE = "item_per_page";
+    public static final String PAGE = "page";
+    public static final String SYSTEM_NAME = "systemName";
+    public static final String SORT_FIELD = "sort_field";
+    public static final String ID = "id";
+    public static final String RAISED_AT = "raisedAt";
+    public static final String CREATED_AT = "createdAt";
+    public static final String UPDATED_AT = "updatedAt";
+    public static final String CLEARED_AT = "clearedAt";
+    public static final String DIRECTION = "direction";
+    public static final String ASC = "ASC";
+    public static final String DESC = "DESC";
+    public static final String SEVERITY = "severity";
+    public static final String ACKNOWLEDGED = "acknowledged";
+
     protected final String name;
     protected final List<QueryParameter> requiredParameters = new ArrayList<>();
 

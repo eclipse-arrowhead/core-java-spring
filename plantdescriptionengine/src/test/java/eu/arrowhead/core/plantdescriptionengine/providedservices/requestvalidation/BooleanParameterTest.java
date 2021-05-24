@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import se.arkalix.net.http.service.HttpServiceRequest;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -17,26 +16,30 @@ public class BooleanParameterTest {
     @Test
     public void shouldParseBooleans() throws ParseError {
 
+        String key1 = "smart";
+        String key2 = "tired";
+        String key3 = "strong";
+        String key4 = "fat";
+
         final BooleanParameter smartParam = new BooleanParameter.Builder()
-            .name("smart")
+            .name(key1)
             .build();
         final BooleanParameter tiredParam = new BooleanParameter.Builder()
-            .name("tired")
+            .name(key2)
             .build();
 
         final List<QueryParameter> requiredParameters = List.of(smartParam, tiredParam);
 
-        final BooleanParameter strongParam = new BooleanParameter.Builder()
-            .name("strong")
-            .build();
-        final BooleanParameter fatParam = new BooleanParameter.Builder()
-            .name("fat")
-            .build();
-
+        final BooleanParameter strongParam = new BooleanParameter.Builder().name(key3).build();
+        final BooleanParameter fatParam = new BooleanParameter.Builder().name(key4).build();
         final List<QueryParameter> acceptedParameters = List.of(strongParam, fatParam);
 
-        final HttpServiceRequest request = new MockRequest.Builder().queryParameters(Map.of("smart", List.of("true"),
-            "tired", List.of("false"), "strong", List.of("true"), "fat", List.of("false"))).build();
+        final HttpServiceRequest request = new MockRequest.Builder()
+            .queryParam(key1, true)
+            .queryParam(key2, false)
+            .queryParam(key3, true)
+            .queryParam(key4, false)
+            .build();
 
         final QueryParamParser parser = new QueryParamParser(requiredParameters, acceptedParameters, request);
 
@@ -59,11 +62,7 @@ public class BooleanParameterTest {
             .build();
 
         final List<QueryParameter> acceptedParameters = List.of(goodParam, happyParam);
-
-        final HttpServiceRequest request = new MockRequest.Builder()
-            .queryParameters(Map.of())
-            .build();
-
+        final HttpServiceRequest request = new MockRequest.Builder().build();
         final QueryParamParser parser = new QueryParamParser(null, acceptedParameters, request);
 
         assertTrue(parser.getValue(goodParam).orElse(false));
@@ -72,17 +71,20 @@ public class BooleanParameterTest {
 
     @Test
     public void shouldNonBooleans() {
+        final String key = "cool";
+        final String value = "123";
         final List<QueryParameter> requiredParameters = List.of(new BooleanParameter.Builder()
-            .name("cool")
+            .name(key)
             .build());
 
-        final HttpServiceRequest request = new MockRequest.Builder().queryParameters(Map.of("cool", List.of("128")))
+        final HttpServiceRequest request = new MockRequest.Builder()
+            .queryParam(key, value)
             .build();
 
         final Exception exception = assertThrows(ParseError.class,
             () -> new QueryParamParser(requiredParameters, null, request));
 
-        assertEquals("<Query parameter 'cool' must be true or false, got '128'.>", exception.getMessage());
+        assertEquals("<Query parameter '" + key + "' must be true or false, got '" + value + "'.>", exception.getMessage());
     }
 
     @Test
@@ -94,9 +96,7 @@ public class BooleanParameterTest {
                 .build());
 
         final Exception exception = assertThrows(ParseError.class, () -> {
-            final HttpServiceRequest request = new MockRequest.Builder()
-                .queryParameters(Map.of())
-                .build();
+            final HttpServiceRequest request = new MockRequest.Builder().build();
             new QueryParamParser(requiredParameters, null, request);
         });
         assertEquals("<Missing parameter 'weekends'.>", exception.getMessage());
@@ -104,20 +104,21 @@ public class BooleanParameterTest {
 
     @Test
     public void shouldReportMissingDependency() {
-
-        final List<QueryParameter> acceptedParameters = List.of(new BooleanParameter.Builder().name("sort")
-            .requires(new IntParameter.Builder()
-                .name("item_per_page")
-                .build())
-            .build());
+        final String sortKey = "sort";
+        final QueryParameter itemPerPageParameter = new IntParameter.Builder()
+            .name(QueryParameter.ITEM_PER_PAGE)
+            .build();
+        final QueryParameter sortParameter = new BooleanParameter.Builder().name(sortKey)
+            .requires(itemPerPageParameter)
+            .build();
 
         final Exception exception = assertThrows(ParseError.class, () -> {
             final HttpServiceRequest request = new MockRequest.Builder()
-                .queryParameters(Map.of("sort", List.of("true")))
+                .queryParam(sortKey, true)
                 .build();
-            new QueryParamParser(null, acceptedParameters, request);
+            new QueryParamParser(null, List.of(sortParameter), request);
         });
-        assertEquals("<Missing parameter 'item_per_page'.>", exception.getMessage());
+        assertEquals("<Missing parameter '" + QueryParameter.ITEM_PER_PAGE + "'.>", exception.getMessage());
     }
 
 }

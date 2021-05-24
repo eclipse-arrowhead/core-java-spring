@@ -1,5 +1,8 @@
 package eu.arrowhead.core.plantdescriptionengine.consumedservices.orchestrator.rulebackingstore;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -14,6 +17,8 @@ import java.util.Set;
  * Class that reads and writes Orchestration rules to an SQL database.
  */
 public class SqlRuleStore implements RuleStore {
+
+    private static final Logger logger = LoggerFactory.getLogger(RuleStore.class);
 
     private final String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS pde_rule (id INT, plant_description_id INT);";
     private final String SQL_SELECT_RULES = "select id from pde_rule where plant_description_id=?;";
@@ -59,8 +64,8 @@ public class SqlRuleStore implements RuleStore {
             connection = DriverManager.getConnection(connectionUrl, username, password);
             final Statement statement = connection.createStatement();
             statement.execute(SQL_CREATE_TABLE);
-
         } catch (final ClassNotFoundException | SQLException e) {
+            connection = null;
             throw new RuleStoreException("Failed to initialize rule store", e);
         }
     }
@@ -70,6 +75,7 @@ public class SqlRuleStore implements RuleStore {
         ensureInitialized();
 
         try {
+            connection.setAutoCommit(true);
             final Set<Integer> result = new HashSet<>();
             final PreparedStatement statement = connection.prepareStatement(SQL_SELECT_RULES);
             statement.setInt(1, plantDescriptionId);
@@ -92,15 +98,23 @@ public class SqlRuleStore implements RuleStore {
         ensureInitialized();
 
         try {
+            connection.setAutoCommit(false);
             final PreparedStatement statement = connection.prepareStatement(SQL_INSERT_RULE);
             for (final Integer rule : rules) {
                 statement.setInt(1, rule);
                 statement.setInt(2, plantDescriptionId);
                 statement.executeUpdate();
             }
-
+            connection.commit();
         } catch (final SQLException e) {
+            rollback();
             throw new RuleStoreException("Failed to write orchestration rules to database", e);
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                logger.error("Failed to set DB connection's auto-commit mode to true", e);
+            }
         }
     }
 
@@ -108,12 +122,20 @@ public class SqlRuleStore implements RuleStore {
     public void removeRules(final int plantDescriptionId) throws RuleStoreException {
         ensureInitialized();
         try {
+            connection.setAutoCommit(true);
             final PreparedStatement statement = connection.prepareStatement(SQL_DELETE_RULES);
             statement.setInt(1, plantDescriptionId);
             statement.executeUpdate();
-
         } catch (final SQLException e) {
             throw new RuleStoreException("Failed to delete orchestration rules", e);
+        }
+    }
+
+    private void rollback() {
+        try {
+            connection.rollback();
+        } catch (SQLException e) {
+            logger.error("DB Rollback failed.", e);
         }
     }
 }

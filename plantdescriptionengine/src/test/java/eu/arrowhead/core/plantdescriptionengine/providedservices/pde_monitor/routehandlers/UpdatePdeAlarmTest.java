@@ -6,7 +6,7 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PdeAlarmUpdateDto;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockRequest;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockServiceResponse;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import se.arkalix.net.http.HttpStatus;
 import se.arkalix.net.http.service.HttpServiceRequest;
@@ -20,12 +20,21 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class UpdatePdeAlarmTest {
 
+    private AlarmManager alarmManager;
+    private UpdatePdeAlarm handler;
+    private MockServiceResponse response;
+
+    @BeforeEach
+    public void initEach() {
+        alarmManager = new AlarmManager();
+        handler = new UpdatePdeAlarm(alarmManager);
+        response = new MockServiceResponse();
+    }
+
     @Test
     public void shouldAcknowledgeAlarm() {
 
-        final String systemNameA = "System A";
-
-        final AlarmManager alarmManager = new AlarmManager();
+        final String systemNameA = "abc";
 
         alarmManager.raiseSystemNotInDescription(systemNameA, null);
         final PdeAlarm alarm = alarmManager.getAlarms().get(0);
@@ -37,27 +46,19 @@ public class UpdatePdeAlarmTest {
                 .acknowledged(true)
                 .build())
             .build();
-        final MockServiceResponse response = new MockServiceResponse();
-        final UpdatePdeAlarm handler = new UpdatePdeAlarm(alarmManager);
 
-        try {
-            handler.handle(request, response).ifSuccess(result -> {
-                assertEquals(HttpStatus.OK, response.status().orElse(null));
-                final PdeAlarm updatedAlarm = (PdeAlarm) response.getRawBody();
-                assertTrue(updatedAlarm.acknowledged());
-                assertTrue(updatedAlarm.acknowledgedAt().isPresent());
-            }).onFailure(Assertions::assertNull);
-        } catch (final Exception e) {
-            fail();
-        }
+        handler.handle(request, response).ifSuccess(result -> {
+            final PdeAlarm updatedAlarm = (PdeAlarm) response.getRawBody();
+            assertEquals(HttpStatus.OK, response.status().orElse(null));
+            assertTrue(updatedAlarm.acknowledged());
+            assertTrue(updatedAlarm.acknowledgedAt().isPresent());
+        }).onFailure(e -> fail());
     }
 
     @Test
     public void shouldNotUnacknowledgeAlarm() {
 
-        final String systemNameA = "System A";
-
-        final AlarmManager alarmManager = new AlarmManager();
+        final String systemNameA = "abc";
 
         alarmManager.raiseSystemNotInDescription(systemNameA, null);
         final PdeAlarm alarm = alarmManager.getAlarms().get(0);
@@ -69,21 +70,14 @@ public class UpdatePdeAlarmTest {
                 .acknowledged(false)
                 .build())
             .build();
-        final MockServiceResponse response = new MockServiceResponse();
-        final UpdatePdeAlarm handler = new UpdatePdeAlarm(alarmManager);
 
-        try {
-            handler.handle(request, response).ifSuccess(result -> {
-                System.out.println(response.status());
-                System.out.println(response.getRawBody());
-                assertEquals(HttpStatus.BAD_REQUEST, response.status().orElse(null));
-                final ErrorMessage errorMessage = (ErrorMessage) response.getRawBody();
-                String expectedErrorMessage = "Cannot unacknowledge an acknowledged alarm.";
-                assertEquals(expectedErrorMessage, errorMessage.error());
-            }).onFailure(Assertions::assertNull);
-        } catch (final Exception e) {
-            fail();
-        }
+        handler.handle(request, response).ifSuccess(result -> {
+            final ErrorMessage errorMessage = (ErrorMessage) response.getRawBody();
+            String expectedErrorMessage = "Cannot unacknowledge an acknowledged alarm.";
+            assertEquals(HttpStatus.BAD_REQUEST, response.status().orElse(null));
+            assertEquals(expectedErrorMessage, errorMessage.error());
+        }).onFailure(e -> fail());
+
     }
 
     @Test
@@ -95,19 +89,14 @@ public class UpdatePdeAlarmTest {
                 .acknowledged(true)
                 .build())
             .build();
-        final MockServiceResponse response = new MockServiceResponse();
-        final UpdatePdeAlarm handler = new UpdatePdeAlarm(new AlarmManager());
 
-        try {
-            handler.handle(request, response).ifSuccess(result -> {
-                assertEquals(HttpStatus.BAD_REQUEST, response.status().orElse(null));
-                final String expectedErrorMessage = "'" + invalidEntryId + "' is not a valid PDE Alarm ID.";
-                final String actualErrorMessage = ((ErrorMessage) response.getRawBody()).error();
-                assertEquals(expectedErrorMessage, actualErrorMessage);
-            }).onFailure(Assertions::assertNull);
-        } catch (final Exception e) {
-            fail();
-        }
+        handler.handle(request, response).ifSuccess(result -> {
+            final String expectedErrorMessage = "'" + invalidEntryId + "' is not a valid PDE Alarm ID.";
+            final String actualErrorMessage = ((ErrorMessage) response.getRawBody()).error();
+            assertEquals(HttpStatus.BAD_REQUEST, response.status().orElse(null));
+            assertEquals(expectedErrorMessage, actualErrorMessage);
+        })
+            .onFailure(e -> fail());
     }
 
     @Test
@@ -119,25 +108,19 @@ public class UpdatePdeAlarmTest {
                 .acknowledged(true)
                 .build())
             .build();
-        final MockServiceResponse response = new MockServiceResponse();
-        final UpdatePdeAlarm handler = new UpdatePdeAlarm(new AlarmManager());
 
-        try {
-            handler.handle(request, response).ifSuccess(result -> {
-                assertEquals(HttpStatus.NOT_FOUND, response.status().orElse(null));
-                final String expectedErrorMessage = "PDE Alarm with ID '" + nonexistentId + "' not found.";
-                final String actualErrorMessage = ((ErrorMessage) response.getRawBody()).error();
-                assertEquals(expectedErrorMessage, actualErrorMessage);
-            }).onFailure(Assertions::assertNull);
-        } catch (final Exception e) {
-            fail();
-        }
+        handler.handle(request, response).ifSuccess(result -> {
+            final String expectedErrorMessage = "PDE Alarm with ID '" + nonexistentId + "' not found.";
+            final String actualErrorMessage = ((ErrorMessage) response.getRawBody()).error();
+            assertEquals(HttpStatus.NOT_FOUND, response.status().orElse(null));
+            assertEquals(expectedErrorMessage, actualErrorMessage);
+        })
+            .onFailure(e -> fail());
+
     }
 
     @Test
     public void shouldNotChangeAlarm() {
-
-        final AlarmManager alarmManager = new AlarmManager();
 
         alarmManager.raiseSystemNotInDescription("SystemA", null);
         final PdeAlarm alarm = alarmManager.getAlarms().get(0);
@@ -147,17 +130,13 @@ public class UpdatePdeAlarmTest {
             .pathParameters(List.of(String.valueOf(alarm.id())))
             .body(new PdeAlarmUpdateDto.Builder().build())
             .build();
-        final MockServiceResponse response = new MockServiceResponse();
-        final UpdatePdeAlarm handler = new UpdatePdeAlarm(alarmManager);
 
-        try {
-            handler.handle(request, response).ifSuccess(result -> {
-                assertEquals(HttpStatus.OK, response.status().orElse(null));
-                final PdeAlarm updatedAlarm = (PdeAlarm) response.getRawBody();
-                assertFalse(updatedAlarm.acknowledged());
-            }).onFailure(Assertions::assertNull);
-        } catch (final Exception e) {
-            fail();
-        }
+        handler.handle(request, response).ifSuccess(result -> {
+            final PdeAlarm updatedAlarm = (PdeAlarm) response.getRawBody();
+            assertEquals(HttpStatus.OK, response.status().orElse(null));
+            assertFalse(updatedAlarm.acknowledged());
+        })
+            .onFailure(e -> fail());
+
     }
 }

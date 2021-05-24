@@ -8,6 +8,7 @@ import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.FilePdStore;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.PdStore;
+import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.PdStoreException;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.PdeManagementService;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.PdeMonitorService;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitorable.PdeMonitorableService;
@@ -22,6 +23,7 @@ import se.arkalix.core.plugin.or.OrchestrationStrategy;
 import se.arkalix.net.http.client.HttpClient;
 import se.arkalix.security.identity.OwnedIdentity;
 import se.arkalix.security.identity.TrustStore;
+import se.arkalix.util.concurrent.Future;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -127,7 +129,7 @@ public final class PdeMain {
             systemBuilder.identity(loadIdentity(keyStorePath, keyPassword, keyStorePassword))
                 .trustStore(loadTrustStore(trustStorePath, trustStorePassword));
         } else {
-            systemBuilder.name(Constants.PDE_SYSTEM_NAME).insecure();
+            systemBuilder.name(ApiConstants.PDE_SYSTEM_NAME).insecure();
         }
 
         return systemBuilder.build();
@@ -137,53 +139,49 @@ public final class PdeMain {
     /**
      * Loads the keystore at the given path, using the given password.
      * <p>
-     * {@code path} is first treated as a regular file path. If the certificate
-     * cannot be found at that location, an attempt is made to load it from
-     * resources (i.e. within the jar file).
      * If the keystore cannot be loaded, the application is terminated.
      *
      * @param path     Keystore path.
-     * @param password Password or private key associated with the
-     *                 keystore.
+     * @param password Password  associated with the keystore.
      * @return The loaded keystore.
      */
     private static KeyStore loadKeyStore(String path, char[] password) {
 
         KeyStore keyStore = null;
-        try {
+
+        try (InputStream in = getResource(path)) {
             keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-        } catch (KeyStoreException e) {
-            logger.error("Failed to load identity keystore.", e);
-            System.exit(74);
-        }
-
-        File keyStoreFile = new File(path);
-
-        if (keyStoreFile.isFile()) {
-            try (FileInputStream in = new FileInputStream(keyStoreFile)) {
-                keyStore.load(in, password);
-            } catch (NoSuchAlgorithmException | CertificateException | IOException e) {
-                logger.error("Failed to read keystore from working directory.", e);
-                System.exit(74);
-            }
-        } else {
-            try (InputStream in = ClassLoader.getSystemResourceAsStream(path)) {
-                keyStore.load(in, password);
-            } catch (NoSuchAlgorithmException | CertificateException | IOException e) {
-                logger.error("Failed to load keystore from resources directory.", e);
-                System.exit(74);
-            }
+            keyStore.load(in, password);
+        } catch (NoSuchAlgorithmException | CertificateException | IOException | KeyStoreException e) {
+            terminate("Failed to load key store from path " + path, e);
         }
 
         return keyStore;
     }
 
     /**
+     * Loads the resource at the given path.
+     * {@code path} is first treated as a regular file path. If the resource
+     * cannot be found at that location, an attempt is made to load it from
+     * resources (i.e. within the jar file).
+     *
+     * @param path path to the resource.
+     * @return An {@code InputStream} object representing the resource.
+     */
+    private static InputStream getResource(final String path) throws IOException {
+        File file = new File(path);
+        if (file.isFile()) {
+            return new FileInputStream(file);
+        } else {
+            return PdeMain.class.getResourceAsStream("/" + path);
+        }
+    }
+
+    /**
      * Loads the Arrowhead certificate chain and private key required to manage
      * an <i>owned</i> system or operator identity.
      * <p>
-     * If the certificate cannot be read, the entire application
-     * is terminated.
+     * If the certificate cannot be read, the entire application is terminated.
      * The provided arguments {@code keyPassword} and {@code keyStorePassword}
      * are cleared for security reasons.
      *
@@ -210,8 +208,7 @@ public final class PdeMain {
                 .load();
 
         } catch (final GeneralSecurityException | IOException e) {
-            logger.error("Failed to load OwnedIdentity", e);
-            System.exit(74);
+            terminate("Failed to load OwnedIdentity", e);
         }
 
         Arrays.fill(keyPassword, '\0');
@@ -223,10 +220,7 @@ public final class PdeMain {
     /**
      * Loads certificates associated with a <i>trusted</i> Arrowhead systems.
      * <p>
-     * The argument {@code path} is first treated as a regular file path. If it
-     * cannot be found, an attempt is made to find it in resources (i.e. within
-     * the jar file). If the certificate cannot be read, the entire application
-     * is terminated.
+     * If the certificate cannot be read, the entire application is terminated.
      * The provided argument {@code password} is cleared for security reasons.
      *
      * @param path     Truststore path.
@@ -242,8 +236,7 @@ public final class PdeMain {
         try {
             trustStore = TrustStore.from(keyStore);
         } catch (KeyStoreException e) {
-            logger.error("Failed to read trust store", e);
-            System.exit(74);
+            terminate("Failed to read trust store", e);
         }
 
         Arrays.fill(password, '\0');
@@ -251,38 +244,55 @@ public final class PdeMain {
         return trustStore;
     }
 
-    /**
-     * Loads application properties.
-     * <p>
-     * It first searches the current working directory for an application
-     * properties file. If it does not exist, an application file from the
-     * resources directory is used instead. If neither can be found, the
-     * application is terminated.
-     */
     private static Properties loadAppProps() {
         final Properties appProps = new Properties();
-        File appPropsFile = new File(PropertyNames.FILENAME);
 
-        if (appPropsFile.isFile()) {
-            try (FileInputStream in = new FileInputStream(appPropsFile)) {
-                appProps.load(in);
-            } catch (final IOException e) {
-                logger.error("Failed reading " + PropertyNames.FILENAME + " from current directory.", e);
-            }
-        } else {
-            try {
-                appProps.load(ClassLoader.getSystemResourceAsStream(PropertyNames.FILENAME));
-            } catch (IOException e) {
-                logger.error("Failed reading " + PropertyNames.FILENAME + " from system resources.", e);
-            }
+        try (InputStream in = getResource(PropertyNames.FILENAME)) {
+            appProps.load(in);
+        } catch (final IOException e) {
+            logger.error("Failed reading " + PropertyNames.FILENAME, e);
         }
 
         if (appProps.isEmpty()) {
-            logger.error("No valid application properties, exiting.");
-            System.exit(74);
+            terminate("No valid application properties, exiting.");
         }
 
         return appProps;
+    }
+
+    private static PlantDescriptionTracker loadPlantDescriptionTracker(Properties appProps) {
+
+        final String plantDescriptionsDirectory = getProp(appProps, PropertyNames.PD_DIRECTORY);
+        final int maxPdBytes = Integer.parseInt(getProp(appProps, PropertyNames.PD_MAX_SIZE));
+        final PdStore pdStore = new FilePdStore(plantDescriptionsDirectory, maxPdBytes);
+
+        PlantDescriptionTracker pdTracker = null;
+        try {
+            pdTracker = new PlantDescriptionTracker(pdStore);
+        } catch (PdStoreException e) {
+            terminate("Failed to create Plant Description tracker.", e);
+        }
+        return pdTracker;
+    }
+
+    private static InetSocketAddress getServiceRegistryAddress(final Properties appProps) {
+        final String serviceRegistryIp = getProp(appProps, PropertyNames.SERVICE_REGISTRY_ADDRESS);
+        final int serviceRegistryPort = Integer.parseInt(getProp(appProps, PropertyNames.SERVICE_REGISTRY_PORT));
+        return new InetSocketAddress(serviceRegistryIp, serviceRegistryPort);
+    }
+
+    private static Future<InetSocketAddress> getOrchestratorAddress(final SystemTracker systemTracker) {
+        return systemTracker.getSystemWithRetries(ApiConstants.ORCHESTRATOR_SYSTEM_NAME)
+            .map(SrSystem::getAddress);
+    }
+
+    private static void terminate(final String message, final Throwable e) {
+        logger.error(message, e);
+        System.exit(1);
+    }
+
+    private static void terminate(final String message) {
+        terminate(message, null);
     }
 
     /**
@@ -294,88 +304,71 @@ public final class PdeMain {
     public static void main(final String[] args) {
 
         final Properties appProps = loadAppProps();
-
-        final String serviceRegistryIp = getProp(appProps, PropertyNames.SERVICE_REGISTRY_ADDRESS);
-        final int serviceRegistryPort = Integer.parseInt(getProp(appProps, PropertyNames.SERVICE_REGISTRY_PORT));
-        final InetSocketAddress serviceRegistryAddress = new InetSocketAddress(serviceRegistryIp, serviceRegistryPort);
-        final int systemPollInterval = Integer.parseInt(getProp(appProps, PropertyNames.SYSTEM_POLL_INTERVAL));
-
         final HttpClient httpClient = createHttpClient(appProps);
+        final InetSocketAddress serviceRegistryAddress = getServiceRegistryAddress(appProps);
+        final int systemPollInterval = Integer.parseInt(getProp(appProps, PropertyNames.SYSTEM_POLL_INTERVAL));
         final SystemTracker systemTracker = new SystemTracker(httpClient, serviceRegistryAddress, systemPollInterval);
+        final PlantDescriptionTracker pdTracker = loadPlantDescriptionTracker(appProps);
+
+        final ArSystem arSystem = createArSystem(appProps, serviceRegistryAddress);
+        final boolean secureMode = Boolean.parseBoolean(getProp(appProps, PropertyNames.SSL_ENABLED));
 
         logger.info("Contacting Service Registry...");
         systemTracker.start()
-            .flatMap(result -> {
-
+            .flatMap(systemTrackerResult -> getOrchestratorAddress(systemTracker))
+            .flatMap(orchestratorAddress -> {
                 final String ruleDirectory = getProp(appProps, PropertyNames.ORCHESTRATION_RULES);
-                final String plantDescriptionsDirectory = getProp(appProps, PropertyNames.PD_DIRECTORY);
-                final int maxPdBytes = Integer.parseInt(getProp(appProps, PropertyNames.PD_MAX_SIZE));
-                final PdStore pdStore = new FilePdStore(plantDescriptionsDirectory, maxPdBytes);
-                final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(pdStore);
-                final SrSystem orchestrator = systemTracker.getSystem(Constants.ORCHESTRATOR_SYSTEM_NAME);
-
-                if (orchestrator == null) {
-                    throw new RuntimeException("Could not find Orchestrator in the Service Registry.");
-                }
-
                 final OrchestratorClient orchestratorClient = new OrchestratorClient(
                     httpClient,
                     new FileRuleStore(ruleDirectory),
                     pdTracker,
-                    orchestrator.getAddress()
+                    orchestratorAddress
                 );
-
-                final ArSystem arSystem = createArSystem(appProps, serviceRegistryAddress);
-                final boolean secureMode = Boolean.parseBoolean(getProp(appProps, PropertyNames.SSL_ENABLED));
-                final AlarmManager alarmManager = new AlarmManager();
-
                 logger.info("Initializing the Orchestrator client...");
-
-                return orchestratorClient.initialize()
-                    .flatMap(orchestratorInitializationResult -> {
-                        logger.info("Orchestrator client initialized.");
-                        final SystemMismatchDetector mismatchDetector = new SystemMismatchDetector(
-                            pdTracker,
-                            systemTracker,
-                            alarmManager
-                        );
-                        mismatchDetector.run();
-                        logger.info("Starting the PDE Monitor service...");
-                        final int pingInterval = Integer.parseInt(getProp(appProps, PropertyNames.PING_INTERVAL));
-                        final int fetchInterval = Integer.parseInt(getProp(appProps, PropertyNames.FETCH_INTERVAL));
-                        return new PdeMonitorService(
-                            arSystem,
-                            pdTracker,
-                            httpClient,
-                            alarmManager,
-                            secureMode,
-                            pingInterval,
-                            fetchInterval
-                        ).provide();
-                    })
-                    .flatMap(monitorServiceResult -> {
-                        logger.info("The PDE Monitor service is ready.");
-                        logger.info("Starting the PDE Management service...");
-                        final PdeManagementService pdeManagementService = new PdeManagementService(
-                            pdTracker,
-                            secureMode
-                        );
-                        return arSystem.provide(pdeManagementService.getService());
-                    })
-                    .flatMap(mgmtServiceResult -> {
-                        logger.info("The PDE Management service is ready.");
-                        logger.info("Starting the PDE Monitorable service...");
-                        final PdeMonitorableService pdeMonitorableService = new PdeMonitorableService(secureMode);
-                        return arSystem.provide(pdeMonitorableService.getService());
-                    });
+                return orchestratorClient.initialize();
+            })
+            .flatMap(orchestratorInitializationResult -> {
+                logger.info("Orchestrator client initialized.");
+                final AlarmManager alarmManager = new AlarmManager();
+                final SystemMismatchDetector mismatchDetector = new SystemMismatchDetector(
+                    pdTracker,
+                    systemTracker,
+                    alarmManager
+                );
+                mismatchDetector.run();
+                logger.info("Starting the PDE Monitor service...");
+                final int pingInterval = Integer.parseInt(getProp(appProps, PropertyNames.PING_INTERVAL));
+                final int fetchInterval = Integer.parseInt(getProp(appProps, PropertyNames.FETCH_INTERVAL));
+                return new PdeMonitorService(
+                    arSystem,
+                    pdTracker,
+                    httpClient,
+                    alarmManager,
+                    secureMode,
+                    pingInterval,
+                    fetchInterval
+                ).provide();
+            })
+            .flatMap(monitorServiceResult -> {
+                logger.info("The PDE Monitor service is ready.");
+                logger.info("Starting the PDE Management service...");
+                final PdeManagementService pdeManagementService = new PdeManagementService(
+                    pdTracker,
+                    secureMode
+                );
+                return arSystem.provide(pdeManagementService.getService());
+            })
+            .flatMap(mgmtServiceResult -> {
+                logger.info("The PDE Management service is ready.");
+                logger.info("Starting the PDE Monitorable service...");
+                final PdeMonitorableService pdeMonitorableService = new PdeMonitorableService(secureMode);
+                return arSystem.provide(pdeMonitorableService.getService());
             })
             .ifSuccess(consumer -> {
                 logger.info("The PDE Monitorable service is ready.");
                 logger.info("The Plant Description Engine is up and running.");
             })
-            .onFailure(e -> {
-                logger.error("Failed to launch Plant Description Engine.", e);
-                System.exit(1);
-            });
+            .onFailure(e -> terminate("Failed to launch Plant Description Engine.", e));
     }
+
 }

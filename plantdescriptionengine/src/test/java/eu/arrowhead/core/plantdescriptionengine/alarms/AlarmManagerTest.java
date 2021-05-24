@@ -16,7 +16,7 @@ public class AlarmManagerTest {
     @Test
     public void shouldRaiseNotRegistered() {
         final String systemId = "Sys-A";
-        final String systemName = "System A";
+        final String systemName = "abc";
         final AlarmManager alarmManager = new AlarmManager();
 
         alarmManager.raiseSystemNotRegistered(systemId, systemName, null);
@@ -29,7 +29,7 @@ public class AlarmManagerTest {
 
     @Test
     public void shouldNotRaiseDuplicateAlarms() {
-        final String systemName = "System A";
+        final String systemName = "abc";
         final AlarmManager alarmManager = new AlarmManager();
 
         alarmManager.raiseNoPingResponse(systemName);
@@ -45,7 +45,7 @@ public class AlarmManagerTest {
 
     @Test
     public void shouldClearAlarmBySystemName() {
-        final String systemNameA = "System A";
+        final String systemNameA = "abc";
         final String systemNameB = "System B";
 
         final AlarmManager alarmManager = new AlarmManager();

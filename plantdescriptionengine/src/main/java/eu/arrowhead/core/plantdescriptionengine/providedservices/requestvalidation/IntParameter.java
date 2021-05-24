@@ -70,7 +70,10 @@ public final class IntParameter extends QueryParameter {
 
         if (intValue < minValue) {
             parser.report(new ParseError(
-                "Query parameter '" + name + "' must be greater than " + minValue + ", got " + intValue + "."));
+                "Query parameter '" + name +
+                    "' must be greater than or equal to " + minValue +
+                    ", got " + intValue + "."
+            ));
         }
 
         if (!parser.hasError()) {

@@ -1,6 +1,7 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor;
 
-import eu.arrowhead.core.plantdescriptionengine.MonitorInfo;
+import eu.arrowhead.core.plantdescriptionengine.ApiConstants;
+import eu.arrowhead.core.plantdescriptionengine.MonitorInfoTracker;
 import eu.arrowhead.core.plantdescriptionengine.alarms.AlarmManager;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.CodecExceptionCatcher;
@@ -29,20 +30,11 @@ import java.util.Timer;
  */
 public class PdeMonitorService {
 
-    private static final String MONITOR_SERVICE_NAME = "plant-description-monitor";
-    private static final String MONITORABLE_SERVICE_NAME = "monitorable";
-    private static final String BASE_PATH = "/pde/monitor";
-    private static final String GET_ALL_PLANT_DESCRIPTIONS_PATH = "/pd";
-    private static final String GET_PLANT_DESCRIPTION_PATH = "/pd/#id";
-    private static final String GET_ALL_ALARMS_PATH = "/alarm";
-    private static final String GET_ALARM_PATH = "/alarm/#id";
-    private static final String UPDATE_ALARM_PATH = "/alarm/#id";
-
     private final int pingInterval;
     private final int fetchInterval;
 
     private final ArSystem arSystem;
-    private final MonitorInfo monitorInfo = new MonitorInfo();
+    private final MonitorInfoTracker monitorInfoTracker = new MonitorInfoTracker();
     private final AlarmManager alarmManager;
 
     private final PlantDescriptionTracker pdTracker;
@@ -89,12 +81,12 @@ public class PdeMonitorService {
         this.fetchInterval = fetchInterval;
 
         final ServiceQuery serviceQuery = arSystem.consume()
-            .name(MONITORABLE_SERVICE_NAME)
+            .name(ApiConstants.MONITORABLE_SERVICE_NAME)
             .codecTypes(CodecType.JSON)
             .protocolTypes(ProtocolType.HTTP);
 
         pingTask = new PingTask(serviceQuery, httpClient, alarmManager, pdTracker);
-        retrieveMonitorInfoTask = new RetrieveMonitorInfoTask(serviceQuery, httpClient, monitorInfo);
+        retrieveMonitorInfoTask = new RetrieveMonitorInfoTask(serviceQuery, httpClient, monitorInfoTracker);
     }
 
     /**
@@ -106,14 +98,14 @@ public class PdeMonitorService {
      */
     public Future<ArServiceHandle> provide() {
         final HttpService service = new HttpService()
-            .name(MONITOR_SERVICE_NAME)
+            .name(ApiConstants.MONITOR_SERVICE_NAME)
             .codecs(CodecType.JSON)
-            .basePath(BASE_PATH)
-            .get(GET_ALL_PLANT_DESCRIPTIONS_PATH, new GetAllPlantDescriptions(monitorInfo, pdTracker))
-            .get(GET_PLANT_DESCRIPTION_PATH, new GetPlantDescription(monitorInfo, pdTracker))
-            .get(GET_ALL_ALARMS_PATH, new GetAllPdeAlarms(alarmManager))
-            .get(GET_ALARM_PATH, new GetPdeAlarm(alarmManager))
-            .patch(UPDATE_ALARM_PATH, new UpdatePdeAlarm(alarmManager))
+            .basePath(ApiConstants.MONITOR_BASE_PATH)
+            .get(ApiConstants.MONITOR_PDS_PATH, new GetAllPlantDescriptions(monitorInfoTracker, pdTracker))
+            .get(ApiConstants.MONITOR_PD_PATH, new GetPlantDescription(monitorInfoTracker, pdTracker))
+            .get(ApiConstants.MONITOR_ALARMS_PATH, new GetAllPdeAlarms(alarmManager))
+            .get(ApiConstants.MONITOR_ALARM_PATH, new GetPdeAlarm(alarmManager))
+            .patch(ApiConstants.MONITOR_ALARM_PATH, new UpdatePdeAlarm(alarmManager))
             .catcher(CodecException.class, new CodecExceptionCatcher())
             .accessPolicy(secure ? AccessPolicy.cloud() : AccessPolicy.unrestricted());
 

@@ -84,7 +84,7 @@ public class ReplacePlantDescription implements HttpRouteHandler {
                 }
 
                 return response
-                    .status(HttpStatus.CREATED)
+                    .status(HttpStatus.OK)
                     .body(entry, CodecType.JSON);
             });
     }

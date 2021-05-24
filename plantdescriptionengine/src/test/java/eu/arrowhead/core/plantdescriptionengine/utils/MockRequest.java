@@ -1,5 +1,6 @@
 package eu.arrowhead.core.plantdescriptionengine.utils;
 
+import eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidation.QueryParameter;
 import se.arkalix.codec.Decoder;
 import se.arkalix.net.BodyIncoming;
 import se.arkalix.net.http.HttpHeaders;
@@ -35,6 +36,13 @@ public class MockRequest implements HttpServiceRequest {
         _pathParameters = builder.pathParameters;
         body = builder.body;
         _queryParameters = builder.queryParameters;
+    }
+
+    public static MockRequest getSortRequest(final String sortField, final String direction) {
+        return new MockRequest.Builder()
+            .queryParam(QueryParameter.SORT_FIELD, sortField)
+            .queryParam(QueryParameter.DIRECTION, direction)
+            .build();
     }
 
     @Override
@@ -90,9 +98,9 @@ public class MockRequest implements HttpServiceRequest {
     }
 
     public static class Builder {
+        private final Map<String, List<String>> queryParameters = new HashMap<>();
         private List<String> pathParameters = new ArrayList<>();
         private Object body;
-        private Map<String, List<String>> queryParameters;
 
         public Builder pathParameters(final List<String> pathParameters) {
             Objects.requireNonNull(pathParameters, "Expected path parameters.");
@@ -106,10 +114,17 @@ public class MockRequest implements HttpServiceRequest {
             return this;
         }
 
-        public Builder queryParameters(final Map<String, List<String>> queryParameters) {
-            Objects.requireNonNull(queryParameters, "Expected query parameters.");
-            this.queryParameters = queryParameters;
+        public Builder queryParam(final String key, final String value) {
+            this.queryParameters.put(key, List.of(value));
             return this;
+        }
+
+        public Builder queryParam(final String key, final int value) {
+            return queryParam(key, String.valueOf(value));
+        }
+
+        public Builder queryParam(final String key, final boolean value) {
+            return queryParam(key, String.valueOf(value));
         }
 
         public MockRequest build() {

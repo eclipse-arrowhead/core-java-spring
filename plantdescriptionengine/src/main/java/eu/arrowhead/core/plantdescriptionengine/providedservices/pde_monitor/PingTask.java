@@ -1,6 +1,8 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor;
 
-import eu.arrowhead.core.plantdescriptionengine.Constants;
+import eu.arrowhead.core.plantdescriptionengine.ApiConstants;
+import eu.arrowhead.core.plantdescriptionengine.alarms.Alarm;
+import eu.arrowhead.core.plantdescriptionengine.alarms.AlarmCause;
 import eu.arrowhead.core.plantdescriptionengine.alarms.AlarmManager;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Connection;
@@ -29,11 +31,7 @@ import java.util.TimerTask;
 
 public class PingTask extends TimerTask {
 
-    private static final String MONITORABLE_SERVICE_NAME = "monitorable";
-
     private static final Logger logger = LoggerFactory.getLogger(PingTask.class);
-
-    private static final String PING_PATH = "/ping";
 
     private final ServiceQuery serviceQuery;
     private final HttpClient httpClient;
@@ -74,24 +72,38 @@ public class PingTask extends TimerTask {
         // TODO: Maybe this should be done per expected monitorable service
         // (i.e. per port with service definition 'monitorable'), not per
         // system?
-        List<PdeSystem> expectedMonitorableSystems = getMonitoredSystems();
-        for (PdeSystem system : expectedMonitorableSystems) {
+        List<PdeSystem> monitoredSystems = getMonitoredSystems();
+        final List<Alarm> previouslyDetectedAlarms = alarmManager.getActiveAlarmData(AlarmCause.NOT_MONITORABLE); // TODO: List of system's instead of list of alarms.
+        final List<Alarm> currentlyDetectedAlarms = new ArrayList<>();
+
+        for (PdeSystem system : monitoredSystems) {
 
             boolean hasMonitorableService = detectedMonitorableServices.stream()
                 .anyMatch(service -> isProvidedBy(service.provider(), system));
 
-            if (hasMonitorableService) {
-                alarmManager.clearSystemNotMonitorable(
+            if (!hasMonitorableService) {
+                final Alarm alarm = alarmManager.raiseSystemNotMonitorable(
                     system.systemId(),
                     system.systemName().orElse(null),
                     system.metadata()
                 );
-            } else {
-                alarmManager.raiseSystemNotMonitorable(
-                    system.systemId(),
-                    system.systemName().orElse(null),
-                    system.metadata()
-                );
+                currentlyDetectedAlarms.add(alarm);
+            }
+        }
+
+        // TODO: The method below should probably be moved to AlarmManager
+        // and reused for other alarm types.
+        clearAlarmsNoLongerDetected(previouslyDetectedAlarms, currentlyDetectedAlarms);
+    }
+
+    private void clearAlarmsNoLongerDetected(
+        final List<Alarm> previouslyDetectedAlarms,
+        final List<Alarm> currentlyDetectedAlarms
+    ) {
+
+        for (final Alarm previouslyDetectedAlarm : previouslyDetectedAlarms) {
+            if (currentlyDetectedAlarms.stream().noneMatch(alarm -> alarm.matches(previouslyDetectedAlarm))) {
+                alarmManager.clearAlarm(previouslyDetectedAlarm);
             }
         }
     }
@@ -114,10 +126,10 @@ public class PingTask extends TimerTask {
         final Map<String, Port> monitorablePortBySystemId = new HashMap<>();
         final Map<String, PdeSystem> systemById = new HashMap<>();
 
-        for (final var system : activeSystems) {
+        for (final PdeSystem system : activeSystems) {
             systemById.put(system.systemId(), system);
-            for (var port : system.ports()) {
-                if (port.serviceDefinition().equals(MONITORABLE_SERVICE_NAME)) {
+            for (final Port port : system.ports()) {
+                if (port.serviceDefinition().equals(ApiConstants.MONITORABLE_SERVICE_NAME)) {
                     monitorablePortBySystemId.put(system.systemId(), port);
                 }
             }
@@ -128,12 +140,16 @@ public class PingTask extends TimerTask {
 
             final String producerId = connection.producer().systemId();
             final Port producerPort = monitorablePortBySystemId.get(producerId);
+
+            if (producerPort == null) continue; // TODO: Check this logic.
+
             final String consumerId = connection.consumer().systemId();
             final PdeSystem consumer = systemById.get(consumerId);
             final String consumerName = consumer.systemName().orElse(null);
 
-            boolean consumerIsPde = Constants.PDE_SYSTEM_NAME.equals(consumerName);
-            boolean isMonitorableService = producerPort.serviceDefinition().equals(MONITORABLE_SERVICE_NAME);
+            boolean consumerIsPde = ApiConstants.PDE_SYSTEM_NAME.equals(consumerName); // TODO: Lowercase?
+            boolean isMonitorableService = producerPort.serviceDefinition()
+                .equals(ApiConstants.MONITORABLE_SERVICE_NAME);
 
             if (consumerIsPde && isMonitorableService) {
                 result.add(systemById.get(producerId));
@@ -151,11 +167,10 @@ public class PingTask extends TimerTask {
             .send(address,
                 new HttpClientRequest()
                     .method(HttpMethod.GET)
-                    .uri(service.uri() + PING_PATH)
-                    .header("accept",
-                        "application/json"))
+                    .uri(service.uri() + ApiConstants.MONITORABLE_PING_PATH)
+                    .header(ApiConstants.HEADER_ACCEPT, ApiConstants.APPLICATION_JSON))
             .ifSuccess(result -> {
-                logger.info("Successfully pinged system '" + providerName + "'.");
+                logger.debug("Successfully pinged system '" + providerName + "'.");
                 alarmManager.clearNoPingResponse(providerName);
             })
             .onFailure(e -> {

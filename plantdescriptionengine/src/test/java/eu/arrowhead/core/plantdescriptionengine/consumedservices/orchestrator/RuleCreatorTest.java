@@ -14,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -91,7 +90,6 @@ public class RuleCreatorTest {
             .createdAt(now)
             .updatedAt(now)
             .active(true)
-            .include(new ArrayList<>())
             .systems(List.of(consumerSystem, producerSystem))
             .connections(connections)
             .build();
@@ -115,8 +113,8 @@ public class RuleCreatorTest {
     @Test
     public void shouldAllowConnectionsToSystemInIncludedEntry() throws PdStoreException {
 
-        final String serviceDefinitionX = "service_x";
-        final String serviceDefinitionY = "service_z";
+        final String serviceDefinitionX = "servicex";
+        final String serviceDefinitionY = "servicez";
 
         final String consumerId = "Cons-Id";
         final String consumerPortA = "Cons-Port-A";

@@ -6,6 +6,7 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Pl
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Port;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.SystemPort;
 import eu.arrowhead.core.plantdescriptionengine.utils.Metadata;
+import eu.arrowhead.core.plantdescriptionengine.utils.SystemNameVerifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -90,8 +91,9 @@ public class PlantDescriptionValidator {
 
     private void validate(final List<PdeSystem> systems) {
         for (final PdeSystem system : systems) {
+            ensureLegalSystemId(system.systemId());
+            ensureLegalSystemName(system);
             checkIfIdentifiable(system);
-            ensureLegalSystemId(system);
         }
     }
 
@@ -107,9 +109,19 @@ public class PlantDescriptionValidator {
         }
     }
 
-    private void ensureLegalSystemId(final PdeSystem system) {
-        if (blacklist.contains(system.systemId().toLowerCase())) {
-            errors.add("'" + system.systemId() + "' is not a valid system ID.");
+    private void ensureLegalSystemId(final String systemId) {
+        if (blacklist.contains(systemId.toLowerCase())) {
+            errors.add("'" + systemId + "' is not a valid system ID.");
+        }
+    }
+
+    private void ensureLegalSystemName(final PdeSystem system) {
+        if (system.systemName().isEmpty()) {
+            return;
+        }
+        final String systemName = system.systemName().get();
+        if (!SystemNameVerifier.isValid(systemName)) {
+            errors.add("'" + systemName + "' is not a valid system name.");
         }
     }
 
@@ -186,7 +198,7 @@ public class PlantDescriptionValidator {
                 if (!allEntries.containsKey(includedId)) {
                     throw new ValidationException("Error in include list: Entry '" + includedId + "' is required by entry '" + nextEntry.id() + "'.");
                 }
-                final var includedEntry = allEntries.get(includedId);
+                final PlantDescriptionEntry includedEntry = allEntries.get(includedId);
                 queue.add(includedEntry);
             }
         }
@@ -207,12 +219,6 @@ public class PlantDescriptionValidator {
         }
     }
 
-    /**
-     * If the given Plant Description entry has duplicate entries in its include
-     * list, this is reported as an error.
-     *
-     * @param entry A Plant Description entry to investigate.
-     */
     private void checkForDuplicateInclusions(final PlantDescriptionEntry entry) {
         final List<Integer> includes = entry.include();
 
@@ -229,12 +235,6 @@ public class PlantDescriptionValidator {
         duplicates.forEach(id -> errors.add("Entry with ID '" + id + "' is included more than once."));
     }
 
-    /**
-     * Validates the connections present in the given list of Plant Description
-     * entries.
-     *
-     * @param entries A set of Plant Description entries.
-     */
     private void validateConnections(final Set<PlantDescriptionEntry> entries) {
 
         final ArrayList<PdeSystem> systems = new ArrayList<>();
@@ -250,12 +250,6 @@ public class PlantDescriptionValidator {
         }
     }
 
-    /**
-     * Validates a single connection between a service producer and a consumer.
-     *
-     * @param connection A connection to validate.
-     * @param systems    List of systems that the connection may refer to.
-     */
     private void validateConnection(final Connection connection, final ArrayList<PdeSystem> systems) {
         PdeSystem consumerSystem = null;
         PdeSystem producerSystem = null;
@@ -322,36 +316,34 @@ public class PlantDescriptionValidator {
         }
     }
 
-    /**
-     * Ensures that all system ports in the given Plant Description entry are
-     * valid.
-     *
-     * @param entry A Plant Description entry.
-     */
     private void validatePorts(final PlantDescriptionEntry entry) {
-        entry.systems().forEach(this::ensureUniquePorts);
-        entry.systems().forEach(this::ensureNoConsumerPortMetadata);
+        entry.systems().forEach(this::validatePorts);
     }
 
-    /**
-     * For each consumer port in the system, ensure that no metadata is
-     * present.
-     *
-     * @param system The system whose ports will be validated.
-     */
-    private void ensureNoConsumerPortMetadata(final PdeSystem system) {
+    private void validatePorts(final PdeSystem system) {
+        ensureUniquePorts(system);
+
         for (final Port port : system.ports()) {
-            if (port.consumer().orElse(false)) {
-                ensureNoMetadata(port);
-            }
+            ensureValidServiceDefinition(port.serviceDefinition());
+            ensureNoConsumerPortMetadata(port);
         }
     }
 
-    /**
-     * Report an error if the given port has metadata.
-     *
-     * @param port A system port.
-     */
+    private void ensureValidServiceDefinition(String serviceDefinition) {
+        // TODO: Allow uppercase characters and whitespace, but trim and
+        // transform to lowercase when storing PD:s instead.
+        if (!serviceDefinition.trim().toLowerCase().equals(serviceDefinition)) {
+            errors.add("Invalid service definition '" + serviceDefinition +
+                "', only lowercase characters and no whitespace is allowed.");
+        }
+    }
+
+    private void ensureNoConsumerPortMetadata(final Port port) {
+        if (port.consumer().orElse(false)) {
+            ensureNoMetadata(port);
+        }
+    }
+
     private void ensureNoMetadata(Port port) {
         final Map<String, String> metadata = port.metadata();
         if (!metadata.isEmpty()) {

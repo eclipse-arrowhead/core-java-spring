@@ -32,23 +32,6 @@ import java.util.Optional;
 public class GetAllPdeAlarms implements HttpRouteHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetAllPdeAlarms.class);
 
-    // Filter fields and values
-    private static final String ACKNOWLEDGED = "acknowledged";
-    private static final String ITEM_PER_PAGE = "item_per_page";
-    private static final String PAGE = "page";
-    private static final String SEVERITY = "severity";
-    private static final String SYSTEM_NAME = "systemName";
-
-    // Sort fields and values
-    private static final String SORT_FIELD = "sort_field";
-    private static final String ID = "id";
-    private static final String RAISED_AT = "raisedAt";
-    private static final String UPDATED_AT = "updatedAt";
-    private static final String CLEARED_AT = "clearedAt";
-    private static final String DIRECTION = "direction";
-    private static final String ASC = "ASC";
-    private static final String DESC = "DESC";
-
     private final AlarmManager alarmManager;
 
     /**
@@ -82,33 +65,38 @@ public class GetAllPdeAlarms implements HttpRouteHandler {
         severityValues.add(PdeAlarm.NOT_CLEARED);
 
         final IntParameter itemPerPageParam = new IntParameter.Builder()
-            .name(ITEM_PER_PAGE)
+            .name(QueryParameter.ITEM_PER_PAGE)
             .min(0)
             .build();
         final IntParameter pageParam = new IntParameter.Builder()
-            .name(PAGE)
+            .name(QueryParameter.PAGE)
             .min(0)
             .requires(itemPerPageParam)
             .build();
 
         final StringParameter sortFieldParam = new StringParameter.Builder()
-            .name(SORT_FIELD)
-            .legalValues(ID, RAISED_AT, UPDATED_AT, CLEARED_AT)
+            .name(QueryParameter.SORT_FIELD)
+            .legalValues(
+                QueryParameter.ID,
+                QueryParameter.RAISED_AT,
+                QueryParameter.UPDATED_AT,
+                QueryParameter.CLEARED_AT
+            )
             .build();
         final StringParameter directionParam = new StringParameter.Builder()
-            .name(DIRECTION)
-            .legalValues(ASC, DESC)
-            .defaultValue(ASC)
+            .name(QueryParameter.DIRECTION)
+            .legalValues(QueryParameter.ASC, QueryParameter.DESC)
+            .defaultValue(QueryParameter.ASC)
             .build();
         final StringParameter systemNameParam = new StringParameter.Builder()
-            .name(SYSTEM_NAME)
+            .name(QueryParameter.SYSTEM_NAME)
             .build();
         final StringParameter severityParam = new StringParameter.Builder()
-            .name(SEVERITY)
+            .name(QueryParameter.SEVERITY)
             .legalValues(severityValues)
             .build();
         final BooleanParameter acknowledgedParam = new BooleanParameter.Builder()
-            .name(ACKNOWLEDGED)
+            .name(QueryParameter.ACKNOWLEDGED)
             .build();
 
         final List<QueryParameter> acceptedParameters = List.of(pageParam, sortFieldParam, directionParam,
@@ -131,19 +119,19 @@ public class GetAllPdeAlarms implements HttpRouteHandler {
         final Optional<String> sortField = parser.getValue(sortFieldParam);
         if (sortField.isPresent()) {
             final String sortDirection = parser.getRequiredValue(directionParam);
-            final boolean ascending = ASC.equals(sortDirection);
+            final boolean ascending = QueryParameter.ASC.equals(sortDirection);
 
             switch (sortField.get()) {
-                case ID:
+                case QueryParameter.ID:
                     PdeAlarm.sortById(alarms, ascending);
                     break;
-                case RAISED_AT:
+                case QueryParameter.RAISED_AT:
                     PdeAlarm.sortByRaisedAt(alarms, ascending);
                     break;
-                case UPDATED_AT:
+                case QueryParameter.UPDATED_AT:
                     PdeAlarm.sortByUpdatedAt(alarms, ascending);
                     break;
-                case CLEARED_AT:
+                case QueryParameter.CLEARED_AT:
                     PdeAlarm.sortByClearedAt(alarms, ascending);
                     break;
                 default:
@@ -152,16 +140,6 @@ public class GetAllPdeAlarms implements HttpRouteHandler {
                     throw new AssertionError("Encountered the invalid sort field '" + sortField + "'.");
 
             }
-        }
-
-        final Optional<Integer> page = parser.getValue(pageParam);
-        if (page.isPresent()) {
-            final int itemsPerPage = parser.getRequiredValue(itemPerPageParam);
-
-            final int from = Math.min(page.get() * itemsPerPage, alarms.size());
-            final int to = Math.min(from + itemsPerPage, alarms.size());
-
-            alarms = alarms.subList(from, to);
         }
 
         final Optional<String> systemName = parser.getValue(systemNameParam);
@@ -179,9 +157,21 @@ public class GetAllPdeAlarms implements HttpRouteHandler {
             PdeAlarm.filterAcknowledged(alarms, acknowledged.get());
         }
 
+        final int count = alarms.size();
+
+        final Optional<Integer> page = parser.getValue(pageParam);
+        if (page.isPresent()) {
+            final int itemsPerPage = parser.getRequiredValue(itemPerPageParam);
+
+            final int from = Math.min(page.get() * itemsPerPage, alarms.size());
+            final int to = Math.min(from + itemsPerPage, alarms.size());
+
+            alarms = alarms.subList(from, to);
+        }
+
         PdeAlarmListDto result = new PdeAlarmListDto.Builder()
             .data(alarms)
-            .count(alarms.size())
+            .count(count)
             .build();
 
         response

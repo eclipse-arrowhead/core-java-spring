@@ -10,7 +10,7 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Pl
 import eu.arrowhead.core.plantdescriptionengine.utils.MockRequest;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockServiceResponse;
 import eu.arrowhead.core.plantdescriptionengine.utils.TestUtils;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import se.arkalix.net.http.HttpStatus;
@@ -29,11 +29,19 @@ import static org.mockito.Mockito.doThrow;
 
 public class DeletePlantDescriptionTest {
 
+    private PlantDescriptionTracker pdTracker;
+    private DeletePlantDescription handler;
+    private MockServiceResponse response;
+
+    @BeforeEach
+    public void initEach() throws PdStoreException {
+        pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
+        handler = new DeletePlantDescription(pdTracker);
+        response = new MockServiceResponse();
+    }
+
     @Test
     public void shouldDeleteEntries() throws PdStoreException {
-
-        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
-        final DeletePlantDescription handler = new DeletePlantDescription(pdTracker);
         final int entryId = 14;
         pdTracker.put(TestUtils.createEntry(entryId));
 
@@ -41,80 +49,58 @@ public class DeletePlantDescriptionTest {
             .pathParameters(List.of(String.valueOf(entryId)))
             .build();
 
-        final MockServiceResponse response = new MockServiceResponse();
-
         // Make sure that the entry is there before we delete it.
         assertNotNull(pdTracker.get(entryId));
 
-        try {
-            handler.handle(request, response)
-                .ifSuccess(result -> {
-                    assertEquals(HttpStatus.OK, response.status().orElse(null));
-                    assertNull(pdTracker.get(entryId));
-                })
-                .onFailure(Assertions::assertNull);
-        } catch (final Exception e) {
-            fail();
-        }
+        handler.handle(request, response)
+            .ifSuccess(result -> {
+                assertEquals(HttpStatus.OK, response.status().orElse(null));
+                assertNull(pdTracker.get(entryId));
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldRejectInvalidId() throws PdStoreException {
-        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
-        final DeletePlantDescription handler = new DeletePlantDescription(pdTracker);
+    public void shouldRejectInvalidId() {
         final String invalidEntryId = "InvalidId";
 
         final HttpServiceRequest request = new MockRequest.Builder()
             .pathParameters(List.of(invalidEntryId))
             .build();
 
-        final MockServiceResponse response = new MockServiceResponse();
-
-        try {
-            handler.handle(request, response)
-                .ifSuccess(result -> {
-                    assertTrue(response.status().isPresent());
-                    assertEquals(HttpStatus.BAD_REQUEST, response.status().get());
-                    final String expectedErrorMessage = "'" + invalidEntryId + "' is not a valid Plant Description Entry ID.";
-                    final String actualErrorMessage = ((ErrorMessage) response.getRawBody()).error();
-                    assertEquals(expectedErrorMessage, actualErrorMessage);
-                })
-                .onFailure(Assertions::assertNull);
-        } catch (final Exception e) {
-            fail();
-        }
+        handler.handle(request, response)
+            .ifSuccess(result -> {
+                final String expectedErrorMessage = "'" + invalidEntryId +
+                    "' is not a valid Plant Description Entry ID.";
+                final String actualErrorMessage = ((ErrorMessage) response.getRawBody()).error();
+                assertTrue(response.status().isPresent());
+                assertEquals(HttpStatus.BAD_REQUEST, response.status().get());
+                assertEquals(expectedErrorMessage, actualErrorMessage);
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldRejectNonexistentIds() throws PdStoreException {
-        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
-        final DeletePlantDescription handler = new DeletePlantDescription(pdTracker);
+    public void shouldRejectNonexistentIds() {
         final int nonExistentId = 392;
 
         final HttpServiceRequest request = new MockRequest.Builder()
             .pathParameters(List.of(String.valueOf(nonExistentId)))
             .build();
 
-        final MockServiceResponse response = new MockServiceResponse();
+        handler.handle(request, response)
+            .ifSuccess(result -> {
+                final String expectedErrorMessage = "Plant Description with ID " + nonExistentId + " not found.";
+                final String actualErrorMessage = ((ErrorMessage) response.getRawBody()).error();
+                assertEquals(HttpStatus.NOT_FOUND, response.status().orElse(null));
+                assertEquals(expectedErrorMessage, actualErrorMessage);
+            })
+            .onFailure(e -> fail());
 
-        try {
-            handler.handle(request, response)
-                .ifSuccess(result -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.status().orElse(null));
-                    final String expectedErrorMessage = "Plant Description with ID " + nonExistentId + " not found.";
-                    final String actualErrorMessage = ((ErrorMessage) response.getRawBody()).error();
-                    assertEquals(expectedErrorMessage, actualErrorMessage);
-                })
-                .onFailure(Assertions::assertNull);
-        } catch (final Exception e) {
-            fail();
-        }
     }
 
     @Test
     public void shouldRejectDeletionOfIncludedEntry() throws PdStoreException {
-        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
-        final DeletePlantDescription handler = new DeletePlantDescription(pdTracker);
         final Instant now = Instant.now();
         final int entryIdA = 23;
         final int entryIdB = 24;
@@ -141,21 +127,15 @@ public class DeletePlantDescriptionTest {
         final HttpServiceRequest request = new MockRequest.Builder().pathParameters(List.of(String.valueOf(entryIdA)))
             .build();
 
-        final MockServiceResponse response = new MockServiceResponse();
-
-        try {
-            handler.handle(request, response)
-                .ifSuccess(result -> {
-                    assertEquals(HttpStatus.BAD_REQUEST, response.status().orElse(null));
-                    final String expectedErrorMessage = "<Error in include list: Entry '" + entryIdA + "' is required by entry '"
-                        + entryIdB + "'.>";
-                    final String actualErrorMessage = ((ErrorMessage) response.getRawBody()).error();
-                    assertEquals(expectedErrorMessage, actualErrorMessage);
-                })
-                .onFailure(Assertions::assertNull);
-        } catch (final Exception e) {
-            fail();
-        }
+        handler.handle(request, response)
+            .ifSuccess(result -> {
+                final String expectedErrorMessage = "<Error in include list: Entry '" +
+                    entryIdA + "' is required by entry '" + entryIdB + "'.>";
+                final String actualErrorMessage = ((ErrorMessage) response.getRawBody()).error();
+                assertEquals(HttpStatus.BAD_REQUEST, response.status().orElse(null));
+                assertEquals(expectedErrorMessage, actualErrorMessage);
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
@@ -164,6 +144,7 @@ public class DeletePlantDescriptionTest {
         final PdStore backingStore = Mockito.mock(FilePdStore.class);
         final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(backingStore);
         final DeletePlantDescription handler = new DeletePlantDescription(pdTracker);
+
         final int entryId = 87;
         pdTracker.put(TestUtils.createEntry(entryId));
 
@@ -171,16 +152,10 @@ public class DeletePlantDescriptionTest {
             .pathParameters(List.of(String.valueOf(entryId)))
             .build();
 
-        final MockServiceResponse response = new MockServiceResponse();
-
         doThrow(new PdStoreException("Mocked error")).when(backingStore).remove(anyInt());
-        try {
-            handler.handle(request, response)
-                .ifSuccess(result -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.status().orElse(null)))
-                .onFailure(Assertions::assertNull);
-        } catch (final Exception e) {
-            fail();
-        }
+        handler.handle(request, response)
+            .ifSuccess(result -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.status().orElse(null)))
+            .onFailure(e -> fail());
     }
 
 }

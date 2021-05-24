@@ -1,5 +1,7 @@
 package eu.arrowhead.core.plantdescriptionengine;
 
+import eu.arrowhead.core.plantdescriptionengine.alarms.Alarm;
+import eu.arrowhead.core.plantdescriptionengine.alarms.AlarmCause;
 import eu.arrowhead.core.plantdescriptionengine.alarms.AlarmManager;
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.SrSystem;
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.SrSystemDto;
@@ -22,7 +24,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SystemMismatchDetectorTest {
@@ -102,19 +103,19 @@ public class SystemMismatchDetectorTest {
         Map<String, String> metadataA = Map.of("x", "1");
         Map<String, String> metadataB = Map.of("y", "1");
 
-        final var systemName = "System A";
-        final var systemA1 = new PdeSystemDto.Builder()
+        final String systemName = "systemabc";
+        final PdeSystemDto systemA1 = new PdeSystemDto.Builder()
             .systemId("systemA1")
             .systemName(systemName)
             .metadata(metadataA)
             .build();
-        final var systemA2 = new PdeSystemDto.Builder()
+        final PdeSystemDto systemA2 = new PdeSystemDto.Builder()
             .systemId("systemA2")
             .systemName(systemName)
             .metadata(metadataB)
             .build();
 
-        final var entry = new PlantDescriptionEntryDto.Builder()
+        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryDto.Builder()
             .id(1)
             .plantDescription("Plant Description 1A")
             .active(true)
@@ -149,7 +150,7 @@ public class SystemMismatchDetectorTest {
         systemTracker.addSystem(srSystemB);
         detector.run();
 
-        final var alarms = alarmManager.getAlarms();
+        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
         assertEquals(0, alarms.size());
     }
 
@@ -157,18 +158,10 @@ public class SystemMismatchDetectorTest {
     public void shouldReportNotRegistered() throws PdStoreException {
         detector.run();
 
-        final String systemName = "System A";
+        final String systemName = "systemabc";
         pdTracker.put(getPdEntry(systemName));
-        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
+        final List<Alarm> alarms = alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_REGISTERED);
         assertEquals(1, alarms.size());
-        final PdeAlarmDto alarm = alarms.get(0);
-        assertTrue(alarm.systemName().isPresent());
-        assertEquals(systemName, alarm.systemName().get());
-        assertFalse(alarm.clearedAt().isPresent());
-        assertEquals("warning", alarm.severity());
-        assertEquals("System named '" + systemName + "' cannot be found in the Service Registry.", alarm.description());
-        assertFalse(alarm.acknowledged());
-        assertFalse(alarm.clearedAt().isPresent());
     }
 
     @Test
@@ -176,7 +169,7 @@ public class SystemMismatchDetectorTest {
         detector.run();
 
         final String systemIdA = "Sys-A";
-        final String systemNameB = "System B";
+        final String systemNameB = "systemxyz";
 
         final PdeSystemDto system = new PdeSystemDto.Builder()
             .systemId(systemIdA)
@@ -194,7 +187,7 @@ public class SystemMismatchDetectorTest {
 
         final SrSystemDto srSystem = new SrSystemDto.Builder()
             .id(0)
-            .systemName("System B")
+            .systemName(systemNameB)
             .address("0.0.0.0")
             .port(5000)
             .authenticationInfo(null)
@@ -221,34 +214,25 @@ public class SystemMismatchDetectorTest {
     @Test
     public void shouldReportSystemNotInPd() throws PdStoreException {
 
-        final String systemNameA = "System A";
-        final String systemNameB = "System B";
+        final String systemNameA = "systemabc";
+        final String systemNameB = "systemxyz";
 
-        // Create a plant description that only specifies System A.
+        // Create a plant description that only specifies systemabc.
         pdTracker.put(getPdEntry(systemNameA));
         systemTracker.addSystem(getSrSystem(systemNameA));
         systemTracker.addSystem(getSrSystem(systemNameB));
 
         detector.run();
 
-        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
+        final List<Alarm> alarms = alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_IN_DESCRIPTION);
         assertEquals(1, alarms.size());
-        final PdeAlarmDto alarm = alarms.get(0);
-        assertTrue(alarm.systemName().isPresent());
-        assertEquals(systemNameB, alarm.systemName().get());
-        assertFalse(alarm.clearedAt().isPresent());
-        assertEquals("warning", alarm.severity());
-        assertEquals("System named '" + systemNameB + "' is not present in the active Plant Description.",
-            alarm.description());
-        assertFalse(alarm.acknowledged());
-        assertFalse(alarm.clearedAt().isPresent());
     }
 
     @Test
     public void shouldClearWhenSystemIsRegistered() throws PdStoreException {
 
-        final String systemNameA = "System A";
-        final String systemNameB = "System B";
+        final String systemNameA = "systemabc";
+        final String systemNameB = "systemxyz";
 
         final PdeSystemDto systemA = getSystem(systemNameA, "a");
         final PdeSystemDto systemB = getSystem(systemNameB, "b");
@@ -265,29 +249,22 @@ public class SystemMismatchDetectorTest {
         pdTracker.put(pdeEntry);
         systemTracker.addSystem(getSrSystem(systemNameA));
 
-        // System B is missing, an alarm is created.
+        // A is missing, an alarm is created.
         detector.run();
 
-        // System B is added, so the alarm should be cleared.
+        assertEquals(1, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_REGISTERED).size());
+
+        // The is added, so the alarm should be cleared.
         systemTracker.addSystem(getSrSystem(systemNameB));
 
-        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
-        assertEquals(1, alarms.size());
-        final PdeAlarmDto alarm = alarms.get(0);
-        assertTrue(alarm.systemName().isPresent());
-        assertEquals(systemNameB, alarm.systemName().get());
-        assertTrue(alarm.clearedAt().isPresent());
-        assertEquals("cleared", alarm.severity());
-        assertEquals("System named '" + systemNameB + "' cannot be found in the Service Registry.",
-            alarm.description());
-        assertFalse(alarm.acknowledged());
+        assertEquals(0, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_REGISTERED).size());
     }
 
     @Test
     public void shouldStillReportIfOneIsCleared() throws PdStoreException {
 
-        final String systemNameA = "System A";
-        final String systemNameB = "System B";
+        final String systemNameA = "systemabc";
+        final String systemNameB = "systemxyz";
 
         final PlantDescriptionEntryDto pdeEntry = new PlantDescriptionEntryDto.Builder()
             .id(1)
@@ -302,10 +279,10 @@ public class SystemMismatchDetectorTest {
         systemTracker.addSystem(getSrSystem(systemNameA));
         systemTracker.addSystem(getSrSystem(systemNameB));
 
-        // System A and B are missing from PD, two alarms are created.
+        // Two systems are missing from PD, two alarms are created.
         detector.run();
 
-        // System B is removed from the Service Registry, so one of the alarms
+        // One system is removed from the Service Registry, so one of the alarms
         // should be cleared.
         systemTracker.remove(systemNameB);
 
@@ -314,11 +291,9 @@ public class SystemMismatchDetectorTest {
         final PdeAlarmDto alarmA = alarms.get(0);
         final PdeAlarmDto alarmB = alarms.get(1);
 
-        assertTrue(alarmA.systemName().isPresent());
-        assertEquals(systemNameA, alarmA.systemName().get());
+        assertEquals(systemNameA, alarmA.systemName().orElse(null));
         assertTrue(alarmA.clearedAt().isEmpty());
-        assertTrue(alarmB.systemName().isPresent());
-        assertEquals(systemNameB, alarmB.systemName().get());
+        assertEquals(systemNameB, alarmB.systemName().orElse(null));
         assertTrue(alarmB.clearedAt().isPresent());
     }
 
@@ -329,59 +304,29 @@ public class SystemMismatchDetectorTest {
         final String systemName = "System C";
         final PlantDescriptionEntryDto entry = getPdEntry(systemName);
         pdTracker.put(entry);
+        assertEquals(1, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_REGISTERED).size());
         pdTracker.remove(entry.id());
-
-        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
-        assertEquals(1, alarms.size());
-        final PdeAlarmDto alarm = alarms.get(0);
-        assertTrue(alarm.systemName().isPresent());
-        assertEquals(systemName, alarm.systemName().get());
-        assertTrue(alarm.clearedAt().isPresent());
-        assertEquals("cleared", alarm.severity());
-        assertEquals("System named '" + systemName + "' cannot be found in the Service Registry.", alarm.description());
-        assertFalse(alarm.acknowledged());
+        assertEquals(0, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_REGISTERED).size());
     }
 
     @Test
     public void shouldClearWhenPdIsAdded() throws PdStoreException {
         detector.run();
-
         final String systemName = "System D";
-
         systemTracker.addSystem(getSrSystem(systemName));
+        assertEquals(1, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_IN_DESCRIPTION).size());
         pdTracker.put(getPdEntry(systemName));
-
-        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
-        assertEquals(1, alarms.size());
-        final PdeAlarmDto alarm = alarms.get(0);
-        assertTrue(alarm.systemName().isPresent());
-        assertEquals(systemName, alarm.systemName().get());
-        assertTrue(alarm.clearedAt().isPresent());
-        assertEquals("cleared", alarm.severity());
-        assertEquals("System named '" + systemName + "' is not present in the active Plant Description.",
-            alarm.description());
-        assertFalse(alarm.acknowledged());
+        assertEquals(0, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_IN_DESCRIPTION).size());
     }
 
     @Test
     public void shouldClearWhenSystemIsRemoved() {
         detector.run();
-
         final String systemName = "System D";
-
         systemTracker.addSystem(getSrSystem(systemName));
+        assertEquals(1, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_IN_DESCRIPTION).size());
         systemTracker.remove(systemName);
-
-        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
-        assertEquals(1, alarms.size());
-        final PdeAlarmDto alarm = alarms.get(0);
-        assertTrue(alarm.systemName().isPresent());
-        assertEquals(systemName, alarm.systemName().get());
-        assertTrue(alarm.clearedAt().isPresent());
-        assertEquals("cleared", alarm.severity());
-        assertEquals("System named '" + systemName + "' is not present in the active Plant Description.",
-            alarm.description());
-        assertFalse(alarm.acknowledged());
+        assertEquals(0, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_IN_DESCRIPTION).size());
     }
 
     @Test
@@ -392,8 +337,8 @@ public class SystemMismatchDetectorTest {
         // is not significant for the outcome of the test, but it helps improve
         // code coverage.
 
-        final String systemNameA = "System A";
-        final String systemNameB = "System B";
+        final String systemNameA = "systemabc";
+        final String systemNameB = "systemxyz";
         final String systemNameC = "System C";
 
         final SrSystemDto srSystemA = new SrSystemDto.Builder()
@@ -430,8 +375,6 @@ public class SystemMismatchDetectorTest {
             .systemName(systemNameB)
             .build();
 
-        // System with metadata that matches System C in the service registry,
-        // but not System A (whose metadata is only a subset).
         final PdeSystemDto systemC = new PdeSystemDto.Builder()
             .systemId("Sys-C")
             .metadata(Map.of("x", "1", "y", "2", "z", "3"))
@@ -462,36 +405,27 @@ public class SystemMismatchDetectorTest {
             .updatedAt(Instant.now())
             .build();
 
+        assertEquals(1, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_IN_DESCRIPTION).size());
         pdTracker.put(entryWithThreeSystems);
-
-        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
-        assertEquals(1, alarms.size());
-        final PdeAlarmDto alarm = alarms.get(0);
-        assertTrue(alarm.systemName().isPresent());
-        assertEquals(systemNameA, alarm.systemName().get());
-        assertTrue(alarm.clearedAt().isPresent());
-        assertEquals("cleared", alarm.severity());
-        assertEquals("System named '" + systemNameA + "' is not present in the active Plant Description.",
-            alarm.description());
-        assertFalse(alarm.acknowledged());
+        assertEquals(0, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_IN_DESCRIPTION).size());
     }
 
     @Test
     public void shouldClearWhenPdIsUpdatedWithMetadata() throws PdStoreException {
-
-        final String systemNameA = "System A";
+        final Instant now = Instant.now();
+        final String systemNameA = "systemabc";
 
         final PlantDescriptionEntryDto entryWithOneSystem = new PlantDescriptionEntryDto.Builder().id(1)
             .plantDescription("Plant Description 1A")
             .active(true)
             .systems(List.of(getSystem(systemNameA, "a")))
-            .createdAt(Instant.now())
-            .updatedAt(Instant.now())
+            .createdAt(now)
+            .updatedAt(now)
             .build();
 
         pdTracker.put(entryWithOneSystem);
 
-        final String systemNameB = "System B";
+        final String systemNameB = "systemxyz";
         final SrSystemDto srSystemB = new SrSystemDto.Builder()
             .id(38)
             .systemName(systemNameB)
@@ -499,46 +433,32 @@ public class SystemMismatchDetectorTest {
             .port(5022)
             .authenticationInfo(null)
             .metadata(Map.of("a", "1", "b", "2"))
-            .createdAt(Instant.now()
-                .toString())
-            .updatedAt(Instant.now()
-                .toString())
+            .createdAt(now.toString())
+            .updatedAt(now.toString())
             .build();
 
         systemTracker.addSystem(getSrSystem(systemNameA));
         systemTracker.addSystem(srSystemB);
 
-        // An unnamed system is missing from the PD.
-
         detector.run();
 
-        final PdeSystemDto systemB = new PdeSystemDto.Builder()
+        final PdeSystemDto namedSystem = getSystem(systemNameA, "a");
+        final PdeSystemDto unnamedSystem = new PdeSystemDto.Builder()
             .systemId("b")
             .metadata(Map.of("b", "2")) // Subset of the SR system metadata
             .build();
 
-        final PlantDescriptionEntryDto entryWithTwoSystems = new PlantDescriptionEntryDto.Builder().id(1)
+        final PlantDescriptionEntryDto entryWithBothSystems = new PlantDescriptionEntryDto.Builder().id(1)
             .plantDescription("Plant Description 1A")
             .active(true)
-            .systems(List.of(getSystem(systemNameA, "a"), systemB))
-            .createdAt(Instant.now())
-            .updatedAt(Instant.now())
+            .systems(List.of(namedSystem, unnamedSystem))
+            .createdAt(now)
+            .updatedAt(now)
             .build();
 
-        pdTracker.put(entryWithTwoSystems);
-
-        // The unnamed system is no longer missing from the active PD.
-
-        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
-        assertEquals(1, alarms.size());
-        final PdeAlarmDto alarm = alarms.get(0);
-        assertTrue(alarm.systemName().isPresent());
-        assertEquals(systemNameB, alarm.systemName().get());
-        assertTrue(alarm.clearedAt().isPresent());
-        assertEquals("cleared", alarm.severity());
-        assertEquals("System named '" + systemNameB + "' is not present in the active Plant Description.",
-            alarm.description());
-        assertFalse(alarm.acknowledged());
+        assertEquals(1, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_IN_DESCRIPTION).size());
+        pdTracker.put(entryWithBothSystems);
+        assertEquals(0, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_IN_DESCRIPTION).size());
     }
 
     @Test
@@ -561,7 +481,7 @@ public class SystemMismatchDetectorTest {
         // System with matching metadata:
         final SrSystemDto srSystemA = new SrSystemDto.Builder()
             .id(0)
-            .systemName("System A")
+            .systemName("systemabc")
             .metadata(Map.of("a", "1", "b", "2", "c", "3"))
             .address("0.0.0.0")
             .port(5000)
@@ -575,7 +495,7 @@ public class SystemMismatchDetectorTest {
         // Another system with matching metadata:
         final SrSystemDto srSystemB = new SrSystemDto.Builder()
             .id(0)
-            .systemName("System B")
+            .systemName("systemxyz")
             .metadata(Map.of("a", "1", "b", "2", "d", "4"))
             .address("0.0.0.1")
             .port(5001)
@@ -591,16 +511,7 @@ public class SystemMismatchDetectorTest {
         systemTracker.addSystem(srSystemB);
         detector.run();
 
-        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
-        assertEquals(1, alarms.size());
-        final PdeAlarmDto alarm = alarms.get(0);
-        assertTrue(alarm.systemName().isEmpty());
-        assertTrue(alarm.clearedAt().isEmpty());
-        assertEquals("warning", alarm.severity());
-        assertEquals("System with ID '" + systemId + "' cannot be uniquely identified in the Service Registry.",
-            alarm.description());
-        assertFalse(alarm.acknowledged());
-
+        assertEquals(1, alarmManager.getActiveAlarmData(AlarmCause.MULTIPLE_MATCHES).size());
     }
 
     @Test
@@ -624,7 +535,7 @@ public class SystemMismatchDetectorTest {
         final Map<String, String> systemAMetadata = Map.of("a", "1", "b", "2", "c", "3");
         final SrSystemDto srSystemA = new SrSystemDto.Builder()
             .id(0)
-            .systemName("System A")
+            .systemName("systemabc")
             .metadata(systemAMetadata)
             .address("0.0.0.0")
             .port(5000)
@@ -638,7 +549,7 @@ public class SystemMismatchDetectorTest {
         // Another system with matching metadata:
         final SrSystemDto srSystemB = new SrSystemDto.Builder()
             .id(0)
-            .systemName("System B")
+            .systemName("systemxyz")
             .metadata(Map.of("a", "1", "b", "2", "d", "4"))
             .address("0.0.0.1")
             .port(5001)
@@ -653,17 +564,9 @@ public class SystemMismatchDetectorTest {
         systemTracker.addSystem(srSystemA);
         systemTracker.addSystem(srSystemB);
         detector.run();
+
+        assertEquals(1, alarmManager.getActiveAlarmData(AlarmCause.MULTIPLE_MATCHES).size());
         systemTracker.remove(srSystemA.systemName(), systemAMetadata);
-
-        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
-        assertEquals(1, alarms.size());
-        final PdeAlarmDto alarm = alarms.get(0);
-        assertTrue(alarm.systemName().isEmpty());
-        assertTrue(alarm.clearedAt().isPresent());
-        assertEquals("cleared", alarm.severity());
-        assertEquals("System with ID '" + systemId + "' cannot be uniquely identified in the Service Registry.",
-            alarm.description());
-        assertFalse(alarm.acknowledged());
-
+        assertEquals(0, alarmManager.getActiveAlarmData(AlarmCause.MULTIPLE_MATCHES).size());
     }
 }

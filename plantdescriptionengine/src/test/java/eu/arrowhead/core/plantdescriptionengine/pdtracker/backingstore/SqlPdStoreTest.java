@@ -5,6 +5,7 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Co
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystem;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PdeSystemDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryDto;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Port;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PortDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.SystemPortDto;
 import eu.arrowhead.core.plantdescriptionengine.utils.TestUtils;
@@ -173,7 +174,7 @@ public class SqlPdStoreTest {
         assertEquals(consumerId, retrievedConsumer.systemId());
         assertEquals(1, retrievedConsumer.ports().size());
 
-        final var retrievedConsumerPort = retrievedConsumer.ports().get(0);
+        final Port retrievedConsumerPort = retrievedConsumer.ports().get(0);
         assertEquals(consumerPort, retrievedConsumerPort.portName());
         assertEquals(true, retrievedConsumerPort.consumer().orElse(false));
         assertEquals(consumerPortMetadata, retrievedConsumerPort.metadata());
@@ -183,7 +184,7 @@ public class SqlPdStoreTest {
         assertEquals(producerId, retrievedProducer.systemId());
         assertEquals(1, retrievedProducer.ports().size());
 
-        final var retrievedProducerPort = retrievedProducer.ports().get(0);
+        final Port retrievedProducerPort = retrievedProducer.ports().get(0);
         assertEquals(producerPort, retrievedProducerPort.portName());
         assertEquals(false, retrievedProducerPort.consumer().orElse(false));
         assertTrue(retrievedProducerPort.metadata().isEmpty());

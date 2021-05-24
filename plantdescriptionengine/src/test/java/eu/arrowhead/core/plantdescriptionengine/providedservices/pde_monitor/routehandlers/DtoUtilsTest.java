@@ -1,6 +1,6 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.routehandlers;
 
-import eu.arrowhead.core.plantdescriptionengine.MonitorInfo;
+import eu.arrowhead.core.plantdescriptionengine.MonitorInfoTracker;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.InMemoryPdStore;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.PdStoreException;
@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import se.arkalix.ServiceInterface;
 import se.arkalix.ServiceRecord;
 import se.arkalix.SystemRecord;
+import se.arkalix._internal.DefaultSystemRecord;
 import se.arkalix.codec.json.JsonBoolean;
 import se.arkalix.codec.json.JsonObject;
 import se.arkalix.codec.json.JsonPair;
@@ -22,7 +23,6 @@ import se.arkalix.security.access.AccessPolicyType;
 
 import java.net.InetSocketAddress;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -31,263 +31,222 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DtoUtilsTest {
 
-    @Test
-    public void shouldExtendWithMonitorData() throws PdStoreException {
+    final private String systemName = "abc";
+    private final Instant now = Instant.now();
+    private final String someServiceDefinition = "servicexyz";
+    private final String httpSecureJson = ServiceInterface.HTTP_SECURE_JSON.toString();
 
-        final String systemName = "System A";
-
-        final Map<String, String> metadata = Map.of("a", "b");
-        final String portName = "Port-A";
-        final String serviceDefinition = "Service-AC";
-        final String serviceInterface = "HTTP-SECURE-JSON";
-        final List<PortDto> ports = List.of(
-            // Port B and C will *not* be complemented by monitor info:
-            new PortDto.Builder()
-                .metadata(Map.of("i", "j")) // Differs from service A
-                .portName("Port-C")
-                .serviceInterface(serviceInterface)
-                .serviceDefinition(serviceDefinition) // Same as service A
-                .build(),
-            new PortDto.Builder()
-                .metadata(Map.of("x", "y")) // Differs from service A
-                .portName("Port-B")
-                .serviceInterface(serviceInterface)
-                .serviceDefinition("Service-B") // Differs from service A
-                .build(),
-            // Port A will be complemented by monitor info:
-            new PortDto.Builder()
-                .metadata(metadata)
-                .portName(portName)
-                .serviceInterface(serviceInterface)
-                .serviceDefinition(serviceDefinition)
-                .build());
-
-        final PdeSystemDto system = new PdeSystemDto.Builder()
+    private PdeSystemDto getSystemWithPorts(final List<PortDto> ports) {
+        return new PdeSystemDto.Builder()
             .systemName(systemName)
             .systemId("system_a")
             .ports(ports)
             .build();
+    }
 
-        final Instant now = Instant.now();
-        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryDto.Builder()
-            .id(1)
-            .plantDescription("Plant Description 1A")
-            .active(false)
-            .include(new ArrayList<>())
-            .systems(List.of(system))
-            .connections(new ArrayList<>())
-            .createdAt(now)
-            .updatedAt(now)
-            .build();
-
-        final SystemRecord provider = SystemRecord.from(systemName, new InetSocketAddress("0.0.0.0", 5000));
-        final ServiceRecord ServiceRecord = new ServiceRecord.Builder()
-            .name(serviceDefinition)
-            .metadata(metadata)
+    private ServiceRecord getServiceRecord(Map<String, String> systemMetadata, Map<String, String> serviceMetadata) {
+        final SystemRecord provider = new DefaultSystemRecord(
+            systemName, null, new InetSocketAddress("0.0.0.0", 5000), systemMetadata
+        );
+        return new ServiceRecord.Builder()
+            .name(someServiceDefinition)
+            .metadata(serviceMetadata)
             .uri("/abc")
             .provider(provider)
             .accessPolicyType(AccessPolicyType.NOT_SECURE)
             .interfaces(ServiceInterface.HTTP_SECURE_JSON)
             .build();
+    }
 
-        final String inventoryId = "system_a_inventory_id";
+    private PlantDescriptionEntryDto getEntryWithSystem(PdeSystemDto system) {
+        return new PlantDescriptionEntryDto.Builder()
+            .id(1)
+            .plantDescription("Plant Description 1A")
+            .active(false)
+            .systems(List.of(system))
+            .createdAt(now)
+            .updatedAt(now)
+            .build();
+    }
+
+    private boolean hasMonitorInfo(
+        final PortEntry port,
+        final String inventoryId,
+        final JsonObject systemData
+    ) {
+        return inventoryId.equals(port.inventoryId().orElse(null))
+            && systemData.equals(port.systemData().orElse(null));
+    }
+
+    private boolean hasMonitorInfo(
+        final SystemEntry system,
+        final String inventoryId,
+        final JsonObject systemData
+    ) {
+        return inventoryId.equals(system.inventoryId().orElse(null))
+            && systemData.equals(system.systemData().orElse(null));
+    }
+
+    private boolean hasNoMonitorInfo(final PortEntry port) {
+        return port.inventoryId().isEmpty() && port.systemData().isEmpty();
+    }
+
+    @Test
+    public void shouldPlaceMonitorDataOnPortLevel() throws PdStoreException {
+        final Map<String, String> serviceMetadata = Map.of("a", "b");
+        final List<PortDto> ports = List.of(
+            // Port B and C will *not* be complemented by monitor info:
+            new PortDto.Builder()
+                .metadata(Map.of("i", "j")) // Differs
+                .portName("Port-A")
+                .serviceInterface(httpSecureJson)
+                .serviceDefinition(someServiceDefinition)
+                .build(),
+            new PortDto.Builder()
+                .metadata(serviceMetadata)
+                .portName("Port-B")
+                .serviceInterface(httpSecureJson)
+                .serviceDefinition("Service-B") // Differs
+                .build(),
+            // Port A has matching metadata *and* service definition,
+            // so it should be matched.
+            new PortDto.Builder()
+                .metadata(serviceMetadata)
+                .portName("Port-C")
+                .serviceInterface(httpSecureJson)
+                .serviceDefinition(someServiceDefinition)
+                .build()
+        );
+
+        final PdeSystemDto system = getSystemWithPorts(ports);
+        final PlantDescriptionEntryDto entry = getEntryWithSystem(system);
+        final ServiceRecord ServiceRecord = getServiceRecord(null, serviceMetadata);
+        final String inventoryId = "abc_inventory_id";
         final JsonObject systemData = new JsonObject(new JsonPair("a", JsonBoolean.TRUE));
-
-        final MonitorInfo monitorInfo = new MonitorInfo();
-        monitorInfo.putInventoryId(ServiceRecord, inventoryId);
-        monitorInfo.putSystemData(ServiceRecord, systemData);
-
+        final MonitorInfoTracker monitorInfoTracker = new MonitorInfoTracker();
         final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
+
+        monitorInfoTracker.putInventoryId(ServiceRecord, inventoryId);
+        monitorInfoTracker.putSystemData(ServiceRecord, systemData);
         pdTracker.put(entry);
 
-        final MonitorPlantDescriptionEntry extendedEntry = DtoUtils.extend(entry, monitorInfo, pdTracker);
+        final MonitorPlantDescriptionEntry extendedEntry = DtoUtils.extend(entry, monitorInfoTracker, pdTracker);
         final SystemEntry extendedSystem = extendedEntry.systems().get(0);
 
-        final PortEntry extendedPortA = extendedSystem.ports().get(2);
+        final PortEntry extendedPortA = extendedSystem.ports().get(0);
         final PortEntry extendedPortB = extendedSystem.ports().get(1);
-        final PortEntry extendedPortC = extendedSystem.ports().get(0);
+        final PortEntry extendedPortC = extendedSystem.ports().get(2);
 
-        assertEquals(inventoryId, extendedPortA.inventoryId().orElse(null));
-        assertEquals(systemData, extendedPortA.systemData().orElse(null));
+        assertTrue(hasNoMonitorInfo(extendedPortA));
+        assertTrue(hasNoMonitorInfo(extendedPortB));
+        assertTrue(hasMonitorInfo(extendedPortC, inventoryId, systemData));
+    }
 
-        assertTrue(extendedPortB.inventoryId().isEmpty());
-        assertTrue(extendedPortB.systemData().isEmpty());
+    @Test
+    public void shouldPlaceMonitorDataOnSystemLevel() throws PdStoreException {
 
-        assertTrue(extendedPortC.inventoryId().isEmpty());
-        assertTrue(extendedPortC.systemData().isEmpty());
+        final Map<String, String> systemMetadata = Map.of("x", "0", "y", "1", "z", "2");
+        final Map<String, String> serviceMetadata = Map.of("foo", "bar");
+        final ServiceRecord ServiceRecord = getServiceRecord(systemMetadata, serviceMetadata);
+        final List<PortDto> ports = List.of(
+            // This port has metadata that differs from that of the service
+            // record's system metadata.
+            new PortDto.Builder()
+                .metadata(Map.of("i", "j"))
+                .portName("Port-A")
+                .serviceInterface(httpSecureJson)
+                .serviceDefinition(someServiceDefinition)
+                .build(),
+            // This port has the same metadata as the service record's system
+            // metadata, but it should still not be extended with monitor info:
+            // the *service* metadata of the service record does not match.
+            new PortDto.Builder()
+                .metadata(systemMetadata)
+                .portName("Port-B")
+                .serviceInterface(httpSecureJson)
+                .serviceDefinition(someServiceDefinition)
+                .build()
+        );
+
+        final PdeSystemDto system = getSystemWithPorts(ports);
+        final PlantDescriptionEntryDto entry = getEntryWithSystem(system);
+
+        final String inventoryId = "abc_inventory_id";
+        final JsonObject systemData = new JsonObject(new JsonPair("a", JsonBoolean.TRUE));
+        final MonitorInfoTracker monitorInfoTracker = new MonitorInfoTracker();
+        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
+
+        monitorInfoTracker.putInventoryId(ServiceRecord, inventoryId);
+        monitorInfoTracker.putSystemData(ServiceRecord, systemData);
+        pdTracker.put(entry);
+
+        final MonitorPlantDescriptionEntry extendedEntry = DtoUtils.extend(entry, monitorInfoTracker, pdTracker);
+        final SystemEntry extendedSystem = extendedEntry.systems().get(0);
+
+        final PortEntry extendedPortA = extendedSystem.ports().get(0);
+        final PortEntry extendedPortB = extendedSystem.ports().get(1);
+
+        assertTrue(hasNoMonitorInfo(extendedPortA));
+        assertTrue(hasNoMonitorInfo(extendedPortB));
+        assertTrue(hasMonitorInfo(extendedSystem, inventoryId, systemData));
     }
 
     @Test
     public void shouldExtendWithoutMonitorData() throws PdStoreException {
-
-        final String systemName = "System A";
-
-        final Map<String, String> metadata = Map.of("a", "b");
-        final String portName = "Port-A";
-        final String serviceDefinition = "Service-A";
-        final String serviceInterface = "HTTP-SECURE-JSON";
-        final List<PortDto> ports = List
-            .of(new PortDto.Builder()
-                .metadata(metadata)
-                .portName(portName)
-                .serviceInterface(serviceInterface)
-                .serviceDefinition(serviceDefinition)
-                .build());
-        final PdeSystemDto system = new PdeSystemDto.Builder()
-            .systemName(systemName)
-            .systemId("system_a")
-            .ports(ports)
+        final PortDto port = new PortDto.Builder()
+            .portName("Port-A")
+            .serviceInterface(httpSecureJson)
+            .serviceDefinition(someServiceDefinition)
             .build();
-        final Instant now = Instant.now();
-        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryDto.Builder()
-            .id(1)
-            .plantDescription("Plant Description 1A")
-            .active(false)
-            .include(new ArrayList<>())
-            .systems(List.of(system))
-            .connections(new ArrayList<>())
-            .createdAt(now)
-            .updatedAt(now)
-            .build();
-
-        final MonitorInfo monitorInfo = new MonitorInfo();
-
+        final PdeSystemDto system = getSystemWithPorts(List.of(port));
+        final PlantDescriptionEntryDto entry = getEntryWithSystem(system);
+        final MonitorInfoTracker monitorInfoTracker = new MonitorInfoTracker();
         final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
+
         pdTracker.put(entry);
 
-        final MonitorPlantDescriptionEntryDto extendedEntry = DtoUtils.extend(entry, monitorInfo, pdTracker);
+        final MonitorPlantDescriptionEntryDto extendedEntry = DtoUtils.extend(entry, monitorInfoTracker, pdTracker);
         final SystemEntry extendedSystem = extendedEntry.systems().get(0);
         final PortEntry extendedPort = extendedSystem.ports().get(0);
+
         assertTrue(extendedPort.inventoryId().isEmpty());
         assertTrue(extendedPort.systemData().isEmpty());
-        assertEquals(serviceInterface, extendedPort.serviceInterface().orElse(null));
+        assertEquals(httpSecureJson, extendedPort.serviceInterface().orElse(null));
     }
 
     /**
      * Test that consumer ports are not supplemented with monitor info. In fact,
      * Plant Descriptions with consumer ports containing metadata are not
      * allowed. This is enforced by the {@link eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.PlantDescriptionValidator}.
-     * @throws PdStoreException
      */
     @Test
     public void shouldNotAddMonitorDataToConsumerPort() throws PdStoreException {
-
-        final String systemName = "System A";
-
-        final Map<String, String> metadata = Map.of("a", "b");
-        final String portName = "Port-A";
-        final String serviceDefinition = "Service-AC";
-        final String serviceInterface = "HTTP-SECURE-JSON";
-        final List<PortDto> ports = List.of(
-            new PortDto.Builder()
-                .metadata(metadata)
-                .portName(portName)
-                .consumer(true)
-                .serviceInterface(serviceInterface)
-                .serviceDefinition(serviceDefinition)
-                .build());
-
-        final PdeSystemDto system = new PdeSystemDto.Builder()
-            .systemName(systemName)
-            .systemId("system_a")
-            .ports(ports)
+        final Map<String, String> serviceMetadata = Map.of("a", "b");
+        final PortDto port = new PortDto.Builder()
+            .metadata(serviceMetadata)
+            .portName("Port-A")
+            .consumer(true)
+            .serviceInterface(httpSecureJson)
+            .serviceDefinition(someServiceDefinition)
             .build();
 
-        final Instant now = Instant.now();
-        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryDto.Builder()
-            .id(1)
-            .plantDescription("Plant Description 1A")
-            .active(false)
-            .include(new ArrayList<>())
-            .systems(List.of(system))
-            .connections(new ArrayList<>())
-            .createdAt(now)
-            .updatedAt(now)
-            .build();
-
-        final SystemRecord provider = SystemRecord.from(systemName, new InetSocketAddress("0.0.0.0", 5000));
-        final ServiceRecord ServiceRecord = new ServiceRecord.Builder()
-            .name(serviceDefinition)
-            .metadata(metadata)
-            .uri("/abc")
-            .provider(provider)
-            .accessPolicyType(AccessPolicyType.NOT_SECURE)
-            .interfaces(ServiceInterface.HTTP_SECURE_JSON)
-            .build();
-
-        final String inventoryId = "system_a_inventory_id";
+        final PdeSystemDto system = getSystemWithPorts(List.of(port));
+        final PlantDescriptionEntryDto entry = getEntryWithSystem(system);
+        final String inventoryId = "abc_inventory_id";
         final JsonObject systemData = new JsonObject(new JsonPair("a", JsonBoolean.TRUE));
-
-        final MonitorInfo monitorInfo = new MonitorInfo();
-        monitorInfo.putInventoryId(ServiceRecord, inventoryId);
-        monitorInfo.putSystemData(ServiceRecord, systemData);
-
+        final MonitorInfoTracker monitorInfoTracker = new MonitorInfoTracker();
         final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
+        final ServiceRecord ServiceRecord = getServiceRecord(null, serviceMetadata);
+
+        monitorInfoTracker.putInventoryId(ServiceRecord, inventoryId);
+        monitorInfoTracker.putSystemData(ServiceRecord, systemData);
         pdTracker.put(entry);
 
-        final MonitorPlantDescriptionEntryDto extendedEntry = DtoUtils.extend(entry, monitorInfo, pdTracker);
+        final MonitorPlantDescriptionEntryDto extendedEntry = DtoUtils.extend(entry, monitorInfoTracker, pdTracker);
         final SystemEntry extendedSystem = extendedEntry.systems().get(0);
         final PortEntry extendedPortA = extendedSystem.ports().get(0);
 
-        assertTrue(extendedPortA.inventoryId().isEmpty());
-        assertTrue(extendedPortA.inventoryId().isEmpty());
-    }
-
-    /**
-     * In this test, the MonitorInfo instance contains data that can not be
-     * matched to the system itself, since its metadata differs from that of the
-     * system.
-     * @throws PdStoreException
-     */
-    @Test
-    public void shouldNotMatchInfoToSystem() throws PdStoreException {
-
-        final String systemName = "System A";
-
-        final Map<String, String> metadata = Map.of("a", "b");
-        final String serviceDefinition = "Service-AC";
-
-        final PdeSystemDto system = new PdeSystemDto.Builder()
-            .systemName(systemName)
-            .metadata(Map.of("foo", "bar"))
-            .systemId("system_a")
-            .build();
-
-        final Instant now = Instant.now();
-        final PlantDescriptionEntryDto entry = new PlantDescriptionEntryDto.Builder()
-            .id(1)
-            .plantDescription("Plant Description 1A")
-            .active(false)
-            .include(new ArrayList<>())
-            .systems(List.of(system))
-            .connections(new ArrayList<>())
-            .createdAt(now)
-            .updatedAt(now)
-            .build();
-
-        final SystemRecord provider = SystemRecord.from(systemName, new InetSocketAddress("0.0.0.0", 5000));
-        final ServiceRecord ServiceRecord = new ServiceRecord.Builder()
-            .name(serviceDefinition)
-            .metadata(metadata)
-            .uri("/abc")
-            .provider(provider)
-            .accessPolicyType(AccessPolicyType.NOT_SECURE)
-            .interfaces(ServiceInterface.HTTP_SECURE_JSON)
-            .build();
-
-        final String inventoryId = "system_a_inventory_id";
-        final JsonObject systemData = new JsonObject(new JsonPair("a", JsonBoolean.TRUE));
-        final MonitorInfo monitorInfo = new MonitorInfo();
-        monitorInfo.putInventoryId(ServiceRecord, inventoryId);
-        monitorInfo.putSystemData(ServiceRecord, systemData);
-
-        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
-        pdTracker.put(entry);
-
-        final MonitorPlantDescriptionEntryDto extendedEntry = DtoUtils.extend(entry, monitorInfo, pdTracker);
-        final SystemEntry extendedSystem = extendedEntry.systems().get(0);
-        assertTrue(extendedSystem.inventoryData().isEmpty());
-        assertTrue(extendedSystem.systemData().isEmpty());
+        assertTrue(hasNoMonitorInfo(extendedPortA));
     }
 
 }

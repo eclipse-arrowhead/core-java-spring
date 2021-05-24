@@ -6,7 +6,6 @@ import se.arkalix.net.http.service.HttpServiceRequest;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -29,10 +28,8 @@ public class QueryParamParserTest {
         final List<QueryParameter> required = List.of(isAnimal, isMammal);
         final List<QueryParameter> accepted = Collections.emptyList();
         final HttpServiceRequest request = new MockRequest.Builder()
-            .queryParameters(Map.of(
-                isAnimalString, List.of("true"),
-                isMammalString, List.of("false")
-            ))
+            .queryParam(isAnimalString, true)
+            .queryParam(isMammalString, false)
             .build();
         final QueryParamParser parser = new QueryParamParser(required, accepted, request);
 

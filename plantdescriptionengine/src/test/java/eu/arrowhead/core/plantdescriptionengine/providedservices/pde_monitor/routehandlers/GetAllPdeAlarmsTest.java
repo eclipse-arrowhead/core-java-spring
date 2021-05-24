@@ -5,415 +5,304 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.dto.ErrorMessag
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PdeAlarm;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PdeAlarmDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PdeAlarmList;
+import eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidation.QueryParameter;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockRequest;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockServiceResponse;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import se.arkalix.net.http.HttpStatus;
 import se.arkalix.net.http.service.HttpServiceRequest;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class GetAllPdeAlarmsTest {
 
-    @Test
-    public void shouldSortById() {
+    private AlarmManager alarmManager;
+    private GetAllPdeAlarms handler;
+    private MockServiceResponse response;
 
-        final AlarmManager alarmManager = new AlarmManager();
 
-        alarmManager.raiseSystemNotInDescription("systemNameA", null);
-        alarmManager.raiseSystemNotInDescription("systemNameB", null);
-        alarmManager.raiseSystemNotInDescription("systemNameC", null);
-        final GetAllPdeAlarms handler = new GetAllPdeAlarms(alarmManager);
-
-        final HttpServiceRequest ascRequest = new MockRequest.Builder()
-            .queryParameters(Map.of("sort_field", List.of("id"), "direction", List.of("ASC")))
-            .build();
-        final HttpServiceRequest descRequest = new MockRequest.Builder()
-            .queryParameters(Map.of("sort_field", List.of("id"), "direction", List.of("DESC")))
-            .build();
-
-        final MockServiceResponse ascResponse = new MockServiceResponse();
-        final MockServiceResponse descResponse = new MockServiceResponse();
-
-        try {
-            handler.handle(ascRequest, ascResponse)
-                .map(ascendingResult -> {
-                    assertEquals(HttpStatus.OK, ascResponse.status().orElse(null));
-
-                    final PdeAlarmList alarms = (PdeAlarmList) ascResponse.getRawBody();
-                    assertEquals(3, alarms.count());
-
-                    int previousId = alarms.data().get(0).id();
-
-                    for (int i = 1; i < alarms.count(); i++) {
-                        final PdeAlarm alarm = alarms.data().get(i);
-                        assertTrue(alarm.id() >= previousId);
-                        previousId = alarm.id();
-                    }
-                    return handler.handle(descRequest, descResponse);
-                })
-                .ifSuccess(descendingResult -> {
-                    assertEquals(HttpStatus.OK, descResponse.status().orElse(null));
-
-                    final PdeAlarmList alarms = (PdeAlarmList) descResponse.getRawBody();
-                    assertEquals(3, alarms.count());
-
-                    int previousId = alarms.data().get(0).id();
-                    for (int i = 1; i < alarms.count(); i++) {
-                        final PdeAlarm alarm = alarms.data().get(i);
-                        assertTrue(alarm.id() <= previousId);
-                        previousId = alarm.id();
-                    }
-                })
-                .onFailure(Assertions::assertNull);
-        } catch (final Exception e) {
-            fail();
+    private void raiseMultipleAlarms(AlarmManager alarmManager, int n) {
+        for (int i = 0; i < n; i++) {
+            alarmManager.raiseSystemNotRegistered("system" + i, null, null);
         }
     }
 
-    @Test
-    public void shouldSortByRaisedAt() {
-
-        final String systemIdA = "Sys-A";
-        final String systemIdB = "Sys-B";
-        final String systemIdC = "Sys-C";
-
-        final String systemNameA = "System A";
-        final String systemNameB = "System B";
-        final String systemNameC = "System C";
-
-        final AlarmManager alarmManager = new AlarmManager();
-
-        alarmManager.raiseSystemNotRegistered(systemIdA, systemNameA, null);
-        alarmManager.raiseSystemNotRegistered(systemIdB, systemNameB, null);
-        alarmManager.raiseSystemNotRegistered(systemIdC, systemNameC, null);
-        final GetAllPdeAlarms handler = new GetAllPdeAlarms(alarmManager);
-
-        final HttpServiceRequest ascRequest = new MockRequest.Builder()
-            .queryParameters(Map.of("sort_field", List.of("raisedAt"), "direction", List.of("ASC")))
-            .build();
-        final HttpServiceRequest descRequest = new MockRequest.Builder()
-            .queryParameters(
-                Map.of("sort_field", List.of("raisedAt"), "direction", List.of("DESC"))
-            )
-            .build();
-
-        final MockServiceResponse ascResponse = new MockServiceResponse();
-        final MockServiceResponse descResponse = new MockServiceResponse();
-
-        try {
-            handler.handle(ascRequest, ascResponse)
-                .map(ascendingResult -> {
-                    assertEquals(HttpStatus.OK, ascResponse.status().orElse(null));
-
-                    final PdeAlarmList alarms = (PdeAlarmList) ascResponse.getRawBody();
-                    assertEquals(3, alarms.count());
-
-                    int previousId = alarms.data().get(0).id();
-
-                    for (int i = 1; i < alarms.count(); i++) {
-                        final PdeAlarm alarm = alarms.data().get(i);
-                        assertTrue(alarm.id() >= previousId);
-                        previousId = alarm.id();
-                    }
-                    return handler.handle(descRequest, descResponse);
-                })
-                .ifSuccess(descendingResult -> {
-                    assertEquals(HttpStatus.OK, descResponse.status().orElse(null));
-
-                    final PdeAlarmList alarms = (PdeAlarmList) descResponse.getRawBody();
-                    assertEquals(3, alarms.count());
-
-                    int previousId = alarms.data().get(0).id();
-
-                    for (int i = 1; i < alarms.count(); i++) {
-                        final PdeAlarm alarm = alarms.data().get(i);
-                        assertTrue(alarm.id() <= previousId);
-                        previousId = alarm.id();
-                    }
-                })
-                .onFailure(e -> fail());
-        } catch (final Exception e) {
-            fail();
+    private void assertAscending(List<PdeAlarm> alarms) {
+        for (int i = 0; i < alarms.size() - 1; i++) {
+            assertFalse(alarms.get(i).id() > alarms.get(i + 1).id());
         }
+    }
+
+    private void assertDescending(List<PdeAlarm> alarms) {
+        for (int i = 0; i < alarms.size() - 1; i++) {
+            assertFalse(alarms.get(i).id() < alarms.get(i + 1).id());
+        }
+    }
+
+    @BeforeEach
+    public void initEach() {
+        alarmManager = new AlarmManager();
+        handler = new GetAllPdeAlarms(alarmManager);
+        response = new MockServiceResponse();
+    }
+
+    @Test
+    public void shouldSortByIdAscending() {
+        final int numAlarms = 3;
+
+        raiseMultipleAlarms(alarmManager, numAlarms);
+
+        final MockRequest request = MockRequest.getSortRequest(QueryParameter.ID, QueryParameter.ASC);
+
+        handler.handle(request, response)
+            .ifSuccess(ascendingResult -> {
+                final PdeAlarmList alarms = (PdeAlarmList) response.getRawBody();
+                assertEquals(HttpStatus.OK, response.status().orElse(null));
+                assertEquals(numAlarms, alarms.count());
+                assertAscending(alarms.data());
+            })
+            .onFailure(e -> fail());
+    }
+
+    @Test
+    public void shouldSortByIdDescending() {
+        final int numAlarms = 25;
+
+        raiseMultipleAlarms(alarmManager, numAlarms);
+
+        final MockRequest request = MockRequest.getSortRequest(QueryParameter.ID, QueryParameter.DESC);
+
+        handler.handle(request, response)
+            .ifSuccess(descendingResult -> {
+                final PdeAlarmList alarms = (PdeAlarmList) response.getRawBody();
+                assertEquals(HttpStatus.OK, response.status().orElse(null));
+                assertEquals(numAlarms, alarms.count());
+                assertDescending(alarms.data());
+            })
+            .onFailure(e -> fail());
+    }
+
+    @Test
+    public void shouldSortByRaisedAtAscending() {
+        final int numAlarms = 5;
+
+        raiseMultipleAlarms(alarmManager, numAlarms);
+
+        final MockRequest request = MockRequest.getSortRequest(QueryParameter.RAISED_AT, QueryParameter.ASC);
+
+        handler.handle(request, response)
+            .ifSuccess(ascendingResult -> {
+                final PdeAlarmList alarms = (PdeAlarmList) response.getRawBody();
+                assertEquals(HttpStatus.OK, response.status().orElse(null));
+                assertEquals(numAlarms, alarms.count());
+                assertAscending(alarms.data());
+            })
+            .onFailure(e -> fail());
+
+    }
+
+    @Test
+    public void shouldSortByRaisedDescending() {
+        final int numAlarms = 12;
+
+        raiseMultipleAlarms(alarmManager, numAlarms);
+
+        final HttpServiceRequest request = MockRequest.getSortRequest(QueryParameter.RAISED_AT, QueryParameter.DESC);
+
+        handler.handle(request, response)
+            .ifSuccess(descendingResult -> {
+                final PdeAlarmList alarms = (PdeAlarmList) response.getRawBody();
+                assertEquals(HttpStatus.OK, response.status().orElse(null));
+                assertEquals(numAlarms, alarms.count());
+                assertDescending(alarms.data());
+            })
+            .onFailure(e -> fail());
+
     }
 
     @Test
     public void shouldSortByClearedAt() {
+        final String systemNameC = "sysc";
 
-        final String systemIdA = "Sys-A";
-        final String systemIdB = "Sys-B";
-        final String systemIdC = "Sys-C";
-
-        final String systemNameA = "System A";
-        final String systemNameB = "System B";
-        final String systemNameC = "System C";
-
-        final AlarmManager alarmManager = new AlarmManager();
-
-        alarmManager.raiseSystemNotRegistered(systemIdC, systemNameC, null);
+        alarmManager.raiseSystemNotRegistered("Sys-C", systemNameC, null);
 
         int systemCAlarmId = alarmManager.getAlarms().get(0).id();
 
-        alarmManager.raiseSystemNotRegistered(systemIdA, systemNameA, null);
-        alarmManager.raiseSystemNotRegistered(systemIdB, systemNameB, null);
-
+        alarmManager.raiseSystemNotRegistered("Sys-A", "sysa", null);
+        alarmManager.raiseSystemNotRegistered("Sys-B", "sysb", null);
         alarmManager.clearAlarm(systemCAlarmId);
 
-        final GetAllPdeAlarms handler = new GetAllPdeAlarms(alarmManager);
+        final HttpServiceRequest request = MockRequest.getSortRequest(QueryParameter.CLEARED_AT, QueryParameter.ASC);
 
-        final HttpServiceRequest request = new MockRequest.Builder()
-            .queryParameters(Map.of("sort_field", List.of("clearedAt"), "direction", List.of("ASC")))
-            .build();
-
-        final MockServiceResponse response = new MockServiceResponse();
-
-        try {
-            handler.handle(request, response)
-                .ifSuccess(ascendingResult -> {
-                    assertEquals(HttpStatus.OK, response.status().orElse(null));
-
-                    final PdeAlarmList alarms = (PdeAlarmList) response.getRawBody();
-                    final PdeAlarm firstAlarm = alarms.data().get(0);
-                    assertEquals(systemNameC, firstAlarm.systemName().orElse(null));
-                })
-                .onFailure(Assertions::assertNull);
-        } catch (final Exception e) {
-            fail();
-        }
+        handler.handle(request, response)
+            .ifSuccess(ascendingResult -> {
+                final PdeAlarmList alarms = (PdeAlarmList) response.getRawBody();
+                final PdeAlarm firstAlarm = alarms.data().get(0);
+                assertEquals(HttpStatus.OK, response.status().orElse(null));
+                assertEquals(systemNameC, firstAlarm.systemName().orElse(null));
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
     public void shouldSortByUpdatedAt() {
 
-        final String systemIdA = "Sys-A";
-        final String systemIdB = "Sys-B";
-        final String systemIdC = "Sys-C";
+        final String systemNameB = "sysb";
 
-        final String systemNameA = "System A";
-        final String systemNameB = "System B";
-        final String systemNameC = "System C";
+        alarmManager.raiseSystemNotRegistered("Sys-B", systemNameB, null);
 
-        final AlarmManager alarmManager = new AlarmManager();
-
-        alarmManager.raiseSystemNotRegistered(systemIdB, systemNameB, null);
         int systemBAlarmId = alarmManager.getAlarms().get(0).id();
 
-        alarmManager.raiseSystemNotRegistered(systemIdA, systemNameA, null);
-        alarmManager.raiseSystemNotRegistered(systemIdC, systemNameC, null);
-
+        alarmManager.raiseSystemNotRegistered("Sys-A", "sysa", null);
+        alarmManager.raiseSystemNotRegistered("Sys-C", "sysc", null);
         alarmManager.acknowledge(systemBAlarmId); // This changes the 'updatedAt' field
 
-        final GetAllPdeAlarms handler = new GetAllPdeAlarms(alarmManager);
+        final MockRequest request = MockRequest.getSortRequest(QueryParameter.UPDATED_AT, QueryParameter.DESC);
 
-        final HttpServiceRequest request = new MockRequest.Builder()
-            .queryParameters(Map.of("sort_field", List.of("updatedAt"), "direction", List.of("DESC")))
-            .build();
-
-        final MockServiceResponse response = new MockServiceResponse();
-
-        try {
-            handler.handle(request, response)
-                .ifSuccess(ascendingResult -> {
-                    assertEquals(HttpStatus.OK, response.status().orElse(null));
-
-                    final PdeAlarmList alarms = (PdeAlarmList) response.getRawBody();
-                    final PdeAlarm firstAlarm = alarms.data().get(0);
-                    assertEquals(systemNameB, firstAlarm.systemName().orElse(null));
-                })
-                .onFailure(Assertions::assertNull);
-        } catch (final Exception e) {
-            fail();
-        }
+        handler.handle(request, response)
+            .ifSuccess(ascendingResult -> {
+                final PdeAlarmList alarms = (PdeAlarmList) response.getRawBody();
+                final PdeAlarm firstAlarm = alarms.data().get(0);
+                assertEquals(HttpStatus.OK, response.status().orElse(null));
+                assertEquals(systemNameB, firstAlarm.systemName().orElse(null));
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
     public void shouldRejectNonBooleans() {
 
-        final GetAllPdeAlarms handler = new GetAllPdeAlarms(new AlarmManager());
         final String nonBoolean = "Not a boolean";
         final HttpServiceRequest request = new MockRequest.Builder()
-            .queryParameters(Map.of("acknowledged", List.of(nonBoolean) // Should be 'true' or 'false'
-            ))
+            .queryParam(QueryParameter.ACKNOWLEDGED, nonBoolean) // Should be "true" or "false"
             .build();
-        final MockServiceResponse response = new MockServiceResponse();
 
-        try {
-            handler.handle(request, response)
-                .ifSuccess(result -> {
-                    assertEquals(HttpStatus.BAD_REQUEST, response.status().orElse(null));
-                    final String expectedErrorMessage = "<Query parameter 'acknowledged' must be true or false, got '"
-                        + nonBoolean + "'.>";
-                    final String actualErrorMessage = ((ErrorMessage) response.getRawBody()).error();
-                    assertEquals(expectedErrorMessage, actualErrorMessage);
-                })
-                .onFailure(Assertions::assertNull);
-        } catch (final Exception e) {
-            fail();
-        }
+        handler.handle(request, response)
+            .ifSuccess(result -> {
+                final String expectedErrorMessage = "<Query parameter 'acknowledged' must be true or false, got '"
+                    + nonBoolean + "'.>";
+                final String actualErrorMessage = ((ErrorMessage) response.getRawBody()).error();
+                assertEquals(HttpStatus.BAD_REQUEST, response.status().orElse(null));
+                assertEquals(expectedErrorMessage, actualErrorMessage);
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
     public void shouldPaginate() {
 
-        final AlarmManager alarmManager = new AlarmManager();
+        final int numAlarms = 10;
 
-        for (int i = 0; i < 10; i++) {
-            alarmManager.raiseNoPingResponse("System-" + i);
-        }
+        raiseMultipleAlarms(alarmManager, numAlarms);
 
         final ArrayList<Integer> ids = new ArrayList<>();
         for (final PdeAlarm alarm : alarmManager.getAlarms()) {
             ids.add(alarm.id());
         }
 
-        final GetAllPdeAlarms handler = new GetAllPdeAlarms(alarmManager);
-        final MockServiceResponse response = new MockServiceResponse();
         final int page = 2;
         final int itemsPerPage = 3;
-        final HttpServiceRequest request = new MockRequest.Builder().queryParameters(Map.of("sort_field", List.of("id"),
-            "page", List.of(String.valueOf(page)), "item_per_page", List.of(String.valueOf(itemsPerPage)))).build();
 
-        try {
-            handler.handle(request, response).ifSuccess(result -> {
-                assertEquals(HttpStatus.OK, response.status().orElse(null));
+        final HttpServiceRequest request = new MockRequest.Builder()
+            .queryParam(QueryParameter.SORT_FIELD, QueryParameter.ID)
+            .queryParam(QueryParameter.PAGE, page)
+            .queryParam(QueryParameter.ITEM_PER_PAGE, itemsPerPage)
+            .build();
 
-                final PdeAlarmList alarms = (PdeAlarmList) response.getRawBody();
-                assertEquals(itemsPerPage, alarms.count());
-                for (int i = 0; i < itemsPerPage; i++) {
-                    final int index = page * itemsPerPage + i;
-                    final int alarmId = alarms.data().get(i).id();
-                    final int expectedId = ids.get(index);
-                    assertEquals(expectedId, alarmId);
-                }
+        handler.handle(request, response).ifSuccess(result -> {
+            assertEquals(HttpStatus.OK, response.status().orElse(null));
 
-            }).onFailure(Assertions::assertNull);
-        } catch (final Exception e) {
-            fail();
-        }
+            final PdeAlarmList alarms = (PdeAlarmList) response.getRawBody();
+            assertEquals(numAlarms, alarms.count());
+            for (int i = 0; i < itemsPerPage; i++) {
+                final int index = page * itemsPerPage + i;
+                final int alarmId = alarms.data().get(i).id();
+                final int expectedId = ids.get(index);
+                assertEquals(expectedId, alarmId);
+            }
+
+        }).onFailure(e -> fail());
     }
 
     @Test
     public void shouldRejectNegativePage() {
-        final GetAllPdeAlarms handler = new GetAllPdeAlarms(new AlarmManager());
         final int page = -3;
-        final MockServiceResponse response = new MockServiceResponse();
         final HttpServiceRequest request = new MockRequest.Builder()
-            .queryParameters(Map.of("page", List.of(String.valueOf(page)), "item_per_page", List.of(String.valueOf(4))))
+            .queryParam(QueryParameter.PAGE, page)
+            .queryParam(QueryParameter.ITEM_PER_PAGE, 4)
             .build();
 
-        try {
-            handler.handle(request, response).ifSuccess(result -> {
-                assertEquals(HttpStatus.BAD_REQUEST, response.status().orElse(null));
-                final String expectedErrorMessage = "<Query parameter 'page' must be greater than 0, got " + page + ".>";
+        handler.handle(request, response).ifSuccess(result -> {
+            assertEquals(HttpStatus.BAD_REQUEST, response.status().orElse(null));
+            final String expectedErrorMessage = "<Query parameter '" + QueryParameter.PAGE +
+                "' must be greater than or equal to 0, got " + page + ".>";
+            final String actualErrorMessage = ((ErrorMessage) response.getRawBody()).error();
+            assertEquals(expectedErrorMessage, actualErrorMessage);
+        }).onFailure(e -> fail());
 
-                final String actualErrorMessage = ((ErrorMessage) response.getRawBody()).error();
-                assertEquals(expectedErrorMessage, actualErrorMessage);
-            }).onFailure(Assertions::assertNull);
-        } catch (final Exception e) {
-            fail();
-        }
     }
 
     @Test
     public void shouldFilterBySystemName() {
-        final String systemIdA = "Sys-A";
-        final String systemIdB = "Sys-B";
-        final String systemIdC = "Sys-C";
+        final String systemNameA = "sysa";
 
-        final String systemNameA = "System A";
-        final String systemNameB = "System B";
-        final String systemNameC = "System C";
-
-        final AlarmManager alarmManager = new AlarmManager();
-
-        alarmManager.raiseSystemNotRegistered(systemIdA, systemNameA, null);
-        alarmManager.raiseSystemNotRegistered(systemIdB, systemNameB, null);
-        alarmManager.raiseSystemNotRegistered(systemIdC, systemNameC, null);
-
-        final GetAllPdeAlarms handler = new GetAllPdeAlarms(alarmManager);
+        alarmManager.raiseSystemNotRegistered("Sys-A", systemNameA, null);
+        alarmManager.raiseSystemNotRegistered("Sys-B", "sysb", null);
+        alarmManager.raiseSystemNotRegistered("Sys-C", "sysc", null);
 
         final HttpServiceRequest request = new MockRequest.Builder()
-            .queryParameters(Map.of("systemName", List.of(systemNameA)))
+            .queryParam(QueryParameter.SYSTEM_NAME, systemNameA)
             .build();
 
-        final MockServiceResponse response = new MockServiceResponse();
-
-        try {
-            handler.handle(request, response)
-                .ifSuccess(ascendingResult -> {
-                    assertEquals(HttpStatus.OK, response.status().orElse(null));
-
-                    final PdeAlarmList alarms = (PdeAlarmList) response.getRawBody();
-                    assertEquals(1, alarms.count());
-
-                    assertEquals(systemNameA, alarms.data().get(0).systemName().orElse(null));
-                })
-                .onFailure(Assertions::assertNull);
-        } catch (final Exception e) {
-            fail();
-        }
+        handler.handle(request, response)
+            .ifSuccess(ascendingResult -> {
+                final PdeAlarmList alarms = (PdeAlarmList) response.getRawBody();
+                assertEquals(HttpStatus.OK, response.status().orElse(null));
+                assertEquals(1, alarms.count());
+                assertEquals(systemNameA, alarms.data().get(0).systemName().orElse(null));
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
     public void shouldFilterBySeverity() {
-        final String systemIdA = "Sys-A";
-        final String systemIdB = "Sys-B";
+        final String systemNameA = "sysa";
+        final String systemNameB = "sysb";
+        final String systemNameC = "sysc";
 
-        final String systemNameA = "System A";
-        final String systemNameB = "System B";
-        final String systemNameC = "System C";
-
-        final AlarmManager alarmManager = new AlarmManager();
-
-        alarmManager.raiseSystemNotRegistered(systemIdA, systemNameA, null);
-        alarmManager.raiseSystemNotRegistered(systemIdB, systemNameB, null);
+        alarmManager.raiseSystemNotRegistered("Sys-A", systemNameA, null);
+        alarmManager.raiseSystemNotRegistered("Sys-B", systemNameB, null);
         alarmManager.raiseNoPingResponse(systemNameC);
         alarmManager.clearNoPingResponse(systemNameC);
 
-        final GetAllPdeAlarms handler = new GetAllPdeAlarms(alarmManager);
-
         final HttpServiceRequest request = new MockRequest.Builder()
-            .queryParameters(Map.of("severity", List.of("warning")))
+            .queryParam(QueryParameter.SEVERITY, "warning")
             .build();
 
-        final MockServiceResponse response = new MockServiceResponse();
-
-        try {
-            handler.handle(request, response)
-                .ifSuccess(ascendingResult -> {
-                    assertEquals(HttpStatus.OK, response.status().orElse(null));
-
-                    final PdeAlarmList alarms = (PdeAlarmList) response.getRawBody();
-                    assertEquals(2, alarms.count());
-
-                    assertEquals(systemNameA, alarms.data().get(0).systemName().orElse(null));
-                    assertEquals(systemNameB, alarms.data().get(1).systemName().orElse(null));
-                })
-                .onFailure(Assertions::assertNull);
-        } catch (final Exception e) {
-            fail();
-        }
+        handler.handle(request, response)
+            .ifSuccess(ascendingResult -> {
+                final PdeAlarmList alarms = (PdeAlarmList) response.getRawBody();
+                assertEquals(HttpStatus.OK, response.status().orElse(null));
+                assertEquals(2, alarms.count());
+                assertEquals(systemNameA, alarms.data().get(0).systemName().orElse(null));
+                assertEquals(systemNameB, alarms.data().get(1).systemName().orElse(null));
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
     public void shouldFilterAcknowledged() {
 
-        final String systemNameA = "System A";
-        final String systemNameB = "System B";
-        final String systemNameC = "System C";
+        final String systemNameC = "sysc";
 
-        final AlarmManager alarmManager = new AlarmManager();
-
-        alarmManager.raiseSystemNotInDescription(systemNameA, null);
-        alarmManager.raiseSystemNotInDescription(systemNameB, null);
+        alarmManager.raiseSystemNotInDescription("sysa", null);
+        alarmManager.raiseSystemNotInDescription("sysb", null);
         alarmManager.raiseSystemNotInDescription(systemNameC, null);
 
         final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
@@ -421,29 +310,18 @@ public class GetAllPdeAlarmsTest {
         alarmManager.acknowledge(alarms.get(0).id());
         alarmManager.acknowledge(alarms.get(1).id());
 
-        final GetAllPdeAlarms handler = new GetAllPdeAlarms(alarmManager);
-
         final HttpServiceRequest request = new MockRequest.Builder()
-            .queryParameters(Map.of("acknowledged", List.of("false")))
+            .queryParam(QueryParameter.ACKNOWLEDGED, false)
             .build();
 
-        final MockServiceResponse response = new MockServiceResponse();
-
-        try {
-            handler.handle(request, response)
-                .ifSuccess(ascendingResult -> {
-                    assertEquals(HttpStatus.OK, response.status().orElse(null));
-
-
-                    final PdeAlarmList result = (PdeAlarmList) response.getRawBody();
-                    assertEquals(1, result.count());
-
-                    assertEquals(systemNameC, result.data().get(0).systemName().orElse(null));
-                })
-                .onFailure(Assertions::assertNull);
-        } catch (final Exception e) {
-            fail();
-        }
+        handler.handle(request, response)
+            .ifSuccess(ascendingResult -> {
+                final PdeAlarmList result = (PdeAlarmList) response.getRawBody();
+                assertEquals(HttpStatus.OK, response.status().orElse(null));
+                assertEquals(1, result.count());
+                assertEquals(systemNameC, result.data().get(0).systemName().orElse(null));
+            })
+            .onFailure(e -> fail());
     }
 
 }

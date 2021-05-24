@@ -51,12 +51,12 @@ public class MonitorInfoTest {
         final ServiceRecord ServiceRecord = createServiceRecord(metadata);
 
         final JsonObject systemData = new JsonObject(new JsonPair("a", JsonBoolean.TRUE));
-        final MonitorInfo monitorInfo = new MonitorInfo();
-        monitorInfo.putSystemData(ServiceRecord, systemData);
+        final MonitorInfoTracker monitorInfoTracker = new MonitorInfoTracker();
+        monitorInfoTracker.putSystemData(ServiceRecord, systemData);
 
-        final List<MonitorInfo.Bundle> systemInfoList = monitorInfo.getSystemInfo(providerSystemName, null);
+        final List<MonitorInfo> systemInfoList = monitorInfoTracker.getSystemInfo(providerSystemName, null);
         assertEquals(1, systemInfoList.size());
-        final MonitorInfo.Bundle systemInfo = systemInfoList.get(0);
+        final MonitorInfo systemInfo = systemInfoList.get(0);
         assertEquals("{[a: true]}", systemInfo.systemData.toString());
     }
 
@@ -67,12 +67,12 @@ public class MonitorInfoTest {
         final ServiceRecord ServiceRecord = createServiceRecord(metadata);
 
         final JsonObject systemData = new JsonObject(new JsonPair("a", JsonBoolean.TRUE));
-        final MonitorInfo monitorInfo = new MonitorInfo();
-        monitorInfo.putSystemData(ServiceRecord, systemData);
+        final MonitorInfoTracker monitorInfoTracker = new MonitorInfoTracker();
+        monitorInfoTracker.putSystemData(ServiceRecord, systemData);
 
-        final List<MonitorInfo.Bundle> systemInfoList = monitorInfo.getSystemInfo(null, metadata);
+        final List<MonitorInfo> systemInfoList = monitorInfoTracker.getSystemInfo(null, metadata);
         assertEquals(1, systemInfoList.size());
-        final MonitorInfo.Bundle systemInfo = systemInfoList.get(0);
+        final MonitorInfo systemInfo = systemInfoList.get(0);
         assertEquals("{[a: true]}", systemInfo.systemData.toString());
     }
 
@@ -108,13 +108,13 @@ public class MonitorInfoTest {
         final String inventoryIdA = "id-A";
         final String inventoryIdB = "id-B";
 
-        final MonitorInfo monitorInfo = new MonitorInfo();
-        monitorInfo.putInventoryId(serviceA, inventoryIdA);
-        monitorInfo.putInventoryId(serviceB, inventoryIdB);
+        final MonitorInfoTracker monitorInfoTracker = new MonitorInfoTracker();
+        monitorInfoTracker.putInventoryId(serviceA, inventoryIdA);
+        monitorInfoTracker.putInventoryId(serviceB, inventoryIdB);
 
-        final List<MonitorInfo.Bundle> systemInfoList = monitorInfo.getSystemInfo(serviceB.provider().name(), null);
+        final List<MonitorInfo> systemInfoList = monitorInfoTracker.getSystemInfo(serviceB.provider().name(), null);
         assertEquals(1, systemInfoList.size());
-        final MonitorInfo.Bundle systemInfo = systemInfoList.get(0);
+        final MonitorInfo systemInfo = systemInfoList.get(0);
         assertEquals(inventoryIdB, systemInfo.inventoryId);
     }
 
@@ -125,12 +125,12 @@ public class MonitorInfoTest {
         final ServiceRecord ServiceRecord = createServiceRecord(metadata);
 
         final String inventoryId = "id-4567";
-        final MonitorInfo monitorInfo = new MonitorInfo();
+        final MonitorInfoTracker monitorInfo = new MonitorInfoTracker();
         monitorInfo.putInventoryId(ServiceRecord, inventoryId);
-        final List<MonitorInfo.Bundle> systemInfoList = monitorInfo.getSystemInfo(ServiceRecord.provider().name(), null);
+        final List<MonitorInfo> systemInfoList = monitorInfo.getSystemInfo(ServiceRecord.provider().name(), null);
         assertEquals(1, systemInfoList.size());
 
-        final MonitorInfo.Bundle systemInfo = systemInfoList.get(0);
+        final MonitorInfo systemInfo = systemInfoList.get(0);
         assertEquals(inventoryId, systemInfo.inventoryId);
     }
 
@@ -138,25 +138,27 @@ public class MonitorInfoTest {
     public void shouldOverwriteData() {
 
         final ServiceRecord service = createServiceRecord();
-        final MonitorInfo monitorInfo = new MonitorInfo();
+        final MonitorInfoTracker monitorInfoTracker = new MonitorInfoTracker();
 
         final String oldInventoryId = "id-1234";
-        monitorInfo.putInventoryId(service, oldInventoryId);
+        monitorInfoTracker.putInventoryId(service, oldInventoryId);
 
         final String newInventoryId = "id-5678";
-        monitorInfo.putInventoryId(service, newInventoryId);
+        monitorInfoTracker.putInventoryId(service, newInventoryId);
 
-        final List<MonitorInfo.Bundle> systemInfoList = monitorInfo.getSystemInfo(service.provider().name(), null);
+        final List<MonitorInfo> systemInfoList = monitorInfoTracker.getSystemInfo(service.provider().name(), null);
         assertEquals(1, systemInfoList.size());
 
-        final MonitorInfo.Bundle systemInfo = systemInfoList.get(0);
+        final MonitorInfo systemInfo = systemInfoList.get(0);
         assertEquals(newInventoryId, systemInfo.inventoryId);
     }
 
     @Test
     public void shouldThrowWhenArgsAreMissing() {
-        final MonitorInfo monitorInfo = new MonitorInfo();
-        final Exception exception = assertThrows(IllegalArgumentException.class, () -> monitorInfo.getSystemInfo(null, null));
+        final MonitorInfoTracker monitorInfoTracker = new MonitorInfoTracker();
+        final Exception exception = assertThrows(
+            IllegalArgumentException.class, () -> monitorInfoTracker.getSystemInfo(null, null)
+        );
         assertEquals("Either system name or metadata must be present.", exception.getMessage());
     }
 }
