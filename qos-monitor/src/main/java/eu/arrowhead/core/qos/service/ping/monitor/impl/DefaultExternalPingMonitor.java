@@ -1,5 +1,6 @@
 package eu.arrowhead.core.qos.service.ping.monitor.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -109,15 +110,15 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 
 		//TODO externalize block to class
 		while(System.currentTimeMillis() < meausermentExpiryTime) {
-			//TODO empty checked queues at each iteration and all queues on successs
+
 			checkInterupts(measurementProcessId);
 
 			if(!measurmentRequestConfirmed) {
-				receivedMonitoringRequestEventDTO = checkMeasurmentRequestConfirmed(measurementProcessId);
+				receivedMonitoringRequestEventDTO = checkMeasurmentRequestConfirmedEvents(measurementProcessId);
 				if( receivedMonitoringRequestEventDTO != null) {
 					measurmentRequestConfirmed = true;
 
-					logger.info("EVENT: External Ping Measurement request confirmed : " + measurementProcessId);
+					logger.debug("EVENT: External Ping Measurement request confirmed : " + measurementProcessId);
 
 				}else {
 					rest();
@@ -126,7 +127,7 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 			}
 
 			if(!measurmentStartedConfirmed) {
-				startedMonitoringMeasurementEventDTO = checkMeasurmentStartedConfirmed(measurementProcessId);
+				startedMonitoringMeasurementEventDTO = checkMeasurmentStartedConfirmedEvents(measurementProcessId);
 				if(startedMonitoringMeasurementEventDTO != null) {
 					measurmentStartedConfirmed = true;
 
@@ -138,10 +139,11 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 				}
 			}
 
-			final FinishedMonitoringMeasurementEventDTO measurmentResult = tryToGetMeasurementResult(measurementProcessId);
+			final FinishedMonitoringMeasurementEventDTO measurmentResult = checkMeasurementResultEvents(measurementProcessId);
 			if(measurmentResult != null) {
 				logger.info("EVENT: External Ping Measurement finished: " + measurementProcessId);
 
+				clearAllQueues();
 				return IcmpPingDTOConverter.convertPingMeasurementResult(measurmentResult.getPayload());
 			}else {
 				rest();
@@ -157,18 +159,43 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
-	private FinishedMonitoringMeasurementEventDTO tryToGetMeasurementResult(final UUID measurementProcessId) {
-		logger.debug("tryToGetMeasurementResult statred...");
+	private FinishedMonitoringMeasurementEventDTO checkMeasurementResultEvents(final UUID measurementProcessId) {
+		logger.debug("checkMeasurementResultEvents statred...");
+
+		final List<FinishedMonitoringMeasurementEventDTO> uncheckedEvents = new ArrayList<>();
+		finishedMonitoringMeasurementEventQueue.drainTo(uncheckedEvents);
+
+		if (uncheckedEvents.isEmpty()) {
+			return null;
+		}else {
+			for (final FinishedMonitoringMeasurementEventDTO event : uncheckedEvents) {
+
+				final FinishedMonitoringMeasurementEventDTO validEvent = checkMeasurementResult(measurementProcessId, event);
+
+				if (validEvent != null) {
+					return validEvent;
+				}
+			}
+		}
+
+		return null;
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private FinishedMonitoringMeasurementEventDTO checkMeasurementResult(final UUID measurementProcessId, final FinishedMonitoringMeasurementEventDTO event) {
+		logger.debug("checkMeasurementResult statred...");
 
 		try {
 
-			final FinishedMonitoringMeasurementEventDTO event = finishedMonitoringMeasurementEventQueue.poll();
 			if(event != null) {
 				final UUID uuid = UUID.fromString(event.getMetadata().get(QosMonitorConstants.PROCESS_ID_KEY));
 				if(uuid.equals(measurementProcessId)) {
 					return event;
 				}else {
-					throw new ArrowheadException("Invalid measurementProcessId. ");
+					logger.debug("Invalid measurementProcessId : " + event.toString());
+
+					return null;
 				}
 			}else {
 				return null;
@@ -185,10 +212,33 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private StartedMonitoringMeasurementEventDTO checkMeasurmentStartedConfirmed(final UUID measurementProcessId) {
+	private StartedMonitoringMeasurementEventDTO checkMeasurmentStartedConfirmedEvents(final UUID measurementProcessId) {
+		logger.debug("checkMeasurmentStartedConfirmedEvents statred...");
+
+		final List<StartedMonitoringMeasurementEventDTO> uncheckedEvents = new ArrayList<>();
+		startedMonitoringMeasurementEventQueue.drainTo(uncheckedEvents);
+
+		if (uncheckedEvents.isEmpty()) {
+			return null;
+		}else {
+			for (final StartedMonitoringMeasurementEventDTO event : uncheckedEvents) {
+
+				final StartedMonitoringMeasurementEventDTO validEvent = checkMeasurmentStartedConfirmed(measurementProcessId, event);
+
+				if (validEvent != null) {
+					return validEvent;
+				}
+			}
+		}
+
+		return null;
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private StartedMonitoringMeasurementEventDTO checkMeasurmentStartedConfirmed(final UUID measurementProcessId, final StartedMonitoringMeasurementEventDTO event) {
 		logger.debug("checkMeasurmentStartedConfirmed statred...");
 
-		final StartedMonitoringMeasurementEventDTO event = startedMonitoringMeasurementEventQueue.poll();
 		if(event != null) {
 			final UUID uuid = UUID.fromString(event.getMetadata().get(QosMonitorConstants.PROCESS_ID_KEY));
 			if(uuid.equals(measurementProcessId)) {
@@ -202,16 +252,40 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private ReceivedMonitoringRequestEventDTO  checkMeasurmentRequestConfirmed(final UUID measurementProcessId) {
+	private ReceivedMonitoringRequestEventDTO  checkMeasurmentRequestConfirmedEvents(final UUID measurementProcessId) {
+		logger.debug("checkMeasurmentRequestConfirmedEvents statred...");
+
+		final List<ReceivedMonitoringRequestEventDTO> uncheckedEvents = new ArrayList<>();
+		receivedMonitoringRequestEventQueue.drainTo(uncheckedEvents);
+
+		if (uncheckedEvents.isEmpty()) {
+			return null;
+		}else {
+			for (final ReceivedMonitoringRequestEventDTO event : uncheckedEvents) {
+
+				final ReceivedMonitoringRequestEventDTO validEvent = checkMeasurmentRequestConfirmed(measurementProcessId, event);
+
+				if (validEvent != null) {
+					return validEvent;
+				}
+			}
+		}
+
+		return null;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private ReceivedMonitoringRequestEventDTO  checkMeasurmentRequestConfirmed(final UUID measurementProcessId, final ReceivedMonitoringRequestEventDTO event) {
 		logger.debug("checkMeasurmentRequestConfirmed statred...");
 
-		final ReceivedMonitoringRequestEventDTO event = receivedMonitoringRequestEventQueue.poll();
 		if(event != null) {
 			final UUID uuid = UUID.fromString(event.getMetadata().get(QosMonitorConstants.PROCESS_ID_KEY));
 			if(uuid.equals(measurementProcessId)) {
 				return event;
 			}else {
-				throw new ArrowheadException("Invalid measurementProcessId. ");
+				logger.debug("Invalid measurementProcessId: " + event.toString());
+
+				return null;
 			}
 		}else {
 			return null;
@@ -222,18 +296,40 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	private void checkInterupts(final UUID measurementProcessId) {
 		logger.debug("checkInterupts statred...");
 
-		final InterruptedMonitoringMeasurementEventDTO event = interuptedMonitoringMeasurementEventQueue.poll();
+		final List<InterruptedMonitoringMeasurementEventDTO> uncheckedEvents = new ArrayList<>();
+		interuptedMonitoringMeasurementEventQueue.drainTo(uncheckedEvents);
+
+		if (uncheckedEvents.isEmpty()) {
+			return;
+		}else {
+
+			for (final InterruptedMonitoringMeasurementEventDTO event : uncheckedEvents) {
+
+				checkInteruptEvent(measurementProcessId, event);
+
+			}
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void checkInteruptEvent(final UUID measurementProcessId, final InterruptedMonitoringMeasurementEventDTO event) {
+		logger.debug("checkInteruptEvent statred...");
+
+		final List<InterruptedMonitoringMeasurementEventDTO> uncheckedEvents = new ArrayList<>();
+		interuptedMonitoringMeasurementEventQueue.drainTo(uncheckedEvents);
+
 		if(event != null) {
 			final UUID uuid = UUID.fromString(event.getMetadata().get(QosMonitorConstants.PROCESS_ID_KEY));
 			if(uuid.equals(measurementProcessId)) {
 
-				logger.info("EVENT: External Ping Measurement interupted : " + measurementProcessId);
+				logger.debug("EVENT: External Ping Measurement interupted : " + measurementProcessId);
 
 				final String suspectedRootCauses = event.getMetadata().get(QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_ROOT_CAUSE_KEY);
 				final String exeptionInExternalMonitoring = event.getMetadata().get(QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_EXCEPTION_KEY);
 
-				logger.warn("Exception in external monitoring process: " + exeptionInExternalMonitoring);
-				logger.warn("Self clamed root cause of external monitoring process exception: " + suspectedRootCauses);
+				logger.debug("Exception in external monitoring process: " + exeptionInExternalMonitoring);
+				logger.debug("Self clamed root cause of external monitoring process exception: " + suspectedRootCauses);
 
 				throw new ArrowheadException("Interupt in external monitoring process. ");
 			}else {
@@ -242,6 +338,17 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 		}else {
 			return;
 		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void clearAllQueues() {
+		logger.debug("clearAllQueues started...");
+
+		interuptedMonitoringMeasurementEventQueue.clear();
+		receivedMonitoringRequestEventQueue.clear();
+		startedMonitoringMeasurementEventQueue.clear();
+		finishedMonitoringMeasurementEventQueue.clear();
+
 	}
 
 	//-------------------------------------------------------------------------------------------------
