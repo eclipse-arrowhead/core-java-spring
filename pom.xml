@@ -40,6 +40,7 @@
 	    <module>deb-installer</module>
 	    <module>docker-all</module>
 		<module>translator</module>
+		<module>configuration-manager</module>
   	</modules>
   	
 	<properties>

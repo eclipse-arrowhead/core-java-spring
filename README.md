@@ -107,12 +107,13 @@ Please be aware, that versions starting from 4.1.3 are __NOT__ backwards compati
         * [Endpoints](#systemregistry_endpoints)
            * [Onboarding](#systemregistry_endpoints_onboarding)
            * [Client](#systemregistry_endpoints_client)
-	13. [Choreographer](#choreographer)
-        * [System Design Description Overview](#choreographer_sdd)
-        * [Services and Use Cases](#choreographer_usecases)  
-        * [Endpoints](#choreographer_endpoints)
-	       * [Client](#choreographer_endpoints_client)
-           * [Management](#choreographer_endpoints_mgmt)
+    13. [Choreographer](#choreographer)
+          * [System Design Description Overview](#choreographer_sdd)
+          * [Services and Use Cases](#choreographer_usecases)  
+          * [Endpoints](#choreographer_endpoints)
+          * [Client](#choreographer_endpoints_client)
+            * [Management](#choreographer_endpoints_mgmt)
+    14. [Configuration Manager](#configuration_manager)
 
 <a name="quickstart" />
 
@@ -8264,3 +8265,10 @@ Signs the CSR, registers the device and eventually returns a device certificate 
 | `publicKey` | Base64 encoded public key |
 
 Additionally all fields from [SystemRegistryEntry](#datastructures_systemregistryentry) are returned.
+
+
+# Configuration Manager
+<a name="configuration_manager" />
+
+The configuration manager is responsible for managing software rollouts and configuration updates to the actual hardware devices.
+This implementation is based on [Eclipse HawkBit](https://www.eclipse.org/hawkbit/) and is explained in more detail [here](./configuration-manager/README.md).
