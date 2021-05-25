@@ -3,6 +3,7 @@ package eu.arrowhead.core.qos.service.ping.monitor.impl;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 
@@ -40,6 +41,7 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	//-------------------------------------------------------------------------------------------------
 	private static final int ICMP_TTL = 255;
 	private static final int OVERHEAD_MULTIPLIER = 2;
+	private static final long SLEEP_PERIOD = TimeUnit.SECONDS.toMillis(1);
 
 	@Autowired
 	private QoSMonitorDriver driver;
@@ -118,7 +120,8 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 					logger.info("EVENT: External Ping Measurement request confirmed : " + measurementProcessId);
 
 				}else {
-					//TODO rest & continue;
+					rest();
+					continue;
 				}
 			}
 
@@ -130,7 +133,8 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 					logger.info("EVENT: External Ping Measurement started : " + measurementProcessId);
 
 				}else {
-					//TODO rest & continue;
+					rest();
+					continue;
 				}
 			}
 
@@ -140,7 +144,8 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 
 				return IcmpPingDTOConverter.convertPingMeasurementResult(measurmentResult.getPayload());
 			}else {
-				//TODO rest & continue;
+				rest();
+				continue;
 			}
 
 		}
@@ -335,5 +340,14 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 
 		driver.checkPingMonitorProviderEchoUri(createPingMonitorProviderEchoUri());
 		driver.subscribeToExternalPingMonitorEvents(pingMonitorSystem);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void rest() {
+		try {
+			Thread.sleep(SLEEP_PERIOD);
+		} catch (final InterruptedException e) {
+			logger.warn(e.getMessage());
+		}
 	}
 }
