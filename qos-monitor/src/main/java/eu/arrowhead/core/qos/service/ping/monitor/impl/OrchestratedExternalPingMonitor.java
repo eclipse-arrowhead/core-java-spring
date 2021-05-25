@@ -3,6 +3,7 @@ package eu.arrowhead.core.qos.service.ping.monitor.impl;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 
@@ -44,6 +45,7 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 	//-------------------------------------------------------------------------------------------------
 	private static final int ICMP_TTL = 255;
 	private static final int OVERHEAD_MULTIPLIER = 2;
+	private static final long SLEEP_PERIOD = TimeUnit.SECONDS.toMillis(1);
 
 	private OrchestrationResultDTO cachedPingMonitorProvider = null;
 
@@ -121,7 +123,8 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 				if( receivedMonitoringRequestEventDTO != null) {
 					measurmentRequestConfirmed = true;
 				}else {
-					//TODO rest & continue;
+					rest();
+					continue;
 				}
 			}
 
@@ -130,7 +133,8 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 				if(startedMonitoringMeasurementEventDTO != null) {
 					measurmentStartedConfirmed = true;
 				}else {
-					//TODO rest & continue;
+					rest();
+					continue;
 				}
 			}
 
@@ -140,7 +144,8 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 
 				return IcmpPingDTOConverter.convertPingMeasurementResult(measurmentResult.getPayload());
 			}else {
-				//TODO rest & continue;
+				rest();
+				continue;
 			}
 
 		}
@@ -394,4 +399,12 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 		return result.getResponse().get(0);
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	private void rest() {
+		try {
+			Thread.sleep(SLEEP_PERIOD);
+		} catch (final InterruptedException e) {
+			logger.warn(e.getMessage());
+		}
+	}
 }
