@@ -68,4 +68,9 @@ public class DummyPingMonitor extends AbstractPingMonitor{
 		return responseList;
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	public void init() {
+		logger.debug("initPingMonitorProvider started...");
+
+	}
 }

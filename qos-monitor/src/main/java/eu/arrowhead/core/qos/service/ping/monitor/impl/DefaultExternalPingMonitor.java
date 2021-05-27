@@ -62,6 +62,7 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	@Resource(name = QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_QUEUE)
 	private LinkedBlockingQueue<InterruptedMonitoringMeasurementEventDTO> interuptedMonitoringMeasurementEventQueue;
 
+	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_NAME_WD)
 	private String externalPingMonitorName;
 
 	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_ADDRESS_WD)
@@ -76,20 +77,15 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_SECURE_WD)
 	private boolean pingMonitorSecure;
 
+	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_AUTHINFO_WD)
 	private String externalPingMonitorAuthInfo;
 
-	private final SystemRequestDTO pingMonitorSystem = getPingMonitorSystemRequestDTO();
+	private SystemRequestDTO pingMonitorSystem;
 
 	private Logger logger = LogManager.getLogger(DefaultExternalPingMonitor.class);
 
 	//=================================================================================================
 	// methods
-
-	//-------------------------------------------------------------------------------------------------
-	public DefaultExternalPingMonitor() {
-
-		initPingMonitorProvider();
-	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
@@ -153,6 +149,16 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 		}
 
 		return null;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public void init() {
+		logger.debug("initPingMonitorProvider started...");
+
+		pingMonitorSystem = getPingMonitorSystemRequestDTO();
+
+		driver.checkPingMonitorProviderEchoUri(createPingMonitorProviderEchoUri());
+		driver.subscribeToExternalPingMonitorEvents(pingMonitorSystem);
 	}
 
 	//=================================================================================================
@@ -439,14 +445,6 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 		}
 
 		return system;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private void initPingMonitorProvider() {
-		logger.debug("initPingMonitorProvider started...");
-
-		driver.checkPingMonitorProviderEchoUri(createPingMonitorProviderEchoUri());
-		driver.subscribeToExternalPingMonitorEvents(pingMonitorSystem);
 	}
 
 	//-------------------------------------------------------------------------------------------------

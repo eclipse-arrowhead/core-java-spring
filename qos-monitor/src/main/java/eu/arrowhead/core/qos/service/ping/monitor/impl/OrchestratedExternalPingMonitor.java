@@ -162,6 +162,29 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 		return null;
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	public void init() {
+		logger.debug("initPingMonitorProvider started...");
+
+		try {
+
+			final OrchestrationFormRequestDTO request = orchestrationRequestFactory.createExternalMonitorOrchestrationRequest();
+			final OrchestrationResponseDTO result = driver.queryOrchestrator(request);
+
+			cachedPingMonitorProvider = selectProvider(result);
+
+		} catch (final Exception ex) {
+			logger.warn("Exception in external ping monitor orchestration: " + ex);
+
+			cachedPingMonitorProvider = null;
+
+		}
+
+		driver.unsubscribeFromPingMonitorEvents();
+		driver.subscribeToExternalPingMonitorEvents(getPingMonitorSystemRequestDTO());
+
+	}
+
 	//=================================================================================================
 	// assistant methods
 
@@ -478,29 +501,6 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 		final OrchestrationResponseDTO result = driver.queryOrchestrator(request);
 
 		cachedPingMonitorProvider = selectProvider(result);
-
-		driver.unsubscribeFromPingMonitorEvents();
-		driver.subscribeToExternalPingMonitorEvents(getPingMonitorSystemRequestDTO());
-
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private void init() {
-		logger.debug("init started...");
-
-		try {
-
-			final OrchestrationFormRequestDTO request = orchestrationRequestFactory.createExternalMonitorOrchestrationRequest();
-			final OrchestrationResponseDTO result = driver.queryOrchestrator(request);
-
-			cachedPingMonitorProvider = selectProvider(result);
-
-		} catch (final Exception ex) {
-			logger.warn("Exception in external ping monitor orchestration: " + ex);
-
-			cachedPingMonitorProvider = null;
-
-		}
 
 		driver.unsubscribeFromPingMonitorEvents();
 		driver.subscribeToExternalPingMonitorEvents(getPingMonitorSystemRequestDTO());
