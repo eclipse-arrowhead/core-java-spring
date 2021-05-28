@@ -3584,7 +3584,7 @@ Returns an __Orchestration Response__
 
 ### Start store Orchestration by ID
 ```
-GET /orchestrator/rchestration/{id}
+GET /orchestrator/orchestration/{id}
 ```
 
 If the consumer knows its' ID, it can used this service as shortcut for store-based orchestration when
