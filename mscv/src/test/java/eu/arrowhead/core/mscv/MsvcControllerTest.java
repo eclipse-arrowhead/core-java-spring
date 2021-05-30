@@ -55,7 +55,7 @@ public class MsvcControllerTest {
 
     @Test
     public void echoMsvc() throws Exception {
-        final MvcResult response = this.mockMvc.perform(get("/msvc/echo")
+        final MvcResult response = this.mockMvc.perform(get("/mscv/echo")
                                                                 .accept(MediaType.APPLICATION_JSON))
                                                .andExpect(status().isOk())
                                                .andReturn();

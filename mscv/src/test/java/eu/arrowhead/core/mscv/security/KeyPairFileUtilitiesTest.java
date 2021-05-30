@@ -14,7 +14,6 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.pkcs.PKCSException;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
@@ -23,15 +22,11 @@ import org.springframework.core.io.ResourceLoader;
 public class KeyPairFileUtilitiesTest {
 
     private static final String PASSWORD = "123456";
-    private static final String KEYPAIR_P12 = "classpath:keys/mscv-keypair.p12"; // certificate key store
     private static final String KEYPAIR_PEM = "classpath:keys/mscv-keypair.pem"; // private key + certificate. "BEGIN ENCRYPTED PRIVATE KEY" and "BEGIN CERTIFICATE"
     private static final String PRIVATE_KEY = "classpath:keys/mscv-private.key"; // key in encrypted pem format. "BEGIN RSA PRIVATE KEY"
     private static final String PRIVATE_PKCS8 = "classpath:keys/mscv-private.pkcs8"; // key in encrypted pkcs8 format. "BEGIN ENCRYPTED PRIVATE KEY"
-    private static final String PRIVATE_PVK = "classpath:keys/mscv-private.pvk"; // windows proprietary format
-    private static final String PRIVATE_SSH_KEY = "classpath:keys/mscv-ssh-private.key"; // key in encrypted pem format. "BEGIN RSA PRIVATE KEY"
     private static final String PRIVATE_PLAIN_KEY = "classpath:keys/mscv-plain-private.key"; // key in pem format private key. "BEGIN RSA PRIVATE KEY"
     private static final String PUBLIC_PEM = "classpath:keys/mscv-public.pem"; // key in pem format. "BEGIN PUBLIC KEY".
-    private static final String PUBLIC_SSH_PUB = "classpath:keys/mscv-ssh-public.pub"; // key in ?? ssh identity file format. "ssh-rsa AAAAB3Nz..."
 
     private final KeyPairFileUtilities handler = new KeyPairFileUtilities();
     private final ResourceLoader resourceLoader = new DefaultResourceLoader(KeyPairFileUtilities.class.getClassLoader());
@@ -52,19 +47,8 @@ public class KeyPairFileUtilitiesTest {
     }
 
     @Test
-    public void readPrivateKey_encrypted_ssh_key() throws PKCSException, OperatorCreationException, IOException {
-        readPrivateKeyAndVerify(PRIVATE_SSH_KEY);
-    }
-
-    @Test
     public void readPrivateKey_pem() throws PKCSException, OperatorCreationException, IOException {
         readPrivateKeyAndVerify(KEYPAIR_PEM);
-    }
-
-    @Test
-    @Ignore
-    public void readPrivateKey_p12() throws PKCSException, OperatorCreationException, IOException {
-        readPrivateKeyAndVerify(KEYPAIR_P12);
     }
 
     @Test
@@ -73,36 +57,13 @@ public class KeyPairFileUtilitiesTest {
     }
 
     @Test
-    @Ignore
-    public void readPrivateKey_pvk() throws PKCSException, OperatorCreationException, IOException {
-        readPrivateKeyAndVerify(PRIVATE_PVK);
-    }
-
-    @Test
     public void readKeyPair_pem() throws IOException, OperatorCreationException, PKCSException {
         readKeyPairAndVerify(KEYPAIR_PEM);
     }
 
     @Test
-    @Ignore
-    public void readKeyPair_p12() throws IOException, OperatorCreationException, PKCSException {
-        readKeyPairAndVerify(KEYPAIR_P12);
-    }
-
-    @Test
-    @Ignore
-    public void readPublicKey_p12() throws IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
-        readPublicKeyAndVerify(KEYPAIR_P12);
-    }
-
-    @Test
     public void readPublicKey_pem() throws IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
         readPublicKeyAndVerify(PUBLIC_PEM);
-    }
-
-    @Test
-    public void readPublicKey_ssh_pub() throws IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
-        readPublicKeyAndVerify(PUBLIC_SSH_PUB);
     }
 
     @Test

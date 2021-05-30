@@ -38,7 +38,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class MscvMain {
 
     public static final String MSCV_EXECUTOR_SERVICE = "mscv-executor-service";
-    private static final String MSCV_THREAD_FACTORY_FORMAT = "mscv-%02d";
+    public static final String MSCV_THREAD_FACTORY_FORMAT = "mscv-%02d";
 
     private final Logger logger = LogManager.getLogger();
     //=================================================================================================

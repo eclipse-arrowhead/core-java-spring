@@ -1,21 +1,19 @@
 package eu.arrowhead.core.mscv.quartz;
 
+import java.util.List;
+import java.util.Objects;
+
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.drivers.DriverUtilities;
 import eu.arrowhead.common.quartz.QuartzUtilities;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
-import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Objects;
-
-@Component
-@DisallowConcurrentExecution
+//@Component
+//@DisallowConcurrentExecution
 public class UriCrawlerTask implements Job {
 
     //=================================================================================================

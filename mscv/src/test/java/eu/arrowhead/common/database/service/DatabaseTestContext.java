@@ -6,9 +6,9 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootConfiguration
-@EntityScan(basePackages = {"eu.arrowhead.core.msvc.database"})
+@EntityScan(basePackages = {"eu.arrowhead.common.database.entity"})
 @EnableJpaRepositories(
-        basePackages = {"eu.arrowhead.core.mscv.database"},
+        basePackages = {"eu.arrowhead.common.database.repository"},
         repositoryBaseClass = RefreshableRepositoryImpl.class)
 public class DatabaseTestContext {
     public DatabaseTestContext() { super(); }

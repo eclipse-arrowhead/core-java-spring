@@ -48,7 +48,7 @@ public class MeasurableIndicatorPointTest {
         Assert.assertEquals("SAFETY", mip.getDomain());
         Assert.assertEquals("IAC", mip.getCategory());
         Assert.assertEquals("IAC", mip.getCategoryAbbreviation());
-        Assert.assertEquals("name", mip.getStandard());
+        Assert.assertEquals("BLA-4671-347", mip.getStandard());
         Assert.assertEquals("uri", mip.getReferenceUri());
 
         mip = measurableIndicatorPointRepository.findViewById(2L);
@@ -58,7 +58,7 @@ public class MeasurableIndicatorPointTest {
         Assert.assertEquals("SECURITY", mip.getDomain());
         Assert.assertEquals("IAC", mip.getCategory());
         Assert.assertEquals("IAC", mip.getCategoryAbbreviation());
-        Assert.assertEquals("name", mip.getStandard());
+        Assert.assertEquals("BLA-4671-347", mip.getStandard());
         Assert.assertEquals("uri", mip.getReferenceUri());
     }
 }

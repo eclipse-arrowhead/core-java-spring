@@ -52,7 +52,6 @@ import static eu.arrowhead.common.CommonConstants.OP_MSCV_EVENT_CALLBACK_URI;
 )
 @RestController
 @RequestMapping(CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI)
-// TODO create a service
 public class EventHandlerListener {
 
     private static final int MAX_ATTEMPTS = 5;
@@ -121,7 +120,6 @@ public class EventHandlerListener {
         }
     }
 
-    // TODO make a lazy subscribe, assuming that device registry, system registry or event handler are not available (yet)
     @EventListener
     @Order(99) // can't use @PostConstruct because authorization rules are done be ApplicationInitListener
     public void onApplicationEvent(final ContextRefreshedEvent event) {
