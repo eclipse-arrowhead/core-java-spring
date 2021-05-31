@@ -73,7 +73,6 @@ public class PingTask extends TimerTask {
         // (i.e. per port with service definition 'monitorable'), not per
         // system?
         List<PdeSystem> monitoredSystems = getMonitoredSystems();
-        final List<Alarm> previouslyDetectedAlarms = alarmManager.getActiveAlarmData(AlarmCause.NOT_MONITORABLE); // TODO: List of system's instead of list of alarms.
         final List<Alarm> currentlyDetectedAlarms = new ArrayList<>();
 
         for (PdeSystem system : monitoredSystems) {
@@ -82,30 +81,15 @@ public class PingTask extends TimerTask {
                 .anyMatch(service -> isProvidedBy(service.provider(), system));
 
             if (!hasMonitorableService) {
-                final Alarm alarm = alarmManager.raiseSystemNotMonitorable(
+                currentlyDetectedAlarms.add(Alarm.createSystemNotMonitorableAlarm(
                     system.systemId(),
                     system.systemName().orElse(null),
                     system.metadata()
-                );
-                currentlyDetectedAlarms.add(alarm);
+                ));
             }
         }
 
-        // TODO: The method below should probably be moved to AlarmManager
-        // and reused for other alarm types.
-        clearAlarmsNoLongerDetected(previouslyDetectedAlarms, currentlyDetectedAlarms);
-    }
-
-    private void clearAlarmsNoLongerDetected(
-        final List<Alarm> previouslyDetectedAlarms,
-        final List<Alarm> currentlyDetectedAlarms
-    ) {
-
-        for (final Alarm previouslyDetectedAlarm : previouslyDetectedAlarms) {
-            if (currentlyDetectedAlarms.stream().noneMatch(alarm -> alarm.matches(previouslyDetectedAlarm))) {
-                alarmManager.clearAlarm(previouslyDetectedAlarm);
-            }
-        }
+        alarmManager.replaceAlarms(currentlyDetectedAlarms, AlarmCause.NOT_MONITORABLE);
     }
 
     private boolean isProvidedBy(SystemRecord provider, PdeSystem system) {
@@ -141,17 +125,17 @@ public class PingTask extends TimerTask {
             final String producerId = connection.producer().systemId();
             final Port producerPort = monitorablePortBySystemId.get(producerId);
 
-            if (producerPort == null) continue; // TODO: Check this logic.
+            if (producerPort == null) {
+                continue;
+            }
 
             final String consumerId = connection.consumer().systemId();
             final PdeSystem consumer = systemById.get(consumerId);
             final String consumerName = consumer.systemName().orElse(null);
 
-            boolean consumerIsPde = ApiConstants.PDE_SYSTEM_NAME.equals(consumerName); // TODO: Lowercase?
-            boolean isMonitorableService = producerPort.serviceDefinition()
-                .equals(ApiConstants.MONITORABLE_SERVICE_NAME);
+            boolean consumerIsPde = ApiConstants.PDE_SYSTEM_NAME.equals(consumerName);
 
-            if (consumerIsPde && isMonitorableService) {
+            if (consumerIsPde) {
                 result.add(systemById.get(producerId));
             }
         }

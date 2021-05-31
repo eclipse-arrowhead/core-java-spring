@@ -1,6 +1,7 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor;
 
 import eu.arrowhead.core.plantdescriptionengine.ApiConstants;
+import eu.arrowhead.core.plantdescriptionengine.alarms.Alarm;
 import eu.arrowhead.core.plantdescriptionengine.alarms.AlarmCause;
 import eu.arrowhead.core.plantdescriptionengine.alarms.AlarmManager;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
@@ -14,8 +15,8 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Po
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.SystemPortDto;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockClientResponse;
 import eu.arrowhead.core.plantdescriptionengine.utils.RequestMatcher;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mockito;
 import se.arkalix.ServiceRecord;
 import se.arkalix.SystemRecord;
@@ -31,9 +32,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -52,7 +53,7 @@ public class PingTaskTest {
     private MockClientResponse response;
     private PingTask pingTask;
 
-    @BeforeEach
+    @Before
     public void initEach() throws PdStoreException {
         httpClient = Mockito.mock(HttpClient.class);
         alarmManager = new AlarmManager();
@@ -180,11 +181,11 @@ public class PingTaskTest {
         when(serviceQuery.resolveAll()).thenReturn(resolveResult);
 
         pdTracker.put(entryWithMonitoredSystem);
-        alarmManager.raiseSystemNotMonitorable(
+        alarmManager.raise(Alarm.createSystemNotMonitorableAlarm(
             monitoredSystem.systemId(),
             monitoredSystem.systemName().orElse(null),
             monitoredSystem.metadata()
-        );
+        ));
 
         pingTask.run();
         assertTrue(alarmManager.getAlarms()

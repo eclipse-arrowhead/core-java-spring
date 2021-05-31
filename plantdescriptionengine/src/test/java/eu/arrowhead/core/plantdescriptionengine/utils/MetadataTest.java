@@ -1,13 +1,13 @@
 package eu.arrowhead.core.plantdescriptionengine.utils;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.util.Collections;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class MetadataTest {
 

@@ -1,6 +1,6 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 public class PdeAlarmTest {
 

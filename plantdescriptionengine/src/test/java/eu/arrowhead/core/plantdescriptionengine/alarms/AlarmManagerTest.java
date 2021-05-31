@@ -2,16 +2,20 @@ package eu.arrowhead.core.plantdescriptionengine.alarms;
 
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PdeAlarm;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PdeAlarmDto;
-import org.junit.jupiter.api.Test;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class AlarmManagerTest {
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void shouldRaiseNotRegistered() {
@@ -19,7 +23,7 @@ public class AlarmManagerTest {
         final String systemName = "abc";
         final AlarmManager alarmManager = new AlarmManager();
 
-        alarmManager.raiseSystemNotRegistered(systemId, systemName, null);
+        alarmManager.raise(Alarm.createSystemNotRegisteredAlarm(systemId, systemName, null));
         final PdeAlarm alarm = alarmManager.getAlarms().get(0);
 
         assertEquals(systemName, alarm.systemName().orElse(null));
@@ -78,10 +82,9 @@ public class AlarmManagerTest {
     public void shouldNotAllowSetAcknowledgedOnNonexistent() {
         final int nonexistentId = 32;
         final AlarmManager alarmManager = new AlarmManager();
-        final Exception exception = assertThrows(IllegalArgumentException.class,
-            () -> alarmManager.acknowledge(nonexistentId));
-        final String expectedMessage = "There is no alarm with ID " + nonexistentId + ".";
-        assertEquals(expectedMessage, exception.getMessage());
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage("There is no alarm with ID " + nonexistentId + ".");
+        alarmManager.acknowledge(nonexistentId);
     }
 
 }

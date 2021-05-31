@@ -4,8 +4,10 @@ import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.SrSystemDto;
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.SrSystemListDto;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockClientResponse;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 import se.arkalix.net.http.HttpStatus;
 import se.arkalix.net.http.client.HttpClient;
@@ -15,18 +17,19 @@ import se.arkalix.util.concurrent.Future;
 import java.net.InetSocketAddress;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 public class SystemTrackerTest {
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
     private HttpClient httpClient;
     private SystemTracker systemTracker;
 
-    @BeforeEach
+    @Before
     public void initEach() {
         httpClient = Mockito.mock(HttpClient.class);
         systemTracker = new SystemTracker(
@@ -38,8 +41,9 @@ public class SystemTrackerTest {
 
     @Test
     public void shouldThrowWhenNotInitialized() {
-        final Exception exception = assertThrows(RuntimeException.class, () -> systemTracker.getSystem("abc"));
-        assertEquals("SystemTracker has not been initialized.", exception.getMessage());
+        thrown.expect(RuntimeException.class);
+        thrown.expectMessage("SystemTracker has not been initialized.");
+        systemTracker.getSystem("abc");
     }
 
     @Test
@@ -63,7 +67,7 @@ public class SystemTrackerTest {
         systemTracker.start()
             .ifSuccess(result -> {
                 final SrSystem system = systemTracker.getSystem(systemName);
-                assertEquals(systemId, system.id());
+                assertEquals(systemId, (int) system.id());
             })
             .onFailure(e -> fail());
     }
@@ -105,8 +109,8 @@ public class SystemTrackerTest {
             .ifSuccess(result -> {
                 final SrSystem retrievedSystem1 = systemTracker.getSystem(systemName, metadata1);
                 final SrSystem retrievedSystem2 = systemTracker.getSystem(systemName, metadata2);
-                assertEquals(systemId1, retrievedSystem1.id());
-                assertEquals(systemId2, retrievedSystem2.id());
+                assertEquals(systemId1, (int) retrievedSystem1.id());
+                assertEquals(systemId2, (int) retrievedSystem2.id());
             })
             .onFailure(e -> fail());
     }

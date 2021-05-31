@@ -1,5 +1,6 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.routehandlers;
 
+import eu.arrowhead.core.plantdescriptionengine.alarms.Alarm;
 import eu.arrowhead.core.plantdescriptionengine.alarms.AlarmManager;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.dto.ErrorMessage;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PdeAlarm;
@@ -8,17 +9,17 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto
 import eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidation.QueryParameter;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockRequest;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockServiceResponse;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import se.arkalix.net.http.HttpStatus;
 import se.arkalix.net.http.service.HttpServiceRequest;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 
 public class GetAllPdeAlarmsTest {
 
@@ -29,7 +30,7 @@ public class GetAllPdeAlarmsTest {
 
     private void raiseMultipleAlarms(AlarmManager alarmManager, int n) {
         for (int i = 0; i < n; i++) {
-            alarmManager.raiseSystemNotRegistered("system" + i, null, null);
+            alarmManager.raise(Alarm.createSystemNotRegisteredAlarm("system" + i, null, null));
         }
     }
 
@@ -45,7 +46,7 @@ public class GetAllPdeAlarmsTest {
         }
     }
 
-    @BeforeEach
+    @Before
     public void initEach() {
         alarmManager = new AlarmManager();
         handler = new GetAllPdeAlarms(alarmManager);
@@ -130,13 +131,15 @@ public class GetAllPdeAlarmsTest {
     public void shouldSortByClearedAt() {
         final String systemNameC = "sysc";
 
-        alarmManager.raiseSystemNotRegistered("Sys-C", systemNameC, null);
+        final Alarm systemCAlarm = Alarm.createSystemNotRegisteredAlarm("Sys-C", systemNameC, null);
 
-        int systemCAlarmId = alarmManager.getAlarms().get(0).id();
+        alarmManager.raise(List.of(
+            systemCAlarm,
+            Alarm.createSystemNotRegisteredAlarm("Sys-A", "sysa", null),
+            Alarm.createSystemNotRegisteredAlarm("Sys-B", "sysb", null)
+        ));
 
-        alarmManager.raiseSystemNotRegistered("Sys-A", "sysa", null);
-        alarmManager.raiseSystemNotRegistered("Sys-B", "sysb", null);
-        alarmManager.clearAlarm(systemCAlarmId);
+        alarmManager.clearAlarm(systemCAlarm.getId());
 
         final HttpServiceRequest request = MockRequest.getSortRequest(QueryParameter.CLEARED_AT, QueryParameter.ASC);
 
@@ -155,13 +158,15 @@ public class GetAllPdeAlarmsTest {
 
         final String systemNameB = "sysb";
 
-        alarmManager.raiseSystemNotRegistered("Sys-B", systemNameB, null);
+        final Alarm systemBAlarm = Alarm.createSystemNotRegisteredAlarm("Sys-B", systemNameB, null);
 
-        int systemBAlarmId = alarmManager.getAlarms().get(0).id();
+        alarmManager.raise(List.of(
+            systemBAlarm,
+            Alarm.createSystemNotRegisteredAlarm("Sys-A", "sysa", null),
+            Alarm.createSystemNotRegisteredAlarm("Sys-C", "sysc", null)
+        ));
 
-        alarmManager.raiseSystemNotRegistered("Sys-A", "sysa", null);
-        alarmManager.raiseSystemNotRegistered("Sys-C", "sysc", null);
-        alarmManager.acknowledge(systemBAlarmId); // This changes the 'updatedAt' field
+        alarmManager.acknowledge(systemBAlarm.getId()); // This changes the 'updatedAt' field
 
         final MockRequest request = MockRequest.getSortRequest(QueryParameter.UPDATED_AT, QueryParameter.DESC);
 
@@ -252,9 +257,11 @@ public class GetAllPdeAlarmsTest {
     public void shouldFilterBySystemName() {
         final String systemNameA = "sysa";
 
-        alarmManager.raiseSystemNotRegistered("Sys-A", systemNameA, null);
-        alarmManager.raiseSystemNotRegistered("Sys-B", "sysb", null);
-        alarmManager.raiseSystemNotRegistered("Sys-C", "sysc", null);
+        alarmManager.raise(List.of(
+            Alarm.createSystemNotRegisteredAlarm("Sys-A", systemNameA, null),
+            Alarm.createSystemNotRegisteredAlarm("Sys-B", "sysb", null),
+            Alarm.createSystemNotRegisteredAlarm("Sys-C", "sysc", null)
+        ));
 
         final HttpServiceRequest request = new MockRequest.Builder()
             .queryParam(QueryParameter.SYSTEM_NAME, systemNameA)
@@ -276,8 +283,11 @@ public class GetAllPdeAlarmsTest {
         final String systemNameB = "sysb";
         final String systemNameC = "sysc";
 
-        alarmManager.raiseSystemNotRegistered("Sys-A", systemNameA, null);
-        alarmManager.raiseSystemNotRegistered("Sys-B", systemNameB, null);
+        alarmManager.raise(List.of(
+            Alarm.createSystemNotRegisteredAlarm("Sys-A", systemNameA, null),
+            Alarm.createSystemNotRegisteredAlarm("Sys-B", systemNameB, null)
+        ));
+
         alarmManager.raiseNoPingResponse(systemNameC);
         alarmManager.clearNoPingResponse(systemNameC);
 
@@ -301,9 +311,11 @@ public class GetAllPdeAlarmsTest {
 
         final String systemNameC = "sysc";
 
-        alarmManager.raiseSystemNotInDescription("sysa", null);
-        alarmManager.raiseSystemNotInDescription("sysb", null);
-        alarmManager.raiseSystemNotInDescription(systemNameC, null);
+        alarmManager.raise(List.of(
+            Alarm.createSystemNotInDescriptionAlarm("sysa", null),
+            Alarm.createSystemNotInDescriptionAlarm("sysb", null),
+            Alarm.createSystemNotInDescriptionAlarm(systemNameC, null)
+        ));
 
         final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
 

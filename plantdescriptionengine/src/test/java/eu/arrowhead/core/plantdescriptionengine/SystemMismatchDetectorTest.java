@@ -12,8 +12,8 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Pd
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PdeAlarmDto;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockSystemTracker;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import se.arkalix.net.http.client.HttpClient;
 
 import java.net.InetSocketAddress;
@@ -23,8 +23,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class SystemMismatchDetectorTest {
 
@@ -72,7 +72,7 @@ public class SystemMismatchDetectorTest {
             .build();
     }
 
-    @BeforeEach
+    @Before
     public void initEach() throws PdStoreException {
         pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
         final HttpClient httpClient = new HttpClient.Builder().insecure().build();

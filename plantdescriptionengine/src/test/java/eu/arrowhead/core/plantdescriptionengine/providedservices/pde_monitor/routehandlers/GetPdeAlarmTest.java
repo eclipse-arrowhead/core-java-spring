@@ -1,20 +1,21 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.routehandlers;
 
+import eu.arrowhead.core.plantdescriptionengine.alarms.Alarm;
 import eu.arrowhead.core.plantdescriptionengine.alarms.AlarmManager;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.dto.ErrorMessage;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PdeAlarm;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PdeAlarmDto;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockRequest;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockServiceResponse;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import se.arkalix.net.http.HttpStatus;
 import se.arkalix.net.http.service.HttpServiceRequest;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class GetPdeAlarmTest {
 
@@ -22,7 +23,7 @@ public class GetPdeAlarmTest {
     private GetPdeAlarm handler;
     private MockServiceResponse response;
 
-    @BeforeEach
+    @Before
     public void initEach() {
         alarmManager = new AlarmManager();
         handler = new GetPdeAlarm(alarmManager);
@@ -32,7 +33,7 @@ public class GetPdeAlarmTest {
     @Test
     public void shouldRetrieveAlarm() {
 
-        alarmManager.raiseSystemNotInDescription("abc", null);
+        alarmManager.raise(Alarm.createSystemNotInDescriptionAlarm("abc", null));
         final PdeAlarmDto alarm = alarmManager.getAlarms().get(0);
         final HttpServiceRequest request = new MockRequest.Builder()
             .pathParameters(List.of(String.valueOf(alarm.id())))

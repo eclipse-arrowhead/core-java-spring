@@ -100,6 +100,7 @@ Currently only the following values can be updated. If a field is not present th
 | Field | Type | Description | Mandatory | Default value |
 | ----- | ---- | ----------- | --------- | ------------- |
 | `portName` | String | Identity of the port | `true` | |
+| `metadata` | Object\<String> | Metadata - key-value pairs | `false` | null |
 | `serviceDefinition` | String | Service definition identity | `true` | |
 | `consumer` | Boolean | Is the port a consumer port | `false` | `false` |
 
@@ -126,8 +127,8 @@ document claiming to implement this service.
 
 | Type | Description |
 | ---- | ----------- |
-| Object \<A> | An unordered collection of [String: Value] pairs, where each Value conforms to type A. |
-| Array \<A> | An ordered collection of elements, where each element conforms to type A. |
+| Object \<A> | An unordered collection of [String: Value] pairs, where each Value conforms to type A. Empty objects are omitted. |
+| Array \<A> | An ordered collection of elements, where each element conforms to type A. Empty arrays are omitted. |
 | Boolean | One out of `true` or `false`. |
 | DateTime | Pinpoints a specific moment in time. |
 | Integer | 32-bit signed two's complement integer, which has a minimum value of -2<sup>31</sup> and a maximum value of 2<sup>31</sup>-1 |

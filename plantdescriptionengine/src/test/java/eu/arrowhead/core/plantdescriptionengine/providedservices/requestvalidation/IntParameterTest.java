@@ -1,15 +1,19 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidation;
 
 import eu.arrowhead.core.plantdescriptionengine.utils.MockRequest;
-import org.junit.jupiter.api.Test;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import se.arkalix.net.http.service.HttpServiceRequest;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.Assert.assertEquals;
 
 public class IntParameterTest {
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void shouldParseIntegers() throws ParseError {
@@ -42,12 +46,12 @@ public class IntParameterTest {
 
         assertEquals(valueA, parser.getRequiredValue(a));
         assertEquals(valueB, parser.getRequiredValue(b));
-        assertEquals(valueC, parser.getValue(c).orElse(null));
-        assertEquals(valueD, parser.getValue(d).orElse(null));
+        assertEquals(valueC, (int) parser.getValue(c).orElse(-1));
+        assertEquals(valueD, (int) parser.getValue(d).orElse(-1));
     }
 
     @Test
-    public void shouldRejectNonInteger() {
+    public void shouldRejectNonInteger() throws ParseError {
         final String key = "weight";
         final String value = "heavy";
         final List<QueryParameter> requiredParameters = List.of(new IntParameter.Builder()
@@ -58,14 +62,13 @@ public class IntParameterTest {
             .queryParam(key, value)
             .build();
 
-        final Exception exception = assertThrows(ParseError.class,
-            () -> new QueryParamParser(requiredParameters, null, request));
-
-        assertEquals("<Query parameter '" + key + "' must be a valid integer, got '" + value + "'.>", exception.getMessage());
+        thrown.expect(ParseError.class);
+        thrown.expectMessage("<Query parameter '" + key + "' must be a valid integer, got '" + value + "'.>");
+        new QueryParamParser(requiredParameters, null, request);
     }
 
     @Test
-    public void shouldRejectInvalidInteger() {
+    public void shouldRejectInvalidInteger() throws ParseError {
         final String key = "weight";
         final String value = "123 test";
 
@@ -77,15 +80,13 @@ public class IntParameterTest {
             .queryParam(key, value)
             .build();
 
-        final Exception exception = assertThrows(ParseError.class,
-            () -> new QueryParamParser(requiredParameters, null, request));
-
-        assertEquals("<Query parameter '" + key + "' must be a valid integer, got '" +
-            value + "'.>", exception.getMessage());
+        thrown.expect(ParseError.class);
+        thrown.expectMessage("<Query parameter '" + key + "' must be a valid integer, got '" + value + "'.>");
+        new QueryParamParser(requiredParameters, null, request);
     }
 
     @Test
-    public void shouldRejectTooSmallValues() {
+    public void shouldRejectTooSmallValues() throws ParseError {
         final String keyA = "a";
         final String keyB = "b";
         final String keyC = "c";
@@ -114,30 +115,31 @@ public class IntParameterTest {
             .queryParam(keyC, cValue)
             .build();
 
-        final Exception exception = assertThrows(ParseError.class,
-            () -> new QueryParamParser(requiredParameters, null, request));
 
-        assertEquals("<Query parameter '" + keyC +
-            "' must be greater than or equal to " + min + ", got " + cValue +
-            ".>", exception.getMessage());
+        thrown.expect(ParseError.class);
+        thrown.expectMessage(
+            "<Query parameter '" + keyC +
+                "' must be greater than or equal to " + min + ", got " + cValue +
+                ".>"
+        );
+        new QueryParamParser(requiredParameters, null, request);
     }
 
     @Test
-    public void shouldReportMissingParameter() {
+    public void shouldReportMissingParameter() throws ParseError {
         final String key = "height";
         final List<QueryParameter> requiredParameters = List.of(new IntParameter.Builder()
             .name(key)
             .build());
-        final Exception exception = assertThrows(ParseError.class, () -> {
-            final HttpServiceRequest request = new MockRequest.Builder()
-                .build();
-            new QueryParamParser(requiredParameters, null, request);
-        });
-        assertEquals("<Missing parameter '" + key + "'.>", exception.getMessage());
+
+        thrown.expect(ParseError.class);
+        thrown.expectMessage("<Missing parameter '" + key + "'.>");
+        final HttpServiceRequest request = new MockRequest.Builder().build();
+        new QueryParamParser(requiredParameters, null, request);
     }
 
     @Test
-    public void shouldReportMissingDependency() {
+    public void shouldReportMissingDependency() throws ParseError {
         final String keyA = "a";
         final String keyB = "b";
 
@@ -147,12 +149,12 @@ public class IntParameterTest {
                 .name(keyB)
                 .build())
             .build());
-        final Exception exception = assertThrows(ParseError.class, () -> {
-            final HttpServiceRequest request = new MockRequest.Builder()
-                .queryParam(keyA, 95)
-                .build();
-            new QueryParamParser(null, acceptedParameters, request);
-        });
-        assertEquals("<Missing parameter '" + keyB + "'.>", exception.getMessage());
+
+        thrown.expect(ParseError.class);
+        thrown.expectMessage("<Missing parameter '" + keyB + "'.>");
+        final HttpServiceRequest request = new MockRequest.Builder()
+            .queryParam(keyA, 95)
+            .build();
+        new QueryParamParser(null, acceptedParameters, request);
     }
 }

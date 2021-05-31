@@ -21,12 +21,10 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Po
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.SystemPortDto;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockClientResponse;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockSystemTracker;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import se.arkalix.net.http.HttpMethod;
 import se.arkalix.net.http.HttpStatus;
 import se.arkalix.net.http.client.HttpClient;
@@ -39,16 +37,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
 public class OrchestratorClientTest {
 
     final String serviceDefinitionA = "service_a";
@@ -177,7 +174,7 @@ public class OrchestratorClientTest {
             .build();
     }
 
-    @BeforeEach
+    @Before
     public void initEach() throws PdStoreException {
         final PdStore pdStore = new InMemoryPdStore();
         httpClient = Mockito.mock(HttpClient.class);
@@ -236,7 +233,7 @@ public class OrchestratorClientTest {
         assertTrue(capturedRequest.uri().isPresent());
         assertEquals(expectedUri, capturedRequest.uri().get().toString());
         assertEquals(orchestratorSrSystem.address(), capturedAddress.getAddress().getHostAddress());
-        assertEquals(orchestratorSrSystem.port(), capturedAddress.getPort());
+        assertEquals((int) orchestratorSrSystem.port(), capturedAddress.getPort());
 
         assertTrue(capturedRequest.body().isPresent());
 
@@ -312,7 +309,7 @@ public class OrchestratorClientTest {
 
                 // Assert that the Orchestrator was called with the proper data.
                 assertEquals("/" + orchestratorSrSystem.address(), capturedAddress.getAddress().toString());
-                assertEquals(orchestratorSrSystem.port(), capturedAddress.getPort());
+                assertEquals((int) orchestratorSrSystem.port(), capturedAddress.getPort());
                 assertTrue(capturedRequest.uri().isPresent());
                 final String expectedUri = "/orchestrator/store/flexible/" + newRuleId + "?";
                 final String capturedUri = capturedRequest.uri().get().toString();
@@ -401,7 +398,7 @@ public class OrchestratorClientTest {
 
                 // Assert that the Orchestrator was called with the proper data.
                 assertEquals("/" + orchestratorSrSystem.address(), capturedAddress.getAddress().toString());
-                assertEquals(orchestratorSrSystem.port(), capturedAddress.getPort());
+                assertEquals((int) orchestratorSrSystem.port(), capturedAddress.getPort());
                 assertTrue(capturedRequest.uri().isPresent());
                 final String capturedUri = capturedRequest.uri().get().toString();
                 final String expectedUri = "/orchestrator/store/flexible/" + newRuleId + "?";

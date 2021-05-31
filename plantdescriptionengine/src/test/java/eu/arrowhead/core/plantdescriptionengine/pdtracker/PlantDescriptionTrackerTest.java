@@ -13,19 +13,20 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Pl
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PortDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.SystemPortDto;
 import eu.arrowhead.core.plantdescriptionengine.utils.TestUtils;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.time.Instant;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit test for the {@link eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker}
@@ -34,11 +35,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class PlantDescriptionTrackerTest {
 
     final Instant now = Instant.now();
-
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
     PdStore store;
     PlantDescriptionTracker pdTracker;
 
-    @BeforeEach
+    @Before
     public void initEach() throws PdStoreException {
         store = new InMemoryPdStore();
         pdTracker = new PlantDescriptionTracker(store);
@@ -85,7 +87,7 @@ public class PlantDescriptionTrackerTest {
         final PlantDescriptionEntryDto storedEntry = pdTracker.get(entryId);
 
         assertNotNull(storedEntry);
-        assertEquals(entryId, storedEntry.id(), 0);
+        assertEquals(entryId, storedEntry.id());
     }
 
     @Test
@@ -154,7 +156,7 @@ public class PlantDescriptionTrackerTest {
         pdTracker.put(inactiveEntry);
 
         assertNotNull(pdTracker.activeEntry());
-        assertEquals(activeEntry.id(), pdTracker.activeEntry().id(), 0);
+        assertEquals(activeEntry.id(), pdTracker.activeEntry().id());
 
         pdTracker.remove(activeEntry.id());
 
@@ -323,9 +325,9 @@ public class PlantDescriptionTrackerTest {
 
         pdTracker.put(entry);
 
-        final Exception exception = assertThrows(IllegalStateException.class,
-            () -> pdTracker.getSystem("ABC"));
-        assertEquals("No active Plant Description.", exception.getMessage());
+        thrown.expect(IllegalStateException.class);
+        thrown.expectMessage("No active Plant Description.");
+        pdTracker.getSystem("ABC");
     }
 
     @Test
@@ -691,19 +693,20 @@ public class PlantDescriptionTrackerTest {
 
         pdTracker.put(entry);
 
-        final Exception exception = assertThrows(IllegalArgumentException.class,
-            () -> pdTracker.getServiceDefinition(nonexistentPort));
-        assertEquals("No port named '" + nonexistentPort + "' could be found in the Plant Description Tracker.",
-            exception.getMessage());
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage(
+            "No port named '" + nonexistentPort +
+                "' could be found in the Plant Description Tracker."
+        );
+        pdTracker.getServiceDefinition(nonexistentPort);
     }
 
     @Test
     public void shouldThrowWhenGettingSdNoActiveEntry() {
         final String nonexistentPort = "qwerty";
-        final Exception exception = assertThrows(IllegalStateException.class,
-            () -> pdTracker.getServiceDefinition(nonexistentPort));
-
-        assertEquals("No entry is currently active.", exception.getMessage());
+        thrown.expect(IllegalStateException.class);
+        thrown.expectMessage("No entry is currently active.");
+        pdTracker.getServiceDefinition(nonexistentPort);
     }
 
     @Test
@@ -718,9 +721,9 @@ public class PlantDescriptionTrackerTest {
         final String systemId = "Nonexistent";
 
         pdTracker.put(entry);
-        final Exception exception = assertThrows(IllegalArgumentException.class, () -> pdTracker.getSystem(systemId));
-
-        assertEquals("Could not find system with ID '" + systemId + "'.", exception.getMessage());
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage("Could not find system with ID '" + systemId + "'.");
+        pdTracker.getSystem(systemId);
     }
 
     @Test

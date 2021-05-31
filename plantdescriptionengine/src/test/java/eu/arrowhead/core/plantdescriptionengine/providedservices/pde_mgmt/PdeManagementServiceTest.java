@@ -3,11 +3,11 @@ package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.InMemoryPdStore;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.PdStoreException;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import se.arkalix.net.http.service.HttpService;
 import se.arkalix.security.access.AccessPolicy;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 public class PdeManagementServiceTest {
 

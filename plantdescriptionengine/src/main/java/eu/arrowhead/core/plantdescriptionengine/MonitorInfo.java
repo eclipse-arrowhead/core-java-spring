@@ -29,16 +29,7 @@ public class MonitorInfo {
         this.systemMetadata = systemMetadata;
     }
 
-    /**
-     * Returns true if the given arguments match this instances metadata.
-     * <p>
-     * More specifically, returns true if {@code metadata} is not present,
-     * or is a superset of this instance's system metadata.
-     *
-     * @param metadata Metadata relating to a particular system (read from a
-     *                 system in a Plant Description Entry).
-     */
-    public boolean matchesSystemMetadata(final Map<String, String> metadata) {
+    private boolean matchesSystemMetadata(final Map<String, String> metadata) {
         if (metadata == null || metadata.isEmpty()) {
             return true;
         }
@@ -46,5 +37,13 @@ public class MonitorInfo {
             return false;
         }
         return Metadata.isSubset(metadata, systemMetadata);
+    }
+
+    public boolean matches(final String systemName, final Map<String, String> metadata) {
+        if (systemName != null && !systemName.equals(this.systemName)) {
+            return false;
+        }
+        return matchesSystemMetadata(metadata);
+
     }
 }

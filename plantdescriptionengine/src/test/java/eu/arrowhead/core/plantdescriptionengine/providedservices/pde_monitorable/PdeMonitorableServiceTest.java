@@ -1,11 +1,11 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitorable;
 
 import eu.arrowhead.core.plantdescriptionengine.ApiConstants;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import se.arkalix.net.http.service.HttpService;
 import se.arkalix.security.access.AccessPolicy;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 public class PdeMonitorableServiceTest {
 

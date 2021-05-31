@@ -107,7 +107,7 @@ JSON object with the following fields:
 
 | Field | Type | Description | Mandatory |
 | ----- | ---- | ----------- | --------- |
-| `inventoryId` | String | The systems Id in this Inventory system | `true` |
+| `inventoryId` | String | The system's Id in this Inventory system | `true` |
 | `systemName` | String | Identity of the system | `false` |
 | `metadata` | Object\<String> | Metadata - key-value pairs | `false` |
 
@@ -130,8 +130,8 @@ types.
 | JSON Type | Description |
 | --------- | ----------- |
 | Value | Any out of Object, Array, String, Integer, Boolean or Null. |
-| Object \<A> | An unordered collection of [String: Value] pairs, where each Value conforms to type A. |
-| Array \<A> | An ordered collection of Value elements, where each element conforms to type A. |
+| Object \<A> | An unordered collection of [String: Value] pairs, where each Value conforms to type A. Empty objects are omitted. |
+| Array \<A> | An ordered collection of Value elements, where each element conforms to type A. Empty arrays are omitted. |
 | String | An arbitrary UTF-8 string. |
 | Integer | 32-bit signed two's complement integer, which has a minimum value of -2<sup>31</sup> and a maximum value of 2<sup>31</sup>-1 |
 | Boolean | One out of `true` or `false`. |

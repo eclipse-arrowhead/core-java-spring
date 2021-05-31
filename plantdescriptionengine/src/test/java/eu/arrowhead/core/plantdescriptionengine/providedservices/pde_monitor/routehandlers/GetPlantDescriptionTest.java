@@ -9,15 +9,15 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto
 import eu.arrowhead.core.plantdescriptionengine.utils.MockRequest;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockServiceResponse;
 import eu.arrowhead.core.plantdescriptionengine.utils.TestUtils;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import se.arkalix.net.http.HttpStatus;
 import se.arkalix.net.http.service.HttpServiceRequest;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class GetPlantDescriptionTest {
 
@@ -26,7 +26,7 @@ public class GetPlantDescriptionTest {
     private MockServiceResponse response;
     private MonitorInfoTracker monitorInfoTracker;
 
-    @BeforeEach
+    @Before
     public void initEach() throws PdStoreException {
         monitorInfoTracker = new MonitorInfoTracker();
         pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());

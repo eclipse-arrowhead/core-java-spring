@@ -1,13 +1,13 @@
 package eu.arrowhead.core.plantdescriptionengine.consumedservices.orchestrator.rulebackingstore;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class FileRuleStoreTest {
 
@@ -26,7 +26,7 @@ public class FileRuleStoreTest {
         }
     }
 
-    @AfterEach
+    @After
     public void removeTestDirectory() {
         deleteDirectory(new File(entryDirectory));
     }

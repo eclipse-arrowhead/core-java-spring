@@ -3,9 +3,9 @@ package eu.arrowhead.core.plantdescriptionengine.alarms;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PdeAlarmDto;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -85,7 +85,8 @@ public class AlarmManager {
     }
 
     /**
-     * Marks the specified alarm as acknowledged.
+     * Marks the specified alarm as acknowledged, noting the time at which this
+     * was done.
      *
      * @param id ID of an alarm.
      */
@@ -98,38 +99,31 @@ public class AlarmManager {
     }
 
     /**
-     * Raises an alarm with the given info, unless an alarm with the exact same
-     * parameters is already active.
-     *
-     * @return Newly created or previously existing alarm that matches the given
-     * parameters.
+     * Raises the given alarm, unless one with the same parameters is already
+     * active.
      */
-    private Alarm raiseAlarm(
-        final String systemId,
-        final String systemName,
-        final Map<String, String> metadata,
-        final AlarmCause cause
-    ) {
+    public void raise(final Alarm alarm) {
         synchronized (lock) {
-            final Map<String, String> nonNullMetadata = metadata == null ? Collections.emptyMap() : metadata;
-
-            // Check if this alarm has already been raised:
-            for (final Alarm alarm : activeAlarms) {
-                if (alarm.matches(systemId, systemName, nonNullMetadata, cause)) {
-                    return alarm;
-                }
+            if (!alreadyRaised(alarm)) {
+                activeAlarms.add(alarm);
             }
-            final Alarm newAlarm = new Alarm(systemId, systemName, nonNullMetadata, cause);
-            activeAlarms.add(newAlarm);
-            return newAlarm;
         }
     }
 
-    public void clearAlarm(final Alarm alarm) {
-        Objects.requireNonNull(alarm, "Expected alarm.");
+    /**
+     * Raises each of the given alarms, unless one with the same exact
+     * parameters is already active.
+     */
+    public void raise(final List<Alarm> alarms) {
+        alarms.forEach(this::raise);
+    }
 
-        // TODO: Find the alarm from active alarms instead. That way, a copy can
-        // be passed instead of the actual instance.
+    private boolean alreadyRaised(Alarm alarm) {
+        return activeAlarms.stream().anyMatch(alarm::matches);
+    }
+
+    private void clearAlarm(final Alarm alarm) {
+        Objects.requireNonNull(alarm, "Expected alarm.");
 
         alarm.setCleared();
 
@@ -137,65 +131,6 @@ public class AlarmManager {
         activeAlarms.remove(alarm);
     }
 
-    public void clearAlarm(final int id) {
-        Alarm alarm = getAlarmData(id);
-        if (alarm != null) {
-            alarm.setCleared();
-            clearedAlarms.add(alarm);
-            activeAlarms.remove(alarm);
-        }
-    }
-
-    /**
-     * Raise an alarm indicating that a system required by the active Plant
-     * Description was not found in the Service Registry.
-     *
-     * @param systemId   ID of a Plant Description system.
-     * @param systemName Name of a Plant Description system, or null.
-     * @param metadata   Metadata of a Plant Description system, or null.
-     */
-    public void raiseSystemNotRegistered(
-        final String systemId,
-        final String systemName,
-        final Map<String, String> metadata
-    ) {
-        Objects.requireNonNull(systemId, "Expected system ID");
-        raiseAlarm(systemId, systemName, metadata, AlarmCause.SYSTEM_NOT_REGISTERED);
-    }
-
-    /**
-     * Raise an alarm indicating that a system required by the active Plant
-     * Description cannot be uniquely identified in the Service Registry.
-     *
-     * @param systemId   ID of a Plant Description system.
-     * @param systemName Name of a Plant Description system, or null.
-     * @param metadata   Metadata of a Plant Description system, or null.
-     */
-    public void raiseMultipleMatches(
-        final String systemId,
-        final String systemName,
-        final Map<String, String> metadata
-    ) {
-        Objects.requireNonNull(systemId, "Expected system ID");
-        raiseAlarm(systemId, systemName, metadata, AlarmCause.MULTIPLE_MATCHES);
-    }
-
-    /**
-     * Raise an alarm indicating that a supposedly monitorable system does not
-     * seem to provide a 'Monitorable' service.
-     *
-     * @param systemId   ID of a Plant Description system.
-     * @param systemName Name of a Plant Description system, or null.
-     * @param metadata   Metadata of a Plant Description system, or null.
-     */
-    public Alarm raiseSystemNotMonitorable(
-        final String systemId,
-        final String systemName,
-        final Map<String, String> metadata
-    ) {
-        Objects.requireNonNull(systemId, "Expected system ID");
-        return raiseAlarm(systemId, systemName, metadata, AlarmCause.NOT_MONITORABLE);
-    }
 
     /**
      * Raise an alarm indicating that a monitorable system did not respond to
@@ -205,7 +140,7 @@ public class AlarmManager {
      */
     public void raiseNoPingResponse(final String systemName) {
         Objects.requireNonNull(systemName, "Expected system name.");
-        raiseAlarm(null, systemName, Collections.emptyMap(), AlarmCause.NO_PING_RESPONSE);
+        raise(new Alarm(null, systemName, Collections.emptyMap(), AlarmCause.NO_PING_RESPONSE));
     }
 
     /**
@@ -230,14 +165,32 @@ public class AlarmManager {
     }
 
     /**
-     * Raise an alarm indicating that a system found in the Service Registry is
-     * missing from the active Plant Description.
-     *
-     * @param systemName Name of a Plant Description system.
-     * @param metadata   Metadata of a system, or null.
+     * Clears all alarms with the specified alarm cause, except for the ones
+     * matching alarms in {@code currentlyDetectedAlarms}.
      */
-    public void raiseSystemNotInDescription(final String systemName, final Map<String, String> metadata) {
-        Objects.requireNonNull(systemName, "Expected system name.");
-        raiseAlarm(null, systemName, metadata, AlarmCause.SYSTEM_NOT_IN_DESCRIPTION);
+    private void clearOldAlarms(final List<Alarm> currentlyDetectedAlarms, final AlarmCause... causes) {
+
+        final var currentlyActiveAlarms = getActiveAlarmData(Arrays.asList(causes));
+        for (final Alarm previouslyDetectedAlarm : currentlyActiveAlarms) {
+            if (currentlyDetectedAlarms.stream().noneMatch(alarm -> alarm.matches(previouslyDetectedAlarm))) {
+                clearAlarm(previouslyDetectedAlarm);
+            }
+        }
+    }
+
+    /**
+     * Replace any active alarms with the given causes with the provided list
+     * of alarms.
+     */
+    public void replaceAlarms(final List<Alarm> newAlarms, final AlarmCause... notMonitorable) {
+        clearOldAlarms(newAlarms, notMonitorable);
+        raise(newAlarms);
+    }
+
+    public void clearAlarm(final int id) {
+        Alarm alarm = getAlarmData(id);
+        if (alarm != null) {
+            clearAlarm(alarm);
+        }
     }
 }

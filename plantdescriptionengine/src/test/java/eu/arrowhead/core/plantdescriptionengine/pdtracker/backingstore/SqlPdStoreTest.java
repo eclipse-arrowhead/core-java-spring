@@ -9,19 +9,20 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Po
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PortDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.SystemPortDto;
 import eu.arrowhead.core.plantdescriptionengine.utils.TestUtils;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit test for the {@link eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.SqlPdStore}
@@ -34,24 +35,26 @@ public class SqlPdStoreTest {
     private final String USERNAME = "root";
     private final String PASSWORD = "password";
     private final int maxPdBytes = 200000;
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
     SqlPdStore store;
 
-    @BeforeEach
+    @Before
     public void createStore() throws PdStoreException {
         store = new SqlPdStore(maxPdBytes);
         store.init(DRIVER_CLASS_NAME, CONNECTION_URL, USERNAME, PASSWORD);
     }
 
-    @AfterEach
+    @After
     public void clearStore() throws PdStoreException {
         store.removeAll();
     }
 
     @Test
-    public void shouldRequireInitialization() {
-        final Exception exception = assertThrows(IllegalStateException.class,
-            () -> new SqlPdStore(maxPdBytes).readEntries());
-        assertEquals("SqlPdStore has not been initialized.", exception.getMessage());
+    public void shouldRequireInitialization() throws PdStoreException {
+        thrown.expect(IllegalStateException.class);
+        thrown.expectMessage("SqlPdStore has not been initialized.");
+        new SqlPdStore(maxPdBytes).readEntries();
     }
 
     @Test

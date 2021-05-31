@@ -38,7 +38,7 @@ which are used to represent things like hashes and identifiers.
 
 | Field | Type | Description | Mandatory |
 | ----- | ---- | ----------- | --------- |
-| `inventoryId` | String | The systems Id in this Inventory system | `true` |
+| `inventoryId` | String | The system's Id in this Inventory system | `true` |
 | `systemName` | String | Identity of the system | `false` |
 | `metadata` | Custom | Metadata - key-value pairs | `false` |
 
@@ -56,6 +56,6 @@ document claiming to implement this service.
 
 | Type | Description |
 | ---- | ----------- |
-| Array \<A> | An ordered collection of elements, where each element conforms to type A. |
+| Array \<A> | An ordered collection of elements, where each element conforms to type A. Empty arrays are omitted. |
 | Custom | Any suitable type chosen by the implementor of the service.|
 | String | An arbitrary UTF-8 string. |

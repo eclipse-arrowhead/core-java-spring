@@ -402,6 +402,9 @@ JSON object with the following fields:
 | `serviceDefinition` | String | Service definition identity | `true` | |
 | `consumer` | Boolean | Is the port a consumer port | `false` | `false` |
 | `metadata` | Object\<String> | Metadata - key-value pairs. Only allowed if `consumer` is true. | `false` | null |
+| `systemData` | Object | System specific data - key-value pairs | `false` | Only present if provided by [Monitorable] service with metadata matching that of this port |
+| `inventoryId` | String | The system's Id in an Inventory system | `false` | Only present if provided by [Monitorable] service with metadata matching that of this port |
+| `inventoryData` | Custom | Inventory specific data - key-value pairs | `false` | Only present if provided by [Inventory] system |
 
 ### SystemEntry
 JSON object with the following fields:
@@ -413,7 +416,7 @@ JSON object with the following fields:
 | `metadata` | Object\<String> | Metadata - key-value pairs | `false` | Only present if specified |
 | `ports` | Array\<[PortEntry](#PortEntry)> | Array with service ports exposed by the system | `true` ||
 | `systemData` | Object | System specific data - key-value pairs | `false` | Only present if provided by Monitorable |
-| `inventoryId` | String | The systems Id in an Inventory system | `false` | Only present if provided by Monitorable |
+| `inventoryId` | String | The system's Id in an Inventory system | `false` | Only present if provided by Monitorable |
 | `inventoryData` | Object | Inventory specific data - key-value pairs | `false` | Only present if provided by Inventory  |
 
 
@@ -428,8 +431,8 @@ types.
 | JSON Type | Description |
 | --------- | ----------- |
 | Value | Any out of Object, Array, String, Integer, Boolean or Null. |
-| Object \<A> | An unordered collection of [String: Value] pairs, where each Value conforms to type A. |
-| Array \<A> | An ordered collection of Value elements, where each element conforms to type A. |
+| Object \<A> | An unordered collection of [String: Value] pairs, where each Value conforms to type A. Empty objects are omitted. |
+| Array \<A> | An ordered collection of Value elements, where each element conforms to type A. Empty arrays are omitted. |
 | String | An arbitrary UTF-8 string. |
 | Integer | 32-bit signed two's complement integer, which has a minimum value of -2<sup>31</sup> and a maximum value of 2<sup>31</sup>-1 |
 | Boolean | One out of `true` or `false`. |

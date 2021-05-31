@@ -1,6 +1,8 @@
 package eu.arrowhead.core.plantdescriptionengine;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import se.arkalix.ServiceInterface;
 import se.arkalix.ServiceRecord;
 import se.arkalix.SystemRecord;
@@ -15,12 +17,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.Assert.assertEquals;
+
 
 public class MonitorInfoTest {
 
     private final String providerSystemName = "Provider-system";
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     private ServiceRecord createServiceRecord(final Map<String, String> systemMetadata) {
 
@@ -75,8 +80,6 @@ public class MonitorInfoTest {
         final MonitorInfo systemInfo = systemInfoList.get(0);
         assertEquals("{[a: true]}", systemInfo.systemData.toString());
     }
-
-    // TODO: Add test that looks up info by metadata
 
     @Test
     public void shouldStoreInventoryId() {
@@ -156,9 +159,8 @@ public class MonitorInfoTest {
     @Test
     public void shouldThrowWhenArgsAreMissing() {
         final MonitorInfoTracker monitorInfoTracker = new MonitorInfoTracker();
-        final Exception exception = assertThrows(
-            IllegalArgumentException.class, () -> monitorInfoTracker.getSystemInfo(null, null)
-        );
-        assertEquals("Either system name or metadata must be present.", exception.getMessage());
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage("Either system name or metadata must be present.");
+        monitorInfoTracker.getSystemInfo(null, null);
     }
 }

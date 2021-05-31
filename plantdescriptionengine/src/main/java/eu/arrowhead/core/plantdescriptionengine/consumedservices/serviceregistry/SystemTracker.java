@@ -97,7 +97,7 @@ public class SystemTracker {
         // Report removed systems
         for (final SrSystem oldSystem : oldSystems) {
             final boolean stillPresent = newSystems.stream()
-                .anyMatch(newSystem -> newSystem.systemName().equals(oldSystem.systemName()));
+                .anyMatch(newSystem -> same(newSystem, oldSystem));
             if (!stillPresent) {
                 for (final SystemUpdateListener listener : listeners) {
                     logger.info("System '" + oldSystem.systemName() + "' has been removed from the Service Registry.");
@@ -109,7 +109,7 @@ public class SystemTracker {
         // Report added systems
         for (final SrSystem newSystem : newSystems) {
             final boolean wasPresent = oldSystems.stream()
-                .anyMatch(oldSystem -> newSystem.systemName().equals(oldSystem.systemName()));
+                .anyMatch(oldSystem -> same(oldSystem, newSystem));
             if (!wasPresent) {
                 logger.info("System '" + newSystem.systemName() + "' detected in Service Registry.");
                 for (final SystemUpdateListener listener : listeners) {
@@ -117,6 +117,12 @@ public class SystemTracker {
                 }
             }
         }
+    }
+
+    private boolean same(final SrSystem a, final SrSystem b) {
+        return a.systemName().equals(b.systemName()) &&
+            a.address().equals(b.address()) &&
+            a.port().equals(b.port());
     }
 
     /**

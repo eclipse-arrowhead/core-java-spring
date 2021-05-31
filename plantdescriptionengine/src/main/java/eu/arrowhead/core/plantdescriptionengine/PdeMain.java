@@ -2,13 +2,12 @@ package eu.arrowhead.core.plantdescriptionengine;
 
 import eu.arrowhead.core.plantdescriptionengine.alarms.AlarmManager;
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.orchestrator.OrchestratorClient;
-import eu.arrowhead.core.plantdescriptionengine.consumedservices.orchestrator.rulebackingstore.FileRuleStore;
+import eu.arrowhead.core.plantdescriptionengine.consumedservices.orchestrator.rulebackingstore.SqlRuleStore;
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.SystemTracker;
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.serviceregistry.dto.SrSystem;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
-import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.FilePdStore;
-import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.PdStore;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.PdStoreException;
+import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.SqlPdStore;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.PdeManagementService;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.PdeMonitorService;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitorable.PdeMonitorableService;
@@ -262,12 +261,17 @@ public final class PdeMain {
 
     private static PlantDescriptionTracker loadPlantDescriptionTracker(Properties appProps) {
 
-        final String plantDescriptionsDirectory = getProp(appProps, PropertyNames.PD_DIRECTORY);
         final int maxPdBytes = Integer.parseInt(getProp(appProps, PropertyNames.PD_MAX_SIZE));
-        final PdStore pdStore = new FilePdStore(plantDescriptionsDirectory, maxPdBytes);
-
+        final SqlPdStore pdStore = new SqlPdStore(maxPdBytes);
         PlantDescriptionTracker pdTracker = null;
+
         try {
+            pdStore.init(
+                getProp(appProps, PropertyNames.DB_DRIVER_CLASS_NAME),
+                getProp(appProps, PropertyNames.DB_CONNECTION_URL),
+                getProp(appProps, PropertyNames.DB_USERNAME),
+                getProp(appProps, PropertyNames.DB_PASSWORD)
+            );
             pdTracker = new PlantDescriptionTracker(pdStore);
         } catch (PdStoreException e) {
             terminate("Failed to create Plant Description tracker.", e);
@@ -317,10 +321,16 @@ public final class PdeMain {
         systemTracker.start()
             .flatMap(systemTrackerResult -> getOrchestratorAddress(systemTracker))
             .flatMap(orchestratorAddress -> {
-                final String ruleDirectory = getProp(appProps, PropertyNames.ORCHESTRATION_RULES);
+                SqlRuleStore ruleStore = new SqlRuleStore();
+                ruleStore.init(
+                    getProp(appProps, PropertyNames.DB_DRIVER_CLASS_NAME),
+                    getProp(appProps, PropertyNames.DB_CONNECTION_URL),
+                    getProp(appProps, PropertyNames.DB_USERNAME),
+                    getProp(appProps, PropertyNames.DB_PASSWORD)
+                );
                 final OrchestratorClient orchestratorClient = new OrchestratorClient(
                     httpClient,
-                    new FileRuleStore(ruleDirectory),
+                    ruleStore,
                     pdTracker,
                     orchestratorAddress
                 );

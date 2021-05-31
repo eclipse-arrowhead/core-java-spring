@@ -5,11 +5,11 @@ import se.arkalix.ServiceRecord;
 import se.arkalix.SystemRecord;
 import se.arkalix.codec.json.JsonObject;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Object used for keeping track of inventory data of monitorable systems.
@@ -114,16 +114,10 @@ public class MonitorInfoTracker {
             throw new IllegalArgumentException("Either system name or metadata must be present.");
         }
 
-        final List<MonitorInfo> result = new ArrayList<>();
-        for (final MonitorInfo info : trackedInfo.values()) {
-            final boolean namesMatch = systemName == null || systemName.equals(info.systemName);
-            // TODO: Make the method below take the name as an argument as well.
-            final boolean metadataMatch = info.matchesSystemMetadata(metadata);
-            if (namesMatch && metadataMatch) {
-                result.add(info);
-            }
-        }
-        return result;
+        return trackedInfo.values()
+            .stream()
+            .filter(info -> info.matches(systemName, metadata))
+            .collect(Collectors.toList());
     }
 
 }

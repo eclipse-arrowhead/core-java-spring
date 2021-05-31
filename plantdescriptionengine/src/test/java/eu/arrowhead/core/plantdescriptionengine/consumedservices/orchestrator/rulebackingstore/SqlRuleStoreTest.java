@@ -1,22 +1,23 @@
 package eu.arrowhead.core.plantdescriptionengine.consumedservices.orchestrator.rulebackingstore;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class SqlRuleStoreTest {
 
     private final String DRIVER_CLASS_NAME = "org.h2.Driver";
     private final String CONNECTION_URL = "jdbc:h2:mem:testdb";
-
     private final String USERNAME = "root";
     private final String PASSWORD = "password";
-
     private final int plantDescriptionId = 7;
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void shouldWriteRules() throws RuleStoreException {
@@ -44,10 +45,10 @@ public class SqlRuleStoreTest {
     }
 
     @Test
-    public void shouldRequireInitialization() {
-        final Exception exception = assertThrows(IllegalStateException.class,
-            () -> new SqlRuleStore().readRules(plantDescriptionId));
-        assertEquals("SqlRuleStore has not been initialized.", exception.getMessage());
+    public void shouldRequireInitialization() throws RuleStoreException {
+        thrown.expect(IllegalStateException.class);
+        thrown.expectMessage("SqlRuleStore has not been initialized.");
+        new SqlRuleStore().readRules(plantDescriptionId);
     }
 
 }

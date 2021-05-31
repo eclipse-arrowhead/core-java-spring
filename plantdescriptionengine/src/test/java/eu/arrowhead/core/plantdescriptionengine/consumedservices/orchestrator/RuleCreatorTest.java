@@ -10,22 +10,22 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Pd
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PortDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.SystemPortDto;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class RuleCreatorTest {
 
     final Instant now = Instant.now();
     private PlantDescriptionTracker pdTracker;
 
-    @BeforeEach
+    @Before
     public void initEach() throws PdStoreException {
         final PdStore pdStore = new InMemoryPdStore();
         pdTracker = new PlantDescriptionTracker(pdStore);
@@ -102,7 +102,7 @@ public class RuleCreatorTest {
         assertEquals(producerName, rule.providerSystem().systemName().orElse(null));
         assertEquals(producerSystem.ports().get(0).serviceDefinition(), rule.serviceDefinitionName());
         assertEquals(serviceInterface, rule.serviceInterfaceName());
-        assertEquals(priority, rule.priority().orElse(null));
+        assertEquals(priority, (int) rule.priority().orElse(-1));
     }
 
     /**

@@ -1,5 +1,6 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.routehandlers;
 
+import eu.arrowhead.core.plantdescriptionengine.ApiConstants;
 import eu.arrowhead.core.plantdescriptionengine.MonitorInfo;
 import eu.arrowhead.core.plantdescriptionengine.MonitorInfoTracker;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
@@ -80,11 +81,12 @@ public final class DtoUtils {
         final List<PortEntryDto> ports = new ArrayList<>();
 
         // Add all ports. If there is monitor info bound to any of the ports,
-        // add it to the resulting port and remove it from the system info list.
+        // add it to that port and remove it from the system info list.
         for (final Port port : system.ports()) {
 
             // 'consumer' defaults to false when no value is set:
             final boolean isConsumer = port.consumer().orElse(false);
+            final boolean isMonitorablePort = (port.serviceDefinition().equals(ApiConstants.MONITORABLE_SERVICE_NAME));
 
             final PortEntryDto.Builder portBuilder = new PortEntryDto.Builder()
                 .portName(port.portName())
@@ -93,16 +95,14 @@ public final class DtoUtils {
                 .consumer(isConsumer)
                 .metadata(port.metadata());
 
-            // Possibly add monitor info to ports where this system is the
-            // provider:
-            if (!isConsumer) {
+            if (!isConsumer && !isMonitorablePort) {
 
                 for (final MonitorInfo info : monitorInfoList) {
 
-                    final boolean matchesServiceDefinition = info.serviceDefinition.equals(port.serviceDefinition());
+                    final boolean hasMetadata = !port.metadata().isEmpty();
                     final boolean matchesPort = Metadata.isSubset(port.metadata(), info.serviceMetadata);
 
-                    if (matchesServiceDefinition && matchesPort) {
+                    if (hasMetadata && matchesPort) {
 
                         portBuilder.systemData(info.systemData);
                         portBuilder.inventoryId(info.inventoryId);
@@ -122,16 +122,14 @@ public final class DtoUtils {
             .metadata(system.metadata())
             .ports(ports);
 
-        // If there is any monitor info left, it may belong to the system
-        // itself, not a specific port.
-        for (final MonitorInfo info : monitorInfoList) {
-            if (info.matchesSystemMetadata(system.metadata())) {
-                systemBuilder.inventoryId(info.inventoryId).systemData(info.systemData);
-                break;
-            } else {
-                logger.warn("Unmatched data in MonitorInfo");
-            }
+        // If there is any monitor info left, it belongs to the system itself.
+        if (monitorInfoList.size() == 1) {
+            final MonitorInfo info = monitorInfoList.get(0);
+            systemBuilder.inventoryId(info.inventoryId).systemData(info.systemData);
+        } else if (monitorInfoList.size() > 1) {
+            logger.warn("Unmatched data in MonitorInfo");
         }
+
         return systemBuilder.build();
     }
 

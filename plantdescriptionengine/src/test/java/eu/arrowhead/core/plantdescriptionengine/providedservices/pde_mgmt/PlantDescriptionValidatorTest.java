@@ -5,15 +5,16 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Pd
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PortDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.SystemPortDto;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class PlantDescriptionValidatorTest {
 
@@ -972,7 +973,7 @@ public class PlantDescriptionValidatorTest {
             .plantDescription("Plant Description C")
             .createdAt(now)
             .updatedAt(now)
-            .active(true) // TODO: This test should work when active is false as well.
+            .active(true)
             .include(List.of(entryIdB, entryIdC))
             .build();
 
@@ -1013,7 +1014,7 @@ public class PlantDescriptionValidatorTest {
             .plantDescription("Plant Description A")
             .createdAt(now)
             .updatedAt(now)
-            .active(true) // TODO: This test should have the same result when active is set to false
+            .active(false)
             .systems(List.of(
                 new PdeSystemDto.Builder()
                     .systemId("xyz")
@@ -1066,7 +1067,7 @@ public class PlantDescriptionValidatorTest {
             .plantDescription("Plant Description A")
             .createdAt(now)
             .updatedAt(now)
-            .active(true) // TODO: This test should work when active is set to false
+            .active(false)
             .systems(List.of(
                 new PdeSystemDto.Builder()
                     .systemId("xyz")
@@ -1144,6 +1145,50 @@ public class PlantDescriptionValidatorTest {
         assertTrue(validator.hasError());
         final String expectedErrorMessage = "<Port '" + portNameB +
             "' is a consumer port, it must not have any metadata.>";
+        assertEquals(expectedErrorMessage, validator.getErrorMessage());
+    }
+
+    /**
+     * When a validator is passed more than one active Plant Description Entry
+     * in its constructor, it should treat the one with the most recent
+     * 'updatedAt' field as active.
+     *
+     * Previously, there was a bug that made the validator accept invalid
+     * include lists when multiple active entries were given. This test guards
+     * against that bug.
+     */
+    @Test
+    public void shouldReportMissingIncludeWithMultipleActiveEntries() {
+
+        final int entryIdA = 0;
+        final int entryIdB = 1;
+        final int entryIdC = 2;
+
+        final Instant t1 = now;
+        final Instant t2 = t1.plus(1, ChronoUnit.MINUTES);
+
+        final PlantDescriptionEntryDto entryA = new PlantDescriptionEntryDto.Builder()
+            .id(entryIdA)
+            .plantDescription("Plant Description A")
+            .createdAt(t1)
+            .updatedAt(t1)
+            .active(true)
+            .build();
+
+        final PlantDescriptionEntryDto entryC = new PlantDescriptionEntryDto.Builder()
+            .id(entryIdC)
+            .plantDescription("Plant Description B")
+            .createdAt(t2)
+            .updatedAt(t2)
+            .active(true)
+            .include(List.of(entryIdA, entryIdB))
+            .build();
+
+        final PlantDescriptionValidator validator = new PlantDescriptionValidator(entryA, entryC);
+        assertTrue(validator.hasError());
+
+        final String expectedErrorMessage = "<Error in include list: Entry '" +
+            entryIdB + "' is required by entry '" + entryIdC + "'.>";
         assertEquals(expectedErrorMessage, validator.getErrorMessage());
     }
 

@@ -32,17 +32,79 @@ public class Alarm {
     Alarm(final String systemId, final String systemName, final Map<String, String> metadata, final AlarmCause cause) {
 
         Objects.requireNonNull(cause, "Expected an alarm cause.");
-        Objects.requireNonNull(metadata, "Expected metadata.");
 
         this.systemId = systemId;
         this.systemName = systemName;
-        this.metadata = metadata;
+        this.metadata = metadata == null ? Collections.emptyMap() : metadata;
         this.cause = cause;
 
         id = nextId.getAndIncrement();
         acknowledged = false;
         raisedAt = Instant.now();
         updatedAt = raisedAt;
+    }
+
+    /**
+     * Create an alarm indicating that a system required by the active Plant
+     * Description was not found in the Service Registry.
+     *
+     * @param systemId   ID of a Plant Description system.
+     * @param systemName Name of a Plant Description system, or null.
+     * @param metadata   Metadata of a Plant Description system, or null.
+     */
+    public static Alarm createSystemNotRegisteredAlarm(
+        final String systemId,
+        final String systemName,
+        final Map<String, String> metadata
+    ) {
+        Objects.requireNonNull(systemId, "Expected system ID");
+        return new Alarm(systemId, systemName, metadata, AlarmCause.SYSTEM_NOT_REGISTERED);
+    }
+
+    /**
+     * Create an alarm indicating that a system required by the active Plant
+     * Description cannot be uniquely identified in the Service Registry.
+     *
+     * @param systemId   ID of a Plant Description system.
+     * @param systemName Name of a Plant Description system, or null.
+     * @param metadata   Metadata of a Plant Description system, or null.
+     */
+    public static Alarm createMultipleMatchesAlarm(
+        final String systemId,
+        final String systemName,
+        final Map<String, String> metadata
+    ) {
+        Objects.requireNonNull(systemId, "Expected system ID");
+        return new Alarm(systemId, systemName, metadata, AlarmCause.MULTIPLE_MATCHES);
+    }
+
+    /**
+     * Create an alarm indicating that a supposedly monitorable system does not
+     * seem to provide a 'Monitorable' service.
+     *
+     * @param systemId   ID of a Plant Description system.
+     * @param systemName Name of a Plant Description system, or null.
+     * @param metadata   Metadata of a Plant Description system, or null.
+     */
+    public static Alarm createSystemNotMonitorableAlarm(
+        final String systemId,
+        final String systemName,
+        final Map<String, String> metadata
+    ) {
+        Objects.requireNonNull(systemId, "Expected system ID");
+        return new Alarm(systemId, systemName, metadata, AlarmCause.NOT_MONITORABLE);
+    }
+
+    /**
+     * Create an alarm indicating that a system found in the Service Registry is
+     * missing from the active Plant Description.
+     *
+     * @param systemName Name of a Plant Description system.
+     * @param metadata   Metadata of a system, or null.
+     */
+    public static Alarm createSystemNotInDescriptionAlarm(final String systemName, final Map<String, String> metadata) {
+        Objects.requireNonNull(systemName, "Expected system name.");
+        return new Alarm(null, systemName, metadata, AlarmCause.SYSTEM_NOT_IN_DESCRIPTION);
     }
 
     /**

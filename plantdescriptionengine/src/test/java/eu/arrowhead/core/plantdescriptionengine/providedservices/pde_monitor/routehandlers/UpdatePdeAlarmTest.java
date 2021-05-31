@@ -1,22 +1,23 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.routehandlers;
 
+import eu.arrowhead.core.plantdescriptionengine.alarms.Alarm;
 import eu.arrowhead.core.plantdescriptionengine.alarms.AlarmManager;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.dto.ErrorMessage;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PdeAlarm;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PdeAlarmUpdateDto;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockRequest;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockServiceResponse;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import se.arkalix.net.http.HttpStatus;
 import se.arkalix.net.http.service.HttpServiceRequest;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class UpdatePdeAlarmTest {
 
@@ -24,7 +25,7 @@ public class UpdatePdeAlarmTest {
     private UpdatePdeAlarm handler;
     private MockServiceResponse response;
 
-    @BeforeEach
+    @Before
     public void initEach() {
         alarmManager = new AlarmManager();
         handler = new UpdatePdeAlarm(alarmManager);
@@ -36,7 +37,7 @@ public class UpdatePdeAlarmTest {
 
         final String systemNameA = "abc";
 
-        alarmManager.raiseSystemNotInDescription(systemNameA, null);
+        alarmManager.raise(Alarm.createSystemNotInDescriptionAlarm(systemNameA, null));
         final PdeAlarm alarm = alarmManager.getAlarms().get(0);
         assertFalse(alarm.acknowledged());
 
@@ -60,7 +61,7 @@ public class UpdatePdeAlarmTest {
 
         final String systemNameA = "abc";
 
-        alarmManager.raiseSystemNotInDescription(systemNameA, null);
+        alarmManager.raise(Alarm.createSystemNotInDescriptionAlarm(systemNameA, null));
         final PdeAlarm alarm = alarmManager.getAlarms().get(0);
         alarmManager.acknowledge(alarm.id());
 
@@ -122,7 +123,7 @@ public class UpdatePdeAlarmTest {
     @Test
     public void shouldNotChangeAlarm() {
 
-        alarmManager.raiseSystemNotInDescription("SystemA", null);
+        alarmManager.raise(Alarm.createSystemNotInDescriptionAlarm("SystemA", null));
         final PdeAlarm alarm = alarmManager.getAlarms().get(0);
         assertFalse(alarm.acknowledged());
 

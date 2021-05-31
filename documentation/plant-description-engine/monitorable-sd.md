@@ -7,7 +7,7 @@ This document describes an abstract service, which, if implemented by an applica
 This document describes an abstract Arrowhead Framework service meant to enable monitoring of application systems by core systems.
 The service should be produced by all systems that are intended to be monitored by a core system.
 
- 
+
 
 ## Service Interfaces
 This section lists the interfaces that must be exposed by Monitorable systems in alphabetical order. In particular, each
@@ -35,13 +35,13 @@ which are used to represent things like hashes and identifiers.
 
 ### struct InventoryId
 
-| Field | Type | Description | 
+| Field | Type | Description |
 | ----- | ---- | ----------- |
-| `id` | String | The systems Id in an Inventory system |
+| `id` | String | The system's Id in an Inventory system |
 
 ### struct SystemData
 
-| Field | Type | Description | 
+| Field | Type | Description |
 | ----- | ---- | ----------- |
 | `data` | Custom | System specific data - key-value pairs |
 
@@ -51,7 +51,7 @@ Types and structures mentioned throughout this document that are assumed to be a
 of this service. The concrete interpretations of each of these types and structures must be provided by any IDD
 document claiming to implement this service.
 
-| Type | Description | 
+| Type | Description |
 | ---- | ----------- |
 | Custom | Any suitable type chosen by the implementor of the service.|
 | String | An arbitrary UTF-8 string. |

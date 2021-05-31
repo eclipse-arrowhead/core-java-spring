@@ -461,11 +461,11 @@ At the moment the [Orchestration Store Management] service requires `consumerSys
 
 ### Monitoring the plant
 
-The PDE queries the Orchestrator about any systems that it should monitor using the [Monitorable] service. The PDE regularly [Ping](monitorable-sd.md#interface-ping-ok) the monitored systems and raises an alarm if the system does not respond.
+The PDE queries the Orchestrator about any systems that it should monitor using the [Monitorable] service. The PDE regularly [Pings](monitorable-sd.md#interface-ping-ok) the monitored systems and raises an alarm if the system does not respond.
 
-If the monitored system provides any [SystemData](monitorable-sd.md#interface-getsystemdata-systemdata) this data is stored by the PDE and returned as part of the Plant Description Entries provided by the [Plant Description Monitor] service.
+If the monitored system provides any [SystemData](monitorable-sd.md#interface-getsystemdata-systemdata) and/or an [InventoryId](monitorable-sd.md#interface-getinventoryid-inventoryid), this data is stored by the PDE and returned as part of the Plant Description Entries provided by the [Plant Description Monitor] service.
 
-If there is an Inventory system present in the plant that produces the [Inventory] service and the PDE is connected to it in the active PD, the PDE connects to the [Inventory] service. The PDE queries it for [InventoryData] for the systems that the PDE monitors, according to the active PD. If the system has provided an [Inventory ID](monitorable-sd.md#interface-getinventoryid-inventoryid) this is used in the Inventory query otherwise only MetaData about the system is used. Any found [InventoryData] is stored by the PDE and returned as part of the Plant Description Entries provided by the [Plant Description Monitor] service.
+If there is an Inventory system present in the plant that produces the [Inventory] service and the PDE is connected to it in the active PD, the PDE connects to the [Inventory] service. The PDE queries it for [InventoryData] for the systems that the PDE monitors, according to the active PD. If the system has provided an [Inventory ID](monitorable-sd.md#interface-getinventoryid-inventoryid), this is used in the Inventory query. Otherwise, only metadata about the system is used. Any found [InventoryData] is stored by the PDE and returned as part of the Plant Description Entries provided by the [Plant Description Monitor] service.
 
 
 

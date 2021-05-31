@@ -102,9 +102,20 @@ Currently only the following values can be updated. If a field is not present th
 | `systemId` | String | Identity of the system within the PDE | `true` | |
 | `systemName` | String | Name of the system | `false` | null |
 | `metadata` | Object\<String> | Metadata - key-value pairs | `false` | Only present if specified |
-| `ports` | Array\<[Port]> | Array with service ports exposed by the system | `true` ||
+| `ports` | Array\<[PortEntry](#struct-portentry)> | Array with service ports exposed by the system | `true` ||
 | `systemData` | Custom | System specific data - key-value pairs | `false` | Only present if provided by [Monitorable] service of the system |
-| `inventoryId` | String | The systems Id in an Inventory system | `false` | Only present if provided by [Monitorable] service of the system |
+| `inventoryId` | String | The system's Id in an Inventory system | `false` | Only present if provided by [Monitorable] service of the system |
+| `inventoryData` | Custom | Inventory specific data - key-value pairs | `false` | Only present if provided by [Inventory] system |
+
+### struct PortEntry
+| Field | Type | Description | Mandatory | Default value |
+| ----- | ---- | ----------- | --------- | ------------- |
+| `portName` | String | Identity of the port | `true` | |
+| `metadata` | Object\<String> | Metadata - key-value pairs | `false` | null |
+| `serviceDefinition` | String | Service definition identity | `true` | |
+| `consumer` | Boolean | Is the port a consumer port | `false` | `false` |
+| `systemData` | Custom | Service specific data - key-value pairs | `false` | Only present if provided by [Monitorable] service with metadata matching that of this port |'
+| `inventoryId` | String | The service's Id in an Inventory system | `false` | Only present if provided by [Monitorable] service with metadata matching that of this port |
 | `inventoryData` | Custom | Inventory specific data - key-value pairs | `false` | Only present if provided by [Inventory] system |
 
 
@@ -115,8 +126,7 @@ document claiming to implement this service.
 
 | Type | Description |
 | ---- | ----------- |
-| Object \<A> | An unordered collection of [String: Value] pairs, where each Value conforms to type A.
-| Array \<A> | An ordered collection of elements, where each element conforms to type A. |
+| Object \<A> | An unordered collection of [String: Value] pairs, where each Value conforms to type A. Empty objects are omitted. | Array \<A> | An ordered collection of elements, where each element conforms to type A. Empty arrays are omitted. |
 | Boolean | One out of `true` or `false`. |
 | DateTime | Pinpoints a specific moment in time. |
 | Integer | 32-bit signed two's complement integer, which has a minimum value of -2<sup>31</sup> and a maximum value of 2<sup>31</sup>-1 |
@@ -128,4 +138,3 @@ document claiming to implement this service.
 [Plant Description Engine]:plant-description-engine-sysd.md
 [Plant Description Management Service Description]:plant-description-management-sd.md
 [Connection]:plant-description-management-sd.md#struct-connection
-[Port]:plant-description-management-sd.md#struct-port

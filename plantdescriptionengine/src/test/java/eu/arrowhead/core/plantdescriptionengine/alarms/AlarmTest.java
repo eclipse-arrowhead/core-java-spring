@@ -1,16 +1,20 @@
 package eu.arrowhead.core.plantdescriptionengine.alarms;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Collections;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class AlarmTest {
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void shouldHaveProperDescriptions() {
@@ -32,8 +36,9 @@ public class AlarmTest {
 
     @Test
     public void shouldRejectNullAlarmCause() {
-        final Exception exception = assertThrows(RuntimeException.class, () -> new Alarm("XYZ", null, null, null));
-        assertEquals("Expected an alarm cause.", exception.getMessage());
+        thrown.expect(RuntimeException.class);
+        thrown.expectMessage("Expected an alarm cause.");
+        new Alarm("XYZ", null, null, null);
     }
 
     @Test

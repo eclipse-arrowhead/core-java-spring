@@ -8,15 +8,15 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Pl
 import eu.arrowhead.core.plantdescriptionengine.utils.MockRequest;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockServiceResponse;
 import eu.arrowhead.core.plantdescriptionengine.utils.TestUtils;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import se.arkalix.net.http.HttpStatus;
 import se.arkalix.net.http.service.HttpServiceRequest;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class GetPlantDescriptionTest {
 
@@ -24,7 +24,7 @@ public class GetPlantDescriptionTest {
     private GetPlantDescription handler;
     private MockServiceResponse response;
 
-    @BeforeEach
+    @Before
     public void initEach() throws PdStoreException {
         pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
         handler = new GetPlantDescription(pdTracker);
@@ -69,7 +69,10 @@ public class GetPlantDescriptionTest {
                 assertEquals(returnedEntry
                     .id(), entryId, 0); // TODO: Add 'equals' method to entries and do a proper comparison?
             })
-            .onFailure(e -> fail());
+            .onFailure(e -> {
+                e.printStackTrace();
+                fail();
+            });
     }
 
     @Test

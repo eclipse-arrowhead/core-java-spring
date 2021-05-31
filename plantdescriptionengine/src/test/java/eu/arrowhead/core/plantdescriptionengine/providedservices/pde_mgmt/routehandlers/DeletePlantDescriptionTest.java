@@ -10,8 +10,8 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Pl
 import eu.arrowhead.core.plantdescriptionengine.utils.MockRequest;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockServiceResponse;
 import eu.arrowhead.core.plantdescriptionengine.utils.TestUtils;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mockito;
 import se.arkalix.net.http.HttpStatus;
 import se.arkalix.net.http.service.HttpServiceRequest;
@@ -19,11 +19,11 @@ import se.arkalix.net.http.service.HttpServiceRequest;
 import java.time.Instant;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doThrow;
 
@@ -33,7 +33,7 @@ public class DeletePlantDescriptionTest {
     private DeletePlantDescription handler;
     private MockServiceResponse response;
 
-    @BeforeEach
+    @Before
     public void initEach() throws PdStoreException {
         pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
         handler = new DeletePlantDescription(pdTracker);

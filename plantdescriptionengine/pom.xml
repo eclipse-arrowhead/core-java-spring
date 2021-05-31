@@ -14,7 +14,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>11</maven.compiler.release>
-        <kalix.version>0.6.0-alpha</kalix.version>
+        <kalix.version>0.6.0</kalix.version>
         <mysql.jdbc.driver>8.0.16</mysql.jdbc.driver>
     </properties>
 
@@ -44,29 +44,6 @@
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
             <version>4.1.52.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>5.7.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.7.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-inline</artifactId>
-            <version>3.7.7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
-            <version>3.7.7</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
@@ -99,6 +76,89 @@
                                     </includes>
                                 </resource>
                             </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>jdeb</artifactId>
+                <groupId>org.vafer</groupId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jdeb</goal>
+                        </goals>
+                        <configuration>
+                            <snapshotExpand>true</snapshotExpand>
+                            <snapshotTemplate>[YYMMddHHmm].${git.commit.id.abbrev}</snapshotTemplate>
+                            <deb>target/${project.artifactId}_${revision}.deb</deb>
+                            <verbose>true</verbose>
+                            <controlDir>${basedir}/src/deb/control</controlDir>
+                            <dataSet>
+                                <data>
+                                    <type>file</type>
+                                    <src>${project.build.directory}/${project.build.finalName}.jar</src>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/usr/share/arrowhead/plantdescriptionengine</prefix>
+                                        <filemode>755</filemode>
+                                    </mapper>
+                                </data>
+
+                                <data>
+                                    <type>link</type>
+                                    <linkName>/usr/share/arrowhead/plantdescriptionengine/${project.artifactId}.jar</linkName>
+                                    <linkTarget>/usr/share/arrowhead/plantdescriptionengine/${project.build.finalName}.jar</linkTarget>
+                                </data>
+
+                                <data>
+                                    <type>file</type>
+                                    <src>${project.build.directory}/log4j2.xml</src>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/etc/arrowhead/systems/plantdescriptionengine</prefix>
+                                        <filemode>644</filemode>
+                                    </mapper>
+                                </data>
+
+                                <data>
+                                    <type>file</type>
+                                    <src>${project.build.directory}/application.properties</src>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/etc/arrowhead/systems/plantdescriptionengine</prefix>
+                                        <filemode>644</filemode>
+                                    </mapper>
+                                </data>
+
+                                <data>
+                                    <type>link</type>
+                                    <linkName>/usr/share/arrowhead/plantdescriptionengine/application.properties</linkName>
+                                    <linkTarget>/etc/arrowhead/systems/plantdescriptionengine/application.properties</linkTarget>
+                                </data>
+
+                                <data>
+                                    <type>file</type>
+                                    <src>${project.basedir}/src/deb/arrowhead-plantdescriptionengine.service</src>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/etc/systemd/system</prefix>
+                                        <filemode>644</filemode>
+                                    </mapper>
+                                </data>
+
+                                <data>
+                                    <type>file</type>
+                                    <src>${project.basedir}/../scripts/plant_description_engine_privileges.sql</src>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/usr/share/arrowhead/conf</prefix>
+                                    </mapper>
+                                </data>
+                            </dataSet>
                         </configuration>
                     </execution>
                 </executions>

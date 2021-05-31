@@ -15,19 +15,19 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Po
 import eu.arrowhead.core.plantdescriptionengine.utils.MockRequest;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockServiceResponse;
 import eu.arrowhead.core.plantdescriptionengine.utils.TestUtils;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mockito;
 import se.arkalix.net.http.HttpStatus;
 
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 
@@ -37,7 +37,7 @@ public class AddPlantDescriptionTest {
     private AddPlantDescription handler;
     private MockServiceResponse response;
 
-    @BeforeEach
+    @Before
     public void initEach() throws PdStoreException {
         pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
         handler = new AddPlantDescription(pdTracker);

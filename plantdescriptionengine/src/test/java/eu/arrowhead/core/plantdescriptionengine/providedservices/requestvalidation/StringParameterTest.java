@@ -1,13 +1,14 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidation;
 
 import eu.arrowhead.core.plantdescriptionengine.utils.MockRequest;
-import org.junit.jupiter.api.Test;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import se.arkalix.net.http.service.HttpServiceRequest;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.Assert.assertEquals;
 
 public class StringParameterTest {
 
@@ -17,6 +18,9 @@ public class StringParameterTest {
     final String episode4 = "A New Hope";
     final String episode5 = "The Empire Strikes Back";
     final String episode6 = "Return of the Jedi";
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void shouldParseParameters() throws ParseError {
@@ -39,7 +43,7 @@ public class StringParameterTest {
         final QueryParamParser parser = new QueryParamParser(null, acceptedParameters, request);
 
         assertEquals(episode5, parser.getValue(episodeParam).orElse(null));
-        assertEquals(score, parser.getValue(scoreParam).orElse(null));
+        assertEquals(score, (int) parser.getValue(scoreParam).orElse(-1));
     }
 
     @Test
@@ -57,39 +61,39 @@ public class StringParameterTest {
     }
 
     @Test
-    public void shouldReportMissingParameter() {
+    public void shouldReportMissingParameter() throws ParseError {
 
         final List<QueryParameter> requiredParameters = List.of(new StringParameter.Builder()
             .name(QueryParameter.SORT_FIELD)
             .legalValues(QueryParameter.ID, QueryParameter.CREATED_AT, QueryParameter.UPDATED_AT)
             .build());
 
-        final Exception exception = assertThrows(ParseError.class, () -> {
-            final HttpServiceRequest request = new MockRequest.Builder().build();
-            new QueryParamParser(requiredParameters, null, request);
-        });
-        assertEquals(exception.getMessage(), "<Missing parameter '" + QueryParameter.SORT_FIELD + "'.>");
+        thrown.expect(ParseError.class);
+        thrown.expectMessage("<Missing parameter '" + QueryParameter.SORT_FIELD + "'.>");
+
+        final HttpServiceRequest request = new MockRequest.Builder().build();
+        new QueryParamParser(requiredParameters, null, request);
     }
 
     @Test
-    public void shouldReportMissingDependency() {
+    public void shouldReportMissingDependency() throws ParseError {
         final String key = "age";
         final List<QueryParameter> acceptedParameters = List.of(new StringParameter.Builder().name("name")
             .requires(new IntParameter.Builder().name(key)
                 .build())
             .build());
 
-        final Exception exception = assertThrows(ParseError.class, () -> {
-            final HttpServiceRequest request = new MockRequest.Builder()
-                .queryParam("name", "Alice")
-                .build();
-            new QueryParamParser(null, acceptedParameters, request);
-        });
-        assertEquals("<Missing parameter '" + key + "'.>", exception.getMessage());
+        thrown.expect(ParseError.class);
+        thrown.expectMessage("<Missing parameter '" + key + "'.>");
+
+        final HttpServiceRequest request = new MockRequest.Builder()
+            .queryParam("name", "Alice")
+            .build();
+        new QueryParamParser(null, acceptedParameters, request);
     }
 
     @Test
-    public void shouldOnlyAcceptLegalValues() {
+    public void shouldOnlyAcceptLegalValues() throws ParseError {
 
         final String episode4 = "A New Hope";
         final String episode5 = "The Empire Strikes Back";
@@ -102,15 +106,13 @@ public class StringParameterTest {
 
         final String invalidEpisode = "The Rise of Skywalker";
 
-        final Exception exception = assertThrows(ParseError.class, () -> {
-            final HttpServiceRequest request = new MockRequest.Builder()
-                .queryParam(episodeKey, invalidEpisode)
-                .build();
-            new QueryParamParser(List.of(param), null, request);
-        });
+        thrown.expect(ParseError.class);
+        thrown.expectMessage("<" + invalidEpisode + " is not a legal value for parameter " + episodeKey + ".>");
 
-        assertEquals(exception.getMessage(), "<" + invalidEpisode +
-            " is not a legal value for parameter " + episodeKey + ".>");
+        final HttpServiceRequest request = new MockRequest.Builder()
+            .queryParam(episodeKey, invalidEpisode)
+            .build();
+        new QueryParamParser(List.of(param), null, request);
     }
 
 }

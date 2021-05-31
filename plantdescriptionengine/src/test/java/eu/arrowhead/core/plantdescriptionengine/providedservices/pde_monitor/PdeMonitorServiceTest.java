@@ -4,13 +4,13 @@ import eu.arrowhead.core.plantdescriptionengine.alarms.AlarmManager;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.InMemoryPdStore;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.PdStoreException;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 import se.arkalix.ArSystem;
 import se.arkalix.net.http.client.HttpClient;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 
 public class PdeMonitorServiceTest {
 
@@ -50,7 +50,7 @@ public class PdeMonitorServiceTest {
         final PdeMonitorService service = new PdeMonitorService(arSystem, pdTracker, client, new AlarmManager(), true, 1000, 1000);
 
         service.provide()
-            .ifSuccess(e -> fail())
-            .onFailure(Assertions::assertNotNull);
+            .ifSuccess(result -> fail())
+            .onFailure(Assert::assertNotNull);
     }
 }

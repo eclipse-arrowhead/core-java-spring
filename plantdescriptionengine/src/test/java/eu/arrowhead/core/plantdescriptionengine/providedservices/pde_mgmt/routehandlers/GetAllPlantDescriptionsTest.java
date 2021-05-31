@@ -11,9 +11,8 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.requestvalidati
 import eu.arrowhead.core.plantdescriptionengine.utils.MockRequest;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockServiceResponse;
 import eu.arrowhead.core.plantdescriptionengine.utils.TestUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import se.arkalix.net.http.HttpStatus;
 import se.arkalix.net.http.service.HttpServiceRequest;
 
@@ -22,9 +21,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class GetAllPlantDescriptionsTest {
 
@@ -40,7 +39,7 @@ public class GetAllPlantDescriptionsTest {
     GetAllPlantDescriptions handler;
     MockServiceResponse response;
 
-    @BeforeEach
+    @Before
     public void initEach() throws PdStoreException {
         pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
         handler = new GetAllPlantDescriptions(pdTracker);
@@ -62,7 +61,7 @@ public class GetAllPlantDescriptionsTest {
             final PlantDescriptionEntryList entries = (PlantDescriptionEntryList) response.getRawBody();
             assertEquals(HttpStatus.OK, response.status().orElse(null));
             assertEquals(entryIds.size(), entries.count());
-        }).onFailure(Assertions::assertNull);
+        }).onFailure(e -> fail());
     }
 
     @Test
@@ -233,7 +232,8 @@ public class GetAllPlantDescriptionsTest {
             final String actualErrorMessage = ((ErrorMessage) response.getRawBody()).error();
             assertEquals(HttpStatus.BAD_REQUEST, response.status().orElse(null));
             assertEquals(expectedErrorMessage, actualErrorMessage);
-        }).onFailure(Assertions::assertNull);
+        })
+            .onFailure(e -> fail());
 
     }
 
@@ -264,8 +264,8 @@ public class GetAllPlantDescriptionsTest {
             final PlantDescriptionEntryList entries = (PlantDescriptionEntryList) response.getRawBody();
             assertEquals(HttpStatus.OK, response.status().orElse(null));
             assertEquals(1, entries.count());
-            assertEquals(entries.data().get(0).id(), activeEntryId, 0);
-        }).onFailure(Assertions::assertNull);
+            assertEquals(entries.data().get(0).id(), activeEntryId);
+        }).onFailure(e -> fail());
     }
 
     @Test
@@ -298,7 +298,7 @@ public class GetAllPlantDescriptionsTest {
                 final int index = page * itemsPerPage + i;
                 assertEquals((int) entryIds.get(index), entries.data().get(i).id());
             }
-        }).onFailure(Assertions::assertNull);
+        }).onFailure(e -> fail());
 
     }
 
@@ -318,7 +318,7 @@ public class GetAllPlantDescriptionsTest {
             assertEquals(HttpStatus.BAD_REQUEST, response.status().orElse(null));
             assertEquals(expectedErrorMessage, actualErrorMessage);
 
-        }).onFailure(Assertions::assertNull);
+        }).onFailure(e -> fail());
     }
 
     @Test
@@ -334,7 +334,7 @@ public class GetAllPlantDescriptionsTest {
             assertEquals(HttpStatus.BAD_REQUEST, response.status().orElse(null));
             assertEquals(expectedErrorMessage, actualErrorMessage);
 
-        }).onFailure(Assertions::assertNull);
+        }).onFailure(e -> fail());
     }
 
 }

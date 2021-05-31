@@ -1,22 +1,26 @@
 package eu.arrowhead.core.plantdescriptionengine;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import se.arkalix.ArSystem;
 import se.arkalix.net.http.client.HttpClient;
 
 import java.net.InetSocketAddress;
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class PdeMainTest {
 
     final private static InetSocketAddress serviceRegistryAddress = new InetSocketAddress("0.0.0.0", 5000);
     final private static String port = "8000";
     final private String hostname = "localhost";
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     private Properties getInsecureAppProps() {
         final Properties appProps = new Properties();
@@ -64,12 +68,9 @@ public class PdeMainTest {
     @Test
     public void shouldReportMissingField() {
         final Properties appProps = getAppPropsWithMissingTrustStore();
-        final Exception exception = assertThrows(IllegalArgumentException.class,
-            () -> PdeMain.createArSystem(appProps, serviceRegistryAddress));
-        assertEquals(
-            "Missing field '" + PropertyNames.TRUST_STORE + "' in application properties.",
-            exception.getMessage()
-        );
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage("Missing field '" + PropertyNames.TRUST_STORE + "' in application properties.");
+        PdeMain.createArSystem(appProps, serviceRegistryAddress);
     }
 
     @Test

@@ -1,5 +1,6 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.routehandlers;
 
+import eu.arrowhead.core.plantdescriptionengine.ApiConstants;
 import eu.arrowhead.core.plantdescriptionengine.MonitorInfoTracker;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker;
 import eu.arrowhead.core.plantdescriptionengine.pdtracker.backingstore.InMemoryPdStore;
@@ -11,7 +12,8 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.MonitorPlantDescriptionEntryDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.PortEntry;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_monitor.dto.SystemEntry;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import se.arkalix.ServiceInterface;
 import se.arkalix.ServiceRecord;
 import se.arkalix.SystemRecord;
@@ -26,8 +28,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class DtoUtilsTest {
 
@@ -35,6 +37,16 @@ public class DtoUtilsTest {
     private final Instant now = Instant.now();
     private final String someServiceDefinition = "servicexyz";
     private final String httpSecureJson = ServiceInterface.HTTP_SECURE_JSON.toString();
+    final String inventoryId = "abc_inventory_id";
+    final JsonObject systemData = new JsonObject(new JsonPair("a", JsonBoolean.TRUE));
+    MonitorInfoTracker monitorInfoTracker;
+    PlantDescriptionTracker pdTracker;
+
+    @Before
+    public void initEach() throws PdStoreException {
+        monitorInfoTracker = new MonitorInfoTracker();
+        pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
+    }
 
     private PdeSystemDto getSystemWithPorts(final List<PortDto> ports) {
         return new PdeSystemDto.Builder()
@@ -95,6 +107,11 @@ public class DtoUtilsTest {
     public void shouldPlaceMonitorDataOnPortLevel() throws PdStoreException {
         final Map<String, String> serviceMetadata = Map.of("a", "b");
         final List<PortDto> ports = List.of(
+            new PortDto.Builder()
+                .portName("monitorable")
+                .serviceInterface(httpSecureJson)
+                .serviceDefinition(ApiConstants.MONITORABLE_SERVICE_NAME)
+                .build(),
             // Port B and C will *not* be complemented by monitor info:
             new PortDto.Builder()
                 .metadata(Map.of("i", "j")) // Differs
@@ -103,15 +120,14 @@ public class DtoUtilsTest {
                 .serviceDefinition(someServiceDefinition)
                 .build(),
             new PortDto.Builder()
-                .metadata(serviceMetadata)
+                .metadata(Map.of("x", "y")) // Differs
                 .portName("Port-B")
                 .serviceInterface(httpSecureJson)
-                .serviceDefinition("Service-B") // Differs
+                .serviceDefinition(someServiceDefinition)
                 .build(),
-            // Port A has matching metadata *and* service definition,
-            // so it should be matched.
+            // Port A has matching metadata, so it should be matched.
             new PortDto.Builder()
-                .metadata(serviceMetadata)
+                .metadata(serviceMetadata) // Same
                 .portName("Port-C")
                 .serviceInterface(httpSecureJson)
                 .serviceDefinition(someServiceDefinition)
@@ -121,10 +137,6 @@ public class DtoUtilsTest {
         final PdeSystemDto system = getSystemWithPorts(ports);
         final PlantDescriptionEntryDto entry = getEntryWithSystem(system);
         final ServiceRecord ServiceRecord = getServiceRecord(null, serviceMetadata);
-        final String inventoryId = "abc_inventory_id";
-        final JsonObject systemData = new JsonObject(new JsonPair("a", JsonBoolean.TRUE));
-        final MonitorInfoTracker monitorInfoTracker = new MonitorInfoTracker();
-        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
 
         monitorInfoTracker.putInventoryId(ServiceRecord, inventoryId);
         monitorInfoTracker.putSystemData(ServiceRecord, systemData);
@@ -133,13 +145,42 @@ public class DtoUtilsTest {
         final MonitorPlantDescriptionEntry extendedEntry = DtoUtils.extend(entry, monitorInfoTracker, pdTracker);
         final SystemEntry extendedSystem = extendedEntry.systems().get(0);
 
-        final PortEntry extendedPortA = extendedSystem.ports().get(0);
-        final PortEntry extendedPortB = extendedSystem.ports().get(1);
-        final PortEntry extendedPortC = extendedSystem.ports().get(2);
+        final PortEntry monitorablePort = extendedSystem.ports().get(0);
+        final PortEntry extendedPortA = extendedSystem.ports().get(1);
+        final PortEntry extendedPortB = extendedSystem.ports().get(2);
+        final PortEntry extendedPortC = extendedSystem.ports().get(3);
 
+        assertTrue(hasNoMonitorInfo(monitorablePort));
         assertTrue(hasNoMonitorInfo(extendedPortA));
         assertTrue(hasNoMonitorInfo(extendedPortB));
         assertTrue(hasMonitorInfo(extendedPortC, inventoryId, systemData));
+    }
+
+    @Test
+    public void shouldNotPlaceMonitorInfoOnMonitorablePort() throws PdStoreException {
+        final Map<String, String> serviceMetadata = Map.of("a", "b");
+        final List<PortDto> ports = List.of(
+            new PortDto.Builder()
+                .metadata(serviceMetadata)
+                .portName("monitorable")
+                .serviceInterface(httpSecureJson)
+                .serviceDefinition(ApiConstants.MONITORABLE_SERVICE_NAME)
+                .build()
+        );
+
+        final PdeSystemDto system = getSystemWithPorts(ports);
+        final PlantDescriptionEntryDto entry = getEntryWithSystem(system);
+        final ServiceRecord ServiceRecord = getServiceRecord(null, serviceMetadata);
+
+        monitorInfoTracker.putInventoryId(ServiceRecord, inventoryId);
+        monitorInfoTracker.putSystemData(ServiceRecord, systemData);
+        pdTracker.put(entry);
+
+        final MonitorPlantDescriptionEntry extendedEntry = DtoUtils.extend(entry, monitorInfoTracker, pdTracker);
+        final SystemEntry extendedSystem = extendedEntry.systems().get(0);
+        final PortEntry monitorablePort = extendedSystem.ports().get(0);
+
+        assertTrue(hasNoMonitorInfo(monitorablePort));
     }
 
     @Test
@@ -171,11 +212,6 @@ public class DtoUtilsTest {
         final PdeSystemDto system = getSystemWithPorts(ports);
         final PlantDescriptionEntryDto entry = getEntryWithSystem(system);
 
-        final String inventoryId = "abc_inventory_id";
-        final JsonObject systemData = new JsonObject(new JsonPair("a", JsonBoolean.TRUE));
-        final MonitorInfoTracker monitorInfoTracker = new MonitorInfoTracker();
-        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
-
         monitorInfoTracker.putInventoryId(ServiceRecord, inventoryId);
         monitorInfoTracker.putSystemData(ServiceRecord, systemData);
         pdTracker.put(entry);
@@ -200,8 +236,6 @@ public class DtoUtilsTest {
             .build();
         final PdeSystemDto system = getSystemWithPorts(List.of(port));
         final PlantDescriptionEntryDto entry = getEntryWithSystem(system);
-        final MonitorInfoTracker monitorInfoTracker = new MonitorInfoTracker();
-        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
 
         pdTracker.put(entry);
 
@@ -232,10 +266,6 @@ public class DtoUtilsTest {
 
         final PdeSystemDto system = getSystemWithPorts(List.of(port));
         final PlantDescriptionEntryDto entry = getEntryWithSystem(system);
-        final String inventoryId = "abc_inventory_id";
-        final JsonObject systemData = new JsonObject(new JsonPair("a", JsonBoolean.TRUE));
-        final MonitorInfoTracker monitorInfoTracker = new MonitorInfoTracker();
-        final PlantDescriptionTracker pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
         final ServiceRecord ServiceRecord = getServiceRecord(null, serviceMetadata);
 
         monitorInfoTracker.putInventoryId(ServiceRecord, inventoryId);

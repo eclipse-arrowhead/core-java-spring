@@ -15,18 +15,17 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Po
 import eu.arrowhead.core.plantdescriptionengine.utils.MockRequest;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockServiceResponse;
 import eu.arrowhead.core.plantdescriptionengine.utils.TestUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mockito;
 import se.arkalix.net.http.HttpStatus;
 import se.arkalix.net.http.service.HttpServiceRequest;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 
@@ -36,7 +35,7 @@ public class ReplacePlantDescriptionTest {
     private ReplacePlantDescription handler;
     private MockServiceResponse response;
 
-    @BeforeEach
+    @Before
     public void initEach() throws PdStoreException {
         pdTracker = new PlantDescriptionTracker(new InMemoryPdStore());
         handler = new ReplacePlantDescription(pdTracker);
@@ -66,7 +65,7 @@ public class ReplacePlantDescriptionTest {
 
                 final PlantDescriptionEntryDto entryInMap = pdTracker.get(entry.id());
                 assertNotNull(entryInMap);
-            }).onFailure(Assertions::assertNull);
+            }).onFailure(e -> fail());
         } catch (final Exception e) {
             fail();
         }
@@ -99,7 +98,7 @@ public class ReplacePlantDescriptionTest {
                 final PlantDescriptionEntry returnedEntry = (PlantDescriptionEntry) response.getRawBody();
                 assertEquals(returnedEntry.plantDescription(), newName);
                 assertEquals(sizeBeforePut, pdTracker.getEntries().size());
-            }).onFailure(Assertions::assertNull);
+            }).onFailure(e -> fail());
         } catch (final Exception e) {
             fail();
         }
@@ -172,7 +171,7 @@ public class ReplacePlantDescriptionTest {
                 final String expectedErrorMessage = "<Duplicate port name '" + portName + "' in system '" + systemId + "'>";
                 final String actualErrorMessage = ((ErrorMessage) response.getRawBody()).error();
                 assertEquals(expectedErrorMessage, actualErrorMessage);
-            }).onFailure(Assertions::assertNull);
+            }).onFailure(e -> fail());
         } catch (final Exception e) {
             fail();
         }
@@ -199,7 +198,7 @@ public class ReplacePlantDescriptionTest {
         try {
             handler.handle(request, response)
                 .ifSuccess(result -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.status().orElse(null)))
-                .onFailure(Assertions::assertNull);
+                .onFailure(e -> fail());
         } catch (final Exception e) {
             fail();
         }

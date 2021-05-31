@@ -7,7 +7,7 @@ import eu.arrowhead.core.plantdescriptionengine.consumedservices.monitorable.dto
 import eu.arrowhead.core.plantdescriptionengine.consumedservices.monitorable.dto.SystemDataDto;
 import eu.arrowhead.core.plantdescriptionengine.utils.MockClientResponse;
 import eu.arrowhead.core.plantdescriptionengine.utils.RequestMatcher;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.mockito.Mockito;
 import se.arkalix.ServiceRecord;
 import se.arkalix.SystemRecord;
@@ -25,8 +25,8 @@ import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
