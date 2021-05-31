@@ -76,3 +76,8 @@ source qos_monitor_privileges.sql
 CREATE USER IF NOT EXISTS 'translator'@'localhost' IDENTIFIED BY 'wozYpV58G0HUkbL';
 CREATE USER IF NOT EXISTS 'translator'@'%' IDENTIFIED BY 'wozYpV58G0HUkbL';
 source translator_privileges.sql
+
+-- MSVC Monitor
+CREATE USER IF NOT EXISTS 'mscv'@'localhost' IDENTIFIED BY 'ASdPsa64y56A128';
+CREATE USER IF NOT EXISTS 'mscv'@'%' IDENTIFIED BY 'ASdPsa64y56A128';
+source mscv_privileges.sql

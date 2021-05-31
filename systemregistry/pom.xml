@@ -9,7 +9,7 @@
   	<artifactId>arrowhead-systemregistry</artifactId>
   	<packaging>jar</packaging>
   	<name>Arrowhead System Registry</name>
-  	<description>SQL-based System Registry core service</description>
+  	<description>System Registry core service</description>
   	
   	<dependencies>
 	    <dependency>

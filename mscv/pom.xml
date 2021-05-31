@@ -1,0 +1,188 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>eu.arrowhead</groupId>
+        <artifactId>core</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>arrowhead-mscv</artifactId>
+    <packaging>jar</packaging>
+    <name>Arrowhead Monitoring and Standard Compliance Verification</name>
+    <description>Monitoring and Standard Compliance Verification core service</description>
+
+    <properties>
+        <sshd.version>2.4.0</sshd.version>
+        <mina.version>2.1.3</mina.version>
+        <eddsa.version>0.3.0</eddsa.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>eu.arrowhead</groupId>
+            <artifactId>arrowhead-core-common</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.4</version>
+        </dependency>
+
+        <!-- SSH CLIENT -->
+        <dependency>
+            <groupId>org.apache.sshd</groupId>
+            <artifactId>sshd-core</artifactId>
+            <version>${sshd.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sshd</groupId>
+            <artifactId>sshd-scp</artifactId>
+            <version>${sshd.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.mina</groupId>
+            <artifactId>mina-core</artifactId>
+            <version>${mina.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sshd</groupId>
+            <artifactId>sshd-mina</artifactId>
+            <version>${sshd.version}</version>
+        </dependency>
+        <!-- For ssh ed25519 support -->
+        <dependency>
+            <groupId>net.i2p.crypto</groupId>
+            <artifactId>eddsa</artifactId>
+            <version>${eddsa.version}</version>
+        </dependency>
+
+        <!-- testing -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>${mvn.resources.version}</version>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <!-- here the phase you need -->
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/target</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources</directory>
+                                    <includes>
+                                        <include>application.properties</include>
+                                        <include>log4j2.xml</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>jdeb</artifactId>
+                <groupId>org.vafer</groupId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jdeb</goal>
+                        </goals>
+                        <configuration>
+                            <snapshotExpand>true</snapshotExpand>
+                            <!--suppress UnresolvedMavenProperty -->
+                            <snapshotTemplate>[YYMMddHHmm].${git.commit.id.abbrev}</snapshotTemplate>
+                            <deb>target/${project.artifactId}_${revision}.deb</deb>
+                            <verbose>true</verbose>
+                            <controlDir>${basedir}/src/deb/control</controlDir>
+                            <dataSet>
+                                <data>
+                                    <type>file</type>
+                                    <src>${project.build.directory}/${project.build.finalName}.jar</src>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/usr/share/arrowhead/mscv</prefix>
+                                        <filemode>755</filemode>
+                                    </mapper>
+                                </data>
+
+                                <data>
+                                    <type>link</type>
+                                    <linkName>/usr/share/arrowhead/mscv/${project.artifactId}.jar</linkName>
+                                    <linkTarget>/usr/share/arrowhead/mscv/${project.build.finalName}.jar</linkTarget>
+                                </data>
+
+                                <data>
+                                    <type>file</type>
+                                    <src>${project.build.directory}/log4j2.xml</src>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/etc/arrowhead/systems/mscv</prefix>
+                                        <filemode>644</filemode>
+                                    </mapper>
+                                </data>
+
+                                <data>
+                                    <type>file</type>
+                                    <src>${project.build.directory}/application.properties</src>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/etc/arrowhead/systems/mscv</prefix>
+                                        <filemode>644</filemode>
+                                    </mapper>
+                                </data>
+
+                                <data>
+                                    <type>link</type>
+                                    <linkName>/usr/share/arrowhead/mscv/application.properties</linkName>
+                                    <linkTarget>/etc/arrowhead/systems/mscv/application.properties</linkTarget>
+                                </data>
+
+                                <data>
+                                    <type>file</type>
+                                    <src>${project.basedir}/src/deb/arrowhead-mscv.service</src>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/etc/systemd/system</prefix>
+                                        <filemode>644</filemode>
+                                    </mapper>
+                                </data>
+
+                                <data>
+                                    <type>file</type>
+                                    <src>${project.basedir}/../scripts/mscv_privileges.sql</src>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/usr/share/arrowhead/conf</prefix>
+                                    </mapper>
+                                </data>
+                            </dataSet>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
