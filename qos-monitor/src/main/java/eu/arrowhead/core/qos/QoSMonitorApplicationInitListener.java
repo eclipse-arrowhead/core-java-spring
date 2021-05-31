@@ -31,6 +31,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.common.dto.shared.EventDTO;
 import eu.arrowhead.common.dto.shared.FinishedMonitoringMeasurementEventDTO;
 import eu.arrowhead.common.dto.shared.InterruptedMonitoringMeasurementEventDTO;
 import eu.arrowhead.common.dto.shared.ReceivedMonitoringRequestEventDTO;
@@ -56,6 +57,12 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 
 	//=================================================================================================
 	// methods
+
+	//-------------------------------------------------------------------------------------------------
+	@Bean(QosMonitorConstants.EVENT_QUEUE)
+	public LinkedBlockingQueue<EventDTO> getEventQueue() {
+		return new LinkedBlockingQueue<EventDTO>();
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Bean(QosMonitorConstants.RECEIVED_MONITORING_REQUEST_QUEUE)
