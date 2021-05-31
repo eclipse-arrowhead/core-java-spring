@@ -13,4 +13,6 @@ public interface PingMonitorManager {
 	//-------------------------------------------------------------------------------------------------
 	public List<IcmpPingResponse> ping(final String address) throws ArrowheadException;
 
+	//-------------------------------------------------------------------------------------------------
+	public void init() throws ArrowheadException;
 }

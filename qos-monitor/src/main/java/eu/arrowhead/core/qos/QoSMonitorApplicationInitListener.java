@@ -143,6 +143,9 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 		final UriComponents queryAll = createQueryAllUri(scheme);
 		context.put(CoreCommonConstants.SR_QUERY_ALL, queryAll);
 
+		final PingMonitorManager pingManager = appContext.getBean(CoreCommonConstants.PING_MONITOR, PingMonitorManager.class);
+		pingManager.init();
+
 	}
 
 	//-------------------------------------------------------------------------------------------------
