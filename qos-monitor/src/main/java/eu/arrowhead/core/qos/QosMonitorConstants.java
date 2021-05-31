@@ -5,6 +5,8 @@ public class QosMonitorConstants {
 	//=================================================================================================
 	// members
 	public static final String EVENT_QUEUE = "EventQueue";
+	public static final String EVENT_BUFFER = "EventBuffer";
+	public static final String EVENT_COLLECTOR = "EventCollector";
 
 	public static final String RECEIVED_MONITORING_REQUEST_QUEUE = "ReceivedMonitoringRequestEventQueue";
 	public static final String STARTED_MONITORING_MEASUREMENT_QUEUE = "StartedMonitoringMeasurementEventQueue";

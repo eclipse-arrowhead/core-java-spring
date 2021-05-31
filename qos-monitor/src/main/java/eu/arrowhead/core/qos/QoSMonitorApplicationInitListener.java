@@ -17,6 +17,8 @@ package eu.arrowhead.core.qos;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -38,6 +40,8 @@ import eu.arrowhead.common.dto.shared.ReceivedMonitoringRequestEventDTO;
 import eu.arrowhead.common.dto.shared.StartedMonitoringMeasurementEventDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.measurement.properties.MonitorProviderType;
+import eu.arrowhead.core.qos.service.ping.monitor.PingEventBufferElement;
+import eu.arrowhead.core.qos.service.ping.monitor.PingEventCollectorTask;
 import eu.arrowhead.core.qos.service.ping.monitor.PingMonitorManager;
 import eu.arrowhead.core.qos.service.ping.monitor.impl.DefaultExternalPingMonitor;
 import eu.arrowhead.core.qos.service.ping.monitor.impl.DummyPingMonitor;
@@ -62,6 +66,18 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 	@Bean(QosMonitorConstants.EVENT_QUEUE)
 	public LinkedBlockingQueue<EventDTO> getEventQueue() {
 		return new LinkedBlockingQueue<EventDTO>();
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Bean(QosMonitorConstants.EVENT_BUFFER)
+	public ConcurrentHashMap<UUID, PingEventBufferElement> getEventBuffer() {
+		return new ConcurrentHashMap<UUID, PingEventBufferElement>();
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Bean(QosMonitorConstants.EVENT_COLLECTOR)
+	public PingEventCollectorTask getEventCollector() {
+		return new PingEventCollectorTask();
 	}
 
 	//-------------------------------------------------------------------------------------------------
