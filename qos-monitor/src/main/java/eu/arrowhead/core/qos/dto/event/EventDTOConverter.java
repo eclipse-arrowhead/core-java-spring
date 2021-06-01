@@ -14,12 +14,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.EventDTO;
-import eu.arrowhead.common.dto.shared.FinishedMonitoringMeasurementEventDTO;
 import eu.arrowhead.common.dto.shared.IcmpPingResponseDTO;
-import eu.arrowhead.common.dto.shared.InterruptedMonitoringMeasurementEventDTO;
 import eu.arrowhead.common.dto.shared.QosMonitorEventType;
-import eu.arrowhead.common.dto.shared.ReceivedMonitoringRequestEventDTO;
-import eu.arrowhead.common.dto.shared.StartedMonitoringMeasurementEventDTO;
+import eu.arrowhead.common.dto.shared.monitoringevents.FinishedMonitoringMeasurementEventDTO;
+import eu.arrowhead.common.dto.shared.monitoringevents.InterruptedMonitoringMeasurementEventDTO;
+import eu.arrowhead.common.dto.shared.monitoringevents.ReceivedMonitoringRequestEventDTO;
+import eu.arrowhead.common.dto.shared.monitoringevents.StartedMonitoringMeasurementEventDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.QosMonitorConstants;
 
@@ -48,7 +48,6 @@ public class EventDTOConverter {
 		Assert.isTrue(!Utilities.isEmpty(event.getTimeStamp()), "Event timeStamp is empty");
 
 		final InterruptedMonitoringMeasurementEventDTO validEvent = new InterruptedMonitoringMeasurementEventDTO();
-		validEvent.setEventType(QosMonitorEventType.INTERUPTED_MONITORING_MEASUREMENT);
 		validEvent.setMetadata(event.getMetaData());
 		validEvent.setPayload(event.getPayload());
 		try {
@@ -72,7 +71,6 @@ public class EventDTOConverter {
 		Assert.isTrue(!Utilities.isEmpty(event.getTimeStamp()), "Event timeStamp is empty");
 
 		final FinishedMonitoringMeasurementEventDTO validEvent = new FinishedMonitoringMeasurementEventDTO();
-		validEvent.setEventType(QosMonitorEventType.FINISHED_MONITORING_MEASUREMENT);
 		validEvent.setMetadata(event.getMetaData());
 		validEvent.setPayload(convertToIcmpPingResponse(event.getPayload()));
 		try {
@@ -114,7 +112,6 @@ public class EventDTOConverter {
 		Assert.isTrue(!Utilities.isEmpty(event.getTimeStamp()), "Event timeStamp is empty");
 
 		final StartedMonitoringMeasurementEventDTO validEvent = new StartedMonitoringMeasurementEventDTO();
-		validEvent.setEventType(QosMonitorEventType.STARTED_MONITORING_MEASUREMENT);
 		validEvent.setMetadata(event.getMetaData());
 		validEvent.setPayload(event.getPayload());
 		try {
@@ -138,7 +135,6 @@ public class EventDTOConverter {
 		Assert.isTrue(!Utilities.isEmpty(event.getTimeStamp()), "Event timeStamp is empty");
 
 		final ReceivedMonitoringRequestEventDTO validEvent = new ReceivedMonitoringRequestEventDTO();
-		validEvent.setEventType(QosMonitorEventType.RECEIVED_MONITORING_REQUEST);
 		validEvent.setMetadata(event.getMetaData());
 		validEvent.setPayload(event.getPayload());
 		try {

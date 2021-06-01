@@ -1,12 +1,7 @@
 package eu.arrowhead.core.qos.service.ping.monitor.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,22 +12,15 @@ import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
-import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.shared.FinishedMonitoringMeasurementEventDTO;
 import eu.arrowhead.common.dto.shared.IcmpPingRequestACK;
 import eu.arrowhead.common.dto.shared.IcmpPingRequestDTO;
-import eu.arrowhead.common.dto.shared.InterruptedMonitoringMeasurementEventDTO;
-import eu.arrowhead.common.dto.shared.ReceivedMonitoringRequestEventDTO;
-import eu.arrowhead.common.dto.shared.StartedMonitoringMeasurementEventDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.core.qos.QosMonitorConstants;
-import eu.arrowhead.core.qos.dto.IcmpPingDTOConverter;
 import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.service.QoSMonitorDriver;
 import eu.arrowhead.core.qos.service.ping.monitor.AbstractPingMonitor;
+import eu.arrowhead.core.qos.service.ping.monitor.PingEventProcessor;
 
 public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 
@@ -42,25 +30,12 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	//-------------------------------------------------------------------------------------------------
 	private static final int ICMP_TTL = 255;
 	private static final int OVERHEAD_MULTIPLIER = 2;
-	private static final long SLEEP_PERIOD = TimeUnit.SECONDS.toMillis(1);
 
 	@Autowired
 	private QoSMonitorDriver driver;
 
 	@Autowired
-	protected SSLProperties sslProperties;
-
-	@Resource(name = QosMonitorConstants.RECEIVED_MONITORING_REQUEST_QUEUE)
-	private LinkedBlockingQueue<ReceivedMonitoringRequestEventDTO> receivedMonitoringRequestEventQueue;
-
-	@Resource(name = QosMonitorConstants.STARTED_MONITORING_MEASUREMENT_QUEUE)
-	private LinkedBlockingQueue<StartedMonitoringMeasurementEventDTO> startedMonitoringMeasurementEventQueue;
-
-	@Resource(name = QosMonitorConstants.FINISHED_MONITORING_MEASUREMENT_QUEUE)
-	private LinkedBlockingQueue<FinishedMonitoringMeasurementEventDTO> finishedMonitoringMeasurementEventQueue;
-
-	@Resource(name = QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_QUEUE)
-	private LinkedBlockingQueue<InterruptedMonitoringMeasurementEventDTO> interuptedMonitoringMeasurementEventQueue;
+	private PingEventProcessor processor;
 
 	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_NAME_WD)
 	private String externalPingMonitorName;
@@ -82,7 +57,7 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 
 	private SystemRequestDTO pingMonitorSystem;
 
-	private Logger logger = LogManager.getLogger(DefaultExternalPingMonitor.class);
+	private final Logger logger = LogManager.getLogger(DefaultExternalPingMonitor.class);
 
 	//=================================================================================================
 	// methods
@@ -98,54 +73,13 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 		final long startTime = System.currentTimeMillis();
 		final long meausermentExpiryTime = startTime + timeOut;
 
-		boolean measurmentRequestConfirmed = false;
-		boolean measurmentStartedConfirmed = false;
+		try {
 
-		ReceivedMonitoringRequestEventDTO receivedMonitoringRequestEventDTO;
-		StartedMonitoringMeasurementEventDTO startedMonitoringMeasurementEventDTO;
+			return processor.processEvents(measurementProcessId, meausermentExpiryTime);
 
-		//TODO externalize block to class
-		while(System.currentTimeMillis() < meausermentExpiryTime) {
+		} catch (final Exception ex) {
 
-			checkInterupts(measurementProcessId);
-
-			if(!measurmentRequestConfirmed) {
-				receivedMonitoringRequestEventDTO = checkMeasurmentRequestConfirmedEvents(measurementProcessId);
-				if( receivedMonitoringRequestEventDTO != null) {
-					measurmentRequestConfirmed = true;
-
-					logger.debug("EVENT: External Ping Measurement request confirmed : " + measurementProcessId);
-
-				}else {
-					rest();
-					continue;
-				}
-			}
-
-			if(!measurmentStartedConfirmed) {
-				startedMonitoringMeasurementEventDTO = checkMeasurmentStartedConfirmedEvents(measurementProcessId);
-				if(startedMonitoringMeasurementEventDTO != null) {
-					measurmentStartedConfirmed = true;
-
-					logger.info("EVENT: External Ping Measurement started : " + measurementProcessId);
-
-				}else {
-					rest();
-					continue;
-				}
-			}
-
-			final FinishedMonitoringMeasurementEventDTO measurmentResult = checkMeasurementResultEvents(measurementProcessId);
-			if(measurmentResult != null) {
-				logger.info("EVENT: External Ping Measurement finished: " + measurementProcessId);
-
-				clearAllQueues();
-				return IcmpPingDTOConverter.convertPingMeasurementResult(measurmentResult.getPayload());
-			}else {
-				rest();
-				continue;
-			}
-
+			logger.debug(ex.getMessage());
 		}
 
 		return null;
@@ -163,199 +97,6 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 
 	//=================================================================================================
 	// assistant methods
-
-	//-------------------------------------------------------------------------------------------------
-	private FinishedMonitoringMeasurementEventDTO checkMeasurementResultEvents(final UUID measurementProcessId) {
-		logger.debug("checkMeasurementResultEvents statred...");
-
-		final List<FinishedMonitoringMeasurementEventDTO> uncheckedEvents = new ArrayList<>();
-		finishedMonitoringMeasurementEventQueue.drainTo(uncheckedEvents);
-
-		if (uncheckedEvents.isEmpty()) {
-			return null;
-		}else {
-			for (final FinishedMonitoringMeasurementEventDTO event : uncheckedEvents) {
-
-				final FinishedMonitoringMeasurementEventDTO validEvent = checkMeasurementResult(measurementProcessId, event);
-
-				if (validEvent != null) {
-					return validEvent;
-				}
-			}
-		}
-
-		return null;
-
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private FinishedMonitoringMeasurementEventDTO checkMeasurementResult(final UUID measurementProcessId, final FinishedMonitoringMeasurementEventDTO event) {
-		logger.debug("checkMeasurementResult statred...");
-
-		try {
-
-			if(event != null) {
-				final UUID uuid = UUID.fromString(event.getMetadata().get(QosMonitorConstants.PROCESS_ID_KEY));
-				if(uuid.equals(measurementProcessId)) {
-					return event;
-				}else {
-					logger.debug("Invalid measurementProcessId : " + event.toString());
-
-					return null;
-				}
-			}else {
-				return null;
-			}
-
-		} catch (final ArrowheadException ex) {
-
-			throw new InvalidParameterException("Invalid finished ping monitoring measurement : " + ex);
-		} catch (final Exception ex) {
-
-			throw new ArrowheadException("Exeption during finishedMonitoringMeasurementEventQueue poll : " + ex);
-		}
-
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private StartedMonitoringMeasurementEventDTO checkMeasurmentStartedConfirmedEvents(final UUID measurementProcessId) {
-		logger.debug("checkMeasurmentStartedConfirmedEvents statred...");
-
-		final List<StartedMonitoringMeasurementEventDTO> uncheckedEvents = new ArrayList<>();
-		startedMonitoringMeasurementEventQueue.drainTo(uncheckedEvents);
-
-		if (uncheckedEvents.isEmpty()) {
-			return null;
-		}else {
-			for (final StartedMonitoringMeasurementEventDTO event : uncheckedEvents) {
-
-				final StartedMonitoringMeasurementEventDTO validEvent = checkMeasurmentStartedConfirmed(measurementProcessId, event);
-
-				if (validEvent != null) {
-					return validEvent;
-				}
-			}
-		}
-
-		return null;
-
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private StartedMonitoringMeasurementEventDTO checkMeasurmentStartedConfirmed(final UUID measurementProcessId, final StartedMonitoringMeasurementEventDTO event) {
-		logger.debug("checkMeasurmentStartedConfirmed statred...");
-
-		if(event != null) {
-			final UUID uuid = UUID.fromString(event.getMetadata().get(QosMonitorConstants.PROCESS_ID_KEY));
-			if(uuid.equals(measurementProcessId)) {
-				return event;
-			}else {
-				throw new ArrowheadException("Invalid measurementProcessId. ");
-			}
-		}else {
-			return null;
-		}
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private ReceivedMonitoringRequestEventDTO  checkMeasurmentRequestConfirmedEvents(final UUID measurementProcessId) {
-		logger.debug("checkMeasurmentRequestConfirmedEvents statred...");
-
-		final List<ReceivedMonitoringRequestEventDTO> uncheckedEvents = new ArrayList<>();
-		receivedMonitoringRequestEventQueue.drainTo(uncheckedEvents);
-
-		if (uncheckedEvents.isEmpty()) {
-			return null;
-		}else {
-			for (final ReceivedMonitoringRequestEventDTO event : uncheckedEvents) {
-
-				final ReceivedMonitoringRequestEventDTO validEvent = checkMeasurmentRequestConfirmed(measurementProcessId, event);
-
-				if (validEvent != null) {
-					return validEvent;
-				}
-			}
-		}
-
-		return null;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private ReceivedMonitoringRequestEventDTO  checkMeasurmentRequestConfirmed(final UUID measurementProcessId, final ReceivedMonitoringRequestEventDTO event) {
-		logger.debug("checkMeasurmentRequestConfirmed statred...");
-
-		if(event != null) {
-			final UUID uuid = UUID.fromString(event.getMetadata().get(QosMonitorConstants.PROCESS_ID_KEY));
-			if(uuid.equals(measurementProcessId)) {
-				return event;
-			}else {
-				logger.debug("Invalid measurementProcessId: " + event.toString());
-
-				return null;
-			}
-		}else {
-			return null;
-		}
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private void checkInterupts(final UUID measurementProcessId) {
-		logger.debug("checkInterupts statred...");
-
-		final List<InterruptedMonitoringMeasurementEventDTO> uncheckedEvents = new ArrayList<>();
-		interuptedMonitoringMeasurementEventQueue.drainTo(uncheckedEvents);
-
-		if (uncheckedEvents.isEmpty()) {
-			return;
-		}else {
-
-			for (final InterruptedMonitoringMeasurementEventDTO event : uncheckedEvents) {
-
-				checkInteruptEvent(measurementProcessId, event);
-
-			}
-		}
-
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private void checkInteruptEvent(final UUID measurementProcessId, final InterruptedMonitoringMeasurementEventDTO event) {
-		logger.debug("checkInteruptEvent statred...");
-
-		final List<InterruptedMonitoringMeasurementEventDTO> uncheckedEvents = new ArrayList<>();
-		interuptedMonitoringMeasurementEventQueue.drainTo(uncheckedEvents);
-
-		if(event != null) {
-			final UUID uuid = UUID.fromString(event.getMetadata().get(QosMonitorConstants.PROCESS_ID_KEY));
-			if(uuid.equals(measurementProcessId)) {
-
-				logger.debug("EVENT: External Ping Measurement interupted : " + measurementProcessId);
-
-				final String suspectedRootCauses = event.getMetadata().get(QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_ROOT_CAUSE_KEY);
-				final String exeptionInExternalMonitoring = event.getMetadata().get(QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_EXCEPTION_KEY);
-
-				logger.debug("Exception in external monitoring process: " + exeptionInExternalMonitoring);
-				logger.debug("Self clamed root cause of external monitoring process exception: " + suspectedRootCauses);
-
-				throw new ArrowheadException("Interupt in external monitoring process. ");
-			}else {
-				return;
-			}
-		}else {
-			return;
-		}
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private void clearAllQueues() {
-		logger.debug("clearAllQueues started...");
-
-		interuptedMonitoringMeasurementEventQueue.clear();
-		receivedMonitoringRequestEventQueue.clear();
-		startedMonitoringMeasurementEventQueue.clear();
-		finishedMonitoringMeasurementEventQueue.clear();
-
-	}
 
 	//-------------------------------------------------------------------------------------------------
 	private UUID requestExternalMeasurement(final String address) {
@@ -447,12 +188,4 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 		return system;
 	}
 
-	//-------------------------------------------------------------------------------------------------
-	private void rest() {
-		try {
-			Thread.sleep(SLEEP_PERIOD);
-		} catch (final InterruptedException e) {
-			logger.warn(e.getMessage());
-		}
-	}
 }

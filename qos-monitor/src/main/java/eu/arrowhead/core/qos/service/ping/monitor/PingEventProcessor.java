@@ -12,14 +12,15 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import eu.arrowhead.common.dto.shared.EventDTO;
-import eu.arrowhead.common.dto.shared.FinishedMonitoringMeasurementEventDTO;
-import eu.arrowhead.common.dto.shared.QosMonitorEventType;
+import eu.arrowhead.common.dto.shared.monitoringevents.FinishedMonitoringMeasurementEventDTO;
+import eu.arrowhead.common.dto.shared.monitoringevents.InterruptedMonitoringMeasurementEventDTO;
+import eu.arrowhead.common.dto.shared.monitoringevents.MeasurementMonitoringEvent;
+import eu.arrowhead.common.dto.shared.monitoringevents.ReceivedMonitoringRequestEventDTO;
+import eu.arrowhead.common.dto.shared.monitoringevents.StartedMonitoringMeasurementEventDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.qos.QosMonitorConstants;
 import eu.arrowhead.core.qos.dto.IcmpPingDTOConverter;
 import eu.arrowhead.core.qos.dto.IcmpPingResponse;
-import eu.arrowhead.core.qos.dto.event.EventDTOConverter;
 
 @Service
 public class PingEventProcessor {
@@ -27,6 +28,9 @@ public class PingEventProcessor {
 	// members
 
 	private static final long SLEEP_PERIOD = TimeUnit.SECONDS.toMillis(1);
+	private static final String SUCCESS_FINISH_PHRASE = " successfully finished ";
+	private static final String INTERRRUPTED_FINISH_PHRASE = " get interrupted";
+	private static final String TIMEOUT_FINISH_PHRASE = " timed out";
 
 	@Resource(name = QosMonitorConstants.EVENT_BUFFER)
 	private ConcurrentHashMap<UUID, PingEventBufferElement> eventBuffer;
@@ -43,16 +47,13 @@ public class PingEventProcessor {
 		Assert.notNull(id, "Event id could not be null.");
 		Assert.isTrue(timeOut > 0, "TimeOut should be greater then zero");
 
-		boolean hasReceived = false;
-		boolean hasStarted = false;
-		boolean hasFinished = false;
-
-		PingEventBufferElement partialResult = null;
+		ReceivedMonitoringRequestEventDTO temporalReceivedRequestEvent = null;
+		StartedMonitoringMeasurementEventDTO temporalStartedMonitoringEvent = null;
 
 		while ( System.currentTimeMillis() < timeOut) {
 
 			final PingEventBufferElement element = eventBuffer.get(id);
-			if (id == null) {
+			if (element == null) {
 
 				rest();
 				continue;
@@ -64,45 +65,48 @@ public class PingEventProcessor {
 
 			}
 
-			final List<EventDTO> eventList = element.getEventlist();
-			for (final EventDTO eventDTO : eventList) {
+			final List<MeasurementMonitoringEvent> eventList = element.getEventlist();
 
-				if (eventDTO.getEventType().equalsIgnoreCase(QosMonitorEventType.INTERUPTED_MONITORING_MEASUREMENT.name())) {
+			if (eventList.get(QosMonitorConstants.RECEIVED_MONITORING_REQUEST_EVENT_POSITION) != null) {
 
-					handleInterruptEvent(id, eventDTO);
-				}
+				temporalReceivedRequestEvent = (ReceivedMonitoringRequestEventDTO) eventList.get(QosMonitorConstants.RECEIVED_MONITORING_REQUEST_EVENT_POSITION);
 
-				if (eventDTO.getEventType().equalsIgnoreCase(QosMonitorEventType.RECEIVED_MONITORING_REQUEST.name())) {
-
-					hasReceived = handleReceivedRequestEvent(id, eventDTO);
-				}
-
-				if (eventDTO.getEventType().equalsIgnoreCase(QosMonitorEventType.STARTED_MONITORING_MEASUREMENT.name())) {
-
-					hasStarted = handleStartedEvent(id, eventDTO);
-				}
-
-				if (eventDTO.getEventType().equalsIgnoreCase(QosMonitorEventType.FINISHED_MONITORING_MEASUREMENT.name())) {
-
-					final FinishedMonitoringMeasurementEventDTO result = EventDTOConverter.convertToFinishedMonitoringMeasurementEvent(eventDTO);
-					if (hasReceived && hasStarted && hasFinished) {
-
-						eventBuffer.remove(id);
-
-						return IcmpPingDTOConverter.convertPingMeasurementResult(result.getPayload());
-
-					}else {
-						partialResult = element;
-					}
-				}
 			}
 
+			if (eventList.get(QosMonitorConstants.STARTED_MONITORING_MEASUREMENT_EVENT_POSITION) != null) {
 
+				temporalStartedMonitoringEvent = (StartedMonitoringMeasurementEventDTO) eventList.get(QosMonitorConstants.STARTED_MONITORING_MEASUREMENT_EVENT_POSITION);
+
+			}
+
+			if (eventList.get(QosMonitorConstants.FINISHED_MONITORING_MEASUREMENT_EVENT_POSITION) != null) {
+				final FinishedMonitoringMeasurementEventDTO event = (FinishedMonitoringMeasurementEventDTO) eventList.get(QosMonitorConstants.FINISHED_MONITORING_MEASUREMENT_EVENT_POSITION);
+
+				logAssistantEvents(temporalReceivedRequestEvent, temporalStartedMonitoringEvent, SUCCESS_FINISH_PHRASE, id.toString());
+
+				eventBuffer.remove(id);
+				return IcmpPingDTOConverter.convertPingMeasurementResult(event.getPayload());
+
+			} else if (eventList.get(QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_POSITION) != null) {
+
+				eventBuffer.remove(id);
+				final InterruptedMonitoringMeasurementEventDTO event = (InterruptedMonitoringMeasurementEventDTO) eventList.get(QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_POSITION);
+
+				logAssistantEvents(temporalReceivedRequestEvent, temporalStartedMonitoringEvent, INTERRRUPTED_FINISH_PHRASE, id.toString());
+
+				throw new ArrowheadException(id + " - external ping measurement process get interrupted by : " + event.toString());
+
+			}else{
+
+				rest();
+				continue;
+
+			}
 
 		}
 
-		logger.debug("External ping measurement finsched whith partial results: " + partialResult.toString());
-		throw new ArrowheadException("Timeout on external ping measurement : " + id);
+		logAssistantEvents(temporalReceivedRequestEvent, temporalStartedMonitoringEvent, TIMEOUT_FINISH_PHRASE, id.toString());
+		throw new ArrowheadException("Timeout on external ping measurement : " + id.toString());
 	}
 
 
@@ -119,38 +123,22 @@ public class PingEventProcessor {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void handleInterruptEvent(final UUID id, final EventDTO event) {
-		logger.debug("handleInterruptEvent started");
+	private void logAssistantEvents(final ReceivedMonitoringRequestEventDTO temporalReceivedRequestEvent,
+									final StartedMonitoringMeasurementEventDTO temporalStartedMonitoringEvent,
+									final String finishPhrase,
+									final String id) {
 
-		//TODO validateEvent(event);
-		eventBuffer.remove(id);
+		if (temporalReceivedRequestEvent != null) {
+			logger.debug(id + " - external ping measurement process" + finishPhrase + "with valid RECEIVED_MONITORING_REQUEST_EVENT: " + temporalReceivedRequestEvent.toString());
+		}else {
+			logger.debug(id + " - external ping measurement process" + finishPhrase + "without valid RECEIVED_MONITORING_REQUEST_EVENT. ");
+		}
 
-		logger.debug(id.toString() + " : external ping measurement process finished with interrupt. ");
-
-		throw new ArrowheadException("External ping measurement process interuppted: " + event.getMetaData().get(QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_EXCEPTION_KEY));
+		if (temporalStartedMonitoringEvent != null) {
+			logger.debug(id + " - external ping measurement process" + finishPhrase + "with valid STARTED_MONITORING_MEASUREMENT_EVENT: " + temporalStartedMonitoringEvent.toString());
+		}else {
+			logger.debug(id + " - external ping measurement process" + finishPhrase + "without valid STARTED_MONITORING_MEASUREMENT_EVENT. ");
+		}
 	}
 
-	//-------------------------------------------------------------------------------------------------
-	private boolean handleReceivedRequestEvent(final UUID id, final EventDTO event) {
-		logger.debug("handleReceivedRequestEvent started");
-
-		//TODO validateEvent(event);
-
-		final boolean hasReceived = true;
-		logger.debug(id.toString() + " : external ping measurement process finished with interrupt. ");
-
-		return hasReceived;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private boolean handleStartedEvent(final UUID id, final EventDTO event) {
-		logger.debug("handleReceivedRequestEvent started");
-
-		//TODO validateEvent(event);
-
-		final boolean hasReceived = true;
-		logger.debug(id.toString() + " : external ping measurement process finished with interrupt. ");
-
-		return hasReceived;
-	}
 }

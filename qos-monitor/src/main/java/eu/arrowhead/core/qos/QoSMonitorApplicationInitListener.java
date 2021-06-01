@@ -34,10 +34,6 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.shared.EventDTO;
-import eu.arrowhead.common.dto.shared.FinishedMonitoringMeasurementEventDTO;
-import eu.arrowhead.common.dto.shared.InterruptedMonitoringMeasurementEventDTO;
-import eu.arrowhead.common.dto.shared.ReceivedMonitoringRequestEventDTO;
-import eu.arrowhead.common.dto.shared.StartedMonitoringMeasurementEventDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.measurement.properties.MonitorProviderType;
 import eu.arrowhead.core.qos.service.ping.monitor.PingEventBufferElement;
@@ -78,30 +74,6 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 	@Bean(QosMonitorConstants.EVENT_COLLECTOR)
 	public PingEventCollectorTask getEventCollector() {
 		return new PingEventCollectorTask();
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	@Bean(QosMonitorConstants.RECEIVED_MONITORING_REQUEST_QUEUE)
-	public LinkedBlockingQueue<ReceivedMonitoringRequestEventDTO> getReceivedMonitoringRequestEventQueue() {
-		return new LinkedBlockingQueue<ReceivedMonitoringRequestEventDTO>();
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	@Bean(QosMonitorConstants.STARTED_MONITORING_MEASUREMENT_QUEUE)
-	public LinkedBlockingQueue<StartedMonitoringMeasurementEventDTO> getStartedMonitoringMeasurementEventQueue() {
-		return new LinkedBlockingQueue<StartedMonitoringMeasurementEventDTO>();
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	@Bean(QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_QUEUE)
-	public LinkedBlockingQueue<InterruptedMonitoringMeasurementEventDTO> getInteruptedMonitoringMeasurementEventQueue() {
-		return new LinkedBlockingQueue<InterruptedMonitoringMeasurementEventDTO>();
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	@Bean(QosMonitorConstants.FINISHED_MONITORING_MEASUREMENT_QUEUE)
-	public LinkedBlockingQueue<FinishedMonitoringMeasurementEventDTO> getFinishedMonitoringMeasurementEventQueue() {
-		return new LinkedBlockingQueue<FinishedMonitoringMeasurementEventDTO>();
 	}
 
 	//-------------------------------------------------------------------------------------------------
