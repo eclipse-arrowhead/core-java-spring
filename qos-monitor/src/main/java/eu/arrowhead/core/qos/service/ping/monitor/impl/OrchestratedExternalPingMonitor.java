@@ -68,13 +68,6 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public OrchestratedExternalPingMonitor() {
-
-		init();
-
-	}
-
-	//-------------------------------------------------------------------------------------------------
 	@Override
 	public List<IcmpPingResponse> ping(final String address) {
 		logger.debug("ping statred...");

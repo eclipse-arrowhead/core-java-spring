@@ -30,7 +30,7 @@ public class QosMonitorConstants {
 	public static final int INTERRUPTED_MONITORING_MEASUREMENT_EVENT_POSITION = 3;
 
 	public static final String EXTERNAL_PING_MONITORING_SERVICE_INTERFACE = "HTTP-SECURE-JSON";
-	public static final String EXTERNAL_PING_MONITORING_SERVICE_DEFINITION = "externalpingservice";
+	public static final String EXTERNAL_PING_MONITORING_SERVICE_DEFINITION = "qos-icmp-ping";
 
 	public static final String EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI = "/externalpingmonitorevent";
 	//=================================================================================================

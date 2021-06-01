@@ -265,6 +265,8 @@ public class CloudPingTask implements Job {
 	private PingMeasurementCalculationsDTO calculatePingMeasurementValues(final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
 		logger.debug("calculatePingMeasurementValues started...");
 
+		Assert.notNull(responseList, "ResponseList is null");
+		Assert.notNull(aroundNow, "AroundNow is null");
 		final int sentInThisPing = responseList.size();
 		Assert.isTrue(sentInThisPing > 0, "Sent in this Ping value must be greater than zero");
 
@@ -347,6 +349,9 @@ public class CloudPingTask implements Job {
 		final ZonedDateTime aroundNow = ZonedDateTime.now();
 
 		final List<IcmpPingResponse> responseList = pingService.getPingResponseList(address);
+		if(responseList == null) {
+			throw new ArrowheadException("Ping Service response is null");
+		}
 
 		final QoSInterDirectMeasurement measurement = qoSDBService.getOrCreateDirectInterMeasurement(address, cloud, QoSMeasurementType.PING);
 		final PingMeasurementCalculationsDTO calculationsDTO = handleInterPingMeasurement(measurement, responseList, aroundNow);

@@ -84,6 +84,7 @@ public class PingEventProcessor {
 				final FinishedMonitoringMeasurementEventDTO event = (FinishedMonitoringMeasurementEventDTO) eventList.get(QosMonitorConstants.FINISHED_MONITORING_MEASUREMENT_EVENT_POSITION);
 
 				logAssistantEvents(temporalReceivedRequestEvent, temporalStartedMonitoringEvent, SUCCESS_FINISH_PHRASE, id.toString());
+				logger.debug(id + " - external ping measurement process" + SUCCESS_FINISH_PHRASE + "with valid FINISHED_MONITORING_MEASUREMENT_EVENT: " + event.toString());
 
 				eventBuffer.remove(id);
 				return IcmpPingDTOConverter.convertPingMeasurementResult(event.getPayload());
