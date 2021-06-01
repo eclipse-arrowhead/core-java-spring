@@ -2,6 +2,10 @@ package eu.arrowhead.core.qos.service.ping.monitor.impl;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+
+import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,10 +26,12 @@ import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.core.qos.QosMonitorConstants;
 import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.dto.externalMonitor.ExternalMonitorOrchestrationRequestFactory;
 import eu.arrowhead.core.qos.service.QoSMonitorDriver;
 import eu.arrowhead.core.qos.service.ping.monitor.AbstractPingMonitor;
+import eu.arrowhead.core.qos.service.ping.monitor.PingEventCollectorTask;
 import eu.arrowhead.core.qos.service.ping.monitor.PingEventProcessor;
 
 public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
@@ -37,6 +43,8 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 	private static final int ICMP_TTL = 255;
 	private static final int OVERHEAD_MULTIPLIER = 2;
 
+	private final ThreadPoolExecutor threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
+
 	private OrchestrationResultDTO cachedPingMonitorProvider = null;
 
 	@Autowired
@@ -44,6 +52,9 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 
 	@Autowired
 	private PingEventProcessor processor;
+
+	@Resource(name = QosMonitorConstants.EVENT_COLLECTOR)
+	private PingEventCollectorTask eventCollector; 
 
 	@Autowired
 	protected SSLProperties sslProperties;
@@ -118,6 +129,8 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 			cachedPingMonitorProvider = null;
 
 		}
+
+		threadPool.execute(eventCollector);
 
 		driver.unsubscribeFromPingMonitorEvents();
 		driver.subscribeToExternalPingMonitorEvents(getPingMonitorSystemRequestDTO());

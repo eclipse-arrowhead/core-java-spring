@@ -2,6 +2,10 @@ package eu.arrowhead.core.qos.service.ping.monitor.impl;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+
+import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,9 +21,11 @@ import eu.arrowhead.common.dto.shared.IcmpPingRequestACK;
 import eu.arrowhead.common.dto.shared.IcmpPingRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.core.qos.QosMonitorConstants;
 import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.service.QoSMonitorDriver;
 import eu.arrowhead.core.qos.service.ping.monitor.AbstractPingMonitor;
+import eu.arrowhead.core.qos.service.ping.monitor.PingEventCollectorTask;
 import eu.arrowhead.core.qos.service.ping.monitor.PingEventProcessor;
 
 public class DefaultExternalPingMonitor extends AbstractPingMonitor{
@@ -31,11 +37,16 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	private static final int ICMP_TTL = 255;
 	private static final int OVERHEAD_MULTIPLIER = 2;
 
+	private final ThreadPoolExecutor threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
+
 	@Autowired
 	private QoSMonitorDriver driver;
 
 	@Autowired
 	private PingEventProcessor processor;
+
+	@Resource(name = QosMonitorConstants.EVENT_COLLECTOR)
+	private PingEventCollectorTask eventCollector; 
 
 	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_NAME_WD)
 	private String externalPingMonitorName;
@@ -90,6 +101,8 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 		logger.debug("initPingMonitorProvider started...");
 
 		pingMonitorSystem = getPingMonitorSystemRequestDTO();
+
+		threadPool.execute(eventCollector);
 
 		driver.checkPingMonitorProviderEchoUri(createPingMonitorProviderEchoUri());
 		driver.subscribeToExternalPingMonitorEvents(pingMonitorSystem);

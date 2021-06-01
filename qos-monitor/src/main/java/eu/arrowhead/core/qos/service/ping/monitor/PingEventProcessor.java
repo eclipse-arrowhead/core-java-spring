@@ -1,5 +1,6 @@
 package eu.arrowhead.core.qos.service.ping.monitor;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -58,14 +59,14 @@ public class PingEventProcessor {
 				rest();
 				continue;
 
-			}else if (element.getEventlist().isEmpty()){
+			}else if (Arrays.asList(element.getEventlist()).isEmpty()){
 
 				rest();
 				continue;
 
 			}
 
-			final List<MeasurementMonitoringEvent> eventList = element.getEventlist();
+			final List<MeasurementMonitoringEvent> eventList = Arrays.asList(element.getEventlist());
 
 			if (eventList.get(QosMonitorConstants.RECEIVED_MONITORING_REQUEST_EVENT_POSITION) != null) {
 

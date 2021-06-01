@@ -23,7 +23,10 @@ public class IcmpPingDTOConverter {
 	public static List<IcmpPingResponse> convertPingMeasurementResult(final List<IcmpPingResponseDTO> payload) {
 		logger.debug("convertPingMeasurementResult started...");
 
-		final List<IcmpPingResponse> result = new ArrayList(payload.size());
+		Assert.notNull(payload, "Payload is null");
+		Assert.isTrue(!payload.isEmpty(), "Payload is empty");
+
+		final List<IcmpPingResponse> result = new ArrayList<>(payload.size());
 		for (final IcmpPingResponseDTO icmpResponseDTO : payload) {
 
 			result.add(convertIcmpResponseDTOToIcmpResponse(icmpResponseDTO));

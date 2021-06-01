@@ -8,6 +8,7 @@ import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import eu.arrowhead.common.dto.shared.EventDTO;
 import eu.arrowhead.common.dto.shared.QosMonitorEventType;
@@ -39,6 +40,9 @@ public class PingEventCollectorTask implements Runnable {
 
 	@Resource(name = QosMonitorConstants.EVENT_BUFFER)
 	private ConcurrentHashMap<UUID, PingEventBufferElement> eventBuffer;
+
+	@Autowired
+	private PingEventBufferCleaner bufferCleaner;
 
 	private final Logger logger = LogManager.getLogger(PingEventCollectorTask.class);
 
@@ -82,15 +86,15 @@ public class PingEventCollectorTask implements Runnable {
 	private void clearBuffer() {
 		logger.debug("clearBuffer started...");
 
-		eventBuffer.clear();
+		bufferCleaner.clearBuffer();
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	private void addEventToBufferElement (final PingEventBufferElement element, final int position, final MeasurementMonitoringEvent event) {
 		logger.debug("addEventToBufferElement started...");
 
-		if(element.getEventlist().get(position) != null) {
-			logger.warn(element.getId() + REPLACEING_MEASURMENT_EVENT + element.getEventlist().get(position).toString());
+		if(element.getEventlist()[position] != null) {
+			logger.warn(element.getId() + REPLACEING_MEASURMENT_EVENT + element.getEventlist()[position].toString());
 		}
 
 		element.addEvent(position, event);
@@ -115,22 +119,22 @@ public class PingEventCollectorTask implements Runnable {
 				final ReceivedMonitoringRequestEventDTO validReceivedRequestEvent = EventDTOConverter.convertToReceivedMonitoringRequestEvent(event);
 
 				addEventToBufferElement(element, QosMonitorConstants.RECEIVED_MONITORING_REQUEST_EVENT_POSITION, validReceivedRequestEvent);
-
+				break;
 			case STARTED_MONITORING_MEASUREMENT:
 				final StartedMonitoringMeasurementEventDTO validStartedEvent = EventDTOConverter.convertToStartedMonitoringMeasurementEvent(event);
 
 				addEventToBufferElement(element, QosMonitorConstants.STARTED_MONITORING_MEASUREMENT_EVENT_POSITION, validStartedEvent);
-
+				break;
 			case FINISHED_MONITORING_MEASUREMENT:
 				final FinishedMonitoringMeasurementEventDTO validFinishEvent = EventDTOConverter.convertToFinishedMonitoringMeasurementEvent(event);
 
 				addEventToBufferElement(element, QosMonitorConstants.FINISHED_MONITORING_MEASUREMENT_EVENT_POSITION, validFinishEvent);
-
+				break;
 			case INTERUPTED_MONITORING_MEASUREMENT:
 				final InterruptedMonitoringMeasurementEventDTO validInteruptEvent = EventDTOConverter.convertToInteruptedMonitoringMeasurementEvent(event);
 
 				addEventToBufferElement(element, QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_POSITION, validInteruptEvent);
-
+				break;
 			default:
 				throw new InvalidParameterException(eventType + NOT_SUPPORTED_EVENT_TYPE);
 			}
