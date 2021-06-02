@@ -1,14 +1,13 @@
 package eu.arrowhead.core.qos.service.ping.monitor;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import eu.arrowhead.common.dto.shared.monitoringevents.MeasurementMonitoringEvent;
 import eu.arrowhead.core.qos.QosMonitorConstants;
+import eu.arrowhead.core.qos.dto.event.monitoringevents.MeasurementMonitoringEvent;
 
 public class PingEventBufferElement implements Serializable {
 

@@ -1,30 +1,33 @@
-package eu.arrowhead.common.dto.shared.monitoringevents;
+package eu.arrowhead.core.qos.dto.event.monitoringevents;
 
 import java.io.Serializable;
+import java.util.List;
 
+import eu.arrowhead.common.dto.shared.IcmpPingResponseDTO;
 import eu.arrowhead.common.dto.shared.QosMonitorEventType;
 
-public class ReceivedMonitoringRequestEventDTO extends MeasurementMonitoringEvent implements Serializable{
+public class FinishedMonitoringMeasurementEventDTO extends MeasurementMonitoringEvent implements Serializable {
 
 	//=================================================================================================
 	// members
 
 	private static final long serialVersionUID = -2664998954640775578L;
 
-	private String payload;
+	private List<IcmpPingResponseDTO> payload;
 
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public ReceivedMonitoringRequestEventDTO() {
-		this.eventType = QosMonitorEventType.RECEIVED_MONITORING_REQUEST;
+	public FinishedMonitoringMeasurementEventDTO() {
+		this.eventType = QosMonitorEventType.FINISHED_MONITORING_MEASUREMENT;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public String getPayload() { return payload; }
+
+	public List<IcmpPingResponseDTO> getPayload() { return payload; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setPayload(final String payload) { this.payload = payload; }
+	public void setPayload(final List<IcmpPingResponseDTO> payload) { this.payload = payload; }
 
 }

@@ -1,4 +1,4 @@
-package eu.arrowhead.common.dto.shared.monitoringevents;
+package eu.arrowhead.core.qos.dto.event.monitoringevents;
 
 import java.time.ZonedDateTime;
 import java.util.Map;

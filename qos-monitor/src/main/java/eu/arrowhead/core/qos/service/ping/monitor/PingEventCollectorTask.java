@@ -12,15 +12,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import eu.arrowhead.common.dto.shared.EventDTO;
 import eu.arrowhead.common.dto.shared.QosMonitorEventType;
-import eu.arrowhead.common.dto.shared.monitoringevents.FinishedMonitoringMeasurementEventDTO;
-import eu.arrowhead.common.dto.shared.monitoringevents.InterruptedMonitoringMeasurementEventDTO;
-import eu.arrowhead.common.dto.shared.monitoringevents.MeasurementMonitoringEvent;
-import eu.arrowhead.common.dto.shared.monitoringevents.ReceivedMonitoringRequestEventDTO;
-import eu.arrowhead.common.dto.shared.monitoringevents.StartedMonitoringMeasurementEventDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.QosMonitorConstants;
 import eu.arrowhead.core.qos.dto.event.EventDTOConverter;
+import eu.arrowhead.core.qos.dto.event.monitoringevents.FinishedMonitoringMeasurementEventDTO;
+import eu.arrowhead.core.qos.dto.event.monitoringevents.InterruptedMonitoringMeasurementEventDTO;
+import eu.arrowhead.core.qos.dto.event.monitoringevents.MeasurementMonitoringEvent;
+import eu.arrowhead.core.qos.dto.event.monitoringevents.ReceivedMonitoringRequestEventDTO;
+import eu.arrowhead.core.qos.dto.event.monitoringevents.StartedMonitoringMeasurementEventDTO;
 
 public class PingEventCollectorTask implements Runnable {
 

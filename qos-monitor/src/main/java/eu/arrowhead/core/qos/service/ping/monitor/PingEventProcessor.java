@@ -13,15 +13,15 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import eu.arrowhead.common.dto.shared.monitoringevents.FinishedMonitoringMeasurementEventDTO;
-import eu.arrowhead.common.dto.shared.monitoringevents.InterruptedMonitoringMeasurementEventDTO;
-import eu.arrowhead.common.dto.shared.monitoringevents.MeasurementMonitoringEvent;
-import eu.arrowhead.common.dto.shared.monitoringevents.ReceivedMonitoringRequestEventDTO;
-import eu.arrowhead.common.dto.shared.monitoringevents.StartedMonitoringMeasurementEventDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.qos.QosMonitorConstants;
 import eu.arrowhead.core.qos.dto.IcmpPingDTOConverter;
 import eu.arrowhead.core.qos.dto.IcmpPingResponse;
+import eu.arrowhead.core.qos.dto.event.monitoringevents.FinishedMonitoringMeasurementEventDTO;
+import eu.arrowhead.core.qos.dto.event.monitoringevents.InterruptedMonitoringMeasurementEventDTO;
+import eu.arrowhead.core.qos.dto.event.monitoringevents.MeasurementMonitoringEvent;
+import eu.arrowhead.core.qos.dto.event.monitoringevents.ReceivedMonitoringRequestEventDTO;
+import eu.arrowhead.core.qos.dto.event.monitoringevents.StartedMonitoringMeasurementEventDTO;
 
 @Service
 public class PingEventProcessor {
