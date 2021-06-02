@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.util.Assert;
 
 import eu.arrowhead.core.qos.QosMonitorConstants;
 import eu.arrowhead.core.qos.dto.event.monitoringevents.MeasurementMonitoringEvent;
@@ -44,6 +45,8 @@ public class PingEventBufferElement implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public void addEvent( final int position, final MeasurementMonitoringEvent event) {
 		logger.debug("addEvent started...");
+
+		Assert.isTrue(position < QosMonitorConstants.EVENT_LIST_SIZE, "Invalid eventList position.");
 
 		eventList[position] = event;
 	}

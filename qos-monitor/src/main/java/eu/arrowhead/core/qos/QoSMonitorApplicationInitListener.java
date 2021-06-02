@@ -61,18 +61,24 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 	//-------------------------------------------------------------------------------------------------
 	@Bean(QosMonitorConstants.EVENT_QUEUE)
 	public LinkedBlockingQueue<EventDTO> getEventQueue() {
+		logger.debug("getEventQueue started...");
+
 		return new LinkedBlockingQueue<EventDTO>();
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Bean(QosMonitorConstants.EVENT_BUFFER)
 	public ConcurrentHashMap<UUID, PingEventBufferElement> getEventBuffer() {
+		logger.debug("getEventBuffer started...");
+
 		return new ConcurrentHashMap<UUID, PingEventBufferElement>();
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Bean(QosMonitorConstants.EVENT_COLLECTOR)
 	public PingEventCollectorTask getEventCollector() {
+		logger.debug("getEventCollector started...");
+
 		return new PingEventCollectorTask();
 	}
 

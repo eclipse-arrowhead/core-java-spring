@@ -84,7 +84,15 @@ public class PingService {
 		try {
 
 			final List<IcmpPingResponse> responseList = pingMonitorManager.ping(address);
-			return responseList;
+			if (responseList != null) {
+
+				return responseList;
+
+			}else {
+
+				throw new ArrowheadException("PingMonitorManager returned null response.");
+
+			}
 
 		} catch (final ArrowheadException ex) {
 			logger.info(ex);

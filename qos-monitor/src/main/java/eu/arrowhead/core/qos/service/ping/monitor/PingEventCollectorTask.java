@@ -52,12 +52,14 @@ public class PingEventCollectorTask implements Runnable {
 	//-------------------------------------------------------------------------------------------------	
 	@Override
 	public void run() {
+		logger.debug("PingEventCollectorTask run started...");
 
 		interrupted = Thread.currentThread().isInterrupted();
 		clearBuffer();
 
 		while (!interrupted) {
 			logger.debug("PingEventCollectorTask run loop started...");
+
 			try {
 				putEventToBuffer(eventQueue.take());
 
@@ -72,7 +74,7 @@ public class PingEventCollectorTask implements Runnable {
 				logger.debug("PingEventCollectorTask run intrrupted");
 				interrupted = false;
 
-			}catch (final Exception ex) {
+			}catch (final Throwable ex) {
 
 				logger.debug(ex.getMessage());
 			}
@@ -100,6 +102,7 @@ public class PingEventCollectorTask implements Runnable {
 		element.addEvent(position, event);
 
 	}
+
 	//-------------------------------------------------------------------------------------------------
 	private void putEventToBuffer(final EventDTO event) {
 		logger.debug("putEventToBuffer started...");
