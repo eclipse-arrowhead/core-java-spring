@@ -40,8 +40,8 @@ public class EventDTOConverter {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public static InterruptedMonitoringMeasurementEventDTO convertToInteruptedMonitoringMeasurementEvent(final EventDTO event) {
-		logger.debug("convertToInteruptedMonitoringMeasurementEvent started...");
+	public static InterruptedMonitoringMeasurementEventDTO convertToInterruptedMonitoringMeasurementEvent(final EventDTO event) {
+		logger.debug("convertToInterruptedMonitoringMeasurementEvent started...");
 
 		Assert.notNull(event, "Event is null");
 		Assert.isTrue(!Utilities.isEmpty(event.getPayload()), "Event payload is empty");
