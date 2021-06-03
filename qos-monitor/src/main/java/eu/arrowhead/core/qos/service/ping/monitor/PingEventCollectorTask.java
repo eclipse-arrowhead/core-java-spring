@@ -68,13 +68,13 @@ public class PingEventCollectorTask implements Runnable {
 
 				if (lastBufferCleanAt + clearingInterval < System.currentTimeMillis()) {
 
-					lastBufferCleanAt = System.currentTimeMillis();
 					clearBuffer();
+					lastBufferCleanAt = System.currentTimeMillis();
 				}
 
 			} catch (final InterruptedException ex) {
 
-				logger.debug("PingEventCollectorTask run intrrupted");
+				logger.debug("PingEventCollectorTask run interrupted");
 				interrupted = false;
 
 			}catch (final Throwable ex) {
