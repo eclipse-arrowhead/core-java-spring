@@ -749,7 +749,7 @@ public class QoSMonitorController {
 	private boolean checkExternalPingMonitoringNotificationEventType(final String eventType) {
 		logger.debug("checkExternalPingMonitoringNotificationEventType started...");
 
-		for (QosMonitorEventType type : QosMonitorEventType.values()) {
+		for (final QosMonitorEventType type : QosMonitorEventType.values()) {
 			if (eventType.equalsIgnoreCase(type.name())) {
 				return true;
 			}
