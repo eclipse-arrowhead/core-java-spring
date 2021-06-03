@@ -2,8 +2,6 @@ package eu.arrowhead.core.qos.service.ping.monitor.impl;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.annotation.Resource;
 
@@ -42,8 +40,6 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 	//-------------------------------------------------------------------------------------------------
 	private static final int ICMP_TTL = 255;
 	private static final int OVERHEAD_MULTIPLIER = 2;
-
-	private final ThreadPoolExecutor threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
 
 	private OrchestrationResultDTO cachedPingMonitorProvider = null;
 
@@ -123,7 +119,9 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 
 		}
 
-		threadPool.execute(eventCollector);
+		final Thread eventCollectorThread = new Thread(eventCollector);
+		eventCollectorThread.setName("Ping-Event-Collector-Thread");
+		eventCollectorThread.start();
 
 		driver.unsubscribeFromPingMonitorEvents();
 		driver.subscribeToExternalPingMonitorEvents(getPingMonitorSystemRequestDTO());
