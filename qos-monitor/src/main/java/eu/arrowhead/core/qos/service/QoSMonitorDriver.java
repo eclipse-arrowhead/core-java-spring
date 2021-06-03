@@ -242,8 +242,6 @@ public class QoSMonitorDriver {
 
 		while ( count < MAX_RETRIES) {
 
-			rest();
-
 			try {
 
 				httpService.sendRequest(echoUri, HttpMethod.GET, String.class);
@@ -251,8 +249,9 @@ public class QoSMonitorDriver {
 				return;
 
 			} catch (final Exception ex) {
-				logger.warn("QoS Monitor can't access External Qos Monitor provider at : " + echoUri );
+				logger.debug("QoS Monitor can't access External Qos Monitor provider at : " + echoUri );
 
+				rest();
 				count++;
 
 			}
