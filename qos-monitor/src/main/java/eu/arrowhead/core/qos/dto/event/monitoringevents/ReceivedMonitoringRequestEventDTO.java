@@ -1,10 +1,8 @@
 package eu.arrowhead.core.qos.dto.event.monitoringevents;
 
-import java.io.Serializable;
-
 import eu.arrowhead.common.dto.shared.QosMonitorEventType;
 
-public class ReceivedMonitoringRequestEventDTO extends MeasurementMonitoringEvent implements Serializable{
+public class ReceivedMonitoringRequestEventDTO extends MeasurementMonitoringEvent {
 
 	//=================================================================================================
 	// members

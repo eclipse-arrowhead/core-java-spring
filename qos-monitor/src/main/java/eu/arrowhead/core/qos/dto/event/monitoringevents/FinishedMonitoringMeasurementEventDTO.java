@@ -1,12 +1,11 @@
 package eu.arrowhead.core.qos.dto.event.monitoringevents;
 
-import java.io.Serializable;
 import java.util.List;
 
 import eu.arrowhead.common.dto.shared.IcmpPingResponseDTO;
 import eu.arrowhead.common.dto.shared.QosMonitorEventType;
 
-public class FinishedMonitoringMeasurementEventDTO extends MeasurementMonitoringEvent implements Serializable {
+public class FinishedMonitoringMeasurementEventDTO extends MeasurementMonitoringEvent {
 
 	//=================================================================================================
 	// members
