@@ -120,7 +120,7 @@ public class PingEventProcessor {
 	private void rest() {
 		try {
 			Thread.sleep(SLEEP_PERIOD);
-		} catch (final InterruptedException e) {
+		} catch (final InterruptedException ex) {
 			logger.warn(e.getMessage());
 		}
 	}
