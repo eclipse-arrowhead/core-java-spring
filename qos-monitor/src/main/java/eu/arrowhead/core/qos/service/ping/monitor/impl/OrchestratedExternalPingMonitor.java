@@ -199,8 +199,6 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 			return createHttpUri(provider, path);
 		case CERTIFICATE:
 			return createHttpsUri(provider, path);
-		case TOKEN:
-			throw new InvalidParameterException("TOKEN security is not supported yet, for PingMonitor Providers. ");
 		default:
 			throw new InvalidParameterException("Not supported ServiceSecurityType: " + securityType);
 		}
