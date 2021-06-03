@@ -9,8 +9,8 @@ public class IcmpPingResponseDTO implements Serializable{
 
 	private static final long serialVersionUID = 7382047276356365361L;
 
-	private Boolean successFlag;
-	private Boolean timeoutFlag;
+	private boolean successFlag;
+	private boolean timeoutFlag;
 	private String errorMessage;
 	private String throwable;
 	private String host;
@@ -26,8 +26,8 @@ public class IcmpPingResponseDTO implements Serializable{
 	public IcmpPingResponseDTO() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public Boolean isSuccessFlag() { return successFlag; }
-	public Boolean isTimeoutFlag() { return timeoutFlag; }
+	public boolean isSuccessFlag() { return successFlag; }
+	public boolean isTimeoutFlag() { return timeoutFlag; }
 	public String getErrorMessage() { return errorMessage; }
 	public String getThrowable() { return throwable; }
 	public String getHost() { return host; }
@@ -37,8 +37,8 @@ public class IcmpPingResponseDTO implements Serializable{
 	public Long getDuration() { return duration; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setSuccessFlag(final Boolean successFlag) { this.successFlag = successFlag; }
-	public void setTimeoutFlag(final Boolean timeoutFlag) { this.timeoutFlag = timeoutFlag; }
+	public void setSuccessFlag(final boolean successFlag) { this.successFlag = successFlag; }
+	public void setTimeoutFlag(final boolean timeoutFlag) { this.timeoutFlag = timeoutFlag; }
 	public void setErrorMessage(final String errorMessage) { this.errorMessage = errorMessage; }
 	public void setThrowable(final String throwable) { this.throwable = throwable; }
 	public void setHost(final String host) { this.host = host; }
