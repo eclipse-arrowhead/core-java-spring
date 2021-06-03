@@ -167,6 +167,7 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 		} catch (final Exception ex) {
 			logger.debug("External pingMonitorProvider replied invalid ack : " + ex);
 
+			cachedPingMonitorProvider = null;
 			throw new ArrowheadException("External pingMonitorProvider replied invalid ack", ex);
 		}
 	}
