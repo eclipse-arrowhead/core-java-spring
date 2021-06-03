@@ -137,7 +137,7 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 
 			try {
 				final IcmpPingRequestACK acknowledgedMeasurementRequest = driver.requestExternalPingMonitorService(getPingMonitorProvidersServiceUri(), createIcmpPingRequest(address));
-				validateAcknowledgedMeasurmentRequest(acknowledgedMeasurementRequest);
+				validateAcknowledgedMeasurementRequest(acknowledgedMeasurementRequest);
 
 				final UUID startedExternalMeasurementProcessId = acknowledgedMeasurementRequest.getExternalMeasurementUuid();
 				logger.info("IcmpPingRequestACK received, with process id: " + startedExternalMeasurementProcessId);
@@ -153,13 +153,13 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void validateAcknowledgedMeasurmentRequest(final IcmpPingRequestACK acknowledgedMeasurmentRequest) {
-		logger.debug("validateAcknowledgedMeasurmentRequest started...");
+	private void validateAcknowledgedMeasurementRequest(final IcmpPingRequestACK acknowledgedMeasurementRequest) {
+		logger.debug("validateAcknowledgedMeasurementRequest started...");
 
 		try {
-			Assert.notNull(acknowledgedMeasurmentRequest, "IcmpPingRequestACK is null");
-			Assert.notNull(acknowledgedMeasurmentRequest.getAckOk(), "IcmpPingRequestACK.ackOk is null");
-			Assert.isTrue(acknowledgedMeasurmentRequest.getAckOk().equalsIgnoreCase("OK"), "IcmpPingRequestACK is null");
+			Assert.notNull(acknowledgedMeasurementRequest, "IcmpPingRequestACK is null");
+			Assert.notNull(acknowledgedMeasurementRequest.getAckOk(), "IcmpPingRequestACK.ackOk is null");
+			Assert.isTrue(acknowledgedMeasurementRequest.getAckOk().equalsIgnoreCase("OK"), "IcmpPingRequestACK is null");
 		
 			
 		} catch (final Exception ex) {
