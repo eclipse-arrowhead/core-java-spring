@@ -216,7 +216,7 @@
   },
   {
     "name": "monitor_provider_type",
-    "type": "java.lang.String",
+    "type": "java.lang.Enum",
     "description": "A description for 'monitor_provider_type'"
   },
   {
