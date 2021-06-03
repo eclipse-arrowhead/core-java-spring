@@ -63,9 +63,6 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_SECURE_WD)
 	private boolean pingMonitorSecure;
 
-	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_AUTHINFO_WD)
-	private String externalPingMonitorAuthInfo;
-
 	private SystemRequestDTO pingMonitorSystem;
 
 	private final Logger logger = LogManager.getLogger(DefaultExternalPingMonitor.class);
@@ -194,9 +191,6 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 		system.setAddress(externalPingMonitorAddress);
 		system.setPort(externalPingMonitorPort);
 		system.setMetadata(null);
-		if (pingMonitorSecure) {
-			system.setAuthenticationInfo(externalPingMonitorAuthInfo);
-		}
 
 		return system;
 	}
