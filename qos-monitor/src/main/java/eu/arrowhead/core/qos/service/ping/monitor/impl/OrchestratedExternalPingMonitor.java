@@ -136,10 +136,10 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 		logger.debug("requestExternalMeasurement started...");
 
 			try {
-				final IcmpPingRequestACK acknowledgedMeasurmentRequest = driver.requestExternalPingMonitorService(getPingMonitorProvidersServiceUri(), createIcmpPingRequest(address));
-				validateAcknowledgedMeasurmentRequest(acknowledgedMeasurmentRequest);
+				final IcmpPingRequestACK acknowledgedMeasurementRequest = driver.requestExternalPingMonitorService(getPingMonitorProvidersServiceUri(), createIcmpPingRequest(address));
+				validateAcknowledgedMeasurmentRequest(acknowledgedMeasurementRequest);
 
-				final UUID startedExternalMeasurementProcessId = acknowledgedMeasurmentRequest.getExternalMeasurementUuid();
+				final UUID startedExternalMeasurementProcessId = acknowledgedMeasurementRequest.getExternalMeasurementUuid();
 				logger.info("IcmpPingRequestACK received, with process id: " + startedExternalMeasurementProcessId);
 
 				return startedExternalMeasurementProcessId;
