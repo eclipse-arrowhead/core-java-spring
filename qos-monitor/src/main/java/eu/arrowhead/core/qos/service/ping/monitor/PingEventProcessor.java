@@ -46,7 +46,7 @@ public class PingEventProcessor {
 		logger.debug("processEvents started...");
 
 		Assert.notNull(id, "Event id could not be null.");
-		Assert.isTrue(meausermentExpiryTime > 0, "ExpieryTime should be greater then zero.");
+		Assert.isTrue(meausermentExpiryTime > 0, "ExpieryTime should be greater than zero.");
 		Assert.isTrue(meausermentExpiryTime > System.currentTimeMillis(), "ExpieryTime should be in the future.");
 
 		ReceivedMonitoringRequestEventDTO temporalReceivedRequestEvent = null;
