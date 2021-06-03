@@ -32,7 +32,7 @@ public class ExternalMonitorOrchestrationRequestFactory {
 	// members
 
 	@Autowired
-	protected SSLProperties sslProperties;
+	private SSLProperties sslProperties;
 
 	@Value(CoreCommonConstants.$CORE_SYSTEM_NAME)
 	private String coreSystemName;
