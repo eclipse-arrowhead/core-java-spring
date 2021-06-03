@@ -70,14 +70,14 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 
 		if (cachedPingMonitorProvider != null){
 
-			logger.info("starting external ping Monitoring service measurement: " + cachedPingMonitorProvider.getProvider().toString());
+			logger.debug("starting external ping Monitoring service measurement: " + cachedPingMonitorProvider.getProvider().toString());
 
 		}else {
 			try {
 				initPingMonitorProvider();
 			} catch (final Exception ex) {
 
-				logger.warn("Unsuccesfull ping measurement: because of >> Unsuccesfull external ping Monitor provider orchestration!");
+				logger.debug("Unsuccessfull ping measurement: because of >> Unsuccessfull external ping Monitor provider orchestration!");
 
 				return null;
 			}
@@ -103,7 +103,7 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 
 	//-------------------------------------------------------------------------------------------------
 	public void init() {
-		logger.debug("initPingMonitorProvider started...");
+		logger.debug("init started...");
 
 		try {
 
@@ -113,7 +113,7 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 			cachedPingMonitorProvider = selectProvider(result);
 
 		} catch (final Exception ex) {
-			logger.warn("Exception in external ping monitor orchestration: " + ex);
+			logger.debug("Exception in external ping monitor orchestration: " + ex);
 
 			cachedPingMonitorProvider = null;
 
@@ -140,12 +140,12 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 				validateAcknowledgedMeasurementRequest(acknowledgedMeasurementRequest);
 
 				final UUID startedExternalMeasurementProcessId = acknowledgedMeasurementRequest.getExternalMeasurementUuid();
-				logger.info("IcmpPingRequestACK received, with process id: " + startedExternalMeasurementProcessId);
+				logger.debug("IcmpPingRequestACK received, with process id: " + startedExternalMeasurementProcessId);
 
 				return startedExternalMeasurementProcessId;
 
 			} catch (final Exception ex) {
-				logger.info(ex);
+				logger.debug(ex);
 
 				throw new ArrowheadException("External Ping Monitor is not available at: " + address );
 			}
@@ -260,6 +260,10 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 	private OrchestrationResultDTO selectProvider(final OrchestrationResponseDTO result) {
 		logger.debug("selectProvider started...");
 
+		if (result == null || result.getResponse() == null || result.getResponse().isEmpty()) {
+
+			throw new ArrowheadException("PingMonitor orchestration result is empty or null.");
+		}
 		//TODO implement more sophisticated provider selection strategy
 		return result.getResponse().get(0);
 	}
