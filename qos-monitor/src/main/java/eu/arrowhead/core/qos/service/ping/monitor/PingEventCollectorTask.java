@@ -30,7 +30,7 @@ public class PingEventCollectorTask implements Runnable {
 	private static final String NOT_SUPPORTED_EVENT_TYPE = " is not a supported event type. ";
 	private static final String REPLACING_MEASURMENT_EVENT = " - measurment , duplicate event. Overwriting : ";
 
-	private final long clearingInterval = 
+	private static final long clearingInterval = 
 			1000/*Mills to Sec*/
 			* 60/*Sec to Min*/
 			* 10/*Average measurement max time*/;
