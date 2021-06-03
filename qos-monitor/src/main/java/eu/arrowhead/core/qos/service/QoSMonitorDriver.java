@@ -74,7 +74,7 @@ public class QoSMonitorDriver {
 	private static final String EVENT_SUBSCRIBE_URI_KEY = CoreSystemService.EVENT_SUBSCRIBE_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String EVENT_UNSUBSCRIBE_URI_KEY = CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 
-	public static final String KEY_CALCULATED_SERVICE_TIME_FRAME = "QoSCalculatedServiceTimeFrame";
+	private static final String KEY_CALCULATED_SERVICE_TIME_FRAME = "QoSCalculatedServiceTimeFrame";
 
 	private static final Logger logger = LogManager.getLogger(QoSMonitorDriver.class);
 
@@ -92,6 +92,28 @@ public class QoSMonitorDriver {
 
 	@Value(CoreCommonConstants.$SERVER_PORT)
 	private int coreSystemPort;
+
+	private final Map<QosMonitorEventType, Map<String, Object>> unsubscribeParams = Map.of(
+			QosMonitorEventType.RECEIVED_MONITORING_REQUEST, Map.of(
+					CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_EVENT_TYPE, QosMonitorEventType.RECEIVED_MONITORING_REQUEST.name(),
+					CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_SYSTEM_NAME, coreSystemName,
+					CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_ADDRESS, coreSystemAddress,
+					CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_PORT, coreSystemPort),
+			QosMonitorEventType.STARTED_MONITORING_MEASUREMENT, Map.of(
+					CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_EVENT_TYPE, QosMonitorEventType.STARTED_MONITORING_MEASUREMENT.name(),
+					CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_SYSTEM_NAME, coreSystemName,
+					CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_ADDRESS, coreSystemAddress,
+					CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_PORT, coreSystemPort),
+			QosMonitorEventType.FINISHED_MONITORING_MEASUREMENT, Map.of(
+					CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_EVENT_TYPE, QosMonitorEventType.FINISHED_MONITORING_MEASUREMENT.name(),
+					CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_SYSTEM_NAME, coreSystemName,
+					CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_ADDRESS, coreSystemAddress,
+					CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_PORT, coreSystemPort),
+			QosMonitorEventType.INTERRUPTED_MONITORING_MEASUREMENT, Map.of(
+					CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_EVENT_TYPE, QosMonitorEventType.INTERRUPTED_MONITORING_MEASUREMENT.name(),
+					CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_SYSTEM_NAME, coreSystemName,
+					CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_ADDRESS, coreSystemAddress,
+					CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_PORT, coreSystemPort));
 
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
@@ -306,8 +328,6 @@ public class QoSMonitorDriver {
 	public void unsubscribeFromPingMonitorEvents() {
 		logger.debug("unSubscribeFromPingMonitorEvents started...");
 
-
-
 		int count = 0;
 		boolean unsubscribedFromAll = false; 
 
@@ -315,11 +335,7 @@ public class QoSMonitorDriver {
 			try {
 				for (final QosMonitorEventType externalPingMonitorEventType : QosMonitorEventType.values()) {
 
-					final UriComponents unsubscriptionUri = getEventHandlerUnsubscribeUri().expand(Map.of(
-							CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_EVENT_TYPE, externalPingMonitorEventType.name(),
-							CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_SYSTEM_NAME, coreSystemName,
-							CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_ADDRESS, coreSystemAddress,
-							CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_PORT, coreSystemPort));
+					final UriComponents unsubscriptionUri = getEventHandlerUnsubscribeUri().expand(unsubscribeParams.get(externalPingMonitorEventType));
 
 					httpService.sendRequest(unsubscriptionUri, HttpMethod.POST, SubscriptionResponseDTO.class);
 
