@@ -93,11 +93,12 @@ public class EventDTOConverter {
 		Assert.isTrue(!Utilities.isEmpty(payload), "Payload is empty");
 
 		try {
-			final List<IcmpPingResponseDTO> validResponse = mapper.readValue(payload, new TypeReference<List<IcmpPingResponseDTO>>(){});
 
-			return validResponse;
+			return mapper.readValue(payload, new TypeReference<List<IcmpPingResponseDTO>>(){});
 
-		} catch (final IOException e) {
+		} catch (final IOException ex) {
+
+			logger.debug(ex);
 
 			throw new InvalidParameterException("Invalid IcmpPingResponse");
 		}
