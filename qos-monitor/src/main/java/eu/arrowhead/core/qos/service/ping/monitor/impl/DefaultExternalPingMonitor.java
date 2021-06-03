@@ -135,10 +135,10 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 		try {
 			Assert.notNull(acknowledgedMeasurementRequest, "IcmpPingRequestACK is null");
 			Assert.notNull(acknowledgedMeasurementRequest.getAckOk(), "IcmpPingRequestACK.ackOk is null");
-			Assert.isTrue(acknowledgedMeasurementRequest.getAckOk().equalsIgnoreCase("OK"), "IcmpPingRequestACK is null");
+			Assert.isTrue(acknowledgedMeasurementRequest.getAckOk().equalsIgnoreCase("OK"), "IcmpPingRequestACK is not valid");
 
 		} catch (final Exception ex) {
-			logger.warn("External pingMonitorProvider replied invalid ack : " + ex);
+			logger.debug("External pingMonitorProvider replied invalid ack : " + ex);
 
 			throw new ArrowheadException("External pingMonitorProvider replied invalid ack", ex);
 		}
