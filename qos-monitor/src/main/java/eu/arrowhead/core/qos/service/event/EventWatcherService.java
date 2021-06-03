@@ -24,7 +24,7 @@ public class EventWatcherService {
 	@Resource( name = QosMonitorConstants.EVENT_QUEUE)
 	private LinkedBlockingQueue<EventDTO> eventQueue;
 
-	protected Logger logger = LogManager.getLogger(EventWatcherService.class);
+	private Logger logger = LogManager.getLogger(EventWatcherService.class);
 
 	//=================================================================================================
 	// methods
@@ -42,7 +42,7 @@ public class EventWatcherService {
 			eventQueue.add(event);
 
 		} catch (final Exception ex) {
-			logger.info(ex);
+			logger.debug(ex);
 
 			throw new ArrowheadException(ex.getMessage());
 		}
