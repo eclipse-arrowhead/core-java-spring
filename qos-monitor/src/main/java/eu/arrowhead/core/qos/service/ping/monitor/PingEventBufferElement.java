@@ -22,7 +22,7 @@ public class PingEventBufferElement implements Serializable {
 	private final UUID id;
 	private final long createdAt;
 
-	private final MeasurementMonitoringEvent eventArray[];
+	private final MeasurementMonitoringEvent[] eventArray;
 
 	private Logger logger = LogManager.getLogger(PingEventBufferElement.class);
 
