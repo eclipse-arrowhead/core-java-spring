@@ -59,14 +59,14 @@ public class PingEventProcessor {
 				rest();
 				continue;
 
-			}else if (Arrays.asList(element.getEventlist()).isEmpty()){
+			}else if (Arrays.asList(element.getEventArray()).isEmpty()){
 
 				rest();
 				continue;
 
 			}
 
-			final List<MeasurementMonitoringEvent> eventList = Arrays.asList(element.getEventlist());
+			final List<MeasurementMonitoringEvent> eventList = Arrays.asList(element.getEventArray());
 
 			if (eventList.get(QosMonitorConstants.RECEIVED_MONITORING_REQUEST_EVENT_POSITION) != null) {
 

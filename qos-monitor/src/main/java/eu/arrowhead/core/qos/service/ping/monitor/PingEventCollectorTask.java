@@ -95,8 +95,8 @@ public class PingEventCollectorTask implements Runnable {
 	private void addEventToBufferElement (final PingEventBufferElement element, final int position, final MeasurementMonitoringEvent event) {
 		logger.debug("addEventToBufferElement started...");
 
-		if(element.getEventlist()[position] != null) {
-			logger.warn(element.getId() + REPLACEING_MEASURMENT_EVENT + element.getEventlist()[position].toString());
+		if(element.getEventArray()[position] != null) {
+			logger.warn(element.getId() + REPLACEING_MEASURMENT_EVENT + element.getEventArray()[position].toString());
 		}
 
 		element.addEvent(position, event);

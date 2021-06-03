@@ -8,7 +8,7 @@ public class QosMonitorConstants {
 	public static final String EVENT_BUFFER = "EventBuffer";
 	public static final String EVENT_COLLECTOR = "EventCollector";
 
-	public static final int EVENT_LIST_SIZE = 4;
+	public static final int EVENT_ARRAY_SIZE = 4;
 
 	public static final String PROCESS_ID_KEY = "processID";
 
