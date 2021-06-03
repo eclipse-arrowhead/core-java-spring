@@ -509,8 +509,8 @@ public class QoSMonitorDriver {
 		final SubscriptionRequestDTO requestTemplate = new SubscriptionRequestDTO();
 		requestTemplate.setMatchMetaData(false);
 		requestTemplate.setNotifyUri(CommonConstants.QOSMONITOR_URI + QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI);
-		requestTemplate.setSubscriberSystem(getQosMonitorSystemRequestDTO());//requester);
-	
+		requestTemplate.setSubscriberSystem(getQosMonitorSystemRequestDTO());
+
 		if(provider != null) {
 			requestTemplate.setSources(Set.of(provider));
 		}
