@@ -18,7 +18,7 @@ public class InterruptedMonitoringMeasurementEventDTO extends MeasurementMonitor
 
 	//-------------------------------------------------------------------------------------------------
 	public InterruptedMonitoringMeasurementEventDTO() {
-		this.eventType = QosMonitorEventType.INTERUPTED_MONITORING_MEASUREMENT;
+		this.eventType = QosMonitorEventType.INTERRUPTED_MONITORING_MEASUREMENT;
 	}
 
 	//-------------------------------------------------------------------------------------------------

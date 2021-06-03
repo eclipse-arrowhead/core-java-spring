@@ -133,7 +133,7 @@ public class PingEventCollectorTask implements Runnable {
 
 				addEventToBufferElement(element, QosMonitorConstants.FINISHED_MONITORING_MEASUREMENT_EVENT_POSITION, validFinishEvent);
 				break;
-			case INTERUPTED_MONITORING_MEASUREMENT:
+			case INTERRUPTED_MONITORING_MEASUREMENT:
 				final InterruptedMonitoringMeasurementEventDTO validInteruptEvent = EventDTOConverter.convertToInteruptedMonitoringMeasurementEvent(event);
 
 				addEventToBufferElement(element, QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_POSITION, validInteruptEvent);

@@ -163,7 +163,7 @@ public class EventDTOConverter {
 	//-------------------------------------------------------------------------------------------------
 	private static void validateInterruptedMonitoringMeasurementEventDTOFields(final InterruptedMonitoringMeasurementEventDTO event) {
 
-		Assert.isTrue(event.getEventType().equals(QosMonitorEventType.INTERUPTED_MONITORING_MEASUREMENT), "Event type must be: INTERUPTED_MONITORING_MEASUREMENT");
+		Assert.isTrue(event.getEventType().equals(QosMonitorEventType.INTERRUPTED_MONITORING_MEASUREMENT), "Event type must be: INTERRUPTED_MONITORING_MEASUREMENT");
 		//Assert.isTrue(event.getPayload().equalsIgnoreCase(QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_SCHEMA), "Payload must be: " + QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_SCHEMA);
 		Assert.isTrue(event.getMetadata().containsKey(QosMonitorConstants.PROCESS_ID_KEY), "Meta data must contain: " + QosMonitorConstants.PROCESS_ID_KEY);
 		Assert.isTrue( (event.getMetadata().keySet().size() <= QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_MAX_SIZE ), "Meta data has more keys than allowed");
