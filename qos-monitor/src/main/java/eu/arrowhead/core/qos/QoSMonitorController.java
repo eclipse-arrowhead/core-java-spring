@@ -726,7 +726,7 @@ public class QoSMonitorController {
 		}
 
 		if (!checkExternalPingMonitoringNotificationEventType(request.getEventType())) {
-			throw new BadPayloadException("EventType is null or empty", HttpStatus.SC_BAD_REQUEST, origin);
+			throw new BadPayloadException("EventType is not a valid PingMonitoringEvent-Type", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 
 		if (Utilities.isEmpty(request.getPayload())) {
