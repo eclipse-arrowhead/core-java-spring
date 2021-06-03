@@ -29,6 +29,10 @@ cd ..\..\datamanager\target
 START "" /B "cmd /c javaw -jar arrowhead-datamanager-%version%.jar > sout_datamanager.log 2>&1"
 echo DataManager started
 
+cd ..\..\timemanager\target
+START "" /B "cmd /c javaw -jar arrowhead-timemanager-4.1.3.jar > sout_timemanager.log 2>&1"
+echo TimeManager started
+
 cd ..\..\gatekeeper\target
 START "" /B "cmd /c javaw -jar arrowhead-gatekeeper-%version%.jar > sout_gk.log 2>&1"
 echo Gatekeeper started

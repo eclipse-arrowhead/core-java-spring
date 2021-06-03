@@ -37,6 +37,7 @@ public class Defaults {
 	public static final int DEFAULT_GATEWAY_PORT = 8453;
 	public static final int DEFAULT_EVENT_HANDLER_PORT = 8455;
 	public static final int DEFAULT_DATAMANAGER_PORT = 8461;
+	public static final int DEFAULT_TIMEMANAGER_PORT = 8463;
 	public static final int DEFAULT_CHOREOGRAPHER_PORT = 8457;
 	public static final int DEFAULT_CERTIFICATE_AUTHORITY_PORT = 8448;
 	public static final int DEFAULT_TRANSLATOR_PORT = 8462;

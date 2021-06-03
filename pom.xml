@@ -30,6 +30,7 @@
 	    <module>orchestrator</module>
 	    <module>eventhandler</module>
 	    <module>datamanager</module>
+		<module>timemanager</module>
 	    <module>relay-library</module>
 	    <module>gatekeeper</module>
 	    <module>gateway</module>
