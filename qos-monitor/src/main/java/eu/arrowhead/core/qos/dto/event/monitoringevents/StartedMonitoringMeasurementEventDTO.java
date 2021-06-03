@@ -11,8 +11,6 @@ public class StartedMonitoringMeasurementEventDTO extends MeasurementMonitoringE
 
 	private static final long serialVersionUID = -5448189680057980316L;
 
-	private String payload;
-
 	//=================================================================================================
 	// methods
 
@@ -20,11 +18,5 @@ public class StartedMonitoringMeasurementEventDTO extends MeasurementMonitoringE
 	public StartedMonitoringMeasurementEventDTO() {
 		this.eventType = QosMonitorEventType.STARTED_MONITORING_MEASUREMENT;
 	}
-
-	//-------------------------------------------------------------------------------------------------
-	public String getPayload() { return payload; }
-
-	//-------------------------------------------------------------------------------------------------
-	public void setPayload(final String payload) { this.payload = payload; }
 
 }

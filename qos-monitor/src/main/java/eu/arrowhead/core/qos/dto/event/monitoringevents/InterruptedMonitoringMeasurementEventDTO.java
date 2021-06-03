@@ -11,8 +11,6 @@ public class InterruptedMonitoringMeasurementEventDTO extends MeasurementMonitor
 
 	private static final long serialVersionUID = 1971997139168881765L;
 
-	private String payload;
-
 	//=================================================================================================
 	// methods
 
@@ -20,11 +18,5 @@ public class InterruptedMonitoringMeasurementEventDTO extends MeasurementMonitor
 	public InterruptedMonitoringMeasurementEventDTO() {
 		this.eventType = QosMonitorEventType.INTERRUPTED_MONITORING_MEASUREMENT;
 	}
-
-	//-------------------------------------------------------------------------------------------------
-	public String getPayload() { return payload; }
-
-	//-------------------------------------------------------------------------------------------------
-	public void setPayload(final String payload) { this.payload = payload; }
 
 }

@@ -49,7 +49,6 @@ public class EventDTOConverter {
 
 		final InterruptedMonitoringMeasurementEventDTO validEvent = new InterruptedMonitoringMeasurementEventDTO();
 		validEvent.setMetadata(event.getMetaData());
-		validEvent.setPayload(event.getPayload());
 		try {
 			validEvent.setTimeStamp(Utilities.parseUTCStringToLocalZonedDateTime(event.getTimeStamp()));
 		} catch (final DateTimeParseException ex) {
@@ -114,7 +113,6 @@ public class EventDTOConverter {
 
 		final StartedMonitoringMeasurementEventDTO validEvent = new StartedMonitoringMeasurementEventDTO();
 		validEvent.setMetadata(event.getMetaData());
-		validEvent.setPayload(event.getPayload());
 		try {
 			validEvent.setTimeStamp(Utilities.parseUTCStringToLocalZonedDateTime(event.getTimeStamp()));
 		} catch (final DateTimeParseException ex) {
@@ -137,7 +135,6 @@ public class EventDTOConverter {
 
 		final ReceivedMonitoringRequestEventDTO validEvent = new ReceivedMonitoringRequestEventDTO();
 		validEvent.setMetadata(event.getMetaData());
-		validEvent.setPayload(event.getPayload());
 		try {
 			validEvent.setTimeStamp(Utilities.parseUTCStringToLocalZonedDateTime(event.getTimeStamp()));
 		} catch (final DateTimeParseException ex) {
