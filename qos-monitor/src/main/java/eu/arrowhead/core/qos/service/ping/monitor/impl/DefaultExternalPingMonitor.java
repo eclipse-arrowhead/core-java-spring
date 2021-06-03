@@ -185,13 +185,15 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	private SystemRequestDTO getPingMonitorSystemRequestDTO() {
 		logger.debug("getPingMonitorSystemRequestDTO started...");
 
-		final SystemRequestDTO system = new SystemRequestDTO();
-		system.setSystemName(externalPingMonitorName);
-		system.setAddress(externalPingMonitorAddress);
-		system.setPort(externalPingMonitorPort);
-		system.setMetadata(null);
+		if (pingMonitorSystem == null) {
+			pingMonitorSystem = new SystemRequestDTO();
+			pingMonitorSystem.setSystemName(externalPingMonitorName);
+			pingMonitorSystem.setAddress(externalPingMonitorAddress);
+			pingMonitorSystem.setPort(externalPingMonitorPort);
+			pingMonitorSystem.setMetadata(null);
+		}
 
-		return system;
+		return pingMonitorSystem;
 	}
 
 }
