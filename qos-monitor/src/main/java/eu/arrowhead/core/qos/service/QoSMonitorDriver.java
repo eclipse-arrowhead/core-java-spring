@@ -115,6 +115,8 @@ public class QoSMonitorDriver {
 					CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_ADDRESS, coreSystemAddress,
 					CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_PORT, coreSystemPort));
 
+	private SystemRequestDTO requesterSystem;
+
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
 
@@ -524,16 +526,18 @@ public class QoSMonitorDriver {
 
 		final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
 
-		final SystemRequestDTO system = new SystemRequestDTO();
-		system.setSystemName(coreSystemName);
-		system.setAddress(coreSystemAddress);
-		system.setPort(coreSystemPort);
-		system.setMetadata(null);
-		if (sslEnabled) {
-			system.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+		if(requesterSystem == null) {
+			requesterSystem = new SystemRequestDTO();
+			requesterSystem.setSystemName(coreSystemName);
+			requesterSystem.setAddress(coreSystemAddress);
+			requesterSystem.setPort(coreSystemPort);
+			requesterSystem.setMetadata(null);
+			if (sslEnabled) {
+				requesterSystem.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+			}
 		}
 
-		return system;
+		return requesterSystem;
 	}
 
 	//-------------------------------------------------------------------------------------------------
