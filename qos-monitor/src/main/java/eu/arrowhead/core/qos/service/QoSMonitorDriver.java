@@ -249,7 +249,8 @@ public class QoSMonitorDriver {
 				return;
 
 			} catch (final Exception ex) {
-				logger.debug("QoS Monitor can't access External Qos Monitor provider at : " + echoUri );
+				logger.debug("QoS Monitor can't access External Qos Monitor provider at : " + echoUri + ", " + ex.getMessage());
+				logger.debug(ex);
 
 				rest();
 				count++;
