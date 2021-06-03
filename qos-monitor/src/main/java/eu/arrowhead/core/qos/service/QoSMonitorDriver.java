@@ -544,8 +544,8 @@ public class QoSMonitorDriver {
 	private void rest() {
 		try {
 			Thread.sleep(SLEEP_PERIOD);
-		} catch (final InterruptedException e) {
-			logger.warn(e.getMessage());
+		} catch (final InterruptedException ex) {
+			logger.warn(ex.getMessage());
 		}
 	}
 }
