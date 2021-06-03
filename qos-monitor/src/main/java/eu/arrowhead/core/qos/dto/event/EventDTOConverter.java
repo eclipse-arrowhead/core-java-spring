@@ -54,7 +54,7 @@ public class EventDTOConverter {
 			validEvent.setTimeStamp(Utilities.parseUTCStringToLocalZonedDateTime(event.getTimeStamp()));
 		} catch (final DateTimeParseException ex) {
 
-			throw new InvalidParameterException("Event timestap has invalid format.", ex);
+			throw new InvalidParameterException("Event timestamp has invalid format.", ex);
 		}
 
 		validateInterruptedMonitoringMeasurementEventDTOFields(validEvent);
@@ -77,7 +77,7 @@ public class EventDTOConverter {
 			validEvent.setTimeStamp(Utilities.parseUTCStringToLocalZonedDateTime(event.getTimeStamp()));
 		} catch (final DateTimeParseException ex) {
 
-			throw new InvalidParameterException("Event timestap has invalid format.", ex);
+			throw new InvalidParameterException("Event timestamp has invalid format.", ex);
 		}
 
 		validateFinishedMonitoringMeasurementEventDTOFields(validEvent);
@@ -118,7 +118,7 @@ public class EventDTOConverter {
 			validEvent.setTimeStamp(Utilities.parseUTCStringToLocalZonedDateTime(event.getTimeStamp()));
 		} catch (final DateTimeParseException ex) {
 
-			throw new InvalidParameterException("Event timestap has invalid format.", ex);
+			throw new InvalidParameterException("Event timestamp has invalid format.", ex);
 		}
 
 		validateStartedMonitoringMeasurementEventDTOFields(validEvent);
@@ -141,7 +141,7 @@ public class EventDTOConverter {
 			validEvent.setTimeStamp(Utilities.parseUTCStringToLocalZonedDateTime(event.getTimeStamp()));
 		} catch (final DateTimeParseException ex) {
 
-			throw new InvalidParameterException("Event timestap has invalid format.", ex);
+			throw new InvalidParameterException("Event timestamp has invalid format.", ex);
 		}
 
 		validateReceivedMonitoringRequestEventDTOFields(validEvent);
