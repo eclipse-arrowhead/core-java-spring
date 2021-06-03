@@ -91,11 +91,11 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 		final UUID measurementProcessId = requestExternalMeasurement(address);
 
 		final long startTime = System.currentTimeMillis();
-		final long meausermentExpiryTime = startTime + timeOut;
+		final long measurementExpiryTime = startTime + timeOut;
 
 		try {
 
-			return processor.processEvents(measurementProcessId, meausermentExpiryTime);
+			return processor.processEvents(measurementProcessId, measurementExpiryTime);
 
 		} catch (final Exception ex) {
 
