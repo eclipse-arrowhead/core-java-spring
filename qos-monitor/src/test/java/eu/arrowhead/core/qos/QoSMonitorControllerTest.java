@@ -36,6 +36,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.annotation.Resource;
 
@@ -83,14 +84,17 @@ import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
+import eu.arrowhead.common.dto.shared.EventDTO;
 import eu.arrowhead.common.dto.shared.QoSMeasurementStatus;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
+import eu.arrowhead.common.dto.shared.QosMonitorEventType;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.service.PingService;
 import eu.arrowhead.core.qos.service.RelayTestService;
+import eu.arrowhead.core.qos.service.event.EventWatcherService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = QoSMonitorMain.class)
@@ -132,7 +136,10 @@ public class QoSMonitorControllerTest {
 	
 	@MockBean(name = "mockRelayTestService")
 	private RelayTestService relayTestService;
-	
+
+	@MockBean(name = "mockEventWatcherService")
+	private EventWatcherService eventWatcherService;
+
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
 	
@@ -1546,10 +1553,61 @@ public class QoSMonitorControllerTest {
 		Assert.assertEquals("peerName", response.getPeerName());
 		Assert.assertEquals("receiverKey", response.getReceiverQoSMonitorPublicKey());
 	}
-	
+
+
+	//=================================================================================================
+	// Test of pingMonitorNotification
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void pingMonitorNotificationTestOk() throws Exception {
+
+		doNothing().when(eventWatcherService).putEventToQueue(any());
+
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI)
+				 .contentType(MediaType.APPLICATION_JSON)
+				 .content(objectMapper.writeValueAsBytes(getValidEventDTOForTest()))
+				 .accept(MediaType.APPLICATION_JSON))
+				 .andExpect(status().isOk())
+				 .andReturn();
+
+		Assert.assertNotNull("pingMonitorNotificationTest result is null.", result);
+	}
+
 	//=================================================================================================
 	// assistant methods
 
+	//-------------------------------------------------------------------------------------------------
+	private EventDTO getValidEventDTOForTest() {
+
+		return getValidReceivedMeasurementRequestEventDTOForTest();
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private EventDTO getValidReceivedMeasurementRequestEventDTOForTest() {
+
+		final EventDTO event = new EventDTO();
+		event.setEventType(QosMonitorEventType.RECEIVED_MONITORING_REQUEST.name());
+		event.setMetaData(getValidMeasuermentEventDTOMetadtaProcessIdForTest());
+		event.setPayload(getValidMeasuermentEventDTOEmptyPayloadForTest());
+		event.setTimeStamp(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
+
+		return event;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private Map<String, String> getValidMeasuermentEventDTOMetadtaProcessIdForTest() {
+
+		return Map.of(QosMonitorConstants.PROCESS_ID_KEY, UUID.randomUUID().toString());
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private String getValidMeasuermentEventDTOEmptyPayloadForTest() {
+
+		return "[]";
+
+	}
 	//-------------------------------------------------------------------------------------------------
 	private QoSIntraPingMeasurementListResponseDTO getIntraPingMeasurementListResponseDTOForTest() {
 
