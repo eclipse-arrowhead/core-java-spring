@@ -42,16 +42,17 @@ public class PingEventProcessor {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------	
-	public List<IcmpPingResponse> processEvents(final UUID id, final long timeOut) {
+	public List<IcmpPingResponse> processEvents(final UUID id, final long meausermentExpiryTime) {
 		logger.debug("processEvents started...");
 
 		Assert.notNull(id, "Event id could not be null.");
-		Assert.isTrue(timeOut > 0, "TimeOut should be greater then zero");
+		Assert.isTrue(meausermentExpiryTime > 0, "ExpieryTime should be greater then zero.");
+		Assert.isTrue(meausermentExpiryTime > System.currentTimeMillis(), "ExpieryTime should be in the future.");
 
 		ReceivedMonitoringRequestEventDTO temporalReceivedRequestEvent = null;
 		StartedMonitoringMeasurementEventDTO temporalStartedMonitoringEvent = null;
 
-		while ( System.currentTimeMillis() < timeOut) {
+		while ( System.currentTimeMillis() < meausermentExpiryTime) {
 
 			final PingEventBufferElement element = eventBuffer.get(id);
 			if (element == null) {
