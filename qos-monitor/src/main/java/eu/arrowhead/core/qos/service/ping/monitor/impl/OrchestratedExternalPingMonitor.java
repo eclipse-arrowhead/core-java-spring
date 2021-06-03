@@ -147,7 +147,10 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 			} catch (final Exception ex) {
 				logger.debug(ex);
 
+				cachedPingMonitorProvider = null;
+
 				throw new ArrowheadException("External Ping Monitor is not available at: " + address );
+
 			}
 
 	}
