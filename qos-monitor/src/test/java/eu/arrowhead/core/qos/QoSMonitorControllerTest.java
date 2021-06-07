@@ -91,6 +91,7 @@ import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.service.PingService;
 import eu.arrowhead.core.qos.service.RelayTestService;
+import eu.arrowhead.core.qos.service.event.EventWatcherService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = QoSMonitorMain.class)
@@ -132,7 +133,10 @@ public class QoSMonitorControllerTest {
 	
 	@MockBean(name = "mockRelayTestService")
 	private RelayTestService relayTestService;
-	
+
+	@MockBean(name = "mockEventWatcherService")
+	private EventWatcherService eventWatcherService;
+
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
 	

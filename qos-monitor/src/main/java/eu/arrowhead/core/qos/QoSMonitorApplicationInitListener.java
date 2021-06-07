@@ -145,14 +145,17 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 		final ApplicationContext appContext = event.getApplicationContext();
 		@SuppressWarnings("unchecked")
 		final Map<String,Object> context = appContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
+		standaloneMode = context.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
 
-		final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
+		if (!standaloneMode) {
+			final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
 
-		final UriComponents queryAll = createQueryAllUri(scheme);
-		context.put(CoreCommonConstants.SR_QUERY_ALL, queryAll);
+			final UriComponents queryAll = createQueryAllUri(scheme);
+			context.put(CoreCommonConstants.SR_QUERY_ALL, queryAll);
 
-		final PingMonitorManager pingManager = appContext.getBean(CoreCommonConstants.PING_MONITOR, PingMonitorManager.class);
-		pingManager.init();
+			final PingMonitorManager pingManager = appContext.getBean(CoreCommonConstants.PING_MONITOR, PingMonitorManager.class);
+			pingManager.init();
+		}
 
 	}
 
