@@ -1568,7 +1568,7 @@ public class QoSMonitorControllerTest {
 				 .contentType(MediaType.APPLICATION_JSON)
 				 .content(objectMapper.writeValueAsBytes(getValidEventDTOForTest()))
 				 .accept(MediaType.APPLICATION_JSON))
-				 .andExpect(status().isOk())
+				 .andExpect(status().isAccepted())
 				 .andReturn();
 
 		Assert.assertNotNull("pingMonitorNotificationTest result is null.", result);
