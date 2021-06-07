@@ -95,7 +95,7 @@ public class PingService {
 			}
 
 		} catch (final ArrowheadException ex) {
-			logger.info(ex);
+			logger.debug(ex);
 
 			throw ex;
 		}

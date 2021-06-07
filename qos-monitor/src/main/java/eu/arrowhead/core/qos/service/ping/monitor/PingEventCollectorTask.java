@@ -28,9 +28,12 @@ public class PingEventCollectorTask implements Runnable {
 	// members
 
 	private static final String NOT_SUPPORTED_EVENT_TYPE = " is not a supported event type. ";
-	private static final String REPLACEING_MEASURMENT_EVENT = " - measurment , duplicate event. Overwriting : ";
+	private static final String REPLACING_MEASURMENT_EVENT = " - measurment , duplicate event. Overwriting : ";
 
-	private final long clearingInterval = 1000 * 60 * 10;
+	private static final long clearingInterval = 
+			1000/*Mills to Sec*/
+			* 60/*Sec to Min*/
+			* 10/*Average measurement max time*/;
 
 	private boolean interrupted = false;
 	private long lastBufferCleanAt;
@@ -65,13 +68,13 @@ public class PingEventCollectorTask implements Runnable {
 
 				if (lastBufferCleanAt + clearingInterval < System.currentTimeMillis()) {
 
-					lastBufferCleanAt = System.currentTimeMillis();
 					clearBuffer();
+					lastBufferCleanAt = System.currentTimeMillis();
 				}
 
 			} catch (final InterruptedException ex) {
 
-				logger.debug("PingEventCollectorTask run intrrupted");
+				logger.debug("PingEventCollectorTask run interrupted");
 				interrupted = false;
 
 			}catch (final Throwable ex) {
@@ -95,8 +98,8 @@ public class PingEventCollectorTask implements Runnable {
 	private void addEventToBufferElement (final PingEventBufferElement element, final int position, final MeasurementMonitoringEvent event) {
 		logger.debug("addEventToBufferElement started...");
 
-		if(element.getEventlist()[position] != null) {
-			logger.warn(element.getId() + REPLACEING_MEASURMENT_EVENT + element.getEventlist()[position].toString());
+		if(element.getEventArray()[position] != null) {
+			logger.warn(element.getId() + REPLACING_MEASURMENT_EVENT + element.getEventArray()[position].toString());
 		}
 
 		element.addEvent(position, event);
@@ -133,17 +136,23 @@ public class PingEventCollectorTask implements Runnable {
 
 				addEventToBufferElement(element, QosMonitorConstants.FINISHED_MONITORING_MEASUREMENT_EVENT_POSITION, validFinishEvent);
 				break;
-			case INTERUPTED_MONITORING_MEASUREMENT:
-				final InterruptedMonitoringMeasurementEventDTO validInteruptEvent = EventDTOConverter.convertToInteruptedMonitoringMeasurementEvent(event);
+			case INTERRUPTED_MONITORING_MEASUREMENT:
+				final InterruptedMonitoringMeasurementEventDTO validInterruptEvent = EventDTOConverter.convertToInterruptedMonitoringMeasurementEvent(event);
 
-				addEventToBufferElement(element, QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_POSITION, validInteruptEvent);
+				addEventToBufferElement(element, QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_POSITION, validInterruptEvent);
 				break;
 			default:
 				throw new InvalidParameterException(eventType + NOT_SUPPORTED_EVENT_TYPE);
 			}
 
 		} catch (final ArrowheadException ex) {
+
 			logger.debug(ex.getMessage());
+
+		}catch (final IllegalArgumentException ex) {
+
+			logger.debug(ex.getMessage());
+
 		}
 
 		eventBuffer.put(id, element);

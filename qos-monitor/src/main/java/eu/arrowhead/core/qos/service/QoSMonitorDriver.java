@@ -31,6 +31,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
@@ -74,7 +76,7 @@ public class QoSMonitorDriver {
 	private static final String EVENT_SUBSCRIBE_URI_KEY = CoreSystemService.EVENT_SUBSCRIBE_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String EVENT_UNSUBSCRIBE_URI_KEY = CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 
-	public static final String KEY_CALCULATED_SERVICE_TIME_FRAME = "QoSCalculatedServiceTimeFrame";
+	private static final String KEY_CALCULATED_SERVICE_TIME_FRAME = "QoSCalculatedServiceTimeFrame";
 
 	private static final Logger logger = LogManager.getLogger(QoSMonitorDriver.class);
 
@@ -92,6 +94,10 @@ public class QoSMonitorDriver {
 
 	@Value(CoreCommonConstants.$SERVER_PORT)
 	private int coreSystemPort;
+
+	private SystemRequestDTO requesterSystem;
+
+	private Map<QosMonitorEventType, MultiValueMap<String, String>> unsubscribeParams;
 
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
@@ -242,8 +248,6 @@ public class QoSMonitorDriver {
 
 		while ( count < MAX_RETRIES) {
 
-			rest();
-
 			try {
 
 				httpService.sendRequest(echoUri, HttpMethod.GET, String.class);
@@ -251,8 +255,10 @@ public class QoSMonitorDriver {
 				return;
 
 			} catch (final Exception ex) {
-				logger.warn("QoS Monitor can't access External Qos Monitor provider at : " + echoUri );
+				logger.debug("QoS Monitor can't access External Qos Monitor provider at : " + echoUri + ", " + ex.getMessage());
+				logger.debug(ex);
 
+				rest();
 				count++;
 
 			}
@@ -306,8 +312,6 @@ public class QoSMonitorDriver {
 	public void unsubscribeFromPingMonitorEvents() {
 		logger.debug("unSubscribeFromPingMonitorEvents started...");
 
-
-
 		int count = 0;
 		boolean unsubscribedFromAll = false; 
 
@@ -315,13 +319,9 @@ public class QoSMonitorDriver {
 			try {
 				for (final QosMonitorEventType externalPingMonitorEventType : QosMonitorEventType.values()) {
 
-					final UriComponents unsubscriptionUri = getEventHandlerUnsubscribeUri().expand(Map.of(
-							CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_EVENT_TYPE, externalPingMonitorEventType.name(),
-							CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_SYSTEM_NAME, coreSystemName,
-							CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_ADDRESS, coreSystemAddress,
-							CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_PORT, coreSystemPort));
+					final UriComponents unsubscriptionUri = getEventHandlerUnsubscribeUri(getUnsubscribeParams().get(externalPingMonitorEventType));
 
-					httpService.sendRequest(unsubscriptionUri, HttpMethod.POST, SubscriptionResponseDTO.class);
+					httpService.sendRequest(unsubscriptionUri, HttpMethod.DELETE, Void.class, null);
 
 				}
 
@@ -472,12 +472,14 @@ public class QoSMonitorDriver {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private UriComponents getEventHandlerUnsubscribeUri() {
+	private UriComponents getEventHandlerUnsubscribeUri(final MultiValueMap<String, String> multiValueMap) {
 		logger.debug("getEventHandlerUnsubscribeUri started...");
 
 		if (arrowheadContext.containsKey(EVENT_UNSUBSCRIBE_URI_KEY)) {
 			try {
-				return (UriComponents) arrowheadContext.get(EVENT_UNSUBSCRIBE_URI_KEY);
+
+				final UriComponents uri = (UriComponents) arrowheadContext.get(EVENT_UNSUBSCRIBE_URI_KEY);
+				return Utilities.createURI(uri.getScheme(), uri.getHost(), uri.getPort(), multiValueMap, uri.getPath());
 			} catch (final ClassCastException ex) {
 				throw new ArrowheadException("QoS Monitor can't find Event Handler unsubscribe URI.");
 			}
@@ -493,8 +495,8 @@ public class QoSMonitorDriver {
 		final SubscriptionRequestDTO requestTemplate = new SubscriptionRequestDTO();
 		requestTemplate.setMatchMetaData(false);
 		requestTemplate.setNotifyUri(CommonConstants.QOSMONITOR_URI + QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI);
-		requestTemplate.setSubscriberSystem(getQosMonitorSystemRequestDTO());//requester);
-	
+		requestTemplate.setSubscriberSystem(getQosMonitorSystemRequestDTO());
+
 		if(provider != null) {
 			requestTemplate.setSources(Set.of(provider));
 		}
@@ -508,24 +510,67 @@ public class QoSMonitorDriver {
 
 		final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
 
-		final SystemRequestDTO system = new SystemRequestDTO();
-		system.setSystemName(coreSystemName);
-		system.setAddress(coreSystemAddress);
-		system.setPort(coreSystemPort);
-		system.setMetadata(null);
-		if (sslEnabled) {
-			system.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+		if(requesterSystem == null) {
+			requesterSystem = new SystemRequestDTO();
+			requesterSystem.setSystemName(coreSystemName);
+			requesterSystem.setAddress(coreSystemAddress);
+			requesterSystem.setPort(coreSystemPort);
+			requesterSystem.setMetadata(null);
+			if (sslEnabled) {
+				requesterSystem.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+			}
 		}
 
-		return system;
+		return requesterSystem;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private Map<QosMonitorEventType, MultiValueMap<String, String>> getUnsubscribeParams() {
+		logger.debug("getUnsubscribeParams started...");
+
+		if (unsubscribeParams == null ) {
+
+			final MultiValueMap<String, String> unsubscribeReceivedMonitoringequestParams = new LinkedMultiValueMap<>();
+			unsubscribeReceivedMonitoringequestParams.add(CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_EVENT_TYPE, QosMonitorEventType.RECEIVED_MONITORING_REQUEST.name());
+			unsubscribeReceivedMonitoringequestParams.add(CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_SYSTEM_NAME, coreSystemName);
+			unsubscribeReceivedMonitoringequestParams.add(CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_ADDRESS, coreSystemAddress);
+			unsubscribeReceivedMonitoringequestParams.add(CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_PORT, String.valueOf(coreSystemPort));
+
+			final MultiValueMap<String, String> unsubscribeStartMonitoringequestParams = new LinkedMultiValueMap<>();
+			unsubscribeStartMonitoringequestParams.add(CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_EVENT_TYPE, QosMonitorEventType.STARTED_MONITORING_MEASUREMENT.name());
+			unsubscribeStartMonitoringequestParams.add(CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_SYSTEM_NAME, coreSystemName);
+			unsubscribeStartMonitoringequestParams.add(CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_ADDRESS, coreSystemAddress);
+			unsubscribeStartMonitoringequestParams.add(CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_PORT, String.valueOf(coreSystemPort));
+
+			final MultiValueMap<String, String> unsubscribeFinishedMonitoringequestParams = new LinkedMultiValueMap<>();
+			unsubscribeFinishedMonitoringequestParams.add(CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_EVENT_TYPE, QosMonitorEventType.FINISHED_MONITORING_MEASUREMENT.name());
+			unsubscribeFinishedMonitoringequestParams.add(CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_SYSTEM_NAME, coreSystemName);
+			unsubscribeFinishedMonitoringequestParams.add(CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_ADDRESS, coreSystemAddress);
+			unsubscribeFinishedMonitoringequestParams.add(CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_PORT, String.valueOf(coreSystemPort));
+
+			final MultiValueMap<String, String> unsubscribeInterruptMonitoringequestParams = new LinkedMultiValueMap<>();
+			unsubscribeInterruptMonitoringequestParams.add(CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_EVENT_TYPE, QosMonitorEventType.INTERRUPTED_MONITORING_MEASUREMENT.name());
+			unsubscribeInterruptMonitoringequestParams.add(CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_SYSTEM_NAME, coreSystemName);
+			unsubscribeInterruptMonitoringequestParams.add(CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_ADDRESS, coreSystemAddress);
+			unsubscribeInterruptMonitoringequestParams.add(CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_PORT, String.valueOf(coreSystemPort));
+
+			unsubscribeParams = Map.of(
+					QosMonitorEventType.RECEIVED_MONITORING_REQUEST, unsubscribeReceivedMonitoringequestParams,
+					QosMonitorEventType.STARTED_MONITORING_MEASUREMENT, unsubscribeStartMonitoringequestParams,
+					QosMonitorEventType.FINISHED_MONITORING_MEASUREMENT, unsubscribeFinishedMonitoringequestParams,
+					QosMonitorEventType.INTERRUPTED_MONITORING_MEASUREMENT, unsubscribeInterruptMonitoringequestParams);
+
+		}
+
+		return unsubscribeParams;
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	private void rest() {
 		try {
 			Thread.sleep(SLEEP_PERIOD);
-		} catch (final InterruptedException e) {
-			logger.warn(e.getMessage());
+		} catch (final InterruptedException ex) {
+			logger.warn(ex.getMessage());
 		}
 	}
 }

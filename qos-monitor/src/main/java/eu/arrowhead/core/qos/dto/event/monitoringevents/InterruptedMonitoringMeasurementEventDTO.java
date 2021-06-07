@@ -1,30 +1,20 @@
 package eu.arrowhead.core.qos.dto.event.monitoringevents;
 
-import java.io.Serializable;
-
 import eu.arrowhead.common.dto.shared.QosMonitorEventType;
 
-public class InterruptedMonitoringMeasurementEventDTO extends MeasurementMonitoringEvent implements Serializable{
+public class InterruptedMonitoringMeasurementEventDTO extends MeasurementMonitoringEvent {
 
 	//=================================================================================================
 	// members
 
 	private static final long serialVersionUID = 1971997139168881765L;
 
-	private String payload;
-
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
 	public InterruptedMonitoringMeasurementEventDTO() {
-		this.eventType = QosMonitorEventType.INTERUPTED_MONITORING_MEASUREMENT;
+		this.eventType = QosMonitorEventType.INTERRUPTED_MONITORING_MEASUREMENT;
 	}
-
-	//-------------------------------------------------------------------------------------------------
-	public String getPayload() { return payload; }
-
-	//-------------------------------------------------------------------------------------------------
-	public void setPayload(final String payload) { this.payload = payload; }
 
 }

@@ -18,7 +18,11 @@ public class PingEventBufferCleaner {
 	//=================================================================================================
 	// members
 
-	private final long MAX_TIME_BEFORE_CLEAR = 1000 * 60 * 10 * 2;
+	private final long MAX_TIME_BEFORE_CLEAR = 
+			1000/*Mills to Sec*/
+			* 60/*Sec to Min*/
+			* 10/*Average measurement max time*/
+			* 2/*Measurment time Deviation tolerance*/;
 
 	@Resource(name = QosMonitorConstants.EVENT_BUFFER)
 	private ConcurrentHashMap<UUID, PingEventBufferElement> eventBuffer;
@@ -39,7 +43,7 @@ public class PingEventBufferCleaner {
 			if (element.getCreatedAt() < (System.currentTimeMillis() - MAX_TIME_BEFORE_CLEAR)) {
 
 				logger.debug("Clearing element from buffer: " + element.getId());
-				eventBuffer.remove(element.getId());
+				iterator.remove();
 			}
 
 		}

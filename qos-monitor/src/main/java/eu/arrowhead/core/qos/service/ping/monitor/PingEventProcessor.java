@@ -42,16 +42,17 @@ public class PingEventProcessor {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------	
-	public List<IcmpPingResponse> processEvents(final UUID id, final long timeOut) {
+	public List<IcmpPingResponse> processEvents(final UUID id, final long measurementExpiryTime) {
 		logger.debug("processEvents started...");
 
 		Assert.notNull(id, "Event id could not be null.");
-		Assert.isTrue(timeOut > 0, "TimeOut should be greater then zero");
+		Assert.isTrue(measurementExpiryTime > 0, "ExpieryTime should be greater than zero.");
+		Assert.isTrue(measurementExpiryTime > System.currentTimeMillis(), "ExpieryTime should be in the future.");
 
 		ReceivedMonitoringRequestEventDTO temporalReceivedRequestEvent = null;
 		StartedMonitoringMeasurementEventDTO temporalStartedMonitoringEvent = null;
 
-		while ( System.currentTimeMillis() < timeOut) {
+		while ( System.currentTimeMillis() < measurementExpiryTime) {
 
 			final PingEventBufferElement element = eventBuffer.get(id);
 			if (element == null) {
@@ -59,14 +60,14 @@ public class PingEventProcessor {
 				rest();
 				continue;
 
-			}else if (Arrays.asList(element.getEventlist()).isEmpty()){
+			}else if (Arrays.asList(element.getEventArray()).isEmpty()){
 
 				rest();
 				continue;
 
 			}
 
-			final List<MeasurementMonitoringEvent> eventList = Arrays.asList(element.getEventlist());
+			final List<MeasurementMonitoringEvent> eventList = Arrays.asList(element.getEventArray());
 
 			if (eventList.get(QosMonitorConstants.RECEIVED_MONITORING_REQUEST_EVENT_POSITION) != null) {
 
@@ -119,8 +120,8 @@ public class PingEventProcessor {
 	private void rest() {
 		try {
 			Thread.sleep(SLEEP_PERIOD);
-		} catch (final InterruptedException e) {
-			logger.warn(e.getMessage());
+		} catch (final InterruptedException ex) {
+			logger.warn(ex.getMessage());
 		}
 	}
 

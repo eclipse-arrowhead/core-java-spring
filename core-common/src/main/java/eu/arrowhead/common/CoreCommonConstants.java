@@ -206,9 +206,7 @@ public class CoreCommonConstants {
 	public static final String $QOS_MONITOR_PROVIDER_PATH_WD = "${" + QOS_MONITOR_PROVIDER_PATH + ":" + CoreDefaults.DEFAULT_QOS_MONITOR_PROVIDER_PATH + "}";
 	public static final String QOS_MONITOR_PROVIDER_SECURE = "monitor_provider_secure";
 	public static final String $QOS_MONITOR_PROVIDER_SECURE_WD = "${" + QOS_MONITOR_PROVIDER_SECURE + ":" + CoreDefaults.DEFAULT_QOS_MONITOR_PROVIDER_SECURE + "}";
-	public static final String QOS_MONITOR_PROVIDER_AUTHINFO = "monitor_provider_authinfo";
-	public static final String $QOS_MONITOR_PROVIDER_AUTHINFO_WD = "${" + QOS_MONITOR_PROVIDER_AUTHINFO + ":" + CoreDefaults.DEFAULT_QOS_MONITOR_PROVIDER_AUTHINFO + "}";
-	
+
 	public static final String NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS = "no_gatekeeper_relay_request_handler_workers";
 	public static final String $NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS_WD = "${" + NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + ":" + 
 																				 CoreDefaults.DEFAULT_NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + "}";

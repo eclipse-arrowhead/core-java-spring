@@ -69,8 +69,6 @@ public class IcmpPingDTOConverter {
 			Assert.notNull(icmpResponseDTO.getHost(), "Host is null");
 			Assert.notNull(icmpResponseDTO.getRtt(), "Rtt is null");
 			Assert.notNull(icmpResponseDTO.getSize(), "Size is null");
-			Assert.notNull(icmpResponseDTO.isSuccessFlag(), "SuccessFlag is null");
-			Assert.notNull(icmpResponseDTO.isTimeoutFlag(), "TimeOutFlag is null");
 			Assert.notNull(icmpResponseDTO.getTtl(), "Ttl is null");
 
 		} catch (final IllegalArgumentException ex) {

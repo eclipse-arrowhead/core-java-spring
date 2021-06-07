@@ -2,8 +2,6 @@ package eu.arrowhead.core.qos.service.ping.monitor.impl;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.annotation.Resource;
 
@@ -43,8 +41,6 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 	private static final int ICMP_TTL = 255;
 	private static final int OVERHEAD_MULTIPLIER = 2;
 
-	private final ThreadPoolExecutor threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
-
 	private OrchestrationResultDTO cachedPingMonitorProvider = null;
 
 	@Autowired
@@ -74,14 +70,14 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 
 		if (cachedPingMonitorProvider != null){
 
-			logger.info("starting external ping Monitoring service measurement: " + cachedPingMonitorProvider.getProvider().toString());
+			logger.debug("starting external ping Monitoring service measurement: " + cachedPingMonitorProvider.getProvider().toString());
 
 		}else {
 			try {
 				initPingMonitorProvider();
 			} catch (final Exception ex) {
 
-				logger.warn("Unsuccesfull ping measurement: because of >> Unsuccesfull external ping Monitor provider orchestration!");
+				logger.debug("Unsuccessfull ping measurement: because of >> Unsuccessfull external ping Monitor provider orchestration!");
 
 				return null;
 			}
@@ -91,11 +87,11 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 		final UUID measurementProcessId = requestExternalMeasurement(address);
 
 		final long startTime = System.currentTimeMillis();
-		final long meausermentExpiryTime = startTime + timeOut;
+		final long measurementExpiryTime = startTime + timeOut;
 
 		try {
 
-			return processor.processEvents(measurementProcessId, meausermentExpiryTime);
+			return processor.processEvents(measurementProcessId, measurementExpiryTime);
 
 		} catch (final Exception ex) {
 
@@ -107,7 +103,7 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 
 	//-------------------------------------------------------------------------------------------------
 	public void init() {
-		logger.debug("initPingMonitorProvider started...");
+		logger.debug("init started...");
 
 		try {
 
@@ -117,13 +113,15 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 			cachedPingMonitorProvider = selectProvider(result);
 
 		} catch (final Exception ex) {
-			logger.warn("Exception in external ping monitor orchestration: " + ex);
+			logger.debug("Exception in external ping monitor orchestration: " + ex);
 
 			cachedPingMonitorProvider = null;
 
 		}
 
-		threadPool.execute(eventCollector);
+		final Thread eventCollectorThread = new Thread(eventCollector);
+		eventCollectorThread.setName("Ping-Event-Collector-Thread");
+		eventCollectorThread.start();
 
 		driver.unsubscribeFromPingMonitorEvents();
 		driver.subscribeToExternalPingMonitorEvents(getPingMonitorSystemRequestDTO());
@@ -138,35 +136,38 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 		logger.debug("requestExternalMeasurement started...");
 
 			try {
-				final IcmpPingRequestACK acknowledgedMeasurmentRequest = driver.requestExternalPingMonitorService(getPingMonitorProvidersServiceUri(), createIcmpPingRequest(address));
-				validateAcknowledgedMeasurmentRequest(acknowledgedMeasurmentRequest);
+				final IcmpPingRequestACK acknowledgedMeasurementRequest = driver.requestExternalPingMonitorService(getPingMonitorProvidersServiceUri(), createIcmpPingRequest(address));
+				validateAcknowledgedMeasurementRequest(acknowledgedMeasurementRequest);
 
-				final UUID startedExternalMeasurementProcessId = acknowledgedMeasurmentRequest.getExternalMeasurementUuid();
-				logger.info("IcmpPingRequestACK received, with process id: " + startedExternalMeasurementProcessId);
+				final UUID startedExternalMeasurementProcessId = acknowledgedMeasurementRequest.getExternalMeasurementUuid();
+				logger.debug("IcmpPingRequestACK received, with process id: " + startedExternalMeasurementProcessId);
 
 				return startedExternalMeasurementProcessId;
 
 			} catch (final Exception ex) {
-				logger.info(ex);
+				logger.debug(ex);
+
+				cachedPingMonitorProvider = null;
 
 				throw new ArrowheadException("External Ping Monitor is not available at: " + address );
+
 			}
 
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void validateAcknowledgedMeasurmentRequest(final IcmpPingRequestACK acknowledgedMeasurmentRequest) {
-		logger.debug("validateAcknowledgedMeasurmentRequest started...");
+	private void validateAcknowledgedMeasurementRequest(final IcmpPingRequestACK acknowledgedMeasurementRequest) {
+		logger.debug("validateAcknowledgedMeasurementRequest started...");
 
 		try {
-			Assert.notNull(acknowledgedMeasurmentRequest, "IcmpPingRequestACK is null");
-			Assert.notNull(acknowledgedMeasurmentRequest.getAckOk(), "IcmpPingRequestACK.ackOk is null");
-			Assert.isTrue(acknowledgedMeasurmentRequest.getAckOk().equalsIgnoreCase("OK"), "IcmpPingRequestACK is null");
-		
-			
-		} catch (final Exception ex) {
-			logger.warn("External pingMonitorProvider replied invalid ack : " + ex);
+			Assert.notNull(acknowledgedMeasurementRequest, "IcmpPingRequestACK is null");
+			Assert.notNull(acknowledgedMeasurementRequest.getAckOk(), "IcmpPingRequestACK.ackOk is null");
+			Assert.isTrue(acknowledgedMeasurementRequest.getAckOk().equalsIgnoreCase("OK"), "IcmpPingRequestACK is not valid");
 
+		} catch (final Exception ex) {
+			logger.debug("External pingMonitorProvider replied invalid ack : " + ex);
+
+			cachedPingMonitorProvider = null;
 			throw new ArrowheadException("External pingMonitorProvider replied invalid ack", ex);
 		}
 	}
@@ -198,8 +199,6 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 			return createHttpUri(provider, path);
 		case CERTIFICATE:
 			return createHttpsUri(provider, path);
-		case TOKEN:
-			throw new InvalidParameterException("TOKEN security is not supported yet, for PingMonitor Providers. ");
 		default:
 			throw new InvalidParameterException("Not supported ServiceSecurityType: " + securityType);
 		}
@@ -263,6 +262,10 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 	private OrchestrationResultDTO selectProvider(final OrchestrationResponseDTO result) {
 		logger.debug("selectProvider started...");
 
+		if (result == null || result.getResponse() == null || result.getResponse().isEmpty()) {
+
+			throw new ArrowheadException("PingMonitor orchestration result is empty or null.");
+		}
 		//TODO implement more sophisticated provider selection strategy
 		return result.getResponse().get(0);
 	}

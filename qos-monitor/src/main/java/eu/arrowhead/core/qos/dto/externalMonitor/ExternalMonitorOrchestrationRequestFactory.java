@@ -32,7 +32,7 @@ public class ExternalMonitorOrchestrationRequestFactory {
 	// members
 
 	@Autowired
-	protected SSLProperties sslProperties;
+	private SSLProperties sslProperties;
 
 	@Value(CoreCommonConstants.$CORE_SYSTEM_NAME)
 	private String coreSystemName;
@@ -45,6 +45,8 @@ public class ExternalMonitorOrchestrationRequestFactory {
 
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
+
+	private SystemRequestDTO requesterSystem;
 
 	private Logger logger = LogManager.getLogger(ExternalMonitorOrchestrationRequestFactory.class);
 
@@ -75,16 +77,18 @@ public class ExternalMonitorOrchestrationRequestFactory {
 
 		final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
 
-		final SystemRequestDTO system = new SystemRequestDTO();
-		system.setSystemName(coreSystemName);
-		system.setAddress(coreSystemAddress);
-		system.setPort(coreSystemPort);
-		system.setMetadata(null);
-		if (sslProperties.isSslEnabled()) {
-			system.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+		if(requesterSystem == null) {
+			requesterSystem = new SystemRequestDTO();
+			requesterSystem.setSystemName(coreSystemName);
+			requesterSystem.setAddress(coreSystemAddress);
+			requesterSystem.setPort(coreSystemPort);
+			requesterSystem.setMetadata(null);
+			if (sslProperties.isSslEnabled()) {
+				requesterSystem.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+			}
 		}
 
-		return system;
+		return requesterSystem;
 	}
 
 	//-------------------------------------------------------------------------------------------------

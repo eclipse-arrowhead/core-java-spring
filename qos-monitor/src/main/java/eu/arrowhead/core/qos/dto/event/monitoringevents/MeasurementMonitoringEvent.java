@@ -1,12 +1,13 @@
 package eu.arrowhead.core.qos.dto.event.monitoringevents;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.Map;
 
 import eu.arrowhead.common.dto.shared.QosMonitorEventType;
 
-public abstract class MeasurementMonitoringEvent {
-
+@SuppressWarnings("serial")
+public abstract class MeasurementMonitoringEvent implements Serializable {
 
 	//=================================================================================================
 	// members

@@ -726,7 +726,7 @@ public class QoSMonitorController {
 		}
 
 		if (!checkExternalPingMonitoringNotificationEventType(request.getEventType())) {
-			throw new BadPayloadException("EventType is null or empty", HttpStatus.SC_BAD_REQUEST, origin);
+			throw new BadPayloadException("EventType is not a valid PingMonitoringEvent-Type", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 
 		if (Utilities.isEmpty(request.getPayload())) {
@@ -749,7 +749,7 @@ public class QoSMonitorController {
 	private boolean checkExternalPingMonitoringNotificationEventType(final String eventType) {
 		logger.debug("checkExternalPingMonitoringNotificationEventType started...");
 
-		for (QosMonitorEventType type : QosMonitorEventType.values()) {
+		for (final QosMonitorEventType type : QosMonitorEventType.values()) {
 			if (eventType.equalsIgnoreCase(type.name())) {
 				return true;
 			}

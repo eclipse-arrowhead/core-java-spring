@@ -40,8 +40,8 @@ public class EventDTOConverter {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public static InterruptedMonitoringMeasurementEventDTO convertToInteruptedMonitoringMeasurementEvent(final EventDTO event) {
-		logger.debug("convertToInteruptedMonitoringMeasurementEvent started...");
+	public static InterruptedMonitoringMeasurementEventDTO convertToInterruptedMonitoringMeasurementEvent(final EventDTO event) {
+		logger.debug("convertToInterruptedMonitoringMeasurementEvent started...");
 
 		Assert.notNull(event, "Event is null");
 		Assert.isTrue(!Utilities.isEmpty(event.getPayload()), "Event payload is empty");
@@ -49,12 +49,11 @@ public class EventDTOConverter {
 
 		final InterruptedMonitoringMeasurementEventDTO validEvent = new InterruptedMonitoringMeasurementEventDTO();
 		validEvent.setMetadata(event.getMetaData());
-		validEvent.setPayload(event.getPayload());
 		try {
 			validEvent.setTimeStamp(Utilities.parseUTCStringToLocalZonedDateTime(event.getTimeStamp()));
 		} catch (final DateTimeParseException ex) {
 
-			throw new InvalidParameterException("Event timestap has invalid format.", ex);
+			throw new InvalidParameterException("Event timestamp has invalid format.", ex);
 		}
 
 		validateInterruptedMonitoringMeasurementEventDTOFields(validEvent);
@@ -77,7 +76,7 @@ public class EventDTOConverter {
 			validEvent.setTimeStamp(Utilities.parseUTCStringToLocalZonedDateTime(event.getTimeStamp()));
 		} catch (final DateTimeParseException ex) {
 
-			throw new InvalidParameterException("Event timestap has invalid format.", ex);
+			throw new InvalidParameterException("Event timestamp has invalid format.", ex);
 		}
 
 		validateFinishedMonitoringMeasurementEventDTOFields(validEvent);
@@ -93,11 +92,12 @@ public class EventDTOConverter {
 		Assert.isTrue(!Utilities.isEmpty(payload), "Payload is empty");
 
 		try {
-			final List<IcmpPingResponseDTO> validResponse = mapper.readValue(payload, new TypeReference<List<IcmpPingResponseDTO>>(){});
 
-			return validResponse;
+			return mapper.readValue(payload, new TypeReference<List<IcmpPingResponseDTO>>(){});
 
-		} catch (final IOException e) {
+		} catch (final IOException ex) {
+
+			logger.debug(ex);
 
 			throw new InvalidParameterException("Invalid IcmpPingResponse");
 		}
@@ -113,12 +113,11 @@ public class EventDTOConverter {
 
 		final StartedMonitoringMeasurementEventDTO validEvent = new StartedMonitoringMeasurementEventDTO();
 		validEvent.setMetadata(event.getMetaData());
-		validEvent.setPayload(event.getPayload());
 		try {
 			validEvent.setTimeStamp(Utilities.parseUTCStringToLocalZonedDateTime(event.getTimeStamp()));
 		} catch (final DateTimeParseException ex) {
 
-			throw new InvalidParameterException("Event timestap has invalid format.", ex);
+			throw new InvalidParameterException("Event timestamp has invalid format.", ex);
 		}
 
 		validateStartedMonitoringMeasurementEventDTOFields(validEvent);
@@ -136,12 +135,11 @@ public class EventDTOConverter {
 
 		final ReceivedMonitoringRequestEventDTO validEvent = new ReceivedMonitoringRequestEventDTO();
 		validEvent.setMetadata(event.getMetaData());
-		validEvent.setPayload(event.getPayload());
 		try {
 			validEvent.setTimeStamp(Utilities.parseUTCStringToLocalZonedDateTime(event.getTimeStamp()));
 		} catch (final DateTimeParseException ex) {
 
-			throw new InvalidParameterException("Event timestap has invalid format.", ex);
+			throw new InvalidParameterException("Event timestamp has invalid format.", ex);
 		}
 
 		validateReceivedMonitoringRequestEventDTOFields(validEvent);
@@ -155,7 +153,7 @@ public class EventDTOConverter {
 	//-------------------------------------------------------------------------------------------------
 	private static void validateFinishedMonitoringMeasurementEventDTOFields(final FinishedMonitoringMeasurementEventDTO event) {
 
-		Assert.isTrue(event.getEventType().equals(QosMonitorEventType.FINISHED_MONITORING_MEASUREMENT), "Event type must be: FINISHED_MONITORING_MEASUREMENT");
+		Assert.isTrue(event.getEventType().equals(QosMonitorEventType.FINISHED_MONITORING_MEASUREMENT), "Event type must be: " + QosMonitorEventType.FINISHED_MONITORING_MEASUREMENT.name());
 		Assert.isTrue(event.getMetadata().containsKey(QosMonitorConstants.PROCESS_ID_KEY), "Meta data must contain: " + QosMonitorConstants.PROCESS_ID_KEY);
 		Assert.isTrue(event.getMetadata().keySet().size() == QosMonitorConstants.FINISHED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_SIZE, "Meta data keys quantity is not valid");
 	}
@@ -163,8 +161,7 @@ public class EventDTOConverter {
 	//-------------------------------------------------------------------------------------------------
 	private static void validateInterruptedMonitoringMeasurementEventDTOFields(final InterruptedMonitoringMeasurementEventDTO event) {
 
-		Assert.isTrue(event.getEventType().equals(QosMonitorEventType.INTERUPTED_MONITORING_MEASUREMENT), "Event type must be: INTERUPTED_MONITORING_MEASUREMENT");
-		//Assert.isTrue(event.getPayload().equalsIgnoreCase(QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_SCHEMA), "Payload must be: " + QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_SCHEMA);
+		Assert.isTrue(event.getEventType().equals(QosMonitorEventType.INTERRUPTED_MONITORING_MEASUREMENT), "Event type must be: " + QosMonitorEventType.INTERRUPTED_MONITORING_MEASUREMENT.name());
 		Assert.isTrue(event.getMetadata().containsKey(QosMonitorConstants.PROCESS_ID_KEY), "Meta data must contain: " + QosMonitorConstants.PROCESS_ID_KEY);
 		Assert.isTrue( (event.getMetadata().keySet().size() <= QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_MAX_SIZE ), "Meta data has more keys than allowed");
 
@@ -173,8 +170,7 @@ public class EventDTOConverter {
 	//-------------------------------------------------------------------------------------------------
 	private static void validateReceivedMonitoringRequestEventDTOFields(final ReceivedMonitoringRequestEventDTO event) {
 
-		Assert.isTrue(event.getEventType().equals(QosMonitorEventType.RECEIVED_MONITORING_REQUEST), "Event type must be: RECEIVED_MONITORING_REQUEST");
-		//Assert.isTrue(event.getPayload().equalsIgnoreCase(QosMonitorConstants.RECEIVED_MONITORING_REQUEST_EVENT_PAYLOAD_SCHEMA), "Payload must be: " + QosMonitorConstants.RECEIVED_MONITORING_REQUEST_EVENT_PAYLOAD_SCHEMA);
+		Assert.isTrue(event.getEventType().equals(QosMonitorEventType.RECEIVED_MONITORING_REQUEST), "Event type must be: " + QosMonitorEventType.RECEIVED_MONITORING_REQUEST.name());
 		Assert.isTrue(event.getMetadata().containsKey(QosMonitorConstants.PROCESS_ID_KEY), "Meta data must contain: " + QosMonitorConstants.PROCESS_ID_KEY);
 		Assert.isTrue(event.getMetadata().keySet().size() == QosMonitorConstants.RECEIVED_MONITORING_REQUEST_EVENT_PAYLOAD_METADATA_SIZE, "Meta data keys quantity is not valid");
 	}
@@ -183,7 +179,6 @@ public class EventDTOConverter {
 	private static void validateStartedMonitoringMeasurementEventDTOFields(final StartedMonitoringMeasurementEventDTO event) {
 
 		Assert.isTrue(event.getEventType().equals(QosMonitorEventType.STARTED_MONITORING_MEASUREMENT), "Event type must be: " + QosMonitorEventType.STARTED_MONITORING_MEASUREMENT.name());
-		//Assert.isTrue(event.getPayload().equalsIgnoreCase(QosMonitorConstants.STARTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_SCHEMA), "Payload must be: " + QosMonitorConstants.STARTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_SCHEMA);
 		Assert.isTrue(event.getMetadata().containsKey(QosMonitorConstants.PROCESS_ID_KEY), "Meta data must contain: " + QosMonitorConstants.PROCESS_ID_KEY);
 		Assert.isTrue(event.getMetadata().keySet().size() == QosMonitorConstants.STARTED_MONITORING_MEASUREMENT_EVENT_PAYLOAD_METADATA_SIZE, "Meta data keys quantity is not valid");
 	}

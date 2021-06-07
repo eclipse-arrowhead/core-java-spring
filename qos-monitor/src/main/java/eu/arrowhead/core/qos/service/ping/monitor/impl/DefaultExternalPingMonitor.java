@@ -2,8 +2,6 @@ package eu.arrowhead.core.qos.service.ping.monitor.impl;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.annotation.Resource;
 
@@ -37,8 +35,6 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	private static final int ICMP_TTL = 255;
 	private static final int OVERHEAD_MULTIPLIER = 2;
 
-	private final ThreadPoolExecutor threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
-
 	@Autowired
 	private QoSMonitorDriver driver;
 
@@ -63,9 +59,6 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_SECURE_WD)
 	private boolean pingMonitorSecure;
 
-	@Value(CoreCommonConstants.$QOS_MONITOR_PROVIDER_AUTHINFO_WD)
-	private String externalPingMonitorAuthInfo;
-
 	private SystemRequestDTO pingMonitorSystem;
 
 	private final Logger logger = LogManager.getLogger(DefaultExternalPingMonitor.class);
@@ -82,11 +75,11 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 		final UUID measurementProcessId = requestExternalMeasurement(address);
 
 		final long startTime = System.currentTimeMillis();
-		final long meausermentExpiryTime = startTime + timeOut;
+		final long measurementExpiryTime = startTime + timeOut;
 
 		try {
 
-			return processor.processEvents(measurementProcessId, meausermentExpiryTime);
+			return processor.processEvents(measurementProcessId, measurementExpiryTime);
 
 		} catch (final Exception ex) {
 
@@ -102,9 +95,12 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 
 		pingMonitorSystem = getPingMonitorSystemRequestDTO();
 
-		threadPool.execute(eventCollector);
-
 		driver.checkPingMonitorProviderEchoUri(createPingMonitorProviderEchoUri());
+
+		final Thread eventCollectorThread = new Thread(eventCollector);
+		eventCollectorThread.setName("Ping-Event-Collector-Thread");
+		eventCollectorThread.start();
+
 		driver.subscribeToExternalPingMonitorEvents(pingMonitorSystem);
 	}
 
@@ -117,10 +113,10 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 
 		try {
 
-			final IcmpPingRequestACK acknowledgedMeasurmentRequest = driver.requestExternalPingMonitorService(createPingMonitorProviderUri(), createIcmpPingRequest(address));
-			validateAcknowledgedMeasurmentRequest(acknowledgedMeasurmentRequest);
+			final IcmpPingRequestACK acknowledgedMeasurementRequest = driver.requestExternalPingMonitorService(createPingMonitorProviderUri(), createIcmpPingRequest(address));
+			validateAcknowledgedMeasurementRequest(acknowledgedMeasurementRequest);
 
-			final UUID startedExternalMeasurementProcessId = acknowledgedMeasurmentRequest.getExternalMeasurementUuid();
+			final UUID startedExternalMeasurementProcessId = acknowledgedMeasurementRequest.getExternalMeasurementUuid();
 			logger.info("IcmpPingRequestACK received, with process id: " + startedExternalMeasurementProcessId);
 
 			return startedExternalMeasurementProcessId;
@@ -133,16 +129,16 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void validateAcknowledgedMeasurmentRequest(final IcmpPingRequestACK acknowledgedMeasurmentRequest) {
-		logger.debug("validateAcknowledgedMeasurmentRequest started...");
+	private void validateAcknowledgedMeasurementRequest(final IcmpPingRequestACK acknowledgedMeasurementRequest) {
+		logger.debug("validateAcknowledgedMeasurementRequest started...");
 
 		try {
-			Assert.notNull(acknowledgedMeasurmentRequest, "IcmpPingRequestACK is null");
-			Assert.notNull(acknowledgedMeasurmentRequest.getAckOk(), "IcmpPingRequestACK.ackOk is null");
-			Assert.isTrue(acknowledgedMeasurmentRequest.getAckOk().equalsIgnoreCase("OK"), "IcmpPingRequestACK is null");
+			Assert.notNull(acknowledgedMeasurementRequest, "IcmpPingRequestACK is null");
+			Assert.notNull(acknowledgedMeasurementRequest.getAckOk(), "IcmpPingRequestACK.ackOk is null");
+			Assert.isTrue(acknowledgedMeasurementRequest.getAckOk().equalsIgnoreCase("OK"), "IcmpPingRequestACK is not valid");
 
 		} catch (final Exception ex) {
-			logger.warn("External pingMonitorProvider replied invalid ack : " + ex);
+			logger.debug("External pingMonitorProvider replied invalid ack : " + ex);
 
 			throw new ArrowheadException("External pingMonitorProvider replied invalid ack", ex);
 		}
@@ -189,16 +185,15 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	private SystemRequestDTO getPingMonitorSystemRequestDTO() {
 		logger.debug("getPingMonitorSystemRequestDTO started...");
 
-		final SystemRequestDTO system = new SystemRequestDTO();
-		system.setSystemName(externalPingMonitorName);
-		system.setAddress(externalPingMonitorAddress);
-		system.setPort(externalPingMonitorPort);
-		system.setMetadata(null);
-		if (pingMonitorSecure) {
-			system.setAuthenticationInfo(externalPingMonitorAuthInfo);
+		if (pingMonitorSystem == null) {
+			pingMonitorSystem = new SystemRequestDTO();
+			pingMonitorSystem.setSystemName(externalPingMonitorName);
+			pingMonitorSystem.setAddress(externalPingMonitorAddress);
+			pingMonitorSystem.setPort(externalPingMonitorPort);
+			pingMonitorSystem.setMetadata(null);
 		}
 
-		return system;
+		return pingMonitorSystem;
 	}
 
 }

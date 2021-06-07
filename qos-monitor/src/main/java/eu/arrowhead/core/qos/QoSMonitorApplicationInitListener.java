@@ -108,7 +108,14 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
 		logger.debug("getRequiredCoreSystemServiceUris started...");
 
-		final List<CoreSystemService> result = new ArrayList<>(8);
+		int requiredCoreSystemServiceByExternalMonitoring = 0;
+		if (monitorType.equals(MonitorProviderType.DEFAULTEXTERNAL)) {
+			requiredCoreSystemServiceByExternalMonitoring += 2;
+		}else if (monitorType.equals(MonitorProviderType.ORCHESTRATEDEXTERNAL)) {
+			requiredCoreSystemServiceByExternalMonitoring += 3;
+		}
+
+		final List<CoreSystemService> result = new ArrayList<>(5 + requiredCoreSystemServiceByExternalMonitoring);
 
 		if (gatekeeperIsPresent) {
 			result.add(CoreSystemService.GATEKEEPER_PULL_CLOUDS); 
@@ -138,14 +145,17 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 		final ApplicationContext appContext = event.getApplicationContext();
 		@SuppressWarnings("unchecked")
 		final Map<String,Object> context = appContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
+		standaloneMode = context.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
 
-		final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
+		if (!standaloneMode) {
+			final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
 
-		final UriComponents queryAll = createQueryAllUri(scheme);
-		context.put(CoreCommonConstants.SR_QUERY_ALL, queryAll);
+			final UriComponents queryAll = createQueryAllUri(scheme);
+			context.put(CoreCommonConstants.SR_QUERY_ALL, queryAll);
 
-		final PingMonitorManager pingManager = appContext.getBean(CoreCommonConstants.PING_MONITOR, PingMonitorManager.class);
-		pingManager.init();
+			final PingMonitorManager pingManager = appContext.getBean(CoreCommonConstants.PING_MONITOR, PingMonitorManager.class);
+			pingManager.init();
+		}
 
 	}
 

@@ -22,7 +22,7 @@ public class PingEventBufferElement implements Serializable {
 	private final UUID id;
 	private final long createdAt;
 
-	private final MeasurementMonitoringEvent eventList[];
+	private final MeasurementMonitoringEvent[] eventArray;
 
 	private Logger logger = LogManager.getLogger(PingEventBufferElement.class);
 
@@ -33,22 +33,23 @@ public class PingEventBufferElement implements Serializable {
 	public PingEventBufferElement(final UUID id) {
 		this.id = id;
 		this.createdAt = System.currentTimeMillis();
-		this.eventList = new MeasurementMonitoringEvent[QosMonitorConstants.EVENT_LIST_SIZE];
+		this.eventArray = new MeasurementMonitoringEvent[QosMonitorConstants.EVENT_ARRAY_SIZE];
 
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	public UUID getId() {return id;}
 	public long getCreatedAt() {return createdAt;}
-	public MeasurementMonitoringEvent[] getEventlist() {return eventList;}
+	public MeasurementMonitoringEvent[] getEventArray() {return eventArray;}
 
 	//-------------------------------------------------------------------------------------------------
 	public void addEvent( final int position, final MeasurementMonitoringEvent event) {
 		logger.debug("addEvent started...");
 
-		Assert.isTrue(position < QosMonitorConstants.EVENT_LIST_SIZE, "Invalid eventList position.");
+		Assert.isTrue(position < QosMonitorConstants.EVENT_ARRAY_SIZE, "Invalid eventList position.");
+		Assert.notNull(event, "Event is null");
 
-		eventList[position] = event;
+		eventArray[position] = event;
 	}
 
 }

@@ -95,8 +95,7 @@ public class CoreDefaults {
 	public static final int DEFAULT_QOS_MONITOR_PROVIDER_PORT = 8888;
 	public static final String DEFAULT_QOS_MONITOR_PROVIDER_PATH = "/ping-icmp";
 	public static final boolean DEFAULT_QOS_MONITOR_PROVIDER_SECURE = true;
-	public static final String DEFAULT_QOS_MONITOR_PROVIDER_AUTHINFO = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA+5IuB4MwgKvroJ0LCJu4DdhHno77LHkTW+ufF7+HVOCRgi2BKCtR4PNDkov04pmcjljit8viqnVqca2S7c9YSS+20NnxK5nrql/VYdIg98wakErsE40iP8QI7arxGstn2PP1CFfFx4CzbMWRprr9BvDpD8rwqdeOMPrUzWRlCTpvWDcBUO84CbhAUR1v77MCjPu/DjO26yufQWAaglGpbGy980JtzLZ0BmZzQK929MdD5PBgveKJGz7NA3jALidrVspLkduG25az3zG//1mm6ybwVd3dZuogLlscSAszEeexkfZGUYrQZ6XS0cMKHzhJULRQiU8Rud94zfc3HLPL6QIDAQAB";
-	
+
 	public static final int DEFAULT_RELAY_TEST_BAD_GATEWAY_RETRY_MIN = 30; //in minutes
 	public static final byte DEFAULT_RELAY_TEST_TIME_TO_REPEAT = 35;
 	public static final int DEFAULT_RELAY_TEST_TIMEOUT = 5000; // in milliseconds
