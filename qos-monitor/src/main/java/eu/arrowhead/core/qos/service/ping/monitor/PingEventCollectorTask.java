@@ -75,7 +75,7 @@ public class PingEventCollectorTask implements Runnable {
 			} catch (final InterruptedException ex) {
 
 				logger.debug("PingEventCollectorTask run interrupted");
-				interrupted = false;
+				interrupted = true;
 
 			}catch (final Throwable ex) {
 
