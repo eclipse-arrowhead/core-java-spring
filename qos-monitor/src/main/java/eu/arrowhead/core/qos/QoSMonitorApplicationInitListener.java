@@ -108,14 +108,7 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
 		logger.debug("getRequiredCoreSystemServiceUris started...");
 
-		int requiredCoreSystemServiceByExternalMonitoring = 0;
-		if (monitorType.equals(MonitorProviderType.DEFAULTEXTERNAL)) {
-			requiredCoreSystemServiceByExternalMonitoring += 2;
-		}else if (monitorType.equals(MonitorProviderType.ORCHESTRATEDEXTERNAL)) {
-			requiredCoreSystemServiceByExternalMonitoring += 3;
-		}
-
-		final List<CoreSystemService> result = new ArrayList<>(5 + requiredCoreSystemServiceByExternalMonitoring);
+		final List<CoreSystemService> result = new ArrayList<>(8);
 
 		if (gatekeeperIsPresent) {
 			result.add(CoreSystemService.GATEKEEPER_PULL_CLOUDS); 
