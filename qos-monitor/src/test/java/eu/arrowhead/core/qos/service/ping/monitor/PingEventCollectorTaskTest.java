@@ -1,5 +1,7 @@
 package eu.arrowhead.core.qos.service.ping.monitor;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -13,30 +15,28 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.database.entity.Subscription;
-import eu.arrowhead.common.dto.internal.EventPublishStartDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.shared.EventDTO;
-import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.dto.shared.QosMonitorEventType;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.core.qos.QosMonitorConstants;
+import eu.arrowhead.core.qos.dto.event.monitoringevents.MeasurementMonitoringEvent;
 
 @RunWith(SpringRunner.class)
 public class PingEventCollectorTaskTest {
@@ -57,10 +57,10 @@ public class PingEventCollectorTaskTest {
 
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testRunExpressExecutorOk() {
-
+	public void testRunPingEventCollectorTaskOk() {
 		ReflectionTestUtils.setField(pingEventCollectorTask, "interrupted", false);
 
+		final ArgumentCaptor<PingEventBufferElement> bufferElementValueCapture = ArgumentCaptor.forClass(PingEventBufferElement.class);
 		final EventDTO event = getValidReceivedMeasurementRequestEventDTOForTest();
 
 		try {
@@ -69,7 +69,9 @@ public class PingEventCollectorTaskTest {
 			fail();
 		}
 
+		final PingEventBufferElement formerElement = null;
 		doNothing().when(bufferCleaner).clearBuffer();
+		when(eventBuffer.put(any(), bufferElementValueCapture.capture())).thenReturn(formerElement);
 
 		pingEventCollectorTask.run();
 
@@ -80,11 +82,68 @@ public class PingEventCollectorTaskTest {
 		}
 
 		verify(bufferCleaner, atLeastOnce()).clearBuffer();
+		verify(eventBuffer, times(1)).put(any(), any());
+
+		final PingEventBufferElement bufferElement = bufferElementValueCapture.getValue();
+
+		assertNotNull(bufferElement);
+		assertNotNull(bufferElement.getEventArray());
+
+		final MeasurementMonitoringEvent[] eventArray= bufferElement.getEventArray();
+		assertNotNull(eventArray[QosMonitorConstants.RECEIVED_MONITORING_REQUEST_EVENT_POSITION]);
+		assertNull(eventArray[QosMonitorConstants.STARTED_MONITORING_MEASUREMENT_EVENT_POSITION]);
+		assertNull(eventArray[QosMonitorConstants.FINISHED_MONITORING_MEASUREMENT_EVENT_POSITION]);
+		assertNull(eventArray[QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_POSITION]);
+
 
 		final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField(pingEventCollectorTask, "interrupted");
 		assertTrue(runInterupted);
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRunPingEventCollectorTaskInvalidEventDTO() {
+
+		ReflectionTestUtils.setField(pingEventCollectorTask, "interrupted", false);
+
+		final ArgumentCaptor<PingEventBufferElement> bufferElementValueCapture = ArgumentCaptor.forClass(PingEventBufferElement.class);
+		final EventDTO event = getInValidEventTypeEventDTOForTest();
+
+		try {
+			when(eventQueue.take()).thenReturn(event).thenThrow(InterruptedException.class);
+		} catch (final InterruptedException ex) {
+			fail();
+		}
+
+		final PingEventBufferElement formerElement = null;
+		doNothing().when(bufferCleaner).clearBuffer();
+		when(eventBuffer.put(any(), bufferElementValueCapture.capture())).thenReturn(formerElement);
+
+		pingEventCollectorTask.run();
+
+		try {
+			verify(eventQueue, times(2)).take();
+		} catch (final InterruptedException ex) {
+			fail();
+		}
+
+		verify(bufferCleaner, atLeastOnce()).clearBuffer();
+		verify(eventBuffer, times(1)).put(any(), any());
+
+		final PingEventBufferElement bufferElement = bufferElementValueCapture.getValue();
+
+		assertNotNull(bufferElement);
+		assertNotNull(bufferElement.getEventArray());
+
+		final MeasurementMonitoringEvent[] eventArray= bufferElement.getEventArray();
+		assertNull(eventArray[QosMonitorConstants.RECEIVED_MONITORING_REQUEST_EVENT_POSITION]);
+		assertNull(eventArray[QosMonitorConstants.STARTED_MONITORING_MEASUREMENT_EVENT_POSITION]);
+		assertNull(eventArray[QosMonitorConstants.FINISHED_MONITORING_MEASUREMENT_EVENT_POSITION]);
+		assertNull(eventArray[QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_POSITION]);
+
+		final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField(pingEventCollectorTask, "interrupted");
+		assertTrue(runInterupted);
+	}
 
 	//=================================================================================================
 	// assistant methods
