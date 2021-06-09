@@ -75,16 +75,18 @@ public class ExternalMonitorOrchestrationRequestFactory {
 	public SystemRequestDTO createExternalMonitorSystemRequestDTO() {
 		logger.debug("createExternalMonitorSystemRequestDTO started...");
 
-		final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
-
 		if(requesterSystem == null) {
 			requesterSystem = new SystemRequestDTO();
 			requesterSystem.setSystemName(coreSystemName);
 			requesterSystem.setAddress(coreSystemAddress);
 			requesterSystem.setPort(coreSystemPort);
 			requesterSystem.setMetadata(null);
+
 			if (sslProperties.isSslEnabled()) {
+
+				final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
 				requesterSystem.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+
 			}
 		}
 
