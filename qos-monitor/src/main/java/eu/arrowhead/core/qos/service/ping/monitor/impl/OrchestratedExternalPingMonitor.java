@@ -77,7 +77,7 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 				initPingMonitorProvider();
 			} catch (final Exception ex) {
 
-				logger.debug("Unsuccessfull ping measurement: because of >> Unsuccessfull external ping Monitor provider orchestration!");
+				logger.debug("unsuccessful ping measurement: because of >> unsuccessful external ping Monitor provider orchestration!");
 
 				return null;
 			}

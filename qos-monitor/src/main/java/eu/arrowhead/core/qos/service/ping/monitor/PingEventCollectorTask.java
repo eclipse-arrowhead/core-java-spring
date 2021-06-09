@@ -145,11 +145,7 @@ public class PingEventCollectorTask implements Runnable {
 				throw new InvalidParameterException(eventType + NOT_SUPPORTED_EVENT_TYPE);
 			}
 
-		} catch (final ArrowheadException ex) {
-
-			logger.debug(ex.getMessage());
-
-		}catch (final IllegalArgumentException ex) {
+		} catch (final ArrowheadException | IllegalArgumentException ex) {
 
 			logger.debug(ex.getMessage());
 
