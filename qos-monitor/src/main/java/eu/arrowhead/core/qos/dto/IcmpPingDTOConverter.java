@@ -45,15 +45,15 @@ public class IcmpPingDTOConverter {
 		validateIcmpResponseDTO(icmpResponseDTO);
 
 		final IcmpPingResponse icmpResponse = new IcmpPingResponse();
-		icmpResponse.setDuration(icmpResponseDTO.getDuration());
+		icmpResponse.setDuration(icmpResponseDTO.getDuration() != null ? icmpResponseDTO.getDuration() : 0 );
 		icmpResponse.setErrorMessage(icmpResponseDTO.getErrorMessage());
 		icmpResponse.setHost(icmpResponseDTO.getHost());
-		icmpResponse.setRtt(icmpResponseDTO.getRtt());
-		icmpResponse.setSize(icmpResponseDTO.getSize());
+		icmpResponse.setRtt(icmpResponseDTO.getRtt() != null ? icmpResponseDTO.getRtt() : 0);
+		icmpResponse.setSize(icmpResponseDTO.getSize() != null ? icmpResponseDTO.getSize() : 0);
 		icmpResponse.setSuccessFlag(icmpResponseDTO.isSuccessFlag());
 		icmpResponse.setThrowable(icmpResponseDTO.getThrowable());
 		icmpResponse.setTimeoutFlag(icmpResponseDTO.isTimeoutFlag());
-		icmpResponse.setTtl(icmpResponseDTO.getTtl());
+		icmpResponse.setTtl(icmpResponseDTO.getTtl() != null ? icmpResponseDTO.getTtl() : 0);
 
 		return icmpResponse;
 	}
@@ -65,11 +65,6 @@ public class IcmpPingDTOConverter {
 		try {
 
 			Assert.notNull(icmpResponseDTO, "IcmpResponseDTO is null");
-			Assert.notNull(icmpResponseDTO.getDuration(), "Duration is null");
-			Assert.notNull(icmpResponseDTO.getHost(), "Host is null");
-			Assert.notNull(icmpResponseDTO.getRtt(), "Rtt is null");
-			Assert.notNull(icmpResponseDTO.getSize(), "Size is null");
-			Assert.notNull(icmpResponseDTO.getTtl(), "Ttl is null");
 
 		} catch (final IllegalArgumentException ex) {
 
