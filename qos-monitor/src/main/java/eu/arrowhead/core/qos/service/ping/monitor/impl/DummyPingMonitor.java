@@ -35,8 +35,10 @@ public class DummyPingMonitor extends AbstractPingMonitor{
 			throw new InvalidParameterException("Address" + EMPTY_OR_NULL_ERROR_MESSAGE);
 		}
 
-		final List<IcmpPingResponse> responseList = new ArrayList<>(pingMeasurementProperties.getTimeToRepeat());
-		for (int count = 0; count < pingMeasurementProperties.getTimeToRepeat(); count ++) {
+		 final int timeToRepeat = pingMeasurementProperties.getTimeToRepeat();
+
+		final List<IcmpPingResponse> responseList = new ArrayList<>(timeToRepeat);
+		for (int count = 0; count < timeToRepeat; count ++) {
 			final IcmpPingResponse response;
 			response = new IcmpPingResponse();
 			response.setErrorMessage(DUMMY_PING_PROVIDER_ERROR_MESSAGE);
