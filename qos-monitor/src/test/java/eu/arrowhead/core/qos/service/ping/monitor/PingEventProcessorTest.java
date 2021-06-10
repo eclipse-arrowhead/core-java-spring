@@ -20,9 +20,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.EventDTO;
 import eu.arrowhead.common.dto.shared.IcmpPingResponseDTO;
@@ -41,12 +38,6 @@ public class PingEventProcessorTest {
 
 	@Mock
 	private ConcurrentHashMap<UUID, PingEventBufferElement> eventBuffer;
-
-	private static final ObjectMapper mapper = new ObjectMapper();
-
-	static {
-		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-	}
 
 	//=================================================================================================
 	// methods
