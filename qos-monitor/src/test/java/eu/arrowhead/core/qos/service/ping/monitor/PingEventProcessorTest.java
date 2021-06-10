@@ -49,11 +49,17 @@ public class PingEventProcessorTest {
 		final UUID processId = null;
 		final long measurementExpiryTime = 1L;
 
-		when(eventBuffer.get(any())).thenReturn(null);
+		try {
 
-		pingEventProcessor.processEvents(processId, measurementExpiryTime);
+			pingEventProcessor.processEvents(processId, measurementExpiryTime);
 
-		verify(eventBuffer,  never()).get(any());
+		} catch (final IllegalArgumentException ex) {
+
+			verify(eventBuffer,  never()).get(any());
+
+			throw ex;
+		}
+
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -63,9 +69,16 @@ public class PingEventProcessorTest {
 		final UUID processId = UUID.randomUUID();
 		final long measurementExpiryTime = 0L;
 
-		pingEventProcessor.processEvents(processId, measurementExpiryTime);
+		try {
 
-		verify(eventBuffer, never()).get(any());
+			pingEventProcessor.processEvents(processId, measurementExpiryTime);
+
+		} catch (final IllegalArgumentException ex) {
+
+			verify(eventBuffer,  never()).get(any());
+
+			throw ex;
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -75,9 +88,16 @@ public class PingEventProcessorTest {
 		final UUID processId = UUID.randomUUID();
 		final long measurementExpiryTime = System.currentTimeMillis();
 
-		pingEventProcessor.processEvents(processId, measurementExpiryTime);
+		try {
 
-		verify(eventBuffer, never()).get(any());
+			pingEventProcessor.processEvents(processId, measurementExpiryTime);
+
+		} catch (final IllegalArgumentException ex) {
+
+			verify(eventBuffer,  never()).get(any());
+
+			throw ex;
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -92,10 +112,17 @@ public class PingEventProcessorTest {
 
 		when(eventBuffer.get(any())).thenReturn(bufferElement);
 
-		pingEventProcessor.processEvents(processId, measurementExpiryTime);
+		try {
 
-		verify(eventBuffer, atLeastOnce()).get(any());
-		verify(eventBuffer, never()).remove(any());
+			pingEventProcessor.processEvents(processId, measurementExpiryTime);
+
+		} catch (final ArrowheadException ex) {
+
+			verify(eventBuffer, atLeastOnce()).get(any());
+			verify(eventBuffer, never()).remove(any());
+
+			throw ex;
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -110,10 +137,17 @@ public class PingEventProcessorTest {
 
 		when(eventBuffer.get(any())).thenReturn(bufferElement);
 
-		pingEventProcessor.processEvents(processId, measurementExpiryTime);
+		try {
 
-		verify(eventBuffer, atLeastOnce()).get(any());
-		verify(eventBuffer, never()).remove(any());
+			pingEventProcessor.processEvents(processId, measurementExpiryTime);
+
+		} catch (final ArrowheadException ex) {
+
+			verify(eventBuffer, atLeastOnce()).get(any());
+			verify(eventBuffer, never()).remove(any());
+
+			throw ex;
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -130,10 +164,17 @@ public class PingEventProcessorTest {
 
 		when(eventBuffer.get(any())).thenReturn(bufferElement);
 
-		pingEventProcessor.processEvents(processId, measurementExpiryTime);
+		try {
 
-		verify(eventBuffer, times(1)).get(any());
-		verify(eventBuffer, times(1)).remove(any());
+			pingEventProcessor.processEvents(processId, measurementExpiryTime);
+
+		} catch (final ArrowheadException ex) {
+
+			verify(eventBuffer, times(1)).get(any());
+			verify(eventBuffer, times(1)).remove(any());
+
+			throw ex;
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -156,10 +197,17 @@ public class PingEventProcessorTest {
 
 		when(eventBuffer.get(any())).thenReturn(bufferElement);
 
-		pingEventProcessor.processEvents(processId, measurementExpiryTime);
+		try {
 
-		verify(eventBuffer, times(1)).get(any());
-		verify(eventBuffer, times(1)).remove(any());
+			pingEventProcessor.processEvents(processId, measurementExpiryTime);
+
+		} catch (final ArrowheadException ex) {
+
+			verify(eventBuffer, times(1)).get(any());
+			verify(eventBuffer, times(1)).remove(any());
+
+			throw ex;
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -226,26 +274,21 @@ public class PingEventProcessorTest {
 
 		when(eventBuffer.get(any())).thenReturn(bufferElement);
 
-		pingEventProcessor.processEvents(processId, measurementExpiryTime);
+		try {
 
-		verify(eventBuffer, atLeastOnce()).get(any());
-		verify(eventBuffer, atLeastOnce()).remove(any());
+			pingEventProcessor.processEvents(processId, measurementExpiryTime);
+
+		} catch (final ArrowheadException ex) {
+
+			verify(eventBuffer, atLeastOnce()).get(any());
+			verify(eventBuffer, atLeastOnce()).remove(any());
+
+			throw ex;
+		}
 	}
 
 	//=================================================================================================
 	// assistant methods
-
-	//-------------------------------------------------------------------------------------------------
-	private EventDTO getInValidEventTypeEventDTOForTest() {
-
-		final EventDTO event = new EventDTO();
-		event.setEventType("UNKNOWN_MEAUSREMENT_EVENT");
-		event.setMetaData(getValidMeasuermentEventDTOMetadtaProcessIdForTest());
-		event.setPayload(getValidMeasuermentEventDTOEmptyPayloadForTest());
-		event.setTimeStamp(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
-
-		return event;
-	}
 
 	//-------------------------------------------------------------------------------------------------
 	private EventDTO getValidReceivedMeasurementRequestEventDTOForTest() {
