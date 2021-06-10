@@ -38,7 +38,7 @@ public class DummyPingMonitorTest {
 
 		} catch (final InvalidParameterException ex) {
 
-			verify(pingMeasurementProperties,  never()).getTimeToRepeat();
+			verify(pingMeasurementProperties, never()).getTimeToRepeat();
 
 			throw ex;
 		}
@@ -56,7 +56,7 @@ public class DummyPingMonitorTest {
 
 		} catch (final InvalidParameterException ex) {
 
-			verify(pingMeasurementProperties,  never()).getTimeToRepeat();
+			verify(pingMeasurementProperties, never()).getTimeToRepeat();
 
 			throw ex;
 		}
