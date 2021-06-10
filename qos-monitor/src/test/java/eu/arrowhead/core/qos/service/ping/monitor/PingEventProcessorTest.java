@@ -20,7 +20,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -93,12 +92,30 @@ public class PingEventProcessorTest {
 	//-------------------------------------------------------------------------------------------------
 	@Ignore
 	@Test(expected = ArrowheadException.class)
-	public void testProcessEventsNoEventWithinMeasurementExpiryTime() {
+	public void testProcessEventsNoBufferElementWithinMeasurementExpiryTime() {
 
 		final UUID processId = UUID.randomUUID();
 		final long measurementExpiryTime = System.currentTimeMillis() + 10000;
 
 		final PingEventBufferElement bufferElement = null;
+
+		when(eventBuffer.get(any())).thenReturn(bufferElement);
+
+		pingEventProcessor.processEvents(processId, measurementExpiryTime);
+
+		verify(eventBuffer, atLeastOnce()).get(any());
+		verify(eventBuffer, never()).remove(any());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Ignore
+	@Test(expected = ArrowheadException.class)
+	public void testProcessEventsNoEventWithinMeasurementExpiryTime() {
+
+		final UUID processId = UUID.randomUUID();
+		final long measurementExpiryTime = System.currentTimeMillis() + 10000;
+
+		final PingEventBufferElement bufferElement = new PingEventBufferElement(processId);
 
 		when(eventBuffer.get(any())).thenReturn(bufferElement);
 
@@ -129,6 +146,32 @@ public class PingEventProcessorTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testProcessEventsReceivedAndStartAndInterruptedEventPresent() {
+
+		final UUID processId = UUID.randomUUID();
+		final long measurementExpiryTime = System.currentTimeMillis() + 10000;
+
+		final PingEventBufferElement bufferElement = new PingEventBufferElement(processId);
+		bufferElement.addEvent(
+				QosMonitorConstants.RECEIVED_MONITORING_REQUEST_EVENT_POSITION,
+				EventDTOConverter.convertToReceivedMonitoringRequestEvent(getValidReceivedMeasurementRequestEventDTOForTest()));
+		bufferElement.addEvent(
+				QosMonitorConstants.STARTED_MONITORING_MEASUREMENT_EVENT_POSITION,
+				EventDTOConverter.convertToStartedMonitoringMeasurementEvent(getValidStartEventDTOForTest()));
+		bufferElement.addEvent(
+				QosMonitorConstants.INTERRUPTED_MONITORING_MEASUREMENT_EVENT_POSITION,
+				EventDTOConverter.convertToInterruptedMonitoringMeasurementEvent(getValidInterruptedDTOForTest()));
+
+		when(eventBuffer.get(any())).thenReturn(bufferElement);
+
+		pingEventProcessor.processEvents(processId, measurementExpiryTime);
+
+		verify(eventBuffer, times(1)).get(any());
+		verify(eventBuffer, times(1)).remove(any());
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testProcessEventsFinishedEventPresent() {
 
@@ -146,6 +189,56 @@ public class PingEventProcessorTest {
 
 		verify(eventBuffer, times(1)).get(any());
 		verify(eventBuffer, times(1)).remove(any());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testProcessEventsReceivedAndStartAndFinishedEventPresent() {
+
+		final UUID processId = UUID.randomUUID();
+		final long measurementExpiryTime = System.currentTimeMillis() + 10000;
+
+		final PingEventBufferElement bufferElement = new PingEventBufferElement(processId);
+		bufferElement.addEvent(
+				QosMonitorConstants.RECEIVED_MONITORING_REQUEST_EVENT_POSITION,
+				EventDTOConverter.convertToReceivedMonitoringRequestEvent(getValidReceivedMeasurementRequestEventDTOForTest()));
+		bufferElement.addEvent(
+				QosMonitorConstants.STARTED_MONITORING_MEASUREMENT_EVENT_POSITION,
+				EventDTOConverter.convertToStartedMonitoringMeasurementEvent(getValidStartEventDTOForTest()));
+		bufferElement.addEvent(
+				QosMonitorConstants.FINISHED_MONITORING_MEASUREMENT_EVENT_POSITION,
+				EventDTOConverter.convertToFinishedMonitoringMeasurementEvent(getValidFinishedEventDTOForTest()));
+
+		when(eventBuffer.get(any())).thenReturn(bufferElement);
+
+		pingEventProcessor.processEvents(processId, measurementExpiryTime);
+
+		verify(eventBuffer, times(1)).get(any());
+		verify(eventBuffer, times(1)).remove(any());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Ignore
+	@Test(expected = ArrowheadException.class)
+	public void testProcessEventsReceivedAndStartEventPresentButFinishedEventNotPresent() {
+
+		final UUID processId = UUID.randomUUID();
+		final long measurementExpiryTime = System.currentTimeMillis() + 10000;
+
+		final PingEventBufferElement bufferElement = new PingEventBufferElement(processId);
+		bufferElement.addEvent(
+				QosMonitorConstants.RECEIVED_MONITORING_REQUEST_EVENT_POSITION,
+				EventDTOConverter.convertToReceivedMonitoringRequestEvent(getValidReceivedMeasurementRequestEventDTOForTest()));
+		bufferElement.addEvent(
+				QosMonitorConstants.STARTED_MONITORING_MEASUREMENT_EVENT_POSITION,
+				EventDTOConverter.convertToStartedMonitoringMeasurementEvent(getValidStartEventDTOForTest()));
+
+		when(eventBuffer.get(any())).thenReturn(bufferElement);
+
+		pingEventProcessor.processEvents(processId, measurementExpiryTime);
+
+		verify(eventBuffer, atLeastOnce()).get(any());
+		verify(eventBuffer, atLeastOnce()).remove(any());
 	}
 
 	//=================================================================================================
