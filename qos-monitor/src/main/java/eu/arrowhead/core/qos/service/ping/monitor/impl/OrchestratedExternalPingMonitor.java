@@ -262,7 +262,14 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 		logger.debug("initPingMonitorProvider started...");
 
 		final OrchestrationFormRequestDTO request = orchestrationRequestFactory.createExternalMonitorOrchestrationRequest();
+		if (request == null) {
+			throw new ArrowheadException("Orchestration request form is null");
+		}
+
 		final OrchestrationResponseDTO result = driver.queryOrchestrator(request);
+		if (result == null || result.getResponse().isEmpty()) {
+			throw new ArrowheadException("Orchestration result " + EMPTY_OR_NULL_ERROR_MESSAGE);
+		}
 
 		cachedPingMonitorProvider = selectProvider(result);
 
