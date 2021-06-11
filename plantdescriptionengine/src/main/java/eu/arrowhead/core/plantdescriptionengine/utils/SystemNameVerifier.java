@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 public class SystemNameVerifier {
 
     public static final int COMMON_NAME_PART_MAX_LENGTH = 63;
-    public static final String COMMON_NAME_PART_PATTERN_STRING = "^[A-Za-z](?:[0-9A-Za-z-]*[0-9A-Za-z])?$";
+    public static final String COMMON_NAME_PART_PATTERN_STRING = "^[a-z](?:[0-9a-z-]*[0-9a-z])?$";
     private static final Pattern commonNamePartPattern;
 
     static {

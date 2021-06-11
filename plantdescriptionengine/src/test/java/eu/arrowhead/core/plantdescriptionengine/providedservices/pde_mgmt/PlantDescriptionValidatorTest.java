@@ -410,7 +410,7 @@ public class PlantDescriptionValidatorTest {
 
         final PdeSystemDto system = new PdeSystemDto.Builder()
             .systemId(systemId)
-            .systemName("X")
+            .systemName("x")
             .ports(ports)
             .build();
 
@@ -1031,7 +1031,7 @@ public class PlantDescriptionValidatorTest {
     @Test
     public void shouldReportNonUniqueSystem() {
         final String systemIdB = "Sys-B";
-        final String systemName = "XYZ";
+        final String systemName = "xyz";
         final Map<String, String> metadata = Map.of("a", "1");
         final PlantDescriptionEntryDto entry = new PlantDescriptionEntryDto.Builder()
             .id(22)
@@ -1093,7 +1093,7 @@ public class PlantDescriptionValidatorTest {
             .active(true)
             .systems(List.of(
                 new PdeSystemDto.Builder()
-                    .systemId("X")
+                    .systemId("x")
                     .metadata(Map.of("x", "y"))
                     .build()
             ))
@@ -1134,8 +1134,8 @@ public class PlantDescriptionValidatorTest {
             .active(false)
             .systems(List.of(
                 new PdeSystemDto.Builder()
-                    .systemId("x")
-                    .systemName("X")
+                    .systemId("x-id")
+                    .systemName("x")
                     .ports(ports)
                     .build()
             ))
