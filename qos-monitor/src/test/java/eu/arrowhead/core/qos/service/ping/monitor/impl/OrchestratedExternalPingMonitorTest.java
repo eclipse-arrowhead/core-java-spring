@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -456,6 +457,148 @@ public class OrchestratedExternalPingMonitorTest {
 		verify(processor, never()).processEvents(any(),anyLong());
 	}
 
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testPingCachedProviderIsNullAndOrchestrationResponseIsEmpty() {
+
+		final OrchestrationResultDTO cachedPingMonitorProvider = null;
+		ReflectionTestUtils.setField(monitor, "cachedPingMonitorProvider", cachedPingMonitorProvider);
+
+		final String address = "localhost";
+
+		final IcmpPingRequestACK ack = new IcmpPingRequestACK();
+		ack.setAckOk("OK");
+		ack.setExternalMeasurementUuid(UUID.randomUUID());
+
+		final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO();
+
+		final List<IcmpPingResponse> response =  List.of(new IcmpPingResponse());
+
+		when(driver.requestExternalPingMonitorService(any(), any())).thenReturn(ack);
+		when(processor.processEvents(any(), anyLong())).thenReturn(response);
+
+		when(orchestrationRequestFactory.createExternalMonitorOrchestrationRequest()).thenReturn(orchestrationForm);
+		when(driver.queryOrchestrator(any())).thenReturn(getEmptyOrchestrationResponseDTOForTests());
+		doNothing().when(driver).unsubscribeFromPingMonitorEvents();
+		doNothing().when(driver).subscribeToExternalPingMonitorEvents(any());
+
+		final List<IcmpPingResponse> pingResult = monitor.ping(address);
+
+		assertNull(pingResult);
+
+		verify(pingMeasurementProperties, never()).getTimeout();
+		verify(pingMeasurementProperties, never()).getTimeToRepeat();
+		verify(driver, never()).requestExternalPingMonitorService(any(),any());
+		verify(processor, never()).processEvents(any(),anyLong());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testPingCachedProviderIsNullAndQueryOrchestratorThrowException() {
+
+		final OrchestrationResultDTO cachedPingMonitorProvider = null;
+		ReflectionTestUtils.setField(monitor, "cachedPingMonitorProvider", cachedPingMonitorProvider);
+
+		final String address = "localhost";
+
+		final IcmpPingRequestACK ack = new IcmpPingRequestACK();
+		ack.setAckOk("OK");
+		ack.setExternalMeasurementUuid(UUID.randomUUID());
+
+		final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO();
+
+		final List<IcmpPingResponse> response =  List.of(new IcmpPingResponse());
+
+		when(driver.requestExternalPingMonitorService(any(), any())).thenReturn(ack);
+		when(processor.processEvents(any(), anyLong())).thenReturn(response);
+
+		when(orchestrationRequestFactory.createExternalMonitorOrchestrationRequest()).thenReturn(orchestrationForm);
+		when(driver.queryOrchestrator(any())).thenThrow(new ArrowheadException(""));
+		doNothing().when(driver).unsubscribeFromPingMonitorEvents();
+		doNothing().when(driver).subscribeToExternalPingMonitorEvents(any());
+
+		final List<IcmpPingResponse> pingResult = monitor.ping(address);
+
+		assertNull(pingResult);
+
+		verify(pingMeasurementProperties, never()).getTimeout();
+		verify(pingMeasurementProperties, never()).getTimeToRepeat();
+		verify(driver, never()).requestExternalPingMonitorService(any(),any());
+		verify(processor, never()).processEvents(any(),anyLong());
+	}
+
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testPingCachedProviderIsNullAndQueryOrchestratorThrowIllegalArgumentException() {
+
+		final OrchestrationResultDTO cachedPingMonitorProvider = null;
+		ReflectionTestUtils.setField(monitor, "cachedPingMonitorProvider", cachedPingMonitorProvider);
+
+		final String address = "localhost";
+
+		final IcmpPingRequestACK ack = new IcmpPingRequestACK();
+		ack.setAckOk("OK");
+		ack.setExternalMeasurementUuid(UUID.randomUUID());
+
+		final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO();
+
+		final List<IcmpPingResponse> response =  List.of(new IcmpPingResponse());
+
+		when(driver.requestExternalPingMonitorService(any(), any())).thenReturn(ack);
+		when(processor.processEvents(any(), anyLong())).thenReturn(response);
+
+		when(orchestrationRequestFactory.createExternalMonitorOrchestrationRequest()).thenReturn(orchestrationForm);
+		when(driver.queryOrchestrator(any())).thenThrow(new IllegalArgumentException(""));
+		doNothing().when(driver).unsubscribeFromPingMonitorEvents();
+		doNothing().when(driver).subscribeToExternalPingMonitorEvents(any());
+
+		final List<IcmpPingResponse> pingResult = monitor.ping(address);
+
+		assertNull(pingResult);
+
+		verify(pingMeasurementProperties, never()).getTimeout();
+		verify(pingMeasurementProperties, never()).getTimeToRepeat();
+		verify(driver, never()).requestExternalPingMonitorService(any(),any());
+		verify(processor, never()).processEvents(any(),anyLong());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testPingCachedProviderIsNullAndSubscribeThrowException() {
+
+		final OrchestrationResultDTO cachedPingMonitorProvider = null;
+		ReflectionTestUtils.setField(monitor, "cachedPingMonitorProvider", cachedPingMonitorProvider);
+
+		final String address = "localhost";
+
+		final IcmpPingRequestACK ack = new IcmpPingRequestACK();
+		ack.setAckOk("OK");
+		ack.setExternalMeasurementUuid(UUID.randomUUID());
+
+		final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO();
+
+		final List<IcmpPingResponse> response = List.of(new IcmpPingResponse());
+
+		when(driver.requestExternalPingMonitorService(any(), any())).thenReturn(ack);
+		when(processor.processEvents(any(), anyLong())).thenReturn(response);
+
+		when(orchestrationRequestFactory.createExternalMonitorOrchestrationRequest()).thenReturn(orchestrationForm);
+		when(driver.queryOrchestrator(any())).thenReturn(getValidOrchestrationResponseDTOForTests());
+		doNothing().when(driver).unsubscribeFromPingMonitorEvents();
+		doThrow(new ArrowheadException("")).when(driver).subscribeToExternalPingMonitorEvents(any());
+
+		final List<IcmpPingResponse> pingResult = monitor.ping(address);
+
+		assertNull(pingResult);
+
+		verify(pingMeasurementProperties, never()).getTimeout();
+		verify(pingMeasurementProperties, never()).getTimeToRepeat();
+		verify(driver, never()).requestExternalPingMonitorService(any(),any());
+		verify(processor, never()).processEvents(any(),anyLong());
+	}
+
 	//=================================================================================================
 	// assistant methods
 
@@ -472,6 +615,15 @@ public class OrchestratedExternalPingMonitorTest {
 	private OrchestrationResponseDTO getNullOrchestrationResponseDTOForTests() {
 
 		return null;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private OrchestrationResponseDTO getEmptyOrchestrationResponseDTOForTests() {
+
+		final OrchestrationResponseDTO response = new OrchestrationResponseDTO();
+		response.setResponse(List.of());
+
+		return response;
 	}
 
 	//-------------------------------------------------------------------------------------------------
