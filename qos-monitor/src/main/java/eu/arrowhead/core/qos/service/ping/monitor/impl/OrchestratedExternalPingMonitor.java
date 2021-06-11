@@ -145,17 +145,25 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 				validateAcknowledgedMeasurementRequest(acknowledgedMeasurementRequest);
 
 				final UUID startedExternalMeasurementProcessId = acknowledgedMeasurementRequest.getExternalMeasurementUuid();
-				logger.debug("IcmpPingRequestACK received, with process id: " + startedExternalMeasurementProcessId);
+				if (startedExternalMeasurementProcessId == null) {
+					throw new ArrowheadException("External Ping Monitor returned ack without processId.");
+				}
+
+				logger.info("IcmpPingRequestACK received, with process id: " + startedExternalMeasurementProcessId);
 
 				return startedExternalMeasurementProcessId;
 
-			} catch (final Exception ex) {
-				logger.debug(ex);
+			} catch (final ArrowheadException ex) {
+				logger.info(ex);
 
 				cachedPingMonitorProvider = null;
 
-				throw new ArrowheadException("External Ping Monitor is not available at: " + address );
+				throw ex;
+			} catch (final Exception ex) {
+				logger.info(ex);
 
+				cachedPingMonitorProvider = null;
+				throw new ArrowheadException("External Ping Monitor is not available at: " + address );
 			}
 
 	}

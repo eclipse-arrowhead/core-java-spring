@@ -123,10 +123,17 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 			validateAcknowledgedMeasurementRequest(acknowledgedMeasurementRequest);
 
 			final UUID startedExternalMeasurementProcessId = acknowledgedMeasurementRequest.getExternalMeasurementUuid();
+			if (startedExternalMeasurementProcessId == null) {
+				throw new ArrowheadException("External Ping Monitor returned ack without processId.");
+			}
 			logger.info("IcmpPingRequestACK received, with process id: " + startedExternalMeasurementProcessId);
 
 			return startedExternalMeasurementProcessId;
 
+		} catch (final ArrowheadException ex) {
+			logger.info(ex);
+
+			throw ex;
 		} catch (final Exception ex) {
 			logger.info(ex);
 
