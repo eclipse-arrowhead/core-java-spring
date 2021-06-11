@@ -47,7 +47,7 @@ public class OrchestratedExternalPingMonitorTest {
 
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testPingAdressAddressInNull() {
+	public void testPingAdressAddressIsNull() {
 
 		final String address = null;
 		try {

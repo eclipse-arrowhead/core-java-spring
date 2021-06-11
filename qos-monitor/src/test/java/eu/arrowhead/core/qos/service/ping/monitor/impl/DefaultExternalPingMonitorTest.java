@@ -63,7 +63,7 @@ public class DefaultExternalPingMonitorTest {
 
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testPingAdressAddressInNull() {
+	public void testPingAdressAddressIsNull() {
 
 		final String address = null;
 		try {
@@ -84,7 +84,7 @@ public class DefaultExternalPingMonitorTest {
 
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testPingAdressAddressInEmpty() {
+	public void testPingAdressAddressIsEmpty() {
 
 		final String address = "";
 		try {
