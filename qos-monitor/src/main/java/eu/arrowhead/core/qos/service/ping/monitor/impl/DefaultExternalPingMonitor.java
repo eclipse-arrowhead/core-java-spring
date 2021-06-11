@@ -19,6 +19,7 @@ import eu.arrowhead.common.dto.shared.IcmpPingRequestACK;
 import eu.arrowhead.common.dto.shared.IcmpPingRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.QosMonitorConstants;
 import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.service.QoSMonitorDriver;
@@ -34,6 +35,7 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	//-------------------------------------------------------------------------------------------------
 	private static final int ICMP_TTL = 255;
 	private static final int OVERHEAD_MULTIPLIER = 2;
+	private static final String EMPTY_OR_NULL_ERROR_MESSAGE = " is empty or null";
 
 	@Autowired
 	private QoSMonitorDriver driver;
@@ -70,6 +72,10 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	@Override
 	public List<IcmpPingResponse> ping(final String address) {
 		logger.debug("ping statred...");
+
+		if (Utilities.isEmpty(address)) {
+			throw new InvalidParameterException("Address" + EMPTY_OR_NULL_ERROR_MESSAGE);
+		}
 
 		final int timeOut = calculateTimeOut();
 		final UUID measurementProcessId = requestExternalMeasurement(address);

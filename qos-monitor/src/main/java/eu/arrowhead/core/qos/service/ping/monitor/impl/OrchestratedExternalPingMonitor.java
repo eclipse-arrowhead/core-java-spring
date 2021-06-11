@@ -40,6 +40,7 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 	//-------------------------------------------------------------------------------------------------
 	private static final int ICMP_TTL = 255;
 	private static final int OVERHEAD_MULTIPLIER = 2;
+	private static final String EMPTY_OR_NULL_ERROR_MESSAGE = " is empty or null";
 
 	private OrchestrationResultDTO cachedPingMonitorProvider = null;
 
@@ -67,6 +68,10 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 	@Override
 	public List<IcmpPingResponse> ping(final String address) {
 		logger.debug("ping statred...");
+
+		if (Utilities.isEmpty(address)) {
+			throw new InvalidParameterException("Address" + EMPTY_OR_NULL_ERROR_MESSAGE);
+		}
 
 		if (cachedPingMonitorProvider != null){
 
