@@ -73,7 +73,7 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 			throw new InvalidParameterException("Address" + EMPTY_OR_NULL_ERROR_MESSAGE);
 		}
 
-		if (cachedPingMonitorProvider != null){
+		if (cachedPingMonitorProvider != null && cachedPingMonitorProvider.getProvider() != null){
 
 			logger.debug("starting external ping Monitoring service measurement: " + cachedPingMonitorProvider.getProvider().toString());
 
