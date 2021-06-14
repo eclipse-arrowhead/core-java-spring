@@ -36,6 +36,7 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	private static final int ICMP_TTL = 255;
 	private static final int OVERHEAD_MULTIPLIER = 2;
 	private static final String EMPTY_OR_NULL_ERROR_MESSAGE = " is empty or null";
+	private static final String PING_EVENT_COLLECTOR_THREAD_NAME = "Ping-Event-Collector-Thread";
 
 	@Autowired
 	private QoSMonitorDriver driver;
@@ -104,7 +105,7 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 		driver.checkPingMonitorProviderEchoUri(createPingMonitorProviderEchoUri());
 
 		final Thread eventCollectorThread = new Thread(eventCollector);
-		eventCollectorThread.setName("Ping-Event-Collector-Thread");
+		eventCollectorThread.setName(PING_EVENT_COLLECTOR_THREAD_NAME);
 		eventCollectorThread.start();
 
 		driver.subscribeToExternalPingMonitorEvents(pingMonitorSystem);
