@@ -37,6 +37,7 @@ import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.dto.externalMonitor.ExternalMonitorOrchestrationRequestFactory;
 import eu.arrowhead.core.qos.measurement.properties.PingMeasurementProperties;
 import eu.arrowhead.core.qos.service.QoSMonitorDriver;
+import eu.arrowhead.core.qos.service.ping.monitor.PingEventCollectorTask;
 import eu.arrowhead.core.qos.service.ping.monitor.PingEventProcessor;
 
 @RunWith(SpringRunner.class)
@@ -59,6 +60,9 @@ public class OrchestratedExternalPingMonitorTest {
 	@Mock
 	private ExternalMonitorOrchestrationRequestFactory orchestrationRequestFactory;
 
+	@Mock
+	private PingEventCollectorTask eventCollector;
+
 	//=================================================================================================
 	// methods
 
@@ -71,6 +75,9 @@ public class OrchestratedExternalPingMonitorTest {
 		ReflectionTestUtils.setField(monitor, "cachedPingMonitorProvider", cachedPingMonitorProvider);
 
 	}
+
+	//Tests of ping method
+	//-------------------------------------------------------------------------------------------------
 
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
@@ -599,6 +606,36 @@ public class OrchestratedExternalPingMonitorTest {
 		verify(processor, never()).processEvents(any(),anyLong());
 	}
 
+	//Tests of init method
+	//-------------------------------------------------------------------------------------------------
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitOk() {
+
+		final OrchestrationResultDTO cachedPingMonitorProvider = null;
+		ReflectionTestUtils.setField(monitor, "cachedPingMonitorProvider", cachedPingMonitorProvider);
+
+		final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO();
+
+		when(orchestrationRequestFactory.createExternalMonitorOrchestrationRequest()).thenReturn(orchestrationForm);
+		when(driver.queryOrchestrator(any())).thenReturn(getValidOrchestrationResponseDTOForTests());
+		doNothing().when(driver).unsubscribeFromPingMonitorEvents();
+		doNothing().when(driver).subscribeToExternalPingMonitorEvents(any());
+
+		doNothing().when(eventCollector).run();
+
+		monitor.init();
+
+		verify(orchestrationRequestFactory, times(1)).createExternalMonitorOrchestrationRequest();
+		verify(driver, times(1)).queryOrchestrator(any());
+		verify(driver, times(1)).unsubscribeFromPingMonitorEvents();
+		verify(driver, times(1)).subscribeToExternalPingMonitorEvents(any());
+
+		verify(eventCollector, times(1)).run();
+
+	}
+
 	//=================================================================================================
 	// assistant methods
 
@@ -652,4 +689,5 @@ public class OrchestratedExternalPingMonitorTest {
 
 		return system;
 	}
+
 }
