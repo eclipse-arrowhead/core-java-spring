@@ -520,6 +520,8 @@ public class QoSMonitorDriver {
 			requesterSystem.setMetadata(null);
 			if (sslEnabled) {
 
+				Assert.isTrue(arrowheadContext.containsKey(CommonConstants.SERVER_PUBLIC_KEY), "Server Public key is not in Context");
+
 				final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
 				requesterSystem.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
 			}
