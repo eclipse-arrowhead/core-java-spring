@@ -33,6 +33,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
@@ -438,6 +439,76 @@ public class QoSMonitorDriverTest {
 		} catch (final Exception ex) {
 
 			verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq( IcmpPingRequestACK.class), any(IcmpPingRequestDTO.class));
+
+			throw ex;
+		}
+
+	}
+
+	//Tests of checkPingMonitorProviderEchoUri method
+	//-------------------------------------------------------------------------------------------------
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCheckPingMonitorProviderEchoUriOk() {
+
+		final int MAX_RETRIES = 1;
+
+		ReflectionTestUtils.setField(testingObject, "MAX_RETRIES", MAX_RETRIES);
+		ReflectionTestUtils.setField(testingObject, "SLEEP_PERIOD", 100);
+
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/");
+
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.GET), eq( String.class) )).thenReturn(new ResponseEntity<>( HttpStatus.OK));
+
+		testingObject.checkPingMonitorProviderEchoUri(uri);
+
+		verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.GET), eq( String.class));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCheckPingMonitorProviderEchoUriSendRequestThrowsExceptionLessThenMAX_RETIRESThanOk() {
+
+		final int MAX_RETRIES = 2;
+
+		ReflectionTestUtils.setField(testingObject, "MAX_RETRIES", MAX_RETRIES);
+		ReflectionTestUtils.setField(testingObject, "SLEEP_PERIOD", 100);
+
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/");
+
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.GET), eq( String.class) )).
+		thenThrow(new UnavailableServerException("")).
+		thenReturn(new ResponseEntity<>( HttpStatus.OK));
+
+		testingObject.checkPingMonitorProviderEchoUri(uri);
+
+		verify(httpService, times(MAX_RETRIES)).sendRequest(any(UriComponents.class), eq(HttpMethod.GET), eq( String.class));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testCheckPingMonitorProviderEchoUriSendRequestThrowsExceptionMAX_RETIRESTimesThanNotOk() {
+
+		final int MAX_RETRIES = 2;
+
+		ReflectionTestUtils.setField(testingObject, "MAX_RETRIES", MAX_RETRIES);
+		ReflectionTestUtils.setField(testingObject, "SLEEP_PERIOD", 100);
+
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/");
+
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.GET), eq( String.class) )).
+		thenThrow(new UnavailableServerException("")).
+		thenThrow(new UnavailableServerException("")).
+		thenReturn(new ResponseEntity<>( HttpStatus.OK));
+
+		try {
+
+			testingObject.checkPingMonitorProviderEchoUri(uri);
+
+		} catch (final Exception ex) {
+
+			verify(httpService, times(MAX_RETRIES)).sendRequest(any(UriComponents.class), eq(HttpMethod.GET), eq( String.class));
 
 			throw ex;
 		}
