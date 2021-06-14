@@ -19,7 +19,6 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 
@@ -64,9 +63,6 @@ public class QoSMonitorDriver {
 	//=================================================================================================
 	// members
 
-	private static final long SLEEP_PERIOD = TimeUnit.SECONDS.toMillis(15);
-	private static final int MAX_RETRIES = 10;
-
 	private static final String GATEKEEPER_PULL_CLOUDS_URI_KEY = CoreSystemService.GATEKEEPER_PULL_CLOUDS.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_URI_KEY = CoreSystemService.GATEKEEPER_COLLECT_SYSTEM_ADDRESSES.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEKEEPER_COLLECT_ACCESS_TYPES_URI_KEY = CoreSystemService.GATEKEEPER_COLLECT_ACCESS_TYPES.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
@@ -75,8 +71,6 @@ public class QoSMonitorDriver {
 	private static final String ORCHESTRATION_PROCESS_URI_KEY = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String EVENT_SUBSCRIBE_URI_KEY = CoreSystemService.EVENT_SUBSCRIBE_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String EVENT_UNSUBSCRIBE_URI_KEY = CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
-
-	private static final String KEY_CALCULATED_SERVICE_TIME_FRAME = "QoSCalculatedServiceTimeFrame";
 
 	private static final Logger logger = LogManager.getLogger(QoSMonitorDriver.class);
 
@@ -94,6 +88,12 @@ public class QoSMonitorDriver {
 
 	@Value(CoreCommonConstants.$SERVER_PORT)
 	private int coreSystemPort;
+
+	@Value(QosMonitorConstants.$QOS_MONITOR_REQUEST_MAX_RETRY_WD)
+	private int MAX_RETRIES;
+
+	@Value(QosMonitorConstants.$QOS_MONITOR_REQUEST_SLEEP_PERIOD_WD)
+	private int SLEEP_PERIOD;
 
 	private SystemRequestDTO requesterSystem;
 
@@ -286,7 +286,7 @@ public class QoSMonitorDriver {
 				for (final QosMonitorEventType externalPingMonitorEventType : QosMonitorEventType.values()) {
 					subscriptionRequest.setEventType(externalPingMonitorEventType.name());
 
-					final ResponseEntity<SubscriptionResponseDTO> response = httpService.sendRequest(subscriptionUri, HttpMethod.POST, SubscriptionResponseDTO.class, subscriptionRequest);
+					httpService.sendRequest(subscriptionUri, HttpMethod.POST, SubscriptionResponseDTO.class, subscriptionRequest);
 
 				}
 

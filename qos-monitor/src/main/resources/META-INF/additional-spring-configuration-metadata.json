@@ -228,5 +228,15 @@
     "name": "monitor_provider_secure",
     "type": "java.lang.Boolean",
     "description": "A description for 'monitor_provider_secure'"
+  },
+  {
+    "name": "request_max_retry",
+    "type": "java.lang.Integer",
+    "description": "A description for 'request_max_retry'"
+  },
+  {
+    "name": "request_sleep_period",
+    "type": "java.lang.Integer",
+    "description": "A description for 'request_sleep_period'"
   }
 ]}

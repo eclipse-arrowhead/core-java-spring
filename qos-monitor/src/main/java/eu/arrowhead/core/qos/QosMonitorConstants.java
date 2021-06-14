@@ -1,5 +1,7 @@
 package eu.arrowhead.core.qos;
 
+import eu.arrowhead.common.CoreDefaults;
+
 public class QosMonitorConstants {
 
 	//=================================================================================================
@@ -33,6 +35,13 @@ public class QosMonitorConstants {
 	public static final String EXTERNAL_PING_MONITORING_SERVICE_DEFINITION = "qos-icmp-ping";
 
 	public static final String EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI = "/externalpingmonitorevent";
+
+	public static final String QOS_MONITOR_REQUEST_MAX_RETRY = "request_max_retry";
+	public static final String $QOS_MONITOR_REQUEST_MAX_RETRY_WD = "${" + QOS_MONITOR_REQUEST_MAX_RETRY + ":" + 3 + "}";
+
+	public static final String QOS_MONITOR_REQUEST_SLEEP_PERIOD = "request_sleep_period";
+	public static final String $QOS_MONITOR_REQUEST_SLEEP_PERIOD_WD = "${" + QOS_MONITOR_REQUEST_SLEEP_PERIOD + ":" + 1000 + "}";
+
 	//=================================================================================================
 	// assistant methods
 
