@@ -103,12 +103,12 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 		pingMonitorSystem = getPingMonitorSystemRequestDTO();
 
 		driver.checkPingMonitorProviderEchoUri(createPingMonitorProviderEchoUri());
+		driver.subscribeToExternalPingMonitorEvents(pingMonitorSystem);
 
 		final Thread eventCollectorThread = new Thread(eventCollector);
 		eventCollectorThread.setName(PING_EVENT_COLLECTOR_THREAD_NAME);
 		eventCollectorThread.start();
 
-		driver.subscribeToExternalPingMonitorEvents(pingMonitorSystem);
 	}
 
 	//=================================================================================================
