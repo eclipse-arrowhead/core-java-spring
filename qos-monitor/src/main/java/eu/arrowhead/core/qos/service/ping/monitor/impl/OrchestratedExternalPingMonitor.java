@@ -117,6 +117,9 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 
 			cachedPingMonitorProvider = selectProvider(result);
 
+			driver.unsubscribeFromPingMonitorEvents();
+			driver.subscribeToExternalPingMonitorEvents(getPingMonitorSystemRequestDTO());
+
 		} catch (final Exception ex) {
 			logger.debug("Exception in external ping monitor orchestration: " + ex);
 
@@ -127,9 +130,6 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 		final Thread eventCollectorThread = new Thread(eventCollector);
 		eventCollectorThread.setName("Ping-Event-Collector-Thread");
 		eventCollectorThread.start();
-
-		driver.unsubscribeFromPingMonitorEvents();
-		driver.subscribeToExternalPingMonitorEvents(getPingMonitorSystemRequestDTO());
 
 	}
 
