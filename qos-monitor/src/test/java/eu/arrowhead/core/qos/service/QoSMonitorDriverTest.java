@@ -17,6 +17,7 @@ package eu.arrowhead.core.qos.service;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -579,6 +580,83 @@ public class QoSMonitorDriverTest {
 		verify(arrowheadContext, times(2)).containsKey(anyString());
 		verify(arrowheadContext, times(2)).get(anyString());
 		verify(httpService, times(QosMonitorEventType.values().length)).sendRequest(any(UriComponents.class),eq(HttpMethod.POST), eq( SubscriptionResponseDTO.class), any(SubscriptionRequestDTO.class) );
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testSubscribeToExternalPingMonitorEventsServerUnavailableForLessThenMAX_RETIES_TIMESThenOk() {
+
+		final int MAX_RETRIES = 2;
+
+		ReflectionTestUtils.setField(testingObject, "MAX_RETRIES", MAX_RETRIES);
+		ReflectionTestUtils.setField(testingObject, "SLEEP_PERIOD", 100);
+
+		ReflectionTestUtils.setField(testingObject, "coreSystemName", "QoSMonitor");
+		ReflectionTestUtils.setField(testingObject, "coreSystemAddress", "localhost");
+		ReflectionTestUtils.setField(testingObject, "coreSystemPort", 8451);
+		ReflectionTestUtils.setField(testingObject, "sslEnabled", true);
+
+		final SystemRequestDTO provider = new SystemRequestDTO();
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/");
+		final PublicKey publicKey = getPublicKeyForTests();
+
+		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
+		when(arrowheadContext.get(anyString())).
+		thenReturn(publicKey).
+		thenReturn(uri);
+
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq( SubscriptionResponseDTO.class), any(SubscriptionRequestDTO.class) )).
+		thenThrow(new UnavailableServerException("")).
+		thenReturn(new ResponseEntity<>(new SubscriptionResponseDTO(), HttpStatus.OK));
+
+		testingObject.subscribeToExternalPingMonitorEvents(provider);
+
+		verify(arrowheadContext, atLeast(2)).containsKey(anyString());
+		verify(arrowheadContext, atLeast(2)).get(anyString());
+		verify(httpService, times(QosMonitorEventType.values().length + 1)).sendRequest(any(UriComponents.class),eq(HttpMethod.POST), eq( SubscriptionResponseDTO.class), any(SubscriptionRequestDTO.class) );
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testSubscribeToExternalPingMonitorEventsServerUnavailableForMAX_RETIES_TIMESThenNotOk() {
+
+		final int MAX_RETRIES = 2;
+
+		ReflectionTestUtils.setField(testingObject, "MAX_RETRIES", MAX_RETRIES);
+		ReflectionTestUtils.setField(testingObject, "SLEEP_PERIOD", 100);
+
+		ReflectionTestUtils.setField(testingObject, "coreSystemName", "QoSMonitor");
+		ReflectionTestUtils.setField(testingObject, "coreSystemAddress", "localhost");
+		ReflectionTestUtils.setField(testingObject, "coreSystemPort", 8451);
+		ReflectionTestUtils.setField(testingObject, "sslEnabled", true);
+
+		final SystemRequestDTO provider = new SystemRequestDTO();
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/");
+		final PublicKey publicKey = getPublicKeyForTests();
+
+		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
+		when(arrowheadContext.get(anyString())).
+		thenReturn(publicKey).
+		thenReturn(uri);
+
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq( SubscriptionResponseDTO.class), any(SubscriptionRequestDTO.class) )).
+		thenThrow(new UnavailableServerException("")).
+		thenThrow(new UnavailableServerException("")).
+		thenReturn(new ResponseEntity<>(new SubscriptionResponseDTO(), HttpStatus.OK));
+
+		try {
+
+			testingObject.subscribeToExternalPingMonitorEvents(provider);
+
+		} catch (final Exception ex) {
+
+			verify(arrowheadContext, atLeast(2)).containsKey(anyString());
+			verify(arrowheadContext, atLeast(2)).get(anyString());
+			verify(httpService, times(MAX_RETRIES)).sendRequest(any(UriComponents.class),eq(HttpMethod.POST), eq( SubscriptionResponseDTO.class), any(SubscriptionRequestDTO.class) );
+
+			throw ex;
+		}
+
 	}
 
 	//=================================================================================================
