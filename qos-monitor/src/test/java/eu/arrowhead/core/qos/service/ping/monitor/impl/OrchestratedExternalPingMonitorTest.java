@@ -636,6 +636,114 @@ public class OrchestratedExternalPingMonitorTest {
 
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitDriverThrowsIllegalArgumentException() {
+
+		final OrchestrationResultDTO cachedPingMonitorProvider = null;
+		ReflectionTestUtils.setField(monitor, "cachedPingMonitorProvider", cachedPingMonitorProvider);
+
+		final OrchestrationFormRequestDTO orchestrationForm = null;
+
+		when(orchestrationRequestFactory.createExternalMonitorOrchestrationRequest()).thenReturn(orchestrationForm);
+		when(driver.queryOrchestrator(any())).thenThrow( new IllegalArgumentException());
+		doNothing().when(driver).unsubscribeFromPingMonitorEvents();
+		doNothing().when(driver).subscribeToExternalPingMonitorEvents(any());
+
+		doNothing().when(eventCollector).run();
+
+		monitor.init();
+
+		verify(orchestrationRequestFactory, times(1)).createExternalMonitorOrchestrationRequest();
+		verify(driver, times(1)).queryOrchestrator(any());
+		verify(driver, never()).unsubscribeFromPingMonitorEvents();
+		verify(driver, never()).subscribeToExternalPingMonitorEvents(any());
+
+		verify(eventCollector, times(1)).run();
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitDriverThrowsArrowheadException() {
+
+		final OrchestrationResultDTO cachedPingMonitorProvider = null;
+		ReflectionTestUtils.setField(monitor, "cachedPingMonitorProvider", cachedPingMonitorProvider);
+
+		final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO();
+
+		when(orchestrationRequestFactory.createExternalMonitorOrchestrationRequest()).thenReturn(orchestrationForm);
+		when(driver.queryOrchestrator(any())).thenThrow( new ArrowheadException(""));
+		doNothing().when(driver).unsubscribeFromPingMonitorEvents();
+		doNothing().when(driver).subscribeToExternalPingMonitorEvents(any());
+
+		doNothing().when(eventCollector).run();
+
+		monitor.init();
+
+		verify(orchestrationRequestFactory, times(1)).createExternalMonitorOrchestrationRequest();
+		verify(driver, times(1)).queryOrchestrator(any());
+		verify(driver, never()).unsubscribeFromPingMonitorEvents();
+		verify(driver, never()).subscribeToExternalPingMonitorEvents(any());
+
+		verify(eventCollector, times(1)).run();
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitOrchestrationResultIsNull() {
+
+		final OrchestrationResultDTO cachedPingMonitorProvider = null;
+		ReflectionTestUtils.setField(monitor, "cachedPingMonitorProvider", cachedPingMonitorProvider);
+
+		final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO();
+
+		when(orchestrationRequestFactory.createExternalMonitorOrchestrationRequest()).thenReturn(orchestrationForm);
+		when(driver.queryOrchestrator(any())).thenReturn(getNullOrchestrationResponseDTOForTests());
+		doNothing().when(driver).unsubscribeFromPingMonitorEvents();
+		doNothing().when(driver).subscribeToExternalPingMonitorEvents(any());
+
+		doNothing().when(eventCollector).run();
+
+		monitor.init();
+
+		verify(orchestrationRequestFactory, times(1)).createExternalMonitorOrchestrationRequest();
+		verify(driver, times(1)).queryOrchestrator(any());
+		verify(driver, never()).unsubscribeFromPingMonitorEvents();
+		verify(driver, never()).subscribeToExternalPingMonitorEvents(any());
+
+		verify(eventCollector, times(1)).run();
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitOrchestrationResultIsIsEmpty() {
+
+		final OrchestrationResultDTO cachedPingMonitorProvider = null;
+		ReflectionTestUtils.setField(monitor, "cachedPingMonitorProvider", cachedPingMonitorProvider);
+
+		final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO();
+
+		when(orchestrationRequestFactory.createExternalMonitorOrchestrationRequest()).thenReturn(orchestrationForm);
+		when(driver.queryOrchestrator(any())).thenReturn(getEmptyOrchestrationResponseDTOForTests());
+		doNothing().when(driver).unsubscribeFromPingMonitorEvents();
+		doNothing().when(driver).subscribeToExternalPingMonitorEvents(any());
+
+		doNothing().when(eventCollector).run();
+
+		monitor.init();
+
+		verify(orchestrationRequestFactory, times(1)).createExternalMonitorOrchestrationRequest();
+		verify(driver, times(1)).queryOrchestrator(any());
+		verify(driver, never()).unsubscribeFromPingMonitorEvents();
+		verify(driver, never()).subscribeToExternalPingMonitorEvents(any());
+
+		verify(eventCollector, times(1)).run();
+
+	}
+
 	//=================================================================================================
 	// assistant methods
 
