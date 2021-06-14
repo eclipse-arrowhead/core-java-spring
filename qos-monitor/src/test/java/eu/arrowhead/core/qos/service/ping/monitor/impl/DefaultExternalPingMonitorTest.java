@@ -2,6 +2,7 @@ package eu.arrowhead.core.qos.service.ping.monitor.impl;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -19,11 +20,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.dto.shared.IcmpPingRequestACK;
+import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.measurement.properties.PingMeasurementProperties;
 import eu.arrowhead.core.qos.service.QoSMonitorDriver;
+import eu.arrowhead.core.qos.service.ping.monitor.PingEventCollectorTask;
 import eu.arrowhead.core.qos.service.ping.monitor.PingEventProcessor;
 
 @RunWith(SpringRunner.class)
@@ -43,6 +47,9 @@ public class DefaultExternalPingMonitorTest {
 	@Mock
 	private PingEventProcessor processor;
 
+	@Mock
+	private PingEventCollectorTask eventCollector;
+
 	//=================================================================================================
 	// methods
 
@@ -60,6 +67,9 @@ public class DefaultExternalPingMonitorTest {
 		when(pingMeasurementProperties.getTimeToRepeat()).thenReturn(32);
 
 	}
+
+	//Tests of ping method
+	//-------------------------------------------------------------------------------------------------
 
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
@@ -336,5 +346,26 @@ public class DefaultExternalPingMonitorTest {
 		verify(pingMeasurementProperties, times(2)).getTimeToRepeat();
 		verify(driver, times(1)).requestExternalPingMonitorService(any(),any());
 		verify(processor, times(1)).processEvents(any(),anyLong());
+	}
+
+	//Tests of init method
+	//-------------------------------------------------------------------------------------------------
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitOk() {
+
+		doNothing().when(driver).checkPingMonitorProviderEchoUri(any());
+		doNothing().when(driver).subscribeToExternalPingMonitorEvents(any());
+
+		doNothing().when(eventCollector).run();
+
+		monitor.init();
+
+		verify(driver, times(1)).checkPingMonitorProviderEchoUri(any());
+		verify(driver, times(1)).subscribeToExternalPingMonitorEvents(any());
+
+		verify(eventCollector, times(1)).run();
+
 	}
 }
