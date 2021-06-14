@@ -22,6 +22,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.security.PublicKey;
 import java.util.List;
 import java.util.Map;
 
@@ -49,6 +50,10 @@ import eu.arrowhead.common.dto.shared.IcmpPingRequestACK;
 import eu.arrowhead.common.dto.shared.IcmpPingRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
+import eu.arrowhead.common.dto.shared.QosMonitorEventType;
+import eu.arrowhead.common.dto.shared.SubscriptionRequestDTO;
+import eu.arrowhead.common.dto.shared.SubscriptionResponseDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.common.http.HttpService;
@@ -467,6 +472,32 @@ public class QoSMonitorDriverTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@Test( expected = IllegalArgumentException.class)
+	public void testCheckPingMonitorProviderEchoUriUriIsNull() {
+
+		final int MAX_RETRIES = 1;
+
+		ReflectionTestUtils.setField(testingObject, "MAX_RETRIES", MAX_RETRIES);
+		ReflectionTestUtils.setField(testingObject, "SLEEP_PERIOD", 100);
+
+		final UriComponents uri = null;
+
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.GET), eq( String.class) )).thenReturn(new ResponseEntity<>( HttpStatus.OK));
+
+		try {
+
+			testingObject.checkPingMonitorProviderEchoUri(uri);
+
+		} catch (final Exception ex) {
+
+			verify(httpService, never()).sendRequest(any(UriComponents.class), eq(HttpMethod.GET), eq( String.class));
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCheckPingMonitorProviderEchoUriSendRequestThrowsExceptionLessThenMAX_RETIRESThanOk() {
 
@@ -513,5 +544,67 @@ public class QoSMonitorDriverTest {
 			throw ex;
 		}
 
+	}
+
+	//Tests of subscribeToExternalPingMonitorEvents method
+	//-------------------------------------------------------------------------------------------------
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testSubscribeToExternalPingMonitorEventsOk() {
+
+		final int MAX_RETRIES = 1;
+
+		ReflectionTestUtils.setField(testingObject, "MAX_RETRIES", MAX_RETRIES);
+		ReflectionTestUtils.setField(testingObject, "SLEEP_PERIOD", 100);
+
+		ReflectionTestUtils.setField(testingObject, "coreSystemName", "QoSMonitor");
+		ReflectionTestUtils.setField(testingObject, "coreSystemAddress", "localhost");
+		ReflectionTestUtils.setField(testingObject, "coreSystemPort", 8451);
+		ReflectionTestUtils.setField(testingObject, "sslEnabled", true);
+
+		final SystemRequestDTO provider = new SystemRequestDTO();
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/");
+		final PublicKey publicKey = getPublicKeyForTests();
+
+		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
+		when(arrowheadContext.get(anyString())).
+		thenReturn(publicKey).
+		thenReturn(uri);
+
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq( SubscriptionResponseDTO.class), any(SubscriptionRequestDTO.class) )).thenReturn(new ResponseEntity<>(new SubscriptionResponseDTO(), HttpStatus.OK));
+
+		testingObject.subscribeToExternalPingMonitorEvents(provider);
+
+		verify(arrowheadContext, times(2)).containsKey(anyString());
+		verify(arrowheadContext, times(2)).get(anyString());
+		verify(httpService, times(QosMonitorEventType.values().length)).sendRequest(any(UriComponents.class),eq(HttpMethod.POST), eq( SubscriptionResponseDTO.class), any(SubscriptionRequestDTO.class) );
+	}
+
+	//=================================================================================================
+	// assistant methods
+
+	//-------------------------------------------------------------------------------------------------
+	private PublicKey getPublicKeyForTests() {
+
+		return new PublicKey() {
+
+			private static final long serialVersionUID = -641275814713082056L;
+
+			@Override
+			public String getFormat() {
+				return null;
+			}
+			
+			@Override
+			public byte[] getEncoded() {
+				return "publicKey".getBytes();
+			}
+			
+			@Override
+			public String getAlgorithm() {
+				return null;
+			}
+		};
 	}
 }
