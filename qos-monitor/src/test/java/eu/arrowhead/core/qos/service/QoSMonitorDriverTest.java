@@ -47,6 +47,7 @@ import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.common.http.HttpService;
 
 @RunWith(SpringRunner.class)
@@ -275,6 +276,83 @@ public class QoSMonitorDriverTest {
 			verify(arrowheadContext, never()).containsKey(anyString());
 			verify(arrowheadContext, never()).get(anyString());
 			verify(httpService, never()).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(OrchestrationResponseDTO.class), any(OrchestrationFormRequestDTO.class));
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test( expected = ArrowheadException.class)
+	public void testQueryContextNotContainKey() {
+
+		final OrchestrationFormRequestDTO form = new OrchestrationFormRequestDTO();;
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/");
+
+		when(arrowheadContext.containsKey(anyString())).thenReturn(false);
+		when(arrowheadContext.get(anyString())).thenReturn(uri);
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(OrchestrationResponseDTO.class), any(OrchestrationFormRequestDTO.class))).thenReturn(new ResponseEntity<>(new OrchestrationResponseDTO(), HttpStatus.OK));
+
+		try {
+
+			testingObject.queryOrchestrator(form);
+
+		} catch (final Exception ex) {
+
+			verify(arrowheadContext, times(1)).containsKey(anyString());
+			verify(arrowheadContext, never()).get(anyString());
+			verify(httpService, never()).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(OrchestrationResponseDTO.class), any(OrchestrationFormRequestDTO.class));
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test( expected = ArrowheadException.class)
+	public void testQueryContextThowsException() {
+
+		final OrchestrationFormRequestDTO form = new OrchestrationFormRequestDTO();;
+
+		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
+		when(arrowheadContext.get(anyString())).thenThrow(new ClassCastException());
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(OrchestrationResponseDTO.class), any(OrchestrationFormRequestDTO.class))).thenReturn(new ResponseEntity<>(new OrchestrationResponseDTO(), HttpStatus.OK));
+
+		try {
+
+			testingObject.queryOrchestrator(form);
+
+		} catch (final Exception ex) {
+
+			verify(arrowheadContext, times(1)).containsKey(anyString());
+			verify(arrowheadContext, times(1)).get(anyString());
+			verify(httpService, never()).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(OrchestrationResponseDTO.class), any(OrchestrationFormRequestDTO.class));
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test( expected = ArrowheadException.class)
+	public void testQueryOrchestratorNotAvailable() {
+
+		final OrchestrationFormRequestDTO form = null;
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/");
+
+		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
+		when(arrowheadContext.get(anyString())).thenReturn(uri);
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(OrchestrationResponseDTO.class), any(OrchestrationFormRequestDTO.class))).thenThrow(new UnavailableServerException(""));
+
+		try {
+
+			testingObject.queryOrchestrator(form);
+
+		} catch (final Exception ex) {
+
+			verify(arrowheadContext, times(1)).containsKey(anyString());
+			verify(arrowheadContext, times(1)).get(anyString());
+			verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(OrchestrationResponseDTO.class), any(OrchestrationFormRequestDTO.class));
 
 			throw ex;
 		}
