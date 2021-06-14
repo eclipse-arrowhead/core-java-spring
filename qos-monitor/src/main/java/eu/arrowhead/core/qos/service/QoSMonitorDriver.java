@@ -207,7 +207,7 @@ public class QoSMonitorDriver {
 		logger.debug("requestExternalPingMonitorService started...");
 
 		Assert.notNull(request, "IcmpPingRequest is null.");
-		Assert.notNull(request, "externalPingMonitorUri is null.");
+		Assert.notNull(externalPingMonitorUri, "externalPingMonitorUri is null.");
 
 		try {
 			final ResponseEntity<IcmpPingRequestACK> response = httpService.sendRequest(externalPingMonitorUri, HttpMethod.POST, IcmpPingRequestACK.class, request);
