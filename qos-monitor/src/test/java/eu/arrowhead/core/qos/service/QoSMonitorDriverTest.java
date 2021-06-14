@@ -44,6 +44,8 @@ import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.internal.SystemAddressSetRelayResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.IcmpPingRequestACK;
+import eu.arrowhead.common.dto.shared.IcmpPingRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -337,7 +339,7 @@ public class QoSMonitorDriverTest {
 	@Test( expected = ArrowheadException.class)
 	public void testQueryOrchestratorNotAvailable() {
 
-		final OrchestrationFormRequestDTO form = null;
+		final OrchestrationFormRequestDTO form = new OrchestrationFormRequestDTO();
 		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/");
 
 		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
@@ -353,6 +355,89 @@ public class QoSMonitorDriverTest {
 			verify(arrowheadContext, times(1)).containsKey(anyString());
 			verify(arrowheadContext, times(1)).get(anyString());
 			verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(OrchestrationResponseDTO.class), any(OrchestrationFormRequestDTO.class));
+
+			throw ex;
+		}
+
+	}
+
+	//Tests of requestExternalPingMonitorService method
+	//-------------------------------------------------------------------------------------------------
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRequestExternalPingMonitorServiceOk() {
+
+		final IcmpPingRequestDTO request = new IcmpPingRequestDTO();
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/");
+
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq( IcmpPingRequestACK.class), any(IcmpPingRequestDTO.class))).thenReturn(new ResponseEntity<>(new IcmpPingRequestACK(), HttpStatus.OK));
+
+		testingObject.requestExternalPingMonitorService(uri, request);
+
+		verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq( IcmpPingRequestACK.class), any(IcmpPingRequestDTO.class));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test( expected = IllegalArgumentException.class )
+	public void testRequestExternalPingMonitorServiceRequestIsNull() {
+
+		final IcmpPingRequestDTO request = null;
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/");
+
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq( IcmpPingRequestACK.class), any(IcmpPingRequestDTO.class))).thenReturn(new ResponseEntity<>(new IcmpPingRequestACK(), HttpStatus.OK));
+
+		try {
+
+			testingObject.requestExternalPingMonitorService(uri, request);
+
+		} catch (final Exception ex) {
+
+			verify(httpService, never()).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq( IcmpPingRequestACK.class), any(IcmpPingRequestDTO.class));
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test( expected = IllegalArgumentException.class )
+	public void testRequestExternalPingMonitorServiceUriIsNull() {
+
+		final IcmpPingRequestDTO request = new IcmpPingRequestDTO();
+		final UriComponents uri = null;
+
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq( IcmpPingRequestACK.class), any(IcmpPingRequestDTO.class))).thenReturn(new ResponseEntity<>(new IcmpPingRequestACK(), HttpStatus.OK));
+
+		try {
+
+			testingObject.requestExternalPingMonitorService(uri, request);
+
+		} catch (final Exception ex) {
+
+			verify(httpService, never()).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq( IcmpPingRequestACK.class), any(IcmpPingRequestDTO.class));
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test( expected = ArrowheadException.class )
+	public void testRequestExternalPingMonitorServiceSendRequestThrowsException() {
+
+		final IcmpPingRequestDTO request = new IcmpPingRequestDTO();
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/");
+
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq( IcmpPingRequestACK.class), any(IcmpPingRequestDTO.class))).thenThrow(new UnavailableServerException(""));
+
+		try {
+
+			testingObject.requestExternalPingMonitorService(uri, request);
+
+		} catch (final Exception ex) {
+
+			verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq( IcmpPingRequestACK.class), any(IcmpPingRequestDTO.class));
 
 			throw ex;
 		}
