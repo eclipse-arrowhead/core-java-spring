@@ -512,8 +512,6 @@ public class QoSMonitorDriver {
 	private SystemRequestDTO getQosMonitorSystemRequestDTO() {
 		logger.debug("getQosMonitorSystemRequestDTO started...");
 
-		final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
-
 		if(requesterSystem == null) {
 			requesterSystem = new SystemRequestDTO();
 			requesterSystem.setSystemName(coreSystemName);
@@ -521,6 +519,8 @@ public class QoSMonitorDriver {
 			requesterSystem.setPort(coreSystemPort);
 			requesterSystem.setMetadata(null);
 			if (sslEnabled) {
+
+				final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
 				requesterSystem.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
 			}
 		}
