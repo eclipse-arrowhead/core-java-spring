@@ -416,7 +416,7 @@ public class DefaultExternalPingMonitorTest {
 	// because of not entirely predictable nature of thread invocation timing use only in manual test mode
 	@Ignore
 	@Test
-	public void testInitOkWhenPingMonitorSystemNotNullWhitThreadCheck() {
+	public void testInitOkWhenPingMonitorSystemNotNullWithThreadCheck() {
 
 		final SystemRequestDTO pingMonitor = new SystemRequestDTO();
 		pingMonitor.setSystemName("pinger");
@@ -466,7 +466,7 @@ public class DefaultExternalPingMonitorTest {
 	// because of not entirely predictable nature of thread invocation timing use only in manual test mode
 	@Ignore
 	@Test( expected = UnavailableServerException.class)
-	public void testInitDriverCheckPingMonitorProviderEchoUriThrowsExceptionWhitThreadCheck() {
+	public void testInitDriverCheckPingMonitorProviderEchoUriThrowsExceptionWithThreadCheck() {
 
 		doThrow(new UnavailableServerException("")).when(driver).checkPingMonitorProviderEchoUri(any());
 		doNothing().when(driver).subscribeToExternalPingMonitorEvents(any());
@@ -516,7 +516,7 @@ public class DefaultExternalPingMonitorTest {
 	// because of not entirely predictable nature of thread invocation timing use only in manual test mode
 	@Ignore
 	@Test( expected = UnavailableServerException.class)
-	public void testInitDriverSubscribeToExternalPingMonitorEventsThrowsUnavailableExceptionWhitThreadCheck() {
+	public void testInitDriverSubscribeToExternalPingMonitorEventsThrowsUnavailableExceptionWithThreadCheck() {
 
 		doNothing().when(driver).checkPingMonitorProviderEchoUri(any());
 		doThrow(new UnavailableServerException("")).when(driver).subscribeToExternalPingMonitorEvents(any());
@@ -566,7 +566,7 @@ public class DefaultExternalPingMonitorTest {
 	// because of not entirely predictable nature of thread invocation timing use only in manual test mode
 	@Ignore
 	@Test( expected = ArrowheadException.class)
-	public void testInitDriverSubscribeToExternalPingMonitorEventsThrowsArrowheadExceptionWhitThreadCheck() {
+	public void testInitDriverSubscribeToExternalPingMonitorEventsThrowsArrowheadExceptionWithThreadCheck() {
 
 		doNothing().when(driver).checkPingMonitorProviderEchoUri(any());
 		doThrow(new ArrowheadException("")).when(driver).subscribeToExternalPingMonitorEvents(any());
