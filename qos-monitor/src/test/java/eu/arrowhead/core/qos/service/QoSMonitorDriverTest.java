@@ -17,6 +17,7 @@ package eu.arrowhead.core.qos.service;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -240,16 +241,43 @@ public class QoSMonitorDriverTest {
 	@Test
 	public void testQueryOrchestratorOk() {
 
+		final OrchestrationFormRequestDTO form = new OrchestrationFormRequestDTO();
 		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/");
 
 		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
 		when(arrowheadContext.get(anyString())).thenReturn(uri);
 		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(OrchestrationResponseDTO.class), any(OrchestrationFormRequestDTO.class))).thenReturn(new ResponseEntity<>(new OrchestrationResponseDTO(), HttpStatus.OK));
 
-		testingObject.queryOrchestrator(new OrchestrationFormRequestDTO());
+		testingObject.queryOrchestrator(form);
 
 		verify(arrowheadContext, times(1)).containsKey(anyString());
 		verify(arrowheadContext, times(1)).get(anyString());
 		verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(OrchestrationResponseDTO.class), any(OrchestrationFormRequestDTO.class));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test( expected = IllegalArgumentException.class)
+	public void testQueryOrchestratorQeryFromIsNull() {
+
+		final OrchestrationFormRequestDTO form = null;
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/");
+
+		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
+		when(arrowheadContext.get(anyString())).thenReturn(uri);
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(OrchestrationResponseDTO.class), any(OrchestrationFormRequestDTO.class))).thenReturn(new ResponseEntity<>(new OrchestrationResponseDTO(), HttpStatus.OK));
+
+		try {
+
+			testingObject.queryOrchestrator(form);
+
+		} catch (final Exception ex) {
+
+			verify(arrowheadContext, never()).containsKey(anyString());
+			verify(arrowheadContext, never()).get(anyString());
+			verify(httpService, never()).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(OrchestrationResponseDTO.class), any(OrchestrationFormRequestDTO.class));
+
+			throw ex;
+		}
+
 	}
 }
