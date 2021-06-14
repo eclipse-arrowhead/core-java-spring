@@ -424,11 +424,12 @@ public class PlantDescriptionEntryTest {
                     .build())
                 .build());
 
+        final Instant t1 = now.minus(1, ChronoUnit.MINUTES);
         final PlantDescriptionEntryDto entry = new PlantDescriptionEntryDto.Builder()
             .id(1)
             .plantDescription("Plant Description 1A")
-            .createdAt(now)
-            .updatedAt(now)
+            .createdAt(t1)
+            .updatedAt(t1)
             .active(true)
             .systems(List.of(consumerSystem, producerSystem))
             .connections(connections)

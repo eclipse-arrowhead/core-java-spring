@@ -42,14 +42,14 @@ This corresponds to a Plant Description with the core systems:
 	"plantDescription": "ArrowHead core",
 	"systems": [
 		{
-			"systemName": "Service Registry",
+			"systemName": "serviceregistry",
 			"systemId": "service_registry",
 			"ports": [
 				{ "portName": "service_discovery", "serviceDefinition": "Service Discovery"}
 			]
 		},
 		{
-			"systemName": "Authorization",
+			"systemName": "authorization",
 			"systemId": "authorization",
 			"ports": [
 				{ "portName": "service_discovery", "serviceDefinition": "Service Discovery", "consumer": true },
@@ -58,7 +58,7 @@ This corresponds to a Plant Description with the core systems:
 			]
 		},
 		{
-			"systemName": "Orchestration",
+			"systemName": "orchestration",
 			"systemId": "orchestration",
 			"ports": [
 				{ "portName": "service_discovery", "serviceDefinition": "Service Discovery", "consumer": true },
@@ -114,7 +114,7 @@ This corresponds to a bare plant description that include the core and contains 
 	"include": [ 1 ],
 	"systems": [
 		{
-			"systemName": "Operations Center",
+			"systemName": "operationscenter",
 			"systemId": "operations_center",
 			"ports": [
 				{ "portName": "service_discovery", "serviceDefinition": "Service Discovery", "consumer": true },
@@ -124,7 +124,7 @@ This corresponds to a bare plant description that include the core and contains 
 			]
 		},
 		{
-			"systemName": "A",
+			"systemName": "a",
 			"systemId": "a",
 			"ports": [
 				{ "portName": "service_discovery", "serviceDefinition": "Service Discovery", "consumer": true },
@@ -133,7 +133,7 @@ This corresponds to a bare plant description that include the core and contains 
 			]
 		},
 		{
-			"systemName": "B",
+			"systemName": "b",
 			"systemId": "b",
 			"ports": [
 				{ "portName": "service_discovery", "serviceDefinition": "Service Discovery", "consumer": true },
@@ -142,7 +142,7 @@ This corresponds to a bare plant description that include the core and contains 
 			]
 		},
 		{
-			"systemName": "C",
+			"systemName": "c",
 			"systemId": "c",
 			"ports": [
 				{ "portName": "service_discovery", "serviceDefinition": "Service Discovery", "consumer": true },
@@ -151,7 +151,7 @@ This corresponds to a bare plant description that include the core and contains 
 			]
 		},
 		{
-			"systemName": "D",
+			"systemName": "d",
 			"systemId": "d",
 			"ports": [
 				{ "portName": "service_discovery", "serviceDefinition": "Service Discovery", "consumer": true },
@@ -162,7 +162,7 @@ This corresponds to a bare plant description that include the core and contains 
 			]
 		},
 		{
-			"systemName": "Invent",
+			"systemName": "invent",
 			"ports": [
 				{ "portName": "service_discovery", "serviceDefinition": "Service Discovery", "consumer": true },
 				{ "portName": "inventory", "serviceDefinition": "Inventory"}
@@ -294,7 +294,7 @@ A system may need to provide multiple instances of the same service, where each 
 
 ```json
 {
-	"systemName": "E",
+	"systemName": "e",
 	"systemId": "e",
 	"ports": [
 		{
@@ -345,7 +345,7 @@ A merged and cleaned plant description would look like this
 	"plantDescription": "Example plant - base",
 	"systems": [
 		{
-			"systemName": "Plant Description Engine",
+			"systemName": "plantdescriptionengine",
 			"systemId": "plant_description_engine",
 			"ports": [
 				{ "portName": "monitor", "serviceDefinition": "Plant Description Monitor"},
@@ -355,7 +355,7 @@ A merged and cleaned plant description would look like this
 			]
 		},
 		{
-			"systemName": "Operations Center",
+			"systemName": "operationscenter",
 			"systemId": "operations_center",
 			"ports": [
 				{ "portName": "monitor", "serviceDefinition": "Plant Description Monitor", "consumer": true },
@@ -363,7 +363,7 @@ A merged and cleaned plant description would look like this
 			]
 		},
 		{
-			"systemName": "A",
+			"systemName": "a",
 			"systemId": "a",
 			"ports": [
 				{ "portName": "x", "serviceDefinition": "X"},
@@ -371,7 +371,7 @@ A merged and cleaned plant description would look like this
 			]
 		},
 		{
-			"systemName": "B",
+			"systemName": "b",
 			"systemId": "b",
 			"ports": [
 				{ "portName": "y", "serviceDefinition": "Y"},
@@ -379,14 +379,14 @@ A merged and cleaned plant description would look like this
 			]
 		},
 		{
-			"systemName": "C",
+			"systemName": "c",
 			"ports": [
 				{ "portName": "z", "serviceDefinition": "Z"},
 				{ "portName": "monitorable", "serviceDefinition": "Monitorable"}
 			]
 		},
 		{
-			"systemName": "D",
+			"systemName": "d",
 			"systemId": "d",
 			"ports": [
 				{ "portName": "monitorable", "serviceDefinition": "Monitorable"},
@@ -396,7 +396,7 @@ A merged and cleaned plant description would look like this
 			]
 		},
 		{
-			"systemName": "Invent",
+			"systemName": "invent",
 			"systemId": "invent",
 			"ports": [
 				{ "portName": "inventory", "serviceDefinition": "Inventory"}

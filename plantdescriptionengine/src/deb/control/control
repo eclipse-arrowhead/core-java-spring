@@ -3,7 +3,7 @@ Version: [[version]]
 Section: contrib/java
 Priority: optional
 Architecture: all
-Maintainer: Svetlin Tanyi <szvetlin@aitia.ai>
+Maintainer: Nicklas Nyström <nicklas.nystrom@xarepo.com>
 Homepage: http://www.arrowhead.eu
 Description: Arrowhead Plant Description Engine
 Distribution: development

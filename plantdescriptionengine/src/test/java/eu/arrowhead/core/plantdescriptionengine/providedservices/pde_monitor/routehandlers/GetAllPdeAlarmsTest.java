@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
 public class GetAllPdeAlarmsTest {
@@ -34,150 +33,11 @@ public class GetAllPdeAlarmsTest {
         }
     }
 
-    private void assertAscending(List<PdeAlarm> alarms) {
-        for (int i = 0; i < alarms.size() - 1; i++) {
-            assertFalse(alarms.get(i).id() > alarms.get(i + 1).id());
-        }
-    }
-
-    private void assertDescending(List<PdeAlarm> alarms) {
-        for (int i = 0; i < alarms.size() - 1; i++) {
-            assertFalse(alarms.get(i).id() < alarms.get(i + 1).id());
-        }
-    }
-
     @Before
     public void initEach() {
         alarmManager = new AlarmManager();
         handler = new GetAllPdeAlarms(alarmManager);
         response = new MockServiceResponse();
-    }
-
-    @Test
-    public void shouldSortByIdAscending() {
-        final int numAlarms = 3;
-
-        raiseMultipleAlarms(alarmManager, numAlarms);
-
-        final MockRequest request = MockRequest.getSortRequest(QueryParameter.ID, QueryParameter.ASC);
-
-        handler.handle(request, response)
-            .ifSuccess(ascendingResult -> {
-                final PdeAlarmList alarms = (PdeAlarmList) response.getRawBody();
-                assertEquals(HttpStatus.OK, response.status().orElse(null));
-                assertEquals(numAlarms, alarms.count());
-                assertAscending(alarms.data());
-            })
-            .onFailure(e -> fail());
-    }
-
-    @Test
-    public void shouldSortByIdDescending() {
-        final int numAlarms = 25;
-
-        raiseMultipleAlarms(alarmManager, numAlarms);
-
-        final MockRequest request = MockRequest.getSortRequest(QueryParameter.ID, QueryParameter.DESC);
-
-        handler.handle(request, response)
-            .ifSuccess(descendingResult -> {
-                final PdeAlarmList alarms = (PdeAlarmList) response.getRawBody();
-                assertEquals(HttpStatus.OK, response.status().orElse(null));
-                assertEquals(numAlarms, alarms.count());
-                assertDescending(alarms.data());
-            })
-            .onFailure(e -> fail());
-    }
-
-    @Test
-    public void shouldSortByRaisedAtAscending() {
-        final int numAlarms = 5;
-
-        raiseMultipleAlarms(alarmManager, numAlarms);
-
-        final MockRequest request = MockRequest.getSortRequest(QueryParameter.RAISED_AT, QueryParameter.ASC);
-
-        handler.handle(request, response)
-            .ifSuccess(ascendingResult -> {
-                final PdeAlarmList alarms = (PdeAlarmList) response.getRawBody();
-                assertEquals(HttpStatus.OK, response.status().orElse(null));
-                assertEquals(numAlarms, alarms.count());
-                assertAscending(alarms.data());
-            })
-            .onFailure(e -> fail());
-
-    }
-
-    @Test
-    public void shouldSortByRaisedDescending() {
-        final int numAlarms = 12;
-
-        raiseMultipleAlarms(alarmManager, numAlarms);
-
-        final HttpServiceRequest request = MockRequest.getSortRequest(QueryParameter.RAISED_AT, QueryParameter.DESC);
-
-        handler.handle(request, response)
-            .ifSuccess(descendingResult -> {
-                final PdeAlarmList alarms = (PdeAlarmList) response.getRawBody();
-                assertEquals(HttpStatus.OK, response.status().orElse(null));
-                assertEquals(numAlarms, alarms.count());
-                assertDescending(alarms.data());
-            })
-            .onFailure(e -> fail());
-
-    }
-
-    @Test
-    public void shouldSortByClearedAt() {
-        final String systemNameC = "sysc";
-
-        final Alarm systemCAlarm = Alarm.createSystemNotRegisteredAlarm("Sys-C", systemNameC, null);
-
-        alarmManager.raise(List.of(
-            systemCAlarm,
-            Alarm.createSystemNotRegisteredAlarm("Sys-A", "sysa", null),
-            Alarm.createSystemNotRegisteredAlarm("Sys-B", "sysb", null)
-        ));
-
-        alarmManager.clearAlarm(systemCAlarm.getId());
-
-        final HttpServiceRequest request = MockRequest.getSortRequest(QueryParameter.CLEARED_AT, QueryParameter.ASC);
-
-        handler.handle(request, response)
-            .ifSuccess(ascendingResult -> {
-                final PdeAlarmList alarms = (PdeAlarmList) response.getRawBody();
-                final PdeAlarm firstAlarm = alarms.data().get(0);
-                assertEquals(HttpStatus.OK, response.status().orElse(null));
-                assertEquals(systemNameC, firstAlarm.systemName().orElse(null));
-            })
-            .onFailure(e -> fail());
-    }
-
-    @Test
-    public void shouldSortByUpdatedAt() {
-
-        final String systemNameB = "sysb";
-
-        final Alarm systemBAlarm = Alarm.createSystemNotRegisteredAlarm("Sys-B", systemNameB, null);
-
-        alarmManager.raise(List.of(
-            systemBAlarm,
-            Alarm.createSystemNotRegisteredAlarm("Sys-A", "sysa", null),
-            Alarm.createSystemNotRegisteredAlarm("Sys-C", "sysc", null)
-        ));
-
-        alarmManager.acknowledge(systemBAlarm.getId()); // This changes the 'updatedAt' field
-
-        final MockRequest request = MockRequest.getSortRequest(QueryParameter.UPDATED_AT, QueryParameter.DESC);
-
-        handler.handle(request, response)
-            .ifSuccess(ascendingResult -> {
-                final PdeAlarmList alarms = (PdeAlarmList) response.getRawBody();
-                final PdeAlarm firstAlarm = alarms.data().get(0);
-                assertEquals(HttpStatus.OK, response.status().orElse(null));
-                assertEquals(systemNameB, firstAlarm.systemName().orElse(null));
-            })
-            .onFailure(e -> fail());
     }
 
     @Test

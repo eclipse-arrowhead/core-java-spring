@@ -1152,7 +1152,7 @@ public class PlantDescriptionValidatorTest {
      * When a validator is passed more than one active Plant Description Entry
      * in its constructor, it should treat the one with the most recent
      * 'updatedAt' field as active.
-     *
+     * <p>
      * Previously, there was a bug that made the validator accept invalid
      * include lists when multiple active entries were given. This test guards
      * against that bug.

@@ -82,7 +82,7 @@ Content-Type: application/json
 	"count": 1,
 	"data": [{
 		"inventoryId": "1",
-		"systemName": "my system",
+		"systemName": "mysystem",
 		"metaData": {
 			"key1": 1,
 			"key2": "value 2"

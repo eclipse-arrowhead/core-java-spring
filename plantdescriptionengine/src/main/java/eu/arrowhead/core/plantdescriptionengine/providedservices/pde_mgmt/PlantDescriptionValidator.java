@@ -47,8 +47,7 @@ public class PlantDescriptionValidator {
         // Find the currently active Plant Description, if any.
         PlantDescriptionEntry activeEntry = entries.values().stream()
             .filter(PlantDescriptionEntry::active)
-            .sorted(PlantDescriptionValidator::compareByMostRecentlyUpdated)
-            .findFirst()
+            .min(PlantDescriptionValidator::compareByMostRecentlyUpdated)
             .orElse(null);
 
         if (activeEntry == null) {
@@ -67,13 +66,6 @@ public class PlantDescriptionValidator {
         validateConnections(activeEntries);
     }
 
-    private static int compareByMostRecentlyUpdated(
-        final PlantDescriptionEntry a,
-        final PlantDescriptionEntry b
-    ) {
-        return b.updatedAt().compareTo(a.updatedAt());
-    }
-
     /**
      * Constructor
      *
@@ -82,6 +74,13 @@ public class PlantDescriptionValidator {
     public PlantDescriptionValidator(final PlantDescriptionEntry... entries) {
         this(Arrays.stream(entries)
             .collect(Collectors.toMap(PlantDescriptionEntry::id, entry -> entry)));
+    }
+
+    private static int compareByMostRecentlyUpdated(
+        final PlantDescriptionEntry a,
+        final PlantDescriptionEntry b
+    ) {
+        return b.updatedAt().compareTo(a.updatedAt());
     }
 
     /**

@@ -33,12 +33,12 @@ import static org.junit.Assert.assertTrue;
 
 public class DtoUtilsTest {
 
+    final String inventoryId = "abc_inventory_id";
+    final JsonObject systemData = new JsonObject(new JsonPair("a", JsonBoolean.TRUE));
     final private String systemName = "abc";
     private final Instant now = Instant.now();
     private final String someServiceDefinition = "servicexyz";
     private final String httpSecureJson = ServiceInterface.HTTP_SECURE_JSON.toString();
-    final String inventoryId = "abc_inventory_id";
-    final JsonObject systemData = new JsonObject(new JsonPair("a", JsonBoolean.TRUE));
     MonitorInfoTracker monitorInfoTracker;
     PlantDescriptionTracker pdTracker;
 

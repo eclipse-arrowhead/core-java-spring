@@ -76,15 +76,15 @@ Content-Type: application/json
 	"count": 1,
 	"data": [
 		{
-				"id": 1,
-				"systemName": "Example producer with metadata",
-				"systemId": "example-producer",
-				"acknowledged": false,
-				"severity": "major",
-				"description": "System not registered in Service Registry",
-				"raisedAt": "2020-03-13T16:54:00.511Z",
-				"updatedAt": "2020-03-13T16:54:00.511Z"
-			}
+            "id": 1,
+            "systemName": "exampleproducerwithmetadata",
+            "systemId": "example-producer",
+            "acknowledged": false,
+            "severity": "major",
+            "description": "System not registered in Service Registry",
+            "raisedAt": "2020-03-13T16:54:00.511Z",
+            "updatedAt": "2020-03-13T16:54:00.511Z"
+        }
 	]
 }
 ```
@@ -109,7 +109,7 @@ Content-Type: application/json
 
 {
 	"id": 1,
-	"systemName": "Example producer with metadata",
+	"systemName": "exampleproducerwithmetadata",
 	"systemId": "example-producer",
 	"acknowledged": false,
 	"severity": "major",
@@ -147,7 +147,7 @@ Content-Type: application/json
 
 {
 	"id": 1,
-	"systemName": "Example producer with metadata",
+	"systemName": "exampleproducerwithmetadata",
 	"systemId": "example-producer",
 	"acknowledged": true,
 	"severity": "major",
@@ -211,7 +211,7 @@ Content-Type: application/json
 		"active": false,
 		"systems": [
 			{
-				"systemName": "Service Registry",
+				"systemName": "serviceregistry",
 				"systemId": "service_registry",
 				"ports": [
 					{ "portName": "service_registry", "serviceDefinition": "Service Discovery"}
@@ -219,7 +219,7 @@ Content-Type: application/json
 				]
 			},
 			{
-				"systemName": "Authorization",
+				"systemName": "authorization",
 				"systemId": "authorization",
 				"ports": [
 					{ "portName": "service_registry", "serviceDefinition": "Service Discovery", "consumer": true },
@@ -229,7 +229,7 @@ Content-Type: application/json
 				]
 			},
 			{
-				"systemName": "Orchestration",
+				"systemName": "orchestration",
 				"systemId": "orchestration",
 				"ports": [
 					{ "portName": "service_registry", "serviceDefinition": "Service Discovery", "consumer": true },
@@ -286,7 +286,7 @@ Content-Type: application/json
 	"active": false,
 	"systems": [
 		{
-			"systemName": "Service Registry",
+			"systemName": "serviceregistry",
 			"systemId": "service_registry",
 			"ports": [
 				{ "portName": "service_registry", "serviceDefinition": "Service Discovery"}
@@ -294,7 +294,7 @@ Content-Type: application/json
 			]
 		},
 		{
-			"systemName": "Authorization",
+			"systemName": "authorization",
 			"systemId": "authorization",
 			"ports": [
 				{ "portName": "service_registry", "serviceDefinition": "Service Discovery", "consumer": true },
@@ -304,7 +304,7 @@ Content-Type: application/json
 			]
 		},
 		{
-			"systemName": "Orchestration",
+			"systemName": "orchestration",
 			"systemId": "orchestration",
 			"ports": [
 				{ "portName": "service_registry", "serviceDefinition": "Service Discovery", "consumer": true },

@@ -36,7 +36,7 @@ Content-Type: application/json
 	"plantDescription": "ArrowHead core",
 	"systems": [
 		{
-			"systemName": "Service Registry",
+			"systemName": "serviceregistry",
 			"systemId": "service_registry",
 			"ports": [
 				{ "portName": "service_registry", "serviceDefinition": "service-discovery"},
@@ -44,7 +44,7 @@ Content-Type: application/json
 			]
 		},
 		{
-			"systemName": "Authorization",
+			"systemName": "authorization",
 			"systemId": "authorization",
 			"ports": [
 				{ "portName": "service_registry", "serviceDefinition": "service-discovery", "consumer": true },
@@ -54,7 +54,7 @@ Content-Type: application/json
 			]
 		},
 		{
-			"systemName": "Orchestration",
+			"systemName": "orchestration",
 			"systemId": "orchestration",
 			"ports": [
 				{ "portName": "service_registry", "serviceDefinition": "service-discovery", "consumer": true },
@@ -94,7 +94,7 @@ Content-Type: application/json
 	"active": false,
 	"systems": [
 		{
-			"systemName": "Service Registry",
+			"systemName": "serviceregistry",
 			"systemId": "service_registry",
 			"ports": [
 				{ "portName": "service_registry", "serviceDefinition": "service-discovery"}
@@ -102,7 +102,7 @@ Content-Type: application/json
 			]
 		},
 		{
-			"systemName": "Authorization",
+			"systemName": "authorization",
 			"ports": [
 				{ "portName": "service_registry", "serviceDefinition": "service-discovery", "consumer": true },
 				{ "portName": "tokenGeneration", "serviceDefinition": "token-generation"},
@@ -111,7 +111,7 @@ Content-Type: application/json
 			]
 		},
 		{
-			"systemName": "Orchestration",
+			"systemName": "orchestration",
 			"systemId": "orchestration",
 			"ports": [
 				{ "portName": "service_registry", "serviceDefinition": "service-discovery", "consumer": true },
@@ -212,7 +212,7 @@ Content-Type: application/json
 		"active": false,
 		"systems": [
 			{
-				"systemName": "Service Registry",
+				"systemName": "serviceregistry",
 				"systemId": "service_registry",
 				"ports": [
 					{ "portName": "service_registry", "serviceDefinition": "service-discovery"}
@@ -220,7 +220,7 @@ Content-Type: application/json
 				]
 			},
 			{
-				"systemName": "Authorization",
+				"systemName": "authorization",
 				"systemId": "authorization",
 				"ports": [
 					{ "portName": "service_registry", "serviceDefinition": "service-discovery", "consumer": true },
@@ -230,7 +230,7 @@ Content-Type: application/json
 				]
 			},
 			{
-				"systemName": "Orchestration",
+				"systemName": "orchestration",
 				"systemId": "orchestration",
 				"ports": [
 					{ "portName": "service_registry", "serviceDefinition": "service-discovery", "consumer": true },
@@ -287,7 +287,7 @@ Content-Type: application/json
 	"active": false,
 	"systems": [
 		{
-			"systemName": "Service Registry",
+			"systemName": "serviceregistry",
 			"systemId": "service_registry",
 			"ports": [
 				{ "portName": "service_registry", "serviceDefinition": "service-discovery"}
@@ -295,7 +295,7 @@ Content-Type: application/json
 			]
 		},
 		{
-			"systemName": "Authorization",
+			"systemName": "authorization",
 			"systemNId": "authorization",
 			"ports": [
 				{ "portName": "service_registry", "serviceDefinition": "service-discovery", "consumer": true },
@@ -305,7 +305,7 @@ Content-Type: application/json
 			]
 		},
 		{
-			"systemName": "Orchestration",
+			"systemName": "orchestration",
 			"systemId": "orchestration",
 			"ports": [
 				{ "portName": "service_registry", "serviceDefinition": "service-discovery", "consumer": true },
@@ -354,7 +354,7 @@ Content-Type: application/json
 	"plantDescription": "ArrowHead core",
 	"systems": [
 		{
-			"systemName": "Service Registry",
+			"systemName": "serviceregistry",
 			"systemId": "service_registry",
 			"ports": [
 				{ "portName": "service_registry", "serviceDefinition": "service-discovery"},
@@ -362,7 +362,7 @@ Content-Type: application/json
 			]
 		},
 		{
-			"systemName": "Authorization",
+			"systemName": "authorization",
 			"systemId": "authorization",
 			"ports": [
 				{ "portName": "service_registry", "serviceDefinition": "service-discovery", "consumer": true },
@@ -372,7 +372,7 @@ Content-Type: application/json
 			]
 		},
 		{
-			"systemName": "Orchestration",
+			"systemName": "orchestration",
 			"systemId": "orchestration",
 			"ports": [
 				{ "portName": "service_registry", "serviceDefinition": "service-discovery", "consumer": true },
@@ -412,7 +412,7 @@ Content-Type: application/json
 	"active": false,
 	"systems": [
 		{
-			"systemName": "Service Registry",
+			"systemName": "serviceregistry",
 			"systemId": "service_registry",
 			"ports": [
 				{ "portName": "service_registry", "serviceDefinition": "service-discovery"}
@@ -420,7 +420,7 @@ Content-Type: application/json
 			]
 		},
 		{
-			"systemName": "Authorization",
+			"systemName": "authorization",
 			"systemId": "authorization",
 			"ports": [
 				{ "portName": "service_registry", "serviceDefinition": "service-discovery", "consumer": true },
@@ -430,7 +430,7 @@ Content-Type: application/json
 			]
 		},
 		{
-			"systemName": "Orchestration",
+			"systemName": "orchestration",
 			"systemId": "orchestration",
 			"ports": [
 				{ "portName": "service_registry", "serviceDefinition": "service-discovery", "consumer": true },
@@ -492,7 +492,7 @@ Content-Type: application/json
 	"active": true,
 	"systems": [
 		{
-			"systemName": "Service Registry",
+			"systemName": "serviceregistry",
 			"systemId": "service_registry",
 			"ports": [
 				{ "portName": "service_registry", "serviceDefinition": "service-discovery"},
@@ -500,7 +500,7 @@ Content-Type: application/json
 			]
 		},
 		{
-			"systemName": "Authorization",
+			"systemName": "authorization",
 			"systemId": "authorization",
 			"ports": [
 				{ "portName": "service_registry", "serviceDefinition": "service-discovery", "consumer": true },
@@ -510,7 +510,7 @@ Content-Type: application/json
 			]
 		},
 		{
-			"systemName": "Orchestration",
+			"systemName": "orchestration",
 			"systemId": "orchestration",
 			"ports": [
 				{ "portName": "service_registry", "serviceDefinition": "service-discovery", "consumer": true },
