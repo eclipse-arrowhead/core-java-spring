@@ -615,7 +615,7 @@ CREATE TABLE IF NOT EXISTS `qos_inter_direct_ping_measurement_log_details` (
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT `fk_inter_direct_ping_measurement_log` FOREIGN KEY (`measurement_log_id`) REFERENCES `qos_inter_direct_ping_measurement_log` (`id`) ON DELETE CASCADE
-	
+ 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `qos_inter_relay_measurement` (
@@ -714,4 +714,15 @@ CREATE TABLE IF NOT EXISTS `ca_trusted_key` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY `unique_hash` (`hash`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+
+-- Plant Description Engine
+
+CREATE TABLE IF NOT EXISTS `pde_rule` (
+  `id` bigint(20) PRIMARY KEY
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `plant_description` (
+  `id` bigint(20) PRIMARY KEY,
+  `plant_description` mediumtext NOT NULL
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8;

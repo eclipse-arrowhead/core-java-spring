@@ -26,6 +26,9 @@ wrapper
 /**/target
 /mvnw
 /mvnw.cmd
+/orchestrator/target
+/serviceregistry/target
+/plantdescriptionengine/target
 /.settings
 /**/.settings
 *.prefs
