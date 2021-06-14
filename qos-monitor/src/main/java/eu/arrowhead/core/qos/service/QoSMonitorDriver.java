@@ -265,6 +265,8 @@ public class QoSMonitorDriver {
 
 			}
 		}
+
+		throw new ArrowheadException("QoS Monitor can't access External Qos Monitor provider at : " + echoUri);
 	}
 
 	//-------------------------------------------------------------------------------------------------
