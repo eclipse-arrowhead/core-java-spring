@@ -3,6 +3,7 @@ package eu.arrowhead.core.qos.service.ping.monitor.impl;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -20,10 +22,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.dto.shared.IcmpPingRequestACK;
-import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
-import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.measurement.properties.PingMeasurementProperties;
 import eu.arrowhead.core.qos.service.QoSMonitorDriver;
@@ -365,7 +367,225 @@ public class DefaultExternalPingMonitorTest {
 		verify(driver, times(1)).checkPingMonitorProviderEchoUri(any());
 		verify(driver, times(1)).subscribeToExternalPingMonitorEvents(any());
 
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	// because of not entirely predictable nature of thread invocation timing use only in manual test mode
+	@Ignore
+	@Test
+	public void testInitOkWithThreadCheck() {
+
+		doNothing().when(driver).checkPingMonitorProviderEchoUri(any());
+		doNothing().when(driver).subscribeToExternalPingMonitorEvents(any());
+
+		doNothing().when(eventCollector).run();
+
+		monitor.init();
+
+		verify(driver, times(1)).checkPingMonitorProviderEchoUri(any());
+		verify(driver, times(1)).subscribeToExternalPingMonitorEvents(any());
+
 		verify(eventCollector, times(1)).run();
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitOkWhenPingMonitorSystemNotNull() {
+
+		final SystemRequestDTO pingMonitor = new SystemRequestDTO();
+		pingMonitor.setSystemName("pinger");
+		pingMonitor.setAddress("localhost");
+		pingMonitor.setPort(8888);
+
+		ReflectionTestUtils.setField(monitor, "pingMonitorSystem", pingMonitor);
+
+		doNothing().when(driver).checkPingMonitorProviderEchoUri(any());
+		doNothing().when(driver).subscribeToExternalPingMonitorEvents(any());
+
+		doNothing().when(eventCollector).run();
+
+		monitor.init();
+
+		verify(driver, times(1)).checkPingMonitorProviderEchoUri(any());
+		verify(driver, times(1)).subscribeToExternalPingMonitorEvents(any());
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	// because of not entirely predictable nature of thread invocation timing use only in manual test mode
+	@Ignore
+	@Test
+	public void testInitOkWhenPingMonitorSystemNotNullWhitThreadCheck() {
+
+		final SystemRequestDTO pingMonitor = new SystemRequestDTO();
+		pingMonitor.setSystemName("pinger");
+		pingMonitor.setAddress("localhost");
+		pingMonitor.setPort(8888);
+
+		ReflectionTestUtils.setField(monitor, "pingMonitorSystem", pingMonitor);
+
+		doNothing().when(driver).checkPingMonitorProviderEchoUri(any());
+		doNothing().when(driver).subscribeToExternalPingMonitorEvents(any());
+
+		doNothing().when(eventCollector).run();
+
+		monitor.init();
+
+		verify(driver, times(1)).checkPingMonitorProviderEchoUri(any());
+		verify(driver, times(1)).subscribeToExternalPingMonitorEvents(any());
+
+		verify(eventCollector, times(1)).run();
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test( expected = UnavailableServerException.class)
+	public void testInitDriverCheckPingMonitorProviderEchoUriThrowsException() {
+
+		doThrow(new UnavailableServerException("")).when(driver).checkPingMonitorProviderEchoUri(any());
+		doNothing().when(driver).subscribeToExternalPingMonitorEvents(any());
+
+		doNothing().when(eventCollector).run();
+
+		try {
+
+			monitor.init();
+
+		} catch (final Exception ex) {
+
+			verify(driver, times(1)).checkPingMonitorProviderEchoUri(any());
+			verify(driver, never()).subscribeToExternalPingMonitorEvents(any());
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	// because of not entirely predictable nature of thread invocation timing use only in manual test mode
+	@Ignore
+	@Test( expected = UnavailableServerException.class)
+	public void testInitDriverCheckPingMonitorProviderEchoUriThrowsExceptionWhitThreadCheck() {
+
+		doThrow(new UnavailableServerException("")).when(driver).checkPingMonitorProviderEchoUri(any());
+		doNothing().when(driver).subscribeToExternalPingMonitorEvents(any());
+
+		doNothing().when(eventCollector).run();
+
+		try {
+
+			monitor.init();
+
+		} catch (final Exception ex) {
+
+			verify(driver, times(1)).checkPingMonitorProviderEchoUri(any());
+			verify(driver, never()).subscribeToExternalPingMonitorEvents(any());
+
+			verify(eventCollector, never()).run();
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test( expected = UnavailableServerException.class)
+	public void testInitDriverSubscribeToExternalPingMonitorEventsThrowsUnavailableException() {
+
+		doNothing().when(driver).checkPingMonitorProviderEchoUri(any());
+		doThrow(new UnavailableServerException("")).when(driver).subscribeToExternalPingMonitorEvents(any());
+
+		doNothing().when(eventCollector).run();
+
+		try {
+
+			monitor.init();
+
+		} catch (final Exception ex) {
+
+			verify(driver, times(1)).checkPingMonitorProviderEchoUri(any());
+			verify(driver, times(1)).subscribeToExternalPingMonitorEvents(any());
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	// because of not entirely predictable nature of thread invocation timing use only in manual test mode
+	@Ignore
+	@Test( expected = UnavailableServerException.class)
+	public void testInitDriverSubscribeToExternalPingMonitorEventsThrowsUnavailableExceptionWhitThreadCheck() {
+
+		doNothing().when(driver).checkPingMonitorProviderEchoUri(any());
+		doThrow(new UnavailableServerException("")).when(driver).subscribeToExternalPingMonitorEvents(any());
+
+		doNothing().when(eventCollector).run();
+
+		try {
+
+			monitor.init();
+
+		} catch (final Exception ex) {
+
+			verify(driver, times(1)).checkPingMonitorProviderEchoUri(any());
+			verify(driver, times(1)).subscribeToExternalPingMonitorEvents(any());
+
+			verify(eventCollector, never()).run();
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test( expected = ArrowheadException.class)
+	public void testInitDriverSubscribeToExternalPingMonitorEventsThrowsArrowheadException() {
+
+		doNothing().when(driver).checkPingMonitorProviderEchoUri(any());
+		doThrow(new ArrowheadException("")).when(driver).subscribeToExternalPingMonitorEvents(any());
+
+		doNothing().when(eventCollector).run();
+
+		try {
+
+			monitor.init();
+
+		} catch (final Exception ex) {
+
+			verify(driver, times(1)).checkPingMonitorProviderEchoUri(any());
+			verify(driver, times(1)).subscribeToExternalPingMonitorEvents(any());
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	// because of not entirely predictable nature of thread invocation timing use only in manual test mode
+	@Ignore
+	@Test( expected = ArrowheadException.class)
+	public void testInitDriverSubscribeToExternalPingMonitorEventsThrowsArrowheadExceptionWhitThreadCheck() {
+
+		doNothing().when(driver).checkPingMonitorProviderEchoUri(any());
+		doThrow(new ArrowheadException("")).when(driver).subscribeToExternalPingMonitorEvents(any());
+
+		doNothing().when(eventCollector).run();
+
+		try {
+
+			monitor.init();
+
+		} catch (final Exception ex) {
+
+			verify(driver, times(1)).checkPingMonitorProviderEchoUri(any());
+			verify(driver, times(1)).subscribeToExternalPingMonitorEvents(any());
+
+			verify(eventCollector, never()).run();
+
+			throw ex;
+		}
 
 	}
 }
