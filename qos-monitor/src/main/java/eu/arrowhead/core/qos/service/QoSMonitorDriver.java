@@ -244,6 +244,8 @@ public class QoSMonitorDriver {
 	public void checkPingMonitorProviderEchoUri(final UriComponents echoUri) {
 		logger.debug("checkPingMonitorProviderEchoUri started...");
 
+		Assert.notNull(echoUri, "echoUri is null.");
+
 		int count = 0;
 
 		while ( count < MAX_RETRIES) {
