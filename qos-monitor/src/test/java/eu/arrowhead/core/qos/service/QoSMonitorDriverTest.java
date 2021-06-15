@@ -738,6 +738,66 @@ public class QoSMonitorDriverTest {
 
 	}
 
+
+	//Tests of unsubscribeFromPingMonitorEvents method
+	//-------------------------------------------------------------------------------------------------
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnsubscribeFromPingMonitorEventsOk() {
+
+		final int MAX_RETRIES = 1;
+
+		ReflectionTestUtils.setField(testingObject, "MAX_RETRIES", MAX_RETRIES);
+		ReflectionTestUtils.setField(testingObject, "SLEEP_PERIOD", 100);
+
+		ReflectionTestUtils.setField(testingObject, "coreSystemName", "QoSMonitor");
+		ReflectionTestUtils.setField(testingObject, "coreSystemAddress", "localhost");
+		ReflectionTestUtils.setField(testingObject, "coreSystemPort", 8451);
+
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/");
+
+		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
+		when(arrowheadContext.get(anyString())).thenReturn(uri);
+
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.DELETE), eq( Void.class), any() )).thenReturn(new ResponseEntity<>( HttpStatus.OK));
+
+		testingObject.unsubscribeFromPingMonitorEvents();
+
+		verify(arrowheadContext, times(1)).containsKey(anyString());
+		verify(arrowheadContext, times(1)).get(anyString());
+		verify(httpService, times(QosMonitorEventType.values().length)).sendRequest(any(UriComponents.class),eq(HttpMethod.DELETE), eq( Void.class), any() );
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnsubscribeFromPingMonitorEventsEventHandlerUnavailableForLessMAX_RETIREISTimesThanOk() {
+
+		final int MAX_RETRIES = 2;
+
+		ReflectionTestUtils.setField(testingObject, "MAX_RETRIES", MAX_RETRIES);
+		ReflectionTestUtils.setField(testingObject, "SLEEP_PERIOD", 100);
+
+		ReflectionTestUtils.setField(testingObject, "coreSystemName", "QoSMonitor");
+		ReflectionTestUtils.setField(testingObject, "coreSystemAddress", "localhost");
+		ReflectionTestUtils.setField(testingObject, "coreSystemPort", 8451);
+
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/");
+
+		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
+		when(arrowheadContext.get(anyString())).thenReturn(uri);
+
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.DELETE), eq( Void.class), any() )).
+		thenThrow(new UnavailableServerException("")).
+		thenReturn(new ResponseEntity<>( HttpStatus.OK));
+
+		testingObject.unsubscribeFromPingMonitorEvents();
+
+		verify(arrowheadContext, times(2)).containsKey(anyString());
+		verify(arrowheadContext, times(2)).get(anyString());
+		verify(httpService, times(QosMonitorEventType.values().length + 1)).sendRequest(any(UriComponents.class),eq(HttpMethod.DELETE), eq( Void.class), any() );
+	}
+
 	//=================================================================================================
 	// assistant methods
 
