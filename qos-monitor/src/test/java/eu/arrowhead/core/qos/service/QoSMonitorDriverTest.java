@@ -798,6 +798,37 @@ public class QoSMonitorDriverTest {
 		verify(httpService, times(QosMonitorEventType.values().length + 1)).sendRequest(any(UriComponents.class),eq(HttpMethod.DELETE), eq( Void.class), any() );
 	}
 
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnsubscribeFromPingMonitorEventsEventHandlerUnavailableForMAX_RETIREISTimesThanStillOk() {
+
+		final int MAX_RETRIES = 2;
+
+		ReflectionTestUtils.setField(testingObject, "MAX_RETRIES", MAX_RETRIES);
+		ReflectionTestUtils.setField(testingObject, "SLEEP_PERIOD", 100);
+
+		ReflectionTestUtils.setField(testingObject, "coreSystemName", "QoSMonitor");
+		ReflectionTestUtils.setField(testingObject, "coreSystemAddress", "localhost");
+		ReflectionTestUtils.setField(testingObject, "coreSystemPort", 8451);
+
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/");
+
+		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
+		when(arrowheadContext.get(anyString())).thenReturn(uri);
+
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.DELETE), eq( Void.class), any() )).
+		thenThrow(new UnavailableServerException("")).
+		thenThrow(new UnavailableServerException("")).
+		thenReturn(new ResponseEntity<>( HttpStatus.OK));
+
+		testingObject.unsubscribeFromPingMonitorEvents();
+
+		verify(arrowheadContext, times(MAX_RETRIES)).containsKey(anyString());
+		verify(arrowheadContext, times(MAX_RETRIES)).get(anyString());
+		verify(httpService, times(MAX_RETRIES)).sendRequest(any(UriComponents.class),eq(HttpMethod.DELETE), eq( Void.class), any() );
+	}
+
 	//=================================================================================================
 	// assistant methods
 
