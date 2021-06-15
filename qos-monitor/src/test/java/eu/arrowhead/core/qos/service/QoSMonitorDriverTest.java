@@ -659,6 +659,85 @@ public class QoSMonitorDriverTest {
 
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testSubscribeToExternalPingMonitorContextNotContainsKey() {
+
+		final int MAX_RETRIES = 2;
+
+		ReflectionTestUtils.setField(testingObject, "MAX_RETRIES", MAX_RETRIES);
+		ReflectionTestUtils.setField(testingObject, "SLEEP_PERIOD", 100);
+
+		ReflectionTestUtils.setField(testingObject, "coreSystemName", "QoSMonitor");
+		ReflectionTestUtils.setField(testingObject, "coreSystemAddress", "localhost");
+		ReflectionTestUtils.setField(testingObject, "coreSystemPort", 8451);
+		ReflectionTestUtils.setField(testingObject, "sslEnabled", true);
+
+		final SystemRequestDTO provider = new SystemRequestDTO();
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/");
+		final PublicKey publicKey = getPublicKeyForTests();
+
+		when(arrowheadContext.containsKey(anyString())).thenReturn(false);
+		when(arrowheadContext.get(anyString())).
+		thenReturn(publicKey).
+		thenReturn(uri);
+
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq( SubscriptionResponseDTO.class), any(SubscriptionRequestDTO.class) )).
+		thenReturn(new ResponseEntity<>(new SubscriptionResponseDTO(), HttpStatus.OK));
+
+		try {
+
+			testingObject.subscribeToExternalPingMonitorEvents(provider);
+
+		} catch (final Exception ex) {
+
+			verify(arrowheadContext, times(2)).containsKey(anyString());
+			verify(arrowheadContext, never()).get(anyString());
+			verify(httpService, never()).sendRequest(any(UriComponents.class),eq(HttpMethod.POST), eq( SubscriptionResponseDTO.class), any(SubscriptionRequestDTO.class) );
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testSubscribeToExternalPingMonitorContextKeyIsInappropriate() {
+
+		final int MAX_RETRIES = 2;
+
+		ReflectionTestUtils.setField(testingObject, "MAX_RETRIES", MAX_RETRIES);
+		ReflectionTestUtils.setField(testingObject, "SLEEP_PERIOD", 100);
+
+		ReflectionTestUtils.setField(testingObject, "coreSystemName", "QoSMonitor");
+		ReflectionTestUtils.setField(testingObject, "coreSystemAddress", "localhost");
+		ReflectionTestUtils.setField(testingObject, "coreSystemPort", 8451);
+		ReflectionTestUtils.setField(testingObject, "sslEnabled", true);
+
+		final SystemRequestDTO provider = new SystemRequestDTO();
+
+		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
+		when(arrowheadContext.get(anyString())).
+		thenThrow(new ClassCastException());
+
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq( SubscriptionResponseDTO.class), any(SubscriptionRequestDTO.class) )).
+		thenReturn(new ResponseEntity<>(new SubscriptionResponseDTO(), HttpStatus.OK));
+
+		try {
+
+			testingObject.subscribeToExternalPingMonitorEvents(provider);
+
+		} catch (final Exception ex) {
+
+			verify(arrowheadContext, atLeast(2)).containsKey(anyString());
+			verify(arrowheadContext, times(2)).get(anyString());
+			verify(httpService, never()).sendRequest(any(UriComponents.class),eq(HttpMethod.POST), eq( SubscriptionResponseDTO.class), any(SubscriptionRequestDTO.class) );
+
+			throw ex;
+		}
+
+	}
+
 	//=================================================================================================
 	// assistant methods
 
