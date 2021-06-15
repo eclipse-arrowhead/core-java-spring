@@ -29,6 +29,9 @@ wrapper
 /**/target
 /mvnw
 /mvnw.cmd
+/orchestrator/target
+/serviceregistry/target
+/plantdescriptionengine/target
 /.settings
 /**/.settings
 *.prefs
@@ -40,3 +43,4 @@ wrapper
 /deb-installer/.project
 /deb-installer/.settings
 deviceregistry/bin
+/qos-monitor/bin

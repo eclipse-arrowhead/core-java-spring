@@ -52,6 +52,7 @@ create_consumer_system_keystore "gatekeeper"
 create_consumer_system_keystore "gateway"
 create_consumer_system_keystore "orchestrator"
 create_consumer_system_keystore "service_registry"
+create_consumer_system_keystore "plant_description_engine"
 
 create_sysop_keystore \
   "cloud-root/crypto/root.p12" "arrowhead.eu" \
@@ -88,6 +89,7 @@ create_producer_system_keystore "gatekeeper"
 create_producer_system_keystore "gateway"
 create_producer_system_keystore "orchestrator"
 create_producer_system_keystore "service_registry"
+create_producer_system_keystore "plant_description_engine"
 
 create_sysop_keystore \
   "cloud-root/crypto/root.p12" "arrowhead.eu" \
