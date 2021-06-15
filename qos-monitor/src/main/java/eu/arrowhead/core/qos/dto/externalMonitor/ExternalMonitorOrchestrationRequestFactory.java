@@ -16,8 +16,6 @@ import org.springframework.stereotype.Service;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
-import eu.arrowhead.common.dto.internal.ServiceDefinitionRequestDTO;
-import eu.arrowhead.common.dto.internal.ServiceInterfaceRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFlags.Flag;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
@@ -71,8 +69,11 @@ public class ExternalMonitorOrchestrationRequestFactory {
 		return orchestrationForm;
 	}
 
+	//=================================================================================================
+	// assistant methods
+
 	//-------------------------------------------------------------------------------------------------
-	public SystemRequestDTO createExternalMonitorSystemRequestDTO() {
+	private SystemRequestDTO createExternalMonitorSystemRequestDTO() {
 		logger.debug("createExternalMonitorSystemRequestDTO started...");
 
 		if(requesterSystem == null) {
@@ -94,27 +95,7 @@ public class ExternalMonitorOrchestrationRequestFactory {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public ServiceDefinitionRequestDTO createExternalPingMonitorServiceDefinitionRequestDTO() {
-		logger.debug("createExternalMonitorServiceDefinitionRequestDTO started...");
-
-		final ServiceDefinitionRequestDTO externalPingMonitorServiceDefinition = new ServiceDefinitionRequestDTO();
-		externalPingMonitorServiceDefinition.setServiceDefinition(QosMonitorConstants.EXTERNAL_PING_MONITORING_SERVICE_DEFINITION);
-
-		return externalPingMonitorServiceDefinition;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	public ServiceInterfaceRequestDTO createExternalPingMonitorServiceInterfaceRequestDTO() {
-		logger.debug("createExternalPingMonitorServiceInterfaceRequestDTO started...");
-
-		final ServiceInterfaceRequestDTO externalPingMonitorServiceInterface = new ServiceInterfaceRequestDTO();
-		externalPingMonitorServiceInterface.setInterfaceName(QosMonitorConstants.EXTERNAL_PING_MONITORING_SERVICE_INTERFACE);
-
-		return externalPingMonitorServiceInterface;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	public ServiceQueryFormDTO createExternalPingMonitorServiceQueryFormDTO() {
+	private ServiceQueryFormDTO createExternalPingMonitorServiceQueryFormDTO() {
 		logger.debug("createExternalPingMonitorServiceQueryFormDTO started...");
 
 		final ServiceQueryFormDTO externalPingMonitorServiceQueryForm = new ServiceQueryFormDTO();
