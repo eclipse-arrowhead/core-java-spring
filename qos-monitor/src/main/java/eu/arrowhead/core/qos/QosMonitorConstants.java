@@ -1,7 +1,5 @@
 package eu.arrowhead.core.qos;
 
-import eu.arrowhead.common.CoreDefaults;
-
 public class QosMonitorConstants {
 
 	//=================================================================================================
