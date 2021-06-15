@@ -45,6 +45,11 @@
             <artifactId>netty-all</artifactId>
             <version>4.1.52.Final</version>
         </dependency>
+        <dependency>
+            <groupId>eu.arrowhead</groupId>
+            <artifactId>arrowhead-core-common</artifactId>
+            <version>${revision}</version>
+        </dependency>
     </dependencies>
 
     <build>

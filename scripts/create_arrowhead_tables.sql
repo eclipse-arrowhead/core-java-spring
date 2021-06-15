@@ -719,7 +719,8 @@ CREATE TABLE IF NOT EXISTS `ca_trusted_key` (
 -- Plant Description Engine
 
 CREATE TABLE IF NOT EXISTS `pde_rule` (
-  `id` bigint(20) PRIMARY KEY
+  `id` bigint(20) PRIMARY KEY,
+  `plant_description_id` bigint(20) NOT NULL
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
 
 CREATE TABLE IF NOT EXISTS `plant_description` (
