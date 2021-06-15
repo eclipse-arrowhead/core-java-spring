@@ -62,6 +62,8 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 
 	private final Logger logger = LogManager.getLogger(OrchestratedExternalPingMonitor.class);
 
+	private boolean initialized;
+
 	//=================================================================================================
 	// methods
 
@@ -69,6 +71,11 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 	@Override
 	public List<IcmpPingResponse> ping(final String address) {
 		logger.debug("ping statred...");
+
+		if(!initialized) {
+
+			throw new ArrowheadException("OrchestratedExternalPingMonitor is not initilized.");
+		}
 
 		if (Utilities.isEmpty(address)) {
 			throw new InvalidParameterException("Address" + EMPTY_OR_NULL_ERROR_MESSAGE);
@@ -111,6 +118,12 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 	public void init() {
 		logger.debug("init started...");
 
+		if (initialized) {
+			logger.debug("OrchestratedExternalPingMonitor is allready initialized.");
+
+			return;
+		}
+
 		try {
 
 			final OrchestrationFormRequestDTO request = orchestrationRequestFactory.createExternalMonitorOrchestrationRequest();
@@ -132,6 +145,7 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 		eventCollectorThread.setName(PING_EVENT_COLLECTOR_THREAD_NAME);
 		eventCollectorThread.start();
 
+		initialized = true;
 	}
 
 	//=================================================================================================

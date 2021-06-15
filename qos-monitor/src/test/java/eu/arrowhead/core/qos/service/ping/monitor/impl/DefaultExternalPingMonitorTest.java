@@ -1,5 +1,7 @@
 package eu.arrowhead.core.qos.service.ping.monitor.impl;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
@@ -13,7 +15,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -64,6 +65,8 @@ public class DefaultExternalPingMonitorTest {
 		ReflectionTestUtils.setField(monitor, "externalPingMonitorPort", 8888);
 		ReflectionTestUtils.setField(monitor, "externalPingMonitorPath", "/path");
 		ReflectionTestUtils.setField(monitor, "pingMonitorSecure", true);
+
+		ReflectionTestUtils.setField(monitor, "initialized", true);
 
 		when(pingMeasurementProperties.getTimeout()).thenReturn(1);
 		when(pingMeasurementProperties.getTimeToRepeat()).thenReturn(32);
@@ -136,6 +139,38 @@ public class DefaultExternalPingMonitorTest {
 		verify(pingMeasurementProperties, times(2)).getTimeToRepeat();
 		verify(driver, times(1)).requestExternalPingMonitorService(any(),any());
 		verify(processor, times(1)).processEvents(any(),anyLong());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testPingNotInitialized() {
+
+		ReflectionTestUtils.setField(monitor, "initialized", false);
+
+		final String address = "localhost";
+
+		final IcmpPingRequestACK ack = new IcmpPingRequestACK();
+		ack.setAckOk("OK");
+		ack.setExternalMeasurementUuid(UUID.randomUUID());
+
+		final List<IcmpPingResponse> response = List.of(new IcmpPingResponse());
+
+		when(driver.requestExternalPingMonitorService(any(), any())).thenReturn(ack);
+		when(processor.processEvents(any(), anyLong())).thenReturn(response);
+
+		try {
+
+			monitor.ping(address);
+
+		} catch (final Exception ex) {
+
+			verify(pingMeasurementProperties, never()).getTimeout();
+			verify(pingMeasurementProperties, never()).getTimeToRepeat();
+			verify(driver, never()).requestExternalPingMonitorService(any(),any());
+			verify(processor, never()).processEvents(any(),anyLong());
+
+			throw ex;
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -357,6 +392,8 @@ public class DefaultExternalPingMonitorTest {
 	@Test
 	public void testInitOk() {
 
+		ReflectionTestUtils.setField(monitor, "initialized", false);
+
 		doNothing().when(driver).checkPingMonitorProviderEchoUri(any());
 		doNothing().when(driver).subscribeToExternalPingMonitorEvents(any());
 
@@ -367,13 +404,15 @@ public class DefaultExternalPingMonitorTest {
 		verify(driver, times(1)).checkPingMonitorProviderEchoUri(any());
 		verify(driver, times(1)).subscribeToExternalPingMonitorEvents(any());
 
+		final boolean initialized = (boolean) ReflectionTestUtils.getField(monitor, "initialized");
+		assertTrue(initialized);
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	// because of not entirely predictable nature of thread invocation timing use only in manual test mode
-	@Ignore
 	@Test
-	public void testInitOkWithThreadCheck() {
+	public void testInitAlreadyInitialized() {
+
+		ReflectionTestUtils.setField(monitor, "initialized", true);
 
 		doNothing().when(driver).checkPingMonitorProviderEchoUri(any());
 		doNothing().when(driver).subscribeToExternalPingMonitorEvents(any());
@@ -382,41 +421,18 @@ public class DefaultExternalPingMonitorTest {
 
 		monitor.init();
 
-		verify(driver, times(1)).checkPingMonitorProviderEchoUri(any());
-		verify(driver, times(1)).subscribeToExternalPingMonitorEvents(any());
+		verify(driver, never()).checkPingMonitorProviderEchoUri(any());
+		verify(driver, never()).subscribeToExternalPingMonitorEvents(any());
 
-		verify(eventCollector, times(1)).run();
-
+		final boolean initialized = (boolean) ReflectionTestUtils.getField(monitor, "initialized");
+		assertTrue(initialized);
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testInitOkWhenPingMonitorSystemNotNull() {
 
-		final SystemRequestDTO pingMonitor = new SystemRequestDTO();
-		pingMonitor.setSystemName("pinger");
-		pingMonitor.setAddress("localhost");
-		pingMonitor.setPort(8888);
-
-		ReflectionTestUtils.setField(monitor, "pingMonitorSystem", pingMonitor);
-
-		doNothing().when(driver).checkPingMonitorProviderEchoUri(any());
-		doNothing().when(driver).subscribeToExternalPingMonitorEvents(any());
-
-		doNothing().when(eventCollector).run();
-
-		monitor.init();
-
-		verify(driver, times(1)).checkPingMonitorProviderEchoUri(any());
-		verify(driver, times(1)).subscribeToExternalPingMonitorEvents(any());
-
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	// because of not entirely predictable nature of thread invocation timing use only in manual test mode
-	@Ignore
-	@Test
-	public void testInitOkWhenPingMonitorSystemNotNullWithThreadCheck() {
+		ReflectionTestUtils.setField(monitor, "initialized", false);
 
 		final SystemRequestDTO pingMonitor = new SystemRequestDTO();
 		pingMonitor.setSystemName("pinger");
@@ -435,38 +451,15 @@ public class DefaultExternalPingMonitorTest {
 		verify(driver, times(1)).checkPingMonitorProviderEchoUri(any());
 		verify(driver, times(1)).subscribeToExternalPingMonitorEvents(any());
 
-		verify(eventCollector, times(1)).run();
-
+		final boolean initialized = (boolean) ReflectionTestUtils.getField(monitor, "initialized");
+		assertTrue(initialized);
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Test( expected = UnavailableServerException.class)
 	public void testInitDriverCheckPingMonitorProviderEchoUriThrowsException() {
 
-		doThrow(new UnavailableServerException("")).when(driver).checkPingMonitorProviderEchoUri(any());
-		doNothing().when(driver).subscribeToExternalPingMonitorEvents(any());
-
-		doNothing().when(eventCollector).run();
-
-		try {
-
-			monitor.init();
-
-		} catch (final Exception ex) {
-
-			verify(driver, times(1)).checkPingMonitorProviderEchoUri(any());
-			verify(driver, never()).subscribeToExternalPingMonitorEvents(any());
-
-			throw ex;
-		}
-
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	// because of not entirely predictable nature of thread invocation timing use only in manual test mode
-	@Ignore
-	@Test( expected = UnavailableServerException.class)
-	public void testInitDriverCheckPingMonitorProviderEchoUriThrowsExceptionWithThreadCheck() {
+		ReflectionTestUtils.setField(monitor, "initialized", false);
 
 		doThrow(new UnavailableServerException("")).when(driver).checkPingMonitorProviderEchoUri(any());
 		doNothing().when(driver).subscribeToExternalPingMonitorEvents(any());
@@ -482,7 +475,8 @@ public class DefaultExternalPingMonitorTest {
 			verify(driver, times(1)).checkPingMonitorProviderEchoUri(any());
 			verify(driver, never()).subscribeToExternalPingMonitorEvents(any());
 
-			verify(eventCollector, never()).run();
+			final boolean initialized = (boolean) ReflectionTestUtils.getField(monitor, "initialized");
+			assertFalse(initialized);
 
 			throw ex;
 		}
@@ -493,30 +487,7 @@ public class DefaultExternalPingMonitorTest {
 	@Test( expected = UnavailableServerException.class)
 	public void testInitDriverSubscribeToExternalPingMonitorEventsThrowsUnavailableException() {
 
-		doNothing().when(driver).checkPingMonitorProviderEchoUri(any());
-		doThrow(new UnavailableServerException("")).when(driver).subscribeToExternalPingMonitorEvents(any());
-
-		doNothing().when(eventCollector).run();
-
-		try {
-
-			monitor.init();
-
-		} catch (final Exception ex) {
-
-			verify(driver, times(1)).checkPingMonitorProviderEchoUri(any());
-			verify(driver, times(1)).subscribeToExternalPingMonitorEvents(any());
-
-			throw ex;
-		}
-
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	// because of not entirely predictable nature of thread invocation timing use only in manual test mode
-	@Ignore
-	@Test( expected = UnavailableServerException.class)
-	public void testInitDriverSubscribeToExternalPingMonitorEventsThrowsUnavailableExceptionWithThreadCheck() {
+		ReflectionTestUtils.setField(monitor, "initialized", false);
 
 		doNothing().when(driver).checkPingMonitorProviderEchoUri(any());
 		doThrow(new UnavailableServerException("")).when(driver).subscribeToExternalPingMonitorEvents(any());
@@ -532,7 +503,8 @@ public class DefaultExternalPingMonitorTest {
 			verify(driver, times(1)).checkPingMonitorProviderEchoUri(any());
 			verify(driver, times(1)).subscribeToExternalPingMonitorEvents(any());
 
-			verify(eventCollector, never()).run();
+			final boolean initialized = (boolean) ReflectionTestUtils.getField(monitor, "initialized");
+			assertFalse(initialized);
 
 			throw ex;
 		}
@@ -543,30 +515,7 @@ public class DefaultExternalPingMonitorTest {
 	@Test( expected = ArrowheadException.class)
 	public void testInitDriverSubscribeToExternalPingMonitorEventsThrowsArrowheadException() {
 
-		doNothing().when(driver).checkPingMonitorProviderEchoUri(any());
-		doThrow(new ArrowheadException("")).when(driver).subscribeToExternalPingMonitorEvents(any());
-
-		doNothing().when(eventCollector).run();
-
-		try {
-
-			monitor.init();
-
-		} catch (final Exception ex) {
-
-			verify(driver, times(1)).checkPingMonitorProviderEchoUri(any());
-			verify(driver, times(1)).subscribeToExternalPingMonitorEvents(any());
-
-			throw ex;
-		}
-
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	// because of not entirely predictable nature of thread invocation timing use only in manual test mode
-	@Ignore
-	@Test( expected = ArrowheadException.class)
-	public void testInitDriverSubscribeToExternalPingMonitorEventsThrowsArrowheadExceptionWithThreadCheck() {
+		ReflectionTestUtils.setField(monitor, "initialized", false);
 
 		doNothing().when(driver).checkPingMonitorProviderEchoUri(any());
 		doThrow(new ArrowheadException("")).when(driver).subscribeToExternalPingMonitorEvents(any());
@@ -582,10 +531,12 @@ public class DefaultExternalPingMonitorTest {
 			verify(driver, times(1)).checkPingMonitorProviderEchoUri(any());
 			verify(driver, times(1)).subscribeToExternalPingMonitorEvents(any());
 
-			verify(eventCollector, never()).run();
+			final boolean initialized = (boolean) ReflectionTestUtils.getField(monitor, "initialized");
+			assertFalse(initialized);
 
 			throw ex;
 		}
 
 	}
+
 }

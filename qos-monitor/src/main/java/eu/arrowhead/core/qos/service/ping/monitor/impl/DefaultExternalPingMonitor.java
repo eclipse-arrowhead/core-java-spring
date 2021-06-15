@@ -64,6 +64,8 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 
 	private SystemRequestDTO pingMonitorSystem;
 
+	private boolean initialized;
+
 	private final Logger logger = LogManager.getLogger(DefaultExternalPingMonitor.class);
 
 	//=================================================================================================
@@ -73,6 +75,11 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	@Override
 	public List<IcmpPingResponse> ping(final String address) {
 		logger.debug("ping statred...");
+
+		if(!initialized) {
+
+			throw new ArrowheadException("DefaultExternalPingMonitor is not initilized.");
+		}
 
 		if (Utilities.isEmpty(address)) {
 			throw new InvalidParameterException("Address" + EMPTY_OR_NULL_ERROR_MESSAGE);
@@ -100,6 +107,12 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 	public void init() {
 		logger.debug("initPingMonitorProvider started...");
 
+		if (initialized) {
+			logger.debug("DefaultExternalPingMonitor is allready initialized.");
+
+			return;
+		}
+
 		pingMonitorSystem = getPingMonitorSystemRequestDTO();
 
 		driver.checkPingMonitorProviderEchoUri(createPingMonitorProviderEchoUri());
@@ -108,6 +121,8 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 		final Thread eventCollectorThread = new Thread(eventCollector);
 		eventCollectorThread.setName(PING_EVENT_COLLECTOR_THREAD_NAME);
 		eventCollectorThread.start();
+
+		initialized = true;
 
 	}
 

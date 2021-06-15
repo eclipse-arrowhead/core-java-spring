@@ -1,7 +1,9 @@
 package eu.arrowhead.core.qos.service.ping.monitor.impl;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
@@ -17,7 +19,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -74,7 +75,7 @@ public class OrchestratedExternalPingMonitorTest {
 		final OrchestrationResultDTO cachedPingMonitorProvider = getValidOrchestrationResultDTOForTests();
 
 		ReflectionTestUtils.setField(monitor, "cachedPingMonitorProvider", cachedPingMonitorProvider);
-
+		ReflectionTestUtils.setField(monitor, "initialized", true);
 	}
 
 	//Tests of ping method
@@ -147,6 +148,42 @@ public class OrchestratedExternalPingMonitorTest {
 		verify(processor, times(1)).processEvents(any(),anyLong());
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testPingNotInitialized() {
+
+		ReflectionTestUtils.setField(monitor, "initialized", false);
+
+		final String address = "localhost";
+
+		final IcmpPingRequestACK ack = new IcmpPingRequestACK();
+		ack.setAckOk("OK");
+		ack.setExternalMeasurementUuid(UUID.randomUUID());
+
+		final List<IcmpPingResponse> response = List.of(new IcmpPingResponse());
+
+		when(pingMeasurementProperties.getTimeout()).thenReturn(1);
+		when(pingMeasurementProperties.getTimeToRepeat()).thenReturn(32);
+		when(driver.requestExternalPingMonitorService(any(), any())).thenReturn(ack);
+		when(processor.processEvents(any(), anyLong())).thenReturn(response);
+
+		try {
+
+			monitor.ping(address);
+
+		} catch (final Exception ex) {
+
+			verify(pingMeasurementProperties, never()).getTimeout();
+			verify(pingMeasurementProperties, never()).getTimeToRepeat();
+			verify(driver, never()).requestExternalPingMonitorService(any(),any());
+			verify(processor, never()).processEvents(any(),anyLong());
+
+			final boolean initialized = (boolean) ReflectionTestUtils.getField(monitor, "initialized");
+			assertFalse(initialized);
+
+			throw ex;
+		}
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ArrowheadException.class)
@@ -614,6 +651,8 @@ public class OrchestratedExternalPingMonitorTest {
 	@Test
 	public void testInitOk() {
 
+		ReflectionTestUtils.setField(monitor, "initialized", false);
+
 		final OrchestrationResultDTO cachedPingMonitorProvider = null;
 		ReflectionTestUtils.setField(monitor, "cachedPingMonitorProvider", cachedPingMonitorProvider);
 
@@ -633,13 +672,15 @@ public class OrchestratedExternalPingMonitorTest {
 		verify(driver, times(1)).unsubscribeFromPingMonitorEvents();
 		verify(driver, times(1)).subscribeToExternalPingMonitorEvents(any());
 
+		final boolean initialized = (boolean) ReflectionTestUtils.getField(monitor, "initialized");
+		assertTrue(initialized);
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	// because of not entirely predictable nature of thread invocation timing use only in manual test mode
-	@Ignore
 	@Test
-	public void testInitOkWithTrheadCheck() {
+	public void testInitAlreadyInitialized() {
+
+		ReflectionTestUtils.setField(monitor, "initialized", true);
 
 		final OrchestrationResultDTO cachedPingMonitorProvider = null;
 		ReflectionTestUtils.setField(monitor, "cachedPingMonitorProvider", cachedPingMonitorProvider);
@@ -655,45 +696,20 @@ public class OrchestratedExternalPingMonitorTest {
 
 		monitor.init();
 
-		verify(orchestrationRequestFactory, times(1)).createExternalMonitorOrchestrationRequest();
-		verify(driver, times(1)).queryOrchestrator(any());
-		verify(driver, times(1)).unsubscribeFromPingMonitorEvents();
-		verify(driver, times(1)).subscribeToExternalPingMonitorEvents(any());
+		verify(orchestrationRequestFactory, never()).createExternalMonitorOrchestrationRequest();
+		verify(driver, never()).queryOrchestrator(any());
+		verify(driver, never()).unsubscribeFromPingMonitorEvents();
+		verify(driver, never()).subscribeToExternalPingMonitorEvents(any());
 
-		verify(eventCollector, times(1)).run();
-
+		final boolean initialized = (boolean) ReflectionTestUtils.getField(monitor, "initialized");
+		assertTrue(initialized);
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testInitDriverThrowsIllegalArgumentException() {
 
-		final OrchestrationResultDTO cachedPingMonitorProvider = null;
-		ReflectionTestUtils.setField(monitor, "cachedPingMonitorProvider", cachedPingMonitorProvider);
-
-		final OrchestrationFormRequestDTO orchestrationForm = null;
-
-		when(orchestrationRequestFactory.createExternalMonitorOrchestrationRequest()).thenReturn(orchestrationForm);
-		when(driver.queryOrchestrator(any())).thenThrow( new IllegalArgumentException());
-		doNothing().when(driver).unsubscribeFromPingMonitorEvents();
-		doNothing().when(driver).subscribeToExternalPingMonitorEvents(any());
-
-		doNothing().when(eventCollector).run();
-
-		monitor.init();
-
-		verify(orchestrationRequestFactory, times(1)).createExternalMonitorOrchestrationRequest();
-		verify(driver, times(1)).queryOrchestrator(any());
-		verify(driver, never()).unsubscribeFromPingMonitorEvents();
-		verify(driver, never()).subscribeToExternalPingMonitorEvents(any());
-
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	// because of not entirely predictable nature of thread invocation timing use only in manual test mode
-	@Ignore
-	@Test
-	public void testInitDriverThrowsIllegalArgumentExceptionWithThreadCheck() {
+		ReflectionTestUtils.setField(monitor, "initialized", false);
 
 		final OrchestrationResultDTO cachedPingMonitorProvider = null;
 		ReflectionTestUtils.setField(monitor, "cachedPingMonitorProvider", cachedPingMonitorProvider);
@@ -714,40 +730,15 @@ public class OrchestratedExternalPingMonitorTest {
 		verify(driver, never()).unsubscribeFromPingMonitorEvents();
 		verify(driver, never()).subscribeToExternalPingMonitorEvents(any());
 
-		verify(eventCollector, times(1)).run();
-
+		final boolean initialized = (boolean) ReflectionTestUtils.getField(monitor, "initialized");
+		assertTrue(initialized);
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testInitDriverThrowsArrowheadException() {
 
-		final OrchestrationResultDTO cachedPingMonitorProvider = null;
-		ReflectionTestUtils.setField(monitor, "cachedPingMonitorProvider", cachedPingMonitorProvider);
-
-		final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO();
-
-		when(orchestrationRequestFactory.createExternalMonitorOrchestrationRequest()).thenReturn(orchestrationForm);
-		when(driver.queryOrchestrator(any())).thenThrow( new ArrowheadException(""));
-		doNothing().when(driver).unsubscribeFromPingMonitorEvents();
-		doNothing().when(driver).subscribeToExternalPingMonitorEvents(any());
-
-		doNothing().when(eventCollector).run();
-
-		monitor.init();
-
-		verify(orchestrationRequestFactory, times(1)).createExternalMonitorOrchestrationRequest();
-		verify(driver, times(1)).queryOrchestrator(any());
-		verify(driver, never()).unsubscribeFromPingMonitorEvents();
-		verify(driver, never()).subscribeToExternalPingMonitorEvents(any());
-
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	// because of not entirely predictable nature of thread invocation timing use only in manual test mode
-	@Ignore
-	@Test
-	public void testInitDriverThrowsArrowheadExceptionWithThreadCheck() {
+		ReflectionTestUtils.setField(monitor, "initialized", false);
 
 		final OrchestrationResultDTO cachedPingMonitorProvider = null;
 		ReflectionTestUtils.setField(monitor, "cachedPingMonitorProvider", cachedPingMonitorProvider);
@@ -768,40 +759,15 @@ public class OrchestratedExternalPingMonitorTest {
 		verify(driver, never()).unsubscribeFromPingMonitorEvents();
 		verify(driver, never()).subscribeToExternalPingMonitorEvents(any());
 
-		verify(eventCollector, times(1)).run();
-
+		final boolean initialized = (boolean) ReflectionTestUtils.getField(monitor, "initialized");
+		assertTrue(initialized);
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testInitOrchestrationResultIsNull() {
 
-		final OrchestrationResultDTO cachedPingMonitorProvider = null;
-		ReflectionTestUtils.setField(monitor, "cachedPingMonitorProvider", cachedPingMonitorProvider);
-
-		final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO();
-
-		when(orchestrationRequestFactory.createExternalMonitorOrchestrationRequest()).thenReturn(orchestrationForm);
-		when(driver.queryOrchestrator(any())).thenReturn(getNullOrchestrationResponseDTOForTests());
-		doNothing().when(driver).unsubscribeFromPingMonitorEvents();
-		doNothing().when(driver).subscribeToExternalPingMonitorEvents(any());
-
-		doNothing().when(eventCollector).run();
-
-		monitor.init();
-
-		verify(orchestrationRequestFactory, times(1)).createExternalMonitorOrchestrationRequest();
-		verify(driver, times(1)).queryOrchestrator(any());
-		verify(driver, never()).unsubscribeFromPingMonitorEvents();
-		verify(driver, never()).subscribeToExternalPingMonitorEvents(any());
-
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	// because of not entirely predictable nature of thread invocation timing use only in manual test mode
-	@Ignore
-	@Test
-	public void testInitOrchestrationResultIsNullWithThreadCheck() {
+		ReflectionTestUtils.setField(monitor, "initialized", false);
 
 		final OrchestrationResultDTO cachedPingMonitorProvider = null;
 		ReflectionTestUtils.setField(monitor, "cachedPingMonitorProvider", cachedPingMonitorProvider);
@@ -822,40 +788,15 @@ public class OrchestratedExternalPingMonitorTest {
 		verify(driver, never()).unsubscribeFromPingMonitorEvents();
 		verify(driver, never()).subscribeToExternalPingMonitorEvents(any());
 
-		verify(eventCollector, times(1)).run();
-
+		final boolean initialized = (boolean) ReflectionTestUtils.getField(monitor, "initialized");
+		assertTrue(initialized);
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testInitOrchestrationResultIsIsEmpty() {
 
-		final OrchestrationResultDTO cachedPingMonitorProvider = null;
-		ReflectionTestUtils.setField(monitor, "cachedPingMonitorProvider", cachedPingMonitorProvider);
-
-		final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO();
-
-		when(orchestrationRequestFactory.createExternalMonitorOrchestrationRequest()).thenReturn(orchestrationForm);
-		when(driver.queryOrchestrator(any())).thenReturn(getEmptyOrchestrationResponseDTOForTests());
-		doNothing().when(driver).unsubscribeFromPingMonitorEvents();
-		doNothing().when(driver).subscribeToExternalPingMonitorEvents(any());
-
-		doNothing().when(eventCollector).run();
-
-		monitor.init();
-
-		verify(orchestrationRequestFactory, times(1)).createExternalMonitorOrchestrationRequest();
-		verify(driver, times(1)).queryOrchestrator(any());
-		verify(driver, never()).unsubscribeFromPingMonitorEvents();
-		verify(driver, never()).subscribeToExternalPingMonitorEvents(any());
-
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	// because of not entirely predictable nature of thread invocation timing use only in manual test mode
-	@Ignore
-	@Test
-	public void testInitOrchestrationResultIsIsEmptyWithThreadCheck() {
+		ReflectionTestUtils.setField(monitor, "initialized", false);
 
 		final OrchestrationResultDTO cachedPingMonitorProvider = null;
 		ReflectionTestUtils.setField(monitor, "cachedPingMonitorProvider", cachedPingMonitorProvider);
@@ -876,8 +817,8 @@ public class OrchestratedExternalPingMonitorTest {
 		verify(driver, never()).unsubscribeFromPingMonitorEvents();
 		verify(driver, never()).subscribeToExternalPingMonitorEvents(any());
 
-		verify(eventCollector, times(1)).run();
-
+		final boolean initialized = (boolean) ReflectionTestUtils.getField(monitor, "initialized");
+		assertTrue(initialized);
 	}
 
 	//=================================================================================================
