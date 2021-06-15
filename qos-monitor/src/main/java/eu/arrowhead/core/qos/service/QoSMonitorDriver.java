@@ -101,6 +101,8 @@ public class QoSMonitorDriver {
 
 	private UriComponents eventHandlerUnsubscribeUri;
 
+	private UriComponents eventHandlerSubscribeUri;
+
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
 
@@ -297,8 +299,9 @@ public class QoSMonitorDriver {
 			} catch (final Exception ex) {
 				logger.debug("QoS Monitor can't access EventHandler : " + ex.getMessage());
 
-				count++;
+				eventHandlerSubscribeUri = null;
 
+				count++;
 				if (count < MAX_RETRIES) {
 					logger.debug("Retrying to access EventHandler.");
 
@@ -309,6 +312,7 @@ public class QoSMonitorDriver {
 
 		if (!subscribedToAll) {
 
+			eventHandlerSubscribeUri = null;
 			throw new ArrowheadException("QoS Monitor can't subscribe to required events.");
 		}
 
@@ -467,15 +471,29 @@ public class QoSMonitorDriver {
 	private UriComponents getEventHandlerSubscribeUri() {
 		logger.debug("getEventHandlerSubscribeUri started...");
 
-		if (arrowheadContext.containsKey(EVENT_SUBSCRIBE_URI_KEY)) {
-			try {
-				return (UriComponents) arrowheadContext.get(EVENT_SUBSCRIBE_URI_KEY);
-			} catch (final ClassCastException ex) {
-				throw new ArrowheadException("QoS Monitor can't find Event Handler subscribe URI.");
-			}
-		}
+		if (eventHandlerSubscribeUri != null) {
 
-		throw new ArrowheadException("QoS Monitor can't find Event Handler subscribe URI.");
+			return eventHandlerSubscribeUri;
+
+		}else {
+
+			if (arrowheadContext.containsKey(EVENT_SUBSCRIBE_URI_KEY)) {
+				try {
+
+					eventHandlerSubscribeUri = (UriComponents) arrowheadContext.get(EVENT_SUBSCRIBE_URI_KEY);
+
+					return eventHandlerSubscribeUri;
+	
+				} catch (final ClassCastException ex) {
+
+					eventHandlerSubscribeUri = null;
+					throw new ArrowheadException("QoS Monitor can't find Event Handler subscribe URI.");
+				}
+			}
+
+			eventHandlerSubscribeUri = null;
+			throw new ArrowheadException("QoS Monitor can't find Event Handler subscribe URI.");
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
