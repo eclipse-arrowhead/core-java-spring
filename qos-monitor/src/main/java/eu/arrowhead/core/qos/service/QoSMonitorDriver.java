@@ -99,6 +99,8 @@ public class QoSMonitorDriver {
 
 	private Map<QosMonitorEventType, MultiValueMap<String, String>> unsubscribeParams;
 
+	private UriComponents eventHandlerUnsubscribeUri;
+
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
 
@@ -334,8 +336,9 @@ public class QoSMonitorDriver {
 			} catch (final Exception ex) {
 				logger.debug("QoS Monitor can't access EventHandler: " + ex.getMessage());
 
-				count++;
+				eventHandlerUnsubscribeUri = null;
 
+				count++;
 				if (count < MAX_RETRIES) {
 					logger.debug("Retrying to access EventHandler.");
 
@@ -479,17 +482,30 @@ public class QoSMonitorDriver {
 	private UriComponents getEventHandlerUnsubscribeUri(final MultiValueMap<String, String> multiValueMap) {
 		logger.debug("getEventHandlerUnsubscribeUri started...");
 
-		if (arrowheadContext.containsKey(EVENT_UNSUBSCRIBE_URI_KEY)) {
-			try {
+		if(eventHandlerUnsubscribeUri != null) {
 
-				final UriComponents uri = (UriComponents) arrowheadContext.get(EVENT_UNSUBSCRIBE_URI_KEY);
-				return Utilities.createURI(uri.getScheme(), uri.getHost(), uri.getPort(), multiValueMap, uri.getPath());
-			} catch (final ClassCastException ex) {
-				throw new ArrowheadException("QoS Monitor can't find Event Handler unsubscribe URI.");
+			return eventHandlerUnsubscribeUri;
+
+		}else {
+			if (arrowheadContext.containsKey(EVENT_UNSUBSCRIBE_URI_KEY)) {
+				try {
+
+					final UriComponents uri = (UriComponents) arrowheadContext.get(EVENT_UNSUBSCRIBE_URI_KEY);
+					eventHandlerUnsubscribeUri = Utilities.createURI(uri.getScheme(), uri.getHost(), uri.getPort(), multiValueMap, uri.getPath());
+
+					return eventHandlerUnsubscribeUri;
+
+				} catch (final ClassCastException ex) {
+
+					eventHandlerUnsubscribeUri = null;
+					throw new ArrowheadException("QoS Monitor can't find Event Handler unsubscribe URI.");
+				}
 			}
+
+			eventHandlerUnsubscribeUri = null;
+			throw new ArrowheadException("QoS Monitor can't find Event Handler unsubscribe URI.");
 		}
 
-		throw new ArrowheadException("QoS Monitor can't find Event Handler unsubscribe URI.");
 	}
 
 	//-------------------------------------------------------------------------------------------------
