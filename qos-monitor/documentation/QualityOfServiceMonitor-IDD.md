@@ -61,6 +61,13 @@ POST /qos_monitor/externalpingmonitorevent
 ```
 Returns HTTP-OK.
 
+**Input:** <a name="input_post_post_ping_event_notification"/>
+```json
+{
+  []
+}
+```
+
 ### Get Public Key <a name="endpoint_get_publickey"/>
 ```
 GET /qos_monitor/publickey
