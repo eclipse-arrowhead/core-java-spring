@@ -59,14 +59,31 @@ Returns a "Got it" message with the purpose of testing the core service availabi
 ```
 POST /qos_monitor/externalpingmonitorevent
 ```
-Returns HTTP-OK.
+Returns HTTP-OK in order to confirm received event notification.
 
 **Input:** <a name="input_post_post_ping_event_notification"/>
 ```json
 {
-  []
+  "eventType": "string",
+  "metaData": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "payload": "string",
+  "timeStamp": "string"
 }
 ```
+
+| __Input__  fields |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `eventType` | Type of event. | mandatory | max. length = 255 |
+| `metaData` |  The "key - value" pairs for event filtering. | optional | max.length = 65535 |
+| `payload` | String representation of the event. | mandatory | specified at system deployment time |
+| `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format |
 
 ### Get Public Key <a name="endpoint_get_publickey"/>
 ```
