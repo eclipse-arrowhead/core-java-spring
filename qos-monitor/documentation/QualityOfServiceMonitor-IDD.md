@@ -20,6 +20,7 @@ The base URL for the requests: `http://<host>:<port>/qos_monitor`.
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Echo](#endpoint_get_echo) | /echo | GET    | -    | OK     |
+| [Notification](#endpoint_post_ping_event_notification) | /externalpingmonitorevent | POST    | EventDTO(#input_post_post_ping_event_notification)    | OK     |
 
 ## Private Endpoint Description
 
@@ -53,6 +54,12 @@ GET /qos_monitor/echo
 ```
 
 Returns a "Got it" message with the purpose of testing the core service availability.
+
+### Notification <a name="endpoint_post_ping_event_notification"/>
+```
+POST /qos_monitor/externalpingmonitorevent
+```
+Returns HTTP-OK.
 
 ### Get Public Key <a name="endpoint_get_publickey"/>
 ```
