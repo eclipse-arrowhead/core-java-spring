@@ -35,6 +35,7 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -139,24 +140,25 @@ public class PingTaskTest {
     }
 
     @Test
-    public void shouldRaiseSystemNotMonitorable() throws PdStoreException {
+    public void shouldRaiseSystemNotMonitorable() {
 
         final Future<Set<ServiceRecord>> resolveResult = Future.success(Collections.emptySet());
         final SystemRecord provider = Mockito.mock(SystemRecord.class);
         final PlantDescriptionEntryDto entryWithMonitoredSystem = getEntryWithMonitoredSystem();
-        pdTracker.put(entryWithMonitoredSystem);
-
-        when(serviceQuery.name(ApiConstants.MONITORABLE_SERVICE_NAME)).thenReturn(serviceQuery);
-        when(provider.name()).thenReturn(systemName);
-        when(provider.socketAddress()).thenReturn(address);
-        when(serviceQuery.resolveAll()).thenReturn(resolveResult);
-
-        pingTask.run();
-        assertEquals(1, alarmManager.getActiveAlarmData(AlarmCause.NOT_MONITORABLE).size());
+        pdTracker.put(entryWithMonitoredSystem)
+            .ifSuccess(result -> {
+                when(serviceQuery.name(ApiConstants.MONITORABLE_SERVICE_NAME)).thenReturn(serviceQuery);
+                when(provider.name()).thenReturn(systemName);
+                when(provider.socketAddress()).thenReturn(address);
+                when(serviceQuery.resolveAll()).thenReturn(resolveResult);
+                pingTask.run();
+                assertEquals(1, alarmManager.getActiveAlarmData(AlarmCause.NOT_MONITORABLE).size());
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldClearSystemNotMonitorable() throws PdStoreException {
+    public void shouldClearSystemNotMonitorable() {
 
         final ServiceRecord service = Mockito.mock(ServiceRecord.class);
         final Set<ServiceRecord> services = Set.of(service);
@@ -180,18 +182,22 @@ public class PingTaskTest {
             .thenReturn(Future.success(response));
         when(serviceQuery.resolveAll()).thenReturn(resolveResult);
 
-        pdTracker.put(entryWithMonitoredSystem);
-        alarmManager.raise(Alarm.createSystemNotMonitorableAlarm(
-            monitoredSystem.systemId(),
-            monitoredSystem.systemName().orElse(null),
-            monitoredSystem.metadata()
-        ));
+        pdTracker.put(entryWithMonitoredSystem)
+            .ifSuccess(result -> {
+                alarmManager.raise(Alarm.createSystemNotMonitorableAlarm(
+                    monitoredSystem.systemId(),
+                    monitoredSystem.systemName().orElse(null),
+                    monitoredSystem.metadata()
+                ));
 
-        pingTask.run();
-        assertTrue(alarmManager.getAlarms()
-            .get(0)
-            .clearedAt()
-            .isPresent());
+                pingTask.run();
+                assertTrue(alarmManager.getAlarms()
+                    .get(0)
+                    .clearedAt()
+                    .isPresent()
+                );
+            })
+            .onFailure(e -> fail());
     }
 
 

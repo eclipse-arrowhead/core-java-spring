@@ -41,18 +41,19 @@ public class DeletePlantDescriptionTest {
     }
 
     @Test
-    public void shouldDeleteEntries() throws PdStoreException {
+    public void shouldDeleteEntries() {
         final int entryId = 14;
-        pdTracker.put(TestUtils.createEntry(entryId));
+        pdTracker.put(TestUtils.createEntry(entryId))
+            .flatMap(result -> {
+                final HttpServiceRequest request = new MockRequest.Builder()
+                    .pathParameters(List.of(String.valueOf(entryId)))
+                    .build();
 
-        final HttpServiceRequest request = new MockRequest.Builder()
-            .pathParameters(List.of(String.valueOf(entryId)))
-            .build();
+                // Make sure that the entry is there before we delete it.
+                assertNotNull(pdTracker.get(entryId));
 
-        // Make sure that the entry is there before we delete it.
-        assertNotNull(pdTracker.get(entryId));
-
-        handler.handle(request, response)
+                return handler.handle(request, response);
+            })
             .ifSuccess(result -> {
                 assertEquals(HttpStatus.OK, response.status().orElse(null));
                 assertNull(pdTracker.get(entryId));
@@ -100,7 +101,7 @@ public class DeletePlantDescriptionTest {
     }
 
     @Test
-    public void shouldRejectDeletionOfIncludedEntry() throws PdStoreException {
+    public void shouldRejectDeletionOfIncludedEntry() {
         final Instant now = Instant.now();
         final int entryIdA = 23;
         final int entryIdB = 24;
@@ -121,13 +122,13 @@ public class DeletePlantDescriptionTest {
             .include(List.of(entryIdA))
             .build();
 
-        pdTracker.put(entryA);
-        pdTracker.put(entryB);
-
-        final HttpServiceRequest request = new MockRequest.Builder().pathParameters(List.of(String.valueOf(entryIdA)))
-            .build();
-
-        handler.handle(request, response)
+        pdTracker.put(entryA)
+            .flatMap(result -> pdTracker.put(entryB))
+            .flatMap(result -> {
+                final HttpServiceRequest request = new MockRequest.Builder().pathParameters(List.of(String.valueOf(entryIdA)))
+                    .build();
+                return handler.handle(request, response);
+            })
             .ifSuccess(result -> {
                 final String expectedErrorMessage = "<Error in include list: Entry '" +
                     entryIdA + "' is required by entry '" + entryIdB + "'.>";
@@ -146,14 +147,15 @@ public class DeletePlantDescriptionTest {
         final DeletePlantDescription handler = new DeletePlantDescription(pdTracker);
 
         final int entryId = 87;
-        pdTracker.put(TestUtils.createEntry(entryId));
+        pdTracker.put(TestUtils.createEntry(entryId))
+            .flatMap(result -> {
+                final HttpServiceRequest request = new MockRequest.Builder()
+                    .pathParameters(List.of(String.valueOf(entryId)))
+                    .build();
 
-        final HttpServiceRequest request = new MockRequest.Builder()
-            .pathParameters(List.of(String.valueOf(entryId)))
-            .build();
-
-        doThrow(new PdStoreException("Mocked error")).when(backingStore).remove(anyInt());
-        handler.handle(request, response)
+                doThrow(new PdStoreException("Mocked error")).when(backingStore).remove(anyInt());
+                return handler.handle(request, response);
+            })
             .ifSuccess(result -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.status().orElse(null)))
             .onFailure(e -> fail());
     }

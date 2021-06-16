@@ -1,11 +1,12 @@
 package eu.arrowhead.core.plantdescriptionengine.pdtracker;
 
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntry;
+import se.arkalix.util.concurrent.Future;
 
 public interface PlantDescriptionUpdateListener {
-    void onPlantDescriptionAdded(PlantDescriptionEntry entry);
+    Future<?> onPlantDescriptionAdded(PlantDescriptionEntry entry);
 
-    void onPlantDescriptionUpdated(PlantDescriptionEntry newState, PlantDescriptionEntry oldState);
+    Future<?> onPlantDescriptionUpdated(PlantDescriptionEntry newState, PlantDescriptionEntry oldState);
 
-    void onPlantDescriptionRemoved(PlantDescriptionEntry entry);
+    Future<?> onPlantDescriptionRemoved(PlantDescriptionEntry entry);
 }
