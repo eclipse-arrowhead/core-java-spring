@@ -20,7 +20,7 @@ The base URL for the requests: `http://<host>:<port>/qos_monitor`.
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Echo](#endpoint_get_echo) | /echo | GET    | -    | OK     |
-| [Notification](#endpoint_post_ping_event_notification) | /externalpingmonitorevent | POST    | EventDTO(#input_post_post_ping_event_notification)    | OK     |
+| [Notification](#endpoint_post_ping_event_notification) | /externalpingmonitorevent | POST    | [EventDTO](#input_post_post_ping_event_notification)    | OK     |
 
 ## Private Endpoint Description
 
