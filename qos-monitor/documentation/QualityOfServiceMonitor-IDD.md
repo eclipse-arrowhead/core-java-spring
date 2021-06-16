@@ -64,9 +64,9 @@ Returns HTTP-OK in order to confirm received event notification.
 **Input:** <a name="input_post_post_ping_event_notification"/>
 ```json
 {
-  "eventType": "string",
+  "eventType": "QosMonitorEventType",
   "metaData": {
-    "additionalProp1": "string",
+    "processID": "UUID",
     "additionalProp2": "string",
     "additionalProp3": "string"
   },
@@ -80,10 +80,10 @@ Returns HTTP-OK in order to confirm received event notification.
 
 | Field | Description | Necessity | Format/Limitations |
 | ----- | ----------- | --------- | ----------- |
-| `eventType` | Type of event. | mandatory | max. length = 255 |
-| `metaData` |  The "key - value" pairs for event filtering. | optional | max.length = 65535 |
-| `payload` | String representation of the event. | mandatory | specified at system deployment time |
-| `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format |
+| `eventType` | Type of event. | mandatory | must be valid QosMonitorEventType |
+| `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key assosiated with a string value, which is parsable to UUID object |
+| `payload` | String representation of the event. | mandatory | must be an emty list as "{[]}", unless the event type is FinishedMeasurementEvenet, otherwise it must be a list of IcmpResponseDTO |
+| `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd` `T` `HH`:`mm`:`ss.sss` `Z` format |
 
 ### Get Public Key <a name="endpoint_get_publickey"/>
 ```
