@@ -82,7 +82,7 @@ Returns HTTP-OK in order to confirm received event notification.
 | ----- | ----------- | --------- | ----------- |
 | `eventType` | Type of event. | mandatory | must be parsable to a valid [QosMonitorEventType](#input_qos_monitor_event_type) |
 | `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key assosiated with a string value, which is parsable to UUID object |
-| `payload` | String representation of the event. | mandatory | must be an emty list as "{[]}", unless the event type is FinishedMeasurementEvent, otherwise it must be a list of IcmpResponseDTO |
+| `payload` | String representation of the event. | mandatory | must be an emty list as "{[]}", unless the event type is FinishedMeasurementEvent, otherwise it must be a list of [IcmpPingResponse](#input_icmp_ping_response) |
 | `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd` `T` `HH`:`mm`:`ss.sss` `Z` format |
 
 **QosMonitorEventType:** <a name="input_qos_monitor_event_type"/>
@@ -129,7 +129,7 @@ Returns HTTP-OK in order to confirm received event notification.
 | `payload` | String representation of the event. | mandatory | must be an list of [IcmpPingResponse](#input_icmp_ping_response) |
 | `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd` `T` `HH`:`mm`:`ss.sss` `Z` format |
 
-**IcmpPingResponse: ** <a name="input_icmp_ping_response"/>
+**IcmpPingResponse:** <a name="input_icmp_ping_response"/>
 
 | __IcmpPingResponse__  fields |
 | ------------------------------------------------------- |
