@@ -456,10 +456,11 @@ New payload - you can easily map the old fields to the new ones.
 
 Arrowhead Framework's security is relying on SSL Certificate Trust Chains. The Arrowhead trust chain consists of three level:
 1) Master certificate: `arrowhead.eu`
-2) Cloud certificate: `my_cloud.my_company.arrowhead.eu`
-3) Client certificate: `my_client.my_cloud.my_company.arrowhead.eu`
+2) Cloud certificate: `my-cloud.my-company.arrowhead.eu`
+3) Client certificate: `my-client.my-cloud.my-company.arrowhead.eu`
 The certificate naming convention have strict rules:
 * The different parts are delimited by dots, therefore parts are not allowed to contain any of them.
+* A single part is allowed to contain maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).
 * A cloud certificate name has to consist of four part and the last two part have to be 'arrowhead' and 'eu'.
 * A client certificate name has to consist of five part and the last two part have to be 'arrowhead' and 'eu'. 
 
@@ -502,7 +503,7 @@ You can also use the arrowhead script. For this barely any scripting knowledge i
 
 ### System Operator Certificate
 
-The System Operator Certificate is a special client certificate with the naming convention of `sysop.my_cloud.my_company.arrowhead.eu`.
+The System Operator Certificate is a special client certificate with the naming convention of `sysop.my-cloud.my-company.arrowhead.eu`.
 SysOp certificate allows the client to use the management endpoints of the Arrowhead Core Systems. Typical usage of SysOp certificate is by front end applications running in a web browser (for example if you want to access the Swagger or use the Management Tool in secure mode.
 * [Import SysOp Certificate (Windows 10)](documentation/certificates/import_sysop_certificate_win10.pdf)
 * [Import SysOp Certificate (macOS)](documentation/certificates/import_sysop_certificate_macos.pdf)
