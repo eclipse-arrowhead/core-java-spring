@@ -85,7 +85,7 @@ Returns HTTP-OK in order to confirm received event notification.
 | `payload` | String representation of the event. | mandatory | must be an emty list as "{[]}", unless the event type is FinishedMeasurementEvent, otherwise it must be a list of IcmpResponseDTO |
 | `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd` `T` `HH`:`mm`:`ss.sss` `Z` format |
 
-***QosMonitorEventType:*** <a name="input_qos_monitor_event_type"/>
+**QosMonitorEventType:** <a name="input_qos_monitor_event_type"/>
 
 
 | __RECEIVED_MONITORING_REQUEST__  type |
@@ -126,8 +126,25 @@ Returns HTTP-OK in order to confirm received event notification.
 | ----- | ----------- | --------- | ----------- |
 | `eventType` | Type of event. | mandatory | must be "FINISHED_MONITORING_MEASUREMENT" |
 | `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key assosiated with a string value, which is parsable to UUID object |
-| `payload` | String representation of the event. | mandatory | must be an list of IcmpPingResponseDTO |
+| `payload` | String representation of the event. | mandatory | must be an list of [IcmpPingResponse](#input_icmp_ping_response) |
 | `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd` `T` `HH`:`mm`:`ss.sss` `Z` format |
+
+**IcmpPingResponse: ** <a name="input_icmp_ping_response"/>
+
+| __IcmpPingResponse__  fields |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `successFlag` | Measurement success indicator | mandatory | boolean |
+| `timeoutFlag` | Measurement timeout indicator | mandatory | boolean |
+| `errorMessage` | String representation of the meausrement error. | optional | string |
+| `throwable` | String representation of the stacktrace of the meausrement error.  | optional | string |
+| `host` | Domain name or address of the measured system | mandatory | string |
+| `size` | Size of the payload of the measured icmp packet | mandatory | integer |
+| `rtt` | Round trip time of the measured icmp packet | mandatory | integer - zero if error|
+| `ttl` | Time to live of the measured icmp packet | mandatory | integer |
+| `duration` | Measurement time of the measured icmp packet | mandatory | integer - zero if error|
 
 ### Get Public Key <a name="endpoint_get_publickey"/>
 ```
