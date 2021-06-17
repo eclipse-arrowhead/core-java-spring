@@ -20,7 +20,7 @@ The base URL for the requests: `http://<host>:<port>/qos_monitor`.
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Echo](#endpoint_get_echo) | /echo | GET    | -    | OK     |
-| [Notification](#endpoint_post_ping_event_notification) | /externalpingmonitorevent | POST    | [EventDTO](#input_post_post_ping_event_notification)    | OK     |
+| [Notification](#endpoint_post_ping_event_notification) | /externalpingmonitorevent | POST    | [EventDTO](#input_post_ping_event_notification)    | OK     |
 
 ## Private Endpoint Description
 
@@ -61,7 +61,7 @@ POST /qos_monitor/externalpingmonitorevent
 ```
 Returns HTTP-OK in order to confirm received event notification.
 
-**Input:** <a name="input_post_post_ping_event_notification"/>
+**Input:** <a name="input_post_ping_event_notification"/>
 ```json
 {
   "eventType": "string",
@@ -80,9 +80,63 @@ Returns HTTP-OK in order to confirm received event notification.
 
 | Field | Description | Necessity | Format/Limitations |
 | ----- | ----------- | --------- | ----------- |
-| `eventType` | Type of event. | mandatory | must be parsable to a valid QosMonitorEventType |
+| `eventType` | Type of event. | mandatory | must be parsable to a valid [QosMonitorEventType](#input_qos_monitor_event_type) |
 | `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key assosiated with a string value, which is parsable to UUID object |
 | `payload` | String representation of the event. | mandatory | must be an emty list as "{[]}", unless the event type is FinishedMeasurementEvent, otherwise it must be a list of IcmpResponseDTO |
+| `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd` `T` `HH`:`mm`:`ss.sss` `Z` format |
+
+***QosMonitorEventType:*** <a name="input_qos_monitor_event_type"/>
+
+| __RECEIVED_MONITORING_REQUEST__  type |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `eventType` | Type of event. | mandatory | must be "RECEIVED_MONITORING_REQUEST" |
+| `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key assosiated with a string value, which is parsable to UUID object |
+| `payload` | String representation of the event. | mandatory | must be an emty list as "{[]}" |
+| `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd` `T` `HH`:`mm`:`ss.sss` `Z` format |
+
+
+| __RECEIVED_MONITORING_REQUEST__  type |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `eventType` | Type of event. | mandatory | must be "RECEIVED_MONITORING_REQUEST" |
+| `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key assosiated with a string value, which is parsable to UUID object |
+| `payload` | String representation of the event. | mandatory | must be an emty list as "{[]}" |
+| `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd` `T` `HH`:`mm`:`ss.sss` `Z` format |
+
+
+| __STARTED_MONITORING_MEASUREMENT__  type |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `eventType` | Type of event. | mandatory | must be "STARTED_MONITORING_MEASUREMENT" |
+| `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key assosiated with a string value, which is parsable to UUID object |
+| `payload` | String representation of the event. | mandatory | must be an emty list as "{[]}" |
+| `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd` `T` `HH`:`mm`:`ss.sss` `Z` format |
+
+| __INTERRUPTED_MONITORING_MEASUREMENT__  type |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `eventType` | Type of event. | mandatory | must be "INTERRUPTED_MONITORING_MEASUREMENT" |
+| `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key assosiated with a string value, which is parsable to UUID object, must contain an "exception" key assosiated with a string value,  may contain an "root_cause" key assosiated with a string value|
+| `payload` | String representation of the event. | mandatory | must be an emty list as "{[]}" |
+| `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd` `T` `HH`:`mm`:`ss.sss` `Z` format |
+
+| __FINISHED_MONITORING_MEASUREMENT__  type |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `eventType` | Type of event. | mandatory | must be "FINISHED_MONITORING_MEASUREMENT" |
+| `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key assosiated with a string value, which is parsable to UUID object |
+| `payload` | String representation of the event. | mandatory | must be an list of IcmpPingResponseDTO |
 | `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd` `T` `HH`:`mm`:`ss.sss` `Z` format |
 
 ### Get Public Key <a name="endpoint_get_publickey"/>
