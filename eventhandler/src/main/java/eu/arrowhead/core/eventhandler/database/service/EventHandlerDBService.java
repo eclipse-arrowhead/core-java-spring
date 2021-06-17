@@ -228,7 +228,6 @@ public class EventHandlerDBService {
 		logger.debug("deleteSubscriptionResponse started ...");
 
 		EventType validEventType = null;
-		//Experimental
 		try {
 			validEventType = validateEventTypeIsInDB(eventType);
 		} catch (final Exception ex) {
