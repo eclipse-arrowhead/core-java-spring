@@ -20,6 +20,7 @@ The base URL for the requests: `http://<host>:<port>/qos_monitor`.
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Echo](#endpoint_get_echo) | /echo | GET    | -    | OK     |
+| [Notification](#endpoint_post_ping_event_notification) | /externalpingmonitorevent | POST    | [EventDTO](#input_post_post_ping_event_notification)    | OK     |
 
 ## Private Endpoint Description
 
@@ -53,6 +54,36 @@ GET /qos_monitor/echo
 ```
 
 Returns a "Got it" message with the purpose of testing the core service availability.
+
+### Notification <a name="endpoint_post_ping_event_notification"/>
+```
+POST /qos_monitor/externalpingmonitorevent
+```
+Returns HTTP-OK in order to confirm received event notification.
+
+**Input:** <a name="input_post_post_ping_event_notification"/>
+```json
+{
+  "eventType": "QosMonitorEventType",
+  "metaData": {
+    "processID": "UUID",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "payload": "string",
+  "timeStamp": "string"
+}
+```
+
+| __Input__  fields |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `eventType` | Type of event. | mandatory | must be valid QosMonitorEventType |
+| `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key assosiated with a string value, which is parsable to UUID object |
+| `payload` | String representation of the event. | mandatory | must be an emty list as "{[]}", unless the event type is FinishedMeasurementEvenet, otherwise it must be a list of IcmpResponseDTO |
+| `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd` `T` `HH`:`mm`:`ss.sss` `Z` format |
 
 ### Get Public Key <a name="endpoint_get_publickey"/>
 ```
