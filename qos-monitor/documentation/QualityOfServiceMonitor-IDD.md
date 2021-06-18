@@ -81,8 +81,8 @@ Returns HTTP-OK in order to confirm received event notification.
 | Field | Description | Necessity | Format/Limitations |
 | ----- | ----------- | --------- | ----------- |
 | `eventType` | Type of event. | mandatory | must be parsable to a valid [QosMonitorEventType](#input_qos_monitor_event_type) |
-| `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key assosiated with a string value, which is parsable to UUID object |
-| `payload` | String representation of the event. | mandatory | must be an emty list as "{[]}", unless the event type is FINISHED_MONITORING_MEASUREMENT, otherwise it must be a list of [IcmpPingResponse](#input_icmp_ping_response) |
+| `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key associated with a string value, which is parsable to UUID object |
+| `payload` | String representation of the event. | mandatory | must be an empty list as "{[]}", unless the event type is FINISHED_MONITORING_MEASUREMENT, otherwise it must be a list of [IcmpPingResponse](#input_icmp_ping_response) |
 | `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd` `T` `HH`:`mm`:`ss.sss` `Z` format |
 
 **QosMonitorEventType:** <a name="input_qos_monitor_event_type"/>
@@ -94,8 +94,8 @@ Returns HTTP-OK in order to confirm received event notification.
 | Field | Description | Necessity | Format/Limitations |
 | ----- | ----------- | --------- | ----------- |
 | `eventType` | Type of event. | mandatory | must be "RECEIVED_MONITORING_REQUEST" |
-| `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key assosiated with a string value, which is parsable to UUID object |
-| `payload` | String representation of the event. | mandatory | must be an emty list as "{[]}" |
+| `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key associated with a string value, which is parsable to UUID object |
+| `payload` | String representation of the event. | mandatory | must be an empty list as "{[]}" |
 | `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd` `T` `HH`:`mm`:`ss.sss` `Z` format |
 
 
@@ -105,8 +105,8 @@ Returns HTTP-OK in order to confirm received event notification.
 | Field | Description | Necessity | Format/Limitations |
 | ----- | ----------- | --------- | ----------- |
 | `eventType` | Type of event. | mandatory | must be "STARTED_MONITORING_MEASUREMENT" |
-| `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key assosiated with a string value, which is parsable to UUID object |
-| `payload` | String representation of the event. | mandatory | must be an emty list as "{[]}" |
+| `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key associated with a string value, which is parsable to UUID object |
+| `payload` | String representation of the event. | mandatory | must be an empty list as "{[]}" |
 | `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd` `T` `HH`:`mm`:`ss.sss` `Z` format |
 
 | __INTERRUPTED_MONITORING_MEASUREMENT__  type |
@@ -115,8 +115,8 @@ Returns HTTP-OK in order to confirm received event notification.
 | Field | Description | Necessity | Format/Limitations |
 | ----- | ----------- | --------- | ----------- |
 | `eventType` | Type of event. | mandatory | must be "INTERRUPTED_MONITORING_MEASUREMENT" |
-| `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key assosiated with a string value, which is parsable to UUID object, must contain an "exception" key assosiated with a string value,  may contain an "root_cause" key assosiated with a string value|
-| `payload` | String representation of the event. | mandatory | must be an emty list as "{[]}" |
+| `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key associated with a string value, which is parsable to UUID object, must contain an "exception" key associated with a string value,  may contain an "root_cause" key associated with a string value|
+| `payload` | String representation of the event. | mandatory | must be an empty list as "{[]}" |
 | `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd` `T` `HH`:`mm`:`ss.sss` `Z` format |
 
 | __FINISHED_MONITORING_MEASUREMENT__  type |
@@ -125,7 +125,7 @@ Returns HTTP-OK in order to confirm received event notification.
 | Field | Description | Necessity | Format/Limitations |
 | ----- | ----------- | --------- | ----------- |
 | `eventType` | Type of event. | mandatory | must be "FINISHED_MONITORING_MEASUREMENT" |
-| `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key assosiated with a string value, which is parsable to UUID object |
+| `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key associated with a string value, which is parsable to UUID object |
 | `payload` | String representation of the event. | mandatory | must be an list of [IcmpPingResponse](#input_icmp_ping_response) |
 | `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd` `T` `HH`:`mm`:`ss.sss` `Z` format |
 
@@ -138,8 +138,8 @@ Returns HTTP-OK in order to confirm received event notification.
 | ----- | ----------- | --------- | ----------- |
 | `successFlag` | Measurement success indicator | mandatory | boolean |
 | `timeoutFlag` | Measurement timeout indicator | mandatory | boolean |
-| `errorMessage` | String representation of the meausrement error. | optional | string |
-| `throwable` | String representation of the stacktrace of the meausrement error.  | optional | string |
+| `errorMessage` | String representation of the measurement error. | optional | string |
+| `throwable` | String representation of the stacktrace of the measurement error.  | optional | string |
 | `host` | Domain name or address of the measured system | mandatory | string |
 | `size` | Size of the payload of the measured icmp packet | mandatory | integer |
 | `rtt` | Round trip time of the measured icmp packet | mandatory | integer - zero if error|
