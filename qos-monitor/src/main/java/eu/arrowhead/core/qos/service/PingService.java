@@ -67,7 +67,7 @@ public class PingService {
 	@Value(CoreCommonConstants.$QOS_DEFAULT_REFERENCE_LOST_PET_MEASUREMENT_PERCENT_WD)
 	private int defaultReferenceLostPerMeasurementPercent;
 
-	protected Logger logger = LogManager.getLogger(PingService.class);
+	private Logger logger = LogManager.getLogger(PingService.class);
 
 
 	//=================================================================================================
