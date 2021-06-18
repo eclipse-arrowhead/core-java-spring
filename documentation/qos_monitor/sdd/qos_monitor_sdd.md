@@ -34,7 +34,7 @@ The QoS Monitor provides the following services:
 The QoS Monitor consumes the following service:
 * QueryAll private service from the ServiceRegistry core system
 
-In case the QoS Monitor started with the DefaultExternal or the OrchestretedExternal stategy, 
+In case the QoS Monitor started with the DefaultExternal or the OrchestratedExternal strategy, 
 it consumes the "qos-icmp-ping" service.
 
 The "qos-icmp-ping" service is a composit service consisting of a request-response interaction followed by a sequence of events.
@@ -63,10 +63,6 @@ Input IcmpRequest:
         }
     },
     "required": [
-                "timeToRepeat",
-                "timeout",
-                "packetSize",
-                "ttl",
                 "host"
             ]
 }
@@ -94,7 +90,7 @@ Output IcmpResponseACK:
 }
 ```
 
-The response must be followed by the publishing of the following events in the order they listed below:
+The response must be followed by publishing the following events in the order they listed below:
 
 1. RECEIVED_MONITORING_REQUEST
 1. STARTED_MONITORING_MEASUREMENT
@@ -102,9 +98,9 @@ The response must be followed by the publishing of the following events in the o
 
 * INTERRUPTED_MONITORING_MEASUREMENT
 
-The "INTERRUPTED_MONITORING_MEASUREMENT" event could precede any other event and it shuld not be followed by any other event.
+The "INTERRUPTED_MONITORING_MEASUREMENT" event could precede any other event and it should not be followed by any other event.
 
-In order to receive the events invoked by the "qos-icmp-ping" service, the QoS Monitor provide a [notification](https://github.com/arrowhead-f/core-java-spring/blob/qos-monitor-eliminating-icmp4j-dependency/qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#endpoint_post_ping_event_notification) service endpoint.
+In order to receive the events invoked by the "qos-icmp-ping" service, the QoS Monitor provide a [notification](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#endpoint_post_ping_event_notification) service endpoint.
 
 <a name="qos_monitor_usecases" />
 
