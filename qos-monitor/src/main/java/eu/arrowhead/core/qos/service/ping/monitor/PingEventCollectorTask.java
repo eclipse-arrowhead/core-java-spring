@@ -28,7 +28,7 @@ public class PingEventCollectorTask implements Runnable {
 	// members
 
 	private static final String NOT_SUPPORTED_EVENT_TYPE = " is not a supported event type. ";
-	private static final String REPLACING_MEASURMENT_EVENT = " - measurment , duplicate event. Overwriting : ";
+	private static final String REPLACING_MEASUREMENT_EVENT = " - measurement , duplicate event. Overwriting : ";
 
 	private static final long clearingInterval = 
 			1000/*Mills to Sec*/
@@ -99,7 +99,7 @@ public class PingEventCollectorTask implements Runnable {
 		logger.debug("addEventToBufferElement started...");
 
 		if(element.getEventArray()[position] != null) {
-			logger.warn(element.getId() + REPLACING_MEASURMENT_EVENT + element.getEventArray()[position].toString());
+			logger.warn(element.getId() + REPLACING_MEASUREMENT_EVENT + element.getEventArray()[position].toString());
 		}
 
 		element.addEvent(position, event);
