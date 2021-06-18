@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -101,7 +100,6 @@ public class PingEventProcessorTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@Ignore
 	@Test(expected = ArrowheadException.class)
 	public void testProcessEventsNoBufferElementWithinMeasurementExpiryTime() {
 
@@ -119,14 +117,13 @@ public class PingEventProcessorTest {
 		} catch (final ArrowheadException ex) {
 
 			verify(eventBuffer, atLeastOnce()).get(any());
-			verify(eventBuffer, never()).remove(any());
+			verify(eventBuffer, atLeastOnce()).remove(any());
 
 			throw ex;
 		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@Ignore
 	@Test(expected = ArrowheadException.class)
 	public void testProcessEventsNoEventWithinMeasurementExpiryTime() {
 
@@ -144,7 +141,7 @@ public class PingEventProcessorTest {
 		} catch (final ArrowheadException ex) {
 
 			verify(eventBuffer, atLeastOnce()).get(any());
-			verify(eventBuffer, never()).remove(any());
+			verify(eventBuffer, atLeastOnce()).remove(any());
 
 			throw ex;
 		}
@@ -257,7 +254,6 @@ public class PingEventProcessorTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@Ignore
 	@Test(expected = ArrowheadException.class)
 	public void testProcessEventsReceivedAndStartEventPresentButFinishedEventNotPresent() {
 
