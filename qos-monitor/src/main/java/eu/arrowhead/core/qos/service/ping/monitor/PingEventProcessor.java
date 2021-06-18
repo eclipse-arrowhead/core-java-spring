@@ -109,6 +109,7 @@ public class PingEventProcessor {
 		}
 
 		logAssistantEvents(temporalReceivedRequestEvent, temporalStartedMonitoringEvent, TIMEOUT_FINISH_PHRASE, id.toString());
+		eventBuffer.remove(id);
 		throw new ArrowheadException("Timeout on external ping measurement : " + id.toString());
 	}
 
@@ -121,11 +122,11 @@ public class PingEventProcessor {
 
 		for (final MeasurementMonitoringEvent measurementMonitoringEvent : eventArray) {
 			if (measurementMonitoringEvent != null) {
-				return true;
+				return false;
 			}
 		}
 
-		return true;
+		return false;
 	}
 
 	//-------------------------------------------------------------------------------------------------
