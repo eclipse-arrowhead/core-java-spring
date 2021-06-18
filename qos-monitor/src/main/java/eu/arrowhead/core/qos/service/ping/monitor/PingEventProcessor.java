@@ -60,7 +60,7 @@ public class PingEventProcessor {
 				rest();
 				continue;
 
-			}else if (Arrays.asList(element.getEventArray()).isEmpty()){
+			}else if (checkIfEmpty(element.getEventArray())){
 
 				rest();
 				continue;
@@ -112,12 +112,26 @@ public class PingEventProcessor {
 		throw new ArrowheadException("Timeout on external ping measurement : " + id.toString());
 	}
 
-
 	//=================================================================================================
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
+	private boolean checkIfEmpty(final MeasurementMonitoringEvent[] eventArray) {
+		logger.debug("checkIfEmpty started...");
+
+		for (final MeasurementMonitoringEvent measurementMonitoringEvent : eventArray) {
+			if (measurementMonitoringEvent != null) {
+				return true;
+			}
+		}
+
+		return true;
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	private void rest() {
+		logger.debug("rest started...");
+
 		try {
 			Thread.sleep(SLEEP_PERIOD);
 		} catch (final InterruptedException ex) {
