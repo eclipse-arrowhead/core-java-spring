@@ -63,7 +63,11 @@ Input IcmpRequest:
         }
     },
     "required": [
-                "host"
+                "host",
+		"ttl",
+		"packetSize",
+		"timeout",
+		"timeToRepeat"
             ]
 }
 ```
