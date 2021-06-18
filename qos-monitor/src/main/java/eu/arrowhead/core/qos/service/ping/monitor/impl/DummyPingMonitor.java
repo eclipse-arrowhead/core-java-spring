@@ -22,7 +22,7 @@ public class DummyPingMonitor extends AbstractPingMonitor{
 	private static final String EMPTY_OR_NULL_ERROR_MESSAGE = " is empty or null";
 	private static final String DUMMY_PING_PROVIDER_ERROR_MESSAGE = "This is the dummy ping provider's normal ping response";
 
-	protected Logger logger = LogManager.getLogger(DummyPingMonitor.class);
+	private Logger logger = LogManager.getLogger(DummyPingMonitor.class);
 
 	//=================================================================================================
 	// methods

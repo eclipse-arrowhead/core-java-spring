@@ -74,7 +74,7 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 
 		if(!initialized) {
 
-			throw new ArrowheadException("OrchestratedExternalPingMonitor is not initilized.");
+			throw new ArrowheadException("OrchestratedExternalPingMonitor is not initialized.");
 		}
 
 		if (Utilities.isEmpty(address)) {
@@ -119,7 +119,7 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 		logger.debug("init started...");
 
 		if (initialized) {
-			logger.debug("OrchestratedExternalPingMonitor is allready initialized.");
+			logger.debug("OrchestratedExternalPingMonitor is already initialized.");
 
 			return;
 		}
@@ -164,18 +164,18 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 					throw new ArrowheadException("External Ping Monitor returned ack without processId.");
 				}
 
-				logger.info("IcmpPingRequestACK received, with process id: " + startedExternalMeasurementProcessId);
+				logger.debug("IcmpPingRequestACK received, with process id: " + startedExternalMeasurementProcessId);
 
 				return startedExternalMeasurementProcessId;
 
 			} catch (final ArrowheadException ex) {
-				logger.info(ex);
+				logger.debug(ex);
 
 				cachedPingMonitorProvider = null;
 
 				throw ex;
 			} catch (final Exception ex) {
-				logger.info(ex);
+				logger.debug(ex);
 
 				cachedPingMonitorProvider = null;
 				throw new ArrowheadException("External Ping Monitor is not available at: " + address );
@@ -235,18 +235,21 @@ public class OrchestratedExternalPingMonitor extends AbstractPingMonitor{
 
 	//-------------------------------------------------------------------------------------------------
 	private UriComponents createHttpUri(final SystemResponseDTO provider, final String path) {
+		logger.debug("createHttpUri started...");
 
 		return Utilities.createURI(CommonConstants.HTTP, provider.getAddress(), provider.getPort(), path );
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	private UriComponents createHttpsUri(final SystemResponseDTO provider, final String path) {
+		logger.debug("createHttpsUri started...");
 
 		return Utilities.createURI(CommonConstants.HTTPS, provider.getAddress(), provider.getPort(), path );
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	private int calculateTimeOut() {
+		logger.debug("calculateTimeOut started...");
 
 		final int singlePingTimeOut = pingMeasurementProperties.getTimeout();
 		final int timesToRepeatPing = pingMeasurementProperties.getTimeToRepeat();

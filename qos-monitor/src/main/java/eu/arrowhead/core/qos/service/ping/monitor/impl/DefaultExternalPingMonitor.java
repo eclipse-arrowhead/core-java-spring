@@ -78,7 +78,7 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 
 		if(!initialized) {
 
-			throw new ArrowheadException("DefaultExternalPingMonitor is not initilized.");
+			throw new ArrowheadException("DefaultExternalPingMonitor is not initialized.");
 		}
 
 		if (Utilities.isEmpty(address)) {
@@ -108,7 +108,7 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 		logger.debug("initPingMonitorProvider started...");
 
 		if (initialized) {
-			logger.debug("DefaultExternalPingMonitor is allready initialized.");
+			logger.debug("DefaultExternalPingMonitor is already initialized.");
 
 			return;
 		}
@@ -142,16 +142,16 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 			if (startedExternalMeasurementProcessId == null) {
 				throw new ArrowheadException("External Ping Monitor returned ack without processId.");
 			}
-			logger.info("IcmpPingRequestACK received, with process id: " + startedExternalMeasurementProcessId);
+			logger.debug("IcmpPingRequestACK received, with process id: " + startedExternalMeasurementProcessId);
 
 			return startedExternalMeasurementProcessId;
 
 		} catch (final ArrowheadException ex) {
-			logger.info(ex);
+			logger.debug(ex);
 
 			throw ex;
 		} catch (final Exception ex) {
-			logger.info(ex);
+			logger.debug(ex);
 
 			throw new ArrowheadException("External Ping Monitor is not available at: " + address );
 		}
@@ -189,6 +189,7 @@ public class DefaultExternalPingMonitor extends AbstractPingMonitor{
 
 	//-------------------------------------------------------------------------------------------------
 	private int calculateTimeOut() {
+		logger.debug("calculateTimeOut started...");
 
 		final int singlePingTimeOut = pingMeasurementProperties.getTimeout();
 		final int timesToRepeatPing = pingMeasurementProperties.getTimeToRepeat();
