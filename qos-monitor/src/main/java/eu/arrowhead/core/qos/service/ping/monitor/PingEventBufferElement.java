@@ -46,7 +46,7 @@ public class PingEventBufferElement implements Serializable {
 	public void addEvent( final int position, final MeasurementMonitoringEvent event) {
 		logger.debug("addEvent started...");
 
-		Assert.isTrue(position < QosMonitorConstants.EVENT_ARRAY_SIZE || position < 0, "Invalid eventList position.");
+		Assert.isTrue(position < QosMonitorConstants.EVENT_ARRAY_SIZE && position >= 0, "Invalid eventList position.");
 		Assert.notNull(event, "Event is null");
 
 		eventArray[position] = event;
