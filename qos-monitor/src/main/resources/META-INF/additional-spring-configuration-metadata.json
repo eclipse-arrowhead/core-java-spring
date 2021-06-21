@@ -188,5 +188,55 @@
     "name": "http.client.connection.manager.timeout",
     "type": "java.lang.Integer",
     "description": "A description for 'http.client.connection.manager.timeout'"
+  },
+  {
+    "name": "http.client.connection.manager.timeout",
+    "type": "java.lang.Integer",
+    "description": "A description for 'http.client.connection.manager.timeout'"
+  },
+  {
+    "name": "monitor_provider_port",
+    "type": "java.lang.Integer",
+    "description": "A description for 'monitor_provider_port'"
+  },
+  {
+    "name": "monitor_provider_scheme",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'monitor_provider_secure'"
+  },
+  {
+    "name": "monitor_provider_path",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor_provider_path'"
+  },
+  {
+    "name": "monitor_provider_address",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor_provider_address'"
+  },
+  {
+    "name": "monitor_provider_type",
+    "type": "java.lang.Enum",
+    "description": "A description for 'monitor_provider_type'"
+  },
+  {
+    "name": "monitor_provider_name",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor_provider_name'"
+  },
+  {
+    "name": "monitor_provider_secure",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'monitor_provider_secure'"
+  },
+  {
+    "name": "request_max_retry",
+    "type": "java.lang.Integer",
+    "description": "A description for 'request_max_retry'"
+  },
+  {
+    "name": "request_sleep_period",
+    "type": "java.lang.Integer",
+    "description": "A description for 'request_sleep_period'"
   }
 ]}

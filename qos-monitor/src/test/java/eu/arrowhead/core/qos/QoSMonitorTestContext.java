@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Primary;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.service.PingService;
 import eu.arrowhead.core.qos.service.RelayTestService;
+import eu.arrowhead.core.qos.service.event.EventWatcherService;
 
 @Configuration
 public class QoSMonitorTestContext {
@@ -48,5 +49,12 @@ public class QoSMonitorTestContext {
 	@Primary // This bean is primary only in test context
 	public RelayTestService mockRelayTestService() {
 		return Mockito.mock(RelayTestService.class);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Bean
+	@Primary // This bean is primary only in test context
+	public EventWatcherService mockEventWatcherService() {
+		return Mockito.mock(EventWatcherService.class);
 	}
 }

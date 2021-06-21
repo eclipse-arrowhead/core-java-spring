@@ -227,7 +227,17 @@ public class EventHandlerDBService {
 	public void deleteSubscription(final String eventType, final SystemRequestDTO subscriberSystem) {
 		logger.debug("deleteSubscriptionResponse started ...");
 
-		final EventType validEventType = validateEventTypeIsInDB(eventType);
+		EventType validEventType = null;
+		try {
+			validEventType = validateEventTypeIsInDB(eventType);
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage());
+		}
+
+		if (validEventType == null) {
+			return;
+		}
+		
 		final System validSubscriber = validateSystemRequestDTO(subscriberSystem); 
 		
 		try {

@@ -166,6 +166,8 @@ public class CoreCommonConstants {
 	public static final String GATEWAY_MATCHMAKER = "gatewayMatchmaker";
 	public static final String CLOUD_MATCHMAKER = "cloudMatchmaker";
 	
+	public static final String PING_MONITOR = "pingMonitor";
+	
 	public static final int TOP_PRIORITY = 1;
 	
 	public static final String QOSMANAGER = "qosManager";
@@ -192,7 +194,19 @@ public class CoreCommonConstants {
 	public static final String $QOS_ENABLED_RELAY_TASK_WD =  "${" + QOS_ENABLED_RELAY_TASK + ":" + CoreDefaults.DEFAULT_QOS_ENABLED_RELAY_TASK + "}";
 	public static final String QOS_IS_GATEKEEPER_PRESENT = "gatekeeper_is_present";
 	public static final String $QOS_IS_GATEKEEPER_PRESENT_WD = "${" + QOS_IS_GATEKEEPER_PRESENT + ":" + CoreDefaults.DEFAULT_QOS_IS_GATEKEEPER_PRESENT + "}";
-	
+	public static final String QOS_MONITOR_PROVIDER_TYPE = "monitor_provider_type";
+	public static final String $QOS_MONITOR_PROVIDER_TYPE_WD = "${" + QOS_MONITOR_PROVIDER_TYPE + ":" + CoreDefaults.DEFAULT_QOS_MONITOR_PROVIDER_TYPE + "}";
+	public static final String QOS_MONITOR_PROVIDER_NAME = "monitor_provider_name";
+	public static final String $QOS_MONITOR_PROVIDER_NAME_WD = "${" + QOS_MONITOR_PROVIDER_NAME + ":" + CoreDefaults.DEFAULT_QOS_MONITOR_PROVIDER_NAME + "}";
+	public static final String QOS_MONITOR_PROVIDER_ADDRESS = "monitor_provider_address";
+	public static final String $QOS_MONITOR_PROVIDER_ADDRESS_WD = "${" + QOS_MONITOR_PROVIDER_ADDRESS + ":" + CoreDefaults.DEFAULT_QOS_MONITOR_PROVIDER_ADDRESS + "}";
+	public static final String QOS_MONITOR_PROVIDER_PORT = "monitor_provider_port";
+	public static final String $QOS_MONITOR_PROVIDER_PORT_WD = "${" + QOS_MONITOR_PROVIDER_PORT + ":" + CoreDefaults.DEFAULT_QOS_MONITOR_PROVIDER_PORT + "}";
+	public static final String QOS_MONITOR_PROVIDER_PATH = "monitor_provider_path";
+	public static final String $QOS_MONITOR_PROVIDER_PATH_WD = "${" + QOS_MONITOR_PROVIDER_PATH + ":" + CoreDefaults.DEFAULT_QOS_MONITOR_PROVIDER_PATH + "}";
+	public static final String QOS_MONITOR_PROVIDER_SECURE = "monitor_provider_secure";
+	public static final String $QOS_MONITOR_PROVIDER_SECURE_WD = "${" + QOS_MONITOR_PROVIDER_SECURE + ":" + CoreDefaults.DEFAULT_QOS_MONITOR_PROVIDER_SECURE + "}";
+
 	public static final String NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS = "no_gatekeeper_relay_request_handler_workers";
 	public static final String $NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS_WD = "${" + NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + ":" + 
 																				 CoreDefaults.DEFAULT_NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + "}";

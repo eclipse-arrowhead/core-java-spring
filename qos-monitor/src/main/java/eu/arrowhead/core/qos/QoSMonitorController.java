@@ -15,6 +15,7 @@
 package eu.arrowhead.core.qos;
 
 import java.security.PublicKey;
+import java.time.format.DateTimeParseException;
 import java.util.Base64;
 import java.util.Map;
 
@@ -62,6 +63,8 @@ import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.EventDTO;
+import eu.arrowhead.common.dto.shared.QosMonitorEventType;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
@@ -69,6 +72,7 @@ import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.service.PingService;
 import eu.arrowhead.core.qos.service.RelayTestService;
+import eu.arrowhead.core.qos.service.event.EventWatcherService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -148,6 +152,10 @@ public class QoSMonitorController {
 	private static final String POST_CONNECT_HTTP_400_MESSAGE = "Could not create connection";
 	private static final String POST_CONNECT_HTTP_502_MESSAGE = "Error occured when initialize relay communication.";
 
+	private static final String EXTERNAL_PING_MONITOR_NOTIFICATION_DESCRIPTION = "Listens on external ping monitor events";
+	private static final String EXTERNAL_PING_MONITOR_NOTIFICATION_HTTP_200_MESSAGE = "External ping monitor event received";
+	private static final String EXTERNAL_PING_MONITOR_NOTIFICATION_HTTP_400_MESSAGE = "External ping monitor event has incorrect format";
+
 	@Autowired
 	private QoSDBService qosDBService;
 	
@@ -156,6 +164,9 @@ public class QoSMonitorController {
 	
 	@Autowired
 	private RelayTestService relayTestService;
+
+	@Autowired
+	private EventWatcherService eventWatcherService;
 
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
@@ -471,6 +482,24 @@ public class QoSMonitorController {
 		
 		logger.debug("initRelayTest finished...");
 	}
+
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = EXTERNAL_PING_MONITOR_NOTIFICATION_DESCRIPTION, 
+				  tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = EXTERNAL_PING_MONITOR_NOTIFICATION_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = EXTERNAL_PING_MONITOR_NOTIFICATION_HTTP_400_MESSAGE)
+	})
+	@ResponseStatus(value = org.springframework.http.HttpStatus.ACCEPTED)
+	@PostMapping(path = QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI, consumes = MediaType.APPLICATION_JSON_VALUE)
+	public void pingMonitorNotification(@RequestBody final EventDTO request) {
+		logger.debug("pingMonitorNotification started...");
+
+		validateEvent(request, CommonConstants.QOSMONITOR_URI + QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI);
+		eventWatcherService.putEventToQueue(request);
+
+		logger.debug("pingMonitorNotification finished...");
+	}
 	
 	//=================================================================================================
 	// assistant methods
@@ -682,5 +711,50 @@ public class QoSMonitorController {
 		if (Utilities.isEmpty(request.getAttribute())) {
 			throw new BadPayloadException("attribute is null or empty", HttpStatus.SC_BAD_REQUEST, origin);
 		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void validateEvent(final EventDTO request, final String origin) {
+		logger.debug("validateEvent started...");
+
+		if (request == null) {
+			throw new BadPayloadException("QoSBestRelayRequestDTO is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+
+		if (Utilities.isEmpty(request.getEventType())) {
+			throw new BadPayloadException("EventType is null or empty", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+
+		if (!checkExternalPingMonitoringNotificationEventType(request.getEventType())) {
+			throw new BadPayloadException("EventType is not a valid PingMonitoringEvent-Type", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+
+		if (Utilities.isEmpty(request.getPayload())) {
+			throw new BadPayloadException("Payload is null or empty", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+
+		if (Utilities.isEmpty(request.getTimeStamp())) {
+			throw new BadPayloadException("TimeStamp is null or empty", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+
+		try {
+			Utilities.parseUTCStringToLocalZonedDateTime(request.getTimeStamp());
+		} catch (final DateTimeParseException ex) {
+			throw new BadPayloadException("TimeStamp format is not accepted as : " + request.getTimeStamp(), HttpStatus.SC_BAD_REQUEST, origin);
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private boolean checkExternalPingMonitoringNotificationEventType(final String eventType) {
+		logger.debug("checkExternalPingMonitoringNotificationEventType started...");
+
+		for (final QosMonitorEventType type : QosMonitorEventType.values()) {
+			if (eventType.equalsIgnoreCase(type.name())) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

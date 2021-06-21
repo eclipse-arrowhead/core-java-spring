@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,6 +37,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.annotation.Resource;
 
@@ -83,14 +85,17 @@ import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
+import eu.arrowhead.common.dto.shared.EventDTO;
 import eu.arrowhead.common.dto.shared.QoSMeasurementStatus;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
+import eu.arrowhead.common.dto.shared.QosMonitorEventType;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.service.PingService;
 import eu.arrowhead.core.qos.service.RelayTestService;
+import eu.arrowhead.core.qos.service.event.EventWatcherService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = QoSMonitorMain.class)
@@ -132,7 +137,10 @@ public class QoSMonitorControllerTest {
 	
 	@MockBean(name = "mockRelayTestService")
 	private RelayTestService relayTestService;
-	
+
+	@MockBean(name = "mockEventWatcherService")
+	private EventWatcherService eventWatcherService;
+
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
 	
@@ -1546,10 +1554,318 @@ public class QoSMonitorControllerTest {
 		Assert.assertEquals("peerName", response.getPeerName());
 		Assert.assertEquals("receiverKey", response.getReceiverQoSMonitorPublicKey());
 	}
-	
+
+
+	//=================================================================================================
+	// Test of pingMonitorNotification
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void pingMonitorNotificationTestOk() throws Exception {
+
+		doNothing().when(eventWatcherService).putEventToQueue(any());
+
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(getValidEventDTOForTest()))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isAccepted())
+				.andReturn();
+
+		verify(eventWatcherService, times(1)).putEventToQueue(any());
+		Assert.assertNotNull("pingMonitorNotificationTest result is null.", result);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void pingMonitorNotificationNullEventTypeTest() throws Exception {
+
+		doNothing().when(eventWatcherService).putEventToQueue(any());
+
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(getNullEventTypeEventDTOForTest()))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+
+		verify(eventWatcherService, never()).putEventToQueue(any());
+
+		final ErrorMessageDTO responseBody = objectMapper.readValue(result.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void pingMonitorNotificationEmptyEventTypeTest() throws Exception {
+
+		doNothing().when(eventWatcherService).putEventToQueue(any());
+
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(getEmptyEventTypeEventDTOForTest()))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+
+		verify(eventWatcherService, never()).putEventToQueue(any());
+
+		final ErrorMessageDTO responseBody = objectMapper.readValue(result.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void pingMonitorNotificationInvalidEventTypeTest() throws Exception {
+
+		doNothing().when(eventWatcherService).putEventToQueue(any());
+
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(getInValidEventTypeEventDTOForTest()))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+
+		verify(eventWatcherService, never()).putEventToQueue(any());
+
+		final ErrorMessageDTO responseBody = objectMapper.readValue(result.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void pingMonitorNotificationNullPayloadTest() throws Exception {
+
+		doNothing().when(eventWatcherService).putEventToQueue(any());
+
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(getNullPayloadEventDTOForTest()))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+
+		verify(eventWatcherService, never()).putEventToQueue(any());
+
+		final ErrorMessageDTO responseBody = objectMapper.readValue(result.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void pingMonitorNotificationEmptyPayloadTest() throws Exception {
+
+		doNothing().when(eventWatcherService).putEventToQueue(any());
+
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(getEmptyPayloadEventDTOForTest()))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+
+		verify(eventWatcherService, never()).putEventToQueue(any());
+
+		final ErrorMessageDTO responseBody = objectMapper.readValue(result.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void pingMonitorNotificationNullTimeStampTest() throws Exception {
+
+		doNothing().when(eventWatcherService).putEventToQueue(any());
+
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(getNullTimeStampEventDTOForTest()))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+
+		verify(eventWatcherService, never()).putEventToQueue(any());
+
+		final ErrorMessageDTO responseBody = objectMapper.readValue(result.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void pingMonitorNotificationEmptyTimeStampTest() throws Exception {
+
+		doNothing().when(eventWatcherService).putEventToQueue(any());
+
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(getEmptyTimeStampEventDTOForTest()))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+
+		verify(eventWatcherService, never()).putEventToQueue(any());
+
+		final ErrorMessageDTO responseBody = objectMapper.readValue(result.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void pingMonitorNotificationInvalidTimeStampTest() throws Exception {
+
+		doNothing().when(eventWatcherService).putEventToQueue(any());
+
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(getInvalidTimeStampEventDTOForTest()))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+
+		verify(eventWatcherService, never()).putEventToQueue(any());
+
+		final ErrorMessageDTO responseBody = objectMapper.readValue(result.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+
+	}
+
 	//=================================================================================================
 	// assistant methods
 
+	//-------------------------------------------------------------------------------------------------
+	private EventDTO getValidEventDTOForTest() {
+
+		return getValidReceivedMeasurementRequestEventDTOForTest();
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private EventDTO getInvalidTimeStampEventDTOForTest() {
+
+		final EventDTO event = new EventDTO();
+		event.setEventType(QosMonitorEventType.RECEIVED_MONITORING_REQUEST.name());
+		event.setMetaData(getValidMeasuermentEventDTOMetadtaProcessIdForTest());
+		event.setPayload(getValidMeasuermentEventDTOEmptyPayloadForTest());
+		event.setTimeStamp("12:22:34-12:12:12");
+
+		return event;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private EventDTO getEmptyTimeStampEventDTOForTest() {
+
+		final EventDTO event = new EventDTO();
+		event.setEventType(QosMonitorEventType.RECEIVED_MONITORING_REQUEST.name());
+		event.setMetaData(getValidMeasuermentEventDTOMetadtaProcessIdForTest());
+		event.setPayload(getValidMeasuermentEventDTOEmptyPayloadForTest());
+		event.setTimeStamp("");
+
+		return event;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private EventDTO getNullTimeStampEventDTOForTest() {
+
+		final EventDTO event = new EventDTO();
+		event.setEventType(QosMonitorEventType.RECEIVED_MONITORING_REQUEST.name());
+		event.setMetaData(getValidMeasuermentEventDTOMetadtaProcessIdForTest());
+		event.setPayload(getValidMeasuermentEventDTOEmptyPayloadForTest());
+		event.setTimeStamp(null);
+
+		return event;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private EventDTO getNullPayloadEventDTOForTest() {
+
+		final EventDTO event = new EventDTO();
+		event.setEventType(QosMonitorEventType.RECEIVED_MONITORING_REQUEST.name());
+		event.setMetaData(getValidMeasuermentEventDTOMetadtaProcessIdForTest());
+		event.setPayload(null);
+		event.setTimeStamp(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
+
+		return event;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private EventDTO getEmptyPayloadEventDTOForTest() {
+
+		final EventDTO event = new EventDTO();
+		event.setEventType(QosMonitorEventType.RECEIVED_MONITORING_REQUEST.name());
+		event.setMetaData(getValidMeasuermentEventDTOMetadtaProcessIdForTest());
+		event.setPayload("");
+		event.setTimeStamp(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
+
+		return event;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private EventDTO getNullEventTypeEventDTOForTest() {
+
+		final EventDTO event = new EventDTO();
+		event.setEventType(null);
+		event.setMetaData(getValidMeasuermentEventDTOMetadtaProcessIdForTest());
+		event.setPayload(getValidMeasuermentEventDTOEmptyPayloadForTest());
+		event.setTimeStamp(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
+
+		return event;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private EventDTO getEmptyEventTypeEventDTOForTest() {
+
+		final EventDTO event = new EventDTO();
+		event.setEventType("");
+		event.setMetaData(getValidMeasuermentEventDTOMetadtaProcessIdForTest());
+		event.setPayload(getValidMeasuermentEventDTOEmptyPayloadForTest());
+		event.setTimeStamp(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
+
+		return event;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private EventDTO getInValidEventTypeEventDTOForTest() {
+
+		final EventDTO event = new EventDTO();
+		event.setEventType("UNKNOWN_MEAUSREMENT_EVENT");
+		event.setMetaData(getValidMeasuermentEventDTOMetadtaProcessIdForTest());
+		event.setPayload(getValidMeasuermentEventDTOEmptyPayloadForTest());
+		event.setTimeStamp(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
+
+		return event;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private EventDTO getValidReceivedMeasurementRequestEventDTOForTest() {
+
+		final EventDTO event = new EventDTO();
+		event.setEventType(QosMonitorEventType.RECEIVED_MONITORING_REQUEST.name());
+		event.setMetaData(getValidMeasuermentEventDTOMetadtaProcessIdForTest());
+		event.setPayload(getValidMeasuermentEventDTOEmptyPayloadForTest());
+		event.setTimeStamp(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
+
+		return event;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private Map<String, String> getValidMeasuermentEventDTOMetadtaProcessIdForTest() {
+
+		return Map.of(QosMonitorConstants.PROCESS_ID_KEY, UUID.randomUUID().toString());
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private String getValidMeasuermentEventDTOEmptyPayloadForTest() {
+
+		return "[]";
+
+	}
 	//-------------------------------------------------------------------------------------------------
 	private QoSIntraPingMeasurementListResponseDTO getIntraPingMeasurementListResponseDTOForTest() {
 
@@ -1724,7 +2040,7 @@ public class QoSMonitorControllerTest {
 				"localhost",//system.getAddress(), 
 				12345,//system.getPort(), 
 				"authinfo",//system.getAuthenticationInfo(),
-				null, // metadata
+				Map.of(),
 				Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()),
 				Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 
