@@ -104,7 +104,7 @@ The response must be followed by publishing the following events in the order th
 
 The "INTERRUPTED_MONITORING_MEASUREMENT" event could precede any other event and it should not be followed by any other event.
 
-In order to receive the events invoked by the "qos-icmp-ping" service, the QoS Monitor provide a [notification](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#endpoint_post_ping_event_notification) service endpoint.
+In order to receive the events invoked by the "qos-icmp-ping" service, the QoS Monitor provide a [notification](#endpoint_post_ping_event_notification) service endpoint.
 
 <a name="qos_monitor_usecases" />
 
@@ -129,6 +129,7 @@ The QoS Monitor has the following use cases:
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Echo](#qos_monitor_endpoints_get_echo) | /echo | GET    | -    | OK     |
+| [Notification](#endpoint_post_ping_event_notification) | /externalpingmonitorevent | POST    | [EventDTO](#input_post_ping_event_notification)    | OK     |
 
 <a name="qos_monitor_endpoints_management" />
 
@@ -155,6 +156,97 @@ GET /qos_monitor/echo
 ```
 
 Returns a "Got it" message with the purpose of testing the core service availability.
+
+### Notification <a name="endpoint_post_ping_event_notification"/>
+```
+POST /qos_monitor/externalpingmonitorevent
+```
+Returns HTTP-OK in order to confirm received event notification.
+
+**Input:** <a name="input_post_ping_event_notification"/>
+```json
+{
+  "eventType": "string",
+  "metaData": {
+    "processID": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "payload": "string",
+  "timeStamp": "string"
+}
+```
+
+| __Input__  fields |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `eventType` | Type of event. | mandatory | must be parsable to a valid [QosMonitorEventType](#input_qos_monitor_event_type) |
+| `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key associated with a string value, which is parsable to UUID object |
+| `payload` | String representation of the event. | mandatory | must be an empty list as "{[]}", unless the event type is FINISHED_MONITORING_MEASUREMENT, otherwise it must be a list of [IcmpPingResponse](#input_icmp_ping_response) |
+| `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd` `T` `HH`:`mm`:`ss.sss` `Z` format |
+
+**QosMonitorEventType:** <a name="input_qos_monitor_event_type"/>
+
+
+| __RECEIVED_MONITORING_REQUEST__  type |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `eventType` | Type of event. | mandatory | must be "RECEIVED_MONITORING_REQUEST" |
+| `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key associated with a string value, which is parsable to UUID object |
+| `payload` | String representation of the event. | mandatory | must be an empty list as "{[]}" |
+| `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd` `T` `HH`:`mm`:`ss.sss` `Z` format |
+
+
+| __STARTED_MONITORING_MEASUREMENT__  type |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `eventType` | Type of event. | mandatory | must be "STARTED_MONITORING_MEASUREMENT" |
+| `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key associated with a string value, which is parsable to UUID object |
+| `payload` | String representation of the event. | mandatory | must be an empty list as "{[]}" |
+| `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd` `T` `HH`:`mm`:`ss.sss` `Z` format |
+
+| __INTERRUPTED_MONITORING_MEASUREMENT__  type |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `eventType` | Type of event. | mandatory | must be "INTERRUPTED_MONITORING_MEASUREMENT" |
+| `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key associated with a string value, which is parsable to UUID object, must contain an "exception" key associated with a string value,  may contain an "root_cause" key associated with a string value|
+| `payload` | String representation of the event. | mandatory | must be an empty list as "{[]}" |
+| `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd` `T` `HH`:`mm`:`ss.sss` `Z` format |
+
+| __FINISHED_MONITORING_MEASUREMENT__  type |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `eventType` | Type of event. | mandatory | must be "FINISHED_MONITORING_MEASUREMENT" |
+| `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key associated with a string value, which is parsable to UUID object |
+| `payload` | String representation of the event. | mandatory | must be an list of [IcmpPingResponse](#input_icmp_ping_response) |
+| `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd` `T` `HH`:`mm`:`ss.sss` `Z` format |
+
+**IcmpPingResponse:** <a name="input_icmp_ping_response"/>
+
+| __IcmpPingResponse__  fields |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `successFlag` | Measurement success indicator | mandatory | boolean |
+| `timeoutFlag` | Measurement timeout indicator | mandatory | boolean |
+| `errorMessage` | String representation of the measurement error. | optional | string |
+| `throwable` | String representation of the stacktrace of the measurement error.  | optional | string |
+| `host` | Domain name or address of the measured system | mandatory | string |
+| `size` | Size of the payload of the measured icmp packet | mandatory | integer |
+| `rtt` | Round trip time of the measured icmp packet | mandatory | integer - zero if error|
+| `ttl` | Time to live of the measured icmp packet | mandatory | integer |
+| `duration` | Measurement time of the measured icmp packet | mandatory | integer - zero if error|
 
 ### Get ping measurements mgmt
 
