@@ -1,9 +1,12 @@
 package eu.arrowhead.core.qos.dto.event.monitoringevents;
 
 import java.util.List;
+import java.util.StringJoiner;
 
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.IcmpPingResponseDTO;
 import eu.arrowhead.common.dto.shared.QosMonitorEventType;
+import eu.arrowhead.core.qos.QosMonitorConstants;
 
 public class FinishedMonitoringMeasurementEventDTO extends MeasurementMonitoringEvent {
 
@@ -29,4 +32,14 @@ public class FinishedMonitoringMeasurementEventDTO extends MeasurementMonitoring
 	//-------------------------------------------------------------------------------------------------
 	public void setPayload(final List<IcmpPingResponseDTO> payload) { this.payload = payload; }
 
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new StringJoiner(", ", InterruptedMonitoringMeasurementEventDTO.class.getSimpleName() + "[", "]")
+				.add("event type = " + getEventType().name())
+				.add("timeStamp = " + Utilities.convertZonedDateTimeToUTCString(getTimeStamp()))
+				.add("processID = " + 
+						getMetadata().get(QosMonitorConstants.PROCESS_ID_KEY) != null ? getMetadata().get(QosMonitorConstants.PROCESS_ID_KEY) : " - ")
+				.toString();
+	}
 }

@@ -1,6 +1,10 @@
 package eu.arrowhead.core.qos.dto.event.monitoringevents;
 
+import java.util.StringJoiner;
+
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.QosMonitorEventType;
+import eu.arrowhead.core.qos.QosMonitorConstants;
 
 public class StartedMonitoringMeasurementEventDTO extends MeasurementMonitoringEvent {
 
@@ -17,4 +21,14 @@ public class StartedMonitoringMeasurementEventDTO extends MeasurementMonitoringE
 		this.eventType = QosMonitorEventType.STARTED_MONITORING_MEASUREMENT;
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		return new StringJoiner(", ", InterruptedMonitoringMeasurementEventDTO.class.getSimpleName() + "[", "]")
+				.add("event type = " + getEventType().name())
+				.add("timeStamp = " + Utilities.convertZonedDateTimeToUTCString(getTimeStamp()))
+				.add("processID = " + 
+						getMetadata().get(QosMonitorConstants.PROCESS_ID_KEY) != null ? getMetadata().get(QosMonitorConstants.PROCESS_ID_KEY) : " - ")
+				.toString();
+	}
 }
