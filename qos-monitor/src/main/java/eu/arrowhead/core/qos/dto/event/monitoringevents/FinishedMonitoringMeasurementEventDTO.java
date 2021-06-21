@@ -37,7 +37,7 @@ public class FinishedMonitoringMeasurementEventDTO extends MeasurementMonitoring
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", InterruptedMonitoringMeasurementEventDTO.class.getSimpleName() + "[", "]")
+		return new StringJoiner(", ", FinishedMonitoringMeasurementEventDTO.class.getSimpleName() + "[", "]")
 				.add("event type = " + getEventType().name())
 				.add("timeStamp = " + Utilities.convertZonedDateTimeToUTCString(getTimeStamp()))
 				.add("processID = " + 
