@@ -20,9 +20,10 @@ public class SqlRuleStore implements RuleStore {
 
     private static final Logger logger = LoggerFactory.getLogger(RuleStore.class);
 
-    private final String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS pde_rule (id INT, plant_description_id INT);";
+    private final String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS `pde_rule` (`id` bigint(20) PRIMARY KEY, `plant_description_id` bigint(20) NOT NULL ) ENGINE = InnoDB DEFAULT CHARSET = utf8";
+
     private final String SQL_SELECT_RULES = "select id from pde_rule where plant_description_id=?;";
-    private final String SQL_INSERT_RULE = "INSERT INTO pde_rule(id, plant_description_id) VALUES(?, ?);";
+    private final String SQL_REPLACE_RULE = "REPLACE INTO pde_rule(id, plant_description_id) VALUES(?, ?);";
     private final String SQL_DELETE_RULES = "DELETE FROM pde_rule where plant_description_id=?;";
     private final String ID = "id";
 
@@ -99,7 +100,7 @@ public class SqlRuleStore implements RuleStore {
 
         try {
             connection.setAutoCommit(false);
-            final PreparedStatement statement = connection.prepareStatement(SQL_INSERT_RULE);
+            final PreparedStatement statement = connection.prepareStatement(SQL_REPLACE_RULE);
             for (final Integer rule : rules) {
                 statement.setInt(1, rule);
                 statement.setInt(2, plantDescriptionId);
