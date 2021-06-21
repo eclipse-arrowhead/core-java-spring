@@ -217,7 +217,7 @@ Returns HTTP-OK in order to confirm received event notification.
 | Field | Description | Necessity | Format/Limitations |
 | ----- | ----------- | --------- | ----------- |
 | `eventType` | Type of event. | mandatory | must be "INTERRUPTED_MONITORING_MEASUREMENT" |
-| `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key associated with a string value, which is parsable to UUID object, must contain an "exception" key associated with a string value,  may contain an "root_cause" key associated with a string value|
+| `metaData` |  The "key - value" pairs for event filtering. | mandatory | max.length = 65535, must contain a "processID" key associated with a string value, which is parsable to UUID object, must contain an "EXCEPTION" key associated with a string value,  may contain an "ROOT_CAUSE" key associated with a string value|
 | `payload` | String representation of the event. | mandatory | must be an empty list as "{[]}" |
 | `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd` `T` `HH`:`mm`:`ss.sss` `Z` format |
 
