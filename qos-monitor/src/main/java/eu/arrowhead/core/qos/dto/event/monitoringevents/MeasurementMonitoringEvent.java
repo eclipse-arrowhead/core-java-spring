@@ -28,5 +28,4 @@ public abstract class MeasurementMonitoringEvent implements Serializable {
 	public void setMetadata( final Map<String,String> metadata ) { this.metadata = metadata; }
 	public void setTimeStamp(final ZonedDateTime timeStamp) { this.timeStamp = timeStamp; }
 
-
 }
