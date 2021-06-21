@@ -3,6 +3,8 @@ package eu.arrowhead.core.qos.dto.event.monitoringevents;
 import java.util.List;
 import java.util.StringJoiner;
 
+import org.apache.commons.lang3.StringUtils;
+
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.IcmpPingResponseDTO;
 import eu.arrowhead.common.dto.shared.QosMonitorEventType;
@@ -40,6 +42,7 @@ public class FinishedMonitoringMeasurementEventDTO extends MeasurementMonitoring
 				.add("timeStamp = " + Utilities.convertZonedDateTimeToUTCString(getTimeStamp()))
 				.add("processID = " + 
 						getMetadata().get(QosMonitorConstants.PROCESS_ID_KEY) != null ? getMetadata().get(QosMonitorConstants.PROCESS_ID_KEY) : " - ")
+				.add("payload = " + StringUtils.join(payload, "|"))
 				.toString();
 	}
 }
