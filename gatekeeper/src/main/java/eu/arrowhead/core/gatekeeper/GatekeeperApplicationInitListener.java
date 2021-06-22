@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.gatekeeper;
 
 import java.security.PrivateKey;
@@ -82,16 +96,16 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
 		if (gatewayIsPresent) {
 			return List.of(CoreSystemService.AUTH_CONTROL_INTER_SERVICE, CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.ORCHESTRATION_QOS_ENABLED_SERVICE,
-					CoreSystemService.ORCHESTRATION_QOS_RESERVATIONS_SERVICE, CoreSystemService.ORCHESTRATION_QOS_TEMPORARY_LOCK_SERVICE,
-					CoreSystemService.QOS_MONITOR_INTRA_PING_MEASUREMENT_SERVICE, CoreSystemService.ORCHESTRATION_QOS_CONFIRM_RESERVATION_SERVICE,
-					CoreSystemService.GATEWAY_PROVIDER_SERVICE, CoreSystemService.GATEWAY_CONSUMER_SERVICE,
-					CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE, CoreSystemService.QOS_MONITOR_PUBLIC_KEY_SERVICE,
-					CoreSystemService.QOS_MONITOR_JOIN_RELAY_TEST_SERVICE, CoreSystemService.QOS_MONITOR_INIT_RELAY_TEST_SERVICE); 
+						   CoreSystemService.ORCHESTRATION_QOS_RESERVATIONS_SERVICE, CoreSystemService.ORCHESTRATION_QOS_TEMPORARY_LOCK_SERVICE,
+						   CoreSystemService.QOSMONITOR_INTRA_PING_MEASUREMENT_SERVICE, CoreSystemService.ORCHESTRATION_QOS_CONFIRM_RESERVATION_SERVICE,
+						   CoreSystemService.GATEWAY_PROVIDER_SERVICE, CoreSystemService.GATEWAY_CONSUMER_SERVICE,
+						   CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE, CoreSystemService.QOSMONITOR_PUBLIC_KEY_SERVICE,
+						   CoreSystemService.QOSMONITOR_JOIN_RELAY_TEST_SERVICE, CoreSystemService.QOSMONITOR_INIT_RELAY_TEST_SERVICE); 
 		}
 		
 		return List.of(CoreSystemService.AUTH_CONTROL_INTER_SERVICE, CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.ORCHESTRATION_QOS_ENABLED_SERVICE,
 					   CoreSystemService.ORCHESTRATION_QOS_RESERVATIONS_SERVICE, CoreSystemService.ORCHESTRATION_QOS_TEMPORARY_LOCK_SERVICE,
-					   CoreSystemService.QOS_MONITOR_INTRA_PING_MEASUREMENT_SERVICE, CoreSystemService.ORCHESTRATION_QOS_CONFIRM_RESERVATION_SERVICE); 
+					   CoreSystemService.QOSMONITOR_INTRA_PING_MEASUREMENT_SERVICE, CoreSystemService.ORCHESTRATION_QOS_CONFIRM_RESERVATION_SERVICE); 
 	}
 		
 	//-------------------------------------------------------------------------------------------------
@@ -120,7 +134,7 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected void customDestroy() {
-		// close connections using listening on advertisement topic
+		// close connections using to listen on advertisement topic
 		relaySubscriberDataContainer.close();
 		
 		// close connections used by web services and gatekeeper tasks
@@ -145,7 +159,7 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	private UriComponents createQueryAllUri(final String scheme) {
 		logger.debug("createQueryAllUri started...");
 
-		final String registyUriStr = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_ALL_SERVICE_URI;
+		final String registyUriStr = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_QUERY_ALL_SERVICE_URI;
 
 		return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), registyUriStr);
 	}

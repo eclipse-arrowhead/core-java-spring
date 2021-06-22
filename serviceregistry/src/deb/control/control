@@ -3,7 +3,7 @@ Version: [[version]]
 Section: contrib/java
 Priority: optional
 Architecture: all
-Maintainer: Rajmund Bocsi <rbocsi@aitia.ai>
+Maintainer: Svetlin Tanyi <szvetlin@aitia.ai>
 Homepage: http://www.arrowhead.eu
 Description: Arrowhead Service Registry
 Distribution: development

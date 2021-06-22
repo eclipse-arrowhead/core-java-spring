@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2020 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.qos.quartz.task;
 
 import java.security.PublicKey;
@@ -116,7 +130,7 @@ public class RelayEchoTask implements Job {
 		}		
 		
 		if (!checkRequiredCoreSystemServiceUrisAvailable()) {
-			logger.debug("FINISHED: Relay Echo task. Reqired Core System Sevice URIs aren't available");
+			logger.debug("FINISHED: Relay Echo task. Required Core System Sevice URIs aren't available");
 			return;
 		}
 		
@@ -130,7 +144,6 @@ public class RelayEchoTask implements Job {
 			
 			qosMonitorDriver.requestGatekeeperInitRelayTest(testProposal);			
 			logger.debug("FINISHED: Relay Echo task success");
-			
 		} catch (final ArrowheadException ex) {
 			logger.debug("FAILED: Relay Echo task: " + ex.getMessage());
 			if (testProposal != null && ex.getErrorCode() == HttpStatus.SC_BAD_GATEWAY) {
@@ -175,7 +188,8 @@ public class RelayEchoTask implements Job {
 		
 		if (!arrowheadContext.containsKey(CommonConstants.SERVER_PUBLIC_KEY)) {
 			throw new ArrowheadException("Public key is not available.");
-		}		
+		}
+		
 		final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);		
 		proposal.setSenderQoSMonitorPublicKey(Base64.getEncoder().encodeToString(publicKey.getEncoded()));		
 		
@@ -188,7 +202,7 @@ public class RelayEchoTask implements Job {
 			if (cloud.getGatekeeperRelays() == null && cloud.getGatekeeperRelays().isEmpty()) {
 				logger.info(CLOUD_HAS_NO_GATEKEEPER_RELAY_WARNING_MESSAGE + cloud.getName() + "." + cloud.getOperator());
 			} else {
-				if(cloud.getGatewayRelays() != null && !cloud.getGatewayRelays().isEmpty()) {
+				if (cloud.getGatewayRelays() != null && !cloud.getGatewayRelays().isEmpty()) {
 					final QoSMeasurementStatus status = selectRelayFromCloudToTest(cloud, cloud.getGatewayRelays(), proposal);
 					if (status != null && status == QoSMeasurementStatus.NEW) {
 						return proposal;

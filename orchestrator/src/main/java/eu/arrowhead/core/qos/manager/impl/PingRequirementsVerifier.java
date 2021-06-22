@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2020 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.qos.manager.impl;
 
 import java.time.ZonedDateTime;
@@ -30,6 +44,10 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	
 	//=================================================================================================
 	// members
+	
+	private static final List<String> relevantQoSRequirementKeys = List.of(OrchestrationFormRequestDTO.QOS_REQUIREMENT_AVERAGE_RESPONSE_TIME_THRESHOLD, OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RESPONSE_TIME_THRESHOLD,
+																		   OrchestrationFormRequestDTO.QOS_REQUIREMENT_JITTER_THRESHOLD, OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_PACKET_LOSS,
+																		   OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RECENT_PACKET_LOSS); 
 	
 	@Value(CoreCommonConstants.$QOS_NOT_MEASURED_SYSTEM_VERIFY_RESULT)
 	private boolean verifyNotMeasuredSystem; // result of verify if a system has no ping records
@@ -76,11 +94,28 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	private boolean hasRelevantQoSRequirement(final QoSVerificationParameters params) {
+		logger.debug("hasRelevantQoSRequirement started...");
+		
+		if (params.getQosRequirements() == null || params.getQosRequirements().isEmpty()) { // no need to verify anything
+			return false;
+		}
+		
+		for (final String key : relevantQoSRequirementKeys) {
+			if (params.getQosRequirements().containsKey(key)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	private boolean verifyIntraCloudPingMeasurements(final QoSVerificationParameters params) {
 		logger.debug("verifyIntraCloudPingMeasuerements started...");
 		Assert.isTrue(!params.isInterCloud(), "QoSVerificationParameters is Inter-Cloud, but Intra-Cloud ping verification was requested");
 		
-		if (params.getQosRequirements() == null || params.getQosRequirements().isEmpty()) { // no need to verify anything
+		if (!hasRelevantQoSRequirement(params)) { // no need to verify anything
 			return true;
 		}
 		
@@ -145,7 +180,7 @@ public class PingRequirementsVerifier implements QoSVerifier {
 		Assert.isTrue(params.isInterCloud(), "QoSVerificationParameters is not Inter-Cloud, but Inter-Cloud direct ping verification was requested");
 		Assert.isTrue(!params.isGatewayIsMandatory(), "Gateway shouldn't be mandatory for Inter-Cloud direct ping verification");
 		
-		if (params.getQosRequirements() == null || params.getQosRequirements().isEmpty()) { // no need to verify anything
+		if (!hasRelevantQoSRequirement(params)) { // no need to verify anything
 			return true;
 		}
 		
@@ -210,7 +245,7 @@ public class PingRequirementsVerifier implements QoSVerifier {
 		Assert.isTrue(params.isInterCloud(), "QoSVerificationParameters is not Inter-Cloud, but Inter-Cloud relay echo and ping verification was requested");
 		Assert.isTrue(params.isGatewayIsMandatory(), "Gateway should be mandatory for Inter-Cloud relay echo and ping verification");
 		
-		if (params.getQosRequirements() == null || params.getQosRequirements().isEmpty()) { // verify only whether there are possible relays or not
+		if (!hasRelevantQoSRequirement(params)) { // verify only whether there are possible relays or not
 			verifyAllPossibleRelays(params);
 			return !params.getVerifiedRelays().isEmpty();
 		}

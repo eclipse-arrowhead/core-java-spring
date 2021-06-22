@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.serviceregistry.quartz.task;
 
 import java.util.ArrayList;
@@ -34,7 +48,7 @@ public class ProvidersReachabilityTask implements Job {
 	@Autowired
 	private ServiceRegistryDBService serviceRegistryDBService;
 	
-	@Value(CoreCommonConstants.$SERVICE_REGISTRY_PING_TIMEOUT_WD)
+	@Value(CoreCommonConstants.$SERVICEREGISTRY_PING_TIMEOUT_WD)
 	private int timeout;
 	
 	//=================================================================================================
@@ -57,7 +71,7 @@ public class ProvidersReachabilityTask implements Job {
 		try {
 			Page<ServiceRegistry> pageOfServiceEntries = serviceRegistryDBService.getServiceRegistryEntries(pageIndexCounter, PAGE_SIZE, Direction.ASC, CoreCommonConstants.COMMON_FIELD_NAME_ID);
 			if (pageOfServiceEntries.isEmpty()) {
-				logger.debug("Servise Registry database is empty");
+				logger.debug("Service Registry database is empty");
 			} else {
 				final int totalPages = pageOfServiceEntries.getTotalPages();
 				removedServiceRegistryEntries.addAll(pingAndRemoveRegisteredServices(pageOfServiceEntries));

@@ -42,10 +42,20 @@ CREATE USER IF NOT EXISTS 'event_handler'@'localhost' IDENTIFIED BY 'gRLjXbqu9Yw
 CREATE USER IF NOT EXISTS 'event_handler'@'%' IDENTIFIED BY 'gRLjXbqu9YwYhfK';
 source event_handler_privileges.sql
 
+-- DataManager
+CREATE USER IF NOT EXISTS 'datamanager'@'localhost' IDENTIFIED BY 'gRLjXbqu0YwYhfK';
+CREATE USER IF NOT EXISTS 'datamanager'@'%' IDENTIFIED BY 'gRLjXbqu0YwYhfK';
+source datamanager_privileges.sql
+
 -- Choreographer
 CREATE USER IF NOT EXISTS 'choreographer'@'localhost' IDENTIFIED BY 'Qa5yx4oBp4Y9RLX';
 CREATE USER IF NOT EXISTS 'choreographer'@'%' IDENTIFIED BY 'Qa5yx4oBp4Y9RLX';
 source choreographer_privileges.sql
+
+-- Configuration
+CREATE USER IF NOT EXISTS 'configuration'@'localhost' IDENTIFIED BY 'yRLjX2qA0YwYhzU';
+CREATE USER IF NOT EXISTS 'configuration'@'%' IDENTIFIED BY 'yRLjX2qA0YwYhzU';
+source configuration_privileges.sql
 
 -- Gatekeeper
 CREATE USER IF NOT EXISTS 'gatekeeper'@'localhost' IDENTIFIED BY 'fbJKYzKhU5t8QtT';
@@ -66,3 +76,13 @@ source certificate_authority_privileges.sql
 CREATE USER IF NOT EXISTS 'qos_monitor'@'localhost' IDENTIFIED BY 'RLY3UEx6nx4kSXy';
 CREATE USER IF NOT EXISTS 'qos_monitor'@'%' IDENTIFIED BY 'RLY3UEx6nx4kSXy';
 source qos_monitor_privileges.sql
+
+-- Translator
+CREATE USER IF NOT EXISTS 'translator'@'localhost' IDENTIFIED BY 'wozYpV58G0HUkbL';
+CREATE USER IF NOT EXISTS 'translator'@'%' IDENTIFIED BY 'wozYpV58G0HUkbL';
+source translator_privileges.sql
+
+-- Plant Description Engine
+CREATE USER IF NOT EXISTS 'plant_description_engine'@'localhost' IDENTIFIED BY 'ivJ2y9qWCpTmzr0';
+CREATE USER IF NOT EXISTS 'plant_description_engine'@'%' IDENTIFIED BY 'ivJ2y9qWCpTmzr0';
+source plant_description_engine_privileges.sql

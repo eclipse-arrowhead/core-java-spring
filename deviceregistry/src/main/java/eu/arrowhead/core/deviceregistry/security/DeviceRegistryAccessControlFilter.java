@@ -1,4 +1,20 @@
+/********************************************************************************
+ * Copyright (c) 2020 FHB
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   FHB - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.deviceregistry.security;
+
+import java.util.Map;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
@@ -9,25 +25,35 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-
 @Component
 @ConditionalOnProperty(name = CommonConstants.SERVER_SSL_ENABLED, matchIfMissing = true)
 public class DeviceRegistryAccessControlFilter extends CoreSystemAccessControlFilter {
+	
+	//=================================================================================================
+	// members
 
+	private final SecurityUtilities securityUtilities;
+	
+	//=================================================================================================
+	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	@Autowired
+	public DeviceRegistryAccessControlFilter(final SecurityUtilities securityUtilities) {
+		this.securityUtilities = securityUtilities;
+	}
+	
     //=================================================================================================
     // assistant methods
-    private final SecurityUtilities securityUtilities;
-
-    @Autowired
-    public DeviceRegistryAccessControlFilter(final SecurityUtilities securityUtilities) {this.securityUtilities = securityUtilities;}
 
     //-------------------------------------------------------------------------------------------------
     @Override
     protected void checkClientAuthorized(final String clientCN, final String method, final String requestTarget, final String requestJSON,
                                          final Map<String, String[]> queryParams) {
 
-        if (requestTarget.contains(CommonConstants.ONBOARDING_URI) || requestTarget.contains(CommonConstants.OP_DEVICE_REGISTRY_UNREGISTER_URI)) {
+        if (requestTarget.endsWith(CommonConstants.ECHO_URI)
+                || requestTarget.contains(CommonConstants.ONBOARDING_URI)
+                || requestTarget.contains(CommonConstants.OP_DEVICEREGISTRY_UNREGISTER_URI)) {
             securityUtilities.authenticateCertificate(clientCN, requestTarget, CertificateType.AH_ONBOARDING);
             return;
         }

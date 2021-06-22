@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.common.dto.internal;
 
 import org.junit.Assert;
@@ -40,7 +54,7 @@ public class DTOUtilitiesTest {
 		request.setAddress("localhost");
 		request.setPort(1234);
 		
-		final SystemResponseDTO response = new SystemResponseDTO(1, "name", "localhost", 1234, null, null, null);
+		final SystemResponseDTO response = new SystemResponseDTO(1, "name", "localhost", 1234, null, null, null, null);
 		
 		Assert.assertEquals(true, DTOUtilities.equalsSystemInResponseAndRequest(response, request));
 	}
@@ -53,7 +67,7 @@ public class DTOUtilitiesTest {
 		request.setAddress("localhost  ");
 		request.setPort(1234);
 		
-		final SystemResponseDTO response = new SystemResponseDTO(1, " nAme", "\tlocalhost", 1234, null, null, null);
+		final SystemResponseDTO response = new SystemResponseDTO(1, " nAme", "\tlocalhost", 1234, null, null, null, null);
 		
 		Assert.assertEquals(true, DTOUtilities.equalsSystemInResponseAndRequest(response, request));
 	}

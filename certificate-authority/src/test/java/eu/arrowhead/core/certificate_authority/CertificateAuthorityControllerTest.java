@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2020 Evopro
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Evopro - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.certificate_authority;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -64,14 +78,6 @@ public class CertificateAuthorityControllerTest {
     public void testEcho() throws Exception {
         mockMvc.perform(get(ECHO_URI))
                .andExpect(status().isOk());
-    }
-
-    @Test
-    public void testGetCloudCommonName() throws Exception {
-        when(serviceCertificateAuthorityService.getCloudCommonName()).thenReturn("testcloud2.aitia.arrowhead.eu");
-        mockMvc.perform(get(COMMON_NAME_URI).accept(MediaType.TEXT_PLAIN))
-               .andExpect(status().isOk())
-               .andExpect(content().string("testcloud2.aitia.arrowhead.eu"));
     }
 
     @Test

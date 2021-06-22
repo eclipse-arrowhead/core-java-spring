@@ -50,7 +50,7 @@ public class ChoreographerDriverTest {
     //-------------------------------------------------------------------------------------------------
     @Test
     public void testQueryServiceRegistryByServiceDefinitionListOk() {
-        final UriComponents queryByServiceDefinitionListUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443, CommonConstants.SERVICE_REGISTRY_URI +
+        final UriComponents queryByServiceDefinitionListUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443, CommonConstants.SERVICEREGISTRY_URI +
                 CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SERVICE_DEFINITION_LIST_URI);
 
         final ServiceRegistryListResponseDTO responseDTO = new ServiceRegistryListResponseDTO();

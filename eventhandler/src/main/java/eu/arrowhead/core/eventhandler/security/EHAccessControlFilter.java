@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.eventhandler.security;
 
 import java.util.Map;
@@ -39,13 +53,13 @@ public class EHAccessControlFilter extends CoreSystemAccessControlFilter {
 		} else if ( requestTarget.contains( CoreCommonConstants.MGMT_URI ) ) {
 			// Only the local System Operator can use these methods
 			checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
-		} else if (requestTarget.endsWith(CommonConstants.OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE)) {
+		} else if (requestTarget.endsWith(CommonConstants.OP_EVENTHANDLER_PUBLISH_AUTH_UPDATE)) {
 			// Only the specified core systems can use these methods
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForPublishAuthUpdate, requestTarget);
-		} else if (requestTarget.endsWith(CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)) {
+		} else if (requestTarget.endsWith(CommonConstants.OP_EVENTHANDLER_SUBSCRIBE)) {
 			final SubscriptionRequestDTO subscriptionRequestDTO = Utilities.fromJson(requestJSON, SubscriptionRequestDTO.class);
 			checkIfRequesterSystemNameisEqualsWithClientNameFromCN(subscriptionRequestDTO.getSubscriberSystem().getSystemName(), clientCN);				
-		} else if (requestTarget.endsWith(CommonConstants.OP_EVENT_HANDLER_PUBLISH)) {
+		} else if (requestTarget.endsWith(CommonConstants.OP_EVENTHANDLER_PUBLISH)) {
 			final EventPublishRequestDTO eventPublishRequestDTO = Utilities.fromJson(requestJSON, EventPublishRequestDTO.class);
 			checkIfRequesterSystemNameisEqualsWithClientNameFromCN(eventPublishRequestDTO.getSource().getSystemName(), clientCN);				
 		}
@@ -60,7 +74,7 @@ public class EHAccessControlFilter extends CoreSystemAccessControlFilter {
 			throw new AuthException("Requester system name or client name from certificate is null or blank!", HttpStatus.UNAUTHORIZED.value());
 		}
 		
-		if (!requesterSystemName.equalsIgnoreCase(clientNameFromCN) && !requesterSystemName.replaceAll("_", "").equalsIgnoreCase(clientNameFromCN)) {
+		if (!requesterSystemName.equalsIgnoreCase(clientNameFromCN)) {
 			log.debug("Requester system name and client name from certificate do not match!");
 			throw new AuthException("Requester system name(" + requesterSystemName + ") and client name from certificate (" + clientNameFromCN + ") do not match!", HttpStatus.UNAUTHORIZED.value());
 		}

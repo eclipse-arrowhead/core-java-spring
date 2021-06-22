@@ -12,6 +12,8 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_running_step` TO 'choreograph
 GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_worklog` TO 'choreographer'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_executor` TO 'choreographer'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_step_detail` TO 'choreographer'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_executor_service_definition` TO 'choreographer'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_executor_service_definition_connection` TO 'choreographer'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'choreographer'@'localhost';
 
 REVOKE ALL, GRANT OPTION FROM 'choreographer'@'%';
@@ -26,6 +28,8 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_running_step` TO 'choreograph
 GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_worklog` TO 'choreographer'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_executor` TO 'choreographer'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_step_detail` TO 'choreographer'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_executor_service_definition` TO 'choreographer'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_executor_service_definition_connection` TO 'choreographer'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'choreographer'@'%';
 
 FLUSH PRIVILEGES;

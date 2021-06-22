@@ -1,4 +1,28 @@
+/********************************************************************************
+ * Copyright (c) 2020 FHB
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   FHB - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.onboarding.service;
+
+import java.security.KeyPair;
+import java.util.function.Consumer;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SecurityUtilities;
@@ -18,37 +42,30 @@ import eu.arrowhead.common.dto.shared.OnboardingWithNameRequestDTO;
 import eu.arrowhead.common.dto.shared.OnboardingWithNameResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceEndpoint;
 import eu.arrowhead.common.exception.ArrowheadException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-import org.springframework.web.util.UriComponents;
-
-import java.security.KeyPair;
-import java.util.function.Consumer;
 
 @Service
 public class OnboardingService {
 
     //=================================================================================================
     // members
+	
     private final Logger logger = LogManager.getLogger(OnboardingService.class);
     private final OrchestrationDriver orchestrationDriver;
     private final CertificateAuthorityDriver caDriver;
     private final SecurityUtilities securityUtilities;
 
-    @Autowired
-    public OnboardingService(final OrchestrationDriver orchestrationDriver,
-                             final CertificateAuthorityDriver caDriver,
-                             final SecurityUtilities securityUtilities) {
-        this.orchestrationDriver = orchestrationDriver;
-        this.caDriver = caDriver;
-        this.securityUtilities = securityUtilities;
-    }
-
     //=================================================================================================
     // methods
+    
+    //-------------------------------------------------------------------------------------------------
+    @Autowired
+    public OnboardingService(final OrchestrationDriver orchestrationDriver,
+    		final CertificateAuthorityDriver caDriver,
+    		final SecurityUtilities securityUtilities) {
+    	this.orchestrationDriver = orchestrationDriver;
+    	this.caDriver = caDriver;
+    	this.securityUtilities = securityUtilities;
+    }
 
     //-------------------------------------------------------------------------------------------------
     public OnboardingWithNameResponseDTO onboarding(final OnboardingWithNameRequestDTO onboardingRequest, final String host, final String address)
@@ -64,7 +81,7 @@ public class OnboardingService {
         try {
             certificateSigningRequest = securityUtilities.createCertificateSigningRequest(creationRequestDTO.getCommonName(), keyPair,
                                                                                           CertificateType.AH_ONBOARDING, host, address);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.error(e.getMessage(), e);
             throw new ArrowheadException("Unable to create certificate signing request: " + e.getMessage());
         }
@@ -108,7 +125,8 @@ public class OnboardingService {
         return caDriver.signCertificate(csrDTO);
     }
 
-    private <T extends OnboardingResponseDTO> void enrichCaResult(final T responseDTO, final CertificateSigningResponseDTO csrResult) {
+    //-------------------------------------------------------------------------------------------------
+	private <T extends OnboardingResponseDTO> void enrichCaResult(final T responseDTO, final CertificateSigningResponseDTO csrResult) {
         logger.debug("Processing response from Certificate Authority ...");
         final CertificateCreationResponseDTO certificateResponseDTO = new CertificateCreationResponseDTO();
         certificateResponseDTO.setCertificate(csrResult.getCertificateChain().get(0));
@@ -120,21 +138,24 @@ public class OnboardingService {
         responseDTO.setRootCertificate(csrResult.getCertificateChain().get(2));
     }
 
-    private void enrichEndpoints(final OnboardingWithNameResponseDTO responseDTO) throws DriverUtilities.DriverException {
-        orchestrateAndSet(responseDTO::setDeviceRegistry, CoreSystemService.DEVICE_REGISTRY_ONBOARDING_WITH_NAME_SERVICE);
-        orchestrateAndSet(responseDTO::setSystemRegistry, CoreSystemService.SYSTEM_REGISTRY_ONBOARDING_WITH_NAME_SERVICE);
-        orchestrateAndSet(responseDTO::setServiceRegistry, CoreSystemService.SERVICE_REGISTRY_REGISTER_SERVICE);
+    //-------------------------------------------------------------------------------------------------
+	private void enrichEndpoints(final OnboardingWithNameResponseDTO responseDTO) throws DriverUtilities.DriverException {
+        orchestrateAndSet(responseDTO::setDeviceRegistry, CoreSystemService.DEVICEREGISTRY_ONBOARDING_WITH_NAME_SERVICE);
+        orchestrateAndSet(responseDTO::setSystemRegistry, CoreSystemService.SYSTEMREGISTRY_ONBOARDING_WITH_NAME_SERVICE);
+        orchestrateAndSet(responseDTO::setServiceRegistry, CoreSystemService.SERVICEREGISTRY_REGISTER_SERVICE);
         orchestrateAndSet(responseDTO::setOrchestrationService, CoreSystemService.ORCHESTRATION_SERVICE);
     }
 
-    private void enrichEndpoints(final OnboardingWithCsrResponseDTO responseDTO) throws DriverUtilities.DriverException {
-        orchestrateAndSet(responseDTO::setDeviceRegistry, CoreSystemService.DEVICE_REGISTRY_ONBOARDING_WITH_CSR_SERVICE);
-        orchestrateAndSet(responseDTO::setSystemRegistry, CoreSystemService.SYSTEM_REGISTRY_ONBOARDING_WITH_CSR_SERVICE);
-        orchestrateAndSet(responseDTO::setServiceRegistry, CoreSystemService.SERVICE_REGISTRY_REGISTER_SERVICE);
+    //-------------------------------------------------------------------------------------------------
+	private void enrichEndpoints(final OnboardingWithCsrResponseDTO responseDTO) throws DriverUtilities.DriverException {
+        orchestrateAndSet(responseDTO::setDeviceRegistry, CoreSystemService.DEVICEREGISTRY_ONBOARDING_WITH_CSR_SERVICE);
+        orchestrateAndSet(responseDTO::setSystemRegistry, CoreSystemService.SYSTEMREGISTRY_ONBOARDING_WITH_CSR_SERVICE);
+        orchestrateAndSet(responseDTO::setServiceRegistry, CoreSystemService.SERVICEREGISTRY_REGISTER_SERVICE);
         orchestrateAndSet(responseDTO::setOrchestrationService, CoreSystemService.ORCHESTRATION_SERVICE);
     }
 
-    private void orchestrateAndSet(final Consumer<ServiceEndpoint> consumer,
+    //-------------------------------------------------------------------------------------------------
+	private void orchestrateAndSet(final Consumer<ServiceEndpoint> consumer,
                                    final CoreSystemService coreSystemService) throws DriverUtilities.DriverException {
         logger.debug("Orchestrating '{}' ...", coreSystemService.getServiceDefinition());
         final UriComponents service = orchestrationDriver.findCoreSystemService(coreSystemService);

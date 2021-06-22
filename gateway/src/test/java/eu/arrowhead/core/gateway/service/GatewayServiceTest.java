@@ -1,13 +1,29 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.gateway.service;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.net.Socket;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Map;
@@ -33,6 +49,9 @@ import javax.jms.TemporaryTopic;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -40,7 +59,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -60,6 +78,7 @@ import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.exception.UnavailableServerException;
+import eu.arrowhead.core.gateway.thread.SSLContextFactory;
 import eu.arrowhead.relay.gateway.ConsumerSideRelayInfo;
 import eu.arrowhead.relay.gateway.GatewayRelayClient;
 import eu.arrowhead.relay.gateway.ProviderSideRelayInfo;
@@ -478,7 +497,7 @@ public class GatewayServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testConnectProviderEverythingOK() throws JMSException {
+	public void testConnectProviderEverythingOK() throws JMSException, InterruptedException {
 		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
 		final MessageProducer producer = getTestMessageProducer();
 		
@@ -486,12 +505,37 @@ public class GatewayServiceTest {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
 		when(relayClient.initializeProviderSideRelay(any(Session.class), any(MessageListener.class))).thenReturn(new ProviderSideRelayInfo("peerName", "queueId", producer, producer));
 		when(activeSessions.put(any(String.class), any(ActiveSessionDTO.class))).thenReturn(null);
+		when(appContext.getBean(SSLProperties.class)).thenReturn(getTestSSLPropertiesForThread());
+		
+		final boolean[] started = { false };
+		new Thread() {
+			@Override
+			public void run() {
+				final SSLProperties props = getTestSSLPropertiesForDummyProvider();
+				final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(props);
+				final SSLServerSocketFactory serverSocketFactory = sslContext.getServerSocketFactory();
+				try {
+					final SSLServerSocket dummyServerSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(22032);
+					started[0] = true;
+					final Socket socket = dummyServerSocket.accept();
+					socket.close();
+				} catch (final IOException ex) {
+					ex.printStackTrace();
+				}
+			}
+		}.start();
+		
+		while (!started[0]) {
+			Thread.sleep(1000);
+		}
+		Thread.sleep(1000);
 		
 		final GatewayProviderConnectionResponseDTO response = testingObject.connectProvider(request);
 		
 		Assert.assertEquals("queueId", response.getQueueId());
 		Assert.assertEquals("peerName", response.getPeerName());
-		final String key = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq5Jq4tOeFoLqxOqtYcujbCNZina3iuV9+/o8D1R9D0HvgnmlgPlqWwjDSxV7m7SGJpuc/rRXJ85OzqV3rwRHO8A8YWXiabj8EdgEIyqg4SOgTN7oZ7MQUisTpwtWn9K14se4dHt/YE9mUW4en19p/yPUDwdw3ECMJHamy/O+Mh6rbw6AFhYvz6F5rXYB8svkenOuG8TSBFlRkcjdfqQqtl4xlHgmlDNWpHsQ3eFAO72mKQjm2ZhWI1H9CLrJf1NQs2GnKXgHBOM5ET61fEHWN8axGGoSKfvTed5vhhX7l5uwxM+AKQipLNNKjEaQYnyX3TL9zL8I7y+QkhzDa7/5kQIDAQAB";
+		final String key = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA5r6P+DeDvSwMe5qWGlCoX94oNedSu7fdRpueJ9mNKfTgKwRHE8eOwVOf9By/LecfgRnlT+sf8qZbW3GG9jc+3xOPB+Q+NKJcVvLiU+nay6XZD/IbKaOcZz/pKWlQ+J6OoMQuoLSIA+IaVLuuP8Dlj8GJjKZyAxv643B16US2d6QxrkadQ/oKcnCVyBC/SnRAGALt0MHMTrY+MCU1dGqXb0i+aFmhcbMjBDYApni9bIUdOWy7+BlhnUdDATOenFBni94xZ8Or6cupYmKZLtv6rkvV/YkXM7N4m9avmTHGMU1BUVEbSjJ/6aqiTdBPaenHd6WNeFpgIoreG1vHTWpGeQIDAQAB"; 
+		
 		Assert.assertEquals(key, response.getProviderGWPublicKey());
 	}
 
@@ -812,8 +856,8 @@ public class GatewayServiceTest {
 		consumer.setAuthenticationInfo("consAuth");
 		final SystemRequestDTO provider = new SystemRequestDTO();
 		provider.setSystemName("provider");
-		provider.setAddress("fgh.de");
-		provider.setPort(22002);
+		provider.setAddress("localhost");
+		provider.setPort(22032);
 		provider.setAuthenticationInfo("provAuth");
 		final CloudRequestDTO consumerCloud = new CloudRequestDTO();
 		consumerCloud.setName("testcloud1");
@@ -938,5 +982,19 @@ public class GatewayServiceTest {
 		ReflectionTestUtils.setField(sslProps, "trustStorePassword", "123456");
 		
 		return sslProps;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private SSLProperties getTestSSLPropertiesForDummyProvider() {
+		final SSLProperties props = new SSLProperties();
+		ReflectionTestUtils.setField(props, "sslEnabled", true);
+		ReflectionTestUtils.setField(props, "keyStoreType", "PKCS12");
+		ReflectionTestUtils.setField(props, "keyStore", new ClassPathResource("certificates/authorization.p12"));
+		ReflectionTestUtils.setField(props, "keyStorePassword", "123456");
+		ReflectionTestUtils.setField(props, "keyPassword", "123456");
+		ReflectionTestUtils.setField(props, "trustStore", new ClassPathResource("certificates/truststore.p12"));
+		ReflectionTestUtils.setField(props, "trustStorePassword", "123456");
+		
+		return props;
 	}
 }

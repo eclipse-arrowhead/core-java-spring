@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.gatekeeper.service;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -190,11 +204,11 @@ public class GatekeeperDriverQoSTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testQueryQoSMonitorPublicKeyOk() {
-		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_KEY_URI);
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_KEY_URI);
 		
 		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
 		when(arrowheadContext.get(anyString())).thenReturn(uri);
-		when(httpService.sendRequest(uri, HttpMethod.GET, String.class)).thenReturn(new ResponseEntity<>("public key", HttpStatus.OK));
+		when(httpService.sendRequest(uri, HttpMethod.GET, String.class)).thenReturn(new ResponseEntity<>("\"public key\"", HttpStatus.OK));
 		
 		testingObject.queryQoSMonitorPublicKey();
 		

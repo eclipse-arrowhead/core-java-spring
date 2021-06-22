@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.common.database.entity;
 
 import java.time.ZonedDateTime;
@@ -29,7 +43,7 @@ import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"serviceId", "systemId"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"serviceId", "systemId", "serviceUri"}))
 public class ServiceRegistry {
 	
 	//=================================================================================================
@@ -49,8 +63,8 @@ public class ServiceRegistry {
 	@JoinColumn(name = "systemId", referencedColumnName = "id", nullable = false)
 	private System system;
 	
-	@Column(nullable = true, length = CoreDefaults.VARCHAR_BASIC)
-	private String serviceUri;
+	@Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
+	private String serviceUri = "";
 	
 	@Column(nullable = true)
 	private ZonedDateTime endOfValidity;
@@ -59,7 +73,7 @@ public class ServiceRegistry {
 	@Enumerated(EnumType.STRING)
 	private ServiceSecurityType secure = ServiceSecurityType.NOT_SECURE;
 	
-	@Column(nullable = true, columnDefinition = "TEXT")
+	@Column(nullable = true, columnDefinition = "MEDIUMTEXT")
 	private String metadata;
 	
 	@Column(nullable = true)
@@ -86,7 +100,7 @@ public class ServiceRegistry {
 						   final String metadata, final Integer version) {
 		this.serviceDefinition = serviceDefinition;
 		this.system = system;
-		this.serviceUri = serviceUri;
+		this.serviceUri = serviceUri == null ? "" : serviceUri;
 		this.endOfValidity = endOfValidity;
 		this.secure = secure;
 		this.metadata = metadata;
@@ -135,7 +149,7 @@ public class ServiceRegistry {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "ServiceRegistry [id = " + id + ", serviceDefinition = " + serviceDefinition + ", system = " + system + ", endOfValidity = " + endOfValidity + ", version = " + version + "]";
+		return "ServiceRegistry [id = " + id + ", serviceDefinition = " + serviceDefinition + ", system = " + system + ", serviceUri = " + serviceUri + ", endOfValidity = " + endOfValidity + ", version = " + version + "]";
 	}
 
 	//-------------------------------------------------------------------------------------------------

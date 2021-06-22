@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.eventhandler.quartz.task;
 
 import java.util.Properties;
@@ -29,10 +43,10 @@ public class SubscriptionEndOfValidityCheckTaskConfig {
 	@Autowired
     private ApplicationContext applicationContext; //NOSONAR
 	
-	@Value(CoreCommonConstants.$EVENT_HANDLER_TTL_SCHEDULED_WD)
+	@Value(CoreCommonConstants.$EVENTHANDLER_TTL_SCHEDULED_WD)
 	private boolean ttlScheduled;
 	
-	@Value(CoreCommonConstants.$EVENT_HANDLER_TTL_INTERVAL_WD)
+	@Value(CoreCommonConstants.$EVENTHANDLER_TTL_INTERVAL_WD)
 	private int ttlInterval;
 	
 	private static final int SCHEDULER_DELAY = 17;

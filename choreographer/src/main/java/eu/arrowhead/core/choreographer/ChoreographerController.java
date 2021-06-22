@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2020 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.choreographer;
 
 import eu.arrowhead.common.CommonConstants;
@@ -17,15 +31,13 @@ import eu.arrowhead.common.dto.internal.ChoreographerExecutorSearchResponseDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerPlanRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerRunPlanRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
-import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
+import eu.arrowhead.common.dto.internal.ChoreographerSuitableExecutorResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorResponseDTO;
-import eu.arrowhead.common.dto.shared.ChoreographerOFRRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerSessionRunningStepDataDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
 import eu.arrowhead.core.choreographer.service.ChoreographerDriver;
 import io.swagger.annotations.Api;
@@ -54,15 +66,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.naming.InsufficientResourcesException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static eu.arrowhead.common.CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_REGISTER;
-import static eu.arrowhead.common.CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER;
-import static eu.arrowhead.common.CommonConstants.OP_CHOREOGRAPHER_NOTIFY_STEP_DONE;
+import static eu.arrowhead.common.CommonConstants.*;
 
 
 @Api(tags = { CoreCommonConstants.SWAGGER_TAG_ALL })
@@ -85,9 +94,10 @@ public class ChoreographerController {
     private static final String SESSION_MGMT_URI = CoreCommonConstants.MGMT_URI + "/session";
     private static final String EXECUTOR_MGMT_URI = CoreCommonConstants.MGMT_URI + "/executor";
     private static final String EXECUTOR_MGMT_BY_ID_URI = EXECUTOR_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
+    private static final String EXECUTOR_MGMT_TEST_BY_STEP_ID = EXECUTOR_MGMT_URI + "/byStepId" + "/{" + PATH_VARIABLE_ID + "}";
 
     private static final String START_SESSION_MGMT_URI = SESSION_MGMT_URI + "/start";
-    private static final String STEP_FINISHED_MGMT_URI = SESSION_MGMT_URI + "/stepFinished";
+    private static final String STEP_FINISHED_MGMT_URI = SESSION_MGMT_URI + "/notifyStepDone";
 
     private static final String EXECUTOR_SEARCH_MGMT_URI = EXECUTOR_MGMT_URI + "/searchExecutors";
 
@@ -120,7 +130,6 @@ public class ChoreographerController {
     private static final String EXECUTOR_MIN_VERSION_GREATER_THAN_MAX_VERSION_ERROR_MESSAGE = "Maximum version requirement must be greater or equal to the minimum version requirement.";
     private static final String CHOREOGRAPHER_INSUFFICIENT_PROVIDERS_FOR_PLAN_ERROR_MESSAGE = "Can't start plan because not every service definition has a corresponding provider.";
     private static final String CHOREOGRAPHER_INSUFFICIENT_EXECUTORS_FOR_PLAN_ERROR_MESSAGE = "Can't start plan because not every service definition has a corresponding executor.";
-
 
     private static final String EXECUTOR_REQUEST_PARAM_SERVICE_DEFINITION = "service-definition";
     private static final String EXECUTOR_REQUEST_PARAM_MIN_VERSION = "min_version";
@@ -277,7 +286,7 @@ public class ChoreographerController {
     })
     @PostMapping(path = STEP_FINISHED_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = org.springframework.http.HttpStatus.OK)
-    @ResponseBody public void stepFinished(@RequestBody final List<ChoreographerSessionRunningStepDataDTO> requests) {
+    @ResponseBody public void notifyStepDoneMgmt(@RequestBody final List<ChoreographerSessionRunningStepDataDTO> requests) {
         for (final ChoreographerSessionRunningStepDataDTO request : requests) {
             logger.debug("notifyStepDone started...");
             logger.debug("Sending message to session-step-done.");
@@ -324,15 +333,31 @@ public class ChoreographerController {
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @DeleteMapping(path = OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER)
-    public void unregisterExecutor(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
-        logger.debug("New Executor delete request received with id: {}", id);
+    public void unregisterExecutor(@RequestParam(CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_ADDRESS) final String executorAddress,
+                                   @RequestParam(CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_PORT) final int executorPort,
+                                   @RequestParam(CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_BASE_URI) final String executorBaseUri) {
+        logger.debug("Executor removal request received.");
 
-        if (id < 1) {
-            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER);
-        }
+        checkUnregisterExecutorParameters(executorAddress, executorPort, executorBaseUri);
 
-        choreographerDBService.removeExecutorEntryById(id);
-        logger.debug("Executor with id: '{}' successfully deleted", id);
+        choreographerDBService.removeExecutor(executorAddress, executorPort, executorBaseUri);
+        logger.debug("Removed Executor with address: {}, port: {} and baseURI: {}", executorAddress, executorPort, executorBaseUri);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = "Notify the Choreographer that an error happened during the execution of a step in a session.", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_CREATED, message = STEP_FINISHED_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = STEP_FINISHED_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+    })
+    @PostMapping(path = OP_CHOREOGRAPHER_EXECUTOR_NOTIFY_STEP_ERROR, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(value = org.springframework.http.HttpStatus.OK)
+    @ResponseBody public void notifyStepError(@RequestBody final ChoreographerSessionRunningStepDataDTO request) {
+        logger.debug("notifyStepError started...");
+        logger.debug("Sending message to session-step-error.");
+        jmsTemplate.convertAndSend("session-step-error", request);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -368,6 +393,25 @@ public class ChoreographerController {
         logger.debug("Executor entry with id: {} successfully retrieved", id);
 
         return executorEntryByIdResponse;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = "Return the ids of the suitable Executors entries by step id.", response = ServiceRegistryResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_OK, message = GET_EXECUTOR_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_EXECUTOR_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+    })
+    @GetMapping(path = EXECUTOR_MGMT_TEST_BY_STEP_ID)
+    @ResponseBody public ChoreographerSuitableExecutorResponseDTO getSuitableExecutorIds(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+        logger.debug("getSuitableExecutorIds started...");
+
+        if (id < 1) {
+            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + EXECUTOR_MGMT_BY_ID_URI);
+        }
+
+        return choreographerDBService.getSuitableExecutorIdsByStepId(id);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -429,7 +473,7 @@ public class ChoreographerController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Return list of executors suited to execute the task with the service definition and version requriements.",
+    @ApiOperation(value = "Return list of executors suited to execute the task with the service definition and version requirements.",
             response = ChoreographerExecutorSearchResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = GET_EXECUTOR_HTTP_200_MESSAGE),
@@ -542,27 +586,13 @@ public class ChoreographerController {
         for (ChoreographerAction action : actions) {
             final Set<ChoreographerStep> steps = action.getStepEntries();
             for (ChoreographerStep step : steps) {
-                final Set<ChoreographerStepDetail> stepDetails = step.getStepDetails();
-                for (ChoreographerStepDetail stepDetail : stepDetails) {
-                    Integer maxVersion = stepDetail.getMaxVersion();
-                    Integer minVersion = stepDetail.getMinVersion();
-                    Integer version = stepDetail.getVersion();
-                    String serviceDefinition = stepDetail.getServiceDefinition();
 
-                    if (maxVersion != null && minVersion != null) {
-                        if (choreographerDBService.getExecutorByServiceDefinitionAndMinMaxVersion(serviceDefinition, minVersion, maxVersion).getData().isEmpty()) {
-                            throw new BadPayloadException(CHOREOGRAPHER_INSUFFICIENT_EXECUTORS_FOR_PLAN_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-                        }
-                    } else if (version != null) {
-                        if (choreographerDBService.getExecutorByServiceDefinitionAndVersion(serviceDefinition, version).getData().isEmpty()) {
-                            throw new BadPayloadException(CHOREOGRAPHER_INSUFFICIENT_EXECUTORS_FOR_PLAN_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-                        }
-                    }
+                if (choreographerDBService.getSuitableExecutorIdsByStepId(step.getId()).getSuitableExecutorIds().isEmpty()) {
+                    throw new BadPayloadException(CHOREOGRAPHER_INSUFFICIENT_EXECUTORS_FOR_PLAN_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
                 }
             }
         }
     }
-
 
     //-------------------------------------------------------------------------------------------------
     private Set<String> getServiceDefinitionsFromPlan(ChoreographerPlan plan) {
@@ -580,5 +610,24 @@ public class ChoreographerController {
         }
 
         return serviceDefinitions;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    private void checkUnregisterExecutorParameters(final String executorAddress, final int executorPort, final String executorBaseUri) {
+        // parameters can't be null, but can be empty
+        logger.debug("checkUnregisterExecutorParameters started...");
+
+        final String origin = CommonConstants.CHOREOGRAPHER_URI + CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER;
+        if (Utilities.isEmpty(executorAddress)) {
+            throw new BadPayloadException("Executor address is blank.", HttpStatus.SC_BAD_REQUEST, origin);
+        }
+
+        if (Utilities.isEmpty(executorBaseUri)) {
+            throw new BadPayloadException("The base URI of the Executor is blank.", HttpStatus.SC_BAD_REQUEST, origin);
+        }
+
+        if (executorPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || executorPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+            throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
+        }
     }
 }

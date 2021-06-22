@@ -1,0 +1,11 @@
+package eu.arrowhead.common.database.repository;
+
+import eu.arrowhead.common.database.entity.ChoreographerExecutor;
+import eu.arrowhead.common.database.entity.ChoreographerExecutorServiceDefinition;
+import eu.arrowhead.common.database.entity.ChoreographerExecutorServiceDefinitionConnection;
+
+import java.util.Optional;
+
+public interface ChoreographerExecutorServiceDefinitionConnectionRepository extends RefreshableRepository<ChoreographerExecutorServiceDefinitionConnection, Long> {
+    public Optional<ChoreographerExecutorServiceDefinitionConnection> findByExecutorEntryAndServiceDefinitionEntry(ChoreographerExecutor executor, ChoreographerExecutorServiceDefinition serviceDefinition);
+}

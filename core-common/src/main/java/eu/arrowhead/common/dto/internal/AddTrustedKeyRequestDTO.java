@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2020 Evopro
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Evopro - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.common.dto.internal;
 
 import javax.validation.constraints.NotBlank;
@@ -13,14 +27,13 @@ public class AddTrustedKeyRequestDTO implements Serializable {
     @NotBlank(message = "The description is mandatory")
     private String description;
 
+    @NotBlank(message = "The validAfter field is mandatory")
     private String validAfter;
+
+    @NotBlank(message = "The validBefore field is mandatory")
     private String validBefore;
 
     public AddTrustedKeyRequestDTO() {
-    }
-
-    public AddTrustedKeyRequestDTO(String publicKey, String description) {
-        this(publicKey, description, "", "");
     }
 
     public AddTrustedKeyRequestDTO(String publicKey, String description, String validAfter, String validBefore) {

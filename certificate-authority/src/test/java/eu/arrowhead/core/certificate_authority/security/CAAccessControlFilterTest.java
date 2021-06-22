@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2020 Evopro
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Evopro - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.certificate_authority.security;
 
 import eu.arrowhead.common.CommonConstants;
@@ -38,18 +52,16 @@ public class CAAccessControlFilterTest {
     // =================================================================================================
     // members
 
-    private static final String CA_ECHO = CommonConstants.CERTIFICATE_AUTHRORITY_URI + CommonConstants.ECHO_URI;
-    private static final String CA_CLOUD_COMMON_NAME = CommonConstants.CERTIFICATE_AUTHRORITY_URI
-            + CommonConstants.OP_CA_CLOUD_COMMON_NAME_URI;
-    private static final String CA_MGMT_CERTIFICATES = CommonConstants.CERTIFICATE_AUTHRORITY_URI
+    private static final String CA_ECHO = CommonConstants.CERTIFICATEAUTHRORITY_URI + CommonConstants.ECHO_URI;
+    private static final String CA_MGMT_CERTIFICATES = CommonConstants.CERTIFICATEAUTHRORITY_URI
             + CommonConstants.OP_CA_MGMT_CERTIFICATES_URI;
-    private static final String CA_MGMT_TRUSTED_KEYS = CommonConstants.CERTIFICATE_AUTHRORITY_URI
+    private static final String CA_MGMT_TRUSTED_KEYS = CommonConstants.CERTIFICATEAUTHRORITY_URI
             + CommonConstants.OP_CA_MGMT_TRUSTED_KEYS_URI;
-    private static final String CA_CHECK_CERTIFICATE = CommonConstants.CERTIFICATE_AUTHRORITY_URI
+    private static final String CA_CHECK_CERTIFICATE = CommonConstants.CERTIFICATEAUTHRORITY_URI
             + CommonConstants.OP_CA_CHECK_CERTIFICATE_URI;
-    private static final String CA_CHECK_TRUSTED_KEY = CommonConstants.CERTIFICATE_AUTHRORITY_URI
+    private static final String CA_CHECK_TRUSTED_KEY = CommonConstants.CERTIFICATEAUTHRORITY_URI
             + CommonConstants.OP_CA_CHECK_TRUSTED_KEY_URI;
-    private static final String CA_SIGN = CommonConstants.CERTIFICATE_AUTHRORITY_URI
+    private static final String CA_SIGN = CommonConstants.CERTIFICATEAUTHRORITY_URI
             + CommonConstants.OP_CA_SIGN_CERTIFICATE_URI;
 
     @Autowired
@@ -90,25 +102,6 @@ public class CAAccessControlFilterTest {
         this.mockMvc.perform(get(CA_ECHO).secure(true)
                                          .with(x509("certificates/valid.pem"))
                                          .accept(MediaType.TEXT_PLAIN))
-                    .andExpect(status().isOk());
-    }
-
-
-    // -------------------------------------------------------------------------------------------------
-    @Test
-    public void testGetCommonNameCertificateInvalid() throws Exception {
-        this.mockMvc.perform(get(CA_CLOUD_COMMON_NAME).secure(true)
-                                                      .with(x509("certificates/notvalid.pem"))
-                                                      .accept(MediaType.TEXT_PLAIN))
-                    .andExpect(status().isUnauthorized());
-    }
-
-    // -------------------------------------------------------------------------------------------------
-    @Test
-    public void testGetCommonNameCertificateValid() throws Exception {
-        this.mockMvc.perform(get(CA_CLOUD_COMMON_NAME).secure(true)
-                                                      .with(x509("certificates/valid.pem"))
-                                                      .accept(MediaType.TEXT_PLAIN))
                     .andExpect(status().isOk());
     }
 

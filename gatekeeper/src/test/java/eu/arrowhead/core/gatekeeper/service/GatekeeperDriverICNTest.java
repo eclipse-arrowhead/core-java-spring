@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.gatekeeper.service;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -744,13 +758,13 @@ public class GatekeeperDriverICNTest {
 		final ServiceInterfaceResponseDTO intfs1 = new ServiceInterfaceResponseDTO(100, "HTTP-SECURE-JSON", null, null);
 		final ServiceInterfaceResponseDTO intfs2 = new ServiceInterfaceResponseDTO(101, "HTTP-SECURE-XML", null, null);
 		
-		final SystemResponseDTO provider1 = new SystemResponseDTO(1, "testSystem1", "localhost", 1234, "abcd", null, null);
+		final SystemResponseDTO provider1 = new SystemResponseDTO(1, "testSystem1", "localhost", 1234, "abcd", null, null, null);
 		final List<ServiceInterfaceResponseDTO> intfsList1 = new ArrayList<>(1);
 		intfsList1.add(intfs1);
 		final OrchestrationResultDTO dto1 = new OrchestrationResultDTO(provider1, service, "/", ServiceSecurityType.CERTIFICATE, null, intfsList1, 1);
 		result.add(dto1);
 		
-		final SystemResponseDTO provider2 = new SystemResponseDTO(2, "testSystem2", "localhost", 11234, "abcd", null, null);
+		final SystemResponseDTO provider2 = new SystemResponseDTO(2, "testSystem2", "localhost", 11234, "abcd", null, null, null);
 		final List<ServiceInterfaceResponseDTO> intfsList2 = new ArrayList<>(2);
 		intfsList2.add(intfs1);
 		intfsList2.add(intfs2);

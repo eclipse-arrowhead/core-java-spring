@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2020 Evopro
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Evopro - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.certificate_authority;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -189,7 +203,8 @@ public class CertificateAuthorityControllerTrustedKeysTest {
 
     @Test
     public void testAddTrustedKeyValid() throws Exception {
-        final AddTrustedKeyRequestDTO requestDTO = new AddTrustedKeyRequestDTO(MOCKED_PUBLIC_KEY, "dummy");
+        final String now = Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now());
+        final AddTrustedKeyRequestDTO requestDTO = new AddTrustedKeyRequestDTO(MOCKED_PUBLIC_KEY, "dummy", now, now);
 
         mockMvc.perform(put(TRUSTED_KEYS_URL).contentType(MediaType.APPLICATION_JSON_UTF8)
                                              .content(asJsonString(requestDTO)))
@@ -333,7 +348,8 @@ public class CertificateAuthorityControllerTrustedKeysTest {
                                                                 .content(asJsonString(request)))
                             .andExpect(status().isOk())
                             .andReturn();
-        final TrustedKeyCheckResponseDTO responseBody =
+        @SuppressWarnings("unused")
+		final TrustedKeyCheckResponseDTO responseBody =
                 objectMapper.readValue(response.getResponse()
                                                .getContentAsString(), TrustedKeyCheckResponseDTO.class);
     }
@@ -363,7 +379,8 @@ public class CertificateAuthorityControllerTrustedKeysTest {
     }
 
     // -------------------------------------------------------------------------------------------------
-    private CaTrustedKey createTrustedKeyForDBMocking() {
+    @SuppressWarnings("unused")
+	private CaTrustedKey createTrustedKeyForDBMocking() {
         final ZonedDateTime timeStamp = ZonedDateTime.now();
         final CaTrustedKey key = new CaTrustedKey();
         key.setId(1);

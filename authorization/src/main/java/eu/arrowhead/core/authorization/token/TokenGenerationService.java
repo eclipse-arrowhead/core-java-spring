@@ -33,7 +33,7 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
+import eu.arrowhead.common.verifier.ServiceInterfaceNameVerifier;
 
 // works only in secure mode
 @Service
@@ -223,8 +223,8 @@ public class TokenGenerationService {
 			final String[] serverFields = serverCN.split("\\.");
 			// when the Service Registry initializes it will write own cloud in the database using its own common name to identify the cloud's name and operator
 			// the corresponding part of the CN is the same in the Authorization's CN too, so we can use that 
-			ownCloudName = serverFields[1]; 
-			ownCloudOperator = serverFields[2];
+			ownCloudName = serverFields[1].toLowerCase().trim(); 
+			ownCloudOperator = serverFields[2].toLowerCase().trim();
 		}
 	}
 	

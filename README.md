@@ -1,12 +1,12 @@
 
-# Arrowhead Framework 4.1.3
+# Arrowhead Framework 4.3.0
 
 [Arrowhead](http://www.arrowhead.eu/) (and its continuation, [Productive4.0](https://productive40.eu/)) is an ambitious holistic innovation project,
  meant to open the doors to the potentials of Digital Industry and to maintain a leadership position of the industries in Europe. All partners involved will work on creating the capability to efficiently design and integrate hardware and software of Internet of Things (IoT) devices. Linking the real with the digital world takes more than just adding software to the hardware.
 
 
 ## Disclaimer
-Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you have older systems please refer to the [Migration Guide](#migration) 
+Please be aware, that versions starting from 4.1.3 are __NOT__ backwards compatible with 4.1.2. If you have older systems please refer to the [Migration Guide](#migration) 
 
 ## Table of Contents
 1. [Quick Start Guide](#quickstart)
@@ -74,27 +74,24 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 	       * [Client](#gateway_endpoints_client)
            * [Private](#gateway_endpoints_private)
            * [Management](#gateway_endpoints_mgmt)
-    7. [Certificate Authority](#ca)
+    7. [DataManager](#datamanager)
+       * [System Design Description Overview](#datamanager_sdd)
+       * [Services and Use Cases](#datamanager_usecases)  
+       * [Service Description Overview](#datamanager_provided_services)
+       * [Endpoints](#datamanager_endpoints)
+	       * [Client](#datamanager_endpoints_client)
+    8. [Certificate Authority](#ca)
        * [System Design Description Overview](#ca_sdd)
        * [Services and Use Cases](#ca_usecases)  
        * [Endpoints](#ca_endpoints)
 	       * [Client](#ca_endpoints_client)
            * [Private](#ca_endpoints_private)
            * [Management](#ca_endpoints_mgmt)
-    8. **QoS Monitor (Quality of Service Monitor)**
-       * [System Design Description Overview](qos-monitor/documentation/QualityOfServiceMonitor-SysDD.md)
-           * [Services and Use Cases](qos-monitor/documentation/QualityOfServiceMonitor-SysDD.md#services-and-use-cases)  
-       * [Interface Design Description](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md)
-           * [Security](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#security)
-           * [Communication Profile](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#communication-profile)
-               * [Client](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#client-endpoint-description)
-               * [Private](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#private-endpoint-description)
-               * [Management](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#management-endpoint-description)	 
     9. [Onboarding Controller](#onboardingcontroller)
-       * [System Design Description Overview](#onboardingcontroller_sdd)
-       * [Services and Use Cases](#onboardingcontroller_usecases)
-       * [Security](#onboardingcontroller_security)
-       * [Endpoints](#onboardingcontroller_endpoints)
+        * [System Design Description Overview](#onboardingcontroller_sdd)
+        * [Services and Use Cases](#onboardingcontroller_usecases)
+        * [Security](#onboardingcontroller_security)
+        * [Endpoints](#onboardingcontroller_endpoints)
            * [Onboarding](#onboardingcontroller_endpoints_onboarding)
     10. [Device Registry](#deviceregistry)
         * [System Design Description Overview](#deviceregistry_sdd)
@@ -110,13 +107,14 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
         * [Endpoints](#systemregistry_endpoints)
            * [Onboarding](#systemregistry_endpoints_onboarding)
            * [Client](#systemregistry_endpoints_client)
-	12. [Choreographer](#choreographer)
+    12. [Choreographer](#choreographer)
         * [System Design Description Overview](#choreographer_sdd)
-        * [Services and Use Cases](#choreographer_usecases)  
+        * [Services and Use Cases](#choreographer_usecases)
         * [Endpoints](#choreographer_endpoints)
-	       * [Client](#choreographer_endpoints_client)
+           * [Client](#choreographer_endpoints_client)
            * [Management](#choreographer_endpoints_mgmt)
-
+    13. [Plant Description Engine](#plant-description-engine)
+		
 <a name="quickstart" />
 
 ## Quick Start Guide
@@ -221,6 +219,7 @@ Please follow this guide to install them: [Debian Installer Guide](documentation
 <a name="quickstart_compile" />
 
 ### Compile source code and manually install MySQL and Maven.
+
 #### Requirements
 
 > **Note:** A system with 2GB of RAM is advised. 
@@ -236,7 +235,7 @@ Verify that you have Java (```java -version```), Maven (```mvn -version```), MyS
 Pull this code and enter the directory. 
 ```git clone https://github.com/arrowhead-f/core-java-spring.git```
 
-Got to the ```scripts``` folder, execute ```mysql -u root -p < create_empty_arrowhead_db.sql``` MySQL script. If you won't run this script first, the project won't build. 
+Go to the ```scripts``` folder, execute ```mysql -u root -p < create_empty_arrowhead_db.sql``` and ```mysql -u root -p < create_arrowhead_tables.sql``` MySQL script. If you won't run these scripts first, the project won't build. 
 
 ```cd core-java-spring```
 
@@ -269,6 +268,7 @@ Service Registry will be available on ```https://localhost:8443``` <br />
 Authorization will be available on ```https://localhost:8445``` <br />
 Orchestrator will be available on ```https://localhost:8441``` <br />
 Event Handler will be available on ```https://localhost:8455``` <br />
+DataManager will be available on ```https://localhost:8461``` <br />
 Gatekeeper will be available on ```https://localhost:8449``` <br />
 Gateway will be available on ```https://localhost:8453``` <br />
 
@@ -456,10 +456,11 @@ New payload - you can easily map the old fields to the new ones.
 
 Arrowhead Framework's security is relying on SSL Certificate Trust Chains. The Arrowhead trust chain consists of three level:
 1) Master certificate: `arrowhead.eu`
-2) Cloud certificate: `my_cloud.my_company.arrowhead.eu`
-3) Client certificate: `my_client.my_cloud.my_company.arrowhead.eu`
+2) Cloud certificate: `my-cloud.my-company.arrowhead.eu`
+3) Client certificate: `my-client.my-cloud.my-company.arrowhead.eu`
 The certificate naming convention have strict rules:
 * The different parts are delimited by dots, therefore parts are not allowed to contain any of them.
+* A single part is allowed to contain maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).
 * A cloud certificate name has to consist of four part and the last two part have to be 'arrowhead' and 'eu'.
 * A client certificate name has to consist of five part and the last two part have to be 'arrowhead' and 'eu'. 
 
@@ -476,10 +477,15 @@ The Key-Store is intended to store the certificates and/or key-pair certificates
 The Trust-Store is containing those certificates, what the web-server considers as trusted ones. Arrowhead Framework is designed for handling the `p12` type of Trust-Stores. Typically your Trust-Store should contain only the cloud certificate, which ensures that only those incoming HTTPS requests are authorized to access, which are having this certificate within their certificate chain.
 
 ### How to create my own certificates?
+
+#### Method A
+
 Currently Arrowhead community have the possibility to create only "self signed" certifications. See the tutorials:
 * [Create Arrowhead Cloud Self Signed Certificate](documentation/certificates/create_cloud_certificate.pdf)
 * [Create Arrowhead Client Self Signed Certificate](documentation/certificates/create_client_certificate.pdf)
 * [Create Trust Store](documentation/certificates/create_trust_store.pdf)
+
+#### Method B
 
 If you wish to generate all Certificates by a script, you can use the scripts in the [scripts/certificate_generation](scripts/certificate_generation) folder.
 
@@ -489,9 +495,15 @@ If you wish to generate all Certificates by a script, you can use the scripts in
 * mk_certs.sh - Usage example
 * rm_certs.sh - Delete generated certs 
 
+#### Method C
+
+You can also use the arrowhead script. For this barely any scripting knowledge is needed, just follow the instructions.
+
+[Arrowhead scripts](documentation/deb-installer/DEBIAN-INSTALL.md#arrowhead-management-script).
+
 ### System Operator Certificate
 
-The System Operator Certificate is a special client certificate with the naming convention of `sysop.my_cloud.my_company.arrowhead.eu`.
+The System Operator Certificate is a special client certificate with the naming convention of `sysop.my-cloud.my-company.arrowhead.eu`.
 SysOp certificate allows the client to use the management endpoints of the Arrowhead Core Systems. Typical usage of SysOp certificate is by front end applications running in a web browser (for example if you want to access the Swagger or use the Management Tool in secure mode.
 * [Import SysOp Certificate (Windows 10)](documentation/certificates/import_sysop_certificate_win10.pdf)
 * [Import SysOp Certificate (macOS)](documentation/certificates/import_sysop_certificate_macos.pdf)
@@ -529,6 +541,13 @@ All work on Arrowhead repositories happens directly on GitHub. Both core team me
 ### Branch Organization
 
 The latest version of the core systems are available in the ```master``` branch. The code for the next release is merged in the ```development``` branch. If you would like to contribute, please check out the ```development``` branch. Create a new branch from ```development```. Don't forget do write documentation, unit and integration tests. When finished, create a pull request back into ```development```. If accepted, your contribution will be in the next release. :)
+
+### Useful Guides about Java Coding Practices
+
+Before you make a pull request, please make sure you clean your code as best as you can. The following resources can help to understand what **clean code** means:
+
+* [Clean Coding in Java](https://www.baeldung.com/java-clean-code)
+* [A short summary of Java Coding best practices](https://medium.com/@rhamedy/a-short-summary-of-java-coding-best-practices-31283d0167d3)
 
 ### Bugs
 
@@ -681,7 +700,7 @@ The following endpoints no longer exist:
 GET /serviceregistry/echo
 ```
 
-Returns a "Got it" message with the purpose of testing the core service availability.
+Returns a "Got it!" message with the purpose of testing the core service availability.
 
 > **Note:** 4.1.2 version: GET /serviceregistry
 
@@ -729,7 +748,7 @@ __ServiceQueryForm__ is the input
 | `minVersionRequirement` | Minimum version requirement | no |
 | `pingProviders` | Return only available providers | no |
 
-> **Note:** Valid `interfaceRequirements` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTPS-SECURE-JSON)
+> **Note:** Valid `interfaceRequirements` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTP-SECURE-JSON)
 
 > **Note:** Possible values for `securityRequirements` are:
 > * `NOT_SECURE`
@@ -855,7 +874,7 @@ __ServiceRegistryEntry__ is the input
 | `version` | Version of the Service | no |
 | `interfaces` | List of the interfaces the Service supports | yes |
 
-> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTPS-SECURE-JSON)
+> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTP-SECURE-JSON)
 
 > **Note:** `authenticationInfo` is the public key of the system. In Insecure mode you can omit sending this key.
 
@@ -1112,7 +1131,7 @@ __ServiceRegistryEntry__ is the input
 | `version` | Version of the Service | no |
 | `interfaces` | List of the interfaces the Service supports | yes |
 
-> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTPS-SECURE-JSON)
+> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTP-SECURE-JSON)
 
 > **Note:** Possible values for `secure` are:
 > * `NOT_SECURE` (default value if field is not defined)
@@ -1297,7 +1316,7 @@ __ServiceRegistryEntry__ is the input
 | `version` | Version of the Service | no |
 | `interfaces` | List of the interfaces the Service supports | yes |
 
-> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTPS-SECURE-JSON)
+> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTP-SECURE-JSON)
 
 > **Note:** Possible values for `secure` are:
 > * `NOT_SECURE` (default value if field is not defined)
@@ -1411,7 +1430,7 @@ __ServiceRegistryEntry__ is the input
 | `version` | Version of the Service | no |
 | `interfaces` | List of the interfaces the Service supports | no |
 
-> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTPS-SECURE-JSON)
+> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTP-SECURE-JSON)
 
 > **Note:** Possible values for `secure` are:
 > * `NOT_SECURE` (default value if field is not defined)
@@ -2343,7 +2362,7 @@ The following services no longer exist:
 GET /authorization/echo
 ```
 
-Returns a "Got it" message with the purpose of testing the core service availability.
+Returns a "Got it!" message with the purpose of testing the core service availability.
 
 > **Note:** 4.1.2 version: GET /authorization/mgmt
             It was only available for the system operator of the local cloud.  
@@ -3363,7 +3382,7 @@ The following services  no longer exist:
 GET /orchestrator/echo
 ```
 
-Returns a "Got it" message with the purpose of testing the core service availability.
+Returns a "Got it!" message with the purpose of testing the core service availability.
 
 > **Note:** 4.1.2 version: GET /orchestrator/orchestration
             It was basically the same with a slightly different return message
@@ -3567,7 +3586,7 @@ Returns an __Orchestration Response__
 
 ### Start store Orchestration by ID
 ```
-GET /orchestrator/rchestration/{id}
+GET /orchestrator/orchestration/{id}
 ```
 
 If the consumer knows its' ID, it can used this service as shortcut for store-based orchestration when
@@ -4362,7 +4381,7 @@ The Event Handler has the following use cases:
 GET /eventhandler/echo
 ```
 
-Returns a "Got it" message with the purpose of testing the core service availability.
+Returns a "Got it!" message with the purpose of testing the core service availability.
 
 <a name="eventhandler_endpoints_post_subscribe" />
 
@@ -4781,6 +4800,311 @@ __Delete subscription parameters__  the input :
 
 This service can only be used by other core services, therefore this is not part of the public API.    
 
+<a name="datamanager" />
+
+# DataManager
+
+<a name="datamanager_sdd" />
+
+## System Design Description Overview
+
+The purpose of DataManager supporting core system is to provide storage of sensor data.
+
+![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `AH Service Registry`
+![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `AH Authorization` 
+![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `AH Orchestrator`
+![#ffcc44](https://placehold.it/15/ffcc44/000000?text=+) `AH DataManager`
+![Alt text](/documentation/datamanager/overview.png)
+
+The DataManager provides features for producers and consumers to:
+* Store SenML sensor and actuator data,
+* Fetch cached data,
+* and perform database queries.
+
+Type support data model is SenML https://tools.ietf.org/html/rfc8428
+
+<a name="datamanager_sysd" />
+
+## System Design Overview
+
+<a name="datamanager_provided_services" />
+
+## Provided services
+
+The DataManager provides the following services:
+* [Echo](#datamanager_endpoints_get_echo)
+* [Historian](#datamanager_endpoints_historian)
+* [Proxy](#datamanager_endpoints_proxy)
+
+<a name="datamanager_consumed_services" />
+
+## Consumed services
+
+The DataManager consumes the following services:
+
+None currently, but will consume Orchestration later on.
+
+<a name="datamanager_usecases" />
+
+## Use cases
+
+The DataManager has the following use cases:
+* [Update cache message](documentation/datamanager/use_cases/DM_use_case_1.md)
+* [Fetch cache message](documentation/datamanager/use_cases/DM_use_case_2.md)
+* [Update stored message](documentation/datamanager/use_cases/DM_use_case_3.md)
+* [Fetch stored message](documentation/datamanager/use_cases/DM_use_case_4.md)
+
+<a name="datamanager_endpoints_historian" />
+
+## Endpoints
+
+Swagger API documentation is available on: `https://<host>:<port>` <br />
+The base URL for the requests: `http://<host>:<port>/datamanager`
+
+
+
+### Client endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#datamanager_endpoints_get_echo) | /echo | GET    | -    | OK     |
+| [Get system list](#datamanager_histendpoints_getsys) | /historian | GET    | -    | SystemList     |
+| [Get service list](#datamanager_histendpoints_getsrv_from_sys) | /historian/{systemName} | GET    | -    | ServiceList |
+| [Fetch data from db](#datamanager_histendpoints_getdb) | /historian/{systemName}/{serviceName} | GET    | -   | SenML |
+| [Store data in db](#datamanager_histendpoints_storedb) | /historian/{systemName}/{serviceName} | PUT    | SenML   | - |
+| [Get system list](#datamanager_proxyendpoints_getsys) | /proxy | GET    | -    | SystemList     |
+| [Get service list](#datamanager_proxyendpoints_getsrv_from_sys) | /proxy/{systemName} | GET    | -    | ServiceList |
+| [Fetch data from cache](#datamanager_proxyendpoints_fetchdata) | /proxy/{systemName}/{serviceName} | GET    | -   | SenML |
+| [Store data in cache](#datamanager_proxyendpoints_storedata) | /proxy/{systemName}/{serviceName} | PUT    | SenML   | - |
+
+<a name="datamanager_endpoints_get_echo" />
+
+### Echo
+```
+GET /datamanager/echo
+```
+
+Returns a "Got it!" message with the purpose of testing the system availability.
+
+<a name="datamanager_endpoints_client" />
+
+<a name="datamanager_proxyendpoints_getsys" />
+
+### Get system list
+```
+GET /datamanager/proxy/
+```
+
+Returns a list of all systems that have at least one active service endpoint.
+
+<a name="datamanager_getsyslist_response" />
+
+__GetSystemListResponse__ output:
+
+```json
+
+{
+  "systems": ["systemName1", "systemNameX"]
+}
+
+```
+
+<a name="datamanager_proxyendpoints_getsrv_from_sys" />
+
+### Get service list
+```
+GET /datamanager/proxy/{systemName}
+```
+
+Returns a list of all service endpoints that are active.
+
+<a name="datamanager_proxygetsrvlist_response" />
+
+__GetServicesResponse__ output:
+
+```json
+
+{
+  "services": ["serviceDefinition1", "serviceDefinitionX"]
+}
+
+```
+
+<a name="datamanager_proxyendpoints_fetchdata" />
+
+### Fetch data from cache
+```
+GET /datamanager/proxy/{systemName}/{serviceName}
+```
+
+Returns sensor data from a service endpoint from the cache.
+
+<a name="datamanager_proxygetsrvdata_response" />
+
+__GetServiceDataResponse__ output:
+
+```json
+
+[
+   {
+    "bn": "string",
+	  "bt": 0.0,
+	  "bu": "string",
+	  "bver": 0
+   }, {
+    "n": "string",
+	  "t": 0.0,
+	  "u": "string",
+	  "v": 0.0,
+	  "vs": "string",
+	  "vb": false,
+	  "vd": "string"
+   }
+]
+```
+
+<a name="datamanager_proxyendpoints_storedata" />
+
+### Store data in cache
+```
+PUT /datamanager/proxy/{systemName}/{serviceName}
+```
+
+Stores sensor data in a service endpoint in the proxy cache.
+
+<a name="datamanager_putsrvdata_request" />
+
+__PutSServiceDataRequest__ input:
+
+```json
+
+[
+   {
+    "bn": "string",
+	  "bt": 0.0,
+	  "bu": "string",
+	  "bver": 0
+    }, {
+     "n": "string",
+	   "t": 0.0,
+	   "u": "string",
+	   "v": 0.0,
+	   "vs": "string",
+	   "vb": false,
+	   "vd": "string"
+    }
+]
+```
+
+
+<a name="datamanager_histendpoints_getsys" />
+
+### Get system list
+```
+GET /datamanager/historian
+```
+
+Returns a list of all systems that have at least one service endpoint in the database.
+
+<a name="datamanager_getsyslist_response" />
+
+__GetSystemListResponse__ output:
+
+```json
+
+{
+  "systems": ["systemName1", "systemNameX"]
+}
+
+```
+
+<a name="datamanager_histendpoints_getsrv_from_sys" />
+
+### Get service list
+```
+GET /datamanager/historian/{systemName}
+```
+
+Returns a list of all service endpoints that have data stored in the database.
+
+<a name="datamanager_histgetsrvlist_response" />
+
+__GetServicesResponse__ output:
+
+```json
+
+{
+  "services": ["serviceDefinition1", "serviceDefinitionX"]
+}
+
+```
+
+<a name="datamanager_histendpoints_getdb" />
+
+### Fetch data from db
+```
+GET /datamanager/historian/{systemName}/{serviceName}
+```
+
+Returns sensor data from a service endpoint from the database.
+
+<a name="datamanager_histgetsrvdata_response" />
+
+__GetServiceDataResponse__ output:
+
+```json
+
+[
+   {
+        "bn": "string",
+	"bt": 0.0,
+	"bu": "string",
+	"bver": 0
+   }, {
+        "n": "string",
+	"t": 0.0,
+	"u": "string",
+	"v": 0.0,
+	"vs": "string",
+	"vb": false,
+	"vd": "string"
+   }
+]
+```
+
+<a name="datamanager_histendpoints_storedb" />
+
+### Store data in db
+```
+PUT /datamanager/historian/{systemName}/{serviceName}
+```
+
+Stores sensor data in a service endpoint in the database.
+
+<a name="datamanager_putsrvdata_request" />
+
+__PutSServiceDataRequest__ input:
+
+```json
+
+[
+   {
+        "bn": "string",
+	"bt": 0.0,
+	"bu": "string",
+	"bver": 0
+   }, {
+        "n": "string",
+	"t": 0.0,
+	"u": "string",
+	"v": 0.0,
+	"vs": "string",
+	"vb": false,
+	"vd": "string"
+   }
+]
+```
+
 # Gatekeeper 
 
 <a name="gatekeeper_sdd" />
@@ -4883,7 +5207,7 @@ The following endpoints no longer exist:
 GET /gatekeeper/echo
 ```
 
-Returns a "Got it" message with the purpose of testing the core service availability.
+Returns a "Got it!" message with the purpose of testing the core service availability.
 
 <a name="gatekeeper_endpoints_post_init_gsd" />
 
@@ -5934,7 +6258,7 @@ Use case 2: *Connect to Provider*
 GET /gateway/echo
 ```
 
-Returns a "Got it" message with the purpose of testing the core service availability.
+Returns a "Got it!" message with the purpose of testing the core service availability.
 
 <a name="gateway_endpoints_connect_to_consumer" />
 
@@ -6367,7 +6691,7 @@ The Certificate Authority provides the following services:
 | [Get issued certificates](#ca_endpoints_get_certificates) | /mgmt/certificates      | GET    | - | [IssuedCertificatesResponse](#ca_issued_certificates_response) |
 | [Revoke certificate](#ca_endpoints_revoke_certificate)    | /mgmt/certificates/{id} | DELETE | Certificate record id | OK |
 | [Get trusted keys](#ca_endpoints_get_trusted_keys)        | /mgmt/keys              | GET    | - | [TrustedKeysResponse](#ca_trusted_keys_response) |
-| [Add trusted key](#ca_endpoints_add_trusted_key)          | /mgmt/keys              | PUT    | [AddTrustedKeyRequest](#ca_add_trusted_key_request) | 201 Created |
+| [Add trusted key](#ca_endpoints_add_trusted_key)          | /mgmt/keys              | PUT    | [AddTrustedKeyRequest](#ca_add_trusted_key_request) | [AddTrustedKeyResponse](#ca_add_trusted_key_response) |
 | [Delete trusted key](#ca_endpoints_delete_trusted_key)    | /mgmt/keys/{id}         | DELETE | Key record id | 204 No Content |
 
 <a name="ca_endpoints_get_echo" />
@@ -6377,7 +6701,7 @@ The Certificate Authority provides the following services:
 GET /certificate-authority/echo
 ```
 
-Returns a "Got it" message with the purpose of testing the core service availability.
+Returns a "Got it!" message with the purpose of testing the core service availability.
 
 <a name="ca_endpoints_check_certificate" />
 
@@ -6387,7 +6711,7 @@ Returns a "Got it" message with the purpose of testing the core service availabi
 POST /certificate-authority/checkCertificate
 ```
 
-Returns whether the given certificate is valid, or has been revoked. The client SHALL not trust a revoked certificate.
+Returns whether the given certificate is valid or has been revoked. The client SHALL not trust a revoked certificate.
 
 <a name="ca_certificate_check_request" />
 
@@ -6400,10 +6724,10 @@ __CertificateCheckRequest__ is the input:
 }
 ```
 
-| Parameter        | Description                   | Necessity | Format/Limitations              |
-| ---------------- | ----------------------------- | --------- | ------------------------------- |
-| `version`        | Version of the check protocol | mandatory | integer, currently must be `1`  |
-| `certificate`    | The certificate to check      | mandatory | Base64 encoded X509 certificate (PEM without headers) |
+| Parameter     | Description                   | Necessity | Format/Limitations                                     |
+| ------------- | ----------------------------- | --------- | ------------------------------------------------------ |
+| `version`     | Version of the check protocol | mandatory | integer, currently must be `1`                         |
+| `certificate` | The certificate to check      | mandatory | Base64 encoded X.509 certificate (PEM without headers) |
 
 <a name="ca_certificate_check_response" />
 
@@ -6420,14 +6744,14 @@ Returns a __CertificateCheckResponse__:
 }
 ```
 
-| Field              | Description                                         |
-| ------------------ | --------------------------------------------------- |
-| `version`          | Version of the check protocol                       |
-| `producedAt`       | The time at wich the response has been created      |
-| `commonName`       | Common name of the certificate                       |
-| `serialNumber`     | Serial number of the certificate                    |
-| `endOfValidity`    | End of validity due to expiration or revocation     |
-| `status`           | One of the following: `good`, `revoked`, `unknown`  |
+| Field              | Description                                                    |
+| ------------------ | -------------------------------------------------------------- |
+| `version`          | Version of the check protocol                                  |
+| `producedAt`       | The time at wich the response has been created                 |
+| `commonName`       | Common name of the certificate                                 |
+| `serialNumber`     | Serial number of the certificate                               |
+| `endOfValidity`    | End of validity due to expiration or revocation                |
+| `status`           | One of the following: `good`, `revoked`, `expired`, `unknown`  |
 
 <a name="ca_endpoints_sign" />
 
@@ -6441,9 +6765,11 @@ Returns the whole certificate chain beginning with the newly generated leaf cert
 
 Each certificate's issuer is the same as the subject of the following one. The issuer of the root certificate is the same as the subject.
 
-The request may contain a `validAfter` and `validBefore` fields to limit the validity range of the Certificate to be generated more than the default values set in Certificate Authority.
+The request may contain `validAfter` and `validBefore` fields to limit the validity range of the Certificate to be generated more than the default values set in Certificate Authority.
 
-Metadata of of each generated certificate is stored in the database to allow handling revocation and validity checking.
+Metadata of each generated certificate is stored in the database to allow handling revocation and validity checking.
+
+A request for signing a certificate with restricted common name is only accepted if it is requested by `sysop`. Common names starting with the name of a Core System or `sysop` are restricted.
 
 <a name="ca_certificate_signing_request" />
 
@@ -6492,7 +6818,7 @@ Returns __CertificateSigningResponse__:
 POST /certificate-authority/checkTrustedKey
 ```
 
-Returns whether the given public key has been registered as trusted or not. If not, HTTP `204 No Content` is returned.
+Returns whether the given public key has been registered as trusted or not.
 
 <a name="ca_trusted_key_check_request" />
 
@@ -6520,11 +6846,11 @@ Returns a __TrustedKeyCheckResponse__:
 }
 ```
 
-| Field              | Description                                         | Format/Limitations        |
-| ------------------ | --------------------------------------------------- | ------------------------- |
-| `id`               | Record Id                                           | integer                   |
-| `createdAt`        | The time at wich the key has been added             | ISO 8601 date/time string |
-| `description`      | Description of the key, e.g. device identifier      | string                    |
+| Field         | Description                                    | Format/Limitations        |
+| ------------- | ---------------------------------------------- | ------------------------- |
+| `id`          | Record Id                                      | integer                   |
+| `createdAt`   | The time at which the key has been added       | ISO 8601 date/time string |
+| `description` | Description of the key, e.g. device identifier | string                    |
 
 
 <a name="ca_endpoints_get_certificates" />
@@ -6535,7 +6861,7 @@ Returns a __TrustedKeyCheckResponse__:
 GET /certificate-authority/mgmt/certificates
 ```
 
-Returns data about all of the certificates issued by the Certificate Authority.
+Returns data about every certificate issued by the Certificate Authority.
 If `page` and `item_per_page` are not defined, returns all records.
 
 Query params:
@@ -6564,8 +6890,9 @@ Query params:
 Returns a __IssuedCertificatesResponse__:
 
 ```json
-[
-  {
+{
+  "count": "integer",
+  "issuedCertificates": [
     "id": "integer",
     "createdAt": "string",
     "createdBy": "string",
@@ -6575,21 +6902,22 @@ Returns a __IssuedCertificatesResponse__:
     "commonName": "string",
     "serialNumber": "string",
     "status": "string"
-  }
-]
+  ]
+}
 ```
 
-| Field              | Description                                               |
-| ------------------ | --------------------------------------------------------- |
-| `id`               | ID of the certificate record                              |
-| `createdAt`        | The time at wich the record has been created              |
-| `createdBy`        | Name of the system which requested the certificate        |
-| `validFrom`        | Beginning of validity of the certificate                  |
-| `validUntil`       | End of validity of the certificate                        |
+| Field              | Description                                                |
+| ------------------ | ---------------------------------------------------------- |
+| `count`            | Number of issued certificate records                       |
+| `id`               | ID of the certificate record                               |
+| `createdAt`        | The time at wich the record has been created               |
+| `createdBy`        | Name of the system which requested the certificate         |
+| `validFrom`        | Beginning of validity of the certificate                   |
+| `validUntil`       | End of validity of the certificate                         |
 | `revokedAt`        | The time at which the certificate has been revoked or null |
 | `commonName`       | Common name of the certificate                             |
-| `serialNumber`     | Serial number of the certificate                          |
-| `status`           | One of the following: `good`, `revoked`, `expired`        |
+| `serialNumber`     | Serial number of the certificate                           |
+| `status`           | One of the following: `good`, `revoked`, `expired`         |
 
 
 <a name="ca_endpoints_revoke_certificate" />
@@ -6637,7 +6965,6 @@ Query params:
 > **Note:** Default value for `sort_field` is `id`. All possible values are: 
 > * `id`
 > * `createdAt`
-> * `createdBy`
 
 > **Note:** Default value for `direction` is `ASC`. All possible values are:
 > * `ASC`
@@ -6648,22 +6975,22 @@ Query params:
 Returns a __TrustedKeysResponse__:
 
 ```json
-[
-  {
+{
+  "count": "integer",
+  "trustedKeys": [
     "id": "integer",
-    "addedAt": "string",
-    "addedBy": "string",
+    "createdAt": "string",
     "description": "string"
-  }
-]
+  ]
+}
 ```
 
-| Field            | Description                                    |
-| ---------------- | ---------------------------------------------- |
-| `id`             | Record ID                                      |
-| `addedAt`        | The time at wich the key has been added        |
-| `addedBy`        | Name of the system which added the key         |
-| `description`    | Description of the key; e.g. device identifier |
+| Field         | Description                                    |
+| ------------- | ---------------------------------------------- |
+| `count`       | The total number of the trusted keys           |
+| `id`          | Record ID                                      |
+| `createdAt`   | The time at which the key has been added       |
+| `description` | Description of the key; e.g. device identifier |
 
 
 <a name="ca_endpoints_add_trusted_key" />
@@ -6694,10 +7021,28 @@ __AddTrustedKeyRequest__  is the input:
 | -------------- | ---------------------------------------------- | --------- | --------------------------------------------------- |
 | `publicKey`    | The public key to add as trusted               | mandatory | Base64 encoded DER public key (PEM without headers) |
 | `description`  | Description of the key; e.g. device identifier | mandatory | string                                              |
-| `validAfter`   | Beginning of validity                          | optional  | ISO 8601 date/time string                           |
-| `validBefore`  | End of validity                                | optional  | ISO 8601 date/time string                           |
+| `validAfter`   | Beginning of validity                          | mandatory | ISO 8601 date/time string                           |
+| `validBefore`  | End of validity                                | mandatory | ISO 8601 date/time string                           |
 
-Returns HTTP `201 Created` on success.
+
+<a name="ca_add_trusted_key_response" />
+
+Returns an __AddTrustedKeyResponse__ with HTTP `201 Created` on success:
+
+```json
+{
+  "id": "integer",
+  "validAfter": "string",
+  "validBefore": "string"
+}
+```
+
+| Field            | Description                  |
+| ---------------- | ---------------------------- |
+| `id`             | Record ID                    |
+| `validAfter`     | Beginning of validity        |
+| `validBefore`    | End of validity              |
+
 
 <a name="ca_endpoints_delete_trusted_key" />
 
@@ -6718,9 +7063,9 @@ Query params:
 Returns HTTP `204 No Content` on success.
 
 <a name="choreographer" />
- 
+
 # Choreographer
- 
+
 <a name="choreographer_sdd" />
 
 ## System Design Description Overview
@@ -6783,7 +7128,7 @@ These endpoints are mainly used by the Management Tool and Cloud Administrators.
 GET /choreographer/echo
 ```
 
-Returns a "Got it" message with the purpose of testing the core service availability.
+Returns a "Got it!" message with the purpose of testing the core service availability.
 
 <a name="choreographer_endpoints_post_nofity" />
 
@@ -7194,14 +7539,14 @@ The general scheme of the URLs is `https://<host>:<port>/onboarding/<authenticat
 | [Onboard with CSR](#onboardingcontroller_endpoints_csr)    | /certificate/csr      | POST   | [OnboardingWithCsrRequest](#datastructures_onboarding_csr_request) | [OnboardingWithCsrResponse](#datastructures_onboarding_csr_response) |
 | [Onboard with CSR](#onboardingcontroller_endpoints_csr)    | /sharedsecret/csr      | POST   | [OnboardingWithCsrRequest](#datastructures_onboarding_csr_request) | [OnboardingWithCsrResponse](#datastructures_onboarding_csr_response) |
 
-           
+
 ### Onboard with Name
 <a name="onboardingcontroller_endpoints_name" />
 
 ```
 POST /certificate/name
 POST /sharedsecret/name
-```                       
+```
 
 Creates a CSR on behalf of the client and eventually returns an onboarding certificate which may be used in the next step of the onboarding controller.
 
@@ -7226,7 +7571,7 @@ Creates a CSR on behalf of the client and eventually returns an onboarding certi
 | ----- | ----------- |
 | `commonName` | The common name field for the new certificate |
 | `keyAlgorithm` | The key algorithm of the provided keys |
-| `keyFormat` | The key format of the provided keys | 
+| `keyFormat` | The key format of the provided keys |
 | `privateKey` | Base64 encoded private key |
 | `publicKey` | Base64 encoded public key |
 
@@ -7275,20 +7620,20 @@ Creates a CSR on behalf of the client and eventually returns an onboarding certi
 | `certificateFormat` | The certificate format (usually X.509) |
 | `certificateType` | The certificate type. Always AH_ONBOARDING for this operation |
 | `keyAlgorithm` | The key algorithm of the provided keys |
-| `keyFormat` | The key format of the provided keys | 
+| `keyFormat` | The key format of the provided keys |
 | `privateKey` | Base64 encoded private key |
 | `publicKey` | Base64 encoded public key |
 | `service` | The service which is reachable under `uri` |
 | `uri` | The uri under which the depicted `service` is reachable |
 
-          
+
 ### Onboard with CSR
 <a name="onboardingcontroller_endpoints_csr" />
 
 ```
 POST /certificate/csr
 POST /sharedsecret/csr
-```                       
+```
 
 Creates a CSR on behalf of the client and eventually returns an onboarding certificate which may be used in the next step of the onboarding controller.
 
@@ -7350,7 +7695,7 @@ Creates a CSR on behalf of the client and eventually returns an onboarding certi
 | `certificateFormat` | The certificate format (usually X.509) |
 | `certificateType` | The certificate type. Always AH_ONBOARDING for this operation |
 | `keyAlgorithm` | The key algorithm of the provided keys |
-| `keyFormat` | The key format of the provided keys | 
+| `keyFormat` | The key format of the provided keys |
 | `privateKey` | Base64 encoded private key. Always empty for this operation |
 | `publicKey` | Base64 encoded public key |
 | `service` | The service which is reachable under `uri` |
@@ -7359,7 +7704,7 @@ Creates a CSR on behalf of the client and eventually returns an onboarding certi
 
 # Device Registry 
 <a name="deviceregistry"/><br />
- 
+
 ## System Design Description Overview
 <a name="deviceregistry_sdd" /><br />
 
@@ -7425,13 +7770,13 @@ The base URL for the requests: `http://<host>:<port>/deviceregistry`
 ### Detailed description<br />
 
 A detailed description of management and private endpoints is available in the release notes.
-   
+
 ### Onboard with Name
 <a name="deviceregistry_endpoints_onboarding_name" />
 
 ```
 POST /onboarding/name
-```                       
+```
 
 Creates a CSR on behalf of the client, registers the device and eventually returns a device certificate which may be used in the next step of the onboarding controller.
 
@@ -7469,7 +7814,7 @@ Creates a CSR on behalf of the client, registers the device and eventually retur
 | ----- | ----------- |
 | `commonName` | The common name field for the new certificate |
 | `keyAlgorithm` | The key algorithm of the provided keys |
-| `keyFormat` | The key format of the provided keys | 
+| `keyFormat` | The key format of the provided keys |
 | `privateKey` | Base64 encoded private key |
 | `publicKey` | Base64 encoded public key |
 | `address` | The optional IP address of the device |
@@ -7524,7 +7869,7 @@ Creates a CSR on behalf of the client, registers the device and eventually retur
 | `certificateFormat` | The certificate format (usually X.509) |
 | `certificateType` | The certificate type. Always AH_DEVICE for this operation |
 | `keyAlgorithm` | The key algorithm of the provided keys |
-| `keyFormat` | The key format of the provided keys | 
+| `keyFormat` | The key format of the provided keys |
 | `privateKey` | Base64 encoded private key |
 | `publicKey` | Base64 encoded public key |
 
@@ -7535,7 +7880,7 @@ Additionally all fields from [DeviceRegistryEntry](#datastructures_deviceregistr
 
 ```
 POST /onboarding/csr
-```                       
+```
 
 Signs the CSR, registers the device and eventually returns a device certificate which may be used in the next step of the onboarding controller.
 
@@ -7616,17 +7961,17 @@ Signs the CSR, registers the device and eventually returns a device certificate 
 | `certificateFormat` | The certificate format (usually X.509) |
 | `certificateType` | The certificate type. Always AH_DEVICE for this operation |
 | `keyAlgorithm` | The key algorithm of the provided keys |
-| `keyFormat` | The key format of the provided keys | 
+| `keyFormat` | The key format of the provided keys |
 | `privateKey` | Base64 encoded private key. Always empty for this operation |
 | `publicKey` | Base64 encoded public key |
 
 Additionally all fields from [DeviceRegistryEntry](#datastructures_deviceregistryentry) are returned. 
 
- 
+
 # System Registry 
 <a name="systemregistry" />
- 
- 
+
+
 ## System Design Description Overview
 <a name="systemregistry_sdd" />
 
@@ -7691,13 +8036,13 @@ The base URL for the requests: `http://<host>:<port>/systemregistry`
 ### Detailed description<br />
 
 A detailed description of public, management and private endpoints is available in the release notes.
-   
+
 ### Onboard with Name
 <a name="systemregistry_endpoints_onboarding_name" />
 
 ```
 POST /onboarding/name
-```                       
+```
 
 Creates a CSR on behalf of the client, registers the system and eventually returns a system certificate which is valid in the Arrowhead local cloud.
 
@@ -7741,7 +8086,7 @@ Creates a CSR on behalf of the client, registers the system and eventually retur
 | ----- | ----------- |
 | `commonName` | The common name field for the new certificate |
 | `keyAlgorithm` | The key algorithm of the provided keys |
-| `keyFormat` | The key format of the provided keys | 
+| `keyFormat` | The key format of the provided keys |
 | `privateKey` | Base64 encoded private key |
 | `publicKey` | Base64 encoded public key |
 | `address` | The IP address of the device/system |
@@ -7807,7 +8152,7 @@ Creates a CSR on behalf of the client, registers the system and eventually retur
 | `certificateFormat` | The certificate format (usually X.509) |
 | `certificateType` | The certificate type. Always AH_SYSTEM for this operation |
 | `keyAlgorithm` | The key algorithm of the provided keys |
-| `keyFormat` | The key format of the provided keys | 
+| `keyFormat` | The key format of the provided keys |
 | `privateKey` | Base64 encoded private key |
 | `publicKey` | Base64 encoded public key |
 
@@ -7818,7 +8163,7 @@ Additionally all fields from [SystemRegistryEntry](#datastructures_systemregistr
 
 ```
 POST /onboarding/csr
-```                       
+```
 
 Signs the CSR, registers the device and eventually returns a device certificate which may be used in the next step of the onboarding controller.
 
@@ -7916,8 +8261,56 @@ Signs the CSR, registers the device and eventually returns a device certificate 
 | `certificateFormat` | The certificate format (usually X.509) |
 | `certificateType` | The certificate type. Always AH_DEVICE for this operation |
 | `keyAlgorithm` | The key algorithm of the provided keys |
-| `keyFormat` | The key format of the provided keys | 
+| `keyFormat` | The key format of the provided keys |
 | `privateKey` | Base64 encoded private key. Always empty for this operation |
 | `publicKey` | Base64 encoded public key |
 
 Additionally all fields from [SystemRegistryEntry](#datastructures_systemregistryentry) are returned.
+
+
+
+
+
+# Plant Description Engine
+ 
+This supporting core system has the purpose of choreographing the consumers and producers in the plant (System of Systems / Local cloud).
+An abstract view, on which systems the plant contains and how they are connected as consumers and producers, is used to populate the [Orchestrator](#orchestrator) with store rules for each of the consumers. The abstract view does not contain any instance specific information, instead meta-data about each system is used to identify the service producers.
+
+The plant description engine (PDE) can be configured with several variants of the plant description of which at most one can be active. The active plant description is used to populate the orchestrator and if no plant description is active the orchestrator does not contain any store rules populated by the PDE. This can be used to establish alternativ plants (plan A, plan B, etc).
+
+The PDE gathers information about the presence of all specified systems in the active plant description. If a system is not present it raises an alarm. If it detects that an unknown system has registered a service in the service registry it also raises an alarm. For a consumer system to be monitored the system must produce the [Monitorable] service and hence also register in the service registry.
+
+Please see the [Plant Description Engine - System of systems Description (SosD)] and [Plant Description Engine HTTP(S)/JSON - System Description (SysD)] for further details.
+
+## Services
+
+The PDE produces two different services:
+ + the [Plant Description Management] service - [Plant Description Management JSON]
+ + the [Plant Description Monitor] service - [Plant Description Monitor JSON]
+ 
+The PDE consumes the following services:
+ + the [Service Discovery] service produced by the [Service Registry] core system
+ + the [Orchestration Store Management] service produced by the [Orchestrator] core system
+ + the [Orchestration] service produced by the [Orchestrator] core system
+ + the [Inventory] service produced by an Inventory system - [Inventory JSON]
+ + the [Monitorable] service produced by the systems in the plant - [Monitorable JSON]
+    
+  
+[Authorization]:README.md#authorization
+[AuthorizationControl]:README.md#authorization
+[Inventory]:documentation/plant-description-engine/inventory-sd.md
+[Inventory JSON]:documentation/plant-description-engine/inventory-idd-http-json.md
+[Monitorable]:documentation/plant-description-engine/monitorable-sd.md
+[Monitorable JSON]:documentation/plant-description-engine/monitorable-idd-http-json.md
+[Orchestrator]:README.md#orchestrator
+[Orchestration]:README.md#orchestrator
+[Orchestration Store Management]:README.md#orchestrator
+[Plant Description Monitor]:documentation/plant-description-engine/plant-description-monitor-sd.md
+[Plant Description Monitor JSON]:documentation/plant-description-engine/plant-description-monitor-idd-http-json.md
+[Plant Description Management]:documentation/plant-description-engine/plant-description-management-sd.md
+[Plant Description Management JSON]:documentation/plant-description-engine/plant-description-management-idd-http-json.md
+[Plant Description Engine HTTP(S)/JSON - System Description (SysD)]:documentation/plant-description-engine/plant-description-engine-sysd.md
+[Plant Description Engine - System of systems Description (SosD)]:documentation/plant-description-engine/plant-description-engine-sosd.md
+[Service Discovery]:README.md#serviceregistry_usecases
+[Service Registry]:README.md#serviceregistry
+  

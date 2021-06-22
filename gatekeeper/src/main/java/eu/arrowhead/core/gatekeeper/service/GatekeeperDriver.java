@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.gatekeeper.service;
 
 import java.security.PrivateKey;
@@ -94,10 +108,10 @@ public class GatekeeperDriver {
 	private static final String GATEWAY_PUBLIC_KEY_URI_KEY = CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEWAY_CONNECT_PROVIDER_URI_KEY = CoreSystemService.GATEWAY_PROVIDER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEWAY_CONNECT_CONSUMER_URI_KEY = CoreSystemService.GATEWAY_CONSUMER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
-	private static final String QOS_MONITOR_PUBLIC_KEY_URI_KEY = CoreSystemService.QOS_MONITOR_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
-	private static final String QOS_MONITOR_JOIN_RELAY_TEST_URI_KEY = CoreSystemService.QOS_MONITOR_JOIN_RELAY_TEST_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
-	private static final String QOS_MONITOR_INIT_RELAY_TEST_URI_KEY = CoreSystemService.QOS_MONITOR_INIT_RELAY_TEST_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
-	private static final String QOS_MONITOR_INTRA_PING_MEASUREMENTS_URI_KEY = CoreSystemService.QOS_MONITOR_INTRA_PING_MEASUREMENT_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String QOSMONITOR_PUBLIC_KEY_URI_KEY = CoreSystemService.QOSMONITOR_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String QOSMONITOR_JOIN_RELAY_TEST_URI_KEY = CoreSystemService.QOSMONITOR_JOIN_RELAY_TEST_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String QOSMONITOR_INIT_RELAY_TEST_URI_KEY = CoreSystemService.QOSMONITOR_INIT_RELAY_TEST_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String QOSMONITOR_INTRA_PING_MEASUREMENTS_URI_KEY = CoreSystemService.QOSMONITOR_INTRA_PING_MEASUREMENT_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	
 	@Resource(name = CoreCommonConstants.GATEKEEPER_MATCHMAKER)
 	private RelayMatchmakingAlgorithm gatekeeperMatchmaker;
@@ -283,8 +297,9 @@ public class GatekeeperDriver {
 		
 		final UriComponents publicKeyUri = getGatewayPublicKeyUri();
 		final ResponseEntity<String> response = httpService.sendRequest(publicKeyUri, HttpMethod.GET, String.class);
+		final String encodedKey = Utilities.fromJson(response.getBody(), String.class);
 		
-		return response.getBody();
+		return encodedKey;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -395,8 +410,9 @@ public class GatekeeperDriver {
 		
 		final UriComponents publicKeyUri = getQoSMonitorPublicKeyUri();
 		final ResponseEntity<String> response = httpService.sendRequest(publicKeyUri, HttpMethod.GET, String.class);
+		final String encodedKey = Utilities.fromJson(response.getBody(), String.class);
 		
-		return response.getBody();
+		return encodedKey;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -737,9 +753,9 @@ public class GatekeeperDriver {
 	private UriComponents getQoSMonitorPublicKeyUri() {
 		logger.debug("getQosMonitorPublicKeyUri started...");
 		
-		if (arrowheadContext.containsKey(QOS_MONITOR_PUBLIC_KEY_URI_KEY)) {
+		if (arrowheadContext.containsKey(QOSMONITOR_PUBLIC_KEY_URI_KEY)) {
 			try {
-				return (UriComponents) arrowheadContext.get(QOS_MONITOR_PUBLIC_KEY_URI_KEY);
+				return (UriComponents) arrowheadContext.get(QOSMONITOR_PUBLIC_KEY_URI_KEY);
 			} catch (final ClassCastException ex) {
 				throw new ArrowheadException("Gatekeeper can't find QoS Monitor public key URI.");
 			}
@@ -752,9 +768,9 @@ public class GatekeeperDriver {
 	private UriComponents getQoSMonitorJoinRelayTestUri() {
 		logger.debug("getQoSMonitorJoinRelayTestUri started...");
 		
-		if (arrowheadContext.containsKey(QOS_MONITOR_JOIN_RELAY_TEST_URI_KEY)) {
+		if (arrowheadContext.containsKey(QOSMONITOR_JOIN_RELAY_TEST_URI_KEY)) {
 			try {
-				return (UriComponents) arrowheadContext.get(QOS_MONITOR_JOIN_RELAY_TEST_URI_KEY);
+				return (UriComponents) arrowheadContext.get(QOSMONITOR_JOIN_RELAY_TEST_URI_KEY);
 			} catch (final ClassCastException ex) {
 				throw new ArrowheadException("Gatekeeper can't find QoS Monitor join relay test URI.");
 			}
@@ -767,9 +783,9 @@ public class GatekeeperDriver {
 	private UriComponents getQoSMonitorInitRelayTestUri() {
 		logger.debug("getQoSMonitorInitRelayTestUri started...");
 		
-		if (arrowheadContext.containsKey(QOS_MONITOR_INIT_RELAY_TEST_URI_KEY)) {
+		if (arrowheadContext.containsKey(QOSMONITOR_INIT_RELAY_TEST_URI_KEY)) {
 			try {
-				return (UriComponents) arrowheadContext.get(QOS_MONITOR_INIT_RELAY_TEST_URI_KEY);
+				return (UriComponents) arrowheadContext.get(QOSMONITOR_INIT_RELAY_TEST_URI_KEY);
 			} catch (final ClassCastException ex) {
 				throw new ArrowheadException("Gatekeeper can't find QoS Monitor init relay test URI.");
 			}
@@ -797,9 +813,9 @@ public class GatekeeperDriver {
 	private UriComponents getQoSMonitorIntraPingMeasurementUri(final long systemId) {
 		logger.debug("getQoSMonitorIntraPingMeasurementUri started...");
 		
-		if (arrowheadContext.containsKey(QOS_MONITOR_INTRA_PING_MEASUREMENTS_URI_KEY)) {
+		if (arrowheadContext.containsKey(QOSMONITOR_INTRA_PING_MEASUREMENTS_URI_KEY)) {
 			try {
-				final UriComponents uri = (UriComponents) arrowheadContext.get(QOS_MONITOR_INTRA_PING_MEASUREMENTS_URI_KEY);
+				final UriComponents uri = (UriComponents) arrowheadContext.get(QOSMONITOR_INTRA_PING_MEASUREMENTS_URI_KEY);
 				return uri.expand(systemId);
 			} catch (final ClassCastException ex) {
 				throw new ArrowheadException("Gatekeeper can't find QoS Monitor intra ping measurements URI.");
@@ -918,4 +934,3 @@ public class GatekeeperDriver {
 		}
 	}
 }
-

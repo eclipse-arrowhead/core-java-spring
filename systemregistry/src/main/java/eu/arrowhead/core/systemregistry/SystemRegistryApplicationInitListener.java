@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2020 FHB
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   FHB - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.systemregistry;
 
 import eu.arrowhead.common.ApplicationInitListener;
@@ -12,7 +26,7 @@ import java.util.List;
 public class SystemRegistryApplicationInitListener extends ApplicationInitListener {
 
     //=================================================================================================
-    // members
+    // assistant methods
 
     //-------------------------------------------------------------------------------------------------
     @Override
@@ -22,8 +36,9 @@ public class SystemRegistryApplicationInitListener extends ApplicationInitListen
         }
     }
 
-    @Override
+    //-------------------------------------------------------------------------------------------------
+	@Override
     protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
-        return List.of(CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.CERTIFICATE_AUTHORITY_SIGN_SERVICE);
+        return List.of(CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.CERTIFICATEAUTHORITY_SIGN_SERVICE);
     }
 }

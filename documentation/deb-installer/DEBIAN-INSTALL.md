@@ -50,7 +50,7 @@ After typing the password use the following SQL commands to enable remote access
 
 ```
 CREATE USER 'root'@'%' IDENTIFIED BY 'password';
-GRANT ALL PRIVILEGES ON * . * TO 'root'@'localhost' IDENTIFIED BY 'password' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON * . * TO 'root'@'%' IDENTIFIED BY 'password' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 ```
 
@@ -127,42 +127,125 @@ After the process is done, please see the log files in the /var/log/arrowhead fo
 
 The created services will restart on reboot.
 
-### 6. Hints
+## Hints
 
-#### Add a new application system
+### Arrowhead management script
+
+Arrowhead comes with a management script `arrowhead` used to simplify things.
+See `/etc/arrowhead/arrowhead.cfg` for configuration options for the script.
+
+#### Standalone usage
+
+To use this script without installing arrowhead on your system follow these steps.
+
+##### 1. Download neccessary files.
+
+Create a new, empty directory `mkdir $HOME/arrowhead` and download these files to it.
+
+1. [ahconf.sh](core-commons/src/deb/ahconf.sh)
+2. [arrowhead](core-commons/src/deb/arrowhead)
+3. [arrowhead.cfg](core-commons/src/deb/arrowhead.cfg)
+
+##### 2. Permissions
+
+Make sure that `ahconf.sh` and `arrowhead` are executable
+
+```bash
+chmod +x ahconf.sh arrowhead
+```
+
+##### 3. Set neccessary flags
+
+When running arrowhead standalone you need to set two flags for everything to work.
+
+```bash
+arrowhead ... -r=/path/to/created/directory -a=/path/to/ahconf.sh
+```
+
+Where directory is the directory you created in step one.
+
+#### Example uses
+
+##### Generate new master certificate (and, in turn, system certificates)
+
+```bash
+sudo arrowhead certs -m
+```
+
+##### Generate new certificates for all systems
+
+```bash
+sudo arrowhead certs -u
+```
+
+##### Generate new certificates for specific systems
+
+```bash
+sudo arrowhead certs -s=SYSTEM...
+```
+
+##### Generate certificates for new systems
+
+Add the new system to the systems list in `arrowhead.cfg` then run:
+
+```bash
+sudo arrowhead certs -n -u
+```
+
+### Add a new application system
+
+#### Certificate generation
+
+##### Method a)
+
+See [this](#generate-certificates-for-new-systems)
+
+##### Method b)
 
 You can use the script `ah_gen_system_cert` to generate certificate (and trust store) to a system.
 
-```sudo ah_gen_system_cert SYSTEM_NAME PASSWORD SYSTEM_HOST SYSTEM_IP```
+```bash
+sudo ah_gen_system_cert SYSTEM_NAME PASSWORD SYSTEM_HOST SYSTEM_IP
+```
 
 SYSTEM_NAME and PASSWORD are mandatory parameters. The other two are the DNS name and IP address of the computer that running 
 the system. If SYSTEM_HOST and SYSTEM_IP are not specified, the command assumes the system is running on the local machine.
 Examples:
 
-```sudo ah_gen_system_cert client1 123456 abc.com 10.0.0.22```
+```bash
+sudo ah_gen_system_cert client1 123456 abc.com 10.0.0.22
+```
 
-```sudo ah_gen_system_cert localsystem1 123456```
+```bash
+sudo ah_gen_system_cert localsystem1 123456
+```
 
 A new directory is generated in your current directory which is named SYSTEM_NAME. Generated certificates will appear in this directory.
 
-#### Add a new relay
+### Add a new relay
 
 You can use the script `ah_gen_relay_cert` to generate certificate (and trust store) to a ActiveMQ relay.
 
-```sudo ah_gen_relay_cert RELAY_NAME PASSWORD RELAY_MASTER_CERT RELAY_MASTER_PASSWORD RELAY_HOST RELAY_IP```
+```bash
+sudo ah_gen_relay_cert RELAY_NAME PASSWORD RELAY_MASTER_CERT RELAY_MASTER_PASSWORD RELAY_HOST RELAY_IP
+```
 
 RELAY_NAME, PASSWORD, RELAY_MASTER_CERT (path to the relay master certificate .p12 file) and RELAY_MASTER_PASSWORD are mandatory parameters. 
 The other two are the DNS name and IP address of the computer that running the relay. If RELAY_HOST and RELAY_IP are not specified, the 
 command assumes the relay is running on the local machine.
 Examples:
 
-```sudo ah_gen_cert relay1 123456 ./relay-master.p12 654321 abc.com 10.0.0.22```
+```bash
+sudo ah_gen_cert relay1 123456 ./relay-master.p12 654321 abc.com 10.0.0.22
+```
 
-```sudo ah_gen_cert relay1 123456 ./relay-master.p12 654321```
+```bash
+sudo ah_gen_cert relay1 123456 ./relay-master.p12 654321
+```
 
 A new directory is generated in your current directory which is named RELAY_NAME. Generated certificates will appear in this directory.
 
-#### Other hints
+### Other hints
 
 Log files (log4j2) are available in: `/var/log/arrowhead/*`
 

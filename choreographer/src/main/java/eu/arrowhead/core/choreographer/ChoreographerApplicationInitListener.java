@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2020 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.choreographer;
 
 import eu.arrowhead.common.ApplicationInitListener;
@@ -51,16 +65,17 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
     private UriComponents createQueryByServiceDefinitionList(final String scheme) {
         logger.debug("createQuerySystemByServiceDefinitionList started...");
 
-        final String registryUriStr = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SERVICE_DEFINITION_LIST_URI;
+        final String registryUriStr = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SERVICE_DEFINITION_LIST_URI;
 
         return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), registryUriStr);
     }
 
     @Bean
     public JmsListenerContainerFactory<?> getFactory(ConnectionFactory connectionFactory,
-                                                    DefaultJmsListenerContainerFactoryConfigurer configurer) {
+                                                    DefaultJmsListenerContainerFactoryConfigurer configurer, ExampleErrorHandler errorHandler) {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         configurer.configure(factory, connectionFactory);
+        factory.setErrorHandler(errorHandler);
         return factory;
     }
 
@@ -77,7 +92,7 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
 
         @Override
         public void handleError(Throwable throwable) {
-            System.out.println("Hello");
+            System.out.println("Error happened during Workflow Choreography.");
         }
     }
 

@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.gatekeeper.service;
 
 import java.util.concurrent.BlockingQueue;
@@ -41,7 +55,8 @@ public class AccessTypeCollectionTask implements Runnable {
 	// methods
 		
 	//-------------------------------------------------------------------------------------------------
-	public AccessTypeCollectionTask(final GatekeeperRelayClient relayClient, final Session session, final String recipientCloudName, final String recipientCloudOperator, final String recipientCloudCN, final String recipientCloudPublicKey, final BlockingQueue<ErrorWrapperDTO> queue) {
+	public AccessTypeCollectionTask(final GatekeeperRelayClient relayClient, final Session session, final String recipientCloudName, final String recipientCloudOperator, final String recipientCloudCN, final String recipientCloudPublicKey,
+									final BlockingQueue<ErrorWrapperDTO> queue) {
 		Assert.notNull(relayClient, "relayClient is null");
 		Assert.notNull(session, "session is null");
 		Assert.isTrue(!Utilities.isEmpty(recipientCloudName), "recipientCloudName is empty");

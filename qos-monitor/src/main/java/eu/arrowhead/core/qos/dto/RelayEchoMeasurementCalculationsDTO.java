@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2020 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.qos.dto;
 
 import java.io.Serializable;
@@ -68,5 +82,4 @@ public class RelayEchoMeasurementCalculationsDTO implements Serializable {
 	public void setReceivedInThisTest(final Integer receivedInThisPing) { this.receivedInThisTest = receivedInThisPing; }
 	public void setLostPerMeasurementPercent(final Integer lostPerMeasurementPercent) { this.lostPerMeasurementPercent = lostPerMeasurementPercent; }
 	public void setMeasuredAt(final ZonedDateTime measuredAt) { this.measuredAt = measuredAt; }
-
 }

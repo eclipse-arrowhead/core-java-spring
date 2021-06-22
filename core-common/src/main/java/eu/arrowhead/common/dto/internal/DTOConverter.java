@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.common.dto.internal;
 
 
@@ -15,8 +29,11 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
+import eu.arrowhead.common.database.entity.ChoreographerExecutorServiceDefinition;
+import eu.arrowhead.common.database.entity.ChoreographerExecutorServiceDefinitionConnection;
 import eu.arrowhead.common.database.entity.ChoreographerStepDetail;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerStepDetailResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
@@ -40,6 +57,7 @@ import eu.arrowhead.common.database.entity.DeviceRegistry;
 import eu.arrowhead.common.database.entity.EventType;
 import eu.arrowhead.common.database.entity.ForeignSystem;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
+import eu.arrowhead.common.database.entity.OrchestratorStoreFlexible;
 import eu.arrowhead.common.database.entity.QoSInterDirectMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterDirectPingMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterRelayEchoMeasurement;
@@ -88,7 +106,7 @@ public class DTOConverter {
 	public static SystemResponseDTO convertSystemToSystemResponseDTO(final System system) {
 		Assert.notNull(system, "System is null");
 		
-		return new SystemResponseDTO(system.getId(), system.getSystemName(), system.getAddress(), system.getPort(), system.getAuthenticationInfo(),
+		return new SystemResponseDTO(system.getId(), system.getSystemName(), system.getAddress(), system.getPort(), system.getAuthenticationInfo(), Utilities.text2Map(system.getMetadata()),
 									 Utilities.convertZonedDateTimeToUTCString(system.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(system.getUpdatedAt()));		
 	}
 	
@@ -185,6 +203,7 @@ public class DTOConverter {
 			final String systemName = srEntry.getSystem().getSystemName();
 			final String systemAddress = srEntry.getSystem().getAddress();
 			final int systemPort = srEntry.getSystem().getPort();
+			final Map<String,String> systemMetadata = Utilities.text2Map(srEntry.getSystem().getMetadata());
 			final long serviceDefinitionId = srEntry.getServiceDefinition().getId();
 			final String serviceDefinition = srEntry.getServiceDefinition().getServiceDefinition();		
 			
@@ -192,7 +211,7 @@ public class DTOConverter {
 			if (servicesBySystemId.containsKey(systemId)) {
 				servicesBySystemId.get(systemId).getServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
 			} else {
-				final ServicesGroupedBySystemsResponseDTO dto = new ServicesGroupedBySystemsResponseDTO(systemId, systemName, systemAddress, systemPort, new ArrayList<>());
+				final ServicesGroupedBySystemsResponseDTO dto = new ServicesGroupedBySystemsResponseDTO(systemId, systemName, systemAddress, systemPort, systemMetadata, new ArrayList<>());
 				dto.getServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
 				servicesBySystemId.put(systemId, dto);
 			}
@@ -233,6 +252,25 @@ public class DTOConverter {
 		
 		return new ServiceInterfaceResponseDTO(intf.getId(), intf.getInterfaceName(), Utilities.convertZonedDateTimeToUTCString(intf.getCreatedAt()), 
 											   Utilities.convertZonedDateTimeToUTCString(intf.getUpdatedAt()));
+	}
+
+	public static ChoreographerExecutorServiceDefinitionResponseDTO convertExecutorServiceDefinitionToExecturServiceDefinitionResponseDTO(final ChoreographerExecutorServiceDefinition serviceDefinition) {
+		Assert.notNull(serviceDefinition, "Service definition entry is null.");
+
+		return new ChoreographerExecutorServiceDefinitionResponseDTO(serviceDefinition.getId(), serviceDefinition.getServiceDefinitionName(), serviceDefinition.getVersion(),
+				Utilities.convertZonedDateTimeToUTCString(serviceDefinition.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(serviceDefinition.getUpdatedAt()));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static ServiceInterfacesListResponseDTO convertServiceInterfacesListToServiceInterfaceListResponseDTO(final Page<ServiceInterface> serviceInterfaces) {
+		Assert.notNull(serviceInterfaces, "List of ServiceInterface is null");
+
+		final List<ServiceInterfaceResponseDTO> serviceInterfaceDTOs = new ArrayList<>(serviceInterfaces.getNumberOfElements());
+		for (final ServiceInterface serviceInterface : serviceInterfaces) {
+			serviceInterfaceDTOs.add(convertServiceInterfaceToServiceInterfaceResponseDTO(serviceInterface));
+		}
+
+		return new ServiceInterfacesListResponseDTO(serviceInterfaceDTOs, serviceInterfaces.getTotalElements());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -514,7 +552,33 @@ public class DTOConverter {
 
 		return new OrchestratorStoreListResponseDTO(entries, totalElements);
 	}
-
+	
+	//-------------------------------------------------------------------------------------------------
+	public static OrchestratorStoreFlexibleResponseDTO convertOrchestratorStoreFlexibleEntryToOrchestratorStoreFlexibleResponseDTO(final OrchestratorStoreFlexible entry) {
+		Assert.notNull(entry, "OrchestratorStoreFlexible entry is null");
+		
+		return new OrchestratorStoreFlexibleResponseDTO(entry.getId(),
+														new SystemDescriberDTO(entry.getConsumerSystemName(), Utilities.text2Map(entry.getConsumerSystemMetadata())),
+														new SystemDescriberDTO(entry.getProviderSystemName(), Utilities.text2Map(entry.getProviderSystemMetadata())),
+														entry.getServiceDefinitionName(),
+														entry.getServiceInterfaceName(),
+														Utilities.text2Map(entry.getServiceMetadata()),
+														entry.getPriority(),
+														Utilities.convertZonedDateTimeToUTCString(entry.getCreatedAt()),
+														Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static OrchestratorStoreFlexibleListResponseDTO convertOrchestratorStoreFlexibleEntryListToOrchestratorStoreFlexibleListResponseDTO(final Iterable<OrchestratorStoreFlexible> entries, final long totalElements) {
+		Assert.notNull(entries, "OrchestratorStoreFlexible list is null");
+		
+		final List<OrchestratorStoreFlexibleResponseDTO> data = new ArrayList<>();
+		for (final OrchestratorStoreFlexible entry : entries) {
+			data.add(convertOrchestratorStoreFlexibleEntryToOrchestratorStoreFlexibleResponseDTO(entry));
+		}
+		return new OrchestratorStoreFlexibleListResponseDTO(data, totalElements);
+	}
+	
 	//-------------------------------------------------------------------------------------------------
 	public static SystemRequestDTO convertSystemToSystemRequestDTO(final System system) {
 		Assert.notNull(system, "System is null");
@@ -524,6 +588,7 @@ public class DTOConverter {
 		systemRequestDTO.setSystemName(system.getSystemName());
 		systemRequestDTO.setPort(system.getPort());
 		systemRequestDTO.setAuthenticationInfo(systemRequestDTO.getAuthenticationInfo());
+		systemRequestDTO.setMetadata(Utilities.text2Map(system.getMetadata()));
 		
 		return systemRequestDTO;
 	}
@@ -537,6 +602,7 @@ public class DTOConverter {
 		result.setAddress(response.getAddress());
 		result.setPort(response.getPort());
 		result.setAuthenticationInfo(response.getAuthenticationInfo());
+		result.setMetadata(response.getMetadata());
 		
 		return result;
 	}
@@ -712,7 +778,7 @@ public class DTOConverter {
 	public static SystemResponseDTO convertForeignSystemToSystemResponseDTO(final ForeignSystem foreignSystem) {
 		Assert.notNull(foreignSystem, "ForeignSystem is null");
 		
-		return new SystemResponseDTO(foreignSystem.getId(), foreignSystem.getSystemName(), foreignSystem.getAddress(), foreignSystem.getPort(), foreignSystem.getAuthenticationInfo(),
+		return new SystemResponseDTO(foreignSystem.getId(), foreignSystem.getSystemName(), foreignSystem.getAddress(), foreignSystem.getPort(), foreignSystem.getAuthenticationInfo(), Utilities.text2Map(foreignSystem.getMetadata()),
 									 Utilities.convertZonedDateTimeToUTCString(foreignSystem.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(foreignSystem.getUpdatedAt()));		
 	}
 
@@ -1015,11 +1081,11 @@ public class DTOConverter {
 		Assert.notNull(executor.getAddress(), "Related address is null.");
 		Assert.notNull(executor.getName(), "Related executor name is null.");
 		Assert.notNull(executor.getPort(), "Related executor port is null.");
-		Assert.notNull(executor.getVersion(), "Related executor version is null.");
-		Assert.notNull(executor.getServiceDefinitionName(), "Related executor service definition name is null.");
 
-		return new ChoreographerExecutorResponseDTO(executor.getId(), executor.getName(), executor.getAddress(), executor.getPort(), executor.getBaseUri(),
-				executor.getServiceDefinitionName(), executor.getVersion(), Utilities.convertZonedDateTimeToUTCString(executor.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(executor.getUpdatedAt()));
+		return new ChoreographerExecutorResponseDTO(executor.getId(), executor.getName(), executor.getAddress(),
+				executor.getPort(), executor.getBaseUri(), collectServiceDefinitionsFromExecutor(executor.getServiceDefinitionConnections()),
+				Utilities.convertZonedDateTimeToUTCString(executor.getCreatedAt()),
+				Utilities.convertZonedDateTimeToUTCString(executor.getUpdatedAt()));
 	}
 
     //-------------------------------------------------------------------------------------------------
@@ -1106,8 +1172,7 @@ public class DTOConverter {
     }
 
     //-------------------------------------------------------------------------------------------------
-    public static List<ChoreographerStepResponseDTO> collectStepsFromAction(
-            final Set<ChoreographerStep> steps) {
+    public static List<ChoreographerStepResponseDTO> collectStepsFromAction(final Set<ChoreographerStep> steps) {
         Assert.notNull(steps, "Steps list is null.");
 
         final List<ChoreographerStepResponseDTO> result = new ArrayList<>(steps.size());
@@ -1144,7 +1209,7 @@ public class DTOConverter {
     }
 
 	//-------------------------------------------------------------------------------------------------
-    public static String collectNextActionNameFromAction(final ChoreographerAction nextAction) {
+	public static String collectNextActionNameFromAction(final ChoreographerAction nextAction) {
         if (nextAction != null) {
             return nextAction.getName();
         }
@@ -1164,8 +1229,44 @@ public class DTOConverter {
 		return result;
 	}
 
+	public static ChoreographerSuitableExecutorResponseDTO convertSuitableExecutorIdsToSuitableExecutorResponseDTO (List<Long> executorIds) {
+		ChoreographerSuitableExecutorResponseDTO dto = new ChoreographerSuitableExecutorResponseDTO();
+		for (long id : executorIds) {
+			dto.getSuitableExecutorIds().add(id);
+		}
+		return dto;
+	}
 
+	// -------------------------------------------------------------------------------------------------
+	public static IssuedCertificatesResponseDTO convertCaCertificateListToIssuedCertificatesResponseDTO(
+			final Page<CaCertificate> certificateEntryList) {
+		Assert.notNull(certificateEntryList, "certificateEntryList is null");
 
+		final long count = certificateEntryList.getTotalElements();
+		final IssuedCertificatesResponseDTO certificatesResponseDTO = new IssuedCertificatesResponseDTO();
+		certificatesResponseDTO.setCount(count);
+		certificatesResponseDTO.setIssuedCertificates(
+				certificateEntryListToCertificatesResponseDTOList(certificateEntryList.getContent()));
+
+		return certificatesResponseDTO;
+	}
+	
+	// -------------------------------------------------------------------------------------------------
+	public static TrustedKeysResponseDTO convertCaTrustedKeyListToTrustedKeysResponseDTO(
+			final Page<CaTrustedKey> trustedKeyEntryList) {
+		Assert.notNull(trustedKeyEntryList, "trustedKeyEntryList is null");
+
+		final long count = trustedKeyEntryList.getTotalElements();
+		final TrustedKeysResponseDTO trustedKeysResponseDTO = new TrustedKeysResponseDTO();
+		trustedKeysResponseDTO.setCount(count);
+		trustedKeysResponseDTO
+				.setTrustedKeys(trustedKeyEntryListToTrustedKeysResponseDTOList(trustedKeyEntryList.getContent()));
+
+		return trustedKeysResponseDTO;
+	}
+	
+	
+	
 	//=================================================================================================
 	// assistant methods
 
@@ -1194,6 +1295,15 @@ public class DTOConverter {
 		
 		result.sort((dto1, dto2) -> dto1.getInterfaceName().compareToIgnoreCase(dto2.getInterfaceName()));
 		
+		return result;
+	}
+
+	public static List<ChoreographerExecutorServiceDefinitionResponseDTO> collectServiceDefinitionsFromExecutor(final Set<ChoreographerExecutorServiceDefinitionConnection> serviceDefinitionConnections) {
+		final List<ChoreographerExecutorServiceDefinitionResponseDTO> result = new ArrayList<>(serviceDefinitionConnections.size());
+		for (final ChoreographerExecutorServiceDefinitionConnection connection : serviceDefinitionConnections) {
+			result.add(convertExecutorServiceDefinitionToExecturServiceDefinitionResponseDTO(connection.getServiceDefinitionEntry()));
+		}
+
 		return result;
 	}
 	
@@ -1270,20 +1380,6 @@ public class DTOConverter {
     }
 	
 	// -------------------------------------------------------------------------------------------------
-	public static TrustedKeysResponseDTO convertCaTrustedKeyListToTrustedKeysResponseDTO(
-			final Page<CaTrustedKey> trustedKeyEntryList) {
-		Assert.notNull(trustedKeyEntryList, "trustedKeyEntryList is null");
-
-		final long count = trustedKeyEntryList.getTotalElements();
-		final TrustedKeysResponseDTO trustedKeysResponseDTO = new TrustedKeysResponseDTO();
-		trustedKeysResponseDTO.setCount(count);
-		trustedKeysResponseDTO
-				.setTrustedKeys(trustedKeyEntryListToTrustedKeysResponseDTOList(trustedKeyEntryList.getContent()));
-
-		return trustedKeysResponseDTO;
-	}
-
-	// -------------------------------------------------------------------------------------------------
 	private static List<TrustedKeyDTO> trustedKeyEntryListToTrustedKeysResponseDTOList(final List<CaTrustedKey> trustedKeyList) {
 		final List<TrustedKeyDTO> trustedKeyDTOs = new ArrayList<>(trustedKeyList.size());
 
@@ -1298,20 +1394,6 @@ public class DTOConverter {
 	}
 
 	// -------------------------------------------------------------------------------------------------
-	public static IssuedCertificatesResponseDTO convertCaCertificateListToIssuedCertificatesResponseDTO(
-			final Page<CaCertificate> certificateEntryList) {
-		Assert.notNull(certificateEntryList, "certificateEntryList is null");
-
-		final long count = certificateEntryList.getTotalElements();
-		final IssuedCertificatesResponseDTO certificatesResponseDTO = new IssuedCertificatesResponseDTO();
-		certificatesResponseDTO.setCount(count);
-		certificatesResponseDTO.setIssuedCertificates(
-				certificateEntryListToCertificatesResponseDTOList(certificateEntryList.getContent()));
-
-		return certificatesResponseDTO;
-	}
-
-	// -------------------------------------------------------------------------------------------------
 	private static List<IssuedCertificateDTO> certificateEntryListToCertificatesResponseDTOList(
 			final List<CaCertificate> certificateList) {
 		Assert.notNull(certificateList, "certificateList is null");
@@ -1321,7 +1403,7 @@ public class DTOConverter {
 		final ZonedDateTime now = ZonedDateTime.now();
 
 		for (final CaCertificate certificate : certificateList) {
-			IssuedCertificateDTO dto = new IssuedCertificateDTO();
+			final IssuedCertificateDTO dto = new IssuedCertificateDTO();
 			dto.setId(certificate.getId());
 			dto.setCommonName(certificate.getCommonName());
 			dto.setSerialNumber(certificate.getSerial());
@@ -1342,8 +1424,9 @@ public class DTOConverter {
 		return certificateDTOs;
 	}
 
-	private static IssuedCertificateStatus getStatus(ZonedDateTime now, ZonedDateTime validAfter,
-													 ZonedDateTime validBefore, ZonedDateTime revokedAt) {
+	//-------------------------------------------------------------------------------------------------
+	private static IssuedCertificateStatus getStatus(final ZonedDateTime now, final ZonedDateTime validAfter,
+													 final ZonedDateTime validBefore, final ZonedDateTime revokedAt) {
 		Assert.notNull(now, "now cannot be null");
 		Assert.notNull(validAfter, "validAfter cannot be null");
 		Assert.notNull(validBefore, "validBefore cannot be null");
@@ -1356,7 +1439,6 @@ public class DTOConverter {
 		}
 		return IssuedCertificateStatus.GOOD;
 	}
-
 	public static ChoreographerExecutorListResponseDTO convertExecutorListToExecutorListResponseDTO(Page<ChoreographerExecutor> executorEntries) {
 		Assert.notNull(executorEntries, "List of executors is null");
 
@@ -1378,5 +1460,4 @@ public class DTOConverter {
 
 		return new ChoreographerExecutorSearchResponseDTO(executorEntryDTOs);
 	}
-
 }
