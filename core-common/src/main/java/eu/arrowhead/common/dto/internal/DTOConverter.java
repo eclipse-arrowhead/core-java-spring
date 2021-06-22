@@ -1237,15 +1237,6 @@ public class DTOConverter {
 		return dto;
 	}
 
-		final long count = certificateEntryList.getTotalElements();
-		final IssuedCertificatesResponseDTO certificatesResponseDTO = new IssuedCertificatesResponseDTO();
-		certificatesResponseDTO.setCount(count);
-		certificatesResponseDTO.setIssuedCertificates(
-				certificateEntryListToCertificatesResponseDTOList(certificateEntryList.getContent()));
-
-		return certificatesResponseDTO;
-	}
-	
 	// -------------------------------------------------------------------------------------------------
 	public static IssuedCertificatesResponseDTO convertCaCertificateListToIssuedCertificatesResponseDTO(
 			final Page<CaCertificate> certificateEntryList) {

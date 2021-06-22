@@ -12,7 +12,7 @@
  *   Arrowhead Consortia - conceptualization
  ********************************************************************************/
 
-package eu.arrowhead.core.choreographer.jms;
+package eu.arrowhead.core.choreographer.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.CommonConstants;
@@ -39,6 +39,7 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
+import eu.arrowhead.core.choreographer.service.ChoreographerDriver;
 import org.apache.http.conn.HttpHostConnectException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

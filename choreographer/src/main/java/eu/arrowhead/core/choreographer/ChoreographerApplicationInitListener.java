@@ -65,7 +65,7 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
     private UriComponents createQueryByServiceDefinitionList(final String scheme) {
         logger.debug("createQuerySystemByServiceDefinitionList started...");
 
-        final String registryUriStr = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SERVICE_DEFINITION_LIST_URI;
+        final String registryUriStr = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SERVICE_DEFINITION_LIST_URI;
 
         return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), registryUriStr);
     }
