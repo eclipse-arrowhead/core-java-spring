@@ -1,9 +1,25 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.orchestrator.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,6 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,10 +37,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.database.entity.OrchestratorStore;
+import eu.arrowhead.common.database.entity.OrchestratorStoreFlexible;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.System;
@@ -77,6 +98,9 @@ public class OrchestratorServiceTest {
 	
 	@Mock
 	private OrchestratorDriver orchestratorDriver;
+	
+	@Mock
+	private OrchestratorFlexibleDriver orchestratorFlexibleDriver;
 	
 	@Mock
 	private OrchestratorStoreDBService orchestratorStoreDBService;
@@ -781,11 +805,11 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final ServiceInterfaceResponseDTO serviceInterfaceResponseDTO = new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null);
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(List.of(serviceInterfaceResponseDTO));
 		final ServiceRegistryResponseDTO srEntry2 = new ServiceRegistryResponseDTO();
-		srEntry2.setProvider(new SystemResponseDTO(2, "d", "e", 6, null, null, null));
+		srEntry2.setProvider(new SystemResponseDTO(2, "d", "e", 6, null, null, null, null));
 		srEntry2.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry2.setInterfaces(List.of(serviceInterfaceResponseDTO));
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -821,11 +845,11 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinition = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinition);
 		srEntry.setInterfaces(interfaces);
 		final ServiceRegistryResponseDTO srEntry2 = new ServiceRegistryResponseDTO();
-		srEntry2.setProvider(new SystemResponseDTO(2, "d", "e", 6, null, null, null));
+		srEntry2.setProvider(new SystemResponseDTO(2, "d", "e", 6, null, null, null, null));
 		srEntry2.setServiceDefinition(serviceDefinition);
 		srEntry2.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -859,7 +883,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinition = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinition);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -911,7 +935,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -964,7 +988,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1017,7 +1041,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1071,7 +1095,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1126,7 +1150,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1140,7 +1164,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
-		final OrchestrationResponseDTO result = testingObject.orchestrationFromStore(request);
+		final OrchestrationResponseDTO result = testingObject.orchestrationFromOriginalStore(request);
 		
 		Assert.assertNotNull(result);
 		Assert.assertTrue(!result.getResponse().isEmpty());
@@ -1161,7 +1185,7 @@ public class OrchestratorServiceTest {
 	public void testOrchestrationFromStoreWithSystemIdParameterByNullRequest() {
 		final OrchestrationFormRequestDTO request = null;
 
-		testingObject.orchestrationFromStore(request);
+		testingObject.orchestrationFromOriginalStore(request);
 				
 	}
 	
@@ -1206,7 +1230,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1256,7 +1280,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1271,7 +1295,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
-		final OrchestrationResponseDTO result = testingObject.orchestrationFromStore(request);
+		final OrchestrationResponseDTO result = testingObject.orchestrationFromOriginalStore(request);
 		
 		Assert.assertNotNull(result);
 		Assert.assertTrue(!result.getResponse().isEmpty());
@@ -1323,7 +1347,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1356,7 +1380,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
-		testingObject.orchestrationFromStore(request);
+		testingObject.orchestrationFromOriginalStore(request);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1403,7 +1427,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1435,7 +1459,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
-		testingObject.orchestrationFromStore(request);		
+		testingObject.orchestrationFromOriginalStore(request);		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1482,7 +1506,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1514,7 +1538,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
-		testingObject.orchestrationFromStore(request);		
+		testingObject.orchestrationFromOriginalStore(request);		
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -1562,7 +1586,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1594,7 +1618,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
-		testingObject.orchestrationFromStore(request);		
+		testingObject.orchestrationFromOriginalStore(request);		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1643,7 +1667,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1675,7 +1699,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
-		testingObject.orchestrationFromStore(request);		
+		testingObject.orchestrationFromOriginalStore(request);		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1723,7 +1747,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1755,7 +1779,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
-		testingObject.orchestrationFromStore(request);		
+		testingObject.orchestrationFromOriginalStore(request);		
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -1801,7 +1825,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1833,7 +1857,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
-		final OrchestrationResponseDTO result = testingObject.orchestrationFromStore(request);
+		final OrchestrationResponseDTO result = testingObject.orchestrationFromOriginalStore(request);
 		
 		Assert.assertNotNull(result);
 		Assert.assertTrue(!result.getResponse().isEmpty());
@@ -1882,7 +1906,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1914,7 +1938,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
-		final OrchestrationResponseDTO result = testingObject.orchestrationFromStore(request);
+		final OrchestrationResponseDTO result = testingObject.orchestrationFromOriginalStore(request);
 		
 		Assert.assertNotNull(result);
 		Assert.assertTrue(result.getResponse().isEmpty());
@@ -1963,7 +1987,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -1996,7 +2020,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
-		final OrchestrationResponseDTO result = testingObject.orchestrationFromStore(request);
+		final OrchestrationResponseDTO result = testingObject.orchestrationFromOriginalStore(request);
 		
 		Assert.assertNotNull(result);
 		Assert.assertTrue(result.getResponse().isEmpty());
@@ -2036,7 +2060,7 @@ public class OrchestratorServiceTest {
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null), 
 																	 new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-XML", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2095,7 +2119,7 @@ public class OrchestratorServiceTest {
 		consumerSystem.setPort(1234);
 		
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2163,7 +2187,7 @@ public class OrchestratorServiceTest {
 		consumerSystem.setPort(1234);
 		
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2224,7 +2248,7 @@ public class OrchestratorServiceTest {
 		consumerSystem.setPort(1234);
 		
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2284,7 +2308,7 @@ public class OrchestratorServiceTest {
 		consumerSystem.setPort(1234);
 		
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2345,7 +2369,7 @@ public class OrchestratorServiceTest {
 		consumerSystem.setPort(1234);
 		
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2408,7 +2432,7 @@ public class OrchestratorServiceTest {
 		consumerSystem.setPort(1234);
 		
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2470,7 +2494,7 @@ public class OrchestratorServiceTest {
 		consumerSystem.setPort(1234);
 		
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2531,7 +2555,7 @@ public class OrchestratorServiceTest {
 		consumerSystem.setPort(1234);
 		
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2590,7 +2614,7 @@ public class OrchestratorServiceTest {
 		consumerSystem.setPort(1234);
 		
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2647,7 +2671,7 @@ public class OrchestratorServiceTest {
 		consumerSystem.setPort(1234);
 		
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2713,7 +2737,7 @@ public class OrchestratorServiceTest {
 		consumerSystem.setPort(1234);
 		
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2777,7 +2801,7 @@ public class OrchestratorServiceTest {
 		consumerSystem.setPort(1234);
 		
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -2836,7 +2860,7 @@ public class OrchestratorServiceTest {
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
-		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
 		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
 		srEntry.setInterfaces(interfaces);
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
@@ -3144,5 +3168,190 @@ public class OrchestratorServiceTest {
 		
 		final QoSReservationRequestDTO request = new QoSReservationRequestDTO(selectedResult, requesterSystem, List.of(new OrchestrationResultDTO()));		
 		testingObject.confirmProviderReservation(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testOrchestrationFromFlexibleStoreNullRequest() {
+		ReflectionTestUtils.setField(testingObject, "useFlexibleStore", true);
+		try {
+			testingObject.orchestrationFromStore(null);
+		} catch (final InvalidParameterException ex) {
+			Assert.assertEquals("Request is null.", ex.getMessage());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testOrchestrationFromFlexibleStoreFlagObjectNull() {
+		ReflectionTestUtils.setField(testingObject, "useFlexibleStore", true);
+		try {
+			final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+			ReflectionTestUtils.setField(request, "orchestrationFlags", null);
+			testingObject.orchestrationFromStore(request);
+		} catch (final IllegalArgumentException ex) {
+			Assert.assertEquals("Flags map is null.", ex.getMessage());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testOrchestrationFromFlexibleStoreIntercloudNotSupported1() {
+		ReflectionTestUtils.setField(testingObject, "useFlexibleStore", true);
+		try {
+			final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+			request.getOrchestrationFlags().put(Flag.ENABLE_INTER_CLOUD, true);
+			testingObject.orchestrationFromStore(request);
+		} catch (final InvalidParameterException ex) {
+			Assert.assertEquals("Intercloud mode is not supported yet.", ex.getMessage());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testOrchestrationFromFlexibleStoreIntercloudNotSupported2() {
+		ReflectionTestUtils.setField(testingObject, "useFlexibleStore", true);
+		try {
+			final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+			request.getOrchestrationFlags().put(Flag.TRIGGER_INTER_CLOUD, true);
+			testingObject.orchestrationFromStore(request);
+		} catch (final InvalidParameterException ex) {
+			Assert.assertEquals("Intercloud mode is not supported yet.", ex.getMessage());
+			throw ex;
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testOrchestrationFromFlexibleStoreQoSNotSupported2() {
+		ReflectionTestUtils.setField(testingObject, "useFlexibleStore", true);
+		try {
+			final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+			request.getOrchestrationFlags().put(Flag.ENABLE_QOS, true);
+			testingObject.orchestrationFromStore(request);
+		} catch (final InvalidParameterException ex) {
+			Assert.assertEquals("Quality of Service requirements is not supported yet.", ex.getMessage());
+			throw ex;
+		}
+	}
+	
+	// checkSystemRequestDTO() and checkServiceRequestForm() used in dynamic orchestration too and are tested there
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = BadPayloadException.class)
+	public void testOrchestrationFromFlexibleStoreOnlyCloudPreferred() {
+		ReflectionTestUtils.setField(testingObject, "useFlexibleStore", true);
+		try {
+			final SystemRequestDTO consumer = new SystemRequestDTO("testconsumer", "localhost", 1234, null, null);
+			final ServiceQueryFormDTO queryForm = new ServiceQueryFormDTO.Builder("testservice")
+																		 .build();
+			
+			final PreferredProviderDataDTO preferredProvider = new PreferredProviderDataDTO();
+			preferredProvider.setProviderSystem(new SystemRequestDTO("testprovider", "localhost", 5678, null, null));
+			preferredProvider.setProviderCloud(new CloudRequestDTO());
+			final List<PreferredProviderDataDTO> preferredProviderList = new ArrayList<>(1);
+			preferredProviderList.add(preferredProvider);
+			
+			final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+			request.setRequesterSystem(consumer);
+			request.setRequestedService(queryForm);
+			request.setPreferredProviders(preferredProviderList);
+			request.getOrchestrationFlags().put(Flag.ONLY_PREFERRED, true);
+			testingObject.orchestrationFromStore(request);
+		} catch (final BadPayloadException ex) {
+			Assert.assertEquals("There is no valid preferred provider, but \"" + Flag.ONLY_PREFERRED + "\" is set to true", ex.getMessage());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationFromFlexibleStoreNoMatchedRules() {
+		ReflectionTestUtils.setField(testingObject, "useFlexibleStore", true);
+		final SystemRequestDTO consumer = new SystemRequestDTO("testconsumer", "localhost", 1234, null, null);
+		final ServiceQueryFormDTO queryForm = new ServiceQueryFormDTO.Builder("testservice")
+																	 .build();
+		
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setRequesterSystem(consumer);
+		request.setRequestedService(queryForm);
+		
+		when(orchestratorFlexibleDriver.queryConsumerSystem(any(SystemRequestDTO.class))).thenReturn(new SystemResponseDTO());
+		when(orchestratorFlexibleDriver.collectAndSortMatchingRules(any(OrchestrationFormRequestDTO.class), any(SystemResponseDTO.class))).thenReturn(List.of());
+		
+		final OrchestrationResponseDTO response = testingObject.orchestrationFromStore(request);
+		Assert.assertEquals(0, response.getResponse().size());
+		verify(orchestratorFlexibleDriver).queryConsumerSystem(any(SystemRequestDTO.class));
+		verify(orchestratorFlexibleDriver).collectAndSortMatchingRules(any(OrchestrationFormRequestDTO.class), any(SystemResponseDTO.class));
+		verify(orchestratorFlexibleDriver, never()).queryServiceRegistry(any(OrchestrationFormRequestDTO.class), anyList());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationFromFlexibleStoreNoMatchedResultByProviderRequirements() {
+		ReflectionTestUtils.setField(testingObject, "useFlexibleStore", true);
+		final SystemRequestDTO consumer = new SystemRequestDTO("testconsumer", "localhost", 1234, null, null);
+		final ServiceQueryFormDTO queryForm = new ServiceQueryFormDTO.Builder("testservice")
+																	 .build();
+		
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setRequesterSystem(consumer);
+		request.setRequestedService(queryForm);
+		
+		when(orchestratorFlexibleDriver.queryConsumerSystem(any(SystemRequestDTO.class))).thenReturn(new SystemResponseDTO());
+		when(orchestratorFlexibleDriver.collectAndSortMatchingRules(any(OrchestrationFormRequestDTO.class), any(SystemResponseDTO.class))).thenReturn(List.of(new OrchestratorStoreFlexible()));
+		final List<Pair<OrchestratorStoreFlexible,ServiceQueryResultDTO>> queryWithRules = List.of(new ImmutablePair<>(new OrchestratorStoreFlexible(), new ServiceQueryResultDTO()));
+		when(orchestratorFlexibleDriver.queryServiceRegistry(any(OrchestrationFormRequestDTO.class), anyList())).thenReturn(queryWithRules);
+		when(orchestratorFlexibleDriver.filterSRResultsByProviderRequirements(anyList(), any())).thenReturn(List.of());
+		
+		final OrchestrationResponseDTO response = testingObject.orchestrationFromStore(request);
+		Assert.assertEquals(0, response.getResponse().size());
+		verify(orchestratorFlexibleDriver).queryConsumerSystem(any(SystemRequestDTO.class));
+		verify(orchestratorFlexibleDriver).collectAndSortMatchingRules(any(OrchestrationFormRequestDTO.class), any(SystemResponseDTO.class));
+		verify(orchestratorFlexibleDriver).queryServiceRegistry(any(OrchestrationFormRequestDTO.class), anyList());
+		verify(orchestratorFlexibleDriver).filterSRResultsByProviderRequirements(anyList(), any());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationFromFlexibleStoreWithMatchmaking() {
+		ReflectionTestUtils.setField(testingObject, "useFlexibleStore", true);
+		final SystemRequestDTO consumer = new SystemRequestDTO("testconsumer", "localhost", 1234, null, null);
+		final ServiceQueryFormDTO queryForm = new ServiceQueryFormDTO.Builder("testservice")
+																	 .build();
+		
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setRequesterSystem(consumer);
+		request.setRequestedService(queryForm);
+		request.getOrchestrationFlags().put(Flag.MATCHMAKING, true);
+		
+		when(orchestratorFlexibleDriver.queryConsumerSystem(any(SystemRequestDTO.class))).thenReturn(new SystemResponseDTO());
+		when(orchestratorFlexibleDriver.collectAndSortMatchingRules(any(OrchestrationFormRequestDTO.class), any(SystemResponseDTO.class))).thenReturn(List.of(new OrchestratorStoreFlexible()));
+		final List<Pair<OrchestratorStoreFlexible,ServiceQueryResultDTO>> queryWithRules = List.of(new ImmutablePair<>(new OrchestratorStoreFlexible(), new ServiceQueryResultDTO()));
+		when(orchestratorFlexibleDriver.queryServiceRegistry(any(OrchestrationFormRequestDTO.class), anyList())).thenReturn(queryWithRules);
+		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
+		srEntry.setProvider(new SystemResponseDTO());
+		srEntry.setServiceDefinition(new ServiceDefinitionResponseDTO());
+		srEntry.setInterfaces(List.of(new ServiceInterfaceResponseDTO()));
+		when(orchestratorFlexibleDriver.filterSRResultsByProviderRequirements(anyList(), any())).thenReturn(List.of(srEntry));
+		when(intraCloudProviderMatchmaker.doMatchmaking(anyList(), any(IntraCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResultDTO());
+		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), anyList())).thenAnswer(new Answer<List<OrchestrationResultDTO>>() {
+			@SuppressWarnings("unchecked")
+			public List<OrchestrationResultDTO> answer(final InvocationOnMock invocation) throws Throwable {
+				return (List<OrchestrationResultDTO>) invocation.getArgument(1);
+			}
+		});
+		
+		final OrchestrationResponseDTO response = testingObject.orchestrationFromStore(request);
+		Assert.assertEquals(1, response.getResponse().size());
+		verify(orchestratorFlexibleDriver).queryConsumerSystem(any(SystemRequestDTO.class));
+		verify(orchestratorFlexibleDriver).collectAndSortMatchingRules(any(OrchestrationFormRequestDTO.class), any(SystemResponseDTO.class));
+		verify(orchestratorFlexibleDriver).queryServiceRegistry(any(OrchestrationFormRequestDTO.class), anyList());
+		verify(orchestratorFlexibleDriver).filterSRResultsByProviderRequirements(anyList(), any());
+		verify(intraCloudProviderMatchmaker).doMatchmaking(anyList(), any(IntraCloudProviderMatchmakingParameters.class));
+		verify(orchestratorDriver).generateAuthTokens(any(OrchestrationFormRequestDTO.class), anyList());
 	}
 }

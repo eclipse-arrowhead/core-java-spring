@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2020 FHB
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   FHB - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.deviceregistry.database.service;
 
 import eu.arrowhead.common.CoreCommonConstants;
@@ -339,7 +353,7 @@ public class DeviceRegistryDBService {
         } catch (final DateTimeParseException ex) {
             logger.debug(ex.getMessage(), ex);
             throw new InvalidParameterException(
-                    "End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.", ex);
+                    "End of validity is specified in the wrong format. Please provide UTC time using ISO-8601 format.", ex);
         } catch (final InvalidParameterException ex) {
             throw ex;
         } catch (final Exception ex) {
@@ -374,7 +388,7 @@ public class DeviceRegistryDBService {
         } catch (final DateTimeParseException ex) {
             logger.debug(ex.getMessage(), ex);
             throw new InvalidParameterException(
-                    "End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.", ex);
+                    "End of validity is specified in the wrong format. Please provide UTC time using ISO-8601 format.", ex);
         } catch (final InvalidParameterException ex) {
             throw ex;
         } catch (final Exception ex) {
@@ -418,7 +432,7 @@ public class DeviceRegistryDBService {
         } catch (final DateTimeParseException ex) {
             logger.debug(ex.getMessage(), ex);
             throw new InvalidParameterException(
-                    "End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.", ex);
+                    "End of validity is specified in the wrong format. Please provide UTC time using ISO-8601 format.", ex);
         } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);

@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2020 FHB
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   FHB - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.onboarding;
 
 import eu.arrowhead.common.CommonConstants;
@@ -64,9 +78,8 @@ public class OnboardingController {
     private static final String CSR_NULL_ERROR_MESSAGE = " CertificateSigningRequest must have value ";
 
     private final Logger logger = LogManager.getLogger(OnboardingController.class);
-    private final OnboardingService onboardingDBService;
+    private final OnboardingService onboardingService;
     private final SSLProperties sslProperties;
-
 
     @Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
     private Map<String, Object> arrowheadContext;
@@ -74,14 +87,15 @@ public class OnboardingController {
     @Value(value = "${sharedSecret:#{null}}")
     private Optional<String> sharedSecret;
 
-    @Autowired
-    public OnboardingController(final OnboardingService onboardingDBService, final SSLProperties sslProperties) {
-        this.onboardingDBService = onboardingDBService;
-        this.sslProperties = sslProperties;
-    }
-
     //=================================================================================================
     // methods
+
+    //-------------------------------------------------------------------------------------------------
+    @Autowired
+    public OnboardingController(final OnboardingService onboardingService, final SSLProperties sslProperties) {
+    	this.onboardingService = onboardingService;
+    	this.sslProperties = sslProperties;
+    }
 
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Return an echo message with the purpose of testing the core device availability", response = String.class, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
@@ -115,7 +129,7 @@ public class OnboardingController {
 
         final String host = httpServletRequest.getRemoteHost();
         final String address = httpServletRequest.getRemoteAddr();
-        return onboardingDBService.onboarding(onboardingRequest, host, address);
+        return onboardingService.onboarding(onboardingRequest, host, address);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -139,7 +153,7 @@ public class OnboardingController {
 
         final String host = httpServletRequest.getRemoteHost();
         final String address = httpServletRequest.getRemoteAddr();
-        return onboardingDBService.onboarding(onboardingRequest, host, address);
+        return onboardingService.onboarding(onboardingRequest, host, address);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -160,7 +174,7 @@ public class OnboardingController {
         authenticateCertificate(httpServletRequest);
         verifyRequest(onboardingRequest, CommonConstants.ONBOARDING_URI + OP_ONBOARDING_WITH_CERTIFICATE_AND_CSR);
 
-        return onboardingDBService.onboarding(onboardingRequest);
+        return onboardingService.onboarding(onboardingRequest);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -181,7 +195,7 @@ public class OnboardingController {
         authenticateSharedSecret(authorization);
         verifyRequest(onboardingRequest, CommonConstants.ONBOARDING_URI + OP_ONBOARDING_WITH_SHARED_SECRET_AND_CSR);
 
-        return onboardingDBService.onboarding(onboardingRequest);
+        return onboardingService.onboarding(onboardingRequest);
     }
 
     //=================================================================================================
@@ -235,7 +249,7 @@ public class OnboardingController {
         byte[] bytes;
         try {
             bytes = Base64.getDecoder().decode(authInfo);
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             logger.error(e.getMessage());
             throw new ArrowheadException("Unable to decode authorization header");
         }

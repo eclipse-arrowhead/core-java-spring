@@ -234,7 +234,7 @@ public class QoSManagerImplTest {
 		requester.setPort(1234);
 		doThrow(ArrowheadException.class).when(qosReservationDBService).applyTemporaryLock(anyString(), anyString(), anyInt(), any(OrchestrationResultDTO.class));
 		final OrchestrationResultDTO result = new OrchestrationResultDTO();
-		result.setProvider(new SystemResponseDTO(1, "system", "localhost", 1234, null, null, null));
+		result.setProvider(new SystemResponseDTO(1, "system", "localhost", 1234, null, null, null, null));
 		result.setService(new ServiceDefinitionResponseDTO(1, "service", null, null));
 		final List<OrchestrationResultDTO> reserved = qosManager.reserveProvidersTemporarily(List.of(result), requester);
 		Assert.assertEquals(0, reserved.size());
@@ -250,7 +250,7 @@ public class QoSManagerImplTest {
 		requester.setPort(1234);
 		doNothing().when(qosReservationDBService).applyTemporaryLock(anyString(), anyString(), anyInt(), any(OrchestrationResultDTO.class));
 		final OrchestrationResultDTO result = new OrchestrationResultDTO();
-		result.setProvider(new SystemResponseDTO(1, "system", "localhost", 1234, null, null, null));
+		result.setProvider(new SystemResponseDTO(1, "system", "localhost", 1234, null, null, null, null));
 		result.setService(new ServiceDefinitionResponseDTO(1, "service", null, null));
 		final List<OrchestrationResultDTO> reserved = qosManager.reserveProvidersTemporarily(List.of(result), requester);
 		Assert.assertEquals(1, reserved.size());
@@ -600,7 +600,7 @@ public class QoSManagerImplTest {
 			final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
 			srEntry.setId(i);
 			srEntry.setServiceDefinition(new ServiceDefinitionResponseDTO(i, "test-service", null, null));
-			srEntry.setProvider(new SystemResponseDTO(i, "test-sys" + i, "1.1.1.1", 1000, "fgfh", null, null));
+			srEntry.setProvider(new SystemResponseDTO(i, "test-sys" + i, "1.1.1.1", 1000, "fgfh", null, null, null));
 			srEntry.setInterfaces(List.of(new ServiceInterfaceResponseDTO(1, "HTTP-SECURE-JSON", null, null), new ServiceInterfaceResponseDTO(1, "HTTP-SECURE-XML", null, null)));
 			final QoSMeasurementAttributesFormDTO measurement = new QoSMeasurementAttributesFormDTO();
 			measurement.setServiceRegistryEntry(srEntry);
@@ -641,7 +641,7 @@ public class QoSManagerImplTest {
 	//-------------------------------------------------------------------------------------------------
 	private QoSIntraMeasurement getQoSIntraMeasurementForTest() {
 
-		final System system = new System("test-sys", "1.1.1.1", 1000, "dfvldsfme");
+		final System system = new System("test-sys", "1.1.1.1", 1000, "dfvldsfme", null);
 		final QoSIntraMeasurement measurement = new QoSIntraMeasurement(
 				system, 
 				QoSMeasurementType.PING, 

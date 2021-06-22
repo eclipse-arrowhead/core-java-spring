@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.serviceregistry;
 
 import static org.junit.Assert.assertEquals;
@@ -210,6 +224,16 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void addServiceDefinitionTestWithWrongDefinitionFlagTrue() throws Exception {
+		this.mockMvc.perform(post("/serviceregistry/mgmt/services")
+					.content("{\"serviceDefinition\": \"test_definition\"}")
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void addServiceDefinitionTestWithCoreSystemServiceDefinition() throws Exception {
 		for (final CoreSystemService coreSystemService : CoreSystemService.values()) {
 			this.mockMvc.perform(post("/serviceregistry/mgmt/services")
@@ -248,6 +272,16 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	public void putUpdateServiceDefinitionTestWithNullDefinition() throws Exception {
 		this.mockMvc.perform(put("/serviceregistry/mgmt/services/5")
 					.content("{}")
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void putUpdateServiceDefinitionTestWithWrongDefinitionFlagTrue() throws Exception {
+		this.mockMvc.perform(put("/serviceregistry/mgmt/services/5")
+					.content("{\"serviceDefinition\": \"test_definition\"}")
 					.contentType(MediaType.APPLICATION_JSON)
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
@@ -313,6 +347,16 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	public void patchUpdateServiceDefinitionTestWithBlankDefinition() throws Exception {
 		this.mockMvc.perform(patch("/serviceregistry/mgmt/services/5")
 					.content("{\"serviceDefinition\": \"      \"}")
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void patchUpdateServiceDefinitionTestWithWrongDefinitionFlagTrue() throws Exception {
+		this.mockMvc.perform(patch("/serviceregistry/mgmt/services/5")
+					.content("{\"serviceDefinition\": \"test-definition-\"}")
 					.contentType(MediaType.APPLICATION_JSON)
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());

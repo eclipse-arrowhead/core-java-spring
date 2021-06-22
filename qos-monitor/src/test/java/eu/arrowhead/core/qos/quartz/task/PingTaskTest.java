@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2020 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.qos.quartz.task;
 
 import static org.junit.Assert.assertNotNull;
@@ -20,7 +34,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.logging.log4j.Logger;
-import org.icmp4j.IcmpPingResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,6 +67,7 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
+import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.dto.PingMeasurementCalculationsDTO;
 import eu.arrowhead.core.qos.measurement.properties.PingMeasurementProperties;
 import eu.arrowhead.core.qos.service.PingService;
@@ -2161,7 +2175,8 @@ public class PingTaskTest {
 				"testSystem",
 				"address",
 				12345,
-				"authenticationInfo");
+				"authenticationInfo",
+				"");
 
 		return system;
 	}
@@ -2173,7 +2188,8 @@ public class PingTaskTest {
 				"testSystem",
 				null,
 				12345,
-				"authenticationInfo");
+				"authenticationInfo",
+				"");
 
 		return system;
 	}
@@ -2193,7 +2209,8 @@ public class PingTaskTest {
 				"testSystem",
 				"   ",
 				12345,
-				"authenticationInfo");
+				"authenticationInfo",
+				"");
 
 		return system;
 	}

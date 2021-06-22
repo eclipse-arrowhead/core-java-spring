@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.gatekeeper.security;
 
 import java.util.Map;
@@ -18,8 +32,8 @@ public class GatekeeperAccessControlFilter extends CoreSystemAccessControlFilter
 	// members
 	
 	private static final CoreSystem[] allowedCoreSystemsForOrchestrationTasks = { CoreSystem.ORCHESTRATOR };
-	private static final CoreSystem[] allowedCoreSystemsForQoSTasks = { CoreSystem.QOS_MONITOR };
-	private static final CoreSystem[] allowedCoreSystemsForGeneralTasks = { CoreSystem.ORCHESTRATOR, CoreSystem.QOS_MONITOR };
+	private static final CoreSystem[] allowedCoreSystemsForQoSTasks = { CoreSystem.QOSMONITOR };
+	private static final CoreSystem[] allowedCoreSystemsForGeneralTasks = { CoreSystem.ORCHESTRATOR, CoreSystem.QOSMONITOR };
 	
 	//=================================================================================================
 	// assistant methods

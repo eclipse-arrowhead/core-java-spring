@@ -7,7 +7,7 @@ set -e
 
 . /usr/share/debconf/confmodule
 
-SYSTEM_NAME="qos_monitor"
+SYSTEM_NAME="qosmonitor"
 
 # summary of how this script can be called:
 #        * <postrm> `remove'

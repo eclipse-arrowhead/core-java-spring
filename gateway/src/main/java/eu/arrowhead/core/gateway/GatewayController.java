@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.gateway;
 
 import java.security.InvalidParameterException;
@@ -117,7 +131,7 @@ public class GatewayController {
 	public String getPublicKey() {
 		logger.debug("New public key GET request received...");
 		
-		return acquireAndConvertPublicKey();
+		return "\"" + acquireAndConvertPublicKey() + "\"";
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -426,7 +440,8 @@ public class GatewayController {
 	private ZonedDateTime createZonedDateTimeFromStringDateTime(final String dateTime) {
 		logger.debug("createZonedDateTimeFromStringDateTime started...");
 		
-		final String[] dateTimeSplit = dateTime.split(" ");
+		final String _dateTime = dateTime.substring(0, dateTime.length() - 1); // remove Z
+		final String[] dateTimeSplit = _dateTime.split("T");
 		final String[] date = dateTimeSplit[0].split("-");
 		final String[] time = dateTimeSplit[1].split(":");
 		return ZonedDateTime.of(Integer.valueOf(date[0]), Integer.valueOf(date[1]), Integer.valueOf(date[2]), Integer.valueOf(time[0]), Integer.valueOf(time[1]), Integer.valueOf(time[2]), 0,

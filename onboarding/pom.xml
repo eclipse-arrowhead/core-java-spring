@@ -71,15 +71,15 @@
 		                  			<src>${project.build.directory}/${project.build.finalName}.jar</src>
 		                  			<mapper>
 		                    			<type>perm</type>
-		                    			<prefix>/usr/share/arrowhead/onboarding_controller</prefix>
+		                    			<prefix>/usr/share/arrowhead/onboardingcontroller</prefix>
 		                    			<filemode>755</filemode>
 		                  			</mapper>
 	                			</data>
 	                			
 	                			<data>
 		                  			<type>link</type>
-		                  			<linkName>/usr/share/arrowhead/onboarding_controller/${project.artifactId}.jar</linkName>
-		                  			<linkTarget>/usr/share/arrowhead/onboarding_controller/${project.build.finalName}.jar</linkTarget>
+		                  			<linkName>/usr/share/arrowhead/onboardingcontroller/${project.artifactId}.jar</linkName>
+		                  			<linkTarget>/usr/share/arrowhead/onboardingcontroller/${project.build.finalName}.jar</linkTarget>
 	                			</data>
 	                			
 	                			<data>
@@ -87,7 +87,7 @@
 	                				<src>${project.build.directory}/log4j2.xml</src>
 	                				<mapper>
 	                					<type>perm</type>
-	                					<prefix>/etc/arrowhead/systems/onboarding_controller</prefix>
+	                					<prefix>/etc/arrowhead/systems/onboardingcontroller</prefix>
 	                					<filemode>644</filemode>
 	                				</mapper>
 	                			</data>
@@ -97,15 +97,15 @@
 	                				<src>${project.build.directory}/application.properties</src>
 	                				<mapper>
 	                					<type>perm</type>
-	                					<prefix>/etc/arrowhead/systems/onboarding_controller</prefix>
+	                					<prefix>/etc/arrowhead/systems/onboardingcontroller</prefix>
 	                					<filemode>644</filemode>
 	                				</mapper>
 	                			</data>
 	                			
 	                			<data>
 	                				<type>link</type>
-	                				<linkName>/usr/share/arrowhead/onboarding_controller/application.properties</linkName>
-	                				<linkTarget>/etc/arrowhead/systems/onboarding_controller/application.properties</linkTarget>
+	                				<linkName>/usr/share/arrowhead/onboardingcontroller/application.properties</linkName>
+	                				<linkTarget>/etc/arrowhead/systems/onboardingcontroller/application.properties</linkTarget>
 	                			</data>
 	                			
 	                			<data>

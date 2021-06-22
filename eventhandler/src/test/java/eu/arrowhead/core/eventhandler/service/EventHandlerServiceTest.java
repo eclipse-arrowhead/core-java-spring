@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.eventhandler.service;
 
 import static org.junit.Assert.assertEquals;
@@ -71,12 +85,12 @@ public class EventHandlerServiceTest {
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
 		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
-		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
+		doNothing().when(eventHandlerDBService).forceRegisterSubscription(any(), any());
 	
 		eventHandlerService.subscribe(request);
 		
 		verify(eventHandlerDriver, times(1)).getAuthorizedPublishers(any());
-		verify(eventHandlerDBService, times(1)).registerSubscription(any(), any());
+		verify(eventHandlerDBService, times(1)).forceRegisterSubscription(any(), any());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -86,7 +100,7 @@ public class EventHandlerServiceTest {
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
 		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
-		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
+		doNothing().when(eventHandlerDBService).forceRegisterSubscription(any(), any());
 	
 		eventHandlerService.subscribe(request);
 	}
@@ -99,7 +113,7 @@ public class EventHandlerServiceTest {
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
 		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
-		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
+		doNothing().when(eventHandlerDBService).forceRegisterSubscription(any(), any());
 	
 		eventHandlerService.subscribe(request);
 	}
@@ -112,7 +126,7 @@ public class EventHandlerServiceTest {
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
 		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
-		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
+		doNothing().when(eventHandlerDBService).forceRegisterSubscription(any(), any());
 	
 		eventHandlerService.subscribe(request);
 	}
@@ -125,7 +139,7 @@ public class EventHandlerServiceTest {
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
 		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
-		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
+		doNothing().when(eventHandlerDBService).forceRegisterSubscription(any(), any());
 	
 		eventHandlerService.subscribe(request);
 	}
@@ -138,7 +152,7 @@ public class EventHandlerServiceTest {
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
 		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
-		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
+		doNothing().when(eventHandlerDBService).forceRegisterSubscription(any(), any());
 	
 		eventHandlerService.subscribe(request);
 	}
@@ -152,7 +166,7 @@ public class EventHandlerServiceTest {
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
 		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
-		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
+		doNothing().when(eventHandlerDBService).forceRegisterSubscription(any(), any());
 	
 		eventHandlerService.subscribe(request);
 	}
@@ -166,7 +180,7 @@ public class EventHandlerServiceTest {
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
 		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
-		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
+		doNothing().when(eventHandlerDBService).forceRegisterSubscription(any(), any());
 	
 		eventHandlerService.subscribe(request);
 	}
@@ -180,7 +194,7 @@ public class EventHandlerServiceTest {
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
 		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
-		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
+		doNothing().when(eventHandlerDBService).forceRegisterSubscription(any(), any());
 	
 		eventHandlerService.subscribe(request);
 	}
@@ -194,7 +208,7 @@ public class EventHandlerServiceTest {
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
 		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
-		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
+		doNothing().when(eventHandlerDBService).forceRegisterSubscription(any(), any());
 	
 		eventHandlerService.subscribe(request);
 	}
@@ -210,7 +224,7 @@ public class EventHandlerServiceTest {
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
 		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
-		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
+		doNothing().when(eventHandlerDBService).forceRegisterSubscription(any(), any());
 	
 		try {
 			eventHandlerService.subscribe(request);
@@ -228,7 +242,7 @@ public class EventHandlerServiceTest {
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
 		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
-		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
+		doNothing().when(eventHandlerDBService).forceRegisterSubscription(any(), any());
 	
 		try {
 			eventHandlerService.subscribe(request);
@@ -246,7 +260,7 @@ public class EventHandlerServiceTest {
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
 		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
-		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
+		doNothing().when(eventHandlerDBService).forceRegisterSubscription(any(), any());
 	
 		try {
 			eventHandlerService.subscribe(request);
@@ -264,7 +278,7 @@ public class EventHandlerServiceTest {
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
 		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
-		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
+		doNothing().when(eventHandlerDBService).forceRegisterSubscription(any(), any());
 	
 		try {
 			eventHandlerService.subscribe(request);
@@ -282,7 +296,7 @@ public class EventHandlerServiceTest {
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
 		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
-		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
+		doNothing().when(eventHandlerDBService).forceRegisterSubscription(any(), any());
 	
 		try {
 			eventHandlerService.subscribe(request);
@@ -300,7 +314,7 @@ public class EventHandlerServiceTest {
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
 		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
-		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
+		doNothing().when(eventHandlerDBService).forceRegisterSubscription(any(), any());
 	
 		try {
 			eventHandlerService.subscribe(request);
@@ -318,7 +332,7 @@ public class EventHandlerServiceTest {
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
 		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
-		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
+		doNothing().when(eventHandlerDBService).forceRegisterSubscription(any(), any());
 	
 		try {
 			eventHandlerService.subscribe(request);
@@ -336,7 +350,7 @@ public class EventHandlerServiceTest {
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
 		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
-		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
+		doNothing().when(eventHandlerDBService).forceRegisterSubscription(any(), any());
 	
 		try {
 			eventHandlerService.subscribe(request);
@@ -667,7 +681,7 @@ public class EventHandlerServiceTest {
 		
 		final Set<Subscription> involvedSubscriptions = getSubscriptionSet(7);
 		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-		request.setTimeStamp("3019-09-27 09:40:34");
+		request.setTimeStamp("3019-09-27T09:40:34Z");
 		
 		when(eventHandlerDBService.getInvolvedSubscriptions(any())).thenReturn(involvedSubscriptions);
 		doNothing().when(eventHandlerDriver).publishEvent(any(),any());
@@ -688,7 +702,7 @@ public class EventHandlerServiceTest {
 		
 		final Set<Subscription> involvedSubscriptions = getSubscriptionSet(7);
 		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-		request.setTimeStamp("1019-09-27 09:40:34");
+		request.setTimeStamp("1019-09-27T09:40:34Z");
 		
 		when(eventHandlerDBService.getInvolvedSubscriptions(any())).thenReturn(involvedSubscriptions);
 		doNothing().when(eventHandlerDriver).publishEvent(any(),any());

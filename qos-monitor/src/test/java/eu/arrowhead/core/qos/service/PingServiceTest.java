@@ -1,7 +1,20 @@
+/********************************************************************************
+ * Copyright (c) 2020 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.qos.service;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -10,7 +23,6 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.icmp4j.IcmpPingResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -53,18 +65,6 @@ public class PingServiceTest {
 	@Test(expected = InvalidParameterException.class)
 	public void testGetPingResponseListBlankAddress() {
 		pingService.getPingResponseList("    ");
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testGetPingResponseListInvalidAddress() {
-		when(pingMeasurementProperties.getTimeToRepeat()).thenReturn(1);
-		when(pingMeasurementProperties.getTimeout()).thenReturn(2000);
-		when(pingMeasurementProperties.getPacketSize()).thenReturn(32);
-		
-		final List<IcmpPingResponse> responseList = pingService.getPingResponseList("invalid"); //IcmpPingUtil.executePingRequest(request) throws RuntimeException
-		assertEquals(1, responseList.size());
-		assertFalse(responseList.get(0).getSuccessFlag());
 	}
 	
 	//-------------------------------------------------------------------------------------------------

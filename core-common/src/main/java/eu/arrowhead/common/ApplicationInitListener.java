@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.common;
 
 import java.io.IOException;
@@ -8,6 +22,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +45,7 @@ import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.common.core.CoreSystemService.InterfaceData;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryRequestDTO;
@@ -48,7 +64,7 @@ public abstract class ApplicationInitListener {
 
 	protected final Logger logger = LogManager.getLogger(ApplicationInitListener.class);
 	
-	private static final int MAX_NUMBER_OF_SERVICE_REGISTRY_CONNECTION_RETRIES = 3;
+	private static final int MAX_NUMBER_OF_SERVICEREGISTRY_CONNECTION_RETRIES = 3;
 	private static final int WAITING_PERIOD_BETWEEN_RETRIES_IN_SECONDS = 15;
 
 	@Autowired
@@ -108,8 +124,7 @@ public abstract class ApplicationInitListener {
 		
 		int count = coreSystem.getServices().size();
 		for (final CoreSystemService coreService : coreSystem.getServices()) {
-			final UriComponents unregisterUri = createUnregisterUri(scheme, coreService, coreSystemRegistrationProperties.getCoreSystemDomainName(), 
-																    coreSystemRegistrationProperties.getCoreSystemDomainPort());
+			final UriComponents unregisterUri = createUnregisterUri(scheme, coreService, coreSystemRegistrationProperties.getCoreSystemDomainName(), coreSystemRegistrationProperties.getCoreSystemDomainPort());
 			try {
 				httpService.sendRequest(unregisterUri, HttpMethod.DELETE, Void.class);
 			} catch (final InvalidParameterException ex) {
@@ -204,14 +219,13 @@ public abstract class ApplicationInitListener {
 		}
 		
 		final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
-		checkServiceRegistryConnection(scheme, MAX_NUMBER_OF_SERVICE_REGISTRY_CONNECTION_RETRIES, WAITING_PERIOD_BETWEEN_RETRIES_IN_SECONDS);
+		checkServiceRegistryConnection(scheme, MAX_NUMBER_OF_SERVICEREGISTRY_CONNECTION_RETRIES, WAITING_PERIOD_BETWEEN_RETRIES_IN_SECONDS);
 		
 		final UriComponents queryUri = createQueryUri(scheme);
 		final UriComponents registerUri = createRegisterUri(scheme);
-		
 		final SystemRequestDTO coreSystemDTO = getCoreSystemRequestDTO();
+
 		for (final CoreSystemService coreService : coreSystem.getServices()) {
-			
 			final ServiceQueryFormDTO queryForm = new ServiceQueryFormDTO.Builder(coreService.getServiceDefinition()).build();
 			final ResponseEntity<ServiceQueryResultDTO> queryResponse = httpService.sendRequest(queryUri, HttpMethod.POST, ServiceQueryResultDTO.class, queryForm);
 			for (final ServiceRegistryResponseDTO result : queryResponse.getBody().getServiceQueryData()) { // old, possibly obsolete entries
@@ -228,7 +242,7 @@ public abstract class ApplicationInitListener {
 	
 	//-------------------------------------------------------------------------------------------------
 	private boolean skipSROperations(final CoreSystem coreSystem) {
-		return standaloneMode || CoreSystem.SERVICE_REGISTRY == coreSystem; 
+		return standaloneMode || CoreSystem.SERVICEREGISTRY == coreSystem; 
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -244,7 +258,7 @@ public abstract class ApplicationInitListener {
 			} catch (final AuthException ex) {
 				throw ex;
 			} catch (final ArrowheadException ex) {
-				if (i == MAX_NUMBER_OF_SERVICE_REGISTRY_CONNECTION_RETRIES) {
+				if (i == MAX_NUMBER_OF_SERVICEREGISTRY_CONNECTION_RETRIES) {
 					throw ex;
 				} else {
 					logger.info("Service Registry is unavailable at the moment, retrying in {} seconds...", period);
@@ -274,7 +288,7 @@ public abstract class ApplicationInitListener {
 	private ServiceRegistryRequestDTO getCoreSystemServiceRegistryRequestDTO(final SystemRequestDTO coreSystemDTO, final CoreSystemService coreSystemService) {
 		logger.debug("getCoreSystemServiceRegistryRequestDTO started...");
 		
-		final List<String> interfaces = sslProperties.isSslEnabled() ? List.of(CommonConstants.HTTP_SECURE_JSON) : List.of(CommonConstants.HTTP_INSECURE_JSON);
+		final List<String> interfaces = collectInterfaces(coreSystemService);
 		final ServiceRegistryRequestDTO result = new ServiceRegistryRequestDTO();
 		result.setProviderSystem(coreSystemDTO);
 		result.setServiceDefinition(coreSystemService.getServiceDefinition());
@@ -286,10 +300,28 @@ public abstract class ApplicationInitListener {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	private List<String> collectInterfaces(final CoreSystemService service) {
+		logger.debug("collectInterfaces started...");
+		
+		final List<InterfaceData> interfaces = service.getInterfaces();
+		if (interfaces == null || interfaces.isEmpty()) {
+			return sslProperties.isSslEnabled() ? List.of(CommonConstants.HTTP_SECURE_JSON) : List.of(CommonConstants.HTTP_INSECURE_JSON);
+		}
+		
+		final String security = sslProperties.isSslEnabled() ? CommonConstants.SECURE_INTF : CommonConstants.INSECURE_INTF;
+		final List<String> result = new ArrayList<>(interfaces.size());
+		for (final InterfaceData interfaceData : interfaces) {
+			result.add(interfaceData.getProtocol() + security + interfaceData.getFormat());
+		}
+		
+		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	private UriComponents createEchoUri(final String scheme) {
 		logger.debug("createEchoUri started...");
 				
-		final String echoUriStr = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.ECHO_URI;
+		final String echoUriStr = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.ECHO_URI;
 		return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), echoUriStr);
 	}
 	
@@ -297,7 +329,7 @@ public abstract class ApplicationInitListener {
 	private UriComponents createRegisterUri(final String scheme) {
 		logger.debug("createRegisterUri started...");
 				
-		final String registerUriStr = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI;
+		final String registerUriStr = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_REGISTER_URI;
 		return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), registerUriStr);
 	}
 	
@@ -305,12 +337,13 @@ public abstract class ApplicationInitListener {
 	private UriComponents createUnregisterUri(final String scheme, final CoreSystemService coreSystemService, final String address, final int port) {
 		logger.debug("createUnregisterUri started...");
 		
-		final String unregisterUriStr = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI;
-		final MultiValueMap<String,String> queryMap = new LinkedMultiValueMap<>(4);
-		queryMap.put(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME, List.of(coreSystemRegistrationProperties.getCoreSystem().name().toLowerCase()));
-		queryMap.put(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS, List.of(address));
-		queryMap.put(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT, List.of(String.valueOf(port)));
-		queryMap.put(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION, List.of(coreSystemService.getServiceDefinition()));
+		final String unregisterUriStr = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_URI;
+		final MultiValueMap<String,String> queryMap = new LinkedMultiValueMap<>(5);
+		queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME, List.of(coreSystemRegistrationProperties.getCoreSystem().name().toLowerCase()));
+		queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS, List.of(address));
+		queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT, List.of(String.valueOf(port)));
+		queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION, List.of(coreSystemService.getServiceDefinition()));
+		queryMap.put(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_URI, List.of(coreSystemService.getServiceUri()));
 		
 		return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), queryMap, unregisterUriStr);
 	}
@@ -337,7 +370,7 @@ public abstract class ApplicationInitListener {
 	private UriComponents createQueryUri(final String scheme) {
 		logger.debug("createQueryUri started...");
 				
-		final String registerUriStr = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI;
+		final String registerUriStr = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_QUERY_URI;
 		return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), registerUriStr);
 	}
 }

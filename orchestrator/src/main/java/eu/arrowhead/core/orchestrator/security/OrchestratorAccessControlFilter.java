@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.orchestrator.security;
 
 import java.util.Map;
@@ -36,6 +50,11 @@ public class OrchestratorAccessControlFilter extends CoreSystemAccessControlFilt
 			// Only the local Gatekeeper can use these methods
 			final CoreSystem[] allowedCoreSystems = { CoreSystem.GATEKEEPER };
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystems, requestTarget);
+		} else if (requestTarget.contains(CommonConstants.OP_ORCH_CREATE_FLEXIBLE_STORE_RULES_URI) || requestTarget.contains(CommonConstants.OP_ORCH_REMOVE_FLEXIBLE_STORE_RULE_URI) ||
+				   requestTarget.contains(CommonConstants.OP_ORCH_CLEAN_FLEXIBLE_STORE_URI)) {
+			// Only the local PlantDescriptionEngine can use these methods
+			final CoreSystem[] allowedCoreSystems = { CoreSystem.PLANTDESCRIPTIONENGINE };
+			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystems, requestTarget);
 		} else if (Utilities.isEmpty(requestJSON)) {
 			// If request body is empty (example: GET..../orchestrator/{systemId}), than everybody in the local cloud can use these methods => no further check is necessary
 		} else {
@@ -56,7 +75,7 @@ public class OrchestratorAccessControlFilter extends CoreSystemAccessControlFilt
 	//-------------------------------------------------------------------------------------------------
 	private void checkIfRequesterSystemNameisEqualsWithClientNameFromCN(final String requesterSystemName, final String clientCN) {
 		final String clientNameFromCN = getClientNameFromCN(clientCN);
-		if (!requesterSystemName.equalsIgnoreCase(clientNameFromCN) && !requesterSystemName.replaceAll("_", "").equalsIgnoreCase(clientNameFromCN)) {
+		if (!requesterSystemName.equalsIgnoreCase(clientNameFromCN)) {
 			log.debug("Requester system name and client name from certificate do not match!");
 			throw new AuthException("Requester system name(" + requesterSystemName + ") and client name from certificate (" + clientNameFromCN + ") do not match!", HttpStatus.UNAUTHORIZED.value());
 		}

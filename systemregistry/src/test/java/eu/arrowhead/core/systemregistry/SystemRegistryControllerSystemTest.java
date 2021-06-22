@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2020 FHB
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   FHB - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.systemregistry;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -5,10 +19,12 @@ import eu.arrowhead.common.dto.internal.SystemListResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.core.systemregistry.database.service.SystemRegistryDBService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -50,9 +66,7 @@ public class SystemRegistryControllerSystemTest {
     private final static long UNKNOWN_SYSTEM_ID = 2L;
     private final static long NEGATIVE_SYSTEM_ID = -1L;
 
-    private final static SystemResponseDTO VALID_SYSTEM =
-            new SystemResponseDTO(VALID_SYSTEM_ID, "system", "address", 80,
-                                  "authenticationInfo", "2020-01-01T00:00:00", "2020-01-01T00:00:00");
+    private final static SystemResponseDTO VALID_SYSTEM = new SystemResponseDTO(VALID_SYSTEM_ID, "system", "address", 80, "authenticationInfo", null, "2020-01-01T00:00:00", "2020-01-01T00:00:00");
 
 
     //=================================================================================================
@@ -68,6 +82,9 @@ public class SystemRegistryControllerSystemTest {
 
     @MockBean(name = "mockSystemRegistryDBService")
     private SystemRegistryDBService systemRegistryDBService;
+    
+    @Spy
+    private NetworkAddressVerifier networkAddressVerifier;
 
     //=================================================================================================
     // methods
@@ -82,6 +99,7 @@ public class SystemRegistryControllerSystemTest {
     //=================================================================================================
     // Tests of system registry
 
+    //-------------------------------------------------------------------------------------------------
     @Test
     public void echoOnboarding() throws Exception {
         final MvcResult response = this.mockMvc.perform(get("/systemregistry/echo")
@@ -91,7 +109,8 @@ public class SystemRegistryControllerSystemTest {
         assertEquals("Got it!", response.getResponse().getContentAsString());
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void getSystemById() throws Exception {
         when(systemRegistryDBService.getSystemById(VALID_SYSTEM_ID)).thenReturn(VALID_SYSTEM);
         final MvcResult response = this.mockMvc.perform(get("/systemregistry/mgmt/system/" + VALID_SYSTEM_ID)
@@ -103,7 +122,8 @@ public class SystemRegistryControllerSystemTest {
         assertEquals(VALID_SYSTEM, responseDTO);
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void getSystemByUnknownId() throws Exception {
         when(systemRegistryDBService.getSystemById(UNKNOWN_SYSTEM_ID))
                 .thenThrow(new InvalidParameterException("System with id " + UNKNOWN_SYSTEM_ID + " not found."));
@@ -114,7 +134,8 @@ public class SystemRegistryControllerSystemTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void getSystemByNegativeId() throws Exception {
         this.mockMvc.perform(get("/systemregistry/mgmt/system/" + NEGATIVE_SYSTEM_ID)
                                      .accept(MediaType.APPLICATION_JSON))
@@ -122,7 +143,8 @@ public class SystemRegistryControllerSystemTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void getSystemsWithoutParameter() throws Exception {
         final SystemListResponseDTO systemListResponseDTO = new SystemListResponseDTO(List.of(VALID_SYSTEM), 1);
         when(systemRegistryDBService.getSystemEntries(any(), any())).thenReturn(systemListResponseDTO);
@@ -136,7 +158,8 @@ public class SystemRegistryControllerSystemTest {
         assertEquals(1, responseBody.getCount());
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void getSystemsWithPageAndSizeParameter() throws Exception {
         final SystemListResponseDTO systemListResponseDTO = new SystemListResponseDTO(List.of(VALID_SYSTEM), 1);
         when(systemRegistryDBService.getSystemEntries(any(), any())).thenReturn(systemListResponseDTO);
@@ -152,10 +175,11 @@ public class SystemRegistryControllerSystemTest {
         assertEquals(1, responseBody.getCount());
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void createSystemRequest() throws Exception {
-        final SystemRequestDTO dto = new SystemRequestDTO("system", "address", 80, "authenticationInfo");
-        when(systemRegistryDBService.createSystemDto(anyString(), anyString(), anyInt(), anyString())).thenReturn(VALID_SYSTEM);
+        final SystemRequestDTO dto = new SystemRequestDTO("system", "address", 80, "authenticationInfo", null);
+        when(systemRegistryDBService.createSystemDto(anyString(), anyString(), anyInt(), anyString(), any())).thenReturn(VALID_SYSTEM);
 
         final MvcResult response = this.mockMvc.perform(post("/systemregistry/mgmt/systems")
                                                               .accept(MediaType.APPLICATION_JSON)
@@ -166,9 +190,10 @@ public class SystemRegistryControllerSystemTest {
         assertEquals(VALID_SYSTEM, readResponse(response, SystemResponseDTO.class));
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void createSystemRequestNullPayload() throws Exception {
-        when(systemRegistryDBService.createSystemDto(anyString(), anyString(), anyInt(), anyString())).thenReturn(VALID_SYSTEM);
+        when(systemRegistryDBService.createSystemDto(anyString(), anyString(), anyInt(), anyString(), any())).thenReturn(VALID_SYSTEM);
 
         this.mockMvc.perform(post("/systemregistry/mgmt/systems")
                                      .accept(MediaType.APPLICATION_JSON)
@@ -178,10 +203,11 @@ public class SystemRegistryControllerSystemTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void createSystemRequestNullSystemName() throws Exception {
-        final SystemRequestDTO dto = new SystemRequestDTO(null, "address", 80, "authenticationInfo");
-        when(systemRegistryDBService.createSystemDto(anyString(), anyString(), anyInt(), anyString())).thenReturn(VALID_SYSTEM);
+        final SystemRequestDTO dto = new SystemRequestDTO(null, "address", 80, "authenticationInfo", null);
+        when(systemRegistryDBService.createSystemDto(anyString(), anyString(), anyInt(), anyString(), any())).thenReturn(VALID_SYSTEM);
 
         this.mockMvc.perform(post("/systemregistry/mgmt/systems")
                                      .accept(MediaType.APPLICATION_JSON)
@@ -191,10 +217,25 @@ public class SystemRegistryControllerSystemTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void createSystemRequestEmptySystemName() throws Exception {
-        final SystemRequestDTO dto = new SystemRequestDTO("", "address", 80, "authenticationInfo");
-        when(systemRegistryDBService.createSystemDto(anyString(), anyString(), anyInt(), anyString())).thenReturn(VALID_SYSTEM);
+        final SystemRequestDTO dto = new SystemRequestDTO("", "address", 80, "authenticationInfo", null);
+        when(systemRegistryDBService.createSystemDto(anyString(), anyString(), anyInt(), anyString(), any())).thenReturn(VALID_SYSTEM);
+
+        this.mockMvc.perform(post("/systemregistry/mgmt/systems")
+                                     .accept(MediaType.APPLICATION_JSON)
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+    }
+	
+    //-------------------------------------------------------------------------------------------------
+	@Test
+    public void createSystemRequestWrongSystemName() throws Exception {
+        final SystemRequestDTO dto = new SystemRequestDTO("invalid_format", "address", 80, "authenticationInfo", null);
+        when(systemRegistryDBService.createSystemDto(anyString(), anyString(), anyInt(), anyString(), any())).thenReturn(VALID_SYSTEM);
 
         this.mockMvc.perform(post("/systemregistry/mgmt/systems")
                                      .accept(MediaType.APPLICATION_JSON)
@@ -204,10 +245,11 @@ public class SystemRegistryControllerSystemTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void createSystemRequestNullAddress() throws Exception {
-        final SystemRequestDTO dto = new SystemRequestDTO("system", null, 80, "authenticationInfo");
-        when(systemRegistryDBService.createSystemDto(anyString(), anyString(), anyInt(), anyString())).thenReturn(VALID_SYSTEM);
+        final SystemRequestDTO dto = new SystemRequestDTO("system", null, 80, "authenticationInfo", null);
+        when(systemRegistryDBService.createSystemDto(anyString(), anyString(), anyInt(), anyString(), any())).thenReturn(VALID_SYSTEM);
 
         this.mockMvc.perform(post("/systemregistry/mgmt/systems")
                                      .accept(MediaType.APPLICATION_JSON)
@@ -217,10 +259,25 @@ public class SystemRegistryControllerSystemTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void createSystemRequestEmptyAddress() throws Exception {
-        final SystemRequestDTO dto = new SystemRequestDTO("system", "", 80, "authenticationInfo");
-        when(systemRegistryDBService.createSystemDto(anyString(), anyString(), anyInt(), anyString())).thenReturn(VALID_SYSTEM);
+        final SystemRequestDTO dto = new SystemRequestDTO("system", "", 80, "authenticationInfo", null);
+        when(systemRegistryDBService.createSystemDto(anyString(), anyString(), anyInt(), anyString(), any())).thenReturn(VALID_SYSTEM);
+
+        this.mockMvc.perform(post("/systemregistry/mgmt/systems")
+                                     .accept(MediaType.APPLICATION_JSON)
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+    }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+    public void createSystemRequestInvalidAddress() throws Exception {
+        final SystemRequestDTO dto = new SystemRequestDTO("system", "0.0.0.0", 80, "authenticationInfo", null);
+        when(systemRegistryDBService.createSystemDto(anyString(), anyString(), anyInt(), anyString(), any())).thenReturn(VALID_SYSTEM);
 
         this.mockMvc.perform(post("/systemregistry/mgmt/systems")
                                      .accept(MediaType.APPLICATION_JSON)
@@ -230,10 +287,11 @@ public class SystemRegistryControllerSystemTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void createSystemRequestNullPort() throws Exception {
-        final SystemRequestDTO dto = new SystemRequestDTO("system", "address", null, "authenticationInfo");
-        when(systemRegistryDBService.createSystemDto(anyString(), anyString(), anyInt(), anyString())).thenReturn(VALID_SYSTEM);
+        final SystemRequestDTO dto = new SystemRequestDTO("system", "address", null, "authenticationInfo", null);
+        when(systemRegistryDBService.createSystemDto(anyString(), anyString(), anyInt(), anyString(), any())).thenReturn(VALID_SYSTEM);
 
         this.mockMvc.perform(post("/systemregistry/mgmt/systems")
                                      .accept(MediaType.APPLICATION_JSON)
@@ -243,10 +301,11 @@ public class SystemRegistryControllerSystemTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void createSystemRequestZeroPort() throws Exception {
-        final SystemRequestDTO dto = new SystemRequestDTO("system", "address", 0, "authenticationInfo");
-        when(systemRegistryDBService.createSystemDto(anyString(), anyString(), anyInt(), anyString())).thenReturn(VALID_SYSTEM);
+        final SystemRequestDTO dto = new SystemRequestDTO("system", "address", 0, "authenticationInfo", null);
+        when(systemRegistryDBService.createSystemDto(anyString(), anyString(), anyInt(), anyString(), any())).thenReturn(VALID_SYSTEM);
 
         this.mockMvc.perform(post("/systemregistry/mgmt/systems/")
                                      .accept(MediaType.APPLICATION_JSON)
@@ -256,10 +315,11 @@ public class SystemRegistryControllerSystemTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void updateSystemRequest() throws Exception {
-        final SystemRequestDTO dto = new SystemRequestDTO("system", "address", 80, "authenticationInfo");
-        when(systemRegistryDBService.updateSystemDto(eq(VALID_SYSTEM_ID), anyString(), anyString(), anyInt(), anyString()))
+        final SystemRequestDTO dto = new SystemRequestDTO("system", "address", 80, "authenticationInfo", null);
+        when(systemRegistryDBService.updateSystemDto(eq(VALID_SYSTEM_ID), anyString(), anyString(), anyInt(), anyString(), any()))
                 .thenReturn(VALID_SYSTEM);
 
         final MvcResult response = this.mockMvc.perform(put("/systemregistry/mgmt/systems/" + VALID_SYSTEM_ID)
@@ -271,10 +331,11 @@ public class SystemRegistryControllerSystemTest {
         assertEquals(VALID_SYSTEM, readResponse(response, SystemResponseDTO.class));
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void updateSystemUnknownId() throws Exception {
-        final SystemRequestDTO dto = new SystemRequestDTO("system", "address", 80, "authenticationInfo");
-        when(systemRegistryDBService.updateSystemDto(eq(UNKNOWN_SYSTEM_ID), anyString(), anyString(), anyInt(), anyString()))
+        final SystemRequestDTO dto = new SystemRequestDTO("system", "address", 80, "authenticationInfo", null);
+        when(systemRegistryDBService.updateSystemDto(eq(UNKNOWN_SYSTEM_ID), anyString(), anyString(), anyInt(), anyString(), any()))
                 .thenThrow(new InvalidParameterException("No system with id : " + UNKNOWN_SYSTEM_ID));
 
         this.mockMvc.perform(put("/systemregistry/mgmt/systems/" + UNKNOWN_SYSTEM_ID)
@@ -285,9 +346,10 @@ public class SystemRegistryControllerSystemTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void updateSystemInvalidId() throws Exception {
-        final SystemRequestDTO dto = new SystemRequestDTO("system", "address", 80, "authenticationInfo");
+        final SystemRequestDTO dto = new SystemRequestDTO("system", "address", 80, "authenticationInfo", null);
 
         this.mockMvc.perform(put("/systemregistry/mgmt/systems/" + NEGATIVE_SYSTEM_ID)
                                      .accept(MediaType.APPLICATION_JSON)
@@ -297,9 +359,10 @@ public class SystemRegistryControllerSystemTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void updateSystemRequestNullPayload() throws Exception {
-        when(systemRegistryDBService.updateSystemDto(eq(VALID_SYSTEM_ID), anyString(), anyString(), anyInt(), anyString()))
+        when(systemRegistryDBService.updateSystemDto(eq(VALID_SYSTEM_ID), anyString(), anyString(), anyInt(), anyString(), any()))
                 .thenReturn(VALID_SYSTEM);
         this.mockMvc.perform(put("/systemregistry/mgmt/systems/" + VALID_SYSTEM_ID)
                                      .accept(MediaType.APPLICATION_JSON)
@@ -309,9 +372,10 @@ public class SystemRegistryControllerSystemTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void updateSystemRequestNullSystemName() throws Exception {
-        final SystemRequestDTO dto = new SystemRequestDTO(null, "address", 80, "authenticationInfo");
+        final SystemRequestDTO dto = new SystemRequestDTO(null, "address", 80, "authenticationInfo", null);
         this.mockMvc.perform(put("/systemregistry/mgmt/systems/" + VALID_SYSTEM_ID)
                                      .accept(MediaType.APPLICATION_JSON)
                                      .contentType(MediaType.APPLICATION_JSON)
@@ -320,9 +384,22 @@ public class SystemRegistryControllerSystemTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void updateSystemRequestEmptySystemName() throws Exception {
-        final SystemRequestDTO dto = new SystemRequestDTO("", "address", 80, "authenticationInfo");
+        final SystemRequestDTO dto = new SystemRequestDTO("", "address", 80, "authenticationInfo", null);
+        this.mockMvc.perform(put("/systemregistry/mgmt/systems/" + VALID_SYSTEM_ID)
+                                     .accept(MediaType.APPLICATION_JSON)
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+    }
+	
+    //-------------------------------------------------------------------------------------------------
+	@Test
+    public void updateSystemRequestWrongSystemName() throws Exception {
+        final SystemRequestDTO dto = new SystemRequestDTO("invalid.format", "address", 80, "authenticationInfo", null);
         this.mockMvc.perform(put("/systemregistry/mgmt/systems/" + VALID_SYSTEM_ID)
                                      .accept(MediaType.APPLICATION_JSON)
                                      .contentType(MediaType.APPLICATION_JSON)
@@ -331,9 +408,10 @@ public class SystemRegistryControllerSystemTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void updateSystemRequestNullAddress() throws Exception {
-        final SystemRequestDTO dto = new SystemRequestDTO("system", null, 80, "authenticationInfo");
+        final SystemRequestDTO dto = new SystemRequestDTO("system", null, 80, "authenticationInfo", null);
         this.mockMvc.perform(put("/systemregistry/mgmt/systems/" + VALID_SYSTEM_ID)
                                      .accept(MediaType.APPLICATION_JSON)
                                      .contentType(MediaType.APPLICATION_JSON)
@@ -342,9 +420,22 @@ public class SystemRegistryControllerSystemTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void updateSystemRequestEmptyAddress() throws Exception {
-        final SystemRequestDTO dto = new SystemRequestDTO("system", "", 80, "authenticationInfo");
+        final SystemRequestDTO dto = new SystemRequestDTO("system", "", 80, "authenticationInfo", null);
+        this.mockMvc.perform(put("/systemregistry/mgmt/systems/" + VALID_SYSTEM_ID)
+                                     .accept(MediaType.APPLICATION_JSON)
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+    }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+    public void updateSystemRequestInvalidAddress() throws Exception {
+        final SystemRequestDTO dto = new SystemRequestDTO("system", "0.0.0.0", 80, "authenticationInfo", null);
         this.mockMvc.perform(put("/systemregistry/mgmt/systems/" + VALID_SYSTEM_ID)
                                      .accept(MediaType.APPLICATION_JSON)
                                      .contentType(MediaType.APPLICATION_JSON)
@@ -353,9 +444,10 @@ public class SystemRegistryControllerSystemTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void updateSystemRequestNullPort() throws Exception {
-        final SystemRequestDTO dto = new SystemRequestDTO("system", "address", null, "authenticationInfo");
+        final SystemRequestDTO dto = new SystemRequestDTO("system", "address", null, "authenticationInfo", null);
         this.mockMvc.perform(put("/systemregistry/mgmt/systems/" + VALID_SYSTEM_ID)
                                      .accept(MediaType.APPLICATION_JSON)
                                      .contentType(MediaType.APPLICATION_JSON)
@@ -364,9 +456,10 @@ public class SystemRegistryControllerSystemTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void updateSystemRequestZeroPort() throws Exception {
-        final SystemRequestDTO dto = new SystemRequestDTO("system", "address", 0, "authenticationInfo");
+        final SystemRequestDTO dto = new SystemRequestDTO("system", "address", 0, "authenticationInfo", null);
         this.mockMvc.perform(put("/systemregistry/mgmt/systems/" + VALID_SYSTEM_ID)
                                      .accept(MediaType.APPLICATION_JSON)
                                      .contentType(MediaType.APPLICATION_JSON)
@@ -375,13 +468,14 @@ public class SystemRegistryControllerSystemTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void mergeSystemWithOneField() throws Exception {
         SystemRequestDTO dto = null;
-        when(systemRegistryDBService.mergeSystemResponse(eq(VALID_SYSTEM_ID), anyString(), anyString(), anyInt(), anyString())).thenReturn(VALID_SYSTEM);
+        when(systemRegistryDBService.mergeSystemResponse(eq(VALID_SYSTEM_ID), anyString(), anyString(), anyInt(), anyString(), any())).thenReturn(VALID_SYSTEM);
 
         dto = new SystemRequestDTO();
-        dto.setSystemName("not empty");
+        dto.setSystemName("not-empty");
         this.mockMvc.perform(patch("/systemregistry/mgmt/systems/" + VALID_SYSTEM_ID)
                                      .accept(MediaType.APPLICATION_JSON)
                                      .contentType(MediaType.APPLICATION_JSON)
@@ -399,7 +493,7 @@ public class SystemRegistryControllerSystemTest {
                     .andReturn();
 
         dto = new SystemRequestDTO();
-        dto.setAddress("not empty");
+        dto.setAddress("not-empty");
         this.mockMvc.perform(patch("/systemregistry/mgmt/systems/" + VALID_SYSTEM_ID)
                                      .accept(MediaType.APPLICATION_JSON)
                                      .contentType(MediaType.APPLICATION_JSON)
@@ -408,7 +502,7 @@ public class SystemRegistryControllerSystemTest {
                     .andReturn();
 
         dto = new SystemRequestDTO();
-        dto.setAuthenticationInfo("not empty");
+        dto.setAuthenticationInfo("not-empty");
         this.mockMvc.perform(patch("/systemregistry/mgmt/systems/" + VALID_SYSTEM_ID)
                                      .accept(MediaType.APPLICATION_JSON)
                                      .contentType(MediaType.APPLICATION_JSON)
@@ -417,10 +511,12 @@ public class SystemRegistryControllerSystemTest {
                     .andReturn();
     }
 
-    @Test
-    public void mergeSystemWithEmpty() throws Exception {
+    //-------------------------------------------------------------------------------------------------
+	@Test
+    public void mergeSystemWithWrongName() throws Exception {
         final SystemRequestDTO dto = new SystemRequestDTO();
-        when(systemRegistryDBService.mergeSystemResponse(eq(VALID_SYSTEM_ID), anyString(), anyString(), anyInt(), anyString())).thenReturn(VALID_SYSTEM);
+        dto.setSystemName("invalid_format");
+        when(systemRegistryDBService.mergeSystemResponse(eq(VALID_SYSTEM_ID), anyString(), anyString(), anyInt(), anyString(), any())).thenReturn(VALID_SYSTEM);
 
         this.mockMvc.perform(patch("/systemregistry/mgmt/systems/" + VALID_SYSTEM_ID)
                                      .accept(MediaType.APPLICATION_JSON)
@@ -429,11 +525,26 @@ public class SystemRegistryControllerSystemTest {
                     .andExpect(status().isBadRequest())
                     .andReturn();
     }
+	
+	   //-------------------------------------------------------------------------------------------------
+		@Test
+	    public void mergeSystemWithEmpty() throws Exception {
+	        final SystemRequestDTO dto = new SystemRequestDTO();
+	        when(systemRegistryDBService.mergeSystemResponse(eq(VALID_SYSTEM_ID), anyString(), anyString(), anyInt(), anyString(), any())).thenReturn(VALID_SYSTEM);
 
-    @Test
+	        this.mockMvc.perform(patch("/systemregistry/mgmt/systems/" + VALID_SYSTEM_ID)
+	                                     .accept(MediaType.APPLICATION_JSON)
+	                                     .contentType(MediaType.APPLICATION_JSON)
+	                                     .content(objectMapper.writeValueAsString(dto)))
+	                    .andExpect(status().isBadRequest())
+	                    .andReturn();
+	    }
+
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void mergeSystemUnknownId() throws Exception {
-        final SystemRequestDTO dto = new SystemRequestDTO("system", "address", 80, "authenticationInfo");
-        when(systemRegistryDBService.mergeSystemResponse(eq(UNKNOWN_SYSTEM_ID), anyString(), anyString(), anyInt(), anyString()))
+        final SystemRequestDTO dto = new SystemRequestDTO("system", "address", 80, "authenticationInfo", null);
+        when(systemRegistryDBService.mergeSystemResponse(eq(UNKNOWN_SYSTEM_ID), anyString(), anyString(), anyInt(), anyString(), any()))
                 .thenThrow(new InvalidParameterException("No system with id : " + UNKNOWN_SYSTEM_ID));
 
         this.mockMvc.perform(patch("/systemregistry/mgmt/systems/" + UNKNOWN_SYSTEM_ID)
@@ -444,9 +555,10 @@ public class SystemRegistryControllerSystemTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void mergeSystemInvalidId() throws Exception {
-        final SystemRequestDTO dto = new SystemRequestDTO("system", "address", 80, "authenticationInfo");
+        final SystemRequestDTO dto = new SystemRequestDTO("system", "address", 80, "authenticationInfo", null);
 
         this.mockMvc.perform(patch("/systemregistry/mgmt/systems/" + NEGATIVE_SYSTEM_ID)
                                      .accept(MediaType.APPLICATION_JSON)
@@ -455,8 +567,22 @@ public class SystemRegistryControllerSystemTest {
                     .andExpect(status().isBadRequest())
                     .andReturn();
     }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+    public void mergeSystemInvalidAddress() throws Exception {
+        final SystemRequestDTO dto = new SystemRequestDTO("system", "0.0.0.0", 80, "authenticationInfo", null);
 
-    @Test
+        this.mockMvc.perform(patch("/systemregistry/mgmt/systems/" + VALID_SYSTEM_ID)
+                                     .accept(MediaType.APPLICATION_JSON)
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void removeSystemInvalidId() throws Exception {
         this.mockMvc.perform(delete("/systemregistry/mgmt/systems/" + NEGATIVE_SYSTEM_ID)
                                      .accept(MediaType.APPLICATION_JSON)
@@ -465,7 +591,8 @@ public class SystemRegistryControllerSystemTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void removeSystemUnknownId() throws Exception {
         doThrow(new InvalidParameterException("No system with id : " + UNKNOWN_SYSTEM_ID))
                 .when(systemRegistryDBService)
@@ -478,7 +605,8 @@ public class SystemRegistryControllerSystemTest {
                     .andReturn();
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void removeSystem() throws Exception {
 
         this.mockMvc.perform(delete("/systemregistry/mgmt/systems/" + VALID_SYSTEM_ID)
@@ -487,10 +615,12 @@ public class SystemRegistryControllerSystemTest {
                     .andExpect(status().isOk())
                     .andReturn();
     }
+	
     //=================================================================================================
     // Tests of system registry
 
-    private <T> T readResponse(final MvcResult response, final Class<T> clz) throws IOException {
+    //-------------------------------------------------------------------------------------------------
+	private <T> T readResponse(final MvcResult response, final Class<T> clz) throws IOException {
         return objectMapper.readValue(response.getResponse().getContentAsString(), clz);
     }
 }

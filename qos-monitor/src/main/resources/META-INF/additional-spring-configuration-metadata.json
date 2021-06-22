@@ -65,16 +65,6 @@
     "description": "A description for 'ping.available_from_success_percent'"
   },
   {
-    "name": "ping.logMeasurementsToDB",
-    "type": "java.lang.Boolean",
-    "description": "A description for 'ping.logMeasurementsToDB'"
-  },
-  {
-    "name": "ping.logMeasurementsDetailsToDB",
-    "type": "java.lang.Boolean",
-    "description": "A description for 'ping.logMeasurementsDetailsToDB'"
-  },
-  {
     "name": "relay.test.time_to_repeat",
     "type": "java.lang.Byte",
     "description": "A description for 'relay.test.time_to_repeat'"
@@ -138,5 +128,115 @@
     "name": "relay_ping_ttl_interval_minutes",
     "type": "java.lang.Integer",
     "description": "A description for 'relay_ping_ttl_interval_minutes'"
+  },
+  {
+    "name": "relay_echo_ttl_interval_minutes",
+    "type": "java.lang.Integer",
+    "description": "A description for 'relay_echo_ttl_interval_minutes'"
+  },
+  {
+    "name": "relay.test.bad_gateway_retry_min",
+    "type": "java.lang.Integer",
+    "description": "A description for 'relay.test.bad_gateway_retry_min'"
+  },
+  {
+    "name": "default.min_response_time",
+    "type": "java.lang.Integer",
+    "description": "A description for 'default.min_response_time'"
+  },
+  {
+    "name": "default.max_response_time",
+    "type": "java.lang.Integer",
+    "description": "A description for 'default.max_response_time'"
+  },
+  {
+    "name": "default.mean_response_time_with_timeout",
+    "type": "java.lang.Integer",
+    "description": "A description for 'default.mean_response_time_with_timeout'"
+  },
+  {
+    "name": "default.mean_response_time_without_timeout",
+    "type": "java.lang.Integer",
+    "description": "A description for 'default.mean_response_time_without_timeout'"
+  },
+  {
+    "name": "default.jitter_with_timeout",
+    "type": "java.lang.Integer",
+    "description": "A description for 'default.jitter_with_timeout'"
+  },
+  {
+    "name": "default.jitter_without_timeout",
+    "type": "java.lang.Integer",
+    "description": "A description for 'default.jitter_without_timeout'"
+  },
+  {
+    "name": "default.lost_per_measurement_percent",
+    "type": "java.lang.Integer",
+    "description": "A description for 'default.lost_per_measurement_percent'"
+  },
+  {
+    "name": "http.client.socket.timeout",
+    "type": "java.lang.Integer",
+    "description": "A description for 'http.client.socket.timeout'"
+  },
+  {
+    "name": "http.client.connection.timeout",
+    "type": "java.lang.Integer",
+    "description": "A description for 'http.client.connection.timeout'"
+  },
+  {
+    "name": "http.client.connection.manager.timeout",
+    "type": "java.lang.Integer",
+    "description": "A description for 'http.client.connection.manager.timeout'"
+  },
+  {
+    "name": "http.client.connection.manager.timeout",
+    "type": "java.lang.Integer",
+    "description": "A description for 'http.client.connection.manager.timeout'"
+  },
+  {
+    "name": "monitor_provider_port",
+    "type": "java.lang.Integer",
+    "description": "A description for 'monitor_provider_port'"
+  },
+  {
+    "name": "monitor_provider_scheme",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'monitor_provider_secure'"
+  },
+  {
+    "name": "monitor_provider_path",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor_provider_path'"
+  },
+  {
+    "name": "monitor_provider_address",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor_provider_address'"
+  },
+  {
+    "name": "monitor_provider_type",
+    "type": "java.lang.Enum",
+    "description": "A description for 'monitor_provider_type'"
+  },
+  {
+    "name": "monitor_provider_name",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor_provider_name'"
+  },
+  {
+    "name": "monitor_provider_secure",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'monitor_provider_secure'"
+  },
+  {
+    "name": "request_max_retry",
+    "type": "java.lang.Integer",
+    "description": "A description for 'request_max_retry'"
+  },
+  {
+    "name": "request_sleep_period",
+    "type": "java.lang.Integer",
+    "description": "A description for 'request_sleep_period'"
   }
 ]}

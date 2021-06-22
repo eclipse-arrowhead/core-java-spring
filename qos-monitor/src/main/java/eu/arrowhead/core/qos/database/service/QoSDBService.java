@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2020 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.qos.database.service;
 
 import java.time.ZonedDateTime;
@@ -7,7 +21,6 @@ import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.icmp4j.IcmpPingResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -60,6 +73,7 @@ import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.dto.PingMeasurementCalculationsDTO;
 import eu.arrowhead.core.qos.dto.RelayEchoMeasurementCalculationsDTO;
 import eu.arrowhead.core.qos.dto.RelayEchoMeasurementDetailsDTO;
@@ -301,10 +315,10 @@ public class QoSDBService {
 			final QoSIntraPingMeasurementLogDetails measurementLogDetails = new QoSIntraPingMeasurementLogDetails();
 			measurementLogDetails.setMeasurementLog(measurementLogSaved);
 			measurementLogDetails.setMeasurementSequeneceNumber( measurementSequenece++ );
-			measurementLogDetails.setSuccessFlag(icmpPingResponse.getSuccessFlag());
-			measurementLogDetails.setTimeoutFlag(icmpPingResponse.getTimeoutFlag());
+			measurementLogDetails.setSuccessFlag(icmpPingResponse.isSuccessFlag());
+			measurementLogDetails.setTimeoutFlag(icmpPingResponse.isTimeoutFlag());
 			measurementLogDetails.setErrorMessage(icmpPingResponse.getErrorMessage());
-			measurementLogDetails.setThrowable(icmpPingResponse.getThrowable() == null ? null : icmpPingResponse.getThrowable().toString());
+			measurementLogDetails.setThrowable(icmpPingResponse.getThrowable() == null ? null : icmpPingResponse.getThrowable());
 			measurementLogDetails.setSize(icmpPingResponse.getSize());
 			measurementLogDetails.setTtl(icmpPingResponse.getTtl());
 			measurementLogDetails.setRtt(icmpPingResponse.getRtt());
@@ -644,10 +658,10 @@ public class QoSDBService {
 			final QoSInterDirectPingMeasurementLogDetails measurementLogDetails = new QoSInterDirectPingMeasurementLogDetails();
 			measurementLogDetails.setMeasurementLog(measurementLogSaved);
 			measurementLogDetails.setMeasurementSequeneceNumber( measurementSequenece++ );
-			measurementLogDetails.setSuccessFlag(icmpPingResponse.getSuccessFlag());
-			measurementLogDetails.setTimeoutFlag(icmpPingResponse.getTimeoutFlag());
+			measurementLogDetails.setSuccessFlag(icmpPingResponse.isSuccessFlag());
+			measurementLogDetails.setTimeoutFlag(icmpPingResponse.isTimeoutFlag());
 			measurementLogDetails.setErrorMessage(icmpPingResponse.getErrorMessage());
-			measurementLogDetails.setThrowable(icmpPingResponse.getThrowable() == null ? null : icmpPingResponse.getThrowable().toString());
+			measurementLogDetails.setThrowable(icmpPingResponse.getThrowable() == null ? null : icmpPingResponse.getThrowable());
 			measurementLogDetails.setSize(icmpPingResponse.getSize());
 			measurementLogDetails.setTtl(icmpPingResponse.getTtl());
 			measurementLogDetails.setRtt(icmpPingResponse.getRtt());

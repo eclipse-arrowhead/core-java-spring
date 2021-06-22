@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2020 Evopro
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Evopro - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.certificate_authority.security;
 
 import java.util.Map;
@@ -15,8 +29,9 @@ public class CAAccessControlFilter extends CoreSystemAccessControlFilter {
 
 	// =================================================================================================
 	// members
-	private static final CoreSystem[] allowedCoreSystemsForTrustedKeyHandling = { CoreSystem.ONBOARDING_CONTROLLER, CoreSystem.DEVICE_REGISTRY, CoreSystem.SYSTEM_REGISTRY };
-	private static final CoreSystem[] allowedCoreSystemsForCertificateHandling = { CoreSystem.ONBOARDING_CONTROLLER, CoreSystem.DEVICE_REGISTRY, CoreSystem.SYSTEM_REGISTRY };
+	
+	private static final CoreSystem[] allowedCoreSystemsForTrustedKeyHandling = { CoreSystem.ONBOARDINGCONTROLLER, CoreSystem.DEVICEREGISTRY, CoreSystem.SYSTEMREGISTRY };
+	private static final CoreSystem[] allowedCoreSystemsForCertificateHandling = { CoreSystem.ONBOARDINGCONTROLLER, CoreSystem.DEVICEREGISTRY, CoreSystem.SYSTEMREGISTRY };
 
 	// =================================================================================================
 	// assistant methods
@@ -46,10 +61,11 @@ public class CAAccessControlFilter extends CoreSystemAccessControlFilter {
 		}
 	}
 
+	//-------------------------------------------------------------------------------------------------
 	private void checkIfClientIsAnAllowedCoreSystemOrSysop(final String clientCN, final String cloudCN,
 			final CoreSystem[] allowedCoreSystems, final String requestTarget) {
 
-		boolean result = checkIfClientIsAnAllowedCoreSystemNoException(clientCN, cloudCN,
+		final boolean result = checkIfClientIsAnAllowedCoreSystemNoException(clientCN, cloudCN,
 				allowedCoreSystems, requestTarget);
 
 

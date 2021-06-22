@@ -14,17 +14,18 @@
 	<name>core-java-spring</name>
 	<description>Arrowhead Core Services using Spring Boot</description>
 
-	<url>https://github.com/arrowhead-f/core-java-spring</url>
+	<url>https://github.com/eclipse-arrowhead/core-java-spring</url>
 	<licenses>
     	<license>
-	     	<name>Apache License, Version 2.0</name>
-	     	<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+	     	<name>Eclipse Public License - v 2.0</name>
+	     	<url>https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt</url>
 	   </license>
   	</licenses>
   	
   	<modules>
 	    <module>core-common</module>
 	    <module>serviceregistry</module>
+	    <module>configuration</module>
 	    <module>authorization</module>
 	    <module>certificate-authority</module>
 	    <module>orchestrator</module>
@@ -41,10 +42,11 @@
 	    <module>deb-installer</module>
 	    <module>docker-all</module>
 		<module>translator</module>
+		<module>plantdescriptionengine</module>
   	</modules>
   	
 	<properties>
-		<base.version>4.2.0</base.version>
+		<base.version>4.4.0</base.version>
 		<revision>${base.version}</revision>
 		<java.version>11</java.version>
 		<mvn.clean.version>3.1.0</mvn.clean.version>
@@ -63,7 +65,6 @@
   		<jms.api.version>2.0.1</jms.api.version>
   		<activemq.client.version>5.15.9</activemq.client.version>
 		<bouncy.castle.version>1.64</bouncy.castle.version>
-  		<icmp4j.version>1.2</icmp4j.version>
   		<jna.version>5.5.0</jna.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -78,7 +79,7 @@
             <id>jenkins-repo</id>
             <name>Jenkins Repository</name>
 			<url>https://repo.jenkins-ci.org/public/</url>
-        </repository>	
+        </repository>
     </repositories>
 
 	<dependencies>
@@ -182,11 +183,6 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<dependency>
-        	<groupId>sheltekio.javalibs</groupId>
-        	<artifactId>icmp4j</artifactId>
-        	<version>${icmp4j.version}</version>
-    	</dependency>
     	<dependency>
         	<groupId>net.java.dev.jna</groupId>
         	<artifactId>jna</artifactId>
@@ -221,6 +217,11 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

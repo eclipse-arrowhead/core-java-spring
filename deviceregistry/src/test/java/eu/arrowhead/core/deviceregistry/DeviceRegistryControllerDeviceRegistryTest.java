@@ -1,14 +1,36 @@
+/********************************************************************************
+ * Copyright (c) 2020 FHB
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   FHB - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.deviceregistry;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.arrowhead.common.database.service.CommonDBService;
-import eu.arrowhead.common.dto.internal.DeviceRegistryListResponseDTO;
-import eu.arrowhead.common.dto.shared.DeviceRegistryRequestDTO;
-import eu.arrowhead.common.dto.shared.DeviceRegistryResponseDTO;
-import eu.arrowhead.common.dto.shared.DeviceRequestDTO;
-import eu.arrowhead.common.dto.shared.DeviceResponseDTO;
-import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.core.deviceregistry.database.service.DeviceRegistryDBService;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,23 +45,15 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import eu.arrowhead.common.dto.internal.DeviceRegistryListResponseDTO;
+import eu.arrowhead.common.dto.shared.DeviceRegistryRequestDTO;
+import eu.arrowhead.common.dto.shared.DeviceRegistryResponseDTO;
+import eu.arrowhead.common.dto.shared.DeviceRequestDTO;
+import eu.arrowhead.common.dto.shared.DeviceResponseDTO;
+import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.core.deviceregistry.database.service.DeviceRegistryDBService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest

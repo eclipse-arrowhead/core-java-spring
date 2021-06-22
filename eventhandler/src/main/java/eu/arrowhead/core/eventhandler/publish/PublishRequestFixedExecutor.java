@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.eventhandler.publish;
 
 import java.time.ZonedDateTime;
@@ -24,7 +38,7 @@ public class PublishRequestFixedExecutor {
 	//=================================================================================================
 	// members
 	
-	@Value(CoreCommonConstants.$EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS_WD)
+	@Value(CoreCommonConstants.$EVENTHANDLER_MAX_EXPRESS_SUBSCRIBERS_WD)
 	private int maxExpressSubscribers;
 	
 	private static final int MAX_THREAD_POOL_SIZE = 20;
@@ -40,7 +54,6 @@ public class PublishRequestFixedExecutor {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------	
-	
 	@PostConstruct
 	public void init() {
 		logger.debug("PublishRequestFixedExecutor.init started...");

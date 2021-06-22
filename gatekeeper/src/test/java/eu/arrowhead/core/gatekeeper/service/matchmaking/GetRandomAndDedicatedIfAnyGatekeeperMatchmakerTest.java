@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.gatekeeper.service.matchmaking;
 
 import static org.junit.Assert.assertEquals;
@@ -14,9 +28,6 @@ import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.dto.internal.RelayType;
-import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingAlgorithm;
-import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingParameters;
-import eu.arrowhead.core.gatekeeper.service.matchmaking.GetRandomAndDedicatedIfAnyGatekeeperMatchmaker;
 
 @RunWith(SpringRunner.class)
 public class GetRandomAndDedicatedIfAnyGatekeeperMatchmakerTest {

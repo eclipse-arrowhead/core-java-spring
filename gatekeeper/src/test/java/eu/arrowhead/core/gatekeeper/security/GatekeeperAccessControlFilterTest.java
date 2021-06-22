@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.gatekeeper.security;
 
 import static org.junit.Assume.assumeTrue;
@@ -178,7 +192,7 @@ public class GatekeeperAccessControlFilterTest {
 	public void testPullCloudsCertificateQoSMonitor() throws Exception {
 		this.mockMvc.perform(get(GATEKEEPER_PULL_CLOUDS_URI)
 				    .secure(true)
-					.with(x509("certificates/qos_monitor.pem"))
+					.with(x509("certificates/qosmonitor.pem"))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isOk());
 	}
@@ -198,7 +212,7 @@ public class GatekeeperAccessControlFilterTest {
 	public void testCollectSystemAddressesCertificateQoSMonitor() throws Exception {
 		this.mockMvc.perform(post(GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_URI)
 				    .secure(true)
-					.with(x509("certificates/qos_monitor.pem"))
+					.with(x509("certificates/qosmonitor.pem"))
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(getCloudRequestDTO()))
 					.accept(MediaType.APPLICATION_JSON))
@@ -222,7 +236,7 @@ public class GatekeeperAccessControlFilterTest {
 	public void testCollectAccessTypesCertificateQoSMonitor() throws Exception {
 		this.mockMvc.perform(post(GATEKEEPER_COLLECT_ACCESS_TYPES_URI)
 				    .secure(true)
-					.with(x509("certificates/qos_monitor.pem"))
+					.with(x509("certificates/qosmonitor.pem"))
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(List.of(getCloudRequestDTO())))
 					.accept(MediaType.APPLICATION_JSON))
@@ -246,7 +260,7 @@ public class GatekeeperAccessControlFilterTest {
 	public void testGetCloudTypesCertificateQoSMonitor() throws Exception {
 		this.mockMvc.perform(get(GATEKEEPER_GET_CLOUD_URI + "/operator/  ")
 				    .secure(true)
-					.with(x509("certificates/qos_monitor.pem"))
+					.with(x509("certificates/qosmonitor.pem"))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest()); //BadRequest means that request gone through on the filter
 	}

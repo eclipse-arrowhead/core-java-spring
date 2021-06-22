@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.authorization;
 
 import static org.junit.Assert.assertEquals;
@@ -493,13 +507,13 @@ public class AuthorizationControllerIntraCloudTest {
 	//-------------------------------------------------------------------------------------------------
 	private Page<AuthorizationIntraCloud> createPageForMockingAuthorizationDBService(final int numberOfRequestedEntry) {
 		final List<AuthorizationIntraCloud> entries = new ArrayList<>(numberOfRequestedEntry);
-		final System consumer = new System("Consumer", "0.0.0.0.", 1000, null);
+		final System consumer = new System("Consumer", "0.0.0.0.", 1000, null, null);
 		consumer.setId(1);
 		
 		for (int i = 1; i <= numberOfRequestedEntry; ++i) {
 			final ServiceDefinition serviceDefinition = new ServiceDefinition("testService" + i);
 			serviceDefinition.setId(i);
-			final System provider = new System("Provider" + i, i + "." + i + "." + i + "." + i, i * 1000, null);
+			final System provider = new System("Provider" + i, i + "." + i + "." + i + "." + i, i * 1000, null, null);
 			provider.setId(i);
 			final AuthorizationIntraCloud entry = new AuthorizationIntraCloud(consumer, provider, serviceDefinition);
 			entry.setId(i);

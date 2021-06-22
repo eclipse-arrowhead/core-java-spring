@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2020 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.qos.quartz.task;
 
 import java.time.ZonedDateTime;
@@ -11,7 +25,6 @@ import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.icmp4j.IcmpPingResponse;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -37,6 +50,7 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
+import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.dto.PingMeasurementCalculationsDTO;
 import eu.arrowhead.core.qos.measurement.properties.PingMeasurementProperties;
 import eu.arrowhead.core.qos.service.PingService;
@@ -47,6 +61,7 @@ public class PingTask implements Job {
 
 	//=================================================================================================
 	// members
+	
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
 
 	private static final int INVALID_CALCULATION_VALUE = -1;
@@ -93,16 +108,11 @@ public class PingTask implements Job {
 
 			final String address = systemResponseDTO.getAddress();
 			if (pingCache.containsKey(address)) {
-
 				copyCalculationsToPingMeasurement(systemResponseDTO, pingCache.get(address));
-
-			}else {
-
+			} else {
 				final PingMeasurementCalculationsDTO calculations = pingSystem(systemResponseDTO);
 				pingCache.put(address, calculations);
-
 			}
-
 		}
 
 		logger.debug("Finished: ping task success");
@@ -116,10 +126,10 @@ public class PingTask implements Job {
 		logger.debug("getSystemToMeasure started...");
 
 		final ServiceRegistryListResponseDTO serviceRegistryListResponseDTO = queryServiceRegistryAll();
-		if(serviceRegistryListResponseDTO == null || serviceRegistryListResponseDTO.getData() == null ||  serviceRegistryListResponseDTO.getData().isEmpty()) {
-
+		if (serviceRegistryListResponseDTO == null || serviceRegistryListResponseDTO.getData() == null ||  serviceRegistryListResponseDTO.getData().isEmpty()) {
 			return null;
 		}
+		
 		final List<SystemResponseDTO> systemList = serviceRegistryListResponseDTO.getData().stream().map(ServiceRegistryResponseDTO::getProvider).collect(Collectors.toList());
 
 		return systemList;
@@ -142,8 +152,7 @@ public class PingTask implements Job {
 		int meanResponseTimeWithoutTimeoutMembersCount = 0;
 
 		for (final IcmpPingResponse icmpPingResponse : responseList) {
-
-			final boolean successFlag = icmpPingResponse.getSuccessFlag();
+			final boolean successFlag = icmpPingResponse.isSuccessFlag();
 
 			if (successFlag) {
 				++receivedInThisPing;
@@ -160,7 +169,6 @@ public class PingTask implements Job {
 				sumOfDurationForMeanResponseTimeWithoutTimeout += duration;
 				sumOfDurationForMeanResponseTimeWithTimeout += duration;
 				++meanResponseTimeWithoutTimeoutMembersCount;
-
 			} else {
 				sumOfDurationForMeanResponseTimeWithTimeout += timeout;
 			}
@@ -175,8 +183,7 @@ public class PingTask implements Job {
 		double sumOfDiffsForJitterWithTimeout = 0;
 		double sumOfDiffsForJitterWithoutTimeout = 0;
 		for (final IcmpPingResponse icmpPingResponse : responseList) {
-
-			final boolean successFlag = icmpPingResponse.getSuccessFlag();
+			final boolean successFlag = icmpPingResponse.isSuccessFlag();
 			final double duration;
 			if (successFlag) {
 				 duration = icmpPingResponse.getDuration();
@@ -187,6 +194,7 @@ public class PingTask implements Job {
 
 			sumOfDiffsForJitterWithTimeout += Math.pow( (duration - meanResponseTimeWithTimeout), 2);
 		}
+		
 		final double jitterWithTimeout = responseList.size() < 1 ? INVALID_CALCULATION_VALUE : Math.sqrt(sumOfDiffsForJitterWithTimeout / responseList.size());
 		final double jitterWithoutTimeout =  meanResponseTimeWithoutTimeoutMembersCount < 1 ? INVALID_CALCULATION_VALUE : Math.sqrt(sumOfDiffsForJitterWithoutTimeout / meanResponseTimeWithoutTimeoutMembersCount );
 
@@ -247,37 +255,29 @@ public class PingTask implements Job {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private PingMeasurementCalculationsDTO handlePingMeasurement(final QoSIntraMeasurement measurement,
-			final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
+	private PingMeasurementCalculationsDTO handlePingMeasurement(final QoSIntraMeasurement measurement, final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
 		logger.debug("handelPingMeasurement started...");
 
 		final PingMeasurementCalculationsDTO calculationsDTO = calculatePingMeasurementValues(responseList, aroundNow);
 		final Optional<QoSIntraPingMeasurement> pingMeasurementOptional = qoSDBService.getIntraPingMeasurementByMeasurement(measurement);
 
 		if (pingMeasurementOptional.isEmpty()) {
-
 			qoSDBService.createIntraPingMeasurement(measurement, calculationsDTO, aroundNow);
 
 			if (pingMeasurementProperties.getLogMeasurementsToDB()) {
-
 				final QoSIntraPingMeasurementLog measurementLogSaved = qoSDBService.logIntraMeasurementToDB(measurement.getSystem().getAddress(), calculationsDTO, aroundNow);
 
 				if (pingMeasurementProperties.getLogMeasurementsDetailsToDB() && measurementLogSaved != null) {
-
 					qoSDBService.logIntraMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
 				}
 			}
-
 		} else {
-
 			qoSDBService.updateIntraPingMeasurement(measurement, calculationsDTO, pingMeasurementOptional.get(), aroundNow);
 
-			if(pingMeasurementProperties.getLogMeasurementsToDB()) {
-
+			if (pingMeasurementProperties.getLogMeasurementsToDB()) {
 				final QoSIntraPingMeasurementLog measurementLogSaved = qoSDBService.logIntraMeasurementToDB(measurement.getSystem().getAddress(), calculationsDTO, aroundNow);
 
-				if(pingMeasurementProperties.getLogMeasurementsDetailsToDB() && measurementLogSaved != null) {
-
+				if (pingMeasurementProperties.getLogMeasurementsDetailsToDB() && measurementLogSaved != null) {
 					qoSDBService.logIntraMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
 				}
 			}
@@ -293,13 +293,9 @@ public class PingTask implements Job {
 		final Optional<QoSIntraPingMeasurement> pingMeasurementOptional = qoSDBService.getIntraPingMeasurementByMeasurement(measurement);
 
 		if (pingMeasurementOptional.isEmpty()) {
-
 			qoSDBService.createIntraPingMeasurement(measurement, calculationsDTO, aroundNow);
-
 		} else {
-
 			qoSDBService.updateIntraPingMeasurement(measurement, calculationsDTO, pingMeasurementOptional.get(), aroundNow);
-
 		}
 
 	}
@@ -313,14 +309,10 @@ public class PingTask implements Job {
 			final ResponseEntity<ServiceRegistryListResponseDTO> response = httpService.sendRequest(queryBySystemDTOUri, HttpMethod.GET, ServiceRegistryListResponseDTO.class);
 
 			return response.getBody();
-
 		} catch (final ArrowheadException ex) {
-
 			logger.debug("Exception: " + ex.getMessage());
 			throw ex;
-
 		}
-
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -347,5 +339,4 @@ public class PingTask implements Job {
 
 		return availableFromSuccessPercent <= Math.round(availablePercent);
 	}
-
 }
