@@ -247,7 +247,7 @@ public class ServiceRegistryDBServiceSystemTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void updateSystemByIdInvalidIdTest() {
 		final String systemName0 = "testSystemName0";
 		final String address0 = "testAddress0";
@@ -355,7 +355,7 @@ public class ServiceRegistryDBServiceSystemTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void mergeSystemByIdInvalidIdTest() {
 		final String systemName0 = "testSystemName0";
 		final String address0 = "testAddress0";

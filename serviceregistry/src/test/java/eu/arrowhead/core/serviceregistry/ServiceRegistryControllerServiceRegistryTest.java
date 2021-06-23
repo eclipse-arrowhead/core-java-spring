@@ -919,7 +919,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S2699") // because of false positive in sonar
 	@Test
-	public void testQqueryServiceRegistryEntriesByServiceDefinitonListOk() throws Exception {
+	public void testQueryServiceRegistryEntriesByServiceDefinitonListOk() throws Exception {
 		when(serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinitonListResponse(any())).thenReturn(new ServiceRegistryListResponseDTO());
 		postQueryServicesByDefinitions(List.of("service-def"), status().isOk());
 	}
@@ -927,7 +927,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S2699") // because of false positive in sonar
 	@Test
-	public void testQqueryServiceRegistryEntriesByServiceDefinitonListWithNull() throws Exception {
+	public void testQueryServiceRegistryEntriesByServiceDefinitonListWithNull() throws Exception {
 		when(serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinitonListResponse(any())).thenReturn(new ServiceRegistryListResponseDTO());
 		final List<String> definitions = new ArrayList<>(1);
 		definitions.add(null);
@@ -941,7 +941,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S2699") // because of false positive in sonar
 	@Test
-	public void testQqueryServiceRegistryEntriesByServiceDefinitonListWithBlank() throws Exception {
+	public void testQueryServiceRegistryEntriesByServiceDefinitonListWithBlank() throws Exception {
 		when(serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinitonListResponse(any())).thenReturn(new ServiceRegistryListResponseDTO());
 		final MvcResult result = postQueryServicesByDefinitions(List.of("  "), status().isBadRequest());
 		

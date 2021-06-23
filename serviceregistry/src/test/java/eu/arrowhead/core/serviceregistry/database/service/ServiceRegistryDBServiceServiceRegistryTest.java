@@ -750,20 +750,20 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		final System system = new System();
 		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(system));
 		when(serviceRegistryRepository.findBySystem(eq(system))).thenReturn(new ArrayList<>());
-		serviceRegistryDBService.getServiceRegistryEntriesBySystemId(1l);
+		serviceRegistryDBService.getServiceRegistryEntriesBySystemId(1L);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testGetServiceRegistryEntriesBySystemIdInvalidId() {
-		serviceRegistryDBService.getServiceRegistryEntriesBySystemId(0l);
+		serviceRegistryDBService.getServiceRegistryEntriesBySystemId(0L);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testGetServiceRegistryEntriesBySystemIdSysNotExists() {
 		when(systemRepository.findById(anyLong())).thenReturn(Optional.empty());
-		serviceRegistryDBService.getServiceRegistryEntriesBySystemId(1l);
+		serviceRegistryDBService.getServiceRegistryEntriesBySystemId(1L);
 	}
 	
 	//=================================================================================================
