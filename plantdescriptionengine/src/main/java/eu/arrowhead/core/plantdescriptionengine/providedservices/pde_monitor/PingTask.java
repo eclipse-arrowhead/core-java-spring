@@ -28,6 +28,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TimerTask;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class PingTask extends TimerTask {
 
@@ -107,25 +109,20 @@ public class PingTask extends TimerTask {
         }
 
         final List<PdeSystem> activeSystems = pdTracker.getActiveSystems();
-        final Map<String, Port> monitorablePortBySystemId = new HashMap<>();
-        final Map<String, PdeSystem> systemById = new HashMap<>();
+        final Map<String, PdeSystem> systemById = toMap(activeSystems);
 
-        for (final PdeSystem system : activeSystems) {
-            systemById.put(system.systemId(), system);
-            for (final Port port : system.ports()) {
-                if (port.serviceDefinition().equals(ApiConstants.MONITORABLE_SERVICE_NAME)) {
-                    monitorablePortBySystemId.put(system.systemId(), port);
-                }
-            }
-        }
+        // A mapping from "port keys" (computed via "toKey(systemId, portName)"
+        // to ports:
+        final Map<String, Port> monitorablePorts = getMonitorablePorts(activeSystems);
 
         List<Connection> activeConnections = activeEntry.connections();
         for (final Connection connection : activeConnections) {
 
-            final String producerId = connection.producer().systemId();
-            final Port producerPort = monitorablePortBySystemId.get(producerId);
+            final String producerSystemId = connection.producer().systemId();
+            final String producerPortName = connection.producer().portName();
 
-            if (producerPort == null) {
+            final String portKey = toKey(producerSystemId, producerPortName);
+            if (!monitorablePorts.containsKey(portKey)) {
                 continue;
             }
 
@@ -136,10 +133,35 @@ public class PingTask extends TimerTask {
             boolean consumerIsPde = ApiConstants.PDE_SYSTEM_NAME.equals(consumerName);
 
             if (consumerIsPde) {
-                result.add(systemById.get(producerId));
+                result.add(systemById.get(producerSystemId));
             }
         }
 
+        return result;
+    }
+
+    private Map<String, PdeSystem> toMap(List<PdeSystem> systems) {
+        return systems.stream()
+            .collect(Collectors.toMap(
+                PdeSystem::systemId,
+                Function.identity()
+            ));
+    }
+
+    private String toKey(String systemId, String portName) {
+        return systemId + portName;
+    }
+
+    private Map<String, Port> getMonitorablePorts(List<PdeSystem> systems) {
+        final Map<String,Port> result = new HashMap<>();
+        for (final PdeSystem system : systems) {
+            for (final Port port : system.ports()) {
+                if (port.serviceDefinition().equals(ApiConstants.MONITORABLE_SERVICE_NAME)) {
+                    final String key = toKey(system.systemId(), port.portName());
+                    result.put(key, port);
+                }
+            }
+        }
         return result;
     }
 

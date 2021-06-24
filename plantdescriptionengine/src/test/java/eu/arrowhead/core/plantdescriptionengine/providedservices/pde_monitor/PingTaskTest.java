@@ -45,8 +45,10 @@ import static org.mockito.Mockito.when;
 
 public class PingTaskTest {
 
+    final Instant now = Instant.now();
     final String systemNameA = "sysa";
     final String systemNameB = "sysb";
+    final String systemNameC = "sysc";
     final String serviceUri = "http://some-service-uri";
     final InetSocketAddress address = new InetSocketAddress("1.1.1.1", 8443);
 
@@ -160,6 +162,102 @@ public class PingTaskTest {
             .onFailure(e -> fail());
     }
 
+    /**
+     * A system that is not the PDE is consuming another's "monitorable"
+     * service, but the PDE is not. No alarm should be raised.
+     */
+    @Test
+    public void shouldNotRaiseAlarmA() {
+        final Future<Set<ServiceRecord>> resolveResult = Future.success(Collections.emptySet());
+        final PlantDescriptionEntryDto pdEntry = getEntryWitNonPdeSystemMonitoring();
+        pdTracker.put(pdEntry)
+            .ifSuccess(result -> {
+                when(serviceQuery.name(ApiConstants.MONITORABLE_SERVICE_NAME)).thenReturn(serviceQuery);
+                when(serviceQuery.resolveAll()).thenReturn(resolveResult);
+                pingTask.run();
+                assertEquals(0, alarmManager.getActiveAlarmData(AlarmCause.NOT_MONITORABLE).size());
+            })
+            .onFailure(e -> fail());
+    }
+
+    /**
+     * A service is providing a service to the PDE, and has a "monitorable" port
+     * (which is not connected to the PDE). No alarm should be raised.
+     */
+    @Test
+    public void shouldNotRaiseAlarmB() {
+
+        final String monitorablePortName = "monitorable";
+        final String pdeId = "pde";
+        final String systemId = "sysC";
+        final String unrelatedService = "someservice";
+
+        final PortDto monitorableConsumerPort = new PortDto.Builder()
+            .consumer(true)
+            .serviceDefinition(ApiConstants.MONITORABLE_SERVICE_NAME)
+            .portName(monitorablePortName)
+            .build();
+        final PortDto monitorableProducerPort = new PortDto.Builder()
+            .consumer(false)
+            .serviceDefinition(ApiConstants.MONITORABLE_SERVICE_NAME)
+            .portName(monitorablePortName)
+            .build();
+        final PortDto unrelatedConsumerPort = new PortDto.Builder()
+            .consumer(false)
+            .serviceDefinition(unrelatedService)
+            .portName("somePortNameA")
+            .build();
+        final PortDto unrelatedProducerPort = new PortDto.Builder()
+            .consumer(true)
+            .serviceDefinition(unrelatedService)
+            .portName("somePortNameB")
+            .build();
+        final PdeSystemDto pdeSystem = new PdeSystemDto.Builder()
+            .systemId(pdeId)
+            .systemName(ApiConstants.PDE_SYSTEM_NAME)
+            .ports(monitorableConsumerPort, unrelatedConsumerPort)
+            .build();
+        final PdeSystemDto unmonitoredSystem = new PdeSystemDto.Builder()
+            .systemId(systemId)
+            .metadata(Map.of("x", "y"))
+            .ports(monitorableProducerPort, unrelatedProducerPort)
+            .build();
+        final ConnectionDto unrelatedConnectionA = new ConnectionDto.Builder()
+            .consumer(new SystemPortDto.Builder()
+                .systemId(pdeId)
+                .portName(unrelatedConsumerPort.portName())
+                .build()
+            )
+            .producer(new SystemPortDto.Builder()
+                .systemId(systemId)
+                .portName(unrelatedProducerPort.portName())
+                .build()
+            )
+            .build();
+        PlantDescriptionEntryDto pdEntry = new PlantDescriptionEntryDto.Builder()
+            .id(1)
+            .plantDescription("Plant Description 1A")
+            .active(true)
+            .systems(
+                pdeSystem,
+                unmonitoredSystem
+            )
+            .createdAt(now)
+            .updatedAt(now)
+            .connections(unrelatedConnectionA)
+            .build();
+
+        final Future<Set<ServiceRecord>> resolveResult = Future.success(Collections.emptySet());
+        pdTracker.put(pdEntry)
+            .ifSuccess(result -> {
+                when(serviceQuery.name(ApiConstants.MONITORABLE_SERVICE_NAME)).thenReturn(serviceQuery);
+                when(serviceQuery.resolveAll()).thenReturn(resolveResult);
+                pingTask.run();
+                assertEquals(0, alarmManager.getActiveAlarmData(AlarmCause.NOT_MONITORABLE).size());
+            })
+            .onFailure(e -> fail());
+    }
+
     @Test
     public void shouldClearOneAlarm() {
 
@@ -209,83 +307,76 @@ public class PingTaskTest {
             .onFailure(e -> fail());
     }
 
-
     private PlantDescriptionEntryDto getEntryWithMonitoredSystems() {
-        final Instant now = Instant.now();
-        final String portName = "monitorable";
+        final String monitorablePortName = "monitorable";
         final String pdeId = "pde";
         final String systemIdA = "sysA";
         final String systemIdB = "sysB";
         final String systemIdC = "sysC";
-        final PortDto pdePort = new PortDto.Builder()
+
+        final PortDto monitorableConsumerPort = new PortDto.Builder()
             .consumer(true)
             .serviceDefinition(ApiConstants.MONITORABLE_SERVICE_NAME)
-            .portName(portName)
+            .portName(monitorablePortName)
             .build();
-        final PortDto monitoredPort = new PortDto.Builder()
+        final PortDto monitorableProducerPort = new PortDto.Builder()
             .consumer(false)
             .serviceDefinition(ApiConstants.MONITORABLE_SERVICE_NAME)
-            .portName(portName)
-            .build();
-        // Add an unrelated port, just to tickle every corner of the code base.
-        final PortDto unrelatedPort = new PortDto.Builder()
-            .consumer(false)
-            .serviceDefinition("someservice")
-            .portName("somePortName")
+            .portName(monitorablePortName)
             .build();
         final PdeSystemDto pdeSystem = new PdeSystemDto.Builder()
             .systemId(pdeId)
             .systemName(ApiConstants.PDE_SYSTEM_NAME)
-            .ports(List.of(pdePort))
+            .ports(monitorableConsumerPort)
             .build();
         final PdeSystemDto monitoredSystemA = new PdeSystemDto.Builder()
             .systemId(systemIdA)
             .systemName(systemNameA)
-            .ports(List.of(monitoredPort))
+            .ports(monitorableProducerPort)
             .build();
         final PdeSystemDto monitoredSystemB = new PdeSystemDto.Builder()
             .systemId(systemIdB)
-            .systemName(systemNameB)
-            .ports(List.of(monitoredPort, unrelatedPort))
+            .metadata(Map.of("x", "y"))
+            .ports(monitorableProducerPort)
             .build();
         final PdeSystemDto monitoredSystemC = new PdeSystemDto.Builder()
             .systemId(systemIdC)
-            .metadata(Map.of("x", "y"))
-            .ports(List.of(monitoredPort))
+            .systemName(systemNameC)
+            .ports(monitorableProducerPort)
             .build();
-        final ConnectionDto connectionA = new ConnectionDto.Builder()
+        final ConnectionDto monitorableConnectionA = new ConnectionDto.Builder()
             .consumer(new SystemPortDto.Builder()
                 .systemId(pdeId)
-                .portName(portName)
+                .portName(monitorablePortName)
                 .build()
             )
             .producer(new SystemPortDto.Builder()
                 .systemId(systemIdA)
-                .portName(portName)
+                .portName(monitorablePortName)
                 .build()
             )
             .build();
-        final ConnectionDto connectionB = new ConnectionDto.Builder()
+        final ConnectionDto monitorableConnectionB = new ConnectionDto.Builder()
             .consumer(new SystemPortDto.Builder()
                 .systemId(pdeId)
-                .portName(portName)
+                .portName(monitorablePortName)
                 .build()
             )
             .producer(new SystemPortDto.Builder()
                 .systemId(systemIdB)
-                .portName(portName)
+                .portName(monitorablePortName)
                 .build()
             )
             .build();
-        final ConnectionDto connectionC = new ConnectionDto.Builder()
+        final ConnectionDto monitorableConnectionC = new ConnectionDto.Builder()
             .consumer(new SystemPortDto.Builder()
                 .systemId(pdeId)
-                .portName(portName)
+                .portName(monitorablePortName)
                 .build()
             )
             .producer(new SystemPortDto.Builder()
                 .systemId(systemIdC)
-                .portName(portName)
+                .portName(monitorablePortName)
                 .build()
             )
             .build();
@@ -293,15 +384,76 @@ public class PingTaskTest {
             .id(1)
             .plantDescription("Plant Description 1A")
             .active(true)
-            .systems(List.of(
+            .systems(
                 pdeSystem,
                 monitoredSystemA,
                 monitoredSystemB,
                 monitoredSystemC
-            ))
+            )
             .createdAt(now)
             .updatedAt(now)
-            .connections(List.of(connectionA, connectionB, connectionC))
+            .connections(
+                monitorableConnectionA,
+                monitorableConnectionB,
+                monitorableConnectionC
+            )
+            .build();
+    }
+
+    private PlantDescriptionEntryDto getEntryWitNonPdeSystemMonitoring() {
+        final String pdeId = "pde";
+        final String systemIdA = "sysA";
+        final String systemIdB = "sysB";
+
+        final PortDto monitorableConsumerPort = new PortDto.Builder()
+            .consumer(true)
+            .serviceDefinition(ApiConstants.MONITORABLE_SERVICE_NAME)
+            .portName("mon-a")
+            .build();
+        final PortDto monitorableProducerPort = new PortDto.Builder()
+            .consumer(false)
+            .serviceDefinition(ApiConstants.MONITORABLE_SERVICE_NAME)
+            .portName("mon-b")
+            .build();
+
+        final PdeSystemDto pdeSystem = new PdeSystemDto.Builder()
+            .systemId(pdeId)
+            .systemName(ApiConstants.PDE_SYSTEM_NAME)
+            .ports(monitorableConsumerPort)
+            .build();
+        final PdeSystemDto systemA = new PdeSystemDto.Builder()
+            .systemId(systemIdA)
+            .systemName(systemNameA)
+            .ports(monitorableProducerPort)
+            .build();
+        final PdeSystemDto systemB = new PdeSystemDto.Builder()
+            .systemId(systemIdB)
+            .systemName(systemNameB)
+            .ports(monitorableProducerPort, monitorableConsumerPort)
+            .build();
+        final ConnectionDto connection = new ConnectionDto.Builder()
+            .consumer(new SystemPortDto.Builder()
+                .systemId(systemIdB)
+                .portName(monitorableConsumerPort.portName())
+                .build()
+            )
+            .producer(new SystemPortDto.Builder()
+                .systemId(systemIdA)
+                .portName(monitorableProducerPort.portName())
+                .build()
+            )
+            .build();
+        return new PlantDescriptionEntryDto.Builder()
+            .id(1)
+            .plantDescription("Plant Description 1A")
+            .active(true)
+            .systems(pdeSystem,
+                systemA,
+                systemB
+            )
+            .createdAt(now)
+            .updatedAt(now)
+            .connections(connection)
             .build();
     }
 
