@@ -25,12 +25,12 @@ public abstract class AbstractEntity {
     }
 
     public AbstractEntity(final ZonedDateTime createdAt) {
-        this.createdAt = createdAt;
+        this.createdAt = createdAt.withNano(0);
     }
 
     @PrePersist
     public void onCreate() {
-        if(Objects.isNull(createdAt)) this.createdAt = ZonedDateTime.now();
+        if(Objects.isNull(createdAt)) this.createdAt = ZonedDateTime.now().withNano(0);
     }
 
     public long getId() {
@@ -46,7 +46,7 @@ public abstract class AbstractEntity {
     }
 
     public void setCreatedAt(final ZonedDateTime createdAt) {
-        this.createdAt = createdAt;
+        this.createdAt = createdAt.withNano(0);
     }
 
     @Override
@@ -71,4 +71,5 @@ public abstract class AbstractEntity {
                 .add("createdAt=" + createdAt)
                 .toString();
     }
+
 }

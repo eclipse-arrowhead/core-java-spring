@@ -10,4 +10,6 @@ import org.springframework.stereotype.Repository;
 public interface GamsInstanceRepository extends RefreshableRepository<GamsInstance, Long> {
 
     <S extends GamsInstance> Optional<S> findByUid(final UUID uid);
+
+    <S extends GamsInstance> Optional<S> findByName(final String name);
 }

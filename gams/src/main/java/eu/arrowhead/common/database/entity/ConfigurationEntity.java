@@ -40,6 +40,11 @@ public abstract class ConfigurationEntity extends AbstractEntity {
         this.uid = uid;
     }
 
+    public String getUidString() {
+        if (Objects.isNull(uid)) { uid = UUID.randomUUID(); }
+        return uid.toString();
+    }
+
     public ZonedDateTime getUpdatedAt() {
         return updatedAt;
     }

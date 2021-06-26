@@ -71,7 +71,7 @@ public class EventConsumer {
             while (this.workers.size() < workerProperties.getMinimum()) {
                 this.workers.push(
                         executorService.scheduleAtFixedRate(handleEventsWorker(),
-                                                            0, workerProperties.getLoopWait(),
+                                                            10_0000, workerProperties.getLoopWait(),
                                                             TimeUnit.MILLISECONDS)
                 );
             }
@@ -139,8 +139,8 @@ public class EventConsumer {
 
             eventService.processed(event);
         } catch (final Exception e) {
-            logger.error(event.getPhase().getMarker(), "{}: {}", e.getClass().getSimpleName(), e.getMessage());
-            eventService.createFailureEvent(event, e.getClass().getSimpleName() + ": " + e.getMessage());
+            logger.error(event.getPhase().getMarker(), "{}: {}", e.getClass().getSimpleName(), e.getMessage(), e);
+            eventService.createFailureEvent(event, e.getClass().getSimpleName());
         }
     }
 

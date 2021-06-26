@@ -10,7 +10,7 @@ import eu.arrowhead.core.gams.dto.AnalysisType;
 
 @Entity
 @Table(name = "gams_setpoint_analysis")
-public class SetPointAnalysis extends AbstractAnalysis {
+public class SetPointEvaluation extends AbstractEvaluation {
 
     @Column(nullable = false, length = 16)
     private String lowerSetPoint;
@@ -21,13 +21,13 @@ public class SetPointAnalysis extends AbstractAnalysis {
     @Column(nullable = false)
     private Boolean inverse;
 
-    public SetPointAnalysis() {
+    public SetPointEvaluation() {
         super();
     }
 
-    public SetPointAnalysis(final Sensor sensor, final String knowledgeName,
-                            final String lowerSetPoint, final String upperSetPoint,
-                            final Boolean inverse) {
+    public SetPointEvaluation(final Sensor sensor, final String knowledgeName,
+                              final String lowerSetPoint, final String upperSetPoint,
+                              final Boolean inverse) {
         super(sensor, knowledgeName, AnalysisType.SET_POINT);
         this.lowerSetPoint = lowerSetPoint;
         this.upperSetPoint = upperSetPoint;
@@ -61,9 +61,9 @@ public class SetPointAnalysis extends AbstractAnalysis {
     @Override
     public boolean equals(final Object o) {
         if (this == o) { return true; }
-        if (!(o instanceof SetPointAnalysis)) { return false; }
+        if (!(o instanceof SetPointEvaluation)) { return false; }
         if (!super.equals(o)) { return false; }
-        final SetPointAnalysis that = (SetPointAnalysis) o;
+        final SetPointEvaluation that = (SetPointEvaluation) o;
         return Objects.equals(lowerSetPoint, that.lowerSetPoint) &&
                 Objects.equals(upperSetPoint, that.upperSetPoint) &&
                 Objects.equals(inverse, that.inverse);

@@ -17,6 +17,11 @@ public enum AggregationType {
     /* min */
     MIN,
 
+    /* count */
+    COUNT,
+
     /* create event in any case */
-    NONE
+    NONE,
+
+    SEPARATE;
 }

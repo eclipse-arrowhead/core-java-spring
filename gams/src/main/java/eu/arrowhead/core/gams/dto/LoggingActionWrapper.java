@@ -31,6 +31,7 @@ public class LoggingActionWrapper extends AbstractActionWrapper {
         final Marker marker = sourceAction.createMarker();
         final Sensor sensor = sourceEvent.getSensor();
         final GamsInstance instance = sensor.getInstance();
-        logger.log(Level.ALL, marker, "Instance: {}, Sensor: {}, Data: {}", instance.getName(), sensor.getName(), sourceEvent.getData());
+        logger.log(Level.OFF, marker, "Instance: {}, Sensor: {}, Source: {}, Data: {}", instance.getName(), sensor.getName(),
+                   sourceEvent.getSource(), sourceEvent.getData());
     }
 }

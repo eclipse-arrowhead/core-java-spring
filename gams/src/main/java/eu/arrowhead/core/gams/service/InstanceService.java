@@ -44,8 +44,6 @@ public class InstanceService {
         GamsInstance instance = new GamsInstance(instanceRequest.getName(), UUID.randomUUID(), instanceRequest.getDelayInSeconds());
         instance = instanceRepository.saveAndFlush(instance);
 
-        sensorService.createEventSensor(instance);
-
         return instance;
     }
 
@@ -63,6 +61,18 @@ public class InstanceService {
             return instanceByUid.orElseThrow(() -> createException(uid));
         } catch (IllegalArgumentException e) {
             throw createException(uid);
+        }
+    }
+
+    public GamsInstance findByName(final String name) {
+        logger.debug("findByName({})", name);
+        Assert.notNull(name, "Name must not be null");
+
+        try {
+            final Optional<GamsInstance> instanceByName = instanceRepository.findByName(name);
+            return instanceByName.orElseThrow(() -> createException(name));
+        } catch (IllegalArgumentException e) {
+            throw createException(name);
         }
     }
 

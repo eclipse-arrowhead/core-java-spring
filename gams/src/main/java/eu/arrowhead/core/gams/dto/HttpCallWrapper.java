@@ -7,22 +7,26 @@ import java.util.Objects;
 import eu.arrowhead.common.database.entity.Event;
 import eu.arrowhead.common.database.entity.HttpBodyApiCall;
 import eu.arrowhead.common.database.entity.HttpUrlApiCall;
+import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.gams.service.EventService;
 import eu.arrowhead.core.gams.service.KnowledgeService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 public class HttpCallWrapper extends ProcessableActionWrapper implements Runnable {
 
-    protected final RestTemplate restTemplate;
+    private final Logger logger = LogManager.getLogger();
+    protected final HttpService httpService;
 
     public HttpCallWrapper(final EventService eventService, final Event sourceEvent,
-                           final KnowledgeService knowledgeService, final HttpUrlApiCall apiCall) {
+                           final KnowledgeService knowledgeService, final HttpUrlApiCall apiCall, final HttpService httpService) {
         super(eventService, sourceEvent, knowledgeService, apiCall);
-        this.restTemplate = new RestTemplate();
+        this.httpService = httpService;
     }
 
     @Override
@@ -36,8 +40,11 @@ public class HttpCallWrapper extends ProcessableActionWrapper implements Runnabl
         final HttpEntity<?> entity = new HttpEntity<>(body);
         addAuthentication(entity);
 
-        final ResponseEntity<String> exchange = restTemplate.exchange(uri, getHttpMethod(), entity, String.class);
+        logger.info("Performing HTTP {} {}", getHttpMethod(), uri);
+        final ResponseEntity<String> exchange = httpService
+                .sendRequest(UriComponentsBuilder.fromUriString(uri).build(), getHttpMethod(), String.class, body);
         final String result = exchange.getBody();
+        logger.info("HTTP result {} - parsing body", exchange.getStatusCodeValue());
         processResults(result);
     }
 

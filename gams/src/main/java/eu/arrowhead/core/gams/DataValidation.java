@@ -33,8 +33,7 @@ public class DataValidation {
 
     public void verify(final Event event) {
         notNull(event, "Event");
-        verify(event.getInstance());
-        notNull(event.getSensor(), "Event Name");
+        verify(event.getSensor());
         notNull(event.getCreatedAt(), "Event Creation Time");
         notNull(event.getValidFrom(), "Event Validity");
         notNull(event.getValidTill(), "Event Validity");

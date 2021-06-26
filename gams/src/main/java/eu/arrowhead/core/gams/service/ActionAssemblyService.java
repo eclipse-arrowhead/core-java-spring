@@ -8,14 +8,17 @@ import eu.arrowhead.common.database.entity.AbstractAction;
 import eu.arrowhead.common.database.entity.ActionPlan;
 import eu.arrowhead.common.database.entity.CompositeAction;
 import eu.arrowhead.common.database.entity.Event;
+import eu.arrowhead.common.database.entity.EventAction;
 import eu.arrowhead.common.database.entity.GamsInstance;
 import eu.arrowhead.common.database.entity.HttpUrlApiCall;
 import eu.arrowhead.common.database.entity.LoggingAction;
 import eu.arrowhead.common.database.repository.ActionPlanRepository;
 import eu.arrowhead.common.exception.DataNotFoundException;
+import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.gams.DataValidation;
 import eu.arrowhead.core.gams.dto.AbstractActionWrapper;
 import eu.arrowhead.core.gams.dto.DependentActionWrapper;
+import eu.arrowhead.core.gams.dto.EventActionWrapper;
 import eu.arrowhead.core.gams.dto.HttpCallWrapper;
 import eu.arrowhead.core.gams.dto.IndependentActionWrapper;
 import eu.arrowhead.core.gams.dto.LoggingActionWrapper;
@@ -28,14 +31,17 @@ public class ActionAssemblyService {
 
     private final Logger logger = LogManager.getLogger();
 
+    private final HttpService httpService;
     private final EventService eventService;
     private final ActionPlanRepository actionPlanRepository;
     private final KnowledgeService knowledgeService;
     private final DataValidation validation;
 
-    public ActionAssemblyService(final EventService eventService, final ActionPlanRepository actionPlanRepository,
+    public ActionAssemblyService(final HttpService httpService, final EventService eventService,
+                                 final ActionPlanRepository actionPlanRepository,
                                  final KnowledgeService knowledgeService) {
         super();
+        this.httpService = httpService;
         this.eventService = eventService;
         this.actionPlanRepository = actionPlanRepository;
         this.knowledgeService = knowledgeService;
@@ -56,7 +62,7 @@ public class ActionAssemblyService {
         return assembleRunnable(source, actionPlan.getAction());
     }
 
-    private AbstractActionWrapper assembleRunnable(final Event source, final AbstractAction action) {
+    protected AbstractActionWrapper assembleRunnable(final Event source, final AbstractAction action) {
 
         final AbstractActionWrapper wrapper;
         logger.debug(source.getMarker(), "Creating Action {} for {}", action::shortToString, source::shortToString);
@@ -65,31 +71,42 @@ public class ActionAssemblyService {
         switch (action.getActionType()) {
             case API_BODY_CALL:
             case API_URL_CALL:
-                wrapper = new HttpCallWrapper(eventService, source, knowledgeService, (HttpUrlApiCall) action);
+                wrapper = new HttpCallWrapper(eventService, source, knowledgeService, (HttpUrlApiCall) action, httpService);
                 break;
             case COMPOSITE:
-                final CompositeAction compositeAction = (CompositeAction) action;
-                final List<AbstractActionWrapper> wrappers = new ArrayList<>();
-
-                for (AbstractAction abstractAction : compositeAction.getActions()) {
-                    wrappers.add(assembleRunnable(source, abstractAction));
-                }
-
-                switch (compositeAction.getCompositeType()) {
-                    case DEPENDENT:
-                        wrapper = new DependentActionWrapper(eventService, source, action, wrappers);
-                        break;
-                    case INDEPENDENT:
-                        wrapper = new IndependentActionWrapper(eventService, source, action, wrappers);
-                        break;
-                    default:
-                        throw new UnsupportedOperationException("CompositeActionType not supported: " + compositeAction.getCompositeType());
-                }
+                wrapper = assembleCompositeWrapper((CompositeAction) action, source);
                 break;
             case LOGGING:
                 wrapper = new LoggingActionWrapper(eventService, source, (LoggingAction) action);
+                break;
+            case EVENT:
+                wrapper = new EventActionWrapper(eventService, source, (EventAction) action);
+                break;
             default:
                 throw new UnsupportedOperationException("ActionType not supported: " + action.getActionType());
+        }
+
+        return wrapper;
+    }
+
+    private AbstractActionWrapper assembleCompositeWrapper(final CompositeAction action, final Event source) {
+
+        final List<AbstractActionWrapper> wrappers = new ArrayList<>();
+        final AbstractActionWrapper wrapper;
+
+        for (AbstractAction abstractAction : action.getActions()) {
+            wrappers.add(assembleRunnable(source, abstractAction));
+        }
+
+        switch (action.getCompositeType()) {
+            case DEPENDENT:
+                wrapper = new DependentActionWrapper(eventService, source, action, wrappers);
+                break;
+            case INDEPENDENT:
+                wrapper = new IndependentActionWrapper(eventService, source, action, wrappers);
+                break;
+            default:
+                throw new UnsupportedOperationException("CompositeActionType not supported: " + action.getCompositeType());
         }
 
         return wrapper;

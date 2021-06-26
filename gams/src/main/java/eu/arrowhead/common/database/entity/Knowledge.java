@@ -17,10 +17,10 @@ public class Knowledge extends AbstractEntity {
     @JoinColumn(name = "instanceId", referencedColumnName = "id", nullable = false)
     private GamsInstance instance;
 
-    @Column(nullable = false, unique = true, length = 64)
+    @Column(name = "key_", nullable = false, unique = true, length = 64)
     private String key;
 
-    @Column(nullable = false, unique = false, length = 64)
+    @Column(name = "value_", nullable = false, unique = false, length = 64)
     private String value;
 
     public Knowledge() {

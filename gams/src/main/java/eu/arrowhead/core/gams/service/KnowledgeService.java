@@ -3,7 +3,8 @@ package eu.arrowhead.core.gams.service;
 import java.util.List;
 import java.util.Optional;
 
-import eu.arrowhead.common.database.entity.AbstractAnalysis;
+import eu.arrowhead.common.database.entity.AbstractEvaluation;
+import eu.arrowhead.common.database.entity.AbstractPolicy;
 import eu.arrowhead.common.database.entity.Aggregation;
 import eu.arrowhead.common.database.entity.GamsInstance;
 import eu.arrowhead.common.database.entity.Knowledge;
@@ -11,7 +12,10 @@ import eu.arrowhead.common.database.entity.Sensor;
 import eu.arrowhead.common.database.repository.AggregationRepository;
 import eu.arrowhead.common.database.repository.AnalysisRepository;
 import eu.arrowhead.common.database.repository.KnowledgeRepository;
+import eu.arrowhead.common.database.repository.PolicyRepository;
 import eu.arrowhead.core.gams.DataValidation;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -19,19 +23,23 @@ import org.springframework.util.Assert;
 @Service
 public class KnowledgeService {
 
+    private final Logger logger = LogManager.getLogger();
     private final DataValidation validation = new DataValidation();
 
     private final AggregationRepository aggregationRepository;
     private final AnalysisRepository analysisRepository;
+    private final PolicyRepository policyRepository;
 
     private final KnowledgeRepository knowledgeRepository;
 
     @Autowired
     public KnowledgeService(final AggregationRepository aggregationRepository,
                             final AnalysisRepository analysisRepository,
+                            final PolicyRepository policyRepository,
                             final KnowledgeRepository knowledgeRepository) {
         this.aggregationRepository = aggregationRepository;
         this.analysisRepository = analysisRepository;
+        this.policyRepository = policyRepository;
         this.knowledgeRepository = knowledgeRepository;
     }
 
@@ -45,8 +53,21 @@ public class KnowledgeService {
         validation.verify(instance);
         Assert.hasText(key, "Knowledge key must not be empty");
         Assert.hasText(value, "Knowledge value must not be empty");
-        final Knowledge knowledge = new Knowledge(instance, key, value);
-        knowledgeRepository.saveAndFlush(knowledge);
+
+        final Optional<Knowledge> optionalKnowledge = get(instance, key);
+        final Knowledge knowledge;
+
+        try {
+            if (optionalKnowledge.isPresent()) {
+                knowledge = optionalKnowledge.get();
+                knowledge.setValue(value);
+            } else {
+                knowledge = new Knowledge(instance, key, value);
+            }
+            knowledgeRepository.saveAndFlush(knowledge);
+        } catch(final Exception e) {
+            logger.error("Unable to store Knowledge {}={}: {}", key, value, e.getMessage());
+        }
     }
 
     public List<Aggregation> loadPreAnalysis(final Sensor sensor) {
@@ -54,8 +75,13 @@ public class KnowledgeService {
         return aggregationRepository.findBySensor(sensor);
     }
 
-    public List<AbstractAnalysis> loadAnalysis(final Sensor sensor) {
+    public List<AbstractEvaluation> loadEvaluation(final Sensor sensor) {
         validation.verify(sensor);
         return analysisRepository.findBySensor(sensor);
+    }
+
+    public List<AbstractPolicy> loadPolicy(final Sensor sensor) {
+        validation.verify(sensor);
+        return policyRepository.findBySensor(sensor);
     }
 }

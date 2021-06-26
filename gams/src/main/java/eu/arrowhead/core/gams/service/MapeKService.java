@@ -1,23 +1,34 @@
 package eu.arrowhead.core.gams.service;
 
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
 
-import eu.arrowhead.common.database.entity.AbstractAnalysis;
+import eu.arrowhead.common.database.entity.AbstractEvaluation;
+import eu.arrowhead.common.database.entity.AbstractPolicy;
 import eu.arrowhead.common.database.entity.AbstractSensorData;
 import eu.arrowhead.common.database.entity.Aggregation;
-import eu.arrowhead.common.database.entity.CountingAnalysis;
+import eu.arrowhead.common.database.entity.ApiCallPolicy;
+import eu.arrowhead.common.database.entity.CountingAggregation;
+import eu.arrowhead.common.database.entity.CountingEvaluation;
 import eu.arrowhead.common.database.entity.DoubleSensorData;
 import eu.arrowhead.common.database.entity.Event;
+import eu.arrowhead.common.database.entity.Knowledge;
 import eu.arrowhead.common.database.entity.LongSensorData;
+import eu.arrowhead.common.database.entity.MatchPolicy;
+import eu.arrowhead.common.database.entity.ProcessableAction;
 import eu.arrowhead.common.database.entity.Sensor;
-import eu.arrowhead.common.database.entity.SetPointAnalysis;
+import eu.arrowhead.common.database.entity.SetPointEvaluation;
 import eu.arrowhead.core.gams.DataValidation;
 import eu.arrowhead.core.gams.controller.SetPointController;
+import eu.arrowhead.core.gams.dto.AbstractActionWrapper;
 import eu.arrowhead.core.gams.dto.GamsPhase;
 import eu.arrowhead.core.gams.dto.ProcessingState;
 import eu.arrowhead.core.gams.rest.dto.SensorType;
@@ -61,25 +72,24 @@ public class MapeKService {
         validation.verify(sensor);
 
         final AbstractSensorData sensorData = sensorService.store(sensor, timestamp, data, address);
-        logger.info(GamsPhase.MONITOR.getMarker(), "Received new sensor data: {}", sensorData);
-
+        logger.debug(GamsPhase.MONITOR.getMarker(), "Received new sensor data: {}", sensorData);
+        // TODO only publish event if non exists
         eventService.createMonitorEvent(sensor, sensorData);
     }
 
     public void monitor(final Event source) {
         validation.verify(source);
-        logger.info(source.getMarker(), "Received monitor source: {}", source.shortToString());
+        logger.debug(source.getMarker(), "Received monitor event: {}", source::shortToString);
 
-        final Sensor eventSensor = sensorService.getEventSensor(source.getSensor().getInstance());
         final Sensor sourceSensor = source.getSensor();
         final List<Aggregation> preAnalysis = knowledgeService.loadPreAnalysis(sourceSensor);
 
         if (sourceSensor.getType() == SensorType.EVENT) {
-            noAggregation(eventSensor, source);
+            noAggregation(sourceSensor, source);
         } else if (preAnalysis.isEmpty()) {
-            noAggregation(eventSensor, source);
+            noAggregation(sourceSensor, source);
         } else {
-            processAggregation(knowledgeService.loadPreAnalysis(sourceSensor), eventSensor, sourceSensor, source);
+            processAggregation(preAnalysis, sourceSensor, source);
         }
     }
 
@@ -90,60 +100,99 @@ public class MapeKService {
         timeoutService.rescheduleTimeoutEvent(source);
         final Sensor sensor = source.getSensor();
 
-        final List<AbstractAnalysis> analyses = knowledgeService.loadAnalysis(source.getSensor());
-        for (AbstractAnalysis analysis : analyses) {
-            switch(analysis.getType()) {
+        final List<AbstractEvaluation> evaluations = knowledgeService.loadEvaluation(source.getSensor());
+        if(evaluations.isEmpty()) {
+            logger.warn("No Evaluations available for {}", source.getSensor());
+            return;
+        }
+
+        for (AbstractEvaluation evaluation : evaluations) {
+
+            final AbstractSensorData sensorData;
+            final Sensor eventSensor = sensorService.getEventSensor(source.getSensor().getInstance(), evaluation.getUidString());
+            logger.debug("Processing evaluation: {}", evaluation::shortToString);
+
+            switch (evaluation.getType()) {
                 case SET_POINT:
-                    final double setPoint = calculateSetPoint(sensor, (SetPointAnalysis) analysis, source.getData());
-                    knowledgeService.put(sensor.getInstance(), analysis.getKnowledgeName(), String.valueOf(setPoint));
-                    eventService.createPlanEvent(source, analysis.getKnowledgeName(), String.valueOf(setPoint));
+                    final double setPoint = calculateSetPoint(sensor, (SetPointEvaluation) evaluation, source.getData());
+                    knowledgeService.put(sensor.getInstance(), evaluation.getTargetKnowledge(), String.valueOf(setPoint));
+
+                    sensorData = sensorService.store(eventSensor, ZonedDateTime.now(), setPoint, eventSensor.getAddress());
+                    eventService.createPlanEvent(eventSensor, sensorData);
 
                     break;
                 case COUNTING:
-                    final CountingAnalysis countingAnalysis = (CountingAnalysis) analysis;
-                    final ZonedDateTime validFrom = ZonedDateTime.now().minus(countingAnalysis.getTimeValue(),countingAnalysis.getTimeUnit());
+                    final CountingEvaluation countingEvaluation = (CountingEvaluation) evaluation;
+                    final ZonedDateTime validFrom = ZonedDateTime.now().minus(countingEvaluation.getTimeValue(), countingEvaluation.getTimeUnit());
                     final long count = sensorService.count(sensor, validFrom);
 
-                    if(count >= countingAnalysis.getCount()) {
-                        knowledgeService.put(sensor.getInstance(), analysis.getKnowledgeName(), String.valueOf(count));
-                        eventService.createPlanEvent(source, analysis.getKnowledgeName(), String.valueOf(count));
+                    if (count >= countingEvaluation.getCount()) {
+                        knowledgeService.put(sensor.getInstance(), evaluation.getTargetKnowledge(), String.valueOf(count));
+                        sensorData = sensorService.store(eventSensor, ZonedDateTime.now(), count, eventSensor.getAddress());
+                        eventService.createPlanEvent(eventSensor, sensorData);
                     }
                     break;
-                default: throw new IllegalStateException("Unexpected value: " + analysis.getType());
+                default: throw new IllegalStateException("Unexpected value: " + evaluation.getType());
             }
         }
     }
 
-    private <T extends Number> double calculateSetPoint(final Sensor sensor, final SetPointAnalysis analysis, final String inputStr) {
-        final boolean inverse = analysis.getInverse();
-        final SetPointController<T> controller;
-        final T lower;
-        final T upper;
-        final T input;
+    public void plan(final Event source) {
+        validation.verify(source);
+        logger.info(source.getMarker(), "Received plan event: {}", source::shortToString);
 
-        switch(sensor.getType()) {
-            case INTEGER_NUMBER:
-                lower = (T)MathHelper.convertToLong(analysis.getLowerSetPoint());
-                upper = (T)MathHelper.convertToLong(analysis.getUpperSetPoint());
-                input = (T)MathHelper.convertToLong(inputStr);
-                break;
-            case FLOATING_POINT_NUMBER:
-                lower = (T)MathHelper.convertToDouble(analysis.getLowerSetPoint());
-                upper = (T)MathHelper.convertToDouble(analysis.getUpperSetPoint());
-                input = (T)MathHelper.convertToDouble(inputStr);
-                break;
-            default: throw new IllegalStateException("Unexpected value: " + sensor.getType());
+        final List<AbstractPolicy> policies = knowledgeService.loadPolicy(source.getSensor());
+        if(policies.isEmpty()) {
+            logger.warn("No Policies available for {}", source.getSensor());
+            return;
         }
 
-        controller = new SetPointController<>(inverse,lower,upper);
-        return controller.evaluate(input);
-    }
+        for (AbstractPolicy policy : policies) {
+            final AbstractSensorData sensorData;
+            final Sensor eventSensor = sensorService.getEventSensor(source.getSensor().getInstance(), policy.getUidString());
+            logger.debug("Processing policy: {}", policy::shortToString);
 
-    public void plan(final Event event) {
-        validation.verify(event);
-        logger.info(event.getMarker(), "Received plan event: {}", event::shortToString);
+            switch (policy.getType()) {
+                case MATCH:
+                    final MatchPolicy matchPolicy = ((MatchPolicy) policy);
+                    logger.info("Performing Match: {}", matchPolicy::shortToString);
 
+                    final Optional<Knowledge> optionalKnowledge = knowledgeService.get(eventSensor.getInstance(), policy.getSourceKnowledge());
+                    if (optionalKnowledge.isPresent()) {
+                        final Knowledge knowledge = optionalKnowledge.get();
+                        if(evaluateMatchPolicy(matchPolicy, knowledge)) {
+                            sensorData = sensorService.store(eventSensor, ZonedDateTime.now(), policy.getTargetKnowledge(), eventSensor.getAddress());
+                            eventService.createExecuteEvent(eventSensor, sensorData);
+                        }
+                    } else {
+                        if (evaluateMatchPolicy(matchPolicy, source.getData())) {
+                            sensorData = sensorService.store(eventSensor, ZonedDateTime.now(), policy.getTargetKnowledge(), eventSensor.getAddress());
+                            eventService.createExecuteEvent(eventSensor, sensorData);
+                        }
+                    }
+                    break;
+                case API_CALL:
+                    final ProcessableAction action = ((ApiCallPolicy) policy).getApiCall();
+                    logger.info("Performing API CALL: {}", action::shortToString);
+                    final AbstractActionWrapper wrapper = apiCallService.assembleRunnable(source, action);
+                    wrapper.run();
 
+                    // TODO fix NPE issue by moving processor into its own instance
+                    sensorData = sensorService.store(eventSensor, ZonedDateTime.now(), "", eventSensor.getAddress());
+                    eventService.createExecuteEvent(eventSensor, sensorData);
+                    break;
+                case TRANSFORM:
+                    // TODO add transform action
+                    logger.info("Performing TRANSFORM: {}", policy::shortToString);
+                    break;
+                case NONE:
+                    logger.info("Performing Nothing: {}", policy::shortToString);
+                    sensorData = sensorService.store(eventSensor, ZonedDateTime.now(), source.getData(), eventSensor.getAddress());
+                    eventService.createExecuteEvent(eventSensor, sensorData);
+                    break;
+                default: throw new IllegalStateException("Unexpected value: " + policy.getType());
+            }
+        }
     }
 
     public void execute(final Event event) {
@@ -157,45 +206,97 @@ public class MapeKService {
         logger.fatal(GamsPhase.FAILURE.getMarker(), event);
     }
 
-    private void processAggregation(final List<Aggregation> preAnalysis, final Sensor eventSensor, final Sensor sourceSensor, final Event source) {
+    private void processAggregation(final List<Aggregation> aggregations, final Sensor sourceSensor, final Event source) {
         final List<AbstractSensorData> processedData = new ArrayList<>();
 
-        for (final Aggregation aggregation : preAnalysis) {
-            final List<AbstractSensorData> load = sensorService.load(sourceSensor, aggregation.getQuantity());
+        for (final Aggregation aggregation : aggregations) {
+
+            final List<AbstractSensorData> sensorDataList;
+            if (Objects.nonNull(aggregation.getQuantity()) && Objects.nonNull(aggregation.getValidity())) {
+                sensorDataList = sensorService.load(sourceSensor, aggregation.getQuantity(), aggregation.getValidity(), aggregation.getValidityTimeUnit());
+            } else if (Objects.nonNull(aggregation.getQuantity())) {
+                sensorDataList = sensorService.load(sourceSensor, aggregation.getQuantity());
+            } else if (Objects.nonNull(aggregation.getValidity())) {
+                sensorDataList = sensorService.load(sourceSensor, aggregation.getValidity(), aggregation.getValidityTimeUnit());
+            } else {
+                sensorDataList = sensorService.load(sourceSensor);
+            }
+
+            logger.debug("Loaded '{}' sensor data", sensorDataList.size());
+
+            if(sensorDataList.isEmpty()) {
+                return;
+            }
+
+            final Sensor eventSensor = sensorService.getEventSensor(sourceSensor.getInstance(), aggregation.getUidString());
+            sensorDataList.forEach(sensorService::processing);
 
             switch (aggregation.getType()) {
                 case NONE:
-                    processedData.addAll(load);
+                    processedData.addAll(sensorDataList);
                     noAggregation(eventSensor, source);
                     break;
                 case SUM:
-                    processedData.addAll(load);
-                    summary(eventSensor, sourceSensor, load);
+                    processedData.addAll(sensorDataList);
+                    sum(eventSensor, sourceSensor, sensorDataList);
                     break;
                 case AVERAGE:
-                    processedData.addAll(load);
-                    average(eventSensor, sourceSensor, load);
+                    processedData.addAll(sensorDataList);
+                    average(eventSensor, sourceSensor, sensorDataList);
                     break;
                 case TREND:
-                    processedData.addAll(load);
-                    trend(eventSensor, load);
+                    processedData.addAll(sensorDataList);
+                    trend(eventSensor, sensorDataList);
                     break;
                 case MAX:
-                    processedData.addAll(load);
-                    max(eventSensor, sourceSensor, load);
+                    processedData.addAll(sensorDataList);
+                    max(eventSensor, sourceSensor, sensorDataList);
                     break;
                 case MIN:
-                    processedData.addAll(load);
-                    min(eventSensor, sourceSensor, load);
+                    processedData.addAll(sensorDataList);
+                    min(eventSensor, sourceSensor, sensorDataList);
                     break;
-                default: throw new IllegalStateException("Unexpected value: " + aggregation.getType());
+                case COUNT:
+                    count(eventSensor, sensorDataList, (CountingAggregation) aggregation, processedData);
+                    break;
+                default:
+                    processedData.forEach(sensorService::persisted);
+                    throw new IllegalStateException("Unexpected value: " + aggregation.getType());
             }
+
+            logger.debug("Persisting '{}' sensor data", sensorDataList.size());
+            sensorDataList.forEach(sensorService::persisted);
         }
 
-        for (final AbstractSensorData datum : processedData) {
-            datum.setState(ProcessingState.PROCESSED);
-            sensorService.store(datum);
+        logger.debug("processed '{}' sensor data", processedData.size());
+        processedData.forEach(sensorService::processed);
+    }
+
+    private <T extends Number> double calculateSetPoint(final Sensor sensor, final SetPointEvaluation analysis, final String inputStr) {
+        final boolean inverse = analysis.getInverse();
+        final SetPointController<T> controller;
+        final T lower;
+        final T upper;
+        final T input;
+
+        switch (sensor.getType()) {
+            case INTEGER_NUMBER:
+                lower = (T) MathHelper.convertToLong(analysis.getLowerSetPoint());
+                upper = (T) MathHelper.convertToLong(analysis.getUpperSetPoint());
+                input = (T) MathHelper.convertToLong(inputStr);
+                break;
+            case FLOATING_POINT_NUMBER:
+                lower = (T) MathHelper.convertToDouble(analysis.getLowerSetPoint());
+                upper = (T) MathHelper.convertToDouble(analysis.getUpperSetPoint());
+                input = (T) MathHelper.convertToDouble(inputStr);
+                break;
+            default: throw new IllegalStateException("Unexpected value: " + sensor.getType());
         }
+
+        controller = new SetPointController<>(inverse, lower, upper);
+        final double result = controller.evaluate(input);
+        logger.info("Evaluated SetPoint for input {} with result {}", inputStr, result);
+        return result;
     }
 
     private void trend(final Sensor eventSensor, final List<AbstractSensorData> load) {
@@ -210,7 +311,7 @@ public class MapeKService {
         publishAggregation(eventSensor, source.getData());
     }
 
-    private void summary(final Sensor eventSensor, final Sensor sourceSensor, final List<AbstractSensorData> sensorDataList) {
+    private void sum(final Sensor eventSensor, final Sensor sourceSensor, final List<AbstractSensorData> sensorDataList) {
 
         final Object result;
 
@@ -260,7 +361,7 @@ public class MapeKService {
 
             default: throw new IllegalStateException("Unexpected value: " + sourceSensor.getType());
         }
-        
+
         publishAggregation(eventSensor, result);
     }
 
@@ -282,9 +383,104 @@ public class MapeKService {
         publishAggregation(eventSensor, result);
     }
 
+    private void count(final Sensor eventSensor, final List<AbstractSensorData> sensorDataList, final CountingAggregation countingAggregation,
+                       final List<AbstractSensorData> processedList) {
+
+        ZonedDateTime localDateTime = ZonedDateTime.now().withNano(0);
+        final Duration duration;
+
+        switch (countingAggregation.getTimescaleUnit()) {
+            case MINUTES:
+                localDateTime = localDateTime.withSecond(0);
+                break;
+            case HOURS:
+                localDateTime = localDateTime.withSecond(0).withMinute(0);
+                break;
+            case DAYS:
+                localDateTime = localDateTime.withSecond(0).withMinute(0).withHour(0);
+                break;
+            case MONTHS:
+                localDateTime = localDateTime.withSecond(0).withMinute(0).withHour(0).withDayOfMonth(1);
+                break;
+        }
+
+        if (Objects.nonNull(countingAggregation.getTimescale()) && Objects.nonNull(countingAggregation.getTimescaleUnit())) {
+            duration = Duration.of(countingAggregation.getTimescale(), countingAggregation.getTimescaleUnit());
+            boolean result;
+            ZonedDateTime nextDateTime = localDateTime;
+            do {
+                logger.info("Counting for each {} {}", countingAggregation.getTimescale(), countingAggregation.getTimescaleUnit());
+                result = countBetween(eventSensor, sensorDataList, nextDateTime, duration, countingAggregation.getQuantity(), processedList);
+                nextDateTime = nextDateTime.minus(duration);
+            } while (nextDateTime.isAfter(localDateTime.minus(countingAggregation.getValidity(), countingAggregation.getValidityTimeUnit())));
+
+        } else if (Objects.nonNull(countingAggregation.getValidity()) && Objects.nonNull(countingAggregation.getValidityTimeUnit())) {
+            duration = Duration.of(countingAggregation.getValidity(), countingAggregation.getValidityTimeUnit());
+            logger.info("Counting over the last {} {}", countingAggregation.getValidity(), countingAggregation.getValidityTimeUnit());
+            countBetween(eventSensor, sensorDataList, localDateTime, duration, countingAggregation.getQuantity(), processedList);
+        } else {
+            publishAggregation(eventSensor, sensorDataList.size());
+        }
+    }
+
+    private boolean countBetween(final Sensor eventSensor, final List<AbstractSensorData> sensorDataList,
+                                 final ZonedDateTime till, final Duration duration, final Integer quantity,
+                                 final List<AbstractSensorData> processedList) {
+        final AtomicInteger count = new AtomicInteger();
+        final ZonedDateTime from = till.minus(duration);
+        final int threshold = Objects.nonNull(quantity) ? quantity : 1;
+
+        logger.debug("Filtering through unprocessed sensor data between '{}' and '{}'", from, till);
+        for (final AbstractSensorData data : sensorDataList) {
+            if(data.getState() != ProcessingState.PROCESSED) {
+                final ZonedDateTime dateTime = data.getCreatedAt();
+                if(dateTime.isAfter(from) && dateTime.isBefore(till)) {
+                    count.incrementAndGet();
+                    processedList.add(data);
+                }
+            }
+        }
+
+        logger.debug("'{}' out of '{}' sensor data match our filter", count.get(), sensorDataList.size());
+
+
+        if (count.get() >= threshold) {
+            logger.info("Processed Monitor Event from {} with result '{}'", eventSensor, count.get());
+            final AbstractSensorData sensorData = sensorService.store(eventSensor, till, count.get(), eventSensor.getAddress());
+            eventService.createAnalyseEvent(eventSensor, sensorData);
+            return true;
+        }
+
+        logger.info("Processed Monitor Event from {}: '{}' elements do not meet threshold of '{}'", eventSensor, count.get(), threshold);
+        return false;
+    }
+
     private void publishAggregation(final Sensor eventSensor, final Object result) {
+        logger.info("Processed Monitor Event from {} with result '{}'", eventSensor, result);
         final AbstractSensorData sensorData = sensorService.store(eventSensor, ZonedDateTime.now(), result, eventSensor.getAddress());
         eventService.createAnalyseEvent(eventSensor, sensorData);
+    }
+
+    private boolean evaluateMatchPolicy(final MatchPolicy policy, final Knowledge knowledge) {
+        return evaluateMatchPolicy(policy, knowledge.getValue());
+    }
+
+    public boolean evaluateMatchPolicy(final MatchPolicy policy, final String valueStr) {
+        final long value = MathHelper.convertToLong(valueStr);
+        logger.debug("Evaluating {} {} {}", value, policy.getMatchType(), policy.getNumber());
+        switch (policy.getMatchType()) {
+            case SMALLER_THAN:
+                return value < policy.getNumber();
+            case SMALLER_OR_EQUAL:
+                return value <= policy.getNumber();
+            case EQUAL:
+                return value == policy.getNumber();
+            case GREATER_OR_EQUAL:
+                return value >= policy.getNumber();
+            case GREATER_THAN:
+                return value > policy.getNumber();
+        }
+        return false;
     }
 
     private LongStream toLongStream(final List<AbstractSensorData> list) {

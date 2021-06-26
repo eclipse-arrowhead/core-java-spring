@@ -12,10 +12,13 @@ import eu.arrowhead.common.database.entity.Knowledge;
 import eu.arrowhead.core.gams.Constants;
 import eu.arrowhead.core.gams.service.EventService;
 import eu.arrowhead.core.gams.service.KnowledgeService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.lookup.StrSubstitutor;
 
 public abstract class ProcessableActionWrapper extends AbstractActionWrapper implements Runnable {
 
+    private final Logger logger = LogManager.getLogger();
     protected final KnowledgeService knowledgeService;
     protected final HttpUrlApiCall apiCall;
 
@@ -39,7 +42,9 @@ public abstract class ProcessableActionWrapper extends AbstractActionWrapper imp
 
         final DocumentContext ctx = JsonPath.parse(result);
         for (Map.Entry<String, String> entry : apiCall.getProcessors().entrySet()) {
+            logger.debug("Processing Body: {}={}", entry.getKey(), entry.getValue());
             final String extractedValue = ctx.read(entry.getKey());
+            logger.debug("Saving Knowledge: {}={}", entry.getValue(), extractedValue);
             knowledgeService.put(apiCall.getInstance(), entry.getValue(), extractedValue);
         }
     }

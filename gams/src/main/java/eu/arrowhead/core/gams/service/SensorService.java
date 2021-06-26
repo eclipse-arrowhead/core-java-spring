@@ -1,12 +1,14 @@
 package eu.arrowhead.core.gams.service;
 
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
 import eu.arrowhead.common.database.entity.AbstractSensorData;
+import eu.arrowhead.common.database.entity.ConfigurationEntity;
 import eu.arrowhead.common.database.entity.DoubleSensorData;
 import eu.arrowhead.common.database.entity.GamsInstance;
 import eu.arrowhead.common.database.entity.LongSensorData;
@@ -25,13 +27,14 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 @Service
 public class SensorService {
 
-    private static final String EVENT_SENSOR = "Event Sensor";
+    public static final String SENSOR_EVENT_NAME = "Event Sensor";
 
     private final DataValidation validation = new DataValidation();
     private final Logger logger = LogManager.getLogger(SensorService.class);
@@ -87,11 +90,42 @@ public class SensorService {
         sensorDataRepository.saveAndFlush(datum);
     }
 
+    public List<AbstractSensorData> load(final Sensor sensor) {
+        logger.debug("load({})", sensor);
+        validation.verify(sensor);
+        return sensorDataRepository.findBySensorAndStateOrderByValidTillDesc(sensor, ProcessingState.PERSISTED);
+    }
+
     public List<AbstractSensorData> load(final Sensor sensor, final int count) {
         logger.debug("load({},{})", sensor, count);
         validation.verify(sensor);
-        final Page<AbstractSensorData> page = sensorDataRepository.findBySensorAndStateOrderByValidTillDesc(sensor, ProcessingState.PERSISTED,
-                                                                                                            PageRequest.of(0, count));
+        final Page<AbstractSensorData> page = sensorDataRepository.findBySensorAndStateOrderByValidTillDesc(sensor, ProcessingState.PERSISTED, PageRequest.of(0, count));
+        return page.getContent();
+    }
+
+    public List<AbstractSensorData>  load(final Sensor sensor, final int count, final int validity, final ChronoUnit validityTimeUnit) {
+        logger.debug("load({},{},{},{})", sensor, count, validity, validityTimeUnit);
+        validation.verify(sensor);
+        final ZonedDateTime loadFrom = ZonedDateTime.now().minus(validity, validityTimeUnit);
+        final Pageable pageable = PageRequest.of(0, count);
+        final Page<AbstractSensorData> page = sensorDataRepository.findBySensorAndStateAndCreatedAtAfterOrderByValidTillDesc(sensor,
+                                                                                                                             ProcessingState.PERSISTED,
+                                                                                                                             loadFrom,
+                                                                                                                             pageable);
+        return page.getContent();
+    }
+
+    public List<AbstractSensorData> load(final Sensor sensor, final int validity, final ChronoUnit validityTimeUnit) {
+        logger.debug("load({},{},{})", sensor, validity, validityTimeUnit);
+        final ZonedDateTime loadFrom = ZonedDateTime.now().minus(validity, validityTimeUnit);
+        return sensorDataRepository.findBySensorAndStateAndCreatedAtAfterOrderByValidTillDesc(sensor, ProcessingState.PERSISTED, loadFrom);
+    }
+
+    private List<AbstractSensorData> loadPage(final Sensor sensor, final ZonedDateTime loadFrom, final Pageable pageable) {
+        final Page<AbstractSensorData> page = sensorDataRepository.findBySensorAndStateAndCreatedAtAfterOrderByValidTillDesc(sensor,
+                                                                                                                             ProcessingState.PERSISTED,
+                                                                                                                             loadFrom,
+                                                                                                                             pageable);
         return page.getContent();
     }
 
@@ -143,16 +177,50 @@ public class SensorService {
         sensorRepository.deleteAll(sensorList);
     }
 
-    protected void createEventSensor(final GamsInstance instance) {
-        sensorRepository.saveAndFlush(new Sensor(instance, EVENT_SENSOR, SensorType.EVENT));
+    protected Sensor createEventSensor(final GamsInstance instance, final String name, final SensorType type) {
+        validation.verify(instance);
+        Assert.hasText(name, "Name must not be empty");
+        Assert.notNull(type, "Sensor Type must not be null");
+        return sensorRepository.saveAndFlush(new Sensor(instance, name, type));
     }
 
-    protected Sensor getEventSensor(final GamsInstance instance) {
-        return sensorRepository.findByInstanceAndName(instance, EVENT_SENSOR)
-                               .orElseThrow(exceptionSupplier(instance));
+    public Sensor createEventSensor(final GamsInstance instance, final ConfigurationEntity entity, final SensorType type) {
+        Assert.notNull(entity, "Entity must not be null");
+        return createEventSensor(instance, entity.getUidString(), type);
     }
 
-    private Supplier<IllegalStateException> exceptionSupplier(final GamsInstance instance) {
-        return () -> new IllegalStateException("Unable to find event sensor for supplied gams instance '" + instance.getUidAsString() + "'");
+    protected Sensor getEventSensor(final GamsInstance instance, final String name) {
+        validation.verify(instance);
+        Assert.hasText(name, "Name must not be empty");
+        return sensorRepository.findByInstanceAndName(instance, name)
+                               .orElseThrow(exceptionSupplier(instance, name));
     }
+
+    protected Sensor getEventSensor(final GamsInstance instance, final ConfigurationEntity entity) {
+        Assert.notNull(entity, "Entity must not be null");
+        return getEventSensor(instance,entity.getUidString());
+    }
+
+    private Supplier<IllegalStateException> exceptionSupplier(final GamsInstance instance, final String name) {
+        return () -> new IllegalStateException("Unable to find event sensor '" + name + "' for supplied gams instance '" + instance.getUidAsString() + "'");
+    }
+
+    protected void persisted(final AbstractSensorData data) {
+        data.setState(ProcessingState.PERSISTED);
+        sensorDataRepository.saveAndFlush(data);
+        logger.trace("persisted {}", data);
+    }
+
+    protected void processing(final AbstractSensorData data) {
+        data.setState(ProcessingState.PROCESSING);
+        sensorDataRepository.saveAndFlush(data);
+        logger.trace("processing {}", data);
+    }
+
+    protected void processed(final AbstractSensorData data) {
+        data.setState(ProcessingState.PROCESSED);
+        sensorDataRepository.saveAndFlush(data);
+        logger.trace("processed {}", data);
+    }
+
 }

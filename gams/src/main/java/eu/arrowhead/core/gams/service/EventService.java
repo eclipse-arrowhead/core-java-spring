@@ -62,37 +62,18 @@ public class EventService {
     }
 
     public void createAnalyseEvent(final Sensor sensor, final AbstractSensorData<?> data) {
-        createEvent(sensor, data, GamsPhase.ANALYZE, EventType.ANALYSIS);
+        createEvent(sensor, data, GamsPhase.ANALYZE, EventType.ANALYSIS, 0L);
     }
 
-    private void createEvent(final Sensor sensor, final AbstractSensorData<?> data, final GamsPhase phase, final EventType type) {
-        logger.debug("Creating new Event for {}", data::shortToString);
-
-        validation.verify(sensor);
-        validation.verify(data);
-        final GamsInstance instance = sensor.getInstance();
-        final Event event = new Event(sensor, phase, type, instance.getDelay(), ChronoUnit.SECONDS);
-        event.setCreatedAt(data.getCreatedAt());
-        event.setSource(data.getClass().getSimpleName() + DELIMITER + data.getId());
-        event.setData(String.valueOf(data.getData()));
-
-        repository.saveAndFlush(event);
+    public void createPlanEvent(final Sensor sensor, final AbstractSensorData<?> data) {
+        createEvent(sensor, data, GamsPhase.PLAN, EventType.METRIC, 0L);
     }
 
-    public void createPlanEvent(final Event source, final String name, final String data) {
-        logger.debug("Creating new Event for {}", source.getSource());
-        validation.verify(source);
-        final Sensor sensor = source.getSensor();
-        final GamsInstance instance = sensor.getInstance();
-        final Event event = new Event(sensor, GamsPhase.PLAN, EventType.METRIC, instance.getDelay(), ChronoUnit.SECONDS);
-        event.setCreatedAt(source.getCreatedAt());
-        event.setSource(name);
-        event.setData(data);
-        repository.saveAndFlush(event);
+    public void createExecuteEvent(final Sensor sensor, final AbstractSensorData data) {
+        createEvent(sensor, data, GamsPhase.EXECUTE, EventType.PLAN, 0L);
     }
 
     public void createTimeoutEvent(final TimeoutGuard analysis) {
-        logger.debug("Creating new Timeout Event for {}", analysis::shortToString);
         validation.verify(analysis);
 
         final Sensor sensor = analysis.getSensor();
@@ -131,8 +112,28 @@ public class EventService {
     public void createFailureEvent(final AbstractActionWrapper wrapper, final Exception ex) {
         Assert.notNull(wrapper,"AbstractActionWrapper " + DataValidation.NOT_NULL);
         Assert.notNull(ex, "Exception " + DataValidation.NOT_NULL);
+        final String message = "ActionExecution Failed: " + ex.getMessage();
+        createFailureEvent(wrapper.getSourceEvent(), message.substring(0, 64));
+    }
 
-        createFailureEvent(wrapper.getSourceEvent(), "ActionExecution Failed: " + ex.getMessage());
+    private void createEvent(final Sensor sensor, final AbstractSensorData<?> data, final GamsPhase phase, final EventType type) {
+        validation.verify(sensor);
+        final GamsInstance instance = sensor.getInstance();
+        createEvent(sensor,data,phase,type,instance.getDelay());
+    }
+
+    private void createEvent(final Sensor sensor, final AbstractSensorData<?> data, final GamsPhase phase, final EventType type, final Long delay) {
+        logger.debug("Creating new Event for {}", data::shortToString);
+
+        validation.verify(sensor);
+        validation.verify(data);
+        final Event event = new Event(sensor, phase, type, delay, ChronoUnit.SECONDS);
+        event.setCreatedAt(data.getCreatedAt());
+        event.setSource(data.getClass().getSimpleName() + DELIMITER + data.getId());
+        event.setData(String.valueOf(data.getData()));
+
+        repository.saveAndFlush(event);
+        logger.debug("Persisted new Event: {}", event::shortToString);
     }
 
     protected boolean hasLoad() {

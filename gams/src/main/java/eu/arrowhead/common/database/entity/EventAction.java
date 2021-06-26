@@ -16,7 +16,7 @@ import eu.arrowhead.core.gams.dto.EventType;
 import eu.arrowhead.core.gams.dto.GamsPhase;
 
 @Entity
-@Table(name = "gams_sensor_action")
+@Table(name = "gams_event_action")
 public class EventAction extends AbstractAction {
 
     @ManyToOne(fetch = FetchType.EAGER)
