@@ -72,9 +72,8 @@ public class MapeKService {
         validation.verify(sensor);
 
         final AbstractSensorData sensorData = sensorService.store(sensor, timestamp, data, address);
-        logger.debug(GamsPhase.MONITOR.getMarker(), "Received new sensor data: {}", sensorData);
-        // TODO only publish event if non exists
-        eventService.createMonitorEvent(sensor, sensorData);
+        logger.debug(GamsPhase.MONITOR.getMarker(), "Stored new sensor data: {}", sensorData);
+        eventService.createMonitorEventWithDelay(sensor, sensorData);
     }
 
     public void monitor(final Event source) {
@@ -406,13 +405,16 @@ public class MapeKService {
 
         if (Objects.nonNull(countingAggregation.getTimescale()) && Objects.nonNull(countingAggregation.getTimescaleUnit())) {
             duration = Duration.of(countingAggregation.getTimescale(), countingAggregation.getTimescaleUnit());
-            boolean result;
+
             ZonedDateTime nextDateTime = localDateTime;
+            ZonedDateTime processTillDateTime = localDateTime.minus(countingAggregation.getValidity(), countingAggregation.getValidityTimeUnit());
+            logger.info("Counting for each {} {} from {} till {}",
+                        countingAggregation.getTimescale(), countingAggregation.getTimescaleUnit(), processTillDateTime, localDateTime);
+
             do {
-                logger.info("Counting for each {} {}", countingAggregation.getTimescale(), countingAggregation.getTimescaleUnit());
-                result = countBetween(eventSensor, sensorDataList, nextDateTime, duration, countingAggregation.getQuantity(), processedList);
+                countBetween(eventSensor, sensorDataList, nextDateTime, duration, countingAggregation.getQuantity(), processedList);
                 nextDateTime = nextDateTime.minus(duration);
-            } while (nextDateTime.isAfter(localDateTime.minus(countingAggregation.getValidity(), countingAggregation.getValidityTimeUnit())));
+            } while (nextDateTime.isAfter(processTillDateTime));
 
         } else if (Objects.nonNull(countingAggregation.getValidity()) && Objects.nonNull(countingAggregation.getValidityTimeUnit())) {
             duration = Duration.of(countingAggregation.getValidity(), countingAggregation.getValidityTimeUnit());
@@ -423,7 +425,7 @@ public class MapeKService {
         }
     }
 
-    private boolean countBetween(final Sensor eventSensor, final List<AbstractSensorData> sensorDataList,
+    private void countBetween(final Sensor eventSensor, final List<AbstractSensorData> sensorDataList,
                                  final ZonedDateTime till, final Duration duration, final Integer quantity,
                                  final List<AbstractSensorData> processedList) {
         final AtomicInteger count = new AtomicInteger();
@@ -448,11 +450,9 @@ public class MapeKService {
             logger.info("Processed Monitor Event from {} with result '{}'", eventSensor, count.get());
             final AbstractSensorData sensorData = sensorService.store(eventSensor, till, count.get(), eventSensor.getAddress());
             eventService.createAnalyseEvent(eventSensor, sensorData);
-            return true;
+        } else {
+            logger.info("Processed Monitor Event from {}: '{}' elements do not meet threshold of '{}'", eventSensor, count.get(), threshold);
         }
-
-        logger.info("Processed Monitor Event from {}: '{}' elements do not meet threshold of '{}'", eventSensor, count.get(), threshold);
-        return false;
     }
 
     private void publishAggregation(final Sensor eventSensor, final Object result) {

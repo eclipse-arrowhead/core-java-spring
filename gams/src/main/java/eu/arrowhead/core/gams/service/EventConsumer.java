@@ -11,9 +11,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.annotation.PostConstruct;
 
-import eu.arrowhead.core.gams.GamsProperties;
 import eu.arrowhead.common.database.entity.Event;
 import eu.arrowhead.common.database.repository.EventRepository;
+import eu.arrowhead.core.gams.GamsProperties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,6 @@ public class EventConsumer {
     private final static Long REMOVE_WORKERS_START_DELAY = 60L;
     private final static Long REMOVE_WORKERS_INTERVAL_DELAY = 60L;
     private final static TimeUnit REMOVE_WORKERS_TIME_UNIT = TimeUnit.SECONDS;
-
 
 
     private final Logger logger = LogManager.getLogger();
@@ -64,14 +63,16 @@ public class EventConsumer {
         try {
             final GamsProperties.WorkerProperties workerProperties = properties.getWorkers();
 
-            logger.debug("Initiating Event consumers and starting {} Event Workers", workerProperties.getMinimum());
+            logger.info("Initiating Event consumers and starting {} Event Workers with a delay of {}",
+                        workerProperties.getMinimum(),
+                        workerProperties.getDelay() / 1000);
             executorService.scheduleAtFixedRate(this::verifyLoad, ADD_WORKERS_START_DELAY, ADD_WORKERS_INTERVAL_DELAY, ADD_WORKERS_TIME_UNIT);
             executorService.scheduleAtFixedRate(this::requestRemoveWorker, REMOVE_WORKERS_START_DELAY, REMOVE_WORKERS_INTERVAL_DELAY, REMOVE_WORKERS_TIME_UNIT);
 
             while (this.workers.size() < workerProperties.getMinimum()) {
                 this.workers.push(
                         executorService.scheduleAtFixedRate(handleEventsWorker(),
-                                                            10_0000, workerProperties.getLoopWait(),
+                                                            workerProperties.getDelay(), workerProperties.getLoopWait(),
                                                             TimeUnit.MILLISECONDS)
                 );
             }
@@ -114,30 +115,31 @@ public class EventConsumer {
 
     private void processEvent(final Event event) {
         try {
-            eventService.processing(event);
-
-            switch (event.getPhase()) {
-                case MONITOR:
-                    mapeK.monitor(event);
-                    break;
-                case ANALYZE:
-                    mapeK.analyze(event);
-                    break;
-                case PLAN:
-                    mapeK.plan(event);
-                    break;
-                case EXECUTE:
-                    mapeK.execute(event);
-                    break;
-                case FAILURE:
-                    mapeK.failure(event);
-                    break;
-                default:
-                    eventService.createFailureEvent(event, "Unknown EventType " + event.getPhase());
-                    break;
+            // make sure that only events for different sensors run mapek concurrently to prevent concurrent processing of sensor data
+            synchronized (event.getSensor().getUidAsString().intern()) {
+                eventService.processing(event);
+                switch (event.getPhase()) {
+                    case MONITOR:
+                        mapeK.monitor(event);
+                        break;
+                    case ANALYZE:
+                        mapeK.analyze(event);
+                        break;
+                    case PLAN:
+                        mapeK.plan(event);
+                        break;
+                    case EXECUTE:
+                        mapeK.execute(event);
+                        break;
+                    case FAILURE:
+                        mapeK.failure(event);
+                        break;
+                    default:
+                        eventService.createFailureEvent(event, "Unknown EventType " + event.getPhase());
+                        break;
+                }
+                eventService.processed(event);
             }
-
-            eventService.processed(event);
         } catch (final Exception e) {
             logger.error(event.getPhase().getMarker(), "{}: {}", e.getClass().getSimpleName(), e.getMessage(), e);
             eventService.createFailureEvent(event, e.getClass().getSimpleName());

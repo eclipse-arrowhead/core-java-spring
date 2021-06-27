@@ -171,12 +171,10 @@ public class Event extends ProcessableEntity {
         Assert.isTrue(startDelay >= 0, "StartDelay must not be negative");
         Assert.notNull(startDelayUnit, "StartDelayTimeUnit must not be null");
         Assert.isTrue(validity >= 0, "Validity must not be negative");
-        Assert.notNull(startDelayUnit, "ValidityTimeUnit must not be null");
+        Assert.notNull(validityUnit, "ValidityTimeUnit must not be null");
 
         if (Objects.isNull(createdAt)) { this.createdAt = ZonedDateTime.now(); }
         if (Objects.isNull(validFrom)) { this.validFrom = calculateValidityTime(createdAt, startDelay, startDelayUnit); }
         if (Objects.isNull(validTill)) { this.validTill = calculateValidityTime(validFrom, validity, validityUnit); }
     }
-
-
 }

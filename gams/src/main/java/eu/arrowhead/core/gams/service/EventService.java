@@ -57,20 +57,32 @@ public class EventService {
         return repository.countValid();
     }
 
+    public void createMonitorEventWithDelay(final Sensor sensor, final AbstractSensorData<?> data) {
+        validation.verify(sensor);
+        final GamsInstance instance = sensor.getInstance();
+
+        // only create the event if there is no event ready for processing
+        if(!(instance.getDelay() > 0 && repository.hasValidEvent(sensor, ProcessingState.PERSISTED, GamsPhase.MONITOR, EventType.SENSOR_DATA))) {
+            createEvent(sensor, data, GamsPhase.MONITOR, EventType.SENSOR_DATA, instance.getDelay(), instance.getDelayTimeUnit());
+        } else {
+            logger.debug("A Monitor event is already scheduled to examine new sensor data... skipping");
+        }
+    }
+
     public void createMonitorEvent(final Sensor sensor, final AbstractSensorData<?> data) {
-        createEvent(sensor, data, GamsPhase.MONITOR, EventType.SENSOR_DATA);
+        createEvent(sensor, data, GamsPhase.ANALYZE, EventType.ANALYSIS, 0L, ChronoUnit.SECONDS);
     }
 
     public void createAnalyseEvent(final Sensor sensor, final AbstractSensorData<?> data) {
-        createEvent(sensor, data, GamsPhase.ANALYZE, EventType.ANALYSIS, 0L);
+        createEvent(sensor, data, GamsPhase.ANALYZE, EventType.ANALYSIS, 0L, ChronoUnit.SECONDS);
     }
 
     public void createPlanEvent(final Sensor sensor, final AbstractSensorData<?> data) {
-        createEvent(sensor, data, GamsPhase.PLAN, EventType.METRIC, 0L);
+        createEvent(sensor, data, GamsPhase.PLAN, EventType.METRIC, 0L, ChronoUnit.SECONDS);
     }
 
     public void createExecuteEvent(final Sensor sensor, final AbstractSensorData data) {
-        createEvent(sensor, data, GamsPhase.EXECUTE, EventType.PLAN, 0L);
+        createEvent(sensor, data, GamsPhase.EXECUTE, EventType.PLAN, 0L, ChronoUnit.SECONDS);
     }
 
     public void createTimeoutEvent(final TimeoutGuard analysis) {
@@ -116,24 +128,23 @@ public class EventService {
         createFailureEvent(wrapper.getSourceEvent(), message.substring(0, 64));
     }
 
-    private void createEvent(final Sensor sensor, final AbstractSensorData<?> data, final GamsPhase phase, final EventType type) {
-        validation.verify(sensor);
-        final GamsInstance instance = sensor.getInstance();
-        createEvent(sensor,data,phase,type,instance.getDelay());
-    }
-
-    private void createEvent(final Sensor sensor, final AbstractSensorData<?> data, final GamsPhase phase, final EventType type, final Long delay) {
+    private void createEvent(final Sensor sensor,
+                             final AbstractSensorData<?> data,
+                             final GamsPhase phase,
+                             final EventType type,
+                             final Long delay,
+                             final ChronoUnit unit) {
         logger.debug("Creating new Event for {}", data::shortToString);
 
         validation.verify(sensor);
         validation.verify(data);
-        final Event event = new Event(sensor, phase, type, delay, ChronoUnit.SECONDS);
+        final Event event = new Event(sensor, phase, type, delay, unit);
         event.setCreatedAt(data.getCreatedAt());
         event.setSource(data.getClass().getSimpleName() + DELIMITER + data.getId());
         event.setData(String.valueOf(data.getData()));
 
         repository.saveAndFlush(event);
-        logger.debug("Persisted new Event: {}", event::shortToString);
+        logger.info("Persisted new {} which will be valid from '{}'", event.shortToString(), event.getValidFrom());
     }
 
     protected boolean hasLoad() {
@@ -147,19 +158,19 @@ public class EventService {
     protected void persisted(final Event event) {
         event.setState(ProcessingState.PERSISTED);
         repository.saveAndFlush(event);
-        logger.debug("persisted {}", event);
+        logger.debug("Persisted {}", event::shortToString);
     }
 
     protected void processing(final Event event) {
         event.setState(ProcessingState.PROCESSING);
         repository.saveAndFlush(event);
-        logger.debug("processing {}", event);
+        logger.debug("Processing {}", event::shortToString);
     }
 
     protected void processed(final Event event) {
         event.setState(ProcessingState.PROCESSED);
         repository.saveAndFlush(event);
-        logger.debug("processed {}", event);
+        logger.debug("Processed {}", event::shortToString);
     }
 
     protected void expireEvents() {

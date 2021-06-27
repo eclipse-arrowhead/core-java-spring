@@ -2,9 +2,7 @@ package eu.arrowhead.core.gams.usecase;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 
-import eu.arrowhead.common.database.entity.AbstractAction;
 import eu.arrowhead.common.database.entity.ActionPlan;
 import eu.arrowhead.common.database.entity.CountingAggregation;
 import eu.arrowhead.common.database.entity.GamsInstance;
@@ -126,23 +124,14 @@ public class Jammer {
     //@Ignore
     public void lowSetPoint() throws InterruptedException {
         final GamsInstance instance = instanceService.findByName("jammer");
-
-        logger.info("Instance:" + instance.getUidAsString());
-        sensorService.findAllSensorByInstance(instance).forEach(x -> logger.info("Sensor: {}={}", x.getId(), x.getUidAsString()));
-
-        final List<AbstractAction> actions = actionRepository.findAll();
-        actions.forEach(x -> logger.info("Actions: {}={}", x.getName(), x.getActionType()));
-
-        final List<ActionPlan> actionsPlan = actionPlanRepository.findAll();
-        actionsPlan.forEach(x -> logger.info("ActionPlans: {}={}", x.getName(), x.getAction().getName()));
-
         final Sensor temperature = sensorService.findSensorByName(instance, "temperature");
         final ZonedDateTime time = ZonedDateTime.now().minusDays(1);
 
-        for(int i = 0; i < 225; i++) {
-            //mapeKService.publish(temperature, time, i+1, "0.0.0.0");
+        for(int i = 0; i < 200; i++) {
+            mapeKService.publish(temperature, time, i+1, "0.0.0.0");
         }
 
-        Thread.sleep(10000L);
+        Thread.sleep(15000L);
+        logger.info("Sleep is over; existing unit test");
     }
 }

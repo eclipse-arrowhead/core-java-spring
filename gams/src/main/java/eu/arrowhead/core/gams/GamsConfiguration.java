@@ -19,6 +19,6 @@ public class GamsConfiguration {
                                                                 .setNameFormat("executor-%d")
                                                                 .setUncaughtExceptionHandler(exceptionHandler)
                                                                 .build();
-        return Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors(), factory);
+        return Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors() + 1, factory);
     }
 }

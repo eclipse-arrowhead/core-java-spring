@@ -10,16 +10,16 @@ import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
 
 import eu.arrowhead.common.database.entity.Event;
-import eu.arrowhead.common.database.entity.GamsInstance;
 import eu.arrowhead.common.database.entity.ProcessableEntity;
+import eu.arrowhead.common.database.entity.Sensor;
 import eu.arrowhead.common.database.repository.EventRepository;
+import eu.arrowhead.core.gams.dto.EventType;
+import eu.arrowhead.core.gams.dto.GamsPhase;
 import eu.arrowhead.core.gams.dto.ProcessingState;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,10 +37,8 @@ import static org.springframework.data.jpa.domain.Specification.where;
 public class EventRepositoryImpl extends ProcessableEntitySpecification<Event> implements EventRepository {
 
     protected static final String TYPE = "type";
-    protected static final String INSTANCE_ID = "instanceId";
-    protected static final String NAME = "name";
-    protected static final String SOURCE = "source";
-    protected static final String DATA = "data";
+    protected static final String SENSOR = "sensor";
+    protected static final String PHASE = "phase";
     protected static final String VALID_FROM = "validFrom";
 
     private final Logger logger = LogManager.getLogger();
@@ -53,6 +51,7 @@ public class EventRepositoryImpl extends ProcessableEntitySpecification<Event> i
     }
 
     @Transactional
+    @Override
     public Optional<Event> findValidEvent(final ProcessingState previousState, final ProcessingState newState) {
 
         final List<Event> validEvents = findValidEvent(previousState, newState, 1);
@@ -66,6 +65,7 @@ public class EventRepositoryImpl extends ProcessableEntitySpecification<Event> i
     }
 
     @Transactional
+    @Override
     public List<Event> findValidEvent(final ProcessingState previousState,
                                       final ProcessingState newState, int limit) {
         final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
@@ -92,11 +92,13 @@ public class EventRepositoryImpl extends ProcessableEntitySpecification<Event> i
     }
 
     @Transactional
+    @Override
     public Iterable<Event> findAllValidEvents(final ProcessingState state) {
         return findAll(where(stateIsSpec(state)).and(validSpec()), sort());
     }
 
     @Transactional
+    @Override
     public void expireEvents() {
         final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         final CriteriaUpdate<Event> query = builder.createCriteriaUpdate(Event.class);
@@ -111,7 +113,7 @@ public class EventRepositoryImpl extends ProcessableEntitySpecification<Event> i
             final List<Long> expiredIds = new ArrayList<>();
 
             expiredEvents.forEach((e) -> {
-                logger.debug("Event expired: {}", e);
+                logger.debug("Expired: {}", e::shortToString);
                 expiredIds.add(e.getId());
             });
 
@@ -125,6 +127,7 @@ public class EventRepositoryImpl extends ProcessableEntitySpecification<Event> i
     }
 
     @Transactional
+    @Override
     public Long countValid() {
         final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Long> query = builder.createQuery(Long.class);
@@ -135,6 +138,24 @@ public class EventRepositoryImpl extends ProcessableEntitySpecification<Event> i
         query.select(builder.count(root))
              .where(specification.toPredicate(root, query, builder));
         return entityManager.createQuery(query).getSingleResult();
+    }
+
+    @Override
+    public boolean hasValidEvent(final Sensor sensor,
+                                 final ProcessingState persisted,
+                                 final GamsPhase phase,
+                                 final EventType eventType) {
+
+        final Specification<Event> specification = where(
+                sensorSpec(sensor)
+                        .and(notYetValidSpec())
+                        .and(stateIsSpec(persisted))
+                        .and(phaseIsSpec(phase))
+                        .and(typeIsSpec(eventType))
+        );
+
+        final Page<Event> page = findAll(specification, PageRequest.of(0, 1));
+        return page.hasContent();
     }
 
     @Override
@@ -152,6 +173,10 @@ public class EventRepositoryImpl extends ProcessableEntitySpecification<Event> i
         };
     }
 
+    protected Specification<Event> notYetValidSpec() {
+        return (root, query, builder) -> builder.greaterThan(root.get(VALID_FROM), ZonedDateTime.now());
+    }
+
     protected Specification<Event> expiredSpec() {
         return (root, query, builder) -> {
             final ZonedDateTime now = ZonedDateTime.now();
@@ -159,11 +184,16 @@ public class EventRepositoryImpl extends ProcessableEntitySpecification<Event> i
         };
     }
 
-    protected Specification<Event> instanceSpec(final GamsInstance instance) {
-        return (root, query, builder) -> {
-            final Join<Event, GamsInstance> join = root.join(INSTANCE_ID, JoinType.INNER);
-            return builder.equal(join.get(ID), instance.getId());
-        };
+    protected Specification<Event> sensorSpec(final Sensor sensor) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get(SENSOR), sensor);
+    }
+
+    protected Specification<Event> phaseIsSpec(final GamsPhase phase) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get(PHASE), phase);
+    }
+
+    protected Specification<Event> typeIsSpec(final EventType type) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get(TYPE), type);
     }
 
     protected Specification<Event> notDoneSpec() {

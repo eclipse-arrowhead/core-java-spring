@@ -3,6 +3,9 @@ package eu.arrowhead.common.database.repository;
 import java.util.Optional;
 
 import eu.arrowhead.common.database.entity.Event;
+import eu.arrowhead.common.database.entity.Sensor;
+import eu.arrowhead.core.gams.dto.EventType;
+import eu.arrowhead.core.gams.dto.GamsPhase;
 import eu.arrowhead.core.gams.dto.ProcessingState;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
@@ -20,4 +23,7 @@ public interface EventRepository extends RefreshableRepository<Event, Long>, Jpa
     void expireEvents();
 
     Long countValid();
+
+    boolean hasValidEvent(final Sensor sensor, final ProcessingState persisted, final GamsPhase monitor,
+                          final EventType sensorData);
 }

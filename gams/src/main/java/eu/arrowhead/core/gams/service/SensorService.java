@@ -48,7 +48,7 @@ public class SensorService {
     }
 
     public Sensor create(final GamsInstance instance, final CreateSensorRequest request) {
-        logger.debug("create({})", request);
+        logger.info("create({})", request);
         validation.verify(instance);
         Assert.notNull(request, "CreateSensorRequest must not be null");
         Assert.notNull(request.getName(), "Sensor name must not be null");
@@ -63,7 +63,7 @@ public class SensorService {
     }
 
     public AbstractSensorData<?> store(final Sensor sensor, final ZonedDateTime timestamp, final Object data, final String address) {
-        logger.debug("store({},{},{})", sensor, timestamp, data);
+        logger.trace("store({},{},{})", sensor.shortToString(), timestamp, data);
         validation.verify(sensor);
         Assert.notNull(data, "Sensor data must not be null");
 
@@ -119,14 +119,6 @@ public class SensorService {
         logger.debug("load({},{},{})", sensor, validity, validityTimeUnit);
         final ZonedDateTime loadFrom = ZonedDateTime.now().minus(validity, validityTimeUnit);
         return sensorDataRepository.findBySensorAndStateAndCreatedAtAfterOrderByValidTillDesc(sensor, ProcessingState.PERSISTED, loadFrom);
-    }
-
-    private List<AbstractSensorData> loadPage(final Sensor sensor, final ZonedDateTime loadFrom, final Pageable pageable) {
-        final Page<AbstractSensorData> page = sensorDataRepository.findBySensorAndStateAndCreatedAtAfterOrderByValidTillDesc(sensor,
-                                                                                                                             ProcessingState.PERSISTED,
-                                                                                                                             loadFrom,
-                                                                                                                             pageable);
-        return page.getContent();
     }
 
     public long count(final Sensor sensor, final ZonedDateTime validFrom) {
@@ -194,11 +186,6 @@ public class SensorService {
         Assert.hasText(name, "Name must not be empty");
         return sensorRepository.findByInstanceAndName(instance, name)
                                .orElseThrow(exceptionSupplier(instance, name));
-    }
-
-    protected Sensor getEventSensor(final GamsInstance instance, final ConfigurationEntity entity) {
-        Assert.notNull(entity, "Entity must not be null");
-        return getEventSensor(instance,entity.getUidString());
     }
 
     private Supplier<IllegalStateException> exceptionSupplier(final GamsInstance instance, final String name) {

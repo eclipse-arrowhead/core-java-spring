@@ -19,7 +19,7 @@ public class GamsProperties {
     @NotNull
     private TimeProperties eventExpiration = new TimeProperties(1L, ChronoUnit.HOURS);
     @NotNull
-    private WorkerProperties workers = new WorkerProperties(1, Runtime.getRuntime().availableProcessors(), 1_000L, 30_000L);
+    private WorkerProperties workers = new WorkerProperties(2, Runtime.getRuntime().availableProcessors() + 1, 1_000L, 30_000L, 2_000L);
 
     public GamsProperties() {
         super();
@@ -99,15 +99,18 @@ public class GamsProperties {
         private long loopWait;
         @Positive
         private long threadWait;
+        @Positive
+        private long delay;
 
         public WorkerProperties() {
         }
 
-        public WorkerProperties(final int minimum, final int maximum, final long loopWait, final long threadWait) {
+        public WorkerProperties(final int minimum, final int maximum, final long loopWait, final long threadWait, final long delay) {
             this.minimum = minimum;
             this.maximum = maximum;
             this.loopWait = loopWait;
             this.threadWait = threadWait;
+            this.delay = delay;
         }
 
         public int getMinimum() {
@@ -140,6 +143,14 @@ public class GamsProperties {
 
         public void setThreadWait(final long threadWait) {
             this.threadWait = threadWait;
+        }
+
+        public long getDelay() {
+            return delay;
+        }
+
+        public void setDelay(final long delay) {
+            this.delay = delay;
         }
     }
 }
