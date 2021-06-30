@@ -1,0 +1,14 @@
+[Unit]
+Description=arrowhead-configuration
+After=network.target mysql.target
+
+[Service]
+WorkingDirectory=/etc/arrowhead/systems/configuration
+ExecStart=/usr/bin/java -Dlog4j.configurationFile=file:/etc/arrowhead/systems/configuration/log4j2.xml -jar /usr/share/arrowhead/configuration/arrowhead-configuration.jar
+TimeoutStopSec=5
+Type=simple
+User=arrowhead
+Group=arrowhead
+
+[Install]
+WantedBy=default.target
