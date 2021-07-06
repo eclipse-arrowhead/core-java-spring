@@ -35,12 +35,12 @@
 	    <module>gatekeeper</module>
 	    <module>gateway</module>
 	    <module>choreographer</module>
-		<module>systemregistry</module>
-		<module>deviceregistry</module>
-		<module>onboarding</module>
+	    <module>systemregistry</module>
+	    <module>deviceregistry</module>
+	    <module>onboarding</module>
 	    <module>deb-installer</module>
 	    <module>docker-all</module>
-		<module>translator</module>
+	    <module>translator</module>
   	</modules>
   	
 	<properties>
@@ -114,6 +114,10 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+		<dependency>
+                	<groupId>org.springframework.boot</groupId>
+                	<artifactId>spring-boot-starter-websocket</artifactId>
+                </dependency>
 		<dependency>
 		    <groupId>org.springframework.boot</groupId>
     		<artifactId>spring-boot-configuration-processor</artifactId>
