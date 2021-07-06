@@ -34,9 +34,9 @@
 	    <module>gatekeeper</module>
 	    <module>gateway</module>
 	    <module>choreographer</module>
-		<module>systemregistry</module>
-		<module>deviceregistry</module>
-		<module>onboarding</module>
+	    <module>systemregistry</module>
+	    <module>deviceregistry</module>
+	    <module>onboarding</module>
 	    <module>qos-monitor</module>
 	    <module>deb-installer</module>
 	    <module>docker-all</module>
