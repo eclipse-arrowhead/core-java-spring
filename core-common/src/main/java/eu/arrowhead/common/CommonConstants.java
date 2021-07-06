@@ -39,7 +39,7 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_ORCHESTRATOR = "Orchestrator";
 	public static final String CORE_SYSTEM_SERVICE_REGISTRY = "Service Registry";
 	public static final String CORE_SYSTEM_QOS_MONITOR = "Quality of Service Monitor";
-    public static final String CORE_SYSTEM_TRANSLATOR = "Translator";
+	public static final String CORE_SYSTEM_TRANSLATOR = "Translator";
 
 	public static final String CORE_SYSTEM_SYSTEM_REGISTRY = "System Registry";
 	public static final String CORE_SYSTEM_DEVICE_REGISTRY = "Device Registry";
@@ -131,8 +131,11 @@ public class CommonConstants {
 
 	public static final String HTTPS = "https";
 	public static final String HTTP = "http";
+	public static final String WSS = "wss";
+	public static final String WS = "ws";
 	public static final String JSON = "JSON";
 	public static final String XML = "XML";
+	public static final String CBOR = "CBOR";
 	public static final String HTTP_SECURE_JSON = HTTP + "-SECURE-" + JSON; 
 	public static final String HTTP_INSECURE_JSON = HTTP + "-INSECURE-" + JSON;
 	public static final String UNKNOWN_ORIGIN = "<unknown>";
@@ -257,9 +260,9 @@ public class CommonConstants {
 	public static final String OP_DATAMANAGER_PROXY = "/proxy";
 	public static final String OP_DATAMANAGER_HISTORIAN = "/historian";
 
-    public static final String TRANSLATOR_URI = "/translator";
-    public static final String OP_TRANSLATOR_FIWARE_URI = "/v2";
-    public static final String OP_TRANSLATOR_PLUGIN_URI = "/plugin";
+	public static final String TRANSLATOR_URI = "/translator";
+	public static final String OP_TRANSLATOR_FIWARE_URI = "/v2";
+	public static final String OP_TRANSLATOR_PLUGIN_URI = "/plugin";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
