@@ -1,12 +1,12 @@
 
-# Arrowhead Framework 4.1.3
+# Arrowhead Framework 4.3.0
 
 [Arrowhead](http://www.arrowhead.eu/) (and its continuation, [Productive4.0](https://productive40.eu/)) is an ambitious holistic innovation project,
  meant to open the doors to the potentials of Digital Industry and to maintain a leadership position of the industries in Europe. All partners involved will work on creating the capability to efficiently design and integrate hardware and software of Internet of Things (IoT) devices. Linking the real with the digital world takes more than just adding software to the hardware.
 
 
 ## Disclaimer
-Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you have older systems please refer to the [Migration Guide](#migration) 
+Please be aware, that versions starting from 4.1.3 are __NOT__ backwards compatible with 4.1.2. If you have older systems please refer to the [Migration Guide](#migration) 
 
 ## Table of Contents
 1. [Quick Start Guide](#quickstart)
@@ -87,20 +87,11 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 	       * [Client](#ca_endpoints_client)
            * [Private](#ca_endpoints_private)
            * [Management](#ca_endpoints_mgmt)
-    9. **QoS Monitor (Quality of Service Monitor)**
-       * [System Design Description Overview](qos-monitor/documentation/QualityOfServiceMonitor-SysDD.md)
-           * [Services and Use Cases](qos-monitor/documentation/QualityOfServiceMonitor-SysDD.md#services-and-use-cases)  
-       * [Interface Design Description](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md)
-           * [Security](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#security)
-           * [Communication Profile](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#communication-profile)
-               * [Client](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#client-endpoint-description)
-               * [Private](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#private-endpoint-description)
-               * [Management](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#management-endpoint-description)	 
     10. [Onboarding Controller](#onboardingcontroller)
-       * [System Design Description Overview](#onboardingcontroller_sdd)
-       * [Services and Use Cases](#onboardingcontroller_usecases)
-       * [Security](#onboardingcontroller_security)
-       * [Endpoints](#onboardingcontroller_endpoints)
+        * [System Design Description Overview](#onboardingcontroller_sdd)
+        * [Services and Use Cases](#onboardingcontroller_usecases)
+        * [Security](#onboardingcontroller_security)
+        * [Endpoints](#onboardingcontroller_endpoints)
            * [Onboarding](#onboardingcontroller_endpoints_onboarding)
     11. [Device Registry](#deviceregistry)
         * [System Design Description Overview](#deviceregistry_sdd)
@@ -227,6 +218,7 @@ Please follow this guide to install them: [Debian Installer Guide](documentation
 <a name="quickstart_compile" />
 
 ### Compile source code and manually install MySQL and Maven.
+
 #### Requirements
 
 > **Note:** A system with 2GB of RAM is advised. 
@@ -242,7 +234,7 @@ Verify that you have Java (```java -version```), Maven (```mvn -version```), MyS
 Pull this code and enter the directory. 
 ```git clone https://github.com/arrowhead-f/core-java-spring.git```
 
-Got to the ```scripts``` folder, execute ```mysql -u root -p < create_empty_arrowhead_db.sql``` MySQL script. If you won't run this script first, the project won't build. 
+Go to the ```scripts``` folder, execute ```mysql -u root -p < create_empty_arrowhead_db.sql``` and ```mysql -u root -p < create_arrowhead_tables.sql``` MySQL script. If you won't run these scripts first, the project won't build. 
 
 ```cd core-java-spring```
 
@@ -483,10 +475,15 @@ The Key-Store is intended to store the certificates and/or key-pair certificates
 The Trust-Store is containing those certificates, what the web-server considers as trusted ones. Arrowhead Framework is designed for handling the `p12` type of Trust-Stores. Typically your Trust-Store should contain only the cloud certificate, which ensures that only those incoming HTTPS requests are authorized to access, which are having this certificate within their certificate chain.
 
 ### How to create my own certificates?
+
+#### Method A
+
 Currently Arrowhead community have the possibility to create only "self signed" certifications. See the tutorials:
 * [Create Arrowhead Cloud Self Signed Certificate](documentation/certificates/create_cloud_certificate.pdf)
 * [Create Arrowhead Client Self Signed Certificate](documentation/certificates/create_client_certificate.pdf)
 * [Create Trust Store](documentation/certificates/create_trust_store.pdf)
+
+#### Method B
 
 If you wish to generate all Certificates by a script, you can use the scripts in the [scripts/certificate_generation](scripts/certificate_generation) folder.
 
@@ -495,6 +492,12 @@ If you wish to generate all Certificates by a script, you can use the scripts in
 * lib_certs.sh - Certificate generation code
 * mk_certs.sh - Usage example
 * rm_certs.sh - Delete generated certs 
+
+#### Method C
+
+You can also use the arrowhead script. For this barely any scripting knowledge is needed, just follow the instructions.
+
+[Arrowhead scripts](documentation/deb-installer/DEBIAN-INSTALL.md#arrowhead-management-script).
 
 ### System Operator Certificate
 
@@ -536,6 +539,13 @@ All work on Arrowhead repositories happens directly on GitHub. Both core team me
 ### Branch Organization
 
 The latest version of the core systems are available in the ```master``` branch. The code for the next release is merged in the ```development``` branch. If you would like to contribute, please check out the ```development``` branch. Create a new branch from ```development```. Don't forget do write documentation, unit and integration tests. When finished, create a pull request back into ```development```. If accepted, your contribution will be in the next release. :)
+
+### Useful Guides about Java Coding Practices
+
+Before you make a pull request, please make sure you clean your code as best as you can. The following resources can help to understand what **clean code** means:
+
+* [Clean Coding in Java](https://www.baeldung.com/java-clean-code)
+* [A short summary of Java Coding best practices](https://medium.com/@rhamedy/a-short-summary-of-java-coding-best-practices-31283d0167d3)
 
 ### Bugs
 
@@ -688,7 +698,7 @@ The following endpoints no longer exist:
 GET /serviceregistry/echo
 ```
 
-Returns a "Got it" message with the purpose of testing the core service availability.
+Returns a "Got it!" message with the purpose of testing the core service availability.
 
 > **Note:** 4.1.2 version: GET /serviceregistry
 
@@ -2350,7 +2360,7 @@ The following services no longer exist:
 GET /authorization/echo
 ```
 
-Returns a "Got it" message with the purpose of testing the core service availability.
+Returns a "Got it!" message with the purpose of testing the core service availability.
 
 > **Note:** 4.1.2 version: GET /authorization/mgmt
             It was only available for the system operator of the local cloud.  
@@ -3370,7 +3380,7 @@ The following services  no longer exist:
 GET /orchestrator/echo
 ```
 
-Returns a "Got it" message with the purpose of testing the core service availability.
+Returns a "Got it!" message with the purpose of testing the core service availability.
 
 > **Note:** 4.1.2 version: GET /orchestrator/orchestration
             It was basically the same with a slightly different return message
@@ -4369,7 +4379,7 @@ The Event Handler has the following use cases:
 GET /eventhandler/echo
 ```
 
-Returns a "Got it" message with the purpose of testing the core service availability.
+Returns a "Got it!" message with the purpose of testing the core service availability.
 
 <a name="eventhandler_endpoints_post_subscribe" />
 
@@ -5195,7 +5205,7 @@ The following endpoints no longer exist:
 GET /gatekeeper/echo
 ```
 
-Returns a "Got it" message with the purpose of testing the core service availability.
+Returns a "Got it!" message with the purpose of testing the core service availability.
 
 <a name="gatekeeper_endpoints_post_init_gsd" />
 
@@ -6246,7 +6256,7 @@ Use case 2: *Connect to Provider*
 GET /gateway/echo
 ```
 
-Returns a "Got it" message with the purpose of testing the core service availability.
+Returns a "Got it!" message with the purpose of testing the core service availability.
 
 <a name="gateway_endpoints_connect_to_consumer" />
 
@@ -6689,7 +6699,7 @@ The Certificate Authority provides the following services:
 GET /certificate-authority/echo
 ```
 
-Returns a "Got it" message with the purpose of testing the core service availability.
+Returns a "Got it!" message with the purpose of testing the core service availability.
 
 <a name="ca_endpoints_check_certificate" />
 
@@ -7116,7 +7126,7 @@ These endpoints are mainly used by the Management Tool and Cloud Administrators.
 GET /choreographer/echo
 ```
 
-Returns a "Got it" message with the purpose of testing the core service availability.
+Returns a "Got it!" message with the purpose of testing the core service availability.
 
 <a name="choreographer_endpoints_post_nofity" />
 

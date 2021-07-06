@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.common;
 
 import java.io.ByteArrayOutputStream;
@@ -158,6 +172,26 @@ public class Utilities {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:RedundantThrowsDeclarationCheck")
+	public static ZonedDateTime parseLocalStringToUTCZonedDateTime(final String timeStr) throws DateTimeParseException {
+		if (isEmpty(timeStr)) {
+			return null;
+		}
+
+		final TemporalAccessor tempAcc = dateTimeFormatter.parse(timeStr);
+		final ZonedDateTime parsedDateTime = ZonedDateTime.of(tempAcc.get(ChronoField.YEAR),
+															  tempAcc.get(ChronoField.MONTH_OF_YEAR),
+															  tempAcc.get(ChronoField.DAY_OF_MONTH),
+															  tempAcc.get(ChronoField.HOUR_OF_DAY),
+															  tempAcc.get(ChronoField.MINUTE_OF_HOUR),
+															  tempAcc.get(ChronoField.SECOND_OF_MINUTE),
+															  0,
+															  OffsetDateTime.now().getOffset());
+
+			return ZonedDateTime.ofInstant(parsedDateTime.toInstant(), ZoneOffset.UTC);
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	@Nullable
 	public static String toPrettyJson(final String jsonString) {
 		try {
@@ -280,6 +314,9 @@ public class Utilities {
 
 	//-------------------------------------------------------------------------------------------------
 	public static UriComponents createURI(final String scheme, final String host, final int port, final String path, final String... queryParams) {
+		if (queryParams == null || queryParams.length == 0) {
+			return createURI(scheme, host, port, path);
+		}
 		if (queryParams.length % 2 != 0) {
 			throw new InvalidParameterException("queryParams variable arguments conatins a key without value");
 		}
@@ -415,7 +452,7 @@ public class Utilities {
 
 		try {
 		    // debian installation with new certificates have a different alias
-            // i.e. the format is {cloudname}." + AH_MASTER_NAME + "." + AH_MASTER_SUFFIX
+            // i.e. the format is {cloudname}.{cloudoperator}." + AH_MASTER_NAME + "." + AH_MASTER_SUFFIX
 			final Enumeration<String> enumeration = keystore.aliases();
 			while (enumeration.hasMoreElements()) {
 				final String alias = enumeration.nextElement();

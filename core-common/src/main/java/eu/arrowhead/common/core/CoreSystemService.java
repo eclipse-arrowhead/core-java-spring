@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.common.core;
 
 import org.springframework.util.Assert;
@@ -45,9 +59,14 @@ public enum CoreSystemService {
 	EVENT_UNSUBSCRIBE_SERVICE(CommonConstants.CORE_SERVICE_EVENT_HANDLER_UNSUBSCRIBE, CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE),
 	EVENT_PUBLISH_AUTH_UPDATE_SERVICE(CommonConstants.CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE, CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE),
 
-        // DataManager services
-        PROXY_SERVICE(CommonConstants.CORE_SERVICE_DATAMANAGER_PROXY, CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_PROXY),
-        HISTORIAN_SERVICE(CommonConstants.CORE_SERVICE_DATAMANAGER_HISTORIAN, CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN),
+	// DataManager services
+	PROXY_SERVICE(CommonConstants.CORE_SERVICE_DATAMANAGER_PROXY, CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_PROXY),
+	HISTORIAN_SERVICE(CommonConstants.CORE_SERVICE_DATAMANAGER_HISTORIAN, CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN),
+
+	// Translator services
+	TRANSLATOR_SERVICE(CommonConstants.CORE_SERVICE_TRANSLATOR, CommonConstants.TRANSLATOR_URI),
+	TRANSLATOR_FIWARE_SERVICE(CommonConstants.CORE_SERVICE_TRANSLATOR_FIWARE, CommonConstants.TRANSLATOR_URI + CommonConstants.OP_TRANSLATOR_FIWARE_URI),
+	TRANSLATOR_PLUGIN_SERVICE(CommonConstants.CORE_SERVICE_TRANSLATOR_PLUGIN, CommonConstants.TRANSLATOR_URI + CommonConstants.OP_TRANSLATOR_PLUGIN_URI),
 	
 	// CA services
 	CERTIFICATE_AUTHORITY_SIGN_SERVICE(CommonConstants.CORE_SERVICE_CERTIFICATE_AUTHORITY_SIGN, CommonConstants.CERTIFICATE_AUTHRORITY_URI + CommonConstants.OP_CA_SIGN_CERTIFICATE_URI),
@@ -61,7 +80,12 @@ public enum CoreSystemService {
 	CERTIFICATE_AUTHORITY_DELETE_TRUSTED_KEY_SERVICE(CommonConstants.CORE_SERVICE_CERTIFICATE_AUTHORITY_DELETE_TRUSTED_KEY, CommonConstants.CERTIFICATE_AUTHRORITY_URI + CommonConstants.OP_CA_MGMT_TRUSTED_KEYS_URI +
 													CommonConstants.OP_CA_MGMT_TRUSTED_KEYS_URI_SUFFIX),
 
-	// Choreographer services
+    // Configuration services
+	CONFIGURATION_SERVICE(CommonConstants.CORE_SERVICE_CONFIGURATION_CONF, CommonConstants.CONFIGURATION_URI +  CommonConstants.OP_CONFIGURATION_CONF),
+	CONFIGURATION_RAW_SERVICE(CommonConstants.CORE_SERVICE_CONFIGURATION_RAWCONF, CommonConstants.CONFIGURATION_URI +  CommonConstants.OP_CONFIGURATION_RAWCONF),
+	CONFIGURATION_MANAGE_SERVICE(CommonConstants.CORE_SERVICE_CONFIGURATION_CONF, CommonConstants.CONFIGURATION_URI +  CommonConstants.OP_CONFIGURATION_MGMT_MANAGE),
+	
+    // Choreographer services
 	CHOREOGRAPHER_SERVICE(CommonConstants.CORE_SERVICE_CHOREOGRAPHER_PROCESS, CommonConstants.CHOREOGRAPHER_URI +  CommonConstants.OP_CHOREOGRAPHER_NOTIFY_STEP_DONE),
 	
 	// QoS Monitor services

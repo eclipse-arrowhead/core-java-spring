@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.common;
 
 public class CoreCommonConstants {
@@ -59,6 +73,7 @@ public class CoreCommonConstants {
 	public static final String SWAGGER_HTTP_401_MESSAGE = "You are not authorized";
 	public static final String SWAGGER_HTTP_404_MESSAGE = "Not found";
 	public static final String SWAGGER_HTTP_409_MESSAGE = "Request caused a conflict";
+    public static final String SWAGGER_HTTP_415_MESSAGE = "MediaType not supported";
 	public static final String SWAGGER_HTTP_500_MESSAGE = "Core service is not available";
 	
 	public static final String SWAGGER_TAG_MGMT = "Management";
@@ -219,6 +234,12 @@ public class CoreCommonConstants {
 	public static final String $RELAY_TEST_LOG_MEASUREMENTS_IN_DB_WD = "${" + RELAY_TEST_LOG_MEASUREMENTS_IN_DB + ":" + CoreDefaults.DEFAULT_RELAY_TEST_LOG_MEASUREMENTS_IN_DB + "}";
 	
     public static final String CERTIFICATE_FORMAT = "X.509";
+
+	// Translator-Fiware
+    public static final String FIWARE_SERVER_HOST = "fiware.server.host";
+    public static final String $FIWARE_SERVER_HOST = "${" + FIWARE_SERVER_HOST + ":}";
+    public static final String FIWARE_SERVER_PORT = "fiware.server.port";
+    public static final String $FIWARE_SERVER_PORT = "${" + FIWARE_SERVER_PORT + ":0}";
 
     //=================================================================================================
 	// assistant methods
