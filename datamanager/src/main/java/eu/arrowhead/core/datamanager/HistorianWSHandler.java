@@ -85,7 +85,11 @@ public class HistorianWSHandler extends TextWebSocketHandler {
 		    SenML head = sml.firstElement();
 		    if(head.getBt() == null) {
 			    head.setBt((double)System.currentTimeMillis() / 1000);
-		    }
+		    } else {
+                double deltaTime = ((double)System.currentTimeMillis() / 1000) - head.getBt();
+                deltaTime *= 1000.0;
+                System.out.println("req took: "+ deltaTime+" ms");
+            }
 		    //System.out.println("bn: " + sml.get(0).getBn() + ", bt: " + sml.get(0).getBt());
 
 		    dataManagerDriver.validateSenMLContent(sml);
