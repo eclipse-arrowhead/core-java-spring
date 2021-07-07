@@ -138,6 +138,8 @@ public class CommonConstants {
 	public static final String CBOR = "CBOR";
 	public static final String HTTP_SECURE_JSON = HTTP + "-SECURE-" + JSON; 
 	public static final String HTTP_INSECURE_JSON = HTTP + "-INSECURE-" + JSON;
+	public static final String WS_SECURE_JSON = WS + "-SECURE-" + JSON;
+	public static final String WS_INSECURE_JSON = WS + "-INSECURE-" + JSON;
 	public static final String UNKNOWN_ORIGIN = "<unknown>";
 	
 	public static final String SERVICE_REGISTRY_ADDRESS = "sr_address";
