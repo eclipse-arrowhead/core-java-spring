@@ -70,7 +70,7 @@ public class DatamanagerACLFilter {
         System.out.println("ACL file name: " + aclFileName);
         boolean res = loadFile(aclFileName);
         if(res==false) {
-            logger.debug("Could not load ACL file!");
+            logger.info("Could not load ACL file!");
             
             int exitCode = 0;
             SpringApplication.exit(context, () -> exitCode);
