@@ -37,7 +37,6 @@ import java.util.Base64;
 import java.util.Objects;
 import java.util.ServiceConfigurationError;
 import javax.servlet.http.HttpServletRequest;
-//import org.springframework.http.server.reactive.SslInfo;
 
 import eu.arrowhead.common.dto.shared.CertificateCreationRequestDTO;
 import eu.arrowhead.common.dto.shared.CertificateCreationResponseDTO;
@@ -114,16 +113,9 @@ public class SecurityUtilities {
     //-------------------------------------------------------------------------------------------------
     public static String getCertificateCNFromServerRequest(final ServletServerHttpRequest request) {
         Assert.notNull(request, "request must not be null");
-        final Principal principal = request.getPrincipal();
-        //System.out.println("CN: " + principal.getName());
-        //System.out.println(principal.toString());
-        /*final X509Certificate[] certificates = (X509Certificate[]) request.getAttribute(CommonConstants.ATTR_JAVAX_SERVLET_REQUEST_X509_CERTIFICATE);
-        if (certificates != null && certificates.length != 0) {
-            final X509Certificate cert = certificates[0];
-            return Utilities.getCertCNFromSubject(cert.getSubjectDN().getName());
-        }*/
+        final HttpServletRequest servletRequest = request.getServletRequest();
 
-        return "ok"; //null;
+        return getCertificateCNFromRequest(servletRequest);
     }
 
     //-------------------------------------------------------------------------------------------------
