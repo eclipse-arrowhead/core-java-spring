@@ -20,7 +20,7 @@ import org.apache.logging.log4j.Logger;
 
 import eu.arrowhead.common.SecurityUtilities;
 import eu.arrowhead.core.datamanager.HistorianWSHandler;
-//import eu.arrowhead.core.datamanager.security.DatamanagerACLFilter;
+import eu.arrowhead.core.datamanager.security.DatamanagerACLFilter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,8 +51,8 @@ public class DataManagerWSConfig implements WebSocketConfigurer {
     @Autowired
     HistorianWSHandler historianWSHandler;
 
-    //@Autowired
-    //DatamanagerACLFilter dmACLFilter;
+    @Autowired
+    DatamanagerACLFilter dmACLFilter;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry webSocketHandlerRegistry) {
