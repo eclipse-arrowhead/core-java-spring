@@ -14,6 +14,9 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.util.List;
 
 public class CloudWithRelaysAndPublicRelaysResponseDTO extends CloudResponseDTO {
@@ -51,4 +54,14 @@ public class CloudWithRelaysAndPublicRelaysResponseDTO extends CloudResponseDTO 
 	public void setGatekeeperRelays(final List<RelayResponseDTO> gatekeeperRelays) { this.gatekeeperRelays = gatekeeperRelays; }
 	public void setGatewayRelays(final List<RelayResponseDTO> gatewayRelays) { this.gatewayRelays = gatewayRelays; }
 	public void setPublicRelays(final List<RelayResponseDTO> publicRelays) { this.publicRelays = publicRelays; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

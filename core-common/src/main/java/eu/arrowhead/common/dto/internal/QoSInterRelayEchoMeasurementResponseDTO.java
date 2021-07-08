@@ -17,6 +17,8 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class QoSInterRelayEchoMeasurementResponseDTO implements Serializable{
 
@@ -115,5 +117,15 @@ public class QoSInterRelayEchoMeasurementResponseDTO implements Serializable{
 	public void setSentAll(final long sentAll) { this.sentAll = sentAll; } 
 	public void setReceivedAll(final long receivedAll) { this.receivedAll = receivedAll; }
 	public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
-	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }	
+	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

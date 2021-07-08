@@ -9,6 +9,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.CommonConstants;
 
 //https://tools.ietf.org/html/rfc8428
@@ -162,14 +164,16 @@ public class SenML implements Serializable {
   public Double getUt() {
     return ut;
   }
-  
+
+  //-------------------------------------------------------------------------------------------------
   @Override
   public String toString() {
-    return "SenML [bn=" + bn + ", bt=" + bt + ", bu=" + bu + ", bv=" + bv
-		+ ", bs=" + bs + ", bver=" + bver + ", n=" + n + ", u=" + u + ", v="
-		+ v + ", vs=" + vs + ", vb=" + vb + ", vd=" + vd + ", s=" + s
-		+ ", t=" + t + ", ut=" + ut + "]";
-}
+    try {
+      return new ObjectMapper().writeValueAsString(this);
+    } catch (final JsonProcessingException ex) {
+      return "toString failure";
+    }
+  }
 
   //-------------------------------------------------------------------------------------------------
 }

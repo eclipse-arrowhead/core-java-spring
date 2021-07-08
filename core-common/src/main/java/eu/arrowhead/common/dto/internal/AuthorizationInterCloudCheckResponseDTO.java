@@ -14,6 +14,9 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -51,5 +54,15 @@ public class AuthorizationInterCloudCheckResponseDTO implements Serializable {
 	public void setServiceDefinition(final String serviceDefinition) { this.serviceDefinition = serviceDefinition; } 
 	public void setAuthorizedProviderIdsWithInterfaceIds(final List<IdIdListDTO> authorizedProviderIdsWithInterfaceIds) {
 		this.authorizedProviderIdsWithInterfaceIds = authorizedProviderIdsWithInterfaceIds;
-	}	
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

@@ -4,6 +4,8 @@ import java.io.Serializable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.CommonConstants;
 
 
@@ -39,6 +41,16 @@ public class SigML implements Serializable {
 
   public String getXs() {
     return xs;
+  }
+
+  //-------------------------------------------------------------------------------------------------
+  @Override
+  public String toString() {
+    try {
+      return new ObjectMapper().writeValueAsString(this);
+    } catch (final JsonProcessingException ex) {
+      return "toString failure";
+    }
   }
 
 

@@ -17,6 +17,8 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.util.Set;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 
 public class AuthorizationSubscriptionCheckResponseDTO implements Serializable {
@@ -48,4 +50,14 @@ public class AuthorizationSubscriptionCheckResponseDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public void setConsumer(final SystemResponseDTO consumer) { this.consumer = consumer; }
 	public void setProviders(final Set<SystemResponseDTO> publishers) { this.publishers = publishers; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

@@ -20,6 +20,8 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 
 @JsonInclude(Include.NON_NULL)
@@ -55,5 +57,15 @@ public class ServicesGroupedByServiceDefinitionResponseDTO implements Serializab
 	//-------------------------------------------------------------------------------------------------
 	public void setServiceDefinitionId(final long serviceDefinitionId) { this.serviceDefinitionId = serviceDefinitionId; }
 	public void setServiceDefinition(final String serviceDefinition) { this.serviceDefinition = serviceDefinition; }
-	public void setProviderServices(final List<ServiceRegistryResponseDTO> providerServices) { this.providerServices = providerServices; }	
+	public void setProviderServices(final List<ServiceRegistryResponseDTO> providerServices) { this.providerServices = providerServices; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

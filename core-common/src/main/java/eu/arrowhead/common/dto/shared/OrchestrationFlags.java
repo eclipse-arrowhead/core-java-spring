@@ -17,6 +17,8 @@ package eu.arrowhead.common.dto.shared;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.CommonConstants;
 
 public class OrchestrationFlags extends HashMap<String,Boolean> {
@@ -89,6 +91,16 @@ public class OrchestrationFlags extends HashMap<String,Boolean> {
 		result.put(CommonConstants.ORCHESTRATION_FLAG_ENABLE_QOS, Flag.ENABLE_QOS);
 		
 		return result;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
 	}
 	
 	//=================================================================================================

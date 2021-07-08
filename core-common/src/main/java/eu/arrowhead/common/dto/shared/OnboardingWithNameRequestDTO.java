@@ -16,6 +16,8 @@ package eu.arrowhead.common.dto.shared;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.Serializable;
 import java.util.StringJoiner;
@@ -52,11 +54,13 @@ public class OnboardingWithNameRequestDTO implements Serializable {
         this.creationRequestDTO = creationRequestDTO;
     }
 
+    //-------------------------------------------------------------------------------------------------
     @Override
     public String toString() {
-        return new StringJoiner(", ", OnboardingWithNameRequestDTO.class.getSimpleName() + "[", "]")
-                .add("creationRequestDTO=" + creationRequestDTO)
-                .add("parent=" + super.toString())
-                .toString();
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
     }
 }

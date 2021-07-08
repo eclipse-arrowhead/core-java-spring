@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
@@ -136,6 +138,16 @@ public class ICNProposalRequestDTO implements Serializable {
 	public void setCommands(final Map<String,String> commands) {
 		if (commands != null) {
 			this.commands = commands;
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
 		}
 	}
 }

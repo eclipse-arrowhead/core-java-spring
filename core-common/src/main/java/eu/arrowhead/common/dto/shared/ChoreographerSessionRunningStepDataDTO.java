@@ -14,6 +14,9 @@
 
 package eu.arrowhead.common.dto.shared;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class ChoreographerSessionRunningStepDataDTO {
 
     private long sessionId;
@@ -41,5 +44,15 @@ public class ChoreographerSessionRunningStepDataDTO {
 
     public void setRunningStepId(long runningStepId) {
         this.runningStepId = runningStepId;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
     }
 }

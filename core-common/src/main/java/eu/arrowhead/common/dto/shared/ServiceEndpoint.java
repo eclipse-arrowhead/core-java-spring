@@ -14,6 +14,8 @@
 
 package eu.arrowhead.common.dto.shared;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.core.CoreSystemService;
 
 import java.io.Serializable;
@@ -48,11 +50,13 @@ public class ServiceEndpoint implements Serializable {
     }
     public void setUri(final URI uri) { this.uri = uri; }
 
+    //-------------------------------------------------------------------------------------------------
     @Override
     public String toString() {
-        return new StringJoiner(", ", ServiceEndpoint.class.getSimpleName() + "[", "]")
-                .add("system=" + system)
-                .add("uri=" + uri)
-                .toString();
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
     }
 }

@@ -20,6 +20,8 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 
 @JsonInclude(Include.NON_NULL)
@@ -63,5 +65,15 @@ public class ServicesGroupedBySystemsResponseDTO implements Serializable {
 	public void setSystemName(final String systemName) {this.systemName = systemName;}
 	public void setAddress(final String address) {this.address = address;}
 	public void setPort(final int port) {this.port = port;}
-	public void setServices(final List<ServiceRegistryResponseDTO> services) {this.services = services;}	
+	public void setServices(final List<ServiceRegistryResponseDTO> services) {this.services = services;}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

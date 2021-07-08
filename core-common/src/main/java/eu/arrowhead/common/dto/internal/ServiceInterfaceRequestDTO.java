@@ -1,5 +1,8 @@
 package eu.arrowhead.common.dto.internal;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.Serializable;
 
 public class ServiceInterfaceRequestDTO implements Serializable {
@@ -28,4 +31,13 @@ public class ServiceInterfaceRequestDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public void setInterfaceName(final String interfaceName) { this.interfaceName = interfaceName; }
 
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

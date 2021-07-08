@@ -18,6 +18,8 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.dto.shared.ErrorWrapperDTO;
 
 public class CloudAccessResponseDTO implements Serializable, ErrorWrapperDTO {
@@ -55,10 +57,19 @@ public class CloudAccessResponseDTO implements Serializable, ErrorWrapperDTO {
 	public void setDirectAccess(final boolean directAccess) { this.directAccess = directAccess; }
 
 	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	@JsonIgnore
 	@Override
 	public boolean isError() {
 		return false;
 	}
-	
 }

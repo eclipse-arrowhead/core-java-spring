@@ -22,6 +22,8 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.dto.shared.ErrorWrapperDTO;
 import eu.arrowhead.common.dto.shared.QoSMeasurementAttributesFormDTO;
 
@@ -80,6 +82,16 @@ public class GSDPollResponseDTO implements Serializable, ErrorWrapperDTO {
 	public void setServiceMetadata(final Map<String,String> serviceMetadata) { this.serviceMetadata = serviceMetadata; }
 	public void setGatewayIsMandatory(final boolean gatewayIsMandatory) { this.gatewayIsMandatory = gatewayIsMandatory; }
 	public void setVerifiedRelays(final HashSet<RelayResponseDTO> verifiedRelays ) { this.verifiedRelays = verifiedRelays; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	@JsonIgnore

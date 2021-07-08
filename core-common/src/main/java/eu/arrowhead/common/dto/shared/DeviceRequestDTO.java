@@ -16,6 +16,8 @@ package eu.arrowhead.common.dto.shared;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -103,13 +105,13 @@ public class DeviceRequestDTO implements Serializable
                 Objects.equals(deviceName, other.deviceName);
     }
 
+    //-------------------------------------------------------------------------------------------------
     @Override
     public String toString() {
-        return new StringJoiner(", ", DeviceRequestDTO.class.getSimpleName() + "[", "]")
-                .add("deviceName='" + deviceName + "'")
-                .add("address='" + address + "'")
-                .add("macAddress='" + macAddress + "'")
-                .add("authenticationInfo='" + authenticationInfo + "'")
-                .toString();
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
     }
 }

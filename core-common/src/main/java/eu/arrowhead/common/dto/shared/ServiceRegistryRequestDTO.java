@@ -14,6 +14,9 @@
 
 package eu.arrowhead.common.dto.shared;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -91,18 +94,12 @@ public class ServiceRegistryRequestDTO implements Serializable {
 	public void setInterfaces(final List<String> interfaces) { this.interfaces = interfaces; }
 
 	//-------------------------------------------------------------------------------------------------
-
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", ServiceRegistryRequestDTO.class.getSimpleName() + "[", "]")
-				.add("serviceDefinition='" + serviceDefinition + "'")
-				.add("providerSystem=" + providerSystem)
-				.add("serviceUri='" + serviceUri + "'")
-				.add("endOfValidity='" + endOfValidity + "'")
-				.add("secure='" + secure + "'")
-				.add("metadata=" + metadata)
-				.add("version=" + version)
-				.add("interfaces=" + interfaces)
-				.toString();
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
 	}
 }

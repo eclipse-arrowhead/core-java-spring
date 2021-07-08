@@ -14,6 +14,9 @@
 
 package eu.arrowhead.common.dto.internal;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.Serializable;
 
 public class DecryptedMessageDTO implements Serializable {
@@ -39,4 +42,14 @@ public class DecryptedMessageDTO implements Serializable {
 	public void setMessageType(final String messageType) { this.messageType = messageType; }
 	public void setSessionId(final String sessionId) { this.sessionId = sessionId; }
 	public void setPayload(final String payload) { this.payload = payload; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

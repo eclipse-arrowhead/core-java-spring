@@ -16,6 +16,8 @@ package eu.arrowhead.common.dto.shared;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.Utilities;
 import org.springframework.util.Assert;
 
@@ -67,5 +69,15 @@ public enum CertificateType {
             return commonName + '.' + commonNamePart;
         } else { return commonName; } */
         return commonName;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
     }
 }

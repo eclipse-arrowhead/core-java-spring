@@ -14,6 +14,9 @@
 
 package eu.arrowhead.common.dto.shared;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.Serializable;
 
 public class ChoreographerNextStepResponseDTO implements Serializable {
@@ -45,4 +48,14 @@ public class ChoreographerNextStepResponseDTO implements Serializable {
     //-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
     public void setStepName(final String stepName) { this.stepName = stepName; }
+
+    //-------------------------------------------------------------------------------------------------
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (final JsonProcessingException ex) {
+            return "toString failure";
+        }
+    }
 }
