@@ -13,11 +13,15 @@
  ********************************************************************************/
 package eu.arrowhead.core.datamanager.security;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SecurityUtilities;
 import eu.arrowhead.common.dto.shared.CertificateType;
 import eu.arrowhead.common.security.CoreSystemAccessControlFilter;
+import eu.arrowhead.core.datamanager.security.DatamanagerACLFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -28,14 +32,21 @@ import org.springframework.stereotype.Component;
 //import eu.arrowhead.common.dto.shared.SenML;
 import eu.arrowhead.common.Utilities;
 //import eu.arrowhead.common.core.CoreSystem;
+
 import eu.arrowhead.common.exception.AuthException;
 
 import java.util.Map;
+import java.net.URI;
 
 @Component
 @ConditionalOnProperty(name = CommonConstants.SERVER_SSL_ENABLED, matchIfMissing = true) 
 public class DatamanagerAccessControlFilter extends CoreSystemAccessControlFilter {
-	
+
+        private final Logger logger = LogManager.getLogger(DatamanagerAccessControlFilter.class);
+
+        @Autowired
+        DatamanagerACLFilter dataManagerACLFilter;
+
 	//=================================================================================================
         // members
         
@@ -50,35 +61,51 @@ public class DatamanagerAccessControlFilter extends CoreSystemAccessControlFilte
 		final String cloudCN = getServerCloudCN();
 
 		if (requestTarget.endsWith(CommonConstants.ECHO_URI)) {
-      // Everybody in the local cloud can test the server => no further check is necessary
-      return;
-		} 
+                        // Everybody in the local cloud can test the server => no further check is necessary
+                        return;
+		}
 
-    // only the system named $SysName is allowed to write to <historian or proxy>/$SysName/$SrvName
-    if (!method.toLowerCase().equals("get")) {
-      final String dataManagerHistorianURI = CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN+"/";
-      int sysNameStartPosition = requestTarget.indexOf(dataManagerHistorianURI);
-      int sysNameStopPosition = -1;
-      if ( sysNameStartPosition != -1) {
-        sysNameStopPosition = requestTarget.indexOf("/", sysNameStartPosition + dataManagerHistorianURI.length());
-        String requestTargetSystemName = requestTarget.substring(sysNameStartPosition + dataManagerHistorianURI.length(), sysNameStopPosition);
+                /* check ACL for {historian/proxy}/system/service */
+		try {
+                        URI uri = new URI(requestTarget);
+                        if (!(uri.getPath().equals(CommonConstants.DATAMANAGER_URI) || uri.getPath().equals(CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_PROXY) || uri.getPath().equals(CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN))) {
+      
+                              if(dataManagerACLFilter.checkRequest(clientCN, method, requestTarget)) {
+                                      logger.info("Authorized");
+                              } else {
+                                      logger.info("Unauthorized!");
+                                      throw new AuthException("Not authorized");
+                              }
+                        }
+                } catch(Exception e) {
+                        throw new AuthException("Error during authorization");
+                }
 
-        checkIfRequesterSystemNameisEqualsWithClientNameFromCN(requestTargetSystemName, clientCN);
-        return;
-      }
+                // only the system named $SysName is allowed to write to <historian or proxy>/$SysName/$SrvName
+                /*if (!method.toLowerCase().equals("get")) {
+                        final String dataManagerHistorianURI = CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN+"/";
+                        int sysNameStartPosition = requestTarget.indexOf(dataManagerHistorianURI);
+                        int sysNameStopPosition = -1;
+                        if ( sysNameStartPosition != -1) {
+                                sysNameStopPosition = requestTarget.indexOf("/", sysNameStartPosition + dataManagerHistorianURI.length());
+                                String requestTargetSystemName = requestTarget.substring(sysNameStartPosition + dataManagerHistorianURI.length(), sysNameStopPosition);
 
-      if ( sysNameStartPosition == -1) {
-        final String dataManagerProxyURI = CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_PROXY+"/";
-        sysNameStartPosition = requestTarget.indexOf(dataManagerProxyURI);
-        sysNameStopPosition = requestTarget.indexOf("/", sysNameStartPosition + dataManagerProxyURI.length());
-        String requestTargetSystemName = requestTarget.substring(sysNameStartPosition + dataManagerProxyURI.length(), sysNameStopPosition);
+                                checkIfRequesterSystemNameisEqualsWithClientNameFromCN(requestTargetSystemName, clientCN);
+                                return;
+                        }
 
-        checkIfRequesterSystemNameisEqualsWithClientNameFromCN(requestTargetSystemName, clientCN);
-        return;
-      } else {
-        throw new AuthException("Illegal request");
-      }
-    }
+                        if ( sysNameStartPosition == -1) {
+                                final String dataManagerProxyURI = CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_PROXY+"/";
+                                sysNameStartPosition = requestTarget.indexOf(dataManagerProxyURI);
+                                sysNameStopPosition = requestTarget.indexOf("/", sysNameStartPosition + dataManagerProxyURI.length());
+                                String requestTargetSystemName = requestTarget.substring(sysNameStartPosition + dataManagerProxyURI.length(), sysNameStopPosition);
+
+                                checkIfRequesterSystemNameisEqualsWithClientNameFromCN(requestTargetSystemName, clientCN);
+                                return;
+                        } else {
+                                throw new AuthException("Illegal request");
+                        }
+                }*/
 
 	}
 

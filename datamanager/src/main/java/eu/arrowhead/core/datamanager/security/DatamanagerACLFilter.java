@@ -91,7 +91,7 @@ public class DatamanagerACLFilter {
         } else if (path.contains("datamanager/proxy")){
             endPath = path.substring(path.indexOf("/datamanager/proxy")+ 19);
         }
-        //System.out.println("End of path is: " + endPath);
+        System.out.println("End of path is: " + endPath);
 
         final String[] targetPath = endPath.split("/");
         String op = "";
@@ -158,17 +158,32 @@ public class DatamanagerACLFilter {
                 for(AclEntry acl: rule.acls) {
                     System.out.println("ACL-path: " + acl.path);
                     final String[] pathParts = acl.path.split("/");
-                    final String pathSystem = pathParts[0].trim();
-                    final String pathService = pathParts[1].trim();
+                    String pathSystem = "";
+                    String pathService = "";
+                    if (pathParts.length == 2) {
+                        pathSystem = pathParts[0].trim();
+                        pathService = pathParts[1].trim();
+                    }
 
                     System.out.println("pathSystem: " + pathSystem);
                     System.out.println("pathService: " + pathService);
-                    System.out.println("targetPath[1]: " + targetPath[1]);
+                    if(targetPath.length == 1) {
+                        if((pathSystem.equals("$SYS") && targetPath[0].equals(systemCN))) {
+                            if(acl.operations.contains(op)) {
+                                System.out.println("\tFound allowed operationS-1: " + operation);
+                                return true;
+                            }
+                        }
+                    } else {
 
-                    if((pathSystem.equals("$SYS") && targetPath[0].equals(systemCN)) && (pathService.equals("*") || pathService.equals(targetPath[1]))) {
-                        if(acl.operations.contains(op)) {
-                            System.out.println("\tFound allowed operationS0: " + operation);
-                            return true;
+                        System.out.println("targetPath[1]: " + targetPath[1]);
+                        System.out.println("!\n");
+
+                        if((pathSystem.equals("$SYS") && targetPath[0].equals(systemCN)) && (pathService.equals("*") || pathService.equals(targetPath[1]))) {
+                            if(acl.operations.contains(op)) {
+                                System.out.println("\tFound allowed operationS0: " + operation);
+                                return true;
+                            }
                         }
                     }
 
@@ -176,6 +191,7 @@ public class DatamanagerACLFilter {
             } //else if *
 
         }
+        System.out.println("No auth rule found!\n");
         return false;
     }
     //-------------------------------------------------------------------------------------------------
