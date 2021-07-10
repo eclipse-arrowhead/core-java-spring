@@ -91,8 +91,7 @@ public class HistorianWSHandler extends TextWebSocketHandler {
             }
 
 
-
-		    logger.debug("Got message from {}/{}", systemName, serviceName);
+		    //logger.debug("Got message from {}/{}", systemName, serviceName);
 
             boolean authorized = dataManagerACLFilter.checkRequest(CN, "PUT", "/datamanager/historian/ws/" + attributes.get("systemId") + "/" + attributes.get("serviceId"));
             if(authorized) {
@@ -105,7 +104,7 @@ public class HistorianWSHandler extends TextWebSocketHandler {
 		        } else {
                     double deltaTime = ((double)System.currentTimeMillis() / 1000) - head.getBt();
                     deltaTime *= 1000.0;
-                    System.out.println("req took: "+ deltaTime+" ms");
+                    System.out.println("Message took: "+ String.format("%.3f", deltaTime) +" ms");
                 }
 		        //System.out.println("bn: " + sml.get(0).getBn() + ", bt: " + sml.get(0).getBt());
 
@@ -113,7 +112,7 @@ public class HistorianWSHandler extends TextWebSocketHandler {
 
     		    final boolean statusCode = historianService.updateEndpoint(systemName, serviceName, sml);
             } else {
-                logger.debug("Unauthorized!");
+                //logger.debug("Unauthorized!");
 		        session.close();
             }
 	    } catch(Exception e) {
@@ -124,13 +123,13 @@ public class HistorianWSHandler extends TextWebSocketHandler {
 	    }
 
 	    logger.debug("Incoming msg: \n" + payload + "\n from " + systemName + "/" + serviceName);
-            sessions.forEach(webSocketSession -> {
-                try {
-                    webSocketSession.sendMessage(message); //XXX: only send to sessions that are connected to the system+service combo!!
-                } catch (IOException e) {
-                    logger.error("Error occurred.", e);
-                }
-            });
+        /*sessions.forEach(webSocketSession -> {
+            try {
+                webSocketSession.sendMessage(message); //XXX: only send to sessions that are connected to the system+service combo!!
+            } catch (IOException e) {
+                logger.error("Error occurred.", e);
+            }
+        });*/
     }
 }
 
