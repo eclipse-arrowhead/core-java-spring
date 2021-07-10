@@ -48,6 +48,9 @@ public class HistorianWSHandler extends TextWebSocketHandler {
     
     private final List<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
  
+    @Value("${server.ssl.enabled}")
+    private boolean sslEnabled;
+
     @Autowired
     private HistorianService historianService;
 
@@ -84,14 +87,14 @@ public class HistorianWSHandler extends TextWebSocketHandler {
 	    try {
 		    systemName = (String)session.getAttributes().get("systemId");
 		    serviceName = (String)session.getAttributes().get("serviceId");
-		    payload = message.getPayload();
-            String CN = (String)attributes.get("CN");
-            if (Utilities.isEmpty(CN)) { // check cert
-                CN = systemName;
+            String CN = systemName;
+            if (sslEnabled ) {
+                CN = (String)attributes.get("CN");
             }
+            
+            payload = message.getPayload();
 
-
-		    //logger.debug("Got message from {}/{}", systemName, serviceName);
+		    //logger.debug("Got message for {}/{}", systemName, serviceName);
 
             boolean authorized = dataManagerACLFilter.checkRequest(CN, "PUT", "/datamanager/historian/ws/" + attributes.get("systemId") + "/" + attributes.get("serviceId"));
             if(authorized) {
