@@ -71,13 +71,13 @@ public class DataManagerWSConfig implements WebSocketConfigurer {
                 WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
 
                 String path = request.getURI().getPath();
-		        //System.out.println("PATH: " + path);
+		        System.out.println("PATH: " + path);
                 final String serviceId = path.substring(path.lastIndexOf('/') + 1);
 		        path = path.substring(0, path.lastIndexOf('/'));
                 final String systemId = path.substring(path.lastIndexOf('/') + 1);
 
-		        //System.out.println("System: " + systemId);
-                //System.out.println("Service: " + serviceId);
+		        System.out.println("System: " + systemId);
+                System.out.println("Service: " + serviceId);
                 String CN = null;
 
                 // if running in secure mode, check authorization (ACL)

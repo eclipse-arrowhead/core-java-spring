@@ -16,6 +16,7 @@ package eu.arrowhead.core.datamanager;
 import java.io.IOException;
 import java.util.List;
 import java.util.Vector;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.logging.log4j.LogManager;
@@ -29,7 +30,10 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import eu.arrowhead.core.datamanager.service.HistorianService;
+import eu.arrowhead.core.datamanager.security.DatamanagerACLFilter;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.core.datamanager.service.DataManagerDriver;
+import eu.arrowhead.core.datamanager.security.DatamanagerACLFilter;
 //import eu.arrowhead.core.datamanager.database.service.DataManagerDBService;
 import eu.arrowhead.common.dto.shared.SenML;
 
@@ -49,6 +53,9 @@ public class HistorianWSHandler extends TextWebSocketHandler {
 
     @Autowired
     private DataManagerDriver dataManagerDriver;
+
+    @Autowired
+    DatamanagerACLFilter dataManagerACLFilter;
 
     //=================================================================================================
     // methods
@@ -71,31 +78,44 @@ public class HistorianWSHandler extends TextWebSocketHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         super.handleTextMessage(session, message);
         
+        Map<String,Object> attributes = session.getAttributes();
 	    String systemName, serviceName, payload;
 
 	    try {
-		    systemName = (String) session.getAttributes().get("systemId");
-		    serviceName = (String) session.getAttributes().get("serviceId");
+		    systemName = (String)session.getAttributes().get("systemId");
+		    serviceName = (String)session.getAttributes().get("serviceId");
 		    payload = message.getPayload();
+            String CN = (String)attributes.get("CN");
+            if (Utilities.isEmpty(CN)) { // check cert
+                CN = systemName;
+            }
+
+
+
 		    logger.debug("Got message from {}/{}", systemName, serviceName);
 
-		    Vector<SenML> sml = gson.fromJson(payload, new TypeToken<Vector<SenML>>(){}.getType());
-		    dataManagerDriver.validateSenMLMessage(systemName, serviceName, sml);
+            boolean authorized = dataManagerACLFilter.checkRequest(CN, "PUT", "/datamanager/historian/ws/" + attributes.get("systemId") + "/" + attributes.get("serviceId"));
+            if(authorized) {
+                Vector<SenML> sml = gson.fromJson(payload, new TypeToken<Vector<SenML>>(){}.getType());
+		        dataManagerDriver.validateSenMLMessage(systemName, serviceName, sml);
 
-		    SenML head = sml.firstElement();
-		    if(head.getBt() == null) {
-			    head.setBt((double)System.currentTimeMillis() / 1000);
-		    } else {
-                double deltaTime = ((double)System.currentTimeMillis() / 1000) - head.getBt();
-                deltaTime *= 1000.0;
-                System.out.println("req took: "+ deltaTime+" ms");
+		        SenML head = sml.firstElement();
+		        if(head.getBt() == null) {
+			        head.setBt((double)System.currentTimeMillis() / 1000);
+		        } else {
+                    double deltaTime = ((double)System.currentTimeMillis() / 1000) - head.getBt();
+                    deltaTime *= 1000.0;
+                    System.out.println("req took: "+ deltaTime+" ms");
+                }
+		        //System.out.println("bn: " + sml.get(0).getBn() + ", bt: " + sml.get(0).getBt());
+
+		        dataManagerDriver.validateSenMLContent(sml);
+
+    		    final boolean statusCode = historianService.updateEndpoint(systemName, serviceName, sml);
+            } else {
+                logger.debug("Unauthorized!");
+		        session.close();
             }
-		    //System.out.println("bn: " + sml.get(0).getBn() + ", bt: " + sml.get(0).getBt());
-
-		    dataManagerDriver.validateSenMLContent(sml);
-
-		    final boolean statusCode = historianService.updateEndpoint(systemName, serviceName, sml);
-		    
 	    } catch(Exception e) {
 		    //logger.debug("got incorrect payload");
 		    session.close();
