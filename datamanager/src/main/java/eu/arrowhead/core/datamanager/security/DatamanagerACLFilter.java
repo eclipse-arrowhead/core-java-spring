@@ -33,7 +33,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.context.ApplicationContext;
 import org.springframework.boot.SpringApplication;
 
-//import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.Utilities;
