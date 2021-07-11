@@ -41,19 +41,19 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 @EnableWebSocket
 public class DataManagerWSConfig implements WebSocketConfigurer {
  
-    private final Logger logger = LogManager.getLogger(DataManagerWSConfig.class);
+    private final Logger logger = LogManager.getLogger(DataManagerWSConfig.class);
 
     @Value("${server.ssl.enabled}")
     private boolean sslEnabled;
 
     @Value("${websockets.enabled}")
-    private boolean websocketsEnabled;
+    private boolean websocketsEnabled;
 
     @Autowired
-    HistorianWSHandler historianWSHandler;
+    HistorianWSHandler historianWSHandler;
 
     @Autowired
-    DatamanagerACLFilter dmACLFilter;
+    DatamanagerACLFilter dmACLFilter;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry webSocketHandlerRegistry) {
@@ -61,7 +61,7 @@ public class DataManagerWSConfig implements WebSocketConfigurer {
             logger.info("WebSocket support enabled");
             webSocketHandlerRegistry.addHandler(historianWSHandler, CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN + "/ws/*/*").addInterceptors(auctionInterceptor());
 	    } else {
-            logger.info("WebSocket support disabled");
+            logger.info("WebSocket support disabled");
         }
     }
 
