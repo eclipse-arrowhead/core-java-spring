@@ -3,10 +3,10 @@ package eu.arrowhead.common.dto.shared;
 import java.util.Date;
 import java.util.TimeZone;
 import java.io.Serializable;
-//import java.util.ArrayList;
-//import java.util.List;
+
 
 public class TimeManagerTimeResponseDTO implements Serializable {
+
 
         //=================================================================================================
         // members
@@ -22,12 +22,13 @@ public class TimeManagerTimeResponseDTO implements Serializable {
         // methods
         
         //-------------------------------------------------------------------------------------------------
-        public TimeManagerTimeResponseDTO() {
+        public TimeManagerTimeResponseDTO(final String tz) {
+                this.tz = tz;
+                
                 Date date = new Date();
                 epoch_ms = date.getTime();
                 epoch = epoch_ms / 1000;
 
-                tz = new String("Europe/London");
                 inDaylightTime = TimeZone.getTimeZone(this.tz).inDaylightTime(date);
         }
 
