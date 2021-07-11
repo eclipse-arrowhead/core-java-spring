@@ -32,18 +32,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.context.ApplicationContext;
 import org.springframework.boot.SpringApplication;
-
 import org.springframework.stereotype.Component;
-
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.AuthException;
 
-//import java.util.Map;
 
 @Component
 @ConditionalOnProperty(name = CommonConstants.SERVER_SSL_ENABLED, matchIfMissing = true) 
 public class DatamanagerACLFilter {
-
     private final Logger logger = LogManager.getLogger(DatamanagerACLFilter.class);
 
     @Autowired
@@ -56,6 +52,31 @@ public class DatamanagerACLFilter {
 
     //=================================================================================================
     // members
+
+    public static final String DM_HIST_OP = CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN;
+    public static final String DM_PROXY_OP = CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_PROXY;
+    public static final String DM_HIST_OP_WS = DM_HIST_OP + "/ws";
+
+    public static final String METHOD_GET  = "GET";
+    public static final String METHOD_PUT  = "PUT";
+    public static final String METHOD_POST = "POST";
+    public static final String METHOD_DEL  = "DELETE";
+
+    public static final String ACL_METHODS = "gpPd";
+    public static final String ACL_METHOD_GET  = "g";
+    public static final String ACL_METHOD_PUT  = "p";
+    public static final String ACL_METHOD_POST = "P";
+    public static final String ACL_METHOD_DEL  = "d";
+
+    public static final String ACL_LINE_COMMENT1 = "#";
+    public static final String ACL_LINE_COMMENT2 = ";";
+    public static final String ACL_SYS_WILDCARD  = "$SYS";
+    public static final String ACL_SRV_WILDCARD  = "*";
+
+    public static final String ACL_SYS_DELIM  = ":";
+    public static final String ACL_RULE_DELIM  = ",";
+    public static final String ACL_PATH_DELIM  = "@";
+    
         
 	//=================================================================================================
 	// assistant methods
@@ -84,30 +105,30 @@ public class DatamanagerACLFilter {
         //logger.info("Method: " + operation);
 
         String endPath = "";
-        if (path.contains("/datamanager/historian/ws")) {
-            endPath = path.substring(path.indexOf("/datamanager/historian/ws") + 26);
-        }else if (path.contains("/datamanager/historian")) {
-            endPath = path.substring(path.indexOf("/datamanager/historian") + 23);
-        } else if (path.contains("/datamanager/proxy")){
-            endPath = path.substring(path.indexOf("/datamanager/proxy")+ 19);
+        if (path.contains(DM_HIST_OP_WS)) {
+            endPath = path.substring(path.indexOf(DM_HIST_OP_WS) + DM_HIST_OP_WS.length() + 1);
+        }else if (path.contains(DM_HIST_OP)) {
+            endPath = path.substring(path.indexOf(DM_HIST_OP) + DM_HIST_OP.length() + 1);
+        } else if (path.contains(DM_PROXY_OP)){
+            endPath = path.substring(path.indexOf(DM_PROXY_OP)+ DM_PROXY_OP.length() + 1);
         }
         //System.out.println("End of path is: " + endPath);
 
         final String[] targetPath = endPath.split("/");
         String op = "";
 
-        switch(operation.trim()) {
-            case "GET":
-                op = "g";
+        switch(operation.toUpperCase().trim()) {
+            case METHOD_GET:
+                op = ACL_METHOD_GET;
                 break;
-            case "PUT":
-                op ="p";
+            case METHOD_PUT:
+                op = ACL_METHOD_PUT;
                 break;
-            case "POST":
-                op ="P";
+            case METHOD_POST:
+                op = ACL_METHOD_POST;
                 break;
-            case "DELETE":
-                op ="d";
+            case METHOD_DEL:
+                op = ACL_METHOD_DEL;
                 break;
             default:
                 throw new AuthException("Unknown method");
@@ -132,12 +153,12 @@ public class DatamanagerACLFilter {
                             //System.out.println("\tFound allowed operation0: " + operation);
                             return true;
                         }
-                    } else if(pathSystem.equals(targetPath[0]) && pathService.equals("*")) { // match aname/*
+                    } else if(pathSystem.equals(targetPath[0]) && pathService.equals(ACL_SRV_WILDCARD)) {
                         if(acl.operations.contains(op)) {
                             //System.out.println("\tFound allowed operation1: " + operation);
                             return true;
                         }
-                    } else if(pathSystem.equals("*") && pathService.equals("*")) { // match */*
+                    } else if(pathSystem.equals(ACL_SRV_WILDCARD) && pathService.equals(ACL_SRV_WILDCARD)) {
                         if(acl.operations.contains(op)) {
                             //System.out.println("\tFound allowed operation2: " + operation);
                             return true;
@@ -147,7 +168,7 @@ public class DatamanagerACLFilter {
                     }
 
                 }
-            } else if(rule.systemName.equals("$SYS")) {
+            } else if(rule.systemName.equals(ACL_SYS_WILDCARD)) {
                 //System.out.println("Found matching system name: $SYS(" + systemCN + ")");
 
                 for(AclEntry acl: rule.acls) {
@@ -163,13 +184,13 @@ public class DatamanagerACLFilter {
                     //logger.info("pathSystem: " + pathSystem);
                     //logger.info("pathService: " + pathService);
                     if(targetPath.length == 1) {
-                        if((pathSystem.equals("$SYS") && targetPath[0].equals(systemCN))) {
+                        if((pathSystem.equals(ACL_SYS_WILDCARD) && targetPath[0].equals(systemCN))) {
                             if(acl.operations.contains(op)) {
                                 return true;
                             }
                         }
                     } else {
-                        if((pathSystem.equals("$SYS") && targetPath[0].equals(systemCN)) && (pathService.equals("*") || pathService.equals(targetPath[1]))) {
+                        if((pathSystem.equals(ACL_SYS_WILDCARD) && targetPath[0].equals(systemCN)) && (pathService.equals(ACL_SRV_WILDCARD) || pathService.equals(targetPath[1]))) {
                             if(acl.operations.contains(op)) {
                                 return true;
                             }
@@ -183,6 +204,8 @@ public class DatamanagerACLFilter {
         
         return false;
     }
+
+
     //-------------------------------------------------------------------------------------------------
     public boolean load(final String[] lines) {
         rules = new ArrayList<AclRule>();
@@ -190,17 +213,16 @@ public class DatamanagerACLFilter {
         try {
             for(String line: lines) {
                 line = line.trim();
-                if(line.startsWith("#") || line.startsWith(";") || line.equals("")) {
+                if(line.startsWith(ACL_LINE_COMMENT1) || line.startsWith(ACL_LINE_COMMENT1) || line.equals("")) {
                     continue;
                 }
 
-                String[] parts = line.split(":");
-                final AclRule r  = new AclRule(parts[0].trim());
-                final String rulesData[] = parts[1].trim().split(",");
+                String[] parts = line.split(ACL_SYS_DELIM);
+                final AclRule r = new AclRule(parts[0].trim());
+                final String rulesData[] = parts[1].trim().split(ACL_RULE_DELIM);
                 for (String rule : rulesData) {
                     r.addACLEntries(rule.trim());
                 }
-
                 rules.add(r);
             }
 
@@ -210,6 +232,7 @@ public class DatamanagerACLFilter {
 
             return false;
         }
+
         return true;
     }
 
@@ -235,7 +258,8 @@ public class DatamanagerACLFilter {
         return false;
     }
 
-    class AclEntry {
+    //-------------------------------------------------------------------------------------------------
+    private class AclEntry {
         String operations;
         String path;
 
@@ -244,7 +268,8 @@ public class DatamanagerACLFilter {
         }
     }
 
-    class AclRule {
+    //-------------------------------------------------------------------------------------------------
+    private class AclRule {
         String systemName;
         ArrayList<AclEntry> acls = new ArrayList<AclEntry>();
 
@@ -255,24 +280,22 @@ public class DatamanagerACLFilter {
 
 
         private void addACLEntries(final String entryString) throws Exception{
-            final String[] parts = entryString.split(",");
+            final String[] parts = entryString.split(ACL_RULE_DELIM);
 
             for (String part : parts) {
                 addACLEntry(part);
             }
-            
         }
-
         
         private void addACLEntry(final String entryString) throws Exception {
-            final String[] parts = entryString.split("@");
+            final String[] parts = entryString.split(ACL_PATH_DELIM);
             final String operations = parts[0].trim().toLowerCase();
             final String path = parts[1].trim();
 
             // validate CRUD only operations
             for (int i = 0; i < operations.length(); i++) {
                 String op = "" + operations.charAt(i);
-                if("gpPd".indexOf(op) == -1) {
+                if(ACL_METHODS.indexOf(op) == -1) {
                     throw new Exception("illegal operation: " + op);
                 }
             }
