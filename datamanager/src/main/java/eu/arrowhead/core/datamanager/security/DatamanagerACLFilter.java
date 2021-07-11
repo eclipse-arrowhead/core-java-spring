@@ -52,6 +52,7 @@ public class DatamanagerACLFilter {
 
     //=================================================================================================
     // members
+    private static final boolean USE_DEFAULTS = true;
 
     public static final String DM_HIST_OP = CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN;
     public static final String DM_PROXY_OP = CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_PROXY;
@@ -77,6 +78,7 @@ public class DatamanagerACLFilter {
     public static final String ACL_RULE_DELIM  = ",";
     public static final String ACL_PATH_DELIM  = "@";
     public static final String ACL_PATH_SEPARATOR  = "/";
+    public static final String ACL_DEFAULT_RULE = "$SYS: gpPd@$SYS/*";
     
         
 	//=================================================================================================
@@ -91,15 +93,18 @@ public class DatamanagerACLFilter {
         boolean res = loadFile(aclFileName);
         if(res==false) {
             logger.info("Could not load ACL file!");
-            logger.info("Loading defaults ...");
 
-            String[] defaults = new String[1];
-            defaults[0] = "$SYS: gpPd@$SYS/*";
-            load(defaults);
-            
-            //int exitCode = 0;
-            //SpringApplication.exit(context, () -> exitCode);
-            //System.exit(exitCode);
+            if(USE_DEFAULTS) {
+                logger.info("Loading defaults ...");
+                String[] defaults = new String[1];
+                defaults[0] = ACL_DEFAULT_RULE;
+                load(defaults);
+            } else {
+                logger.info("Exiting ...");
+                int exitCode = 0;
+                SpringApplication.exit(context, () -> exitCode);
+                System.exit(exitCode);
+            }
         }
     }
 
@@ -138,16 +143,13 @@ public class DatamanagerACLFilter {
 
         for(AclRule rule: rules) {
 
-            // only check rules that matches systemName or $SYS constant
             if(rule.systemName.equals(systemCN)) {
-                //logger.info("Found matching system name: " + rule.systemName);
 
                 for(AclEntry acl: rule.acls) {
                     final String[] pathParts = acl.path.split(ACL_PATH_SEPARATOR);
                     final String pathSystem = pathParts[0].trim();
                     final String pathService = pathParts[1].trim();
 
-                    // check hard coded rule
                     if(acl.path.equals(endPath)) {
                         
                         if(acl.operations.contains(op)) {
@@ -161,13 +163,10 @@ public class DatamanagerACLFilter {
                         if(acl.operations.contains(op)) {
                             return true;
                         }
-                    } else {
-                        //logger.debug("No match for endpath: " + endPath + " for rule: " + acl.path + " ops: " + acl.operations);
-                    }
+                    } 
 
                 }
             } else if(rule.systemName.equals(ACL_SYS_WILDCARD)) {
-                //logger.debug("Found matching system name: $SYS(" + systemCN + ")");
 
                 for(AclEntry acl: rule.acls) {
                     final String[] pathParts = acl.path.split(ACL_PATH_SEPARATOR);

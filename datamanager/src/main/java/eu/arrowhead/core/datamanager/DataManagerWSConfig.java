@@ -19,6 +19,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import eu.arrowhead.common.SecurityUtilities;
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.core.datamanager.HistorianWSHandler;
 import eu.arrowhead.core.datamanager.security.DatamanagerACLFilter;
 import org.springframework.context.annotation.Configuration;
@@ -40,27 +41,27 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 @EnableWebSocket
 public class DataManagerWSConfig implements WebSocketConfigurer {
  
-    private final Logger logger = LogManager.getLogger(DataManagerWSConfig.class);
+    private final Logger logger = LogManager.getLogger(DataManagerWSConfig.class);
 
     @Value("${server.ssl.enabled}")
     private boolean sslEnabled;
 
     @Value("${websockets.enabled}")
-    private boolean websocketsEnabled;
+    private boolean websocketsEnabled;
 
     @Autowired
-    HistorianWSHandler historianWSHandler;
+    HistorianWSHandler historianWSHandler;
 
     @Autowired
-    DatamanagerACLFilter dmACLFilter;
+    DatamanagerACLFilter dmACLFilter;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry webSocketHandlerRegistry) {
 	    if (websocketsEnabled) {
             logger.info("WebSocket support enabled");
-            webSocketHandlerRegistry.addHandler(historianWSHandler, "/datamanager/historian/ws/*/*").addInterceptors(auctionInterceptor());
+            webSocketHandlerRegistry.addHandler(historianWSHandler, CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN + "/ws/*/*").addInterceptors(auctionInterceptor());
 	    } else {
-            logger.info("WebSocket support disabled");
+            logger.info("WebSocket support disabled");
         }
     }
 
@@ -71,13 +72,9 @@ public class DataManagerWSConfig implements WebSocketConfigurer {
                 WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
 
                 String path = request.getURI().getPath();
-		        System.out.println("PATH: " + path);
                 final String serviceId = path.substring(path.lastIndexOf('/') + 1);
 		        path = path.substring(0, path.lastIndexOf('/'));
                 final String systemId = path.substring(path.lastIndexOf('/') + 1);
-
-		        System.out.println("System: " + systemId);
-                System.out.println("Service: " + serviceId);
                 String CN = null;
 
                 // if running in secure mode, check authorization (ACL)
