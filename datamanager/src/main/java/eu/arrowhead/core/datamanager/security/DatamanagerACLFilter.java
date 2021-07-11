@@ -76,6 +76,7 @@ public class DatamanagerACLFilter {
     public static final String ACL_SYS_DELIM  = ":";
     public static final String ACL_RULE_DELIM  = ",";
     public static final String ACL_PATH_DELIM  = "@";
+    public static final String ACL_PATH_SEPARATOR  = "/";
     
         
 	//=================================================================================================
@@ -114,7 +115,7 @@ public class DatamanagerACLFilter {
         }
         //System.out.println("End of path is: " + endPath);
 
-        final String[] targetPath = endPath.split("/");
+        final String[] targetPath = endPath.split(ACL_PATH_SEPARATOR);
         String op = "";
 
         switch(operation.toUpperCase().trim()) {
@@ -142,7 +143,7 @@ public class DatamanagerACLFilter {
 
                 for(AclEntry acl: rule.acls) {
                     //System.out.println("ACL-path: " + acl.path);
-                    final String[] pathParts = acl.path.split("/");
+                    final String[] pathParts = acl.path.split(ACL_PATH_SEPARATOR);
                     final String pathSystem = pathParts[0].trim();
                     final String pathService = pathParts[1].trim();
 
@@ -169,11 +170,10 @@ public class DatamanagerACLFilter {
 
                 }
             } else if(rule.systemName.equals(ACL_SYS_WILDCARD)) {
-                //System.out.println("Found matching system name: $SYS(" + systemCN + ")");
+                //logger.debug("Found matching system name: $SYS(" + systemCN + ")");
 
                 for(AclEntry acl: rule.acls) {
-                    //System.out.println("ACL-path: " + acl.path);
-                    final String[] pathParts = acl.path.split("/");
+                    final String[] pathParts = acl.path.split(ACL_PATH_SEPARATOR);
                     String pathSystem = "";
                     String pathService = "";
                     if (pathParts.length == 2) {
@@ -181,8 +181,6 @@ public class DatamanagerACLFilter {
                         pathService = pathParts[1].trim();
                     }
 
-                    //logger.info("pathSystem: " + pathSystem);
-                    //logger.info("pathService: " + pathService);
                     if(targetPath.length == 1) {
                         if((pathSystem.equals(ACL_SYS_WILDCARD) && targetPath[0].equals(systemCN))) {
                             if(acl.operations.contains(op)) {
@@ -292,7 +290,7 @@ public class DatamanagerACLFilter {
             final String operations = parts[0].trim().toLowerCase();
             final String path = parts[1].trim();
 
-            // validate CRUD only operations
+            // allow CRUD only operations
             for (int i = 0; i < operations.length(); i++) {
                 String op = "" + operations.charAt(i);
                 if(ACL_METHODS.indexOf(op) == -1) {
