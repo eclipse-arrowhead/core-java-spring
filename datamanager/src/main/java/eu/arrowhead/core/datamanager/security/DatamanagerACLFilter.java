@@ -24,7 +24,9 @@ import org.apache.logging.log4j.Logger;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import org.springframework.beans.factory.annotation.Value;
-import eu.arrowhead.common.SecurityUtilities;
+import eu.arrowhead.common.SecurityUtilities; 
+
+
 import eu.arrowhead.common.dto.shared.CertificateType;
 import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.PostConstruct;
@@ -111,6 +113,7 @@ public class DatamanagerACLFilter {
 
     //-------------------------------------------------------------------------------------------------
     public boolean checkRequest(final String systemCN, final String operation, final String path) throws Exception {
+        logger.debug("checkRequest for CN: {}, op: {} for '{}'", systemCN, operation, path);
 
         String endPath = "";
         if (path.contains(DM_HIST_OP_WS)) {
@@ -121,6 +124,7 @@ public class DatamanagerACLFilter {
             endPath = path.substring(path.indexOf(DM_PROXY_OP)+ DM_PROXY_OP.length() + 1);
         }
 
+        logger.info("endPath: {}", endPath);
         final String[] targetPath = endPath.split(ACL_PATH_SEPARATOR);
         String op = "";
 

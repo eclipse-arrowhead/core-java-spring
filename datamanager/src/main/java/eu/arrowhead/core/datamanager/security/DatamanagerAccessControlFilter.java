@@ -66,16 +66,14 @@ public class DatamanagerAccessControlFilter extends CoreSystemAccessControlFilte
 		}
 
 		try {
-                        URI uri = new URI(requestTarget);
-                        if (!(uri.getPath().equals(CommonConstants.DATAMANAGER_URI) || uri.getPath().equals(CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_PROXY) || uri.getPath().equals(CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN))) {
-      
-                              if(dataManagerACLFilter.checkRequest(clientCN, method, requestTarget)) {
-                                      logger.debug("Authorized");
-                              } else {
-                                      logger.debug("Unauthorized!");
-                                      throw new AuthException("Not authorized");
-                              }
+                        
+                        if(dataManagerACLFilter.checkRequest(clientCN, method, requestTarget)) {
+                                logger.debug("Authorized");
+                        } else {
+                                logger.debug("Unauthorized!");
+                                throw new AuthException("Not authorized");
                         }
+                        
                 } catch(Exception e) {
                         throw new AuthException("Error during authorization");
                 }

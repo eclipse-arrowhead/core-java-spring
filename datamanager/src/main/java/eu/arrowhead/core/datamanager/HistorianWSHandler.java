@@ -94,7 +94,7 @@ public class HistorianWSHandler extends TextWebSocketHandler {
             
             payload = message.getPayload();
 
-		    //logger.debug("Got message for {}/{}", systemName, serviceName);
+		    logger.debug("Got message for {}/{}", systemName, serviceName);
 
             boolean authorized = dataManagerACLFilter.checkRequest(CN, "PUT", "/datamanager/historian/ws/" + attributes.get("systemId") + "/" + attributes.get("serviceId"));
             if(authorized) {
@@ -107,13 +107,15 @@ public class HistorianWSHandler extends TextWebSocketHandler {
 		        } else {
                     double deltaTime = ((double)System.currentTimeMillis() / 1000) - head.getBt();
                     deltaTime *= 1000.0;
-                    System.out.println("Message took: "+ String.format("%.3f", deltaTime) +" ms");
+                    logger.info("Message took {} ms ", String.format("%.3f", deltaTime));
                 }
 		        //System.out.println("bn: " + sml.get(0).getBn() + ", bt: " + sml.get(0).getBt());
 
 		        dataManagerDriver.validateSenMLContent(sml);
-
+                historianService.createEndpoint(systemName, serviceName);
     		    final boolean statusCode = historianService.updateEndpoint(systemName, serviceName, sml);
+                logger.info("dB storage: {}", statusCode);
+
             } else {
                 //logger.debug("Unauthorized!");
 		        session.close();
