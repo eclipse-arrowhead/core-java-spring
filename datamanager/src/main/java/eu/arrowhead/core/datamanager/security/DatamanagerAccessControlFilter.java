@@ -29,10 +29,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-//import eu.arrowhead.common.dto.shared.SenML;
 import eu.arrowhead.common.Utilities;
-//import eu.arrowhead.common.core.CoreSystem;
-
 import eu.arrowhead.common.exception.AuthException;
 
 import java.util.Map;

@@ -34,7 +34,6 @@ import eu.arrowhead.core.datamanager.security.DatamanagerACLFilter;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.core.datamanager.service.DataManagerDriver;
 import eu.arrowhead.core.datamanager.security.DatamanagerACLFilter;
-//import eu.arrowhead.core.datamanager.database.service.DataManagerDBService;
 import eu.arrowhead.common.dto.shared.SenML;
 
 import com.google.gson.*;
@@ -67,14 +66,12 @@ public class HistorianWSHandler extends TextWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         sessions.add(session);
         super.afterConnectionEstablished(session);
-	    //logger.info("Got new connection!");
     }
  
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         sessions.remove(session);
         super.afterConnectionClosed(session, status);
-	    //logger.info("Connection lost!");
     }
  
     @Override
@@ -94,9 +91,8 @@ public class HistorianWSHandler extends TextWebSocketHandler {
             
             payload = message.getPayload();
 
-		    logger.debug("Got message for {}/{}", systemName, serviceName);
-
-            boolean authorized = dataManagerACLFilter.checkRequest(CN, "PUT", "/datamanager/historian/ws/" + attributes.get("systemId") + "/" + attributes.get("serviceId"));
+		    //logger.debug("Got message for {}/{}", systemName, serviceName);
+            boolean authorized = dataManagerACLFilter.checkRequest(CN, "PUT", CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN + "/ws/" + attributes.get("systemId") + "/" + attributes.get("serviceId"));
             if(authorized) {
                 Vector<SenML> sml = gson.fromJson(payload, new TypeToken<Vector<SenML>>(){}.getType());
 		        dataManagerDriver.validateSenMLMessage(systemName, serviceName, sml);
@@ -107,27 +103,23 @@ public class HistorianWSHandler extends TextWebSocketHandler {
 		        } else {
                     double deltaTime = ((double)System.currentTimeMillis() / 1000) - head.getBt();
                     deltaTime *= 1000.0;
-                    logger.info("Message took {} ms ", String.format("%.3f", deltaTime));
+                    //logger.info("Message took {} ms ", String.format("%.3f", deltaTime));
                 }
-		        //System.out.println("bn: " + sml.get(0).getBn() + ", bt: " + sml.get(0).getBt());
 
 		        dataManagerDriver.validateSenMLContent(sml);
                 historianService.createEndpoint(systemName, serviceName);
-    		    final boolean statusCode = historianService.updateEndpoint(systemName, serviceName, sml);
-                logger.info("dB storage: {}", statusCode);
+    		    historianService.updateEndpoint(systemName, serviceName, sml);
 
             } else {
-                //logger.debug("Unauthorized!");
 		        session.close();
             }
 	    } catch(Exception e) {
-		    //logger.debug("got incorrect payload");
 		    session.close();
 		    return;
 
 	    }
 
-	    logger.debug("Incoming msg: \n" + payload + "\n from " + systemName + "/" + serviceName);
+	    //logger.debug("Incoming msg: \n" + payload + "\n from " + systemName + "/" + serviceName); //TODO: decide if EventHandler like forwaridng should be added!
         /*sessions.forEach(webSocketSession -> {
             try {
                 webSocketSession.sendMessage(message); //XXX: only send to sessions that are connected to the system+service combo!!
