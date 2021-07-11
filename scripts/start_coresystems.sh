@@ -44,6 +44,10 @@ cd ../../choreographer/target
 nohup java -jar $(find . -maxdepth 1 -name arrowhead-choreographer-\*.jar | sort | tail -n1) &> sout_choreographer.log &
 echo Choreographer started
 
+cd ../../configuration/target
+nohup java -jar $(find . -maxdepth 1 -name arrowhead-configuration-\*.jar | sort | tail -n1) &> sout_configuration.log &
+echo Configuration started
+
 cd ../../certificate-authority/target
 nohup java -jar $(find . -maxdepth 1 -name arrowhead-certificate-authority-\*.jar | sort | tail -n1) &> sout_ca.log &
 echo Certificate Authority started

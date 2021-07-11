@@ -5,11 +5,11 @@
  * terms of the Eclipse Public License 2.0 which is available at
  * http://www.eclipse.org/legal/epl-2.0.
  *
- * SPDX-License-Identifier: EPL-2.0 
+ * SPDX-License-Identifier: EPL-2.0
  *
- * Contributors: 
+ * Contributors:
  *   {Lulea University of Technology} - implementation
- *   Arrowhead Consortia - conceptualization 
+ *   Arrowhead Consortia - conceptualization
  ********************************************************************************/
 package eu.arrowhead.core.datamanager;
 
@@ -59,6 +59,7 @@ import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.datamanager.database.service.DataManagerDBService;
+import eu.arrowhead.core.datamanager.service.DataManagerDriver;
 import eu.arrowhead.core.datamanager.service.ProxyService;
 import eu.arrowhead.core.datamanager.service.ProxyElement;
 import eu.arrowhead.core.datamanager.service.HistorianService;
@@ -91,11 +92,14 @@ public class DataManagerController {
 	private HistorianService historianService;
 
 	@Autowired
+	private DataManagerDriver dataManagerDriver;
+
+	@Autowired
 	private DataManagerDBService dataManagerDBService;
-	
+
 	//=================================================================================================
 	// methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses (value = {
@@ -167,9 +171,9 @@ public class DataManagerController {
 		@RequestParam MultiValueMap<String, String> params
 		) {
 
-    if(Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
-      throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN);
-    }
+    		if(Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
+		      throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN);
+		}
 		logger.debug("historianServiceGet for {}/{}", systemName, serviceName);
 
 		double from=-1, to=-1;
@@ -256,7 +260,7 @@ public class DataManagerController {
         }
 		logger.debug("historianServicePut for {}/{}", systemName, serviceName);
 
-		validateSenMLMessage(systemName, serviceName, message);
+		dataManagerDriver.validateSenMLMessage(systemName, serviceName, message);
 
 		historianService.createEndpoint(systemName, serviceName);
 
@@ -265,7 +269,7 @@ public class DataManagerController {
 			head.setBt((double)System.currentTimeMillis() / 1000);
 		}
 
-		validateSenMLContent(message);
+		dataManagerDriver.validateSenMLContent(message);
 
 		final boolean statusCode = historianService.updateEndpoint(systemName, serviceName, message);
 		if (!statusCode) {
@@ -362,14 +366,14 @@ public class DataManagerController {
             }
 			logger.debug("proxyServicePut for {}/{}", systemName, serviceName);
 
-			validateSenMLMessage(systemName, serviceName, message);
+			dataManagerDriver.validateSenMLMessage(systemName, serviceName, message);
 
 			SenML head = message.firstElement();
 			if(head.getBt() == null) {
 				head.setBt((double)System.currentTimeMillis() / 1000);
 			}
 
-			validateSenMLContent(message);
+			dataManagerDriver.validateSenMLContent(message);
 
 			final ProxyElement pe = proxyService.getEndpointFromService(systemName, serviceName);
 			if (pe == null) {
@@ -388,82 +392,4 @@ public class DataManagerController {
 	//=================================================================================================
 	// assistant methods
 	
-	
-	//=================================================================================================
-  private void validateSenMLMessage(String systemName, String serviceName, Vector<SenML> message) {
-	try {
-    	Assert.notNull(systemName, "systemName is null.");
-    	Assert.notNull(serviceName, "serviceName is null.");
-    	Assert.notNull(message, "message is null.");
-    	Assert.isTrue(!message.isEmpty(), "message is empty");
-
-    	SenML head = (SenML)message.get(0);
-		Assert.notNull(head.getBn(), "bn is null.");
-	} catch(Exception e){
-		throw new BadPayloadException("Missing mandatory field");
-	}
-  }
-
-  //-------------------------------------------------------------------------------------------------
-  public void validateSenMLContent(final Vector<SenML> message) {
-	try {
-
-    	/* check that bn, bt and bu are included only once, and in the first object */
-    	Iterator<SenML> entry = message.iterator();
-    	int bnc=0, btc=0, buc=0;
-    	while (entry.hasNext()) {
-      		SenML element = entry.next();
-      		if (element.getBn() != null) {
-        		bnc++;
-    	  	}
-      		if (element.getBt() != null) {
-        		btc++;
-      		}
-      		if (element.getBu() != null) {
-        		buc++;
-      		}
-    	}
-
-    	/* bu can only exist once. bt can only exist one, bu can exist 0 or 1 times */
-    	Assert.isTrue(!(bnc != 1 || btc != 1 || buc > 1), "invalid bn/bt/bu");
-
-    	/* bn must exist in [0] */
-    	SenML element = (SenML)message.get(0);
-    	Assert.notNull(element.getBn(), "bn is missing");
-
-    	/* bt must exist in [0] */
-    	Assert.notNull(element.getBt(), "bt is missing");
-
-    	/* bt cannot be negative */
-    	Assert.isTrue(element.getBt() >= 0.0, "a negative base time is not allowed");
-
-    	/* bu must exist in [0], if it exists */
-    	Assert.isTrue(!(element.getBu() == null && buc == 1), "invalid use of bu");
-
-    	/* check that v, bv, sv, etc are included only once per object */
-    	entry = message.iterator();
-    	while (entry.hasNext()) {
-      		element = (SenML)entry.next();
-
-      		int valueCount = 0;
-      		if (element.getV() != null) {
-        		valueCount++;
-      		}
-      		if (element.getVs() != null) {
-        		valueCount++;
-      		}
-      		if (element.getVd() != null) {
-        		valueCount++;
-      		}
-      		if (element.getVb() != null) {
-        		valueCount++;
-			}
-
-      		Assert.isTrue(!(valueCount > 1 && element.getS() == null), "too many value tags");
-		}
-	} catch(Exception e) {
-		throw new BadPayloadException("Illegal request");
-	}
-
-  }	
 }
