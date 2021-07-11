@@ -1,9 +1,6 @@
 package eu.arrowhead.core.datamanager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-//import eu.arrowhead.common.dto.internal.SystemListResponseDTO;
-//import eu.arrowhead.common.dto.shared.SystemRequestDTO;
-//import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.dto.shared.DataManagerSystemsResponseDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.datamanager.database.service.DataManagerDBService;
@@ -81,7 +78,7 @@ public class DataManagerControllerSystemTest {
     @Test
     public void echoHistorian() throws Exception {
         final MvcResult response = this.mockMvc.perform(get(DATAMANAGER_ECHO_URI)
-                                                                .accept(MediaType.APPLICATION_JSON))
+                                               .accept(MediaType.APPLICATION_JSON))
                                                .andExpect(status().isOk())
                                                .andReturn();
         assertEquals("Got it!", response.getResponse().getContentAsString());
@@ -90,7 +87,7 @@ public class DataManagerControllerSystemTest {
     @Test
     public void testProxy() throws Exception {
         final MvcResult response = this.mockMvc.perform(get(DATAMANAGER_PROXY_URI)
-                                                                .accept(MediaType.APPLICATION_JSON))
+                                               .accept(MediaType.APPLICATION_JSON))
                                                .andExpect(status().isOk())
                                                .andReturn();
         final DataManagerSystemsResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), DataManagerSystemsResponseDTO.class);
@@ -100,7 +97,7 @@ public class DataManagerControllerSystemTest {
     @Test
     public void testHistorian() throws Exception {
         final MvcResult response = this.mockMvc.perform(get(DATAMANAGER_HISTORIAN_URI)
-                                                                .accept(MediaType.APPLICATION_JSON))
+                                               .accept(MediaType.APPLICATION_JSON))
                                                .andExpect(status().isOk())
                                                .andReturn();
         final DataManagerSystemsResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), DataManagerSystemsResponseDTO.class);

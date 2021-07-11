@@ -65,40 +65,39 @@ public class DataManagerDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	private Connection getConnection() throws SQLException {
-	  return DriverManager.getConnection(url, user, password);
+		return DriverManager.getConnection(url, user, password);
 	}
 
 
 	//-------------------------------------------------------------------------------------------------
 	private void closeConnection(final Connection conn) throws SQLException {
-	  conn.close();
+		conn.close();
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	private int serviceToID(final String systemName, final String serviceName, final Connection conn) {
-    logger.debug("serviceToID for {}/{}", systemName, serviceName);
+    	logger.debug("serviceToID for {}/{}", systemName, serviceName);
 
-	  int id=-1;
+		int id=-1;
 
-	  PreparedStatement stmt;
-	  try {
-	    String sql = "SELECT id FROM dmhist_services WHERE system_name=? AND service_name=? LIMIT 1;";
-	    stmt = conn.prepareStatement(sql);
-	    stmt.setString(1, systemName);
-	    stmt.setString(2, serviceName);
-	    ResultSet rs = stmt.executeQuery();
+		PreparedStatement stmt;
+		try {
+	    	String sql = "SELECT id FROM dmhist_services WHERE system_name=? AND service_name=? LIMIT 1;";
+	    	stmt = conn.prepareStatement(sql);
+	    	stmt.setString(1, systemName);
+	    	stmt.setString(2, serviceName);
+	    	ResultSet rs = stmt.executeQuery();
+	    	rs.next();
+	    	id  = rs.getInt("id");
 
-	    rs.next();
-	    id  = rs.getInt("id");
+	    	rs.close();
+	    	stmt.close();
+	  	} catch(Exception e) {
+	      	logger.debug("serviceToID: " + e.toString());
+		    id = -1;
+	  	}
 
-	    rs.close();
-	    stmt.close();
-	  } catch(Exception e) {
-      logger.debug("serviceToID: " + e.toString());
-	    id = -1;
-	  }
-
-	  return id;
+		return id;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -258,7 +257,8 @@ public class DataManagerDBService {
 	  Connection conn = null;
 	  try {
 	    conn = getConnection();
-      conn.setAutoCommit(false);
+      	conn.setAutoCommit(false);
+		
 	    int sid = serviceToID(systemName, serviceName, conn);
 	    if (sid != -1) {
 	      String sql = "INSERT INTO dmhist_messages(sid, bt, mint, maxt, msg) VALUES(?, ?, ?, ?, ?)";
@@ -278,7 +278,7 @@ public class DataManagerDBService {
 
 	      // that was the entire message, now insert each individual JSON object in the message
 	      String bu = message.get(0).getBu();
-        for (SenML m : message) {
+          for (SenML m : message) {
           double t = 0;
           if (m.getT() != null) {
             if (m.getT() < SenML.RELATIVE_TIMESTAMP_INDICATOR) {
