@@ -91,10 +91,15 @@ public class DatamanagerACLFilter {
         boolean res = loadFile(aclFileName);
         if(res==false) {
             logger.info("Could not load ACL file!");
+            logger.info("Loading defaults ...");
+
+            String[] defaults = new String[1];
+            defaults[0] = "$SYS: gpPd@$SYS/*";
+            load(defaults);
             
-            int exitCode = 0;
-            SpringApplication.exit(context, () -> exitCode);
-            System.exit(exitCode);
+            //int exitCode = 0;
+            //SpringApplication.exit(context, () -> exitCode);
+            //System.exit(exitCode);
         }
     }
 
