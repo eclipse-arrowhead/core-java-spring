@@ -78,12 +78,10 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_DATAMANAGER_PROXY = "proxy";
 	public static final String CORE_SERVICE_DATAMANAGER_HISTORIAN = "historian";
 
-<<<<<<< HEAD
 	public static final String CORE_SERVICE_TIMEMANAGER_TIME = "time";
-=======
+	
 	public static final String CORE_SERVICE_CONFIGURATION_CONF = "conf";
 	public static final String CORE_SERVICE_CONFIGURATION_RAWCONF = "confraw";
->>>>>>> development
 
 	public static final String CORE_SERVICE_CHOREOGRAPHER_PROCESS = "choreographer-service";
 
