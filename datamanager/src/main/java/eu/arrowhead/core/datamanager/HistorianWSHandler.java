@@ -29,6 +29,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.core.datamanager.service.HistorianService;
 import eu.arrowhead.core.datamanager.security.DatamanagerACLFilter;
 import eu.arrowhead.common.Utilities;
