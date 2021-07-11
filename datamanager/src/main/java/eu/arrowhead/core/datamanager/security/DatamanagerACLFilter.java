@@ -102,9 +102,6 @@ public class DatamanagerACLFilter {
     //-------------------------------------------------------------------------------------------------
     public boolean checkRequest(final String systemCN, final String operation, final String path) throws Exception {
 
-        //logger.info("\n\nsystemName: "+  systemCN+ " path: " + path);
-        //logger.info("Method: " + operation);
-
         String endPath = "";
         if (path.contains(DM_HIST_OP_WS)) {
             endPath = path.substring(path.indexOf(DM_HIST_OP_WS) + DM_HIST_OP_WS.length() + 1);
@@ -113,7 +110,6 @@ public class DatamanagerACLFilter {
         } else if (path.contains(DM_PROXY_OP)){
             endPath = path.substring(path.indexOf(DM_PROXY_OP)+ DM_PROXY_OP.length() + 1);
         }
-        //System.out.println("End of path is: " + endPath);
 
         final String[] targetPath = endPath.split(ACL_PATH_SEPARATOR);
         String op = "";
@@ -142,30 +138,26 @@ public class DatamanagerACLFilter {
                 //logger.info("Found matching system name: " + rule.systemName);
 
                 for(AclEntry acl: rule.acls) {
-                    //System.out.println("ACL-path: " + acl.path);
                     final String[] pathParts = acl.path.split(ACL_PATH_SEPARATOR);
                     final String pathSystem = pathParts[0].trim();
                     final String pathService = pathParts[1].trim();
 
                     // check hard coded rule
                     if(acl.path.equals(endPath)) {
-                        //System.out.println("Found matching path: " + endPath);
+                        
                         if(acl.operations.contains(op)) {
-                            //System.out.println("\tFound allowed operation0: " + operation);
                             return true;
                         }
                     } else if(pathSystem.equals(targetPath[0]) && pathService.equals(ACL_SRV_WILDCARD)) {
                         if(acl.operations.contains(op)) {
-                            //System.out.println("\tFound allowed operation1: " + operation);
                             return true;
                         }
                     } else if(pathSystem.equals(ACL_SRV_WILDCARD) && pathService.equals(ACL_SRV_WILDCARD)) {
                         if(acl.operations.contains(op)) {
-                            //System.out.println("\tFound allowed operation2: " + operation);
                             return true;
                         }
                     } else {
-                        //System.out.println("No match for endpath: " + endPath + " for rule: " + acl.path + " ops: " + acl.operations);
+                        //logger.debug("No match for endpath: " + endPath + " for rule: " + acl.path + " ops: " + acl.operations);
                     }
 
                 }
