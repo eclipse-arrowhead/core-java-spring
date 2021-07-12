@@ -68,8 +68,8 @@ public class TimeManagerControllerSystemTest {
     //-------------------------------------------------------------------------------------------------
     @Before
     public void setup() {
-        //reset(timeManagerDBService);
-        //this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+        reset(timeManagerDBService);
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
     }
 
     //=================================================================================================
@@ -77,11 +77,11 @@ public class TimeManagerControllerSystemTest {
 
     @Test
     public void echoTM() throws Exception {
-        /*final MvcResult response = this.mockMvc.perform(get(TIMEMANAGER_ECHO_URI)
+        final MvcResult response = this.mockMvc.perform(get(TIMEMANAGER_ECHO_URI)
                                                .accept(MediaType.APPLICATION_JSON))
                                                .andExpect(status().isOk())
                                                .andReturn();
-        assertEquals("Got it!", response.getResponse().getContentAsString());*/
+        assertEquals("Got it!", response.getResponse().getContentAsString());
     }
 
 }
