@@ -14,14 +14,15 @@
 
 package eu.arrowhead.common.database.repository;
 
-import eu.arrowhead.common.database.entity.Device;
-import eu.arrowhead.common.database.entity.DeviceRegistry;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Repository;
+
+import eu.arrowhead.common.database.entity.Device;
+import eu.arrowhead.common.database.entity.DeviceRegistry;
 
 @Repository
 public interface DeviceRegistryRepository extends RefreshableRepository<DeviceRegistry, Long>
@@ -32,6 +33,6 @@ public interface DeviceRegistryRepository extends RefreshableRepository<DeviceRe
 
     //-------------------------------------------------------------------------------------------------
     Optional<DeviceRegistry> findByDevice(final Device device);
-    Page<DeviceRegistry> findAllByDeviceIsIn(final List<Device> devices, final PageRequest pageRequest);
+    Page<DeviceRegistry> findAllByDeviceIsIn(final List<Device> devices, final Pageable pageable);
     List<DeviceRegistry> findAllByDeviceIsIn(final List<Device> devices);
 }
