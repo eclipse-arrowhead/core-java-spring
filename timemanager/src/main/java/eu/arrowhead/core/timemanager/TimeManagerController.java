@@ -71,16 +71,18 @@ import io.swagger.annotations.ApiResponses;
 @RestController
 @RequestMapping(CommonConstants.TIMEMANAGER_URI)
 public class TimeManagerController {
-	
+	private final Logger logger = LogManager.getLogger(TimeManagerController.class);
+
+	@Value("${serverTimezone}")
+    private String serverTimeZone;
+
 	//=================================================================================================
 	// members
 	
 	private static final String OP_NOT_VALID_ERROR_MESSAGE = " Illegal operation. ";
 	private static final String NOT_FOUND_ERROR_MESSAGE = " Resource not found. ";
 	
-	private final Logger logger = LogManager.getLogger(TimeManagerController.class);
-
-	@Autowired
+	@Autowired 
 	private TimeService timeService;
 
 	@Autowired
@@ -112,7 +114,7 @@ public class TimeManagerController {
 			) {
 		logger.debug("timeGet");
 
-        TimeManagerTimeResponseDTO resp = new TimeManagerTimeResponseDTO();
+        TimeManagerTimeResponseDTO resp = new TimeManagerTimeResponseDTO(serverTimeZone);
 		return resp;
 	}
 
