@@ -79,6 +79,9 @@ public enum CoreSystem {
 												   CoreSystemService.GATEWAY_CONSUMER_SERVICE)),
 	
 	CHOREOGRAPHER(Defaults.DEFAULT_CHOREOGRAPHER_PORT, List.of(CoreSystemService.CHOREOGRAPHER_SERVICE)),
+
+    CONFIGURATION(Defaults.DEFAULT_CONFIGURATION_PORT, List.of(CoreSystemService.CONFIGURATION_SERVICE,
+                                                               CoreSystemService.CONFIGURATION_RAW_SERVICE)),
 	
 	QOS_MONITOR(Defaults.DEFAULT_QOS_MONITOR_PORT, List.of(CoreSystemService.QOS_MONITOR_INTRA_PING_MEASUREMENT_SERVICE,
 														   CoreSystemService.QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT_SERVICE,

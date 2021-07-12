@@ -45,6 +45,10 @@ cd ..\..\choreographer\target
 START "" /B "cmd /c javaw -jar arrowhead-choreographer-%version%.jar > sout_choreographer.log 2>&1"
 echo Choreographer started
 
+cd ..\..\configuration\target
+START "" /B "cmd /c javaw -jar arrowhead-configuration-4.2.0.jar > sout_configuration.log 2>&1"
+echo Configuration started
+
 cd ..\..\certificate-authority\target
 START "" /B "cmd /c javaw -jar arrowhead-certificate-authority-%version%.jar > sout_ca.log 2>&1"
 echo Certificate Authority started

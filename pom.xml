@@ -25,6 +25,7 @@
   	<modules>
 	    <module>core-common</module>
 	    <module>serviceregistry</module>
+	    <module>configuration</module>
 	    <module>authorization</module>
 	    <module>certificate-authority</module>
 	    <module>orchestrator</module>
@@ -35,12 +36,12 @@
 	    <module>gatekeeper</module>
 	    <module>gateway</module>
 	    <module>choreographer</module>
-		<module>systemregistry</module>
-		<module>deviceregistry</module>
-		<module>onboarding</module>
+	    <module>systemregistry</module>
+	    <module>deviceregistry</module>
+	    <module>onboarding</module>
 	    <module>deb-installer</module>
 	    <module>docker-all</module>
-		<module>translator</module>
+	    <module>translator</module>
   	</modules>
   	
 	<properties>
@@ -114,6 +115,10 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+		<dependency>
+                	<groupId>org.springframework.boot</groupId>
+                	<artifactId>spring-boot-starter-websocket</artifactId>
+                </dependency>
 		<dependency>
 		    <groupId>org.springframework.boot</groupId>
     		<artifactId>spring-boot-configuration-processor</artifactId>
@@ -195,12 +200,12 @@
 		</dependency>
 -->
 		
-		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
-		<!--<dependency>
-      			<groupId>com.google.code.gson</groupId>
-      			<artifactId>gson</artifactId>
-      			<version>2.8.5</version>
-		</dependency>-->
+	<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+	<dependency>
+      		<groupId>com.google.code.gson</groupId>
+      		<artifactId>gson</artifactId>
+      		<version>2.8.6</version>
+	</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

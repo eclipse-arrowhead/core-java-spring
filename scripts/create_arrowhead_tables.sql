@@ -438,6 +438,18 @@ CREATE TABLE IF NOT EXISTS `choreographer_worklog` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- Configuration
+CREATE TABLE IF NOT EXISTS `configuration_data` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `systemName` varchar(255) NOT NULL UNIQUE,
+  `fileName` varchar(255) NOT NULL,
+  `contentType` varchar(255) NOT NULL,
+  `data` blob NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
 -- QoS Monitor
 -- Intra
 
