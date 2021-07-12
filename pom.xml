@@ -65,6 +65,7 @@
   		<activemq.client.version>5.15.9</activemq.client.version>
 		<bouncy.castle.version>1.64</bouncy.castle.version>
   		<jna.version>5.5.0</jna.version>
+		<paho.version>1.2.0</paho.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -210,7 +211,7 @@
 	<dependency>
 		<groupId>org.eclipse.paho</groupId>
 		<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-		<version>1.2.0</version>
+		<version>${paho.version}</version>
 	</dependency>
 
 		<dependency>
