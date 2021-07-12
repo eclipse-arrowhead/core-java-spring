@@ -241,6 +241,24 @@ public class CoreCommonConstants {
     public static final String FIWARE_SERVER_PORT = "fiware.server.port";
     public static final String $FIWARE_SERVER_PORT = "${" + FIWARE_SERVER_PORT + ":0}";
 
+	// MQTT 
+	public static final String MQTT_BROKER_ENABLED = "mqtt.broker.enabled";
+	public static final String $MQTT_BROKER_ENABLED = "${" + MQTT_BROKER_ENABLED + ":false}";
+	public static final String MQTT_BROKER_ADDRESS = "mqtt.broker.address";
+	public static final String $MQTT_BROKER_ADDRESS = "${" + MQTT_BROKER_ADDRESS + ":0.0.0.0}";
+	public static final String MQTT_BROKER_PORT = "mqtt.broker.port";
+	public static final String $MQTT_BROKER_PORT = "${" + MQTT_BROKER_PORT + ":0}";
+	public static final String MQTT_BROKER_USERNAME = "mqtt.broker.username";
+	public static final String $MQTT_BROKER_USERNAME = "${" + MQTT_BROKER_USERNAME + ":}";
+	public static final String MQTT_BROKER_PASSWORD = "mqtt.broker.password";
+	public static final String $MQTT_BROKER_PASSWORD = "${" + MQTT_BROKER_PASSWORD + ":}";
+	public static final String MQTT_BROKER_CAFILE = "mqtt.broker.cafile";
+	public static final String $MQTT_BROKER_CAFILE = "${" + MQTT_BROKER_CAFILE + ":}";
+	public static final String MQTT_BROKER_CERTFILE = "mqtt.broker.certfile";
+	public static final String $MQTT_BROKER_CERTFILE = "${" + MQTT_BROKER_CERTFILE + ":}";
+	public static final String MQTT_BROKER_KEYFILE = "mqtt.broker.keyfile";
+	public static final String $MQTT_BROKER_KEYFILE = "${" + MQTT_BROKER_KEYFILE + ":}";
+
     //=================================================================================================
 	// assistant methods
 
