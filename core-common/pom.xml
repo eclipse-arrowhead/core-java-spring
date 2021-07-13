@@ -12,14 +12,15 @@
   <description>Common resources for the Arrowhead core services</description>
 
   <properties>
-    <client.skeleton>core-client-skeleton</client.skeleton>
+    <core.common.essentials>core-common-essentials</core.common.essentials>
+	<bouncy.castle.version>1.65</bouncy.castle.version>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcpkix-jdk15on</artifactId>
-      <version>1.65</version>
+      <version>${bouncy.castle.version}</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
@@ -51,7 +52,7 @@
             </goals>
             <configuration>
               <shadedArtifactAttached>false</shadedArtifactAttached>
-              <finalName>${client.skeleton}</finalName>
+              <finalName>${core.common.essentials}</finalName>
               <createDependencyReducedPom>false</createDependencyReducedPom>
               <minimizeJar>false</minimizeJar>
               <artifactSet>

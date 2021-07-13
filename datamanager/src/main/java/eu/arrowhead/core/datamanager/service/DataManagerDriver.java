@@ -1,28 +1,15 @@
 package eu.arrowhead.core.datamanager.service;
 
-import java.util.Vector;
 import java.util.Iterator;
-
-import javax.annotation.Resource;
+import java.util.Vector;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
-import org.springframework.web.util.UriComponents;
 
-import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.CoreCommonConstants;
-import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.core.CoreSystemService;
-import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.dto.shared.SenML;
+import eu.arrowhead.common.exception.BadPayloadException;
 
 @Component
 public class DataManagerDriver {
@@ -30,26 +17,29 @@ public class DataManagerDriver {
 	//=================================================================================================
 	// members
 
-	private static final Logger logger = LogManager.getLogger(DataManagerDriver.class);
+	private final Logger logger = LogManager.getLogger(DataManagerDriver.class);
 
 	//=================================================================================================
 	// methods
 	
-	//=================================================================================================
+	//-------------------------------------------------------------------------------------------------
   	public void validateSenMLMessage(final String systemName, final String serviceName, final Vector<SenML> message) {
-	  try {
-      	    Assert.notNull(systemName, "systemName is null.");
-    	    Assert.notNull(serviceName, "serviceName is null.");
-    	    Assert.notNull(message, "message is null.");
-    	    Assert.isTrue(!message.isEmpty(), "message is empty");
+  		logger.debug("validateSenMLMessage started...");
+  		
+		try {
+		    Assert.notNull(systemName, "systemName is null.");
+		    Assert.notNull(serviceName, "serviceName is null.");
+		    Assert.notNull(message, "message is null.");
+		    Assert.isTrue(!message.isEmpty(), "message is empty");
+		
+		    final SenML head = (SenML)message.get(0);
+		    Assert.notNull(head.getBn(), "bn is null.");
+		} catch (final Exception e) {
+			throw new BadPayloadException("Missing mandatory field: " + e.getMessage());
+		}
+    }
 
-    	    SenML head = (SenML)message.get(0);
-	    Assert.notNull(head.getBn(), "bn is null.");
-	  } catch(Exception e) {
-	    throw new BadPayloadException("Missing mandatory field");
-	  }
-      }
-
+  	//TODO continue
 
       //-------------------------------------------------------------------------------------------------
       public void validateSenMLContent(final Vector<SenML> message) {
@@ -59,7 +49,7 @@ public class DataManagerDriver {
     	Iterator<SenML> entry = message.iterator();
     	int bnc=0, btc=0, buc=0;
     	while (entry.hasNext()) {
-      		SenML element = entry.next();
+      		final SenML element = entry.next();
       		if (element.getBn() != null) {
         		bnc++;
     	  	}
@@ -108,7 +98,7 @@ public class DataManagerDriver {
 
       		Assert.isTrue(!(valueCount > 1 && element.getS() == null), "too many value tags");
 		}
-	} catch(Exception e) {
+	} catch(final Exception e) {
 		throw new BadPayloadException("Illegal request");
 	}
 

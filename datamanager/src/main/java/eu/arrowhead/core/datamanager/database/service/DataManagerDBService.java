@@ -67,7 +67,6 @@ public class DataManagerDBService {
 		return DriverManager.getConnection(url, user, password);
 	}
 
-
 	//-------------------------------------------------------------------------------------------------
 	private void closeConnection(final Connection conn) throws SQLException {
 		conn.close();

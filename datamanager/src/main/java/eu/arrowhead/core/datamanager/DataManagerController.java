@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,13 +44,12 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.DataManagerServicesResponseDTO;
 import eu.arrowhead.common.dto.shared.DataManagerSystemsResponseDTO;
 import eu.arrowhead.common.dto.shared.SenML;
-import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
+import eu.arrowhead.core.datamanager.service.DataManagerDriver;
 import eu.arrowhead.core.datamanager.service.HistorianService;
 import eu.arrowhead.core.datamanager.service.ProxyElement;
-import eu.arrowhead.core.datamanager.service.DataManagerDriver;
 import eu.arrowhead.core.datamanager.service.ProxyService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -407,8 +405,4 @@ public class DataManagerController {
 			proxyService.updateEndpointFromService(systemName, serviceName, message);
 		}
 	}
-
-	//=================================================================================================
-	// assistant methods
-	
 }
