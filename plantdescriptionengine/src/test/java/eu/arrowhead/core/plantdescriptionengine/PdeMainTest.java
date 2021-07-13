@@ -11,6 +11,7 @@ import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class PdeMainTest {
@@ -87,5 +88,23 @@ public class PdeMainTest {
         final ArSystem arSystem = PdeMain.createArSystem(appProps, serviceRegistryAddress);
         assertEquals(ApiConstants.PDE_SYSTEM_NAME, arSystem.name());
         assertFalse(arSystem.isSecure());
+    }
+
+    @Test
+    public void shouldLoadAppProps() {
+        Properties appProps = PdeMain.loadAppProps();
+        System.out.println(appProps);
+        assertEquals("certificates/truststore.p12", appProps.getProperty(PropertyNames.TRUST_STORE));
+    }
+
+    @Test
+    public void shouldLoadPlantDescriptionTracker() {
+        final Properties appProps = getInsecureAppProps();
+        appProps.setProperty(PropertyNames.PD_MAX_SIZE, "1000");
+        appProps.setProperty(PropertyNames.DB_CONNECTION_URL, "jdbc:h2:mem:testdb");
+        appProps.setProperty(PropertyNames.DB_USERNAME, "root");
+        appProps.setProperty(PropertyNames.DB_PASSWORD, "password");
+        appProps.setProperty(PropertyNames.DB_DRIVER_CLASS_NAME, "org.h2.Driver");
+        assertNotNull(PdeMain.loadPlantDescriptionTracker(appProps));
     }
 }

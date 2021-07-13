@@ -72,7 +72,7 @@ public class ReplacePlantDescriptionTest {
     }
 
     @Test
-    public void shouldReplaceExistingEntry() throws PdStoreException {
+    public void shouldReplaceExistingEntry() {
 
         final int entryId = 87;
 
@@ -87,21 +87,16 @@ public class ReplacePlantDescriptionTest {
             .body(description)
             .build();
 
-        pdTracker.put(entry);
-
-        final int sizeBeforePut = pdTracker.getEntries().size();
-
-        try {
-            handler.handle(request, response).ifSuccess(result -> {
+        pdTracker.put(entry)
+            .flatMap(result -> handler.handle(request, response))
+            .ifSuccess(result -> {
                 assertEquals(HttpStatus.OK, response.status().orElse(null));
 
                 final PlantDescriptionEntry returnedEntry = (PlantDescriptionEntry) response.getRawBody();
                 assertEquals(returnedEntry.plantDescription(), newName);
-                assertEquals(sizeBeforePut, pdTracker.getEntries().size());
-            }).onFailure(e -> fail());
-        } catch (final Exception e) {
-            fail();
-        }
+                assertEquals(1, pdTracker.getEntries().size());
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
@@ -127,12 +122,10 @@ public class ReplacePlantDescriptionTest {
     }
 
     @Test
-    public void shouldReportInvalidDescription() throws PdStoreException {
+    public void shouldReportInvalidDescription() {
         final int entryId = 1;
         final String systemId = "system_a";
         final String portName = "port_a";
-
-        pdTracker.put(TestUtils.createEntry(entryId));
 
         final List<PortDto> consumerPorts = List.of(
             new PortDto.Builder()
@@ -165,16 +158,15 @@ public class ReplacePlantDescriptionTest {
             .body(description)
             .build();
 
-        try {
-            handler.handle(request, response).ifSuccess(result -> {
+        pdTracker.put(TestUtils.createEntry(entryId))
+            .flatMap(result -> handler.handle(request, response))
+            .ifSuccess(result -> {
                 assertEquals(HttpStatus.BAD_REQUEST, response.status().orElse(null));
                 final String expectedErrorMessage = "<Duplicate port name '" + portName + "' in system '" + systemId + "'>";
                 final String actualErrorMessage = ((ErrorMessage) response.getRawBody()).error();
                 assertEquals(expectedErrorMessage, actualErrorMessage);
-            }).onFailure(e -> fail());
-        } catch (final Exception e) {
-            fail();
-        }
+            })
+            .onFailure(e -> fail());
     }
 
     @Test

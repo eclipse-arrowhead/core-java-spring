@@ -177,11 +177,10 @@ public class AddPlantDescriptionTest {
         handler.handle(request, response)
             .ifSuccess(result -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.status().orElse(null)))
             .onFailure(e -> fail());
-
     }
 
     @Test
-    public void shouldDeactivateOldActive() throws PdStoreException {
+    public void shouldDeactivateOldActive() {
         final int initiallyActiveId = 18;
 
         final PlantDescriptionEntryDto initiallyActiveEntry = TestUtils.createEntry(initiallyActiveId);
@@ -190,20 +189,20 @@ public class AddPlantDescriptionTest {
             .active(true)
             .build();
 
-        pdTracker.put(initiallyActiveEntry);
+        pdTracker.put(initiallyActiveEntry)
+            .flatMap(result -> {
+                final MockRequest request = new MockRequest.Builder()
+                    .body(newDescription)
+                    .build();
 
-        final MockRequest request = new MockRequest.Builder()
-            .body(newDescription)
-            .build();
-
-        handler.handle(request, response).ifSuccess(result -> {
-
-            final PlantDescriptionEntryDto newEntry = (PlantDescriptionEntryDto) response.getRawBody();
-            final int newId = newEntry.id();
-            assertFalse(pdTracker.get(initiallyActiveId).active());
-            assertTrue(pdTracker.get(newId).active());
-
-        })
+                return handler.handle(request, response);
+            })
+            .ifSuccess(result -> {
+                final PlantDescriptionEntryDto newEntry = (PlantDescriptionEntryDto) response.getRawBody();
+                final int newId = newEntry.id();
+                assertFalse(pdTracker.get(initiallyActiveId).active());
+                assertTrue(pdTracker.get(newId).active());
+            })
             .onFailure(e -> fail());
 
     }

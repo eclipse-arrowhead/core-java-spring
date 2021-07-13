@@ -33,11 +33,12 @@ import static org.mockito.Mockito.when;
 
 public class RetrieveMonitorInfoTaskTest {
 
+    final String serviceUri = "http://some_service_uri";
+    final String systemName = "System-xyz";
+    final String serviceName = "someservice";
+
     @Test
     public void shouldRetrieveMonitorInfo() {
-
-        final String serviceUri = "http://some_service_uri";
-        final String systemName = "System-xyz";
 
         final HttpClient httpClient = Mockito.mock(HttpClient.class);
         final MonitorInfoTracker monitorInfoTracker = new MonitorInfoTracker();
@@ -61,6 +62,7 @@ public class RetrieveMonitorInfoTaskTest {
         final SystemRecord provider = Mockito.mock(SystemRecord.class);
         final InetSocketAddress address = new InetSocketAddress("1.1.1.1", 8443);
         when(serviceQuery.name(ApiConstants.MONITORABLE_SERVICE_NAME)).thenReturn(serviceQuery);
+        when(service.name()).thenReturn(serviceName);
         when(service.provider()).thenReturn(provider);
         when(service.uri()).thenReturn(serviceUri);
         when(provider.name()).thenReturn(systemName);
@@ -112,10 +114,6 @@ public class RetrieveMonitorInfoTaskTest {
 
     @Test
     public void shouldHandleInventoryIdFetchFailure() {
-
-        final String serviceUri = "http://some-service-uri";
-        final String systemName = "System-xyz";
-
         final HttpClient httpClient = Mockito.mock(HttpClient.class);
         final MonitorInfoTracker monitorInfoTracker = new MonitorInfoTracker();
         final ServiceQuery serviceQuery = Mockito.mock(ServiceQuery.class);
@@ -132,6 +130,7 @@ public class RetrieveMonitorInfoTaskTest {
         final SystemRecord provider = Mockito.mock(SystemRecord.class);
         final InetSocketAddress address = new InetSocketAddress("1.1.1.1", 8443);
         when(serviceQuery.name(ApiConstants.MONITORABLE_SERVICE_NAME)).thenReturn(serviceQuery);
+        when(service.name()).thenReturn(serviceName);
         when(service.provider()).thenReturn(provider);
         when(service.uri()).thenReturn(serviceUri);
         when(provider.name()).thenReturn(systemName);
@@ -164,10 +163,6 @@ public class RetrieveMonitorInfoTaskTest {
 
     @Test
     public void shouldHandleSystemDataFailure() {
-
-        final String serviceUri = "http://some-service-uri";
-        final String systemName = "System-xyz";
-
         final HttpClient httpClient = Mockito.mock(HttpClient.class);
         final MonitorInfoTracker monitorInfoTracker = new MonitorInfoTracker();
         final ServiceQuery serviceQuery = Mockito.mock(ServiceQuery.class);
@@ -184,6 +179,7 @@ public class RetrieveMonitorInfoTaskTest {
         final SystemRecord provider = Mockito.mock(SystemRecord.class);
         final InetSocketAddress address = new InetSocketAddress("1.1.1.1", 8443);
         when(serviceQuery.name(ApiConstants.MONITORABLE_SERVICE_NAME)).thenReturn(serviceQuery);
+        when(service.name()).thenReturn(serviceName);
         when(service.provider()).thenReturn(provider);
         when(service.uri()).thenReturn(serviceUri);
         when(provider.name()).thenReturn(systemName);
