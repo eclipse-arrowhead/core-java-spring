@@ -44,3 +44,4 @@ wrapper
 /deb-installer/.settings
 deviceregistry/bin
 /qos-monitor/bin
+/**/.DS_Store

@@ -30,6 +30,10 @@ cd ../../orchestrator/target
 nohup java -jar $(find . -maxdepth 1 -name arrowhead-orchestrator-\*.jar | sort | tail -n1) &> sout_orch.log &
 echo Orchestrator started
 
-cd ../../certificate-authority/target
-nohup java -jar $(find . -maxdepth 1 -name arrowhead-certificate-authority-\*.jar | sort | tail -n1) &> sout_ca.log &
-echo Certificate Authority started
+#cd ../../choreographer/target
+#nohup java -jar $(find . -maxdepth 1 -name arrowhead-choreographer-\*.jar | sort | tail -n1) &> sout_choreographer.log &
+#echo Choreographer started
+
+#cd ../../certificate-authority/target
+#nohup java -jar $(find . -maxdepth 1 -name arrowhead-certificate-authority-\*.jar | sort | tail -n1) &> sout_ca.log &
+#echo Certificate Authority started

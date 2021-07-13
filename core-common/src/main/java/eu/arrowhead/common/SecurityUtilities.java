@@ -65,6 +65,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.StringUtils;
+import org.springframework.http.server.ServletServerHttpRequest;
 
 @Component
 public class SecurityUtilities {
@@ -110,6 +111,14 @@ public class SecurityUtilities {
         }
 
         return null;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public static String getCertificateCNFromServerRequest(final ServletServerHttpRequest request) {
+        Assert.notNull(request, "request must not be null");
+        final HttpServletRequest servletRequest = request.getServletRequest();
+
+        return getCertificateCNFromRequest(servletRequest);
     }
 
     //-------------------------------------------------------------------------------------------------
