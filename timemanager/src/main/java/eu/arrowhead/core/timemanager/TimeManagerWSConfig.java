@@ -53,7 +53,7 @@ public class TimeManagerWSConfig implements WebSocketConfigurer {
     TimeWSHandler timeWSHandler;
 
     //@Autowired
-    //DatamanagerACLFilter dmACLFilter;
+    //TimemanagerACLFilter timeACLFilter;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry webSocketHandlerRegistry) {
