@@ -1,6 +1,6 @@
 package eu.arrowhead.core.plantdescriptionengine.providedservices;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 import org.junit.Test;
 import org.mockito.Mockito;

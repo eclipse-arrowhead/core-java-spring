@@ -170,7 +170,6 @@ public class SystemTrackerTest {
             })
             .ifSuccess(result -> fail())
             .onFailure(e -> {
-                e.printStackTrace();
                 assertEquals("More than one system matches the given arguments.", e.getMessage());
             });
     }
