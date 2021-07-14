@@ -84,6 +84,7 @@ public class DataManagerController {
 	@Autowired
 	private DataManagerDriver dataManagerDriver;
 
+	@Autowired
 	private CommonNamePartVerifier cnVerifier;
 
 	@Value(CoreCommonConstants.$USE_STRICT_SERVICE_DEFINITION_VERIFIER_WD)

@@ -37,6 +37,7 @@ import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 
 @Service
 public class DataManagerDBService {
+	
 	//=================================================================================================
 	// members
 
