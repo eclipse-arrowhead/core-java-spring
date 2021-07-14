@@ -12,7 +12,7 @@
   <description>Common resources for the Arrowhead core services</description>
 
   <properties>
-    <core.common.essentials>core-common-essentials</core.common.essentials>
+    <core.common.essentials>core-common-essentials-java-spring</core.common.essentials>
 	<bouncy.castle.version>1.65</bouncy.castle.version>
   </properties>
 
