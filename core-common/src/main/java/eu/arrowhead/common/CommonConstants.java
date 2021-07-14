@@ -148,8 +148,8 @@ public class CommonConstants {
 	public static final String BINARY = "BINARY";
 	public static final String HTTP_SECURE_JSON = HTTP.toUpperCase() + SECURE_INTF + JSON; 
 	public static final String HTTP_INSECURE_JSON = HTTP.toUpperCase() + INSECURE_INTF + JSON;
-	public static final String WS_SECURE_JSON = WS.toUpperCase() + "-SECURE-" + JSON;
-	public static final String WS_INSECURE_JSON = WS.toUpperCase() + "-INSECURE-" + JSON;
+	public static final String WS_SECURE_JSON = WS.toUpperCase() + SECURE_INTF + JSON;
+	public static final String WS_INSECURE_JSON = WS.toUpperCase() + INSECURE_INTF + JSON;
 	public static final String UNKNOWN_ORIGIN = "<unknown>";
 	
 	public static final String SERVICEREGISTRY_ADDRESS = "sr_address";
