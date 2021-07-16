@@ -21,6 +21,8 @@ import org.apache.logging.log4j.Logger;
 import eu.arrowhead.common.SecurityUtilities;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.core.timemanager.TimeWSHandler;
+import eu.arrowhead.core.timemanager.service.TimeManagerDriver;
+
 //import eu.arrowhead.core.datamanager.security.DatamanagerACLFilter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Bean;
@@ -52,6 +54,9 @@ public class TimeManagerWSConfig implements WebSocketConfigurer {
     @Autowired
     TimeWSHandler timeWSHandler;
 
+    @Autowired
+    TimeManagerDriver timeManagerDriver;
+    
     //@Autowired
     //TimemanagerACLFilter timeACLFilter;
 

@@ -57,6 +57,7 @@ import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.timemanager.database.service.TimeManagerDBService;
+import eu.arrowhead.core.timemanager.service.TimeManagerDriver;
 import eu.arrowhead.core.timemanager.service.TimeService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -86,7 +87,10 @@ public class TimeManagerController {
 	private TimeService timeService;
 
 	@Autowired
-	private TimeManagerDBService timeManagerDBService;
+	private TimeManagerDriver timeManagerDriver;
+
+	//@Autowired
+	//private TimeManagerDBService timeManagerDBService;
 	
 	//=================================================================================================
 	// methods
@@ -114,7 +118,7 @@ public class TimeManagerController {
 			) {
 		logger.debug("timeGet");
 
-        TimeManagerTimeResponseDTO resp = new TimeManagerTimeResponseDTO(serverTimeZone);
+        TimeManagerTimeResponseDTO resp = new TimeManagerTimeResponseDTO(serverTimeZone, timeManagerDriver.isTimeTrusted());
 		return resp;
 	}
 

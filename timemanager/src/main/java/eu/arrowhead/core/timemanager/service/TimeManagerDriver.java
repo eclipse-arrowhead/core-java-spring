@@ -1,7 +1,8 @@
 package eu.arrowhead.core.timemanager.service;
 
-import java.util.Vector;
-import java.util.Iterator;
+//import java.util.Vector;
+//import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Resource;
 
@@ -38,40 +39,65 @@ public class TimeManagerDriver {
 
 	//=================================================================================================
 	// members
-	private static final Logger logger = LogManager.getLogger(TimeManagerDriver.class);
+	private final Logger logger = LogManager.getLogger(TimeManagerDriver.class);
 
 	@Value("${ntp.server.list}")
     private String serverList;
 
+	@Value("${time.offsetThreshold}")
+	private long timeOffsetThreshold =  5000; 
+
+	private AtomicBoolean isTimeTrusted = new AtomicBoolean(true);
+
 	//=================================================================================================
 	// methods
 
-	@Scheduled(fixedDelay = 1000 * 60, initialDelay = 1000 * 5)
+	//-------------------------------------------------------------------------------------------------
+	public boolean isTimeTrusted() {
+		return isTimeTrusted.get();
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Scheduled(fixedDelay = 1000 * 60, initialDelay = 1000 * 1)
     public void checkExternalTimeServer() {
 		logger.info("Checking external time!");
 	
 		final NTPUDPClient client = new NTPUDPClient();
 	
 		client.setDefaultTimeout(10000);
+
 		try {
 		  client.open();
 		  //for (final String arg : args) {
 			System.out.println();
 			try {
-			  // Ntp pool or server
-			  final InetAddress hostAddr = InetAddress.getByName("pool.ntp.org");
-			  System.out.println("> " + hostAddr.getHostName() + "/" + hostAddr.getHostAddress());
+			  final InetAddress hostAddr = InetAddress.getByName(serverList);
+			  //logger.debug("> " + hostAddr.getHostName() + "/" + hostAddr.getHostAddress());
 			  
 			  // Get time from server
 			  final TimeInfo info = client.getTime(hostAddr);
 			  info.computeDetails(); // compute offset/delay if not already done
 			 
-			  // For printing
 			  final Long offsetMillis = info.getOffset();
 			  final Long delayMillis = info.getDelay();
-			  final String delay = delayMillis == null ? "n/a" : delayMillis.toString();
-			  final String offset = offsetMillis == null ? "n/a" : offsetMillis.toString();
-			  System.out.println(" Roundtrip delay(ms)=" + delay + ", clock offset(ms)=" + offset); // offset in ms
+			  //final long delay = delayMillis == null ? "n/a" : delayMillis.toString();
+			  //final Long offset = offsetMillis == null ? "n/a" : offsetMillis.toString();
+			  final long offset = offsetMillis.longValue();
+			  logger.debug(" Roundtrip delay(ms)=" + delayMillis + ", clock offset(ms)=" + delayMillis); // offset in ms
+
+			  if (offsetMillis == null) {
+				isTimeTrusted.set(false);
+				logger.debug("Coulnd't get a response, something is wrong!");
+				return;
+			  }
+
+			  if (offset < timeOffsetThreshold) {
+				  isTimeTrusted.set(true);
+			  } else {
+				  isTimeTrusted.set(false);
+				  logger.info("Time offset to large, something is wrong!");
+			  }
+
 			} catch (final IOException ioe) {
 			  ioe.printStackTrace();
 			}
