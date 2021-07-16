@@ -47,7 +47,7 @@ Description: Enter the alias for the externally issued cloud certificate
 
 Template: arrowhead-core-common/cloud_warning
 Type: note
-Description: The name and operator of a cloud should not contain . (dot) or any whitespaces.
+Description: The name and operator of a cloud should not contain . (dot), _ (underscore) or any whitespaces.
 
 Template: arrowhead-core-common/cloudname
 Type: string

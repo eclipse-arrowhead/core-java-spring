@@ -27,8 +27,8 @@ case "$1" in
     . /usr/share/arrowhead/conf/ahconf.sh
     SYSTEM_DIR="${AH_SYSTEMS_DIR}/${SYSTEM_NAME}"
 
-    db_get arrowhead-core-common/mysql_password_configuration; system_passwd=$RET || true
-    db_unregister arrowhead-core-common/mysql_password_configuration
+    db_get arrowhead-core-common/mysql_password_cs; system_passwd=$RET || true
+    db_unregister arrowhead-core-common/mysql_password_cs
 
     # Generate password (if required)
     if [ -z "${system_passwd}" ]; then
