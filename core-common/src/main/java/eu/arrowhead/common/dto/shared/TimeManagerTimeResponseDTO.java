@@ -37,6 +37,10 @@ public class TimeManagerTimeResponseDTO implements Serializable {
         // methods
         
         //-------------------------------------------------------------------------------------------------
+        public TimeManagerTimeResponseDTO() {
+        }
+        
+        //-------------------------------------------------------------------------------------------------
         public TimeManagerTimeResponseDTO(final String tz) {
                 this.tz = tz;
                 
