@@ -50,7 +50,6 @@ import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
-//import eu.arrowhead.common.dto.shared.TimeManagerTimeRequestDTO;
 import eu.arrowhead.common.dto.shared.TimeManagerTimeResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;

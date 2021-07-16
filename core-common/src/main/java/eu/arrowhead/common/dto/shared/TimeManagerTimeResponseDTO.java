@@ -21,7 +21,6 @@ import java.io.Serializable;
 
 public class TimeManagerTimeResponseDTO implements Serializable {
 
-
         //=================================================================================================
         // members
         
@@ -39,7 +38,7 @@ public class TimeManagerTimeResponseDTO implements Serializable {
         //-------------------------------------------------------------------------------------------------
         public TimeManagerTimeResponseDTO() {
         }
-        
+
         //-------------------------------------------------------------------------------------------------
         public TimeManagerTimeResponseDTO(final String tz) {
                 this.tz = tz;

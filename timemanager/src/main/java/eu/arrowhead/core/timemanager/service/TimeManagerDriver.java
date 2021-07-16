@@ -1,9 +1,20 @@
+/********************************************************************************
+ * Copyright (c) 2021 {Lulea University of Technology}
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0 
+ *
+ * Contributors: 
+ *   {Lulea University of Technology} - implementation
+ *   Arrowhead Consortia - conceptualization 
+ ********************************************************************************/
+
 package eu.arrowhead.core.timemanager.service;
 
-//import java.util.Vector;
-//import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
@@ -45,7 +56,7 @@ public class TimeManagerDriver {
     private String serverList;
 
 	@Value("${time.offsetThreshold}")
-	private long timeOffsetThreshold =  5000; 
+	private long timeOffsetThreshold; 
 
 	private AtomicBoolean isTimeTrusted = new AtomicBoolean(true);
 
@@ -72,11 +83,8 @@ public class TimeManagerDriver {
 			System.out.println();
 			try {
 			  final InetAddress hostAddr = InetAddress.getByName(serverList);
-			  //logger.debug("> " + hostAddr.getHostName() + "/" + hostAddr.getHostAddress());
-			  
-			  // Get time from server
 			  final TimeInfo info = client.getTime(hostAddr);
-			  info.computeDetails(); // compute offset/delay if not already done
+			  info.computeDetails();
 			 
 			  final Long offsetMillis = info.getOffset();
 			  final Long delayMillis = info.getDelay();
@@ -94,8 +102,8 @@ public class TimeManagerDriver {
 			  if (offset < timeOffsetThreshold) {
 				  isTimeTrusted.set(true);
 			  } else {
-				  isTimeTrusted.set(false);
 				  logger.info("Time offset to large, something is wrong!");
+				  isTimeTrusted.set(false);
 			  }
 
 			} catch (final IOException ioe) {
