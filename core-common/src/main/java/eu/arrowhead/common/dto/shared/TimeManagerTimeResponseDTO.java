@@ -29,7 +29,7 @@ public class TimeManagerTimeResponseDTO implements Serializable {
         private long epoch;
         private long epoch_ms;
         private String tz;
-        private boolean inDaylightTime;
+        private boolean dst;
         private boolean trusted;
                 
         //=================================================================================================
@@ -47,7 +47,7 @@ public class TimeManagerTimeResponseDTO implements Serializable {
                 epoch_ms = date.getTime();
                 epoch = epoch_ms / 1000;
 
-                inDaylightTime = TimeZone.getTimeZone(this.tz).inDaylightTime(date);
+                dst = TimeZone.getTimeZone(this.tz).inDaylightTime(date);
                 trusted = false;
         }
 
@@ -58,7 +58,7 @@ public class TimeManagerTimeResponseDTO implements Serializable {
                 epoch_ms = date.getTime();
                 epoch = epoch_ms / 1000;
 
-                inDaylightTime = TimeZone.getTimeZone(this.tz).inDaylightTime(date);
+                dst = TimeZone.getTimeZone(this.tz).inDaylightTime(date);
                 this.trusted = trusted;
         }
 
@@ -69,16 +69,16 @@ public class TimeManagerTimeResponseDTO implements Serializable {
                 this.epoch_ms = epoch * 1000;
                 this.tz = tz;
 
-                inDaylightTime = TimeZone.getTimeZone(this.tz).inDaylightTime(date);
+                this.dst = TimeZone.getTimeZone(this.tz).inDaylightTime(date);
                 this.trusted = trusted;
         }
 
         //-------------------------------------------------------------------------------------------------
-        public TimeManagerTimeResponseDTO(final long epoch, final long epoch_ms, final String tz, final boolean inDaylightTime, final boolean trusted) {
+        public TimeManagerTimeResponseDTO(final long epoch, final long epoch_ms, final String tz, final boolean dst, final boolean trusted) {
                 this.epoch = epoch;
                 this.epoch_ms = epoch_ms;
                 this.tz = tz;
-                this.inDaylightTime = inDaylightTime;
+                this.dst = dst;
                 this.trusted = trusted;
         }
 
@@ -86,13 +86,13 @@ public class TimeManagerTimeResponseDTO implements Serializable {
         public long getEpoch() { return epoch; }
         public long getEpoch_ms() { return epoch_ms; }
         public String getTz() { return tz; }
-        public boolean getInDaylightTime() { return inDaylightTime; }
+        public boolean getDst() { return dst; }
         public boolean getTrusted() {return trusted; }
 
         //-------------------------------------------------------------------------------------------------
         public void setEpoch(long epoch) { this.epoch = epoch; }
         public void setEpoch_ms(long epoch_ms) { this.epoch_ms = epoch_ms; }
         public void setTz(String tz) { this.tz = tz; }
-        public void setInDaylightTime(boolean inDaylightTime) { this.inDaylightTime = inDaylightTime; }
+        public void setDst(boolean dst) { this.dst = dst; }
         public void setTrusted(boolean trusted) { this.trusted = trusted; }
 }
