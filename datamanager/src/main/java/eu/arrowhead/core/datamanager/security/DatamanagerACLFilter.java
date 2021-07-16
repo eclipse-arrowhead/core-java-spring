@@ -118,7 +118,11 @@ public class DatamanagerACLFilter {
             endPath = path.substring(path.indexOf(DM_PROXY_OP)+ DM_PROXY_OP.length() + 1);
         }
 
-        logger.info("endPath: {}", endPath);
+        logger.debug("endPath: {}", endPath);
+        if (endPath.isEmpty()) {
+        	return true;
+        }
+        
         final String[] targetPath = endPath.split(ACL_PATH_SEPARATOR);
         String op = "";
 
