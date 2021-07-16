@@ -58,6 +58,8 @@ public class DatamanagerAccessControlFilter extends CoreSystemAccessControlFilte
                 logger.debug("Unauthorized!");
                 throw new AuthException("Not authorized");
             }
+		} catch (final AuthException e) {
+			throw e;
         } catch (final Exception e) {
         	throw new AuthException("Error during authorization");
         }
