@@ -71,6 +71,15 @@ public class TimeManagerTimeResponseDTO implements Serializable {
         }
 
         //-------------------------------------------------------------------------------------------------
+        public TimeManagerTimeResponseDTO(final long epoch, final long epoch_ms, final String tz, final boolean inDaylightTime, final boolean trusted) {
+                this.epoch = epoch;
+                this.epoch_ms = epoch_ms;
+                this.tz = tz;
+                this.inDaylightTime = inDaylightTime;
+                this.trusted = trusted;
+        }
+
+        //-------------------------------------------------------------------------------------------------
         public long getEpoch() { return epoch; }
         public long getEpoch_ms() { return epoch_ms; }
         public String getTz() { return tz; }

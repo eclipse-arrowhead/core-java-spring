@@ -3,7 +3,7 @@ package eu.arrowhead.core.timemanager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.timemanager.database.service.TimeManagerDBService;
-
+import eu.arrowhead.common.dto.shared.TimeManagerTimeResponseDTO;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -82,6 +83,16 @@ public class TimeManagerControllerSystemTest {
                                                .andExpect(status().isOk())
                                                .andReturn();
         assertEquals("Got it!", response.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void testTime() throws Exception {
+        final MvcResult response = this.mockMvc.perform(get(TIMEMANAGER_TIME_URI)
+                                               .accept(MediaType.APPLICATION_JSON))
+                                               .andExpect(status().isOk())
+                                               .andReturn();
+        final TimeManagerTimeResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), TimeManagerTimeResponseDTO.class);
+        assertNotEquals(0, responseBody.getEpoch());
     }
 
 }
