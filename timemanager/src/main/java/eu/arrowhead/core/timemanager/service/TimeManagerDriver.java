@@ -55,7 +55,7 @@ public class TimeManagerDriver {
 	@Value("${ntp.server.list}")
     private String serverList;
 
-	@Value("${time.offsetThreshold}")
+	@Value("${time.offset.threshold}")
 	private long timeOffsetThreshold; 
 
 	private AtomicBoolean isTimeTrusted = new AtomicBoolean(true);
@@ -79,8 +79,7 @@ public class TimeManagerDriver {
 
 		try {
 		  client.open();
-		  //for (final String arg : args) {
-			System.out.println();
+		  
 			try {
 			  final InetAddress hostAddr = InetAddress.getByName(serverList);
 			  final TimeInfo info = client.getTime(hostAddr);
@@ -88,8 +87,6 @@ public class TimeManagerDriver {
 			 
 			  final Long offsetMillis = info.getOffset();
 			  final Long delayMillis = info.getDelay();
-			  //final long delay = delayMillis == null ? "n/a" : delayMillis.toString();
-			  //final Long offset = offsetMillis == null ? "n/a" : offsetMillis.toString();
 			  final long offset = offsetMillis.longValue();
 			  logger.debug(" Roundtrip delay(ms)=" + delayMillis + ", clock offset(ms)=" + delayMillis); // offset in ms
 
@@ -102,14 +99,13 @@ public class TimeManagerDriver {
 			  if (offset < timeOffsetThreshold) {
 				  isTimeTrusted.set(true);
 			  } else {
-				  logger.info("Time offset to large, something is wrong!");
+				  logger.debug("Time offset to large, something is wrong!");
 				  isTimeTrusted.set(false);
 			  }
 
 			} catch (final IOException ioe) {
 			  ioe.printStackTrace();
 			}
-		  //}
 		} catch (final SocketException e) {
 		  e.printStackTrace();
 		}

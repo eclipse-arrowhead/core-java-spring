@@ -35,6 +35,7 @@ import eu.arrowhead.common.CommonConstants;
 //import eu.arrowhead.core.timemanager.security.TimemanagerACLFilter;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.TimeManagerTimeResponseDTO;
+import eu.arrowhead.core.timemanager.service.TimeManagerDriver;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
@@ -51,8 +52,11 @@ public class TimeWSHandler extends TextWebSocketHandler {
     @Value("${server.ssl.enabled}")
     private boolean sslEnabled;
 
-    @Value("${serverTimezone}")
+    @Value("${time.timezone}")
     private String serverTimeZone;
+
+    @Autowired
+    TimeManagerDriver timeManagerDriver;
 
     //@Autowired
     //TimemanagerACLFilter dataManagerACLFilter;
@@ -76,7 +80,7 @@ public class TimeWSHandler extends TextWebSocketHandler {
     public void sendOutTimeMessages() {
         sessions.forEach(webSocketSession -> {
             try {
-                TimeManagerTimeResponseDTO response = new TimeManagerTimeResponseDTO(serverTimeZone);
+                TimeManagerTimeResponseDTO response = new TimeManagerTimeResponseDTO(serverTimeZone, timeManagerDriver.isTimeTrusted());
                 TextMessage msg = new TextMessage(Utilities.toJson(response).getBytes("UTF-8"));
                 webSocketSession.sendMessage(msg);
             } catch (IOException e) {

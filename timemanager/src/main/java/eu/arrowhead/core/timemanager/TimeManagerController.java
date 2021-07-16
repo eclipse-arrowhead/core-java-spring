@@ -73,7 +73,7 @@ import io.swagger.annotations.ApiResponses;
 public class TimeManagerController {
 	private final Logger logger = LogManager.getLogger(TimeManagerController.class);
 
-	@Value("${serverTimezone}")
+	@Value("${time.timezone}")
     private String serverTimeZone;
 
 	//=================================================================================================
