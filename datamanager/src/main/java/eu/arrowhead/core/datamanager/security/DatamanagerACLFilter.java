@@ -111,11 +111,20 @@ public class DatamanagerACLFilter {
 
         String endPath = "";
         if (path.contains(DM_HIST_OP_WS)) {
-            endPath = path.substring(path.indexOf(DM_HIST_OP_WS) + DM_HIST_OP_WS.length() + 1);
+            final int idx = path.indexOf(DM_HIST_OP_WS) + DM_HIST_OP_WS.length() + 1;
+            if (idx < path.length()) {
+            	endPath = path.substring(idx);
+            }
         } else if (path.contains(DM_HIST_OP)) {
-            endPath = path.substring(path.indexOf(DM_HIST_OP) + DM_HIST_OP.length() + 1);
+            final int idx = path.indexOf(DM_HIST_OP) + DM_HIST_OP.length() + 1;
+            if (idx < path.length()) {
+            	endPath = path.substring(idx);
+            }
         } else if (path.contains(DM_PROXY_OP)){
-            endPath = path.substring(path.indexOf(DM_PROXY_OP)+ DM_PROXY_OP.length() + 1);
+            final int idx = path.indexOf(DM_PROXY_OP)+ DM_PROXY_OP.length() + 1;
+            if (idx < path.length()) {
+            	endPath = path.substring(idx);
+            }
         }
 
         logger.debug("endPath: {}", endPath);
