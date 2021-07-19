@@ -27,6 +27,7 @@ call mvn gpg:sign-and-deploy-file -Durl=https://s01.oss.sonatype.org/service/loc
 
 call mvn gpg:sign-and-deploy-file -Durl=https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/ -DrepositoryId=ossrh  -DpomFile=arrowhead-core-common-essentials-java-spring-%VERSION%.pom -Dfile=arrowhead-core-common-essentials-java-spring-%VERSION%-javadoc.jar -Dclassifier=javadoc || goto mvnerror
 
+cd..
 goto finished
 
 :nopom
@@ -50,7 +51,6 @@ set ABORTED="true"
 goto finished
 
 :finished
-cd..
 echo -------------------------------------------------------------------------------
 if %ABORTED%=="false" ( echo [92mDEPLOYMENT SUCCESS[0m ) else ( echo [91mDEPLOYMENT FAILURE[0m )
 echo -------------------------------------------------------------------------------
