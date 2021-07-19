@@ -33,7 +33,7 @@ Description: Enter the path for the externally issued master certificate (crt fi
 Template: arrowhead-core-common/relay_master_cert
 Type: string
 Default:
-Description: Enter the path for the extarnally issued relay master certificate (crt file, leave empty if you don't want to use secured relays)
+Description: Enter the path for the externally issued relay master certificate (crt file, leave empty if you don't want to use secured relays)
 
 Template: arrowhead-core-common/cloud_password
 Type: password
