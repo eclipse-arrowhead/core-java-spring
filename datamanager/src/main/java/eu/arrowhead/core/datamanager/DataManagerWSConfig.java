@@ -55,6 +55,7 @@ public class DataManagerWSConfig implements WebSocketConfigurer {
     @Autowired
     DatamanagerACLFilter dmACLFilter;
 
+    //-------------------------------------------------------------------------------------------------
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry webSocketHandlerRegistry) {
 	    if (websocketsEnabled) {
@@ -65,6 +66,7 @@ public class DataManagerWSConfig implements WebSocketConfigurer {
         }
     }
 
+    //-------------------------------------------------------------------------------------------------
     @Bean
     public HandshakeInterceptor auctionInterceptor() {
         return new HandshakeInterceptor() {
