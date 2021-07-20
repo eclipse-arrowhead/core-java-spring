@@ -15,8 +15,6 @@ package eu.arrowhead.core.timemanager;
  
 import java.io.IOException;
 import java.util.List;
-import java.util.Vector;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.logging.log4j.LogManager;
@@ -32,20 +30,16 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import eu.arrowhead.common.CommonConstants;
-//import eu.arrowhead.core.timemanager.security.TimemanagerACLFilter;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.TimeManagerTimeResponseDTO;
 import eu.arrowhead.core.timemanager.service.TimeManagerDriver;
 
-import com.google.gson.*;
-import com.google.gson.reflect.TypeToken;
 
 @Component
 @EnableScheduling
 public class TimeWSHandler extends TextWebSocketHandler {
  
     private final Logger logger = LogManager.getLogger(TimeWSHandler.class);
-    //private Gson gson = new Gson();
     
     private final List<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
  
@@ -57,9 +51,6 @@ public class TimeWSHandler extends TextWebSocketHandler {
 
     @Autowired
     TimeManagerDriver timeManagerDriver;
-
-    //@Autowired
-    //TimemanagerACLFilter dataManagerACLFilter;
 
     //=================================================================================================
     // methods
