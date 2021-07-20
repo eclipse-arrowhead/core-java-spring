@@ -34,6 +34,7 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_CHOREOGRAPHER = "Choreographer";
 	public static final String CORE_SYSTEM_EVENT_HANDLER = "Event Handler";
 	public static final String CORE_SYSTEM_DATAMANAGER  = "DataManager";
+	public static final String CORE_SYSTEM_TIMEMANAGER  = "TimeManager";
 	public static final String CORE_SYSTEM_GATEKEEPER = "Gatekeeper";
 	public static final String CORE_SYSTEM_GATEWAY = "Gateway";
 	public static final String CORE_SYSTEM_ORCHESTRATOR = "Orchestrator";
@@ -77,6 +78,8 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_DATAMANAGER_PROXY = "proxy";
 	public static final String CORE_SERVICE_DATAMANAGER_HISTORIAN = "historian";
 
+	public static final String CORE_SERVICE_TIMEMANAGER_TIME = "time";
+	
 	public static final String CORE_SERVICE_CONFIGURATION_CONF = "conf";
 	public static final String CORE_SERVICE_CONFIGURATION_RAWCONF = "confraw";
 
@@ -262,9 +265,12 @@ public class CommonConstants {
 	public static final String OP_DATAMANAGER_PROXY = "/proxy";
 	public static final String OP_DATAMANAGER_HISTORIAN = "/historian";
 
-	public static final String TRANSLATOR_URI = "/translator";
-	public static final String OP_TRANSLATOR_FIWARE_URI = "/v2";
-	public static final String OP_TRANSLATOR_PLUGIN_URI = "/plugin";
+	public static final String TIMEMANAGER_URI = "/timemanager";
+	public static final String OP_TIMEMANAGER_TIME = "/time";
+
+    public static final String TRANSLATOR_URI = "/translator";
+    public static final String OP_TRANSLATOR_FIWARE_URI = "/v2";
+    public static final String OP_TRANSLATOR_PLUGIN_URI = "/plugin";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
@@ -281,7 +287,8 @@ public class CommonConstants {
 	public static final List<CoreSystemService> PUBLIC_CORE_SYSTEM_SERVICES = List.of(CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.AUTH_PUBLIC_KEY_SERVICE,
   			  																		  CoreSystemService.EVENT_PUBLISH_SERVICE, CoreSystemService.EVENT_SUBSCRIBE_SERVICE, CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE, 
 																					  CoreSystemService.PROXY_SERVICE, CoreSystemService.HISTORIAN_SERVICE, CoreSystemService.CHOREOGRAPHER_SERVICE, CoreSystemService.TRANSLATOR_SERVICE,
-	       																			  CoreSystemService.CONFIGURATION_SERVICE, CoreSystemService.CONFIGURATION_RAW_SERVICE);
+	       																			  CoreSystemService.CONFIGURATION_SERVICE, CoreSystemService.CONFIGURATION_RAW_SERVICE, CoreSystemService.TIME_SERVICE);
+
 	
 	public static final String HTTP_CLIENT_CONNECTION_TIMEOUT = "http.client.connection.timeout";
 	public static final String $HTTP_CLIENT_CONNECTION_TIMEOUT_WD = "${" + HTTP_CLIENT_CONNECTION_TIMEOUT + ":" + Defaults.DEFAULT_CONNECTION_TIMEOUT + "}";

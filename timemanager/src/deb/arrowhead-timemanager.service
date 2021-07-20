@@ -1,0 +1,14 @@
+[Unit]
+Description=arrowhead-timemanager
+After=network.target mysql.target
+
+[Service]
+WorkingDirectory=/etc/arrowhead/systems/timemanager
+ExecStart=/usr/bin/java -Dlog4j.configurationFile=file:/etc/arrowhead/systems/timemanager/log4j2.xml -jar /usr/share/arrowhead/timemanager/arrowhead-timemanager.jar
+TimeoutStopSec=5
+Type=simple
+User=arrowhead
+Group=arrowhead
+
+[Install]
+WantedBy=default.target
