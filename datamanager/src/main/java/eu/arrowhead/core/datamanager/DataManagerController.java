@@ -141,7 +141,6 @@ public class DataManagerController {
 	    if (!cnVerifier.isValid(systemName)) {
 	    	throw new InvalidParameterException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN);
 	    }
-
 		final DataManagerServicesResponseDTO ret = new DataManagerServicesResponseDTO();
 		final ArrayList<String> services = historianService.getServicesFromSystem(systemName);
 		ret.setServices(services);
@@ -150,7 +149,7 @@ public class DataManagerController {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Interface to get sensor data from a service", response = SenML.class, responseContainer="Vector", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiOperation(value = "Interface to get data from a service", response = SenML.class, responseContainer="Vector", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CoreCommonConstants.SWAGGER_HTTP_400_MESSAGE),
@@ -242,7 +241,7 @@ public class DataManagerController {
 
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Interface to put sensor data from a service", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiOperation(value = "Interface to put data from a service", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses (value = {
 		@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
 		@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CoreCommonConstants.SWAGGER_HTTP_400_MESSAGE),
@@ -292,7 +291,7 @@ public class DataManagerController {
 	})
 	@GetMapping(value= CommonConstants.OP_DATAMANAGER_PROXY, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public DataManagerSystemsResponseDTO proxyGet() {
-		logger.debug("proxyGet ...");
+		logger.debug("proxyGet");
 
 		final DataManagerSystemsResponseDTO ret = new DataManagerSystemsResponseDTO();
 
