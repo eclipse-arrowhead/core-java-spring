@@ -1,3 +1,4 @@
+rem TODO: create linux version too
 @echo OFF
 cls
 
@@ -5,9 +6,9 @@ cls
 set /p VERSION=Type the version:
 if [%VERSION%]==[] goto start
 
-if not exist .\work md "work"
+rmdir /Q /S work
+md work
 cd .\work
-del /Q *.*
 
 set ABORTED="false"
 if not exist ..\pom.xml goto nopom
