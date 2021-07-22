@@ -13,7 +13,7 @@
 
   <properties>
     <core.common.essentials>arrowhead-core-common-essentials-java-spring</core.common.essentials>
-	<bouncy.castle.version>1.65</bouncy.castle.version>
+	<bouncy.castle.version>1.69</bouncy.castle.version>
   </properties>
 
   <dependencies>
