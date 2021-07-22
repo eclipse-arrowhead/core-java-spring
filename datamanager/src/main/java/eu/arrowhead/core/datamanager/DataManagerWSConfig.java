@@ -49,6 +49,7 @@ public class DataManagerWSConfig implements WebSocketConfigurer {
     @Autowired
     private HistorianWSHandler historianWSHandler;
 
+    //-------------------------------------------------------------------------------------------------
     @Override
     public void registerWebSocketHandlers(final WebSocketHandlerRegistry webSocketHandlerRegistry) {
 	    if (websocketsEnabled) {
@@ -59,6 +60,7 @@ public class DataManagerWSConfig implements WebSocketConfigurer {
         }
     }
 
+    //-------------------------------------------------------------------------------------------------
     @Bean
     public HandshakeInterceptor auctionInterceptor() {
         return new HandshakeInterceptor() {
