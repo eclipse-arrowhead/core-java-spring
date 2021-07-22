@@ -8,7 +8,7 @@
 	<version>VERSION</version>
   
 	<name>Arrowhead Core Common Essentials for Java Spring</name>
-	<description>Extracted components from Arrowhead Core Common for apllication systems</description>
+	<description>Extracted components from Arrowhead Core Common for application systems</description>
 	<url>https://github.com/eclipse-arrowhead/core-java-spring</url>
   
 	<licenses>
