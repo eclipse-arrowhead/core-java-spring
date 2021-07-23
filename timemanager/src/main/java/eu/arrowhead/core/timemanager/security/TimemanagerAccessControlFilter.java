@@ -45,7 +45,6 @@ public class TimemanagerAccessControlFilter extends CoreSystemAccessControlFilte
 	protected void checkClientAuthorized(final String clientCN, final String method, final String requestTarget, final String requestJSON, final Map<String,String[]> queryParams) {
 		super.checkClientAuthorized(clientCN, method, requestTarget, requestJSON, queryParams);
 
-		
 		if (requestTarget.endsWith(CommonConstants.ECHO_URI)) {
                         // Everybody in the local cloud can test the server => no further check is necessary
                         return;

@@ -12,11 +12,11 @@
  *   Arrowhead Consortia - conceptualization 
  ********************************************************************************/
 package eu.arrowhead.core.timemanager;
- 
+
+import java.nio.charset.StandardCharsets;
 import java.io.IOException;
 import java.util.List;
 import java.util.Vector;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.logging.log4j.LogManager;
@@ -35,10 +35,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.TimeManagerTimeResponseDTO;
 import eu.arrowhead.core.timemanager.service.TimeManagerDriver;
-import jdk.internal.reflect.UTF8;
 
-import com.google.gson.*;
-import com.google.gson.reflect.TypeToken;
 
 @Component
 @EnableScheduling
@@ -46,8 +43,6 @@ public class TimeWSHandler extends TextWebSocketHandler {
  
     //=================================================================================================
     // members
-
-    private static final String MESSAGE_ENCODING = "UTF-8";
 
     private final Logger logger = LogManager.getLogger(TimeWSHandler.class);
     
@@ -82,7 +77,7 @@ public class TimeWSHandler extends TextWebSocketHandler {
         sessions.forEach(webSocketSession -> {
             try {
                 TimeManagerTimeResponseDTO response = new TimeManagerTimeResponseDTO(serverTimeZone, timeManagerDriver.isTimeTrusted());
-                TextMessage msg = new TextMessage(Utilities.toJson(response).getBytes(MESSAGE_ENCODING));
+                TextMessage msg = new TextMessage(Utilities.toJson(response).getBytes(StandardCharsets.UTF_8));
                 webSocketSession.sendMessage(msg);
             } catch (IOException e) {
                 logger.error("Error occurred.", e);
