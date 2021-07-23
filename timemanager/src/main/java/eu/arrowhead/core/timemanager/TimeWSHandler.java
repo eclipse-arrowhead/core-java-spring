@@ -16,7 +16,6 @@ package eu.arrowhead.core.timemanager;
 import java.nio.charset.StandardCharsets;
 import java.io.IOException;
 import java.util.List;
-import java.util.Vector;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.logging.log4j.LogManager;
