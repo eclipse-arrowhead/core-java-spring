@@ -30,7 +30,7 @@ START "" /B "cmd /c javaw -jar arrowhead-datamanager-%version%.jar > sout_datama
 echo DataManager started
 
 cd ..\..\timemanager\target
-START "" /B "cmd /c javaw -jar arrowhead-timemanager-4.1.3.jar > sout_timemanager.log 2>&1"
+START "" /B "cmd /c javaw -jar arrowhead-timemanager-%version%.jar > sout_timemanager.log 2>&1"
 echo TimeManager started
 
 cd ..\..\gatekeeper\target
@@ -46,7 +46,7 @@ START "" /B "cmd /c javaw -jar arrowhead-choreographer-%version%.jar > sout_chor
 echo Choreographer started
 
 cd ..\..\configuration\target
-START "" /B "cmd /c javaw -jar arrowhead-configuration-4.2.0.jar > sout_configuration.log 2>&1"
+START "" /B "cmd /c javaw -jar arrowhead-configuration-%version%.jar > sout_configuration.log 2>&1"
 echo Configuration started
 
 cd ..\..\certificate-authority\target
