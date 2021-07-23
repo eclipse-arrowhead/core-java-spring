@@ -32,10 +32,10 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import eu.arrowhead.common.CommonConstants;
-//import eu.arrowhead.core.timemanager.security.TimemanagerACLFilter;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.TimeManagerTimeResponseDTO;
 import eu.arrowhead.core.timemanager.service.TimeManagerDriver;
+import jdk.internal.reflect.UTF8;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
@@ -44,8 +44,12 @@ import com.google.gson.reflect.TypeToken;
 @EnableScheduling
 public class TimeWSHandler extends TextWebSocketHandler {
  
+    //=================================================================================================
+    // members
+
+    private static final String MESSAGE_ENCODING = "UTF-8";
+
     private final Logger logger = LogManager.getLogger(TimeWSHandler.class);
-    //private Gson gson = new Gson();
     
     private final List<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
  
@@ -57,9 +61,6 @@ public class TimeWSHandler extends TextWebSocketHandler {
 
     @Autowired
     TimeManagerDriver timeManagerDriver;
-
-    //@Autowired
-    //TimemanagerACLFilter dataManagerACLFilter;
 
     //=================================================================================================
     // methods
@@ -81,7 +82,7 @@ public class TimeWSHandler extends TextWebSocketHandler {
         sessions.forEach(webSocketSession -> {
             try {
                 TimeManagerTimeResponseDTO response = new TimeManagerTimeResponseDTO(serverTimeZone, timeManagerDriver.isTimeTrusted());
-                TextMessage msg = new TextMessage(Utilities.toJson(response).getBytes("UTF-8"));
+                TextMessage msg = new TextMessage(Utilities.toJson(response).getBytes(MESSAGE_ENCODING));
                 webSocketSession.sendMessage(msg);
             } catch (IOException e) {
                 logger.error("Error occurred.", e);
