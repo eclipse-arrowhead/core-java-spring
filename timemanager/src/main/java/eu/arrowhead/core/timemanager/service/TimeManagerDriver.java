@@ -88,18 +88,18 @@ public class TimeManagerDriver {
 			  final Long offsetMillis = info.getOffset();
 			  final Long delayMillis = info.getDelay();
 			  final long offset = offsetMillis.longValue();
-			  logger.debug(" Roundtrip delay(ms)=" + delayMillis + ", clock offset(ms)=" + delayMillis); // offset in ms
+			  logger.debug("Roundtrip delay(ms)=" + delayMillis + ", clock offset(ms)=" + delayMillis); // offset in ms
 
 			  if (offsetMillis == null) {
 				isTimeTrusted.set(false);
-				logger.debug("Coulnd't get a response, something is wrong!");
+				logger.debug("Couldn't get a response, something is wrong!");
 				return;
 			  }
 
 			  if (offset < timeOffsetThreshold) {
 				  isTimeTrusted.set(true);
 			  } else {
-				  logger.debug("Time offset to large, something is wrong!");
+				  logger.debug("Time offset too large, something is wrong!");
 				  isTimeTrusted.set(false);
 			  }
 

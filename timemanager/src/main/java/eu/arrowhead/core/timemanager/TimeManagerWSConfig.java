@@ -42,7 +42,13 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 @Configuration
 @EnableWebSocket
 public class TimeManagerWSConfig implements WebSocketConfigurer {
- 
+    
+    //=================================================================================================
+    // members
+        
+    private static final String SYSTEM_REF = "systemId";
+    private static final String SERVICE_REF = "serviceId";
+
     private final Logger logger = LogManager.getLogger(TimeManagerWSConfig.class);
 
     @Value("${server.ssl.enabled}")
@@ -52,13 +58,13 @@ public class TimeManagerWSConfig implements WebSocketConfigurer {
     private boolean websocketsEnabled;
 
     @Autowired
-    TimeWSHandler timeWSHandler;
+    private TimeWSHandler timeWSHandler;
 
     @Autowired
-    TimeManagerDriver timeManagerDriver;
+    private TimeManagerDriver timeManagerDriver;
     
     //@Autowired
-    //TimemanagerACLFilter timeACLFilter;
+    //private TimemanagerACLFilter timeACLFilter;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry webSocketHandlerRegistry) {
@@ -90,15 +96,15 @@ public class TimeManagerWSConfig implements WebSocketConfigurer {
                             logger.info("No valid client certificate found");
                             return false;
                         }
-                        attributes.put("CN", CN);
+                        attributes.put(CommonConstants.COMMON_NAME_FIELD_NAME, CN);
                     } else {
                         return false;
                     }
                 }
 
                 // Add to the websocket session
-                attributes.put("systemId", systemId);
-                attributes.put("serviceId", serviceId);
+                attributes.put(SYSTEM_REF, systemId);
+                attributes.put(SERVICE_REF, serviceId);
                 
                 return true;
             }
