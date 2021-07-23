@@ -71,7 +71,7 @@ public class TimeManagerDriver {
 	//-------------------------------------------------------------------------------------------------
 	@Scheduled(fixedDelay = 1000 * 60, initialDelay = 1000 * 1)
     public void checkExternalTimeServer() {
-		logger.info("Checking external time!");
+		logger.debug("Checking external time!");
 		  
 		try {
 			final NTPUDPClient client = new NTPUDPClient();
