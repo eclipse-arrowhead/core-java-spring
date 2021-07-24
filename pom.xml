@@ -280,7 +280,7 @@
 		          	<failOnUnableToExtractRepoInfo>true</failOnUnableToExtractRepoInfo>
 		          	<runOnlyOnce>false</runOnlyOnce>
 		          	<excludeProperties>
-		            <excludeProperty>git.user.*</excludeProperty>
+		            	<excludeProperty>git.user.*</excludeProperty>
 		          	</excludeProperties>
 		          	<includeOnlyProperties>
 		          	</includeOnlyProperties>
