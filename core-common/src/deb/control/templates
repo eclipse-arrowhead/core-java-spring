@@ -151,7 +151,12 @@ Description: MySQL password for Certificate Authority system (leave empty for ra
 Template: arrowhead-core-common/mysql_password_datamanager
 Type: password
 Default:
-Description: MySQL password for Datamanager system (leave empty for random).
+Description: MySQL password for DataManager system (leave empty for random).
+
+Template: arrowhead-core-common/mysql_password_timemanager
+Type: password
+Default:
+Description: MySQL password for TimeManager system (leave empty for random).
 
 Template: arrowhead-core-common/sr_host
 Type: string

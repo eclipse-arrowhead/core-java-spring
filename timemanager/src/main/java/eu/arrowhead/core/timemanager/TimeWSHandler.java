@@ -12,7 +12,8 @@
  *   Arrowhead Consortia - conceptualization 
  ********************************************************************************/
 package eu.arrowhead.core.timemanager;
- 
+
+import java.nio.charset.StandardCharsets;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -39,6 +40,9 @@ import eu.arrowhead.core.timemanager.service.TimeManagerDriver;
 @EnableScheduling
 public class TimeWSHandler extends TextWebSocketHandler {
  
+    //=================================================================================================
+    // members
+
     private final Logger logger = LogManager.getLogger(TimeWSHandler.class);
     
     private final List<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
@@ -72,7 +76,7 @@ public class TimeWSHandler extends TextWebSocketHandler {
         sessions.forEach(webSocketSession -> {
             try {
                 TimeManagerTimeResponseDTO response = new TimeManagerTimeResponseDTO(serverTimeZone, timeManagerDriver.isTimeTrusted());
-                TextMessage msg = new TextMessage(Utilities.toJson(response).getBytes("UTF-8"));
+                TextMessage msg = new TextMessage(Utilities.toJson(response).getBytes(StandardCharsets.UTF_8));
                 webSocketSession.sendMessage(msg);
             } catch (IOException e) {
                 logger.error("Error occurred.", e);

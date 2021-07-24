@@ -71,46 +71,44 @@ public class TimeManagerDriver {
 	//-------------------------------------------------------------------------------------------------
 	@Scheduled(fixedDelay = 1000 * 60, initialDelay = 1000 * 1)
     public void checkExternalTimeServer() {
-		logger.info("Checking external time!");
-	
-		final NTPUDPClient client = new NTPUDPClient();
-	
-		client.setDefaultTimeout(10000);
-
-		try {
-		  client.open();
+		logger.debug("Checking external time!");
 		  
-			try {
-			  final InetAddress hostAddr = InetAddress.getByName(serverList);
-			  final TimeInfo info = client.getTime(hostAddr);
-			  info.computeDetails();
-			 
-			  final Long offsetMillis = info.getOffset();
-			  final Long delayMillis = info.getDelay();
-			  final long offset = offsetMillis.longValue();
-			  logger.debug(" Roundtrip delay(ms)=" + delayMillis + ", clock offset(ms)=" + delayMillis); // offset in ms
-
-			  if (offsetMillis == null) {
+		try {
+			final NTPUDPClient client = new NTPUDPClient();
+			client.setDefaultTimeout(10000);
+			client.open();
+			final InetAddress hostAddr = InetAddress.getByName(serverList);
+			final TimeInfo info = client.getTime(hostAddr);
+			client.close();
+			if (info == null) {
 				isTimeTrusted.set(false);
-				logger.debug("Coulnd't get a response, something is wrong!");
+				logger.debug("Couldn't get a response, something is wrong!");
 				return;
-			  }
-
-			  if (offset < timeOffsetThreshold) {
-				  isTimeTrusted.set(true);
-			  } else {
-				  logger.debug("Time offset to large, something is wrong!");
-				  isTimeTrusted.set(false);
-			  }
-
-			} catch (final IOException ioe) {
-			  ioe.printStackTrace();
 			}
-		} catch (final SocketException e) {
-		  e.printStackTrace();
+			info.computeDetails();
+ 
+			if (info.getOffset() == null || info.getDelay() == null) {
+				isTimeTrusted.set(false);
+				logger.debug("Response details are wrong!");
+				return;
+			}
+
+			final Long offsetMillis = info.getOffset();
+			final Long delayMillis = info.getDelay();
+			final long offset = offsetMillis.longValue();
+			logger.debug("Roundtrip delay(ms)=" + delayMillis + ", clock offset(ms)=" + delayMillis); // offset in ms
+
+			if (offset < timeOffsetThreshold) {
+				isTimeTrusted.set(true);
+		  	} else {
+			  logger.debug("Time offset too large, something is wrong!");
+			  isTimeTrusted.set(false);
+		  	}
+		} catch (final Exception e) {
+			logger.debug("Exception occured: " + e.toString());
+			isTimeTrusted.set(false);
+			return;
 		}
-	
-		client.close();
 	  }
 	//=================================================================================================
 

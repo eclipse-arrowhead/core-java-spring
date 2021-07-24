@@ -11,7 +11,7 @@
  *   {Lulea University of Technology} - implementation
  *   Arrowhead Consortia - conceptualization 
  ********************************************************************************/
-package eu.arrowhead.core.timeamanager;
+package eu.arrowhead.core.timemanager;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -34,7 +34,6 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.dto.shared.TimeManagerTimeResponseDTO;
 import eu.arrowhead.core.timemanager.service.TimeManagerDriver;
-import eu.arrowhead.core.timemanager.service.TimeService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -42,9 +41,6 @@ import io.swagger.annotations.ApiResponses;
 
 
 @Api(tags = { CoreCommonConstants.SWAGGER_TAG_ALL })
-//@CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS, 
-//allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
-//)
 @RestController
 @RequestMapping(CommonConstants.TIMEMANAGER_URI)
 public class TimeManagerController {
@@ -59,9 +55,6 @@ public class TimeManagerController {
 	private static final String OP_NOT_VALID_ERROR_MESSAGE = " Illegal operation. ";
 	private static final String NOT_FOUND_ERROR_MESSAGE = " Resource not found. ";
 	
-	@Autowired 
-	private TimeService timeService;
-
 	@Autowired
 	private TimeManagerDriver timeManagerDriver;
 
