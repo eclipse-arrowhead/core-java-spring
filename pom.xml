@@ -51,20 +51,20 @@
 		<mvn.compiler.version>3.8.1</mvn.compiler.version>
 		<mvn.compile.target>11</mvn.compile.target>
 		<mvn.dependency.version>3.1.1</mvn.dependency.version>
-	  <mvn.jar.version>3.1.2</mvn.jar.version>
-	  <mvn.resources.version>3.1.0</mvn.resources.version>
+		<mvn.jar.version>3.1.2</mvn.jar.version>
+		<mvn.resources.version>3.1.0</mvn.resources.version>
 		<mariadb.jdbc.driver>2.3.0</mariadb.jdbc.driver>
 		<mysql.jdbc.driver>8.0.16</mysql.jdbc.driver>
 		<paho.version>1.2.2</paho.version>
 		<swagger.version>2.9.2</swagger.version>
 		<disruptor.version>3.3.6</disruptor.version>
 		<http.client.version>4.5.8</http.client.version>
-  	<jose4j.version>0.6.5</jose4j.version>
-  	<apache.commons.lang3.version>3.9</apache.commons.lang3.version>
-  	<jms.api.version>2.0.1</jms.api.version>
-  	<activemq.client.version>5.15.9</activemq.client.version>
+  		<jose4j.version>0.6.5</jose4j.version>
+  		<apache.commons.lang3.version>3.9</apache.commons.lang3.version>
+  		<jms.api.version>2.0.1</jms.api.version>
+  		<activemq.client.version>5.15.9</activemq.client.version>
 		<bouncy.castle.version>1.64</bouncy.castle.version>
-  	<jna.version>5.5.0</jna.version>
+  		<jna.version>5.5.0</jna.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -116,9 +116,9 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
-                	<groupId>org.springframework.boot</groupId>
-                	<artifactId>spring-boot-starter-websocket</artifactId>
-                </dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+            </dependency>
 		<dependency>
 		    <groupId>org.springframework.boot</groupId>
     		<artifactId>spring-boot-configuration-processor</artifactId>
@@ -180,12 +180,11 @@
 			<version>${mysql.jdbc.driver}</version>
 			<scope>runtime</scope>
 		</dependency>
-    <dependency>
-      <groupId>org.eclipse.paho</groupId>
-      <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-      <version>${paho.version}</version>
-    </dependency>
-
+    	<dependency>
+	    	<groupId>org.eclipse.paho</groupId>
+    		<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+      		<version>${paho.version}</version>
+    	</dependency>
     	<dependency>
         	<groupId>net.java.dev.jna</groupId>
         	<artifactId>jna</artifactId>
@@ -281,7 +280,7 @@
 		          	<failOnUnableToExtractRepoInfo>true</failOnUnableToExtractRepoInfo>
 		          	<runOnlyOnce>false</runOnlyOnce>
 		          	<excludeProperties>
-		            	<excludeProperty>git.user.*</excludeProperty>
+		            <excludeProperty>git.user.*</excludeProperty>
 		          	</excludeProperties>
 		          	<includeOnlyProperties>
 		          	</includeOnlyProperties>
