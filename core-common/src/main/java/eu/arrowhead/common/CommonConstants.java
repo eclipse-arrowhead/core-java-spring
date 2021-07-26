@@ -136,13 +136,18 @@ public class CommonConstants {
 	public static final String HTTP = "http";
 	public static final String WSS = "wss";
 	public static final String WS = "ws";
+	public static final String MQTTS = "mqtts";
+	public static final String MQTT = "mqtt";
 	public static final String JSON = "JSON";
 	public static final String XML = "XML";
 	public static final String CBOR = "CBOR";
+	public static final String EXI = "EXI";
 	public static final String HTTP_SECURE_JSON = HTTP + "-SECURE-" + JSON; 
 	public static final String HTTP_INSECURE_JSON = HTTP + "-INSECURE-" + JSON;
 	public static final String WS_SECURE_JSON = WS + "-SECURE-" + JSON;
 	public static final String WS_INSECURE_JSON = WS + "-INSECURE-" + JSON;
+	public static final String MQTT_SECURE_JSON = MQTT + "-SECURE-" + JSON;
+	public static final String MQTT_INSECURE_JSON = MQTT + "-INSECURE-" + JSON;
 	public static final String UNKNOWN_ORIGIN = "<unknown>";
 	
 	public static final String SERVICE_REGISTRY_ADDRESS = "sr_address";
