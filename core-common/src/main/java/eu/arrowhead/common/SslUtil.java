@@ -47,7 +47,6 @@ import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
 
-
 public class SslUtil
 {
 
@@ -60,7 +59,7 @@ public class SslUtil
     private static final String PRIVATE_KEY = "private-key";
     private static final String TLS_VERSION = "TLSv1.3";
 
-    private final Logger logger = LogManager.getLogger(SslUtil.class);
+    private static final Logger logger = LogManager.getLogger(SslUtil.class);
 
     //=================================================================================================
     // methods
@@ -122,6 +121,7 @@ public class SslUtil
 
                      return context.getSocketFactory();
               } catch(Exception e) {
+                     logger.debug("Unhandled exception: " + e.toString());
                      throw e;
               } finally {
                      if (parser != null) {

@@ -51,10 +51,10 @@ public class TimeManagerWSConfig implements WebSocketConfigurer {
 
     private final Logger logger = LogManager.getLogger(TimeManagerWSConfig.class);
 
-    @Value("${server.ssl.enabled}")
+    @Value(CommonConstants.SERVER_SSL_ENABLED)
     private boolean sslEnabled;
 
-    @Value("${websockets.enabled}")
+    @Value(CommonConstants.WEBSOCKETS_ENABLED)
     private boolean websocketsEnabled;
 
     @Autowired
@@ -62,9 +62,6 @@ public class TimeManagerWSConfig implements WebSocketConfigurer {
 
     @Autowired
     private TimeManagerDriver timeManagerDriver;
-    
-    //@Autowired
-    //private TimemanagerACLFilter timeACLFilter;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry webSocketHandlerRegistry) {
@@ -88,7 +85,6 @@ public class TimeManagerWSConfig implements WebSocketConfigurer {
                 final String systemId = path.substring(path.lastIndexOf('/') + 1);
                 String CN = null;
 
-                // if running in secure mode, check authorization (ACL)
                 if(sslEnabled) {  
                     if (request instanceof org.springframework.http.server.ServletServerHttpRequest) {
                         CN = SecurityUtilities.getCertificateCNFromServerRequest((ServletServerHttpRequest)request);

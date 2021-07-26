@@ -50,12 +50,19 @@ public class TimeManagerDriver {
 
 	//=================================================================================================
 	// members
+
+	private static final String NTP_SERVER_LIST = "${ntp.server.list}";
+	private static final String TIME_OFFSET_THRESHOLD = "${time.offset.threshold}";
+
+	private static final int TIME_CHECK_INTERVAL = 1000 * 60;
+	private static final int TIME_CHECK_INITIAL = 1000 * 1;
+
 	private final Logger logger = LogManager.getLogger(TimeManagerDriver.class);
 
-	@Value("${ntp.server.list}")
+	@Value(NTP_SERVER_LIST)
     private String serverList;
 
-	@Value("${time.offset.threshold}")
+	@Value(TIME_OFFSET_THRESHOLD)
 	private long timeOffsetThreshold; 
 
 	private AtomicBoolean isTimeTrusted = new AtomicBoolean(true);
@@ -69,7 +76,7 @@ public class TimeManagerDriver {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@Scheduled(fixedDelay = 1000 * 60, initialDelay = 1000 * 1)
+	@Scheduled(fixedDelay = TIME_CHECK_INTERVAL, initialDelay = TIME_CHECK_INITIAL)
     public void checkExternalTimeServer() {
 		logger.debug("Checking external time!");
 		  
@@ -96,7 +103,7 @@ public class TimeManagerDriver {
 			final Long offsetMillis = info.getOffset();
 			final Long delayMillis = info.getDelay();
 			final long offset = offsetMillis.longValue();
-			logger.debug("Roundtrip delay(ms)=" + delayMillis + ", clock offset(ms)=" + delayMillis); // offset in ms
+			logger.debug("Roundtrip delay(ms)=" + delayMillis + ", clock offset(ms)=" + offsetMillis);
 
 			if (offset < timeOffsetThreshold) {
 				isTimeTrusted.set(true);

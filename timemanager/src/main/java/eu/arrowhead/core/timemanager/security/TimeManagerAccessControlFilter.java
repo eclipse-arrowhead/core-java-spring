@@ -32,7 +32,7 @@ import java.util.Map;
 
 @Component
 @ConditionalOnProperty(name = CommonConstants.SERVER_SSL_ENABLED, matchIfMissing = true) 
-public class TimemanagerAccessControlFilter extends CoreSystemAccessControlFilter {
+public class TimeManagerAccessControlFilter extends CoreSystemAccessControlFilter {
 	
 	//=================================================================================================
         // members

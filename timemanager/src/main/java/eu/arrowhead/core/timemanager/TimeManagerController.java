@@ -44,9 +44,12 @@ import io.swagger.annotations.ApiResponses;
 @RestController
 @RequestMapping(CommonConstants.TIMEMANAGER_URI)
 public class TimeManagerController {
+
+	private static final String TIME_TZ = "${time.timezone}";
+
 	private final Logger logger = LogManager.getLogger(TimeManagerController.class);
 
-	@Value("${time.timezone}")
+	@Value(TIME_TZ)
     private String serverTimeZone;
 
 	//=================================================================================================
