@@ -303,7 +303,7 @@ public class CommonConstants {
 	public static final String SERVER_SSL_ENABLED = "server.ssl.enabled";
 	public static final String $SERVER_SSL_ENABLED_WD = "${" + SERVER_SSL_ENABLED + ":" + Defaults.DEFAULT_SSL_SERVER_ENABLED + "}";
 	public static final String WEBSOCKETS_ENABLED = "websockets.enabled";
-	public static final String $WEBSOCKETS_ENABLED = "${" + WEBSOCKETS_ENABLED + "}";
+	public static final String $WEBSOCKETS_ENABLED_WD = "${" + WEBSOCKETS_ENABLED + ":" + Defaults.DEFAULT_WEBSOCKETS_ENABLED + "}";
 	public static final String KEYSTORE_TYPE = "server.ssl.key-store-type";
 	public static final String $KEYSTORE_TYPE = "${" + KEYSTORE_TYPE + "}";
 	public static final String KEYSTORE_PATH = "server.ssl.key-store";

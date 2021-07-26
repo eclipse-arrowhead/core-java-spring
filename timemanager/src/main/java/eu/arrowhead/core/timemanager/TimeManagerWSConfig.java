@@ -51,10 +51,10 @@ public class TimeManagerWSConfig implements WebSocketConfigurer {
 
     private final Logger logger = LogManager.getLogger(TimeManagerWSConfig.class);
 
-    @Value(CommonConstants.SERVER_SSL_ENABLED)
+    @Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
     private boolean sslEnabled;
 
-    @Value(CommonConstants.WEBSOCKETS_ENABLED)
+    @Value(CommonConstants.$WEBSOCKETS_ENABLED_WD)
     private boolean websocketsEnabled;
 
     @Autowired
