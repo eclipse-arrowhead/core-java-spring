@@ -8,12 +8,12 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-public class GraphUtilsTest {
+public class StepGraphUtilsTest {
 	
 	//=================================================================================================
 	// members
 	
-	private GraphUtils graphUtils = new GraphUtils();
+	private StepGraphUtils graphUtils = new StepGraphUtils();
 	
 	//=================================================================================================
 	// methods
@@ -21,7 +21,7 @@ public class GraphUtilsTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testHasCircle1() throws Exception {
-		final List<StepGraph> nonCirculars = GraphExamples.getNonCirculars();
+		final List<StepGraph> nonCirculars = StepGraphExamples.getNonCirculars();
 		
 		for (int i = 0; i < nonCirculars.size(); ++i) {
 			final boolean result = graphUtils.hasCircle(nonCirculars.get(i));
@@ -32,7 +32,7 @@ public class GraphUtilsTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testHasCircle2() throws Exception {
-		final List<StepGraph> circulars = GraphExamples.getCirculars();
+		final List<StepGraph> circulars = StepGraphExamples.getCirculars();
 		
 		for (int i = 0; i < circulars.size(); ++i) { 
 			final boolean result = graphUtils.hasCircle(circulars.get(i));

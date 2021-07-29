@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-public class GraphExamples {
+public class StepGraphExamples {
 
 	private static List<StepGraph> nonCirculars = new ArrayList<>();
 	private static List<StepGraph> circulars = new ArrayList<>();
