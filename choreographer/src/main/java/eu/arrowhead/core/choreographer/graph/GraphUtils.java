@@ -1,9 +1,7 @@
 package eu.arrowhead.core.choreographer.graph;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
@@ -99,24 +97,27 @@ public class GraphUtils {
 			return new ArrayList<>();
 		}
 		routes.sort((final List<Node> l1, final List<Node> l2) -> (l2.size() - l1.size()));
-		final Set<Node> longest = new HashSet<>(routes.remove(0));
+		final List<Node> longest = routes.remove(0);
 		
 		final List<Pair<Node,Node>> removables = new ArrayList<>();		
 		for (final List<Node> route : routes) {
 			boolean removable = true;
-			final List<Pair<Node,Node>> routeRemovables = new ArrayList<>();
 			for (int i = 0; i < route.size(); i++) {
 				if (!longest.contains(route.get(i))) {
 					removable = false;
 					break;
 				}
-				
-				if (i + 1 < routes.size() - 1 ) {
-					routeRemovables.add(Pair.of(route.get(i + 1), route.get(i))); //Because route is backward, so the result will Pair(from,to)
-				}
 			}
 			
 			if (removable) {
+				final List<Pair<Node,Node>> routeRemovables = new ArrayList<>();
+				for (int i = 0; i < route.size() - 1; i++) {
+					final int idxInLongest = longest.indexOf(route.get(i));
+					if (!longest.get(idxInLongest + 1).equals(route.get(i + 1))) {
+						routeRemovables.add(Pair.of(route.get(i + 1), route.get(i))); //Because route is backward, so the result will Pair(from,to)
+					}
+				}
+				
 				removables.addAll(routeRemovables);
 			}
 		}
