@@ -14,16 +14,7 @@
 
 package eu.arrowhead.core.certificate_authority;
 
-import java.math.BigInteger;
-import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.List;
-import javax.annotation.PostConstruct;
-
+import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.CaCertificate;
 import eu.arrowhead.common.dto.internal.AddTrustedKeyRequestDTO;
@@ -47,6 +38,16 @@ import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import java.math.BigInteger;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.List;
 
 @Service
 public class CertificateAuthorityService {

@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.common;
 
 public class CoreCommonConstants {
@@ -87,6 +101,23 @@ public class CoreCommonConstants {
 	public static final String AUTH_TOKEN_TTL_IN_MINUTES = "auth_token_ttl_in_minutes";
 	public static final String $AUTH_TOKEN_TTL_IN_MINUTES_WD = "${" + AUTH_TOKEN_TTL_IN_MINUTES + ":" + CoreDefaults.DEFAULT_AUTH_TOKEN_TTL_IN_MINUTES + "}";
 
+	public static final String MQTT_BROKER_ENABLED = "mqtt.broker.enabled";
+	public static final String $MQTT_BROKER_ENABLED = "${" + MQTT_BROKER_ENABLED + ":false}";
+	public static final String MQTT_BROKER_ADDRESS = "mqtt.broker.address";
+	public static final String $MQTT_BROKER_ADDRESS = "${" + MQTT_BROKER_ADDRESS + ":0.0.0.0}";
+	public static final String MQTT_BROKER_PORT = "mqtt.broker.port";
+	public static final String $MQTT_BROKER_PORT = "${" + MQTT_BROKER_PORT + ":0}";
+	public static final String MQTT_BROKER_USERNAME = "mqtt.broker.username";
+	public static final String $MQTT_BROKER_USERNAME = "${" + MQTT_BROKER_USERNAME + ":}";
+	public static final String MQTT_BROKER_PASSWORD = "mqtt.broker.password";
+	public static final String $MQTT_BROKER_PASSWORD = "${" + MQTT_BROKER_PASSWORD + ":}";
+	public static final String MQTT_BROKER_CAFILE = "mqtt.broker.cafile";
+	public static final String $MQTT_BROKER_CAFILE = "${" + MQTT_BROKER_CAFILE + ":}";
+	public static final String MQTT_BROKER_CERTFILE = "mqtt.broker.certfile";
+	public static final String $MQTT_BROKER_CERTFILE = "${" + MQTT_BROKER_CERTFILE + ":}";
+	public static final String MQTT_BROKER_KEYFILE = "mqtt.broker.keyfile";
+	public static final String $MQTT_BROKER_KEYFILE = "${" + MQTT_BROKER_KEYFILE + ":}";
+	
 	public static final String REQUEST_PARAM_PAGE = "page";
 	public static final String REQUEST_PARAM_ITEM_PER_PAGE = "item_per_page";
 	public static final String REQUEST_PARAM_DIRECTION = "direction";

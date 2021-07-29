@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2019 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.common.core;
 
 import org.springframework.util.Assert;
@@ -66,7 +80,12 @@ public enum CoreSystemService {
 	CERTIFICATE_AUTHORITY_DELETE_TRUSTED_KEY_SERVICE(CommonConstants.CORE_SERVICE_CERTIFICATE_AUTHORITY_DELETE_TRUSTED_KEY, CommonConstants.CERTIFICATE_AUTHRORITY_URI + CommonConstants.OP_CA_MGMT_TRUSTED_KEYS_URI +
 													CommonConstants.OP_CA_MGMT_TRUSTED_KEYS_URI_SUFFIX),
 
-	// Choreographer services
+    // Configuration services
+	CONFIGURATION_SERVICE(CommonConstants.CORE_SERVICE_CONFIGURATION_CONF, CommonConstants.CONFIGURATION_URI +  CommonConstants.OP_CONFIGURATION_CONF),
+	CONFIGURATION_RAW_SERVICE(CommonConstants.CORE_SERVICE_CONFIGURATION_RAWCONF, CommonConstants.CONFIGURATION_URI +  CommonConstants.OP_CONFIGURATION_RAWCONF),
+	CONFIGURATION_MANAGE_SERVICE(CommonConstants.CORE_SERVICE_CONFIGURATION_CONF, CommonConstants.CONFIGURATION_URI +  CommonConstants.OP_CONFIGURATION_MGMT_MANAGE),
+	
+    // Choreographer services
 	CHOREOGRAPHER_SERVICE(CommonConstants.CORE_SERVICE_CHOREOGRAPHER_PROCESS, CommonConstants.CHOREOGRAPHER_URI +  CommonConstants.OP_CHOREOGRAPHER_NOTIFY_STEP_DONE),
 	
 	// QoS Monitor services

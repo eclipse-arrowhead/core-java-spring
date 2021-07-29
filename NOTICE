@@ -1,0 +1,84 @@
+# Notices for Eclipse Arrowhead
+
+This content is produced and maintained by the Eclipse Arrowhead project.
+
+* Project home: https://projects.eclipse.org/projects/iot.arrowhead
+
+## Trademarks
+
+ Eclipse Arrowhead is a trademark of the Eclipse Foundation.
+
+## Copyright
+
+All content is the property of the respective authors or their employers. For
+more information regarding authorship of content, please consult the listed
+source code repository logs.
+
+## Declared Project Licenses
+
+This program and the accompanying materials are made available under the terms
+of the Eclipse Public License v. 2.0 which is available at
+https://www.eclipse.org/legal/epl-2.0.
+
+SPDX-License-Identifier: EPL-2.0
+
+## Source Code
+
+The project maintains the following source code repositories:
+
+* https://github.com/eclipse-arrowhead/core-java-spring
+
+## Third-party Content
+
+This project leverages the following third party content.
+
+Eclipse Arrowhead Third Party library - 2 (n/a)
+
+* License: Apache-2.0
+
+Eclipse Arrowhead Third Party library - 3 (n/a)
+
+* License: Apache-2.0
+
+Eclipse Arrowhead Third Party library - 4 (n/a)
+
+* License: BSD-3-Clause AND EPL-1.0
+
+Eclipse Arrowhead Third Party library - 5 (n/a)
+
+* License: Apache-2.0
+
+mchange-commons-java-0.2.15 (0.2.15)
+
+* License: EPL-1.0 OR LGPL-2.1-only
+
+org.springframework.boot/spring-boot-starter-activemq/2.1.5 (2.1.5)
+
+* License: Apache-2.0
+
+org.springframework.boot/spring-boot-starter-json/2.1.5,
+/org.mapstruct/mapstruct:1.2.0, javax.jms/javax.jms-api:2.0.1 (2.1.5)
+
+* License: Various
+
+org.springframework.boot/spring-boot-starter-log4j2/2.1.5 (2.1.5)
+
+* License: Apache-2.0
+
+spring-boot-starter-security/2.1.5, spring-boot-starter-tomcat/2.1.5,
+spring-retry/1.2.4 (2.1.5)
+
+* License: Apache-2.0
+
+spring-boot-starter-web:2.1.5, spring-boot-starter-amqp:2.1.5 (2.1.5)
+
+* License: Apache-2.0
+
+## Cryptography
+
+Content may contain encryption software. The country in which you are currently
+may have restrictions on the import, possession, and use, and/or re-export to
+another country, of encryption software. BEFORE using any encryption software,
+please check the country's laws, regulations and policies concerning the import,
+possession, or use, and re-export of encryption software, to see if this is
+permitted.

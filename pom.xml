@@ -14,17 +14,18 @@
 	<name>core-java-spring</name>
 	<description>Arrowhead Core Services using Spring Boot</description>
 
-	<url>https://github.com/arrowhead-f/core-java-spring</url>
+	<url>https://github.com/eclipse-arrowhead/core-java-spring</url>
 	<licenses>
     	<license>
-	     	<name>Apache License, Version 2.0</name>
-	     	<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+	     	<name>Eclipse Public License - v 2.0</name>
+	     	<url>https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt</url>
 	   </license>
   	</licenses>
   	
   	<modules>
 	    <module>core-common</module>
 	    <module>serviceregistry</module>
+	    <module>configuration</module>
 	    <module>authorization</module>
 	    <module>certificate-authority</module>
 	    <module>orchestrator</module>
@@ -34,28 +35,29 @@
 	    <module>gatekeeper</module>
 	    <module>gateway</module>
 	    <module>choreographer</module>
-		<module>systemregistry</module>
-		<module>deviceregistry</module>
-		<module>onboarding</module>
+	    <module>systemregistry</module>
+	    <module>deviceregistry</module>
+	    <module>onboarding</module>
 		<module>gams</module>
 	    <module>qos-monitor</module>
 	    <module>deb-installer</module>
 	    <module>docker-all</module>
-		<module>translator</module>
+	    <module>translator</module>
   	</modules>
   	
 	<properties>
-		<base.version>4.2.0</base.version>
+		<base.version>4.3.0</base.version>
 		<revision>${base.version}</revision>
 		<java.version>11</java.version>
 		<mvn.clean.version>3.1.0</mvn.clean.version>
 		<mvn.compiler.version>3.8.1</mvn.compiler.version>
 		<mvn.compile.target>11</mvn.compile.target>
 		<mvn.dependency.version>3.1.1</mvn.dependency.version>
-	    <mvn.jar.version>3.1.2</mvn.jar.version>
-	    <mvn.resources.version>3.1.0</mvn.resources.version>
+		<mvn.jar.version>3.1.2</mvn.jar.version>
+		<mvn.resources.version>3.1.0</mvn.resources.version>
 		<mariadb.jdbc.driver>2.3.0</mariadb.jdbc.driver>
 		<mysql.jdbc.driver>8.0.16</mysql.jdbc.driver>
+		<paho.version>1.2.2</paho.version>
 		<swagger.version>2.9.2</swagger.version>
 		<disruptor.version>3.3.6</disruptor.version>
 		<http.client.version>4.5.8</http.client.version>
@@ -64,7 +66,6 @@
   		<jms.api.version>2.0.1</jms.api.version>
   		<activemq.client.version>5.15.9</activemq.client.version>
 		<bouncy.castle.version>1.64</bouncy.castle.version>
-  		<icmp4j.version>1.2</icmp4j.version>
   		<jna.version>5.5.0</jna.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -75,12 +76,7 @@
             <name>Spring Repository</name>
 			<url>https://repo.spring.io/plugins-release/</url>
         </repository>
-	<repository>
-            <id>jenkins-repo</id>
-            <name>Jenkins Repository</name>
-			<url>https://repo.jenkins-ci.org/public/</url>
-        </repository>	
-    </repositories>
+	</repositories>
 
 	<dependencies>
 		<dependency>
@@ -121,6 +117,10 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+		<dependency>
+        	<groupId>org.springframework.boot</groupId>
+        	<artifactId>spring-boot-starter-websocket</artifactId>
+        	</dependency>
 		<dependency>
 		    <groupId>org.springframework.boot</groupId>
     		<artifactId>spring-boot-configuration-processor</artifactId>
@@ -182,11 +182,10 @@
 			<version>${mysql.jdbc.driver}</version>
 			<scope>runtime</scope>
 		</dependency>
-
-		<dependency>
-        	<groupId>sheltekio.javalibs</groupId>
-        	<artifactId>icmp4j</artifactId>
-        	<version>${icmp4j.version}</version>
+    	<dependency>
+	    	<groupId>org.eclipse.paho</groupId>
+    		<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+      		<version>${paho.version}</version>
     	</dependency>
     	<dependency>
         	<groupId>net.java.dev.jna</groupId>
@@ -207,12 +206,12 @@
 		</dependency>
 -->
 		
-		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
-		<!--<dependency>
-      			<groupId>com.google.code.gson</groupId>
-      			<artifactId>gson</artifactId>
-      			<version>2.8.5</version>
-		</dependency>-->
+	<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+	<dependency>
+      		<groupId>com.google.code.gson</groupId>
+      		<artifactId>gson</artifactId>
+      		<version>2.8.6</version>
+	</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
