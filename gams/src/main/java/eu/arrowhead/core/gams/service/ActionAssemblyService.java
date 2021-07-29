@@ -62,7 +62,8 @@ public class ActionAssemblyService {
         return assembleRunnable(source, actionPlan.getAction());
     }
 
-    protected AbstractActionWrapper assembleRunnable(final Event source, final AbstractAction action) {
+    protected AbstractActionWrapper assembleRunnable(final Event source,
+                                                     final AbstractAction action) {
 
         final AbstractActionWrapper wrapper;
         logger.debug(source.getMarker(), "Creating Action {} for {}", action::shortToString, source::shortToString);
@@ -80,7 +81,7 @@ public class ActionAssemblyService {
                 wrapper = new LoggingActionWrapper(eventService, source, (LoggingAction) action);
                 break;
             case EVENT:
-                wrapper = new EventActionWrapper(eventService, source, (EventAction) action);
+                wrapper = new EventActionWrapper(eventService, source, knowledgeService, (EventAction) action);
                 break;
             default:
                 throw new UnsupportedOperationException("ActionType not supported: " + action.getActionType());

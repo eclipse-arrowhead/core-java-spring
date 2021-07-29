@@ -1,12 +1,12 @@
 package eu.arrowhead.core.gams.dto;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 import eu.arrowhead.common.database.entity.Event;
 import eu.arrowhead.common.database.entity.HttpBodyApiCall;
 import eu.arrowhead.common.database.entity.HttpUrlApiCall;
+import eu.arrowhead.common.database.entity.Sensor;
 import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.gams.service.EventService;
 import eu.arrowhead.core.gams.service.KnowledgeService;
@@ -29,11 +29,8 @@ public class HttpCallWrapper extends ProcessableActionWrapper implements Runnabl
         this.httpService = httpService;
     }
 
-    @Override
-    public void innerRun() {
-        final Map<String, String> knowledgeMap = new HashMap<>();
-        loadKnowledgeMap(knowledgeMap);
-
+    protected ResponseEntity<String> exchange() {
+        final Map<String, String> knowledgeMap = loadKnowledgeMap();
         final String uri = processPlaceholders(knowledgeMap, createUri());
         final String body = processPlaceholders(knowledgeMap, getBody());
 
@@ -41,11 +38,21 @@ public class HttpCallWrapper extends ProcessableActionWrapper implements Runnabl
         addAuthentication(entity);
 
         logger.info("Performing HTTP {} {}", getHttpMethod(), uri);
-        final ResponseEntity<String> exchange = httpService
-                .sendRequest(UriComponentsBuilder.fromUriString(uri).build(), getHttpMethod(), String.class, body);
-        final String result = exchange.getBody();
+        return httpService.sendRequest(UriComponentsBuilder.fromUriString(uri).build(), getHttpMethod(), String.class, body);
+    }
+
+    @Override
+    protected void innerRun() {
+        final ResponseEntity<String> exchange = exchange();
         logger.info("HTTP result {} - parsing body", exchange.getStatusCodeValue());
-        processResults(result);
+        processResults(exchange.getBody());
+    }
+
+    @Override
+    protected void innerRunWithResult(final Sensor eventSensor) {
+        final ResponseEntity<String> exchange = exchange();
+        logger.info("HTTP result {} - parsing body", exchange.getStatusCodeValue());
+        processResults(exchange.getBody(), eventSensor);
     }
 
     protected void addAuthentication(final HttpEntity<?> entity) {

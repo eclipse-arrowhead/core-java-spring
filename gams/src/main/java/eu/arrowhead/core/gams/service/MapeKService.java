@@ -20,12 +20,14 @@ import eu.arrowhead.common.database.entity.CountingAggregation;
 import eu.arrowhead.common.database.entity.CountingEvaluation;
 import eu.arrowhead.common.database.entity.DoubleSensorData;
 import eu.arrowhead.common.database.entity.Event;
+import eu.arrowhead.common.database.entity.GamsInstance;
 import eu.arrowhead.common.database.entity.Knowledge;
 import eu.arrowhead.common.database.entity.LongSensorData;
 import eu.arrowhead.common.database.entity.MatchPolicy;
 import eu.arrowhead.common.database.entity.ProcessableAction;
 import eu.arrowhead.common.database.entity.Sensor;
 import eu.arrowhead.common.database.entity.SetPointEvaluation;
+import eu.arrowhead.common.database.entity.TransformPolicy;
 import eu.arrowhead.core.gams.DataValidation;
 import eu.arrowhead.core.gams.controller.SetPointController;
 import eu.arrowhead.core.gams.dto.AbstractActionWrapper;
@@ -37,6 +39,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import parser.MathExpression;
 
 @Service
 public class MapeKService {
@@ -154,7 +157,7 @@ public class MapeKService {
             switch (policy.getType()) {
                 case MATCH:
                     final MatchPolicy matchPolicy = ((MatchPolicy) policy);
-                    logger.info("Performing Match: {}", matchPolicy::shortToString);
+                    logger.info("Performing MATCH: {}", matchPolicy::shortToString);
 
                     final Optional<Knowledge> optionalKnowledge = knowledgeService.get(eventSensor.getInstance(), policy.getSourceKnowledge());
                     if (optionalKnowledge.isPresent()) {
@@ -174,15 +177,17 @@ public class MapeKService {
                     final ProcessableAction action = ((ApiCallPolicy) policy).getApiCall();
                     logger.info("Performing API CALL: {}", action::shortToString);
                     final AbstractActionWrapper wrapper = apiCallService.assembleRunnable(source, action);
-                    wrapper.run();
-
-                    // TODO fix NPE issue by moving processor into its own instance
-                    sensorData = sensorService.store(eventSensor, ZonedDateTime.now(), "", eventSensor.getAddress());
-                    eventService.createExecuteEvent(eventSensor, sensorData);
+                    wrapper.runWithResult(eventSensor);
                     break;
                 case TRANSFORM:
-                    // TODO add transform action
+                    final TransformPolicy transformPolicy = (TransformPolicy) policy;
                     logger.info("Performing TRANSFORM: {}", policy::shortToString);
+                    final MathExpression expression = new MathExpression(transformPolicy.getExpression());
+                    expression.setValue(transformPolicy.getVariable(), source.getData());
+
+                    final String solution = expression.solve();
+                    sensorData = sensorService.store(eventSensor, ZonedDateTime.now(), solution, eventSensor.getAddress());
+                    eventService.createExecuteEvent(eventSensor, sensorData);
                     break;
                 case NONE:
                     logger.info("Performing Nothing: {}", policy::shortToString);
@@ -197,7 +202,9 @@ public class MapeKService {
     public void execute(final Event event) {
         validation.verify(event);
         logger.info(event.getMarker(), "Received execute event: {}", event::shortToString);
-        final Runnable actionPlan = apiCallService.assembleActionPlan(event.getSensor().getInstance(), event);
+        final Sensor sourceSensor = event.getSensor();
+        final GamsInstance instance = sourceSensor.getInstance();
+        final Runnable actionPlan = apiCallService.assembleActionPlan(instance, event);
         executorService.submit(actionPlan);
     }
 

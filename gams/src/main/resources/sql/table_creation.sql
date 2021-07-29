@@ -305,6 +305,14 @@ CREATE TABLE IF NOT EXISTS `gams_match_policy`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
+CREATE TABLE IF NOT EXISTS `gams_transform_policy`
+(
+    `id`   bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `expression`        varchar(64) NOT NULL,
+    `variable`        varchar(16) NOT NULL,
+    CONSTRAINT `fk_transform_policy_parent` FOREIGN KEY (`id`) REFERENCES `gams_policy` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
 
 CREATE TABLE IF NOT EXISTS `gams_api_policy`
 (

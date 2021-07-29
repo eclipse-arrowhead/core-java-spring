@@ -12,8 +12,8 @@ import org.apache.logging.log4j.Marker;
 
 public class LoggingActionWrapper extends AbstractActionWrapper {
 
-    private final Logger logger = LogManager.getLogger();
     protected final LoggingAction sourceAction;
+    private final Logger logger = LogManager.getLogger();
 
     public LoggingActionWrapper(final EventService eventService,
                                 final Event sourceEvent,
@@ -33,5 +33,10 @@ public class LoggingActionWrapper extends AbstractActionWrapper {
         final GamsInstance instance = sensor.getInstance();
         logger.log(Level.OFF, marker, "Instance: {}, Sensor: {}, Source: {}, Data: {}", instance.getName(), sensor.getName(),
                    sourceEvent.getSource(), sourceEvent.getData());
+    }
+
+    @Override
+    protected void innerRunWithResult(final Sensor eventSensor) {
+        innerRun();
     }
 }

@@ -1,10 +1,12 @@
 package eu.arrowhead.core.gams.service;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import eu.arrowhead.common.database.entity.AbstractEvaluation;
 import eu.arrowhead.common.database.entity.AbstractPolicy;
+import eu.arrowhead.common.database.entity.AbstractSensorData;
 import eu.arrowhead.common.database.entity.Aggregation;
 import eu.arrowhead.common.database.entity.GamsInstance;
 import eu.arrowhead.common.database.entity.Knowledge;
@@ -29,17 +31,18 @@ public class KnowledgeService {
     private final AggregationRepository aggregationRepository;
     private final AnalysisRepository analysisRepository;
     private final PolicyRepository policyRepository;
-
+    private final SensorService sensorService;
     private final KnowledgeRepository knowledgeRepository;
 
     @Autowired
     public KnowledgeService(final AggregationRepository aggregationRepository,
                             final AnalysisRepository analysisRepository,
                             final PolicyRepository policyRepository,
-                            final KnowledgeRepository knowledgeRepository) {
+                            final SensorService sensorService, final KnowledgeRepository knowledgeRepository) {
         this.aggregationRepository = aggregationRepository;
         this.analysisRepository = analysisRepository;
         this.policyRepository = policyRepository;
+        this.sensorService = sensorService;
         this.knowledgeRepository = knowledgeRepository;
     }
 
@@ -83,5 +86,13 @@ public class KnowledgeService {
     public List<AbstractPolicy> loadPolicy(final Sensor sensor) {
         validation.verify(sensor);
         return policyRepository.findBySensor(sensor);
+    }
+
+    public void storeSensorData(final AbstractSensorData<?> data) {
+        sensorService.store(data);
+    }
+
+    public AbstractSensorData<?> storeSensorData(final Sensor eventSensor, final String value) {
+        return sensorService.store(eventSensor, ZonedDateTime.now(), value, eventSensor.getAddress());
     }
 }
