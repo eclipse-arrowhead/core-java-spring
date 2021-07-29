@@ -4,6 +4,7 @@ import java.util.List;
 
 import eu.arrowhead.common.database.entity.AbstractAction;
 import eu.arrowhead.common.database.entity.Event;
+import eu.arrowhead.common.database.entity.Sensor;
 import eu.arrowhead.core.gams.service.EventService;
 
 public abstract class CompositeActionWrapper extends AbstractActionWrapper {
@@ -20,5 +21,10 @@ public abstract class CompositeActionWrapper extends AbstractActionWrapper {
 
     public AbstractAction getSourceAction() {
         return sourceAction;
+    }
+
+    @Override
+    protected void innerRunWithResult(final Sensor eventSensor) {
+        innerRun();
     }
 }
