@@ -109,13 +109,12 @@ public class GraphExamples {
 		graph.getSteps().addAll(Set.of(n1, n2, n3, n4, n5, n6, n7, n8, n9));
 		graph.getFirstSteps().add(n1);
 		nonCirculars.add(graph);		
-		
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	private static void initCirculars() {
 		//------------------------------
-		// self neighbour node
+		// self neighbor node
 		Node n1 = new Node("n1");
 		n1.getNextNodes().add(n1);
 		n1.getPrevNodes().add(n1);
