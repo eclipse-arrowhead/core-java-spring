@@ -30,6 +30,7 @@ public class CommonConstants {
 
 	public static final String CORE_SYSTEM_AUTHORIZATION = "Authorization";
 	public static final String CORE_SYSTEM_CERTIFICATE_AUTHORITY = "Certificate Authority";
+	public static final String CORE_SYSTEM_CONFIGURATION  = "Configuration";
 	public static final String CORE_SYSTEM_CHOREOGRAPHER = "Choreographer";
 	public static final String CORE_SYSTEM_EVENT_HANDLER = "Event Handler";
 	public static final String CORE_SYSTEM_DATAMANAGER  = "DataManager";
@@ -38,7 +39,7 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_ORCHESTRATOR = "Orchestrator";
 	public static final String CORE_SYSTEM_SERVICE_REGISTRY = "Service Registry";
 	public static final String CORE_SYSTEM_QOS_MONITOR = "Quality of Service Monitor";
-    public static final String CORE_SYSTEM_TRANSLATOR = "Translator";
+	public static final String CORE_SYSTEM_TRANSLATOR = "Translator";
 
 	public static final String CORE_SYSTEM_SYSTEM_REGISTRY = "System Registry";
 	public static final String CORE_SYSTEM_DEVICE_REGISTRY = "Device Registry";
@@ -75,6 +76,9 @@ public class CommonConstants {
 
 	public static final String CORE_SERVICE_DATAMANAGER_PROXY = "proxy";
 	public static final String CORE_SERVICE_DATAMANAGER_HISTORIAN = "historian";
+
+	public static final String CORE_SERVICE_CONFIGURATION_CONF = "conf";
+	public static final String CORE_SERVICE_CONFIGURATION_RAWCONF = "confraw";
 
 	public static final String CORE_SERVICE_CHOREOGRAPHER_PROCESS = "choreographer-service";
 
@@ -129,15 +133,18 @@ public class CommonConstants {
 	public static final String HTTP = "http";
 	public static final String WSS = "wss";
 	public static final String WS = "ws";
+	public static final String MQTTS = "mqtts";
+	public static final String MQTT = "mqtt";
 	public static final String JSON = "JSON";
 	public static final String XML = "XML";
 	public static final String CBOR = "CBOR";
 	public static final String EXI = "EXI";
-	public static final String CSV = "CSV";
 	public static final String HTTP_SECURE_JSON = HTTP + "-SECURE-" + JSON; 
 	public static final String HTTP_INSECURE_JSON = HTTP + "-INSECURE-" + JSON;
 	public static final String WS_SECURE_JSON = WS + "-SECURE-" + JSON;
 	public static final String WS_INSECURE_JSON = WS + "-INSECURE-" + JSON;
+	public static final String MQTT_SECURE_JSON = MQTT + "-SECURE-" + JSON;
+	public static final String MQTT_INSECURE_JSON = MQTT + "-INSECURE-" + JSON;
 	public static final String UNKNOWN_ORIGIN = "<unknown>";
 	
 	public static final String SERVICE_REGISTRY_ADDRESS = "sr_address";
@@ -226,6 +233,11 @@ public class CommonConstants {
 	public static final String OP_GATEKEEPER_GET_CLOUD_SERVICE = "/cloud/";
 	public static final String OP_GATEKEEPER_GET_CLOUD_SERVICE_SUFFIX = "{operator}/{name}";
 
+	public static final String CONFIGURATION_URI = "/configuration";
+	public static final String OP_CONFIGURATION_CONF = "/config";
+	public static final String OP_CONFIGURATION_RAWCONF = "/config/raw";
+	public static final String OP_CONFIGURATION_MGMT_MANAGE = "/mgmt/config";
+
 	public static final String CHOREOGRAPHER_URI = "/choreographer";
 	public static final String OP_CHOREOGRAPHER_NOTIFY_STEP_DONE = "/notifyStepDone";
 
@@ -255,9 +267,9 @@ public class CommonConstants {
 	public static final String OP_DATAMANAGER_PROXY = "/proxy";
 	public static final String OP_DATAMANAGER_HISTORIAN = "/historian";
 
-    public static final String TRANSLATOR_URI = "/translator";
-    public static final String OP_TRANSLATOR_FIWARE_URI = "/v2";
-    public static final String OP_TRANSLATOR_PLUGIN_URI = "/plugin";
+	public static final String TRANSLATOR_URI = "/translator";
+	public static final String OP_TRANSLATOR_FIWARE_URI = "/v2";
+	public static final String OP_TRANSLATOR_PLUGIN_URI = "/plugin";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
@@ -273,7 +285,8 @@ public class CommonConstants {
 	
 	public static final List<CoreSystemService> PUBLIC_CORE_SYSTEM_SERVICES = List.of(CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.AUTH_PUBLIC_KEY_SERVICE,
   			  																		  CoreSystemService.EVENT_PUBLISH_SERVICE, CoreSystemService.EVENT_SUBSCRIBE_SERVICE, CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE, 
-																					  CoreSystemService.PROXY_SERVICE, CoreSystemService.HISTORIAN_SERVICE, CoreSystemService.CHOREOGRAPHER_SERVICE, CoreSystemService.TRANSLATOR_SERVICE);
+																					  CoreSystemService.PROXY_SERVICE, CoreSystemService.HISTORIAN_SERVICE, CoreSystemService.CHOREOGRAPHER_SERVICE, CoreSystemService.TRANSLATOR_SERVICE,
+	       																			  CoreSystemService.CONFIGURATION_SERVICE, CoreSystemService.CONFIGURATION_RAW_SERVICE);
 	
 	public static final String HTTP_CLIENT_CONNECTION_TIMEOUT = "http.client.connection.timeout";
 	public static final String $HTTP_CLIENT_CONNECTION_TIMEOUT_WD = "${" + HTTP_CLIENT_CONNECTION_TIMEOUT + ":" + Defaults.DEFAULT_CONNECTION_TIMEOUT + "}";

@@ -172,6 +172,26 @@ public class Utilities {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:RedundantThrowsDeclarationCheck")
+	public static ZonedDateTime parseLocalStringToUTCZonedDateTime(final String timeStr) throws DateTimeParseException {
+		if (isEmpty(timeStr)) {
+			return null;
+		}
+
+		final TemporalAccessor tempAcc = dateTimeFormatter.parse(timeStr);
+		final ZonedDateTime parsedDateTime = ZonedDateTime.of(tempAcc.get(ChronoField.YEAR),
+															  tempAcc.get(ChronoField.MONTH_OF_YEAR),
+															  tempAcc.get(ChronoField.DAY_OF_MONTH),
+															  tempAcc.get(ChronoField.HOUR_OF_DAY),
+															  tempAcc.get(ChronoField.MINUTE_OF_HOUR),
+															  tempAcc.get(ChronoField.SECOND_OF_MINUTE),
+															  0,
+															  OffsetDateTime.now().getOffset());
+
+			return ZonedDateTime.ofInstant(parsedDateTime.toInstant(), ZoneOffset.UTC);
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	@Nullable
 	public static String toPrettyJson(final String jsonString) {
 		try {
