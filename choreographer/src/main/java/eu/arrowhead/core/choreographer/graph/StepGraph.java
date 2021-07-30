@@ -8,20 +8,18 @@ public class StepGraph {
 	//=================================================================================================
 	// members
 	
-	private final Set<Node> firstSteps = new HashSet<>();
 	private final Set<Node> steps = new HashSet<>();
 
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public Set<Node> getFirstSteps() { 	return firstSteps; }
 	public Set<Node> getSteps() { return steps; }
 	
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "StepGraph [firstSteps=" + firstSteps + ", steps=" + steps + "]";
+		return "StepGraph [steps=" + steps + "]";
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -29,8 +27,6 @@ public class StepGraph {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((firstSteps == null) ? 0 : firstSteps.hashCode());
 		result = prime * result + ((steps == null) ? 0 : steps.hashCode());
 		return result;
 	}
@@ -49,7 +45,7 @@ public class StepGraph {
 		}
 		
 		final StepGraph other = (StepGraph) obj;
-		if (!this.steps.equals(other.steps) || !this.firstSteps.equals(other.firstSteps)) {
+		if (!this.steps.equals(other.steps)) {
 			return false;
 		}
 		
