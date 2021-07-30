@@ -40,14 +40,8 @@ public class GraphUtils {
 			}
 			
 			final Set<Node> nextNodes = new HashSet<>(node.getNextNodes());
-			final List<Pair<Node,Node>> edgesToRemove = new ArrayList<>();
 			for (final Node nextNode : nextNodes) {
-				edgesToRemove.add(Pair.of(node, nextNode));
-			}
-			for (final Pair<Node,Node> edge : edgesToRemove) {
-				removeEdge(edge);				
-			}
-			for (final Node nextNode : nextNodes) {
+				removeEdge(Pair.of(node, nextNode));
 				if (nextNode.getPrevNodes().isEmpty()) {
 					independentNodes.add(nextNode);
 				}
