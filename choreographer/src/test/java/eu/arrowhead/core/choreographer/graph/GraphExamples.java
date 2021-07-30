@@ -63,7 +63,7 @@ public class GraphExamples {
 		n1.getNextNodes().add(n3);
 		n2.getNextNodes().add(n4);
 		n3.getPrevNodes().add(n1);
-		n4.getPrevNodes().add(n3);
+		n4.getPrevNodes().add(n2);
 		
 		graph = new StepGraph();
 		graph.getSteps().addAll(Set.of(n1, n2, n3, n4));

@@ -1,7 +1,11 @@
 package eu.arrowhead.core.choreographer.graph;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
+import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
@@ -14,12 +18,43 @@ public class GraphUtils {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public boolean hasCircle(final StepGraph graph) {
+	public boolean hasCircle(final StepGraph graph) { 
 		Assert.notNull(graph, "'graph' is null.");
 		
-		//TODO: implement
+		//Edge case: First step(s) with incoming edge
+		for (final Node node : graph.getFirstSteps()) {
+			if (!node.getPrevNodes().isEmpty()) {
+				return true;
+			}
+		}
 		
-		return false;
+		//Based on Khan's (Topology) Algorithm https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm
+		final StepGraph deepCopy = graph.deepCopy();		
+		final Set<Node> workingGraph = deepCopy.getSteps();
+		final Queue<Node> independentNodes = new LinkedList<>(deepCopy.getFirstSteps()); //Nodes without incoming edges in the actual workingGraph
+		
+		while (!independentNodes.isEmpty()) {
+			final Node node = independentNodes.poll();
+			if (node.getNextNodes().contains(node)) {
+				return true;
+			}
+			
+			final Set<Node> nextNodes = new HashSet<>(node.getNextNodes());
+			final List<Pair<Node,Node>> edgesToRemove = new ArrayList<>();
+			for (final Node nextNode : nextNodes) {
+				edgesToRemove.add(Pair.of(node, nextNode));
+			}
+			for (final Pair<Node,Node> edge : edgesToRemove) {
+				removeEdge(edge);				
+			}
+			for (final Node nextNode : nextNodes) {
+				if (nextNode.getPrevNodes().isEmpty()) {
+					independentNodes.add(nextNode);
+				}
+			}
+		}
+		
+		return hasEdges(workingGraph);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -131,17 +166,25 @@ public class GraphUtils {
 			return graph;
 		}
 		
-		for (final Pair<Node, Node> link : removables) {
-			for (final Node step : graph.getSteps()) {
-				final Node from = link.getLeft();
-				final Node to = link.getRight();
-				if (step.equals(from)) {
-					from.getNextNodes().remove(to);
-					to.getPrevNodes().remove(from);
-					break;
-				}
-			}
+		for (final Pair<Node, Node> edge : removables) {
+			removeEdge(edge);
 		}
 		return graph;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void removeEdge(final Pair<Node,Node> edgeFromTo) {
+		edgeFromTo.getLeft().getNextNodes().remove(edgeFromTo.getRight());
+		edgeFromTo.getRight().getPrevNodes().remove(edgeFromTo.getLeft());		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private boolean hasEdges(final Set<Node> graph) {
+		for (final Node node : graph) {
+			if (!node.getPrevNodes().isEmpty() || !node.getNextNodes().isEmpty()) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
