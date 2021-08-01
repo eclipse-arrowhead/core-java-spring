@@ -5059,7 +5059,7 @@ __GetServiceDataResponse__ output:
 
 [
    {
-        "bn": "string",
+    "bn": "string",
 	"bt": 0.0,
 	"bu": "string",
 	"bver": 0
@@ -5153,6 +5153,7 @@ None currently, but will consume Orchestration later on.
 ## Use cases
 
 The TimeManager has the following use cases:
+* [Fetch trusted time](documentation/timemanager/use_cases/TM_use_case_1.md)
 
 <a name="timemanager_endpoints_time" />
 
@@ -5165,7 +5166,8 @@ The base URL for the requests: `http://<host>:<port>/timemanager`
 
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
-| [Echo](#datamanager_endpoints_get_echo) | /echo | GET    | -    | OK     |
+| [Echo](#timemanager_endpoints_get_echo) | /echo | GET    | -    | OK     |
+| [Time](#timemanager_endpoints_get_time) | /time | GET    | -    | OK     |
 
 # Gatekeeper 
 
