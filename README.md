@@ -5167,7 +5167,39 @@ The base URL for the requests: `http://<host>:<port>/timemanager`
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Echo](#timemanager_endpoints_get_echo) | /echo | GET    | -    | OK     |
-| [Time](#timemanager_endpoints_get_time) | /time | GET    | -    | OK     |
+| [Time](#timemanager_endpoints_get_time) | /time | GET    | -    | TimeResponse  |
+
+<a name="timemanager_endpoints_get_echo" />
+
+### Echo
+```
+GET /timemanager/echo
+```
+
+Returns a "Got it!" message with the purpose of testing the system availability.
+
+### Get trusted time and location
+```
+GET /timemanager/time
+```
+
+Returns time stamps (UNIX in seconds and millseconds), time zone ("Europe/Budapest"), Daylist savings active (true/false) and if the time is trusted (true/false).
+
+<a name="timemanager_gettime_response" />
+
+__GetTimeResponse__ output:
+
+```json
+
+{
+  "epoch": 1627844812,
+  "epochMs": 1627844812102,
+  "tz": string,
+  "dst": true,
+  "trusted": true
+}
+
+```
 
 # Gatekeeper 
 
