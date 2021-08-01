@@ -5132,6 +5132,29 @@ The TimeManager provides features for a local cloud systems to :
 
 <a name="timemanager_sysd" />
 
+## System Design Overview
+
+<a name="timeamanager_provided_services" />
+
+## Provided services
+
+The TimeManager provides the following services:
+* [Echo](#timemanager_endpoints_get_echo)
+* [Time](#timemanager_endpoints_time)
+
+<a name="timemanager_consumed_services" />
+
+## Consumed services
+
+The TimeManager consumes the following services:
+
+None currently, but will consume Orchestration later on.
+
+<a name="timemanager_usecases" />
+
+## Use cases
+
+The TimeManager has the following use cases:
 
 # Gatekeeper 
 
