@@ -4815,11 +4815,6 @@ This service can only be used by other core services, therefore this is not part
 
 The purpose of DataManager supporting core system is to provide storage of sensor data.
 
-![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `AH Service Registry`
-![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `AH Authorization` 
-![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `AH Orchestrator`
-![#ffcc44](https://placehold.it/15/ffcc44/000000?text=+) `AH DataManager`
-![Alt text](/documentation/datamanager/overview.png)
 
 The DataManager provides features for producers and consumers to:
 * Store SenML sensor and actuator data,
@@ -5118,12 +5113,6 @@ __PutSServiceDataRequest__ input:
 
 The purpose of TimeManager supporting core system is to provide time and location based services.
 
-![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `AH Service Registry`
-![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `AH Authorization` 
-![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `AH Orchestrator`
-![#ffcc44](https://placehold.it/15/ffcc44/000000?text=+) `AH TimeManager`
-![Alt text](/documentation/datamanager/overview.png)
-
 The TimeManager provides features for a local cloud systems to :
 * Fetch accurate and trusted time and location information,
 
@@ -5177,6 +5166,8 @@ GET /timemanager/echo
 ```
 
 Returns a "Got it!" message with the purpose of testing the system availability.
+
+<a name="timemanager_endpoints_get_time" />
 
 ### Get trusted time and location
 ```
