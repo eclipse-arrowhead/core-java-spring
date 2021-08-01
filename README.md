@@ -5180,7 +5180,7 @@ Returns time stamps (UNIX in seconds and millseconds), time zone ("Europe/Budape
 
 <a name="timemanager_gettime_response" />
 
-__GetTimeResponse__ output:
+__TimeResponse__ output:
 
 ```json
 
