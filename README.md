@@ -4972,7 +4972,7 @@ Stores sensor data in a service endpoint in the proxy cache.
 
 <a name="datamanager_putsrvdata_request" />
 
-__PutSServiceDataRequest__ input:
+__PutServiceDataRequest__ input:
 
 ```json
 
@@ -5081,25 +5081,25 @@ Stores sensor data in a service endpoint in the database.
 
 <a name="datamanager_putsrvdata_request" />
 
-__PutSServiceDataRequest__ input:
+__PutServiceDataRequest__ input:
 
 ```json
 
 [
-   {
-        "bn": "string",
-	"bt": 0.0,
-	"bu": "string",
-	"bver": 0
-   }, {
-        "n": "string",
-	"t": 0.0,
-	"u": "string",
-	"v": 0.0,
-	"vs": "string",
-	"vb": false,
-	"vd": "string"
-   }
+  {
+    "bn": "string",
+    "bt": 0.0,
+    "bu": "string",
+    "bver": 0
+  }, {
+    "n": "string",
+    "t": 0.0,
+    "u": "string",
+    "v": 0.0,
+    "vs": "string",
+    "vb": false,
+    "vd": "string"
+  }
 ]
 ```
 
