@@ -80,7 +80,13 @@ Please be aware, that versions starting from 4.1.3 are __NOT__ backwards compati
        * [Service Description Overview](#datamanager_provided_services)
        * [Endpoints](#datamanager_endpoints)
 	       * [Client](#datamanager_endpoints_client)
-    8. [Certificate Authority](#ca)
+    8. [TimeManager](#timemanager)
+       * [System Design Description Overview](#timemanager_sdd)
+       * [Services and Use Cases](#timemanager_usecases)  
+       * [Service Description Overview](#timemanager_provided_services)
+       * [Endpoints](#timemanager_endpoints)
+	       * [Client](#timemanager_endpoints_client)
+    9. [Certificate Authority](#ca)
        * [System Design Description Overview](#ca_sdd)
        * [Services and Use Cases](#ca_usecases)  
        * [Endpoints](#ca_endpoints)
@@ -268,6 +274,7 @@ Authorization will be available on ```https://localhost:8445``` <br />
 Orchestrator will be available on ```https://localhost:8441``` <br />
 Event Handler will be available on ```https://localhost:8455``` <br />
 DataManager will be available on ```https://localhost:8461``` <br />
+TimeManager will be available on ```https://localhost:8463``` <br />
 Gatekeeper will be available on ```https://localhost:8449``` <br />
 Gateway will be available on ```https://localhost:8453``` <br />
 
@@ -5102,6 +5109,29 @@ __PutSServiceDataRequest__ input:
    }
 ]
 ```
+
+<a name="timemanager" />
+
+# TimeManager
+
+<a name="timemanager_sdd" />
+
+## System Design Description Overview
+
+The purpose of TimeManager supporting core system is to provide time and location based services.
+
+![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `AH Service Registry`
+![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `AH Authorization` 
+![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `AH Orchestrator`
+![#ffcc44](https://placehold.it/15/ffcc44/000000?text=+) `AH TimeManager`
+![Alt text](/documentation/datamanager/overview.png)
+
+The TimeManager provides features for a local cloud systems to :
+* Fetch accurate and trusted time and location information,
+
+
+<a name="timemanager_sysd" />
+
 
 # Gatekeeper 
 
