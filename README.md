@@ -4866,8 +4866,6 @@ The DataManager has the following use cases:
 Swagger API documentation is available on: `https://<host>:<port>` <br />
 The base URL for the requests: `http://<host>:<port>/datamanager`
 
-
-
 ### Client endpoint description<br />
 
 | Function | URL subpath | Method | Input | Output |
@@ -5155,6 +5153,19 @@ None currently, but will consume Orchestration later on.
 ## Use cases
 
 The TimeManager has the following use cases:
+
+<a name="timemanager_endpoints_time" />
+
+## Endpoints
+
+Swagger API documentation is available on: `https://<host>:<port>` <br />
+The base URL for the requests: `http://<host>:<port>/timemanager`
+
+### Client endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#datamanager_endpoints_get_echo) | /echo | GET    | -    | OK     |
 
 # Gatekeeper 
 
