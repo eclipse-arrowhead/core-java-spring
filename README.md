@@ -4949,7 +4949,7 @@ __GetServiceDataResponse__ output:
 	  "bt": 0.0,
 	  "bu": "string",
 	  "bver": 0
-   }, {
+  }, {
     "n": "string",
 	  "t": 0.0,
 	  "u": "string",
@@ -4957,7 +4957,7 @@ __GetServiceDataResponse__ output:
 	  "vs": "string",
 	  "vb": false,
 	  "vd": "string"
-   }
+  }
 ]
 ```
 
@@ -4979,7 +4979,7 @@ __PutServiceDataRequest__ input:
 [
   {
     "bn": "string",
-	  "bt": 0.0,
+    "bt": 0.0,
 	  "bu": "string",
 	  "bver": 0
   }, {
