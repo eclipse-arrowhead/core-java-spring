@@ -5144,7 +5144,7 @@ None currently, but will consume Orchestration later on.
 The TimeManager has the following use cases:
 * [Fetch trusted time](documentation/timemanager/use_cases/TM_use_case_1.md)
 
-<a name="timemanager_endpoints_time" />
+<a name="timemanager_endpoints" />
 
 ## Endpoints
 
@@ -5187,7 +5187,7 @@ __GetTimeResponse__ output:
 {
   "epoch": 1627844812,
   "epochMs": 1627844812102,
-  "tz": string,
+  "tz": "string",
   "dst": true,
   "trusted": true
 }
