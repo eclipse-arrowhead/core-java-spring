@@ -4946,17 +4946,17 @@ __GetServiceDataResponse__ output:
 [
   {
     "bn": "string",
-	  "bt": 0.0,
-	  "bu": "string",
-	  "bver": 0
+    "bt": 0.0,
+    "bu": "string",
+    "bver": 0
   }, {
     "n": "string",
-	  "t": 0.0,
-	  "u": "string",
-	  "v": 0.0,
-	  "vs": "string",
-	  "vb": false,
-	  "vd": "string"
+    "t": 0.0,
+    "u": "string",
+    "v": 0.0,
+    "vs": "string",
+    "vb": false,
+    "vd": "string"
   }
 ]
 ```
@@ -4980,16 +4980,16 @@ __PutServiceDataRequest__ input:
   {
     "bn": "string",
     "bt": 0.0,
-	  "bu": "string",
-	  "bver": 0
+    "bu": "string",
+    "bver": 0
   }, {
     "n": "string",
-	  "t": 0.0,
-	  "u": "string",
-	  "v": 0.0,
-	  "vs": "string",
-	  "vb": false,
-	  "vd": "string"
+    "t": 0.0,
+    "u": "string",
+    "v": 0.0,
+    "vs": "string",
+    "vb": false,
+    "vd": "string"
   }
 ]
 ```
