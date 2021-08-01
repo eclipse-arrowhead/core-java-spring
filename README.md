@@ -4861,6 +4861,8 @@ The DataManager has the following use cases:
 Swagger API documentation is available on: `https://<host>:<port>` <br />
 The base URL for the requests: `http://<host>:<port>/datamanager`
 
+<a name="datamanager_endpoints_client" />
+
 ### Client endpoint description<br />
 
 | Function | URL subpath | Method | Input | Output |
@@ -4883,8 +4885,6 @@ GET /datamanager/echo
 ```
 
 Returns a "Got it!" message with the purpose of testing the system availability.
-
-<a name="datamanager_endpoints_client" />
 
 <a name="datamanager_proxyendpoints_getsys" />
 
@@ -5121,7 +5121,7 @@ The TimeManager provides features for a local cloud systems to :
 
 ## System Design Overview
 
-<a name="timeamanager_provided_services" />
+<a name="timemanager_provided_services" />
 
 ## Provided services
 
@@ -5150,6 +5150,8 @@ The TimeManager has the following use cases:
 
 Swagger API documentation is available on: `https://<host>:<port>` <br />
 The base URL for the requests: `http://<host>:<port>/timemanager`
+
+<a name="timemanager_endpoints_client" />
 
 ### Client endpoint description<br />
 
