@@ -4944,7 +4944,7 @@ __GetServiceDataResponse__ output:
 ```json
 
 [
-   {
+  {
     "bn": "string",
 	  "bt": 0.0,
 	  "bu": "string",
@@ -4977,20 +4977,20 @@ __PutServiceDataRequest__ input:
 ```json
 
 [
-   {
+  {
     "bn": "string",
 	  "bt": 0.0,
 	  "bu": "string",
 	  "bver": 0
-    }, {
-     "n": "string",
-	   "t": 0.0,
-	   "u": "string",
-	   "v": 0.0,
-	   "vs": "string",
-	   "vb": false,
-	   "vd": "string"
-    }
+  }, {
+    "n": "string",
+	  "t": 0.0,
+	  "u": "string",
+	  "v": 0.0,
+	  "vs": "string",
+	  "vb": false,
+	  "vd": "string"
+  }
 ]
 ```
 
@@ -5053,20 +5053,20 @@ __GetServiceDataResponse__ output:
 ```json
 
 [
-   {
+  {
     "bn": "string",
-	"bt": 0.0,
-	"bu": "string",
-	"bver": 0
-   }, {
-        "n": "string",
-	"t": 0.0,
-	"u": "string",
-	"v": 0.0,
-	"vs": "string",
-	"vb": false,
-	"vd": "string"
-   }
+    "bt": 0.0,
+    "bu": "string",
+    "bver": 0
+  }, {
+    "n": "string",
+    "t": 0.0,
+    "u": "string",
+    "v": 0.0,
+    "vs": "string",
+    "vb": false,
+    "vd": "string"
+  }
 ]
 ```
 
