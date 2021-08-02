@@ -236,10 +236,10 @@ public class CoreCommonConstants {
     public static final String CERTIFICATE_FORMAT = "X.509";
 
 	// Translator-Fiware
-    public static final String FIWARE_SERVER_HOST = "fiware.server.host";
-    public static final String $FIWARE_SERVER_HOST = "${" + FIWARE_SERVER_HOST + ":}";
-    public static final String FIWARE_SERVER_PORT = "fiware.server.port";
-    public static final String $FIWARE_SERVER_PORT = "${" + FIWARE_SERVER_PORT + ":0}";
+	public static final String FIWARE_SERVER_HOST = "fiware.server.host";
+	public static final String $FIWARE_SERVER_HOST = "${" + FIWARE_SERVER_HOST + ":}";
+	public static final String FIWARE_SERVER_PORT = "fiware.server.port";
+	public static final String $FIWARE_SERVER_PORT = "${" + FIWARE_SERVER_PORT + ":0}";
 
 	// MQTT 
 	public static final String MQTT_BROKER_ENABLED = "mqtt.broker.enabled";
