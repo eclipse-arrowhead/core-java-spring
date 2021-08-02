@@ -4,6 +4,7 @@ import eu.arrowhead.core.plantdescriptionengine.utils.Metadata;
 import se.arkalix.codec.json.JsonObject;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class MonitorInfo {
     public final JsonObject systemData;
@@ -21,19 +22,19 @@ public class MonitorInfo {
         final JsonObject systemData,
         final String inventoryId
     ) {
+        this.systemName = Objects.requireNonNull(systemName);
+        this.serviceDefinition = Objects.requireNonNull(serviceDefinition);
+        this.serviceMetadata = Objects.requireNonNull(serviceMetadata);
+        this.systemMetadata = Objects.requireNonNull(systemMetadata);
         this.systemData = systemData;
-        this.serviceDefinition = serviceDefinition;
         this.inventoryId = inventoryId;
-        this.systemName = systemName;
-        this.serviceMetadata = serviceMetadata;
-        this.systemMetadata = systemMetadata;
     }
 
     private boolean matchesSystemMetadata(final Map<String, String> metadata) {
         if (metadata == null || metadata.isEmpty()) {
             return true;
         }
-        if (systemMetadata == null || systemMetadata.isEmpty()) {
+        if (systemMetadata.isEmpty()) {
             return false;
         }
         return Metadata.isSubset(metadata, systemMetadata);

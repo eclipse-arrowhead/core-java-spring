@@ -37,6 +37,7 @@ import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 
 @Service
 public class DataManagerDBService {
+	
 	//=================================================================================================
 	// members
 
@@ -64,13 +65,12 @@ public class DataManagerDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	private Connection getConnection() throws SQLException {
-	  return DriverManager.getConnection(url, user, password);
+		return DriverManager.getConnection(url, user, password);
 	}
-
 
 	//-------------------------------------------------------------------------------------------------
 	private void closeConnection(final Connection conn) throws SQLException {
-	  conn.close();
+		conn.close();
 	}
 
 	//-------------------------------------------------------------------------------------------------

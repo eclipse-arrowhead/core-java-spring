@@ -222,32 +222,31 @@ public class OrchestratorClient implements PlantDescriptionUpdateListener {
      * @param old     The Plant Description entry as it was before the update.
      */
     @Override
-    public void onPlantDescriptionUpdated(final PlantDescriptionEntry updated, final PlantDescriptionEntry old) {
+    public Future<?> onPlantDescriptionUpdated(final PlantDescriptionEntry updated, final PlantDescriptionEntry old) {
         Objects.requireNonNull(updated, "Expected updated entry.");
 
         final boolean wasActive = old != null && old.active();
         final Future<Void> deleteRulesTask = wasActive ? deleteRules(updated.id()) : Future.done();
 
-        deleteRulesTask
+        return deleteRulesTask
             .flatMap(deletionResult -> {
                 final boolean activeConnectionsExist = !pdTracker.getActiveConnections().isEmpty();
                 final boolean shouldPostRules = updated.active() && activeConnectionsExist;
                 return shouldPostRules ? postRules() : Future.success(emptyRuleList());
             })
-            .ifSuccess(createdRules -> {
+            .flatMap(createdRules -> {
                 if (updated.active()) {
-                    ruleStore.writeRules(updated.id(), createdRules.getIds());
-                    logEntryActivated(updated, createdRules);
-                }
-
-                if (!updated.active() && wasActive) {
+                    try {
+                        ruleStore.writeRules(updated.id(), createdRules.getIds());
+                        logEntryActivated(updated, createdRules);
+                    } catch (RuleStoreException e) {
+                        return Future.failure(e);
+                    }
+                } else if (wasActive) {
                     logger.info("Deactivated Plant Description '" + updated.plantDescription() + "'");
                 }
-            })
-            .onFailure(throwable -> logger.error(
-                "Encountered an error while handling the new Plant Description '" + updated.plantDescription() + "'",
-                throwable)
-            );
+                return Future.done();
+            });
     }
 
     /**
@@ -256,9 +255,9 @@ public class OrchestratorClient implements PlantDescriptionUpdateListener {
      * @param entry The added entry.
      */
     @Override
-    public void onPlantDescriptionAdded(final PlantDescriptionEntry entry) {
+    public Future<?> onPlantDescriptionAdded(final PlantDescriptionEntry entry) {
         Objects.requireNonNull(entry, "Expected entry.");
-        onPlantDescriptionUpdated(entry, null);
+        return onPlantDescriptionUpdated(entry, null);
     }
 
     /**
@@ -267,19 +266,14 @@ public class OrchestratorClient implements PlantDescriptionUpdateListener {
      * @param entry The entry that has been removed.
      */
     @Override
-    public void onPlantDescriptionRemoved(final PlantDescriptionEntry entry) {
+    public Future<Void> onPlantDescriptionRemoved(final PlantDescriptionEntry entry) {
         Objects.requireNonNull(entry, "Expected entry.");
 
         if (!entry.active()) {
-            return;
+            return Future.done();
         }
 
-        deleteRules(entry.id())
-            .ifSuccess(result -> logger.info("Deleted all Orchestrator rules belonging to Plant Description Entry '"
-                + entry.plantDescription() + "'"))
-            .onFailure(throwable -> logger.error(
-                "Encountered an error while attempting to delete Plant Description '" + entry.plantDescription() + "'",
-                throwable));
+        return deleteRules(entry.id());
     }
 
 }

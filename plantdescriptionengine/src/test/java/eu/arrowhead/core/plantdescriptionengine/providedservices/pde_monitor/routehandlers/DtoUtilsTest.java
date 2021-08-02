@@ -30,6 +30,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class DtoUtilsTest {
 
@@ -104,7 +105,7 @@ public class DtoUtilsTest {
     }
 
     @Test
-    public void shouldPlaceMonitorDataOnPortLevel() throws PdStoreException {
+    public void shouldPlaceMonitorDataOnPortLevel() {
         final Map<String, String> serviceMetadata = Map.of("a", "b");
         final List<PortDto> ports = List.of(
             new PortDto.Builder()
@@ -140,24 +141,26 @@ public class DtoUtilsTest {
 
         monitorInfoTracker.putInventoryId(ServiceRecord, inventoryId);
         monitorInfoTracker.putSystemData(ServiceRecord, systemData);
-        pdTracker.put(entry);
+        pdTracker.put(entry)
+            .ifSuccess(result -> {
+                final MonitorPlantDescriptionEntry extendedEntry = DtoUtils.extend(entry, monitorInfoTracker, pdTracker);
+                final SystemEntry extendedSystem = extendedEntry.systems().get(0);
 
-        final MonitorPlantDescriptionEntry extendedEntry = DtoUtils.extend(entry, monitorInfoTracker, pdTracker);
-        final SystemEntry extendedSystem = extendedEntry.systems().get(0);
+                final PortEntry monitorablePort = extendedSystem.ports().get(0);
+                final PortEntry extendedPortA = extendedSystem.ports().get(1);
+                final PortEntry extendedPortB = extendedSystem.ports().get(2);
+                final PortEntry extendedPortC = extendedSystem.ports().get(3);
 
-        final PortEntry monitorablePort = extendedSystem.ports().get(0);
-        final PortEntry extendedPortA = extendedSystem.ports().get(1);
-        final PortEntry extendedPortB = extendedSystem.ports().get(2);
-        final PortEntry extendedPortC = extendedSystem.ports().get(3);
-
-        assertTrue(hasNoMonitorInfo(monitorablePort));
-        assertTrue(hasNoMonitorInfo(extendedPortA));
-        assertTrue(hasNoMonitorInfo(extendedPortB));
-        assertTrue(hasMonitorInfo(extendedPortC, inventoryId, systemData));
+                assertTrue(hasNoMonitorInfo(monitorablePort));
+                assertTrue(hasNoMonitorInfo(extendedPortA));
+                assertTrue(hasNoMonitorInfo(extendedPortB));
+                assertTrue(hasMonitorInfo(extendedPortC, inventoryId, systemData));
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldNotPlaceMonitorInfoOnMonitorablePort() throws PdStoreException {
+    public void shouldNotPlaceMonitorInfoOnMonitorablePort() {
         final Map<String, String> serviceMetadata = Map.of("a", "b");
         final List<PortDto> ports = List.of(
             new PortDto.Builder()
@@ -174,17 +177,19 @@ public class DtoUtilsTest {
 
         monitorInfoTracker.putInventoryId(ServiceRecord, inventoryId);
         monitorInfoTracker.putSystemData(ServiceRecord, systemData);
-        pdTracker.put(entry);
+        pdTracker.put(entry)
+            .ifSuccess(result -> {
+                final MonitorPlantDescriptionEntry extendedEntry = DtoUtils.extend(entry, monitorInfoTracker, pdTracker);
+                final SystemEntry extendedSystem = extendedEntry.systems().get(0);
+                final PortEntry monitorablePort = extendedSystem.ports().get(0);
 
-        final MonitorPlantDescriptionEntry extendedEntry = DtoUtils.extend(entry, monitorInfoTracker, pdTracker);
-        final SystemEntry extendedSystem = extendedEntry.systems().get(0);
-        final PortEntry monitorablePort = extendedSystem.ports().get(0);
-
-        assertTrue(hasNoMonitorInfo(monitorablePort));
+                assertTrue(hasNoMonitorInfo(monitorablePort));
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldPlaceMonitorDataOnSystemLevel() throws PdStoreException {
+    public void shouldPlaceMonitorDataOnSystemLevel() {
 
         final Map<String, String> systemMetadata = Map.of("x", "0", "y", "1", "z", "2");
         final Map<String, String> serviceMetadata = Map.of("foo", "bar");
@@ -214,21 +219,23 @@ public class DtoUtilsTest {
 
         monitorInfoTracker.putInventoryId(ServiceRecord, inventoryId);
         monitorInfoTracker.putSystemData(ServiceRecord, systemData);
-        pdTracker.put(entry);
+        pdTracker.put(entry)
+            .ifSuccess(result -> {
+                final MonitorPlantDescriptionEntry extendedEntry = DtoUtils.extend(entry, monitorInfoTracker, pdTracker);
+                final SystemEntry extendedSystem = extendedEntry.systems().get(0);
 
-        final MonitorPlantDescriptionEntry extendedEntry = DtoUtils.extend(entry, monitorInfoTracker, pdTracker);
-        final SystemEntry extendedSystem = extendedEntry.systems().get(0);
+                final PortEntry extendedPortA = extendedSystem.ports().get(0);
+                final PortEntry extendedPortB = extendedSystem.ports().get(1);
 
-        final PortEntry extendedPortA = extendedSystem.ports().get(0);
-        final PortEntry extendedPortB = extendedSystem.ports().get(1);
-
-        assertTrue(hasNoMonitorInfo(extendedPortA));
-        assertTrue(hasNoMonitorInfo(extendedPortB));
-        assertTrue(hasMonitorInfo(extendedSystem, inventoryId, systemData));
+                assertTrue(hasNoMonitorInfo(extendedPortA));
+                assertTrue(hasNoMonitorInfo(extendedPortB));
+                assertTrue(hasMonitorInfo(extendedSystem, inventoryId, systemData));
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldExtendWithoutMonitorData() throws PdStoreException {
+    public void shouldExtendWithoutMonitorData() {
         final PortDto port = new PortDto.Builder()
             .portName("Port-A")
             .serviceInterface(httpSecureJson)
@@ -237,15 +244,17 @@ public class DtoUtilsTest {
         final PdeSystemDto system = getSystemWithPorts(List.of(port));
         final PlantDescriptionEntryDto entry = getEntryWithSystem(system);
 
-        pdTracker.put(entry);
+        pdTracker.put(entry)
+            .ifSuccess(result -> {
+                final MonitorPlantDescriptionEntryDto extendedEntry = DtoUtils.extend(entry, monitorInfoTracker, pdTracker);
+                final SystemEntry extendedSystem = extendedEntry.systems().get(0);
+                final PortEntry extendedPort = extendedSystem.ports().get(0);
 
-        final MonitorPlantDescriptionEntryDto extendedEntry = DtoUtils.extend(entry, monitorInfoTracker, pdTracker);
-        final SystemEntry extendedSystem = extendedEntry.systems().get(0);
-        final PortEntry extendedPort = extendedSystem.ports().get(0);
-
-        assertTrue(extendedPort.inventoryId().isEmpty());
-        assertTrue(extendedPort.systemData().isEmpty());
-        assertEquals(httpSecureJson, extendedPort.serviceInterface().orElse(null));
+                assertTrue(extendedPort.inventoryId().isEmpty());
+                assertTrue(extendedPort.systemData().isEmpty());
+                assertEquals(httpSecureJson, extendedPort.serviceInterface().orElse(null));
+            })
+            .onFailure(e -> fail());
     }
 
     /**
@@ -254,7 +263,7 @@ public class DtoUtilsTest {
      * allowed. This is enforced by the {@link eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.PlantDescriptionValidator}.
      */
     @Test
-    public void shouldNotAddMonitorDataToConsumerPort() throws PdStoreException {
+    public void shouldNotAddMonitorDataToConsumerPort() {
         final Map<String, String> serviceMetadata = Map.of("a", "b");
         final PortDto port = new PortDto.Builder()
             .metadata(serviceMetadata)
@@ -270,13 +279,15 @@ public class DtoUtilsTest {
 
         monitorInfoTracker.putInventoryId(ServiceRecord, inventoryId);
         monitorInfoTracker.putSystemData(ServiceRecord, systemData);
-        pdTracker.put(entry);
+        pdTracker.put(entry)
+            .ifSuccess(result -> {
+                final MonitorPlantDescriptionEntryDto extendedEntry = DtoUtils.extend(entry, monitorInfoTracker, pdTracker);
+                final SystemEntry extendedSystem = extendedEntry.systems().get(0);
+                final PortEntry extendedPortA = extendedSystem.ports().get(0);
 
-        final MonitorPlantDescriptionEntryDto extendedEntry = DtoUtils.extend(entry, monitorInfoTracker, pdTracker);
-        final SystemEntry extendedSystem = extendedEntry.systems().get(0);
-        final PortEntry extendedPortA = extendedSystem.ports().get(0);
-
-        assertTrue(hasNoMonitorInfo(extendedPortA));
+                assertTrue(hasNoMonitorInfo(extendedPortA));
+            })
+            .onFailure(e -> fail());
     }
 
 }

@@ -8,6 +8,8 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Pl
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.PlantDescriptionEntryListDto;
 import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Port;
+import se.arkalix.util.concurrent.Future;
+import se.arkalix.util.concurrent.Futures;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * Object used to keep track of Plant Description entries. It keeps a reference
@@ -38,7 +42,8 @@ public class PlantDescriptionTracker {
     // Integer for storing the next plant description entry ID to be used:
     private final AtomicInteger nextId = new AtomicInteger();
 
-    private final Object lock = new Object();
+    private final Semaphore semaphore = new Semaphore(1);
+
 
     /**
      * Class constructor.
@@ -49,10 +54,12 @@ public class PlantDescriptionTracker {
     public PlantDescriptionTracker(final PdStore backingStore) throws PdStoreException {
         Objects.requireNonNull(backingStore, "Expected backing store");
         this.backingStore = backingStore;
+        readEntriesFromBackingStore();
+    }
 
-        // Read entries from non-volatile storage and
-        // calculate the next free Plant Description Entry ID:
+    private void readEntriesFromBackingStore() throws PdStoreException {
         int maxId = -1;
+        entries.clear();
         for (final PlantDescriptionEntryDto entry : backingStore.readEntries()) {
             maxId = Math.max(maxId, entry.id());
             entries.put(entry.id(), entry);
@@ -76,30 +83,23 @@ public class PlantDescriptionTracker {
      * {@code PlantDescriptionUpdateListener} are notified.
      *
      * @param entry Entry to store in the map.
-     * @throws PdStoreException If the entry is not successfully stored in
-     *                          permanent storage. In this case, the entry will
-     *                          not be stored in memory either, and no listeners
-     *                          will be notified.
      */
-    public void put(final PlantDescriptionEntryDto entry) throws PdStoreException {
+    public Future<?> put(final PlantDescriptionEntryDto entry) {
         Objects.requireNonNull(entry, "Expected entry.");
 
-        final PlantDescriptionEntry previouslyActiveEntry;
-        final boolean anotherEntryWasActive;
-        final boolean isNew;
-        final PlantDescriptionEntry oldEntry;
-        final PlantDescriptionEntryDto deactivatedEntry;
+        try {
+            semaphore.acquire();
+        } catch (InterruptedException e) {
+            return Future.failure(e);
+        }
 
-        // TODO: This synchronization is not enough: Inconsistencies can appear
-        // when the update listeners are running.
-        synchronized (lock) {
+        try {
+            final PlantDescriptionEntry previouslyActiveEntry = activeEntry();
+            final boolean anotherEntryWasActive = previouslyActiveEntry != null && previouslyActiveEntry.id() != entry.id();
+            final boolean isNew = !entries.containsKey(entry.id());
+            final PlantDescriptionEntry oldEntry = isNew ? null : entries.get(entry.id());
+            final PlantDescriptionEntryDto deactivatedEntry;
 
-            backingStore.write(entry);
-
-            previouslyActiveEntry = activeEntry();
-            anotherEntryWasActive = previouslyActiveEntry != null && previouslyActiveEntry.id() != entry.id();
-            isNew = !entries.containsKey(entry.id());
-            oldEntry = isNew ? null : entries.get(entry.id());
             entries.put(entry.id(), entry);
 
             if (entry.active() && anotherEntryWasActive) {
@@ -109,20 +109,48 @@ public class PlantDescriptionTracker {
             } else {
                 deactivatedEntry = null;
             }
-        }
 
-        if (deactivatedEntry != null) {
-            for (final PlantDescriptionUpdateListener listener : listeners) {
-                listener.onPlantDescriptionUpdated(deactivatedEntry, previouslyActiveEntry);
-            }
-        }
+            Future<?> informListenersOfDeactivation = (deactivatedEntry == null)
+                ? Future.done()
+                : runOnUpdateListeners(deactivatedEntry, previouslyActiveEntry);
 
-        for (final PlantDescriptionUpdateListener listener : listeners) {
-            if (isNew) {
-                listener.onPlantDescriptionAdded(entry);
-            } else {
-                listener.onPlantDescriptionUpdated(entry, oldEntry);
-            }
+            return informListenersOfDeactivation
+                .flatMap(result -> {
+                    Future<?> informListenersOfUpdate = (isNew)
+                        ? runOnAddedListeners(entry)
+                        : runOnUpdateListeners(entry, oldEntry);
+                    return informListenersOfUpdate;
+                })
+                .mapFault(Throwable.class, e -> {
+                    // Something went wrong, restore to previous state:
+                    readEntriesFromBackingStore();
+                    return e;
+                })
+                .map(result -> {
+                    backingStore.write(entry);
+                    return null;
+                })
+                .always(result -> tryReleaseSemaphore());
+
+        } catch (Exception e) {
+            return Future.failure(e);
+        } finally {
+            tryReleaseSemaphore();
+        }
+    }
+
+    private Future<Void> tryAcquireSemaphore() {
+        try {
+            semaphore.acquire();
+            return Future.done();
+        } catch (InterruptedException e) {
+            return Future.failure(e);
+        }
+    }
+
+    private void tryReleaseSemaphore() {
+        if (semaphore.availablePermits() == 0) {
+            semaphore.release();
         }
     }
 
@@ -135,19 +163,42 @@ public class PlantDescriptionTracker {
      * memory and from the backing store.
      *
      * @param id ID of the entry to remove.
-     * @throws PdStoreException If the entry is not successfully removed from
-     *                          permanent storage. In this case, the entry will
-     *                          not be stored in memory either, and no listeners
-     *                          will be notified.
+     * @return A {@code Future} that will complete when the entry is removed.
      */
-    public void remove(final int id) throws PdStoreException {
-        backingStore.remove(id);
-        final PlantDescriptionEntry entry = entries.remove(id);
+    public Future<?> remove(final int id) {
+        return tryAcquireSemaphore()
+            .flatMap(result -> {
+                final PlantDescriptionEntry entry = entries.remove(id);
+                return runOnRemoveListeners(entry);
+            })
+            .flatMapFault(Throwable.class, e -> {
+                // Something went wrong, restore to previous state:
+                readEntriesFromBackingStore();
+                return Future.failure(e);
+            })
+            .flatMap(result -> {
+                backingStore.remove(id);
+                return Future.done();
+            })
+            .always(result -> semaphore.release());
+    }
 
-        // Notify listeners:
-        for (final PlantDescriptionUpdateListener listener : listeners) {
-            listener.onPlantDescriptionRemoved(entry);
-        }
+    private Future<?> runOnRemoveListeners(final PlantDescriptionEntry entry) {
+        return Futures.serialize(listeners.stream()
+            .map(listener -> listener.onPlantDescriptionRemoved(entry))
+            .collect(Collectors.toList()));
+    }
+
+    private Future<?> runOnUpdateListeners(final PlantDescriptionEntry newState, final PlantDescriptionEntry oldState) {
+        return Futures.serialize(listeners.stream()
+            .map(listener -> listener.onPlantDescriptionUpdated(newState, oldState))
+            .collect(Collectors.toList()));
+    }
+
+    private Future<?> runOnAddedListeners(final PlantDescriptionEntry entry) {
+        return Futures.serialize(listeners.stream()
+            .map(listener -> listener.onPlantDescriptionAdded(entry))
+            .collect(Collectors.toList()));
     }
 
     /**

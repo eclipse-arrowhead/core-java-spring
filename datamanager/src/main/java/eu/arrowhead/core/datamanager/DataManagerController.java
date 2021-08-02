@@ -5,11 +5,11 @@
  * terms of the Eclipse Public License 2.0 which is available at
  * http://www.eclipse.org/legal/epl-2.0.
  *
- * SPDX-License-Identifier: EPL-2.0 
+ * SPDX-License-Identifier: EPL-2.0
  *
- * Contributors: 
+ * Contributors:
  *   {Lulea University of Technology} - implementation
- *   Arrowhead Consortia - conceptualization 
+ *   Arrowhead Consortia - conceptualization
  ********************************************************************************/
 package eu.arrowhead.core.datamanager;
 
@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,10 +44,10 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.DataManagerServicesResponseDTO;
 import eu.arrowhead.common.dto.shared.DataManagerSystemsResponseDTO;
 import eu.arrowhead.common.dto.shared.SenML;
-import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
+import eu.arrowhead.core.datamanager.service.DataManagerDriver;
 import eu.arrowhead.core.datamanager.service.HistorianService;
 import eu.arrowhead.core.datamanager.service.ProxyElement;
 import eu.arrowhead.core.datamanager.service.ProxyService;
@@ -83,14 +82,17 @@ public class DataManagerController {
 	private HistorianService historianService;
 
 	@Autowired
+	private DataManagerDriver dataManagerDriver;
+
+	@Autowired
 	private CommonNamePartVerifier cnVerifier;
-	
+
 	@Value(CoreCommonConstants.$USE_STRICT_SERVICE_DEFINITION_VERIFIER_WD)
 	private boolean useStrictServiceDefinitionVerifier;
 	
 	//=================================================================================================
 	// methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses (value = {
@@ -139,7 +141,6 @@ public class DataManagerController {
 	    if (!cnVerifier.isValid(systemName)) {
 	    	throw new InvalidParameterException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN);
 	    }
-
 		final DataManagerServicesResponseDTO ret = new DataManagerServicesResponseDTO();
 		final ArrayList<String> services = historianService.getServicesFromSystem(systemName);
 		ret.setServices(services);
@@ -148,7 +149,7 @@ public class DataManagerController {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Interface to get sensor data from a service", response = SenML.class, responseContainer="Vector", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiOperation(value = "Interface to get data from a service", response = SenML.class, responseContainer="Vector", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CoreCommonConstants.SWAGGER_HTTP_400_MESSAGE),
@@ -240,7 +241,7 @@ public class DataManagerController {
 
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Interface to put sensor data from a service", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiOperation(value = "Interface to put data from a service", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses (value = {
 		@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
 		@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CoreCommonConstants.SWAGGER_HTTP_400_MESSAGE),
@@ -264,7 +265,7 @@ public class DataManagerController {
 	    	throw new InvalidParameterException(SERVICE_DEFINITION_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN);
 	    }
 		
-		validateSenMLMessage(systemName, serviceName, message);
+		dataManagerDriver.validateSenMLMessage(systemName, serviceName, message);
 
 		historianService.createEndpoint(systemName, serviceName);
 
@@ -273,7 +274,7 @@ public class DataManagerController {
 			head.setBt((double)System.currentTimeMillis() / 1000);
 		}
 
-		validateSenMLContent(message);
+		dataManagerDriver.validateSenMLContent(message);
 
 		final boolean statusCode = historianService.updateEndpoint(systemName, serviceName, message);
 		if (!statusCode) {
@@ -290,7 +291,7 @@ public class DataManagerController {
 	})
 	@GetMapping(value= CommonConstants.OP_DATAMANAGER_PROXY, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public DataManagerSystemsResponseDTO proxyGet() {
-		logger.debug("proxyGet ...");
+		logger.debug("proxyGet");
 
 		final DataManagerSystemsResponseDTO ret = new DataManagerSystemsResponseDTO();
 
@@ -383,14 +384,14 @@ public class DataManagerController {
         	throw new InvalidParameterException(SERVICE_DEFINITION_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_PROXY);
         }
 
-		validateSenMLMessage(systemName, serviceName, message);
+		dataManagerDriver.validateSenMLMessage(systemName, serviceName, message);
 
 		final SenML head = message.firstElement();
 		if(head.getBt() == null) {
 			head.setBt((double)System.currentTimeMillis() / 1000);
 		}
 
-		validateSenMLContent(message);
+		dataManagerDriver.validateSenMLContent(message);
 
 		final ProxyElement pe = proxyService.getEndpointFromService(systemName, serviceName);
 		if (pe == null) {
@@ -404,84 +405,4 @@ public class DataManagerController {
 			proxyService.updateEndpointFromService(systemName, serviceName, message);
 		}
 	}
-
-	//=================================================================================================
-	// assistant methods
-	
-	//-------------------------------------------------------------------------------------------------
-	private void validateSenMLMessage(final String systemName, final String serviceName, final Vector<SenML> message) {
-		try {
-	    	Assert.notNull(systemName, "systemName is null.");
-	    	Assert.notNull(serviceName, "serviceName is null.");
-	    	Assert.notNull(message, "message is null.");
-	    	Assert.isTrue(!message.isEmpty(), "message is empty");
-	
-	    	final SenML head = (SenML) message.get(0);
-			Assert.notNull(head.getBn(), "bn is null.");
-		} catch (final Exception e) {
-			throw new BadPayloadException("Missing mandatory field: " + e.getMessage());
-		}
-	}
-
-	  //-------------------------------------------------------------------------------------------------
-	  public void validateSenMLContent(final Vector<SenML> message) {
-		  try {
-	
-	    	/* check that bn, bt and bu are included only once, and in the first object */
-			Iterator<SenML> entry = message.iterator();
-			int bnc=0, btc=0, buc=0;
-			while (entry.hasNext()) {
-		  		final SenML element = entry.next();
-		  		if (element.getBn() != null) {
-		    		bnc++;
-			  	}
-		  		if (element.getBt() != null) {
-		    		btc++;
-		  		}
-		  		if (element.getBu() != null) {
-		    		buc++;
-		  		}
-			}
-	
-			/* bu can only exist once. bt can only exist one, bu can exist 0 or 1 times */
-			Assert.isTrue(!(bnc != 1 || btc != 1 || buc > 1), "invalid bn/bt/bu");
-		
-			/* bn must exist in [0] */
-			SenML element = (SenML)message.get(0);
-			Assert.notNull(element.getBn(), "bn is missing");
-		
-			/* bt must exist in [0] */
-			Assert.notNull(element.getBt(), "bt is missing");
-		
-			/* bt cannot be negative */
-			Assert.isTrue(element.getBt() >= 0.0, "a negative base time is not allowed");
-		
-			/* bu must exist in [0], if it exists */
-			Assert.isTrue(!(element.getBu() == null && buc == 1), "invalid use of bu");
-		
-			/* check that v, bv, sv, etc are included only once per object */
-			entry = message.iterator();
-			while (entry.hasNext()) {
-		  		element = (SenML)entry.next();
-		
-		  		int valueCount = 0;
-		  		if (element.getV() != null) {
-		    		valueCount++;
-		  		}
-		  		if (element.getVs() != null) {
-		    		valueCount++;
-		  		}
-		  		if (element.getVd() != null) {
-		    		valueCount++;
-		  		}
-		  		if (element.getVb() != null) {
-		    		valueCount++;
-				}
-		
-		  		Assert.isTrue(!(valueCount > 1 && element.getS() == null), "too many value tags");
-			}
-		} catch (final Exception e) {
-			throw new BadPayloadException("Illegal request: " + e.getMessage());
-		}
-	  }	
 }

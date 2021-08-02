@@ -243,7 +243,7 @@ public final class PdeMain {
         return trustStore;
     }
 
-    private static Properties loadAppProps() {
+    static Properties loadAppProps() {
         final Properties appProps = new Properties();
 
         try (InputStream in = getResource(PropertyNames.FILENAME)) {
@@ -259,7 +259,8 @@ public final class PdeMain {
         return appProps;
     }
 
-    private static PlantDescriptionTracker loadPlantDescriptionTracker(Properties appProps) {
+    static PlantDescriptionTracker loadPlantDescriptionTracker(Properties appProps) {
+        Objects.requireNonNull(appProps, "Expected application properties.");
 
         final int maxPdBytes = Integer.parseInt(getProp(appProps, PropertyNames.PD_MAX_SIZE));
         final SqlPdStore pdStore = new SqlPdStore(maxPdBytes);

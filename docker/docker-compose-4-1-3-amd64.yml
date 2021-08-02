@@ -14,7 +14,7 @@ services:
 
   serviceregistry:
     container_name: serviceregistry
-    image: svetlint/serviceregistry:latest
+    image: svetlint/serviceregistry:4.1.3
     depends_on:
       - mysql
     volumes:
@@ -26,7 +26,7 @@ services:
 
   authorization:
     container_name: authorization
-    image: svetlint/authorization:latest
+    image: svetlint/authorization:4.1.3
     depends_on:
       - mysql
     volumes:
@@ -36,7 +36,7 @@ services:
 
   orchestrator:
     container_name: orchestrator
-    image: svetlint/orchestrator:latest
+    image: svetlint/orchestrator:4.1.3
     depends_on:
       - mysql
     volumes:
@@ -46,7 +46,7 @@ services:
 
   eventhandler:
     container_name: eventhandler
-    image: svetlint/eventhandler:latest
+    image: svetlint/eventhandler:4.1.3
     depends_on:
       - mysql
     volumes:
@@ -56,7 +56,7 @@ services:
   
   gatekeeper:
     container_name: gatekeeper
-    image: svetlint/gatekeeper:latest
+    image: svetlint/gatekeeper:4.1.3
     depends_on:
       - mysql
     volumes:
@@ -66,23 +66,13 @@ services:
 
   gateway:
     container_name: gateway
-    image: svetlint/gateway:latest
+    image: svetlint/gateway:4.1.3
     depends_on:
       - mysql
     volumes:
       - ./core_system_config/gateway.properties:/gateway/application.properties
     ports:
       - 8453:8453
-
-  certificateauthority:
-    container_name: certificateauthority
-    image: svetlint/certificateauthority:latest
-    depends_on:
-      - mysql
-    volumes:
-      - ./core_system_config/certificateauthority.properties:/certificateauthority/application.properties
-    ports:
-      - 8448:8448 
 
 volumes:
   mysql:

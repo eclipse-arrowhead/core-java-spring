@@ -10,6 +10,10 @@ pkill -f eventhandler
 pkill -f datamanager
 pkill -f gateway
 pkill -f certificate-authority
+pkill -f plantdescriptionengine
+pkill -f onboarding
+pkill -f systemregistry
+pkill -f deviceregistry
 sleep 5s
 pkill -f serviceregistry
 sleep 2s
@@ -25,6 +29,10 @@ then
   kill -KILL $(ps aux | grep 'datamanager' | awk '{print $2}')
   kill -KILL $(ps aux | grep 'gateway' | awk '{print $2}')
   kill -KILL $(ps aux | grep 'certificate-authority' | awk '{print $2}')
+  kill -KILL $(ps aux | grep 'plantdescriptionengine' | awk '{print $2}')
+  kill -KILL $(ps aux | grep 'onboarding' | awk '{print $2}')
+  kill -KILL $(ps aux | grep 'systemregistry' | awk '{print $2}')
+  kill -KILL $(ps aux | grep 'deviceregistry' | awk '{print $2}')
   kill -KILL $(ps aux | grep 'serviceregistry' | awk '{print $2}')
   echo Core systems forcefully killed
 else
