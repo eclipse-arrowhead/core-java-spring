@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.util.Assert;
 
-public class EdgeDestroyerStepGraphNormalizer {
+public class EdgeDestroyerStepGraphNormalizer implements StepGraphNormalizer {
 
 	//=================================================================================================
 	// methods
@@ -19,8 +19,10 @@ public class EdgeDestroyerStepGraphNormalizer {
 			return graph;
 		}
 		
+		final StepGraph workingGraph = graph.deepCopy();
+		
 		final List<Pair<Node,Node>> removables = new ArrayList<>();
-		for (final Node node : graph.getSteps()) {
+		for (final Node node : workingGraph.getSteps()) {
 			if (!node.getPrevNodes().isEmpty()) {
 				
 				List<List<Node>> routes = new ArrayList<>();
@@ -32,7 +34,7 @@ public class EdgeDestroyerStepGraphNormalizer {
 			}
 		}
 		
-		return cleanGraph(graph, removables);
+		return cleanGraph(workingGraph, removables);
 	}
 	
 	//=================================================================================================

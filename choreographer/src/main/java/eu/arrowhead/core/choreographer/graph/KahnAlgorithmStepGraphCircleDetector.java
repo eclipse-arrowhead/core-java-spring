@@ -7,7 +7,7 @@ import java.util.Set;
 
 import org.springframework.util.Assert;
 
-public class KahnAlgorithmStepGraphCircleDetector {
+public class KahnAlgorithmStepGraphCircleDetector implements StepGraphCircleDetector {
 
 	//=================================================================================================
 	// methods

@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-public class GraphExamples {
+public class StepGraphExamples {
 
 	private static List<StepGraph> nonCirculars = new ArrayList<>();
 	private static List<StepGraph> circulars = new ArrayList<>();
@@ -50,7 +50,6 @@ public class GraphExamples {
 		
 		StepGraph graph = new StepGraph();
 		graph.getSteps().addAll(Set.of(n1, n2, n3, n4));
-		graph.getFirstSteps().add(n1);
 		nonCirculars.add(graph);
 		
 		//------------------------------
@@ -67,7 +66,6 @@ public class GraphExamples {
 		
 		graph = new StepGraph();
 		graph.getSteps().addAll(Set.of(n1, n2, n3, n4));
-		graph.getFirstSteps().addAll(Set.of(n1, n2));
 		nonCirculars.add(graph);
 		
 		//------------------------------
@@ -107,22 +105,19 @@ public class GraphExamples {
 		
 		graph = new StepGraph();
 		graph.getSteps().addAll(Set.of(n1, n2, n3, n4, n5, n6, n7, n8, n9));
-		graph.getFirstSteps().add(n1);
 		nonCirculars.add(graph);		
-		
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	private static void initCirculars() {
 		//------------------------------
-		// self neighbour node
+		// self neighbor node
 		Node n1 = new Node("n1");
 		n1.getNextNodes().add(n1);
 		n1.getPrevNodes().add(n1);
 		
 		StepGraph graph = new StepGraph();
 		graph.getSteps().add(n1);
-		graph.getFirstSteps().add(n1);
 		circulars.add(graph);
 		
 		//------------------------------
@@ -136,7 +131,6 @@ public class GraphExamples {
 		
 		graph = new StepGraph();
 		graph.getSteps().addAll(Set.of(n1, n2));
-		graph.getFirstSteps().add(n1);
 		circulars.add(graph);
 		
 		//------------------------------
@@ -156,7 +150,6 @@ public class GraphExamples {
 		
 		graph = new StepGraph();
 		graph.getSteps().addAll(Set.of(n1, n2, n3, n4));
-		graph.getFirstSteps().add(n1);
 		circulars.add(graph);
 		
 		//------------------------------
@@ -196,7 +189,6 @@ public class GraphExamples {
 		
 		graph = new StepGraph();
 		graph.getSteps().addAll(Set.of(n1, n2, n3, n4, n5, n6, n7, n8, n9));
-		graph.getFirstSteps().add(n1);
 		circulars.add(graph);
 	}
 	
@@ -220,7 +212,6 @@ public class GraphExamples {
 		
 		StepGraph graph = new StepGraph();
 		graph.getSteps().addAll(Set.of(n1, n2, n3, n4));
-		graph.getFirstSteps().add(n1);
 		
 		n1 = new Node("n1");
 		n2 = new Node("n2");
@@ -238,7 +229,6 @@ public class GraphExamples {
 		
 		StepGraph resultGraph = new StepGraph();
 		resultGraph.getSteps().addAll(Set.of(n1, n2, n3, n4));
-		resultGraph.getFirstSteps().add(n1);
 		
 		normalizables.add(Pair.of(graph, resultGraph));
 		
@@ -264,7 +254,6 @@ public class GraphExamples {
 		n5.getPrevNodes().addAll(Set.of(n2, n4));
 		graph = new StepGraph();
 		graph.getSteps().addAll(Set.of(n1, n2, n3, n4, n5));
-		graph.getFirstSteps().add(n1);
 		
 		
 		n1 = new Node("n1");
@@ -288,7 +277,6 @@ public class GraphExamples {
 		
 		resultGraph = new StepGraph();
 		resultGraph.getSteps().addAll(Set.of(n1, n2, n3, n4, n5));
-		resultGraph.getFirstSteps().add(n1);
 		
 		normalizables.add(Pair.of(graph, resultGraph));
 		
@@ -314,7 +302,6 @@ public class GraphExamples {
 		n5.getPrevNodes().addAll(Set.of(n1, n2, n4));
 		graph = new StepGraph();
 		graph.getSteps().addAll(Set.of(n1, n2, n3, n4, n5));
-		graph.getFirstSteps().add(n1);
 		
 		n1 = new Node("n1");
 		n2 = new Node("n2");
@@ -337,7 +324,6 @@ public class GraphExamples {
 		
 		resultGraph = new StepGraph();
 		resultGraph.getSteps().addAll(Set.of(n1, n2, n3, n4, n5));
-		resultGraph.getFirstSteps().add(n1);
 		
 		normalizables.add(Pair.of(graph, resultGraph));
 		
@@ -359,7 +345,6 @@ public class GraphExamples {
 		
 		graph = new StepGraph();
 		graph.getSteps().addAll(Set.of(n1, n2, n3, n4));
-		graph.getFirstSteps().add(n1);
 		normalizables.add(Pair.of(graph, graph));
 		
 		//------------------------------
@@ -372,11 +357,10 @@ public class GraphExamples {
 		n1.getNextNodes().add(n3);
 		n2.getNextNodes().add(n4);
 		n3.getPrevNodes().add(n1);
-		n4.getPrevNodes().add(n3);
+		n4.getPrevNodes().add(n2);
 		
 		graph = new StepGraph();
 		graph.getSteps().addAll(Set.of(n1, n2, n3, n4));
-		graph.getFirstSteps().addAll(Set.of(n1, n2));
 		normalizables.add(Pair.of(graph, graph));
 	}
 }

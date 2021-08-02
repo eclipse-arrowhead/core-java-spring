@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class SystemMismatchDetectorTest {
 
@@ -82,15 +83,18 @@ public class SystemMismatchDetectorTest {
     }
 
     @Test
-    public void shouldNotReportErrors() throws PdStoreException {
+    public void shouldNotReportErrors() {
         final String systemName = "System Z";
 
-        pdTracker.put(getPdEntry(systemName));
-        systemTracker.addSystem(getSrSystem(systemName));
-        detector.run();
+        pdTracker.put(getPdEntry(systemName))
+            .ifSuccess(result -> {
+                systemTracker.addSystem(getSrSystem(systemName));
+                detector.run();
 
-        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
-        assertEquals(0, alarms.size());
+                final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
+                assertEquals(0, alarms.size());
+            })
+            .onFailure(e -> fail());
     }
 
     /**
@@ -98,7 +102,7 @@ public class SystemMismatchDetectorTest {
      * long as there is metadata available to differentiate between them.
      */
     @Test
-    public void shouldAllowSameSystemName() throws PdStoreException {
+    public void shouldAllowSameSystemName() {
 
         Map<String, String> metadataA = Map.of("x", "1");
         Map<String, String> metadataB = Map.of("y", "1");
@@ -145,27 +149,33 @@ public class SystemMismatchDetectorTest {
             .updatedAt(now.toString())
             .build();
 
-        pdTracker.put(entry);
-        systemTracker.addSystem(srSystemA);
-        systemTracker.addSystem(srSystemB);
-        detector.run();
+        pdTracker.put(entry)
+            .ifSuccess(result -> {
+                systemTracker.addSystem(srSystemA);
+                systemTracker.addSystem(srSystemB);
+                detector.run();
 
-        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
-        assertEquals(0, alarms.size());
+                final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
+                assertEquals(0, alarms.size());
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldReportNotRegistered() throws PdStoreException {
+    public void shouldReportNotRegistered() {
         detector.run();
 
         final String systemName = "systemabc";
-        pdTracker.put(getPdEntry(systemName));
-        final List<Alarm> alarms = alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_REGISTERED);
-        assertEquals(1, alarms.size());
+        pdTracker.put(getPdEntry(systemName))
+            .ifSuccess(result -> {
+                final List<Alarm> alarms = alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_REGISTERED);
+                assertEquals(1, alarms.size());
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldRaiseTwoAlarms() throws PdStoreException {
+    public void shouldRaiseTwoAlarms() {
         detector.run();
 
         final String systemIdA = "Sys-A";
@@ -198,38 +208,43 @@ public class SystemMismatchDetectorTest {
             .build();
 
         systemTracker.addSystem(srSystem);
-        pdTracker.put(entry);
+        pdTracker.put(entry)
+            .ifSuccess(result -> {
+                final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
+                assertEquals(2, alarms.size());
+                final PdeAlarmDto alarm1 = alarms.get(0);
+                final PdeAlarmDto alarm2 = alarms.get(1);
 
-        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
-        assertEquals(2, alarms.size());
-        final PdeAlarmDto alarm1 = alarms.get(0);
-        final PdeAlarmDto alarm2 = alarms.get(1);
-
-        assertEquals("System named '" + systemNameB + "' is not present in the active Plant Description.", alarm1
-            .description());
-        assertEquals("System with ID '" + systemIdA + "' cannot be found in the Service Registry.", alarm2
-            .description());
+                assertEquals("System named '" + systemNameB + "' is not present in the active Plant Description.", alarm1
+                    .description());
+                assertEquals("System with ID '" + systemIdA + "' cannot be found in the Service Registry.", alarm2
+                    .description());
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldReportSystemNotInPd() throws PdStoreException {
+    public void shouldReportSystemNotInPd() {
 
         final String systemNameA = "systemabc";
         final String systemNameB = "systemxyz";
 
         // Create a plant description that only specifies systemabc.
-        pdTracker.put(getPdEntry(systemNameA));
-        systemTracker.addSystem(getSrSystem(systemNameA));
-        systemTracker.addSystem(getSrSystem(systemNameB));
+        pdTracker.put(getPdEntry(systemNameA))
+            .ifSuccess(result -> {
+                systemTracker.addSystem(getSrSystem(systemNameA));
+                systemTracker.addSystem(getSrSystem(systemNameB));
 
-        detector.run();
+                detector.run();
 
-        final List<Alarm> alarms = alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_IN_DESCRIPTION);
-        assertEquals(1, alarms.size());
+                final List<Alarm> alarms = alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_IN_DESCRIPTION);
+                assertEquals(1, alarms.size());
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldClearWhenSystemIsRegistered() throws PdStoreException {
+    public void shouldClearWhenSystemIsRegistered() {
 
         final String systemNameA = "systemabc";
         final String systemNameB = "systemxyz";
@@ -246,22 +261,19 @@ public class SystemMismatchDetectorTest {
             .updatedAt(Instant.now())
             .build();
 
-        pdTracker.put(pdeEntry);
-        systemTracker.addSystem(getSrSystem(systemNameA));
-
-        // A is missing, an alarm is created.
-        detector.run();
-
-        assertEquals(1, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_REGISTERED).size());
-
-        // The is added, so the alarm should be cleared.
-        systemTracker.addSystem(getSrSystem(systemNameB));
-
-        assertEquals(0, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_REGISTERED).size());
+        pdTracker.put(pdeEntry)
+            .ifSuccess(result -> {
+                systemTracker.addSystem(getSrSystem(systemNameA));
+                detector.run();
+                assertEquals(1, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_REGISTERED).size());
+                systemTracker.addSystem(getSrSystem(systemNameB));
+                assertEquals(0, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_REGISTERED).size());
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldStillReportIfOneIsCleared() throws PdStoreException {
+    public void shouldStillReportIfOneIsCleared() {
 
         final String systemNameA = "systemabc";
         final String systemNameB = "systemxyz";
@@ -275,48 +287,55 @@ public class SystemMismatchDetectorTest {
             .updatedAt(Instant.now())
             .build();
 
-        pdTracker.put(pdeEntry);
-        systemTracker.addSystem(getSrSystem(systemNameA));
-        systemTracker.addSystem(getSrSystem(systemNameB));
+        pdTracker.put(pdeEntry)
+            .ifSuccess(result -> {
+                systemTracker.addSystem(getSrSystem(systemNameA));
+                systemTracker.addSystem(getSrSystem(systemNameB));
 
-        // Two systems are missing from PD, two alarms are created.
-        detector.run();
+                // Two systems are missing from PD, two alarms are created.
+                detector.run();
 
-        // One system is removed from the Service Registry, so one of the alarms
-        // should be cleared.
-        systemTracker.remove(systemNameB);
+                // One system is removed from the Service Registry, so one of the alarms
+                // should be cleared.
+                systemTracker.remove(systemNameB);
 
-        final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
-        assertEquals(2, alarms.size());
-        final PdeAlarmDto alarmA = alarms.get(0);
-        final PdeAlarmDto alarmB = alarms.get(1);
+                final List<PdeAlarmDto> alarms = alarmManager.getAlarms();
+                assertEquals(2, alarms.size());
+                final PdeAlarmDto alarmA = alarms.get(0);
+                final PdeAlarmDto alarmB = alarms.get(1);
 
-        assertEquals(systemNameA, alarmA.systemName().orElse(null));
-        assertTrue(alarmA.clearedAt().isEmpty());
-        assertEquals(systemNameB, alarmB.systemName().orElse(null));
-        assertTrue(alarmB.clearedAt().isPresent());
+                assertEquals(systemNameA, alarmA.systemName().orElse(null));
+                assertTrue(alarmA.clearedAt().isEmpty());
+                assertEquals(systemNameB, alarmB.systemName().orElse(null));
+                assertTrue(alarmB.clearedAt().isPresent());
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldClearWhenPdIsRemoved() throws PdStoreException {
+    public void shouldClearWhenPdIsRemoved() {
         detector.run();
 
         final String systemName = "System C";
         final PlantDescriptionEntryDto entry = getPdEntry(systemName);
-        pdTracker.put(entry);
-        assertEquals(1, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_REGISTERED).size());
-        pdTracker.remove(entry.id());
-        assertEquals(0, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_REGISTERED).size());
+        pdTracker.put(entry)
+            .flatMap(result -> {
+                assertEquals(1, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_REGISTERED).size());
+                return pdTracker.remove(entry.id());
+            })
+            .ifSuccess(result -> assertEquals(0, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_REGISTERED).size()))
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldClearWhenPdIsAdded() throws PdStoreException {
+    public void shouldClearWhenPdIsAdded() {
         detector.run();
         final String systemName = "System D";
         systemTracker.addSystem(getSrSystem(systemName));
         assertEquals(1, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_IN_DESCRIPTION).size());
-        pdTracker.put(getPdEntry(systemName));
-        assertEquals(0, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_IN_DESCRIPTION).size());
+        pdTracker.put(getPdEntry(systemName))
+            .ifSuccess(result -> assertEquals(0, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_IN_DESCRIPTION).size()))
+            .onFailure(e -> fail());
     }
 
     @Test
@@ -330,7 +349,7 @@ public class SystemMismatchDetectorTest {
     }
 
     @Test
-    public void shouldClearWhenPdIsUpdated() throws PdStoreException {
+    public void shouldClearWhenPdIsUpdated() {
 
         // The systems added in the PD and Service Registry are crafted to
         // tickle several corners of the codebase. More specifically, System C
@@ -389,29 +408,31 @@ public class SystemMismatchDetectorTest {
             .updatedAt(Instant.now())
             .build();
 
-        pdTracker.put(entryWithTwoSystems);
+        pdTracker.put(entryWithTwoSystems)
+            .ifSuccess(result -> {
+                systemTracker.addSystem(srSystemC);
+                systemTracker.addSystem(srSystemB);
+                systemTracker.addSystem(srSystemA);
 
-        systemTracker.addSystem(srSystemC);
-        systemTracker.addSystem(srSystemB);
-        systemTracker.addSystem(srSystemA);
+                detector.run();
 
-        detector.run();
+                final PlantDescriptionEntryDto entryWithThreeSystems = new PlantDescriptionEntryDto.Builder().id(1)
+                    .plantDescription("Plant Description 1A")
+                    .active(true)
+                    .systems(List.of(systemB, systemC, systemA))
+                    .createdAt(Instant.now())
+                    .updatedAt(Instant.now())
+                    .build();
 
-        final PlantDescriptionEntryDto entryWithThreeSystems = new PlantDescriptionEntryDto.Builder().id(1)
-            .plantDescription("Plant Description 1A")
-            .active(true)
-            .systems(List.of(systemB, systemC, systemA))
-            .createdAt(Instant.now())
-            .updatedAt(Instant.now())
-            .build();
-
-        assertEquals(1, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_IN_DESCRIPTION).size());
-        pdTracker.put(entryWithThreeSystems);
-        assertEquals(0, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_IN_DESCRIPTION).size());
+                assertEquals(1, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_IN_DESCRIPTION).size());
+                pdTracker.put(entryWithThreeSystems);
+                assertEquals(0, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_IN_DESCRIPTION).size());
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldClearWhenPdIsUpdatedWithMetadata() throws PdStoreException {
+    public void shouldClearWhenPdIsUpdatedWithMetadata() {
         final Instant now = Instant.now();
         final String systemNameA = "systemabc";
 
@@ -423,46 +444,48 @@ public class SystemMismatchDetectorTest {
             .updatedAt(now)
             .build();
 
-        pdTracker.put(entryWithOneSystem);
+        pdTracker.put(entryWithOneSystem)
+            .flatMap(result -> {
+                final String systemNameB = "systemxyz";
+                final SrSystemDto srSystemB = new SrSystemDto.Builder()
+                    .id(38)
+                    .systemName(systemNameB)
+                    .address("0.0.2.1")
+                    .port(5022)
+                    .authenticationInfo(null)
+                    .metadata(Map.of("a", "1", "b", "2"))
+                    .createdAt(now.toString())
+                    .updatedAt(now.toString())
+                    .build();
 
-        final String systemNameB = "systemxyz";
-        final SrSystemDto srSystemB = new SrSystemDto.Builder()
-            .id(38)
-            .systemName(systemNameB)
-            .address("0.0.2.1")
-            .port(5022)
-            .authenticationInfo(null)
-            .metadata(Map.of("a", "1", "b", "2"))
-            .createdAt(now.toString())
-            .updatedAt(now.toString())
-            .build();
+                systemTracker.addSystem(getSrSystem(systemNameA));
+                systemTracker.addSystem(srSystemB);
 
-        systemTracker.addSystem(getSrSystem(systemNameA));
-        systemTracker.addSystem(srSystemB);
+                detector.run();
 
-        detector.run();
+                final PdeSystemDto namedSystem = getSystem(systemNameA, "a");
+                final PdeSystemDto unnamedSystem = new PdeSystemDto.Builder()
+                    .systemId("b")
+                    .metadata(Map.of("b", "2")) // Subset of the SR system metadata
+                    .build();
 
-        final PdeSystemDto namedSystem = getSystem(systemNameA, "a");
-        final PdeSystemDto unnamedSystem = new PdeSystemDto.Builder()
-            .systemId("b")
-            .metadata(Map.of("b", "2")) // Subset of the SR system metadata
-            .build();
+                final PlantDescriptionEntryDto entryWithBothSystems = new PlantDescriptionEntryDto.Builder().id(1)
+                    .plantDescription("Plant Description 1A")
+                    .active(true)
+                    .systems(List.of(namedSystem, unnamedSystem))
+                    .createdAt(now)
+                    .updatedAt(now)
+                    .build();
 
-        final PlantDescriptionEntryDto entryWithBothSystems = new PlantDescriptionEntryDto.Builder().id(1)
-            .plantDescription("Plant Description 1A")
-            .active(true)
-            .systems(List.of(namedSystem, unnamedSystem))
-            .createdAt(now)
-            .updatedAt(now)
-            .build();
-
-        assertEquals(1, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_IN_DESCRIPTION).size());
-        pdTracker.put(entryWithBothSystems);
-        assertEquals(0, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_IN_DESCRIPTION).size());
+                assertEquals(1, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_IN_DESCRIPTION).size());
+                return pdTracker.put(entryWithBothSystems);
+            })
+            .ifSuccess(result -> assertEquals(0, alarmManager.getActiveAlarmData(AlarmCause.SYSTEM_NOT_IN_DESCRIPTION).size()))
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldReportWhenSystemCannotBeUniquelyIdentified() throws PdStoreException {
+    public void shouldReportWhenSystemCannotBeUniquelyIdentified() {
 
         final String systemId = "System X";
         final PdeSystemDto systemA = new PdeSystemDto.Builder()
@@ -506,16 +529,19 @@ public class SystemMismatchDetectorTest {
                 .toString())
             .build();
 
-        pdTracker.put(entry);
-        systemTracker.addSystem(srSystemA);
-        systemTracker.addSystem(srSystemB);
-        detector.run();
+        pdTracker.put(entry)
+            .ifSuccess(result -> {
+                systemTracker.addSystem(srSystemA);
+                systemTracker.addSystem(srSystemB);
+                detector.run();
 
-        assertEquals(1, alarmManager.getActiveAlarmData(AlarmCause.MULTIPLE_MATCHES).size());
+                assertEquals(1, alarmManager.getActiveAlarmData(AlarmCause.MULTIPLE_MATCHES).size());
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldClearWhenSystemBecomesUnique() throws PdStoreException {
+    public void shouldClearWhenSystemBecomesUnique() {
 
         final String systemId = "System X";
         final PdeSystemDto systemA = new PdeSystemDto.Builder()
@@ -560,13 +586,16 @@ public class SystemMismatchDetectorTest {
                 .toString())
             .build();
 
-        pdTracker.put(entry);
-        systemTracker.addSystem(srSystemA);
-        systemTracker.addSystem(srSystemB);
-        detector.run();
+        pdTracker.put(entry)
+            .ifSuccess(result -> {
+                systemTracker.addSystem(srSystemA);
+                systemTracker.addSystem(srSystemB);
+                detector.run();
 
-        assertEquals(1, alarmManager.getActiveAlarmData(AlarmCause.MULTIPLE_MATCHES).size());
-        systemTracker.remove(srSystemA.systemName(), systemAMetadata);
-        assertEquals(0, alarmManager.getActiveAlarmData(AlarmCause.MULTIPLE_MATCHES).size());
+                assertEquals(1, alarmManager.getActiveAlarmData(AlarmCause.MULTIPLE_MATCHES).size());
+                systemTracker.remove(srSystemA.systemName(), systemAMetadata);
+                assertEquals(0, alarmManager.getActiveAlarmData(AlarmCause.MULTIPLE_MATCHES).size());
+            })
+            .onFailure(e -> fail());
     }
 }

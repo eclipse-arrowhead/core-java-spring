@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.SenML;
+import eu.arrowhead.core.datamanager.service.DataManagerDriver;
 import eu.arrowhead.core.datamanager.service.HistorianService;
 import eu.arrowhead.core.datamanager.service.ProxyService;
 
@@ -54,6 +55,10 @@ public class DataManagerControllerSystemTest2 {
 
     @MockBean(name = "mockProxyService")
     private ProxyService proxyService;
+    
+    @MockBean(name = "mockDataManagerDriver")
+	private DataManagerDriver dataManagerDriver;
+
 
     private static final String DATAMANAGER_PROXY_URI  = "/datamanager/proxy";
     private static final String DATAMANAGER_HISTORIAN_URI  = "/datamanager/historian";

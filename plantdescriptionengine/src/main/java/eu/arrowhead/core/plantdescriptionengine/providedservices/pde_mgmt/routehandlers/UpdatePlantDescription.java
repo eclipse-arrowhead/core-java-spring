@@ -52,7 +52,7 @@ public class UpdatePlantDescription implements HttpRouteHandler {
         Objects.requireNonNull(response, "Expected response.");
 
         return request.bodyTo(PlantDescriptionUpdateDto::decodeJson)
-            .map(newFields -> {
+            .flatMap(newFields -> {
                 final String idString = request.pathParameter(0);
                 final int id;
 
@@ -61,18 +61,20 @@ public class UpdatePlantDescription implements HttpRouteHandler {
                 } catch (final NumberFormatException e) {
 
                     ErrorMessageDto errorMessage = ErrorMessage.of("'" + idString + "' is not a valid Plant Description Entry ID.");
-                    return response
+                    response
                         .status(HttpStatus.BAD_REQUEST)
                         .body(errorMessage, CodecType.JSON);
+                    return Future.success(response);
                 }
 
                 final PlantDescriptionEntryDto entry = pdTracker.get(id);
 
                 if (entry == null) {
                     ErrorMessageDto errorMessage = ErrorMessage.of("Plant Description with ID '" + idString + "' not found.");
-                    return response
+                    response
                         .status(HttpStatus.NOT_FOUND)
                         .body(errorMessage, CodecType.JSON);
+                    return Future.success(response);
                 }
 
                 final PlantDescriptionEntryDto updatedEntry = PlantDescriptionEntry.update(entry, newFields);
@@ -83,21 +85,20 @@ public class UpdatePlantDescription implements HttpRouteHandler {
                 entries.put(id, updatedEntry);
                 final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
                 if (validator.hasError()) {
-                    return response
+                    response
                         .status(HttpStatus.BAD_REQUEST)
                         .body(ErrorMessage.of(validator.getErrorMessage()), CodecType.JSON);
+                    return Future.success(response);
                 }
 
-                try {
-                    pdTracker.put(updatedEntry);
-                } catch (final PdStoreException e) {
-                    logger.error("Failed to write Plant Description Entry update to backing store.", e);
-                    return response.status(HttpStatus.INTERNAL_SERVER_ERROR);
-                }
-
-                return response
-                    .status(HttpStatus.OK)
-                    .body(updatedEntry, CodecType.JSON);
+                return pdTracker.put(updatedEntry)
+                    .map(result -> response
+                        .status(HttpStatus.OK)
+                        .body(updatedEntry, CodecType.JSON))
+                    .mapCatch(PdStoreException.class, e -> {
+                        logger.error("Failed to write Plant Description Entry update to backing store.", e);
+                        return response.status(HttpStatus.INTERNAL_SERVER_ERROR);
+                    });
             });
     }
 }

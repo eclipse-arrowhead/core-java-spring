@@ -10,15 +10,24 @@ public class StepGraph {
 	//=================================================================================================
 	// members
 	
-	private final Set<Node> firstSteps = new HashSet<>();
 	private final Set<Node> steps = new HashSet<>();
 
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public Set<Node> getFirstSteps() { 	return firstSteps; }
 	public Set<Node> getSteps() { return steps; }
+	
+	//-------------------------------------------------------------------------------------------------
+	public Set<Node> getFirstSteps() {
+		final Set<Node> firstSteps = new HashSet<>();
+		for (final Node node : this.getSteps()) {
+			if (node.getPrevNodes().isEmpty()) {
+				firstSteps.add(node);
+			}
+		}
+		return firstSteps;
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public StepGraph deepCopy() {
@@ -34,15 +43,9 @@ public class StepGraph {
 			for (final Node nextNode : node.getNextNodes()) {
 				copiedSteps.get(node.getName()).getNextNodes().add(copiedSteps.get(nextNode.getName()));
 			}
-		}
-
-		final Set<Node> copiedFirstSteps = new HashSet<>();
-		for (final Node node : this.getFirstSteps()) {
-			copiedFirstSteps.add(copiedSteps.get(node.getName()));
-		}
+		}		
 		
 		final StepGraph copiedGraph = new StepGraph();
-		copiedGraph.getFirstSteps().addAll(copiedFirstSteps);
 		copiedGraph.getSteps().addAll(copiedSteps.values());
 		return copiedGraph;
 	}
@@ -50,7 +53,7 @@ public class StepGraph {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "StepGraph [firstSteps=" + firstSteps + ", steps=" + steps + "]";
+		return "StepGraph [steps=" + steps + "]";
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -58,8 +61,6 @@ public class StepGraph {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((firstSteps == null) ? 0 : firstSteps.hashCode());
 		result = prime * result + ((steps == null) ? 0 : steps.hashCode());
 		return result;
 	}
@@ -78,7 +79,7 @@ public class StepGraph {
 		}
 		
 		final StepGraph other = (StepGraph) obj;
-		if (!this.steps.equals(other.steps) || !this.firstSteps.equals(other.firstSteps)) {
+		if (!this.steps.equals(other.steps)) {
 			return false;
 		}
 		

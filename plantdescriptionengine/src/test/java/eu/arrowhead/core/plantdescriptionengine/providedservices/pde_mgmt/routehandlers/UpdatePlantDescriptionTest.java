@@ -45,7 +45,7 @@ public class UpdatePlantDescriptionTest {
     }
 
     @Test
-    public void shouldReplaceExistingEntries() throws PdStoreException {
+    public void shouldReplaceExistingEntries() {
 
         final int entryId = 87;
 
@@ -59,22 +59,16 @@ public class UpdatePlantDescriptionTest {
             .body(update)
             .build();
 
-        pdTracker.put(entry);
-
-        final int sizeBeforePut = pdTracker.getEntries().size();
-
-        try {
-            handler.handle(request, response).ifSuccess(result -> {
+        pdTracker.put(entry)
+            .flatMap(result -> handler.handle(request, response))
+            .ifSuccess(result -> {
                 final PlantDescriptionEntry returnedEntry = (PlantDescriptionEntry) response.getRawBody();
                 assertEquals(newName, returnedEntry.plantDescription());
-                assertEquals(sizeBeforePut, pdTracker.getEntries().size());
+                assertEquals(1, pdTracker.getEntries().size());
                 assertTrue(response.status().isPresent());
                 assertEquals(HttpStatus.OK, response.status().get());
             })
-                .onFailure(e -> fail());
-        } catch (final Exception e) {
-            fail();
-        }
+            .onFailure(e -> fail());
     }
 
     @Test
@@ -117,12 +111,10 @@ public class UpdatePlantDescriptionTest {
     }
 
     @Test
-    public void shouldReportInvalidDescription() throws PdStoreException {
+    public void shouldReportInvalidDescription() {
         final int entryId = 1;
         final String systemId = "system_a";
         final String portName = "port_a";
-
-        pdTracker.put(TestUtils.createEntry(entryId));
 
         final List<PortDto> consumerPorts = List.of(
             new PortDto.Builder()
@@ -155,17 +147,16 @@ public class UpdatePlantDescriptionTest {
             .body(update)
             .build();
 
-        try {
-            handler.handle(request, response).ifSuccess(result -> {
+        pdTracker.put(TestUtils.createEntry(entryId))
+            .flatMap(result -> handler.handle(request, response))
+            .ifSuccess(result -> {
                 assertEquals(HttpStatus.BAD_REQUEST, response.status().orElse(null));
                 final String expectedErrorMessage = "<Duplicate port name '" + portName + "' in system '" + systemId + "'>";
                 final ErrorMessage body = (ErrorMessage) response.getRawBody();
                 final String actualErrorMessage = body.error();
                 assertEquals(expectedErrorMessage, actualErrorMessage);
-            }).onFailure(e -> fail());
-        } catch (final Exception e) {
-            fail();
-        }
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
@@ -187,21 +178,17 @@ public class UpdatePlantDescriptionTest {
             .body(update)
             .build();
 
-        pdTracker.put(entry);
-
-        doThrow(new PdStoreException("Mocked error")).when(backingStore).write(any());
-
-        try {
-            handler.handle(request, response)
-                .ifSuccess(result -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.status().orElse(null)))
-                .onFailure(e -> fail());
-        } catch (final Exception e) {
-            fail();
-        }
+        pdTracker.put(entry)
+            .flatMap(result -> {
+                doThrow(new PdStoreException("Mocked error")).when(backingStore).write(any());
+                return handler.handle(request, response);
+            })
+            .ifSuccess(result -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.status().orElse(null)))
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldDeactivateOldActive() throws PdStoreException {
+    public void shouldDeactivateOldActive() {
 
         final Instant now = Instant.now();
 
@@ -221,23 +208,20 @@ public class UpdatePlantDescriptionTest {
             .active(true)
             .build();
 
-        pdTracker.put(initiallyActiveEntry);
-        pdTracker.put(initiallyInactiveEntry);
-
         // Create a request for activating the inactive Plant Description.
         final HttpServiceRequest request = new MockRequest.Builder()
             .pathParameters(List.of(String.valueOf(initiallyInactiveId)))
             .body(update)
             .build();
 
-        try {
-            handler.handle(request, response).ifSuccess(result -> {
+        pdTracker.put(initiallyActiveEntry)
+            .flatMap(result -> pdTracker.put(initiallyInactiveEntry))
+            .flatMap(result -> handler.handle(request, response))
+            .ifSuccess(result -> {
                 assertFalse(pdTracker.get(initiallyActiveId).active());
                 assertTrue(pdTracker.get(initiallyInactiveId).active());
 
-            }).onFailure(e -> fail());
-        } catch (final Exception e) {
-            fail();
-        }
+            })
+            .onFailure(e -> fail());
     }
 }

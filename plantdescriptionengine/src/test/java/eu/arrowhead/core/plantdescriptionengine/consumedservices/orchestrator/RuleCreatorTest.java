@@ -19,6 +19,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class RuleCreatorTest {
 
@@ -32,7 +33,7 @@ public class RuleCreatorTest {
     }
 
     @Test
-    public void shouldCreateRule() throws PdStoreException {
+    public void shouldCreateRule() {
 
         final String consumerId = "system_1";
         final String producerId = "system_2";
@@ -94,15 +95,18 @@ public class RuleCreatorTest {
             .connections(connections)
             .build();
 
-        pdTracker.put(entry);
-        final RuleCreator ruleCreator = new RuleCreator(pdTracker);
-        final StoreRule rule = ruleCreator.createRule(entry.connections().get(0));
-        assertEquals(consumerName, rule.consumerSystem().systemName().orElse(null));
-        assertEquals(producerName, rule.providerSystem().systemName().orElse(null));
-        assertEquals(producerName, rule.providerSystem().systemName().orElse(null));
-        assertEquals(producerSystem.ports().get(0).serviceDefinition(), rule.serviceDefinitionName());
-        assertEquals(serviceInterface, rule.serviceInterfaceName());
-        assertEquals(priority, (int) rule.priority().orElse(-1));
+        pdTracker.put(entry)
+            .ifSuccess(result -> {
+                final RuleCreator ruleCreator = new RuleCreator(pdTracker);
+                final StoreRule rule = ruleCreator.createRule(entry.connections().get(0));
+                assertEquals(consumerName, rule.consumerSystem().systemName().orElse(null));
+                assertEquals(producerName, rule.providerSystem().systemName().orElse(null));
+                assertEquals(producerName, rule.providerSystem().systemName().orElse(null));
+                assertEquals(producerSystem.ports().get(0).serviceDefinition(), rule.serviceDefinitionName());
+                assertEquals(serviceInterface, rule.serviceInterfaceName());
+                assertEquals(priority, (int) rule.priority().orElse(-1));
+            })
+            .onFailure(e -> fail());
     }
 
     /**
@@ -111,7 +115,7 @@ public class RuleCreatorTest {
      * system in the included Plant Description.
      */
     @Test
-    public void shouldAllowConnectionsToSystemInIncludedEntry() throws PdStoreException {
+    public void shouldAllowConnectionsToSystemInIncludedEntry() {
 
         final String serviceDefinitionX = "servicex";
         final String serviceDefinitionY = "servicez";
@@ -217,23 +221,25 @@ public class RuleCreatorTest {
             .connections(List.of(connectionA, connectionB))
             .build();
 
-        pdTracker.put(entryA);
-        pdTracker.put(entryB);
+        pdTracker.put(entryA)
+            .flatMap(result -> pdTracker.put(entryB))
+            .ifSuccess(result -> {
+                final RuleCreator ruleCreator = new RuleCreator(pdTracker);
 
-        final RuleCreator ruleCreator = new RuleCreator(pdTracker);
+                final StoreRule ruleA = ruleCreator.createRule(connectionA);
+                final StoreRule ruleB = ruleCreator.createRule(connectionB);
 
-        final StoreRule ruleA = ruleCreator.createRule(connectionA);
-        final StoreRule ruleB = ruleCreator.createRule(connectionB);
+                assertEquals(consumerName, ruleA.consumerSystem().systemName().orElse(null));
+                assertEquals(producerAName, ruleA.providerSystem().systemName().orElse(null));
 
-        assertEquals(consumerName, ruleA.consumerSystem().systemName().orElse(null));
-        assertEquals(producerAName, ruleA.providerSystem().systemName().orElse(null));
-
-        assertEquals(consumerName, ruleB.consumerSystem().systemName().orElse(null));
-        assertEquals(producerBName, ruleB.providerSystem().systemName().orElse(null));
+                assertEquals(consumerName, ruleB.consumerSystem().systemName().orElse(null));
+                assertEquals(producerBName, ruleB.providerSystem().systemName().orElse(null));
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldAddMetadata() throws PdStoreException {
+    public void shouldAddMetadata() {
         final String serviceDefinition = "service_a";
         final String consumerId = "Cons-A-Id";
         final String consumerPort = "Cons-A-Port";
@@ -294,22 +300,24 @@ public class RuleCreatorTest {
             .systems(List.of(consumerSystem, producerSystem))
             .build();
 
-        pdTracker.put(entry);
+        pdTracker.put(entry)
+            .ifSuccess(result -> {
+                final RuleCreator ruleCreator = new RuleCreator(pdTracker);
+                final StoreRule rule = ruleCreator.createRule(connection);
 
-        final RuleCreator ruleCreator = new RuleCreator(pdTracker);
-        final StoreRule rule = ruleCreator.createRule(connection);
+                assertTrue(rule.consumerSystem().systemName().isEmpty());
+                assertTrue(rule.providerSystem().systemName().isEmpty());
 
-        assertTrue(rule.consumerSystem().systemName().isEmpty());
-        assertTrue(rule.providerSystem().systemName().isEmpty());
+                final Map<String, String> expectedConsumerMetadata = Map.of("x", "y");
+                assertEquals(expectedConsumerMetadata, rule.consumerSystem().metadata());
 
-        final Map<String, String> expectedConsumerMetadata = Map.of("x", "y");
-        assertEquals(expectedConsumerMetadata, rule.consumerSystem().metadata());
-
-        final Map<String, String> expectedSystemMetadata = Map.of("a", "1");
-        final Map<String, String> expectedServiceMetadata = Map.of("b", "2");
-        assertEquals(expectedSystemMetadata, rule.providerSystem().metadata());
-        assertEquals(expectedServiceMetadata, rule.serviceMetadata());
-        assertEquals(serviceInterface, rule.serviceInterfaceName());
+                final Map<String, String> expectedSystemMetadata = Map.of("a", "1");
+                final Map<String, String> expectedServiceMetadata = Map.of("b", "2");
+                assertEquals(expectedSystemMetadata, rule.providerSystem().metadata());
+                assertEquals(expectedServiceMetadata, rule.serviceMetadata());
+                assertEquals(serviceInterface, rule.serviceInterfaceName());
+            })
+            .onFailure(e -> fail());
     }
 
 }

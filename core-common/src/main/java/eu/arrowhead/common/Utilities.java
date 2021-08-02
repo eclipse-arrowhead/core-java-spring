@@ -487,7 +487,7 @@ public class Utilities {
 			}
 
 			final String errorMsg = "Getting the root cert from keystore failed. " +
-					"Cannot find alias in the following format: " + AH_MASTER_NAME + "." + AH_MASTER_SUFFIX;
+					"Cannot find CN in the following format: " + AH_MASTER_NAME + "." + AH_MASTER_SUFFIX;
 			logger.error(errorMsg);
 			throw new ServiceConfigurationError(errorMsg);
 		} catch (final KeyStoreException | NoSuchElementException ex) {

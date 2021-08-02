@@ -13,6 +13,7 @@ import eu.arrowhead.core.plantdescriptionengine.providedservices.pde_mgmt.dto.Pl
 import eu.arrowhead.core.plantdescriptionengine.utils.Metadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import se.arkalix.util.concurrent.Future;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,27 +55,30 @@ public class SystemMismatchDetector implements PlantDescriptionUpdateListener, S
     }
 
     @Override
-    public void onPlantDescriptionAdded(final PlantDescriptionEntry entry) {
+    public Future<Void> onPlantDescriptionAdded(final PlantDescriptionEntry entry) {
         Objects.requireNonNull(entry, "Expected entry.");
         logger.debug("Entry '" + entry.plantDescription() + "' added, checking for inconsistencies...");
         updateAlarms();
+        return Future.done();
     }
 
     @Override
-    public void onPlantDescriptionUpdated(
+    public Future<Void> onPlantDescriptionUpdated(
         final PlantDescriptionEntry updatedEntry,
         final PlantDescriptionEntry oldEntry
     ) {
         Objects.requireNonNull(updatedEntry, "Expected entry.");
         logger.debug("Entry '" + updatedEntry.plantDescription() + "' updated, checking for inconsistencies...");
         updateAlarms();
+        return Future.done();
     }
 
     @Override
-    public void onPlantDescriptionRemoved(final PlantDescriptionEntry entry) {
+    public Future<Void> onPlantDescriptionRemoved(final PlantDescriptionEntry entry) {
         Objects.requireNonNull(entry, "Expected entry.");
         logger.debug("Entry '" + entry.plantDescription() + "' removed, checking for inconsistencies...");
         updateAlarms();
+        return Future.done();
     }
 
     @Override

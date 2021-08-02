@@ -22,16 +22,13 @@ public class MonitorInfoTracker {
      * @param service An Arrowhead Framework service.
      * @return A unique identifier for the given service.
      */
-    private String toKey(final ServiceRecord service) {
+    static String toKey(final ServiceRecord service) {
+
+        Objects.requireNonNull(service, "Expected service.");
 
         Map<String, String> metadata = service.provider().metadata();
-        String result = "name=" + service.provider().name() + ",serviceUri=" + service.uri();
-
-        if (metadata != null) {
-            result += ",metadata={" + Metadata.toString(metadata);
-        }
-
-        return result + "}";
+        return "name=" + service.provider().name() + ",serviceUri=" +
+            service.uri() + ",metadata={" + Metadata.toString(metadata) + "}";
     }
 
     /**
@@ -47,6 +44,7 @@ public class MonitorInfoTracker {
         Objects.requireNonNull(service, "Expected inventory ID");
 
         final String systemName = service.provider().name();
+        final String serviceDefinition = service.name();
         final Map<String, String> serviceMetadata = service.metadata();
         final Map<String, String> systemMetadata = service.provider().metadata();
 
@@ -56,7 +54,7 @@ public class MonitorInfoTracker {
 
         final MonitorInfo newInfo = new MonitorInfo(
             systemName,
-            service.name(),
+            serviceDefinition,
             systemMetadata,
             serviceMetadata,
             systemData,

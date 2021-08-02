@@ -20,6 +20,9 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.core.choreographer.graph.StepGraphCircleDetector;
+import eu.arrowhead.core.choreographer.graph.StepGraphNormalizer;
+
 import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -85,6 +88,18 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
         converter.setTargetType(MessageType.TEXT);
         converter.setTypeIdPropertyName("_type");
         return converter;
+    }
+    
+    @Bean
+    public StepGraphCircleDetector getStepGraphCircleDetector() {
+    	//TODO: implement
+    	return null;
+    }
+    
+    @Bean
+    public StepGraphNormalizer getStepGraphNormalizer() {
+    	//TODO: implement
+    	return null;
     }
 
     @Service

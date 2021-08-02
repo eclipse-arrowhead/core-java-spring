@@ -2,7 +2,6 @@ package eu.arrowhead.core.choreographer.graph;
 
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,12 +9,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 
 @RunWith(SpringRunner.class)
-public class GraphUtilsTest {
+public class KahnAlgorithmStepGraphCircleDetectorTest {
 	
 	//=================================================================================================
 	// members
 	
-	private final GraphUtils graphUtils = new GraphUtils();
+	private final StepGraphCircleDetector circleDetector= new KahnAlgorithmStepGraphCircleDetector();
 
 	//=================================================================================================
 	// methods
@@ -23,10 +22,10 @@ public class GraphUtilsTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testHasCircle1() throws Exception {
-		final List<StepGraph> nonCirculars = GraphExamples.getNonCirculars();
+		final List<StepGraph> nonCirculars = StepGraphExamples.getNonCirculars();
 		
 		for (int i = 0; i < nonCirculars.size(); ++i) {
-			final boolean result = graphUtils.hasCircle(nonCirculars.get(i));
+			final boolean result = circleDetector.hasCircle(nonCirculars.get(i));
 			Assert.assertFalse("Non-existent circle detected in graph[" + i + "]", result);
 		}
 	}
@@ -34,21 +33,11 @@ public class GraphUtilsTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testHasCircle2() throws Exception {
-		final List<StepGraph> circulars = GraphExamples.getCirculars();
+		final List<StepGraph> circulars = StepGraphExamples.getCirculars();
 		
 		for (int i = 0; i < circulars.size(); ++i) { 
-			final boolean result = graphUtils.hasCircle(circulars.get(i));
+			final boolean result = circleDetector.hasCircle(circulars.get(i));
 			Assert.assertTrue("Circle not detected in graph[" + i + "]", result);
 		}
 	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testNormalize() throws Exception {
-		final List<Pair<StepGraph, StepGraph>> normalizables = GraphExamples.getNormalizables();
-		for (int i = 0; i < normalizables.size(); i++) {
-			final StepGraph normalizedGraph = graphUtils.normalizeStepGraph(normalizables.get(i).getLeft());
-			Assert.assertTrue("Normalized garph don't match in example[" + i + "]", normalizedGraph.equals(normalizables.get(i).getRight()));
-		}
-	} 
 }

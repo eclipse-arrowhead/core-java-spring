@@ -198,50 +198,52 @@ public class OrchestratorClientTest {
     }
 
     @Test
-    public void shouldStoreRulesWhenAddingPd() throws RuleStoreException, PdStoreException {
+    public void shouldStoreRulesWhenAddingPd() {
 
         final PlantDescriptionEntryDto entry = createEntry();
-        pdTracker.put(entry);
-
-        final MockClientResponse response = new MockClientResponse();
-        final int ruleId = 39;
-        response.status(HttpStatus.CREATED)
-            .body(new StoreEntryListDto.Builder()
-                .count(1)
-                .data(List.of(createStoreEntryRule(ruleId, producerRuleSystem, consumerRuleSystem)))
-                .build());
-
-        when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class)))
-            .thenReturn(Future.success(response));
-
-        orchestratorClient.onPlantDescriptionAdded(entry);
-
-        // Verify that the rule was stored correctly:
-        assertTrue(ruleStore.readRules(entry.id()).contains(ruleId));
-
-        // Verify that the HTTP client was passed correct data:
         final ArgumentCaptor<InetSocketAddress> addressCaptor = ArgumentCaptor.forClass(InetSocketAddress.class);
         final ArgumentCaptor<HttpClientRequest> requestCaptor = ArgumentCaptor.forClass(HttpClientRequest.class);
 
-        verify(httpClient).send(addressCaptor.capture(), requestCaptor.capture());
+        pdTracker.put(entry)
+            .ifSuccess(result -> {
 
-        final InetSocketAddress capturedAddress = addressCaptor.getValue();
-        final HttpClientRequest capturedRequest = requestCaptor.getValue();
+                final MockClientResponse response = new MockClientResponse();
+                final int ruleId = 39;
+                response.status(HttpStatus.CREATED)
+                    .body(new StoreEntryListDto.Builder()
+                        .count(1)
+                        .data(List.of(createStoreEntryRule(ruleId, producerRuleSystem, consumerRuleSystem)))
+                        .build());
 
-        assertEquals(HttpMethod.POST, capturedRequest.method().orElse(null));
-        final String expectedUri = "/orchestrator/store/flexible?";
-        assertTrue(capturedRequest.uri().isPresent());
-        assertEquals(expectedUri, capturedRequest.uri().get().toString());
-        assertEquals(orchestratorSrSystem.address(), capturedAddress.getAddress().getHostAddress());
-        assertEquals((int) orchestratorSrSystem.port(), capturedAddress.getPort());
+                when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class)))
+                    .thenReturn(Future.success(response));
 
-        assertTrue(capturedRequest.body().isPresent());
+                orchestratorClient.onPlantDescriptionAdded(entry);
 
-        // TODO: Assert that the body is correctly formed.
+                // Verify that the rule was stored correctly:
+                assertTrue(ruleStore.readRules(entry.id()).contains(ruleId));
+
+                verify(httpClient).send(addressCaptor.capture(), requestCaptor.capture());
+
+                final InetSocketAddress capturedAddress = addressCaptor.getValue();
+                final HttpClientRequest capturedRequest = requestCaptor.getValue();
+
+                assertEquals(HttpMethod.POST, capturedRequest.method().orElse(null));
+                final String expectedUri = "/orchestrator/store/flexible?";
+                assertTrue(capturedRequest.uri().isPresent());
+                assertEquals(expectedUri, capturedRequest.uri().get().toString());
+                assertEquals(orchestratorSrSystem.address(), capturedAddress.getAddress().getHostAddress());
+                assertEquals((int) orchestratorSrSystem.port(), capturedAddress.getPort());
+
+                assertTrue(capturedRequest.body().isPresent());
+
+                // TODO: Assert that the body is correctly formed.
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldNotCreateRulesForPdWithoutConnections() throws PdStoreException {
+    public void shouldNotCreateRulesForPdWithoutConnections() {
         final PlantDescriptionEntryDto entry = new PlantDescriptionEntryDto.Builder()
             .id(0)
             .plantDescription("Plant Description 1A")
@@ -252,12 +254,12 @@ public class OrchestratorClientTest {
             // No connections
             .build();
 
-        pdTracker.put(entry);
-
-        when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class)))
-            .thenReturn(Future.success(new MockClientResponse()));
-
-        orchestratorClient.initialize()
+        pdTracker.put(entry)
+            .flatMap(result -> {
+                when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class)))
+                    .thenReturn(Future.success(new MockClientResponse()));
+                return orchestratorClient.initialize();
+            })
             .ifSuccess(result -> {
                 verify(httpClient, times(1)).send(any(), any());
                 assertTrue(ruleStore.readRules(entry.id()).isEmpty());
@@ -267,33 +269,33 @@ public class OrchestratorClientTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void shouldRemoveRulesWhenRemovingActiveEntry() throws RuleStoreException, PdStoreException {
+    public void shouldRemoveRulesWhenRemovingActiveEntry() {
         final PlantDescriptionEntryDto activeEntry = createEntry();
-        pdTracker.put(activeEntry);
-
         final int ruleId = 65;
-
-        ruleStore.writeRules(activeEntry.id(), Set.of(ruleId));
-
-        final MockClientResponse pingResponse = new MockClientResponse();
-        pingResponse.status(HttpStatus.OK);
-
-        final MockClientResponse deletionResponse = new MockClientResponse();
-        deletionResponse.status(HttpStatus.OK);
-
-        final MockClientResponse creationResponse = new MockClientResponse();
         final int newRuleId = 82;
-        creationResponse.status(HttpStatus.CREATED);
-        creationResponse.body(createSingleRuleStoreList(newRuleId, producerRuleSystem, consumerRuleSystem));
+        pdTracker.put(activeEntry)
+            .flatMap(result -> {
+                ruleStore.writeRules(activeEntry.id(), Set.of(ruleId));
 
-        when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class))).thenReturn(
-            Future.success(pingResponse),
-            Future.success(deletionResponse),
-            Future.success(creationResponse),
-            Future.success(deletionResponse)
-        );
+                final MockClientResponse pingResponse = new MockClientResponse();
+                pingResponse.status(HttpStatus.OK);
 
-        orchestratorClient.initialize()
+                final MockClientResponse deletionResponse = new MockClientResponse();
+                deletionResponse.status(HttpStatus.OK);
+
+                final MockClientResponse creationResponse = new MockClientResponse();
+                creationResponse.status(HttpStatus.CREATED);
+                creationResponse.body(createSingleRuleStoreList(newRuleId, producerRuleSystem, consumerRuleSystem));
+
+                when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class))).thenReturn(
+                    Future.success(pingResponse),
+                    Future.success(deletionResponse),
+                    Future.success(creationResponse),
+                    Future.success(deletionResponse)
+                );
+
+                return orchestratorClient.initialize();
+            })
             .ifSuccess(result -> {
                 assertEquals(1, ruleStore.readRules(activeEntry.id()).size());
                 orchestratorClient.onPlantDescriptionRemoved(activeEntry);
@@ -320,7 +322,7 @@ public class OrchestratorClientTest {
     }
 
     @Test
-    public void shouldHandleStoreRemovalFailure() throws RuleStoreException, PdStoreException {
+    public void shouldHandleStoreRemovalFailure() throws RuleStoreException {
         final PlantDescriptionEntryDto activeEntry = createEntry();
 
         // Use a mock rule store in order to make it throw exceptions.
@@ -337,55 +339,57 @@ public class OrchestratorClientTest {
         orchestratorClient = new OrchestratorClient(httpClient, ruleStore, pdTracker, orchestratorSrSystem
             .getAddress());
 
-        pdTracker.put(activeEntry);
-        ruleStore.writeRules(activeEntry.id(), Set.of(12));
-
-        orchestratorClient.initialize()
+        pdTracker.put(activeEntry)
+            .flatMap(result -> {
+                ruleStore.writeRules(activeEntry.id(), Set.of(12));
+                return orchestratorClient.initialize();
+            })
             .ifSuccess(result -> fail())
             .onFailure(e -> assertEquals(errorMessage, e.getMessage()));
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    public void shouldRemoveRulesWhenRemovingConnections() throws RuleStoreException, PdStoreException {
+    public void shouldRemoveRulesWhenRemovingConnections() {
         final PlantDescriptionEntryDto entry = createEntry();
-
-        pdTracker.put(entry);
         final int ruleId = 65;
-        ruleStore.writeRules(entry.id(), Set.of(ruleId));
-
-        final MockClientResponse pingResponse = new MockClientResponse();
-        pingResponse.status(HttpStatus.OK);
-
-        final MockClientResponse deletionResponse = new MockClientResponse();
-        deletionResponse.status(HttpStatus.OK);
-
-        final MockClientResponse creationResponse = new MockClientResponse();
         final int newRuleId = 82;
-        creationResponse.status(HttpStatus.CREATED);
-        creationResponse.body(createSingleRuleStoreList(newRuleId, producerRuleSystem, consumerRuleSystem));
 
-        when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class))).thenReturn(
-            Future.success(pingResponse),
-            Future.success(deletionResponse),
-            Future.success(creationResponse),
-            Future.success(deletionResponse)
-        );
+        final PlantDescriptionEntryDto entryWithoutConnections = new PlantDescriptionEntryDto.Builder()
+            .id(entry.id())
+            .plantDescription(entry.plantDescription())
+            .createdAt(entry.createdAt())
+            .updatedAt(now)
+            .active(true)
+            .build();
 
-        orchestratorClient.initialize()
-            .ifSuccess(result -> {
+        pdTracker.put(entry)
+            .flatMap(result -> {
+                ruleStore.writeRules(entry.id(), Set.of(ruleId));
+
+                final MockClientResponse pingResponse = new MockClientResponse();
+                pingResponse.status(HttpStatus.OK);
+
+                final MockClientResponse deletionResponse = new MockClientResponse();
+                deletionResponse.status(HttpStatus.OK);
+
+                final MockClientResponse creationResponse = new MockClientResponse();
+                creationResponse.status(HttpStatus.CREATED);
+                creationResponse.body(createSingleRuleStoreList(newRuleId, producerRuleSystem, consumerRuleSystem));
+
+                when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class))).thenReturn(
+                    Future.success(pingResponse),
+                    Future.success(deletionResponse),
+                    Future.success(creationResponse),
+                    Future.success(deletionResponse)
+                );
+                return orchestratorClient.initialize();
+            })
+            .flatMap(result -> {
                 assertEquals(1, ruleStore.readRules(entry.id()).size());
-
-                final PlantDescriptionEntryDto entryWithoutConnections = new PlantDescriptionEntryDto.Builder()
-                    .id(entry.id())
-                    .plantDescription(entry.plantDescription())
-                    .createdAt(entry.createdAt())
-                    .updatedAt(now)
-                    .active(true)
-                    .build();
-
-                pdTracker.put(entryWithoutConnections);
-                pdTracker.put(entryWithoutConnections);
+                return pdTracker.put(entryWithoutConnections);
+            })
+            .ifSuccess(result -> {
 
                 // Verify that the HTTP client was passed correct data:
                 final ArgumentCaptor<InetSocketAddress> addressCaptor = ArgumentCaptor.forClass(InetSocketAddress.class);
@@ -410,7 +414,7 @@ public class OrchestratorClientTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void shouldNotChangeRulesWhenRemovingInactiveEntry() throws RuleStoreException, PdStoreException {
+    public void shouldNotChangeRulesWhenRemovingInactiveEntry() {
 
         final PlantDescriptionEntryDto activeEntry = createEntry();
         final PlantDescriptionEntryDto inactiveEntry = new PlantDescriptionEntryDto.Builder()
@@ -421,42 +425,36 @@ public class OrchestratorClientTest {
             .active(false)
             .build();
 
-        pdTracker.put(activeEntry);
-        pdTracker.put(inactiveEntry);
-
         final int ruleId = 65;
-
-        final RuleStore ruleStore = new InMemoryRuleStore();
-        ruleStore.writeRules(activeEntry.id(), Set.of(ruleId));
-
-        final OrchestratorClient orchestratorClient = new OrchestratorClient(
-            httpClient,
-            ruleStore,
-            pdTracker,
-            orchestratorSrSystem.getAddress()
-        );
-
-        final MockClientResponse pingResponse = new MockClientResponse();
-        pingResponse.status(HttpStatus.OK);
-
-        final MockClientResponse deletionResponse = new MockClientResponse();
-        deletionResponse.status(HttpStatus.OK);
-
-        final MockClientResponse creationResponse = new MockClientResponse();
         final int newRuleId = 2;
-        creationResponse.status(HttpStatus.CREATED);
-        creationResponse.body(createSingleRuleStoreList(newRuleId, producerRuleSystem, consumerRuleSystem));
 
-        when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class)))
-            .thenReturn(
-                Future.success(pingResponse),
-                Future.success(deletionResponse),
-                Future.success(creationResponse)
-            );
+        pdTracker.put(activeEntry)
+            .flatMap(result -> pdTracker.put(inactiveEntry))
+            .flatMap(result -> {
 
-        orchestratorClient.initialize()
+                ruleStore.writeRules(activeEntry.id(), Set.of(ruleId));
+
+                final MockClientResponse pingResponse = new MockClientResponse();
+                pingResponse.status(HttpStatus.OK);
+
+                final MockClientResponse deletionResponse = new MockClientResponse();
+                deletionResponse.status(HttpStatus.OK);
+
+                final MockClientResponse creationResponse = new MockClientResponse();
+                creationResponse.status(HttpStatus.CREATED);
+                creationResponse.body(createSingleRuleStoreList(newRuleId, producerRuleSystem, consumerRuleSystem));
+
+                when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class)))
+                    .thenReturn(
+                        Future.success(pingResponse),
+                        Future.success(deletionResponse),
+                        Future.success(creationResponse)
+                    );
+
+                return orchestratorClient.initialize();
+            })
+            .flatMap(result -> orchestratorClient.onPlantDescriptionRemoved(inactiveEntry))
             .ifSuccess(result -> {
-                orchestratorClient.onPlantDescriptionRemoved(inactiveEntry);
                 final Set<Integer> rules = ruleStore.readRules(activeEntry.id());
                 assertEquals(1, rules.size());
                 assertTrue(rules.contains(newRuleId));
@@ -465,19 +463,20 @@ public class OrchestratorClientTest {
     }
 
     @Test
-    public void shouldHandleRemovalOfInactivePd() throws PdStoreException {
+    public void shouldHandleRemovalOfInactivePd() {
 
         final PlantDescriptionEntryDto inactiveEntry = PlantDescriptionEntry.deactivated(createEntry());
-        pdTracker.put(inactiveEntry);
+        pdTracker.put(inactiveEntry)
+            .flatMap(result -> {
+                final OrchestratorClient orchestratorClient = new OrchestratorClient(httpClient, ruleStore, pdTracker, orchestratorSrSystem
+                    .getAddress());
 
-        final OrchestratorClient orchestratorClient = new OrchestratorClient(httpClient, ruleStore, pdTracker, orchestratorSrSystem
-            .getAddress());
+                final MockClientResponse pingResponse = new MockClientResponse();
+                when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class)))
+                    .thenReturn(Future.success(pingResponse));
 
-        final MockClientResponse pingResponse = new MockClientResponse();
-        when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class)))
-            .thenReturn(Future.success(pingResponse));
-
-        orchestratorClient.initialize()
+                return orchestratorClient.initialize();
+            })
             .ifSuccess(result -> {
                 assertTrue(ruleStore.readRules(inactiveEntry.id()).isEmpty());
                 orchestratorClient.onPlantDescriptionRemoved(inactiveEntry);
@@ -488,42 +487,42 @@ public class OrchestratorClientTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void shouldRemoveRulesWhenSettingInactive() throws RuleStoreException, PdStoreException {
+    public void shouldRemoveRulesWhenSettingInactive() {
         final PlantDescriptionEntryDto activeEntry = createEntry();
+        final PlantDescriptionEntryDto deactivatedEntry = PlantDescriptionEntry.deactivated(activeEntry);
 
-        pdTracker.put(activeEntry);
-        final int ruleId = 512;
-        ruleStore.writeRules(activeEntry.id(), Set.of(ruleId));
+        pdTracker.put(activeEntry)
+            .flatMap(result -> {
+                final int ruleId = 512;
+                ruleStore.writeRules(activeEntry.id(), Set.of(ruleId));
 
-        final MockClientResponse pingResponse = new MockClientResponse();
-        pingResponse.status(HttpStatus.OK);
+                final MockClientResponse pingResponse = new MockClientResponse();
+                pingResponse.status(HttpStatus.OK);
 
-        final MockClientResponse deletionResponse = new MockClientResponse();
-        deletionResponse.status(HttpStatus.OK);
+                final MockClientResponse deletionResponse = new MockClientResponse();
+                deletionResponse.status(HttpStatus.OK);
 
-        final MockClientResponse creationResponse = new MockClientResponse();
-        final int newRuleId = 2;
-        creationResponse.status(HttpStatus.CREATED);
-        creationResponse.body(createSingleRuleStoreList(newRuleId, producerRuleSystem, consumerRuleSystem));
+                final MockClientResponse creationResponse = new MockClientResponse();
+                final int newRuleId = 2;
+                creationResponse.status(HttpStatus.CREATED);
+                creationResponse.body(createSingleRuleStoreList(newRuleId, producerRuleSystem, consumerRuleSystem));
 
-        when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class))).thenReturn(
-            Future.success(pingResponse),
-            Future.success(deletionResponse),
-            Future.success(creationResponse),
-            Future.success(deletionResponse)
-        );
+                when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class))).thenReturn(
+                    Future.success(pingResponse),
+                    Future.success(deletionResponse),
+                    Future.success(creationResponse),
+                    Future.success(deletionResponse)
+                );
 
-        orchestratorClient.initialize()
-            .ifSuccess(result -> {
-                final PlantDescriptionEntryDto deactivatedEntry = PlantDescriptionEntry.deactivated(activeEntry);
-                pdTracker.put(deactivatedEntry);
-                assertEquals(0, ruleStore.readRules(deactivatedEntry.id()).size());
+                return orchestratorClient.initialize();
             })
+            .flatMap(result -> pdTracker.put(deactivatedEntry))
+            .ifSuccess(result -> assertEquals(0, ruleStore.readRules(deactivatedEntry.id()).size()))
             .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldNotTouchRulesWhenUpdatingInactiveToInactive() throws PdStoreException {
+    public void shouldNotTouchRulesWhenUpdatingInactiveToInactive() {
 
         final PlantDescriptionEntryDto entryA = new PlantDescriptionEntryDto.Builder()
             .id(0)
@@ -540,16 +539,16 @@ public class OrchestratorClientTest {
             .active(false)
             .build();
 
-        pdTracker.put(entryA);
-        pdTracker.put(entryB);
-
-        final MockClientResponse pingResponse = new MockClientResponse();
-        when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class)))
-            .thenReturn(Future.success(pingResponse));
-
-        orchestratorClient.initialize()
+        pdTracker.put(entryA)
+            .flatMap(result -> pdTracker.put(entryB))
+            .flatMap(result -> {
+                final MockClientResponse pingResponse = new MockClientResponse();
+                when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class)))
+                    .thenReturn(Future.success(pingResponse));
+                return orchestratorClient.initialize();
+            })
+            .flatMap(result -> pdTracker.put(entryB))
             .ifSuccess(result -> {
-                pdTracker.put(entryB);
                 verify(httpClient, times(1)).send(any(), any());
                 assertTrue(ruleStore.readRules(entryA.id()).isEmpty());
                 assertTrue(ruleStore.readRules(entryB.id()).isEmpty());
@@ -559,89 +558,83 @@ public class OrchestratorClientTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void rulesShouldBeEmptyAfterFailedPost() throws RuleStoreException, PdStoreException {
+    public void rulesShouldBeEmptyAfterFailedPost() throws RuleStoreException {
 
         final PlantDescriptionEntryDto entry = createEntry();
-
-        pdTracker.put(entry);
         final int ruleId = 25;
 
-        final RuleStore ruleStore = new InMemoryRuleStore();
         ruleStore.writeRules(entry.id(), Set.of(ruleId));
 
-        final OrchestratorClient orchestratorClient = new OrchestratorClient(
-            httpClient,
-            ruleStore,
-            pdTracker,
-            orchestratorSrSystem.getAddress()
-        );
-
-        final MockClientResponse pingResponse = new MockClientResponse();
-
-        final MockClientResponse deletionResponse = new MockClientResponse();
-        deletionResponse.status(HttpStatus.OK);
-
-        final MockClientResponse failedCreationResponse = new MockClientResponse();
-        failedCreationResponse.status(HttpStatus.INTERNAL_SERVER_ERROR);
-
-        final MockClientResponse creationResponse = new MockClientResponse();
-
         final int newRuleId = 23;
+        final MockClientResponse pingResponse = new MockClientResponse();
+        final MockClientResponse deletionResponse = new MockClientResponse();
+        final MockClientResponse failedCreationResponse = new MockClientResponse();
+        final MockClientResponse creationResponse = new MockClientResponse();
+        deletionResponse.status(HttpStatus.OK);
+        failedCreationResponse.status(HttpStatus.INTERNAL_SERVER_ERROR);
         creationResponse.status(HttpStatus.CREATED);
         creationResponse.body(createSingleRuleStoreList(newRuleId, producerRuleSystem, consumerRuleSystem));
 
-        when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class))).thenReturn(
-            Future.success(pingResponse),
-            Future.success(deletionResponse),
-            Future.success(creationResponse),
-            Future.success(deletionResponse),
-            // An error occurs when POSTing new rules:
-            Future.failure(new RuntimeException("Some error")));
+        when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class)))
+            .thenReturn(
+                Future.success(pingResponse),
+                Future.success(deletionResponse),
+                Future.success(creationResponse),
+                Future.success(deletionResponse),
+                // An error occurs when POSTing new rules:
+                Future.failure(new RuntimeException("Some error"))
+            );
 
-        orchestratorClient.initialize()
-            .ifSuccess(result -> {
-                pdTracker.put(entry);
-                assertTrue(ruleStore.readRules(entry.id()).isEmpty());
-            })
-            .onFailure(e -> fail());
+        pdTracker.put(entry)
+            .flatMap(result -> orchestratorClient.initialize())
+            .flatMap(result -> pdTracker.put(entry))
+            .ifSuccess(result -> fail())
+            .onFailure(e1 -> {
+                try {
+                    assertTrue(ruleStore.readRules(entry.id()).isEmpty());
+                } catch (RuleStoreException e2) {
+                    fail();
+                }
+            });
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    public void shouldNotRemoveRulesOnFailure() throws RuleStoreException, PdStoreException {
+    public void shouldNotRemoveRulesOnFailure() {
 
         final PlantDescriptionEntryDto activeEntry = createEntry();
-
-        pdTracker.put(activeEntry);
-        ruleStore.writeRules(activeEntry.id(), Set.of(65));
-
-        final MockClientResponse pingResponse = new MockClientResponse();
-        pingResponse.status(HttpStatus.OK);
-
-        final MockClientResponse deletionResponse = new MockClientResponse();
-        deletionResponse.status(HttpStatus.OK);
-
-        final MockClientResponse creationResponse = new MockClientResponse();
         final int newRuleId = 82;
 
-        creationResponse
-            .status(HttpStatus.CREATED)
-            .body(createSingleRuleStoreList(newRuleId, producerRuleSystem, consumerRuleSystem));
+        pdTracker.put(activeEntry)
+            .flatMap(result -> {
+                ruleStore.writeRules(activeEntry.id(), Set.of(65));
 
-        final MockClientResponse failedDeletionResponse = new MockClientResponse();
-        failedDeletionResponse.status(HttpStatus.INTERNAL_SERVER_ERROR);
+                final MockClientResponse pingResponse = new MockClientResponse();
+                pingResponse.status(HttpStatus.OK);
 
-        when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class))).thenReturn(
-            Future.success(pingResponse),
-            Future.success(deletionResponse),
-            Future.success(creationResponse),
-            Future.success(failedDeletionResponse)
-        );
+                final MockClientResponse deletionResponse = new MockClientResponse();
+                deletionResponse.status(HttpStatus.OK);
 
-        orchestratorClient.initialize()
+                final MockClientResponse creationResponse = new MockClientResponse();
+
+                creationResponse
+                    .status(HttpStatus.CREATED)
+                    .body(createSingleRuleStoreList(newRuleId, producerRuleSystem, consumerRuleSystem));
+
+                final MockClientResponse failedDeletionResponse = new MockClientResponse();
+                failedDeletionResponse.status(HttpStatus.INTERNAL_SERVER_ERROR);
+
+                when(httpClient.send(any(InetSocketAddress.class), any(HttpClientRequest.class))).thenReturn(
+                    Future.success(pingResponse),
+                    Future.success(deletionResponse),
+                    Future.success(creationResponse),
+                    Future.success(failedDeletionResponse)
+                );
+
+                return orchestratorClient.initialize();
+            })
             .ifSuccess(result -> {
                 orchestratorClient.onPlantDescriptionRemoved(activeEntry);
-                // The rule should not have been removed.
                 assertTrue(ruleStore.readRules(activeEntry.id()).contains(newRuleId));
             })
             .onFailure(e -> fail());
