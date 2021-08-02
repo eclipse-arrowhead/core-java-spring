@@ -6,15 +6,21 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import eu.arrowhead.core.choreographer.ChoreographerMain;
+
 @RunWith(SpringRunner.class)
+@SpringBootTest(classes = ChoreographerMain.class)
 public class StepGraphUtilsTest {
 	
 	//=================================================================================================
 	// members
 	
-	private StepGraphUtils graphUtils = new StepGraphUtils();
+	@Autowired
+	private StepGraphUtils graphUtils;
 	
 	//=================================================================================================
 	// methods
