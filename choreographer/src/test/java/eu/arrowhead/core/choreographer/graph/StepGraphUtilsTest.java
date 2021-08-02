@@ -55,9 +55,7 @@ public class StepGraphUtilsTest {
 		for (int i = 0; i < normalizables.size(); ++i) {
 			final Pair<StepGraph,StepGraph> graphPair = normalizables.get(i);
 			final StepGraph result = graphUtils.normalizeStepGraph(graphPair.getLeft());
-			System.out.println("---------------------"); //TODO remove this line
 			Assert.assertEquals(graphPair.getRight(), result);
 		}
 	}
-
 }

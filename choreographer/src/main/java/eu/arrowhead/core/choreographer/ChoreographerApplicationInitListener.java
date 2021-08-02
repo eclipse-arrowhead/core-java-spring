@@ -14,14 +14,10 @@
 
 package eu.arrowhead.core.choreographer;
 
-import eu.arrowhead.common.ApplicationInitListener;
-import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.CoreCommonConstants;
-import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.core.CoreSystemService;
-import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.core.choreographer.graph.StepGraphCircleDetector;
-import eu.arrowhead.core.choreographer.graph.StepGraphNormalizer;
+import java.util.List;
+import java.util.Map;
+
+import javax.jms.ConnectionFactory;
 
 import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer;
 import org.springframework.context.ApplicationContext;
@@ -36,12 +32,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ErrorHandler;
 import org.springframework.web.util.UriComponents;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
-import javax.jms.ConnectionFactory;
-import java.util.List;
-import java.util.Map;
+import eu.arrowhead.common.ApplicationInitListener;
+import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.core.choreographer.graph.DepthFirstStepGraphCircleDetector;
+import eu.arrowhead.core.choreographer.graph.EdgeBuilderStepGraphNormalizer;
+import eu.arrowhead.core.choreographer.graph.StepGraphCircleDetector;
+import eu.arrowhead.core.choreographer.graph.StepGraphNormalizer;
 
 @Component
 public class ChoreographerApplicationInitListener extends ApplicationInitListener {
@@ -92,14 +92,14 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
     
     @Bean
     public StepGraphCircleDetector getStepGraphCircleDetector() {
-    	//TODO: implement
-    	return null;
+    	//TODO: select implementation
+    	return new DepthFirstStepGraphCircleDetector();
     }
     
     @Bean
     public StepGraphNormalizer getStepGraphNormalizer() {
-    	//TODO: implement
-    	return null;
+    	//TODO: select implementation
+    	return new EdgeBuilderStepGraphNormalizer();
     }
 
     @Service
