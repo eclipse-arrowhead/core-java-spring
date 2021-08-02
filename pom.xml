@@ -35,14 +35,14 @@
 	    <module>gatekeeper</module>
 	    <module>gateway</module>
 	    <module>choreographer</module>
-		<module>systemregistry</module>
-		<module>deviceregistry</module>
-		<module>onboarding</module>
+	    <module>systemregistry</module>
+	    <module>deviceregistry</module>
+	    <module>onboarding</module>
 	    <module>qos-monitor</module>
+	    <module>translator</module>
+		<module>plantdescriptionengine</module>
 	    <module>deb-installer</module>
 	    <module>docker-all</module>
-		<module>translator</module>
-		<module>plantdescriptionengine</module>
   	</modules>
   	
 	<properties>
@@ -64,8 +64,10 @@
   		<apache.commons.lang3.version>3.9</apache.commons.lang3.version>
   		<jms.api.version>2.0.1</jms.api.version>
   		<activemq.client.version>5.15.9</activemq.client.version>
-		<bouncy.castle.version>1.64</bouncy.castle.version>
+		<bouncy.castle.version>1.69</bouncy.castle.version>
   		<jna.version>5.5.0</jna.version>
+		<spring.jms.version>5.1.7.RELEASE</spring.jms.version>
+		<google.gson.version>2.8.6</google.gson.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -75,12 +77,7 @@
             <name>Spring Repository</name>
 			<url>https://repo.spring.io/plugins-release/</url>
         </repository>
-	<repository>
-            <id>jenkins-repo</id>
-            <name>Jenkins Repository</name>
-			<url>https://repo.jenkins-ci.org/public/</url>
-        </repository>
-    </repositories>
+	</repositories>
 
 	<dependencies>
 		<dependency>
@@ -122,6 +119,10 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+		<dependency>
 		    <groupId>org.springframework.boot</groupId>
     		<artifactId>spring-boot-configuration-processor</artifactId>
     		<optional>true</optional>
@@ -159,13 +160,12 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jms</artifactId>
-			<version>5.1.7.RELEASE</version>
+			<version>${spring.jms.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-activemq</artifactId>
 		</dependency>
-	    
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger2</artifactId>
@@ -203,11 +203,11 @@
 -->
 		
 		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
-		<!--<dependency>
-      			<groupId>com.google.code.gson</groupId>
-      			<artifactId>gson</artifactId>
-      			<version>2.8.5</version>
-		</dependency>-->
+		<dependency>
+				<groupId>com.google.code.gson</groupId>
+				<artifactId>gson</artifactId>
+				<version>${google.gson.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

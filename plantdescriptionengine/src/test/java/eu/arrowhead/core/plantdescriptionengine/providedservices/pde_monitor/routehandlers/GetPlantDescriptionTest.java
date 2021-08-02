@@ -53,36 +53,34 @@ public class GetPlantDescriptionTest {
     }
 
     @Test
-    public void shouldRespondWithStoredEntry() throws PdStoreException {
+    public void shouldRespondWithStoredEntry() {
 
         final int entryId = 39;
-
-        pdTracker.put(TestUtils.createEntry(entryId));
-
         final HttpServiceRequest request = new MockRequest.Builder()
             .pathParameters(List.of(String.valueOf(entryId)))
             .build();
 
-        handler.handle(request, response).ifSuccess(result -> {
-            final MonitorPlantDescriptionEntry returnedEntry = (MonitorPlantDescriptionEntry) response.getRawBody();
-            assertEquals(HttpStatus.OK, response.status().orElse(null));
-            assertEquals(returnedEntry.id(), entryId);
-        }).onFailure(e -> fail());
+        pdTracker.put(TestUtils.createEntry(entryId))
+            .flatMap(result -> handler.handle(request, response))
+            .ifSuccess(result -> {
+                final MonitorPlantDescriptionEntry returnedEntry = (MonitorPlantDescriptionEntry) response.getRawBody();
+                assertEquals(HttpStatus.OK, response.status().orElse(null));
+                assertEquals(returnedEntry.id(), entryId);
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldNotAcceptInvalidId() throws PdStoreException {
+    public void shouldNotAcceptInvalidId() {
 
         final int entryId = 24;
         final String invalidId = "Invalid";
-
-        pdTracker.put(TestUtils.createEntry(entryId));
-
         final HttpServiceRequest request = new MockRequest.Builder()
             .pathParameters(List.of(invalidId))
             .build();
 
-        handler.handle(request, response)
+        pdTracker.put(TestUtils.createEntry(entryId))
+            .flatMap(result -> handler.handle(request, response))
             .ifSuccess(result -> assertEquals(HttpStatus.BAD_REQUEST, response.status().orElse(null)))
             .onFailure(e -> fail());
     }

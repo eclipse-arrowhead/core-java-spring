@@ -17,6 +17,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import se.arkalix.util.concurrent.Future;
+import se.arkalix.util.concurrent.Futures;
 
 import java.time.Instant;
 import java.util.List;
@@ -27,6 +29,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Unit test for the {@link eu.arrowhead.core.plantdescriptionengine.pdtracker.PlantDescriptionTracker}
@@ -61,83 +64,90 @@ public class PlantDescriptionTrackerTest {
     }
 
     @Test
-    public void shouldWriteEntriesToBackingStore() throws PdStoreException {
+    public void shouldWriteEntriesToBackingStore() {
         final List<Integer> entryIds = List.of(23, 42, 888);
 
         for (final int id : entryIds) {
             pdTracker.put(TestUtils.createEntry(id));
         }
 
-        final List<PlantDescriptionEntryDto> entries = store.readEntries();
-
-        for (final int id : entryIds) {
-            final var entry = entries.stream().filter(e -> e.id() == id).findAny();
-            assertTrue(entry.isPresent());
-        }
-
-
+        Futures.serialize(
+            entryIds.stream().map(id -> pdTracker.put(TestUtils.createEntry(id)))
+        )
+            .ifSuccess(result -> {
+                final List<PlantDescriptionEntryDto> entries = store.readEntries();
+                for (final int id : entryIds) {
+                    final var entry = entries.stream().filter(e -> e.id() == id).findAny();
+                    assertTrue(entry.isPresent());
+                }
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldReturnEntryById() throws PdStoreException {
+    public void shouldReturnEntryById() {
         final int entryId = 16;
         final PlantDescriptionEntryDto entry = TestUtils.createEntry(entryId);
-        pdTracker.put(entry);
-
-        final PlantDescriptionEntryDto storedEntry = pdTracker.get(entryId);
-
-        assertNotNull(storedEntry);
-        assertEquals(entryId, storedEntry.id());
+        pdTracker.put(entry)
+            .ifSuccess(result -> {
+                final PlantDescriptionEntryDto storedEntry = pdTracker.get(entryId);
+                assertNotNull(storedEntry);
+                assertEquals(entryId, storedEntry.id());
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldReturnAllEntries() throws PdStoreException {
+    public void shouldReturnAllEntries() {
 
         final List<Integer> entryIds = List.of(16, 39, 244);
 
-        for (final int id : entryIds) {
-            pdTracker.put(TestUtils.createEntry(id));
-        }
+        Futures.serialize(
+            entryIds.stream().map(id -> pdTracker.put(TestUtils.createEntry(id)))
+        )
+            .ifSuccess(result -> {
+                final List<PlantDescriptionEntryDto> storedEntries = pdTracker.getEntries();
 
-        final List<PlantDescriptionEntryDto> storedEntries = pdTracker.getEntries();
-
-        assertEquals(entryIds.size(), storedEntries.size());
-
-        for (final PlantDescriptionEntryDto entry : storedEntries) {
-            assertTrue(entryIds.contains(entry.id()));
-        }
+                assertEquals(entryIds.size(), storedEntries.size());
+                for (final PlantDescriptionEntryDto entry : storedEntries) {
+                    assertTrue(entryIds.contains(entry.id()));
+                }
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldReturnListDto() throws PdStoreException {
+    public void shouldReturnListDto() {
 
         final List<Integer> entryIds = List.of(16, 39, 244);
-        for (final int id : entryIds) {
-            pdTracker.put(TestUtils.createEntry(id));
-        }
 
-        final PlantDescriptionEntryListDto storedEntries = pdTracker.getListDto();
-
-        assertEquals(entryIds.size(), storedEntries.data().size());
-
-        for (final PlantDescriptionEntry entry : storedEntries.data()) {
-            assertTrue(entryIds.contains(entry.id()));
-        }
+        Futures.serialize(
+            entryIds.stream().map(id -> pdTracker.put(TestUtils.createEntry(id)))
+        )
+            .ifSuccess(result -> {
+                final PlantDescriptionEntryListDto storedEntries = pdTracker.getListDto();
+                assertEquals(entryIds.size(), storedEntries.data().size());
+                for (final PlantDescriptionEntry entry : storedEntries.data()) {
+                    assertTrue(entryIds.contains(entry.id()));
+                }
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldRemoveEntries() throws PdStoreException {
+    public void shouldRemoveEntries() {
         final int entryId = 24;
         final PlantDescriptionEntryDto entry = TestUtils.createEntry(entryId);
-        pdTracker.put(entry);
-        pdTracker.remove(entryId);
-        final PlantDescriptionEntry storedEntry = pdTracker.get(entryId);
-
-        assertNull(storedEntry);
+        pdTracker.put(entry)
+            .flatMap(result -> pdTracker.remove(entryId))
+            .ifSuccess(result -> {
+                final PlantDescriptionEntry storedEntry = pdTracker.get(entryId);
+                assertNull(storedEntry);
+            });
     }
 
     @Test
-    public void shouldTrackActiveEntry() throws PdStoreException {
+    public void shouldTrackActiveEntry() {
         final PlantDescriptionEntryDto.Builder builder = new PlantDescriptionEntryDto.Builder()
             .createdAt(now)
             .updatedAt(now);
@@ -152,19 +162,19 @@ public class PlantDescriptionTrackerTest {
             .active(false)
             .build();
 
-        pdTracker.put(activeEntry);
-        pdTracker.put(inactiveEntry);
-
-        assertNotNull(pdTracker.activeEntry());
-        assertEquals(activeEntry.id(), pdTracker.activeEntry().id());
-
-        pdTracker.remove(activeEntry.id());
-
-        assertNull(pdTracker.activeEntry());
+        pdTracker.put(activeEntry)
+            .flatMap(result -> pdTracker.put(inactiveEntry))
+            .flatMap(result -> {
+                assertNotNull(pdTracker.activeEntry());
+                assertEquals(activeEntry.id(), pdTracker.activeEntry().id());
+                return pdTracker.remove(activeEntry.id());
+            })
+            .ifSuccess(result -> assertNull(pdTracker.activeEntry()))
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldDeactivateEntry() throws PdStoreException {
+    public void shouldDeactivateEntry() {
         final int idA = 1;
         final int idB = 2;
         final PlantDescriptionEntryDto.Builder builder = new PlantDescriptionEntryDto.Builder()
@@ -178,33 +188,41 @@ public class PlantDescriptionTrackerTest {
             .plantDescription("Plant Description B")
             .build();
 
-        pdTracker.put(entryA);
-        assertTrue(pdTracker.get(idA).active());
-
-        pdTracker.put(entryB);
-        assertFalse(pdTracker.get(idA).active());
-        assertTrue(pdTracker.get(idB).active());
+        pdTracker.put(entryA)
+            .flatMap(result -> {
+                assertTrue(pdTracker.get(idA).active());
+                return pdTracker.put(entryB);
+            })
+            .ifSuccess(result -> {
+                assertFalse(pdTracker.get(idA).active());
+                assertTrue(pdTracker.get(idB).active());
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldGenerateUniqueIds() throws PdStoreException {
+    public void shouldGenerateUniqueIds() {
 
-        final List<PlantDescriptionEntryDto> entries = List.of(TestUtils.createEntry(pdTracker.getUniqueId()),
-            TestUtils.createEntry(pdTracker.getUniqueId()), TestUtils.createEntry(pdTracker.getUniqueId()));
+        final List<PlantDescriptionEntryDto> entries = List.of(
+            TestUtils.createEntry(pdTracker.getUniqueId()),
+            TestUtils.createEntry(pdTracker.getUniqueId()),
+            TestUtils.createEntry(pdTracker.getUniqueId())
+        );
 
-        for (final PlantDescriptionEntryDto entry : entries) {
-            pdTracker.put(entry);
-        }
-
-        final int uid = pdTracker.getUniqueId();
-
-        for (final PlantDescriptionEntryDto entry : entries) {
-            assertNotEquals(uid, entry.id());
-        }
+        Futures.serialize(
+            entries.stream().map(entry -> pdTracker.put(entry))
+        )
+            .ifSuccess(result -> {
+                final int uid = pdTracker.getUniqueId();
+                for (final PlantDescriptionEntryDto entry : entries) {
+                    assertNotEquals(uid, entry.id());
+                }
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldNotifyOnAdd() throws PdStoreException {
+    public void shouldNotifyOnAdd() {
 
         final Listener listener = new Listener();
 
@@ -212,15 +230,17 @@ public class PlantDescriptionTrackerTest {
         final int idB = 32;
 
         pdTracker.addListener(listener);
-        pdTracker.put(TestUtils.createEntry(idA));
-        pdTracker.put(TestUtils.createEntry(idB));
-
-        assertEquals(idB, listener.lastAdded.id());
-        assertEquals(2, listener.numAdded);
+        pdTracker.put(TestUtils.createEntry(idA))
+            .flatMap(result -> pdTracker.put(TestUtils.createEntry(idB)))
+            .ifSuccess(result -> {
+                assertEquals(idB, listener.lastAdded.id());
+                assertEquals(2, listener.numAdded);
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldNotifyOnDelete() throws PdStoreException {
+    public void shouldNotifyOnDelete() {
 
         final Listener listener = new Listener();
 
@@ -228,33 +248,39 @@ public class PlantDescriptionTrackerTest {
         final int idB = 12;
 
         pdTracker.addListener(listener);
-        pdTracker.put(TestUtils.createEntry(idA));
-        pdTracker.put(TestUtils.createEntry(idB));
-        pdTracker.remove(idA);
-
-        assertEquals(idA, listener.lastRemoved.id());
-        assertEquals(1, listener.numRemoved);
+        pdTracker.put(TestUtils.createEntry(idA))
+            .flatMap(result -> pdTracker.put(TestUtils.createEntry(idB)))
+            .flatMap(result -> pdTracker.remove(idA))
+            .ifSuccess(result -> {
+                assertEquals(idA, listener.lastRemoved.id());
+                assertEquals(1, listener.numRemoved);
+            })
+            .onFailure(e -> {
+                e.printStackTrace();
+                fail();
+            });
     }
 
     @Test
-    public void shouldNotifyOnUpdate() throws PdStoreException {
+    public void shouldNotifyOnUpdate() {
 
         final Listener listener = new Listener();
 
         final int idA = 93;
 
         pdTracker.addListener(listener);
-        pdTracker.put(TestUtils.createEntry(idA));
-
-        // "Update" the entry by putting an identical copy in the tracker.
-        pdTracker.put(TestUtils.createEntry(idA));
-
-        assertEquals(idA, listener.lastUpdated.id());
-        assertEquals(1, listener.numUpdated);
+        pdTracker.put(TestUtils.createEntry(idA))
+            // "Update" the entry by putting an identical copy in the tracker.
+            .flatMap(result -> pdTracker.put(TestUtils.createEntry(idA)))
+            .ifSuccess(result -> {
+                assertEquals(idA, listener.lastUpdated.id());
+                assertEquals(1, listener.numUpdated);
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldNotifyWhenActiveEntryChanges() throws PdStoreException {
+    public void shouldNotifyWhenActiveEntryChanges() {
 
         final Listener listener = new Listener();
 
@@ -264,22 +290,25 @@ public class PlantDescriptionTrackerTest {
         pdTracker.addListener(listener);
 
         // Add an active entry.
-        pdTracker.put(TestUtils.createEntry(idA, true));
-        assertEquals(idA, listener.lastAdded.id());
-        assertTrue(listener.lastAdded.active());
+        pdTracker.put(TestUtils.createEntry(idA, true))
+            .flatMap(result -> {
+                assertEquals(idA, listener.lastAdded.id());
+                assertTrue(listener.lastAdded.active());
 
-        // Add another active entry.
-        pdTracker.put(TestUtils.createEntry(idB, true));
-
-        // Listeners should have been notified that the old one was deactivated.
-        assertEquals(idA, listener.lastUpdated.id());
-        assertFalse(listener.lastUpdated.active());
-
-        assertEquals(1, listener.numUpdated);
+                // Add another active entry.
+                return pdTracker.put(TestUtils.createEntry(idB, true));
+            })
+            .ifSuccess(result -> {
+                // Listeners should have been notified that the old one was deactivated.
+                assertEquals(idA, listener.lastUpdated.id());
+                assertFalse(listener.lastUpdated.active());
+                assertEquals(1, listener.numUpdated);
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldReturnTheCorrectSystem() throws PdStoreException {
+    public void shouldReturnTheCorrectSystem() {
         final String idA = "Sys-A";
         final String idB = "Sys-B";
         final String idC = "Sys-C";
@@ -305,15 +334,17 @@ public class PlantDescriptionTrackerTest {
             .systems(List.of(systemA, systemB, systemC))
             .build();
 
-        pdTracker.put(entry);
-
-        assertEquals(idA, pdTracker.getSystem(idA).systemId());
-        assertEquals(idB, pdTracker.getSystem(idB).systemId());
-        assertEquals(idC, pdTracker.getSystem(idC).systemId());
+        pdTracker.put(entry)
+            .ifSuccess(result -> {
+                assertEquals(idA, pdTracker.getSystem(idA).systemId());
+                assertEquals(idB, pdTracker.getSystem(idB).systemId());
+                assertEquals(idC, pdTracker.getSystem(idC).systemId());
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldThrowWhenNoEntryIsActive() throws PdStoreException {
+    public void shouldThrowWhenNoEntryIsActive() {
 
         final PlantDescriptionEntryDto entry = new PlantDescriptionEntryDto.Builder()
             .id(1)
@@ -323,15 +354,14 @@ public class PlantDescriptionTrackerTest {
             .active(false)
             .build();
 
-        pdTracker.put(entry);
-
-        thrown.expect(IllegalStateException.class);
-        thrown.expectMessage("No active Plant Description.");
-        pdTracker.getSystem("ABC");
+        pdTracker.put(entry)
+            .map(result -> pdTracker.getSystem("ABC"))
+            .ifSuccess(result -> fail())
+            .onFailure(e -> assertEquals("No active Plant Description.", e.getMessage()));
     }
 
     @Test
-    public void shouldReturnSystemFromIncludedEntry() throws PdStoreException {
+    public void shouldReturnSystemFromIncludedEntry() {
 
         final int entryIdA = 32;
         final int entryIdB = 8;
@@ -390,17 +420,16 @@ public class PlantDescriptionTrackerTest {
             .systems(List.of(systemC))
             .build();
 
-        pdTracker.put(entryA);
-        pdTracker.put(entryB);
-        pdTracker.put(entryC);
-        pdTracker.put(entryX);
-
-        assertEquals(systemIdA, pdTracker.getSystem(systemIdA)
-            .systemId());
+        pdTracker.put(entryA)
+            .flatMap(result -> pdTracker.put(entryB))
+            .flatMap(result -> pdTracker.put(entryC))
+            .flatMap(result -> pdTracker.put(entryX))
+            .ifSuccess(result -> assertEquals(systemIdA, pdTracker.getSystem(systemIdA).systemId()))
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldReturnAllSystems() throws PdStoreException {
+    public void shouldReturnAllSystems() {
 
         final int entryIdA = 32;
         final int entryIdB = 8;
@@ -449,34 +478,36 @@ public class PlantDescriptionTrackerTest {
             .systems(List.of(systemC))
             .build();
 
-        pdTracker.put(entryA);
-        pdTracker.put(entryB);
-        pdTracker.put(entryC);
+        pdTracker.put(entryA)
+            .flatMap(result -> pdTracker.put(entryB))
+            .flatMap(result -> pdTracker.put(entryC))
+            .ifSuccess(result -> {
+                final List<PdeSystem> systems = pdTracker.getActiveSystems();
+                assertEquals(3, systems.size());
 
-        final List<PdeSystem> systems = pdTracker.getActiveSystems();
+                final PdeSystem retrievedA = systems.stream()
+                    .filter(system -> system.systemId().equals(systemIdA))
+                    .findFirst()
+                    .orElse(null);
+                final PdeSystem retrievedB = systems.stream()
+                    .filter(system -> system.systemId().equals(systemIdB))
+                    .findFirst()
+                    .orElse(null);
+                final PdeSystem retrievedC = systems.stream()
+                    .filter(system -> system.systemId().equals(systemIdC))
+                    .findFirst()
+                    .orElse(null);
 
-        assertEquals(3, systems.size());
+                assertNotNull(retrievedA);
+                assertNotNull(retrievedB);
+                assertNotNull(retrievedC);
 
-        final PdeSystem retrievedA = systems.stream()
-            .filter(system -> system.systemId().equals(systemIdA))
-            .findFirst()
-            .orElse(null);
-        final PdeSystem retrievedB = systems.stream()
-            .filter(system -> system.systemId().equals(systemIdB))
-            .findFirst()
-            .orElse(null);
-        final PdeSystem retrievedC = systems.stream()
-            .filter(system -> system.systemId().equals(systemIdC))
-            .findFirst()
-            .orElse(null);
-
-        assertNotNull(retrievedA);
-        assertNotNull(retrievedB);
-        assertNotNull(retrievedC);
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldReturnAllConnections() throws PdStoreException {
+    public void shouldReturnAllConnections() {
 
         // First entry
         final int entryIdA = 0;
@@ -575,17 +606,19 @@ public class PlantDescriptionTrackerTest {
             .connections(connectionsB)
             .build();
 
-        pdTracker.put(entryA);
-        pdTracker.put(entryB);
+        pdTracker.put(entryA)
+            .flatMap(result -> pdTracker.put(entryB))
+            .ifSuccess(result -> {
+                final List<Connection> retrievedConnections = pdTracker.getActiveConnections();
+                assertEquals(2, retrievedConnections.size());
 
-        final List<Connection> retrievedConnections = pdTracker.getActiveConnections();
-        assertEquals(2, retrievedConnections.size());
+                final Connection connectionA = retrievedConnections.get(1);
+                final Connection connectionB = retrievedConnections.get(0);
 
-        final Connection connectionA = retrievedConnections.get(1);
-        final Connection connectionB = retrievedConnections.get(0);
-
-        assertEquals(consumerIdA, connectionA.consumer().systemId());
-        assertEquals(consumerIdB, connectionB.consumer().systemId());
+                assertEquals(consumerIdA, connectionA.consumer().systemId());
+                assertEquals(consumerIdB, connectionB.consumer().systemId());
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
@@ -595,7 +628,7 @@ public class PlantDescriptionTrackerTest {
     }
 
     @Test
-    public void shouldReturnServiceDefinition() throws PdStoreException {
+    public void shouldReturnServiceDefinition() {
 
         // First entry
         final int entryIdA = 0;
@@ -671,15 +704,17 @@ public class PlantDescriptionTrackerTest {
             .systems(List.of(consumerSystemB))
             .build();
 
-        pdTracker.put(entryA);
-        pdTracker.put(entryB);
-
-        final String serviceDefinition = pdTracker.getServiceDefinition(producerPortA);
-        assertEquals(serviceDefinitionA, serviceDefinition);
+        pdTracker.put(entryA)
+            .flatMap(result -> pdTracker.put(entryB))
+            .ifSuccess(result -> {
+                final String serviceDefinition = pdTracker.getServiceDefinition(producerPortA);
+                assertEquals(serviceDefinitionA, serviceDefinition);
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldThrowWhenGettingSdFromNonexistentPort() throws PdStoreException {
+    public void shouldThrowWhenGettingSdFromNonexistentPort() {
         final int entryId = 98;
         final String nonexistentPort = "qwerty";
 
@@ -691,14 +726,14 @@ public class PlantDescriptionTrackerTest {
             .active(true)
             .build();
 
-        pdTracker.put(entry);
-
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(
-            "No port named '" + nonexistentPort +
-                "' could be found in the Plant Description Tracker."
-        );
-        pdTracker.getServiceDefinition(nonexistentPort);
+        pdTracker.put(entry)
+            .map(result -> pdTracker.getServiceDefinition(nonexistentPort))
+            .ifSuccess(result -> fail())
+            .onFailure(e -> {
+                final String expectedMessage = "No port named '" + nonexistentPort +
+                    "' could be found in the Plant Description Tracker.";
+                assertEquals(expectedMessage, e.getMessage());
+            });
     }
 
     @Test
@@ -710,7 +745,7 @@ public class PlantDescriptionTrackerTest {
     }
 
     @Test
-    public void shouldThrowWhenRetrievingMissingSystem() throws PdStoreException {
+    public void shouldThrowWhenRetrievingMissingSystem() {
         final PlantDescriptionEntryDto entry = new PlantDescriptionEntryDto.Builder()
             .id(123)
             .plantDescription("Plant Description A")
@@ -720,10 +755,10 @@ public class PlantDescriptionTrackerTest {
             .build();
         final String systemId = "Nonexistent";
 
-        pdTracker.put(entry);
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("Could not find system with ID '" + systemId + "'.");
-        pdTracker.getSystem(systemId);
+        pdTracker.put(entry)
+            .map(result -> pdTracker.getSystem(systemId))
+            .ifSuccess(result -> fail())
+            .onFailure(e -> assertEquals("Could not find system with ID '" + systemId + "'.", e.getMessage()));
     }
 
     @Test
@@ -735,13 +770,15 @@ public class PlantDescriptionTrackerTest {
         store.write(TestUtils.createEntry(idA));
         store.write(TestUtils.createEntry(idB));
         pdTracker = new PlantDescriptionTracker(store);
-        pdTracker.put(TestUtils.createEntry(idC));
+        pdTracker.put(TestUtils.createEntry(idC))
+            .ifSuccess(result -> {
+                // An earlier, naive implementation of getUniqueId would return
+                // idC at this point.
+                final int nextId = pdTracker.getUniqueId();
+                assertEquals(idC + 1, nextId);
+            })
+            .onFailure(e -> fail());
 
-        // An earlier, naive implementation of getUniqueId would return idC at
-        // this point.
-        final int nextId = pdTracker.getUniqueId();
-
-        assertEquals(idC + 1, nextId);
     }
 
     static final class Listener implements PlantDescriptionUpdateListener {
@@ -756,24 +793,27 @@ public class PlantDescriptionTrackerTest {
         PlantDescriptionEntry lastRemoved;
 
         @Override
-        public void onPlantDescriptionAdded(final PlantDescriptionEntry entry) {
+        public Future<Void> onPlantDescriptionAdded(final PlantDescriptionEntry entry) {
             lastAdded = entry;
             numAdded++;
+            return Future.done();
         }
 
         @Override
-        public void onPlantDescriptionRemoved(final PlantDescriptionEntry entry) {
+        public Future<Void> onPlantDescriptionRemoved(final PlantDescriptionEntry entry) {
             lastRemoved = entry;
             numRemoved++;
+            return Future.done();
         }
 
         @Override
-        public void onPlantDescriptionUpdated(
+        public Future<Void> onPlantDescriptionUpdated(
             PlantDescriptionEntry updatedEntry,
             PlantDescriptionEntry oldEntry
         ) {
             lastUpdated = updatedEntry;
             numUpdated++;
+            return Future.done();
         }
     }
 

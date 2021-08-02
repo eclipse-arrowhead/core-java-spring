@@ -38,5 +38,15 @@
     "name": "domain.port",
     "type": "java.lang.Integer",
     "description": "A description for 'domain.port'"
+  },
+  {
+    "name": "websockets.enabled",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'websockets.enabled'"
+  },
+  {
+    "name": "acl.file",
+    "type": "java.lang.String",
+    "description": "A description for 'acl.file'"
   }
 ]}

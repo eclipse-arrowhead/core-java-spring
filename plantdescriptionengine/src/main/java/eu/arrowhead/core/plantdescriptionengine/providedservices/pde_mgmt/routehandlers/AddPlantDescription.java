@@ -50,7 +50,7 @@ public class AddPlantDescription implements HttpRouteHandler {
         Objects.requireNonNull(response, "Expected response.");
 
         return request.bodyTo(PlantDescriptionDto::decodeJson)
-            .map(description -> {
+            .flatMap(description -> {
 
                 final PlantDescriptionEntryDto entry = PlantDescriptionEntry.from(description, pdTracker.getUniqueId());
 
@@ -59,19 +59,20 @@ public class AddPlantDescription implements HttpRouteHandler {
                 final Map<Integer, PlantDescriptionEntry> entries = pdTracker.getEntryMap();
                 entries.put(entry.id(), entry);
                 final PlantDescriptionValidator validator = new PlantDescriptionValidator(entries);
+
                 if (validator.hasError()) {
-                    return response
+                    return Future.success(response
                         .status(HttpStatus.BAD_REQUEST)
-                        .body(ErrorMessage.of(validator.getErrorMessage()), CodecType.JSON);
+                        .body(ErrorMessage.of(validator.getErrorMessage()), CodecType.JSON));
                 }
 
-                try {
-                    pdTracker.put(entry);
-                } catch (final PdStoreException e) {
-                    logger.error("Failure when communicating with backing store.", e);
-                    return response.status(HttpStatus.INTERNAL_SERVER_ERROR);
-                }
-                return response.status(HttpStatus.CREATED).body(entry, CodecType.JSON);
+                return pdTracker.put(entry)
+                    .map(result -> response.status(HttpStatus.CREATED).body(entry, CodecType.JSON))
+                    .mapCatch(PdStoreException.class, e -> {
+                        logger.error("Failure when communicating with backing store.", e);
+                        return response.status(HttpStatus.INTERNAL_SERVER_ERROR);
+                    });
             });
+
     }
 }

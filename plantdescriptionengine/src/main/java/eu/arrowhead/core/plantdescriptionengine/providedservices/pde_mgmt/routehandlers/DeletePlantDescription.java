@@ -80,16 +80,14 @@ public class DeletePlantDescription implements HttpRouteHandler {
             return Future.success(response);
         }
 
-        try {
-            pdTracker.remove(id);
-        } catch (final PdStoreException e) {
-            logger.error("Failed to remove Plant Description Entry from backing store", e);
-            response
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErrorMessage.of("Encountered an error while deleting entry file."), CodecType.JSON);
-            return Future.success(response);
-        }
-
-        return Future.success(response.status(HttpStatus.OK));
+        return pdTracker.remove(id)
+            .map(result -> response.status(HttpStatus.OK))
+            .mapCatch(PdStoreException.class, e -> {
+                logger.error("Failed to remove Plant Description Entry from backing store", e);
+                response
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ErrorMessage.of("Encountered an error while deleting entry file."), CodecType.JSON);
+                return response;
+            });
     }
 }

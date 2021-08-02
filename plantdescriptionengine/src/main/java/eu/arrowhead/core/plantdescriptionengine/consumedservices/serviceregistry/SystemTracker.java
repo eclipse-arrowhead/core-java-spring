@@ -93,7 +93,10 @@ public class SystemTracker {
      *                   Registry.
      * @param newSystems Systems that are present in the Service Registry.
      */
-    private void notifyListeners(final List<? extends SrSystem> oldSystems, final List<? extends SrSystem> newSystems) {
+    void notifyListeners(final List<? extends SrSystem> oldSystems, final List<? extends SrSystem> newSystems) {
+        Objects.requireNonNull(oldSystems, "Expected old systems.");
+        Objects.requireNonNull(newSystems, "Expected new systems.");
+        
         // Report removed systems
         for (final SrSystem oldSystem : oldSystems) {
             final boolean stillPresent = newSystems.stream()

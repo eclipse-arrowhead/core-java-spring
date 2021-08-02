@@ -28,108 +28,102 @@ import eu.arrowhead.core.datamanager.database.service.DataManagerDBService;
 
 @Service
 public class HistorianService {
-
-  //=================================================================================================
-  // members
- 
-  private final Logger logger = LogManager.getLogger(HistorianService.class);
-
-  @Autowired
-  private DataManagerDBService dataManagerDBService;
-
-  //=================================================================================================
-  // methods
-
-  //-------------------------------------------------------------------------------------------------
-  public ArrayList<String> getSystems(){
-    logger.debug("getSystems");
-
-    return dataManagerDBService.getAllHistorianSystems();
-  }
-  
-  //-------------------------------------------------------------------------------------------------
-  public ArrayList<String> getServicesFromSystem(final String systemName) {
-
-    if (Utilities.isEmpty(systemName)) {
-      return null;
-    }
-    logger.debug("getServicesFromSystem for {}", systemName);
-
-    return dataManagerDBService.getServicesFromSystem(systemName);
-  }
-
-  //-------------------------------------------------------------------------------------------------
-  public boolean createEndpoint(final String systemName, final String serviceName) {
-
-    if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
-      return false;
-    }
-    logger.debug("createEndpoint for {}/{}", systemName, serviceName);
-
-    return dataManagerDBService.createEndpoint(systemName, serviceName);
-  }
-
-  //-------------------------------------------------------------------------------------------------
-  public boolean addServiceForSystem(final String systemName, final String serviceName, final String serviceType) {
-
-    if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName) || Utilities.isEmpty(serviceType)) {
-      return false;
-    }
-    logger.debug("addServiceForSystem for {}/{}", systemName, serviceName);
-
-    return dataManagerDBService.addServiceForSystem(systemName, serviceName, serviceType);
-  }
-
-  //-------------------------------------------------------------------------------------------------
-  public boolean updateEndpoint(final String systemName, final String serviceName, final Vector<SenML> msg) {
-
-    if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
-      return false;
-    }
-    logger.debug("updateEndpoint for {}/{}", systemName, serviceName);
-
-    if (msg == null) {
-      return false;
-    }
-
-    if (msg.size() == 0) {
-      return false;
-    }
-
-    return dataManagerDBService.updateEndpoint(systemName, serviceName, msg);
-  }
-  
-  //-------------------------------------------------------------------------------------------------
-  public Vector<SenML> fetchEndpoint(final String systemName, final String serviceName, final double from, final double to, final int count) {
-
-    if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
-      return null;
-    }
-    logger.debug("fetchEndpoint for {}/{}", systemName, serviceName);
-
-    return dataManagerDBService.fetchMessagesFromEndpoint(systemName, serviceName, from, to, count);
-  }
-
-  //-------------------------------------------------------------------------------------------------
-  public Vector<SenML> fetchEndpoint(final String systemName, final String serviceName, final double from, final double to, final Vector<Integer> counts, final Vector<String> signals) {
-
-    if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
-      return null;
-    }
-    logger.debug("fetchEndpoint with signals for {}/{}", systemName, serviceName);
-
-    if (counts == null || signals == null) {
-      return null;
-    }
-
-    if (signals.size() == 0) {
-      return null;
-    }
-
-    if (counts.size() != signals.size()) {
-      return null;
-    }
-
-    return dataManagerDBService.fetchSignalsFromEndpoint(systemName, serviceName, from, to, counts, signals);
-  }
+	
+	//=================================================================================================
+	// members
+	 
+	private final Logger logger = LogManager.getLogger(HistorianService.class);
+	
+	@Autowired
+	private DataManagerDBService dataManagerDBService;
+	
+	//=================================================================================================
+	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	public ArrayList<String> getSystems(){
+		logger.debug("getSystems");
+	
+		return dataManagerDBService.getAllHistorianSystems();
+	}
+	  
+	//-------------------------------------------------------------------------------------------------
+	public ArrayList<String> getServicesFromSystem(final String systemName) {
+		if (Utilities.isEmpty(systemName)) {
+			return null;
+	    }
+	    logger.debug("getServicesFromSystem for {}", systemName);
+	
+	    return dataManagerDBService.getServicesFromSystem(systemName);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public boolean createEndpoint(final String systemName, final String serviceName) {
+	    if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
+	    	return false;
+	    }
+	    logger.debug("createEndpoint for {}/{}", systemName, serviceName);
+	
+	    return dataManagerDBService.createEndpoint(systemName, serviceName);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public boolean addServiceForSystem(final String systemName, final String serviceName, final String serviceType) {
+	    if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName) || Utilities.isEmpty(serviceType)) {
+	    	return false;
+	    }
+	    logger.debug("addServiceForSystem for {}/{}", systemName, serviceName);
+	
+	    return dataManagerDBService.addServiceForSystem(systemName, serviceName, serviceType);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public boolean updateEndpoint(final String systemName, final String serviceName, final Vector<SenML> msg) {
+	    if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
+	    	return false;
+	    }
+	    logger.debug("updateEndpoint for {}/{}", systemName, serviceName);
+	
+	    if (msg == null) {
+	    	return false;
+	    }
+	
+	    if (msg.size() == 0) {
+	    	return false;
+	    }
+	
+	    return dataManagerDBService.updateEndpoint(systemName, serviceName, msg);
+	}
+	  
+	//-------------------------------------------------------------------------------------------------
+	public Vector<SenML> fetchEndpoint(final String systemName, final String serviceName, final double from, final double to, final int count) {
+	    if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
+	    	return null;
+	    }
+	    logger.debug("fetchEndpoint for {}/{}", systemName, serviceName);
+	
+	    return dataManagerDBService.fetchMessagesFromEndpoint(systemName, serviceName, from, to, count);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Vector<SenML> fetchEndpoint(final String systemName, final String serviceName, final double from, final double to, final Vector<Integer> counts, final Vector<String> signals) {
+	    if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
+	    	return null;
+	    }
+	    logger.debug("fetchEndpoint with signals for {}/{}", systemName, serviceName);
+	
+	    if (counts == null || signals == null) {
+	    	return null;
+	    }
+	
+	    if (signals.size() == 0) {
+	    	return null;
+	    }
+	
+	    if (counts.size() != signals.size()) {
+	    	return null;
+	    }
+	
+	    return dataManagerDBService.fetchSignalsFromEndpoint(systemName, serviceName, from, to, counts, signals);
+	}
 }

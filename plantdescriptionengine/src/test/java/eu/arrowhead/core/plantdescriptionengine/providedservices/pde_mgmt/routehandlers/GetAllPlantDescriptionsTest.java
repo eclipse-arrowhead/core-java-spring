@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import se.arkalix.net.http.HttpStatus;
 import se.arkalix.net.http.service.HttpServiceRequest;
+import se.arkalix.util.concurrent.Futures;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -47,25 +48,25 @@ public class GetAllPlantDescriptionsTest {
     }
 
     @Test
-    public void shouldRespondWithStoredEntries() throws PdStoreException {
+    public void shouldRespondWithStoredEntries() {
 
         final List<Integer> entryIds = List.of(0, 1, 2, 3);
-
-        for (final int id : entryIds) {
-            pdTracker.put(TestUtils.createEntry(id));
-        }
-
         final HttpServiceRequest request = new MockRequest();
 
-        handler.handle(request, response).ifSuccess(result -> {
-            final PlantDescriptionEntryList entries = (PlantDescriptionEntryList) response.getRawBody();
-            assertEquals(HttpStatus.OK, response.status().orElse(null));
-            assertEquals(entryIds.size(), entries.count());
-        }).onFailure(e -> fail());
+        Futures.serialize(
+            entryIds.stream().map(id -> pdTracker.put(TestUtils.createEntry(id)))
+        )
+            .flatMap(result -> handler.handle(request, response))
+            .ifSuccess(result -> {
+                final PlantDescriptionEntryList entries = (PlantDescriptionEntryList) response.getRawBody();
+                assertEquals(HttpStatus.OK, response.status().orElse(null));
+                assertEquals(entryIds.size(), entries.count());
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldSortByIdDescending() throws PdStoreException {
+    public void shouldSortByIdDescending() {
 
         final PlantDescriptionEntryDto entry1 = new PlantDescriptionEntryDto.Builder()
             .id(32)
@@ -89,21 +90,19 @@ public class GetAllPlantDescriptionsTest {
             .updatedAt(t5)
             .build();
 
-        pdTracker.put(entry1);
-        pdTracker.put(entry2);
-        pdTracker.put(entry3);
-
-        final int numEntries = pdTracker.getListDto().count();
         final HttpServiceRequest request = MockRequest.getSortRequest(
             QueryParameter.ID, QueryParameter.DESC
         );
 
-        handler.handle(request, response)
+        pdTracker.put(entry1)
+            .flatMap(result -> pdTracker.put(entry2))
+            .flatMap(result -> pdTracker.put(entry3))
+            .flatMap(result -> handler.handle(request, response))
             .ifSuccess(result -> {
                 final PlantDescriptionEntryList entries = (PlantDescriptionEntryList) response.getRawBody();
 
                 assertEquals(HttpStatus.OK, response.status().orElse(null));
-                assertEquals(numEntries, entries.count());
+                assertEquals(3, entries.count());
 
                 int previousId = entries.data().get(0).id();
                 for (int i = 1; i < entries.count(); i++) {
@@ -112,12 +111,17 @@ public class GetAllPlantDescriptionsTest {
                     previousId = entry.id();
                 }
             })
-            .onFailure(e -> fail());
+            .onFailure(e -> {
+                e.printStackTrace();
+                fail();
+            });
     }
 
     @Test
-    public void shouldSortByCreatedAtAscending() throws PdStoreException {
-
+    public void shouldSortByCreatedAtAscending() {
+        final HttpServiceRequest request = MockRequest.getSortRequest(
+            QueryParameter.CREATED_AT, QueryParameter.ASC
+        );
         final PlantDescriptionEntryDto entry1 = new PlantDescriptionEntryDto.Builder()
             .id(32)
             .plantDescription("Plant Description 1")
@@ -140,20 +144,14 @@ public class GetAllPlantDescriptionsTest {
             .updatedAt(t5)
             .build();
 
-        pdTracker.put(entry1);
-        pdTracker.put(entry2);
-        pdTracker.put(entry3);
-
-        final int numEntries = pdTracker.getListDto().count();
-        final HttpServiceRequest request = MockRequest.getSortRequest(
-            QueryParameter.CREATED_AT, QueryParameter.ASC
-        );
-
-        handler.handle(request, response)
+        pdTracker.put(entry1)
+            .flatMap(result -> pdTracker.put(entry2))
+            .flatMap(result -> pdTracker.put(entry3))
+            .flatMap(result -> handler.handle(request, response))
             .ifSuccess(result -> {
                 final PlantDescriptionEntryList entries = (PlantDescriptionEntryList) response.getRawBody();
                 assertEquals(HttpStatus.OK, response.status().orElse(null));
-                assertEquals(numEntries, entries.count());
+                assertEquals(3, entries.count());
 
                 Instant previousTimestamp = entries.data().get(0).createdAt();
                 for (int i = 1; i < entries.count(); i++) {
@@ -166,7 +164,10 @@ public class GetAllPlantDescriptionsTest {
     }
 
     @Test
-    public void shouldSortByUpdatedAtDescending() throws PdStoreException {
+    public void shouldSortByUpdatedAtDescending() {
+        final HttpServiceRequest request = MockRequest.getSortRequest(
+            QueryParameter.UPDATED_AT, QueryParameter.DESC
+        );
 
         final PlantDescriptionEntryDto entry1 = new PlantDescriptionEntryDto.Builder()
             .id(32)
@@ -190,22 +191,16 @@ public class GetAllPlantDescriptionsTest {
             .updatedAt(t5)
             .build();
 
-        pdTracker.put(entry1);
-        pdTracker.put(entry2);
-        pdTracker.put(entry3);
-
-        final int numEntries = pdTracker.getListDto().count();
-        final HttpServiceRequest request = MockRequest.getSortRequest(
-            QueryParameter.UPDATED_AT, QueryParameter.DESC
-        );
-
-        handler.handle(request, response)
+        pdTracker.put(entry1)
+            .flatMap(result -> pdTracker.put(entry2))
+            .flatMap(result -> pdTracker.put(entry3))
+            .flatMap(result -> handler.handle(request, response))
             .ifSuccess(result -> {
                 final PlantDescriptionEntryList entries = (PlantDescriptionEntryList) response.getRawBody();
 
                 assertTrue(response.status().isPresent());
                 assertEquals(HttpStatus.OK, response.status().get());
-                assertEquals(numEntries, entries.count());
+                assertEquals(3, entries.count());
 
                 Instant previousTimestamp = entries.data().get(0).updatedAt();
                 for (int i = 1; i < entries.count(); i++) {
@@ -238,44 +233,39 @@ public class GetAllPlantDescriptionsTest {
     }
 
     @Test
-    public void shouldFilterEntries() throws PdStoreException {
+    public void shouldFilterEntries() {
 
         final List<Integer> entryIds = List.of(0, 1, 2);
         final int activeEntryId = 3;
-
-        for (final int id : entryIds) {
-            pdTracker.put(TestUtils.createEntry(id));
-        }
-
         final Instant now = Instant.now();
-        pdTracker.put(new PlantDescriptionEntryDto.Builder()
-            .id(activeEntryId)
-            .plantDescription("Plant Description 1B")
-            .active(true)
-            .createdAt(now)
-            .updatedAt(now)
-            .build());
-
         final HttpServiceRequest request = new MockRequest.Builder()
             .queryParam(QueryParameter.ACTIVE, true)
             .build();
 
-        handler.handle(request, response).ifSuccess(result -> {
-            final PlantDescriptionEntryList entries = (PlantDescriptionEntryList) response.getRawBody();
-            assertEquals(HttpStatus.OK, response.status().orElse(null));
-            assertEquals(1, entries.count());
-            assertEquals(entries.data().get(0).id(), activeEntryId);
-        }).onFailure(e -> fail());
+        Futures.serialize(
+            entryIds.stream().map(id -> pdTracker.put(TestUtils.createEntry(id)))
+        )
+            .flatMap(result -> pdTracker.put(new PlantDescriptionEntryDto.Builder()
+                .id(activeEntryId)
+                .plantDescription("Plant Description 1B")
+                .active(true)
+                .createdAt(now)
+                .updatedAt(now)
+                .build()))
+            .flatMap(result -> handler.handle(request, response))
+            .ifSuccess(result -> {
+                final PlantDescriptionEntryList entries = (PlantDescriptionEntryList) response.getRawBody();
+                assertEquals(HttpStatus.OK, response.status().orElse(null));
+                assertEquals(1, entries.count());
+                assertEquals(entries.data().get(0).id(), activeEntryId);
+            })
+            .onFailure(e -> fail());
     }
 
     @Test
-    public void shouldPaginate() throws PdStoreException {
+    public void shouldPaginate() {
 
         final List<Integer> entryIds = Arrays.asList(32, 11, 25, 3, 24, 35);
-
-        for (final int id : entryIds) {
-            pdTracker.put(TestUtils.createEntry(id));
-        }
 
         final int page = 1;
         final int itemsPerPage = 2;
@@ -285,20 +275,25 @@ public class GetAllPlantDescriptionsTest {
             .queryParam(QueryParameter.ITEM_PER_PAGE, itemsPerPage)
             .build();
 
-        handler.handle(request, response).ifSuccess(result -> {
-            final PlantDescriptionEntryList entries = (PlantDescriptionEntryList) response.getRawBody();
-            assertEquals(HttpStatus.OK, response.status().orElse(null));
-            assertEquals(entryIds.size(), entries.count());
+        Futures.serialize(
+            entryIds.stream().map(id -> pdTracker.put(TestUtils.createEntry(id)))
+        )
+            .flatMap(result -> handler.handle(request, response))
+            .ifSuccess(result -> {
+                final PlantDescriptionEntryList entries = (PlantDescriptionEntryList) response.getRawBody();
+                assertEquals(HttpStatus.OK, response.status().orElse(null));
+                assertEquals(entryIds.size(), entries.count());
 
-            // Sort the entry ID:s, so that their order will match that of
-            // the response data.
-            Collections.sort(entryIds);
+                // Sort the entry ID:s, so that their order will match that of
+                // the response data.
+                Collections.sort(entryIds);
 
-            for (int i = 0; i < itemsPerPage; i++) {
-                final int index = page * itemsPerPage + i;
-                assertEquals((int) entryIds.get(index), entries.data().get(i).id());
-            }
-        }).onFailure(e -> fail());
+                for (int i = 0; i < itemsPerPage; i++) {
+                    final int index = page * itemsPerPage + i;
+                    assertEquals((int) entryIds.get(index), entries.data().get(i).id());
+                }
+            })
+            .onFailure(e -> fail());
 
     }
 
@@ -318,7 +313,8 @@ public class GetAllPlantDescriptionsTest {
             assertEquals(HttpStatus.BAD_REQUEST, response.status().orElse(null));
             assertEquals(expectedErrorMessage, actualErrorMessage);
 
-        }).onFailure(e -> fail());
+        })
+            .onFailure(e -> fail());
     }
 
     @Test
@@ -334,7 +330,8 @@ public class GetAllPlantDescriptionsTest {
             assertEquals(HttpStatus.BAD_REQUEST, response.status().orElse(null));
             assertEquals(expectedErrorMessage, actualErrorMessage);
 
-        }).onFailure(e -> fail());
+        })
+            .onFailure(e -> fail());
     }
 
 }
