@@ -22,7 +22,7 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.database.entity.ChoreographerAction;
 import eu.arrowhead.common.database.entity.ChoreographerPlan;
-import eu.arrowhead.common.database.entity.ChoreographerRunningStep;
+import eu.arrowhead.common.database.entity.ChoreographerSessionStep;
 import eu.arrowhead.common.database.entity.ChoreographerStep;
 import eu.arrowhead.common.database.entity.ChoreographerStepDetail;
 import eu.arrowhead.common.database.entity.ChoreographerStepNextStepConnection;
@@ -146,7 +146,7 @@ public class ChoreographerService {
 
         choreographerDBService.setRunningStepStatus(runningStepId, ChoreographerStatusType.DONE, "Step execution is done.");
 
-        ChoreographerRunningStep runningStep = choreographerDBService.getRunningStepById(runningStepId);
+        ChoreographerSessionStep runningStep = choreographerDBService.getRunningStepById(runningStepId);
         ChoreographerStep currentStep = choreographerDBService.getStepById(runningStep.getStep().getId());
 
         //System.out.println(currentStep.getName());
@@ -156,9 +156,9 @@ public class ChoreographerService {
             logger.debug("Step has no next steps therefore it should be checked if can go to next action.");
             ChoreographerAction currentAction = currentStep.getAction();
 
-            List<ChoreographerRunningStep> currentRunningStepList = choreographerDBService.getAllRunningStepsBySessionId(sessionId);
+            List<ChoreographerSessionStep> currentRunningStepList = choreographerDBService.getAllRunningStepsBySessionId(sessionId);
 
-            for (ChoreographerRunningStep runningStepInstance : currentRunningStepList) {
+            for (ChoreographerSessionStep runningStepInstance : currentRunningStepList) {
                 //System.out.println(runningStepInstance.getId());
                 if (!runningStepInstance.getStatus().equals(ChoreographerStatusType.DONE)) {
                     //System.out.println("canGoToNextStep should be set to false");
@@ -196,7 +196,7 @@ public class ChoreographerService {
             // Check if all previous steps of the next step are done.
             for (ChoreographerStepNextStepConnection prevStep : nextStep.getNextStepEntry().getSteps()) {
                 //System.out.println(prevStep.getId() + "    " + prevStep.getStepEntry().getName());
-                ChoreographerRunningStep prevRunningStep = choreographerDBService.getRunningStepBySessionIdAndStepId(sessionId, prevStep.getStepEntry().getId());
+                ChoreographerSessionStep prevRunningStep = choreographerDBService.getRunningStepBySessionIdAndStepId(sessionId, prevStep.getStepEntry().getId());
                 if (!prevRunningStep.getStatus().equals(ChoreographerStatusType.DONE)) {
                     allPreviousStepsDone = false;
                 }
@@ -223,7 +223,7 @@ public class ChoreographerService {
     public void executeStep(ChoreographerStep step, long sessionId) throws InterruptedException {
         logger.debug("Execution of step with the id of " + step.getId() + " and sessionId of " + sessionId + " started.");
 
-        ChoreographerRunningStep runningStep = insertInitiatedRunningStep(step.getId(), sessionId);
+        ChoreographerSessionStep runningStep = insertInitiatedRunningStep(step.getId(), sessionId);
 
         ChoreographerSuitableExecutorResponseDTO suitableExecutors = choreographerDBService.getSuitableExecutorIdsByStepId(step.getId());
 
@@ -277,7 +277,7 @@ public class ChoreographerService {
     }
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerRunningStep insertInitiatedRunningStep(final long stepId, final long sessionId) {
+    public ChoreographerSessionStep insertInitiatedRunningStep(final long stepId, final long sessionId) {
         return choreographerDBService.registerRunningStep(stepId, sessionId, ChoreographerStatusType.RUNNING, "Step running is initiated and search for provider started.");
     }
 

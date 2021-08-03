@@ -1,8 +1,6 @@
 package eu.arrowhead.common.database.entity;
 
-import eu.arrowhead.common.CoreDefaults;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import java.time.ZonedDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,17 +8,17 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import java.time.ZonedDateTime;
-import java.util.HashSet;
-import java.util.Set;
+
+import eu.arrowhead.common.CoreDefaults;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"serviceDefinitionName", "version"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = { "executorId", "serviceDefinition"}))
 public class ChoreographerExecutorServiceDefinition {
 
     //=================================================================================================
@@ -29,22 +27,22 @@ public class ChoreographerExecutorServiceDefinition {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "executorId", referencedColumnName = "id", nullable = false)
+    private ChoreographerExecutor executor;
 
     @Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
-    private String serviceDefinitionName;
+    private String serviceDefinition;
 
-    @Column(nullable = false)
-    private Integer version;
+    private Integer minVersion;
+    private Integer maxVersion;
 
     @Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private ZonedDateTime createdAt;
 
     @Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private ZonedDateTime updatedAt;
-
-    @OneToMany(mappedBy = "serviceDefinitionEntry", fetch = FetchType.LAZY, orphanRemoval = true)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Set<ChoreographerExecutorServiceDefinitionConnection> executorConnections = new HashSet<>();
 
     //=================================================================================================
     // methods
@@ -54,9 +52,11 @@ public class ChoreographerExecutorServiceDefinition {
     }
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerExecutorServiceDefinition(String serviceDefinitionName, Integer version) {
-        this.serviceDefinitionName = serviceDefinitionName;
-        this.version = version;
+    public ChoreographerExecutorServiceDefinition(final ChoreographerExecutor executor, final String serviceDefinition, final Integer minVersion, final Integer maxVersion) {
+    	this.setExecutor(executor);
+        this.setServiceDefinition(serviceDefinition);
+        this.minVersion = minVersion;
+        this.maxVersion = maxVersion;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -74,23 +74,19 @@ public class ChoreographerExecutorServiceDefinition {
 
     //-------------------------------------------------------------------------------------------------
     public long getId() { return id; }
-    public String getServiceDefinitionName() { return serviceDefinitionName; }
-    public Integer getVersion() { return version; }
-    public Set<ChoreographerExecutorServiceDefinitionConnection> getExecutorConnections() { return executorConnections; }
+    public ChoreographerExecutor getExecutor() { return executor; }
+    public String getServiceDefinition() { return serviceDefinition; }
+    public Integer getMinVersion() { return minVersion; }
+    public Integer getMaxVersion() { return maxVersion; }
     public ZonedDateTime getCreatedAt() { return createdAt; }
     public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
     //-------------------------------------------------------------------------------------------------
-    public void setId(long id) { this.id = id; }
-    public void setServiceDefinitionName(String serviceDefinitionName) { this.serviceDefinitionName = serviceDefinitionName; }
-    public void setVersion(Integer version) { this.version = version; }
-    public void setExecutorConnections(Set<ChoreographerExecutorServiceDefinitionConnection> executorConnections) { this.executorConnections = executorConnections; }
-    public void setCreatedAt(ZonedDateTime createdAt) { this.createdAt = createdAt; }
-    public void setUpdatedAt(ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
-
-    //-------------------------------------------------------------------------------------------------
-    @Override
-    public String toString() {
-        return "ExecutorServiceDefinition [id = " + id + ", serviceDefinitionName = " + serviceDefinitionName + ", version = " + "]";
-    }
+    public void setId(final long id) { this.id = id; }
+    public void setExecutor(final ChoreographerExecutor executor) { this.executor = executor; }
+    public void setServiceDefinition(final String serviceDefinition) { this.serviceDefinition = serviceDefinition; }
+    public void setMinVersion(final Integer minVersion) { this.minVersion = minVersion; }
+    public void setMaxVersion(final Integer maxVersion) { this.maxVersion = maxVersion; }
+    public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
+    public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

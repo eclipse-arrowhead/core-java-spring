@@ -19,15 +19,15 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
 
-import eu.arrowhead.common.database.entity.ChoreographerRunningStep;
+import eu.arrowhead.common.database.entity.ChoreographerSessionStep;
 
 @Repository
-public interface ChoreographerRunningStepRepository extends RefreshableRepository<ChoreographerRunningStep, Long> {
+public interface ChoreographerRunningStepRepository extends RefreshableRepository<ChoreographerSessionStep, Long> {
 
     //=================================================================================================
     // methods
 
     //-------------------------------------------------------------------------------------------------
-    public Optional<ChoreographerRunningStep> findByStepIdAndSessionId(final long stepId, final long sessionId);
-    public List<ChoreographerRunningStep> findAllBySessionId(final long sessionId);
+    public Optional<ChoreographerSessionStep> findByStepIdAndSessionId(final long stepId, final long sessionId);
+    public List<ChoreographerSessionStep> findAllBySessionId(final long sessionId);
 }

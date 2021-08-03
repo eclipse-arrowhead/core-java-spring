@@ -24,7 +24,7 @@ import eu.arrowhead.common.database.entity.ChoreographerExecutor;
 import eu.arrowhead.common.database.entity.ChoreographerExecutorServiceDefinition;
 import eu.arrowhead.common.database.entity.ChoreographerExecutorServiceDefinitionConnection;
 import eu.arrowhead.common.database.entity.ChoreographerPlan;
-import eu.arrowhead.common.database.entity.ChoreographerRunningStep;
+import eu.arrowhead.common.database.entity.ChoreographerSessionStep;
 import eu.arrowhead.common.database.entity.ChoreographerSession;
 import eu.arrowhead.common.database.entity.ChoreographerStep;
 import eu.arrowhead.common.database.entity.ChoreographerStepDetail;
@@ -492,7 +492,7 @@ public class ChoreographerDBService {
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public ChoreographerRunningStep registerRunningStep(final long stepId, final long sessionId, final ChoreographerStatusType status, final String message) {
+    public ChoreographerSessionStep registerRunningStep(final long stepId, final long sessionId, final ChoreographerStatusType status, final String message) {
         try {
             if (status == null) {
                 throw new InvalidParameterException("Status is null or blank.");
@@ -506,7 +506,7 @@ public class ChoreographerDBService {
             final Optional<ChoreographerSession> sessionOptional = choreographerSessionRepository.findById(sessionId);
 
             if (stepOptional.isPresent() && sessionOptional.isPresent()) {
-                return choreographerRunningStepRepository.saveAndFlush(new ChoreographerRunningStep(status, message, stepOptional.get(), sessionOptional.get()));
+                return choreographerRunningStepRepository.saveAndFlush(new ChoreographerSessionStep(status, message, stepOptional.get(), sessionOptional.get()));
             } else {
                 throw new InvalidParameterException("Step or Session with given id(s) not found!");
             }
@@ -520,7 +520,7 @@ public class ChoreographerDBService {
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public ChoreographerRunningStep setRunningStepStatus(final long runningStepId, final ChoreographerStatusType status, final String message) {
+    public ChoreographerSessionStep setRunningStepStatus(final long runningStepId, final ChoreographerStatusType status, final String message) {
         try {
             if (status == null) {
                 throw new InvalidParameterException("Status is null or blank.");
@@ -530,10 +530,10 @@ public class ChoreographerDBService {
                 throw new InvalidParameterException("Message is null or blank.");
             }
 
-            final Optional<ChoreographerRunningStep> runningStepOptional = choreographerRunningStepRepository.findById(runningStepId);
+            final Optional<ChoreographerSessionStep> runningStepOptional = choreographerRunningStepRepository.findById(runningStepId);
 
             if (runningStepOptional.isPresent()) {
-                ChoreographerRunningStep runningStepToChange = runningStepOptional.get();
+                ChoreographerSessionStep runningStepToChange = runningStepOptional.get();
                 runningStepToChange.setStatus(status);
                 runningStepToChange.setMessage(message);
                 return choreographerRunningStepRepository.saveAndFlush(runningStepToChange);
@@ -667,11 +667,11 @@ public class ChoreographerDBService {
     }
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerRunningStep getRunningStepBySessionIdAndStepId(final long sessionId, final long stepId) {
+    public ChoreographerSessionStep getRunningStepBySessionIdAndStepId(final long sessionId, final long stepId) {
         logger.debug("getRunningStepBySessionIdAndStepId started...");
 
         try {
-            final Optional<ChoreographerRunningStep> runningStepOpt = choreographerRunningStepRepository.findByStepIdAndSessionId(stepId, sessionId);
+            final Optional<ChoreographerSessionStep> runningStepOpt = choreographerRunningStepRepository.findByStepIdAndSessionId(stepId, sessionId);
             if (runningStepOpt.isPresent()) {
                 return runningStepOpt.get();
             } else {
@@ -686,11 +686,11 @@ public class ChoreographerDBService {
     }
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerRunningStep getRunningStepById(final long id) {
+    public ChoreographerSessionStep getRunningStepById(final long id) {
         logger.debug("getRunningStepById started...");
 
         try {
-            final Optional<ChoreographerRunningStep> runningStepOpt = choreographerRunningStepRepository.findById(id);
+            final Optional<ChoreographerSessionStep> runningStepOpt = choreographerRunningStepRepository.findById(id);
             if (runningStepOpt.isPresent()) {
                 return runningStepOpt.get();
             } else {
@@ -724,11 +724,11 @@ public class ChoreographerDBService {
     }
 
     //-------------------------------------------------------------------------------------------------
-    public List<ChoreographerRunningStep> getAllRunningStepsBySessionId(final long sessionId) {
+    public List<ChoreographerSessionStep> getAllRunningStepsBySessionId(final long sessionId) {
         logger.debug("getAllRunningStepsBySessionId started...");
 
         try {
-            final List<ChoreographerRunningStep> runningSteps = choreographerRunningStepRepository.findAllBySessionId(sessionId);
+            final List<ChoreographerSessionStep> runningSteps = choreographerRunningStepRepository.findAllBySessionId(sessionId);
             if (!runningSteps.isEmpty()) {
                 return  runningSteps;
             } else {

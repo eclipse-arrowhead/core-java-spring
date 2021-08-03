@@ -1,27 +1,22 @@
 package eu.arrowhead.common.database.entity;
 
-import eu.arrowhead.common.CoreDefaults;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import java.time.ZonedDateTime;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import java.time.ZonedDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+
+import eu.arrowhead.common.CoreDefaults;
 
 @Entity
-@Table
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"address", "port", "baseUri"}))
 public class ChoreographerExecutor {
 
     //=================================================================================================
@@ -33,7 +28,7 @@ public class ChoreographerExecutor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
+    @Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC, unique = true)
     private String name;
 
     @Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
@@ -42,18 +37,14 @@ public class ChoreographerExecutor {
     @Column(nullable = false)
     private int port;
 
-    @Column(nullable = true, length = CoreDefaults.VARCHAR_BASIC)
-    private String baseUri;
+    @Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
+    private String baseUri = "";
 
     @Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private ZonedDateTime createdAt;
 
     @Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private ZonedDateTime updatedAt;
-
-    @OneToMany(mappedBy = "executorEntry", fetch = FetchType.EAGER, orphanRemoval = true)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Set<ChoreographerExecutorServiceDefinitionConnection> serviceDefinitionConnections = new HashSet<>();
 
     //=================================================================================================
     // methods
@@ -95,19 +86,17 @@ public class ChoreographerExecutor {
     public String getAddress() { return address; }
     public int getPort() { return port; }
     public String getBaseUri() { return baseUri; }
-    public Set<ChoreographerExecutorServiceDefinitionConnection> getServiceDefinitionConnections() { return serviceDefinitionConnections; }
     public ZonedDateTime getCreatedAt() { return createdAt; }
     public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
     //-------------------------------------------------------------------------------------------------
-    public void setId(long id) { this.id = id; }
-    public void setName(String name) { this.name = name; }
-    public void setAddress(String address) { this.address = address; }
-    public void setPort(int port) { this.port = port; }
-    public void setBaseUri(String baseUri) { this.baseUri = baseUri; }
-    public void setServiceDefinitionConnections(Set<ChoreographerExecutorServiceDefinitionConnection> serviceDefinitionConnections) { this.serviceDefinitionConnections = serviceDefinitionConnections; }
-    public void setCreatedAt(ZonedDateTime createdAt) { this.createdAt = createdAt; }
-    public void setUpdatedAt(ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public void setId(final long id) { this.id = id; }
+    public void setName(final String name) { this.name = name; }
+    public void setAddress(final String address) { this.address = address; }
+    public void setPort(final int port) { this.port = port; }
+    public void setBaseUri(final String baseUri) { this.baseUri = baseUri; }
+    public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
+    public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 
     //-------------------------------------------------------------------------------------------------
     @Override

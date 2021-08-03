@@ -42,12 +42,12 @@ public class ChoreographerStepNextStepConnection {
     private long id;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn (name = "stepId", referencedColumnName = "id", nullable = false)
-    private ChoreographerStep stepEntry;
+    @JoinColumn (name = "fromId", referencedColumnName = "id", nullable = false)
+    private ChoreographerStep from;
 
     @ManyToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn (name = "nextStepId", referencedColumnName = "id", nullable = false)
-    private ChoreographerStep nextStepEntry;
+    @JoinColumn (name = "toId", referencedColumnName = "id", nullable = false)
+    private ChoreographerStep to;
 
     @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private ZonedDateTime createdAt;
@@ -62,22 +62,22 @@ public class ChoreographerStepNextStepConnection {
 	public ChoreographerStepNextStepConnection() {}
 
     //-------------------------------------------------------------------------------------------------
-	public ChoreographerStepNextStepConnection(final ChoreographerStep stepEntry, final ChoreographerStep nextStepEntry) {
-        this.stepEntry = stepEntry;
-        this.nextStepEntry = nextStepEntry;
+	public ChoreographerStepNextStepConnection(final ChoreographerStep from, final ChoreographerStep to) {
+        this.from = from;
+        this.to = to;
     }
 
     //-------------------------------------------------------------------------------------------------
 	public long getId() { return id; }
-	public ChoreographerStep getStepEntry() { return stepEntry; }
-	public ChoreographerStep getNextStepEntry() { return nextStepEntry; }
+	public ChoreographerStep getFrom() { return from; }
+	public ChoreographerStep getTo() { return to; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
     //-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
-    public void setStepEntry(final ChoreographerStep stepEntry) { this.stepEntry = stepEntry; }
-    public void setNextActionStepEntry(final ChoreographerStep nextStepEntry) { this.nextStepEntry = nextStepEntry; }
+	public void setFrom(final ChoreographerStep from) { this.from = from; }
+	public void setTo(final ChoreographerStep to) { this.to = to; }
     public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
     public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 

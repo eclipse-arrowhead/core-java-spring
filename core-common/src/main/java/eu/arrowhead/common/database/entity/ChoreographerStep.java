@@ -17,6 +17,7 @@ package eu.arrowhead.common.database.entity;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -48,8 +49,26 @@ public class ChoreographerStep {
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false, /*unique = true,*/ length = CoreDefaults.VARCHAR_BASIC)
+    @Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
     private String name;
+    
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "actionId", referencedColumnName = "id", nullable = false)
+    private ChoreographerAction action;
+    
+    private boolean firstStep = false;
+    
+    @Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
+    private String serviceDefinition;
+
+    @Column
+    private Integer minVersion;
+
+    @Column
+    private Integer maxVersion;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String orchTemplate;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String staticParameters;
@@ -63,30 +82,13 @@ public class ChoreographerStep {
     @Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private ZonedDateTime updatedAt;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "actionFirstStepId", referencedColumnName = "id")
-    private ChoreographerAction actionFirstStep;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "actionId", referencedColumnName = "id", nullable = false)
-    private ChoreographerAction action;
-
-    // SHOULD BE LAZY
-    @OneToMany (mappedBy = "stepEntry", fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany (mappedBy = "from", fetch = FetchType.EAGER, orphanRemoval = true)
     @OnDelete (action = OnDeleteAction.CASCADE)
-    private Set<ChoreographerStepNextStepConnection> nextSteps = new HashSet<>();
+    private Set<ChoreographerStepNextStepConnection> nextStepsConnections = new HashSet<>();
 
-    @OneToMany (mappedBy = "nextStepEntry", fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany (mappedBy = "to", fetch = FetchType.EAGER, orphanRemoval = true)
     @OnDelete (action = OnDeleteAction.CASCADE)
-    private Set<ChoreographerStepNextStepConnection> steps = new HashSet<>();
-
-    @OneToMany(mappedBy = "step", fetch = FetchType.EAGER, orphanRemoval = true)
-    @OnDelete (action = OnDeleteAction.CASCADE)
-    private Set<ChoreographerRunningStep> runningSteps = new HashSet<>();
-
-    @OneToMany(mappedBy = "step", fetch = FetchType.EAGER, orphanRemoval = true)
-    @OnDelete (action = OnDeleteAction.CASCADE)
-    private Set<ChoreographerStepDetail> stepDetails = new HashSet<>();
+    private Set<ChoreographerStepNextStepConnection> previousStepsConnections = new HashSet<>();
 
     //=================================================================================================
 	// methods
@@ -95,45 +97,58 @@ public class ChoreographerStep {
 	public ChoreographerStep() {}
 
     //-------------------------------------------------------------------------------------------------
-
-    public ChoreographerStep(String name, String metadata, String staticParameters, ChoreographerAction action, int quantity) {
+    public ChoreographerStep(final String name, final ChoreographerAction action, final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final String orchTemplate, final String staticParameters, final int quantity) {
         this.name = name;
-        this.staticParameters = staticParameters;
         this.action = action;
+        this.serviceDefinition = serviceDefinition;
+        this.minVersion = minVersion;
+        this.maxVersion = maxVersion;
+        this.orchTemplate = orchTemplate;
+        this.staticParameters = staticParameters;
         this.quantity = quantity;
     }
 
     //-------------------------------------------------------------------------------------------------
-
     public long getId() { return id; }
     public String getName() { return name; }
+    public ChoreographerAction getAction() { return action; }
+    public String getServiceDefinition() { return serviceDefinition; }
+    public Integer getMinVersion() { return minVersion; }
+    public Integer getMaxVersion() { return maxVersion; }
+    public String getOrchTemplate() { return orchTemplate; }
+    public String getStaticParameters() { return staticParameters; }
+    public int getQuantity() { return quantity; }
     public ZonedDateTime getCreatedAt() { return createdAt; }
     public ZonedDateTime getUpdatedAt() { return updatedAt; }
-    public ChoreographerAction getActionFirstStep() { return actionFirstStep; }
-    public ChoreographerAction getAction() { return action; }
-    public String getStaticParameters() { return staticParameters; }
-    public Set<ChoreographerStepNextStepConnection> getNextSteps() { return nextSteps; }
-    public Set<ChoreographerStepNextStepConnection> getSteps() { return steps; }
-    public Set<ChoreographerRunningStep> getRunningSteps() { return runningSteps; }
-    public int getQuantity() { return quantity; }
-    public Set<ChoreographerStepDetail> getStepDetails() { return stepDetails; }
+    public Set<ChoreographerStepNextStepConnection> getNextStepsConnections() { return nextStepsConnections; }
+    public Set<ChoreographerStepNextStepConnection> getPreviousStepsConnections() { return previousStepsConnections; }
+    
+    //-------------------------------------------------------------------------------------------------
+	public Set<ChoreographerStep> getNextSteps() {
+		return nextStepsConnections.stream().map(c -> c.getTo()).collect(Collectors.toSet());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Set<ChoreographerStep> getPreviousSteps() {
+		return previousStepsConnections.stream().map(c -> c.getFrom()).collect(Collectors.toSet());
+	}
 
     //-------------------------------------------------------------------------------------------------
+    public void setId(final long id) { this.id = id; }
+    public void setName(final String name) { this.name = name; }
+    public void setAction(final ChoreographerAction action) { this.action = action; }
+    public void setServiceDefinition(final String serviceDefinition) { this.serviceDefinition = serviceDefinition; }
+    public void setMinVersion(final Integer minVersion) { this.minVersion = minVersion; }
+    public void setMaxVersion(final Integer maxVersion) { this.maxVersion = maxVersion; }
+    public void setOrchTemplate(final String orchTemplate) { this.orchTemplate = orchTemplate; }
+    public void setStaticParameters(final String parameters) { this.staticParameters = parameters; }
+    public void setQuantity(final int quantity) { this.quantity = quantity; }
+    public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
+    public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public void setNextStepsConnections(final Set<ChoreographerStepNextStepConnection> nextStepsConnections) { this.nextStepsConnections = nextStepsConnections; }
+    public void setPreviousStepsConnections(final Set<ChoreographerStepNextStepConnection> previousStepsConnections) { this.previousStepsConnections = previousStepsConnections; }
 
-    public void setId(long id) { this.id = id; }
-    public void setName(String name) { this.name = name; }
-    public void setCreatedAt(ZonedDateTime createdAt) { this.createdAt = createdAt; }
-    public void setUpdatedAt(ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
-    public void setActionFirstStep(ChoreographerAction actionFirstStep) { this.actionFirstStep = actionFirstStep; }
-    public void setAction(ChoreographerAction action) { this.action = action; }
-    public void setStaticParameters(String parameters) { this.staticParameters = parameters; }
-    public void setNextSteps(Set<ChoreographerStepNextStepConnection> nextSteps) { this.nextSteps = nextSteps; }
-    public void setSteps(Set<ChoreographerStepNextStepConnection> actionSteps) { this.steps = actionSteps; }
-    public void setRunningSteps(Set<ChoreographerRunningStep> runningSteps) { this.runningSteps = runningSteps; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
-    public void setStepDetails(Set<ChoreographerStepDetail> stepDetails) { this.stepDetails = stepDetails; }
-
-    //-------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	@PrePersist
     public void onCreate() {
         this.createdAt = ZonedDateTime.now();
@@ -145,4 +160,12 @@ public class ChoreographerStep {
     public void onUpdate() {
         this.updatedAt = ZonedDateTime.now();
     }
+
+	public boolean isFirstStep() {
+		return firstStep;
+	}
+
+	public void setFirstStep(final boolean firstStep) {
+		this.firstStep = firstStep;
+	}
 }

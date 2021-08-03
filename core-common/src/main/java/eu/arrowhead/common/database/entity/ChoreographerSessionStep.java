@@ -29,11 +29,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import java.time.ZonedDateTime;
 
 @Entity
-public class ChoreographerRunningStep {
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"sessionId", "stepId"}))
+public class ChoreographerSessionStep {
 
     //=================================================================================================
     // members
@@ -42,6 +45,14 @@ public class ChoreographerRunningStep {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "sessionId", referencedColumnName = "id", nullable = false)
+    private ChoreographerSession session;
+    
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "stepId", referencedColumnName = "id", nullable = false)
+    private ChoreographerStep step;
+    
     @Column(nullable = false, columnDefinition = "varchar(" + CoreDefaults.VARCHAR_BASIC + ")")
     @Enumerated(EnumType.STRING)
     private ChoreographerStatusType status;
@@ -55,55 +66,49 @@ public class ChoreographerRunningStep {
     @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private ZonedDateTime updatedAt;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "stepId", referencedColumnName = "id", nullable = false)
-    private ChoreographerStep step;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "sessionId", referencedColumnName = "id", nullable = false)
-    private ChoreographerSession session;
-
     //=================================================================================================
     // methods
 
     //=================================================================================================
-    public ChoreographerRunningStep() {}
+    public ChoreographerSessionStep() {}
 
     //=================================================================================================
-    public ChoreographerRunningStep(ChoreographerStatusType status, String message, ChoreographerStep step, ChoreographerSession session) {
+    public ChoreographerSessionStep(final ChoreographerSession session, final ChoreographerStep step, final ChoreographerStatusType status, final String message) {
+    	this.session = session;
+    	this.step = step;
         this.status = status;
         this.message = message;
-        this.step = step;
-        this.session = session;
     }
 
     //=================================================================================================
     public long getId() { return id; }
+    public ChoreographerSession getSession() { return session; }
+    public ChoreographerStep getStep() { return step; }
     public ChoreographerStatusType getStatus() { return status; }
     public String getMessage() { return message; }
     public ZonedDateTime getStartedAt() { return startedAt; }
-    public ChoreographerStep getStep() { return step; }
-    public ChoreographerSession getSession() { return session; }
+    public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
     //=================================================================================================
 
-    public void setId(long id) { this.id = id; }
-    public void setStatus(ChoreographerStatusType status) { this.status = status; }
-    public void setMessage(String message) { this.message = message; }
-    public void setStartedAt(ZonedDateTime startedAt) { this.startedAt = startedAt; }
-    public void setStep(ChoreographerStep step) { this.step = step; }
-    public void setSession(ChoreographerSession session) { this.session = session; }
+    public void setId(final long id) { this.id = id; }
+    public void setSession(final ChoreographerSession session) { this.session = session; }
+    public void setStep(final ChoreographerStep step) { this.step = step; }
+    public void setStatus(final ChoreographerStatusType status) { this.status = status; }
+    public void setMessage(final String message) { this.message = message; }
+    public void setStartedAt(final ZonedDateTime startedAt) { this.startedAt = startedAt; }
+    public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 
     //-------------------------------------------------------------------------------------------------
     @PrePersist
     public void onCreate() {
         this.startedAt = ZonedDateTime.now();
-        this.updatedAt = this.startedAt;
+        this.setUpdatedAt(this.startedAt);
     }
 
     //-------------------------------------------------------------------------------------------------
     @PreUpdate
     public void onUpdate() {
-        this.updatedAt = ZonedDateTime.now();
+        this.setUpdatedAt(ZonedDateTime.now());
     }
 }

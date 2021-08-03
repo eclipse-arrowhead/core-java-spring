@@ -53,27 +53,20 @@ public class ChoreographerAction {
     @Column(length = CoreDefaults.VARCHAR_BASIC, nullable = false)
     private String name;
 
-    // The plan whose first action is this action must be mapped like this. Better name needed.
-    @OneToOne(mappedBy = "firstAction", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private ChoreographerPlan planFirstAction;
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "planId", referencedColumnName = "id", nullable = false)
     private ChoreographerPlan plan;
+    
+    private boolean firstAction = false;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "nextActionId", referencedColumnName = "id", nullable = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private ChoreographerAction nextAction;
 
-    // Should be LAZY
     @OneToMany(mappedBy = "actionFirstStep", fetch = FetchType.EAGER, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<ChoreographerStep> firstStepEntries = new HashSet<>();
-
-    @OneToMany(mappedBy = "action", fetch = FetchType.EAGER, orphanRemoval = true)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Set<ChoreographerStep> stepEntries = new HashSet<>();
 
     @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private ZonedDateTime createdAt;
@@ -97,25 +90,23 @@ public class ChoreographerAction {
 
     public long getId() { return id; }
     public String getName() { return name; }
-    public ChoreographerPlan getPlanFirstAction() { return planFirstAction; }
     public ChoreographerPlan getPlan() { return plan; }
+    public boolean isFirstAction() { return firstAction; }
     public ChoreographerAction getNextAction() { return nextAction; }
     public Set<ChoreographerStep> getFirstStepEntries() { return firstStepEntries; }
-    public Set<ChoreographerStep> getStepEntries() { return stepEntries; }
     public ZonedDateTime getCreatedAt() { return createdAt; }
     public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
     //-------------------------------------------------------------------------------------------------
 
-    public void setId(long id) { this.id = id; }
-    public void setName(String name) { this.name = name; }
-    public void setPlanFirstAction(ChoreographerPlan planFirstAction) { this.planFirstAction = planFirstAction; }
-    public void setPlan(ChoreographerPlan plan) { this.plan = plan; }
-    public void setNextAction(ChoreographerAction nextAction) { this.nextAction = nextAction; }
-    public void setFirstStepEntries(Set<ChoreographerStep> firstStepEntries) { this.firstStepEntries = firstStepEntries; }
-    public void setStepEntries(Set<ChoreographerStep> stepEntries) { this.stepEntries = stepEntries; }
-    public void setCreatedAt(ZonedDateTime createdAt) { this.createdAt = createdAt; }
-    public void setUpdatedAt(ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public void setId(final long id) { this.id = id; }
+    public void setName(final String name) { this.name = name; }
+    public void setPlan(final ChoreographerPlan plan) { this.plan = plan; }
+    public void setFirst(final boolean firstAction) { this.firstAction = firstAction; }
+    public void setNextAction(final ChoreographerAction nextAction) { this.nextAction = nextAction; }
+    public void setFirstStepEntries(final Set<ChoreographerStep> firstStepEntries) { this.firstStepEntries = firstStepEntries; }
+    public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
+    public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 
     //-------------------------------------------------------------------------------------------------
 	@PrePersist
