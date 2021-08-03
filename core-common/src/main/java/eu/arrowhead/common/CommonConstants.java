@@ -252,6 +252,7 @@ public class CommonConstants {
 	public static final String OP_CONFIGURATION_MGMT_MANAGE = "/mgmt/config";
 
 	public static final String CHOREOGRAPHER_URI = "/choreographer";
+	public static final String CHOREOGRAPHER_EXECUTOR_URI = "/choreographer/executor";
 	public static final String OP_CHOREOGRAPHER_NOTIFY_STEP_DONE = "/executor/notifyStepDone";
 	public static final String OP_CHOREOGRAPHER_EXECUTOR_REGISTER = "/executor/register";
 	public static final String OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER = "/executor/unregister";
