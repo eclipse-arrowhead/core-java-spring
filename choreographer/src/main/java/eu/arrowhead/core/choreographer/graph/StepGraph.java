@@ -1,6 +1,8 @@
 package eu.arrowhead.core.choreographer.graph;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class StepGraph {
@@ -15,6 +17,38 @@ public class StepGraph {
 	
 	//-------------------------------------------------------------------------------------------------
 	public Set<Node> getSteps() { return steps; }
+	
+	//-------------------------------------------------------------------------------------------------
+	public Set<Node> getFirstSteps() {
+		final Set<Node> firstSteps = new HashSet<>();
+		for (final Node node : this.getSteps()) {
+			if (node.getPrevNodes().isEmpty()) {
+				firstSteps.add(node);
+			}
+		}
+		return firstSteps;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public StepGraph deepCopy() {
+		final Map<String,Node> copiedSteps = new HashMap<String,Node>();		
+		for (final Node node : this.getSteps()) {
+			final Node copy = new Node(node.getName());
+			copiedSteps.put(copy.getName(), copy);
+		}
+		for (final Node node : this.getSteps()) {
+			for (final Node prevNode : node.getPrevNodes()) {
+				copiedSteps.get(node.getName()).getPrevNodes().add(copiedSteps.get(prevNode.getName()));
+			}
+			for (final Node nextNode : node.getNextNodes()) {
+				copiedSteps.get(node.getName()).getNextNodes().add(copiedSteps.get(nextNode.getName()));
+			}
+		}		
+		
+		final StepGraph copiedGraph = new StepGraph();
+		copiedGraph.getSteps().addAll(copiedSteps.values());
+		return copiedGraph;
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Override
