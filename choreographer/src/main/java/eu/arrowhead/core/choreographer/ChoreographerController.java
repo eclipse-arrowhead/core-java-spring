@@ -396,6 +396,7 @@ public class ChoreographerController {
     }
 
     //-------------------------------------------------------------------------------------------------
+    // TODO: instead of this, we need a WS to verify if a plan is executable (find suitable executor to all steps)
     @ApiOperation(value = "Return the ids of the suitable Executors entries by step id.", response = ServiceRegistryResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = GET_EXECUTOR_HTTP_200_MESSAGE),
@@ -473,6 +474,7 @@ public class ChoreographerController {
     }
 
     //-------------------------------------------------------------------------------------------------
+    //TODO: delete
     @ApiOperation(value = "Return list of executors suited to execute the task with the service definition and version requirements.",
             response = ChoreographerExecutorSearchResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses(value = {

@@ -71,7 +71,6 @@ public class ChoreographerWorklog {
     	this(planName, null, null, message, exception);
     }
 
-
     //-------------------------------------------------------------------------------------------------
     public long getId() { return id; }
     public ZonedDateTime getEntryDate() { return entryDate; }
