@@ -36,36 +36,59 @@ public class ChoreographerWorklog {
     @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private ZonedDateTime entryDate;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    private String planName;
+    private String actionName;
+    private String stepName;
+
+    @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
     private String message;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "MEDIUMTEXT")
     private String exception;
 
     //=================================================================================================
     // methods
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerWorklog() {
-    }
+    public ChoreographerWorklog() {}
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerWorklog(final String message, final String exception) {
+    public ChoreographerWorklog(final String planName, final String actionName, final String stepName, final String message, final String exception) {
+    	this.setPlanName(planName);
+    	this.setActionName(actionName);
+    	this.setStepName(stepName);
         this.message = message;
         this.exception = exception;
     }
 
     //-------------------------------------------------------------------------------------------------
+    public ChoreographerWorklog(final String planName, final String actionName, final String message, final String exception) {
+    	this(planName, actionName, null, message, exception);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    public ChoreographerWorklog(final String planName, final String message, final String exception) {
+    	this(planName, null, null, message, exception);
+    }
+
+
+    //-------------------------------------------------------------------------------------------------
     public long getId() { return id; }
     public ZonedDateTime getEntryDate() { return entryDate; }
+    public String getPlanName() { return planName; }
+    public String getActionName() { return actionName; }
+    public String getStepName() { return stepName; }
     public String getMessage() { return message; }
     public String getException() { return exception; }
 
     //-------------------------------------------------------------------------------------------------
-    public void setId(long id) { this.id = id; }
-    public void setEntryDate(ZonedDateTime entryDate) { this.entryDate = entryDate; }
-    public void setMessage(String message) { this.message = message; }
-    public void setException(String exception) { this.exception = exception; }
+    public void setId(final long id) { this.id = id; }
+    public void setPlanName(final String planName) { this.planName = planName; }
+    public void setActionName(final String actionName) { this.actionName = actionName; }
+    public void setStepName(final String stepName) { this.stepName = stepName; }
+    public void setEntryDate(final ZonedDateTime entryDate) { this.entryDate = entryDate; }
+    public void setMessage(final String message) { this.message = message; }
+    public void setException(final String exception) { this.exception = exception; }
 
     //-------------------------------------------------------------------------------------------------
     @PrePersist

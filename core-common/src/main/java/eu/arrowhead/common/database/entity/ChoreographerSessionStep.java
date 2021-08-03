@@ -53,6 +53,10 @@ public class ChoreographerSessionStep {
     @JoinColumn(name = "stepId", referencedColumnName = "id", nullable = false)
     private ChoreographerStep step;
     
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "executorId", referencedColumnName = "id", nullable = false)
+    private ChoreographerExecutor executor;
+    
     @Column(nullable = false, columnDefinition = "varchar(" + CoreDefaults.VARCHAR_BASIC + ")")
     @Enumerated(EnumType.STRING)
     private ChoreographerStatusType status;
@@ -69,31 +73,33 @@ public class ChoreographerSessionStep {
     //=================================================================================================
     // methods
 
-    //=================================================================================================
+    //-------------------------------------------------------------------------------------------------
     public ChoreographerSessionStep() {}
 
-    //=================================================================================================
-    public ChoreographerSessionStep(final ChoreographerSession session, final ChoreographerStep step, final ChoreographerStatusType status, final String message) {
+    //-------------------------------------------------------------------------------------------------
+	public ChoreographerSessionStep(final ChoreographerSession session, final ChoreographerStep step, final ChoreographerExecutor executor, final ChoreographerStatusType status, final String message) {
     	this.session = session;
     	this.step = step;
+    	this.executor = executor;
         this.status = status;
         this.message = message;
     }
 
-    //=================================================================================================
-    public long getId() { return id; }
+    //-------------------------------------------------------------------------------------------------
+	public long getId() { return id; }
     public ChoreographerSession getSession() { return session; }
     public ChoreographerStep getStep() { return step; }
+    public ChoreographerExecutor getExecutor() { return executor; }
     public ChoreographerStatusType getStatus() { return status; }
     public String getMessage() { return message; }
     public ZonedDateTime getStartedAt() { return startedAt; }
     public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
-    //=================================================================================================
-
+    //-------------------------------------------------------------------------------------------------
     public void setId(final long id) { this.id = id; }
     public void setSession(final ChoreographerSession session) { this.session = session; }
     public void setStep(final ChoreographerStep step) { this.step = step; }
+    public void setExecutor(ChoreographerExecutor executor) { this.executor = executor;	}
     public void setStatus(final ChoreographerStatusType status) { this.status = status; }
     public void setMessage(final String message) { this.message = message; }
     public void setStartedAt(final ZonedDateTime startedAt) { this.startedAt = startedAt; }
