@@ -17,6 +17,11 @@
 	      	<artifactId>arrowhead-core-common</artifactId>
 	      	<version>${revision}</version>
 	    </dependency>
+		<dependency>
+			<groupId>org.shredzone.commons</groupId>
+			<artifactId>commons-suncalc</artifactId>
+			<version>3.5</version>
+		</dependency>
   	</dependencies>
   	
   	<build>
