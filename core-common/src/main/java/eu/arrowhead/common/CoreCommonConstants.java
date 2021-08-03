@@ -73,7 +73,7 @@ public class CoreCommonConstants {
 	public static final String SWAGGER_HTTP_401_MESSAGE = "You are not authorized";
 	public static final String SWAGGER_HTTP_404_MESSAGE = "Not found";
 	public static final String SWAGGER_HTTP_409_MESSAGE = "Request caused a conflict";
-    public static final String SWAGGER_HTTP_415_MESSAGE = "MediaType not supported";
+	public static final String SWAGGER_HTTP_415_MESSAGE = "MediaType not supported";
 	public static final String SWAGGER_HTTP_500_MESSAGE = "Core service is not available";
 	
 	public static final String SWAGGER_TAG_MGMT = "Management";
@@ -130,8 +130,8 @@ public class CoreCommonConstants {
 	public static final String $SYSTEM_REGISTRY_PING_TIMEOUT_WD =
 			"${" + SYSTEM_REGISTRY_PING_TIMEOUT + ":" + CoreDefaults.DEFAULT_SYSTEM_REGISTRY_PING_TIMEOUT_MILLISECONDS + "}";
 
-    public static final String AUTHORIZATION_IS_EVENTHANDLER_PRESENT = "eventhandler_is_present";
-    public static final String $AUTHORIZATION_IS_EVENTHANDLER_PRESENT_WD = "${" + AUTHORIZATION_IS_EVENTHANDLER_PRESENT + ":" + CoreDefaults.DEFAULT_AUTHORIZATION_IS_EVENTHANDLER_PRESENT + "}";
+	public static final String AUTHORIZATION_IS_EVENTHANDLER_PRESENT = "eventhandler_is_present";
+	public static final String $AUTHORIZATION_IS_EVENTHANDLER_PRESENT_WD = "${" + AUTHORIZATION_IS_EVENTHANDLER_PRESENT + ":" + CoreDefaults.DEFAULT_AUTHORIZATION_IS_EVENTHANDLER_PRESENT + "}";
 	
 	public static final String ORCHESTRATOR_IS_GATEKEEPER_PRESENT = "gatekeeper_is_present";
 	public static final String $ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD = "${" + ORCHESTRATOR_IS_GATEKEEPER_PRESENT + ":" + CoreDefaults.DEFAULT_ORCHESTRATOR_IS_GATEKEEPER_PRESENT + "}";
@@ -233,7 +233,7 @@ public class CoreCommonConstants {
 	public static final String RELAY_TEST_LOG_MEASUREMENTS_IN_DB = "relay.test.log_measurements_in_db";
 	public static final String $RELAY_TEST_LOG_MEASUREMENTS_IN_DB_WD = "${" + RELAY_TEST_LOG_MEASUREMENTS_IN_DB + ":" + CoreDefaults.DEFAULT_RELAY_TEST_LOG_MEASUREMENTS_IN_DB + "}";
 	
-    public static final String CERTIFICATE_FORMAT = "X.509";
+	public static final String CERTIFICATE_FORMAT = "X.509";
 
 	// Translator-Fiware
 	public static final String FIWARE_SERVER_HOST = "fiware.server.host";
