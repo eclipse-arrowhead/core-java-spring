@@ -17,7 +17,6 @@ public class ChoreographerExecutorService {
 	
 	@Autowired
 	private ChoreographerDriver driver;
-
 	private final Logger logger = LogManager.getLogger(ChoreographerExecutorService.class);
 	
 	//=================================================================================================
@@ -29,5 +28,12 @@ public class ChoreographerExecutorService {
 		Assert.notNull(systemRequest, "SystemRequestDTO is null");
 		
 		return driver.registerSystem(systemRequest);
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	public void unregisterExecutorSystem(final String systemName, final String address, final int port) {
+		logger.debug("unregisterExecutorSystem started...");
+		
+		//TODO
 	}
 }

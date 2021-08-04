@@ -119,4 +119,62 @@ public class ChoreographerExecutorDBService {
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Optional<ChoreographerExecutor> getExecutorOptionalById(final long id) { //TODO junit
+		logger.debug("getExecutorById started...");
+		
+		try {
+			return executorRepository.findById(id);	
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Optional<ChoreographerExecutor> getExecutorOptionalByAddressAndPortAndBaseUri(final String address, final int port, final String baseUri) { //TODO junit
+		logger.debug("getExecutorById started...");
+		Assert.isTrue(!Utilities.isEmpty(address), "address is empty");
+		
+		try {
+			return executorRepository.findByAddressAndPortAndBaseUri(address.toLowerCase().trim(), port, Utilities.isEmpty(baseUri) ? "" : baseUri);	
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+    public void deleteExecutorById(final long id) { //TODO junit
+		logger.debug("deleteExecutorById started...");
+		
+		try {
+			if (executorRepository.existsById(id)) {
+				executorRepository.deleteById(id);
+				executorRepository.flush();
+			}			
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+    public void deleteExecutorByAddressAndPortAndBaseUri(final String address, final int port, final String baseUri) { //TODO junit
+		logger.debug("deleteExecutorByAddressAndPortAndBaseUri started...");
+		Assert.isTrue(!Utilities.isEmpty(address), "address is empty");
+		
+		try {
+			final Optional<ChoreographerExecutor> opt = executorRepository.findByAddressAndPortAndBaseUri(address.toLowerCase().trim(), port, Utilities.isEmpty(baseUri) ? "" : baseUri);
+			if (opt.isPresent()) {
+				deleteExecutorById(opt.get().getId());
+			}
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
 }
