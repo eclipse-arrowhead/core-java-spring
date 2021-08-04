@@ -34,17 +34,18 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorResponseDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.processor.NetworkAddressDetector;
-import eu.arrowhead.common.processor.NetworkAddressPreProcessor;
 import eu.arrowhead.common.processor.model.AddressDetectionResult;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerExecutorDBService;
+import eu.arrowhead.core.choreographer.service.ChoreographerExecutorService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -65,13 +66,10 @@ public class ChoreographerExecutorController {
 	private ChoreographerExecutorDBService executorDBService;
 	
 	@Autowired
+	private ChoreographerExecutorService executorService;
+	
+	@Autowired
 	private CommonNamePartVerifier cnVerifier;
-	
-	@Autowired
-	private NetworkAddressPreProcessor networkAddressPreProcessor;
-	
-	@Autowired
-	private NetworkAddressVerifier networkAddressVerifier; //TODO properties should come from ServiceRegistry or verify with a new SR service in order to allow the same formats (or register System by SR service)
 	
 	@Autowired
 	private NetworkAddressDetector networkAddressDetector;
@@ -79,11 +77,6 @@ public class ChoreographerExecutorController {
 	private static final String POST_EXECUTOR_HTTP_201_MESSAGE = "Executor created.";
     private static final String POST_EXECUTOR_HTTP_400_MESSAGE = "Could not create executor.";
     
-    private static final String SYSTEM_NAME_NULL_ERROR_MESSAGE = " System name must have value ";
-	private static final String SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE = "System name has invalid format. System names only contain maximum 63 character of letters (english alphabet), numbers and dash (-), and have to start with a letter (also cannot end with dash).";
-	private static final String SYSTEM_PORT_NULL_ERROR_MESSAGE = " System port must have value ";
-	private static final String SERVICE_DEFINITION_WRONG_FORMAT_ERROR_MESSAGE = "Service definition has invalid format. Service definition only contains maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).";
-	
     private final Logger logger = LogManager.getLogger(ChoreographerExecutorController.class);
     
     //=================================================================================================
@@ -100,8 +93,12 @@ public class ChoreographerExecutorController {
     @PostMapping(path = CoreCommonConstants.MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
     @ResponseBody public ChoreographerExecutorResponseDTO addExecutor(@RequestBody final ChoreographerExecutorRequestDTO request) {
+    	logger.debug("addExecutor started...");
+    	
     	checkExecutorRequestDTO(request, CommonConstants.CHOREOGRAPHER_EXECUTOR_URI + CoreCommonConstants.MGMT_URI, null);
-        return executorDBService.createExecutorResponse(request);
+    	final SystemResponseDTO system = executorService.registerExecutorSystem(request.getSystem());
+    	return executorDBService.createExecutorResponse(system.getSystemName(), system.getAddress(), system.getPort(), request.getBaseUri(), request.getServiceDefinitionName(),
+    													request.getMinVersion(), request.getMaxVersion());
     }
 
 	//TODO removeExecutorById
@@ -119,8 +116,24 @@ public class ChoreographerExecutorController {
     @PostMapping(path = CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_REGISTER, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
     @ResponseBody public ChoreographerExecutorResponseDTO registerExecutor(final HttpServletRequest servletRequest, @RequestBody final ChoreographerExecutorRequestDTO request) {
-    	checkExecutorRequestDTO(request, CommonConstants.CHOREOGRAPHER_EXECUTOR_URI + CoreCommonConstants.MGMT_URI, servletRequest);
-        return executorDBService.createExecutorResponse(request);
+    	logger.debug("registerExecutor started...");
+    	
+    	final String origin = CommonConstants.CHOREOGRAPHER_EXECUTOR_URI + CoreCommonConstants.MGMT_URI;
+    	checkExecutorRequestDTO(request, origin, servletRequest);
+    	
+    	SystemResponseDTO system = null;
+    	try {
+    		system = executorService.registerExecutorSystem(request.getSystem());
+			
+		} catch (final ArrowheadException ex) {
+			if (ex.getMessage().contains(NetworkAddressVerifier.ERROR_MSG_PREFIX)) {
+				detectNetworkAddress(servletRequest, request, ex.getMessage(), origin);
+				system = executorService.registerExecutorSystem(request.getSystem());
+			}
+		}
+    	
+    	return executorDBService.createExecutorResponse(system.getSystemName(), system.getAddress(), system.getPort(), request.getBaseUri(), request.getServiceDefinitionName(),
+														request.getMinVersion(), request.getMaxVersion());
     }
     
 	//TODO unregisterExecutor    
@@ -129,63 +142,52 @@ public class ChoreographerExecutorController {
 	private void checkExecutorRequestDTO(final ChoreographerExecutorRequestDTO dto, final String origin, final HttpServletRequest servletRequest) {
 		logger.debug("checkExecutorRequestDTO started...");
 
-		// check system
+		// Check SystemRequestDTO only for nulls. (Verification will be done by ServiceRegistry)
 		if (dto == null) {
 			throw new BadPayloadException("dto is null.", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 
 		if (Utilities.isEmpty(dto.getSystem().getSystemName())) {
-			throw new BadPayloadException(SYSTEM_NAME_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			throw new BadPayloadException("System name is empty.", HttpStatus.SC_BAD_REQUEST, origin);
 		}
-
-		for (final CoreSystem coreSysteam : CoreSystem.values()) {
-			if (coreSysteam.name().equalsIgnoreCase(dto.getSystem().getSystemName().trim())) {
-				throw new BadPayloadException("System name '" + dto.getSystem().getSystemName() + "' is a reserved arrowhead core system name.", HttpStatus.SC_BAD_REQUEST, origin);
+		
+		if (Utilities.isEmpty(dto.getSystem().getAddress())) {
+			if (servletRequest == null) {
+				throw new BadPayloadException("System address is empty.", HttpStatus.SC_BAD_REQUEST, origin);
+			} else {
+				detectNetworkAddress(servletRequest, dto, "System address is empty.", origin);				
 			}
-		}
-
-		if (!cnVerifier.isValid(dto.getSystem().getSystemName())) {
-			throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 
 		if (dto.getSystem().getPort() == null) {
-			throw new BadPayloadException(SYSTEM_PORT_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-		}
-
-		final int validatedPort = dto.getSystem().getPort();
-		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-			throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
-		}
-		
-		try {			
-			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(dto.getSystem().getAddress()));
-		} catch (final InvalidParameterException ex) {
-			if (servletRequest != null) {
-				final AddressDetectionResult detectionResult = networkAddressDetector.detect(servletRequest);
-				if (detectionResult.isSkipped()) {
-					throw new BadPayloadException(ex.getMessage() + " " + detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);				
-				}
-				if (!detectionResult.isDetectionSuccess()) {
-					throw new BadPayloadException(ex.getMessage() + " " + detectionResult.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);
-				} else {
-					dto.getSystem().setAddress(detectionResult.getDetectedAddress());
-				}				
-			}
+			throw new BadPayloadException("System port is null.", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		// check others
 		if (!cnVerifier.isValid(dto.getServiceDefinitionName())) {
-			throw new BadPayloadException(SERVICE_DEFINITION_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			throw new BadPayloadException("Service definition has invalid format. Name must match with the following regular expression: " + CommonNamePartVerifier.COMMON_NAME_PART_PATTERN_STRING, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		if (dto.getMinVersion() == null) {
-			throw new BadPayloadException("minVersion is null", HttpStatus.SC_BAD_REQUEST, origin);
+			throw new BadPayloadException("minVersion is null.", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		if (dto.getMaxVersion() == null) {
-			throw new BadPayloadException("maxVersion is null", HttpStatus.SC_BAD_REQUEST, origin);
+			throw new BadPayloadException("maxVersion is null.", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		if (dto.getMinVersion() > dto.getMaxVersion()) {
-			throw new InvalidParameterException("minVersion cannot be higher than maxVersion");
+			throw new InvalidParameterException("minVersion cannot be higher than maxVersion.");
 		}
-	}	
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void detectNetworkAddress(final HttpServletRequest servletRequest, final ChoreographerExecutorRequestDTO dto, final String errorMsgPrefix, final String origin) {
+		logger.debug("detectNetworkAddress started...");
+		
+		final AddressDetectionResult result = networkAddressDetector.detect(servletRequest);
+		if (result.isSkipped() || !result.isDetectionSuccess()) {
+			throw new BadPayloadException(errorMsgPrefix + " " + result.getDetectionMessage(), HttpStatus.SC_BAD_REQUEST, origin);				
+		} else {
+			dto.getSystem().setAddress(result.getDetectedAddress());
+		}
+	}
 }
