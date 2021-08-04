@@ -56,7 +56,7 @@ public class ChoreographerExecutorDBService {
 	//=================================================================================================
     // methods
 
-	///-------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	public ChoreographerExecutorResponseDTO createExecutorResponse(final String systemName, final String address, final int port, final String baseUri, final String serviceDefinitionName,
 																   final int minVersion, final int maxVersion) { //TODO junit
 		logger.debug("createExecutorResponse started...");
