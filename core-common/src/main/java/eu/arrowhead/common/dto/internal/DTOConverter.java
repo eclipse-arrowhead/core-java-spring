@@ -254,13 +254,6 @@ public class DTOConverter {
 											   Utilities.convertZonedDateTimeToUTCString(intf.getUpdatedAt()));
 	}
 
-	public static ChoreographerExecutorServiceDefinitionResponseDTO convertExecutorServiceDefinitionToExecturServiceDefinitionResponseDTO(final ChoreographerExecutorServiceDefinition serviceDefinition) {
-		Assert.notNull(serviceDefinition, "Service definition entry is null.");
-
-		return new ChoreographerExecutorServiceDefinitionResponseDTO(serviceDefinition.getId(), serviceDefinition.getServiceDefinitionName(), serviceDefinition.getVersion(),
-				Utilities.convertZonedDateTimeToUTCString(serviceDefinition.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(serviceDefinition.getUpdatedAt()));
-	}
-
 	//-------------------------------------------------------------------------------------------------
 	public static ServiceInterfacesListResponseDTO convertServiceInterfacesListToServiceInterfaceListResponseDTO(final Page<ServiceInterface> serviceInterfaces) {
 		Assert.notNull(serviceInterfaces, "List of ServiceInterface is null");
@@ -1042,7 +1035,7 @@ public class DTOConverter {
 
     public static ChoreographerStepDetailResponseDTO convertStepDetailToStepDetailResponseDTO(final ChoreographerStepDetail stepDetailEntry) {
 		Assert.notNull(stepDetailEntry, "StepDetail entry is null.");
-		ChoreographerStepDetailResponseDTO detailResponseDTO = new ChoreographerStepDetailResponseDTO();
+		final ChoreographerStepDetailResponseDTO detailResponseDTO = new ChoreographerStepDetailResponseDTO();
 
 		detailResponseDTO.setId(stepDetailEntry.getId());
 
@@ -1076,18 +1069,40 @@ public class DTOConverter {
                                                 Utilities.convertZonedDateTimeToUTCString(planEntry.getUpdatedAt()));
     }
 
-	public static ChoreographerExecutorResponseDTO convertExecutorToExecutorResponseDTO(ChoreographerExecutor executor) {
+    //-------------------------------------------------------------------------------------------------
+	public static ChoreographerExecutorResponseDTO convertExecutorToExecutorResponseDTO(final ChoreographerExecutor executor, final List<ChoreographerExecutorServiceDefinition> serviceDefinitions) {
 		Assert.notNull(executor, "Executor is null.");
-		Assert.notNull(executor.getAddress(), "Related address is null.");
-		Assert.notNull(executor.getName(), "Related executor name is null.");
-		Assert.notNull(executor.getPort(), "Related executor port is null.");
-
-		return new ChoreographerExecutorResponseDTO(executor.getId(), executor.getName(), executor.getAddress(),
-				executor.getPort(), executor.getBaseUri(), collectServiceDefinitionsFromExecutor(executor.getServiceDefinitionConnections()),
-				Utilities.convertZonedDateTimeToUTCString(executor.getCreatedAt()),
-				Utilities.convertZonedDateTimeToUTCString(executor.getUpdatedAt()));
+		Assert.notNull(serviceDefinitions, "serviceDefinitions is null.");
+		
+		final ChoreographerExecutorResponseDTO dto = new ChoreographerExecutorResponseDTO(executor.getId(),
+																						  executor.getName(),
+																						  executor.getAddress(),
+																						  executor.getPort(),
+																						  executor.getBaseUri(),
+																						  new ArrayList<>(),
+																						  Utilities.convertZonedDateTimeToUTCString(executor.getCreatedAt()),
+																						  Utilities.convertZonedDateTimeToUTCString(executor.getUpdatedAt()));
+		
+		for (final ChoreographerExecutorServiceDefinition serviceDef : serviceDefinitions) {
+			dto.getServiceDefinitions().add(convertExecutorServiceDefinitionToExecturServiceDefinitionResponseDTO(serviceDef));
+		}
+		
+		return dto;
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	public static ChoreographerExecutorServiceDefinitionResponseDTO convertExecutorServiceDefinitionToExecturServiceDefinitionResponseDTO(final ChoreographerExecutorServiceDefinition executorServiceDefinition) {
+		Assert.notNull(executorServiceDefinition, "ChoreographerExecutorServiceDefinition entry is null.");
+
+		return new ChoreographerExecutorServiceDefinitionResponseDTO(executorServiceDefinition.getId(),
+																	 executorServiceDefinition.getExecutor().getId(),
+																	 executorServiceDefinition.getServiceDefinition(),
+																	 executorServiceDefinition.getMinVersion(),
+																	 executorServiceDefinition.getMaxVersion(),
+																	 Utilities.convertZonedDateTimeToUTCString(executorServiceDefinition.getCreatedAt()),
+																	 Utilities.convertZonedDateTimeToUTCString(executorServiceDefinition.getUpdatedAt()));
+	}
+	
     //-------------------------------------------------------------------------------------------------
     public static SystemRegistryResponseDTO convertSystemRegistryToSystemRegistryResponseDTO(final SystemRegistry entry) {
 
@@ -1229,9 +1244,9 @@ public class DTOConverter {
 		return result;
 	}
 
-	public static ChoreographerSuitableExecutorResponseDTO convertSuitableExecutorIdsToSuitableExecutorResponseDTO (List<Long> executorIds) {
-		ChoreographerSuitableExecutorResponseDTO dto = new ChoreographerSuitableExecutorResponseDTO();
-		for (long id : executorIds) {
+	public static ChoreographerSuitableExecutorResponseDTO convertSuitableExecutorIdsToSuitableExecutorResponseDTO (final List<Long> executorIds) {
+		final ChoreographerSuitableExecutorResponseDTO dto = new ChoreographerSuitableExecutorResponseDTO();
+		for (final long id : executorIds) {
 			dto.getSuitableExecutorIds().add(id);
 		}
 		return dto;
@@ -1439,7 +1454,7 @@ public class DTOConverter {
 		}
 		return IssuedCertificateStatus.GOOD;
 	}
-	public static ChoreographerExecutorListResponseDTO convertExecutorListToExecutorListResponseDTO(Page<ChoreographerExecutor> executorEntries) {
+	public static ChoreographerExecutorListResponseDTO convertExecutorListToExecutorListResponseDTO(final Page<ChoreographerExecutor> executorEntries) {
 		Assert.notNull(executorEntries, "List of executors is null");
 
 		final List<ChoreographerExecutorResponseDTO> executorEntryDTOs = new ArrayList<>(executorEntries.getNumberOfElements());
@@ -1450,7 +1465,7 @@ public class DTOConverter {
 		return new ChoreographerExecutorListResponseDTO(executorEntryDTOs, executorEntries.getTotalElements());
 	}
 
-	public static ChoreographerExecutorSearchResponseDTO convertExecutorListToExecutorSearchResponseDTO(List<ChoreographerExecutor> executorEntries) {
+	public static ChoreographerExecutorSearchResponseDTO convertExecutorListToExecutorSearchResponseDTO(final List<ChoreographerExecutor> executorEntries) {
 		Assert.notNull(executorEntries, "List of executors is null");
 
 		final List<ChoreographerExecutorResponseDTO> executorEntryDTOs = new ArrayList<>();
