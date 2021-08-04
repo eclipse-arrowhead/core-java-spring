@@ -377,7 +377,7 @@ CREATE TABLE IF NOT EXISTS `choreographer_plan` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `plan_name_unique_key` (`name`),
+  UNIQUE KEY `plan_name_unique_key` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `choreographer_action` (
@@ -411,7 +411,6 @@ CREATE TABLE IF NOT EXISTS `choreographer_step` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name_action_id_unique_key` (`name`, `action_id`),
-  CONSTRAINT `action_first_step` FOREIGN KEY (`action_first_step_id`) REFERENCES `choreographer_action` (`id`) ON DELETE CASCADE,
   CONSTRAINT `action` FOREIGN KEY (`action_id`) REFERENCES `choreographer_action` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
@@ -448,7 +447,7 @@ CREATE TABLE IF NOT EXISTS `choreographer_executor_service_definition` (
     `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY  KEY (`id`),
-    CONSTRAINT `fk_executor_id` FOREIGN KEY (`executor_id`) REFERENCES `choreographer_executor` (`id`) ON DELETE CASCADE
+    CONSTRAINT `fk_executor_id` FOREIGN KEY (`executor_id`) REFERENCES `choreographer_executor` (`id`) ON DELETE CASCADE,
     UNIQUE KEY `unique_executor_service_definition` ( `executor_id`, `service_definition`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -475,7 +474,7 @@ CREATE TABLE IF NOT EXISTS `choreographer_session_step` (
   CONSTRAINT `session_step` FOREIGN KEY (`step_id`) REFERENCES `choreographer_step` (`id`),
   CONSTRAINT `session_step_session` FOREIGN KEY (`session_id`) REFERENCES `choreographer_session`(`id`),
   CONSTRAINT `session_step_executor` FOREIGN KEY (`executor_id`) REFERENCES `choreographer_executor` (`id`),
-  UNIQUE KEY ˙session_step_unique˙ (`session_id`, ˙step_id˙)
+  UNIQUE KEY `session_step_unique` (`session_id`, `step_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `choreographer_worklog` (
@@ -486,7 +485,7 @@ CREATE TABLE IF NOT EXISTS `choreographer_worklog` (
   `step_name` varchar(255),
   `message` mediumtext,
   `exception` mediumtext,
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Configuration
