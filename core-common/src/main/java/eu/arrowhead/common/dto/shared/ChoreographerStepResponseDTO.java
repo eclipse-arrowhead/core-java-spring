@@ -28,6 +28,7 @@ public class ChoreographerStepResponseDTO implements Serializable {
 	
 	private static final long serialVersionUID = 3665162578177568728L;
 
+	//TODO: continue
 	private long id;
     private String name;
     private List<ChoreographerStepDetailResponseDTO> stepDetails;

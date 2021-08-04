@@ -38,13 +38,50 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
-import eu.arrowhead.core.choreographer.graph.DepthFirstStepGraphCircleDetector;
-import eu.arrowhead.core.choreographer.graph.EdgeBuilderStepGraphNormalizer;
+import eu.arrowhead.core.choreographer.graph.EdgeDestroyerStepGraphNormalizer;
+import eu.arrowhead.core.choreographer.graph.KahnAlgorithmStepGraphCircleDetector;
 import eu.arrowhead.core.choreographer.graph.StepGraphCircleDetector;
 import eu.arrowhead.core.choreographer.graph.StepGraphNormalizer;
 
 @Component
 public class ChoreographerApplicationInitListener extends ApplicationInitListener {
+	
+	//=================================================================================================
+	// methods
+	
+    //-------------------------------------------------------------------------------------------------
+	@Bean
+    public JmsListenerContainerFactory<?> getFactory(final ConnectionFactory connectionFactory,
+                                                    final DefaultJmsListenerContainerFactoryConfigurer configurer, final ExampleErrorHandler errorHandler) {
+        final DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+        configurer.configure(factory, connectionFactory);
+        factory.setErrorHandler(errorHandler);
+        return factory;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+	@Bean
+    public MessageConverter jacksonJmsMessageConverter() {
+        final MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
+        converter.setTargetType(MessageType.TEXT);
+        converter.setTypeIdPropertyName("_type");
+        return converter;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+	@Bean
+    public StepGraphCircleDetector getStepGraphCircleDetector() {
+    	return new KahnAlgorithmStepGraphCircleDetector();
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+	@Bean
+    public StepGraphNormalizer getStepGraphNormalizer() {
+    	return new EdgeDestroyerStepGraphNormalizer();
+    }
+	
+	//=================================================================================================
+	// assistant methods
 
     //-------------------------------------------------------------------------------------------------
     @Override
@@ -64,8 +101,15 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
 
         context.put(CoreCommonConstants.SR_QUERY_BY_SERVICE_DEFINITION_LIST_URI, queryByServiceDefinitionList);
     }
+    
+    //-------------------------------------------------------------------------------------------------
+	@Override
+    protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
+        return List.of(CoreSystemService.ORCHESTRATION_SERVICE);
+    }
 
-    private UriComponents createQueryByServiceDefinitionList(final String scheme) {
+    //-------------------------------------------------------------------------------------------------
+	private UriComponents createQueryByServiceDefinitionList(final String scheme) {
         logger.debug("createQuerySystemByServiceDefinitionList started...");
 
         final String registryUriStr = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SERVICE_DEFINITION_LIST_URI;
@@ -73,46 +117,13 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
         return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), registryUriStr);
     }
 
-    @Bean
-    public JmsListenerContainerFactory<?> getFactory(ConnectionFactory connectionFactory,
-                                                    DefaultJmsListenerContainerFactoryConfigurer configurer, ExampleErrorHandler errorHandler) {
-        DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-        configurer.configure(factory, connectionFactory);
-        factory.setErrorHandler(errorHandler);
-        return factory;
-    }
-
-    @Bean
-    public MessageConverter jacksonJmsMessageConverter() {
-        MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
-        converter.setTargetType(MessageType.TEXT);
-        converter.setTypeIdPropertyName("_type");
-        return converter;
-    }
-    
-    @Bean
-    public StepGraphCircleDetector getStepGraphCircleDetector() {
-    	//TODO: select implementation
-    	return new DepthFirstStepGraphCircleDetector();
-    }
-    
-    @Bean
-    public StepGraphNormalizer getStepGraphNormalizer() {
-    	//TODO: select implementation
-    	return new EdgeBuilderStepGraphNormalizer();
-    }
-
+	//TODO: rename, implement, move to a new file
     @Service
     public class ExampleErrorHandler implements ErrorHandler {
 
         @Override
-        public void handleError(Throwable throwable) {
+        public void handleError(final Throwable throwable) {
             System.out.println("Error happened during Workflow Choreography.");
         }
-    }
-
-    @Override
-    protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
-        return List.of(CoreSystemService.ORCHESTRATION_SERVICE);
     }
 }
