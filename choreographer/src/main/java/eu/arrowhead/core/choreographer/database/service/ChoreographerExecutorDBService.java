@@ -230,4 +230,20 @@ public class ChoreographerExecutorDBService {
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+    public boolean lockExecutorById(final long id) { //TODO junit
+		logger.debug("lockExecutorById started...");
+		
+		final Optional<ChoreographerExecutor> optional = executorRepository.findById(id);
+		if (optional.isEmpty()) {
+			return false;
+		}
+		
+		final ChoreographerExecutor executor = optional.get();
+		executor.setLocked(true);
+		executorRepository.saveAndFlush(executor);
+		return true;
+	}
 }

@@ -145,8 +145,15 @@ public class ChoreographerExecutorService {
         final Optional<ChoreographerExecutor> optional = executorDBService.getExecutorOptionalById(id);
         if (optional.isPresent()) {
         	final ChoreographerExecutor executor = optional.get();
-			driver.unregisterSystem(executor.getName(), executor.getAddress(), executor.getPort());
-        	executorDBService.deleteExecutorById(id);
+        	if (!isExecutorActive(executor)) {
+        		if (!executorDBService.lockExecutorById(executor.getId())) { //Locking executor from Executor selection
+            		//Should not happen
+            		throw new ArrowheadException("Executor lock failure.", HttpStatus.SC_INTERNAL_SERVER_ERROR);
+            	} else {
+            		driver.unregisterSystem(executor.getName(), executor.getAddress(), executor.getPort());
+            		executorDBService.deleteExecutorById(executor.getId());        		
+            	}
+			}
 		}
 	}
 	
@@ -173,9 +180,15 @@ public class ChoreographerExecutorService {
 		
         final Optional<ChoreographerExecutor> optional = executorDBService.getExecutorOptionalByAddressAndPortAndBaseUri(validAddress, validPort, baseUri);
         if (optional.isPresent()) {
+        	//We expect Executors not to unregister during an active execution
         	final ChoreographerExecutor executor = optional.get();
-        	driver.unregisterSystem(executor.getName(), executor.getAddress(), executor.getPort());
-        	executorDBService.deleteExecutorById(executor.getId());
+        	if (!executorDBService.lockExecutorById(executor.getId())) { //Locking executor from Executor selection
+        		//Should not happen
+        		throw new ArrowheadException("Executor lock failure.", HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        	} else {
+        		driver.unregisterSystem(executor.getName(), executor.getAddress(), executor.getPort());
+        		executorDBService.deleteExecutorById(executor.getId());        		
+        	}
 		}
 	}
 	
@@ -234,5 +247,12 @@ public class ChoreographerExecutorService {
 		}
 		
 		return result.getDetectedAddress();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private boolean isExecutorActive(final ChoreographerExecutor executor) {
+		logger.debug("isExecutorActive started...");
+		//TODO implement when Session db service is merged
+		return false;
 	}
 }
