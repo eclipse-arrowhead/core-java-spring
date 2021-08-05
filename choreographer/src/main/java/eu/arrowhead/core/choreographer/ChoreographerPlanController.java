@@ -47,10 +47,10 @@ import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerPlan;
 import eu.arrowhead.common.database.entity.ChoreographerSession;
-import eu.arrowhead.common.dto.internal.ChoreographerPlanRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerRunPlanRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanListResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerPlanRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
@@ -169,24 +169,7 @@ public class ChoreographerPlanController {
 
         return planEntryResponse;
     }
-
-    //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Register a plan.",
-    			  tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_PLAN_MGMT_HTTP_201_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_PLAN_MGMT_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-    })
-    @PostMapping(path = PLAN_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-    @ResponseBody public ChoreographerPlanResponseDTO registerPlan(@RequestBody final ChoreographerPlanRequestDTO request) {
-        checkPlanRequest(request, CommonConstants.CHOREOGRAPHER_URI + PLAN_MGMT_URI);
-
-        return choreographerDBService.createPlanResponse(request.getName(), request.getFirstActionName(), request.getActions());
-    }
-
+	
     //-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Remove the requested Plan entry.", tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses(value = {
@@ -207,6 +190,22 @@ public class ChoreographerPlanController {
         logger.debug("Plan with id: " + id + " successfully deleted!");
     }
 
+    //-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = "Register a plan.",
+    			  tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_PLAN_MGMT_HTTP_201_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_PLAN_MGMT_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+    })
+    @PostMapping(path = PLAN_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
+    @ResponseBody public ChoreographerPlanResponseDTO registerPlan(@RequestBody final ChoreographerPlanRequestDTO request) {
+        checkPlanRequest(request, CommonConstants.CHOREOGRAPHER_URI + PLAN_MGMT_URI);
+
+        return choreographerDBService.createPlanResponse(request.getName(), request.getFirstActionName(), request.getActions());
+    }
 
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Initiate the start of one or more plans.",

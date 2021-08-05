@@ -57,17 +57,17 @@ import eu.arrowhead.common.database.repository.ChoreographerSessionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerStepNextStepConnectionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerStepRepository;
 import eu.arrowhead.common.database.repository.ChoreographerWorklogRepository;
-import eu.arrowhead.common.dto.internal.ChoreographerActionRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerExecutorListResponseDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerExecutorSearchResponseDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerStatusType;
-import eu.arrowhead.common.dto.internal.ChoreographerStepRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerSuitableExecutorResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.shared.ChoreographerActionRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerOFRRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanListResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerStepRequestDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -564,12 +564,19 @@ public class ChoreographerDBService {
         logger.debug("removePlanEntryById started...");
 
         try {
-            if (!choreographerPlanRepository.existsById(id)) {
-                throw new InvalidParameterException("ActionPlan with id of '" + id + "' doesn't exist!");
+        	final Optional<ChoreographerPlan> planOpt = choreographerPlanRepository.findById(id);
+            if (planOpt.isEmpty()) {
+                throw new InvalidParameterException("Plan with id of '" + id + "' doesn't exist!");
             }
+            
+            final List<ChoreographerSession> sessions = choreographerSessionRepository.findByPlanAndStatusIn(planOpt.get(), List.of(ChoreographerStatusType.INITIATED, ChoreographerStatusType.RUNNING));
+            if (!sessions.isEmpty()) {
+            	throw new ArrowheadException("Plan cannot be deleted, because it is currently executed.");
+            }
+            
             choreographerPlanRepository.deleteById(id);
             choreographerPlanRepository.flush();
-        } catch (final InvalidParameterException ex) {
+        } catch (final ArrowheadException ex) {
             throw ex;
         } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
