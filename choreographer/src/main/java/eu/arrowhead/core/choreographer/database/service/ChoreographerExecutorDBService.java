@@ -78,7 +78,7 @@ public class ChoreographerExecutorDBService {
 		Assert.isTrue(!Utilities.isEmpty(serviceDefinitionName), "serviceDefinitionName is empty");
 		
 		try {
-			final String validatedBaseUri = Utilities.isEmpty(baseUri) ? "" : baseUri;
+			final String validatedBaseUri = Utilities.isEmpty(baseUri) ? "" : baseUri.trim();
 			
 			ChoreographerExecutor executor;
 			final Optional<ChoreographerExecutor> optionalExecutor = executorRepository.findByAddressAndPortAndBaseUri(address, port, validatedBaseUri);
@@ -138,7 +138,7 @@ public class ChoreographerExecutorDBService {
 		Assert.isTrue(!Utilities.isEmpty(address), "address is empty");
 		
 		try {
-			return executorRepository.findByAddressAndPortAndBaseUri(address.toLowerCase().trim(), port, Utilities.isEmpty(baseUri) ? "" : baseUri);	
+			return executorRepository.findByAddressAndPortAndBaseUri(address.toLowerCase().trim(), port, Utilities.isEmpty(baseUri) ? "" : baseUri.trim());	
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -168,7 +168,7 @@ public class ChoreographerExecutorDBService {
 		Assert.isTrue(!Utilities.isEmpty(address), "address is empty");
 		
 		try {
-			final Optional<ChoreographerExecutor> opt = executorRepository.findByAddressAndPortAndBaseUri(address.toLowerCase().trim(), port, Utilities.isEmpty(baseUri) ? "" : baseUri);
+			final Optional<ChoreographerExecutor> opt = executorRepository.findByAddressAndPortAndBaseUri(address.toLowerCase().trim(), port, Utilities.isEmpty(baseUri) ? "" : baseUri.trim());
 			if (opt.isPresent()) {
 				deleteExecutorById(opt.get().getId());
 			}
