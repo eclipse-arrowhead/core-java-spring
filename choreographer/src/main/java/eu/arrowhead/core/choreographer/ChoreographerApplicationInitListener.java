@@ -64,7 +64,8 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
 
         final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
         context.put(CoreCommonConstants.SR_QUERY_BY_SERVICE_DEFINITION_LIST_URI, createQueryByServiceDefinitionListUri(scheme));
-        context.put(CoreCommonConstants.SR_QUERY_BY_SERVICE_DEFINITION_LIST_URI, createRegisterSystemUri(scheme));
+        context.put(CoreCommonConstants.SR_REGISTER_SYSTEM_URI, createRegisterSystemUri(scheme));
+        context.put(CoreCommonConstants.SR_UNREGISTER_SYSTEM_URI, createUnregisterSystemUri(scheme));
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -132,6 +133,14 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
         logger.debug("createQuerySystemByServiceDefinitionList started...");
 
         final String uriStr = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI;
+        return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), uriStr);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    private UriComponents createUnregisterSystemUri(final String scheme) {
+        logger.debug("createUnregisterSystemUri started...");
+
+        final String uriStr = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI;
         return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), uriStr);
     }
 }

@@ -13,9 +13,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
@@ -59,6 +61,16 @@ public class ChoreographerDriver {
         return httpService.sendRequest(uri, HttpMethod.POST, SystemResponseDTO.class, request).getBody();
     }
     
+    //-------------------------------------------------------------------------------------------------
+    public void unregisterSystem(final String systemName, final String address, final int port) {
+    	logger.debug("unregisterSystem started...");
+    	Assert.isTrue(!Utilities.isEmpty(systemName), "systemName is empty");
+    	Assert.isTrue(!Utilities.isEmpty(address), "address is empty");
+    	
+    	final UriComponents uri = getUnregisterSystemUri(systemName, address, port);
+    	httpService.sendRequest(uri, HttpMethod.DELETE, Void.class);
+    }
+    
     //=================================================================================================
     // assistant methods
 
@@ -90,5 +102,23 @@ public class ChoreographerDriver {
         }
 
         throw new ArrowheadException("Choreographer can't find Service Registry Register System URI.");
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    private UriComponents getUnregisterSystemUri(final String systemName, final String address, final int port) {
+    	logger.debug("getUnregisterSystemUri started...");
+
+        if (arrowheadContext.containsKey(CoreCommonConstants.SR_UNREGISTER_SYSTEM_URI)) {
+            try {
+            	final UriComponents uri = (UriComponents) arrowheadContext.get(CoreCommonConstants.SR_UNREGISTER_SYSTEM_URI);
+            	return UriComponentsBuilder.fromUri(uri.toUri()).queryParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME, systemName)
+		            											.queryParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS, address)
+		            											.queryParam(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT, port).build();
+            } catch (final ClassCastException ex) {
+                throw new ArrowheadException("Choreographer can't find Service Registry Unregister System URI.");
+            }
+        }
+
+        throw new ArrowheadException("Choreographer can't find Service Registry Unregister System URI.");
     }
 }

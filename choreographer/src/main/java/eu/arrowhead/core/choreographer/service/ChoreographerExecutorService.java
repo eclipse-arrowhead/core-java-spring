@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 
@@ -33,7 +34,9 @@ public class ChoreographerExecutorService {
 	//-------------------------------------------------------------------------------------------------	
 	public void unregisterExecutorSystem(final String systemName, final String address, final int port) {
 		logger.debug("unregisterExecutorSystem started...");
-		
-		//TODO
+		Assert.isTrue(!Utilities.isEmpty(systemName), "systemName is empty");
+    	Assert.isTrue(!Utilities.isEmpty(address), "address is empty");
+
+    	driver.unregisterSystem(systemName, address, port);
 	}
 }
