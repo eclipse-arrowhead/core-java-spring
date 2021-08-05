@@ -15,8 +15,10 @@
 package eu.arrowhead.core.choreographer.database.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -134,8 +136,13 @@ public class ChoreographerDBService {
         final Page<ChoreographerPlan> planEntries = getPlanEntries(page, size, direction, sortField);
 
         final List<ChoreographerPlanResponseDTO> planDTOs = new ArrayList<>(planEntries.getSize());
-        for (final ChoreographerPlan plan : planEntries) {
-            planDTOs.add(DTOConverter.convertPlanToPlanResponseDTO(plan));
+        try {
+        	for (final ChoreographerPlan plan : planEntries) {
+        		planDTOs.add(DTOConverter.convertPlanToPlanResponseDTO(plan, getPlanDetails(plan)));
+        	}
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
 
         return new ChoreographerPlanListResponseDTO(planDTOs, planEntries.getTotalElements());
@@ -164,7 +171,13 @@ public class ChoreographerDBService {
 	public ChoreographerPlanResponseDTO getPlanByIdResponse(final long id) {
         logger.debug("getPlanByIdResponse started...");
 
-        return DTOConverter.convertPlanToPlanResponseDTO(getPlanById(id));
+        final ChoreographerPlan plan = getPlanById(id);
+        try {
+        	return DTOConverter.convertPlanToPlanResponseDTO(plan, getPlanDetails(plan));
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -962,4 +975,17 @@ public class ChoreographerDBService {
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
     }
+    
+    //-------------------------------------------------------------------------------------------------
+	private Map<ChoreographerAction,List<ChoreographerStep>> getPlanDetails(final ChoreographerPlan plan) {
+		final List<ChoreographerAction> actions = choreographerActionRepository.findByPlan(plan);
+		final Map<ChoreographerAction,List<ChoreographerStep>> result = new HashMap<>(actions.size());
+		
+		for (final ChoreographerAction action : actions) {
+			final List<ChoreographerStep> steps = choreographerStepRepository.findByAction(action);
+			result.put(action, steps);
+		}
+		
+		return result;
+	}
 }

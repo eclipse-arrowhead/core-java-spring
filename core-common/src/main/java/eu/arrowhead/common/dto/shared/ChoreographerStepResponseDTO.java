@@ -14,11 +14,11 @@
 
 package eu.arrowhead.common.dto.shared;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import eu.arrowhead.common.database.entity.ChoreographerStepDetail;
-
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ChoreographerStepResponseDTO implements Serializable {
@@ -26,16 +26,16 @@ public class ChoreographerStepResponseDTO implements Serializable {
 	//=================================================================================================
 	// members
 	
-	private static final long serialVersionUID = 3665162578177568728L;
-
-	//TODO: continue
+	private static final long serialVersionUID = -3759791369622905848L;
+	
 	private long id;
     private String name;
-    private List<ChoreographerStepDetailResponseDTO> stepDetails;
-    private String metadata;
-    private String parameters;
+    private String serviceDefinition;
+    private Integer minVersion;
+    private Integer maxVersion;
+    private Map<String,String> staticParameters;
     private int quantity;
-    private List<ChoreographerNextStepResponseDTO> nextSteps;
+    private List<String> nextStepNames;
     private String createdAt;
     private String updatedAt;
 
@@ -46,14 +46,16 @@ public class ChoreographerStepResponseDTO implements Serializable {
 	public ChoreographerStepResponseDTO() {}
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerStepResponseDTO(final long id, final String name, final List<ChoreographerStepDetailResponseDTO> stepDetails, final String parameters,
-                                        final List<ChoreographerNextStepResponseDTO> nextSteps, final int quantity, final String createdAt, final String updatedAt) {
+    public ChoreographerStepResponseDTO(final long id, final String name, final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final Map<String, String> staticParameters, final int quantity,
+    									final List<String> nextStepNames, final String createdAt, final String updatedAt) {
         this.id = id;
         this.name = name;
-        this.stepDetails = stepDetails;
-        this.parameters = parameters;
-        this.nextSteps = nextSteps;
+        this.serviceDefinition = serviceDefinition;
+        this.minVersion = minVersion;
+        this.maxVersion = maxVersion;
+        this.staticParameters = staticParameters;
         this.quantity = quantity;
+        this.nextStepNames = nextStepNames;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -61,21 +63,23 @@ public class ChoreographerStepResponseDTO implements Serializable {
     //-------------------------------------------------------------------------------------------------
 	public long getId() { return id; }
 	public String getName() { return name; }
-    public List<ChoreographerStepDetailResponseDTO> getStepDetails() { return stepDetails; }
-    public String getMetadata() { return metadata; }
-    public String getParameters() { return parameters; }
-    public List<ChoreographerNextStepResponseDTO> getNextSteps() { return nextSteps; }
+	public String getServiceDefinition() { return serviceDefinition; }
+	public Integer getMinVersion() { return minVersion; }
+	public Integer getMaxVersion() { return maxVersion; }
+	public Map<String,String> getStaticParameters() { return staticParameters; }
     public int getQuantity() { return quantity; }
+    public List<String> getNextStepNames() { return nextStepNames; }
     public String getCreatedAt() { return createdAt; }
 	public String getUpdatedAt() { return updatedAt; }
 
-    //-------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
     public void setName(final String name) { this.name = name; }
-    public void setStepDetails(List<ChoreographerStepDetailResponseDTO> stepDetails) { this.stepDetails = stepDetails; }
-    public void setMetadata(String metadata) { this.metadata = metadata; }
-    public void setParameters(String parameters) { this.parameters = parameters; }
-    public void setNextSteps(final List<ChoreographerNextStepResponseDTO> nextSteps) { this.nextSteps = nextSteps; }
+    public void setServiceDefinition(String serviceDefinition) { this.serviceDefinition = serviceDefinition; }
+    public void setMinVersion(Integer minVersion) { this.minVersion = minVersion; }
+    public void setMaxVersion(Integer maxVersion) { this.maxVersion = maxVersion; }
+    public void setNextStepNames(List<String> nextStepNames) { this.nextStepNames = nextStepNames; }
+    public void setStaticParameters(Map<String,String> staticParameters) { this.staticParameters = staticParameters; }
     public void setQuantity(int quantity) { this.quantity = quantity; }
     public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
     public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }

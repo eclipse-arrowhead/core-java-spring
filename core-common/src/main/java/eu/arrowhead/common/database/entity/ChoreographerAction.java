@@ -102,7 +102,7 @@ public class ChoreographerAction {
     public void setId(final long id) { this.id = id; }
     public void setName(final String name) { this.name = name; }
     public void setPlan(final ChoreographerPlan plan) { this.plan = plan; }
-    public void setFirst(final boolean firstAction) { this.firstAction = firstAction; }
+    public void setFirstAction(final boolean firstAction) { this.firstAction = firstAction; }
     public void setNextAction(final ChoreographerAction nextAction) { this.nextAction = nextAction; }
     public void setFirstStepEntries(final Set<ChoreographerStep> firstStepEntries) { this.firstStepEntries = firstStepEntries; }
     public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
@@ -120,4 +120,34 @@ public class ChoreographerAction {
     public void onUpdate() {
         this.updatedAt = ZonedDateTime.now();
     }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (id ^ (id >>> 32));
+		return result;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		
+		final ChoreographerAction other = (ChoreographerAction) obj;
+		if (id != other.id) {
+			return false;
+		}
+		
+		return true;
+	}
 }
