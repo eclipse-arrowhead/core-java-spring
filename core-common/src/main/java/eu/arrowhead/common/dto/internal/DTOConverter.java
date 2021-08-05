@@ -1454,16 +1454,6 @@ public class DTOConverter {
 		}
 		return IssuedCertificateStatus.GOOD;
 	}
-	public static ChoreographerExecutorListResponseDTO convertExecutorListToExecutorListResponseDTO(final Page<ChoreographerExecutor> executorEntries) {
-		Assert.notNull(executorEntries, "List of executors is null");
-
-		final List<ChoreographerExecutorResponseDTO> executorEntryDTOs = new ArrayList<>(executorEntries.getNumberOfElements());
-		for (final ChoreographerExecutor executorEntry: executorEntries) {
-			executorEntryDTOs.add(convertExecutorToExecutorResponseDTO(executorEntry));
-		}
-
-		return new ChoreographerExecutorListResponseDTO(executorEntryDTOs, executorEntries.getTotalElements());
-	}
 
 	public static ChoreographerExecutorSearchResponseDTO convertExecutorListToExecutorSearchResponseDTO(final List<ChoreographerExecutor> executorEntries) {
 		Assert.notNull(executorEntries, "List of executors is null");

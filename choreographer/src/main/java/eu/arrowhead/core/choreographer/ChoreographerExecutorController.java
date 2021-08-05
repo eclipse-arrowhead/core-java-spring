@@ -24,6 +24,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,7 +36,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.dto.internal.ChoreographerExecutorListResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorResponseDTO;
 import eu.arrowhead.core.choreographer.service.ChoreographerExecutorService;
@@ -60,6 +63,8 @@ public class ChoreographerExecutorController {
 	
 	private static final String POST_EXECUTOR_HTTP_201_MESSAGE = "Executor created.";
     private static final String POST_EXECUTOR_HTTP_400_MESSAGE = "Could not create executor.";
+    private static final String GET_EXECUTOR_HTTP_200_MESSAGE = "Executor returned.";
+    private static final String GET_EXECUTOR_HTTP_400_MESSAGE = "Could not retrieve Executor.";
     private static final String DELETE_EXECUTOR_HTTP_200_MESSAGE = "Executor successfully removed.";
     private static final String DELETE_EXECUTOR_HTTP_400_MESSAGE = "Could not remove Executor.";
     
@@ -78,7 +83,7 @@ public class ChoreographerExecutorController {
     })
     @PostMapping(path = CommonConstants.CHOREOGRAPHER_EXECUTOR_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
-    @ResponseBody public ChoreographerExecutorResponseDTO addExecutor(@RequestBody final ChoreographerExecutorRequestDTO request) {
+    @ResponseBody public ChoreographerExecutorResponseDTO addExecutor(@RequestBody final ChoreographerExecutorRequestDTO request) { //TODO junit
     	logger.debug("addExecutor started...");
     	return executorService.addExecutorSystem(request, CommonConstants.CHOREOGRAPHER_URI + CommonConstants.CHOREOGRAPHER_EXECUTOR_MGMT_URI);
     }
@@ -91,15 +96,44 @@ public class ChoreographerExecutorController {
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @DeleteMapping(CommonConstants.CHOREOGRAPHER_EXECUTOR_MGMT_BY_ID_URI)
-    public void removeExecutor(@PathVariable final long id) {
+    @DeleteMapping(path = CommonConstants.CHOREOGRAPHER_EXECUTOR_MGMT_BY_ID_URI)
+    public void removeExecutor(@PathVariable final long id) { //TODO junit
         logger.debug("New Executor delete request received with id: {}", id);
         executorService.removeExecutorSystem(id, CommonConstants.CHOREOGRAPHER_URI + CommonConstants.CHOREOGRAPHER_EXECUTOR_MGMT_BY_ID_URI);
         logger.debug("Executor with id: '{}' successfully deleted", id);
     }
     
-	//TODO getExecutors
-	//TODO getExecutorById
+
+    //-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = "Return requested executor entries by the given parameters", response = ChoreographerExecutorListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_OK, message = GET_EXECUTOR_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_EXECUTOR_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+    })
+    @GetMapping(path = CommonConstants.CHOREOGRAPHER_EXECUTOR_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody public ChoreographerExecutorListResponseDTO getExecutorEntries(@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
+																	             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
+																	             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
+																	             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) { //TODO junit
+        logger.debug("New Executor get request received with page: {} and item_per page: {}", page, size);
+        return executorService.getExecutors(page, size, direction, sortField, CommonConstants.CHOREOGRAPHER_URI + CommonConstants.CHOREOGRAPHER_EXECUTOR_MGMT_URI);
+    }
+    
+	//-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = "Return requested executor entry.", response = ChoreographerExecutorResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_OK, message = GET_EXECUTOR_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_EXECUTOR_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+    })
+    @GetMapping(path = CommonConstants.CHOREOGRAPHER_EXECUTOR_MGMT_BY_ID_URI)
+    @ResponseBody public ChoreographerExecutorResponseDTO getExecutorEntryById(@PathVariable final long id) { //TODO junit
+        logger.debug("New Executor get request received with id: {}", id);
+        return executorService.getExecutorById(id, CommonConstants.CHOREOGRAPHER_URI + CommonConstants.CHOREOGRAPHER_EXECUTOR_MGMT_BY_ID_URI);
+    }
 	
 	//-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Return registered executor.", response = ChoreographerExecutorResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
@@ -111,7 +145,7 @@ public class ChoreographerExecutorController {
     })
     @PostMapping(path = CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_REGISTER, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
-    @ResponseBody public ChoreographerExecutorResponseDTO registerExecutor(final HttpServletRequest servletRequest, @RequestBody final ChoreographerExecutorRequestDTO request) {
+    @ResponseBody public ChoreographerExecutorResponseDTO registerExecutor(final HttpServletRequest servletRequest, @RequestBody final ChoreographerExecutorRequestDTO request) { //TODO junit
     	logger.debug("registerExecutor started...");
     	return executorService.registerExecutorSystem(request, CommonConstants.CHOREOGRAPHER_URI + CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_REGISTER, servletRequest);
     }

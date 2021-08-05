@@ -311,26 +311,6 @@ public class ChoreographerController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Remove executor.", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_EXECUTOR_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_EXECUTOR_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-    })
-    @DeleteMapping(path = OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER)
-    public void unregisterExecutor(@RequestParam(CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_ADDRESS) final String executorAddress,
-                                   @RequestParam(CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_PORT) final int executorPort,
-                                   @RequestParam(CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_BASE_URI) final String executorBaseUri) {
-        logger.debug("Executor removal request received.");
-
-        checkUnregisterExecutorParameters(executorAddress, executorPort, executorBaseUri);
-
-        choreographerDBService.removeExecutor(executorAddress, executorPort, executorBaseUri);
-        logger.debug("Removed Executor with address: {}, port: {} and baseURI: {}", executorAddress, executorPort, executorBaseUri);
-    }
-
-    //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Notify the Choreographer that an error happened during the execution of a step in a session.", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_CREATED, message = STEP_FINISHED_HTTP_200_MESSAGE),
@@ -344,27 +324,6 @@ public class ChoreographerController {
         logger.debug("notifyStepError started...");
         logger.debug("Sending message to session-step-error.");
         jmsTemplate.convertAndSend("session-step-error", request);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Return requested executor entry.", response = ServiceRegistryResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = GET_EXECUTOR_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_EXECUTOR_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-    })
-    @GetMapping(path = EXECUTOR_MGMT_BY_ID_URI)
-    @ResponseBody public ChoreographerExecutorResponseDTO getExecutorEntryById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
-        logger.debug("New Executor get request received with id: {}", id);
-
-        if (id < 1) {
-            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + EXECUTOR_MGMT_BY_ID_URI);
-        }
-        final ChoreographerExecutorResponseDTO executorEntryByIdResponse = choreographerDBService.getExecutorEntryByIdResponse(id);
-        logger.debug("Executor entry with id: {} successfully retrieved", id);
-
-        return executorEntryByIdResponse;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -387,95 +346,6 @@ public class ChoreographerController {
         return choreographerDBService.getSuitableExecutorIdsByStepId(id);
     }
 
-    //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Return requested executor entries by the given parameters", response = ChoreographerExecutorListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = GET_EXECUTOR_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_EXECUTOR_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-    })
-    @GetMapping(path = EXECUTOR_MGMT_URI)
-    @ResponseBody public ChoreographerExecutorListResponseDTO getExecutorEntries(
-            @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
-            @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
-            @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
-            @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
-        logger.debug("New Executor get request received with page: {} and item_per page: {}", page, size);
-
-        int validatedPage;
-        int validatedSize;
-        if (page == null && size == null) {
-            validatedPage = -1;
-            validatedSize = -1;
-        } else {
-            if (page == null || size == null) {
-                throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI +
-                        EXECUTOR_MGMT_URI);
-            } else {
-                validatedPage = page;
-                validatedSize = size;
-            }
-        }
-
-        final Sort.Direction validatedDirection = CoreUtilities.calculateDirection(direction, CommonConstants.CHOREOGRAPHER_URI + EXECUTOR_MGMT_URI);
-        final ChoreographerExecutorListResponseDTO executorEntriesResponse = choreographerDBService.getExecutorEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
-        logger.debug("Service Registry entries with page: {} and item_per page: {} successfully retrieved", page, size);
-
-        return executorEntriesResponse;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Remove executor.", tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_EXECUTOR_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_EXECUTOR_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-    })
-    @DeleteMapping(path = EXECUTOR_MGMT_BY_ID_URI)
-    public void removeExecutor(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
-        logger.debug("New Executor delete request received with id: {}", id);
-
-        if (id < 1) {
-            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + EXECUTOR_MGMT_BY_ID_URI);
-        }
-
-        choreographerDBService.removeExecutorEntryById(id);
-        logger.debug("Executor with id: '{}' successfully deleted", id);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    //TODO: delete
-    @ApiOperation(value = "Return list of executors suited to execute the task with the service definition and version requirements.",
-            response = ChoreographerExecutorSearchResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = GET_EXECUTOR_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_EXECUTOR_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-    })
-    @GetMapping(path = EXECUTOR_SEARCH_MGMT_URI)
-    @ResponseBody public ChoreographerExecutorSearchResponseDTO getExecutorsByServiceDefinitionAndVersion(
-            @RequestParam(name = EXECUTOR_REQUEST_PARAM_SERVICE_DEFINITION, required = true) final String serviceDefinition,
-            @RequestParam(name = EXECUTOR_REQUEST_PARAM_MIN_VERSION, required = false) final Integer minVersion,
-            @RequestParam(name = EXECUTOR_REQUEST_PARAM_MAX_VERSION, required = false) final Integer maxVersion,
-            @RequestParam(name = EXECUTOR_REQUEST_PARAM_VERSION, required = false) final Integer version) {
-
-        logger.debug("New Executor get request received with service definition: {}", serviceDefinition);
-
-        if (minVersion != null && maxVersion != null && version == null) {
-            if (maxVersion < minVersion) {
-                throw new BadPayloadException(EXECUTOR_MIN_VERSION_GREATER_THAN_MAX_VERSION_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + EXECUTOR_SEARCH_MGMT_URI);
-            }
-            return choreographerDBService.getExecutorByServiceDefinitionAndMinMaxVersion(serviceDefinition, minVersion, maxVersion);
-        } else if (version != null && minVersion == null && maxVersion == null) {
-            return choreographerDBService.getExecutorByServiceDefinitionAndVersion(serviceDefinition, version);
-        } else {
-            throw new BadPayloadException(EXECUTOR_VERSION_MIN_VERSION_MAX_VERSION_AMBIGUOUS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + EXECUTOR_SEARCH_MGMT_URI);
-        }
-    }
-
     //=================================================================================================
 	// assistant methods
 
@@ -485,54 +355,6 @@ public class ChoreographerController {
 
         if (Utilities.isEmpty(request.getName())) {
             throw new BadPayloadException("Plan name is null or blank.", HttpStatus.SC_BAD_REQUEST, origin);
-        }
-    }
-
-    private ChoreographerExecutorResponseDTO callCreateExecutor(ChoreographerExecutorRequestDTO request) {
-        logger.debug("callCreateExecutor started...");
-
-        checkExecutorRequest(request, CommonConstants.CHOREOGRAPHER_URI + EXECUTOR_MGMT_URI);
-
-        final String validatedName = request.getName();
-        final String validatedAddress = request.getAddress();
-        final int validatedPort = request.getPort();
-        final String validatedBaseUri = request.getBaseUri();
-        final String validatedServiceDefinitionName = request.getServiceDefinitionName();
-        final int validatedVersion = request.getVersion();
-
-        return choreographerDBService.createExecutorResponse(validatedName, validatedAddress, validatedPort, validatedBaseUri, validatedServiceDefinitionName, validatedVersion);
-    }
-
-    private void checkExecutorRequest(final ChoreographerExecutorRequestDTO request, final String origin) {
-        logger.debug("checkExecutorRequest started...");
-
-        if (request == null) {
-            throw new BadPayloadException("Executor is null.", HttpStatus.SC_BAD_REQUEST, origin);
-        }
-
-        if (Utilities.isEmpty(request.getName())) {
-            throw new BadPayloadException(EXECUTOR_NAME_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-        }
-
-        if (Utilities.isEmpty(request.getAddress())) {
-            throw new BadPayloadException(EXECUTOR_ADDRESS_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-        }
-
-        if (request.getPort() == null) {
-            throw new BadPayloadException(EXECUTOR_PORT_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-        }
-
-        if (Utilities.isEmpty(request.getServiceDefinitionName())) {
-            throw new BadPayloadException(EXECUTOR_SD_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-        }
-
-        if (request.getVersion() == null) {
-            throw new BadPayloadException(EXECUTOR_VERSION_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-        }
-
-        final int validatedPort = request.getPort();
-        if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-            throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
         }
     }
 
@@ -584,24 +406,5 @@ public class ChoreographerController {
         }
 
         return serviceDefinitions;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    private void checkUnregisterExecutorParameters(final String executorAddress, final int executorPort, final String executorBaseUri) {
-        // parameters can't be null, but can be empty
-        logger.debug("checkUnregisterExecutorParameters started...");
-
-        final String origin = CommonConstants.CHOREOGRAPHER_URI + CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER;
-        if (Utilities.isEmpty(executorAddress)) {
-            throw new BadPayloadException("Executor address is blank.", HttpStatus.SC_BAD_REQUEST, origin);
-        }
-
-        if (Utilities.isEmpty(executorBaseUri)) {
-            throw new BadPayloadException("The base URI of the Executor is blank.", HttpStatus.SC_BAD_REQUEST, origin);
-        }
-
-        if (executorPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || executorPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-            throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
-        }
     }
 }

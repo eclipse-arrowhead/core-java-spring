@@ -14,12 +14,16 @@
 
 package eu.arrowhead.core.choreographer.database.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -30,6 +34,7 @@ import eu.arrowhead.common.database.entity.ChoreographerExecutor;
 import eu.arrowhead.common.database.entity.ChoreographerExecutorServiceDefinition;
 import eu.arrowhead.common.database.repository.ChoreographerExecutorRepository;
 import eu.arrowhead.common.database.repository.ChoreographerExecutorServiceDefinitionRepository;
+import eu.arrowhead.common.dto.internal.ChoreographerExecutorListResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -118,6 +123,54 @@ public class ChoreographerExecutorDBService {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ChoreographerExecutorListResponseDTO getExecutorsResponse(final int page, final int size, final Direction direction, final String sortField) { //TODO junit
+		logger.debug("getExecutorsResponse started...");
+		
+		final Page<ChoreographerExecutor> executors = getExecutors(page, size, direction, sortField);
+		final List<ChoreographerExecutorResponseDTO> responseData = new ArrayList<>(executors.getSize());
+		for (final ChoreographerExecutor entry : executors) {
+			final ChoreographerExecutorResponseDTO dto = DTOConverter.convertExecutorToExecutorResponseDTO(entry, executorServiceDefinitionRepository.findAllByExecutor(entry));
+			responseData.add(dto);
+		}
+		
+		return new ChoreographerExecutorListResponseDTO(responseData, executors.getTotalElements());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Page<ChoreographerExecutor> getExecutors(final int page, final int size, final Direction direction, final String sortField) { //TODO junit
+		logger.debug("getExecutors started...");
+		
+		final int validatedPage = page < 0 ? 0 : page;
+		final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size;
+		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
+		final String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		
+		if (!ChoreographerExecutor.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
+			throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
+		}
+		
+		try {
+			return executorRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Optional<ChoreographerExecutorResponseDTO> getExecutorOptionalByIdResponse(final long id) { //TODO junit
+		logger.debug("getExecutorOptionalByIdResponse started...");
+		
+		final Optional<ChoreographerExecutor> optional = getExecutorOptionalById(id);
+		if (optional.isEmpty()) {
+			return Optional.empty();
+		}
+		
+		final ChoreographerExecutorResponseDTO dto = DTOConverter.convertExecutorToExecutorResponseDTO(optional.get(), executorServiceDefinitionRepository.findAllByExecutor(optional.get()));
+		return Optional.of(dto);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
