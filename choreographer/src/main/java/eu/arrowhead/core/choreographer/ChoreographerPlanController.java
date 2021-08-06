@@ -44,7 +44,6 @@ import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Defaults;
-import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerPlan;
 import eu.arrowhead.common.database.entity.ChoreographerSession;
 import eu.arrowhead.common.dto.internal.ChoreographerRunPlanRequestDTO;
@@ -56,6 +55,7 @@ import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
 import eu.arrowhead.core.choreographer.service.ChoreographerDriver;
+import eu.arrowhead.core.choreographer.validation.ChoreographerPlanValidator;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -100,6 +100,9 @@ public class ChoreographerPlanController {
 
     @Autowired
     private ChoreographerDBService choreographerDBService;
+    
+    @Autowired
+    private ChoreographerPlanValidator planValidator;
 
     @Autowired
     private ChoreographerDriver choreographerDriver;
@@ -139,13 +142,13 @@ public class ChoreographerPlanController {
         logger.debug("New Plan GET request received with page: {} and item_per_page: {}.", page, size);
 
         final ValidatedPageParams validatedPageParams = CoreUtilities.validatePageParameters(page, size, direction, sortField);
-        final ChoreographerPlanListResponseDTO planEntiresResponse = choreographerDBService.getPlanEntriesResponse(validatedPageParams.getValidatedPage(),
+        final ChoreographerPlanListResponseDTO planEntriesResponse = choreographerDBService.getPlanEntriesResponse(validatedPageParams.getValidatedPage(),
         																										   validatedPageParams.getValidatedSize(),
         																										   validatedPageParams.getValidatedDirection(),
         																										   sortField);
         logger.debug("Plan with page: {} and item_per_page: {} retrieved successfully", page, size);
 
-        return planEntiresResponse;
+        return planEntriesResponse;
     }
 	
     //-------------------------------------------------------------------------------------------------
@@ -202,9 +205,9 @@ public class ChoreographerPlanController {
     @PostMapping(path = PLAN_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
     @ResponseBody public ChoreographerPlanResponseDTO registerPlan(@RequestBody final ChoreographerPlanRequestDTO request) {
-        checkPlanRequest(request, CommonConstants.CHOREOGRAPHER_URI + PLAN_MGMT_URI);
+        final ChoreographerPlanRequestDTO validatedPlan = planValidator.validatePlan(request, CommonConstants.CHOREOGRAPHER_URI + PLAN_MGMT_URI);
 
-        return choreographerDBService.createPlanResponse(request.getName(), request.getFirstActionName(), request.getActions());
+        return choreographerDBService.createPlanResponse(validatedPlan);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -254,15 +257,6 @@ public class ChoreographerPlanController {
 
     //=================================================================================================
 	// assistant methods
-
-	//-------------------------------------------------------------------------------------------------
-    private void checkPlanRequest(final ChoreographerPlanRequestDTO request, final String origin) {
-        logger.debug("checkPlanRequest started...");
-
-        if (Utilities.isEmpty(request.getName())) {
-            throw new BadPayloadException("Plan name is null or blank.", HttpStatus.SC_BAD_REQUEST, origin);
-        }
-    }
 
     //-------------------------------------------------------------------------------------------------
     private void checkIfPlanHasEveryRequiredProvider (final ChoreographerRunPlanRequestDTO request, final String origin) {

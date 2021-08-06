@@ -64,13 +64,14 @@ import eu.arrowhead.common.dto.internal.ChoreographerSuitableExecutorResponseDTO
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.shared.ChoreographerActionRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorResponseDTO;
-import eu.arrowhead.common.dto.shared.ChoreographerOFRRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanListResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerPlanRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerStepRequestDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.core.choreographer.validation.ChoreographerPlanValidator;
 
 @Service
 public class ChoreographerDBService {
@@ -101,7 +102,9 @@ public class ChoreographerDBService {
 
     @Autowired
     private ChoreographerExecutorServiceDefinitionRepository choreographerExecutorServiceDefinitionRepository;
-
+    
+    @Autowired
+    private ChoreographerPlanValidator planValidator;
 
     private final Logger logger = LogManager.getLogger(ChoreographerDBService.class);
     
@@ -179,6 +182,76 @@ public class ChoreographerDBService {
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
     }
+	
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public ChoreographerPlanResponseDTO createPlanResponse(final ChoreographerPlanRequestDTO request) {
+        logger.debug("createPlanResponse started...");
+
+        final ChoreographerPlan planEntry = createPlan(request);
+        try {
+        	final Map<ChoreographerAction,List<ChoreographerStep>> planDetails = getPlanDetails(planEntry);
+        	
+        	return DTOConverter.convertPlanToPlanResponseDTO(planEntry, planDetails);
+        } catch (final Exception ex) {
+        	logger.debug(ex.getMessage(), ex);
+        	throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+    public ChoreographerPlan createPlan(final ChoreographerPlanRequestDTO request) {
+        logger.debug("createPlan started...");
+
+        try {
+            if (Utilities.isEmpty(request.getName())) {
+                throw new InvalidParameterException("Plan name is null or blank!");
+            }
+
+            final Optional<ChoreographerPlan> planOptional = choreographerPlanRepository.findByName(request.getName().trim().toLowerCase());
+            planOptional.ifPresent(choreographerActionPlan -> {
+                throw new InvalidParameterException("Plan with specified name already exists.");
+            });
+            
+            final ChoreographerPlanRequestDTO normalizedRequest = planValidator.validateAndNormalizePlan(request);
+
+            //TODO: continue from here
+            
+            final ChoreographerPlan plan = new ChoreographerPlan(name);
+            final ChoreographerPlan planEntry = choreographerPlanRepository.save(plan);
+
+            if (actions != null && !actions.isEmpty()) {
+                for (final ChoreographerActionRequestDTO action : actions) {
+                    planEntry.getActions().add(choreographerActionRepository.saveAndFlush(createAction(action.getName(), action.getFirstStepNames(), planEntry.getId(), action.getSteps())));
+                }
+
+                for (final ChoreographerActionRequestDTO action : actions) {
+                    addNextActionToAction(action.getName(), action.getNextActionName(), planEntry.getId());
+                }
+            } else {
+                throw new InvalidParameterException("Plan doesn't have any actions or the action field is blank.");
+            }
+
+            if (Utilities.isEmpty(firstActionName)) {
+                throw new InvalidParameterException("A plan must have one first Action.");
+            }
+
+            final Optional<ChoreographerAction> actionOptional = choreographerActionRepository.findByNameAndPlanId(firstActionName, planEntry.getId());
+            if (actionOptional.isPresent()) {
+                ChoreographerAction action = actionOptional.get();
+                planEntry.setFirstAction(action);
+            }
+
+            return choreographerPlanRepository.saveAndFlush(planEntry);
+        } catch (final InvalidParameterException ex) {
+            throw ex;
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
@@ -441,64 +514,6 @@ public class ChoreographerDBService {
         }
     }
 
-    //-------------------------------------------------------------------------------------------------
-    @Transactional(rollbackFor = ArrowheadException.class)
-    public ChoreographerPlanResponseDTO createPlanResponse(final String name, final String firstActionName, final List<ChoreographerActionRequestDTO> actions) {
-        logger.debug("createPlanResponse started...");
-
-        final ChoreographerPlan planEntry = createPlan(name, firstActionName, actions);
-
-        return DTOConverter.convertPlanToPlanResponseDTO(planEntry);
-    }
-
-	//-------------------------------------------------------------------------------------------------
-	@Transactional(rollbackFor = ArrowheadException.class)
-    public ChoreographerPlan createPlan(final String name, final String firstActionName, final List<ChoreographerActionRequestDTO> actions) {
-        logger.debug("createPlan started...");
-
-        try {
-            if (Utilities.isEmpty(name)) {
-                throw new InvalidParameterException("Plan name is null or blank!");
-            }
-
-            final Optional<ChoreographerPlan> planOptional = choreographerPlanRepository.findByName(name);
-            planOptional.ifPresent(choreographerActionPlan -> {
-                throw new InvalidParameterException("Plan with given name already exists! Plan names must be unique.");
-            });
-
-            final ChoreographerPlan plan = new ChoreographerPlan(name);
-            final ChoreographerPlan planEntry = choreographerPlanRepository.save(plan);
-
-            if (actions != null && !actions.isEmpty()) {
-                for (final ChoreographerActionRequestDTO action : actions) {
-                    planEntry.getActions().add(choreographerActionRepository.saveAndFlush(createAction(action.getName(), action.getFirstStepNames(), planEntry.getId(), action.getSteps())));
-                }
-
-                for (final ChoreographerActionRequestDTO action : actions) {
-                    addNextActionToAction(action.getName(), action.getNextActionName(), planEntry.getId());
-                }
-            } else {
-                throw new InvalidParameterException("Plan doesn't have any actions or the action field is blank.");
-            }
-
-            if (Utilities.isEmpty(firstActionName)) {
-                throw new InvalidParameterException("A plan must have one first Action.");
-            }
-
-            final Optional<ChoreographerAction> actionOptional = choreographerActionRepository.findByNameAndPlanId(firstActionName, planEntry.getId());
-            if (actionOptional.isPresent()) {
-                ChoreographerAction action = actionOptional.get();
-                planEntry.setFirstAction(action);
-            }
-
-            return choreographerPlanRepository.saveAndFlush(planEntry);
-        } catch (final InvalidParameterException ex) {
-            throw ex;
-        } catch (final Exception ex) {
-            logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-        }
-    }
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)

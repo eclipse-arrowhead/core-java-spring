@@ -22,13 +22,17 @@ import java.util.stream.Collectors;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.ChoreographerActionRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerStepRequestDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.core.choreographer.graph.StepGraph;
+import eu.arrowhead.core.choreographer.graph.StepGraphUtils;
 
 @Service
 public class ChoreographerPlanValidator {
@@ -36,8 +40,16 @@ public class ChoreographerPlanValidator {
 	//=================================================================================================
 	// members
 	
+	@Autowired
+	private ActionCircleDetector actionCircleDetector;
+	
+	@Autowired
+	private StepGraphUtils stepGraphUtils;
+	
+	@Autowired
+	private ActionUtils actionUtils;
+	
 	private final Logger logger = LogManager.getLogger(ChoreographerPlanValidator.class);
-
 	
 	//=================================================================================================
 	// methods
@@ -58,8 +70,15 @@ public class ChoreographerPlanValidator {
 	public ChoreographerPlanRequestDTO validateAndNormalizePlan(final ChoreographerPlanRequestDTO request, final boolean normalizeNames) {
 		logger.debug("validateAndNormalizePlan started...");
 
-		//TODO: implement
-		return null;
+		final ChoreographerPlanRequestDTO validatedPlan = validatePlan(request, null, normalizeNames);
+		
+		if (actionCircleDetector.hasCircle(validatedPlan)) {
+			throw new InvalidParameterException("An action references a previous action as its next action (or referencing itself).");
+		}
+		
+		validatedPlan.setActions(validateAndNormalizeActions(validatedPlan.getActions()));
+
+		return validatedPlan;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -158,23 +177,9 @@ public class ChoreographerPlanValidator {
 				   							   .map(a -> a.getName())
 				   							   .collect(Collectors.toSet());
 		
-		return nameFound(actionNames, firstActionName);
+		return actionNames.contains(firstActionName);
 	}
 
-
-	//-------------------------------------------------------------------------------------------------
-	private boolean nameFound(final Set<String> names, final String candidate) {
-		logger.debug("nameFound started...");
-		
-		for (final String name : names) {
-			if (candidate.equals(name)) {
-				return true;
-			}
-		}
-		
-		return false;
-	}
-	
 	//-------------------------------------------------------------------------------------------------
 	private void handleActionNameDuplications(final List<ChoreographerActionRequestDTO> actions, final String origin) {
 		logger.debug("handleActionNameDuplications started...");
@@ -191,15 +196,24 @@ public class ChoreographerPlanValidator {
 	private void handleNextActionNames(final List<ChoreographerActionRequestDTO> actions, final String origin) {
 		logger.debug("handleNextActionNames started...");
 		
+		final Set<String> actionNames = actions.stream()
+				   							   .map(a -> a.getName())
+				   							   .collect(Collectors.toSet());
+
 		final Set<String> nextActionNames = actions.stream()
 												   .filter(a -> !Utilities.isEmpty(a.getNextActionName()))
 												   .map(a -> a.getNextActionName())
 												   .collect(Collectors.toSet());
-		
+		// check if every next action reference is valid
 		for (final String name : nextActionNames) {
-			if (!nameFound(nextActionNames, name)) {
+			if (!actionNames.contains(name)) {
 				throw new InvalidParameterException("Action not found: " + name, HttpStatus.SC_BAD_REQUEST, origin);
 			}
+		}
+		
+		// check if every action is reachable
+		if (nextActionNames.size() != actionNames.size() -1) { // actionNames contains first action's name too
+			throw new InvalidParameterException("Unreachable action detected.", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 	}
 	
@@ -214,15 +228,148 @@ public class ChoreographerPlanValidator {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<ChoreographerStepRequestDTO> validateSteps(final List<ChoreographerStepRequestDTO> steps, final List<String> resultFirstStepNames, final String origin, final boolean normalizeNames) {
+	private List<ChoreographerStepRequestDTO> validateSteps(final List<ChoreographerStepRequestDTO> steps, final List<String> firstStepNames, final String origin, final boolean normalizeNames) {
 		logger.debug("validateSteps started...");
-		//TODO: 
-		// steps check (null, size)
-		// check every step
-		// first steps are found
-		// step name duplication
-		// next steps are found
 		
-		return null;
+		if (steps == null) {
+			throw new InvalidParameterException("Step list is null.", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (steps.size() < firstStepNames.size()) {
+			throw new InvalidParameterException("The size of the step list is lesser than the size of the first step list.", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		final List<ChoreographerStepRequestDTO> result = new ArrayList<>(steps.size());
+		
+		for (final ChoreographerStepRequestDTO step : steps) {
+			result.add(validateStep(step, origin, normalizeNames));
+		}
+		
+		final Set<String> stepNames = result.stream()
+					 					   	.map(a -> a.getName())
+					 					   	.collect(Collectors.toSet());
+		for (final String firstStepName : firstStepNames) {
+			if (!stepNames.contains(firstStepName)) {
+				throw new InvalidParameterException("Specified first step " + firstStepName + " is not found in the steps list.", HttpStatus.SC_BAD_REQUEST, origin);
+			}
+		}
+		
+		handleStepNameDuplications(stepNames, result.size(), origin);
+		handleNextStepNames(result, firstStepNames, origin);
+		
+		return result;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private ChoreographerStepRequestDTO validateStep(final ChoreographerStepRequestDTO step, final String origin, final boolean normalizeNames) {
+		logger.debug("validateStep started...");
+		
+		if (step == null) {
+			throw new InvalidParameterException("Step is null.", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		final ChoreographerStepRequestDTO result = new ChoreographerStepRequestDTO();
+		result.setName(handleName(step.getName(), "Step name is null or blank.", origin, normalizeNames));
+		result.setStaticParameters(step.getStaticParameters());
+		result.setQuantity(step.getQuantity() != null ? step.getQuantity() : 1);
+		result.setServiceRequirement(handleServiceRequirement(step.getServiceRequirement(), origin));
+		
+		if (step.getNextStepNames() != null) {
+			final List<String> resultNextStepNames = new ArrayList<String>(step.getNextStepNames().size());
+			for (final String name : step.getNextStepNames()) {
+				resultNextStepNames.add(normalizeNames ? name.trim().toLowerCase() : name);
+			}
+			
+			result.setNextStepNames(resultNextStepNames);
+		}
+		
+		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private ServiceQueryFormDTO handleServiceRequirement(final ServiceQueryFormDTO serviceRequirement, final String origin) {
+		logger.debug("handleServiceRequirement started...");
+		
+		if (serviceRequirement == null) {
+			throw new InvalidParameterException("Service requirement is null.", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		final ServiceQueryFormDTO result = new ServiceQueryFormDTO();
+		result.setServiceDefinitionRequirement(handleName(serviceRequirement.getServiceDefinitionRequirement(), "Service definition is null or blank.", origin, true));
+		result.setVersionRequirement(serviceRequirement.getVersionRequirement());
+		result.setMinVersionRequirement(serviceRequirement.getMinVersionRequirement());
+		result.setMaxVersionRequirement(serviceRequirement.getMaxVersionRequirement());
+		result.setInterfaceRequirements(serviceRequirement.getInterfaceRequirements());
+		result.setSecurityRequirements(serviceRequirement.getSecurityRequirements());
+		result.setMetadataRequirements(serviceRequirement.getMetadataRequirements());
+		result.setPingProviders(serviceRequirement.getPingProviders());
+		
+		return result;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void handleStepNameDuplications(final Set<String> stepNames, final int stepCount, final String origin) {
+		logger.debug("handleStepNameDuplications started...");
+		
+		if (stepNames.size() != stepCount) {
+			throw new InvalidParameterException("Step name duplication found.", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void handleNextStepNames(final List<ChoreographerStepRequestDTO> steps, final List<String> firstStepNames, final String origin) {
+		logger.debug("handleNextStepNames started...");
+		
+		final Set<String> stepNames = steps.stream()
+				   						   .map(a -> a.getName())
+				   						   .collect(Collectors.toSet());
+		
+		final Set<String> nextStepNames = steps.stream()
+											   .filter(s -> s.getNextStepNames() != null)
+											   .flatMap(s -> s.getNextStepNames().stream())
+											   .collect(Collectors.toSet());
+		
+		// check if every next step reference is valid
+		for (final String name : nextStepNames) {
+			if (!stepNames.contains(name)) {
+				throw new InvalidParameterException("Step not found: " + name, HttpStatus.SC_BAD_REQUEST, origin);
+			}
+		}
+		
+		// check is every step is reachable (appears as first or next step)
+		for (final String name : stepNames) {
+			if (!(firstStepNames.contains(name) || nextStepNames.contains(name))) {
+				throw new InvalidParameterException("Step is unreachable: " + name, HttpStatus.SC_BAD_REQUEST, origin);
+			}
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<ChoreographerActionRequestDTO> validateAndNormalizeActions(final List<ChoreographerActionRequestDTO> actions) {
+		logger.debug("validateAndNormalizeActions started...");
+		
+		final List<ChoreographerActionRequestDTO> result = new ArrayList<>(actions.size());
+		for (final ChoreographerActionRequestDTO action : actions) {
+			result.add(validateAndNormalizeAction(action));
+		}
+		
+		return result;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private ChoreographerActionRequestDTO validateAndNormalizeAction(final ChoreographerActionRequestDTO action) {
+		logger.debug("validateAndNormalizeAction started...");
+		
+		StepGraph graph = actionUtils.createStepGraphFromAction(action);
+
+		// circle detection
+		if (stepGraphUtils.hasCircle(graph)) {
+			throw new InvalidParameterException("Circular reference detected between the steps of action: " + action.getName());
+		}
+		
+		// normalization
+		graph = stepGraphUtils.normalizeStepGraph(graph);
+		
+		return actionUtils.transformActionWithGraph(graph, action);
 	}
 }
