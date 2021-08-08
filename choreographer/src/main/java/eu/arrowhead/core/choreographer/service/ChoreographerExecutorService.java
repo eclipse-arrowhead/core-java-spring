@@ -51,6 +51,8 @@ public class ChoreographerExecutorService {
 	@Autowired
 	private ChoreographerDriver driver;
 	
+	private final Object lock = new Object();
+	
 	private final Logger logger = LogManager.getLogger(ChoreographerExecutorService.class);
 	
 	//=================================================================================================
@@ -144,16 +146,7 @@ public class ChoreographerExecutorService {
 
         final Optional<ChoreographerExecutor> optional = executorDBService.getExecutorOptionalById(id);
         if (optional.isPresent()) {
-        	final ChoreographerExecutor executor = optional.get();
-        	if (!isExecutorActive(executor)) {
-        		if (!executorDBService.lockExecutorById(executor.getId())) { //Locking executor from Executor selection
-            		//Should not happen
-            		throw new ArrowheadException("Executor lock failure.", HttpStatus.SC_INTERNAL_SERVER_ERROR);
-            	} else {
-            		driver.unregisterSystem(executor.getName(), executor.getAddress(), executor.getPort());
-            		executorDBService.deleteExecutorById(executor.getId());        		
-            	}
-			}
+        	deleteExectuorSafely(optional.get(), origin);
 		}
 	}
 	
@@ -180,15 +173,7 @@ public class ChoreographerExecutorService {
 		
         final Optional<ChoreographerExecutor> optional = executorDBService.getExecutorOptionalByAddressAndPortAndBaseUri(validAddress, validPort, baseUri);
         if (optional.isPresent()) {
-        	//We expect Executors not to unregister during an active execution
-        	final ChoreographerExecutor executor = optional.get();
-        	if (!executorDBService.lockExecutorById(executor.getId())) { //Locking executor from Executor selection
-        		//Should not happen
-        		throw new ArrowheadException("Executor lock failure.", HttpStatus.SC_INTERNAL_SERVER_ERROR);
-        	} else {
-        		driver.unregisterSystem(executor.getName(), executor.getAddress(), executor.getPort());
-        		executorDBService.deleteExecutorById(executor.getId());        		
-        	}
+        	deleteExectuorSafely(optional.get(), origin);
 		}
 	}
 	
@@ -250,9 +235,22 @@ public class ChoreographerExecutorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private boolean isExecutorActive(final ChoreographerExecutor executor) {
-		logger.debug("isExecutorActive started...");
-		//TODO implement when Session db service is merged
-		return false;
+	private void deleteExectuorSafely(final ChoreographerExecutor executor, final String origin) {
+		logger.debug("deleteExectuorSafely started...");
+
+		synchronized (lock) {
+			if (executorDBService.isExecutorActiveById(executor.getId())) {
+				throw new BadPayloadException("Executor is working!", HttpStatus.SC_BAD_REQUEST, origin);
+				
+			} else {
+				if (!executorDBService.lockExecutorById(executor.getId())) { //Locking executor from Executor selection
+					//Should not happen
+					throw new ArrowheadException("Executor lock failure.", HttpStatus.SC_INTERNAL_SERVER_ERROR);
+				} else {
+					driver.unregisterSystem(executor.getName(), executor.getAddress(), executor.getPort());
+					executorDBService.deleteExecutorById(executor.getId());        		
+				}
+			}			
+		}
 	}
 }

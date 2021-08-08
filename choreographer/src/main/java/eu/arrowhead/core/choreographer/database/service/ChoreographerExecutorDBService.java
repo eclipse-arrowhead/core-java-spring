@@ -17,6 +17,7 @@ package eu.arrowhead.core.choreographer.database.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,7 +35,9 @@ import eu.arrowhead.common.database.entity.ChoreographerExecutor;
 import eu.arrowhead.common.database.entity.ChoreographerExecutorServiceDefinition;
 import eu.arrowhead.common.database.repository.ChoreographerExecutorRepository;
 import eu.arrowhead.common.database.repository.ChoreographerExecutorServiceDefinitionRepository;
+import eu.arrowhead.common.database.repository.ChoreographerSessionStepRepository;
 import eu.arrowhead.common.dto.internal.ChoreographerExecutorListResponseDTO;
+import eu.arrowhead.common.dto.internal.ChoreographerStatusType;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -52,6 +55,9 @@ public class ChoreographerExecutorDBService {
 	
 	@Autowired
 	private ChoreographerExecutorServiceDefinitionRepository executorServiceDefinitionRepository;
+	
+	@Autowired
+	private ChoreographerSessionStepRepository sessionStepRepository;
 	
 	@Autowired
 	private CommonNamePartVerifier cnVerifier;
@@ -236,14 +242,38 @@ public class ChoreographerExecutorDBService {
     public boolean lockExecutorById(final long id) { //TODO junit
 		logger.debug("lockExecutorById started...");
 		
-		final Optional<ChoreographerExecutor> optional = executorRepository.findById(id);
-		if (optional.isEmpty()) {
-			return false;
-		}
+		try {
+			final Optional<ChoreographerExecutor> optional = executorRepository.findById(id);
+			if (optional.isEmpty()) {
+				return false;
+			}
+			
+			final ChoreographerExecutor executor = optional.get();
+			executor.setLocked(true);
+			executorRepository.saveAndFlush(executor);
+			return true;
+			
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public boolean isExecutorActiveById(final long id) {		
+		logger.debug("lockExecutorById started...");		
 		
-		final ChoreographerExecutor executor = optional.get();
-		executor.setLocked(true);
-		executorRepository.saveAndFlush(executor);
-		return true;
+		try {
+			final Optional<ChoreographerExecutor> optional = executorRepository.findById(id);
+			if (optional.isEmpty()) {
+				return false;
+			}			
+			return sessionStepRepository.existsByExecutorAndStatusIn(optional.get(), Set.of(ChoreographerStatusType.INITIATED,
+																							ChoreographerStatusType.RUNNING));
+			
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}		
 	}
 }
