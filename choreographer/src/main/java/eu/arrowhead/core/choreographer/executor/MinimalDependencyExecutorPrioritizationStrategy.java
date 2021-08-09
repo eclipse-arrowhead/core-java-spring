@@ -1,10 +1,8 @@
 package eu.arrowhead.core.choreographer.executor;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,15 +10,12 @@ import org.apache.logging.log4j.Logger;
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoResponseDTO;
 
-
-public class RandomExecutorPrioritizationStrategy implements ExecutorPrioritizationStrategy {
+public class MinimalDependencyExecutorPrioritizationStrategy implements ExecutorPrioritizationStrategy {
 
 	//=================================================================================================
 	// members
 	
-	private Random rng;
-	
-	private static final Logger logger = LogManager.getLogger(ExecutorPrioritizationStrategy.class);
+	private static final Logger logger = LogManager.getLogger(MinimalDependencyExecutorPrioritizationStrategy.class);
 	
 	//=================================================================================================
 	// methods
@@ -34,11 +29,9 @@ public class RandomExecutorPrioritizationStrategy implements ExecutorPrioritizat
 			return new ArrayList<>();
 		}
 		
-		if (rng == null) {
-			rng = new Random(System.currentTimeMillis());
-		}
-		
-		Collections.shuffle(executors, rng);
+		//Ascending sort by num of dependencies
+		executors.sort((final ChoreographerExecutor e1, final ChoreographerExecutor e2) ->
+						executorServiceInfos.get(e2.getId()).getDependencies().size() - executorServiceInfos.get(e1.getId()).getDependencies().size());
 		return executors;
 	}
 }

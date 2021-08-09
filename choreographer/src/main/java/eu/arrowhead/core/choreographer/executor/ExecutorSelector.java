@@ -16,6 +16,7 @@ package eu.arrowhead.core.choreographer.executor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,6 +32,10 @@ import org.springframework.util.Assert;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultListDTO;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerExecutorDBService;
 import eu.arrowhead.core.choreographer.service.ChoreographerDriver;
 
@@ -57,7 +62,7 @@ public class ExecutorSelector {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerExecutor select(final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final List<ChoreographerExecutor> exclusions) {
+	public ChoreographerExecutor selectAndInit(final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final List<ChoreographerExecutor> exclusions) {
 		//exclusions: when a ChoreographerSessionStep failed due to executor issue, then selection can be repeated but without that executor(s)
 		logger.debug("select started...");
 		Assert.isTrue(!Utilities.isEmpty(serviceDefinition), "serviceDefinition is empty");
@@ -71,10 +76,10 @@ public class ExecutorSelector {
 			return null;
 		}
 		
-		final Map<ChoreographerExecutor,ChoreographerExecutorServiceInfoResponseDTO> executorServiceInfos = collectExecutorServiceInfos(potentials, serviceDefinition, minVersion_, maxVersion_);
-		potentials = priorizeByStrategy(executorServiceInfos);
+		final Map<Long,ChoreographerExecutorServiceInfoResponseDTO> executorServiceInfos = collectExecutorServiceInfos(potentials, serviceDefinition, minVersion_, maxVersion_);
+		potentials = prioritizationStrategy.priorize(potentials, executorServiceInfos);
 		
-		return selectVerifyAndInitFirstAvailable(potentials);
+		return selectVerifyAndInitFirstAvailable(potentials, executorServiceInfos);
 	}
 	
 	//=================================================================================================
@@ -98,16 +103,16 @@ public class ExecutorSelector {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Map<ChoreographerExecutor,ChoreographerExecutorServiceInfoResponseDTO> collectExecutorServiceInfos(final List<ChoreographerExecutor> potentials, final String serviceDefinition,
+	private Map<Long,ChoreographerExecutorServiceInfoResponseDTO> collectExecutorServiceInfos(final List<ChoreographerExecutor> potentials, final String serviceDefinition,
 																							  				   final int minVersion, final int maxVersion) {
 		logger.debug("collectExecutorServiceInfos started...");
 		
-		final Map<ChoreographerExecutor,ChoreographerExecutorServiceInfoResponseDTO> collected = new HashMap<>(potentials.size());
+		final Map<Long,ChoreographerExecutorServiceInfoResponseDTO> collected = new HashMap<>(potentials.size());
 		for (final ChoreographerExecutor executor : potentials) {
 			try {
-				final ChoreographerExecutorServiceInfoResponseDTO info = driver.getExecutorServiceInfo(executor.getAddress(), executor.getPort(), executor.getBaseUri(),
-																									   serviceDefinition, minVersion, maxVersion);
-				collected.put(executor, info);
+				final ChoreographerExecutorServiceInfoResponseDTO info = driver.queryExecutorServiceInfo(executor.getAddress(), executor.getPort(), executor.getBaseUri(),
+																										 serviceDefinition, minVersion, maxVersion);
+				collected.put(executor.getId(), info);
 				
 			} catch (final Exception ex) {
 				logger.debug(ex.getMessage());
@@ -117,14 +122,8 @@ public class ExecutorSelector {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<ChoreographerExecutor> priorizeByStrategy(final Map<ChoreographerExecutor, ChoreographerExecutorServiceInfoResponseDTO> executorServiceInfos) {
-		logger.debug("sortByStrategy started...");
-		return prioritizationStrategy.priorize(executorServiceInfos);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private ChoreographerExecutor selectVerifyAndInitFirstAvailable(final List<ChoreographerExecutor> potentials) {
-		logger.debug("selectAndInit started...");
+	private ChoreographerExecutor selectVerifyAndInitFirstAvailable(final List<ChoreographerExecutor> potentials, final Map<Long,ChoreographerExecutorServiceInfoResponseDTO> executorServiceInfos) {
+		logger.debug("selectVerifyAndInitFirstAvailable started...");
 		
 		if (potentials.isEmpty()) {
 			return null;
@@ -138,12 +137,34 @@ public class ExecutorSelector {
 				}
 				final ChoreographerExecutor executor = optional.get();
 				if (!executor.isLocked()) {
-					// TODO Verify the dependencies wit SR (Strategy implementation either did it or didn't)
-					// TODO create a ChoreographerSessionStep entry with Initialized state in order to not being deletable 
-					return executor;
+					if (verifyReliedServices(executorServiceInfos.get(executor.getId()))) {						
+						// TODO create a ChoreographerSessionStep entry with Initialized state in order to not being deletable 
+						return executor;
+					}
 				}
 			}
 			return null;
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private boolean verifyReliedServices(final ChoreographerExecutorServiceInfoResponseDTO serviceInfo) {
+		logger.debug("verifyExecutorSR started...");
+		
+		final Set<String> availableReliedServices = new HashSet<>(serviceInfo.getDependencies().size());
+		final ServiceQueryResultListDTO response = driver.multiQueryServiceRegistry(new ServiceQueryFormListDTO(serviceInfo.getDependencies()));
+		for (final ServiceQueryResultDTO result : response.getResults()) {
+			if (!result.getServiceQueryData().isEmpty()) {
+				result.getServiceQueryData().get(0).getServiceDefinition().getServiceDefinition();
+				availableReliedServices.add(result.getServiceQueryData().get(0).getServiceDefinition().getServiceDefinition());
+			}
+		}
+		
+		for (final ServiceQueryFormDTO dependency : serviceInfo.getDependencies()) {
+			if (!availableReliedServices.contains(dependency.getServiceDefinitionRequirement())) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

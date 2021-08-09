@@ -1,6 +1,5 @@
 package eu.arrowhead.core.choreographer.service;
 
-import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -9,7 +8,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
@@ -17,9 +15,12 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultListDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -35,6 +36,9 @@ public class ChoreographerDriver {
 
     @Autowired
     private HttpService httpService;
+    
+    @Autowired
+	protected SSLProperties sslProperties;
 
     @Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
     private Map<String,Object> arrowheadContext;
@@ -43,14 +47,12 @@ public class ChoreographerDriver {
     // methods
 
     //-------------------------------------------------------------------------------------------------
-    public ServiceRegistryListResponseDTO queryServiceRegistryByServiceDefinitionList(final List<String> serviceDefinitions) {
-        logger.debug("queryServiceRegistryByServiceDefinitionList started...");
-        Assert.notNull(serviceDefinitions, "Service Definition list is null.");
+    public ServiceQueryResultListDTO multiQueryServiceRegistry(final ServiceQueryFormListDTO forms) {
+        logger.debug("multiQueryServiceRegistry started...");
+        Assert.notNull(forms, "ServiceQueryFormListDTOt is null.");
 
-        final UriComponents queryByServiceDefinitionListUri = getQueryByServiceDefinitionListUri();
-        final ResponseEntity<ServiceRegistryListResponseDTO> response = httpService.sendRequest(queryByServiceDefinitionListUri, HttpMethod.POST, ServiceRegistryListResponseDTO.class, serviceDefinitions);
-
-        return response.getBody();
+        final UriComponents uri = getMultiQueryServiceRegistryUri();
+        return httpService.sendRequest(uri, HttpMethod.POST, ServiceQueryResultListDTO.class, forms).getBody();
     }
     
     //-------------------------------------------------------------------------------------------------
@@ -73,29 +75,34 @@ public class ChoreographerDriver {
     }
     
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerExecutorServiceInfoResponseDTO getExecutorServiceInfo(final String address, final int port, final String baseUri, final String serviceDefinition, final int minVersion,
+    public ChoreographerExecutorServiceInfoResponseDTO queryExecutorServiceInfo(final String address, final int port, final String baseUri, final String serviceDefinition, final int minVersion,
     																		  final int maxVersion) {
     	logger.debug("getExecutorServiceInfo started...");
-    	//TODO implement
-    	return null;
+    	Assert.isTrue(!Utilities.isEmpty(address), "address is empty");
+    	Assert.isTrue(!Utilities.isEmpty(baseUri), "baseUri is empty");
+    	Assert.isTrue(!Utilities.isEmpty(serviceDefinition), "serviceDefinition is empty");
+    	
+    	final ChoreographerExecutorServiceInfoRequestDTO dto = new ChoreographerExecutorServiceInfoRequestDTO(serviceDefinition, minVersion, maxVersion);
+    	final UriComponents uri = getQueryExecutorServiceInfoUri(address, port, baseUri);
+    	return httpService.sendRequest(uri, HttpMethod.POST, ChoreographerExecutorServiceInfoResponseDTO.class, dto).getBody();
     }
     
     //=================================================================================================
     // assistant methods
 
     //-------------------------------------------------------------------------------------------------
-    private UriComponents getQueryByServiceDefinitionListUri() {
-        logger.debug("getQueryByServiceDefinitionListUri started...");
+    private UriComponents getMultiQueryServiceRegistryUri() {
+        logger.debug("getMultiQueryServiceRegistryUri started...");
 
-        if (arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_BY_SERVICE_DEFINITION_LIST_URI)) {
+        if (arrowheadContext.containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI)) {
             try {
-                return (UriComponents) arrowheadContext.get(CoreCommonConstants.SR_QUERY_BY_SERVICE_DEFINITION_LIST_URI);
+                return (UriComponents) arrowheadContext.get(CoreCommonConstants.SR_MULTI_QUERY_URI);
             } catch (final ClassCastException ex) {
-                throw new ArrowheadException("Choreographer can't find Service Registry Query By Service Definition URI.");
+                throw new ArrowheadException("Choreographer can't find Service Registry multi-query URI.");
             }
         }
 
-        throw new ArrowheadException("Choreographer can't find Service Registry Query By Service Definition URI.");
+        throw new ArrowheadException("Choreographer can't find Service Registry multi-query URI.");
     }
     
     //-------------------------------------------------------------------------------------------------
@@ -129,5 +136,13 @@ public class ChoreographerDriver {
         }
 
         throw new ArrowheadException("Choreographer can't find Service Registry Unregister System URI.");
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    private UriComponents getQueryExecutorServiceInfoUri(final String address, final int port, final String baseUri) {
+    	logger.debug("getExecutorServiceInfoUri started...");
+    	
+    	final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
+    	return Utilities.createURI(scheme, address, port, baseUri + CommonConstants.CHOREOGRAPHER_EXECUTOR_CLIENT_SERVICE_INFO_URI);
     }
 }
