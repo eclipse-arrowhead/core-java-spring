@@ -42,14 +42,14 @@ import eu.arrowhead.common.dto.shared.ChoreographerStepRequestDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
 @RunWith(SpringRunner.class)
-public class ChoreographerDBServiceTest {
+public class ChoreographerPlanDBServiceTest {
 
 	
 	//=================================================================================================
 	// members
 
     @InjectMocks
-    private ChoreographerDBService choreographerDBService;
+    private ChoreographerPlanDBService choreographerDBService;
 
     @Mock
     ChoreographerPlanRepository choreographerPlanRepository;

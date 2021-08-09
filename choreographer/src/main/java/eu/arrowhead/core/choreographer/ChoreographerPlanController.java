@@ -16,7 +16,6 @@ package eu.arrowhead.core.choreographer;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.http.HttpStatus;
@@ -45,15 +44,13 @@ import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.database.entity.ChoreographerPlan;
-import eu.arrowhead.common.database.entity.ChoreographerSession;
 import eu.arrowhead.common.dto.internal.ChoreographerRunPlanRequestDTO;
-import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanListResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
+import eu.arrowhead.core.choreographer.database.service.ChoreographerPlanDBService;
 import eu.arrowhead.core.choreographer.service.ChoreographerDriver;
 import eu.arrowhead.core.choreographer.validation.ChoreographerPlanValidator;
 import io.swagger.annotations.Api;
@@ -99,7 +96,7 @@ public class ChoreographerPlanController {
     private final Logger logger = LogManager.getLogger(ChoreographerPlanController.class);
 
     @Autowired
-    private ChoreographerDBService choreographerDBService;
+    private ChoreographerPlanDBService choreographerPlanDBService;
     
     @Autowired
     private ChoreographerPlanValidator planValidator;
@@ -142,7 +139,7 @@ public class ChoreographerPlanController {
         logger.debug("New Plan GET request received with page: {} and item_per_page: {}.", page, size);
 
         final ValidatedPageParams validatedPageParams = CoreUtilities.validatePageParameters(page, size, direction, sortField);
-        final ChoreographerPlanListResponseDTO planEntriesResponse = choreographerDBService.getPlanEntriesResponse(validatedPageParams.getValidatedPage(),
+        final ChoreographerPlanListResponseDTO planEntriesResponse = choreographerPlanDBService.getPlanEntriesResponse(validatedPageParams.getValidatedPage(),
         																										   validatedPageParams.getValidatedSize(),
         																										   validatedPageParams.getValidatedDirection(),
         																										   sortField);
@@ -167,7 +164,7 @@ public class ChoreographerPlanController {
             throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + PLAN_MGMT_BY_ID_URI);
         }
 
-        final ChoreographerPlanResponseDTO planEntryResponse = choreographerDBService.getPlanByIdResponse(id);
+        final ChoreographerPlanResponseDTO planEntryResponse = choreographerPlanDBService.getPlanByIdResponse(id);
         logger.debug("Plan entry with id: " + " successfully retrieved!");
 
         return planEntryResponse;
@@ -189,7 +186,7 @@ public class ChoreographerPlanController {
             throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + PLAN_MGMT_BY_ID_URI);
         }
 
-        choreographerDBService.removePlanEntryById(id);
+        choreographerPlanDBService.removePlanEntryById(id);
         logger.debug("Plan with id: " + id + " successfully deleted!");
     }
 
@@ -207,7 +204,7 @@ public class ChoreographerPlanController {
     @ResponseBody public ChoreographerPlanResponseDTO registerPlan(@RequestBody final ChoreographerPlanRequestDTO request) {
         final ChoreographerPlanRequestDTO validatedPlan = planValidator.validatePlan(request, CommonConstants.CHOREOGRAPHER_URI + PLAN_MGMT_URI);
 
-        return choreographerDBService.createPlanResponse(validatedPlan);
+        return choreographerPlanDBService.createPlanResponse(validatedPlan);
     }
 
 //    //-------------------------------------------------------------------------------------------------
@@ -260,7 +257,7 @@ public class ChoreographerPlanController {
 
     //-------------------------------------------------------------------------------------------------
     private void checkIfPlanHasEveryRequiredProvider(final ChoreographerRunPlanRequestDTO request, final String origin) {
-        ChoreographerPlan plan = choreographerDBService.getPlanById(request.getId());
+        ChoreographerPlan plan = choreographerPlanDBService.getPlanById(request.getId());
 
         Set<String> serviceDefinitionsFromPlan = getServiceDefinitionsFromPlan(plan);
         Set<String> serviceDefinitionsByProviders = new HashSet<>();

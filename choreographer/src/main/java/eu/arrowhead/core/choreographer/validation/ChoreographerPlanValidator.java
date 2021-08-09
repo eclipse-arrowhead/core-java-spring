@@ -296,6 +296,11 @@ public class ChoreographerPlanValidator {
 		
 		final ServiceQueryFormDTO result = new ServiceQueryFormDTO();
 		result.setServiceDefinitionRequirement(handleName(serviceRequirement.getServiceDefinitionRequirement(), "Service definition is null or blank.", origin, true));
+		
+		if (serviceRequirement.getMinVersionRequirement() != null && serviceRequirement.getMaxVersionRequirement() != null && serviceRequirement.getMinVersionRequirement() > serviceRequirement.getMaxVersionRequirement()) {
+			throw new InvalidParameterException("Minimum version cannot be higher than maximum version", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
 		result.setVersionRequirement(serviceRequirement.getVersionRequirement());
 		result.setMinVersionRequirement(serviceRequirement.getMinVersionRequirement());
 		result.setMaxVersionRequirement(serviceRequirement.getMaxVersionRequirement());

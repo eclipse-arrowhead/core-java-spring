@@ -38,7 +38,7 @@ import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.common.http.HttpService;
-import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
+import eu.arrowhead.core.choreographer.database.service.ChoreographerPlanDBService;
 import eu.arrowhead.core.choreographer.service.ChoreographerDriver;
 import org.apache.http.conn.HttpHostConnectException;
 import org.apache.logging.log4j.LogManager;
@@ -76,7 +76,7 @@ public class ChoreographerService {
     private static final String ORCHESTRATION_PROCESS_URI_KEY = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 
     @Autowired
-    private ChoreographerDBService choreographerDBService;
+    private ChoreographerPlanDBService choreographerDBService;
 
     @Autowired
     private ChoreographerDriver choreographerDriver;
