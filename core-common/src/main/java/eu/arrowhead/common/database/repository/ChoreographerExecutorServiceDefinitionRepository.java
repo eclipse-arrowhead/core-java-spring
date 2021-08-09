@@ -13,4 +13,5 @@ public interface ChoreographerExecutorServiceDefinitionRepository extends Refres
 
     public Optional<ChoreographerExecutorServiceDefinition> findByExecutorAndServiceDefinition(final ChoreographerExecutor executor, final String serviceDefinition);
     public List<ChoreographerExecutorServiceDefinition> findAllByExecutor(final ChoreographerExecutor executor);
+    public List<ChoreographerExecutorServiceDefinition> findAllByServiceDefinition(final String serviceDefinition);
 }

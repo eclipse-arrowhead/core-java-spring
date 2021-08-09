@@ -207,8 +207,21 @@ public class ChoreographerExecutorDBService {
 	//-------------------------------------------------------------------------------------------------
 	public List<ChoreographerExecutor> getExecutorsByServiceDefinitionAndVersion(final String serviceDefinition, final int minVersion, final int maxVersion) { //TODO junit
 		logger.debug("getExecutorsByServiceDefinitionAndVersion started...");
-		//TODO implement
-		return null;
+		Assert.isTrue(!Utilities.isEmpty(serviceDefinition), "serviceDefinition is empty");
+		
+		try {
+			final List<ChoreographerExecutor> results = new ArrayList<>();
+			for (final ChoreographerExecutorServiceDefinition entry : executorServiceDefinitionRepository.findAllByServiceDefinition(serviceDefinition)) {
+				if (entry.getMinVersion() >= minVersion && entry.getMaxVersion() <= maxVersion) {
+					results.add(entry.getExecutor());
+				}
+			}
+			return results;
+			
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
