@@ -29,6 +29,6 @@ public interface ChoreographerStepRepository extends RefreshableRepository<Chore
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-    public Optional<ChoreographerStep> findByNameAndActionId(final String name, final long actionId);
+    public Optional<ChoreographerStep> findByNameAndAction(final String name, final ChoreographerAction action);
     public List<ChoreographerStep> findByAction(final ChoreographerAction action);
 }

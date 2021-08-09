@@ -210,30 +210,30 @@ public class ChoreographerPlanController {
         return choreographerDBService.createPlanResponse(validatedPlan);
     }
 
-    //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Initiate the start of one or more plans.",
-            tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_CREATED, message = START_SESSION_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = START_PLAN_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-    })
-    @PostMapping(path = START_SESSION_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-    @ResponseBody public void startPlan(@RequestBody final List<ChoreographerRunPlanRequestDTO> requests) {
-        for (final ChoreographerRunPlanRequestDTO request : requests) {
-            logger.debug("startPlan started...");
-
-            checkIfPlanHasEveryRequiredProvider(request, CommonConstants.CHOREOGRAPHER_URI + START_SESSION_MGMT_URI);
-            checkIfPlanHasEveryRequiredExecutor(request, CommonConstants.CHOREOGRAPHER_URI + START_SESSION_MGMT_URI);
-
-            ChoreographerSession session = choreographerDBService.initiateSession(request.getId());
-
-            logger.debug("Sending a message to start-session.");
-            jmsTemplate.convertAndSend("start-session", new ChoreographerStartSessionDTO(session.getId(), request.getId()));
-        }
-    }
+//    //-------------------------------------------------------------------------------------------------
+//    @ApiOperation(value = "Initiate the start of one or more plans.",
+//            tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+//    @ApiResponses(value = {
+//            @ApiResponse(code = HttpStatus.SC_CREATED, message = START_SESSION_HTTP_200_MESSAGE),
+//            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = START_PLAN_HTTP_400_MESSAGE),
+//            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+//            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+//    })
+//    @PostMapping(path = START_SESSION_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+//    @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
+//    @ResponseBody public void startPlan(@RequestBody final List<ChoreographerRunPlanRequestDTO> requests) {
+//        for (final ChoreographerRunPlanRequestDTO request : requests) {
+//            logger.debug("startPlan started...");
+//
+//            checkIfPlanHasEveryRequiredProvider(request, CommonConstants.CHOREOGRAPHER_URI + START_SESSION_MGMT_URI);
+//            checkIfPlanHasEveryRequiredExecutor(request, CommonConstants.CHOREOGRAPHER_URI + START_SESSION_MGMT_URI);
+//
+//            ChoreographerSession session = choreographerDBService.initiateSession(request.getId());
+//
+//            logger.debug("Sending a message to start-session.");
+//            jmsTemplate.convertAndSend("start-session", new ChoreographerStartSessionDTO(session.getId(), request.getId()));
+//        }
+//    }
 
     //-------------------------------------------------------------------------------------------------
     // TODO: instead of this, we need a WS to verify if a plan is executable (find suitable executor to all steps)
@@ -259,7 +259,7 @@ public class ChoreographerPlanController {
 	// assistant methods
 
     //-------------------------------------------------------------------------------------------------
-    private void checkIfPlanHasEveryRequiredProvider (final ChoreographerRunPlanRequestDTO request, final String origin) {
+    private void checkIfPlanHasEveryRequiredProvider(final ChoreographerRunPlanRequestDTO request, final String origin) {
         ChoreographerPlan plan = choreographerDBService.getPlanById(request.getId());
 
         Set<String> serviceDefinitionsFromPlan = getServiceDefinitionsFromPlan(plan);

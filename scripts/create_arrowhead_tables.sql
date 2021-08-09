@@ -404,7 +404,7 @@ CREATE TABLE IF NOT EXISTS `choreographer_step` (
   `service_definition` varchar(255) NOT NULL,
   `min_version` int(11),
   `max_version` int(11),
-  `orch_template` mediumtext NOT NULL,
+  `sr_template` mediumtext NOT NULL,
   `static_parameters` mediumtext,
   `quantity` int(20) NOT NULL DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,

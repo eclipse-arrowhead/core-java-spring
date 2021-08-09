@@ -68,7 +68,7 @@ public class ChoreographerStep {
     private Integer maxVersion;
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    private String orchTemplate;
+    private String srTemplate;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String staticParameters;
@@ -97,13 +97,13 @@ public class ChoreographerStep {
 	public ChoreographerStep() {}
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerStep(final String name, final ChoreographerAction action, final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final String orchTemplate, final String staticParameters, final int quantity) {
+    public ChoreographerStep(final String name, final ChoreographerAction action, final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final String srTemplate, final String staticParameters, final int quantity) {
         this.name = name;
         this.action = action;
         this.serviceDefinition = serviceDefinition;
         this.minVersion = minVersion;
         this.maxVersion = maxVersion;
-        this.orchTemplate = orchTemplate;
+        this.srTemplate = srTemplate;
         this.staticParameters = staticParameters;
         this.quantity = quantity;
     }
@@ -116,7 +116,7 @@ public class ChoreographerStep {
     public String getServiceDefinition() { return serviceDefinition; }
     public Integer getMinVersion() { return minVersion; }
     public Integer getMaxVersion() { return maxVersion; }
-    public String getOrchTemplate() { return orchTemplate; }
+    public String getSrTemplate() { return srTemplate; }
     public String getStaticParameters() { return staticParameters; }
     public int getQuantity() { return quantity; }
     public ZonedDateTime getCreatedAt() { return createdAt; }
@@ -142,7 +142,7 @@ public class ChoreographerStep {
     public void setServiceDefinition(final String serviceDefinition) { this.serviceDefinition = serviceDefinition; }
     public void setMinVersion(final Integer minVersion) { this.minVersion = minVersion; }
     public void setMaxVersion(final Integer maxVersion) { this.maxVersion = maxVersion; }
-    public void setOrchTemplate(final String orchTemplate) { this.orchTemplate = orchTemplate; }
+    public void setSrTemplate(final String srTemplate) { this.srTemplate = srTemplate; }
     public void setStaticParameters(final String parameters) { this.staticParameters = parameters; }
     public void setQuantity(final int quantity) { this.quantity = quantity; }
     public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
