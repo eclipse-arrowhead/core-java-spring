@@ -19,6 +19,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -69,6 +70,14 @@ public class ChoreographerDriver {
     	
     	final UriComponents uri = getUnregisterSystemUri(systemName, address, port);
     	httpService.sendRequest(uri, HttpMethod.DELETE, Void.class);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    public ChoreographerExecutorServiceInfoResponseDTO getExecutorServiceInfo(final String address, final int port, final String baseUri, final String serviceDefinition, final int minVersion,
+    																		  final int maxVersion) {
+    	logger.debug("getExecutorServiceInfo started...");
+    	//TODO implement
+    	return null;
     }
     
     //=================================================================================================

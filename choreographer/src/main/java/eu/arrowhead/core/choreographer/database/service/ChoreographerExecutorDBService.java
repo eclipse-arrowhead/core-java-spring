@@ -205,6 +205,13 @@ public class ChoreographerExecutorDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public List<ChoreographerExecutor> getExecutorsByServiceDefinitionAndVersion(final String serviceDefinition, final int minVersion, final int maxVersion) { //TODO junit
+		logger.debug("getExecutorsByServiceDefinitionAndVersion started...");
+		//TODO implement
+		return null;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
     public void deleteExecutorById(final long id) { //TODO junit
 		logger.debug("deleteExecutorById started...");
