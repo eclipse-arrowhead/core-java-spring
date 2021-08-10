@@ -97,9 +97,9 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
         final Map<String,Object> context = appContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
 
         final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
-        final UriComponents queryByServiceDefinitionList = createQueryByServiceDefinitionList(scheme);
-
-        context.put(CoreCommonConstants.SR_QUERY_BY_SERVICE_DEFINITION_LIST_URI, queryByServiceDefinitionList);
+        context.put(CoreCommonConstants.SR_QUERY_BY_SERVICE_DEFINITION_LIST_URI, createQueryByServiceDefinitionListUri(scheme));
+        context.put(CoreCommonConstants.SR_REGISTER_SYSTEM_URI, createRegisterSystemUri(scheme));
+        context.put(CoreCommonConstants.SR_UNREGISTER_SYSTEM_URI, createUnregisterSystemUri(scheme));
     }
     
     //-------------------------------------------------------------------------------------------------
@@ -108,16 +108,8 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
         return List.of(CoreSystemService.ORCHESTRATION_SERVICE);
     }
 
-    //-------------------------------------------------------------------------------------------------
-	private UriComponents createQueryByServiceDefinitionList(final String scheme) {
-        logger.debug("createQuerySystemByServiceDefinitionList started...");
-
-        final String registryUriStr = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SERVICE_DEFINITION_LIST_URI;
-
-        return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), registryUriStr);
-    }
-
 	//TODO: rename, implement, move to a new file
+    //-------------------------------------------------------------------------------------------------
     @Service
     public class ExampleErrorHandler implements ErrorHandler {
 
@@ -125,5 +117,32 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
         public void handleError(final Throwable throwable) {
             System.out.println("Error happened during Workflow Choreography.");
         }
+    }
+    
+    //=================================================================================================
+    // assistant methods
+    
+    //-------------------------------------------------------------------------------------------------
+    private UriComponents createQueryByServiceDefinitionListUri(final String scheme) {
+        logger.debug("createQueryByServiceDefinitionListUri started...");
+
+        final String uriStr = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SERVICE_DEFINITION_LIST_URI;
+        return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), uriStr);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    private UriComponents createRegisterSystemUri(final String scheme) {
+        logger.debug("createQuerySystemByServiceDefinitionList started...");
+
+        final String uriStr = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI;
+        return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), uriStr);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    private UriComponents createUnregisterSystemUri(final String scheme) {
+        logger.debug("createUnregisterSystemUri started...");
+
+        final String uriStr = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI;
+        return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), uriStr);
     }
 }

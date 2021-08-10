@@ -431,6 +431,7 @@ CREATE TABLE IF NOT EXISTS `choreographer_executor` (
     `address` varchar(255) NOT NULL,
     `port` int(11) NOT NULL,
     `base_uri` varchar(255) DEFAULT NULL,
+	`locked` int(1) NOT NULL DEFAULT 0,
     `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),

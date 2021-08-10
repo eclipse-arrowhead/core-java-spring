@@ -39,6 +39,8 @@ public class ChoreographerExecutor {
 
     @Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
     private String baseUri = "";
+    
+    private boolean locked = false;
 
     @Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private ZonedDateTime createdAt;
@@ -86,7 +88,8 @@ public class ChoreographerExecutor {
     public String getAddress() { return address; }
     public int getPort() { return port; }
     public String getBaseUri() { return baseUri; }
-    public ZonedDateTime getCreatedAt() { return createdAt; }
+    public boolean isLocked() { return locked; }
+	public ZonedDateTime getCreatedAt() { return createdAt; }
     public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
     //-------------------------------------------------------------------------------------------------
@@ -95,12 +98,13 @@ public class ChoreographerExecutor {
     public void setAddress(final String address) { this.address = address; }
     public void setPort(final int port) { this.port = port; }
     public void setBaseUri(final String baseUri) { this.baseUri = baseUri; }
-    public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
+    public void setLocked(final boolean locked) { this.locked = locked; }
+	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
     public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 
     //-------------------------------------------------------------------------------------------------
     @Override
     public String toString() {
-        return "Executor [id = " + id + ", name = " + name + ", address = " + address + ", port = " + port + ", baseUri = " + baseUri + "]";
+        return "Executor [id = " + id + ", name = " + name + ", address = " + address + ", port = " + port + ", baseUri = " + baseUri + "locked = " + locked + "]";
     }
 }
