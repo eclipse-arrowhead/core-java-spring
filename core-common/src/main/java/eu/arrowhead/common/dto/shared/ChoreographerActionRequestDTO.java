@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2020 AITIA
+ * Copyright (c) 2019 AITIA
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -12,42 +12,47 @@
  *   Arrowhead Consortia - conceptualization
  ********************************************************************************/
 
-package eu.arrowhead.common.dto.internal;
+package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
 import java.util.List;
 
-public class ChoreographerPlanRequestDTO implements Serializable {
+public class ChoreographerActionRequestDTO implements Serializable {
 	
 	//=================================================================================================
 	// members
 
-	private static final long serialVersionUID = 7757993756490969411L;
+	private static final long serialVersionUID = 305775285238451287L;
 
 	private String name;
-	private String firstActionName;
-    private List<ChoreographerActionRequestDTO> actions;
+    private String nextActionName;
+    private List<String> firstStepNames;
+    private List<ChoreographerStepRequestDTO> steps;
 
     //=================================================================================================
 	// methods
     
     //-------------------------------------------------------------------------------------------------
-	public ChoreographerPlanRequestDTO() {}
+    public ChoreographerActionRequestDTO() {}
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerPlanRequestDTO(String name, String firstActionName, List<ChoreographerActionRequestDTO> actions) {
+
+    public ChoreographerActionRequestDTO(String name, String nextActionName, List<String> firstStepNames, List<ChoreographerStepRequestDTO> steps) {
         this.name = name;
-        this.firstActionName = firstActionName;
-        this.actions = actions;
+        this.nextActionName = nextActionName;
+        this.firstStepNames = firstStepNames;
+        this.steps = steps;
     }
 
     //-------------------------------------------------------------------------------------------------
 	public String getName() { return name; }
-	public List<ChoreographerActionRequestDTO> getActions() { return actions; }
-    public String getFirstActionName() { return firstActionName; }
+	public String getNextActionName() { return nextActionName; }
+	public List<ChoreographerStepRequestDTO> getSteps() { return steps; }
+    public List<String> getFirstStepNames() { return firstStepNames; }
 
     //-------------------------------------------------------------------------------------------------
 	public void setName(final String name) { this.name = name; }
-    public void setActions(final List<ChoreographerActionRequestDTO> actions) { this.actions = actions; }
-    public void setFirstActionName(String firstActionName) { this.firstActionName = firstActionName; }
+    public void setNextActionName(final String nextActionName) { this.nextActionName = nextActionName; }
+    public void setSteps(final List<ChoreographerStepRequestDTO> steps) { this.steps = steps; }
+    public void setFirstStepNames(List<String> firstStepNames) { this.firstStepNames = firstStepNames; }
 }
