@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2020 AITIA
+ * Copyright (c) 2021 AITIA
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -14,8 +14,8 @@
 
 package eu.arrowhead.common.dto.internal;
 
-public enum ChoreographerStatusType {
-    INITIATED,
+public enum ChoreographerSessionStepStatus {
+    WAITING,
     RUNNING,
     ABORTED,
     DONE

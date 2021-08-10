@@ -30,7 +30,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 
 import eu.arrowhead.common.CoreDefaults;
-import eu.arrowhead.common.dto.internal.ChoreographerStatusType;
+import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
 
 @Entity
 public class ChoreographerSession {
@@ -48,7 +48,7 @@ public class ChoreographerSession {
 
     @Column(nullable = false, columnDefinition = "varchar(" + CoreDefaults.VARCHAR_BASIC + ")")
     @Enumerated(EnumType.STRING)
-    private ChoreographerStatusType status;
+    private ChoreographerSessionStatus status;
 
     @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private ZonedDateTime startedAt;
@@ -63,7 +63,7 @@ public class ChoreographerSession {
     public ChoreographerSession() {}
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerSession(final ChoreographerPlan plan, final ChoreographerStatusType status) {
+    public ChoreographerSession(final ChoreographerPlan plan, final ChoreographerSessionStatus status) {
         this.plan = plan;
         this.status = status;
     }
@@ -71,14 +71,14 @@ public class ChoreographerSession {
     //-------------------------------------------------------------------------------------------------
     public long getId() { return id; }
     public ChoreographerPlan getPlan() { return plan; }
-    public ChoreographerStatusType getStatus() { return status; }
+    public ChoreographerSessionStatus getStatus() { return status; }
     public ZonedDateTime getStartedAt() { return startedAt; }
     public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
     //-------------------------------------------------------------------------------------------------
     public void setId(final long id) { this.id = id; }
     public void setPlan(final ChoreographerPlan plan) { this.plan = plan; }
-    public void setStatus(final ChoreographerStatusType status) { this.status = status; }
+    public void setStatus(final ChoreographerSessionStatus status) { this.status = status; }
     public void setStartedAt(final ZonedDateTime startedAt) { this.startedAt = startedAt; }
     public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
  

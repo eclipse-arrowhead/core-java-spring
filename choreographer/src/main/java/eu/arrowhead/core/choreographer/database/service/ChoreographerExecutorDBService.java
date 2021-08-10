@@ -37,7 +37,7 @@ import eu.arrowhead.common.database.repository.ChoreographerExecutorRepository;
 import eu.arrowhead.common.database.repository.ChoreographerExecutorServiceDefinitionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerSessionStepRepository;
 import eu.arrowhead.common.dto.internal.ChoreographerExecutorListResponseDTO;
-import eu.arrowhead.common.dto.internal.ChoreographerStatusType;
+import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStatus;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -62,7 +62,7 @@ public class ChoreographerExecutorDBService {
 	@Autowired
 	private CommonNamePartVerifier cnVerifier;
 	
-	private static final Set<ChoreographerStatusType> ACTIVE_SESSION_STATES = Set.of(ChoreographerStatusType.INITIATED, ChoreographerStatusType.RUNNING);
+	private static final Set<ChoreographerSessionStepStatus> ACTIVE_SESSION_STEP_STATES = Set.of(ChoreographerSessionStepStatus.WAITING, ChoreographerSessionStepStatus.RUNNING);
 	
 	private final Logger logger = LogManager.getLogger(ChoreographerExecutorDBService.class);
 	
@@ -207,6 +207,26 @@ public class ChoreographerExecutorDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public List<ChoreographerExecutor> getExecutorsByServiceDefinitionAndVersion(final String serviceDefinition, final int minVersion, final int maxVersion) { //TODO junit
+		logger.debug("getExecutorsByServiceDefinitionAndVersion started...");
+		Assert.isTrue(!Utilities.isEmpty(serviceDefinition), "serviceDefinition is empty");
+		
+		try {
+			final List<ChoreographerExecutor> results = new ArrayList<>();
+			for (final ChoreographerExecutorServiceDefinition entry : executorServiceDefinitionRepository.findAllByServiceDefinition(serviceDefinition)) {
+				if (entry.getMinVersion() >= minVersion && entry.getMaxVersion() <= maxVersion) {
+					results.add(entry.getExecutor());
+				}
+			}
+			return results;
+			
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
     public void deleteExecutorById(final long id) { //TODO junit
 		logger.debug("deleteExecutorById started...");
@@ -214,7 +234,7 @@ public class ChoreographerExecutorDBService {
 		try {
 			final Optional<ChoreographerExecutor> optional = executorRepository.findById(id);
 			if (optional.isPresent()) {
-				if (sessionStepRepository.existsByExecutorAndStatusIn(optional.get(), ACTIVE_SESSION_STATES)) {
+				if (sessionStepRepository.existsByExecutorAndStatusIn(optional.get(), ACTIVE_SESSION_STEP_STATES)) {
 					throw new InvalidParameterException("Executor is working!");
 				} else {
 					executorRepository.deleteById(id);
@@ -275,7 +295,7 @@ public class ChoreographerExecutorDBService {
 			if (optional.isEmpty()) {
 				return false;
 			}			
-			return sessionStepRepository.existsByExecutorAndStatusIn(optional.get(), ACTIVE_SESSION_STATES);
+			return sessionStepRepository.existsByExecutorAndStatusIn(optional.get(), ACTIVE_SESSION_STEP_STATES);
 			
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
