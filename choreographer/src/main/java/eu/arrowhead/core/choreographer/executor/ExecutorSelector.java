@@ -53,21 +53,24 @@ public class ExecutorSelector {
 	
 	@Autowired
 	private ExecutorPrioritizationStrategy prioritizationStrategy;
-
-	private final Object lock = new Object();
 	
 	private static final Logger logger = LogManager.getLogger(ExecutorSelector.class);
 	
 	//=================================================================================================
 	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	public ChoreographerExecutor select(final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final List<ChoreographerExecutor> exclusions) {
+		return selectAndInit(serviceDefinition, minVersion, maxVersion, exclusions, false);
+	}
 
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerExecutor selectAndInit(final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final List<ChoreographerExecutor> exclusions) {
+	public ChoreographerExecutor selectAndInit(final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final List<ChoreographerExecutor> exclusions, final boolean init) {
 		//exclusions: when a ChoreographerSessionStep failed due to executor issue, then selection can be repeated but without that executor(s)
-		logger.debug("select started...");
+		logger.debug("selectAndInit started...");
 		Assert.isTrue(!Utilities.isEmpty(serviceDefinition), "serviceDefinition is empty");
 		
-		final int minVersion_ = minVersion == null ? 0 : minVersion;
+		final int minVersion_ = minVersion == null ? 1 : minVersion; //TODO 1->CommonConstans
 		final int maxVersion_ = maxVersion == null ? Integer.MAX_VALUE : maxVersion;
 		
 		List<ChoreographerExecutor> potentials = executorDBService.getExecutorsByServiceDefinitionAndVersion(serviceDefinition, minVersion_, maxVersion_);
@@ -79,7 +82,7 @@ public class ExecutorSelector {
 		final Map<Long,ChoreographerExecutorServiceInfoResponseDTO> executorServiceInfos = collectExecutorServiceInfos(potentials, serviceDefinition, minVersion_, maxVersion_);
 		potentials = prioritizationStrategy.priorize(potentials, executorServiceInfos);
 		
-		return selectVerifyAndInitFirstAvailable(potentials, executorServiceInfos);
+		return selectVerifyAndInitFirstAvailable(potentials, executorServiceInfos, init);
 	}
 	
 	//=================================================================================================
@@ -91,15 +94,13 @@ public class ExecutorSelector {
 		
 		final Set<Long> excudedIds = exclusions.stream().map(e -> e.getId()).collect(Collectors.toSet());
 		
-		synchronized (lock) {
-			final List<ChoreographerExecutor> filtered = new ArrayList<>(original.size());
-			for (final ChoreographerExecutor executor : original) {
-				if (!executor.isLocked() && !excudedIds.contains(executor.getId())) {
-					filtered.add(executor);
-				}
-			}			
-			return filtered;
-		}		
+		final List<ChoreographerExecutor> filtered = new ArrayList<>(original.size());
+		for (final ChoreographerExecutor executor : original) {
+			if (!executor.isLocked() && !excudedIds.contains(executor.getId())) {
+				filtered.add(executor);
+			}
+		}			
+		return filtered;		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -122,29 +123,30 @@ public class ExecutorSelector {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private ChoreographerExecutor selectVerifyAndInitFirstAvailable(final List<ChoreographerExecutor> potentials, final Map<Long,ChoreographerExecutorServiceInfoResponseDTO> executorServiceInfos) {
+	private ChoreographerExecutor selectVerifyAndInitFirstAvailable(final List<ChoreographerExecutor> potentials, final Map<Long,ChoreographerExecutorServiceInfoResponseDTO> executorServiceInfos,
+																	final boolean init) {
 		logger.debug("selectVerifyAndInitFirstAvailable started...");
 		
 		if (potentials.isEmpty()) {
 			return null;
 		}
 		
-		synchronized (lock) {
-			for (final ChoreographerExecutor potential : potentials) {
-				final Optional<ChoreographerExecutor> optional = executorDBService.getExecutorOptionalById(potential.getId()); //refreshing from DB
-				if (optional.isEmpty()) {
-					continue;
-				}
-				final ChoreographerExecutor executor = optional.get();
-				if (!executor.isLocked()) {
-					if (verifyReliedServices(executorServiceInfos.get(executor.getId()))) {						
-						// TODO create a ChoreographerSessionStep entry with Initialized state in order to not being deletable 
-						return executor;
+		for (final ChoreographerExecutor potential : potentials) {
+			final Optional<ChoreographerExecutor> optional = executorDBService.getExecutorOptionalById(potential.getId()); //refreshing from DB
+			if (optional.isEmpty()) {
+				continue;
+			}
+			final ChoreographerExecutor executor = optional.get();
+			if (!executor.isLocked()) {
+				if (verifyReliedServices(executorServiceInfos.get(executor.getId()))) {
+					if (init) {
+						// TODO create a ChoreographerSessionStep entry with WAITING state in order to not being deletable 							
 					}
+					return executor;
 				}
 			}
-			return null;
 		}
+		return null;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
