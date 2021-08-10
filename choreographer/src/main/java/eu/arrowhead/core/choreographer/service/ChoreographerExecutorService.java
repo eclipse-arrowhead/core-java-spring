@@ -8,12 +8,12 @@ import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreUtilities;
+import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
 import eu.arrowhead.common.dto.internal.ChoreographerExecutorListResponseDTO;
@@ -100,22 +100,8 @@ public class ChoreographerExecutorService {
 		logger.debug("getExecutors started...");
 		Assert.isTrue(!Utilities.isEmpty(origin), "origin is empty");
 		
-		int validatedPage;
-        int validatedSize;
-        if (page == null && size == null) {
-            validatedPage = -1;
-            validatedSize = -1;
-        } else {
-            if (page == null || size == null) {
-                throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, origin);
-            } else {
-                validatedPage = page;
-                validatedSize = size;
-            }
-        }
-
-        final Sort.Direction validatedDirection = CoreUtilities.calculateDirection(direction, origin);
-        return executorDBService.getExecutorsResponse(validatedPage, validatedSize, validatedDirection, sortField);
+		final ValidatedPageParams validPageParams = CoreUtilities.validatePageParameters(page, size, direction, origin);
+        return executorDBService.getExecutorsResponse(validPageParams.getValidatedPage(), validPageParams.getValidatedSize(), validPageParams.getValidatedDirection(), sortField);
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
@@ -178,7 +164,7 @@ public class ChoreographerExecutorService {
 	}
 	
 	//=================================================================================================
-    // methods
+    // assistant methods
 
 	//-------------------------------------------------------------------------------------------------
 	private void checkExecutorRequestDTO(final ChoreographerExecutorRequestDTO dto, final String origin, final HttpServletRequest servletRequest) {

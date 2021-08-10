@@ -62,6 +62,8 @@ public class ChoreographerExecutorDBService {
 	@Autowired
 	private CommonNamePartVerifier cnVerifier;
 	
+	private static final Set<ChoreographerStatusType> ACTIVE_SESSION_STATES = Set.of(ChoreographerStatusType.INITIATED, ChoreographerStatusType.RUNNING);
+	
 	private final Logger logger = LogManager.getLogger(ChoreographerExecutorDBService.class);
 	
 	//=================================================================================================
@@ -210,9 +212,14 @@ public class ChoreographerExecutorDBService {
 		logger.debug("deleteExecutorById started...");
 		
 		try {
-			if (executorRepository.existsById(id)) {
-				executorRepository.deleteById(id);
-				executorRepository.flush();
+			final Optional<ChoreographerExecutor> optional = executorRepository.findById(id);
+			if (optional.isPresent()) {
+				if (sessionStepRepository.existsByExecutorAndStatusIn(optional.get(), ACTIVE_SESSION_STATES)) {
+					throw new InvalidParameterException("Executor is working!");
+				} else {
+					executorRepository.deleteById(id);
+					executorRepository.flush();					
+				}
 			}			
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
@@ -268,8 +275,7 @@ public class ChoreographerExecutorDBService {
 			if (optional.isEmpty()) {
 				return false;
 			}			
-			return sessionStepRepository.existsByExecutorAndStatusIn(optional.get(), Set.of(ChoreographerStatusType.INITIATED,
-																							ChoreographerStatusType.RUNNING));
+			return sessionStepRepository.existsByExecutorAndStatusIn(optional.get(), ACTIVE_SESSION_STATES);
 			
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
