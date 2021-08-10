@@ -24,7 +24,7 @@ public class ActionCircleDetector {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public boolean hasCircle(final ChoreographerPlanRequestDTO plan) {
+	/* default */ boolean hasCircle(final ChoreographerPlanRequestDTO plan) {
 		logger.debug("hasCircle started...");
 		
 		final Set<String> checkedActions = new HashSet<>();

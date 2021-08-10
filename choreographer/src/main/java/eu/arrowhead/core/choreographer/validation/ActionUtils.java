@@ -27,7 +27,7 @@ public class ActionUtils {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public StepGraph createStepGraphFromAction(final ChoreographerActionRequestDTO action) {
+	/* default */ StepGraph createStepGraphFromAction(final ChoreographerActionRequestDTO action) {
 		logger.debug("convertActionToStepGraph started...");
 		
 		if (action == null) {
@@ -57,7 +57,7 @@ public class ActionUtils {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerActionRequestDTO transformActionWithGraph(final StepGraph graph, final ChoreographerActionRequestDTO action) {
+	/* default */ ChoreographerActionRequestDTO transformActionWithGraph(final StepGraph graph, final ChoreographerActionRequestDTO action) {
 		logger.debug("transformActionWithGraph started...");
 		
 		if (action == null) {
