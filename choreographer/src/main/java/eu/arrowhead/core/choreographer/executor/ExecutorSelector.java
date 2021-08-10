@@ -127,7 +127,7 @@ public class ExecutorSelector {
 																			  final Map<Long,ChoreographerExecutorServiceInfoResponseDTO> executorServiceInfos) {
 		logger.debug("filterOutExecutorsWithoutServiceInfos started...");
 		
-		final List<ChoreographerExecutor> filtered = new ArrayList<>(original.size());
+		final List<ChoreographerExecutor> filtered = new ArrayList<>(executorServiceInfos.keySet().size());
 		for (final ChoreographerExecutor executor : original) {
 			if (executorServiceInfos.containsKey(executor.getId())) {
 				filtered.add(executor);
