@@ -27,8 +27,8 @@ public class ChoreographerExecutorServiceInfoRequestDTO implements Serializable 
 	private static final long serialVersionUID = 8360159447969430679L;
 	
 	private String serviceDefinition;
-	private int minVersion;
-	private int maxVersion;
+	private Integer minVersion;
+	private Integer maxVersion;
 	
 	//=================================================================================================
 	// methods
@@ -37,7 +37,7 @@ public class ChoreographerExecutorServiceInfoRequestDTO implements Serializable 
 	public ChoreographerExecutorServiceInfoRequestDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------	
-	public ChoreographerExecutorServiceInfoRequestDTO(final String serviceDefinition, final int minVersion, final int maxVersion) {
+	public ChoreographerExecutorServiceInfoRequestDTO(final String serviceDefinition, final Integer minVersion, final Integer maxVersion) {
 		this.serviceDefinition = serviceDefinition;
 		this.minVersion = minVersion;
 		this.maxVersion = maxVersion;
@@ -45,13 +45,13 @@ public class ChoreographerExecutorServiceInfoRequestDTO implements Serializable 
 	
 	//-------------------------------------------------------------------------------------------------
 	public String getServiceDefinition() { return serviceDefinition; }
-	public int getMinVersion() { return minVersion; }
-	public int getMaxVersion() { return maxVersion; }
+	public Integer getMinVersion() { return minVersion; }
+	public Integer getMaxVersion() { return maxVersion; }
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setServiceDefinition(final String serviceDefinition) { this.serviceDefinition = serviceDefinition; }
-	public void setMinVersion(final int minVersion) { this.minVersion = minVersion; }
-	public void setMaxVersion(final int maxVersion) { this.maxVersion = maxVersion; }
+	public void setMinVersion(final Integer minVersion) { this.minVersion = minVersion; }
+	public void setMaxVersion(final Integer maxVersion) { this.maxVersion = maxVersion; }
 	
 	//-------------------------------------------------------------------------------------------------
     @Override

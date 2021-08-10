@@ -22,5 +22,5 @@ import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoResponseDT
 
 public interface ExecutorPrioritizationStrategy {
 
-	List<ChoreographerExecutor> priorize(final List<ChoreographerExecutor> executors, final Map<Long,ChoreographerExecutorServiceInfoResponseDTO> executorServiceInfos);
+	List<ChoreographerExecutor> prioritize(final List<ChoreographerExecutor> executors, final Map<Long,ChoreographerExecutorServiceInfoResponseDTO> executorServiceInfos);
 }

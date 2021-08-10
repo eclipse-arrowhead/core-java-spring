@@ -36,7 +36,7 @@ public class MinimalDependencyExecutorPrioritizationStrategy implements Executor
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
-	public List<ChoreographerExecutor> priorize(final List<ChoreographerExecutor> executors, final Map<Long,ChoreographerExecutorServiceInfoResponseDTO> executorServiceInfos) {
+	public List<ChoreographerExecutor> prioritize(final List<ChoreographerExecutor> executors, final Map<Long,ChoreographerExecutorServiceInfoResponseDTO> executorServiceInfos) {
 		logger.debug("priorize started");
 		
 		if (executors.isEmpty()) {

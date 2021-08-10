@@ -32,7 +32,6 @@ import org.springframework.util.Assert;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoResponseDTO;
-import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultListDTO;
@@ -70,17 +69,18 @@ public class ExecutorSelector {
 		logger.debug("selectAndInit started...");
 		Assert.isTrue(!Utilities.isEmpty(serviceDefinition), "serviceDefinition is empty");
 		
-		final int minVersion_ = minVersion == null ? 1 : minVersion; //TODO 1->CommonConstans
-		final int maxVersion_ = maxVersion == null ? Integer.MAX_VALUE : maxVersion;
+		final int _minVersion = minVersion == null ? 1 : minVersion; //TODO 1->CommonConstans
+		final int _maxVersion = maxVersion == null ? Integer.MAX_VALUE : maxVersion;
 		
-		List<ChoreographerExecutor> potentials = executorDBService.getExecutorsByServiceDefinitionAndVersion(serviceDefinition, minVersion_, maxVersion_);
+		List<ChoreographerExecutor> potentials = executorDBService.getExecutorsByServiceDefinitionAndVersion(serviceDefinition, _minVersion, _maxVersion);
 		potentials = filterOutLockedAndExcludedExecutors(potentials, exclusions);
 		if (potentials.isEmpty()) {
 			return null;
 		}
 		
-		final Map<Long,ChoreographerExecutorServiceInfoResponseDTO> executorServiceInfos = collectExecutorServiceInfos(potentials, serviceDefinition, minVersion_, maxVersion_);
-		potentials = prioritizationStrategy.priorize(potentials, executorServiceInfos);
+		final Map<Long,ChoreographerExecutorServiceInfoResponseDTO> executorServiceInfos = collectExecutorServiceInfos(potentials, serviceDefinition, _minVersion, _maxVersion);
+		potentials = filterOutExecutorsWithoutServiceInfos(potentials, executorServiceInfos);
+		potentials = prioritizationStrategy.prioritize(potentials, executorServiceInfos);
 		
 		return selectVerifyAndInitFirstAvailable(potentials, executorServiceInfos, init);
 	}
@@ -92,7 +92,7 @@ public class ExecutorSelector {
 	private List<ChoreographerExecutor> filterOutLockedAndExcludedExecutors(final List<ChoreographerExecutor> original, final List<ChoreographerExecutor> exclusions) {
 		logger.debug("filterOutLockedAndExcludedExecutors started...");
 		
-		final Set<Long> excudedIds = exclusions.stream().map(e -> e.getId()).collect(Collectors.toSet());
+		final Set<Long> excudedIds = exclusions == null? Set.of() : exclusions.stream().map(e -> e.getId()).collect(Collectors.toSet());
 		
 		final List<ChoreographerExecutor> filtered = new ArrayList<>(original.size());
 		for (final ChoreographerExecutor executor : original) {
@@ -105,7 +105,7 @@ public class ExecutorSelector {
 	
 	//-------------------------------------------------------------------------------------------------
 	private Map<Long,ChoreographerExecutorServiceInfoResponseDTO> collectExecutorServiceInfos(final List<ChoreographerExecutor> potentials, final String serviceDefinition,
-																							  				   final int minVersion, final int maxVersion) {
+																							  final int minVersion, final int maxVersion) {
 		logger.debug("collectExecutorServiceInfos started...");
 		
 		final Map<Long,ChoreographerExecutorServiceInfoResponseDTO> collected = new HashMap<>(potentials.size());
@@ -120,6 +120,20 @@ public class ExecutorSelector {
 			}
 		}
 		return collected;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<ChoreographerExecutor> filterOutExecutorsWithoutServiceInfos(final List<ChoreographerExecutor> original,
+																			  final Map<Long,ChoreographerExecutorServiceInfoResponseDTO> executorServiceInfos) {
+		logger.debug("filterOutExecutorsWithoutServiceInfos started...");
+		
+		final List<ChoreographerExecutor> filtered = new ArrayList<>(original.size());
+		for (final ChoreographerExecutor executor : original) {
+			if (executorServiceInfos.containsKey(executor.getId())) {
+				filtered.add(executor);
+			}
+		}			
+		return filtered;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -157,16 +171,11 @@ public class ExecutorSelector {
 		final ServiceQueryResultListDTO response = driver.multiQueryServiceRegistry(new ServiceQueryFormListDTO(serviceInfo.getDependencies()));
 		for (final ServiceQueryResultDTO result : response.getResults()) {
 			if (!result.getServiceQueryData().isEmpty()) {
-				result.getServiceQueryData().get(0).getServiceDefinition().getServiceDefinition();
-				availableReliedServices.add(result.getServiceQueryData().get(0).getServiceDefinition().getServiceDefinition());
+				final String serviceDefinition = result.getServiceQueryData().get(0).getServiceDefinition().getServiceDefinition();
+				availableReliedServices.add(serviceDefinition);
 			}
 		}
 		
-		for (final ServiceQueryFormDTO dependency : serviceInfo.getDependencies()) {
-			if (!availableReliedServices.contains(dependency.getServiceDefinitionRequirement())) {
-				return false;
-			}
-		}
-		return true;
+		return availableReliedServices.size() == serviceInfo.getDependencies().size();
 	}
 }
