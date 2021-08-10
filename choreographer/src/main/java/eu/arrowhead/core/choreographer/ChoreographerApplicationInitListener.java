@@ -45,6 +45,9 @@ import eu.arrowhead.core.choreographer.graph.StepGraphNormalizer;
 
 @Component
 public class ChoreographerApplicationInitListener extends ApplicationInitListener {
+	
+	//=================================================================================================
+    // methods
 
     //-------------------------------------------------------------------------------------------------
     @Override
@@ -60,19 +63,12 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
         final Map<String,Object> context = appContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
 
         final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
-        final UriComponents queryByServiceDefinitionList = createQueryByServiceDefinitionList(scheme);
-
-        context.put(CoreCommonConstants.SR_QUERY_BY_SERVICE_DEFINITION_LIST_URI, queryByServiceDefinitionList);
+        context.put(CoreCommonConstants.SR_QUERY_BY_SERVICE_DEFINITION_LIST_URI, createQueryByServiceDefinitionListUri(scheme));
+        context.put(CoreCommonConstants.SR_REGISTER_SYSTEM_URI, createRegisterSystemUri(scheme));
+        context.put(CoreCommonConstants.SR_UNREGISTER_SYSTEM_URI, createUnregisterSystemUri(scheme));
     }
 
-    private UriComponents createQueryByServiceDefinitionList(final String scheme) {
-        logger.debug("createQuerySystemByServiceDefinitionList started...");
-
-        final String registryUriStr = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SERVICE_DEFINITION_LIST_URI;
-
-        return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), registryUriStr);
-    }
-
+    //-------------------------------------------------------------------------------------------------
     @Bean
     public JmsListenerContainerFactory<?> getFactory(ConnectionFactory connectionFactory,
                                                     DefaultJmsListenerContainerFactoryConfigurer configurer, ExampleErrorHandler errorHandler) {
@@ -82,6 +78,7 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
         return factory;
     }
 
+    //-------------------------------------------------------------------------------------------------
     @Bean
     public MessageConverter jacksonJmsMessageConverter() {
         MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
@@ -90,18 +87,21 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
         return converter;
     }
     
+    //-------------------------------------------------------------------------------------------------
     @Bean
     public StepGraphCircleDetector getStepGraphCircleDetector() {
     	//TODO: select implementation
     	return new DepthFirstStepGraphCircleDetector();
     }
     
+    //-------------------------------------------------------------------------------------------------
     @Bean
     public StepGraphNormalizer getStepGraphNormalizer() {
     	//TODO: select implementation
     	return new EdgeBuilderStepGraphNormalizer();
     }
 
+    //-------------------------------------------------------------------------------------------------
     @Service
     public class ExampleErrorHandler implements ErrorHandler {
 
@@ -111,8 +111,36 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
         }
     }
 
+    //-------------------------------------------------------------------------------------------------
     @Override
     protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
         return List.of(CoreSystemService.ORCHESTRATION_SERVICE);
+    }
+    
+    //=================================================================================================
+    // assistant methods
+    
+    //-------------------------------------------------------------------------------------------------
+    private UriComponents createQueryByServiceDefinitionListUri(final String scheme) {
+        logger.debug("createQueryByServiceDefinitionListUri started...");
+
+        final String uriStr = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SERVICE_DEFINITION_LIST_URI;
+        return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), uriStr);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    private UriComponents createRegisterSystemUri(final String scheme) {
+        logger.debug("createQuerySystemByServiceDefinitionList started...");
+
+        final String uriStr = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI;
+        return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), uriStr);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    private UriComponents createUnregisterSystemUri(final String scheme) {
+        logger.debug("createUnregisterSystemUri started...");
+
+        final String uriStr = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI;
+        return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), uriStr);
     }
 }
