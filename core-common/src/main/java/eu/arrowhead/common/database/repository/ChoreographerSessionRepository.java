@@ -14,13 +14,13 @@
 
 package eu.arrowhead.common.database.repository;
 
-import eu.arrowhead.common.database.entity.ChoreographerPlan;
-import eu.arrowhead.common.database.entity.ChoreographerSession;
-import eu.arrowhead.common.dto.internal.ChoreographerStatusType;
-
 import java.util.List;
 
 import org.springframework.stereotype.Repository;
+
+import eu.arrowhead.common.database.entity.ChoreographerPlan;
+import eu.arrowhead.common.database.entity.ChoreographerSession;
+import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
 
 @Repository
 public interface ChoreographerSessionRepository extends RefreshableRepository<ChoreographerSession,Long> {
@@ -29,5 +29,5 @@ public interface ChoreographerSessionRepository extends RefreshableRepository<Ch
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public List<ChoreographerSession> findByPlanAndStatusIn(final ChoreographerPlan plan, final List<ChoreographerStatusType> statuses);
+	public List<ChoreographerSession> findByPlanAndStatusIn(final ChoreographerPlan plan, final List<ChoreographerSessionStatus> statuses);
 }

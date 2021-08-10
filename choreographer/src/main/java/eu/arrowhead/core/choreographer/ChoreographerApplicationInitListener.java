@@ -38,6 +38,8 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.core.choreographer.executor.ExecutorPrioritizationStrategy;
+import eu.arrowhead.core.choreographer.executor.RandomExecutorPrioritizationStrategy;
 import eu.arrowhead.core.choreographer.graph.EdgeDestroyerStepGraphNormalizer;
 import eu.arrowhead.core.choreographer.graph.KahnAlgorithmStepGraphCircleDetector;
 import eu.arrowhead.core.choreographer.graph.StepGraphCircleDetector;
@@ -111,7 +113,6 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
     //-------------------------------------------------------------------------------------------------
     @Bean
     public ExecutorPrioritizationStrategy getExecutorPrioritizationStrategy() {
-    	//TODO: select implementation
     	return new RandomExecutorPrioritizationStrategy();
     }
 

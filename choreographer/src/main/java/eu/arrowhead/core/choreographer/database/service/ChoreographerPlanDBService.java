@@ -44,7 +44,7 @@ import eu.arrowhead.common.database.repository.ChoreographerSessionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerStepNextStepConnectionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerStepRepository;
 import eu.arrowhead.common.database.repository.ChoreographerWorklogRepository;
-import eu.arrowhead.common.dto.internal.ChoreographerStatusType;
+import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.shared.ChoreographerActionRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanListResponseDTO;
@@ -177,7 +177,7 @@ public class ChoreographerPlanDBService {
                 throw new InvalidParameterException("Plan with id of '" + id + "' doesn't exist!");
             }
             
-            final List<ChoreographerSession> sessions = choreographerSessionRepository.findByPlanAndStatusIn(planOpt.get(), List.of(ChoreographerStatusType.INITIATED, ChoreographerStatusType.RUNNING));
+            final List<ChoreographerSession> sessions = choreographerSessionRepository.findByPlanAndStatusIn(planOpt.get(), List.of(ChoreographerSessionStatus.INITIATED, ChoreographerSessionStatus.RUNNING));
             if (!sessions.isEmpty()) {
             	throw new ArrowheadException("Plan cannot be deleted, because it is currently executed.");
             }
