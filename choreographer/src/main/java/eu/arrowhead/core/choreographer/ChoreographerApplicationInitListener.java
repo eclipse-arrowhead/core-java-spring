@@ -38,6 +38,8 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.core.choreographer.executor.ExecutorPrioritizationStrategy;
+import eu.arrowhead.core.choreographer.executor.RandomExecutorPrioritizationStrategy;
 import eu.arrowhead.core.choreographer.graph.DepthFirstStepGraphCircleDetector;
 import eu.arrowhead.core.choreographer.graph.EdgeBuilderStepGraphNormalizer;
 import eu.arrowhead.core.choreographer.graph.StepGraphCircleDetector;
@@ -63,7 +65,7 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
         final Map<String,Object> context = appContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
 
         final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
-        context.put(CoreCommonConstants.SR_QUERY_BY_SERVICE_DEFINITION_LIST_URI, createQueryByServiceDefinitionListUri(scheme));
+        context.put(CoreCommonConstants.SR_MULTI_QUERY_URI, createMultiQueryRegistryUri(scheme));
         context.put(CoreCommonConstants.SR_REGISTER_SYSTEM_URI, createRegisterSystemUri(scheme));
         context.put(CoreCommonConstants.SR_UNREGISTER_SYSTEM_URI, createUnregisterSystemUri(scheme));
     }
@@ -100,6 +102,13 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
     	//TODO: select implementation
     	return new EdgeBuilderStepGraphNormalizer();
     }
+    
+    //-------------------------------------------------------------------------------------------------
+    @Bean
+    public ExecutorPrioritizationStrategy getExecutorPrioritizationStrategy() {
+    	//TODO: select implementation
+    	return new RandomExecutorPrioritizationStrategy();
+    }
 
     //-------------------------------------------------------------------------------------------------
     @Service
@@ -121,10 +130,10 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
     // assistant methods
     
     //-------------------------------------------------------------------------------------------------
-    private UriComponents createQueryByServiceDefinitionListUri(final String scheme) {
-        logger.debug("createQueryByServiceDefinitionListUri started...");
+    private UriComponents createMultiQueryRegistryUri(final String scheme) {
+        logger.debug("createMultiQueryRegistryUri started...");
 
-        final String uriStr = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SERVICE_DEFINITION_LIST_URI;
+        final String uriStr = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_MULTI_QUERY_URI;
         return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), uriStr);
     }
     

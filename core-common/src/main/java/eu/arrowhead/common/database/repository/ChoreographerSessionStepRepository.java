@@ -20,7 +20,7 @@ import org.springframework.stereotype.Repository;
 
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
 import eu.arrowhead.common.database.entity.ChoreographerSessionStep;
-import eu.arrowhead.common.dto.internal.ChoreographerStatusType;
+import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStatus;
 
 @Repository
 public interface ChoreographerSessionStepRepository extends RefreshableRepository<ChoreographerSessionStep,Long> {
@@ -29,5 +29,5 @@ public interface ChoreographerSessionStepRepository extends RefreshableRepositor
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public boolean existsByExecutorAndStatusIn(final ChoreographerExecutor executor, final Set<ChoreographerStatusType> statuses);
+	public boolean existsByExecutorAndStatusIn(final ChoreographerExecutor executor, final Set<ChoreographerSessionStepStatus> statuses);
 }

@@ -26,7 +26,7 @@ import eu.arrowhead.common.database.entity.ChoreographerSessionStep;
 import eu.arrowhead.common.database.entity.ChoreographerStep;
 import eu.arrowhead.common.database.entity.ChoreographerStepDetail;
 import eu.arrowhead.common.database.entity.ChoreographerStepNextStepConnection;
-import eu.arrowhead.common.dto.internal.ChoreographerStatusType;
+import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
 import eu.arrowhead.common.dto.internal.ChoreographerSuitableExecutorResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerSessionRunningStepDataDTO;
@@ -123,14 +123,14 @@ public class ChoreographerService {
         ChoreographerAction firstAction = plan.getFirstAction();
         Set<ChoreographerStep> firstSteps = new HashSet<>(firstAction.getFirstStepEntries());
 
-        choreographerDBService.setSessionStatus(sessionId, ChoreographerStatusType.RUNNING);
+        choreographerDBService.setSessionStatus(sessionId, ChoreographerSessionStatus.RUNNING);
 
         firstSteps.parallelStream().forEach(firstStep -> {
             try {
                 //runStep(firstStep, sessionId);
                 executeStep(firstStep, sessionId);
             } catch (InterruptedException e) {
-                choreographerDBService.setSessionStatus(sessionId, ChoreographerStatusType.ABORTED);
+                choreographerDBService.setSessionStatus(sessionId, ChoreographerSessionStatus.ABORTED);
                 logger.debug(e.getMessage(), e);
             }
         });
@@ -144,7 +144,7 @@ public class ChoreographerService {
 
         //System.out.println(sessionFinishedStepDataDTO.getSessionId() + " " + sessionFinishedStepDataDTO.getRunningStepId());
 
-        choreographerDBService.setRunningStepStatus(runningStepId, ChoreographerStatusType.DONE, "Step execution is done.");
+        choreographerDBService.setRunningStepStatus(runningStepId, ChoreographerSessionStatus.DONE, "Step execution is done.");
 
         ChoreographerSessionStep runningStep = choreographerDBService.getRunningStepById(runningStepId);
         ChoreographerStep currentStep = choreographerDBService.getStepById(runningStep.getStep().getId());
@@ -160,12 +160,12 @@ public class ChoreographerService {
 
             for (ChoreographerSessionStep runningStepInstance : currentRunningStepList) {
                 //System.out.println(runningStepInstance.getId());
-                if (!runningStepInstance.getStatus().equals(ChoreographerStatusType.DONE)) {
+                if (!runningStepInstance.getStatus().equals(ChoreographerSessionStatus.DONE)) {
                     //System.out.println("canGoToNextStep should be set to false");
                     canGoToNextAction = false;
                     break;
                 }
-                if (runningStepInstance.getStep().getNextSteps().isEmpty() && !runningStep.getStatus().equals(ChoreographerStatusType.DONE)) {
+                if (runningStepInstance.getStep().getNextSteps().isEmpty() && !runningStep.getStatus().equals(ChoreographerSessionStatus.DONE)) {
                     //System.out.println("-------------------  canGoToNextAction should be set to false!!!! --------------------");
                     canGoToNextAction = false;
                     break;
@@ -197,7 +197,7 @@ public class ChoreographerService {
             for (ChoreographerStepNextStepConnection prevStep : nextStep.getNextStepEntry().getSteps()) {
                 //System.out.println(prevStep.getId() + "    " + prevStep.getStepEntry().getName());
                 ChoreographerSessionStep prevRunningStep = choreographerDBService.getRunningStepBySessionIdAndStepId(sessionId, prevStep.getStepEntry().getId());
-                if (!prevRunningStep.getStatus().equals(ChoreographerStatusType.DONE)) {
+                if (!prevRunningStep.getStatus().equals(ChoreographerSessionStatus.DONE)) {
                     allPreviousStepsDone = false;
                 }
             }
@@ -278,7 +278,7 @@ public class ChoreographerService {
 
     //-------------------------------------------------------------------------------------------------
     public ChoreographerSessionStep insertInitiatedRunningStep(final long stepId, final long sessionId) {
-        return choreographerDBService.registerRunningStep(stepId, sessionId, ChoreographerStatusType.RUNNING, "Step running is initiated and search for provider started.");
+        return choreographerDBService.registerRunningStep(stepId, sessionId, ChoreographerSessionStatus.RUNNING, "Step running is initiated and search for provider started.");
     }
 
     //=================================================================================================
