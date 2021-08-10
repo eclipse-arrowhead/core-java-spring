@@ -257,8 +257,8 @@ public class CommonConstants {
 	public static final String CHOREOGRAPHER_EXECUTOR_CLIENT_SERVICE_INFO_URI = "/service_info";
 	public static final String OP_CHOREOGRAPHER_EXECUTOR_REGISTER = "/executor/register";
 	public static final String OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER = "/executor/unregister";
-	public static final String OP_CHOREOGRAPHER_NOTIFY_STEP_DONE = "/executor/notifyStepDone";
-	public static final String OP_CHOREOGRAPHER_EXECUTOR_NOTIFY_STEP_ERROR = "/executor/notifyStepError";
+	public static final String OP_CHOREOGRAPHER_NOTIFY_STEP_DONE = "/executor/notify-step-done";
+	public static final String OP_CHOREOGRAPHER_EXECUTOR_NOTIFY_STEP_ERROR = "/executor/notify-step-error";
 	public static final String OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_ADDRESS = "address";
 	public static final String OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_PORT = "port";
 	public static final String OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_BASE_URI = "base_uri";
