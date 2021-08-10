@@ -49,6 +49,8 @@ public class ChoreographerSession {
     @Column(nullable = false, columnDefinition = "varchar(" + CoreDefaults.VARCHAR_BASIC + ")")
     @Enumerated(EnumType.STRING)
     private ChoreographerSessionStatus status;
+    
+    private String notifyUri;
 
     @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private ZonedDateTime startedAt;
@@ -63,15 +65,17 @@ public class ChoreographerSession {
     public ChoreographerSession() {}
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerSession(final ChoreographerPlan plan, final ChoreographerSessionStatus status) {
+    public ChoreographerSession(final ChoreographerPlan plan, final ChoreographerSessionStatus status, final String notifyUri) {
         this.plan = plan;
         this.status = status;
+        this.notifyUri = notifyUri;
     }
 
     //-------------------------------------------------------------------------------------------------
     public long getId() { return id; }
     public ChoreographerPlan getPlan() { return plan; }
     public ChoreographerSessionStatus getStatus() { return status; }
+    public String getNotifyUri() { return notifyUri; }
     public ZonedDateTime getStartedAt() { return startedAt; }
     public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
@@ -79,6 +83,7 @@ public class ChoreographerSession {
     public void setId(final long id) { this.id = id; }
     public void setPlan(final ChoreographerPlan plan) { this.plan = plan; }
     public void setStatus(final ChoreographerSessionStatus status) { this.status = status; }
+    public void setNotifyUri(String notifyUri) { this.notifyUri = notifyUri; }
     public void setStartedAt(final ZonedDateTime startedAt) { this.startedAt = startedAt; }
     public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
  
