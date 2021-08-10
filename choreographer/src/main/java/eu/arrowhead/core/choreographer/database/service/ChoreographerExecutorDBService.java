@@ -74,7 +74,7 @@ public class ChoreographerExecutorDBService {
 																   final int minVersion, final int maxVersion) { //TODO junit
 		logger.debug("createExecutorResponse started...");
 		
-		final ChoreographerExecutor executor = createExecutor(systemName, address, port, baseUri, serviceDefinitionName, minVersion, maxVersion);		
+		final ChoreographerExecutor executor = createExecutorWithoutSystemNameAndAddressValidation(systemName, address, port, baseUri, serviceDefinitionName, minVersion, maxVersion);		
 		final List<ChoreographerExecutorServiceDefinition> serviceDefinitions = executorServiceDefinitionRepository.findAllByExecutor(executor);
 		
 		return DTOConverter.convertExecutorToExecutorResponseDTO(executor, serviceDefinitions);
@@ -82,12 +82,12 @@ public class ChoreographerExecutorDBService {
 	
     //-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-    public ChoreographerExecutor createExecutor(final String systemName, final String address, final int port, final String baseUri, final String serviceDefinitionName,
-    											final int minVersion, final int maxVersion) { //TODO junit
+    public ChoreographerExecutor createExecutorWithoutSystemNameAndAddressValidation(final String systemName, final String address, final int port, final String baseUri, final String serviceDefinitionName,
+    																				 final int minVersion, final int maxVersion) { //TODO junit
 		logger.debug("createExecutor started...");
 		Assert.isTrue(!Utilities.isEmpty(systemName), "systemName is empty");
 		Assert.isTrue(!Utilities.isEmpty(address), "address is empty");
-		// System name and address is coming from SR registration result, so should be verified
+		// System name and address is coming from SR registration result, so should be verified (verification is depending on SR's application properties)
 		Assert.isTrue(!Utilities.isEmpty(serviceDefinitionName), "serviceDefinitionName is empty");
 		
 		try {
