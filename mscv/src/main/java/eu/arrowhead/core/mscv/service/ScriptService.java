@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
+import javax.persistence.PersistenceException;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreSystemRegistrationProperties;
@@ -87,105 +88,142 @@ public class ScriptService {
 
     @Transactional(readOnly = true)
     public Optional<Script> findScriptFor(final Mip mip, final Layer layer, final OS os) {
-        logger.debug("findScriptFor({},{},{}) started", mip, layer, os);
-        Assert.notNull(mip, MIP_NULL_ERROR_MESSAGE);
-        Assert.notNull(os, OS_NULL_ERROR_MESSAGE);
-        Assert.notNull(layer, LAYER_NULL_ERROR_MESSAGE);
-        return scriptRepository.findOneByMipAndLayerAndOs(mip, layer, os);
+        try {
+            logger.debug("findScriptFor({},{},{}) started", mip, layer, os);
+            Assert.notNull(mip, MIP_NULL_ERROR_MESSAGE);
+            Assert.notNull(os, OS_NULL_ERROR_MESSAGE);
+            Assert.notNull(layer, LAYER_NULL_ERROR_MESSAGE);
+            return scriptRepository.findOneByMipAndLayerAndOs(mip, layer, os);
+        } catch (final PersistenceException pe) {
+            throw new ArrowheadException("Unable to find Scripts", pe);
+        }
     }
 
     @Transactional(readOnly = true)
     public Optional<Script> findScriptFor(final String identifier, final Layer layer, final OS os) {
-        logger.debug("findScriptFor({},{},{}) started", identifier, layer, os);
-        Assert.notNull(identifier, MIP_IDENTIFIER_NULL_ERROR_MESSAGE);
-        Assert.notNull(layer, LAYER_NULL_ERROR_MESSAGE);
-        Assert.notNull(os, OS_NULL_ERROR_MESSAGE);
+        try {
+            logger.debug("findScriptFor({},{},{}) started", identifier, layer, os);
+            Assert.hasText(identifier, MIP_IDENTIFIER_NULL_ERROR_MESSAGE);
+            Assert.notNull(layer, LAYER_NULL_ERROR_MESSAGE);
+            Assert.notNull(os, OS_NULL_ERROR_MESSAGE);
 
-        final Matcher matcher = Validation.MIP_IDENTIFIER_PATTERN.matcher(identifier);
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException(MIP_IDENTIFIER_FORMAT_ERROR_MESSAGE);
+            final Matcher matcher = Validation.MIP_IDENTIFIER_PATTERN.matcher(identifier);
+            if (!matcher.matches()) {
+                throw new IllegalArgumentException(MIP_IDENTIFIER_FORMAT_ERROR_MESSAGE);
+            }
+
+            final String categoryAbbreviation = matcher.group(1).trim();
+            final Integer externalId = Integer.valueOf(matcher.group(2));
+            final Optional<Mip> optionalMip = mipRepository.findByCategoryAbbreviationAndExtId(categoryAbbreviation, externalId);
+            final Mip mip = optionalMip.orElseThrow(notFoundException("MIP"));
+
+            return scriptRepository.findOneByMipAndLayerAndOs(mip, layer, os);
+        } catch (final PersistenceException pe) {
+            throw new ArrowheadException("Unable to find Scripts", pe);
         }
-
-        final String categoryAbbreviation = matcher.group(1);
-        final Integer externalId = Integer.valueOf(matcher.group(2));
-        final Optional<Mip> optionalMip = mipRepository.findByCategoryAbbreviationAndExtId(categoryAbbreviation, externalId);
-        final Mip mip = optionalMip.orElseThrow(notFoundException("MIP"));
-
-        return scriptRepository.findOneByMipAndLayerAndOs(mip, layer, os);
     }
 
     @Transactional
     public Script create(final ByteArrayOutputStream content, final String catAbbr, final Integer extId,
                          final Layer layer, final OS os) {
-        logger.debug("create(<stream>,{},{},{},{}) started", catAbbr, extId, layer, os);
-        Assert.notNull(content, SCRIPT_CONTENT_NULL_ERROR_MESSAGE);
-        Assert.notNull(catAbbr, CATEGORY_NULL_ERROR_MESSAGE);
-        Assert.notNull(extId, ID_NULL_ERROR_MESSAGE);
-        Assert.notNull(layer, LAYER_NULL_ERROR_MESSAGE);
-        Assert.notNull(os, OS_NULL_ERROR_MESSAGE);
+        try {
+            logger.debug("create(<stream>,{},{},{},{}) started", catAbbr, extId, layer, os);
+            Assert.notNull(content, SCRIPT_CONTENT_NULL_ERROR_MESSAGE);
+            Assert.isTrue(content.size() > 0, SCRIPT_CONTENT_NULL_ERROR_MESSAGE);
+            Assert.hasText(catAbbr, CATEGORY_NULL_ERROR_MESSAGE);
+            Assert.notNull(extId, ID_NULL_ERROR_MESSAGE);
+            Assert.notNull(layer, LAYER_NULL_ERROR_MESSAGE);
+            Assert.notNull(os, OS_NULL_ERROR_MESSAGE);
 
-        final Optional<Mip> optionalMip = mipRepository.findByCategoryAbbreviationAndExtId(catAbbr, extId);
-        final Mip mip = optionalMip.orElseThrow(notFoundException("MIP"));
-        final Script script = new Script(mip, layer, os, null);
+            final Optional<Mip> optionalMip = mipRepository.findByCategoryAbbreviationAndExtId(catAbbr, extId);
+            final Mip mip = optionalMip.orElseThrow(notFoundException("MIP"));
+            final Script script = new Script(mip, layer, os, null);
 
-        if (exists(script)) { throw new InvalidParameterException("Script meta information exist already"); }
+            if (exists(script)) { throw new InvalidParameterException("Script meta information exist already"); }
 
-        safeContent(script, content);
-        return scriptRepository.saveAndFlush(script);
+            safeContent(script, content);
+            return scriptRepository.saveAndFlush(script);
+        } catch (final PersistenceException pe) {
+            throw new ArrowheadException("Unable to create Scripts", pe);
+        }
     }
 
     @Transactional(readOnly = true)
     public boolean exists(final Script script) {
-        logger.debug("exists({}) started", script);
-        Assert.notNull(script, SCRIPT_NULL_ERROR_MESSAGE);
-        return scriptRepository.exists(Example.of(script, ExampleMatcher.matchingAll()));
+        try {
+            logger.debug("exists({}) started", script);
+            Assert.notNull(script, SCRIPT_NULL_ERROR_MESSAGE);
+            return scriptRepository.exists(Example.of(script, ExampleMatcher.matchingAll()));
+        } catch (final PersistenceException pe) {
+            throw new ArrowheadException("Unable to verify existence of Scripts", pe);
+        }
     }
 
     @Transactional(readOnly = true)
     public Page<Script> pageAll(final Pageable pageable) {
-        logger.debug("pageAll({}) started", pageable);
-        Assert.notNull(pageable, PAGE_NULL_ERROR_MESSAGE);
-        return scriptRepository.findAll(pageable);
+        try {
+            logger.debug("pageAll({}) started", pageable);
+            Assert.notNull(pageable, PAGE_NULL_ERROR_MESSAGE);
+            return scriptRepository.findAll(pageable);
+        } catch (final PersistenceException pe) {
+            throw new ArrowheadException("Unable to query Scripts", pe);
+        }
     }
 
     @Transactional(readOnly = true)
     public Page<Script> pageByExample(final Example<Script> example, final Pageable pageable) {
-        logger.debug("pageByExample({},{}) started", example, pageable);
-        Assert.notNull(example, EXAMPLE_NULL_ERROR_MESSAGE);
-        Assert.notNull(pageable, PAGE_NULL_ERROR_MESSAGE);
-        return scriptRepository.findAll(example, pageable);
+        try {
+            logger.debug("pageByExample({},{}) started", example, pageable);
+            Assert.notNull(example, EXAMPLE_NULL_ERROR_MESSAGE);
+            Assert.notNull(pageable, PAGE_NULL_ERROR_MESSAGE);
+            return scriptRepository.findAll(example, pageable);
+        } catch (final PersistenceException pe) {
+            throw new ArrowheadException("Unable to find Scripts", pe);
+        }
     }
 
     @Transactional
     public Script replace(final Script oldScript, final Script newScript) {
-        logger.debug("replace({},{}) started", oldScript, newScript);
-        Assert.notNull(oldScript, "old " + SCRIPT_NULL_ERROR_MESSAGE);
-        Assert.notNull(newScript, "new " + SCRIPT_NULL_ERROR_MESSAGE);
+        try {
+            logger.debug("replace({},{}) started", oldScript, newScript);
+            Assert.notNull(oldScript, "old " + SCRIPT_NULL_ERROR_MESSAGE);
+            Assert.notNull(newScript, "new " + SCRIPT_NULL_ERROR_MESSAGE);
 
-        verifyScriptPath(newScript);
-        // TODO oldScript.setPhysicalPath(newScript.getPhysicalPath());
-        oldScript.setLayer(newScript.getLayer());
-        oldScript.setMip(newScript.getMip());
-        oldScript.setOs(newScript.getOs());
-        return scriptRepository.saveAndFlush(oldScript);
+            verifyScriptPath(newScript);
+            // TODO oldScript.setPhysicalPath(newScript.getPhysicalPath());
+            oldScript.setLayer(newScript.getLayer());
+            oldScript.setMip(newScript.getMip());
+            oldScript.setOs(newScript.getOs());
+            return scriptRepository.saveAndFlush(oldScript);
+        } catch (final PersistenceException pe) {
+            throw new ArrowheadException("Unable to replace Scripts", pe);
+        }
     }
 
     @Transactional
     public Script replace(final Script script, final ByteArrayOutputStream content) {
-        logger.debug("replace({},<stream>) started", script);
-        Assert.notNull(script, SCRIPT_NULL_ERROR_MESSAGE);
-        safeContent(script, content);
-        return script;
+        try {
+            logger.debug("replace({},<stream>) started", script);
+            Assert.notNull(script, SCRIPT_NULL_ERROR_MESSAGE);
+            safeContent(script, content);
+            return script;
+        } catch (final PersistenceException pe) {
+            throw new ArrowheadException("Unable to replace Scripts", pe);
+        }
     }
 
     @Transactional
     public void delete(final String name, final Layer layer, final OS os) {
-        logger.debug("delete({}) started", name);
-        Assert.notNull(name, NAME_NULL_ERROR_MESSAGE);
+        try {
+            logger.debug("delete({}) started", name);
+            Assert.hasText(name, NAME_NULL_ERROR_MESSAGE);
 
-        final Optional<Script> optionalScript = findScriptFor(name, layer, os);
-        optionalScript.ifPresent(scriptRepository::delete);
-        scriptRepository.flush();
+            final Optional<Script> optionalScript = findScriptFor(name, layer, os);
+            optionalScript.ifPresent(scriptRepository::delete);
+            scriptRepository.flush();
+        } catch (final PersistenceException pe) {
+            throw new ArrowheadException("Unable to delete Scripts", pe);
+        }
     }
 
     public String createUriPath(final Script script) {
@@ -198,16 +236,24 @@ public class ScriptService {
 
     @Transactional(readOnly = true)
     protected Set<Script> findAllByLayer(final Layer layer) {
-        logger.debug("findAllByLayer({}) started", layer);
-        Assert.notNull(layer, LAYER_NULL_ERROR_MESSAGE);
-        return scriptRepository.findAllByLayer(layer);
+        try {
+            logger.debug("findAllByLayer({}) started", layer);
+            Assert.notNull(layer, LAYER_NULL_ERROR_MESSAGE);
+            return scriptRepository.findAllByLayer(layer);
+        } catch (final PersistenceException pe) {
+            throw new ArrowheadException("Unable to find Scripts", pe);
+        }
     }
 
     @Transactional(readOnly = true)
     protected Set<Script> findAllByOS(final OS os) {
-        logger.debug("findAllByOS({}) started", os);
-        Assert.notNull(os, OS_NULL_ERROR_MESSAGE);
-        return scriptRepository.findAllByOs(os);
+        try {
+            logger.debug("findAllByOS({}) started", os);
+            Assert.notNull(os, OS_NULL_ERROR_MESSAGE);
+            return scriptRepository.findAllByOs(os);
+        } catch (final PersistenceException pe) {
+            throw new ArrowheadException("Unable to find Scripts", pe);
+        }
     }
 
     private void safeContent(final Script script, final ByteArrayOutputStream content) {

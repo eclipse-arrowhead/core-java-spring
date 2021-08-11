@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import javax.persistence.PersistenceException;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.mscv.Mip;
@@ -25,6 +26,7 @@ import eu.arrowhead.common.dto.shared.mscv.Layer;
 import eu.arrowhead.common.dto.shared.mscv.MipVerificationResultDto;
 import eu.arrowhead.common.dto.shared.mscv.VerificationResultDto;
 import eu.arrowhead.common.dto.shared.mscv.VerificationResultListResponseDto;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.mscv.MscvDefaults;
 import eu.arrowhead.core.mscv.MscvDtoConverter;
 import org.apache.logging.log4j.LogManager;
@@ -84,69 +86,95 @@ public class VerificationService {
 
     @Transactional(readOnly = true)
     public VerificationListView getListByNameAndLayer(final String name, final Layer layer) {
-        logger.debug("getListByName({}) started", name);
-        Assert.notNull(name, NAME_NULL_ERROR_MESSAGE);
-        final Optional<VerificationEntryList> optional = verListRepository.findOneByNameAndLayer(name, layer);
-        return MscvDtoConverter.convertToView(optional.orElseThrow(notFoundException("Verification list name")));
+        try {
+            logger.debug("getListByName({}, {}) started", name, layer);
+            Assert.hasText(name, NAME_NULL_ERROR_MESSAGE);
+            Assert.notNull(layer, LAYER_NULL_ERROR_MESSAGE);
+            final Optional<VerificationEntryList> optional = verListRepository.findOneByNameAndLayer(name, layer);
+            return MscvDtoConverter.convertToView(optional.orElseThrow(notFoundException("Verification list name")));
+        } catch (final PersistenceException pe) {
+            throw new ArrowheadException("Unable to find VerificationList", pe);
+        }
     }
 
     @Transactional(readOnly = true)
     public VerificationResultDto getDetailResults(final Target target, final Layer layer) {
-        logger.debug("getDetailResults({},{}) started", target, layer);
-        Assert.notNull(target, TARGET_NULL_ERROR_MESSAGE);
-        Assert.notNull(layer, LAYER_NULL_ERROR_MESSAGE);
-        final VerificationResult latestExecution =
-                executionRepo.findTopViewByTargetAndVerificationListLayerOrderByExecutionDateDesc(target, layer);
-        return createResults(latestExecution);
+        try {
+            logger.debug("getDetailResults({},{}) started", target, layer);
+            Assert.notNull(target, TARGET_NULL_ERROR_MESSAGE);
+            Assert.notNull(layer, LAYER_NULL_ERROR_MESSAGE);
+            final VerificationResult latestExecution =
+                    executionRepo.findTopViewByTargetAndVerificationListLayerOrderByExecutionDateDesc(target, layer);
+            return createResults(latestExecution);
+        } catch (final PersistenceException pe) {
+            throw new ArrowheadException("Unable to find VerificationResult", pe);
+        }
     }
 
     @Transactional(readOnly = true)
     public VerificationResultListResponseDto findDetailResults(final Pageable page, final Target target,
                                                                final ZonedDateTime from, final ZonedDateTime to,
                                                                final List<VerificationEntryList> list) {
-        logger.debug("findDetailResults({},{},{},{},{}) started", page, target, from, to, list);
-        Assert.notNull(page, PAGE_NULL_ERROR_MESSAGE);
-        Assert.notNull(target, TARGET_NULL_ERROR_MESSAGE);
-        // other parameters are optional
+        try {
+            logger.debug("findDetailResults({},{},{},{},{}) started", page, target, from, to, list);
+            Assert.notNull(page, PAGE_NULL_ERROR_MESSAGE);
+            Assert.notNull(target, TARGET_NULL_ERROR_MESSAGE);
+            // other parameters are optional
 
-        final ZonedDateTime validatedTo = Objects.isNull(to) ? ZonedDateTime.now() : to;
-        final ZonedDateTime validatedFrom = Objects.isNull(from) ? validatedTo.minusYears(10) : from;
+            final ZonedDateTime validatedTo = Objects.isNull(to) ? ZonedDateTime.now() : to;
+            final ZonedDateTime validatedFrom = Objects.isNull(from) ? validatedTo.minusYears(10) : from;
 
-        final Page<VerificationResult> executions =
-                executionRepo.findAllByTargetAndVerificationListInAndExecutionDateIsBetween(page, target, list, validatedFrom, validatedTo);
+            final Page<VerificationResult> executions =
+                    executionRepo.findAllByTargetAndVerificationListInAndExecutionDateIsBetween(page, target, list, validatedFrom, validatedTo);
 
-        final List<VerificationResultDto> content = new ArrayList<>();
+            final List<VerificationResultDto> content = new ArrayList<>();
 
-        for (final VerificationResult execution : executions) {
-            content.add(createResults(execution));
+            for (final VerificationResult execution : executions) {
+                content.add(createResults(execution));
+            }
+
+            final Page<VerificationResultDto> resultsPage = new PageImpl<>(content, page, executions.getSize());
+            return new VerificationResultListResponseDto(resultsPage);
+        } catch (final PersistenceException pe) {
+            throw new ArrowheadException("Unable to find VerificationResultList", pe);
         }
-
-        final Page<VerificationResultDto> resultsPage = new PageImpl<>(content, page, executions.getSize());
-        return new VerificationResultListResponseDto(resultsPage);
     }
 
+    @Transactional(readOnly = true)
     public List<VerificationEntryList> findListByProbe(final VerificationEntryList probe) {
-        return verListRepository.findAll(Example.of(probe, ExampleMatcher.matchingAny()));
+        try {
+            return verListRepository.findAll(Example.of(probe, ExampleMatcher.matchingAny()));
+        } catch (final PersistenceException pe) {
+            throw new ArrowheadException("Unable to find VerificationEntryLists", pe);
+        }
     }
 
     @Transactional(readOnly = true)
     protected VerificationEntryList findListById(final Long id) {
-        logger.debug("findListById({}) started", id);
-        Assert.notNull(id, ID_NULL_ERROR_MESSAGE);
-        final Optional<VerificationEntryList> optional = verListRepository.findById(id);
-        return optional.orElseThrow(notFoundException("Verification list ID"));
+        try {
+            logger.debug("findListById({}) started", id);
+            Assert.notNull(id, ID_NULL_ERROR_MESSAGE);
+            final Optional<VerificationEntryList> optional = verListRepository.findById(id);
+            return optional.orElseThrow(notFoundException("Verification list ID"));
+        } catch (final PersistenceException pe) {
+            throw new ArrowheadException("Unable to find VerificationEntryList", pe);
+        }
     }
 
     @Transactional
     protected VerificationEntryList findOrCreateSuitableList(final Target target, final Layer layer) {
-        logger.debug("findSuitableList({}) started", target);
-        Assert.notNull(target, TARGET_NULL_ERROR_MESSAGE);
-        Assert.notNull(layer, LAYER_NULL_ERROR_MESSAGE);
+        try {
+            logger.debug("findSuitableList({}) started", target);
+            Assert.notNull(target, TARGET_NULL_ERROR_MESSAGE);
+            Assert.notNull(layer, LAYER_NULL_ERROR_MESSAGE);
 
-        // no strategy exists yet. using default list
-        Optional<VerificationEntryList> defaultList = verListRepository.findOneByNameAndLayer(defaults.getListName(), layer);
-        //return defaultList.orElseThrow(() -> new MscvException("No suitable list found"));
-        return defaultList.orElseGet(() -> createDefaultList(layer));
+            // no strategy exists yet. using default list
+            Optional<VerificationEntryList> defaultList = verListRepository.findOneByNameAndLayer(defaults.getListName(), layer);
+            //return defaultList.orElseThrow(() -> new MscvException("No suitable list found"));
+            return defaultList.orElseGet(() -> createDefaultList(layer));
+        } catch (final PersistenceException pe) {
+            throw new ArrowheadException("Unable to find or create suitable VerificationEntryList", pe);
+        }
     }
 
     private VerificationEntryList createDefaultList(final Layer layer) {

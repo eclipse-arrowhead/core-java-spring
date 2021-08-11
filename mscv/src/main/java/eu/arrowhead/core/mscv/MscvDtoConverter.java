@@ -59,24 +59,24 @@ public class MscvDtoConverter {
         return new VerificationExecutionViewImpl(execution);
     }
 
-    public static SshTargetDto convert(SshTarget sshTarget) {
+    public static SshTargetDto convert(final SshTarget sshTarget) {
         if (Objects.isNull(sshTarget)) { return null; }
 
         SshTargetDto sshTargetDto = new SshTargetDto();
-        sshTargetDto.setAddress(sshTarget.getAddress());
+        sshTargetDto.setAddress(safeTrim(sshTarget.getAddress()));
         sshTargetDto.setPort(sshTarget.getPort());
-        sshTargetDto.setName(sshTarget.getName());
+        sshTargetDto.setName(safeTrim(sshTarget.getName()));
         sshTargetDto.setOs(sshTarget.getOs());
         return sshTargetDto;
     }
 
-    public static SshTarget convert(SshTargetDto sshTargetDto) {
+    public static SshTarget convert(final SshTargetDto sshTargetDto) {
         if (Objects.isNull(sshTargetDto)) { return null; }
 
         SshTarget sshTarget = new SshTarget();
-        sshTarget.setAddress(sshTargetDto.getAddress());
+        sshTarget.setAddress(safeTrim(sshTargetDto.getAddress()));
         sshTarget.setPort(sshTargetDto.getPort());
-        sshTarget.setName(sshTargetDto.getName());
+        sshTarget.setName(safeTrim(sshTargetDto.getName()));
         sshTarget.setOs(sshTargetDto.getOs());
         return sshTarget;
     }
@@ -90,19 +90,19 @@ public class MscvDtoConverter {
     }
 
     public static CategoryDto convert(final MipCategory mipCategory) {
-        if (Objects.isNull(mipCategory)) { return null; } else { return new CategoryDto(mipCategory.getName(), mipCategory.getAbbreviation()); }
+        if (Objects.isNull(mipCategory)) { return null; } else { return new CategoryDto(safeTrim(mipCategory.getName()), safeTrim(mipCategory.getAbbreviation())); }
     }
 
     public static MipCategory convert(final CategoryDto dto) {
-        if (Objects.isNull(dto)) { return null; } else { return new MipCategory(dto.getName(), dto.getAbbreviation()); }
+        if (Objects.isNull(dto)) { return null; } else { return new MipCategory(safeTrim(dto.getName()), safeTrim(dto.getAbbreviation())); }
     }
 
     @SuppressWarnings("DuplicatedCode")
     public static MipDto convert(final Mip mip) {
         if (Objects.isNull(mip)) { return null; }
         final MipDto dto = new MipDto();
-        dto.setName(mip.getName());
-        dto.setDescription(mip.getDescription());
+        dto.setName(safeTrim(mip.getName()));
+        dto.setDescription(safeTrim(mip.getDescription()));
         dto.setCategory(convert(mip.getCategory()));
         dto.setDomain(convert(mip.getDomain()));
         dto.setStandard(convert(mip.getStandard()));
@@ -114,8 +114,8 @@ public class MscvDtoConverter {
     public static Mip convert(final MipDto dto) {
         if (Objects.isNull(dto)) { return null; }
         final Mip mip = new Mip();
-        mip.setName(dto.getName());
-        mip.setDescription(dto.getDescription());
+        mip.setName(safeTrim(dto.getName()));
+        mip.setDescription(safeTrim(dto.getDescription()));
         mip.setCategory(convert(dto.getCategory()));
         mip.setDomain(convert(dto.getDomain()));
         mip.setStandard(convert(dto.getStandard()));
@@ -124,11 +124,11 @@ public class MscvDtoConverter {
     }
 
     private static MipDomain convert(final DomainDto domain) {
-        if (Objects.isNull(domain)) { return null; } else { return new MipDomain(domain.getName()); }
+        if (Objects.isNull(domain)) { return null; } else { return new MipDomain(safeTrim(domain.getName())); }
     }
 
     private static DomainDto convert(final MipDomain domain) {
-        if (Objects.isNull(domain)) { return null; } else { return new DomainDto(domain.getName()); }
+        if (Objects.isNull(domain)) { return null; } else { return new DomainDto(safeTrim(domain.getName())); }
     }
 
     public static Script convert(final ScriptRequestDto dto) {
@@ -145,7 +145,7 @@ public class MscvDtoConverter {
     private static Mip convert(final MipIdentifierDto dto) {
         final Mip mip = new Mip();
         final MipCategory category = new MipCategory();
-        category.setAbbreviation(dto.getCategoryAbbreviation());
+        category.setAbbreviation(safeTrim(dto.getCategoryAbbreviation()));
         mip.setCategory(category);
         mip.setExtId(dto.getExtId());
         return mip;
@@ -167,10 +167,10 @@ public class MscvDtoConverter {
             return null;
         }
         Standard standard = new Standard();
-        standard.setIdentification(dto.getIdentification());
-        standard.setName(dto.getName());
-        standard.setReferenceUri(dto.getReferenceUri());
-        standard.setDescription(dto.getDescription());
+        standard.setIdentification(safeTrim(dto.getIdentification()));
+        standard.setName(safeTrim(dto.getName()));
+        standard.setReferenceUri(safeTrim(dto.getReferenceUri()));
+        standard.setDescription(safeTrim(dto.getDescription()));
         return standard;
     }
     public static StandardDto convert(final Standard standard) {
@@ -178,10 +178,10 @@ public class MscvDtoConverter {
             return null;
         }
         StandardDto dto = new StandardDto();
-        dto.setIdentification(standard.getIdentification());
-        dto.setName(standard.getName());
-        dto.setReferenceUri(standard.getReferenceUri());
-        dto.setDescription(standard.getDescription());
+        dto.setIdentification(safeTrim(standard.getIdentification()));
+        dto.setName(safeTrim(standard.getName()));
+        dto.setReferenceUri(safeTrim(standard.getReferenceUri()));
+        dto.setDescription(safeTrim(standard.getDescription()));
         return dto;
     }
 
@@ -189,6 +189,11 @@ public class MscvDtoConverter {
         if (target == null) {
             return null;
         }
-        return new TargetDto(target.getName(), target.getOs());
+        return new TargetDto(safeTrim(target.getName()), target.getOs());
+    }
+
+    private static String safeTrim(final String string) {
+        if(Objects.nonNull(string)) return string.trim();
+        else return null;
     }
 }

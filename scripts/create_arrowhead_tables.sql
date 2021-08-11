@@ -688,8 +688,6 @@ CREATE TABLE IF NOT EXISTS `ca_trusted_key` (
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
 
 -- MSVC
-use arrowhead;
-
 CREATE TABLE IF NOT EXISTS `mscv_target`
 (
     `id`   bigint(20) PRIMARY KEY AUTO_INCREMENT,

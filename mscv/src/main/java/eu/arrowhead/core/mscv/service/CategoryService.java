@@ -1,9 +1,11 @@
 package eu.arrowhead.core.mscv.service;
 
 import java.util.Optional;
+import javax.persistence.PersistenceException;
 
 import eu.arrowhead.common.database.entity.mscv.MipCategory;
 import eu.arrowhead.common.database.repository.mscv.MipCategoryRepository;
+import eu.arrowhead.common.exception.ArrowheadException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,52 +33,76 @@ public class CategoryService {
 
     @Transactional
     public MipCategory create(final MipCategory category) {
-        logger.debug("create({}) started", category);
-        Assert.notNull(category, CATEGORY_NULL_ERROR_MESSAGE);
-        return repository.saveAndFlush(category);
+        try {
+            logger.debug("create({}) started", category);
+            Assert.notNull(category, CATEGORY_NULL_ERROR_MESSAGE);
+            return repository.saveAndFlush(category);
+        } catch (final PersistenceException pe) {
+            throw new ArrowheadException("Unable to create Category", pe);
+        }
     }
 
     @Transactional(readOnly = true)
     public Optional<MipCategory> find(final String name) {
-        logger.debug("find({}) started", name);
-        Assert.notNull(name, NAME_NULL_ERROR_MESSAGE);
+        try {
+            logger.debug("find({}) started", name);
+            Assert.notNull(name, NAME_NULL_ERROR_MESSAGE);
 
-        return repository.findByName(name);
+            return repository.findByName(name);
+        } catch (final PersistenceException pe) {
+            throw new ArrowheadException("Unable to find Category", pe);
+        }
     }
 
     @Transactional(readOnly = true)
     public boolean exists(final MipCategory category) {
-        logger.debug("exists({}) started", category);
-        Assert.notNull(category, CATEGORY_NULL_ERROR_MESSAGE);
+        try {
+            logger.debug("exists({}) started", category);
+            Assert.notNull(category, CATEGORY_NULL_ERROR_MESSAGE);
 
-        return repository.exists(Example.of(category, ExampleMatcher.matchingAll()));
+            return repository.exists(Example.of(category, ExampleMatcher.matchingAll()));
+        } catch (final PersistenceException pe) {
+            throw new ArrowheadException("Unable to verify existence of Category", pe);
+        }
     }
 
     @Transactional(readOnly = true)
     public Page<MipCategory> pageAll(final Pageable pageable) {
-        logger.debug("pageAll({}) started", pageable);
-        Assert.notNull(pageable, PAGE_NULL_ERROR_MESSAGE);
-        return repository.findAll(pageable);
+        try {
+            logger.debug("pageAll({}) started", pageable);
+            Assert.notNull(pageable, PAGE_NULL_ERROR_MESSAGE);
+            return repository.findAll(pageable);
+        } catch (final PersistenceException pe) {
+            throw new ArrowheadException("Unable to query Category", pe);
+        }
     }
 
     @Transactional
     public MipCategory replace(final MipCategory oldCategory, final MipCategory newCategory) {
-        logger.debug("replace({},{}) started", oldCategory, newCategory);
-        Assert.notNull(oldCategory, "old " + CATEGORY_NULL_ERROR_MESSAGE);
-        Assert.notNull(newCategory, "new " + CATEGORY_NULL_ERROR_MESSAGE);
+        try {
+            logger.debug("replace({},{}) started", oldCategory, newCategory);
+            Assert.notNull(oldCategory, "old " + CATEGORY_NULL_ERROR_MESSAGE);
+            Assert.notNull(newCategory, "new " + CATEGORY_NULL_ERROR_MESSAGE);
 
-        oldCategory.setName(newCategory.getName());
-        oldCategory.setAbbreviation(newCategory.getAbbreviation());
-        return repository.saveAndFlush(oldCategory);
+            oldCategory.setName(newCategory.getName());
+            oldCategory.setAbbreviation(newCategory.getAbbreviation());
+            return repository.saveAndFlush(oldCategory);
+        } catch (final PersistenceException pe) {
+            throw new ArrowheadException("Unable to replace Category", pe);
+        }
     }
 
     @Transactional
     public void delete(final String name) {
-        logger.debug("delete({}) started", name);
-        Assert.notNull(name, NAME_NULL_ERROR_MESSAGE);
+        try {
+            logger.debug("delete({}) started", name);
+            Assert.notNull(name, NAME_NULL_ERROR_MESSAGE);
 
-        final Optional<MipCategory> optionalMipCategory = find(name);
-        optionalMipCategory.ifPresent(repository::delete);
-        repository.flush();
+            final Optional<MipCategory> optionalMipCategory = find(name);
+            optionalMipCategory.ifPresent(repository::delete);
+            repository.flush();
+        } catch (final PersistenceException pe) {
+            throw new ArrowheadException("Unable to delete Category", pe);
+        }
     }
 }

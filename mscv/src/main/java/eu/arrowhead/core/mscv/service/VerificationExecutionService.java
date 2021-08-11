@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import javax.persistence.PersistenceException;
 
 import eu.arrowhead.common.database.entity.mscv.Script;
 import eu.arrowhead.common.database.entity.mscv.SshTarget;
@@ -20,6 +21,7 @@ import eu.arrowhead.common.dto.shared.mscv.DetailSuccessIndicator;
 import eu.arrowhead.common.dto.shared.mscv.Layer;
 import eu.arrowhead.common.dto.shared.mscv.SuccessIndicator;
 import eu.arrowhead.common.dto.shared.mscv.TargetDto;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.mscv.MscvDtoConverter;
 import eu.arrowhead.core.mscv.handlers.ExecutionHandler;
 import eu.arrowhead.core.mscv.handlers.ExecutionHandlerFactory;
@@ -90,40 +92,42 @@ public class VerificationExecutionService {
     }
 
     private VerificationResult execute(final VerificationEntryList entryList, final Target target) {
+        try {
+            final VerificationResult execution = executionRepo.saveAndFlush(
+                    new VerificationResult(target, entryList, ZonedDateTime.now(), SuccessIndicator.IN_PROGRESS));
 
-        final VerificationResult execution = executionRepo.saveAndFlush(
-                new VerificationResult(target, entryList, ZonedDateTime.now(), SuccessIndicator.IN_PROGRESS));
+            final Set<VerificationEntry> entries = entryList.getEntries();
+            final List<VerificationResultDetail> detailList = new ArrayList<>();
 
-        final Set<VerificationEntry> entries = entryList.getEntries();
-        final List<VerificationResultDetail> detailList = new ArrayList<>();
+            final Optional<ExecutionHandler<SshTarget>> optionalHandler = handlerFactory.find(target);
+            if (optionalHandler.isPresent()) {
+                final var executionHandler = optionalHandler.get();
 
-        final Optional<ExecutionHandler<SshTarget>> optionalHandler = handlerFactory.find(target);
-        if (optionalHandler.isPresent()) {
-            final var executionHandler = optionalHandler.get();
+                // prepare result for each verification entry. result will be adapted during execution run.
+                for (VerificationEntry entry : entries) {
+                    final Optional<Script> optionalScript = scriptService.findScriptFor(entry.getMip(), entryList.getLayer(), target.getOs());
 
-            // prepare result for each verification entry. result will be adapted during execution run.
-            for (VerificationEntry entry : entries) {
-                final Optional<Script> optionalScript = scriptService.findScriptFor(entry.getMip(), entryList.getLayer(), target.getOs());
-
-                if (optionalScript.isPresent()) {
-                    final var detail = new VerificationResultDetail(execution, entry, optionalScript.get(),
-                                                                    DetailSuccessIndicator.NOT_APPLICABLE, null);
-                    detailList.add(detail);
-                } else {
-                    detailList.add(createNotApplicableDetail(execution, entry));
+                    if (optionalScript.isPresent()) {
+                        final var detail = new VerificationResultDetail(execution, entry, optionalScript.get(),
+                                                                        DetailSuccessIndicator.IN_PROGRESS, null);
+                        detailList.add(detail);
+                    } else {
+                        final var detail = new VerificationResultDetail(execution, entry, null,
+                                                                        DetailSuccessIndicator.NOT_APPLICABLE, null);
+                        detailList.add(detail);
+                    }
                 }
+                executionHandler.deferVerification(executionRepo, executionDetailRepo, execution, detailList);
+            } else {
+                execution.setResult(SuccessIndicator.SKIPPED);
+                logger.warn("No ExecutionHandler available for target: {}", target);
             }
-            executionHandler.deferVerification(executionRepo, executionDetailRepo, execution, detailList);
-        } else {
-            execution.setResult(SuccessIndicator.SKIPPED);
-            logger.warn("No ExecutionHandler available for target: {}", target);
+
+            executionDetailRepo.saveAll(detailList);
+            return executionRepo.saveAndFlush(execution);
+        } catch (final PersistenceException pe) {
+            logger.error("execute threw error: {}", pe.getMessage(), pe);
+            throw new ArrowheadException("Unable to perform verification execution", pe);
         }
-
-        executionDetailRepo.saveAll(detailList);
-        return executionRepo.saveAndFlush(execution);
-    }
-
-    private VerificationResultDetail createNotApplicableDetail(final VerificationResult result, final VerificationEntry entry) {
-        return new VerificationResultDetail(result, entry, null, DetailSuccessIndicator.NOT_APPLICABLE, null);
     }
 }

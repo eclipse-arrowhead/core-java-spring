@@ -20,6 +20,7 @@ import eu.arrowhead.common.dto.shared.SubscriptionRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.mscv.Layer;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.mscv.MscvDefaults;
 import eu.arrowhead.core.mscv.quartz.VerificationJobFactory;
 import io.swagger.annotations.Api;
@@ -51,8 +52,8 @@ import static eu.arrowhead.common.CommonConstants.OP_MSCV_EVENT_CALLBACK_URI;
         allowedHeaders = {HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT}
 )
 @RestController
-@RequestMapping(CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI)
-public class EventHandlerListener {
+@RequestMapping(CommonConstants.MSCV_URI)
+public class EventHandlerCallbackController {
 
     private static final int MAX_ATTEMPTS = 5;
     private final Logger logger = LogManager.getLogger();
@@ -64,11 +65,11 @@ public class EventHandlerListener {
     private final EventDriver eventDriver;
 
     @Autowired
-    public EventHandlerListener(final MscvDefaults mscvDefaults,
-                                final VerificationService verificationService,
-                                final TargetService targetService,
-                                final VerificationJobFactory jobFactory,
-                                final EventDriver eventDriver) {
+    public EventHandlerCallbackController(final MscvDefaults mscvDefaults,
+                                          final VerificationService verificationService,
+                                          final TargetService targetService,
+                                          final VerificationJobFactory jobFactory,
+                                          final EventDriver eventDriver) {
         super();
         this.mscvDefaults = mscvDefaults;
         this.verificationService = verificationService;
@@ -87,36 +88,40 @@ public class EventHandlerListener {
     })
     @PostMapping(OP_MSCV_EVENT_CALLBACK_URI)
     @ResponseBody
-    public void publish(@RequestBody final EventDTO event) throws IOException, SchedulerException {
-        logger.debug("publish started ...");
+    public void receiveEvent(@RequestBody final EventDTO event) {
+        try {
+            logger.debug("receiveEvent started ...");
 
-        switch (event.getEventType()) {
-            case CoreEventHandlerConstants.REGISTER_DEVICE_EVENT:
-                final var registerDevice = eventDriver.convert(event.getPayload(), DeviceRegistryRequestDTO.class);
-                createJob(convert(registerDevice.getDevice()), Layer.DEVICE);
-                break;
-            case CoreEventHandlerConstants.UNREGISTER_DEVICE_EVENT:
-                final var unregisterDevice = eventDriver.convert(event.getPayload(), DeviceRegistryRequestDTO.class);
-                deleteJob(convert(unregisterDevice.getDevice()), Layer.DEVICE);
-                break;
-            case CoreEventHandlerConstants.REGISTER_SYSTEM_EVENT:
-                final var registerSystem = eventDriver.convert(event.getPayload(), SystemRegistryRequestDTO.class);
-                createJob(convert(registerSystem.getSystem()), Layer.SYSTEM);
-                break;
-            case CoreEventHandlerConstants.UNREGISTER_SYSTEM_EVENT:
-                final var unregisterSystem = eventDriver.convert(event.getPayload(), SystemRegistryRequestDTO.class);
-                deleteJob(convert(unregisterSystem.getSystem()), Layer.SYSTEM);
-                break;
-            case CoreEventHandlerConstants.REGISTER_SERVICE_EVENT:
-                final var registerService = eventDriver.convert(event.getPayload(), ServiceRegistryRequestDTO.class);
-                createJob(convert(registerService.getProviderSystem()), Layer.SERVICE);
-                break;
-            case CoreEventHandlerConstants.UNREGISTER_SERVICE_EVENT:
-                final var unregisterService = eventDriver.convert(event.getPayload(), ServiceRegistryRequestDTO.class);
-                deleteJob(convert(unregisterService.getProviderSystem()), Layer.SERVICE);
-                break;
-            default:
-                logger.warn("Unknown event type {} with payload: {}", event.getEventType(), event.getPayload());
+            switch (event.getEventType()) {
+                case CoreEventHandlerConstants.REGISTER_DEVICE_EVENT:
+                    final var registerDevice = eventDriver.convert(event.getPayload(), DeviceRegistryRequestDTO.class);
+                    createJob(convert(registerDevice.getDevice()), Layer.DEVICE);
+                    break;
+                case CoreEventHandlerConstants.UNREGISTER_DEVICE_EVENT:
+                    final var unregisterDevice = eventDriver.convert(event.getPayload(), DeviceRegistryRequestDTO.class);
+                    deleteJob(convert(unregisterDevice.getDevice()), Layer.DEVICE);
+                    break;
+                case CoreEventHandlerConstants.REGISTER_SYSTEM_EVENT:
+                    final var registerSystem = eventDriver.convert(event.getPayload(), SystemRegistryRequestDTO.class);
+                    createJob(convert(registerSystem.getSystem()), Layer.SYSTEM);
+                    break;
+                case CoreEventHandlerConstants.UNREGISTER_SYSTEM_EVENT:
+                    final var unregisterSystem = eventDriver.convert(event.getPayload(), SystemRegistryRequestDTO.class);
+                    deleteJob(convert(unregisterSystem.getSystem()), Layer.SYSTEM);
+                    break;
+                case CoreEventHandlerConstants.REGISTER_SERVICE_EVENT:
+                    final var registerService = eventDriver.convert(event.getPayload(), ServiceRegistryRequestDTO.class);
+                    createJob(convert(registerService.getProviderSystem()), Layer.SERVICE);
+                    break;
+                case CoreEventHandlerConstants.UNREGISTER_SERVICE_EVENT:
+                    final var unregisterService = eventDriver.convert(event.getPayload(), ServiceRegistryRequestDTO.class);
+                    deleteJob(convert(unregisterService.getProviderSystem()), Layer.SERVICE);
+                    break;
+                default:
+                    logger.warn("Unknown event type {} with payload: {}", event.getEventType(), event.getPayload());
+            }
+        } catch (final SchedulerException | IOException ex) {
+            throw new ArrowheadException("Unable to process event", ex);
         }
     }
 
@@ -182,7 +187,7 @@ public class EventHandlerListener {
         dto.setSubscriberSystem(eventDriver.getRequesterSystem());
         dto.setEventType(eventType);
         dto.setMatchMetaData(false);
-        dto.setNotifyUri(CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI + OP_MSCV_EVENT_CALLBACK_URI);
+        dto.setNotifyUri(CommonConstants.MSCV_URI + OP_MSCV_EVENT_CALLBACK_URI);
         return dto;
     }
 
