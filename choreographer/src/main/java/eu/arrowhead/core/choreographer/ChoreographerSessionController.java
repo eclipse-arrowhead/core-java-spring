@@ -57,12 +57,15 @@ public class ChoreographerSessionController {
 	private ChoreographerSessionDBService sessionDBService;
 	
 	private static final String REQUEST_PARAM_PLAN_ID = "plan_id";
+	private static final String REQUEST_PARAM_SESSION_ID = "session_id";
 	private static final String REQUEST_PARAM_STATUS = "status";
 	
 	private static final String GET_SESSION_HTTP_200_MESSAGE = "Sessions returned.";
     private static final String GET_SESSION_HTTP_400_MESSAGE = "Could not retrieve Sessions.";
-	
-	private final Logger logger = LogManager.getLogger(ChoreographerSessionController.class);
+    private static final String GET_SESSION_STEPS_HTTP_200_MESSAGE = "Session steps returned.";
+    private static final String GET_SESSION_STEPS_HTTP_400_MESSAGE = "Could not retrieve sessions steps.";
+    
+	private final Logger logger = LogManager.getLogger(ChoreographerSessionController.class);	
 
 	//=================================================================================================
 	// methods
@@ -91,9 +94,26 @@ public class ChoreographerSessionController {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerSessionStepListResponseDTO getSessionSteps(final Integer page, final Integer size, final String direction, final String sortby, final Long sessionId, final String status) {
-		//TODO
-		return null;
+	@ApiOperation(value = "Return requested session step entries by the given parameters", response = ChoreographerSessionStepListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_OK, message = GET_SESSION_STEPS_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SESSION_STEPS_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+    })
+	@GetMapping(path = CommonConstants.CHOREOGRAPHER_SESSION_STEPS_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public ChoreographerSessionStepListResponseDTO getSessionSteps(@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
+																	             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
+																	             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
+																	             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField,
+																	             @RequestParam(name = REQUEST_PARAM_SESSION_ID, required = false) final Long sessionId,
+																	             @RequestParam(name = REQUEST_PARAM_STATUS, required = false) final String status) {
+		logger.debug("getSessionSteps started...");
+		
+		final ValidatedPageParams validatedPageParams = CoreUtilities.validatePageParameters(page, size, direction,
+				 																			 CommonConstants.CHOREOGRAPHER_URI + CommonConstants.CHOREOGRAPHER_SESSION_STEPS_MGMT_URI);
+		return sessionDBService.getSessionStepsResponse(validatedPageParams.getValidatedPage(), validatedPageParams.getValidatedSize(), validatedPageParams.getValidatedDirection(),
+														sortField, sessionId, status);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

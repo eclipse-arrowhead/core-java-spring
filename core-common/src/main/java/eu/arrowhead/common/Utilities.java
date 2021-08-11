@@ -71,6 +71,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
+import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStatus;
 import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
@@ -397,6 +398,19 @@ public class Utilities {
 				
 		try {
 			return ChoreographerSessionStatus.valueOf(str.toUpperCase().trim());			
+		} catch (final IllegalArgumentException ex) {
+			throw new InvalidParameterException("Unkown status string: " + str);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static ChoreographerSessionStepStatus convertStringToChoreographerSessionStepStatus(final String str) {
+		if (isEmpty(str)) {
+			throw new InvalidParameterException("Status string is null or empty");
+		}
+				
+		try {
+			return ChoreographerSessionStepStatus.valueOf(str.toUpperCase().trim());			
 		} catch (final IllegalArgumentException ex) {
 			throw new InvalidParameterException("Unkown status string: " + str);
 		}

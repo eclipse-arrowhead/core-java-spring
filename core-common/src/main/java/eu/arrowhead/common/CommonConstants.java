@@ -253,6 +253,7 @@ public class CommonConstants {
 
 	public static final String CHOREOGRAPHER_URI = "/choreographer";
 	public static final String CHOREOGRAPHER_SESSION_MGMT_URI = "/session" + CoreCommonConstants.MGMT_URI;
+	public static final String CHOREOGRAPHER_SESSION_STEPS_MGMT_URI = "/session/steps" + CoreCommonConstants.MGMT_URI;
 	public static final String CHOREOGRAPHER_EXECUTOR_MGMT_URI = "/executor" + CoreCommonConstants.MGMT_URI;
 	public static final String CHOREOGRAPHER_EXECUTOR_MGMT_BY_ID_URI = CHOREOGRAPHER_EXECUTOR_MGMT_URI + "{/id}";
 	public static final String CHOREOGRAPHER_EXECUTOR_CLIENT_SERVICE_INFO_URI = "/service-info";

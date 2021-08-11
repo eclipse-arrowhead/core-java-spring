@@ -51,6 +51,7 @@ import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
 import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStatus;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.shared.ChoreographerSessionListResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerSessionStepListResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
@@ -319,6 +320,49 @@ public class ChoreographerSessionDBService {
 	    	logger.debug(ex.getMessage(), ex);
 	    	throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 	    }
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Page<ChoreographerSessionStep> getSessionSteps(final int page, final int size, final Direction direction, final String sortField, final Long sessionId,
+														  final ChoreographerSessionStepStatus status) {
+		logger.debug("getSessionSteps started...");
+		
+		final int validatedPage = page < 0 ? 0 : page;
+		final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size;
+		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
+		final String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		final PageRequest pageRequest = PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField);
+		
+		final ChoreographerSessionStep schema = new ChoreographerSessionStep();
+		schema.setStatus(status);
+		if (sessionId != null) {
+			final Optional<ChoreographerSession> optional = sessionRepository.findById(sessionId);
+			if (optional.isEmpty()) {
+				throw new InvalidParameterException("Session with id " + sessionId + " not exists"); 
+			}
+			schema.setSession(optional.get());
+		}
+		
+		final ExampleMatcher matcher = ExampleMatcher.matching()
+													 .withIgnorePaths(CommonConstants.COMMON_FIELD_NAME_ID)
+													 .withStringMatcher(StringMatcher.EXACT)
+													 .withIgnoreNullValues();
+		try {
+			return sessionStepRepository.findAll(Example.of(schema, matcher), pageRequest);
+		} catch (final Exception ex) {
+	    	logger.debug(ex.getMessage(), ex);
+	    	throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+	    }
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ChoreographerSessionStepListResponseDTO getSessionStepsResponse(final int page, final int size, final Direction direction, final String sortField, final Long sessionId,
+			  															   final String status) {
+		logger.debug("getSessionStepsResponse started...");
+		
+		final ChoreographerSessionStepStatus _status = Utilities.isEmpty(status) ? null : Utilities.convertStringToChoreographerSessionStepStatus(status);
+		final Page<ChoreographerSessionStep> data = getSessionSteps(page, size, direction, sortField, sessionId, _status);
+		return DTOConverter.convertSessionStepListToSessionStepListResponseDTO(data, data.getTotalElements());
 	}
   
   	//=================================================================================================

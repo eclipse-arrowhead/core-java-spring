@@ -20,7 +20,7 @@ public class ChoreographerSessionStepResponseDTO implements Serializable {
 	private ChoreographerExecutorResponseDTO executor;
 	private ChoreographerSessionStepStatus status;
 	private String message;
-    private String createdAt;
+    private String startedAt;
     private String updatedAt;
     
     //=================================================================================================
@@ -32,14 +32,14 @@ public class ChoreographerSessionStepResponseDTO implements Serializable {
     //-------------------------------------------------------------------------------------------------
 	public ChoreographerSessionStepResponseDTO(final long id, final ChoreographerSessionResponseDTO session, final ChoreographerStepResponseDTO step,
 											   final ChoreographerExecutorResponseDTO executor, final ChoreographerSessionStepStatus status, final String message,
-											   final String createdAt, final String updatedAt) {
+											   final String startedAt, final String updatedAt) {
 		this.id = id;
 		this.session = session;
 		this.step = step;
 		this.executor = executor;
 		this.status = status;
 		this.message = message;
-		this.createdAt = createdAt;
+		this.startedAt = startedAt;
 		this.updatedAt = updatedAt;
 	}
 
@@ -50,7 +50,7 @@ public class ChoreographerSessionStepResponseDTO implements Serializable {
 	public ChoreographerExecutorResponseDTO getExecutor() { return executor; }
 	public ChoreographerSessionStepStatus getStatus() { return status; }
 	public String getMessage() { return message; }
-	public String getCreatedAt() { return createdAt; }
+	public String getStartedAt() { return startedAt; }
 	public String getUpdatedAt() { return updatedAt; }
 
 	//-------------------------------------------------------------------------------------------------
@@ -60,7 +60,7 @@ public class ChoreographerSessionStepResponseDTO implements Serializable {
 	public void setExecutor(final ChoreographerExecutorResponseDTO executor) { this.executor = executor; }
 	public void setStatus(final ChoreographerSessionStepStatus status) { this.status = status; }
 	public void setMessage(final String message) { this.message = message; }
-	public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
+	public void setStartedAt(final String startedAt) { this.startedAt = startedAt; }
 	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
 	
 	//-------------------------------------------------------------------------------------------------
