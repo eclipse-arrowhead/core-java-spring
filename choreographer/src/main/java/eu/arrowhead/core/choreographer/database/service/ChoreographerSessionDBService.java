@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import eu.arrowhead.common.CoreCommonConstants;
@@ -108,7 +109,7 @@ public class ChoreographerSessionDBService {
       try {
     	  final Optional<ChoreographerPlan> optional = planRepository.findById(planId);
     	  if (optional.isEmpty()) {
-    		  throw new InvalidParameterException("Can't initiate session because the plan with the given ID doesn't exist.");
+    		  worklogAndThrow("Initiating plan has been failed", new InvalidParameterException("Plan with id " + planId + " not exists"));
     	  }
     	  
     	  final String _notifyUri = UriComponentsBuilder.fromUriString(notifyUri).build().toUriString();
@@ -127,28 +128,33 @@ public class ChoreographerSessionDBService {
       }
   }
 
-//  //-------------------------------------------------------------------------------------------------
-//  @Transactional(rollbackFor = ArrowheadException.class)
-//  public ChoreographerSession finalizeSession(final long sessionId) {
-//      logger.debug("finalizeSession started...");
-//
-//      try {
-//          Optional<ChoreographerSession> sessionOptional = choreographerSessionRepository.findById(sessionId);
-//          if (sessionOptional.isPresent()) {
-//              ChoreographerSession session = sessionOptional.get();
-//              session.setStatus(ChoreographerStatusType.DONE);
-//              createWorklog("Session with ID of " + sessionId + " finished successfully.", "");
-//              return choreographerSessionRepository.saveAndFlush(session);
-//          } else {
-//              throw new InvalidParameterException("Session with given ID doesn't exist.");
-//          }
-//      } catch (InvalidParameterException ex) {
-//          throw ex;
-//      } catch (final Exception ex) {
-//          logger.debug(ex.getMessage(), ex);
-//          throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-//      }
-//  }
+  //-------------------------------------------------------------------------------------------------
+  @Transactional(rollbackFor = ArrowheadException.class)
+  public ChoreographerSession changeSessionStatus(final long sessionId, final ChoreographerSessionStatus status) {
+      logger.debug("changeSessionStatus started...");
+      Assert.notNull(status, "ChoreographerSessionStatus is null");
+
+      try {
+    	  final Optional<ChoreographerSession> optional = sessionRepository.findById(sessionId);
+    	  if (optional.isEmpty()) {
+    		  worklogAndThrow("Session status change has been failed", new InvalidParameterException("Session with id " + sessionId + " not exists"));
+    	  }
+    	  
+    	  ChoreographerSession session = optional.get();
+    	  session.setStatus(status);
+    	  session = sessionRepository.saveAndFlush(session);
+    	  
+    	  worklog(session.getPlan().getName(), "Session (" + session.getId() + ") status has been changed to " + status, null);
+    	  return session;
+    	  
+      } catch (final InvalidParameterException ex) {
+          throw ex;
+          
+      } catch (final Exception ex) {
+          logger.debug(ex.getMessage(), ex);
+          throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+      }
+  }
 
 //  //-------------------------------------------------------------------------------------------------
 //  @Transactional(rollbackFor = ArrowheadException.class)
@@ -256,6 +262,12 @@ public class ChoreographerSessionDBService {
   	//=================================================================================================
 	// assistant methods
 	
+  	//-------------------------------------------------------------------------------------------------  
+  	private void worklogAndThrow(final String message, final Exception ex) throws Exception {
+		worklog(null, null, null, message, ex.getClass().getSimpleName() + ": " + ex.getMessage());
+		throw ex;
+	}
+  
   	//-------------------------------------------------------------------------------------------------  
   	private void worklog(final String planName, final String message, final String exception) {
 		worklog(planName, null, null, message, exception);
