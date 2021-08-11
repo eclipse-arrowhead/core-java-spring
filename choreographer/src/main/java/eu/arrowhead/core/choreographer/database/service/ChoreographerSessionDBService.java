@@ -1,20 +1,40 @@
 package eu.arrowhead.core.choreographer.database.service;
 
 
+import java.util.Optional;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.database.entity.ChoreographerPlan;
 import eu.arrowhead.common.database.entity.ChoreographerSession;
+import eu.arrowhead.common.database.entity.ChoreographerWorklog;
+import eu.arrowhead.common.database.repository.ChoreographerPlanRepository;
+import eu.arrowhead.common.database.repository.ChoreographerSessionRepository;
+import eu.arrowhead.common.database.repository.ChoreographerWorklogRepository;
 import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 
 @Service
 public class ChoreographerSessionDBService {
 
 	//=================================================================================================
 	// members
+	
+	@Autowired
+	private ChoreographerPlanRepository planRepository;
+	
+	@Autowired
+	private ChoreographerSessionRepository sessionRepository;
+	
+	@Autowired
+	private ChoreographerWorklogRepository worklogRepository;
 	
     private final Logger logger = LogManager.getLogger(ChoreographerSessionDBService.class);
 
@@ -85,28 +105,26 @@ public class ChoreographerSessionDBService {
   public ChoreographerSession initiateSession(final long planId, final String notifyUri) {
       logger.debug("initiateSession started...");
       
-      //TODO: delete this
-      final ChoreographerSession dummySession = new ChoreographerSession(null, ChoreographerSessionStatus.INITIATED, notifyUri);
-      dummySession.setId(1);
-      return dummySession;
-
-      //TODO: implement this
-//      try {
-//          final Optional<ChoreographerPlan> planOptional = choreographerPlanRepository.findById(planId);
-//          if (planOptional.isPresent()) {
-//              ChoreographerSession sessionEntry = choreographerSessionRepository.saveAndFlush(new ChoreographerSession(planOptional.get(), ChoreographerStatusType.INITIATED));
-//              String worklogMessage = "Plan with ID of " + planId + " started running with session ID of " + sessionEntry.getId() + ".";
-//              createWorklog(worklogMessage, "");
-//              return sessionEntry;
-//          } else {
-//              throw new InvalidParameterException("Can't initiate session because the plan with the given ID doesn't exist.");
-//          }
-//      } catch (final InvalidParameterException ex) {
-//          throw ex;
-//      } catch (final Exception ex) {
-//          logger.debug(ex.getMessage(), ex);
-//          throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-//      }
+      try {
+    	  final Optional<ChoreographerPlan> optional = planRepository.findById(planId);
+    	  if (optional.isEmpty()) {
+    		  throw new InvalidParameterException("Can't initiate session because the plan with the given ID doesn't exist.");
+    	  }
+    	  
+    	  final String _notifyUri = UriComponentsBuilder.fromUriString(notifyUri).build().toUriString();
+    	  final ChoreographerPlan plan = optional.get();
+    	  final ChoreographerSession session = sessionRepository.saveAndFlush(new ChoreographerSession(plan, ChoreographerSessionStatus.INITIATED, _notifyUri));
+    	  
+    	  worklog(plan.getName(), "New session has been initiated with id " + session.getId(), null);
+    	  return session;
+    
+      } catch (final InvalidParameterException ex) {
+    	  throw ex;
+    	  
+      } catch (final Exception ex) {
+    	  logger.debug(ex.getMessage(), ex);
+	      throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+      }
   }
 
 //  //-------------------------------------------------------------------------------------------------
@@ -234,4 +252,23 @@ public class ChoreographerSessionDBService {
 //          throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 //      }
 //  }
+  
+  	//=================================================================================================
+	// assistant methods
+	
+  	//-------------------------------------------------------------------------------------------------  
+  	private void worklog(final String planName, final String message, final String exception) {
+		worklog(planName, null, null, message, exception);
+	}
+  
+  	//-------------------------------------------------------------------------------------------------  
+  	private void worklog(final String planName, final String actionName, final String message, final String exception) {
+		worklog(planName, actionName, null, message, exception);
+	}
+
+  	//-------------------------------------------------------------------------------------------------  
+  	private void worklog(final String planName, final String actionName, final String stepName, final String message, final String exception) {
+  		logger.debug("worklog started...");
+  		worklogRepository.saveAndFlush(new ChoreographerWorklog(planName, actionName, stepName, message, exception));
+  	}
 }
