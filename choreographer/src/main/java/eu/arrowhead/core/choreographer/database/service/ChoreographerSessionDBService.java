@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2021 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.choreographer.database.service;
 
 
@@ -76,7 +90,7 @@ public class ChoreographerSessionDBService {
       	  final ChoreographerPlan plan = optional.get();
       	  final ChoreographerSession session = sessionRepository.saveAndFlush(new ChoreographerSession(plan, ChoreographerSessionStatus.INITIATED, _notifyUri));
       	  
-      	  worklog(plan.getName(), "New session has been initiated with id " + session.getId(), null);
+      	  worklog(plan.getName(), session.getId(), "New session has been initiated", null);
       	  return session;
       
         } catch (final InvalidParameterException ex) {
@@ -104,7 +118,7 @@ public class ChoreographerSessionDBService {
       	  session.setStatus(status);
       	  session = sessionRepository.saveAndFlush(session);
       	  
-      	  worklog(session.getPlan().getName(), "Session (id: " + session.getId() + ") status has been changed to " + status, null);
+      	  worklog(session.getPlan().getName(), session.getId(), "Session status has been changed to " + status, null);
       	  return session;
       	  
         } catch (final InvalidParameterException ex) {
@@ -132,18 +146,18 @@ public class ChoreographerSessionDBService {
 			
 			final Optional<ChoreographerStep> stepOpt = stepRepository.findById(stepId);
 			if (stepOpt.isEmpty()) {
-				worklogAndThrow(session.getPlan().getName(), "Session step registration has been failed", new InvalidParameterException("Step with id " + stepId + " not exists"));
+				worklogAndThrow(session.getPlan().getName(), session.getId(), "Session step registration has been failed", new InvalidParameterException("Step with id " + stepId + " not exists"));
 			}
 			final ChoreographerStep step = stepOpt.get();
 			
 			final Optional<ChoreographerExecutor> executorOpt = executorRepository.findById(executorId);
 			if (executorOpt.isEmpty()) {
-				worklogAndThrow(session.getPlan().getName(), "Session step registration has been failed", new InvalidParameterException("Executor with id " + executorId + " not exists"));
+				worklogAndThrow(session.getPlan().getName(), session.getId(), "Session step registration has been failed", new InvalidParameterException("Executor with id " + executorId + " not exists"));
 			}
 			final ChoreographerExecutor executor = executorOpt.get();
 			
 			final ChoreographerSessionStep sessionStep = sessionStepRepository.saveAndFlush(new ChoreographerSessionStep(session, step, executor, status, message.trim()))	;
-			worklog(session.getPlan().getName(), step.getAction().getName(), step.getName(), "New session step has been registrated with id " + sessionStep.getId(), null);
+			worklog(session.getPlan().getName(), step.getAction().getName(), step.getName(), session.getId(), "New session step has been registrated with id " + sessionStep.getId(), null);
 			return sessionStep;
         	
         } catch (final InvalidParameterException ex) {
@@ -172,7 +186,7 @@ public class ChoreographerSessionDBService {
 			sessionStep.setMessage(message.trim());
 			
 			sessionStep = sessionStepRepository.saveAndFlush(sessionStep);
-			worklog(sessionStep.getSession().getPlan().getName(), sessionStep.getStep().getAction().getName(), sessionStep.getStep().getName(),
+			worklog(sessionStep.getSession().getPlan().getName(), sessionStep.getStep().getAction().getName(), sessionStep.getStep().getName(), sessionStep.getStep().getId(),
 					"Session step (id: " + sessionStepId + ") status has been changed to " + status, null);
 			return sessionStep;
         	
@@ -259,29 +273,30 @@ public class ChoreographerSessionDBService {
 	// assistant methods
   
   	//-------------------------------------------------------------------------------------------------  
-  	private void worklog(final String planName, final String message, final String exception) {
-		worklog(planName, null, null, message, exception);
+  	private void worklog(final String planName, final Long sessionId, final String message, final String exception) {
+		worklog(planName, null, null, sessionId, message, exception);
 	}
   
   	//-------------------------------------------------------------------------------------------------  
-  	private void worklog(final String planName, final String actionName, final String stepName, final String message, final String exception) {
+  	private void worklog(final String planName, final String actionName, final String stepName, final Long sessionId, final String message, final String exception) {
   		logger.debug("worklog started...");
-  		worklogRepository.saveAndFlush(new ChoreographerWorklog(planName, actionName, stepName, message, exception));
+  		worklogRepository.saveAndFlush(new ChoreographerWorklog(planName, actionName, stepName, sessionId, message, exception));
   	}
   	
   	//-------------------------------------------------------------------------------------------------  
   	private void worklogAndThrow(final String message, final Exception ex) throws Exception {
-		worklogAndThrow(null, null, null, message, ex);
+		worklogAndThrow(null, null, null, null, message, ex);
 	}
   	
   	//-------------------------------------------------------------------------------------------------  
-  	private void worklogAndThrow(final String planName, final String message, final Exception ex) throws Exception {
-		worklogAndThrow(planName, null, null, message, ex);
+  	private void worklogAndThrow(final String planName, final Long sessionId, final String message, final Exception ex) throws Exception {
+		worklogAndThrow(planName, null, null, sessionId, message, ex);
 	}
   	
   	//-------------------------------------------------------------------------------------------------  
-  	private void worklogAndThrow(final String planName, final String actionName, final String stepName, final String message, final Exception ex) {
+  	private void worklogAndThrow(final String planName, final String actionName, final String stepName, final Long sessionId, final String message, final Exception ex) throws Exception {
   		logger.debug("worklogAndThrow started...");
-  		worklogRepository.saveAndFlush(new ChoreographerWorklog(planName, actionName, stepName, message, ex.getClass().getSimpleName() + ": " + ex.getMessage()));
+  		worklogRepository.saveAndFlush(new ChoreographerWorklog(planName, actionName, stepName, sessionId, message, ex.getClass().getSimpleName() + ": " + ex.getMessage()));
+  		throw ex;
   	}
 }
