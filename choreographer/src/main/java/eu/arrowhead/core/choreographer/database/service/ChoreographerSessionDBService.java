@@ -21,11 +21,18 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.ExampleMatcher.StringMatcher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
@@ -42,6 +49,8 @@ import eu.arrowhead.common.database.repository.ChoreographerStepRepository;
 import eu.arrowhead.common.database.repository.ChoreographerWorklogRepository;
 import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
 import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStatus;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.shared.ChoreographerSessionListResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
@@ -128,6 +137,49 @@ public class ChoreographerSessionDBService {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    public Page<ChoreographerSession> getSessions(final int page, final int size, final Direction direction, final String sortField, final Long planId, final ChoreographerSessionStatus status) {
+    	logger.debug("getSessions started...");
+    	
+    	final int validatedPage = page < 0 ? 0 : page;
+		final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size;
+		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
+		final String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		final PageRequest pageRequest = PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField);
+		
+		final ChoreographerSession schema = new ChoreographerSession();
+		schema.setStatus(status);
+		if (planId != null) {
+			final Optional<ChoreographerPlan> optional = planRepository.findById(planId);
+			if (optional.isEmpty()) {
+				throw new InvalidParameterException("Plan with id " + planId + " not exists"); 
+			}
+			schema.setPlan(optional.get());
+		}
+		
+		final ExampleMatcher matcher = ExampleMatcher.matching()
+													 .withIgnorePaths(CommonConstants.COMMON_FIELD_NAME_ID)
+													 .withStringMatcher(StringMatcher.EXACT)
+													 .withIgnoreNullValues();
+		
+		try {
+			return sessionRepository.findAll(Example.of(schema, matcher), pageRequest);			
+		} catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    public ChoreographerSessionListResponseDTO getSessionsResponse(final int page, final int size, final Direction direction, final String sortField, final Long planId, final String status) {
+    	logger.debug("getSessionsResponse started...");
+    	
+    	final ChoreographerSessionStatus _status = Utilities.isEmpty(status) ? null : Utilities.convertStringToChoreographerSessionStatus(status);
+    	
+    	final Page<ChoreographerSession> data = getSessions(page, size, direction, sortField, planId, _status);
+    	return DTOConverter.convertSessionListToSessionListResponseDTO(data, data.getTotalElements());
     }
     
     //-------------------------------------------------------------------------------------------------
