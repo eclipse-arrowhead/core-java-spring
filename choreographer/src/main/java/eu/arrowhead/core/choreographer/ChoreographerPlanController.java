@@ -15,8 +15,7 @@
 package eu.arrowhead.core.choreographer;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
@@ -43,15 +42,20 @@ import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Defaults;
-import eu.arrowhead.common.database.entity.ChoreographerPlan;
-import eu.arrowhead.common.dto.internal.ChoreographerRunPlanRequestDTO;
+import eu.arrowhead.common.database.entity.ChoreographerSession;
+import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerCheckPlanResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanListResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
-import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerRunPlanRequestDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerRunPlanResponseDTO;
+import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerPlanDBService;
-import eu.arrowhead.core.choreographer.service.ChoreographerDriver;
+import eu.arrowhead.core.choreographer.database.service.ChoreographerSessionDBService;
+import eu.arrowhead.core.choreographer.service.ChoreographerService;
+import eu.arrowhead.core.choreographer.validation.ChoreographerPlanExecutionChecker;
 import eu.arrowhead.core.choreographer.validation.ChoreographerPlanValidator;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -75,11 +79,14 @@ public class ChoreographerPlanController {
     private static final String PLAN_MGMT_URI = CoreCommonConstants.MGMT_URI + "/plan";
     private static final String PLAN_MGMT_BY_ID_URI = PLAN_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
     private static final String SESSION_MGMT_URI = CoreCommonConstants.MGMT_URI + "/session";
-
     private static final String START_SESSION_MGMT_URI = SESSION_MGMT_URI + "/start";
+    private static final String CHECK_PLAN_MGMT_BY_ID_URI = CoreCommonConstants.MGMT_URI + "/check-plan/{" + PATH_VARIABLE_ID + "}";
 
     private static final String GET_PlAN_MGMT_HTTP_200_MESSAGE = "Plan returned.";
     private static final String GET_PLAN_MGMT_HTTP_400_MESSAGE = "Could not retrieve plan.";
+
+    private static final String GET_CHECK_PLAN_MGMT_HTTP_200_MESSAGE = "Check report returned.";
+    private static final String GET_CHECK_PLAN_MGMT_HTTP_400_MESSAGE = "Could not retrieve check report.";
 
     private static final String POST_PLAN_MGMT_HTTP_201_MESSAGE = "Plan created with given service definition and first Action.";
     private static final String POST_PLAN_MGMT_HTTP_400_MESSAGE = "Could not create Plan.";
@@ -90,22 +97,22 @@ public class ChoreographerPlanController {
     private static final String START_SESSION_HTTP_200_MESSAGE = "Initiated plan execution with given id(s).";
     private static final String START_PLAN_HTTP_400_MESSAGE = "Could not start plan with given id(s).";
 
-    private static final String CHOREOGRAPHER_INSUFFICIENT_PROVIDERS_FOR_PLAN_ERROR_MESSAGE = "Can't start plan because not every service definition has a corresponding provider.";
-    private static final String CHOREOGRAPHER_INSUFFICIENT_EXECUTORS_FOR_PLAN_ERROR_MESSAGE = "Can't start plan because not every service definition has a corresponding executor.";
-
     private final Logger logger = LogManager.getLogger(ChoreographerPlanController.class);
 
     @Autowired
-    private ChoreographerPlanDBService choreographerPlanDBService;
+    private ChoreographerPlanDBService planDBService;
+    
+    @Autowired
+    private ChoreographerSessionDBService sessionDBService;
     
     @Autowired
     private ChoreographerPlanValidator planValidator;
 
     @Autowired
-    private ChoreographerDriver choreographerDriver;
+    private ChoreographerPlanExecutionChecker planChecker;
 
     @Autowired
-    private JmsTemplate jmsTemplate;
+    private JmsTemplate jms;
     
     //=================================================================================================
 	// methods
@@ -139,7 +146,7 @@ public class ChoreographerPlanController {
         logger.debug("New Plan GET request received with page: {} and item_per_page: {}.", page, size);
 
         final ValidatedPageParams validatedPageParams = CoreUtilities.validatePageParameters(page, size, direction, sortField);
-        final ChoreographerPlanListResponseDTO planEntriesResponse = choreographerPlanDBService.getPlanEntriesResponse(validatedPageParams.getValidatedPage(),
+        final ChoreographerPlanListResponseDTO planEntriesResponse = planDBService.getPlanEntriesResponse(validatedPageParams.getValidatedPage(),
         																										   validatedPageParams.getValidatedSize(),
         																										   validatedPageParams.getValidatedDirection(),
         																										   sortField);
@@ -164,8 +171,8 @@ public class ChoreographerPlanController {
             throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + PLAN_MGMT_BY_ID_URI);
         }
 
-        final ChoreographerPlanResponseDTO planEntryResponse = choreographerPlanDBService.getPlanByIdResponse(id);
-        logger.debug("Plan entry with id: " + " successfully retrieved!");
+        final ChoreographerPlanResponseDTO planEntryResponse = planDBService.getPlanByIdResponse(id);
+        logger.debug("Plan entry with id: " + id + " successfully retrieved!");
 
         return planEntryResponse;
     }
@@ -186,7 +193,7 @@ public class ChoreographerPlanController {
             throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + PLAN_MGMT_BY_ID_URI);
         }
 
-        choreographerPlanDBService.removePlanEntryById(id);
+        planDBService.removePlanEntryById(id);
         logger.debug("Plan with id: " + id + " successfully deleted!");
     }
 
@@ -204,107 +211,71 @@ public class ChoreographerPlanController {
     @ResponseBody public ChoreographerPlanResponseDTO registerPlan(@RequestBody final ChoreographerPlanRequestDTO request) {
         final ChoreographerPlanRequestDTO validatedPlan = planValidator.validatePlan(request, CommonConstants.CHOREOGRAPHER_URI + PLAN_MGMT_URI);
 
-        return choreographerPlanDBService.createPlanResponse(validatedPlan);
+        return planDBService.createPlanResponse(validatedPlan);
     }
 
-//    //-------------------------------------------------------------------------------------------------
-//    @ApiOperation(value = "Initiate the start of one or more plans.",
-//            tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
-//    @ApiResponses(value = {
-//            @ApiResponse(code = HttpStatus.SC_CREATED, message = START_SESSION_HTTP_200_MESSAGE),
-//            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = START_PLAN_HTTP_400_MESSAGE),
-//            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-//            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-//    })
-//    @PostMapping(path = START_SESSION_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-//    @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-//    @ResponseBody public void startPlan(@RequestBody final List<ChoreographerRunPlanRequestDTO> requests) {
-//        for (final ChoreographerRunPlanRequestDTO request : requests) {
-//            logger.debug("startPlan started...");
-//
-//            checkIfPlanHasEveryRequiredProvider(request, CommonConstants.CHOREOGRAPHER_URI + START_SESSION_MGMT_URI);
-//            checkIfPlanHasEveryRequiredExecutor(request, CommonConstants.CHOREOGRAPHER_URI + START_SESSION_MGMT_URI);
-//
-//            ChoreographerSession session = choreographerDBService.initiateSession(request.getId());
-//
-//            logger.debug("Sending a message to start-session.");
-//            jmsTemplate.convertAndSend("start-session", new ChoreographerStartSessionDTO(session.getId(), request.getId()));
-//        }
-//    }
-
     //-------------------------------------------------------------------------------------------------
-    // TODO: instead of this, we need a WS to verify if a plan is executable (find suitable executor to all steps)
-//    @ApiOperation(value = "Return the ids of the suitable Executors entries by step id.", response = ServiceRegistryResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
-//    @ApiResponses(value = {
-//            @ApiResponse(code = HttpStatus.SC_OK, message = GET_EXECUTOR_HTTP_200_MESSAGE),
-//            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_EXECUTOR_HTTP_400_MESSAGE),
-//            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-//            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-//    })
-//    @GetMapping(path = EXECUTOR_MGMT_TEST_BY_STEP_ID)
-//    @ResponseBody public ChoreographerSuitableExecutorResponseDTO getSuitableExecutorIds(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
-//        logger.debug("getSuitableExecutorIds started...");
-//
-//        if (id < 1) {
-//            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + EXECUTOR_MGMT_BY_ID_URI);
-//        }
-//
-//        return choreographerDBService.getSuitableExecutorIdsByStepId(id);
-//    }
+    @ApiOperation(value = "Initiate the start of one or more plans.",
+            tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_OK, message = START_SESSION_HTTP_200_MESSAGE, responseContainer = "List", response = ChoreographerRunPlanResponseDTO.class),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = START_PLAN_HTTP_400_MESSAGE, response= ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response= ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response= ErrorMessageDTO.class)
+    })
+    @PostMapping(path = START_SESSION_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody public List<ChoreographerRunPlanResponseDTO> startPlans(@RequestBody final List<ChoreographerRunPlanRequestDTO> requests) {
+    	logger.debug("startPlans started...");
+    	
+    	if (requests == null || requests.isEmpty()) {
+    		throw new BadPayloadException("No plan specified to start.", HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + START_SESSION_MGMT_URI);
+    	}
+    	
+    	final List<ChoreographerRunPlanResponseDTO> results = new ArrayList<>(requests.size());
+        for (final ChoreographerRunPlanRequestDTO request : requests) {
+
+           final ChoreographerRunPlanResponseDTO errorResponse = planChecker.checkPlanForExecution(request);
+           if (errorResponse != null) {
+        	   results.add(errorResponse);
+           } else {
+        	   final ChoreographerSession session = sessionDBService.initiateSession(request.getPlanId(), createNotifyUri(request));
+        	   results.add(new ChoreographerRunPlanResponseDTO(request.getPlanId(), session.getId()));
+        	   
+        	   logger.debug("Sending a message to start-session.");
+        	   jms.convertAndSend(ChoreographerService.START_SESSION_DESTINATION, new ChoreographerStartSessionDTO(session.getId(), request.getPlanId()));
+           }
+        }
+           
+        return results;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return the check report of the specified plan.", response = ChoreographerCheckPlanResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+    @ApiResponses (value = {
+            @ApiResponse(code = HttpStatus.SC_OK, message = GET_CHECK_PLAN_MGMT_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CHECK_PLAN_MGMT_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+    })
+    @GetMapping(path = CHECK_PLAN_MGMT_BY_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody public ChoreographerCheckPlanResponseDTO checkPlan(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+        logger.debug("New check plan GET request received with id: " + id + ".");
+
+        if (id < 1) {
+            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + CHECK_PLAN_MGMT_BY_ID_URI);
+        }
+
+        final ChoreographerRunPlanResponseDTO result = planChecker.checkPlanForExecution(id);
+        logger.debug("Check report for plan with id: " + id + " successfully retrieved!");
+
+        return new ChoreographerCheckPlanResponseDTO(id, result.getErrorMessages());
+    }
 
     //=================================================================================================
 	// assistant methods
-
+    
     //-------------------------------------------------------------------------------------------------
-    private void checkIfPlanHasEveryRequiredProvider(final ChoreographerRunPlanRequestDTO request, final String origin) {
-        ChoreographerPlan plan = choreographerPlanDBService.getPlanById(request.getId());
-
-        Set<String> serviceDefinitionsFromPlan = getServiceDefinitionsFromPlan(plan);
-        Set<String> serviceDefinitionsByProviders = new HashSet<>();
-
-        for (ServiceRegistryResponseDTO dto : choreographerDriver.queryServiceRegistryByServiceDefinitionList(new ArrayList<>(serviceDefinitionsFromPlan)).getData()) {
-            serviceDefinitionsByProviders.add(dto.getServiceDefinition().getServiceDefinition());
-        }
-
-        if (!serviceDefinitionsByProviders.equals(serviceDefinitionsFromPlan)) {
-            throw new BadPayloadException(CHOREOGRAPHER_INSUFFICIENT_PROVIDERS_FOR_PLAN_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-        }
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    //TODO: fix this
-    private void checkIfPlanHasEveryRequiredExecutor(final ChoreographerRunPlanRequestDTO request, final String origin) {
-//        ChoreographerPlan plan = choreographerDBService.getPlanById(request.getId());
-//
-//        final Set<ChoreographerAction> actions = plan.getActions();
-//        for (ChoreographerAction action : actions) {
-//            final Set<ChoreographerStep> steps = action.getStepEntries();
-//            for (ChoreographerStep step : steps) {
-//
-//                if (choreographerDBService.getSuitableExecutorIdsByStepId(step.getId()).getSuitableExecutorIds().isEmpty()) {
-//                    throw new BadPayloadException(CHOREOGRAPHER_INSUFFICIENT_EXECUTORS_FOR_PLAN_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-//                }
-//            }
-//        }
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    // TODO: fix this
-    private Set<String> getServiceDefinitionsFromPlan(ChoreographerPlan plan) {
-//        Set<String> serviceDefinitions = new HashSet<>();
-//
-//        final Set<ChoreographerAction> actions = plan.getActions();
-//        for (ChoreographerAction action : actions) {
-//            final Set<ChoreographerStep> steps = action.getStepEntries();
-//            for (ChoreographerStep step : steps) {
-//                final Set<ChoreographerStepDetail> stepDetails = step.getStepDetails();
-//                for (ChoreographerStepDetail stepDetail : stepDetails) {
-//                    serviceDefinitions.add(stepDetail.getServiceDefinition().toLowerCase());
-//                }
-//            }
-//        }
-//
-//        return serviceDefinitions;
-    	return null;
-    }
+	private String createNotifyUri(final ChoreographerRunPlanRequestDTO request) {
+		return request.getNotifyProtocol() + "://" + request.getNotifyAddress() + ":" + request.getNotifyPort() + "/" + request.getNotifyPath();
+	}
 }

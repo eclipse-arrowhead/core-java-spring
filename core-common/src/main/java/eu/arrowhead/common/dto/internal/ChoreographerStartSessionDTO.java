@@ -30,28 +30,19 @@ public class ChoreographerStartSessionDTO implements Serializable {
     // methods
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerStartSessionDTO() {
-    }
+    public ChoreographerStartSessionDTO() {}
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerStartSessionDTO(long sessionId, long planId) {
+    public ChoreographerStartSessionDTO(final long sessionId, final long planId) {
         this.sessionId = sessionId;
         this.planId = planId;
     }
 
     //-------------------------------------------------------------------------------------------------
-    public long getSessionId() {
-        return sessionId;
-    }
-    public long getPlanId() {
-        return planId;
-    }
+    public long getSessionId() { return sessionId; }
+    public long getPlanId() { return planId; }
 
     //-------------------------------------------------------------------------------------------------
-    public void setSessionId(long sessionId) {
-        this.sessionId = sessionId;
-    }
-    public void setPlanId(long planId) {
-        this.planId = planId;
-    }
+    public void setSessionId(final long sessionId) { this.sessionId = sessionId; }
+    public void setPlanId(final long planId) { this.planId = planId; }
 }

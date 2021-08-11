@@ -33,5 +33,15 @@
     "name": "domain.port",
     "type": "java.lang.Integer",
     "description": "A description for 'domain.port'"
+  },
+  {
+    "name": "allow_self_addressing",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'allow_self_addressing'"
+  },
+  {
+    "name": "allow_non_routable_addressing",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'allow_non_routable_addressing'"
   }
 ]}

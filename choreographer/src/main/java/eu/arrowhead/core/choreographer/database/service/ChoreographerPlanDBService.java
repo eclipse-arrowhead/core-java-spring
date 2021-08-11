@@ -28,6 +28,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
@@ -153,6 +154,21 @@ public class ChoreographerPlanDBService {
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
     }
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<ChoreographerStep> collectStepsPlan(final ChoreographerPlan plan) {
+		logger.debug("collectStepsPlan started...");
+		Assert.notNull(plan, "Plan is null.");
+		
+		try {
+			choreographerPlanRepository.refresh(plan);
+			final List<ChoreographerAction> actions = choreographerActionRepository.findByPlan(plan);
+			return choreographerStepRepository.findByActionIn(actions);
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
