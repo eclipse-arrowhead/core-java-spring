@@ -1,6 +1,7 @@
 package eu.arrowhead.core.choreographer.database.service;
 
 
+import java.util.List;
 import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
@@ -185,62 +186,74 @@ public class ChoreographerSessionDBService {
     }
 
 
-//  //-------------------------------------------------------------------------------------------------
-//  public ChoreographerSessionStep getRunningStepBySessionIdAndStepId(final long sessionId, final long stepId) {
-//      logger.debug("getRunningStepBySessionIdAndStepId started...");
-//
-//      try {
-//          final Optional<ChoreographerSessionStep> runningStepOpt = choreographerRunningStepRepository.findByStepIdAndSessionId(stepId, sessionId);
-//          if (runningStepOpt.isPresent()) {
-//              return runningStepOpt.get();
-//          } else {
-//              throw new InvalidParameterException("Running step with session id of '" + sessionId + "' and step id of '" + stepId + "' doesn't exist!");
-//          }
-//      } catch (final InvalidParameterException ex) {
-//          throw ex;
-//      } catch (final Exception ex) {
-//          logger.debug(ex.getMessage(), ex);
-//          throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-//      }
-//  }
-
-//  //-------------------------------------------------------------------------------------------------
-//  public ChoreographerSessionStep getRunningStepById(final long id) {
-//      logger.debug("getRunningStepById started...");
-//
-//      try {
-//          final Optional<ChoreographerSessionStep> runningStepOpt = choreographerRunningStepRepository.findById(id);
-//          if (runningStepOpt.isPresent()) {
-//              return runningStepOpt.get();
-//          } else {
-//              throw new InvalidParameterException("Running step with id of '" + id + "' doesn't exist!");
-//          }
-//      } catch (final InvalidParameterException ex) {
-//          throw ex;
-//      } catch (final Exception ex) {
-//          logger.debug(ex.getMessage(), ex);
-//          throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-//      }
-//  }
+    //-------------------------------------------------------------------------------------------------
+	public ChoreographerSessionStep getSessionStepBySessionIdAndStepId(final long sessionId, final long stepId) {
+		logger.debug("getSessionStepBySessionIdAndStepId started...");
 	
-//  //-------------------------------------------------------------------------------------------------
-//  public List<ChoreographerSessionStep> getAllRunningStepsBySessionId(final long sessionId) {
-//      logger.debug("getAllRunningStepsBySessionId started...");
-//
-//      try {
-//          final List<ChoreographerSessionStep> runningSteps = choreographerRunningStepRepository.findAllBySessionId(sessionId);
-//          if (!runningSteps.isEmpty()) {
-//              return  runningSteps;
-//          } else {
-//              throw new InvalidParameterException("There are no running steps associated with id of '" + sessionId + "'.");
-//          }
-//      } catch (final InvalidParameterException ex) {
-//          throw ex;
-//      } catch (final Exception ex) {
-//          logger.debug(ex.getMessage(), ex);
-//          throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-//      }
-//  }
+		try {
+			final Optional<ChoreographerSession> sessionOpt = sessionRepository.findById(sessionId);
+			if (sessionOpt.isEmpty()) {
+				throw new InvalidParameterException("Session with id " + sessionId + " not exists");
+			}			
+			final Optional<ChoreographerStep> stepOpt = stepRepository.findById(stepId);
+			if (stepOpt.isEmpty()) {
+				throw new InvalidParameterException("Step with id " + stepId + " not exists");
+			}
+			
+			final Optional<ChoreographerSessionStep> sessionStepOpt = sessionStepRepository.findBySessionAndStep(sessionOpt.get(), stepOpt.get());
+			if (sessionStepOpt.isEmpty()) {
+				throw new InvalidParameterException("Session step with session id " + sessionId + " and step id " + stepId + " not exists");
+			}
+			return sessionStepOpt.get();
+			
+	    } catch (final InvalidParameterException ex) {
+	    	throw ex;
+	      
+	    } catch (final Exception ex) {
+	    	logger.debug(ex.getMessage(), ex);
+	    	throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+	    }
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public ChoreographerSessionStep getSessionStepById(final long id) {
+		logger.debug("getSessionStepById started...");
+	
+		try {
+			final Optional<ChoreographerSessionStep> optional = sessionStepRepository.findById(id);
+			if (optional.isEmpty()) {
+				throw new InvalidParameterException("Session step with id " + id + " not exists");
+			}
+			return optional.get();
+			
+	    } catch (final InvalidParameterException ex) {
+	    	throw ex;
+	      
+	    } catch (final Exception ex) {
+	    	logger.debug(ex.getMessage(), ex);
+	    	throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+	    }
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<ChoreographerSessionStep> getAllSessionStepBySessionId(final long sessionId) {
+		logger.debug("getSessionStepById started...");
+	
+		try {
+			final Optional<ChoreographerSession> optional = sessionRepository.findById(sessionId);
+			if (optional.isEmpty()) {
+				throw new InvalidParameterException("Session with id " + sessionId + " not exists");
+			}
+			return sessionStepRepository.findAllBySession(optional.get());
+			
+	    } catch (final InvalidParameterException ex) {
+	    	throw ex;
+	      
+	    } catch (final Exception ex) {
+	    	logger.debug(ex.getMessage(), ex);
+	    	throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+	    }
+	}
   
   	//=================================================================================================
 	// assistant methods
@@ -250,11 +263,6 @@ public class ChoreographerSessionDBService {
 		worklog(planName, null, null, message, exception);
 	}
   
-  	//-------------------------------------------------------------------------------------------------  
-  	private void worklog(final String planName, final String actionName, final String message, final String exception) {
-		worklog(planName, actionName, null, message, exception);
-	}
-
   	//-------------------------------------------------------------------------------------------------  
   	private void worklog(final String planName, final String actionName, final String stepName, final String message, final String exception) {
   		logger.debug("worklog started...");
