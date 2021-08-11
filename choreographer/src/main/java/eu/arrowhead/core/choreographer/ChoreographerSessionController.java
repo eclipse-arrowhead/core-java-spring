@@ -59,11 +59,16 @@ public class ChoreographerSessionController {
 	private static final String REQUEST_PARAM_PLAN_ID = "plan_id";
 	private static final String REQUEST_PARAM_SESSION_ID = "session_id";
 	private static final String REQUEST_PARAM_STATUS = "status";
+	private static final String REQUEST_PARAM_PLAN_NAME = "plan_name";
+	private static final String REQUEST_PARAM_ACTION_NAME = "action_name";
+	private static final String REQUEST_PARAM_STEP_NAME = "step_name";
 	
 	private static final String GET_SESSION_HTTP_200_MESSAGE = "Sessions returned.";
     private static final String GET_SESSION_HTTP_400_MESSAGE = "Could not retrieve Sessions.";
     private static final String GET_SESSION_STEPS_HTTP_200_MESSAGE = "Session steps returned.";
     private static final String GET_SESSION_STEPS_HTTP_400_MESSAGE = "Could not retrieve sessions steps.";
+    private static final String GET_WORKLOG_HTTP_200_MESSAGE = "Worklogs returned.";
+    private static final String GET_WORKLOG_HTTP_400_MESSAGE = "Could not retrieve worklogs.";
     
 	private final Logger logger = LogManager.getLogger(ChoreographerSessionController.class);	
 
@@ -117,9 +122,27 @@ public class ChoreographerSessionController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerWorklogListResponseDTO getWorklog(final Integer page, final Integer size, final String direction, final String sortby, final Long sessionId,
-														  final String planName, final String actionName, final String stepName) {
-		//TODO
-		return null;
+	@ApiOperation(value = "Return requested worklog entries by the given parameters", response = ChoreographerWorklogListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_OK, message = GET_WORKLOG_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_WORKLOG_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+    })
+	@GetMapping(path = CommonConstants.CHOREOGRAPHER_WORKLOG_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public ChoreographerWorklogListResponseDTO getWorklog(@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
+															            @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
+															            @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
+															            @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField,
+															            @RequestParam(name = REQUEST_PARAM_SESSION_ID, required = false) final Long sessionId,
+															            @RequestParam(name = REQUEST_PARAM_PLAN_NAME, required = false) final String planName,
+															            @RequestParam(name = REQUEST_PARAM_ACTION_NAME, required = false) final String actionName,
+															            @RequestParam(name = REQUEST_PARAM_STEP_NAME, required = false) final String stepName) {
+		logger.debug("getWorklog started...");
+		
+		final ValidatedPageParams validatedPageParams = CoreUtilities.validatePageParameters(page, size, direction,
+				 																			 CommonConstants.CHOREOGRAPHER_URI + CommonConstants.CHOREOGRAPHER_WORKLOG_MGMT_URI);
+		return sessionDBService.getWorklogsResponse(validatedPageParams.getValidatedPage(), validatedPageParams.getValidatedSize(), validatedPageParams.getValidatedDirection(), sortField,
+													sessionId, planName, actionName, stepName);
 	}
 }

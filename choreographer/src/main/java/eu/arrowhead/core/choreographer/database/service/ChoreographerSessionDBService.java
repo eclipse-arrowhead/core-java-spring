@@ -52,6 +52,7 @@ import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStatus;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.shared.ChoreographerSessionListResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerSessionStepListResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerWorklogListResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
@@ -365,6 +366,46 @@ public class ChoreographerSessionDBService {
 		return DTOConverter.convertSessionStepListToSessionStepListResponseDTO(data, data.getTotalElements());
 	}
   
+	//-------------------------------------------------------------------------------------------------
+	public Page<ChoreographerWorklog> getWorklogs(final int page, final int size, final Direction direction, final String sortField,
+												  final Long sessionId, final String planName, final String actionName, final String stepName) {
+		
+		logger.debug("getWorklogs started...");
+		
+		final int validatedPage = page < 0 ? 0 : page;
+		final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size;
+		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
+		final String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		final PageRequest pageRequest = PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField);
+		
+		final ChoreographerWorklog schema = new ChoreographerWorklog();
+		schema.setSessionId(sessionId);
+		schema.setPlanName(Utilities.isEmpty(planName) ? null : planName.trim());
+		schema.setActionName(Utilities.isEmpty(actionName) ? null : actionName.trim());
+		schema.setStepName(Utilities.isEmpty(stepName) ? null : stepName.trim());
+		
+		final ExampleMatcher matcher = ExampleMatcher.matching()
+													 .withIgnorePaths(CommonConstants.COMMON_FIELD_NAME_ID)
+													 .withStringMatcher(StringMatcher.EXACT)
+													 .withIgnoreNullValues();
+		
+		try {
+			return worklogRepository.findAll(Example.of(schema, matcher), pageRequest);
+		} catch (final Exception ex) {
+	    	logger.debug(ex.getMessage(), ex);
+	    	throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+	    }
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ChoreographerWorklogListResponseDTO getWorklogsResponse(final int page, final int size, final Direction direction, final String sortField,
+			  													   final Long sessionId, final String planName, final String actionName, final String stepName) {
+		logger.debug("getWorklogsResponse started...");
+		
+		final Page<ChoreographerWorklog> data = getWorklogs(page, size, direction, sortField, sessionId, planName, actionName, stepName);
+		return DTOConverter.convertWorklogListToWorklogListResponseDTO(data, data.getTotalElements());
+	}
+	
   	//=================================================================================================
 	// assistant methods
   

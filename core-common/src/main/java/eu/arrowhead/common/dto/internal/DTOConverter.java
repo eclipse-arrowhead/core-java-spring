@@ -44,6 +44,7 @@ import eu.arrowhead.common.database.entity.ChoreographerSession;
 import eu.arrowhead.common.database.entity.ChoreographerSessionStep;
 import eu.arrowhead.common.database.entity.ChoreographerStep;
 import eu.arrowhead.common.database.entity.ChoreographerStepNextStepConnection;
+import eu.arrowhead.common.database.entity.ChoreographerWorklog;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
@@ -78,6 +79,8 @@ import eu.arrowhead.common.dto.shared.ChoreographerSessionResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerSessionStepListResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerSessionStepResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerStepResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerWorklogListResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerWorklogResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.DeviceQueryResultDTO;
 import eu.arrowhead.common.dto.shared.DeviceRegistryResponseDTO;
@@ -1091,6 +1094,31 @@ public class DTOConverter {
 			data.add(convertSessionStepToSessionStepResponseDTO(entry));
 		}
     	return new ChoreographerSessionStepListResponseDTO(data, count);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    public static ChoreographerWorklogResponseDTO convertWorklogToWorklogResponseDTO(final ChoreographerWorklog entry) {
+    	Assert.notNull(entry, "worklog entry is null.");
+    	
+    	return new ChoreographerWorklogResponseDTO(entry.getId(),
+    											   Utilities.convertZonedDateTimeToUTCString(entry.getEntryDate()),
+    											   entry.getPlanName(),
+    											   entry.getActionName(),
+    											   entry.getStepName(),
+    											   entry.getSessionId(),
+    											   entry.getMessage(),
+    											   entry.getMessage());
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    public static ChoreographerWorklogListResponseDTO convertWorklogListToWorklogListResponseDTO(final Iterable<ChoreographerWorklog> entries, final long count) {
+    	Assert.notNull(entries, "worklog entry list is null.");
+    	
+    	final List<ChoreographerWorklogResponseDTO> data = new ArrayList<>();
+    	for (final ChoreographerWorklog entry : entries) {
+			data.add(convertWorklogToWorklogResponseDTO(entry));
+		}
+    	return new ChoreographerWorklogListResponseDTO(data, count);
     }
     
     //-------------------------------------------------------------------------------------------------
