@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
@@ -17,8 +18,12 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerNotificationDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultListDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
@@ -31,8 +36,8 @@ public class ChoreographerDriver {
 
     //=================================================================================================
     // members
-
-    private static final Logger logger = LogManager.getLogger(ChoreographerDriver.class);
+	
+    private static final String ORCHESTRATION_PROCESS_URI_KEY = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 
     @Autowired
     private HttpService httpService;
@@ -42,6 +47,8 @@ public class ChoreographerDriver {
 
     @Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
     private Map<String,Object> arrowheadContext;
+
+    private final Logger logger = LogManager.getLogger(ChoreographerDriver.class);
 
     //=================================================================================================
     // methods
@@ -75,8 +82,7 @@ public class ChoreographerDriver {
     }
     
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerExecutorServiceInfoResponseDTO queryExecutorServiceInfo(final String address, final int port, final String baseUri, final String serviceDefinition, final int minVersion,
-    																		  final int maxVersion) {
+    public ChoreographerExecutorServiceInfoResponseDTO queryExecutorServiceInfo(final String address, final int port, final String baseUri, final String serviceDefinition, final int minVersion, final int maxVersion) {
     	logger.debug("getExecutorServiceInfo started...");
     	Assert.isTrue(!Utilities.isEmpty(address), "address is empty");
     	Assert.isTrue(!Utilities.isEmpty(baseUri), "baseUri is empty");
@@ -86,6 +92,28 @@ public class ChoreographerDriver {
     	final UriComponents uri = getQueryExecutorServiceInfoUri(address, port, baseUri);
     	return httpService.sendRequest(uri, HttpMethod.POST, ChoreographerExecutorServiceInfoResponseDTO.class, dto).getBody();
     }
+    
+    //-------------------------------------------------------------------------------------------------
+    public OrchestrationResponseDTO queryOrchestrator(final OrchestrationFormRequestDTO form) {
+        logger.debug("queryOrchestrator started...");
+
+        Assert.notNull(form, "form is null.");
+
+        final UriComponents orchestrationProcessUri = getOrchestrationProcessUri();
+        final ResponseEntity<OrchestrationResponseDTO> response = httpService.sendRequest(orchestrationProcessUri, HttpMethod.POST, OrchestrationResponseDTO.class, form);
+
+        return response.getBody();
+    }
+    
+	//-------------------------------------------------------------------------------------------------
+	public void sendSessionNotification(final String notifyUri, final ChoreographerNotificationDTO payload) {
+		logger.debug("sendSessionNotification started...");
+		Assert.isTrue(!Utilities.isEmpty(notifyUri), "Notification URI is not specified.");
+		Assert.notNull(payload, "Payload is not specified");
+		
+		final UriComponents uri = UriComponentsBuilder.fromUriString(notifyUri).build();
+		httpService.sendRequest(uri, HttpMethod.POST, Void.class, payload);
+	}
     
     //=================================================================================================
     // assistant methods
@@ -144,5 +172,19 @@ public class ChoreographerDriver {
     	
     	final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
     	return Utilities.createURI(scheme, address, port, baseUri + CommonConstants.CHOREOGRAPHER_EXECUTOR_CLIENT_SERVICE_INFO_URI);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    private UriComponents getOrchestrationProcessUri() {
+        logger.debug("getOrchestrationProcessUri started...");
+
+        if (arrowheadContext.containsKey(ORCHESTRATION_PROCESS_URI_KEY)) {
+            try {
+                return (UriComponents) arrowheadContext.get(ORCHESTRATION_PROCESS_URI_KEY);
+            } catch (final ClassCastException ex) {
+                throw new ArrowheadException("Choreographer can't find orchestration process URI.");
+            }
+        }
+        throw new ArrowheadException("Choreographer can't find orchestration process URI.");
     }
 }

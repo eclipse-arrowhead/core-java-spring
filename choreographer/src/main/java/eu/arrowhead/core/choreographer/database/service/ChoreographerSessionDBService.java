@@ -253,7 +253,6 @@ public class ChoreographerSessionDBService {
         }
     }
 
-
     //-------------------------------------------------------------------------------------------------
 	public ChoreographerSessionStep getSessionStepBySessionIdAndStepId(final long sessionId, final long stepId) {
 		logger.debug("getSessionStepBySessionIdAndStepId started...");
@@ -406,34 +405,44 @@ public class ChoreographerSessionDBService {
 		return DTOConverter.convertWorklogListToWorklogListResponseDTO(data, data.getTotalElements());
 	}
 	
-  	//=================================================================================================
-	// assistant methods
-  
-  	//-------------------------------------------------------------------------------------------------  
-  	private void worklog(final String planName, final Long sessionId, final String message, final String exception) {
+   	//-------------------------------------------------------------------------------------------------  
+  	public void worklog(final String planName, final Long sessionId, final String message, final String exception) {
 		worklog(planName, null, null, sessionId, message, exception);
 	}
   
   	//-------------------------------------------------------------------------------------------------  
-  	private void worklog(final String planName, final String actionName, final String stepName, final Long sessionId, final String message, final String exception) {
+    @Transactional(rollbackFor = ArrowheadException.class)
+  	public void worklog(final String planName, final String actionName, final String stepName, final Long sessionId, final String message, final String exception) {
   		logger.debug("worklog started...");
-  		worklogRepository.saveAndFlush(new ChoreographerWorklog(planName, actionName, stepName, sessionId, message, exception));
+	  	try {
+	  		worklogRepository.saveAndFlush(new ChoreographerWorklog(planName, actionName, stepName, sessionId, message, exception));
+		} catch (final Exception ex) {
+	    	logger.debug(ex.getMessage(), ex);
+	    	throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+	    }
   	}
   	
   	//-------------------------------------------------------------------------------------------------  
-  	private void worklogAndThrow(final String message, final Exception ex) throws Exception {
+    public void worklogAndThrow(final String message, final Exception ex) throws Exception {
 		worklogAndThrow(null, null, null, null, message, ex);
 	}
   	
   	//-------------------------------------------------------------------------------------------------  
-  	private void worklogAndThrow(final String planName, final Long sessionId, final String message, final Exception ex) throws Exception {
+    public void worklogAndThrow(final String planName, final Long sessionId, final String message, final Exception ex) throws Exception {
 		worklogAndThrow(planName, null, null, sessionId, message, ex);
 	}
   	
   	//-------------------------------------------------------------------------------------------------  
-  	private void worklogAndThrow(final String planName, final String actionName, final String stepName, final Long sessionId, final String message, final Exception ex) throws Exception {
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public void worklogAndThrow(final String planName, final String actionName, final String stepName, final Long sessionId, final String message, final Exception originalException) throws Exception {
   		logger.debug("worklogAndThrow started...");
-  		worklogRepository.saveAndFlush(new ChoreographerWorklog(planName, actionName, stepName, sessionId, message, ex.getClass().getSimpleName() + ": " + ex.getMessage()));
-  		throw ex;
+  	  	try {
+  	  		worklogRepository.saveAndFlush(new ChoreographerWorklog(planName, actionName, stepName, sessionId, message, originalException.getClass().getSimpleName() + ": " + originalException.getMessage()));
+  		} catch (final Exception ex) {
+  	    	logger.debug(ex.getMessage(), ex); 
+  	    	// still throw the original exception
+  	    }
+  	  	
+  		throw originalException;
   	}
 }

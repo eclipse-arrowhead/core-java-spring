@@ -102,7 +102,7 @@ public class ChoreographerPlanExecutionChecker {
 			return new ChoreographerRunPlanResponseDTO(planId, List.of(ex.getMessage()));
 		}
 		
-		final List<ChoreographerStep> steps = planDBService.collectStepsPlan(plan);
+		final List<ChoreographerStep> steps = planDBService.collectStepsFromPlan(plan);
 			
 		// executor check
 		checkAvailableExecutorsInDB(steps, errors);
