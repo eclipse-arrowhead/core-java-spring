@@ -29,8 +29,6 @@ import org.springframework.jms.support.converter.MappingJackson2MessageConverter
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessageType;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-import org.springframework.util.ErrorHandler;
 import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.ApplicationInitListener;
@@ -38,6 +36,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.core.choreographer.exception.ChoreographerSessionErrorHandler;
 import eu.arrowhead.core.choreographer.executor.ExecutorPrioritizationStrategy;
 import eu.arrowhead.core.choreographer.executor.RandomExecutorPrioritizationStrategy;
 import eu.arrowhead.core.choreographer.graph.EdgeDestroyerStepGraphNormalizer;
@@ -49,15 +48,20 @@ import eu.arrowhead.core.choreographer.graph.StepGraphNormalizer;
 public class ChoreographerApplicationInitListener extends ApplicationInitListener {
 	
 	//=================================================================================================
+	// members
+	
+	private static final String TYPE_ID_PROPERTY_NAME = "_type";
+	
+	//=================================================================================================
 	// methods
 	
-    //-------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	@Bean
-    public JmsListenerContainerFactory<?> getFactory(final ConnectionFactory connectionFactory,
-                                                    final DefaultJmsListenerContainerFactoryConfigurer configurer, final ExampleErrorHandler errorHandler) {
+    public JmsListenerContainerFactory<?> getJMSFactory(final ConnectionFactory connectionFactory, final DefaultJmsListenerContainerFactoryConfigurer configurer, final ChoreographerSessionErrorHandler errorHandler) {
         final DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         configurer.configure(factory, connectionFactory);
         factory.setErrorHandler(errorHandler);
+        
         return factory;
     }
 
@@ -66,7 +70,7 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
     public MessageConverter jacksonJmsMessageConverter() {
         final MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
         converter.setTargetType(MessageType.TEXT);
-        converter.setTypeIdPropertyName("_type");
+        converter.setTypeIdPropertyName(TYPE_ID_PROPERTY_NAME);
         return converter;
     }
     
@@ -80,6 +84,12 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
 	@Bean
     public StepGraphNormalizer getStepGraphNormalizer() {
     	return new EdgeDestroyerStepGraphNormalizer();
+    }
+	
+    //-------------------------------------------------------------------------------------------------
+    @Bean
+    public ExecutorPrioritizationStrategy getExecutorPrioritizationStrategy() {
+    	return new RandomExecutorPrioritizationStrategy();
     }
 	
 	//=================================================================================================
@@ -109,24 +119,7 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
     protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
         return List.of(CoreSystemService.ORCHESTRATION_SERVICE);
     }
-    
-    //-------------------------------------------------------------------------------------------------
-    @Bean
-    public ExecutorPrioritizationStrategy getExecutorPrioritizationStrategy() {
-    	return new RandomExecutorPrioritizationStrategy();
-    }
 
-	//TODO: rename, implement, move to a new file
-    //-------------------------------------------------------------------------------------------------
-    @Service
-    public class ExampleErrorHandler implements ErrorHandler {
-
-        @Override
-        public void handleError(final Throwable throwable) {
-            System.out.println("Error happened during Workflow Choreography.");
-        }
-    }
-    
     //=================================================================================================
     // assistant methods
     

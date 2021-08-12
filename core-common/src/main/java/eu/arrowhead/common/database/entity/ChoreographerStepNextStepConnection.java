@@ -31,7 +31,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"stepId", "nextStepId"}))
+@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"fromId", "toId"}))
 public class ChoreographerStepNextStepConnection {
 
     //=================================================================================================

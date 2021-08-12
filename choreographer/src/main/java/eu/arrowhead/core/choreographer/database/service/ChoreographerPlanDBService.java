@@ -318,7 +318,6 @@ public class ChoreographerPlanDBService {
 				final Optional<ChoreographerStep> stepOpt = choreographerStepRepository.findByNameAndAction(stepName, action);
 				final ChoreographerStep step = stepOpt.get();
 			    step.setFirstStep(true);
-			    action.getFirstStepEntries().add(step);
 			    choreographerStepRepository.saveAndFlush(step);
 			}
             
