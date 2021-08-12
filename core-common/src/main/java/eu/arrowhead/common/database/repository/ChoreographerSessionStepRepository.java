@@ -14,12 +14,16 @@
 
 package eu.arrowhead.common.database.repository;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.stereotype.Repository;
 
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
+import eu.arrowhead.common.database.entity.ChoreographerSession;
 import eu.arrowhead.common.database.entity.ChoreographerSessionStep;
+import eu.arrowhead.common.database.entity.ChoreographerStep;
 import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStatus;
 
 @Repository
@@ -30,4 +34,6 @@ public interface ChoreographerSessionStepRepository extends RefreshableRepositor
 	
 	//-------------------------------------------------------------------------------------------------
 	public boolean existsByExecutorAndStatusIn(final ChoreographerExecutor executor, final Set<ChoreographerSessionStepStatus> statuses);
+	public Optional<ChoreographerSessionStep> findBySessionAndStep(final ChoreographerSession session, final ChoreographerStep step);
+	public List<ChoreographerSessionStep> findAllBySession(final ChoreographerSession session);
 }
