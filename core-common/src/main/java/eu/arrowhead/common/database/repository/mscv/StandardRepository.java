@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface StandardRepository extends RefreshableRepository<Standard, Long> {
-    Optional<Standard> findByIdentification(final String name);
+    Optional<Standard> findByIdentification(final String identification);
 }

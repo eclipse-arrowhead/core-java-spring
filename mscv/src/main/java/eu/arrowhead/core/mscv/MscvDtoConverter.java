@@ -36,7 +36,7 @@ public class MscvDtoConverter {
     private MscvDtoConverter() { super(); }
 
     public static Set<VerificationEntryViewImpl> convertToView(final Collection<VerificationEntry> entries) {
-        final var resultSet = new HashSet<VerificationEntryViewImpl>();
+        final HashSet<VerificationEntryViewImpl> resultSet = new HashSet<>();
         for (VerificationEntry entry : entries) {
             resultSet.add(convertToView(entry));
         }
@@ -44,11 +44,11 @@ public class MscvDtoConverter {
     }
 
     public static VerificationEntryViewImpl convertToView(final VerificationEntry entry) {
-        if (Objects.isNull(entry)) { return null; } else { return new VerificationEntryViewImpl(entry); }
+        return Objects.nonNull(entry) ? new VerificationEntryViewImpl(entry) : null;
     }
 
     public static MipView convertToView(final Mip mip) {
-        if (Objects.isNull(mip)) { return null; } else { return new MipViewImpl(mip); }
+        return Objects.nonNull(mip) ? new MipViewImpl(mip) : null;
     }
 
     public static VerificationListView convertToView(final VerificationEntryList entryList) {
@@ -60,7 +60,9 @@ public class MscvDtoConverter {
     }
 
     public static SshTargetDto convert(final SshTarget sshTarget) {
-        if (Objects.isNull(sshTarget)) { return null; }
+        if (Objects.isNull(sshTarget)) {
+            return null;
+        }
 
         SshTargetDto sshTargetDto = new SshTargetDto();
         sshTargetDto.setAddress(safeTrim(sshTarget.getAddress()));
@@ -71,7 +73,9 @@ public class MscvDtoConverter {
     }
 
     public static SshTarget convert(final SshTargetDto sshTargetDto) {
-        if (Objects.isNull(sshTargetDto)) { return null; }
+        if (Objects.isNull(sshTargetDto)) {
+            return null;
+        }
 
         SshTarget sshTarget = new SshTarget();
         sshTarget.setAddress(safeTrim(sshTargetDto.getAddress()));
@@ -86,20 +90,24 @@ public class MscvDtoConverter {
             return null;
         } else if (SshTargetDto.class.isAssignableFrom(targetDto.getClass())) {
             return convert((SshTargetDto) targetDto);
-        } else { throw new UnsupportedOperationException("Conversion of target not supported!"); }
+        } else {
+            throw new UnsupportedOperationException("Conversion of target not supported!");
+        }
     }
 
     public static CategoryDto convert(final MipCategory mipCategory) {
-        if (Objects.isNull(mipCategory)) { return null; } else { return new CategoryDto(safeTrim(mipCategory.getName()), safeTrim(mipCategory.getAbbreviation())); }
+        return Objects.nonNull(mipCategory) ? new CategoryDto(safeTrim(mipCategory.getName()), safeTrim(mipCategory.getAbbreviation())) : null;
     }
 
     public static MipCategory convert(final CategoryDto dto) {
-        if (Objects.isNull(dto)) { return null; } else { return new MipCategory(safeTrim(dto.getName()), safeTrim(dto.getAbbreviation())); }
+        return Objects.nonNull(dto) ? new MipCategory(safeTrim(dto.getName()), safeTrim(dto.getAbbreviation())) : null;
     }
 
     @SuppressWarnings("DuplicatedCode")
     public static MipDto convert(final Mip mip) {
-        if (Objects.isNull(mip)) { return null; }
+        if (Objects.isNull(mip)) {
+            return null;
+        }
         final MipDto dto = new MipDto();
         dto.setName(safeTrim(mip.getName()));
         dto.setDescription(safeTrim(mip.getDescription()));
@@ -112,7 +120,9 @@ public class MscvDtoConverter {
 
     @SuppressWarnings("DuplicatedCode")
     public static Mip convert(final MipDto dto) {
-        if (Objects.isNull(dto)) { return null; }
+        if (Objects.isNull(dto)) {
+            return null;
+        }
         final Mip mip = new Mip();
         mip.setName(safeTrim(dto.getName()));
         mip.setDescription(safeTrim(dto.getDescription()));
@@ -124,11 +134,11 @@ public class MscvDtoConverter {
     }
 
     private static MipDomain convert(final DomainDto domain) {
-        if (Objects.isNull(domain)) { return null; } else { return new MipDomain(safeTrim(domain.getName())); }
+        return Objects.nonNull(domain) ? new MipDomain(safeTrim(domain.getName())) : null;
     }
 
     private static DomainDto convert(final MipDomain domain) {
-        if (Objects.isNull(domain)) { return null; } else { return new DomainDto(safeTrim(domain.getName())); }
+        return Objects.nonNull(domain) ? new DomainDto(safeTrim(domain.getName())) : null;
     }
 
     public static Script convert(final ScriptRequestDto dto) {
@@ -143,6 +153,9 @@ public class MscvDtoConverter {
     }
 
     private static Mip convert(final MipIdentifierDto dto) {
+        if (dto == null) {
+            return null;
+        }
         final Mip mip = new Mip();
         final MipCategory category = new MipCategory();
         category.setAbbreviation(safeTrim(dto.getCategoryAbbreviation()));
@@ -193,7 +206,6 @@ public class MscvDtoConverter {
     }
 
     private static String safeTrim(final String string) {
-        if(Objects.nonNull(string)) return string.trim();
-        else return null;
+        return Objects.nonNull(string) ? string.trim() : null;
     }
 }

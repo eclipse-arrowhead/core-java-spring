@@ -98,6 +98,7 @@ public class Validation {
 
 
     public void verify(final MipDto dto, final String origin) {
+        logger.debug("verify({},{}) started...", dto, origin);
         verifyPayload(dto, origin);
         verify(dto.getCategory(), origin);
         verify(dto.getDomain(), origin);
@@ -109,6 +110,7 @@ public class Validation {
     }
 
     public void verify(final MipIdentifierDto dto, final String origin) {
+        logger.debug("verify({},{}) started...", dto, origin);
         verifyPayload(dto, origin);
         if (Objects.isNull(dto.getExtId())) {
             throw new BadPayloadException(ID_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
@@ -119,6 +121,7 @@ public class Validation {
     }
 
     public void verify(final ScriptRequestDto dto, final String origin) {
+        logger.debug("verify({},{}) started...", dto, origin);
         if (Objects.isNull(dto)) {
             throw new BadPayloadException(SCRIPT_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
@@ -128,6 +131,7 @@ public class Validation {
     }
 
     public void verify(final DomainDto dto, final String origin) {
+        logger.debug("verify({},{}) started...", dto, origin);
         verifyPayload(dto, origin);
         if (Objects.isNull(dto.getName())) {
             throw new BadPayloadException(DOMAIN_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
@@ -171,6 +175,7 @@ public class Validation {
     }
 
     public void verify(final StandardDto standard, final String origin) {
+        logger.debug("verify({},{}) started...", standard, origin);
         if (Objects.isNull(standard)) {
             throw new BadPayloadException(STANDARD_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
@@ -194,24 +199,28 @@ public class Validation {
     }
 
     public void verifyId(final Long mipId, final String origin) {
+        logger.debug("verifyId({},{}) started...", mipId, origin);
         if (Objects.isNull(mipId)) {
             throw new BadPayloadException(ID_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
     }
 
-    public void verifyId(final Integer mipId, final String origin) {
+    public void verifyExtId(final Integer mipId, final String origin) {
+        logger.debug("verifyId({},{}) started...", mipId, origin);
         if (Objects.isNull(mipId)) {
             throw new BadPayloadException(ID_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
     }
 
     public void verifyLayer(final Layer layer, final String origin) {
+        logger.debug("verifyLayer({},{}) started...", layer, origin);
         if (Objects.isNull(layer)) {
             throw new BadPayloadException(OS_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
     }
 
     public void verifyOs(final OS os, final String origin) {
+        logger.debug("verifyOs({},{}) started...", os, origin);
         if (Objects.isNull(os)) {
             throw new BadPayloadException(OS_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }

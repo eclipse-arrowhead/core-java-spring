@@ -101,19 +101,18 @@ public class VerificationExecutionService {
 
             final Optional<ExecutionHandler<SshTarget>> optionalHandler = handlerFactory.find(target);
             if (optionalHandler.isPresent()) {
-                final var executionHandler = optionalHandler.get();
+                final ExecutionHandler<SshTarget> executionHandler = optionalHandler.get();
 
                 // prepare result for each verification entry. result will be adapted during execution run.
                 for (VerificationEntry entry : entries) {
                     final Optional<Script> optionalScript = scriptService.findScriptFor(entry.getMip(), entryList.getLayer(), target.getOs());
 
+                    final VerificationResultDetail detail;
                     if (optionalScript.isPresent()) {
-                        final var detail = new VerificationResultDetail(execution, entry, optionalScript.get(),
-                                                                        DetailSuccessIndicator.IN_PROGRESS, null);
+                        detail = new VerificationResultDetail(execution, entry, optionalScript.get(), DetailSuccessIndicator.IN_PROGRESS, null);
                         detailList.add(detail);
                     } else {
-                        final var detail = new VerificationResultDetail(execution, entry, null,
-                                                                        DetailSuccessIndicator.NOT_APPLICABLE, null);
+                        detail = new VerificationResultDetail(execution, entry, null, DetailSuccessIndicator.NOT_APPLICABLE, null);
                         detailList.add(detail);
                     }
                 }

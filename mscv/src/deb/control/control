@@ -1,4 +1,4 @@
-Package: arrowhead-onboarding
+Package: arrowhead-mscv
 Version: [[version]]
 Section: contrib/java
 Priority: optional

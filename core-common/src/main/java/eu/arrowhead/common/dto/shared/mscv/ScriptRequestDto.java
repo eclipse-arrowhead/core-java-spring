@@ -6,6 +6,7 @@ import java.util.StringJoiner;
 
 public class ScriptRequestDto implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private MipIdentifierDto mip;
     private Layer layer;
     private OS os;

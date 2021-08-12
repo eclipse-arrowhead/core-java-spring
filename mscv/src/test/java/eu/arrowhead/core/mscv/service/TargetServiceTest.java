@@ -9,7 +9,7 @@ import org.junit.Test;
 
 public class TargetServiceTest {
 
-    private final TargetService service = new TargetService(null, null, null);
+    private final TargetService service = new TargetService(null, null);
     @Test
     public void test_is_supported()
     {

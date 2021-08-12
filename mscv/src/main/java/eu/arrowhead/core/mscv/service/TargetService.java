@@ -202,7 +202,7 @@ public class TargetService {
         }
     }
 
-    public boolean verifyLogin(final Target target) {
+    public boolean verifyPasswordlessLogin(final Target target) {
         try {
             logger.debug("verifyLogin({}) started", target);
             Assert.notNull(target, TARGET_NULL_ERROR_MESSAGE);

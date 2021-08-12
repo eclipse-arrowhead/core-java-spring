@@ -24,6 +24,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_NAME;
@@ -46,7 +48,8 @@ import static eu.arrowhead.core.mscv.MscvUtilities.notFoundException;
         allowedHeaders = {HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT}
 )
 @RestController
-@RequestMapping(CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI)
+@RequestMapping(value = CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI,
+        consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 public class DomainMgmtController {
 
     private static final String DOMAIN_URI = "/domain";
@@ -111,14 +114,17 @@ public class DomainMgmtController {
         validation.verify(dto, origin);
         domain = new MipDomain(dto.getName());
 
-        if (crudService.exists(domain)) {
-            return ResponseEntity.ok(dto);
-        } else {
-            final MipDomain created = crudService.create(domain);
-            final DomainDto result = new DomainDto(created.getName());
-            return ResponseEntity.status(HttpStatus.SC_CREATED).body(result);
+        synchronized (crudService) {
+            if (crudService.exists(domain)) {
+                return ResponseEntity.ok(dto);
+            } else {
+                final MipDomain created = crudService.create(domain);
+                final DomainDto result = new DomainDto(created.getName());
+                return ResponseEntity.status(HttpStatus.SC_CREATED).body(result);
+            }
         }
     }
+
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = READ_DOMAIN_DESCRIPTION, response = DomainDto.class)
     @ApiResponses(value = {
@@ -139,6 +145,7 @@ public class DomainMgmtController {
 
         return new DomainDto(domain.getName());
     }
+
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = READ_ALL_DOMAIN_DESCRIPTION, response = DomainDto.class)
     @ApiResponses(value = {
@@ -161,6 +168,7 @@ public class DomainMgmtController {
         final Page<MipDomain> domains = crudService.pageAll(pageParameters.createPageable(sortField));
         return new DomainListResponseDto(domains.map(x -> new DomainDto(x.getName())));
     }
+
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = UPDATE_DOMAIN_DESCRIPTION, response = DomainDto.class)
     @ApiResponses(value = {
@@ -175,8 +183,8 @@ public class DomainMgmtController {
     public DomainDto update(@PathVariable(PARAMETER_NAME) final String name, @RequestBody final DomainDto dto) {
         logger.debug("update started ...");
         final String origin = createMgmtOrigin(UPDATE_DOMAIN_URI);
-        validation.verify(dto, origin);
         validation.verifyName(name, origin);
+        validation.verify(dto, origin);
 
         final Optional<MipDomain> optionalMipDomain = crudService.find(name);
         final MipDomain oldDomain = optionalMipDomain.orElseThrow(notFoundException("Domain", origin));
@@ -184,16 +192,17 @@ public class DomainMgmtController {
 
         return new DomainDto(newDomain.getName());
     }
+
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = DELETE_DOMAIN_DESCRIPTION)
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_DOMAIN_SUCCESS),
+            @ApiResponse(code = HttpStatus.SC_NO_CONTENT, message = DELETE_DOMAIN_SUCCESS),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_DOMAIN_BAD_REQUEST, response = ErrorMessageDTO.class),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response = ErrorMessageDTO.class),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response = ErrorMessageDTO.class)
     })
     @DeleteMapping(DELETE_DOMAIN_URI)
-    @ResponseBody
+    @ResponseStatus(org.springframework.http.HttpStatus.NO_CONTENT)
     public void delete(@PathVariable(PARAMETER_NAME) final String name) {
         logger.debug("delete started ...");
         final String origin = createMgmtOrigin(DELETE_DOMAIN_URI);

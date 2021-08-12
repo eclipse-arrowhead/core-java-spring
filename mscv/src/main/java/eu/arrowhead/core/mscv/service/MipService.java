@@ -51,7 +51,7 @@ public class MipService {
             logger.debug("findByExternalIdAndCategory({},{}) started", extId, category);
             Assert.notNull(extId, ID_NULL_ERROR_MESSAGE);
             Assert.hasText(category, CATEGORY_NULL_ERROR_MESSAGE);
-            return repository.findByExtIdAndCategoryName(extId, category.trim());
+            return repository.findByCategoryNameAndExtId(category.trim(), extId);
         } catch (final PersistenceException pe) {
             throw new ArrowheadException("Unable to find MIP", pe);
         }

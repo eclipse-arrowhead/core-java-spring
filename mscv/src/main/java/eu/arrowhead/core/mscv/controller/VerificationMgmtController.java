@@ -16,6 +16,7 @@ import eu.arrowhead.common.dto.shared.mscv.Layer;
 import eu.arrowhead.common.dto.shared.mscv.OS;
 import eu.arrowhead.common.dto.shared.mscv.VerificationResultDto;
 import eu.arrowhead.common.dto.shared.mscv.VerificationResultListResponseDto;
+import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.mscv.Constants;
 import eu.arrowhead.core.mscv.Validation;
 import eu.arrowhead.core.mscv.service.TargetService;
@@ -31,6 +32,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -55,7 +57,8 @@ import static eu.arrowhead.core.mscv.MscvUtilities.notFoundException;
         allowedHeaders = {HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT}
 )
 @RestController
-@RequestMapping(CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI)
+@RequestMapping(value = CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI,
+        consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 public class VerificationMgmtController {
 
     private static final String VERIFICATION_URI = "/results";
@@ -129,9 +132,9 @@ public class VerificationMgmtController {
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
             @PathVariable(PARAMETER_TARGET_NAME) final String name,
             @PathVariable(PARAMETER_OS) final OS os,
-            @ApiParam(value = "Filter for start date. Format: yyyy-MM-dd HH:mm:ss")
+            @ApiParam(value = "Filter for start date in ISO8601 format.")
             @RequestParam(name = "dateFrom", required = false) final String fromString,
-            @ApiParam(value = "Filter for to date. Format: yyyy-MM-dd HH:mm:ss")
+            @ApiParam(value = "Filter for to date in ISO8601 format.")
             @RequestParam(name = "dateTo", required = false) final String toString,
             @ApiParam(value = "Filter for list name. Partial match ignoring case")
             @RequestParam(name = "list", required = false) final String listNameString) {
@@ -143,8 +146,14 @@ public class VerificationMgmtController {
                 .validatePageParameters(pages, size, CoreCommonConstants.SORT_ORDER_DESCENDING, origin);
 
         final Pageable page = pageParameters.createPageable(EXECUTION_DATE_FIELD);
-        final ZonedDateTime from = Utilities.parseUTCStringToLocalZonedDateTime(fromString);
-        final ZonedDateTime to = Utilities.parseUTCStringToLocalZonedDateTime(toString);
+        final ZonedDateTime from;
+        final ZonedDateTime to;
+        try {
+            from = ZonedDateTime.parse(fromString);
+            to = ZonedDateTime.parse(toString);
+        } catch(final Exception ex) {
+            throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, createMgmtOrigin(FIND_ALL_VERIFICATION_URI));
+        }
 
         final List<VerificationEntryList> list;
         if (Utilities.notEmpty(listNameString)) {

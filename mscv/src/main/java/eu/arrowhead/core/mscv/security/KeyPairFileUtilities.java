@@ -71,13 +71,16 @@ public class KeyPairFileUtilities {
     private static final String DEFAULT_ENCRYPTION_ALGORITHM = "AES-128-CBC";
     private static final String OPENSSH_RSA_TYPE = "ssh-rsa";
     private static final String OPENSSH_DSA_TYPE = "ssh-dss";
+    private static final String ALGORITHM_RSA = "RSA";
+    private static final String ALGORITHM_DSA = "DSA";
+    private static final String PROVIDER_BC = "BC";
 
     static {
         Security.addProvider(new BouncyCastleProvider());
     }
 
     private final Logger logger = LogManager.getLogger();
-    private final JcaPEMKeyConverter pemKeyConverter = new JcaPEMKeyConverter().setProvider("BC");
+    private final JcaPEMKeyConverter pemKeyConverter = new JcaPEMKeyConverter().setProvider(PROVIDER_BC);
 
     public KeyPairFileUtilities() { super(); }
 
@@ -173,7 +176,7 @@ public class KeyPairFileUtilities {
         try (final FileWriter writer = new FileWriter(file)) {
             final JcaPEMWriter pWrt = new JcaPEMWriter(writer);
             final PEMEncryptor encryptor = new JcePEMEncryptorBuilder(DEFAULT_ENCRYPTION_ALGORITHM)
-                    .setProvider("BC")
+                    .setProvider(PROVIDER_BC)
                     .build(password.toCharArray());
 
             final PemObjectGenerator pemObjectGenerator = new JcaMiscPEMGenerator(privateKey, encryptor);
@@ -191,7 +194,7 @@ public class KeyPairFileUtilities {
             final JcaPEMWriter pWrt = new JcaPEMWriter(writer);
             final ASN1ObjectIdentifier algorithm = new ASN1ObjectIdentifier(DEFAULT_ASN_ALGORITHM_IDENTIFIER);
             final OutputEncryptor encryptor = new JceOpenSSLPKCS8EncryptorBuilder(algorithm)
-                    .setProvider("BC")
+                    .setProvider(PROVIDER_BC)
                     .setPasssword(password.toCharArray())
                     .build();
 
@@ -214,9 +217,9 @@ public class KeyPairFileUtilities {
 
     public String encodePublicKeySSH(final PublicKey publicKey, final String user) throws IOException, InvalidKeySpecException {
         final String encodedKey;
-        if (publicKey.getAlgorithm().equals("RSA")) {
+        if (publicKey.getAlgorithm().equals(ALGORITHM_RSA)) {
             encodedKey = encodeRsaPublicKey((RSAPublicKey) publicKey, user);
-        } else if (publicKey.getAlgorithm().equals("DSA")) {
+        } else if (publicKey.getAlgorithm().equals(ALGORITHM_DSA)) {
             encodedKey = encodeDsaPublicKey((DSAPublicKey) publicKey, user);
         } else {
             throw new InvalidKeySpecException("Unknown public key encoding: " + publicKey.getAlgorithm());
@@ -266,7 +269,7 @@ public class KeyPairFileUtilities {
 
     // can't find out how to do this with bouncy castle. OpenSSHPublicKeyUtil doesn't work
     private PublicKey readOpenSshPublicKey(final String file) throws IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
+        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
             // SSH keys only have a single line
             final String line = reader.readLine();
             final String[] split = line.split(" ", 3);
@@ -278,32 +281,34 @@ public class KeyPairFileUtilities {
             final String type = split[0];
             final String base64Data = split[1];
             final byte[] bytes = Base64.getDecoder().decode(base64Data);
-            final DataInputStream dis = new DataInputStream(new ByteArrayInputStream(bytes));
 
-            byte[] header = readElement(dis);
-            final String pubKeyFormat = new String(header);
-            if (!pubKeyFormat.equals(type)) {
-                throw new InvalidKeySpecException("Header type '" + type + "' does not match encoded format '" + pubKeyFormat + "'");
-            }
+            try (final DataInputStream dis = new DataInputStream(new ByteArrayInputStream(bytes))) {
 
-            switch (type) {
-                case OPENSSH_RSA_TYPE:
-                    byte[] publicExponent = readElement(dis);
-                    byte[] modulus = readElement(dis);
+                byte[] header = readElement(dis);
+                final String pubKeyFormat = new String(header);
+                if (!pubKeyFormat.equals(type)) {
+                    throw new InvalidKeySpecException("Header type '" + type + "' does not match encoded format '" + pubKeyFormat + "'");
+                }
 
-                    final KeySpec rsaKeySpec = new RSAPublicKeySpec(new BigInteger(modulus), new BigInteger(publicExponent));
-                    final KeyFactory rsaKeyFactory = KeyFactory.getInstance("RSA", "BC");
-                    return rsaKeyFactory.generatePublic(rsaKeySpec);
-                case OPENSSH_DSA_TYPE:
-                    byte[] p = readElement(dis);
-                    byte[] q = readElement(dis);
-                    byte[] g = readElement(dis);
-                    byte[] y = readElement(dis);
-                    final KeySpec dssKeySpec = new DSAPublicKeySpec(new BigInteger(p), new BigInteger(q), new BigInteger(g), new BigInteger(y));
-                    final KeyFactory dssKeyFactory = KeyFactory.getInstance("DSA", "BC");
-                    return dssKeyFactory.generatePublic(dssKeySpec);
-                default:
-                    throw new InvalidKeySpecException("Unsupported format: " + type);
+                switch (type) {
+                    case OPENSSH_RSA_TYPE:
+                        byte[] publicExponent = readElement(dis);
+                        byte[] modulus = readElement(dis);
+
+                        final KeySpec rsaKeySpec = new RSAPublicKeySpec(new BigInteger(modulus), new BigInteger(publicExponent));
+                        final KeyFactory rsaKeyFactory = KeyFactory.getInstance(ALGORITHM_RSA, PROVIDER_BC);
+                        return rsaKeyFactory.generatePublic(rsaKeySpec);
+                    case OPENSSH_DSA_TYPE:
+                        byte[] p = readElement(dis);
+                        byte[] q = readElement(dis);
+                        byte[] g = readElement(dis);
+                        byte[] y = readElement(dis);
+                        final KeySpec dssKeySpec = new DSAPublicKeySpec(new BigInteger(p), new BigInteger(q), new BigInteger(g), new BigInteger(y));
+                        final KeyFactory dssKeyFactory = KeyFactory.getInstance(ALGORITHM_DSA, PROVIDER_BC);
+                        return dssKeyFactory.generatePublic(dssKeySpec);
+                    default:
+                        throw new InvalidKeySpecException("Unsupported format: " + type);
+                }
             }
         }
     }

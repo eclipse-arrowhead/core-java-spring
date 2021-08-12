@@ -15,6 +15,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+/*
+Measurable Indicator Points are extracted from existing standards and guidelines to address requirements.
+The MIPs are executed through target operating system specific Scripts.
+The results of all executions determine the compliance of a device/system/service to a specific standard.
+
+See also: "Security Safety and Organizational Standard Compliance in Cyber Physical Systems" from Ani Bicaku et. al.
+ */
 @Entity
 @Table(name = "mscv_mip",
         uniqueConstraints = @UniqueConstraint(name = "u_mip_category_id",
@@ -68,8 +75,7 @@ public class Mip {
     }
 
     public String getIdentifier() {
-        if(Objects.nonNull(category)) return category.getAbbreviation() + "-" + extId;
-        else return name;
+        if (Objects.nonNull(category)) { return category.getAbbreviation() + "-" + extId; } else { return name; }
     }
 
     public Long getId() {

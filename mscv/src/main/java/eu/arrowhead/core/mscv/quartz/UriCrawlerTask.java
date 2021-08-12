@@ -12,8 +12,6 @@ import org.apache.logging.log4j.Logger;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 
-//@Component
-//@DisallowConcurrentExecution
 public class UriCrawlerTask implements Job {
 
     //=================================================================================================

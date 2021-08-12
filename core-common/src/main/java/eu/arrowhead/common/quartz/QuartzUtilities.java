@@ -1,5 +1,10 @@
 package eu.arrowhead.common.quartz;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.Date;
+import java.util.Objects;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.quartz.JobDetail;
@@ -7,12 +12,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
-import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
-
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.Date;
 
 public class QuartzUtilities {
 
@@ -32,6 +32,7 @@ public class QuartzUtilities {
     }
 
     public static boolean unscheduleJob(final JobExecutionContext context) throws SchedulerException {
+        Assert.notNull(context, "JobExecutionContext must not be null");
         return unscheduleJob(context.getScheduler(), context.getTrigger());
     }
 
@@ -43,6 +44,7 @@ public class QuartzUtilities {
     }
 
     public static ZonedDateTime rescheduleJob(final JobExecutionContext context, final Trigger newTrigger) throws SchedulerException {
+        Assert.notNull(context, "JobExecutionContext must not be null");
         return rescheduleJob(context.getScheduler(), context.getTrigger(), newTrigger);
     }
 
@@ -56,6 +58,7 @@ public class QuartzUtilities {
     }
 
     public static void pauseJob(final JobExecutionContext context) throws SchedulerException {
+        Assert.notNull(context, "JobExecutionContext must not be null");
         pauseJob(context.getScheduler(), context.getJobDetail());
     }
 
@@ -67,7 +70,8 @@ public class QuartzUtilities {
     }
 
     public static void pauseTrigger(final JobExecutionContext context, final Trigger trigger) throws SchedulerException {
-        pauseTrigger(context.getScheduler(), context.getTrigger());
+        Assert.notNull(context, "JobExecutionContext must not be null");
+        pauseTrigger(context.getScheduler(), trigger);
     }
 
     public static void pauseTrigger(final Scheduler scheduler, final Trigger trigger) throws SchedulerException {
@@ -78,6 +82,7 @@ public class QuartzUtilities {
     }
 
     public static void resumeJob(final JobExecutionContext context) throws SchedulerException {
+        Assert.notNull(context, "JobExecutionContext must not be null");
         resumeJob(context.getScheduler(), context.getJobDetail());
     }
 
@@ -89,7 +94,8 @@ public class QuartzUtilities {
     }
 
     public static void resumeTrigger(final JobExecutionContext context, final Trigger trigger) throws SchedulerException {
-        resumeTrigger(context.getScheduler(), context.getTrigger());
+        Assert.notNull(context, "JobExecutionContext must not be null");
+        resumeTrigger(context.getScheduler(), trigger);
     }
 
     public static void resumeTrigger(final Scheduler scheduler, final Trigger trigger) throws SchedulerException {
@@ -101,7 +107,11 @@ public class QuartzUtilities {
 
 
     public static boolean silentlyDeleteJob(final JobExecutionContext context) {
-        return silentlyDeleteJob(context.getScheduler(), context.getJobDetail());
+        if (Objects.isNull(context)) {
+            return false;
+        } else {
+            return silentlyDeleteJob(context.getScheduler(), context.getJobDetail());
+        }
     }
 
     public static boolean silentlyDeleteJob(final Scheduler scheduler, final JobDetail jobDetail) {
@@ -114,7 +124,11 @@ public class QuartzUtilities {
     }
 
     public static boolean silentlyUnscheduleJob(final JobExecutionContext context) {
-        return silentlyUnscheduleJob(context.getScheduler(), context.getTrigger());
+        if (Objects.isNull(context)) {
+            return false;
+        } else {
+            return silentlyUnscheduleJob(context.getScheduler(), context.getTrigger());
+        }
     }
 
     public static boolean silentlyUnscheduleJob(final Scheduler scheduler, final Trigger trigger) {
@@ -127,7 +141,11 @@ public class QuartzUtilities {
     }
 
     public static ZonedDateTime silentlyRescheduleJob(final JobExecutionContext context, final Trigger newTrigger) {
-        return silentlyRescheduleJob(context.getScheduler(), context.getTrigger(), newTrigger);
+        if (Objects.isNull(context)) {
+            return null;
+        } else {
+            return silentlyRescheduleJob(context.getScheduler(), context.getTrigger(), newTrigger);
+        }
     }
 
     public static ZonedDateTime silentlyRescheduleJob(final Scheduler scheduler, final Trigger oldTrigger, final Trigger newTrigger) {
@@ -140,7 +158,9 @@ public class QuartzUtilities {
     }
 
     public static void silentlyPauseJob(final JobExecutionContext context) {
-        silentlyPauseJob(context.getScheduler(), context.getJobDetail());
+        if (Objects.nonNull(context)) {
+            silentlyPauseJob(context.getScheduler(), context.getJobDetail());
+        }
     }
 
     public static void silentlyPauseJob(final Scheduler scheduler, final JobDetail jobDetail) {
@@ -152,7 +172,9 @@ public class QuartzUtilities {
     }
 
     public static void silentlyPauseTrigger(final JobExecutionContext context, final Trigger trigger) {
-        silentlyPauseTrigger(context.getScheduler(), context.getTrigger());
+        if (Objects.nonNull(context)) {
+            silentlyPauseTrigger(context.getScheduler(), trigger);
+        }
     }
 
     public static void silentlyPauseTrigger(final Scheduler scheduler, final Trigger trigger) {
@@ -164,7 +186,9 @@ public class QuartzUtilities {
     }
 
     public static void silentlyResumeJob(final JobExecutionContext context) {
-        silentlyResumeJob(context.getScheduler(), context.getJobDetail());
+        if (Objects.nonNull(context)) {
+            silentlyResumeJob(context.getScheduler(), context.getJobDetail());
+        }
     }
 
     public static void silentlyResumeJob(final Scheduler scheduler, final JobDetail jobDetail) {
@@ -176,7 +200,9 @@ public class QuartzUtilities {
     }
 
     public static void silentlyResumeTrigger(final JobExecutionContext context, final Trigger trigger) {
-        silentlyResumeTrigger(context.getScheduler(), context.getTrigger());
+        if (Objects.nonNull(context)) {
+            silentlyResumeTrigger(context.getScheduler(), trigger);
+        }
     }
 
     public static void silentlyResumeTrigger(final Scheduler scheduler, final Trigger trigger) {

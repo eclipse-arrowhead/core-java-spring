@@ -1,10 +1,12 @@
 package eu.arrowhead.common.dto.shared.mscv;
 
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-public class PublicKeyResponse {
+public class PublicKeyResponse implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private String base64PublicKey;
     private String sshPublicKey;
     private String algorithm;

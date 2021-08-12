@@ -109,7 +109,7 @@ public class VerificationEntryList {
     }
 
     public void addEntry(final VerificationEntry entry) {
-        Assert.notNull(entry,"Verification entry must not be mull");
+        Assert.notNull(entry,"Verification entry must not be null");
         if(Objects.isNull(entry.getVerificationList())) {
             entry.setVerificationList(this);
         }
@@ -117,7 +117,7 @@ public class VerificationEntryList {
     }
 
     public void removeEntry(final VerificationEntry entry) {
-        Assert.notNull(entry,"Verification entry must not be mull");
+        Assert.notNull(entry,"Verification entry must not be null");
         entries.remove(entry);
         entry.setVerificationList(null);
     }

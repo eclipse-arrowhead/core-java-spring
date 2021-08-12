@@ -103,9 +103,9 @@ public class VerificationService {
             logger.debug("getDetailResults({},{}) started", target, layer);
             Assert.notNull(target, TARGET_NULL_ERROR_MESSAGE);
             Assert.notNull(layer, LAYER_NULL_ERROR_MESSAGE);
-            final VerificationResult latestExecution =
-                    executionRepo.findTopViewByTargetAndVerificationListLayerOrderByExecutionDateDesc(target, layer);
-            return createResults(latestExecution);
+            final Optional<VerificationResult> optional = executionRepo.findTopByTargetAndVerificationListLayerOrderByExecutionDateDesc(target, layer);
+            final VerificationResult result = optional.orElseThrow(notFoundException("Verification Detail Results"));
+            return createResults(result);
         } catch (final PersistenceException pe) {
             throw new ArrowheadException("Unable to find VerificationResult", pe);
         }

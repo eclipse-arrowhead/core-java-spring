@@ -6,6 +6,7 @@ import java.util.StringJoiner;
 
 public class TargetLoginRequest implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private SshTargetDto target;
     private String credentials;
 

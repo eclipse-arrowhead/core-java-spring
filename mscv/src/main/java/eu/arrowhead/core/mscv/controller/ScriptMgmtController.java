@@ -14,10 +14,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.CoreDefaults;
-import eu.arrowhead.common.CoreSystemRegistrationProperties;
 import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.Defaults;
-import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.database.entity.mscv.Mip;
 import eu.arrowhead.common.database.entity.mscv.MipDomain;
 import eu.arrowhead.common.database.entity.mscv.Script;
@@ -44,7 +42,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
@@ -63,6 +60,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -84,8 +82,11 @@ import static eu.arrowhead.core.mscv.MscvUtilities.notFoundException;
         allowedHeaders = {HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT}
 )
 @RestController
-@RequestMapping(CommonConstants.MSCV_URI)
+@RequestMapping(value = CommonConstants.MSCV_URI,
+        consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 public class ScriptMgmtController {
+
+    private static final String MIP_IDENTIFIER_DESCRIPTION = "Identifier in the form: &lt;category abbreviation&gt;-&lt;external id&gt;";
 
     private static final String SCRIPT_URI = "/script";
     public static final String QUALIFY_SCRIPT_URI = SCRIPT_URI +
@@ -140,9 +141,7 @@ public class ScriptMgmtController {
     private final Validation validation;
 
     @Autowired
-    public ScriptMgmtController(final MscvDefaults mscvDefaults, final ScriptService service,
-                                final CoreSystemRegistrationProperties properties,
-                                final SSLProperties sslProperties) {
+    public ScriptMgmtController(final MscvDefaults mscvDefaults, final ScriptService service) {
         super();
         this.parentPath = mscvDefaults.getDefaultPath();
         this.service = service;
@@ -166,7 +165,7 @@ public class ScriptMgmtController {
     public ScriptResponseDto create(@RequestPart("file") final MultipartFile file,
                                     @ApiParam(value = "Example: {\"layer\": \"DEVICE\", \"mip\": {\"categoryAbbreviation\": \"IAC\", \"extId\": 1 },   " +
                                             "\"os\": \"LINUX\" }", type = "eu.arrowhead.common.dto.shared.mscv.ScriptRequestDto")
-                                    @RequestPart(name = "dto", required = true) final Part part) throws IOException {
+                                    @RequestPart(name = "dto", required = true) final Part part)  {
         logger.debug("create started ...");
         final String origin = createMgmtOrigin(UPLOAD_SCRIPT_URI);
         final ByteArrayOutputStream byteArray;
@@ -204,7 +203,7 @@ public class ScriptMgmtController {
     })
     @GetMapping(READ_SCRIPT_URI)
     @ResponseBody
-    public ScriptResponseDto read(@ApiParam(value = MipMgmtController.MIP_IDENTIFIER_DESCRIPTION)
+    public ScriptResponseDto read(@ApiParam(value = MIP_IDENTIFIER_DESCRIPTION)
                                   @PathVariable(PARAMETER_MIP_IDENTIFIER) final String identifier,
                                   @PathVariable(PARAMETER_OS) final Layer layer,
                                   @PathVariable(PARAMETER_LAYER) final OS os) {
@@ -214,7 +213,7 @@ public class ScriptMgmtController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = READ_SCRIPT_CONTENT_DESCRIPTION, response = byte[].class, tags = {CoreCommonConstants.SWAGGER_TAG_ALL, CoreCommonConstants.SWAGGER_TAG_CLIENT})
+    @ApiOperation(value = READ_SCRIPT_CONTENT_DESCRIPTION, response = ByteArrayResource.class, tags = {CoreCommonConstants.SWAGGER_TAG_ALL, CoreCommonConstants.SWAGGER_TAG_CLIENT})
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = READ_SCRIPT_CONTENT_SUCCESS),
             @ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = READ_SCRIPT_CONTENT_NOT_FOUND, response = ErrorMessageDTO.class),
@@ -224,7 +223,7 @@ public class ScriptMgmtController {
     })
     @GetMapping(value = READ_SCRIPT_CONTENT_URI, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @ResponseBody
-    public ResponseEntity<Resource> readContent(@ApiParam(value = MipMgmtController.MIP_IDENTIFIER_DESCRIPTION)
+    public ResponseEntity<ByteArrayResource> readContent(@ApiParam(value = MIP_IDENTIFIER_DESCRIPTION)
                                                 @PathVariable(PARAMETER_MIP_IDENTIFIER) final String identifier,
                                                 @PathVariable(PARAMETER_OS) final Layer layer,
                                                 @PathVariable(PARAMETER_LAYER) final OS os) {
@@ -233,7 +232,7 @@ public class ScriptMgmtController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = READ_SCRIPT_CONTENT_DESCRIPTION, response = byte[].class)
+    @ApiOperation(value = READ_SCRIPT_CONTENT_DESCRIPTION, response = ByteArrayResource.class)
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = READ_SCRIPT_CONTENT_SUCCESS),
             @ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = READ_SCRIPT_CONTENT_NOT_FOUND, response = ErrorMessageDTO.class),
@@ -243,7 +242,7 @@ public class ScriptMgmtController {
     })
     @GetMapping(value = READ_SCRIPT_CONTENT_MGMT_URI, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @ResponseBody
-    public ResponseEntity<Resource> readContentMgmt(@ApiParam(value = MipMgmtController.MIP_IDENTIFIER_DESCRIPTION)
+    public ResponseEntity<ByteArrayResource> readContentMgmt(@ApiParam(value = MIP_IDENTIFIER_DESCRIPTION)
                                                     @PathVariable(PARAMETER_MIP_IDENTIFIER) final String identifier,
                                                     @PathVariable(PARAMETER_OS) final Layer layer,
                                                     @PathVariable(PARAMETER_LAYER) final OS os) {
@@ -255,9 +254,9 @@ public class ScriptMgmtController {
 
             HttpHeaders header = new HttpHeaders();
             header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=img.jpg");
-            header.add("Cache-Control", "no-cache, no-store, must-revalidate");
-            header.add("Pragma", "no-cache");
-            header.add("Expires", "0");
+            header.add(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate");
+            header.add(HttpHeaders.PRAGMA, "no-cache");
+            header.add(HttpHeaders.EXPIRES, "0");
 
             final File file;
 
@@ -281,7 +280,7 @@ public class ScriptMgmtController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = READ_ALL_SCRIPT_DESCRIPTION, response = ScriptResponseDto.class)
+    @ApiOperation(value = READ_ALL_SCRIPT_DESCRIPTION, response = ScriptListResponseDto.class)
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = READ_ALL_SCRIPT_SUCCESS),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = READ_ALL_SCRIPT_BAD_REQUEST, response = ErrorMessageDTO.class),
@@ -339,7 +338,7 @@ public class ScriptMgmtController {
     })
     @PutMapping(UPDATE_SCRIPT_URI)
     @ResponseBody
-    public ScriptResponseDto update(@ApiParam(value = MipMgmtController.MIP_IDENTIFIER_DESCRIPTION)
+    public ScriptResponseDto update(@ApiParam(value = MIP_IDENTIFIER_DESCRIPTION)
                                     @PathVariable(PARAMETER_MIP_IDENTIFIER) final String identifier,
                                     @PathVariable(PARAMETER_OS) final Layer layer,
                                     @PathVariable(PARAMETER_LAYER) final OS os,
@@ -362,7 +361,7 @@ public class ScriptMgmtController {
     })
     @PutMapping(value = UPDATE_SCRIPT_CONTENT_URI, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
-    public ScriptResponseDto updateContent(@ApiParam(value = MipMgmtController.MIP_IDENTIFIER_DESCRIPTION)
+    public ScriptResponseDto updateContent(@ApiParam(value = MIP_IDENTIFIER_DESCRIPTION)
                                            @PathVariable(PARAMETER_MIP_IDENTIFIER) final String identifier,
                                            @PathVariable(PARAMETER_OS) final Layer layer,
                                            @PathVariable(PARAMETER_LAYER) final OS os,
@@ -370,9 +369,7 @@ public class ScriptMgmtController {
         logger.debug("update started ...");
         final String origin = createMgmtOrigin(UPDATE_SCRIPT_CONTENT_URI);
         final Script script = findScript(identifier, layer, os, origin);
-        final ByteArrayOutputStream outputStream;
-
-        outputStream = new ByteArrayOutputStream();
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         try (final InputStream inputStream = file.getInputStream()) {
             StreamUtils.copy(inputStream, outputStream);
@@ -387,14 +384,14 @@ public class ScriptMgmtController {
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = DELETE_SCRIPT_DESCRIPTION)
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_SCRIPT_SUCCESS),
+            @ApiResponse(code = HttpStatus.SC_NO_CONTENT, message = DELETE_SCRIPT_SUCCESS),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_SCRIPT_BAD_REQUEST, response = ErrorMessageDTO.class),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response = ErrorMessageDTO.class),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response = ErrorMessageDTO.class)
     })
     @DeleteMapping(DELETE_SCRIPT_URI)
-    @ResponseBody
-    public void delete(@ApiParam(value = MipMgmtController.MIP_IDENTIFIER_DESCRIPTION)
+    @ResponseStatus(org.springframework.http.HttpStatus.NO_CONTENT)
+    public void delete(@ApiParam(value = MIP_IDENTIFIER_DESCRIPTION)
                        @PathVariable(PARAMETER_MIP_IDENTIFIER) final String identifier,
                        @PathVariable(PARAMETER_OS) final Layer layer,
                        @PathVariable(PARAMETER_LAYER) final OS os) {

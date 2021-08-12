@@ -1,6 +1,10 @@
 package eu.arrowhead.common.dto.shared.mscv;
 
-public class ExecutionRequest {
+import java.io.Serializable;
+
+public class ExecutionRequest implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private Long executionListId;
     private Long targetId;

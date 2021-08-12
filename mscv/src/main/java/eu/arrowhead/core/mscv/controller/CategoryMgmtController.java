@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -48,7 +49,8 @@ import static eu.arrowhead.core.mscv.MscvUtilities.notFoundException;
         allowedHeaders = {HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT}
 )
 @RestController
-@RequestMapping(CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI)
+@RequestMapping(value = CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI,
+        consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 public class CategoryMgmtController {
 
     private static final String CATEGORY_URI = "/category";
@@ -113,12 +115,14 @@ public class CategoryMgmtController {
         validation.verify(dto, origin);
         category = MscvDtoConverter.convert(dto);
 
-        if (crudService.exists(category)) {
-            return ResponseEntity.ok(dto);
-        } else {
-            final MipCategory created = crudService.create(category);
-            final CategoryDto result = MscvDtoConverter.convert(created);
-            return ResponseEntity.status(HttpStatus.SC_CREATED).body(result);
+        synchronized (crudService) {
+            if (crudService.exists(category)) {
+                return ResponseEntity.ok(dto);
+            } else {
+                final MipCategory created = crudService.create(category);
+                final CategoryDto result = MscvDtoConverter.convert(created);
+                return ResponseEntity.status(HttpStatus.SC_CREATED).body(result);
+            }
         }
     }
 
@@ -181,8 +185,8 @@ public class CategoryMgmtController {
     public CategoryDto update(@PathVariable(PARAMETER_NAME) final String name, @RequestBody final CategoryDto dto) {
         logger.debug("update started ...");
         final String origin = createMgmtOrigin(UPDATE_CATEGORY_URI);
-        validation.verify(dto, origin);
         validation.verifyName(name, origin);
+        validation.verify(dto, origin);
 
         final Optional<MipCategory> optionalMipCategory = crudService.find(name);
         final MipCategory oldCategory = optionalMipCategory.orElseThrow(notFoundException("Category", origin));

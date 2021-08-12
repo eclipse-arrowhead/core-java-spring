@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 
 public class MipListResponseDto extends PaginationResponse<MipDto> {
+    private static final long serialVersionUID = 1L;
     public MipListResponseDto(final Page<MipDto> page) {
         super(page);
     }

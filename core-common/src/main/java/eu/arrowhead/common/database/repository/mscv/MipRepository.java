@@ -10,11 +10,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MipRepository extends RefreshableRepository<Mip, Long> {
 
-    MipView findViewById(final Long id);
+    Optional<MipView> findViewById(final Long id);
 
-    MipView findViewByName(final String name);
+    Optional<MipView> findViewByName(final String name);
 
-    Optional<Mip> findByExtIdAndCategoryName(final Integer extId, final String category);
+    Optional<Mip> findByCategoryNameAndExtId(final String category, final Integer extId);
 
     Optional<Mip> findByCategoryAbbreviationAndExtId(final String categoryAbbreviation, final Integer extId);
 

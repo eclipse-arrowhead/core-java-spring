@@ -1,10 +1,10 @@
 [Unit]
-Description=msvc
+Description=mscv
 After=network.target
 
 [Service]
-WorkingDirectory=/etc/arrowhead/systems/msvc
-ExecStart=/usr/bin/java -Dlog4j.configurationFile=file:/etc/arrowhead/systems/msvc/log4j2.xml -jar /usr/share/arrowhead/msvc/msvc.jar
+WorkingDirectory=/etc/arrowhead/systems/mscv
+ExecStart=/usr/bin/java -Dlog4j.configurationFile=file:/etc/arrowhead/systems/mscv/log4j2.xml -jar /usr/share/arrowhead/mscv/mscv.jar
 ExecStartPost=/bin/bash -c 'sleep 10'
 TimeoutStopSec=5
 Type=simple

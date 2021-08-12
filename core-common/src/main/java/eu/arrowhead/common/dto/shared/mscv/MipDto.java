@@ -7,6 +7,7 @@ import java.util.StringJoiner;
 
 public class MipDto implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private String identifier;
     private Integer extId;
     private String name;

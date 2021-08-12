@@ -1,12 +1,12 @@
 package eu.arrowhead.common.database.view.mscv;
 
-import eu.arrowhead.common.database.entity.mscv.VerificationEntry;
-import eu.arrowhead.common.database.entity.mscv.VerificationEntryList;
-import org.springframework.util.Assert;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
+import eu.arrowhead.common.database.entity.mscv.VerificationEntry;
+import eu.arrowhead.common.database.entity.mscv.VerificationEntryList;
+import org.springframework.util.Assert;
 
 public class VerificationListViewImpl implements VerificationListView {
 
@@ -40,7 +40,7 @@ public class VerificationListViewImpl implements VerificationListView {
 
     @Override
     public Set<VerificationEntryView> getEntries() {
-        final var set = new HashSet<VerificationEntryView>();
+        final HashSet<VerificationEntryView> set = new HashSet<>();
         for (VerificationEntry entry : target.getEntries()) {
             set.add(new VerificationEntryViewImpl(entry));
         }

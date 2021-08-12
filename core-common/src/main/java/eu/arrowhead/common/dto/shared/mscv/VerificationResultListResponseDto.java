@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 
 public class VerificationResultListResponseDto extends PaginationResponse<VerificationResultDto> {
+    private static final long serialVersionUID = 1L;
     public VerificationResultListResponseDto(final Page<VerificationResultDto> page) {
         super(page);
     }

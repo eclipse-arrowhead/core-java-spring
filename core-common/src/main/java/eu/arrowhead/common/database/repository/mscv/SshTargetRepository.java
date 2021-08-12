@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SshTargetRepository extends RefreshableRepository<SshTarget, Long> {
 
-    List<SshTarget> findViewByName(final String name);
+    List<SshTarget> findByName(final String name);
 
     <S extends SshTarget> Optional<S> findByAddressAndPort(final String address, final Integer port);
 

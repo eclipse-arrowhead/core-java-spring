@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 
 public class TargetListResponseDto extends PaginationResponse<SshTargetDto> {
+    private static final long serialVersionUID = 1L;
     public TargetListResponseDto(final Page<SshTargetDto> page) {
         super(page);
     }

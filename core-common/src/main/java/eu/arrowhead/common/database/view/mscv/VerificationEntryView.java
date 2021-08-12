@@ -7,9 +7,9 @@ public interface VerificationEntryView {
     @Value("#{target.id}")
     Long getId();
 
-    @Value("#{target.id}")
+    @Value("#{target.weight}")
     Short getWeight();
 
-    @Value("#{target.id}")
+    @Value("#{target.mip}")
     MipView getMip();
 }

@@ -1,11 +1,11 @@
 #!/bin/sh
-# prerm script for arrowhead-msvc
+# prerm script for arrowhead-mscv
 #
 # see: dh_installdeb(1)
 
 set -e
 
-PKG_NAME="arrowhead-msvc"
+PKG_NAME="arrowhead-mscv"
 
 # summary of how this script can be called:
 #        * <prerm> `remove'

@@ -5,6 +5,7 @@ import java.util.StringJoiner;
 
 public class SshTargetDto extends TargetDto {
 
+    private static final long serialVersionUID = 1L;
     private String address;
     private Integer port;
 

@@ -32,6 +32,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -43,6 +44,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import static eu.arrowhead.core.mscv.Constants.PARAMETER_IDENTIFICATION;
@@ -65,10 +67,9 @@ import static eu.arrowhead.core.mscv.MscvUtilities.notFoundException;
         allowedHeaders = {HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT}
 )
 @RestController
-@RequestMapping(CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI)
+@RequestMapping(value = CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI,
+        consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 public class MipMgmtController {
-
-    protected static final String MIP_IDENTIFIER_DESCRIPTION = "Identifier in the form: &lt;category abbreviation&gt;-&lt;external id&gt;";
 
     private static final String MIP_URI = "/mip";
     private static final String QUALIFY_MIP_URI = MIP_URI + PARAMETER_MIP_EXT_ID_PATH +
@@ -82,7 +83,7 @@ public class MipMgmtController {
 
     private static final String READ_MIP_URI = QUALIFY_MIP_URI;
     private static final String READ_MIP_EXT_ID_URI = MIP_URI + PARAMETER_MIP_EXT_ID_PATH + PATH_MIP_CATEGORY + PARAMETER_MIP_CATEGORY_PATH;
-    private static final String READ_MIP_DESCRIPTION = "Get MSCV mip by through external id category abbreviation";
+    private static final String READ_MIP_DESCRIPTION = "Get MSCV mip through external id and category abbreviation";
     private static final String READ_MIP_EXT_ID_DESCRIPTION = "Get MSCV mip through external id and category name";
     private static final String READ_MIP_NOT_FOUND = "MSCV mip not found";
     private static final String READ_MIP_SUCCESS = "MSCV mip returned";
@@ -94,13 +95,13 @@ public class MipMgmtController {
     private static final String READ_ALL_MIP_BAD_REQUEST = "Unable to return MSCV mips";
 
     private static final String UPDATE_MIP_URI = QUALIFY_MIP_URI;
-    private static final String UPDATE_MIP_DESCRIPTION = "Update MSCV mip through external id category abbreviation";
+    private static final String UPDATE_MIP_DESCRIPTION = "Update MSCV mip through external id and category abbreviation";
     private static final String UPDATE_MIP_SUCCESS = "MSCV mip updated";
     private static final String UPDATE_MIP_NOT_FOUND = "MSCV mip not found";
     private static final String UPDATE_MIP_BAD_REQUEST = "Unable to update MSCV mip";
 
     private static final String DELETE_MIP_URI = QUALIFY_MIP_URI;
-    private static final String DELETE_MIP_DESCRIPTION = "Delete MSCV mip through external id category abbreviation";
+    private static final String DELETE_MIP_DESCRIPTION = "Delete MSCV mip through external id and category abbreviation";
     private static final String DELETE_MIP_SUCCESS = "MSCV mip deleted";
     private static final String DELETE_MIP_BAD_REQUEST = "Unable to delete MSCV mip";
 
@@ -136,12 +137,14 @@ public class MipMgmtController {
         validation.verify(dto, origin);
         mip = MscvDtoConverter.convert(dto);
 
-        if (crudService.exists(mip)) {
-            return ResponseEntity.ok(dto);
-        } else {
-            final Mip created = crudService.create(mip);
-            final MipDto result = MscvDtoConverter.convert(created);
-            return ResponseEntity.status(HttpStatus.SC_CREATED).body(result);
+        synchronized (crudService) {
+            if (crudService.exists(mip)) {
+                return ResponseEntity.ok(dto);
+            } else {
+                final Mip created = crudService.create(mip);
+                final MipDto result = MscvDtoConverter.convert(created);
+                return ResponseEntity.status(HttpStatus.SC_CREATED).body(result);
+            }
         }
     }
 
@@ -156,10 +159,12 @@ public class MipMgmtController {
     })
     @GetMapping(READ_MIP_URI)
     @ResponseBody
-    public MipDto read(@PathVariable(PARAMETER_MIP_EXT_ID) final Integer extId, @PathVariable(PARAMETER_MIP_CATEGORY_ABBREVIATION) final String categoryAbbreviation) {
+    public MipDto read(@PathVariable(PARAMETER_MIP_EXT_ID) final Integer extId,
+                       @PathVariable(PARAMETER_MIP_CATEGORY_ABBREVIATION) final String categoryAbbreviation) {
         logger.debug("read started ...");
         final String origin = createMgmtOrigin(READ_MIP_URI);
-        validation.verifyName(categoryAbbreviation, origin);
+        validation.verifyExtId(extId, origin);
+        validation.verifyAbbreviation(categoryAbbreviation, origin);
 
         final Optional<Mip> optionalMip = crudService.findByExternalIdAndCategoryAbbreviation(extId, categoryAbbreviation);
         final Mip mip = optionalMip.orElseThrow(notFoundException(READ_MIP_NOT_FOUND, origin));
@@ -181,7 +186,7 @@ public class MipMgmtController {
     public MipDto readExtId(@PathVariable(PARAMETER_MIP_EXT_ID) final Integer extId, @PathVariable(PARAMETER_MIP_CATEGORY) final String categoryName) {
         logger.debug("readExtId started ...");
         final String origin = createMgmtOrigin(READ_MIP_EXT_ID_URI);
-        validation.verifyId(extId, origin);
+        validation.verifyExtId(extId, origin);
         validation.verifyName(categoryName, origin);
 
         final Optional<Mip> optionalMip = crudService.findByExternalIdAndCategory(extId, categoryName);
@@ -191,7 +196,7 @@ public class MipMgmtController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = READ_ALL_MIP_DESCRIPTION, response = MipDto.class)
+    @ApiOperation(value = READ_ALL_MIP_DESCRIPTION, response = MipListResponseDto.class)
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = READ_ALL_MIP_SUCCESS),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = READ_ALL_MIP_BAD_REQUEST, response = ErrorMessageDTO.class),
@@ -210,13 +215,13 @@ public class MipMgmtController {
             @ApiParam(value = "Filter for name. Partial match ignoring case.")
             @RequestParam(name = PARAMETER_NAME, required = false) final String name,
             @ApiParam(value = "Filter for category name. Partial match ignoring case.")
-            @RequestParam(name = PARAMETER_MIP_CATEGORY, required = false) final String category,
+            @RequestParam(name = PARAMETER_MIP_CATEGORY, required = false) final String categoryName,
             @ApiParam(value = "Filter for category abbreviation. Partial match ignoring case.")
             @RequestParam(name = PARAMETER_MIP_ABBREVIATION, required = false) final String abbreviation,
             @ApiParam(value = "Filter for domain name. Partial match ignoring case.")
-            @RequestParam(name = PARAMETER_MIP_DOMAIN, required = false) final String domain,
+            @RequestParam(name = PARAMETER_MIP_DOMAIN, required = false) final String domainName,
             @ApiParam(value = "Filter for standard. Partial match ignoring case.")
-            @RequestParam(name = PARAMETER_MIP_STANDARD, required = false) final String standard,
+            @RequestParam(name = PARAMETER_MIP_STANDARD, required = false) final String standardName,
             @ApiParam(value = "Filter for standard identification. Partial match ignoring case.")
             @RequestParam(name = PARAMETER_IDENTIFICATION, required = false) final String identification) {
         logger.debug("readAll started ...");
@@ -226,16 +231,12 @@ public class MipMgmtController {
         final Mip probe = new Mip();
 
         if (Objects.nonNull(name)) { probe.setName(name); }
-        if (Objects.nonNull(domain)) { probe.setDomain(new MipDomain(domain)); }
-        if (Objects.nonNull(standard) || Objects.nonNull(identification)) {
-            Standard s = new Standard();
-            s.setIdentification(identification);
-            s.setName(name);
-            probe.setStandard(s);
+        if (Objects.nonNull(domainName)) { probe.setDomain(new MipDomain(domainName)); }
+        if (Objects.nonNull(standardName) || Objects.nonNull(identification)) {
+            probe.setStandard(new Standard(identification, standardName, null));
         }
-        if (Objects.nonNull(category) || Objects.nonNull(abbreviation)) {
-            MipCategory c = new MipCategory(name, abbreviation);
-            probe.setCategory(c);
+        if (Objects.nonNull(categoryName) || Objects.nonNull(abbreviation)) {
+            probe.setCategory(new MipCategory(categoryName, abbreviation));
         }
 
         final Example<Mip> example = Example.of(probe, validation.exampleMatcher(mode));
@@ -260,9 +261,9 @@ public class MipMgmtController {
                          @RequestBody final MipDto dto) {
         logger.debug("update started ...");
         final String origin = createMgmtOrigin(UPDATE_MIP_URI);
-        validation.verify(dto, origin);
-        validation.verifyId(extId, origin);
+        validation.verifyExtId(extId, origin);
         validation.verifyAbbreviation(categoryAbbreviation, origin);
+        validation.verify(dto, origin);
 
         final Optional<Mip> optionalMip = crudService.findByExternalIdAndCategoryAbbreviation(extId, categoryAbbreviation);
         final Mip oldMip = optionalMip.orElseThrow(notFoundException("MIP", origin));
@@ -274,18 +275,18 @@ public class MipMgmtController {
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = DELETE_MIP_DESCRIPTION)
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_MIP_SUCCESS),
+            @ApiResponse(code = HttpStatus.SC_NO_CONTENT, message = DELETE_MIP_SUCCESS),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_MIP_BAD_REQUEST, response = ErrorMessageDTO.class),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response = ErrorMessageDTO.class),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response = ErrorMessageDTO.class)
     })
     @DeleteMapping(DELETE_MIP_URI)
-    @ResponseBody
+    @ResponseStatus(org.springframework.http.HttpStatus.NO_CONTENT)
     public void delete(@PathVariable(PARAMETER_MIP_EXT_ID) final Integer extId,
                        @PathVariable(PARAMETER_MIP_CATEGORY_ABBREVIATION) final String categoryAbbreviation) {
         logger.debug("delete started ...");
         final String origin = createMgmtOrigin(DELETE_MIP_URI);
-        validation.verifyId(extId, origin);
+        validation.verifyExtId(extId, origin);
         validation.verifyAbbreviation(categoryAbbreviation, origin);
         crudService.delete(extId, categoryAbbreviation);
     }

@@ -7,6 +7,7 @@ import java.util.StringJoiner;
 
 public class MipVerificationResultDto implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private String standard;
     private String domain;
     private String category;

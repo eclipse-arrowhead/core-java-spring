@@ -138,6 +138,11 @@ Type: password
 Default:
 Description: MySQL password for Onboarding Controller system (leave empty for random).
 
+Template: arrowhead-core-common/mysql_password_mscv
+Type: password
+Default:
+Description: MySQL password for MSCV system (leave empty for random).
+
 Template: arrowhead-core-common/mysql_password_ca
 Type: password
 Default:

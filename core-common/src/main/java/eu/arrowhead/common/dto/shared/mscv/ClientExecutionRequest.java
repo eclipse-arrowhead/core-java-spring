@@ -5,6 +5,7 @@ import java.util.StringJoiner;
 
 public class ClientExecutionRequest implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private TargetDto target;
     private Layer layer;
 

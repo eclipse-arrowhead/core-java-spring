@@ -15,10 +15,10 @@ public interface VerificationExecutionDetailView {
     MipView getMip();
 
     @Value("#{target.execution.verificationList.name}")
-    String getVerificationSet();
+    String getVerificationList();
 
     @Value("#{target.verificationEntry.weight}")
-    Integer getResultWeight();
+    Short getResultWeight();
 
     @Value("#{target.result}")
     DetailSuccessIndicator getResult();

@@ -9,7 +9,6 @@ import org.quartz.TriggerBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 
-//@Configuration
 public class QuartzJobConfiguration {
 
     private final int schedulerInterval;

@@ -64,7 +64,7 @@ public class VerificationResultDetail {
         this.verificationEntry = verificationEntry;
         this.script = script;
         this.result = result;
-        this.details = details;
+        setDetails(details);
     }
 
     public VerificationResultDetail(final Long id, final VerificationResult execution,
@@ -77,7 +77,7 @@ public class VerificationResultDetail {
         this.verificationEntry = verificationEntry;
         this.script = script;
         this.result = result;
-        this.details = details;
+        setDetails(details);
     }
 
     public Long getId() {
@@ -125,7 +125,7 @@ public class VerificationResultDetail {
     }
 
     public void setDetails(final String details) {
-        if (details.length() > DETAILS_LENGTH) {
+        if (Objects.nonNull(details) && details.length() > DETAILS_LENGTH) {
             this.details = details.substring(0, DETAILS_LENGTH);
         } else {
             this.details = details;

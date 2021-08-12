@@ -20,6 +20,7 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -33,6 +34,7 @@ public class MscvApplicationInitListener extends ApplicationInitListener {
     private final Logger logger = LogManager.getLogger(MscvApplicationInitListener.class);
     private final DriverUtilities driver;
 
+    @Autowired
     public MscvApplicationInitListener(final DriverUtilities driver) {this.driver = driver;}
 
     //=================================================================================================

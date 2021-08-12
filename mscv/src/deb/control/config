@@ -12,7 +12,8 @@ fi
 
 # Get installation type
 db_input high arrowhead-core-common/db_host || true
-db_input high arrowhead-core-common/mysql_password_onboarding || true
+db_input high arrowhead-core-common/mysql_password_mscv || true
+db_input high arrowhead-core-common/sr_host || true
 
 # Run dialogs
 db_go || true

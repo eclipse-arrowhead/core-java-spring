@@ -1,5 +1,5 @@
 #!/bin/sh
-# preinst script for arrowhead-msvc
+# preinst script for arrowhead-mscv
 #
 # see: dh_installdeb(1)
 

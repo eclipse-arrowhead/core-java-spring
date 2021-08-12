@@ -6,6 +6,7 @@ import java.util.StringJoiner;
 
 public class MipIdentifierDto implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private String categoryAbbreviation;
     private Integer extId;
 

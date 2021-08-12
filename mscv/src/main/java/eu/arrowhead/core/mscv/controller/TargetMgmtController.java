@@ -34,6 +34,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -45,6 +46,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import static eu.arrowhead.common.CommonConstants.OP_MSCV_LOGIN_URI;
@@ -65,7 +67,8 @@ import static eu.arrowhead.core.mscv.Validation.LOGIN_TARGET_NOT_FOUND;
         allowedHeaders = {HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT}
 )
 @RestController
-@RequestMapping(CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI)
+@RequestMapping(value = CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI,
+        consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 public class TargetMgmtController {
 
     private static final String TARGET_URI = "/target";
@@ -102,11 +105,11 @@ public class TargetMgmtController {
 
     private static final String LOGIN_TARGET_URI = TARGET_URI + OP_MSCV_LOGIN_URI;
     private static final String LOGIN_TARGET_DESCRIPTION = "Instruct MSCV to remote login to a target with a username and password";
-     private static final String LOGIN_TARGET_SUCCESS = "MSCV target login success";
+    private static final String LOGIN_TARGET_SUCCESS = "MSCV target login success";
     private static final String LOGIN_TARGET_BAD_REQUEST = "Unable to login to MSCV target";
 
     private static final String VERIFY_LOGIN_TARGET_URI = TARGET_URI + "/verify";
-    private static final String VERIFY_LOGIN_TARGET_DESCRIPTION = "Instruct MSCV to remote login to a target with a username and password";
+    private static final String VERIFY_LOGIN_TARGET_DESCRIPTION = "Instruct MSCV to remote login to a target with the SSH key";
 
     private final Logger logger = LogManager.getLogger();
     private final Validation validation = new Validation();
@@ -195,8 +198,7 @@ public class TargetMgmtController {
             @ApiParam(value = "Filter for address. Partial match ignoring case.")
             @RequestParam(name = PARAMETER_ADDRESS, required = false) final String address,
             @ApiParam(value = "Filter for port.", example = "22")
-            @RequestParam(name = PARAMETER_PORT, required = false) final Integer port)
-    {
+            @RequestParam(name = PARAMETER_PORT, required = false) final Integer port) {
         logger.debug("readAll started ...");
         final CoreUtilities.ValidatedPageParams pageParameters = CoreUtilities
                 .validatePageParameters(page, size, direction, createOrigin(READ_ALL_TARGET_URI));
@@ -236,13 +238,13 @@ public class TargetMgmtController {
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = DELETE_TARGET_DESCRIPTION)
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_TARGET_SUCCESS),
+            @ApiResponse(code = HttpStatus.SC_NO_CONTENT, message = DELETE_TARGET_SUCCESS),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_TARGET_BAD_REQUEST, response = ErrorMessageDTO.class),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response = ErrorMessageDTO.class),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response = ErrorMessageDTO.class)
     })
     @DeleteMapping(DELETE_TARGET_URI)
-    @ResponseBody
+    @ResponseStatus(org.springframework.http.HttpStatus.NO_CONTENT)
     public void delete(@PathVariable(PARAMETER_ADDRESS) final String address,
                        @PathVariable(PARAMETER_PORT) final Integer port) {
         logger.debug("delete started ...");
@@ -263,16 +265,20 @@ public class TargetMgmtController {
     })
     @PostMapping(LOGIN_TARGET_URI)
     @ResponseBody
-    public void login(@RequestBody final TargetLoginRequest request) throws MscvException, ArrowheadException {
-        logger.debug("login started ...");
-        final String origin = createOrigin(LOGIN_TARGET_URI);
-        validation.verify(request, origin);
+    public void login(@RequestBody final TargetLoginRequest request) {
+        try {
+            logger.debug("login started ...");
+            final String origin = createOrigin(LOGIN_TARGET_URI);
+            validation.verify(request, origin);
 
-        SshTarget sshTarget = MscvDtoConverter.convert(request.getTarget());
-        sshTarget = targetService.findOrCreate(sshTarget);
+            SshTarget sshTarget = MscvDtoConverter.convert(request.getTarget());
+            sshTarget = targetService.findOrCreate(sshTarget);
 
-        final MscvUtilities.Tuple2<String, String> credentials = MscvUtilities.decodeCredentials(request.getCredentials(), origin);
-        targetService.login(sshTarget, credentials.getT1(), credentials.getT2());
+            final MscvUtilities.Tuple2<String, String> credentials = MscvUtilities.decodeCredentials(request.getCredentials(), origin);
+            targetService.login(sshTarget, credentials.getT1(), credentials.getT2());
+        } catch (MscvException e) {
+            throw new ArrowheadException(e.getMessage(), HttpStatus.SC_INTERNAL_SERVER_ERROR, createOrigin(LOGIN_TARGET_URI));
+        }
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -286,16 +292,17 @@ public class TargetMgmtController {
     })
     @PostMapping(VERIFY_LOGIN_TARGET_URI)
     @ResponseBody
-    public boolean verifyLogin(@RequestBody final TargetDto dto) throws ArrowheadException {
-        logger.debug("verifyLogin started ...");
+    public boolean verifyPasswordlessLogin(@RequestBody final TargetDto dto) {
+        logger.debug("verifyPasswordlessLogin started ...");
         final String origin = createOrigin(VERIFY_LOGIN_TARGET_URI);
         validation.verify(dto, origin);
 
         final Optional<Target> optionalTarget = targetService.find(dto.getName(), dto.getOs());
         final Target target = optionalTarget.orElseThrow(notFoundException(LOGIN_TARGET_NOT_FOUND, origin));
 
-        return targetService.verifyLogin(target);
+        return targetService.verifyPasswordlessLogin(target);
     }
+
     private String createOrigin(final String path) {
         return CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI + path;
     }

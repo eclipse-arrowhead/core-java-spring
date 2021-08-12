@@ -1,5 +1,7 @@
 package eu.arrowhead.common.database.service;
 
+import java.util.Optional;
+
 import eu.arrowhead.common.database.repository.mscv.MipCategoryRepository;
 import eu.arrowhead.common.database.repository.mscv.MipDomainRepository;
 import eu.arrowhead.common.database.repository.mscv.MipRepository;
@@ -41,7 +43,8 @@ public class MeasurableIndicatorPointTest {
 
     @Test
     public void mipView() {
-        MipView mip = measurableIndicatorPointRepository.findViewById(1L);
+        Optional<MipView> optionalMipView = measurableIndicatorPointRepository.findViewById(1L);
+        MipView mip = optionalMipView.orElseThrow();
         Assert.assertEquals("IAC-1", mip.getIdentifier());
         Assert.assertEquals("SafIAC", mip.getName());
         Assert.assertEquals("Description SafIAC", mip.getDescription());
@@ -51,7 +54,8 @@ public class MeasurableIndicatorPointTest {
         Assert.assertEquals("BLA-4671-347", mip.getStandard());
         Assert.assertEquals("uri", mip.getReferenceUri());
 
-        mip = measurableIndicatorPointRepository.findViewById(2L);
+        optionalMipView = measurableIndicatorPointRepository.findViewById(2L);
+        mip = optionalMipView.orElseThrow();
         Assert.assertEquals("IAC-2", mip.getIdentifier());
         Assert.assertEquals("SecIAC", mip.getName());
         Assert.assertEquals("Description SecIAC", mip.getDescription());

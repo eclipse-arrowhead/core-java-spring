@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 
 public class DomainListResponseDto extends PaginationResponse<DomainDto> {
+    private static final long serialVersionUID = 1L;
     public DomainListResponseDto(final Page<DomainDto> page) {
         super(page);
     }

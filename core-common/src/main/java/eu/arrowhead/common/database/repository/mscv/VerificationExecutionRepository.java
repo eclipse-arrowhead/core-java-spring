@@ -2,6 +2,7 @@ package eu.arrowhead.common.database.repository.mscv;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import eu.arrowhead.common.database.entity.mscv.Target;
 import eu.arrowhead.common.database.entity.mscv.VerificationEntryList;
@@ -15,11 +16,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface VerificationExecutionRepository extends RefreshableRepository<VerificationResult, Long> {
 
-    VerificationResult findViewById(final Long id);
 
-    VerificationResult findTopViewByTargetAndVerificationListOrderByExecutionDateDesc(final Target target, final VerificationEntryList entryList);
+    Optional<VerificationResult> findTopByTargetAndVerificationListOrderByExecutionDateDesc(final Target target, final VerificationEntryList entryList);
 
-    VerificationResult findTopViewByTargetAndVerificationListLayerOrderByExecutionDateDesc(final Target target, final Layer layer);
+    Optional<VerificationResult> findTopByTargetAndVerificationListLayerOrderByExecutionDateDesc(final Target target, final Layer layer);
 
     <S extends VerificationResult> Page<S> findAllByTargetAndVerificationListInAndExecutionDateIsBetween(final Pageable page,
                                                                                                          final Target target,

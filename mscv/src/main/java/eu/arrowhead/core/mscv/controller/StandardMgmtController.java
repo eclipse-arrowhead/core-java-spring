@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -48,7 +49,8 @@ import static eu.arrowhead.core.mscv.MscvUtilities.notFoundException;
         allowedHeaders = {HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT}
 )
 @RestController
-@RequestMapping(CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI)
+@RequestMapping(value = CommonConstants.MSCV_URI + CoreCommonConstants.MGMT_URI,
+        consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 public class StandardMgmtController {
 
     private static final String STANDARD_URI = "/standard";
@@ -181,8 +183,8 @@ public class StandardMgmtController {
     public StandardDto update(@PathVariable(PARAMETER_IDENTIFICATION) final String identification, @RequestBody final StandardDto dto) {
         logger.debug("update started ...");
         final String origin = createMgmtOrigin(UPDATE_STANDARD_URI);
-        validation.verify(dto, origin);
         validation.verifyIdentification(identification, origin);
+        validation.verify(dto, origin);
 
         final Optional<Standard> optionalStandard = crudService.findByIdentification(identification);
         final Standard oldStandard = optionalStandard.orElseThrow(notFoundException("Standard", origin));

@@ -1,5 +1,5 @@
 #!/bin/sh
-# postinst script for arrowhead-msvc
+# postinst script for arrowhead-mscv
 #
 # see: dh_installdeb(1)
 
@@ -7,8 +7,8 @@ set -e
 
 . /usr/share/debconf/confmodule
 
-SYSTEM_NAME="msvc"
-PKG_NAME="arrowhead-msvc"
+SYSTEM_NAME="mscv"
+PKG_NAME="arrowhead-mscv"
 
 # summary of how this script can be called:
 #        * <postinst> `configure' <most-recently-configured-version>
@@ -30,8 +30,8 @@ case "$1" in
 
     SYSTEM_DIR="${AH_SYSTEMS_DIR}/${SYSTEM_NAME}"
 
-		db_get arrowhead-core-common/mysql_password_msvc; system_passwd=$RET || true
-		db_unregister arrowhead-core-common/mysql_password_msvc
+		db_get arrowhead-core-common/mysql_password_mscv; system_passwd=$RET || true
+		db_unregister arrowhead-core-common/mysql_password_mscv
 
 		# Generate password (if required)
 		if [ -z "${system_passwd}" ]; then

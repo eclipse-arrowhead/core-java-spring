@@ -1,13 +1,15 @@
 package eu.arrowhead.common.dto.shared.mscv;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.StringJoiner;
 
 import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
 
-public abstract class PaginationResponse<P> {
+public abstract class PaginationResponse<P> implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private final List<P> content;
     private final int currentPage;
     private final int totalPages;

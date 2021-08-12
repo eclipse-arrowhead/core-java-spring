@@ -42,8 +42,7 @@ public class Standard {
 
     public Standard() { super(); }
 
-    public Standard(final Long id, final String identification, final String name, final String referenceUri) {
-        this.id = id;
+    public Standard(final String identification, final String name, final String referenceUri) {
         this.identification = identification;
         this.name = name;
         this.referenceUri = referenceUri;
