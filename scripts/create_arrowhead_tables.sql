@@ -482,9 +482,10 @@ CREATE TABLE IF NOT EXISTS `choreographer_session_step` (
 CREATE TABLE IF NOT EXISTS `choreographer_worklog` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `entry_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `plan_name` varchar(255) NOT NULL,
+  `plan_name` varchar(255),
   `action_name` varchar(255),
   `step_name` varchar(255),
+  `session_id` bigint(20),
   `message` mediumtext,
   `exception` mediumtext,
   PRIMARY KEY (`id`)

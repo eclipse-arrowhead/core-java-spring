@@ -40,8 +40,11 @@ import eu.arrowhead.common.database.entity.ChoreographerAction;
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
 import eu.arrowhead.common.database.entity.ChoreographerExecutorServiceDefinition;
 import eu.arrowhead.common.database.entity.ChoreographerPlan;
+import eu.arrowhead.common.database.entity.ChoreographerSession;
+import eu.arrowhead.common.database.entity.ChoreographerSessionStep;
 import eu.arrowhead.common.database.entity.ChoreographerStep;
 import eu.arrowhead.common.database.entity.ChoreographerStepNextStepConnection;
+import eu.arrowhead.common.database.entity.ChoreographerWorklog;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
@@ -71,7 +74,13 @@ import eu.arrowhead.common.dto.shared.ChoreographerActionResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerSessionListResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerSessionResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerSessionStepListResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerSessionStepResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerStepResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerWorklogListResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerWorklogResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.DeviceQueryResultDTO;
 import eu.arrowhead.common.dto.shared.DeviceRegistryResponseDTO;
@@ -1036,7 +1045,82 @@ public class DTOConverter {
                                                 Utilities.convertZonedDateTimeToUTCString(planEntry.getCreatedAt()),
                                                 Utilities.convertZonedDateTimeToUTCString(planEntry.getUpdatedAt()));
     }
+    
+    //-------------------------------------------------------------------------------------------------
+    public static ChoreographerSessionResponseDTO convertSessionToSessionResponseDTO(final ChoreographerSession entry) {
+    	 Assert.notNull(entry, "session entry is null.");
+    	 
+    	 return new ChoreographerSessionResponseDTO(entry.getId(),
+    			 									entry.getPlan().getId(),
+    			 									entry.getPlan().getName(),
+    			 									entry.getStatus(),
+    			 									entry.getNotifyUri(),
+                                                    Utilities.convertZonedDateTimeToUTCString(entry.getStartedAt()),
+                                                    Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));
+    }
 
+    //-------------------------------------------------------------------------------------------------
+    public static ChoreographerSessionListResponseDTO convertSessionListToSessionListResponseDTO(final Iterable<ChoreographerSession> entries, final long count) {
+    	Assert.notNull(entries, "session entry list is null.");
+    	
+    	final List<ChoreographerSessionResponseDTO> data = new ArrayList<>();
+    	for (final ChoreographerSession entry : entries) {
+    		data.add(convertSessionToSessionResponseDTO(entry));
+		}
+    	
+    	return new ChoreographerSessionListResponseDTO(data, count);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    public static ChoreographerSessionStepResponseDTO convertSessionStepToSessionStepResponseDTO(final ChoreographerSessionStep entry) {
+    	Assert.notNull(entry, "session step entry is null.");
+    	
+    	return new ChoreographerSessionStepResponseDTO(entry.getId(),
+    												   convertSessionToSessionResponseDTO(entry.getSession()),
+    												   convertStepToStepResponseDTO(entry.getStep()),
+    												   convertExecutorToExecutorResponseDTO(entry.getExecutor(), new ArrayList<>()),
+    												   entry.getStatus(),
+    												   entry.getMessage(),
+    												   Utilities.convertZonedDateTimeToUTCString(entry.getStartedAt()),
+    												   Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    public static ChoreographerSessionStepListResponseDTO convertSessionStepListToSessionStepListResponseDTO(final Iterable<ChoreographerSessionStep> entries, final long count) {
+    	Assert.notNull(entries, "session step entry list is null.");
+    	
+    	final List<ChoreographerSessionStepResponseDTO> data = new ArrayList<>();
+    	for (final ChoreographerSessionStep entry : entries) {
+			data.add(convertSessionStepToSessionStepResponseDTO(entry));
+		}
+    	return new ChoreographerSessionStepListResponseDTO(data, count);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    public static ChoreographerWorklogResponseDTO convertWorklogToWorklogResponseDTO(final ChoreographerWorklog entry) {
+    	Assert.notNull(entry, "worklog entry is null.");
+    	
+    	return new ChoreographerWorklogResponseDTO(entry.getId(),
+    											   Utilities.convertZonedDateTimeToUTCString(entry.getEntryDate()),
+    											   entry.getPlanName(),
+    											   entry.getActionName(),
+    											   entry.getStepName(),
+    											   entry.getSessionId(),
+    											   entry.getMessage(),
+    											   entry.getMessage());
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    public static ChoreographerWorklogListResponseDTO convertWorklogListToWorklogListResponseDTO(final Iterable<ChoreographerWorklog> entries, final long count) {
+    	Assert.notNull(entries, "worklog entry list is null.");
+    	
+    	final List<ChoreographerWorklogResponseDTO> data = new ArrayList<>();
+    	for (final ChoreographerWorklog entry : entries) {
+			data.add(convertWorklogToWorklogResponseDTO(entry));
+		}
+    	return new ChoreographerWorklogListResponseDTO(data, count);
+    }
+    
     //-------------------------------------------------------------------------------------------------
 	public static ChoreographerExecutorResponseDTO convertExecutorToExecutorResponseDTO(final ChoreographerExecutor executor, final List<ChoreographerExecutorServiceDefinition> serviceDefinitions) {
 		Assert.notNull(executor, "Executor is null.");
