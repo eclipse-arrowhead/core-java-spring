@@ -14,10 +14,11 @@
 
 package eu.arrowhead.core.choreographer.service;
 
-import java.io.IOException;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -27,25 +28,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreSystemRegistrationProperties;
+import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerAction;
+import eu.arrowhead.common.database.entity.ChoreographerExecutor;
 import eu.arrowhead.common.database.entity.ChoreographerPlan;
 import eu.arrowhead.common.database.entity.ChoreographerSession;
 import eu.arrowhead.common.database.entity.ChoreographerSessionStep;
 import eu.arrowhead.common.database.entity.ChoreographerStep;
 import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
+import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStatus;
 import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerNotificationDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerSessionRunningStepDataDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFlags;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerPlanDBService;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerSessionDBService;
 import eu.arrowhead.core.choreographer.exception.ChoreographerSessionException;
+import eu.arrowhead.core.choreographer.executor.ExecutorSelector;
 
 @Service
 public class ChoreographerService {
@@ -65,6 +73,12 @@ public class ChoreographerService {
 
     @Autowired
     private ChoreographerDriver driver;
+    
+    @Autowired
+    private SessionDataStorage sessionDataStorage;
+    
+    @Autowired
+    private ExecutorSelector executorSelector;
 
     @Autowired
     protected CoreSystemRegistrationProperties registrationProperties;
@@ -97,20 +111,19 @@ public class ChoreographerService {
 	        
 	        selectExecutorsForPlan(sessionId, plan);
 	        
-	        //TODO: continue
+	        final ChoreographerAction firstAction = plan.getFirstAction();
+	        final Set<ChoreographerStep> firstSteps = new HashSet<>(planDBService.getFirstSteps(firstAction));
 	
-//	        final ChoreographerAction firstAction = plan.getFirstAction();
-//	        final Set<ChoreographerStep> firstSteps = new HashSet<>(firstAction.getFirstStepEntries());
-//	
-//	
-//	        firstSteps.parallelStream().forEach(firstStep -> {
-//	            try {
-//	                executeStep(firstStep, sessionId);
-//	            } catch (InterruptedException e) {
-//	                choreographerDBService.setSessionStatus(sessionId, ChoreographerSessionStatus.ABORTED);
-//	                logger.debug(e.getMessage(), e);
-//	            }
-//	        });
+	
+	        firstSteps.parallelStream().forEach(step -> {
+	            try {
+	                executeStep(step, sessionId);
+	            } catch (final ChoreographerSessionException ex) {
+	            	throw ex;
+	            } catch (final Throwable t) {
+	            	throw new ChoreographerSessionException(sessionId, t);
+	            }
+	        });
         } catch (final ChoreographerSessionException ex) {
         	throw ex;
         } catch (final Throwable t) {
@@ -202,69 +215,6 @@ public class ChoreographerService {
         //TODO: Implement logic corresponding to what happens when a running step in a session returns from an executor with an error.
     }
 
-    public void executeStep(final ChoreographerStep step, final long sessionId) throws InterruptedException {
-//        logger.debug("Execution of step with the id of " + step.getId() + " and sessionId of " + sessionId + " started.");
-//
-//        ChoreographerSessionStep runningStep = insertInitiatedRunningStep(step.getId(), sessionId);
-//
-//        ChoreographerSuitableExecutorResponseDTO suitableExecutors = choreographerDBService.getSuitableExecutorIdsByStepId(step.getId());
-//
-//        if (suitableExecutors.getSuitableExecutorIds().isEmpty()) {
-//            //TODO: Research how error handling works in JMS.
-//        }
-//
-//        final long executorId = getRandomElementFromList(suitableExecutors.getSuitableExecutorIds());
-//
-//        System.out.println(executorId);
-//
-//        List<ChoreographerStepDetail> preconditionStepDetails = step.getStepDetails().stream().filter(t -> t.getType().equals("PRECONDITION")).collect(Collectors.toList());
-//        ChoreographerStepDetail mainStepDetail = step.getStepDetails().stream().filter(t -> t.getType().equals("MAIN")).collect(Collectors.toList()).get(0);
-//
-//        final List<OrchestrationResponseDTO> preconditionOrchestrationResponses = new ArrayList<>();
-//        OrchestrationResponseDTO mainStepOrchestrationResponse = new OrchestrationResponseDTO();
-//
-//        try {
-//            if (!preconditionStepDetails.isEmpty()) {
-//                for (ChoreographerStepDetail stepDetail : preconditionStepDetails) {
-//                    preconditionOrchestrationResponses.add(queryOrchestrator(createOrchestrationFormRequestFromString(stepDetail.getDto())));
-//                }
-//            }
-//            mainStepOrchestrationResponse = queryOrchestrator(createOrchestrationFormRequestFromString(mainStepDetail.getDto()));
-//        } catch (IOException ex) {
-//            ex.printStackTrace();
-//        }
-//
-//        // TODO: Maybe check later that each Orchestration request returned at least one response.
-//
-//        // TODO: Delete the following line.
-//        System.out.println(mainStepOrchestrationResponse.getResponse().get(0).getProvider().toString());
-//
-//        ChoreographerExecutorResponseDTO executor = choreographerDBService.getExecutorEntryByIdResponse(executorId);
-//
-//        UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, executor.getAddress(), executor.getPort(), executor.getBaseUri() + "/start");
-//
-//        ChoreographerSessionRunningStepDataDTO runningStepDataDTO = new ChoreographerSessionRunningStepDataDTO(sessionId, runningStep.getId(), preconditionOrchestrationResponses, mainStepOrchestrationResponse);
-//
-//        try {
-//            httpService.sendRequest(uri, HttpMethod.POST, Void.class, runningStepDataDTO);
-//        } catch (UnavailableServerException ex) {
-//            //TODO: Needs handling, possibly retrying and / or choosing another viable Executor from the list.
-//            System.out.println("Executor nem online!!");
-//
-//            //TODO: Check how the following code sequence should play out.
-//            //choreographerDBService.setRunningStepStatus(runningStep.getId(),ChoreographerStatusType.ABORTED,
-//            //        "Step aborted because the Orchestrator couldn't find any suitable providers. Rerun the plan when there are suitable providers for all steps!");
-//            //choreographerDBService.setSessionStatus(sessionId, ChoreographerStatusType.ABORTED);
-//        }
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    public ChoreographerSessionStep insertInitiatedRunningStep(final long stepId, final long sessionId) {
-    	//TODO: implement
-    	return null;
-//        return choreographerDBService.registerRunningStep(stepId, sessionId, ChoreographerSessionStatus.RUNNING, "Step running is initiated and search for provider started.");
-    }
-
     //=================================================================================================
     // assistant methods
     
@@ -295,26 +245,146 @@ public class ChoreographerService {
 		logger.debug("selectExecutorsForPlan started...");
 		
 		final List<ChoreographerStep> steps = planDBService.collectStepsFromPlan(plan);
-		// need some storage to store an executor cache and blacklist for every session
+		final SessionExecutorCache cache = new SessionExecutorCache();
+		sessionDataStorage.put(sessionId, cache);
+		
+		for (final ChoreographerStep step : steps) {
+			final ChoreographerExecutor executor = executorSelector.selectAndInit(sessionId, step, cache.getExclusions());
+			if (executor == null) { // means we can't execute at least one of the steps currently 
+				throw new ChoreographerSessionException(sessionId, "Can't find properly working executor for step: " + createFullyQualifiedStepName(step));
+			}
+			cache.put(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion(), executor);
+		}
+		sessionDBService.worklog(plan.getName(), sessionId, "Find executor to all steps.", null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private String createFullyQualifiedStepName(final ChoreographerStep step) {
+		logger.debug("createFullyQualifiedStepName started...");
+		
+		return step.getAction().getPlan().getName() + CommonConstants.DOT + step.getAction().getName() + CommonConstants.DOT + step.getName();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+    private void executeStep(final ChoreographerStep step, final long sessionId) {
+    	logger.debug("executeStep started...");
+    	logger.debug("Execution of step with the id of " + step.getId() + " and sessionId of " + sessionId + " started.");
+	
+    	final String fullStepName = createFullyQualifiedStepName(step);
+		final ChoreographerSessionStep sessionStep = sessionDBService.changeSessionStepStatus(sessionId, step, ChoreographerSessionStepStatus.RUNNING, "Running step: " + fullStepName);
+		OrchestrationResponseDTO mainOrchestrationResponseDTO = null;
+		try {
+			mainOrchestrationResponseDTO = driver.queryOrchestrator(createOrchestrationFormRequestFromServiceQueryForm(Utilities.fromJson(step.getSrTemplate(), ServiceQueryFormDTO.class)));
+			if (mainOrchestrationResponseDTO.getResponse().isEmpty()) { // no providers for the step
+				throw new ChoreographerSessionException(sessionId, sessionStep.getId(), "No providers found for step " + fullStepName);
+			}
+		} catch (final Exception ex) { // problem during orchestration
+			throw new ChoreographerSessionException(sessionId, sessionStep.getId(), "Problem occured while orchestration for step " + fullStepName, ex);
+		}
+		
 		//TODO: continue
+	
+//	
+//	  List<ChoreographerStepDetail> preconditionStepDetails = step.getStepDetails().stream().filter(t -> t.getType().equals("PRECONDITION")).collect(Collectors.toList());
+//	  ChoreographerStepDetail mainStepDetail = step.getStepDetails().stream().filter(t -> t.getType().equals("MAIN")).collect(Collectors.toList()).get(0);
+//	
+//	  final List<OrchestrationResponseDTO> preconditionOrchestrationResponses = new ArrayList<>();
+//	  OrchestrationResponseDTO mainStepOrchestrationResponse = new OrchestrationResponseDTO();
+//	
+//	  try {
+//	      if (!preconditionStepDetails.isEmpty()) {
+//	          for (ChoreographerStepDetail stepDetail : preconditionStepDetails) {
+//	              preconditionOrchestrationResponses.add(queryOrchestrator(createOrchestrationFormRequestFromString(stepDetail.getDto())));
+//	          }
+//	      }
+//	      mainStepOrchestrationResponse = queryOrchestrator(createOrchestrationFormRequestFromString(mainStepDetail.getDto()));
+//	  } catch (IOException ex) {
+//	      ex.printStackTrace();
+//	  }
+//	
+//	  // TODO: Maybe check later that each Orchestration request returned at least one response.
+//	
+//	  // TODO: Delete the following line.
+//	  System.out.println(mainStepOrchestrationResponse.getResponse().get(0).getProvider().toString());
+//	
+//	  ChoreographerExecutorResponseDTO executor = choreographerDBService.getExecutorEntryByIdResponse(executorId);
+//	
+//	  UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, executor.getAddress(), executor.getPort(), executor.getBaseUri() + "/start");
+//	
+//	  ChoreographerSessionRunningStepDataDTO runningStepDataDTO = new ChoreographerSessionRunningStepDataDTO(sessionId, sessionStep.getId(), preconditionOrchestrationResponses, mainStepOrchestrationResponse);
+//	
+//	  try {
+//	      httpService.sendRequest(uri, HttpMethod.POST, Void.class, runningStepDataDTO);
+//	  } catch (UnavailableServerException ex) {
+//	      //TODO: Needs handling, possibly retrying and / or choosing another viable Executor from the list.
+//	  System.out.println("Executor nem online!!");
+//	
+//	  //TODO: Check how the following code sequence should play out.
+//	  //choreographerDBService.setRunningStepStatus(runningStep.getId(),ChoreographerStatusType.ABORTED,
+//	  //        "Step aborted because the Orchestrator couldn't find any suitable providers. Rerun the plan when there are suitable providers for all steps!");
+//	  //choreographerDBService.setSessionStatus(sessionId, ChoreographerStatusType.ABORTED);
+//	  }
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+	private List<OrchestrationResultDTO> getOrchestrationResultsForExecutorPreconditions(final ChoreographerStep step, final ChoreographerSessionStep sessionStep) {
+    	logger.debug("getOrchestrationResultsForExecutorPreconditions started...");
+    	
+    	final List<OrchestrationResultDTO> result = new ArrayList<>();
+    	final SessionExecutorCache cache = sessionDataStorage.get(sessionStep.getSession().getId());
+    	final String serviceDefinition = step.getServiceDefinition();
+		final int minVersion = step.getMinVersion() == null ? Defaults.DEFAULT_VERSION : step.getMinVersion(); 
+		final int maxVersion = step.getMaxVersion() == null ? Integer.MAX_VALUE : step.getMaxVersion();
+    	
+		ChoreographerExecutor executor = cache.get(serviceDefinition, minVersion, maxVersion);
+    	while (executor != null) {
+    		try {
+    			//TODO: maybe store this somehow when using executor selector
+    			final ChoreographerExecutorServiceInfoResponseDTO serviceInfo = driver.queryExecutorServiceInfo(executor.getAddress(), executor.getPort(), executor.getBaseUri(), serviceDefinition, minVersion, maxVersion);
+    			for (final ServiceQueryFormDTO form : serviceInfo.getDependencies()) {
+					final OrchestrationFormRequestDTO orchestrationForm = createOrchestrationFormRequestFromServiceQueryForm(form);
+					final OrchestrationResponseDTO response = driver.queryOrchestrator(orchestrationForm);
+					if (response.getResponse().isEmpty()) {
+						// no provider for a dependency
+						
+						// TODO: maybe worklog
+		        		cache.remove(serviceDefinition, minVersion, maxVersion);
+		        		cache.getExclusions().add(executor.getId());
+		        		break;
+					}
+					result.add(response.getResponse().get(0));
+				}
+    			
+    			return result;
+    		} catch (final Exception ex) {
+    	   		logger.warn("Unable to send notification - " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+        		logger.debug(ex);
+        		
+				// TODO: maybe worklog
+        		cache.remove(serviceDefinition, minVersion, maxVersion);
+        		cache.getExclusions().add(executor.getId());
+    		}
+    		
+    		//TODO: find another executor
+    		//TODO: continue
+    	}
+		
+    	//TODO: throw exception
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	private OrchestrationFormRequestDTO createOrchestrationFormRequestFromServiceQueryForm(final ServiceQueryFormDTO form) {
+    	logger.debug("createOrchestrationFormRequestFromServiceQueryForm started...");
 
-    public long getRandomElementFromList(final List<Long> list) {
-        final Random rand = new Random();
-        return list.get(rand.nextInt(list.size()));
-    }
-
-    public OrchestrationFormRequestDTO createOrchestrationFormRequestFromString(final String dto) throws IOException {
-        final OrchestrationFormRequestDTO orchestrationForm = new ObjectMapper().readValue(dto, OrchestrationFormRequestDTO.class);
-
-        orchestrationForm.setRequesterSystem(requesterSystem);
-        final OrchestrationFlags orchestrationFlags = orchestrationForm.getOrchestrationFlags();
-        orchestrationFlags.put(OrchestrationFlags.Flag.EXTERNAL_SERVICE_REQUEST, true);
-        orchestrationFlags.put(OrchestrationFlags.Flag.MATCHMAKING, true);
-        orchestrationFlags.put(OrchestrationFlags.Flag.OVERRIDE_STORE, true);
-        orchestrationFlags.put(OrchestrationFlags.Flag.TRIGGER_INTER_CLOUD, false);
-
-        return orchestrationForm;
-    }
+	    final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO();
+	    orchestrationForm.setRequestedService(form);
+	    orchestrationForm.setRequesterSystem(requesterSystem);
+	    
+	    final OrchestrationFlags orchestrationFlags = orchestrationForm.getOrchestrationFlags();
+	    orchestrationFlags.put(OrchestrationFlags.Flag.EXTERNAL_SERVICE_REQUEST, true);
+	    orchestrationFlags.put(OrchestrationFlags.Flag.MATCHMAKING, true);
+	    orchestrationFlags.put(OrchestrationFlags.Flag.OVERRIDE_STORE, true);
+	
+	    return orchestrationForm;
+	}
 }

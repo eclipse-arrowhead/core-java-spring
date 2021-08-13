@@ -31,6 +31,7 @@ import org.springframework.util.Assert;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
+import eu.arrowhead.common.database.entity.ChoreographerStep;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
@@ -65,6 +66,11 @@ public class ExecutorSelector {
 	//-------------------------------------------------------------------------------------------------
 	public ChoreographerExecutor select(final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final Set<Long> exclusions) {
 		return selectAndInit(null, null, serviceDefinition, minVersion, maxVersion, exclusions, false);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ChoreographerExecutor selectAndInit(final long sessionId, final ChoreographerStep step, final Set<Long> exclusions) {
+		return selectAndInit(sessionId, step.getId(), step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion(), exclusions, true);
 	}
 
 	//-------------------------------------------------------------------------------------------------

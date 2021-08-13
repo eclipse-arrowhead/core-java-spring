@@ -226,6 +226,32 @@ public class ChoreographerSessionDBService {
     
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
+    public ChoreographerSessionStep changeSessionStepStatus(final long sessionId, final ChoreographerStep step, final ChoreographerSessionStepStatus status, final String message) {
+    	logger.debug("changeSessionStepStatus started...");
+    	Assert.notNull(step, "Step is null");
+    	try {
+    		final Optional<ChoreographerSession> sessionOpt = sessionRepository.findById(sessionId);
+    		if (sessionOpt.isEmpty()) {
+    			worklogAndThrow("Session step status change has been failed", new InvalidParameterException("Session with id " + sessionId + " not exists"));
+    		}
+    		
+    		final Optional<ChoreographerSessionStep> sessionStepOpt = sessionStepRepository.findBySessionAndStep(sessionOpt.get(), step);
+			if (sessionStepOpt.isEmpty()) {
+				worklogAndThrow("Session step status change has been failed", new InvalidParameterException("Session step with session id " + sessionId + " and step id " + step.getId() + " not exists"));
+			}
+    		
+			return changeSessionStepStatus(sessionStepOpt.get().getId(), status, message);
+        } catch (final InvalidParameterException ex) {
+        	throw ex;
+        	
+        } catch (final Exception ex) {
+        	logger.debug(ex.getMessage(), ex);
+        	throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }		
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
     public ChoreographerSessionStep changeSessionStepStatus(final long sessionStepId, final ChoreographerSessionStepStatus status, final String message) {
     	logger.debug("changeSessionStepStatus started...");
         Assert.notNull(status, "ChoreographerSessionStepStatus is null");

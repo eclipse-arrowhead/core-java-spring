@@ -57,7 +57,7 @@ import eu.arrowhead.core.choreographer.validation.ChoreographerPlanValidator;
 @Service
 public class ChoreographerPlanDBService {
 	
-	// =================================================================================================
+	//=================================================================================================
 	// members
 
 	@Autowired
@@ -80,10 +80,10 @@ public class ChoreographerPlanDBService {
 
 	private final Logger logger = LogManager.getLogger(ChoreographerPlanDBService.class);
 
-	// =================================================================================================
+	//=================================================================================================
 	// methods
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	public Page<ChoreographerPlan> getPlanEntries(final int page, final int size, final Direction direction, final String sortField) {
 		logger.debug("getPlanEntries started... ");
 
@@ -105,7 +105,7 @@ public class ChoreographerPlanDBService {
 		}
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	public ChoreographerPlanListResponseDTO getPlanEntriesResponse(final int page, final int size, final Direction direction, final String sortField) {
 		logger.debug("getPlanEntriesResponse started...");
 
@@ -124,7 +124,7 @@ public class ChoreographerPlanDBService {
 		return new ChoreographerPlanListResponseDTO(planDTOs, planEntries.getTotalElements());
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	public ChoreographerPlan getPlanById(final long id) {
 		logger.debug("getPlanById started...");
 
@@ -144,7 +144,7 @@ public class ChoreographerPlanDBService {
 		}
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	public ChoreographerPlanResponseDTO getPlanByIdResponse(final long id) {
 		logger.debug("getPlanByIdResponse started...");
 
@@ -157,22 +157,7 @@ public class ChoreographerPlanDBService {
 		}
 	}
 
-	// -------------------------------------------------------------------------------------------------
-	public List<ChoreographerStep> collectStepsFromPlan(final ChoreographerPlan plan) {
-		logger.debug("collectStepsPlan started...");
-		Assert.notNull(plan, "Plan is null.");
-
-		try {
-			choreographerPlanRepository.refresh(plan);
-			final List<ChoreographerAction> actions = choreographerActionRepository.findByPlan(plan);
-			return choreographerStepRepository.findByActionIn(actions);
-		} catch (final Exception ex) {
-			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-		}
-	}
-
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void removePlanEntryById(final long id) {
 		logger.debug("removePlanEntryById started...");
@@ -199,7 +184,7 @@ public class ChoreographerPlanDBService {
 		}
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public ChoreographerPlanResponseDTO createPlanResponse(final ChoreographerPlanRequestDTO request) {
 		logger.debug("createPlanResponse started...");
@@ -215,7 +200,7 @@ public class ChoreographerPlanDBService {
 		}
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public ChoreographerPlan createPlan(final ChoreographerPlanRequestDTO request) {
 		logger.debug("createPlan started...");
@@ -260,7 +245,7 @@ public class ChoreographerPlanDBService {
 		}
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	public ChoreographerStep getStepById(final long id) {
 		logger.debug("getStepById started...");
 
@@ -279,11 +264,41 @@ public class ChoreographerPlanDBService {
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<ChoreographerStep> collectStepsFromPlan(final ChoreographerPlan plan) {
+		logger.debug("collectStepsPlan started...");
+		Assert.notNull(plan, "Plan is null.");
 
-	// =================================================================================================
+		try {
+			choreographerPlanRepository.refresh(plan);
+			final List<ChoreographerAction> actions = choreographerActionRepository.findByPlan(plan);
+			return choreographerStepRepository.findByActionIn(actions);
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<ChoreographerStep> getFirstSteps(final ChoreographerAction action) {
+		logger.debug("getFirstSteps started...");
+		Assert.notNull(action, "Action is null.");
+		
+		try {
+			choreographerActionRepository.refresh(action);
+			
+			return choreographerStepRepository.findByActionAndFirstStep(action, true);
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+
+	//=================================================================================================
 	// assistant methods
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	private Map<ChoreographerAction,List<ChoreographerStep>> getPlanDetails(final ChoreographerPlan plan) {
 		final List<ChoreographerAction> actions = choreographerActionRepository.findByPlan(plan);
 		final Map<ChoreographerAction,List<ChoreographerStep>> result = new HashMap<>(actions.size());
@@ -296,7 +311,7 @@ public class ChoreographerPlanDBService {
 		return result;
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	private ChoreographerAction createAction(final ChoreographerPlan plan, final String name, final List<ChoreographerStepRequestDTO> steps, final List<String> firstStepNames) {
 		logger.debug("createAction started...");
 
@@ -332,7 +347,7 @@ public class ChoreographerPlanDBService {
 		}
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	private ChoreographerStep createStep(final ChoreographerAction action, final ChoreographerStepRequestDTO stepRequest) {
 		logger.debug("createStep started...");
 
@@ -357,7 +372,7 @@ public class ChoreographerPlanDBService {
 		}
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	private ChoreographerStep addNextStepsToStep(final ChoreographerAction action, final String stepName, final List<String> nextStepNames) {
 		logger.debug("addNextStepsToStep started...");
 
@@ -389,7 +404,7 @@ public class ChoreographerPlanDBService {
 		}
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	private ChoreographerAction addNextActionToAction(final ChoreographerPlan plan, final String name, final String nextActionName) {
 		logger.debug("addNextActionToAction started...");
 
