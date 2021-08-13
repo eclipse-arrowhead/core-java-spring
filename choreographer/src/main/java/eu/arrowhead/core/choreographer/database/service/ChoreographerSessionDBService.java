@@ -186,9 +186,8 @@ public class ChoreographerSessionDBService {
     
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public ChoreographerSessionStep registerSessionStep(final long sessionId, final long stepId, final long executorId, final ChoreographerSessionStepStatus status, final String message) {
+    public ChoreographerSessionStep registerSessionStep(final long sessionId, final long stepId, final long executorId, final String message) {
     	logger.debug("registerSessionStep started...");
-        Assert.notNull(status, "ChoreographerSessionStepStatus is null");
         Assert.isTrue(!Utilities.isEmpty(message), "message is empty");
         
         try {
@@ -197,21 +196,23 @@ public class ChoreographerSessionDBService {
 				worklogAndThrow("Session step registration has been failed", new InvalidParameterException("Session with id " + sessionId + " not exists"));
 			}
 			final ChoreographerSession session = sessionOpt.get();
+			final ChoreographerPlan plan = session.getPlan();
 			
 			final Optional<ChoreographerStep> stepOpt = stepRepository.findById(stepId);
 			if (stepOpt.isEmpty()) {
-				worklogAndThrow(session.getPlan().getName(), session.getId(), "Session step registration has been failed", new InvalidParameterException("Step with id " + stepId + " not exists"));
+				worklogAndThrow(plan.getName(), session.getId(), "Session step registration has been failed", new InvalidParameterException("Step with id " + stepId + " not exists"));
 			}
 			final ChoreographerStep step = stepOpt.get();
 			
 			final Optional<ChoreographerExecutor> executorOpt = executorRepository.findById(executorId);
 			if (executorOpt.isEmpty()) {
-				worklogAndThrow(session.getPlan().getName(), session.getId(), "Session step registration has been failed", new InvalidParameterException("Executor with id " + executorId + " not exists"));
+				worklogAndThrow(plan.getName(), session.getId(), "Session step registration has been failed", new InvalidParameterException("Executor with id " + executorId + " not exists"));
 			}
 			final ChoreographerExecutor executor = executorOpt.get();
 			
-			final ChoreographerSessionStep sessionStep = sessionStepRepository.saveAndFlush(new ChoreographerSessionStep(session, step, executor, status, message.trim()))	;
-			worklog(session.getPlan().getName(), step.getAction().getName(), step.getName(), session.getId(), "New session step has been registrated with id " + sessionStep.getId(), null);
+			final ChoreographerSessionStep sessionStep = sessionStepRepository.saveAndFlush(new ChoreographerSessionStep(session, step, executor, ChoreographerSessionStepStatus.WAITING,
+																							message.trim()));
+			worklog(plan.getName(), step.getAction().getName(), step.getName(), session.getId(), "New session step has been registrated with id " + sessionStep.getId(), null);
 			return sessionStep;
         	
         } catch (final InvalidParameterException ex) {
