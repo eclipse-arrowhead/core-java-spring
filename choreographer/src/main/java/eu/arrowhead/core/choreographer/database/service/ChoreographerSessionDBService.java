@@ -28,6 +28,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -186,9 +187,8 @@ public class ChoreographerSessionDBService {
     
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public ChoreographerSessionStep registerSessionStep(final long sessionId, final long stepId, final long executorId, final String message) {
+    public ChoreographerSessionStep registerSessionStep(final long sessionId, final long stepId, final long executorId) {
     	logger.debug("registerSessionStep started...");
-        Assert.isTrue(!Utilities.isEmpty(message), "message is empty");
         
         try {
 			final Optional<ChoreographerSession> sessionOpt = sessionRepository.findById(sessionId);
@@ -211,7 +211,7 @@ public class ChoreographerSessionDBService {
 			final ChoreographerExecutor executor = executorOpt.get();
 			
 			final ChoreographerSessionStep sessionStep = sessionStepRepository.saveAndFlush(new ChoreographerSessionStep(session, step, executor, ChoreographerSessionStepStatus.WAITING,
-																							message.trim()));
+																							"New session step has been registrated"));
 			worklog(plan.getName(), step.getAction().getName(), step.getName(), session.getId(), "New session step has been registrated with id " + sessionStep.getId(), null);
 			return sessionStep;
         	
@@ -241,10 +241,12 @@ public class ChoreographerSessionDBService {
 			sessionStep.setMessage(message.trim());
 			
 			sessionStep = sessionStepRepository.saveAndFlush(sessionStep);
+			
+			final String exception = status == ChoreographerSessionStepStatus.ABORTED ? message : null;
 			worklog(sessionStep.getSession().getPlan().getName(), sessionStep.getStep().getAction().getName(), sessionStep.getStep().getName(), sessionStep.getStep().getId(),
-					"Session step (id: " + sessionStepId + ") status has been changed to " + status, null);
+					"Session step (id: " + sessionStepId + ") status has been changed to " + status, exception);
+			
 			return sessionStep;
-        	
         } catch (final InvalidParameterException ex) {
         	throw ex;
         	
@@ -412,14 +414,13 @@ public class ChoreographerSessionDBService {
 	}
   
   	//-------------------------------------------------------------------------------------------------  
-    @Transactional(rollbackFor = ArrowheadException.class)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
   	public void worklog(final String planName, final String actionName, final String stepName, final Long sessionId, final String message, final String exception) {
   		logger.debug("worklog started...");
 	  	try {
 	  		worklogRepository.saveAndFlush(new ChoreographerWorklog(planName, actionName, stepName, sessionId, message, exception));
 		} catch (final Exception ex) {
 	    	logger.debug(ex.getMessage(), ex);
-	    	throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 	    }
   	}
   	
@@ -433,17 +434,22 @@ public class ChoreographerSessionDBService {
 		worklogAndThrow(planName, null, null, sessionId, message, ex);
 	}
   	
-  	//-------------------------------------------------------------------------------------------------  
-    @Transactional(rollbackFor = ArrowheadException.class)
+  	//-------------------------------------------------------------------------------------------------
     public void worklogAndThrow(final String planName, final String actionName, final String stepName, final Long sessionId, final String message, final Exception originalException) throws Exception {
   		logger.debug("worklogAndThrow started...");
+  		worklogException(planName, actionName, stepName, sessionId, message, originalException);
+  		
+  		throw originalException;
+  	}
+    
+  	//-------------------------------------------------------------------------------------------------
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void worklogException(final String planName, final String actionName, final String stepName, final Long sessionId, final String message, final Exception originalException) throws Exception {
+  		logger.debug("worklogException started...");
   	  	try {
   	  		worklogRepository.saveAndFlush(new ChoreographerWorklog(planName, actionName, stepName, sessionId, message, originalException.getClass().getSimpleName() + ": " + originalException.getMessage()));
   		} catch (final Exception ex) {
   	    	logger.debug(ex.getMessage(), ex); 
-  	    	// still throw the original exception
   	    }
-  	  	
-  		throw originalException;
   	}
 }

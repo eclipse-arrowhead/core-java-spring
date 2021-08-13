@@ -95,7 +95,7 @@ public class ChoreographerService {
 	        final ChoreographerSession session = sessionDBService.changeSessionStatus(sessionId, ChoreographerSessionStatus.RUNNING);
 	        sendNotification(session, START_SESSION_MSG, null);
 	        
-	        selectExecutorsForPlan(plan);
+	        selectExecutorsForPlan(sessionId, plan);
 	        
 	        //TODO: continue
 	
@@ -105,13 +105,14 @@ public class ChoreographerService {
 //	
 //	        firstSteps.parallelStream().forEach(firstStep -> {
 //	            try {
-//	                //runStep(firstStep, sessionId);
 //	                executeStep(firstStep, sessionId);
 //	            } catch (InterruptedException e) {
 //	                choreographerDBService.setSessionStatus(sessionId, ChoreographerSessionStatus.ABORTED);
 //	                logger.debug(e.getMessage(), e);
 //	            }
 //	        });
+        } catch (final ChoreographerSessionException ex) {
+        	throw ex;
         } catch (final Throwable t) {
         	throw new ChoreographerSessionException(sessionId, t);
         }
@@ -290,7 +291,7 @@ public class ChoreographerService {
 	}
     
 	//-------------------------------------------------------------------------------------------------
-	private void selectExecutorsForPlan(final ChoreographerPlan plan) {
+	private void selectExecutorsForPlan(final long sessionId, final ChoreographerPlan plan) {
 		logger.debug("selectExecutorsForPlan started...");
 		
 		final List<ChoreographerStep> steps = planDBService.collectStepsFromPlan(plan);

@@ -37,6 +37,7 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
@@ -641,7 +642,7 @@ public class ServiceRegistryDBService {
 
 			final ZonedDateTime endOfValidity = Utilities.isEmpty(request.getEndOfValidity()) ? null : Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
 			final String metadataStr = Utilities.map2Text(request.getMetadata());
-			final int version = request.getVersion() == null ? 1 : request.getVersion().intValue();
+			final int version = request.getVersion() == null ? Defaults.DEFAULT_VERSION : request.getVersion().intValue();
 			final ServiceRegistry srEntry = createServiceRegistry(serviceDefinition, provider, validatedServiceUri, endOfValidity, validatedSecurityType, metadataStr, version,
 					request.getInterfaces());
 

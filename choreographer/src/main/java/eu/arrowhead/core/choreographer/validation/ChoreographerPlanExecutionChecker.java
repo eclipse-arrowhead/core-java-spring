@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
 import eu.arrowhead.common.database.entity.ChoreographerPlan;
@@ -164,7 +165,7 @@ public class ChoreographerPlanExecutionChecker {
 		logger.debug("checkAvailableExecutorsInDB started...");
 		
 		for (final ChoreographerStep step : steps) {
-			final int minVersion = step.getMinVersion() == null ? 1 :  step.getMinVersion(); //TODO 1->CommonConstants
+			final int minVersion = step.getMinVersion() == null ? Defaults.DEFAULT_VERSION :  step.getMinVersion(); 
 			final int maxVersion = step.getMaxVersion() == null ? Integer.MAX_VALUE : step.getMaxVersion();
 			
 			final List<ChoreographerExecutor> executors = executorDBService.getExecutorsByServiceDefinitionAndVersion(step.getServiceDefinition(), minVersion, maxVersion);
