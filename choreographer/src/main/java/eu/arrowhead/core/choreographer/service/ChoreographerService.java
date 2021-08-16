@@ -18,9 +18,11 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,8 +32,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.CoreSystemRegistrationProperties;
 import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerAction;
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
@@ -42,14 +46,19 @@ import eu.arrowhead.common.database.entity.ChoreographerStep;
 import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
 import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStatus;
 import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.TokenGenerationProviderDTO;
+import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecuteStepRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerNotificationDTO;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFlags;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerPlanDBService;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerSessionDBService;
 import eu.arrowhead.core.choreographer.exception.ChoreographerSessionException;
@@ -66,8 +75,8 @@ public class ChoreographerService {
 	public static final String SESSION_STEP_DONE_DESTINATION = "session-step-done";
 	
 	private static final String START_SESSION_MSG = "Plan execution started.";
-
-    @Autowired
+	
+	@Autowired
     private ChoreographerPlanDBService planDBService;
     
     @Autowired
@@ -84,8 +93,15 @@ public class ChoreographerService {
 
     @Autowired
     protected CoreSystemRegistrationProperties registrationProperties;
+    
+    @Autowired
+	protected SSLProperties sslProperties;
+    
+    @Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
+    private Map<String,Object> arrowheadContext;
 
     private SystemRequestDTO requesterSystem;
+    private CloudRequestDTO ownCloud;
     
     private final Logger logger = LogManager.getLogger(ChoreographerService.class);
 
@@ -98,6 +114,14 @@ public class ChoreographerService {
         requesterSystem.setSystemName(registrationProperties.getCoreSystemName().toLowerCase());
         requesterSystem.setAddress(registrationProperties.getCoreSystemDomainName());
         requesterSystem.setPort(registrationProperties.getCoreSystemDomainPort());
+        
+        if (sslProperties.isSslEnabled()) {
+        	ownCloud = new CloudRequestDTO();
+            final String serverCN = (String) arrowheadContext.get(CommonConstants.SERVER_COMMON_NAME);
+            final String[] serverFields = serverCN.split("\\.");
+            ownCloud.setName(serverFields[1]);
+            ownCloud.setOperator(serverFields[2]);
+        }
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -283,14 +307,14 @@ public class ChoreographerService {
 			}
 		} catch (final Exception ex) { // problem during orchestration
 			throw new ChoreographerSessionException(sessionId, sessionStep.getId(), "Problem occured while orchestration for step " + fullStepName, ex);
-		}
-		
-		final List<OrchestrationResultDTO> executorPreconditions = getOrchestrationResultsForExecutorPreconditions(step, sessionStep);
-		//TODO: token change
+		}		
 
 		final SessionExecutorCache cache = sessionDataStorage.get(sessionId);
 		final ExecutorData executorData = cache.get(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion());
 		final ChoreographerExecutor executor = executorData.getExecutor();
+		
+		final List<OrchestrationResultDTO> executorPreconditions = getOrchestrationResultsForExecutorPreconditions(step, sessionStep);
+		//TODO: token change
 		
 		final ChoreographerExecuteStepRequestDTO payload = new ChoreographerExecuteStepRequestDTO(sessionId,
 																								  sessionStep.getId(),
@@ -361,5 +385,44 @@ public class ChoreographerService {
 	    orchestrationFlags.put(OrchestrationFlags.Flag.OVERRIDE_STORE, true);
 	
 	    return orchestrationForm;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void regenerateTokens(final ChoreographerExecutor executor, final OrchestrationResultDTO main, final List<OrchestrationResultDTO> preconditions) {
+		logger.debug("regenerateTokens started...");
+		
+		if (sslProperties.isSslEnabled()) { // if Choreographer is running on secure mode, we assume executor also have to!
+			
+			final List<TokenGenerationRequestDTO> tokenGenerationRequests = new ArrayList<>();
+			
+			// Query ServiceRegistry in order to have the authInfo of the executor
+			final SystemRequestDTO consumer = DTOConverter.convertSystemResponseDTOToSystemRequestDTO(driver.queryServiceRegistryBySystem(executor.getName(),
+																																		  executor.getAddress(),
+																																		  executor.getPort()));
+			if (!main.getAuthorizationTokens().isEmpty()) {
+				final TokenGenerationProviderDTO tokenProviderDTO = createTokenGenerationProviderDTOFromOrchResult(main);
+				tokenGenerationRequests.add(new TokenGenerationRequestDTO(consumer, ownCloud, List.of(tokenProviderDTO), main.getService().getServiceDefinition()));
+			}
+			
+			for (final OrchestrationResultDTO precondition : preconditions) {
+				if (!precondition.getAuthorizationTokens().isEmpty()) {
+					final TokenGenerationProviderDTO tokenProviderDTO = createTokenGenerationProviderDTOFromOrchResult(precondition);
+					tokenGenerationRequests.add(new TokenGenerationRequestDTO(consumer, ownCloud, List.of(tokenProviderDTO), precondition.getService().getServiceDefinition()));
+				}
+			}
+			
+			//TODO call Auth for new tokens
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private TokenGenerationProviderDTO createTokenGenerationProviderDTOFromOrchResult(final OrchestrationResultDTO orchResult) {
+		logger.debug("createTokenGenerationProviderDTOFromOrchResult started...");
+		
+		final TokenGenerationProviderDTO tokenProviderDTO = new TokenGenerationProviderDTO();
+		tokenProviderDTO.setProvider(DTOConverter.convertSystemResponseDTOToSystemRequestDTO(orchResult.getProvider()));
+		tokenProviderDTO.setServiceInterfaces(new ArrayList<>(orchResult.getAuthorizationTokens().keySet())); // we need to generate for the same interfaces
+		tokenProviderDTO.setTokenDuration(CoreDefaults.DEFAULT_AUTH_TOKEN_TTL_IN_MINUTES);
+		return tokenProviderDTO;
 	}
 }

@@ -64,6 +64,12 @@ public class ChoreographerDriver {
     }
     
     //-------------------------------------------------------------------------------------------------
+    public SystemResponseDTO queryServiceRegistryBySystem(final String systemName, final String address, final int port) {
+    	//TODO
+    	return null;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
     public SystemResponseDTO registerSystem(final SystemRequestDTO request) {
     	logger.debug("registerSystem started...");
         Assert.notNull(request, "SystemRequestDTO is null.");
