@@ -26,13 +26,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
-import eu.arrowhead.common.dto.shared.ChoreographerExecuteStepRequestDTO;
+import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.shared.ChoreographerExecutedStepResultDTO;
+import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.core.choreographer.service.ChoreographerService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -55,7 +57,7 @@ public class ChoreographerNotifyController {
     private final Logger logger = LogManager.getLogger(ChoreographerNotifyController.class);
 
     @Autowired
-    private JmsTemplate jmsTemplate;
+    private JmsTemplate jms;
     
     //=================================================================================================
 	// methods
@@ -63,32 +65,48 @@ public class ChoreographerNotifyController {
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Notify the Choreographer that a step is done in a session.", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_CREATED, message = STEP_DONE_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_OK, message = STEP_DONE_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = STEP_DONE_HTTP_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @PostMapping(path = CommonConstants.OP_CHOREOGRAPHER_NOTIFY_STEP_DONE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(value = org.springframework.http.HttpStatus.OK)
-    @ResponseBody public void notifyStepDone(@RequestBody final ChoreographerExecuteStepRequestDTO request) {
+    @PostMapping(path = CommonConstants.OP_CHOREOGRAPHER_NOTIFY_STEP_DONE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody public void notifyStepDone(@RequestBody final ChoreographerExecutedStepResultDTO payload) {
         logger.debug("notifyStepDone started...");
-        logger.debug("Sending message to session-step-done.");
-        jmsTemplate.convertAndSend("session-step-done", request);
+        
+        validate(payload);
+        
+        logger.debug("Sending message to {}.", ChoreographerService.SESSION_STEP_DONE_DESTINATION);
+        jms.convertAndSend(ChoreographerService.SESSION_STEP_DONE_DESTINATION, payload);
     }
+    
+    //=================================================================================================
+	// assistant methods
 
-    //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Notify the Choreographer that an error happened during the execution of a step in a session.", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_CREATED, message = STEP_DONE_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = STEP_DONE_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-    })
-    @PostMapping(path = CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_NOTIFY_STEP_ERROR, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(value = org.springframework.http.HttpStatus.OK)
-    @ResponseBody public void notifyStepError(@RequestBody final ChoreographerExecuteStepRequestDTO request) {
-        logger.debug("notifyStepError started...");
-        logger.debug("Sending message to session-step-error.");
-        jmsTemplate.convertAndSend("session-step-error", request);
-    }
+	//-------------------------------------------------------------------------------------------------
+	private void validate(final ChoreographerExecutedStepResultDTO payload) {
+		logger.debug("validate started...");
+		
+		final String origin = CommonConstants.CHOREOGRAPHER_URI + CommonConstants.OP_CHOREOGRAPHER_NOTIFY_STEP_DONE;
+		
+		if (payload == null) {
+			throw new BadPayloadException("Payload is null.", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (payload.getSessionId() == null || payload.getSessionId() <= 0) {
+			throw new BadPayloadException("Invalid session id.", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (payload.getSessionStepId() == null || payload.getSessionStepId() <= 0) {
+			throw new BadPayloadException("Invalid session step id.", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (payload.getStatus() == null) {
+			throw new BadPayloadException("Missing status.", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (payload.getStatus().isError() && Utilities.isEmpty(payload.getMessage())) {
+			throw new BadPayloadException("Message is null or blank.", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+	}
 }

@@ -241,7 +241,7 @@ public class ChoreographerPlanController {
         	   final ChoreographerSession session = sessionDBService.initiateSession(request.getPlanId(), createNotifyUri(request));
         	   results.add(new ChoreographerRunPlanResponseDTO(request.getPlanId(), session.getId()));
         	   
-        	   logger.debug("Sending a message to start-session.");
+        	   logger.debug("Sending a message to {}.", ChoreographerService.START_SESSION_DESTINATION);
         	   jms.convertAndSend(ChoreographerService.START_SESSION_DESTINATION, new ChoreographerStartSessionDTO(session.getId(), request.getPlanId()));
            }
         }

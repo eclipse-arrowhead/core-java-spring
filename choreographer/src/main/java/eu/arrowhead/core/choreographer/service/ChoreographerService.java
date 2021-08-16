@@ -63,6 +63,7 @@ public class ChoreographerService {
     // members
 	
 	public static final String START_SESSION_DESTINATION = "start-session";
+	public static final String SESSION_STEP_DONE_DESTINATION = "session-step-done";
 	
 	private static final String START_SESSION_MSG = "Plan execution started.";
 
@@ -137,7 +138,7 @@ public class ChoreographerService {
     }
 
 	//-------------------------------------------------------------------------------------------------
-    @JmsListener(destination = "session-step-done")
+    @JmsListener(destination = SESSION_STEP_DONE_DESTINATION)
     public void receiveSessionStepDoneMessage(final ChoreographerExecuteStepRequestDTO sessionFinishedStepDataDTO) {
 //        long sessionId = sessionFinishedStepDataDTO.getSessionId();
 //        long runningStepId = sessionFinishedStepDataDTO.getRunningStepId();

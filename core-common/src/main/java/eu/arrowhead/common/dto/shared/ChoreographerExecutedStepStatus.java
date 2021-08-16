@@ -12,29 +12,21 @@
  *   Arrowhead Consortia - conceptualization
  ********************************************************************************/
 
-package eu.arrowhead.core.choreographer.executor;
+package eu.arrowhead.common.dto.shared;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import eu.arrowhead.common.database.entity.ChoreographerExecutor;
-import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
-
-public class ExecutorData {
+public enum ChoreographerExecutedStepStatus {
+	SUCCESS, ERROR, FATAL_ERROR, ABORTED;
 	
 	//=================================================================================================
-	// members
-	
-	private final ChoreographerExecutor executor;
-	private final List<ServiceQueryFormDTO> dependencyForms = new ArrayList<>();
+	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public ExecutorData(final ChoreographerExecutor executor, final List<ServiceQueryFormDTO> dependencyForms) {
-		this.executor = executor;
-		this.dependencyForms.addAll(dependencyForms);
+	public boolean isError() {
+		return this == ERROR || this == FATAL_ERROR;
 	}
-
+	
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerExecutor getExecutor() { return executor; }
-	public List<ServiceQueryFormDTO> getDependencyForms() { return dependencyForms; }
+	public boolean isFatal() {
+		return this == FATAL_ERROR;
+	}
 }
