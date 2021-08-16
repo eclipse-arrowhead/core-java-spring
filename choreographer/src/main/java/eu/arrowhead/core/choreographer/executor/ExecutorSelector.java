@@ -65,16 +65,16 @@ public class ExecutorSelector {
 	
 	//-------------------------------------------------------------------------------------------------
 	public ChoreographerExecutor select(final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final Set<Long> exclusions) {
-		return selectAndInit(null, null, serviceDefinition, minVersion, maxVersion, exclusions, false);
+		return selectAndInit(null, null, serviceDefinition, minVersion, maxVersion, exclusions, false).getExecutor();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerExecutor selectAndInit(final long sessionId, final ChoreographerStep step, final Set<Long> exclusions, boolean init) {
+	public ExecutorData selectAndInit(final long sessionId, final ChoreographerStep step, final Set<Long> exclusions, boolean init) {
 		return selectAndInit(sessionId, step.getId(), step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion(), exclusions, init);
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerExecutor selectAndInit(final Long sessionId, final Long stepId, final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final Set<Long> exclusions, final boolean init) {
+	public ExecutorData selectAndInit(final Long sessionId, final Long stepId, final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final Set<Long> exclusions, final boolean init) {
 		//exclusions: when a ChoreographerSessionStep failed due to executor issue, then selection can be repeated but without that executor(s)
 		logger.debug("selectAndInit started...");
 		Assert.isTrue(!Utilities.isEmpty(serviceDefinition), "serviceDefinition is empty");
@@ -151,8 +151,8 @@ public class ExecutorSelector {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private ChoreographerExecutor selectVerifyAndInitFirstAvailable(final Long sessionId, final Long stepId, final List<ChoreographerExecutor> potentials, final Map<Long,ChoreographerExecutorServiceInfoResponseDTO> executorServiceInfos,
-																	final boolean init) {
+	private ExecutorData selectVerifyAndInitFirstAvailable(final Long sessionId, final Long stepId, final List<ChoreographerExecutor> potentials, final Map<Long,ChoreographerExecutorServiceInfoResponseDTO> executorServiceInfos,
+														   final boolean init) {
 		logger.debug("selectVerifyAndInitFirstAvailable started...");
 		
 		if (potentials.isEmpty()) {
@@ -170,10 +170,12 @@ public class ExecutorSelector {
 					if (init) {
 						sessionDBService.registerSessionStep(sessionId, stepId, executor.getId());					
 					}
-					return executor;
+					
+					return new ExecutorData(executor, executorServiceInfos.get(executor.getId()).getDependencies());
 				}
 			}
 		}
+		
 		return null;
 	}
 	

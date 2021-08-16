@@ -28,7 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreSystemRegistrationProperties;
@@ -43,9 +42,8 @@ import eu.arrowhead.common.database.entity.ChoreographerStep;
 import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
 import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStatus;
 import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
-import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoResponseDTO;
-import eu.arrowhead.common.dto.shared.ChoreographerNotificationDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecuteStepRequestDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerNotificationDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFlags;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
@@ -55,6 +53,7 @@ import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerPlanDBService;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerSessionDBService;
 import eu.arrowhead.core.choreographer.exception.ChoreographerSessionException;
+import eu.arrowhead.core.choreographer.executor.ExecutorData;
 import eu.arrowhead.core.choreographer.executor.ExecutorSelector;
 
 @Service
@@ -249,16 +248,16 @@ public class ChoreographerService {
 		sessionDataStorage.put(sessionId, cache);
 		
 		for (final ChoreographerStep step : steps) {
-			ChoreographerExecutor executor = cache.get(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion());
-			if (executor == null) {
-				executor = executorSelector.selectAndInit(sessionId, step, cache.getExclusions(), true);
-				if (executor == null) { // means we can't execute at least one of the steps currently 
+			ExecutorData executorData = cache.get(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion());
+			if (executorData == null) {
+				executorData = executorSelector.selectAndInit(sessionId, step, cache.getExclusions(), true);
+				if (executorData == null) { // means we can't execute at least one of the steps currently 
 					throw new ChoreographerSessionException(sessionId, "Can't find properly working executor for step: " + createFullyQualifiedStepName(step));
 				}
-				cache.put(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion(), executor);
+				cache.put(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion(), executorData);
 			}
 		}
-		sessionDBService.worklog(plan.getName(), sessionId, "Find executor to all steps.", null);
+		sessionDBService.worklog(plan.getName(), sessionId, "Found executor to all steps.", null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -289,7 +288,8 @@ public class ChoreographerService {
 		//TODO: token change
 
 		final SessionExecutorCache cache = sessionDataStorage.get(sessionId);
-		final ChoreographerExecutor executor = cache.get(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion());
+		final ExecutorData executorData = cache.get(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion());
+		final ChoreographerExecutor executor = executorData.getExecutor();
 		
 		final ChoreographerExecuteStepRequestDTO payload = new ChoreographerExecuteStepRequestDTO(sessionId,
 																								  sessionStep.getId(),
@@ -311,25 +311,23 @@ public class ChoreographerService {
 		final int minVersion = step.getMinVersion() == null ? Defaults.DEFAULT_VERSION : step.getMinVersion(); 
 		final int maxVersion = step.getMaxVersion() == null ? Integer.MAX_VALUE : step.getMaxVersion();
     	
-		ChoreographerExecutor executor = cache.get(serviceDefinition, minVersion, maxVersion);
-    	while (executor != null) {
+		ExecutorData executorData = cache.get(serviceDefinition, minVersion, maxVersion);
+    	while (executorData != null) {
     		try {
-    			//TODO: maybe store this somehow when using executor selector
-    			final ChoreographerExecutorServiceInfoResponseDTO serviceInfo = driver.queryExecutorServiceInfo(executor.getAddress(), executor.getPort(), executor.getBaseUri(), serviceDefinition, minVersion, maxVersion);
-    			for (final ServiceQueryFormDTO form : serviceInfo.getDependencies()) {
+    			for (final ServiceQueryFormDTO form : executorData.getDependencyForms()) {
 					final OrchestrationFormRequestDTO orchestrationForm = createOrchestrationFormRequestFromServiceQueryForm(form);
 					final OrchestrationResponseDTO response = driver.queryOrchestrator(orchestrationForm);
 					if (response.getResponse().isEmpty()) {
 						// no provider for a dependency
 						
 		        		cache.remove(serviceDefinition, minVersion, maxVersion);
-		        		cache.getExclusions().add(executor.getId());
+		        		cache.getExclusions().add(executorData.getExecutor().getId());
 		        		break;
 					}
 					result.add(response.getResponse().get(0));
 				}
     			
-    			if (result.size() == serviceInfo.getDependencies().size()) {
+    			if (result.size() == executorData.getDependencyForms().size()) {
     				return result;
     			}
     		} catch (final Exception ex) {
@@ -337,12 +335,12 @@ public class ChoreographerService {
         		logger.debug(ex);
         		
         		cache.remove(serviceDefinition, minVersion, maxVersion);
-        		cache.getExclusions().add(executor.getId());
+        		cache.getExclusions().add(executorData.getExecutor().getId());
     		}
     		
-    		executor = executorSelector.selectAndInit(sessionStep.getSession().getId(), step, cache.getExclusions(), false);
-    		cache.put(serviceDefinition, minVersion, maxVersion, executor);
-    		sessionDBService.changeSessionStepExecutor(sessionStep.getSession().getId(), executor.getId());
+    		executorData = executorSelector.selectAndInit(sessionStep.getSession().getId(), step, cache.getExclusions(), false);
+    		cache.put(serviceDefinition, minVersion, maxVersion, executorData);
+    		sessionDBService.changeSessionStepExecutor(sessionStep.getSession().getId(), executorData.getExecutor().getId());
     	}
 		
     	throw new ChoreographerSessionException(sessionStep.getSession().getId(), sessionStep.getId(), "Can't find properly working executor for step: " + createFullyQualifiedStepName(step));

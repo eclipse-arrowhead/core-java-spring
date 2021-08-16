@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import eu.arrowhead.common.Defaults;
-import eu.arrowhead.common.database.entity.ChoreographerExecutor;
+import eu.arrowhead.core.choreographer.executor.ExecutorData;
 
 public class SessionExecutorCache {
 
@@ -15,18 +15,18 @@ public class SessionExecutorCache {
 	
 	private static final String SEPARATOR = "/";
 	
-	private final Map<String,ChoreographerExecutor> executorCache = new ConcurrentHashMap<>();
+	private final Map<String,ExecutorData> executorCache = new ConcurrentHashMap<>();
 	private final Set<Long> exclusions = new HashSet<>();
 	
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public Map<String,ChoreographerExecutor> getExecutorCache() { return executorCache; }
+	public Map<String,ExecutorData> getExecutorCache() { return executorCache; }
 	public Set<Long> getExclusions() { return exclusions; }
 	
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerExecutor get(final String serviceDefinition, final Integer minVersion, final Integer maxVersion) {
+	public ExecutorData get(final String serviceDefinition, final Integer minVersion, final Integer maxVersion) {
 		final int _minVersion = minVersion == null ? Defaults.DEFAULT_VERSION : minVersion; 
 		final int _maxVersion = maxVersion == null ? Integer.MAX_VALUE : maxVersion;
 
@@ -34,11 +34,11 @@ public class SessionExecutorCache {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public void put(final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final ChoreographerExecutor executor) {
+	public void put(final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final ExecutorData executorData) {
 		final int _minVersion = minVersion == null ? Defaults.DEFAULT_VERSION : minVersion; 
 		final int _maxVersion = maxVersion == null ? Integer.MAX_VALUE : maxVersion;
 
-		executorCache.put(getKey(serviceDefinition, _minVersion, _maxVersion), executor);
+		executorCache.put(getKey(serviceDefinition, _minVersion, _maxVersion), executorData);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
