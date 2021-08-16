@@ -117,7 +117,7 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
     //-------------------------------------------------------------------------------------------------
 	@Override
     protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
-        return List.of(CoreSystemService.ORCHESTRATION_SERVICE);
+        return List.of(CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.AUTH_TOKEN_GENERATION_SERVICE);
     }
 
     //=================================================================================================

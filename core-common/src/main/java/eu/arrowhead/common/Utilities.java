@@ -43,16 +43,13 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.ServiceConfigurationError;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.IntStream;
 
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
@@ -765,25 +762,5 @@ public class Utilities {
 		      logger.error("getPublicKey: X509 keyspec could not be created from the decoded bytes.");
 		      throw new AuthException("Public key decoding failed due wrong input key", ex);
 		}
-	}
-	
-	//TODO: delete
-	public static void main(String[] args) {
-		
-		final AtomicBoolean throwException = new AtomicBoolean(true);
-		try {
-		IntStream.range(0, 50)
-		    .parallel()
-		    .forEach(i -> {
-		        // Throw only on one of the threads.
-		        if (throwException.compareAndSet(true, false)) {
-		            throw new RuntimeException("One of the tasks threw an exception. Index: " + i);
-		        }
-		        System.out.println(i);
-		    });
-		} catch (final RuntimeException ex) {
-			System.out.println(ex.getMessage());
-		}
-		for(;;);
 	}
 }

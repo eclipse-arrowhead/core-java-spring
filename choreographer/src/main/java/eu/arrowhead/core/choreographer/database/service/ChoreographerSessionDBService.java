@@ -281,6 +281,38 @@ public class ChoreographerSessionDBService {
         	throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
     }
+    
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public ChoreographerSessionStep changeSessionStepExecutor(final long sessionStepId, final long executorId) {
+    	logger.debug("changeSessionStepExecutor started...");
+        
+        try {
+			final Optional<ChoreographerSessionStep> sessionStepOpt = sessionStepRepository.findById(sessionStepId);
+			if (sessionStepOpt.isEmpty()) {
+				worklogAndThrow("Session step executor change has been failed", new InvalidParameterException("Session step with id " + sessionStepId + " not exists"));
+			}
+			
+			final Optional<ChoreographerExecutor> executorOpt = executorRepository.findById(executorId);
+			if (executorOpt.isEmpty()) {
+				worklogAndThrow("Session step executor change has been failed", new InvalidParameterException("Executor with id " + executorId + " not exists"));
+			}
+			
+			ChoreographerSessionStep sessionStep = sessionStepOpt.get();
+			sessionStep.setExecutor(executorOpt.get());
+			sessionStep = sessionStepRepository.saveAndFlush(sessionStep);
+			
+			worklog(sessionStep.getSession().getPlan().getName(), sessionStep.getStep().getAction().getName(), sessionStep.getStep().getName(), sessionStep.getStep().getId(),
+					"The executor of session step (id: " + sessionStepId + ") has been changed to executor with id " + executorId, null);
+			
+			return sessionStep;
+        } catch (final InvalidParameterException ex) {
+        	throw ex;
+        } catch (final Exception ex) {
+        	logger.debug(ex.getMessage(), ex);
+        	throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
 
     //-------------------------------------------------------------------------------------------------
 	public ChoreographerSessionStep getSessionStepBySessionIdAndStepId(final long sessionId, final long stepId) {

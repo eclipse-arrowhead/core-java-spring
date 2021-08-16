@@ -27,6 +27,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreSystemRegistrationProperties;
@@ -43,7 +45,7 @@ import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStatus;
 import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerNotificationDTO;
-import eu.arrowhead.common.dto.shared.ChoreographerSessionRunningStepDataDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerExecuteStepRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFlags;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
@@ -101,6 +103,9 @@ public class ChoreographerService {
     //-------------------------------------------------------------------------------------------------
     @JmsListener(destination = START_SESSION_DESTINATION)
     public void receiveStartSessionMessage(final ChoreographerStartSessionDTO startSessionDTO) {
+    	logger.debug("receiveStartSessionMessage started...");
+    	Assert.notNull(startSessionDTO, "Payload is null.");
+
         final long sessionId = startSessionDTO.getSessionId();
 
         try {
@@ -114,13 +119,14 @@ public class ChoreographerService {
 	        final ChoreographerAction firstAction = plan.getFirstAction();
 	        final Set<ChoreographerStep> firstSteps = new HashSet<>(planDBService.getFirstSteps(firstAction));
 	
-	
 	        firstSteps.parallelStream().forEach(step -> {
 	            try {
 	                executeStep(step, sessionId);
 	            } catch (final ChoreographerSessionException ex) {
+	            	logger.debug(ex);
 	            	throw ex;
 	            } catch (final Throwable t) {
+	            	logger.debug(t);
 	            	throw new ChoreographerSessionException(sessionId, t);
 	            }
 	        });
@@ -133,7 +139,7 @@ public class ChoreographerService {
 
 	//-------------------------------------------------------------------------------------------------
     @JmsListener(destination = "session-step-done")
-    public void receiveSessionStepDoneMessage(final ChoreographerSessionRunningStepDataDTO sessionFinishedStepDataDTO) {
+    public void receiveSessionStepDoneMessage(final ChoreographerExecuteStepRequestDTO sessionFinishedStepDataDTO) {
 //        long sessionId = sessionFinishedStepDataDTO.getSessionId();
 //        long runningStepId = sessionFinishedStepDataDTO.getRunningStepId();
 //
@@ -209,12 +215,6 @@ public class ChoreographerService {
 //        }
     }
 
-    //-------------------------------------------------------------------------------------------------
-    @JmsListener(destination = "session-step-error")
-    public void receiveSessionStepErrorMessage(final ChoreographerSessionRunningStepDataDTO sessionRunningStepDataDTO) {
-        //TODO: Implement logic corresponding to what happens when a running step in a session returns from an executor with an error.
-    }
-
     //=================================================================================================
     // assistant methods
     
@@ -249,11 +249,14 @@ public class ChoreographerService {
 		sessionDataStorage.put(sessionId, cache);
 		
 		for (final ChoreographerStep step : steps) {
-			final ChoreographerExecutor executor = executorSelector.selectAndInit(sessionId, step, cache.getExclusions());
-			if (executor == null) { // means we can't execute at least one of the steps currently 
-				throw new ChoreographerSessionException(sessionId, "Can't find properly working executor for step: " + createFullyQualifiedStepName(step));
+			ChoreographerExecutor executor = cache.get(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion());
+			if (executor == null) {
+				executor = executorSelector.selectAndInit(sessionId, step, cache.getExclusions(), true);
+				if (executor == null) { // means we can't execute at least one of the steps currently 
+					throw new ChoreographerSessionException(sessionId, "Can't find properly working executor for step: " + createFullyQualifiedStepName(step));
+				}
+				cache.put(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion(), executor);
 			}
-			cache.put(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion(), executor);
 		}
 		sessionDBService.worklog(plan.getName(), sessionId, "Find executor to all steps.", null);
 	}
@@ -282,48 +285,20 @@ public class ChoreographerService {
 			throw new ChoreographerSessionException(sessionId, sessionStep.getId(), "Problem occured while orchestration for step " + fullStepName, ex);
 		}
 		
-		//TODO: continue
-	
-//	
-//	  List<ChoreographerStepDetail> preconditionStepDetails = step.getStepDetails().stream().filter(t -> t.getType().equals("PRECONDITION")).collect(Collectors.toList());
-//	  ChoreographerStepDetail mainStepDetail = step.getStepDetails().stream().filter(t -> t.getType().equals("MAIN")).collect(Collectors.toList()).get(0);
-//	
-//	  final List<OrchestrationResponseDTO> preconditionOrchestrationResponses = new ArrayList<>();
-//	  OrchestrationResponseDTO mainStepOrchestrationResponse = new OrchestrationResponseDTO();
-//	
-//	  try {
-//	      if (!preconditionStepDetails.isEmpty()) {
-//	          for (ChoreographerStepDetail stepDetail : preconditionStepDetails) {
-//	              preconditionOrchestrationResponses.add(queryOrchestrator(createOrchestrationFormRequestFromString(stepDetail.getDto())));
-//	          }
-//	      }
-//	      mainStepOrchestrationResponse = queryOrchestrator(createOrchestrationFormRequestFromString(mainStepDetail.getDto()));
-//	  } catch (IOException ex) {
-//	      ex.printStackTrace();
-//	  }
-//	
-//	  // TODO: Maybe check later that each Orchestration request returned at least one response.
-//	
-//	  // TODO: Delete the following line.
-//	  System.out.println(mainStepOrchestrationResponse.getResponse().get(0).getProvider().toString());
-//	
-//	  ChoreographerExecutorResponseDTO executor = choreographerDBService.getExecutorEntryByIdResponse(executorId);
-//	
-//	  UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, executor.getAddress(), executor.getPort(), executor.getBaseUri() + "/start");
-//	
-//	  ChoreographerSessionRunningStepDataDTO runningStepDataDTO = new ChoreographerSessionRunningStepDataDTO(sessionId, sessionStep.getId(), preconditionOrchestrationResponses, mainStepOrchestrationResponse);
-//	
-//	  try {
-//	      httpService.sendRequest(uri, HttpMethod.POST, Void.class, runningStepDataDTO);
-//	  } catch (UnavailableServerException ex) {
-//	      //TODO: Needs handling, possibly retrying and / or choosing another viable Executor from the list.
-//	  System.out.println("Executor nem online!!");
-//	
-//	  //TODO: Check how the following code sequence should play out.
-//	  //choreographerDBService.setRunningStepStatus(runningStep.getId(),ChoreographerStatusType.ABORTED,
-//	  //        "Step aborted because the Orchestrator couldn't find any suitable providers. Rerun the plan when there are suitable providers for all steps!");
-//	  //choreographerDBService.setSessionStatus(sessionId, ChoreographerStatusType.ABORTED);
-//	  }
+		final List<OrchestrationResultDTO> executorPreconditions = getOrchestrationResultsForExecutorPreconditions(step, sessionStep);
+		//TODO: token change
+
+		final SessionExecutorCache cache = sessionDataStorage.get(sessionId);
+		final ChoreographerExecutor executor = cache.get(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion());
+		
+		final ChoreographerExecuteStepRequestDTO payload = new ChoreographerExecuteStepRequestDTO(sessionId,
+																								  sessionStep.getId(),
+																								  executorPreconditions,
+																								  mainOrchestrationResponseDTO.getResponse().get(0),
+																								  step.getQuantity(),
+																								  Utilities.text2Map(step.getStaticParameters()));
+		
+		driver.startExecutor(executor.getAddress(), executor.getPort(), executor.getBaseUri(), payload);
     }
     
     //-------------------------------------------------------------------------------------------------
@@ -347,7 +322,6 @@ public class ChoreographerService {
 					if (response.getResponse().isEmpty()) {
 						// no provider for a dependency
 						
-						// TODO: maybe worklog
 		        		cache.remove(serviceDefinition, minVersion, maxVersion);
 		        		cache.getExclusions().add(executor.getId());
 		        		break;
@@ -355,21 +329,23 @@ public class ChoreographerService {
 					result.add(response.getResponse().get(0));
 				}
     			
-    			return result;
+    			if (result.size() == serviceInfo.getDependencies().size()) {
+    				return result;
+    			}
     		} catch (final Exception ex) {
-    	   		logger.warn("Unable to send notification - " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+    	   		logger.warn("Unable to orchestrate precondition service for an executor - " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
         		logger.debug(ex);
         		
-				// TODO: maybe worklog
         		cache.remove(serviceDefinition, minVersion, maxVersion);
         		cache.getExclusions().add(executor.getId());
     		}
     		
-    		//TODO: find another executor
-    		//TODO: continue
+    		executor = executorSelector.selectAndInit(sessionStep.getSession().getId(), step, cache.getExclusions(), false);
+    		cache.put(serviceDefinition, minVersion, maxVersion, executor);
+    		sessionDBService.changeSessionStepExecutor(sessionStep.getSession().getId(), executor.getId());
     	}
 		
-    	//TODO: throw exception
+    	throw new ChoreographerSessionException(sessionStep.getSession().getId(), sessionStep.getId(), "Can't find properly working executor for step: " + createFullyQualifiedStepName(step));
 	}
 
 	//-------------------------------------------------------------------------------------------------

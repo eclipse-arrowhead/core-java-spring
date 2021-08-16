@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
-import eu.arrowhead.common.dto.shared.ChoreographerSessionRunningStepDataDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerExecuteStepRequestDTO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -70,7 +70,7 @@ public class ChoreographerNotifyController {
     })
     @PostMapping(path = CommonConstants.OP_CHOREOGRAPHER_NOTIFY_STEP_DONE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = org.springframework.http.HttpStatus.OK)
-    @ResponseBody public void notifyStepDone(@RequestBody final ChoreographerSessionRunningStepDataDTO request) {
+    @ResponseBody public void notifyStepDone(@RequestBody final ChoreographerExecuteStepRequestDTO request) {
         logger.debug("notifyStepDone started...");
         logger.debug("Sending message to session-step-done.");
         jmsTemplate.convertAndSend("session-step-done", request);
@@ -86,7 +86,7 @@ public class ChoreographerNotifyController {
     })
     @PostMapping(path = CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_NOTIFY_STEP_ERROR, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = org.springframework.http.HttpStatus.OK)
-    @ResponseBody public void notifyStepError(@RequestBody final ChoreographerSessionRunningStepDataDTO request) {
+    @ResponseBody public void notifyStepError(@RequestBody final ChoreographerExecuteStepRequestDTO request) {
         logger.debug("notifyStepError started...");
         logger.debug("Sending message to session-step-error.");
         jmsTemplate.convertAndSend("session-step-error", request);

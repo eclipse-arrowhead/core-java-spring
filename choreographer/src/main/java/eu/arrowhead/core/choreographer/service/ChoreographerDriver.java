@@ -19,6 +19,7 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.common.dto.shared.ChoreographerExecuteStepRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerNotificationDTO;
@@ -91,6 +92,17 @@ public class ChoreographerDriver {
     	final ChoreographerExecutorServiceInfoRequestDTO dto = new ChoreographerExecutorServiceInfoRequestDTO(serviceDefinition, minVersion, maxVersion);
     	final UriComponents uri = getQueryExecutorServiceInfoUri(address, port, baseUri);
     	return httpService.sendRequest(uri, HttpMethod.POST, ChoreographerExecutorServiceInfoResponseDTO.class, dto).getBody();
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    public void startExecutor(final String address, final int port, final String baseUri, final ChoreographerExecuteStepRequestDTO payload) {
+    	logger.debug("getExecutorServiceInfo started...");
+    	Assert.isTrue(!Utilities.isEmpty(address), "address is empty");
+    	Assert.isTrue(!Utilities.isEmpty(baseUri), "baseUri is empty");
+    	Assert.notNull(payload, "payload is null");
+    	
+    	final UriComponents uri = getStartExecutorUri(address, port, baseUri);
+    	httpService.sendRequest(uri, HttpMethod.POST, Void.class, payload);
     }
     
     //-------------------------------------------------------------------------------------------------
@@ -172,6 +184,14 @@ public class ChoreographerDriver {
     	
     	final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
     	return Utilities.createURI(scheme, address, port, baseUri + CommonConstants.CHOREOGRAPHER_EXECUTOR_CLIENT_SERVICE_INFO_URI);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    private UriComponents getStartExecutorUri(final String address, final int port, final String baseUri) {
+    	logger.debug("getStartExecutorUri started...");
+    	
+    	final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
+    	return Utilities.createURI(scheme, address, port, baseUri + CommonConstants.CHOREOGRAPHER_EXECUTOR_CLIENT_SERVICE_START_URI);
     }
     
     //-------------------------------------------------------------------------------------------------

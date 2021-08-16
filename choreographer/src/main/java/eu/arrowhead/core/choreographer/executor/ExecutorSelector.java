@@ -69,8 +69,8 @@ public class ExecutorSelector {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerExecutor selectAndInit(final long sessionId, final ChoreographerStep step, final Set<Long> exclusions) {
-		return selectAndInit(sessionId, step.getId(), step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion(), exclusions, true);
+	public ChoreographerExecutor selectAndInit(final long sessionId, final ChoreographerStep step, final Set<Long> exclusions, boolean init) {
+		return selectAndInit(sessionId, step.getId(), step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion(), exclusions, init);
 	}
 
 	//-------------------------------------------------------------------------------------------------
