@@ -25,6 +25,7 @@
   	<modules>
 	    <module>core-common</module>
 	    <module>serviceregistry</module>
+	    <module>configuration</module>
 	    <module>authorization</module>
 	    <module>certificate-authority</module>
 	    <module>orchestrator</module>
@@ -34,13 +35,13 @@
 	    <module>gatekeeper</module>
 	    <module>gateway</module>
 	    <module>choreographer</module>
-		<module>systemregistry</module>
-		<module>deviceregistry</module>
-		<module>onboarding</module>
+	    <module>systemregistry</module>
+	    <module>deviceregistry</module>
+	    <module>onboarding</module>
 		<module>mscv</module>
 	    <module>deb-installer</module>
 	    <module>docker-all</module>
-		<module>translator</module>
+	    <module>translator</module>
   	</modules>
   	
 	<properties>
@@ -51,10 +52,11 @@
 		<mvn.compiler.version>3.8.1</mvn.compiler.version>
 		<mvn.compile.target>11</mvn.compile.target>
 		<mvn.dependency.version>3.1.1</mvn.dependency.version>
-	    <mvn.jar.version>3.1.2</mvn.jar.version>
-	    <mvn.resources.version>3.1.0</mvn.resources.version>
+		<mvn.jar.version>3.1.2</mvn.jar.version>
+		<mvn.resources.version>3.1.0</mvn.resources.version>
 		<mariadb.jdbc.driver>2.3.0</mariadb.jdbc.driver>
 		<mysql.jdbc.driver>8.0.16</mysql.jdbc.driver>
+		<paho.version>1.2.2</paho.version>
 		<swagger.version>2.9.2</swagger.version>
 		<disruptor.version>3.3.6</disruptor.version>
 		<http.client.version>4.5.8</http.client.version>
@@ -114,6 +116,10 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+		<dependency>
+        	<groupId>org.springframework.boot</groupId>
+        	<artifactId>spring-boot-starter-websocket</artifactId>
+        	</dependency>
 		<dependency>
 		    <groupId>org.springframework.boot</groupId>
     		<artifactId>spring-boot-configuration-processor</artifactId>
@@ -175,7 +181,11 @@
 			<version>${mysql.jdbc.driver}</version>
 			<scope>runtime</scope>
 		</dependency>
-
+    	<dependency>
+	    	<groupId>org.eclipse.paho</groupId>
+    		<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+      		<version>${paho.version}</version>
+    	</dependency>
     	<dependency>
         	<groupId>net.java.dev.jna</groupId>
         	<artifactId>jna</artifactId>
@@ -195,12 +205,12 @@
 		</dependency>
 -->
 		
-		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
-		<!--<dependency>
-      			<groupId>com.google.code.gson</groupId>
-      			<artifactId>gson</artifactId>
-      			<version>2.8.5</version>
-		</dependency>-->
+	<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+	<dependency>
+      		<groupId>com.google.code.gson</groupId>
+      		<artifactId>gson</artifactId>
+      		<version>2.8.6</version>
+	</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

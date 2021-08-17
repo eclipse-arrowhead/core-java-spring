@@ -118,6 +118,11 @@ Type: password
 Default:
 Description: MySQL password for Orchestrator system (leave empty for random). 
 
+Template: arrowhead-core-common/mysql_password_cs
+Type: password
+Default:
+Description: MySQL password for Configuration system (leave empty for random). 
+
 Template: arrowhead-core-common/mysql_password_sr
 Type: password
 Default:
