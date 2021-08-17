@@ -15,6 +15,7 @@
 package eu.arrowhead.core.choreographer.database.service;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -116,7 +117,7 @@ public class ChoreographerSessionDBService {
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public ChoreographerSession changeSessionStatus(final long sessionId, final ChoreographerSessionStatus status) {
+    public ChoreographerSession changeSessionStatus(final long sessionId, final ChoreographerSessionStatus status, final String message) {
         logger.debug("changeSessionStatus started...");
         Assert.notNull(status, "ChoreographerSessionStatus is null");
 
@@ -130,12 +131,46 @@ public class ChoreographerSessionDBService {
       	  session.setStatus(status);
       	  session = sessionRepository.saveAndFlush(session);
       	  
-      	  worklog(session.getPlan().getName(), session.getId(), "Session status has been changed to " + status, null);
+      	  final String exception = status == ChoreographerSessionStatus.ABORTED ? message : null;
+      	  worklog(session.getPlan().getName(), session.getId(), "Session status has been changed to " + status, exception);
+
       	  return session;
-      	  
         } catch (final InvalidParameterException ex) {
             throw ex;
             
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public List<ChoreographerSessionStep> abortSession(final long sessionId, final String message) {
+        logger.debug("abortSession started...");
+
+        try {
+        	final Optional<ChoreographerSession> sessionOpt = sessionRepository.findById(sessionId);
+      	  	if (sessionOpt.isEmpty()) {
+      	  		worklogAndThrow("Session abortion has been failed", new InvalidParameterException("Session with id " + sessionId + " not exists"));
+      	  	}
+      	  
+      	  	final ChoreographerSession session = sessionOpt.get();
+      	  	worklog(session.getPlan().getName(), sessionId, "Session is aborting.", message);
+      	  	changeSessionStatus(sessionId, ChoreographerSessionStatus.ABORTED, message);
+      	  	
+      	  	final List<ChoreographerSessionStep> result = new ArrayList<>();
+      	  	final List<ChoreographerSessionStep> sessionSteps = sessionStepRepository.findAllBySession(session);
+      	  	for (final ChoreographerSessionStep sessionStep : sessionSteps) {
+      	  		if (ChoreographerSessionStepStatus.RUNNING == sessionStep.getStatus()) {
+      	  			result.add(sessionStep);
+      	  		}
+      	  		changeSessionStepStatus(sessionStep.getId(), ChoreographerSessionStepStatus.ABORTED, message);
+      	  	}
+      	  
+      	  	return result;
+        } catch (final InvalidParameterException ex) {
+        	throw ex;
         } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);

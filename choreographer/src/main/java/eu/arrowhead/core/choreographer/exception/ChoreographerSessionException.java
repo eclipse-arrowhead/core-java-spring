@@ -62,4 +62,12 @@ public class ChoreographerSessionException extends RuntimeException {
 	//-------------------------------------------------------------------------------------------------
 	public long getSessionId() { return sessionId; }
 	public Long getSessionStepId() { return sessionStepId; }
+	
+	//-------------------------------------------------------------------------------------------------
+	public String getDetailedMessage() {
+		String result = this.getCause() != null ? this.getCause().getMessage() : "";
+		result += " " + this.getMessage();
+		
+		return result.trim();
+ 	}
 }
