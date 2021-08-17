@@ -47,10 +47,9 @@ import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
 import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStatus;
 import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
-import eu.arrowhead.common.dto.internal.TokenDataDTO;
+import eu.arrowhead.common.dto.internal.TokenGenerationDetailedResponseDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationProviderDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
-import eu.arrowhead.common.dto.internal.TokenGenerationResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecuteStepRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerNotificationDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
@@ -411,8 +410,8 @@ public class ChoreographerService {
 			}
 		}
 		
-		final Map<String,TokenGenerationResponseDTO> tokenMap = driver.generateMultiServiceAuthorizationTokens(tokenGenerationRequests).getTokenMap();
-		updateTokensInOrchestrationResultDTO(sessionId, sessionStepId, fullStepName, toBeUpdated, tokenMap);
+		final List<TokenGenerationDetailedResponseDTO> tokenData = driver.generateMultiServiceAuthorizationTokens(tokenGenerationRequests).getData();
+		updateTokensInOrchestrationResultDTO(sessionId, sessionStepId, fullStepName, toBeUpdated, tokenData);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -428,22 +427,18 @@ public class ChoreographerService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private void updateTokensInOrchestrationResultDTO(final long sessionId, final long sessionStepId, final String fullStepName,
-													  final List<OrchestrationResultDTO> orchResults, final Map<String,TokenGenerationResponseDTO> tokenMap) {
+													  final List<OrchestrationResultDTO> orchResults, final List<TokenGenerationDetailedResponseDTO> tokenData) {
 		logger.debug("updateTokensInOrchestrationResultDTO started...");
 		
 		for (final OrchestrationResultDTO orchResult : orchResults) {
 			final String serviceDefinition = orchResult.getService().getServiceDefinition();
-			final List<TokenDataDTO> serviceTokens = tokenMap.get(serviceDefinition).getTokenData();
 			
 			boolean newTokenFound = false;
-			for (final TokenDataDTO tokenData : serviceTokens) { // in reality we expect the serviceTokens list have only one element with the proper provider
-				if (tokenData.getProviderName().equalsIgnoreCase(orchResult.getProvider().getSystemName())
-					&& tokenData.getProviderAddress().equalsIgnoreCase(orchResult.getProvider().getAddress())
-					&& tokenData.getProviderPort() == orchResult.getProvider().getPort()) {
-					
-					orchResult.setAuthorizationTokens(tokenData.getTokens());
+			for (final TokenGenerationDetailedResponseDTO tokenDetails : tokenData) {
+				if (serviceDefinition.equalsIgnoreCase(tokenDetails.getService())) {
+					orchResult.setAuthorizationTokens(tokenDetails.getTokenData().get(0).getTokens()); // there was only one provider because of the MATCHMAKING flag, so here we have only one again
 					newTokenFound = true;
-					break;
+					break;					
 				}
 			}
 			

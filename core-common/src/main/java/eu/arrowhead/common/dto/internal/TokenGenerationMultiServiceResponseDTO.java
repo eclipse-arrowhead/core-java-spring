@@ -1,8 +1,8 @@
 package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TokenGenerationMultiServiceResponseDTO implements Serializable {
 
@@ -11,7 +11,7 @@ public class TokenGenerationMultiServiceResponseDTO implements Serializable {
 	
 	private static final long serialVersionUID = -5744544456252438018L;
 	
-	private Map<String,TokenGenerationResponseDTO> tokenMap = new HashMap<>();
+	private List<TokenGenerationDetailedResponseDTO> data = new ArrayList<>();
 
 	//=================================================================================================
 	// methods
@@ -20,13 +20,13 @@ public class TokenGenerationMultiServiceResponseDTO implements Serializable {
 	public TokenGenerationMultiServiceResponseDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public TokenGenerationMultiServiceResponseDTO(final Map<String,TokenGenerationResponseDTO> tokenMap) {
-		this.tokenMap = tokenMap;
+	public TokenGenerationMultiServiceResponseDTO(final List<TokenGenerationDetailedResponseDTO> data) {
+		this.data = data;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public Map<String,TokenGenerationResponseDTO> getTokenMap() { return tokenMap; }
+	public List<TokenGenerationDetailedResponseDTO> getData() { return data; }
 	
 	//-------------------------------------------------------------------------------------------------
-	public void setTokenMap(final Map<String,TokenGenerationResponseDTO> tokenMap) { this.tokenMap = tokenMap; }
+	public void setData(final List<TokenGenerationDetailedResponseDTO> data) { this.data = data; }
 }
