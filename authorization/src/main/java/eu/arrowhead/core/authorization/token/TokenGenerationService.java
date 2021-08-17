@@ -24,6 +24,7 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.TokenGenerationMultiServiceResponseDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationProviderDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationResponseDTO;
@@ -120,6 +121,18 @@ public class TokenGenerationService {
 		logger.debug("generateTokensResponse started...");
 		final Map<SystemRequestDTO,Map<String,String>> tokenMap = generateTokens(request);
 		return DTOConverter.convertTokenMapToTokenGenerationResponseDTO(tokenMap);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public TokenGenerationMultiServiceResponseDTO generateMultiServiceTokensResponse(final List<TokenGenerationRequestDTO> requestList) {
+		logger.debug("generateMultiServiceTokensResponse started...");
+		
+		final Map<String,TokenGenerationResponseDTO> tokenMap = new HashMap<>();
+		for (final TokenGenerationRequestDTO request : requestList) {
+			tokenMap.put(request.getService(), generateTokensResponse(request));
+		}
+		
+		return new TokenGenerationMultiServiceResponseDTO(tokenMap);
 	}
 
 	//=================================================================================================
