@@ -43,6 +43,7 @@ import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
 import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStatus;
 import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecuteStepRequestDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerExecutedStepResultDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerNotificationDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFlags;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
@@ -111,7 +112,7 @@ public class ChoreographerService {
         try {
 	        final ChoreographerPlan plan = planDBService.getPlanById(startSessionDTO.getPlanId());
 	        sessionDBService.worklog(plan.getName(), sessionId, START_SESSION_MSG, null);
-	        final ChoreographerSession session = sessionDBService.changeSessionStatus(sessionId, ChoreographerSessionStatus.RUNNING);
+	        final ChoreographerSession session = sessionDBService.changeSessionStatus(sessionId, ChoreographerSessionStatus.RUNNING, null);
 	        sendNotification(session, START_SESSION_MSG, null);
 	        
 	        selectExecutorsForPlan(sessionId, plan);
@@ -139,86 +140,38 @@ public class ChoreographerService {
 
 	//-------------------------------------------------------------------------------------------------
     @JmsListener(destination = SESSION_STEP_DONE_DESTINATION)
-    public void receiveSessionStepDoneMessage(final ChoreographerExecuteStepRequestDTO sessionFinishedStepDataDTO) {
-//        long sessionId = sessionFinishedStepDataDTO.getSessionId();
-//        long runningStepId = sessionFinishedStepDataDTO.getRunningStepId();
-//
-//        //System.out.println(sessionFinishedStepDataDTO.getSessionId() + " " + sessionFinishedStepDataDTO.getRunningStepId());
-//
-//        choreographerDBService.setRunningStepStatus(runningStepId, ChoreographerSessionStatus.DONE, "Step execution is done.");
-//
-//        ChoreographerSessionStep runningStep = choreographerDBService.getRunningStepById(runningStepId);
-//        ChoreographerStep currentStep = choreographerDBService.getStepById(runningStep.getStep().getId());
-//
-//        //System.out.println(currentStep.getName());
-//
-//        if (currentStep.getNextSteps().isEmpty()) {
-//            boolean canGoToNextAction = true;
-//            logger.debug("Step has no next steps therefore it should be checked if can go to next action.");
-//            ChoreographerAction currentAction = currentStep.getAction();
-//
-//            List<ChoreographerSessionStep> currentRunningStepList = choreographerDBService.getAllRunningStepsBySessionId(sessionId);
-//
-//            for (ChoreographerSessionStep runningStepInstance : currentRunningStepList) {
-//                //System.out.println(runningStepInstance.getId());
-//                if (!runningStepInstance.getStatus().equals(ChoreographerSessionStatus.DONE)) {
-//                    //System.out.println("canGoToNextStep should be set to false");
-//                    canGoToNextAction = false;
-//                    break;
-//                }
-//                if (runningStepInstance.getStep().getNextSteps().isEmpty() && !runningStep.getStatus().equals(ChoreographerSessionStatus.DONE)) {
-//                    //System.out.println("-------------------  canGoToNextAction should be set to false!!!! --------------------");
-//                    canGoToNextAction = false;
-//                    break;
-//                }
-//            }
-//
-//            if (canGoToNextAction) {
-//                // System.out.println("If there is next Action then it should run now!");
-//                ChoreographerAction nextAction = currentAction.getNextAction();
-//                if (nextAction != null) {
-//                    Set<ChoreographerStep> firstStepsInNewAction = new HashSet<>(nextAction.getFirstStepEntries());
-//
-//                    firstStepsInNewAction.parallelStream().forEach(firstStepInNewAction -> {
-//                        try {
-//                            executeStep(firstStepInNewAction, sessionId);
-//                        } catch (InterruptedException e) {
-//                            e.printStackTrace();
-//                        }
-//                    });
-//                }
-//            }
-//        }
-//
-//        for (ChoreographerStepNextStepConnection nextStep : currentStep.getNextSteps()) {
-//            boolean allPreviousStepsDone = true;
-//
-//            //System.out.println(nextStep.getNextStepEntry().getName() + " in for");
-//            // Check if all previous steps of the next step are done.
-//            for (ChoreographerStepNextStepConnection prevStep : nextStep.getNextStepEntry().getSteps()) {
-//                //System.out.println(prevStep.getId() + "    " + prevStep.getStepEntry().getName());
-//                ChoreographerSessionStep prevRunningStep = choreographerDBService.getRunningStepBySessionIdAndStepId(sessionId, prevStep.getStepEntry().getId());
-//                if (!prevRunningStep.getStatus().equals(ChoreographerSessionStatus.DONE)) {
-//                    allPreviousStepsDone = false;
-//                }
-//            }
-//
-//            if (allPreviousStepsDone) {
-//                // Run next step
-//                try {
-//                    executeStep(nextStep.getNextStepEntry(), sessionId);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//                //insertInitiatedRunningStep(nextStep.getNextStepEntry().getId(), sessionId);
-//            }
-//        }
-    }
+    public void receiveSessionStepDoneMessage(final ChoreographerExecutedStepResultDTO payload) {
+    	logger.debug("receiveSessionStepDoneMessage started...");
+    	
+    	validatePayload(payload);
+    	
+    	switch (payload.getStatus()) {
+    	case SUCCESS: handleSessionStepSuccess(payload); 
+    				  break;
+    	case ABORTED: handleSessionStepAborted(payload);
+    				  break;
+    	case ERROR:
+    	case FATAL_ERROR: handleSessionStepError(payload);
+    					  break;
+    	default:
+    		throw new IllegalArgumentException("Invalid status: " + payload.getStatus());
+    	}
+    	
 
-    //=================================================================================================
-    // assistant methods
+    }
     
     //-------------------------------------------------------------------------------------------------
+	public void abortSession(final long sessionId, final String message) {
+		logger.debug("abortSession started...");
+		
+		final List<ChoreographerSessionStep> activeSteps = sessionDBService.abortSession(sessionId, message);
+		//TODO: send abort message to every executor belongs to active steps
+	}
+
+	//=================================================================================================
+    // assistant methods
+
+	//-------------------------------------------------------------------------------------------------
     private void sendNotification(final ChoreographerSession session, final String message, final String details) {
     	logger.debug("sendNotification started..."); 
     	
@@ -362,4 +315,113 @@ public class ChoreographerService {
 	
 	    return orchestrationForm;
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validatePayload(final ChoreographerExecutedStepResultDTO payload) {
+		logger.debug("validatePayload started...");
+		
+		Assert.notNull(payload, "Payload is null.");
+		Assert.isTrue(payload.getSessionId() != null && payload.getSessionId() < 0, "Invalid session id.");
+		Assert.isTrue(payload.getSessionStepId() != null && payload.getSessionStepId() < 0, "Invalid session step id.");
+		Assert.notNull(payload.getStatus(), "Status is null.");
+		
+		if (payload.getStatus().isError()) {
+			Assert.isTrue(!Utilities.isEmpty(payload.getMessage()), "Message is null or blank.");
+		}
+	}
+	
+    //-------------------------------------------------------------------------------------------------
+	private void handleSessionStepError(final ChoreographerExecutedStepResultDTO payload) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void handleSessionStepAborted(final ChoreographerExecutedStepResultDTO payload) {
+		logger.debug("handleSessionStepAborted started...");
+		
+		final ChoreographerSessionStep sessionStep = sessionDBService.getSessionStepById(payload.getSessionStepId());
+		final ChoreographerPlan plan = sessionStep.getSession().getPlan();
+		final ChoreographerStep step = sessionStep.getStep();
+		sessionDBService.worklog(plan.getName(), step.getAction().getName(), step.getName(), payload.getSessionId(), "The executor of this step has aborted successfully." , null);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void handleSessionStepSuccess(final ChoreographerExecutedStepResultDTO payload) {
+		//TOOD: implement this
+//      long sessionId = sessionFinishedStepDataDTO.getSessionId();
+//      long runningStepId = sessionFinishedStepDataDTO.getRunningStepId();
+//
+//      //System.out.println(sessionFinishedStepDataDTO.getSessionId() + " " + sessionFinishedStepDataDTO.getRunningStepId());
+//
+//      choreographerDBService.setRunningStepStatus(runningStepId, ChoreographerSessionStatus.DONE, "Step execution is done.");
+//
+//      ChoreographerSessionStep runningStep = choreographerDBService.getRunningStepById(runningStepId);
+//      ChoreographerStep currentStep = choreographerDBService.getStepById(runningStep.getStep().getId());
+//
+//      //System.out.println(currentStep.getName());
+//
+//      if (currentStep.getNextSteps().isEmpty()) {
+//          boolean canGoToNextAction = true;
+//          logger.debug("Step has no next steps therefore it should be checked if can go to next action.");
+//          ChoreographerAction currentAction = currentStep.getAction();
+//
+//          List<ChoreographerSessionStep> currentRunningStepList = choreographerDBService.getAllRunningStepsBySessionId(sessionId);
+//
+//          for (ChoreographerSessionStep runningStepInstance : currentRunningStepList) {
+//              //System.out.println(runningStepInstance.getId());
+//              if (!runningStepInstance.getStatus().equals(ChoreographerSessionStatus.DONE)) {
+//                  //System.out.println("canGoToNextStep should be set to false");
+//                  canGoToNextAction = false;
+//                  break;
+//              }
+//              if (runningStepInstance.getStep().getNextSteps().isEmpty() && !runningStep.getStatus().equals(ChoreographerSessionStatus.DONE)) {
+//                  //System.out.println("-------------------  canGoToNextAction should be set to false!!!! --------------------");
+//                  canGoToNextAction = false;
+//                  break;
+//              }
+//          }
+//
+//          if (canGoToNextAction) {
+//              // System.out.println("If there is next Action then it should run now!");
+//              ChoreographerAction nextAction = currentAction.getNextAction();
+//              if (nextAction != null) {
+//                  Set<ChoreographerStep> firstStepsInNewAction = new HashSet<>(nextAction.getFirstStepEntries());
+//
+//                  firstStepsInNewAction.parallelStream().forEach(firstStepInNewAction -> {
+//                      try {
+//                          executeStep(firstStepInNewAction, sessionId);
+//                      } catch (InterruptedException e) {
+//                          e.printStackTrace();
+//                      }
+//                  });
+//              }
+//          }
+//      }
+//
+//      for (ChoreographerStepNextStepConnection nextStep : currentStep.getNextSteps()) {
+//          boolean allPreviousStepsDone = true;
+//
+//          //System.out.println(nextStep.getNextStepEntry().getName() + " in for");
+//          // Check if all previous steps of the next step are done.
+//          for (ChoreographerStepNextStepConnection prevStep : nextStep.getNextStepEntry().getSteps()) {
+//              //System.out.println(prevStep.getId() + "    " + prevStep.getStepEntry().getName());
+//              ChoreographerSessionStep prevRunningStep = choreographerDBService.getRunningStepBySessionIdAndStepId(sessionId, prevStep.getStepEntry().getId());
+//              if (!prevRunningStep.getStatus().equals(ChoreographerSessionStatus.DONE)) {
+//                  allPreviousStepsDone = false;
+//              }
+//          }
+//
+//          if (allPreviousStepsDone) {
+//              // Run next step
+//              try {
+//                  executeStep(nextStep.getNextStepEntry(), sessionId);
+//              } catch (InterruptedException e) {
+//                  e.printStackTrace();
+//              }
+//              //insertInitiatedRunningStep(nextStep.getNextStepEntry().getId(), sessionId);
+//          }
+//      }		
+	}
+
 }

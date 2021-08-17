@@ -16,6 +16,7 @@ package eu.arrowhead.core.choreographer.exception;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ErrorHandler;
 
@@ -26,6 +27,9 @@ public class ChoreographerSessionErrorHandler implements ErrorHandler {
 	
 	//=================================================================================================
 	// members
+	
+	@Autowired
+	private ChoreographerService service;
 	
     private final Logger logger = LogManager.getLogger(ChoreographerService.class);
 	
@@ -42,7 +46,7 @@ public class ChoreographerSessionErrorHandler implements ErrorHandler {
 		
 		if (t instanceof ChoreographerSessionException) {
 			final ChoreographerSessionException ex = (ChoreographerSessionException) t;
-			//TODO: handle exception, need to discuss, maybe aborting the session
+			service.abortSession(ex.getSessionId(), ex.getDetailedMessage());
 		}
 	}
 }
