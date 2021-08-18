@@ -205,7 +205,7 @@ public class CommonConstants {
 
 	public static final String AUTHORIZATION_URI = "/authorization";
 	public static final String OP_AUTH_TOKEN_URI = "/token";
-	public static final String OP_AUTH_TOKEN_MULTI_SERVICE_URI = OP_AUTH_TOKEN_URI +"/multi-service";
+	public static final String OP_AUTH_TOKEN_MULTI_SERVICE_URI = OP_AUTH_TOKEN_URI +"/multi";
 	public static final String OP_AUTH_KEY_URI = "/publickey";
 	public static final String OP_AUTH_INTRA_CHECK_URI = "/intracloud/check";
 	public static final String OP_AUTH_INTER_CHECK_URI = "/intercloud/check";

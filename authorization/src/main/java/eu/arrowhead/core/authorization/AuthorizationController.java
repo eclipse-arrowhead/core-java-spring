@@ -630,7 +630,7 @@ public class AuthorizationController {
 	@PostMapping(path = CommonConstants.OP_AUTH_TOKEN_MULTI_SERVICE_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public TokenGenerationMultiServiceResponseDTO generateMultiServiceTokens(@RequestBody final List<TokenGenerationRequestDTO> requestList) {
 		logger.debug("New multi-service token generation request received");
-		for (TokenGenerationRequestDTO request : requestList) {
+		for (final TokenGenerationRequestDTO request : requestList) {
 			checkTokenGenerationRequest(request);			
 		}
 		

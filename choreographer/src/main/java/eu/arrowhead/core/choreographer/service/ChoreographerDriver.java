@@ -73,7 +73,7 @@ public class ChoreographerDriver {
     	Assert.isTrue(!Utilities.isEmpty(systemName), "systemName is empty");
     	Assert.isTrue(!Utilities.isEmpty(address), "address is empty");
     	
-    	UriComponents uri = getQueryServiceRegistryBySystemUri();
+    	final UriComponents uri = getQueryServiceRegistryBySystemUri();
     	final SystemRequestDTO request = new SystemRequestDTO();
     	request.setSystemName(systemName);
     	request.setAddress(address);
@@ -140,7 +140,7 @@ public class ChoreographerDriver {
     	logger.debug("generateMultiServiceAuthorizationTokens started...");
         Assert.notNull(tokenGenerationRequests, "tokenGenerationRequests list is null.");
         
-    	UriComponents uri = getAuthorizationGernerateTokenMultiServiceUri();
+    	final UriComponents uri = getAuthorizationGernerateTokenMultiServiceUri();
     	return httpService.sendRequest(uri, HttpMethod.POST, TokenGenerationMultiServiceResponseDTO.class, tokenGenerationRequests).getBody();
     }
     

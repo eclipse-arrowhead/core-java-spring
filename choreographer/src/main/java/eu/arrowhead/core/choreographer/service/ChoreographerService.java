@@ -35,7 +35,6 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.CoreSystemRegistrationProperties;
 import eu.arrowhead.common.Defaults;
-import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerAction;
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
@@ -47,13 +46,13 @@ import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
 import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStatus;
 import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.TokenDataDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationDetailedResponseDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationProviderDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecuteStepRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutedStepResultDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerNotificationDTO;
-import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFlags;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
@@ -95,14 +94,10 @@ public class ChoreographerService {
     @Autowired
     protected CoreSystemRegistrationProperties registrationProperties;
     
-    @Autowired
-	protected SSLProperties sslProperties;
-    
     @Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
     private Map<String,Object> arrowheadContext;
 
     private SystemRequestDTO requesterSystem;
-    private CloudRequestDTO ownCloud;
     
     private final Logger logger = LogManager.getLogger(ChoreographerService.class);
 
@@ -115,14 +110,6 @@ public class ChoreographerService {
         requesterSystem.setSystemName(registrationProperties.getCoreSystemName().toLowerCase());
         requesterSystem.setAddress(registrationProperties.getCoreSystemDomainName());
         requesterSystem.setPort(registrationProperties.getCoreSystemDomainPort());
-        
-        if (sslProperties.isSslEnabled()) {
-        	ownCloud = new CloudRequestDTO();
-            final String serverCN = (String) arrowheadContext.get(CommonConstants.SERVER_COMMON_NAME);
-            final String[] serverFields = serverCN.split("\\.");
-            ownCloud.setName(serverFields[1]);
-            ownCloud.setOperator(serverFields[2]);
-        }
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -267,11 +254,9 @@ public class ChoreographerService {
 		final ChoreographerExecutor executor = executorData.getExecutor();		
 		final List<OrchestrationResultDTO> executorPreconditions = getOrchestrationResultsForExecutorPreconditions(step, sessionStep);
 		
-		if (sslProperties.isSslEnabled()) {
-			final List<OrchestrationResultDTO> manageTokenList = new ArrayList<>(mainOrchestrationResponseDTO.getResponse());
-			manageTokenList.addAll(executorPreconditions);
-			regenerateTokensIfAny(sessionId, sessionStep.getId(), fullStepName, executor, manageTokenList);
-		}
+		final List<OrchestrationResultDTO> managedTokenList = new ArrayList<>(mainOrchestrationResponseDTO.getResponse());
+		managedTokenList.addAll(executorPreconditions);
+		regenerateTokensIfAny(sessionId, sessionStep.getId(), fullStepName, executor, managedTokenList); // TODO won't work in intercloud communication (only local Auth can sign the token)
 		
 		final ChoreographerExecuteStepRequestDTO payload = new ChoreographerExecuteStepRequestDTO(sessionId,
 																								  sessionStep.getId(),
@@ -359,7 +344,7 @@ public class ChoreographerService {
 			if (!orchResult.getAuthorizationTokens().isEmpty()) {
 				toBeUpdated.add(orchResult);
 				final TokenGenerationProviderDTO tokenProviderDTO = createTokenGenerationProviderDTOFromOrchResult(orchResult);
-				tokenGenerationRequests.add(new TokenGenerationRequestDTO(consumer, ownCloud, List.of(tokenProviderDTO), orchResult.getService().getServiceDefinition()));
+				tokenGenerationRequests.add(new TokenGenerationRequestDTO(consumer, null, List.of(tokenProviderDTO), orchResult.getService().getServiceDefinition()));
 			}
 		}
 		
@@ -380,22 +365,28 @@ public class ChoreographerService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private void updateTokensInOrchestrationResultDTO(final long sessionId, final long sessionStepId, final String fullStepName,
-													  final List<OrchestrationResultDTO> orchResults, final List<TokenGenerationDetailedResponseDTO> tokenData) {
+													  final List<OrchestrationResultDTO> orchResults, final List<TokenGenerationDetailedResponseDTO> tokenDetailsList) {
 		logger.debug("updateTokensInOrchestrationResultDTO started...");
 		
 		for (final OrchestrationResultDTO orchResult : orchResults) {
 			final String serviceDefinition = orchResult.getService().getServiceDefinition();
 			
 			boolean newTokenFound = false;
-			for (final TokenGenerationDetailedResponseDTO tokenDetails : tokenData) {
+			for (final TokenGenerationDetailedResponseDTO tokenDetails : tokenDetailsList) {
 				if (serviceDefinition.equalsIgnoreCase(tokenDetails.getService())) {
-					orchResult.setAuthorizationTokens(tokenDetails.getTokenData().get(0).getTokens()); // there was only one provider because of the MATCHMAKING flag, so here we have only one again
-					newTokenFound = true;
-					break;					
+					final TokenDataDTO tokenData = tokenDetails.getTokenData().get(0); // there was only one provider because of the MATCHMAKING flag, so here we have only one again
+					if (orchResult.getProvider().getSystemName().equalsIgnoreCase(tokenData.getProviderName())
+							&& orchResult.getProvider().getAddress().equalsIgnoreCase(tokenData.getProviderAddress())
+							&& orchResult.getProvider().getPort() == tokenData.getProviderPort()) { 
+						
+						orchResult.setAuthorizationTokens(tokenData.getTokens());
+						newTokenFound = true;
+						break;					
+					}
 				}
 			}
 			
-			if (newTokenFound) {
+			if (!newTokenFound) {
 				throw new ChoreographerSessionException(sessionId, sessionStepId, "Missing regenerated token at step " + fullStepName + " for service " + serviceDefinition);
 			}
 		}
