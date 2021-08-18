@@ -128,11 +128,13 @@ public class ChoreographerSessionDBService {
       	  }
       	  
       	  ChoreographerSession session = optional.get();
-      	  session.setStatus(status);
-      	  session = sessionRepository.saveAndFlush(session);
-      	  
-      	  final String exception = status == ChoreographerSessionStatus.ABORTED ? message : null;
-      	  worklog(session.getPlan().getName(), session.getId(), "Session status has been changed to " + status, exception);
+      	  if (status != session.getStatus()) {
+      		  session.setStatus(status);
+      		  session = sessionRepository.saveAndFlush(session);
+      		  
+      		  final String exception = status == ChoreographerSessionStatus.ABORTED ? message : null;
+      		  worklog(session.getPlan().getName(), session.getId(), "Session status has been changed to " + status, exception);
+      	  }
 
       	  return session;
         } catch (final InvalidParameterException ex) {
@@ -176,6 +178,25 @@ public class ChoreographerSessionDBService {
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
     }
+    
+	//-------------------------------------------------------------------------------------------------
+	public ChoreographerSession getSessionById(final long id) {
+		logger.debug("getSessionById started...");
+	
+		try {
+			final Optional<ChoreographerSession> optional = sessionRepository.findById(id);
+			if (optional.isEmpty()) {
+				throw new InvalidParameterException("Session with id " + id + " not exists");
+			}
+			return optional.get();
+			
+	    } catch (final InvalidParameterException ex) {
+	    	throw ex;
+	    } catch (final Exception ex) {
+	    	logger.debug(ex.getMessage(), ex);
+	    	throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+	    }
+	}
     
     //-------------------------------------------------------------------------------------------------
     public Page<ChoreographerSession> getSessions(final int page, final int size, final Direction direction, final String sortField, final Long planId, final ChoreographerSessionStatus status) {
@@ -298,14 +319,17 @@ public class ChoreographerSessionDBService {
 				worklogAndThrow("Session step status change has been failed", new InvalidParameterException("Session step with id " + sessionStepId + " not exists"));
 			}
 			ChoreographerSessionStep sessionStep = optional.get();
-			sessionStep.setStatus(status);
-			sessionStep.setMessage(message.trim());
 			
-			sessionStep = sessionStepRepository.saveAndFlush(sessionStep);
-			
-			final String exception = status == ChoreographerSessionStepStatus.ABORTED ? message : null;
-			worklog(sessionStep.getSession().getPlan().getName(), sessionStep.getStep().getAction().getName(), sessionStep.getStep().getName(), sessionStep.getStep().getId(),
-					"Session step (id: " + sessionStepId + ") status has been changed to " + status, exception);
+			if (status != sessionStep.getStatus()) {
+				sessionStep.setStatus(status);
+				sessionStep.setMessage(message.trim());
+				
+				sessionStep = sessionStepRepository.saveAndFlush(sessionStep);
+				
+				final String exception = status == ChoreographerSessionStepStatus.ABORTED ? message : null;
+				worklog(sessionStep.getSession().getPlan().getName(), sessionStep.getStep().getAction().getName(), sessionStep.getStep().getName(), sessionStep.getSession().getId(),
+						"Session step (id: " + sessionStepId + ") status has been changed to " + status, exception);
+			}
 			
 			return sessionStep;
         } catch (final InvalidParameterException ex) {

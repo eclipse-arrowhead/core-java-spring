@@ -48,6 +48,7 @@ public class ChoreographerExecuteStepRequestDTO implements Serializable {
 		this.quantity = quantity;
 		this.staticParameters = staticParameters;
 	}
+	
 	//-------------------------------------------------------------------------------------------------
     public long getSessionId() { return sessionId; }
     public long getSessionStepId() { return sessionStepId; }

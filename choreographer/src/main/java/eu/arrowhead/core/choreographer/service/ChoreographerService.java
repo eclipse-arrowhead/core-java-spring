@@ -50,6 +50,7 @@ import eu.arrowhead.common.dto.internal.TokenDataDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationDetailedResponseDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationProviderDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerAbortStepRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecuteStepRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutedStepResultDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerNotificationDTO;
@@ -75,6 +76,7 @@ public class ChoreographerService {
 	public static final String SESSION_STEP_DONE_DESTINATION = "session-step-done";
 	
 	private static final String START_SESSION_MSG = "Plan execution started.";
+	private static final String ABORT_SESSION_MSG = "Plan execution aborted.";
 	
 	@Autowired
     private ChoreographerPlanDBService planDBService;
@@ -172,11 +174,33 @@ public class ChoreographerService {
     }
     
     //-------------------------------------------------------------------------------------------------
-	public void abortSession(final long sessionId, final String message) {
+	public void abortSession(final long sessionId, final Long sessionStepId, final String message) {
 		logger.debug("abortSession started...");
 		
+		final ChoreographerSession session = sessionDBService.getSessionById(sessionId);
 		final List<ChoreographerSessionStep> activeSteps = sessionDBService.abortSession(sessionId, message);
-		//TODO: send abort message to every executor belongs to active steps
+
+		for (final ChoreographerSessionStep sessionStep : activeSteps) {
+			if (sessionStepId != null && sessionStepId.longValue() == sessionStep.getId()) {
+				// this step causes the abort so there is no need to abort its executor
+				continue;
+			}
+			
+			final ChoreographerExecutor executor = sessionStep.getExecutor();
+			final ChoreographerAbortStepRequestDTO payload = new ChoreographerAbortStepRequestDTO(sessionId, sessionStep.getId());
+			try {
+				driver.abortExecutor(executor.getAddress(), executor.getPort(), executor.getBaseUri(), payload);
+			} catch (final Exception ex) {
+				logger.warn("Unable to send abort message - " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+				logger.debug(ex);
+				final ChoreographerStep step = sessionStep.getStep();
+				sessionDBService.worklog(session.getPlan().getName(), step.getAction().getName(), step.getName(), sessionId, "Unable to send abort message to the executor", ex.getMessage());
+			}
+		}
+		
+		sessionDataStorage.remove(sessionId);
+		sessionDBService.worklog(session.getPlan().getName(), sessionId, "Session is aborted", null);
+		sendNotification(session, ABORT_SESSION_MSG, message);
 	}
 
 	//=================================================================================================
@@ -408,8 +432,29 @@ public class ChoreographerService {
 	
     //-------------------------------------------------------------------------------------------------
 	private void handleSessionStepError(final ChoreographerExecutedStepResultDTO payload) {
-		// TODO Auto-generated method stub
+		logger.debug("handleSessionStepError started...");
 		
+		if (payload.getStatus().isFatal()) {
+			abortSession(payload.getSessionId(), payload.getSessionStepId(), payload.getMessage() + " " + payload.getException());
+		} else {
+			// error is not fatal, maybe an other executor can able to do the step
+			final ChoreographerSessionStep sessionStep = sessionDBService.getSessionStepById(payload.getSessionStepId());
+			final ChoreographerStep step = sessionStep.getStep();
+			sessionDBService.worklog(sessionStep.getSession().getPlan().getName(), step.getAction().getName(), step.getName(), payload.getSessionId(), payload.getMessage(), payload.getException());
+			final SessionExecutorCache cache = sessionDataStorage.get(payload.getSessionId());
+			cache.remove(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion());
+			cache.getExclusions().add(sessionStep.getExecutor().getId());
+			
+			final ExecutorData executorData = executorSelector.selectAndInit(payload.getSessionId(), step, cache.getExclusions(), false);
+			if (executorData != null) {
+				cache.put(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion(), executorData);
+				sessionDBService.changeSessionStepExecutor(sessionStep.getId(), executorData.getExecutor().getId());
+				executeStep(step, payload.getSessionId());
+			} else {
+				// no replacement executor so we have to abort
+				abortSession(payload.getSessionId(), payload.getSessionStepId(), payload.getMessage() + " " + payload.getException());
+			}
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------

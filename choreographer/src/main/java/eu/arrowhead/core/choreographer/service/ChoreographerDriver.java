@@ -22,6 +22,7 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.internal.TokenGenerationMultiServiceResponseDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerAbortStepRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecuteStepRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoResponseDTO;
@@ -114,12 +115,23 @@ public class ChoreographerDriver {
     
     //-------------------------------------------------------------------------------------------------
     public void startExecutor(final String address, final int port, final String baseUri, final ChoreographerExecuteStepRequestDTO payload) {
-    	logger.debug("getExecutorServiceInfo started...");
+    	logger.debug("startExecutor started...");
     	Assert.isTrue(!Utilities.isEmpty(address), "address is empty");
     	Assert.isTrue(!Utilities.isEmpty(baseUri), "baseUri is empty");
     	Assert.notNull(payload, "payload is null");
     	
     	final UriComponents uri = getStartExecutorUri(address, port, baseUri);
+    	httpService.sendRequest(uri, HttpMethod.POST, Void.class, payload);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    public void abortExecutor(final String address, final int port, final String baseUri, final ChoreographerAbortStepRequestDTO payload) {
+    	logger.debug("getExecutorServiceInfo started...");
+    	Assert.isTrue(!Utilities.isEmpty(address), "address is empty");
+    	Assert.isTrue(!Utilities.isEmpty(baseUri), "baseUri is empty");
+    	Assert.notNull(payload, "payload is null");
+    	
+    	final UriComponents uri = getAbortExecutorUri(address, port, baseUri);
     	httpService.sendRequest(uri, HttpMethod.POST, Void.class, payload);
     }
     
@@ -234,6 +246,14 @@ public class ChoreographerDriver {
     	
     	final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
     	return Utilities.createURI(scheme, address, port, baseUri + CommonConstants.CHOREOGRAPHER_EXECUTOR_CLIENT_SERVICE_START_URI);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    private UriComponents getAbortExecutorUri(final String address, final int port, final String baseUri) {
+    	logger.debug("getAbortExecutorUri started...");
+    	
+    	final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
+    	return Utilities.createURI(scheme, address, port, baseUri + CommonConstants.CHOREOGRAPHER_EXECUTOR_CLIENT_SERVICE_ABORT_URI);
     }
     
     //-------------------------------------------------------------------------------------------------

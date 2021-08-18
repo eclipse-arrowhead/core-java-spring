@@ -46,7 +46,7 @@ public class ChoreographerSessionErrorHandler implements ErrorHandler {
 		
 		if (t instanceof ChoreographerSessionException) {
 			final ChoreographerSessionException ex = (ChoreographerSessionException) t;
-			service.abortSession(ex.getSessionId(), ex.getDetailedMessage());
+			service.abortSession(ex.getSessionId(), ex.getSessionStepId(), ex.getDetailedMessage());
 		}
 	}
 }
