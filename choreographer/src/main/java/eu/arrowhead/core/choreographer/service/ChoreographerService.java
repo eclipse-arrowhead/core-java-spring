@@ -469,19 +469,30 @@ public class ChoreographerService {
 
 	//-------------------------------------------------------------------------------------------------
 	private void handleSessionStepSuccess(final ChoreographerExecutedStepResultDTO payload) {
+		logger.debug("handleSessionStepSuccess started...");
+		
+		final ChoreographerSessionStep finishedSessionStep = sessionDBService.changeSessionStepStatus(payload.getSessionStepId(), ChoreographerSessionStepStatus.DONE, "Step finished successfully.");
+		final ChoreographerStep finishedStep = finishedSessionStep.getStep();
+		final Set<ChoreographerStep> nextSteps = finishedStep.getNextSteps();
+		
+		if (nextSteps.isEmpty()) {
+			// we need to check if we can go to the next action
+			final ChoreographerAction currentAction = finishedStep.getAction();
+			final boolean canProceedToNextAction = canProceedToNextAction(payload.getSessionId(), currentAction.getId());
+			if (canProceedToNextAction) {
+				final ChoreographerAction nextAction = currentAction.getNextAction();
+				if (nextAction != null) {
+					executeAction(nextAction);
+				} else {
+					// this was the last step of the last action => session is done
+					sessionDone(payload.getSessionId());
+				}
+			}
+		} else {
+			//TODO: continue
+		}
+		
 		//TOOD: implement this
-//      long sessionId = sessionFinishedStepDataDTO.getSessionId();
-//      long runningStepId = sessionFinishedStepDataDTO.getRunningStepId();
-//
-//      //System.out.println(sessionFinishedStepDataDTO.getSessionId() + " " + sessionFinishedStepDataDTO.getRunningStepId());
-//
-//      choreographerDBService.setRunningStepStatus(runningStepId, ChoreographerSessionStatus.DONE, "Step execution is done.");
-//
-//      ChoreographerSessionStep runningStep = choreographerDBService.getRunningStepById(runningStepId);
-//      ChoreographerStep currentStep = choreographerDBService.getStepById(runningStep.getStep().getId());
-//
-//      //System.out.println(currentStep.getName());
-//
 //      if (currentStep.getNextSteps().isEmpty()) {
 //          boolean canGoToNextAction = true;
 //          logger.debug("Step has no next steps therefore it should be checked if can go to next action.");
@@ -543,5 +554,29 @@ public class ChoreographerService {
 //              //insertInitiatedRunningStep(nextStep.getNextStepEntry().getId(), sessionId);
 //          }
 //      }		
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private boolean canProceedToNextAction(final long sessionId, final long actionId) {
+		logger.debug("canProceedToNextAction started...");
+
+		final List<ChoreographerSessionStep> sessionSteps = sessionDBService.getAllSessionStepBySessionIdAndActionId(sessionId, actionId);
+		for (final ChoreographerSessionStep sessionStep : sessionSteps) {
+			if (ChoreographerSessionStepStatus.DONE != sessionStep.getStatus()) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	private void executeAction(ChoreographerAction nextAction) {
+		// TODO Auto-generated method stub
+		// TODO continue
+	}
+	
+	private void sessionDone(Long sessionId) {
+		// TODO Auto-generated method stub
+		
 	}
 }

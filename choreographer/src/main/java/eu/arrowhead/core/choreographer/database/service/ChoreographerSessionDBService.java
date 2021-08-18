@@ -37,12 +37,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.ChoreographerAction;
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
 import eu.arrowhead.common.database.entity.ChoreographerPlan;
 import eu.arrowhead.common.database.entity.ChoreographerSession;
 import eu.arrowhead.common.database.entity.ChoreographerSessionStep;
 import eu.arrowhead.common.database.entity.ChoreographerStep;
 import eu.arrowhead.common.database.entity.ChoreographerWorklog;
+import eu.arrowhead.common.database.repository.ChoreographerActionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerExecutorRepository;
 import eu.arrowhead.common.database.repository.ChoreographerPlanRepository;
 import eu.arrowhead.common.database.repository.ChoreographerSessionRepository;
@@ -66,6 +68,9 @@ public class ChoreographerSessionDBService {
 	
 	@Autowired
 	private ChoreographerPlanRepository planRepository;
+	
+	@Autowired
+	private ChoreographerActionRepository actionRepository;
 	
 	@Autowired
 	private ChoreographerSessionRepository sessionRepository;
@@ -436,6 +441,30 @@ public class ChoreographerSessionDBService {
 	    } catch (final InvalidParameterException ex) {
 	    	throw ex;
 	      
+	    } catch (final Exception ex) {
+	    	logger.debug(ex.getMessage(), ex);
+	    	throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+	    }
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<ChoreographerSessionStep> getAllSessionStepBySessionIdAndActionId(final long sessionId, final long actionId) {
+		logger.debug("getAllSessionStepBySessionIdAndActionId started...");
+		
+		try {
+			final Optional<ChoreographerSession> sessionOpt = sessionRepository.findById(sessionId);
+			if (sessionOpt.isEmpty()) {
+				throw new InvalidParameterException("Session with id " + sessionId + " not exists");
+			}
+			
+			final Optional<ChoreographerAction> actionOpt = actionRepository.findById(actionId);
+			if (actionOpt.isEmpty()) {
+				throw new InvalidParameterException("Action with id " + actionId + " not exists");
+			}
+			
+			return sessionStepRepository.findAllBySessionAndStep_Action(sessionOpt.get(), actionOpt.get());
+	    } catch (final InvalidParameterException ex) {
+	    	throw ex;
 	    } catch (final Exception ex) {
 	    	logger.debug(ex.getMessage(), ex);
 	    	throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
