@@ -18,9 +18,11 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.CoreSystemRegistrationProperties;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
@@ -42,6 +45,11 @@ import eu.arrowhead.common.database.entity.ChoreographerStep;
 import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
 import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStatus;
 import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.TokenDataDTO;
+import eu.arrowhead.common.dto.internal.TokenGenerationDetailedResponseDTO;
+import eu.arrowhead.common.dto.internal.TokenGenerationProviderDTO;
+import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecuteStepRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutedStepResultDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerNotificationDTO;
@@ -67,8 +75,8 @@ public class ChoreographerService {
 	public static final String SESSION_STEP_DONE_DESTINATION = "session-step-done";
 	
 	private static final String START_SESSION_MSG = "Plan execution started.";
-
-    @Autowired
+	
+	@Autowired
     private ChoreographerPlanDBService planDBService;
     
     @Autowired
@@ -85,6 +93,9 @@ public class ChoreographerService {
 
     @Autowired
     protected CoreSystemRegistrationProperties registrationProperties;
+    
+    @Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
+    private Map<String,Object> arrowheadContext;
 
     private SystemRequestDTO requesterSystem;
     
@@ -236,14 +247,16 @@ public class ChoreographerService {
 			}
 		} catch (final Exception ex) { // problem during orchestration
 			throw new ChoreographerSessionException(sessionId, sessionStep.getId(), "Problem occured while orchestration for step " + fullStepName, ex);
-		}
-		
-		final List<OrchestrationResultDTO> executorPreconditions = getOrchestrationResultsForExecutorPreconditions(step, sessionStep);
-		//TODO: token change
+		}		
 
 		final SessionExecutorCache cache = sessionDataStorage.get(sessionId);
 		final ExecutorData executorData = cache.get(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion());
-		final ChoreographerExecutor executor = executorData.getExecutor();
+		final ChoreographerExecutor executor = executorData.getExecutor();		
+		final List<OrchestrationResultDTO> executorPreconditions = getOrchestrationResultsForExecutorPreconditions(step, sessionStep);
+		
+		final List<OrchestrationResultDTO> managedTokenList = new ArrayList<>(mainOrchestrationResponseDTO.getResponse());
+		managedTokenList.addAll(executorPreconditions);
+		regenerateTokensIfAny(sessionId, sessionStep.getId(), fullStepName, executor, managedTokenList); // TODO won't work in intercloud communication (only local Auth can sign the token)
 		
 		final ChoreographerExecuteStepRequestDTO payload = new ChoreographerExecuteStepRequestDTO(sessionId,
 																								  sessionStep.getId(),
@@ -316,6 +329,69 @@ public class ChoreographerService {
 	    return orchestrationForm;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	private void regenerateTokensIfAny(final long sessionId, final long sessionStepId, final String fullStepName, final ChoreographerExecutor executor,
+									   final List<OrchestrationResultDTO> orchResults) {
+		logger.debug("regenerateTokensIfAny started...");
+		
+		// Query ServiceRegistry in order to have the authInfo of the executor
+		final SystemRequestDTO consumer = DTOConverter.convertSystemResponseDTOToSystemRequestDTO(driver.queryServiceRegistryBySystem(executor.getName(),
+																																	  executor.getAddress(),
+																																	  executor.getPort()));			
+		final List<OrchestrationResultDTO> toBeUpdated = new ArrayList<>();
+		final List<TokenGenerationRequestDTO> tokenGenerationRequests = new ArrayList<>();
+		for (final OrchestrationResultDTO orchResult : orchResults) {
+			if (!orchResult.getAuthorizationTokens().isEmpty()) {
+				toBeUpdated.add(orchResult);
+				final TokenGenerationProviderDTO tokenProviderDTO = createTokenGenerationProviderDTOFromOrchResult(orchResult);
+				tokenGenerationRequests.add(new TokenGenerationRequestDTO(consumer, null, List.of(tokenProviderDTO), orchResult.getService().getServiceDefinition()));
+			}
+		}
+		
+		final List<TokenGenerationDetailedResponseDTO> tokenData = driver.generateMultiServiceAuthorizationTokens(tokenGenerationRequests).getData();
+		updateTokensInOrchestrationResultDTO(sessionId, sessionStepId, fullStepName, toBeUpdated, tokenData);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private TokenGenerationProviderDTO createTokenGenerationProviderDTOFromOrchResult(final OrchestrationResultDTO orchResult) {
+		logger.debug("createTokenGenerationProviderDTOFromOrchResult started...");
+		
+		final TokenGenerationProviderDTO tokenProviderDTO = new TokenGenerationProviderDTO();
+		tokenProviderDTO.setProvider(DTOConverter.convertSystemResponseDTOToSystemRequestDTO(orchResult.getProvider()));
+		tokenProviderDTO.setServiceInterfaces(new ArrayList<>(orchResult.getAuthorizationTokens().keySet())); // we need to generate for the same interfaces
+		tokenProviderDTO.setTokenDuration(CoreDefaults.DEFAULT_AUTH_TOKEN_TTL_IN_MINUTES);
+		return tokenProviderDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void updateTokensInOrchestrationResultDTO(final long sessionId, final long sessionStepId, final String fullStepName,
+													  final List<OrchestrationResultDTO> orchResults, final List<TokenGenerationDetailedResponseDTO> tokenDetailsList) {
+		logger.debug("updateTokensInOrchestrationResultDTO started...");
+		
+		for (final OrchestrationResultDTO orchResult : orchResults) {
+			final String serviceDefinition = orchResult.getService().getServiceDefinition();
+			
+			boolean newTokenFound = false;
+			for (final TokenGenerationDetailedResponseDTO tokenDetails : tokenDetailsList) {
+				if (serviceDefinition.equalsIgnoreCase(tokenDetails.getService())) {
+					final TokenDataDTO tokenData = tokenDetails.getTokenData().get(0); // there was only one provider because of the MATCHMAKING flag, so here we have only one again
+					if (orchResult.getProvider().getSystemName().equalsIgnoreCase(tokenData.getProviderName())
+							&& orchResult.getProvider().getAddress().equalsIgnoreCase(tokenData.getProviderAddress())
+							&& orchResult.getProvider().getPort() == tokenData.getProviderPort()) { 
+						
+						orchResult.setAuthorizationTokens(tokenData.getTokens());
+						newTokenFound = true;
+						break;					
+					}
+				}
+			}
+			
+			if (!newTokenFound) {
+				throw new ChoreographerSessionException(sessionId, sessionStepId, "Missing regenerated token at step " + fullStepName + " for service " + serviceDefinition);
+			}
+		}
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	private void validatePayload(final ChoreographerExecutedStepResultDTO payload) {
 		logger.debug("validatePayload started...");
@@ -423,5 +499,4 @@ public class ChoreographerService {
 //          }
 //      }		
 	}
-
 }

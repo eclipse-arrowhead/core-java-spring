@@ -2,6 +2,7 @@ package eu.arrowhead.core.authorization.token;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,8 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.TokenGenerationDetailedResponseDTO;
+import eu.arrowhead.common.dto.internal.TokenGenerationMultiServiceResponseDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationProviderDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationResponseDTO;
@@ -120,6 +123,23 @@ public class TokenGenerationService {
 		logger.debug("generateTokensResponse started...");
 		final Map<SystemRequestDTO,Map<String,String>> tokenMap = generateTokens(request);
 		return DTOConverter.convertTokenMapToTokenGenerationResponseDTO(tokenMap);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public TokenGenerationMultiServiceResponseDTO generateMultiServiceTokensResponse(final List<TokenGenerationRequestDTO> requestList) {
+		logger.debug("generateMultiServiceTokensResponse started...");
+		
+		final List<TokenGenerationDetailedResponseDTO> data = new ArrayList<>();
+		for (final TokenGenerationRequestDTO request : requestList) {
+			final TokenGenerationDetailedResponseDTO tokenDetails = new TokenGenerationDetailedResponseDTO();
+			tokenDetails.setService(request.getService());
+			tokenDetails.setConsumerName(request.getConsumer().getSystemName());
+			tokenDetails.setConsumerAdress(request.getConsumer().getAddress());
+			tokenDetails.setConsumerPort(request.getConsumer().getPort());
+			tokenDetails.setTokenData(generateTokensResponse(request).getTokenData());
+		}
+		
+		return new TokenGenerationMultiServiceResponseDTO(data);
 	}
 
 	//=================================================================================================

@@ -1,5 +1,6 @@
 package eu.arrowhead.core.choreographer.service;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -19,6 +20,8 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.common.dto.internal.TokenGenerationMultiServiceResponseDTO;
+import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecuteStepRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoResponseDTO;
@@ -39,6 +42,7 @@ public class ChoreographerDriver {
     // members
 	
     private static final String ORCHESTRATION_PROCESS_URI_KEY = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+    private static final String AUTH_TOKEN_GENERATION_MULTI_SERVICE_URI_KEY = CoreSystemService.AUTH_TOKEN_GENERATION_MULTI_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 
     @Autowired
     private HttpService httpService;
@@ -61,6 +65,20 @@ public class ChoreographerDriver {
 
         final UriComponents uri = getMultiQueryServiceRegistryUri();
         return httpService.sendRequest(uri, HttpMethod.POST, ServiceQueryResultListDTO.class, forms).getBody();
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    public SystemResponseDTO queryServiceRegistryBySystem(final String systemName, final String address, final int port) {
+    	logger.debug("queryServiceRegistryBySystem started...");
+    	Assert.isTrue(!Utilities.isEmpty(systemName), "systemName is empty");
+    	Assert.isTrue(!Utilities.isEmpty(address), "address is empty");
+    	
+    	final UriComponents uri = getQueryServiceRegistryBySystemUri();
+    	final SystemRequestDTO request = new SystemRequestDTO();
+    	request.setSystemName(systemName);
+    	request.setAddress(address);
+    	request.setPort(port);
+    	return httpService.sendRequest(uri, HttpMethod.POST, SystemResponseDTO.class, request).getBody();
     }
     
     //-------------------------------------------------------------------------------------------------
@@ -117,6 +135,15 @@ public class ChoreographerDriver {
         return response.getBody();
     }
     
+    //-------------------------------------------------------------------------------------------------
+    public TokenGenerationMultiServiceResponseDTO generateMultiServiceAuthorizationTokens(final List<TokenGenerationRequestDTO> tokenGenerationRequests) {
+    	logger.debug("generateMultiServiceAuthorizationTokens started...");
+        Assert.notNull(tokenGenerationRequests, "tokenGenerationRequests list is null.");
+        
+    	final UriComponents uri = getAuthorizationGernerateTokenMultiServiceUri();
+    	return httpService.sendRequest(uri, HttpMethod.POST, TokenGenerationMultiServiceResponseDTO.class, tokenGenerationRequests).getBody();
+    }
+    
 	//-------------------------------------------------------------------------------------------------
 	public void sendSessionNotification(final String notifyUri, final ChoreographerNotificationDTO payload) {
 		logger.debug("sendSessionNotification started...");
@@ -126,7 +153,7 @@ public class ChoreographerDriver {
 		final UriComponents uri = UriComponentsBuilder.fromUriString(notifyUri).build();
 		httpService.sendRequest(uri, HttpMethod.POST, Void.class, payload);
 	}
-    
+	
     //=================================================================================================
     // assistant methods
 
@@ -143,6 +170,21 @@ public class ChoreographerDriver {
         }
 
         throw new ArrowheadException("Choreographer can't find Service Registry multi-query URI.");
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    private UriComponents getQueryServiceRegistryBySystemUri() {
+        logger.debug("getQueryServiceRegistryBySystemUri started...");
+
+        if (arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_BY_SYSTEM_DTO_URI)) {
+            try {
+                return (UriComponents) arrowheadContext.get(CoreCommonConstants.SR_QUERY_BY_SYSTEM_DTO_URI);
+            } catch (final ClassCastException ex) {
+                throw new ArrowheadException("Choreographer can't find Service Registry query by system URI.");
+            }
+        }
+
+        throw new ArrowheadException("Choreographer can't find Service Registry query by system URI.");
     }
     
     //-------------------------------------------------------------------------------------------------
@@ -206,5 +248,19 @@ public class ChoreographerDriver {
             }
         }
         throw new ArrowheadException("Choreographer can't find orchestration process URI.");
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    private UriComponents getAuthorizationGernerateTokenMultiServiceUri() {
+        logger.debug("getAuthorizationGernerateTokenMultiServiceUri started...");
+
+        if (arrowheadContext.containsKey(AUTH_TOKEN_GENERATION_MULTI_SERVICE_URI_KEY)) {
+            try {
+                return (UriComponents) arrowheadContext.get(AUTH_TOKEN_GENERATION_MULTI_SERVICE_URI_KEY);
+            } catch (final ClassCastException ex) {
+                throw new ArrowheadException("Choreographer can't authorization generate multi service token URI.");
+            }
+        }
+        throw new ArrowheadException("Choreographer can't authorization generate multi service token URI.");
     }
 }

@@ -56,8 +56,8 @@ public class AuthAccessControlFilter extends CoreSystemAccessControlFilter {
 		} else if (requestTarget.contains(CoreCommonConstants.MGMT_URI)) {
 			// Only the local System Operator can use these methods
 			checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
-		} else if (requestTarget.endsWith(CommonConstants.OP_AUTH_TOKEN_URI)) {
-			// Only the specified core systems can use this method
+		} else if (requestTarget.endsWith(CommonConstants.OP_AUTH_TOKEN_URI) || requestTarget.endsWith(CommonConstants.OP_AUTH_TOKEN_MULTI_SERVICE_URI)) {
+			// Only the specified core systems can use this methods
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForTokenGenerations, requestTarget);
 		} else if (requestTarget.endsWith(CommonConstants.OP_AUTH_INTRA_CHECK_URI) || requestTarget.endsWith(CommonConstants.OP_AUTH_INTER_CHECK_URI)) {
 			// Only the specified core systems can use all these methods

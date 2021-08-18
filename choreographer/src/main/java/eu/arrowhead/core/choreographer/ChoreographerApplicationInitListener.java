@@ -110,6 +110,7 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
 
         final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
         context.put(CoreCommonConstants.SR_MULTI_QUERY_URI, createMultiQueryRegistryUri(scheme));
+        context.put(CoreCommonConstants.SR_QUERY_BY_SYSTEM_DTO_URI, createQueryRegistryBySystemUri(scheme));
         context.put(CoreCommonConstants.SR_REGISTER_SYSTEM_URI, createRegisterSystemUri(scheme));
         context.put(CoreCommonConstants.SR_UNREGISTER_SYSTEM_URI, createUnregisterSystemUri(scheme));
     }
@@ -117,7 +118,7 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
     //-------------------------------------------------------------------------------------------------
 	@Override
     protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
-        return List.of(CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.AUTH_TOKEN_GENERATION_SERVICE);
+        return List.of(CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.AUTH_TOKEN_GENERATION_MULTI_SERVICE);
     }
 
     //=================================================================================================
@@ -128,6 +129,14 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
         logger.debug("createMultiQueryRegistryUri started...");
 
         final String uriStr = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_MULTI_QUERY_URI;
+        return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), uriStr);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    private UriComponents createQueryRegistryBySystemUri(final String scheme) {
+        logger.debug("createQueryRegistryBySystemUri started...");
+
+        final String uriStr = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_QUERY_BY_SYSTEM_DTO_URI;
         return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), uriStr);
     }
     
