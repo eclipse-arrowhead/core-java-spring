@@ -14,4 +14,5 @@ public interface ChoreographerExecutorRepository extends RefreshableRepository<C
 
     //-------------------------------------------------------------------------------------------------
     public Optional<ChoreographerExecutor> findByAddressAndPortAndBaseUri(final String address, final int port, final String baseUri);
+    public Optional<ChoreographerExecutor> findByName(final String name);
 }

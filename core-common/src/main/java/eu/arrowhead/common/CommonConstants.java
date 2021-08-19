@@ -255,20 +255,18 @@ public class CommonConstants {
 	public static final String OP_CONFIGURATION_MGMT_MANAGE = "/mgmt/config";
 
 	public static final String CHOREOGRAPHER_URI = "/choreographer";
-	public static final String CHOREOGRAPHER_SESSION_MGMT_URI = "/session" + CoreCommonConstants.MGMT_URI;
-	public static final String CHOREOGRAPHER_SESSION_STEPS_MGMT_URI = "/session/steps" + CoreCommonConstants.MGMT_URI;
-	public static final String CHOREOGRAPHER_WORKLOG_MGMT_URI = "/worklog" + CoreCommonConstants.MGMT_URI;
-	public static final String CHOREOGRAPHER_EXECUTOR_MGMT_URI = "/executor" + CoreCommonConstants.MGMT_URI;
-	public static final String CHOREOGRAPHER_EXECUTOR_MGMT_BY_ID_URI = CHOREOGRAPHER_EXECUTOR_MGMT_URI + "{/id}";
+	public static final String CHOREOGRAPHER_SESSION_MGMT_URI = CoreCommonConstants.MGMT_URI + "/session";
+	public static final String CHOREOGRAPHER_SESSION_STEPS_MGMT_URI = CoreCommonConstants.MGMT_URI + "/session/steps";
+	public static final String CHOREOGRAPHER_WORKLOG_MGMT_URI = CoreCommonConstants.MGMT_URI + "/worklog";
+	public static final String CHOREOGRAPHER_EXECUTOR_MGMT_URI = CoreCommonConstants.MGMT_URI + "/executor";
+	public static final String CHOREOGRAPHER_EXECUTOR_MGMT_BY_ID_URI = CHOREOGRAPHER_EXECUTOR_MGMT_URI + "/{id}";
 	public static final String CHOREOGRAPHER_EXECUTOR_CLIENT_SERVICE_INFO_URI = "/service-info";
 	public static final String CHOREOGRAPHER_EXECUTOR_CLIENT_SERVICE_START_URI = "/start";
 	public static final String CHOREOGRAPHER_EXECUTOR_CLIENT_SERVICE_ABORT_URI = "/abort";
 	public static final String OP_CHOREOGRAPHER_EXECUTOR_REGISTER = "/executor/register";
 	public static final String OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER = "/executor/unregister";
 	public static final String OP_CHOREOGRAPHER_NOTIFY_STEP_DONE = "/executor/notify-step-done";
-	public static final String OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_ADDRESS = "address";
-	public static final String OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_PORT = "port";
-	public static final String OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_BASE_URI = "base_uri";
+	public static final String OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_NAME = "name";
 
 	public static final String GATEWAY_URI = "/gateway";
 	public static final String OP_GATEWAY_KEY_URI = "/publickey";
