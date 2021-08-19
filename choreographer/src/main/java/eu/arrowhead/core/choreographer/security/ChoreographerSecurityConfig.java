@@ -44,8 +44,8 @@ public class ChoreographerSecurityConfig extends DefaultSecurityConfig {
     	if (sslEnabled) {
     		final ChoreographerAccessControlFilter baseFilter = appContext.getAutowireCapableBeanFactory().createBean(ChoreographerAccessControlFilter.class);
     		http.addFilterAfter(baseFilter, X509AuthenticationFilter.class);
-    		final ChoreographerExecutorNotifyAccessControlFilter specifalFilter = appContext.getAutowireCapableBeanFactory().createBean(ChoreographerExecutorNotifyAccessControlFilter.class);
-    		http.addFilterAfter(specifalFilter, ChoreographerAccessControlFilter.class);
+    		final ChoreographerExecutorNotifyAccessControlFilter specialFilter = appContext.getAutowireCapableBeanFactory().createBean(ChoreographerExecutorNotifyAccessControlFilter.class);
+    		http.addFilterAfter(specialFilter, ChoreographerAccessControlFilter.class);
     	}
     }
 }
