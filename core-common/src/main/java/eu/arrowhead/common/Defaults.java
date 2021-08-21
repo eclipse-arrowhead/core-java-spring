@@ -20,6 +20,7 @@ public class Defaults {
 	// members
 	
 	public static final boolean DEFAULT_SSL_SERVER_ENABLED = true;
+	public static final boolean DEFAULT_WEBSOCKETS_ENABLED = false;
 	public static final boolean DEFAULT_DISABLE_HOSTNAME_VERIFIER = false;
 	public static final boolean DEFAULT_LOG_ALL_REQUEST_AND_RESPONSE = false;
 	public static final int DEFAULT_URI_CRAWLER_INTERVAL = 30;
@@ -37,6 +38,7 @@ public class Defaults {
 	public static final int DEFAULT_GATEWAY_PORT = 8453;
 	public static final int DEFAULT_EVENT_HANDLER_PORT = 8455;
 	public static final int DEFAULT_DATAMANAGER_PORT = 8461;
+	public static final int DEFAULT_TIMEMANAGER_PORT = 8463;
 	public static final int DEFAULT_CHOREOGRAPHER_PORT = 8457;
     	public static final int DEFAULT_CONFIGURATION_PORT = 8459;
 	public static final int DEFAULT_CERTIFICATE_AUTHORITY_PORT = 8448;

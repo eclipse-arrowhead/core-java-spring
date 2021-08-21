@@ -73,7 +73,7 @@ public class CoreCommonConstants {
 	public static final String SWAGGER_HTTP_401_MESSAGE = "You are not authorized";
 	public static final String SWAGGER_HTTP_404_MESSAGE = "Not found";
 	public static final String SWAGGER_HTTP_409_MESSAGE = "Request caused a conflict";
-    public static final String SWAGGER_HTTP_415_MESSAGE = "MediaType not supported";
+	public static final String SWAGGER_HTTP_415_MESSAGE = "MediaType not supported";
 	public static final String SWAGGER_HTTP_500_MESSAGE = "Core service is not available";
 	
 	public static final String SWAGGER_TAG_MGMT = "Management";
@@ -100,23 +100,6 @@ public class CoreCommonConstants {
 	public static final String $URI_CRAWLER_INTERVAL_WD = "${" + URI_CRAWLER_INTERVAL + ":" + CoreDefaults.DEFAULT_URI_CRAWLER_INTERVAL + "}";
 	public static final String AUTH_TOKEN_TTL_IN_MINUTES = "auth_token_ttl_in_minutes";
 	public static final String $AUTH_TOKEN_TTL_IN_MINUTES_WD = "${" + AUTH_TOKEN_TTL_IN_MINUTES + ":" + CoreDefaults.DEFAULT_AUTH_TOKEN_TTL_IN_MINUTES + "}";
-
-	public static final String MQTT_BROKER_ENABLED = "mqtt.broker.enabled";
-	public static final String $MQTT_BROKER_ENABLED = "${" + MQTT_BROKER_ENABLED + ":false}";
-	public static final String MQTT_BROKER_ADDRESS = "mqtt.broker.address";
-	public static final String $MQTT_BROKER_ADDRESS = "${" + MQTT_BROKER_ADDRESS + ":0.0.0.0}";
-	public static final String MQTT_BROKER_PORT = "mqtt.broker.port";
-	public static final String $MQTT_BROKER_PORT = "${" + MQTT_BROKER_PORT + ":0}";
-	public static final String MQTT_BROKER_USERNAME = "mqtt.broker.username";
-	public static final String $MQTT_BROKER_USERNAME = "${" + MQTT_BROKER_USERNAME + ":}";
-	public static final String MQTT_BROKER_PASSWORD = "mqtt.broker.password";
-	public static final String $MQTT_BROKER_PASSWORD = "${" + MQTT_BROKER_PASSWORD + ":}";
-	public static final String MQTT_BROKER_CAFILE = "mqtt.broker.cafile";
-	public static final String $MQTT_BROKER_CAFILE = "${" + MQTT_BROKER_CAFILE + ":}";
-	public static final String MQTT_BROKER_CERTFILE = "mqtt.broker.certfile";
-	public static final String $MQTT_BROKER_CERTFILE = "${" + MQTT_BROKER_CERTFILE + ":}";
-	public static final String MQTT_BROKER_KEYFILE = "mqtt.broker.keyfile";
-	public static final String $MQTT_BROKER_KEYFILE = "${" + MQTT_BROKER_KEYFILE + ":}";
 	
 	public static final String REQUEST_PARAM_PAGE = "page";
 	public static final String REQUEST_PARAM_ITEM_PER_PAGE = "item_per_page";
@@ -147,8 +130,8 @@ public class CoreCommonConstants {
 	public static final String $SYSTEM_REGISTRY_PING_TIMEOUT_WD =
 			"${" + SYSTEM_REGISTRY_PING_TIMEOUT + ":" + CoreDefaults.DEFAULT_SYSTEM_REGISTRY_PING_TIMEOUT_MILLISECONDS + "}";
 
-    public static final String AUTHORIZATION_IS_EVENTHANDLER_PRESENT = "eventhandler_is_present";
-    public static final String $AUTHORIZATION_IS_EVENTHANDLER_PRESENT_WD = "${" + AUTHORIZATION_IS_EVENTHANDLER_PRESENT + ":" + CoreDefaults.DEFAULT_AUTHORIZATION_IS_EVENTHANDLER_PRESENT + "}";
+	public static final String AUTHORIZATION_IS_EVENTHANDLER_PRESENT = "eventhandler_is_present";
+	public static final String $AUTHORIZATION_IS_EVENTHANDLER_PRESENT_WD = "${" + AUTHORIZATION_IS_EVENTHANDLER_PRESENT + ":" + CoreDefaults.DEFAULT_AUTHORIZATION_IS_EVENTHANDLER_PRESENT + "}";
 	
 	public static final String ORCHESTRATOR_IS_GATEKEEPER_PRESENT = "gatekeeper_is_present";
 	public static final String $ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD = "${" + ORCHESTRATOR_IS_GATEKEEPER_PRESENT + ":" + CoreDefaults.DEFAULT_ORCHESTRATOR_IS_GATEKEEPER_PRESENT + "}";
@@ -250,13 +233,31 @@ public class CoreCommonConstants {
 	public static final String RELAY_TEST_LOG_MEASUREMENTS_IN_DB = "relay.test.log_measurements_in_db";
 	public static final String $RELAY_TEST_LOG_MEASUREMENTS_IN_DB_WD = "${" + RELAY_TEST_LOG_MEASUREMENTS_IN_DB + ":" + CoreDefaults.DEFAULT_RELAY_TEST_LOG_MEASUREMENTS_IN_DB + "}";
 	
-    public static final String CERTIFICATE_FORMAT = "X.509";
+	public static final String CERTIFICATE_FORMAT = "X.509";
 
 	// Translator-Fiware
-    public static final String FIWARE_SERVER_HOST = "fiware.server.host";
-    public static final String $FIWARE_SERVER_HOST = "${" + FIWARE_SERVER_HOST + ":}";
-    public static final String FIWARE_SERVER_PORT = "fiware.server.port";
-    public static final String $FIWARE_SERVER_PORT = "${" + FIWARE_SERVER_PORT + ":0}";
+	public static final String FIWARE_SERVER_HOST = "fiware.server.host";
+	public static final String $FIWARE_SERVER_HOST = "${" + FIWARE_SERVER_HOST + ":}";
+	public static final String FIWARE_SERVER_PORT = "fiware.server.port";
+	public static final String $FIWARE_SERVER_PORT = "${" + FIWARE_SERVER_PORT + ":0}";
+
+	// MQTT 
+	public static final String MQTT_BROKER_ENABLED = "mqtt.broker.enabled";
+	public static final String $MQTT_BROKER_ENABLED = "${" + MQTT_BROKER_ENABLED + ":false}";
+	public static final String MQTT_BROKER_ADDRESS = "mqtt.broker.address";
+	public static final String $MQTT_BROKER_ADDRESS = "${" + MQTT_BROKER_ADDRESS + ":0.0.0.0}";
+	public static final String MQTT_BROKER_PORT = "mqtt.broker.port";
+	public static final String $MQTT_BROKER_PORT = "${" + MQTT_BROKER_PORT + ":0}";
+	public static final String MQTT_BROKER_USERNAME = "mqtt.broker.username";
+	public static final String $MQTT_BROKER_USERNAME = "${" + MQTT_BROKER_USERNAME + ":}";
+	public static final String MQTT_BROKER_PASSWORD = "mqtt.broker.password";
+	public static final String $MQTT_BROKER_PASSWORD = "${" + MQTT_BROKER_PASSWORD + ":}";
+	public static final String MQTT_BROKER_CAFILE = "mqtt.broker.cafile";
+	public static final String $MQTT_BROKER_CAFILE = "${" + MQTT_BROKER_CAFILE + ":}";
+	public static final String MQTT_BROKER_CERTFILE = "mqtt.broker.certfile";
+	public static final String $MQTT_BROKER_CERTFILE = "${" + MQTT_BROKER_CERTFILE + ":}";
+	public static final String MQTT_BROKER_KEYFILE = "mqtt.broker.keyfile";
+	public static final String $MQTT_BROKER_KEYFILE = "${" + MQTT_BROKER_KEYFILE + ":}";
 
     //=================================================================================================
 	// assistant methods

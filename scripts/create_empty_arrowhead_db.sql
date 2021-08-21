@@ -47,6 +47,11 @@ CREATE USER IF NOT EXISTS 'datamanager'@'localhost' IDENTIFIED BY 'gRLjXbqu0YwYh
 CREATE USER IF NOT EXISTS 'datamanager'@'%' IDENTIFIED BY 'gRLjXbqu0YwYhfK';
 source datamanager_privileges.sql
 
+-- TimeManager
+CREATE USER IF NOT EXISTS 'timemanager'@'localhost' IDENTIFIED BY 'xyp2XEAu5Tbc41g';
+CREATE USER IF NOT EXISTS 'timemanager'@'%' IDENTIFIED BY 'xyp2XEAu5Tbc41g';
+source timemanager_privileges.sql
+
 -- Choreographer
 CREATE USER IF NOT EXISTS 'choreographer'@'localhost' IDENTIFIED BY 'Qa5yx4oBp4Y9RLX';
 CREATE USER IF NOT EXISTS 'choreographer'@'%' IDENTIFIED BY 'Qa5yx4oBp4Y9RLX';
