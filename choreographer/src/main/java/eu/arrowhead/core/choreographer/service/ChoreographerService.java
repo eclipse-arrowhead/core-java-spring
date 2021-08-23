@@ -232,7 +232,8 @@ public class ChoreographerService {
 				}
 				cache.put(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion(), executorData);
 			} else {
-				// TODO: add session step to DB
+				// because we found an executor without the selector, we have to create the session step record manually
+				sessionDBService.registerSessionStep(sessionId, step.getId(), executorData.getExecutor().getId());
 			}
 		}
 		sessionDBService.worklog(plan.getName(), sessionId, "Found executors to all steps.", null);
