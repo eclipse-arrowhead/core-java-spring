@@ -158,8 +158,6 @@ public class ChoreographerService {
     	default:
     		throw new IllegalArgumentException("Invalid status: " + payload.getStatus());
     	}
-    	
-
     }
     
     //-------------------------------------------------------------------------------------------------
@@ -233,9 +231,11 @@ public class ChoreographerService {
 					throw new ChoreographerSessionException(sessionId, "Can't find properly working executor for step: " + createFullyQualifiedStepName(step));
 				}
 				cache.put(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion(), executorData);
+			} else {
+				// TODO: add session step to DB
 			}
 		}
-		sessionDBService.worklog(plan.getName(), sessionId, "Found executor to all steps.", null);
+		sessionDBService.worklog(plan.getName(), sessionId, "Found executors to all steps.", null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -298,6 +298,7 @@ public class ChoreographerService {
     	
 		ExecutorData executorData = cache.get(serviceDefinition, minVersion, maxVersion);
     	while (executorData != null) {
+    		result.clear();
     		try {
     			for (final ServiceQueryFormDTO form : executorData.getDependencyForms()) {
 					final OrchestrationFormRequestDTO orchestrationForm = createOrchestrationFormRequestFromServiceQueryForm(form);

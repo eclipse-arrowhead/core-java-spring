@@ -155,8 +155,10 @@ public class ChoreographerExecutorService {
 
 		// Check SystemRequestDTO only for nulls. (Verification will be done by ServiceRegistry)
 		if (dto == null) {
-			throw new BadPayloadException("dto is null.", HttpStatus.SC_BAD_REQUEST, origin);
+			throw new BadPayloadException("Request is null.", HttpStatus.SC_BAD_REQUEST, origin);
 		}
+		
+		//TODO: what if system is null?
 
 		if (Utilities.isEmpty(dto.getSystem().getSystemName())) {
 			throw new BadPayloadException("System name is empty.", HttpStatus.SC_BAD_REQUEST, origin);
@@ -187,7 +189,7 @@ public class ChoreographerExecutorService {
 			throw new BadPayloadException("maxVersion is null.", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		if (dto.getMinVersion() > dto.getMaxVersion()) {
-			throw new InvalidParameterException("minVersion cannot be higher than maxVersion.");
+			throw new InvalidParameterException("minVersion cannot be greater than maxVersion.");
 		}
 	}
 	
