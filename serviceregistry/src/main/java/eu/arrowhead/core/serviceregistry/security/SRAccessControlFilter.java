@@ -135,7 +135,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 
 		if (!providerName.equalsIgnoreCase(clientName)) {
 			log.debug("Provider system name and certificate common name do not match! Registering denied!");
-			throw new AuthException("Provider system name (" + providerName + ") and certificate common name (" + clientCN + ") do not match!", HttpStatus.UNAUTHORIZED.value());
+			throw new AuthException("Provider system name (" + providerName + ") and certificate common name (" + clientName + ") do not match!", HttpStatus.UNAUTHORIZED.value());
 		}
 		
 		if (!isClientACoreSystem(clientCN, cloudCN)) {
@@ -160,7 +160,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 		
 		if (!appSysName.equalsIgnoreCase(clientName)) {
 			log.debug("Application system name and certificate common name do not match! Unregistering denied!");
-			throw new AuthException("Application system name (" + appSysName + ") and certificate common name (" + clientCN + ") do not match!", HttpStatus.UNAUTHORIZED.value());
+			throw new AuthException("Application system name (" + appSysName + ") and certificate common name (" + clientName + ") do not match!", HttpStatus.UNAUTHORIZED.value());
 		}
 	}
 	
@@ -237,7 +237,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 		
 		if (!applicationName.equalsIgnoreCase(clientName)) {
 			log.debug("Application system name and certificate common name do not match! Registering denied!");
-			throw new AuthException("Application system name(" + applicationName + ") and certificate common name (" + clientCN + ") do not match!", HttpStatus.UNAUTHORIZED.value());
+			throw new AuthException("Application system name(" + applicationName + ") and certificate common name (" + clientName + ") do not match!", HttpStatus.UNAUTHORIZED.value());
 		}
 	}
 

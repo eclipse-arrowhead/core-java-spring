@@ -61,7 +61,7 @@ public class ChoreographerAccessControlFilter extends CoreSystemAccessControlFil
 	
 		if (!executorName.equalsIgnoreCase(clientName)) {
 			log.debug("Executor system name and certificate common name do not match! Registering denied!");
-			throw new AuthException("Executor system name (" + executorName + ") and certificate common name (" + clientCN + ") do not match!", HttpStatus.UNAUTHORIZED.value());
+			throw new AuthException("Executor system name (" + executorName + ") and certificate common name (" + clientName + ") do not match!", HttpStatus.UNAUTHORIZED.value());
 		}
 	}
 	
@@ -77,7 +77,7 @@ public class ChoreographerAccessControlFilter extends CoreSystemAccessControlFil
 		
 		if (!executorName.equalsIgnoreCase(clientName)) {
 			log.debug("Executor name and certificate common name do not match! Unregistering denied!");
-			throw new AuthException("Executor name (" + executorName + ") and certificate common name (" + clientCN + ") do not match!", HttpStatus.UNAUTHORIZED.value());
+			throw new AuthException("Executor name (" + executorName + ") and certificate common name (" + clientName + ") do not match!", HttpStatus.UNAUTHORIZED.value());
 		}
 	}
 	
