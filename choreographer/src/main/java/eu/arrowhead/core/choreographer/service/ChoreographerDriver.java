@@ -20,6 +20,7 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.common.dto.internal.KeyValueDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationMultiServiceResponseDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerAbortStepRequestDTO;
@@ -58,6 +59,14 @@ public class ChoreographerDriver {
 
     //=================================================================================================
     // methods
+    
+    //-------------------------------------------------------------------------------------------------
+    public KeyValueDTO pullServiceRegistryConfig() {
+    	logger.debug("pullServiceRegistryConfig started...");
+    	
+    	final UriComponents uri = getPullServiceRegistryConfigUri();
+    	return httpService.sendRequest(uri, HttpMethod.GET, KeyValueDTO.class).getBody();
+    }
 
     //-------------------------------------------------------------------------------------------------
     public ServiceQueryResultListDTO multiQueryServiceRegistry(final ServiceQueryFormListDTO forms) {
@@ -168,6 +177,21 @@ public class ChoreographerDriver {
 	
     //=================================================================================================
     // assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
+    private UriComponents getPullServiceRegistryConfigUri() {
+        logger.debug("getPullServiceRegistryConfigUri started...");
+
+        if (arrowheadContext.containsKey(CoreCommonConstants.SR_PULL_CONFIG_URI)) {
+            try {
+                return (UriComponents) arrowheadContext.get(CoreCommonConstants.SR_PULL_CONFIG_URI);
+            } catch (final ClassCastException ex) {
+                throw new ArrowheadException("Choreographer can't find Service Registry pull-config URI.");
+            }
+        }
+
+        throw new ArrowheadException("Choreographer can't find Service Registry pull-config URI.");
+    }
 
     //-------------------------------------------------------------------------------------------------
     private UriComponents getMultiQueryServiceRegistryUri() {

@@ -110,6 +110,7 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_SERVICEREGISTRY_REGISTER_SYSTEM = "register-system";
 	public static final String CORE_SERVICE_SERVICEREGISTRY_UNREGISTER_SYSTEM = "unregister-system";
 	public static final String CORE_SERVICE_SERVICEREGISTRY_PULL_SYSTEMS = "pull-systems";
+	public static final String CORE_SERVICE_SERVICEREGISTRY_PULL_CONFIG = "pull-config";
 
 	public static final String CORE_SERVICE_SYSTEMREGISTRY_REGISTER = "system-register";
 	public static final String CORE_SERVICE_SYSTEMREGISTRY_UNREGISTER = "system-unregister";
