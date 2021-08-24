@@ -70,7 +70,7 @@ public class CoreCommonConstants {
 	public static final String OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SYSTEM_ID_URI = "/query/provider/{" + COMMON_FIELD_NAME_ID + "}";
 	public static final String OP_SERVICEREGISTRY_MULTI_QUERY_URI = CommonConstants.OP_SERVICEREGISTRY_QUERY_URI + "/multi";	
 	public static final String OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SERVICE_DEFINITION_LIST_URI = "/query/definition";
-	public static final String OP_SERVICEREGISTRY_PULL_CONFIG_URI = "/pull-confing";
+	public static final String OP_SERVICEREGISTRY_PULL_CONFIG_URI = "/pull-config";
 		
 	public static final String ORCHESTRATOR_STORE_MGMT_URI = "/mgmt/store";
 	public static final String ORCHESTRATOR_STORE_FLEXIBLE_MGMT_URI = "/mgmt/store/flexible";

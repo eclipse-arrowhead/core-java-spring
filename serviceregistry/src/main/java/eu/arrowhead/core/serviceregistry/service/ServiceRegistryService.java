@@ -9,13 +9,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.CoreCommonConstants;
-import eu.arrowhead.common.dto.internal.KeyValueDTO;
+import eu.arrowhead.common.dto.internal.KeyValuesDTO;
 
 @Service
 public class ServiceRegistryService {
 	
 	//=================================================================================================
 	// members
+	
+	@Value(CoreCommonConstants.$USE_STRICT_SERVICE_DEFINITION_VERIFIER_WD)
+	private boolean useStrictServiceDefinitionVerifier;
 	
 	@Value(CoreCommonConstants.$ALLOW_SELF_ADDRESSING_WD)
 	private boolean allowSelfAddressing;
@@ -29,12 +32,13 @@ public class ServiceRegistryService {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public KeyValueDTO getPublicConfig() { //TODO juint
+	public KeyValuesDTO getPublicConfig() { //TODO juint
 		logger.debug("getPublicConfig started...");
 		
 		final Map<String,String> map = new HashMap<>();
+		map.put(CoreCommonConstants.USE_STRICT_SERVICE_DEFINITION_VERIFIER, String.valueOf(useStrictServiceDefinitionVerifier));
 		map.put(CoreCommonConstants.ALLOW_SELF_ADDRESSING, String.valueOf(allowSelfAddressing));
 		map.put(CoreCommonConstants.ALLOW_NON_ROUTABLE_ADDRESSING, String.valueOf(allowNonRoutableAddressing));
-		return new KeyValueDTO(map);
+		return new KeyValuesDTO(map);
 	}
 }

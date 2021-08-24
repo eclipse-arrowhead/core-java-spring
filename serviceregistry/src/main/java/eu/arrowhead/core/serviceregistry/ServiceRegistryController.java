@@ -50,7 +50,7 @@ import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.core.CoreSystemService;
-import eu.arrowhead.common.dto.internal.KeyValueDTO;
+import eu.arrowhead.common.dto.internal.KeyValuesDTO;
 import eu.arrowhead.common.dto.internal.ServiceDefinitionRequestDTO;
 import eu.arrowhead.common.dto.internal.ServiceDefinitionsListResponseDTO;
 import eu.arrowhead.common.dto.internal.ServiceInterfaceRequestDTO;
@@ -221,14 +221,14 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return the some configuration of ServiceRegistry", response = KeyValueDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiOperation(value = "Return some configuration of ServiceRegistry", response = KeyValuesDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_CONFIG_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path = CoreCommonConstants.OP_SERVICEREGISTRY_PULL_CONFIG_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public KeyValueDTO pullConfig() { //TODO junit
+	@ResponseBody public KeyValuesDTO pullConfig() { //TODO junit
 		logger.debug("pullConfig started ...");
 		return serviceRegistryService.getPublicConfig();
 	}

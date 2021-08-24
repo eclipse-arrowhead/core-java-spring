@@ -20,7 +20,7 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
-import eu.arrowhead.common.dto.internal.KeyValueDTO;
+import eu.arrowhead.common.dto.internal.KeyValuesDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationMultiServiceResponseDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerAbortStepRequestDTO;
@@ -61,11 +61,11 @@ public class ChoreographerDriver {
     // methods
     
     //-------------------------------------------------------------------------------------------------
-    public KeyValueDTO pullServiceRegistryConfig() {
+    public KeyValuesDTO pullServiceRegistryConfig() {
     	logger.debug("pullServiceRegistryConfig started...");
     	
     	final UriComponents uri = getPullServiceRegistryConfigUri();
-    	return httpService.sendRequest(uri, HttpMethod.GET, KeyValueDTO.class).getBody();
+    	return httpService.sendRequest(uri, HttpMethod.GET, KeyValuesDTO.class).getBody();
     }
 
     //-------------------------------------------------------------------------------------------------

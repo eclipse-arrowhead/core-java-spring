@@ -53,12 +53,19 @@ public class ChoreographerExecutorService {
 	@Autowired
 	private ChoreographerDriver driver;
 	
+	private boolean useStrictServiceDefinitionVerifier = false;
+	
 	private final Object lock = new Object();
 	
 	private final Logger logger = LogManager.getLogger(ChoreographerExecutorService.class);
 	
 	//=================================================================================================
     // methods
+	
+	//-------------------------------------------------------------------------------------------------	
+	public void configure(final boolean useStrictServiceDefinitionVerifier) {
+		this.useStrictServiceDefinitionVerifier = useStrictServiceDefinitionVerifier;
+	}
 	
 	//-------------------------------------------------------------------------------------------------	
 	public ChoreographerExecutorResponseDTO addExecutorSystem(final ChoreographerExecutorRequestDTO request, final String origin) { //TODO junit
@@ -163,7 +170,6 @@ public class ChoreographerExecutorService {
 	private void checkAndNormalizeExecutorRequestDTO(final ChoreographerExecutorRequestDTO dto, final String origin, final HttpServletRequest servletRequest) {
 		logger.debug("checkExecutorRequestDTO started...");
 
-		// Check SystemRequestDTO only for nulls. (Verification will be done by ServiceRegistry)
 		if (dto == null) {
 			throw new BadPayloadException("Request is null.", HttpStatus.SC_BAD_REQUEST, origin);
 		}
@@ -199,7 +205,7 @@ public class ChoreographerExecutorService {
 		}
 		
 		// check others
-		if (!cnVerifier.isValid(dto.getServiceDefinitionName())) {
+		if (useStrictServiceDefinitionVerifier && !cnVerifier.isValid(dto.getServiceDefinitionName())) {
 			throw new BadPayloadException("Service definition has invalid format. Name must match with the following regular expression: " + CommonNamePartVerifier.COMMON_NAME_PART_PATTERN_STRING, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		

@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class KeyValueDTO implements Serializable {
+public class KeyValuesDTO implements Serializable {
 
 	//=================================================================================================
 	// members
@@ -17,10 +17,10 @@ public class KeyValueDTO implements Serializable {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public KeyValueDTO() {}
+	public KeyValuesDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public KeyValueDTO(final Map<String, String> map) {
+	public KeyValuesDTO(final Map<String, String> map) {
 		this.map = map;
 	}
 	

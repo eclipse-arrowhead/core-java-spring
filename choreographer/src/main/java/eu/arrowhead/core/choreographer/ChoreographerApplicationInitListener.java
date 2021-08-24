@@ -47,6 +47,7 @@ import eu.arrowhead.core.choreographer.graph.KahnAlgorithmStepGraphCircleDetecto
 import eu.arrowhead.core.choreographer.graph.StepGraphCircleDetector;
 import eu.arrowhead.core.choreographer.graph.StepGraphNormalizer;
 import eu.arrowhead.core.choreographer.service.ChoreographerDriver;
+import eu.arrowhead.core.choreographer.service.ChoreographerExecutorService;
 
 @Component
 public class ChoreographerApplicationInitListener extends ApplicationInitListener {
@@ -56,6 +57,9 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
 	
 	@Autowired
 	private NetworkAddressVerifier networkAddressVerifier;
+	
+	@Autowired
+	private ChoreographerExecutorService choreographerExecutorService;
 	
 	@Autowired
 	private ChoreographerDriver driver;
@@ -125,7 +129,7 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
         context.put(CoreCommonConstants.SR_REGISTER_SYSTEM_URI, createRegisterSystemUri(scheme));
         context.put(CoreCommonConstants.SR_UNREGISTER_SYSTEM_URI, createUnregisterSystemUri(scheme));
         
-        configureNetworkAddressVerifier();
+        configureServiceRegistryDependentVerifiers();
     }
     
     //-------------------------------------------------------------------------------------------------
@@ -178,13 +182,15 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
     }
     
     //-------------------------------------------------------------------------------------------------
-    private void configureNetworkAddressVerifier() {
+    private void configureServiceRegistryDependentVerifiers() {
     	logger.debug("configureNetworkAddressVerifier started...");
     	
     	try {
     		final Map<String,String> srConfig = driver.pullServiceRegistryConfig().getMap();
     		networkAddressVerifier.configure(Boolean.valueOf(srConfig.get(CoreCommonConstants.ALLOW_SELF_ADDRESSING)),
     										 Boolean.valueOf(srConfig.get(CoreCommonConstants.ALLOW_NON_ROUTABLE_ADDRESSING)));
+    		
+    		choreographerExecutorService.configure(Boolean.valueOf(srConfig.get(CoreCommonConstants.USE_STRICT_SERVICE_DEFINITION_VERIFIER)));
     	} catch (final Exception ex) {
     		logger.error(ex.getMessage());
     		logger.debug(ex);
