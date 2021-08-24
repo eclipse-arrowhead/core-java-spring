@@ -90,7 +90,11 @@ public class ChoreographerExecutorDBService {
 		// System name and address is coming from SR registration result, so should be verified (verification is depending on SR's application properties)
 		Assert.isTrue(!Utilities.isEmpty(serviceDefinitionName), "serviceDefinitionName is empty");
 		
-		try {
+		try {			
+			if (executorRepository.findByName(systemName).isPresent()) {
+				throw new InvalidParameterException("Executor with name '" + systemName +  "' already exists!");
+			}
+			
 			final String validatedBaseUri = Utilities.isEmpty(baseUri) ? "" : baseUri.trim();
 			
 			ChoreographerExecutor executor;

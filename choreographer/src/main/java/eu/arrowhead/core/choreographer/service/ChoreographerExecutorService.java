@@ -23,6 +23,7 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.processor.NetworkAddressDetector;
+import eu.arrowhead.common.processor.NetworkAddressPreProcessor;
 import eu.arrowhead.common.processor.model.AddressDetectionResult;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
@@ -44,7 +45,15 @@ public class ChoreographerExecutorService {
 	private NetworkAddressDetector networkAddressDetector;
 	
 	@Autowired
+	private NetworkAddressVerifier networkAddressVerifier;
+	
+	@Autowired
+	private NetworkAddressPreProcessor networkAddressPreProcessor;
+	
+	@Autowired
 	private ChoreographerDriver driver;
+	
+	private boolean useStrictServiceDefinitionVerifier = false;
 	
 	private final Object lock = new Object();
 	
@@ -54,12 +63,17 @@ public class ChoreographerExecutorService {
     // methods
 	
 	//-------------------------------------------------------------------------------------------------	
+	public void configure(final boolean useStrictServiceDefinitionVerifier) {
+		this.useStrictServiceDefinitionVerifier = useStrictServiceDefinitionVerifier;
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
 	public ChoreographerExecutorResponseDTO addExecutorSystem(final ChoreographerExecutorRequestDTO request, final String origin) { //TODO junit
 		logger.debug("addExecutorSystem started...");
 		Assert.notNull(request, "ChoreographerExecutorRequestDTO is null");
 		Assert.isTrue(!Utilities.isEmpty(origin), "origin is empty");
 		
-		checkExecutorRequestDTO(request, origin, null);
+		checkAndNormalizeExecutorRequestDTO(request, origin, null);
 		final SystemResponseDTO system = driver.registerSystem(request.getSystem());
 		return executorDBService.createExecutorResponse(system.getSystemName(), system.getAddress(), system.getPort(), request.getBaseUri(), request.getServiceDefinitionName(),
 														request.getMinVersion(), request.getMaxVersion());
@@ -72,22 +86,25 @@ public class ChoreographerExecutorService {
 		Assert.isTrue(!Utilities.isEmpty(origin), "origin is empty");
 		Assert.notNull(servletRequest, "servletRequest is null");
 		
-		checkExecutorRequestDTO(request, origin, servletRequest);
-    	
-    	SystemResponseDTO system = null;
-    	try {
-    		system = driver.registerSystem(request.getSystem());
+		checkAndNormalizeExecutorRequestDTO(request, origin, servletRequest);
+		
+		SystemResponseDTO system = null;
+		
+		try {
+			system = driver.queryServiceRegistryBySystem(request.getSystem().getSystemName(), request.getSystem().getAddress(), request.getSystem().getPort());			
+		} catch (final BadPayloadException | InvalidParameterException ex) {
+			// executor has not yet been registered as system
+			system = driver.registerSystem(request.getSystem());
+		}
+		
+		try {
+			return executorDBService.createExecutorResponse(system.getSystemName(), system.getAddress(), system.getPort(), request.getBaseUri(), request.getServiceDefinitionName(),
+													        request.getMinVersion(), request.getMaxVersion());
 			
 		} catch (final ArrowheadException ex) {
-			if (ex.getMessage().contains(NetworkAddressVerifier.ERROR_MSG_PREFIX)) {
-				final String detectedAddress = detectNetworkAddress(servletRequest, ex.getMessage(), origin);
-				request.getSystem().setAddress(detectedAddress);
-				system = driver.registerSystem(request.getSystem());
-			}
+			driver.unregisterSystem(system.getSystemName(), system.getAddress(), system.getPort());
+			throw ex;
 		}
-    	
-    	return executorDBService.createExecutorResponse(system.getSystemName(), system.getAddress(), system.getPort(), request.getBaseUri(), request.getServiceDefinitionName(),
-														request.getMinVersion(), request.getMaxVersion());
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
@@ -150,21 +167,31 @@ public class ChoreographerExecutorService {
     // assistant methods
 
 	//-------------------------------------------------------------------------------------------------
-	private void checkExecutorRequestDTO(final ChoreographerExecutorRequestDTO dto, final String origin, final HttpServletRequest servletRequest) {
+	private void checkAndNormalizeExecutorRequestDTO(final ChoreographerExecutorRequestDTO dto, final String origin, final HttpServletRequest servletRequest) {
 		logger.debug("checkExecutorRequestDTO started...");
 
-		// Check SystemRequestDTO only for nulls. (Verification will be done by ServiceRegistry)
 		if (dto == null) {
 			throw new BadPayloadException("Request is null.", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		//TODO: what if system is null?
+		if (dto.getSystem() == null) {
+			throw new BadPayloadException("System is null.", HttpStatus.SC_BAD_REQUEST, origin);
+		}
 
 		if (Utilities.isEmpty(dto.getSystem().getSystemName())) {
 			throw new BadPayloadException("System name is empty.", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		if (Utilities.isEmpty(dto.getSystem().getAddress())) {
+		if (!Utilities.isEmpty(dto.getSystem().getAddress())) {
+			try {
+				final String normalizedAddress = networkAddressPreProcessor.normalize(dto.getSystem().getAddress());
+				networkAddressVerifier.verify(normalizedAddress);
+				dto.getSystem().setAddress(normalizedAddress);
+			} catch (final InvalidParameterException ex) {
+				throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, origin);
+			}			
+			
+		} else {
 			if (servletRequest == null) {
 				throw new BadPayloadException("System address is empty.", HttpStatus.SC_BAD_REQUEST, origin);
 			} else {
@@ -178,7 +205,7 @@ public class ChoreographerExecutorService {
 		}
 		
 		// check others
-		if (!cnVerifier.isValid(dto.getServiceDefinitionName())) {
+		if (useStrictServiceDefinitionVerifier && !cnVerifier.isValid(dto.getServiceDefinitionName())) {
 			throw new BadPayloadException("Service definition has invalid format. Name must match with the following regular expression: " + CommonNamePartVerifier.COMMON_NAME_PART_PATTERN_STRING, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		

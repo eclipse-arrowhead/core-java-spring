@@ -113,6 +113,9 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICEREGISTRY_PULL_SYSTEMS_URI)) {
 			// Only dedicated core systems can use this service
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForPullSystems, requestTarget);
+		} else if (requestTarget.endsWith(CoreCommonConstants.OP_SERVICEREGISTRY_PULL_CONFIG_URI)) {
+			// Only Core Systems are allowed to pull the SR config
+			checkIfClientIsACoreSystem(clientCN, cloudCN);
 		}
 	}
 
@@ -192,6 +195,13 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 		}
 		
 		return false;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkIfClientIsACoreSystem(final String clientCN, final String cloudCN) {
+		if (!isClientACoreSystem(clientCN, cloudCN)) {
+			throw new AuthException("Only Core Systems are allowed to use this endpoint", HttpStatus.UNAUTHORIZED.value());
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------

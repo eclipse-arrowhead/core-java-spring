@@ -73,6 +73,12 @@ public class NetworkAddressVerifier {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
+	public void configure(final boolean allowSelfAddressing, final boolean allowNonRoutableAddressing) {
+		this.allowSelfAddressing = allowSelfAddressing;
+		this.allowNonRoutableAddressing = allowNonRoutableAddressing;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public void verify(final String address) throws InvalidParameterException {
 		logger.debug("verify started...");
 		
