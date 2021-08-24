@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Utilities;
@@ -24,7 +23,6 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.processor.NetworkAddressDetector;
-import eu.arrowhead.common.processor.NetworkAddressPreProcessor;
 import eu.arrowhead.common.processor.model.AddressDetectionResult;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
@@ -44,9 +42,6 @@ public class ChoreographerExecutorService {
 	
 	@Autowired
 	private NetworkAddressDetector networkAddressDetector;
-	
-	@Autowired
-	private NetworkAddressPreProcessor networkAddressPreProcessor;
 	
 	@Autowired
 	private ChoreographerDriver driver;
@@ -132,34 +127,22 @@ public class ChoreographerExecutorService {
 
         final Optional<ChoreographerExecutor> optional = executorDBService.getExecutorOptionalById(id);
         if (optional.isPresent()) {
-        	deleteExectuorSafely(optional.get(), origin);
+        	deleteExecutorSafely(optional.get(), origin);
 		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	public void unregisterExecutorSystem(final String address, final Integer port, final String baseUri, final String origin, final HttpServletRequest servletRequest) { //TODO junit
+	public void unregisterExecutorSystem(final String name, final String origin) { //TODO junit
 		logger.debug("unregisterExecutorSystem started...");
 		Assert.isTrue(!Utilities.isEmpty(origin), "origin is empty");
-		Assert.notNull(servletRequest, "servletRequest is null");
 		
-		String validAddress = address;
-        if (Utilities.isEmpty(validAddress)) {
-        	validAddress = detectNetworkAddress(servletRequest, "Executor address is empty.", origin);
-		} else {
-			validAddress = networkAddressPreProcessor.normalize(validAddress);
-		}
-        
-        if (port == null) {
-			throw new BadPayloadException("executorPort is null", HttpStatus.SC_BAD_REQUEST, origin);
-		}
-		final int validPort = port;
-		if (validPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-			throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
+		if (Utilities.isEmpty(name)) {
+			throw new BadPayloadException("Executor name is empty.", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-        final Optional<ChoreographerExecutor> optional = executorDBService.getExecutorOptionalByAddressAndPortAndBaseUri(validAddress, validPort, baseUri);
+        final Optional<ChoreographerExecutor> optional = executorDBService.getExecutorOptionalByName(name);
         if (optional.isPresent()) {
-        	deleteExectuorSafely(optional.get(), origin);
+        	deleteExecutorSafely(optional.get(), origin);
 		}
 	}
 	
@@ -172,8 +155,10 @@ public class ChoreographerExecutorService {
 
 		// Check SystemRequestDTO only for nulls. (Verification will be done by ServiceRegistry)
 		if (dto == null) {
-			throw new BadPayloadException("dto is null.", HttpStatus.SC_BAD_REQUEST, origin);
+			throw new BadPayloadException("Request is null.", HttpStatus.SC_BAD_REQUEST, origin);
 		}
+		
+		//TODO: what if system is null?
 
 		if (Utilities.isEmpty(dto.getSystem().getSystemName())) {
 			throw new BadPayloadException("System name is empty.", HttpStatus.SC_BAD_REQUEST, origin);
@@ -204,7 +189,7 @@ public class ChoreographerExecutorService {
 			throw new BadPayloadException("maxVersion is null.", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		if (dto.getMinVersion() > dto.getMaxVersion()) {
-			throw new InvalidParameterException("minVersion cannot be higher than maxVersion.");
+			throw new InvalidParameterException("minVersion cannot be greater than maxVersion.");
 		}
 	}
 	
@@ -221,7 +206,7 @@ public class ChoreographerExecutorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void deleteExectuorSafely(final ChoreographerExecutor executor, final String origin) {
+	private void deleteExecutorSafely(final ChoreographerExecutor executor, final String origin) {
 		logger.debug("deleteExectuorSafely started...");
 
 		synchronized (lock) {

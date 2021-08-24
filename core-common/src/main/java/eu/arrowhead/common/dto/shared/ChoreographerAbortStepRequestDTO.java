@@ -12,37 +12,37 @@
  *   Arrowhead Consortia - conceptualization
  ********************************************************************************/
 
-package eu.arrowhead.common.dto.internal;
+package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
 
-public class ChoreographerStartSessionDTO implements Serializable {
+public class ChoreographerAbortStepRequestDTO implements Serializable {
 
-    //=================================================================================================
+	//=================================================================================================
     // members
 
-    private static final long serialVersionUID = 205131759149025379L;
-    
-    private long sessionId;
-    private long planId;
+	private static final long serialVersionUID = -4367804324253105575L;
+
+	private long sessionId;
+    private long sessionStepId;
 
     //=================================================================================================
     // methods
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerStartSessionDTO() {}
+    public ChoreographerAbortStepRequestDTO() {}
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerStartSessionDTO(final long sessionId, final long planId) {
-        this.sessionId = sessionId;
-        this.planId = planId;
+    public ChoreographerAbortStepRequestDTO(final long sessionId, final long sessionStepId) {
+    	this.sessionId = sessionId;
+    	this.sessionStepId = sessionStepId;
     }
-
-    //-------------------------------------------------------------------------------------------------
+    
+	//-------------------------------------------------------------------------------------------------
     public long getSessionId() { return sessionId; }
-    public long getPlanId() { return planId; }
+	public long getSessionStepId() { return sessionStepId; }
 
     //-------------------------------------------------------------------------------------------------
     public void setSessionId(final long sessionId) { this.sessionId = sessionId; }
-    public void setPlanId(final long planId) { this.planId = planId; }
+	public void setSessionStepId(final long sessionStepId) { this.sessionStepId = sessionStepId; }
 }

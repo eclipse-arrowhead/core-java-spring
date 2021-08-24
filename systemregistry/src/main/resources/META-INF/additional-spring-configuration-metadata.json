@@ -48,5 +48,15 @@
     "name": "sr_port",
     "type": "java.lang.Integer",
     "description": "A description for 'sr_port'"
+  },
+  {
+    "name": "allow_self_addressing",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'allow_self_addressing'"
+  },
+  {
+    "name": "allow_non_routable_addressing",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'allow_non_routable_addressing'"
   }
 ]}

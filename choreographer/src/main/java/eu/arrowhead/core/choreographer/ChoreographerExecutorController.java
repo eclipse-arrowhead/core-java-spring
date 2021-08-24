@@ -159,12 +159,9 @@ public class ChoreographerExecutorController {
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @DeleteMapping(CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER)
-    public void unregisterExecutor(final HttpServletRequest servletRequest,
-    							  @RequestParam(name = CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_ADDRESS, required = false) final String executorAddress,
-						          @RequestParam(name = CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_PORT, required = true) final Integer executorPort,
-						          @RequestParam(name = CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_BASE_URI, required = false) final String executorBaseUri) { //TODO junit
-        logger.debug("New Executor delete request received with address={}, port={}, baseUri= {}", executorAddress, executorPort, executorBaseUri);        
-        executorService.unregisterExecutorSystem(executorAddress, executorPort, executorBaseUri,  CommonConstants.CHOREOGRAPHER_URI + CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER, servletRequest);
+    public void unregisterExecutor(@RequestParam(name = CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_NAME, required = true) final String executorName) { //TODO junit
+        logger.debug("New Executor delete request received with name={}", executorName);        
+        executorService.unregisterExecutorSystem(executorName,  CommonConstants.CHOREOGRAPHER_URI + CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER);
         logger.debug("Executor successfully deleted");
     }
 }

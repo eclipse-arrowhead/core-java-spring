@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,13 +28,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
+import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
+import eu.arrowhead.common.database.entity.ChoreographerStep;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultListDTO;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerExecutorDBService;
+import eu.arrowhead.core.choreographer.database.service.ChoreographerSessionDBService;
 import eu.arrowhead.core.choreographer.service.ChoreographerDriver;
 
 @Component
@@ -46,6 +48,9 @@ public class ExecutorSelector {
 	
 	@Autowired
 	private ChoreographerExecutorDBService executorDBService;
+	
+	@Autowired
+	private ChoreographerSessionDBService sessionDBService;
 	
 	@Autowired
 	private ChoreographerDriver driver;
@@ -59,17 +64,26 @@ public class ExecutorSelector {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerExecutor select(final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final List<ChoreographerExecutor> exclusions) {
-		return selectAndInit(serviceDefinition, minVersion, maxVersion, exclusions, false);
+	public ChoreographerExecutor select(final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final Set<Long> exclusions) {
+		return selectAndInit(null, null, serviceDefinition, minVersion, maxVersion, exclusions, false).getExecutor();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ExecutorData selectAndInit(final long sessionId, final ChoreographerStep step, final Set<Long> exclusions, boolean init) {
+		return selectAndInit(sessionId, step.getId(), step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion(), exclusions, init);
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerExecutor selectAndInit(final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final List<ChoreographerExecutor> exclusions, final boolean init) {
+	public ExecutorData selectAndInit(final Long sessionId, final Long stepId, final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final Set<Long> exclusions, final boolean init) {
 		//exclusions: when a ChoreographerSessionStep failed due to executor issue, then selection can be repeated but without that executor(s)
 		logger.debug("selectAndInit started...");
 		Assert.isTrue(!Utilities.isEmpty(serviceDefinition), "serviceDefinition is empty");
+		if (init) {
+			Assert.isTrue(sessionId != null && sessionId >= 1, "Invalid session id");
+			Assert.isTrue(stepId != null && stepId >= 1, "Invalid step id");
+		}
 		
-		final int _minVersion = minVersion == null ? 1 : minVersion; //TODO 1->CommonConstans
+		final int _minVersion = minVersion == null ? Defaults.DEFAULT_VERSION : minVersion; 
 		final int _maxVersion = maxVersion == null ? Integer.MAX_VALUE : maxVersion;
 		
 		List<ChoreographerExecutor> potentials = executorDBService.getExecutorsByServiceDefinitionAndVersion(serviceDefinition, _minVersion, _maxVersion);
@@ -82,17 +96,17 @@ public class ExecutorSelector {
 		potentials = filterOutExecutorsWithoutServiceInfos(potentials, executorServiceInfos);
 		potentials = prioritizationStrategy.prioritize(potentials, executorServiceInfos);
 		
-		return selectVerifyAndInitFirstAvailable(potentials, executorServiceInfos, init);
+		return selectVerifyAndInitFirstAvailable(sessionId, stepId, potentials, executorServiceInfos, init);
 	}
 	
 	//=================================================================================================
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<ChoreographerExecutor> filterOutLockedAndExcludedExecutors(final List<ChoreographerExecutor> original, final List<ChoreographerExecutor> exclusions) {
+	private List<ChoreographerExecutor> filterOutLockedAndExcludedExecutors(final List<ChoreographerExecutor> original, final Set<Long> exclusions) {
 		logger.debug("filterOutLockedAndExcludedExecutors started...");
 		
-		final Set<Long> excudedIds = exclusions == null? Set.of() : exclusions.stream().map(e -> e.getId()).collect(Collectors.toSet());
+		final Set<Long> excudedIds = exclusions == null? Set.of() : exclusions;
 		
 		final List<ChoreographerExecutor> filtered = new ArrayList<>(original.size());
 		for (final ChoreographerExecutor executor : original) {
@@ -137,8 +151,8 @@ public class ExecutorSelector {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private ChoreographerExecutor selectVerifyAndInitFirstAvailable(final List<ChoreographerExecutor> potentials, final Map<Long,ChoreographerExecutorServiceInfoResponseDTO> executorServiceInfos,
-																	final boolean init) {
+	private ExecutorData selectVerifyAndInitFirstAvailable(final Long sessionId, final Long stepId, final List<ChoreographerExecutor> potentials, final Map<Long,ChoreographerExecutorServiceInfoResponseDTO> executorServiceInfos,
+														   final boolean init) {
 		logger.debug("selectVerifyAndInitFirstAvailable started...");
 		
 		if (potentials.isEmpty()) {
@@ -154,12 +168,14 @@ public class ExecutorSelector {
 			if (!executor.isLocked()) {
 				if (verifyReliedServices(executorServiceInfos.get(executor.getId()))) {
 					if (init) {
-						// TODO create a ChoreographerSessionStep entry with WAITING state in order to not being deletable 							
+						sessionDBService.registerSessionStep(sessionId, stepId, executor.getId());					
 					}
-					return executor;
+					
+					return new ExecutorData(executor, executorServiceInfos.get(executor.getId()).getDependencies());
 				}
 			}
 		}
+		
 		return null;
 	}
 	

@@ -207,6 +207,19 @@ public class ChoreographerExecutorDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public Optional<ChoreographerExecutor> getExecutorOptionalByName(final String name) { //TODO junit
+		logger.debug("getExecutorOptionalByName started...");
+		Assert.isTrue(!Utilities.isEmpty(name), "name is empty");
+		
+		try {
+			return executorRepository.findByName(name.toLowerCase().trim());	
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public List<ChoreographerExecutor> getExecutorsByServiceDefinitionAndVersion(final String serviceDefinition, final int minVersion, final int maxVersion) { //TODO junit
 		logger.debug("getExecutorsByServiceDefinitionAndVersion started...");
 		Assert.isTrue(!Utilities.isEmpty(serviceDefinition), "serviceDefinition is empty");

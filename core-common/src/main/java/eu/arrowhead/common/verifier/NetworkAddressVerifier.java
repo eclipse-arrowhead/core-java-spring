@@ -131,7 +131,6 @@ public class NetworkAddressVerifier {
 		if (firstOctet >= IPV4_MULTICAST_1ST_OCTET_START && firstOctet <= IPV4_MULTICAST_1ST_OCTET_END) {
 			throw new InvalidParameterException(ERROR_MSG_PREFIX + candidate + " ipv4 network address is invalid: multicast addresses are denied.");
 		}		
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------

@@ -1018,7 +1018,7 @@ public class DTOConverter {
     }
 
     //-------------------------------------------------------------------------------------------------
-    public static ChoreographerActionResponseDTO convertActionToActionResponseDTO(final Entry<ChoreographerAction,List<ChoreographerStep>> actionDetails) {
+    public static ChoreographerActionResponseDTO convertActionToActionResponseDTO(final Entry<ChoreographerAction, List<ChoreographerStep>> actionDetails) {
         Assert.notNull(actionDetails, "Action details entry is null.");
         
         final ChoreographerAction action = actionDetails.getKey();
@@ -1029,7 +1029,7 @@ public class DTOConverter {
                                                   action.isFirstAction(),
                                                   action.getNextAction() != null ? action.getNextAction().getName() : null,
                                                   collectStepsFromAction(steps),
-                                                  collectFirstStepNamesFromAction(action.getFirstStepEntries()),
+                                                  collectFirstStepNamesFromAction(steps),
                                                   Utilities.convertZonedDateTimeToUTCString(action.getCreatedAt()),
                                                   Utilities.convertZonedDateTimeToUTCString(action.getUpdatedAt()));
     }
@@ -1252,12 +1252,14 @@ public class DTOConverter {
     }
 
     //-------------------------------------------------------------------------------------------------
-    public static List<String> collectFirstStepNamesFromAction(final Set<ChoreographerStep> steps) {
+    private static List<String> collectFirstStepNamesFromAction(final List<ChoreographerStep> steps) {
         Assert.notNull(steps, "Steps list is null.");
 
-        final List<String> result = new ArrayList<>(steps.size());
+        final List<String> result = new ArrayList<>();
         for (final ChoreographerStep step : steps) {
-            result.add(step.getName());
+        	if (step.isFirstStep()) {
+        		result.add(step.getName());
+        	}
         }
 
         return result;

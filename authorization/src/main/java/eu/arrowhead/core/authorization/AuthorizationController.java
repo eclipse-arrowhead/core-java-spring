@@ -64,6 +64,7 @@ import eu.arrowhead.common.dto.internal.AuthorizationSubscriptionCheckRequestDTO
 import eu.arrowhead.common.dto.internal.AuthorizationSubscriptionCheckResponseDTO;
 import eu.arrowhead.common.dto.internal.IdIdListDTO;
 import eu.arrowhead.common.dto.internal.TokenDataDTO;
+import eu.arrowhead.common.dto.internal.TokenGenerationMultiServiceResponseDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationProviderDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationResponseDTO;
@@ -93,6 +94,7 @@ public class AuthorizationController {
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = "Id must be greater than 0.";
 	
 	private static final String TOKEN_DESCRIPTION = "Generates tokens for a consumer which can be used to access the specified service of the specified providers";
+	private static final String TOKEN_MULTI_SERVICE_DESCRIPTION = "Generates tokens for different services and different consumers which can be used to access the specified services of the specified providers";
 	private static final String TOKEN_HTTP_200_MESSAGE = "Tokens returned";
 	private static final String TOKEN_HTTP_400_MESSAGE = "Could not generate tokens";
 	
@@ -613,6 +615,27 @@ public class AuthorizationController {
 		
 		final TokenGenerationResponseDTO response = tokenGenerationService.generateTokensResponse(request);
 		logger.debug("{} token(s) are generated for {}", calculateNumberOfTokens(response.getTokenData()), request.getConsumer().getSystemName());
+		
+		return response;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = TOKEN_MULTI_SERVICE_DESCRIPTION, response = TokenGenerationMultiServiceResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = TOKEN_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = TOKEN_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = CommonConstants.OP_AUTH_TOKEN_MULTI_SERVICE_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public TokenGenerationMultiServiceResponseDTO generateMultiServiceTokens(@RequestBody final List<TokenGenerationRequestDTO> requestList) {
+		logger.debug("New multi-service token generation request received");
+		for (final TokenGenerationRequestDTO request : requestList) {
+			checkTokenGenerationRequest(request);			
+		}
+		
+		final TokenGenerationMultiServiceResponseDTO response = tokenGenerationService.generateMultiServiceTokensResponse(requestList);
+		logger.debug("Multi-service token generation request has been finished");
 		
 		return response;
 	}

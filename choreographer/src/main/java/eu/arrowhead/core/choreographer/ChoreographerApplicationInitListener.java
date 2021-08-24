@@ -29,8 +29,6 @@ import org.springframework.jms.support.converter.MappingJackson2MessageConverter
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessageType;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-import org.springframework.util.ErrorHandler;
 import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.ApplicationInitListener;
@@ -38,6 +36,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.core.choreographer.exception.ChoreographerSessionErrorHandler;
 import eu.arrowhead.core.choreographer.executor.ExecutorPrioritizationStrategy;
 import eu.arrowhead.core.choreographer.executor.RandomExecutorPrioritizationStrategy;
 import eu.arrowhead.core.choreographer.graph.EdgeDestroyerStepGraphNormalizer;
@@ -49,15 +48,20 @@ import eu.arrowhead.core.choreographer.graph.StepGraphNormalizer;
 public class ChoreographerApplicationInitListener extends ApplicationInitListener {
 	
 	//=================================================================================================
+	// members
+	
+	private static final String TYPE_ID_PROPERTY_NAME = "_type";
+	
+	//=================================================================================================
 	// methods
 	
-    //-------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	@Bean
-    public JmsListenerContainerFactory<?> getFactory(final ConnectionFactory connectionFactory,
-                                                    final DefaultJmsListenerContainerFactoryConfigurer configurer, final ExampleErrorHandler errorHandler) {
+    public JmsListenerContainerFactory<?> getJMSFactory(final ConnectionFactory connectionFactory, final DefaultJmsListenerContainerFactoryConfigurer configurer, final ChoreographerSessionErrorHandler errorHandler) {
         final DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         configurer.configure(factory, connectionFactory);
         factory.setErrorHandler(errorHandler);
+        
         return factory;
     }
 
@@ -66,7 +70,7 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
     public MessageConverter jacksonJmsMessageConverter() {
         final MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
         converter.setTargetType(MessageType.TEXT);
-        converter.setTypeIdPropertyName("_type");
+        converter.setTypeIdPropertyName(TYPE_ID_PROPERTY_NAME);
         return converter;
     }
     
@@ -80,6 +84,12 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
 	@Bean
     public StepGraphNormalizer getStepGraphNormalizer() {
     	return new EdgeDestroyerStepGraphNormalizer();
+    }
+	
+    //-------------------------------------------------------------------------------------------------
+    @Bean
+    public ExecutorPrioritizationStrategy getExecutorPrioritizationStrategy() {
+    	return new RandomExecutorPrioritizationStrategy();
     }
 	
 	//=================================================================================================
@@ -100,6 +110,7 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
 
         final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
         context.put(CoreCommonConstants.SR_MULTI_QUERY_URI, createMultiQueryRegistryUri(scheme));
+        context.put(CoreCommonConstants.SR_QUERY_BY_SYSTEM_DTO_URI, createQueryRegistryBySystemUri(scheme));
         context.put(CoreCommonConstants.SR_REGISTER_SYSTEM_URI, createRegisterSystemUri(scheme));
         context.put(CoreCommonConstants.SR_UNREGISTER_SYSTEM_URI, createUnregisterSystemUri(scheme));
     }
@@ -107,26 +118,9 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
     //-------------------------------------------------------------------------------------------------
 	@Override
     protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
-        return List.of(CoreSystemService.ORCHESTRATION_SERVICE);
-    }
-    
-    //-------------------------------------------------------------------------------------------------
-    @Bean
-    public ExecutorPrioritizationStrategy getExecutorPrioritizationStrategy() {
-    	return new RandomExecutorPrioritizationStrategy();
+        return List.of(CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.AUTH_TOKEN_GENERATION_MULTI_SERVICE);
     }
 
-	//TODO: rename, implement, move to a new file
-    //-------------------------------------------------------------------------------------------------
-    @Service
-    public class ExampleErrorHandler implements ErrorHandler {
-
-        @Override
-        public void handleError(final Throwable throwable) {
-            System.out.println("Error happened during Workflow Choreography.");
-        }
-    }
-    
     //=================================================================================================
     // assistant methods
     
@@ -135,6 +129,14 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
         logger.debug("createMultiQueryRegistryUri started...");
 
         final String uriStr = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_MULTI_QUERY_URI;
+        return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), uriStr);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    private UriComponents createQueryRegistryBySystemUri(final String scheme) {
+        logger.debug("createQueryRegistryBySystemUri started...");
+
+        final String uriStr = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_QUERY_BY_SYSTEM_DTO_URI;
         return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), uriStr);
     }
     

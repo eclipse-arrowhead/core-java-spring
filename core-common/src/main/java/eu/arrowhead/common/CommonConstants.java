@@ -46,6 +46,7 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_ONBOARDING = "Onboarding Controller";
 
 	public static final String CORE_SERVICE_AUTH_TOKEN_GENERATION = "token-generation";
+	public static final String CORE_SERVICE_AUTH_TOKEN_GENERATION_MULTI_SERVICE = "token-generation-multi-service";
 	public static final String CORE_SERVICE_AUTH_PUBLIC_KEY = "auth-public-key";
 	public static final String CORE_SERVICE_AUTH_CONTROL_INTRA = "authorization-control-intra";
 	public static final String CORE_SERVICE_AUTH_CONTROL_INTER = "authorization-control-inter";
@@ -129,6 +130,7 @@ public class CommonConstants {
     public static final String CORE_SERVICE_TRANSLATOR_FIWARE = "translation-fiware-service";
     public static final String CORE_SERVICE_TRANSLATOR_PLUGIN = "translation-plugin-service";
 
+	public static final String DOT = ".";
 	public static final String COMMON_FIELD_NAME_ID = "id";
 	
 	public static final String ARROWHEAD_CONTEXT = "arrowheadContext";
@@ -203,6 +205,7 @@ public class CommonConstants {
 
 	public static final String AUTHORIZATION_URI = "/authorization";
 	public static final String OP_AUTH_TOKEN_URI = "/token";
+	public static final String OP_AUTH_TOKEN_MULTI_SERVICE_URI = OP_AUTH_TOKEN_URI +"/multi";
 	public static final String OP_AUTH_KEY_URI = "/publickey";
 	public static final String OP_AUTH_INTRA_CHECK_URI = "/intracloud/check";
 	public static final String OP_AUTH_INTER_CHECK_URI = "/intercloud/check";
@@ -252,19 +255,18 @@ public class CommonConstants {
 	public static final String OP_CONFIGURATION_MGMT_MANAGE = "/mgmt/config";
 
 	public static final String CHOREOGRAPHER_URI = "/choreographer";
-	public static final String CHOREOGRAPHER_SESSION_MGMT_URI = "/session" + CoreCommonConstants.MGMT_URI;
-	public static final String CHOREOGRAPHER_SESSION_STEPS_MGMT_URI = "/session/steps" + CoreCommonConstants.MGMT_URI;
-	public static final String CHOREOGRAPHER_WORKLOG_MGMT_URI = "/worklog" + CoreCommonConstants.MGMT_URI;
-	public static final String CHOREOGRAPHER_EXECUTOR_MGMT_URI = "/executor" + CoreCommonConstants.MGMT_URI;
-	public static final String CHOREOGRAPHER_EXECUTOR_MGMT_BY_ID_URI = CHOREOGRAPHER_EXECUTOR_MGMT_URI + "{/id}";
+	public static final String CHOREOGRAPHER_SESSION_MGMT_URI = CoreCommonConstants.MGMT_URI + "/session";
+	public static final String CHOREOGRAPHER_SESSION_STEPS_MGMT_URI = CoreCommonConstants.MGMT_URI + "/session/steps";
+	public static final String CHOREOGRAPHER_WORKLOG_MGMT_URI = CoreCommonConstants.MGMT_URI + "/worklog";
+	public static final String CHOREOGRAPHER_EXECUTOR_MGMT_URI = CoreCommonConstants.MGMT_URI + "/executor";
+	public static final String CHOREOGRAPHER_EXECUTOR_MGMT_BY_ID_URI = CHOREOGRAPHER_EXECUTOR_MGMT_URI + "/{id}";
 	public static final String CHOREOGRAPHER_EXECUTOR_CLIENT_SERVICE_INFO_URI = "/service-info";
+	public static final String CHOREOGRAPHER_EXECUTOR_CLIENT_SERVICE_START_URI = "/start";
+	public static final String CHOREOGRAPHER_EXECUTOR_CLIENT_SERVICE_ABORT_URI = "/abort";
 	public static final String OP_CHOREOGRAPHER_EXECUTOR_REGISTER = "/executor/register";
 	public static final String OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER = "/executor/unregister";
 	public static final String OP_CHOREOGRAPHER_NOTIFY_STEP_DONE = "/executor/notify-step-done";
-	public static final String OP_CHOREOGRAPHER_EXECUTOR_NOTIFY_STEP_ERROR = "/executor/notify-step-error";
-	public static final String OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_ADDRESS = "address";
-	public static final String OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_PORT = "port";
-	public static final String OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_BASE_URI = "base_uri";
+	public static final String OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_NAME = "name";
 
 	public static final String GATEWAY_URI = "/gateway";
 	public static final String OP_GATEWAY_KEY_URI = "/publickey";
