@@ -194,7 +194,7 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
     	} catch (final Exception ex) {
     		logger.error(ex.getMessage());
     		logger.debug(ex);
-			throw new ServiceConfigurationError("NetworkAddressVerifier configuration failure");
+			throw new ServiceConfigurationError("ServiceRegistry dependent verifiers configuration failure");
 		}
     }
 }
