@@ -16,9 +16,11 @@ package eu.arrowhead.core.choreographer;
 
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceConfigurationError;
 
 import javax.jms.ConnectionFactory;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -36,6 +38,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.core.choreographer.exception.ChoreographerSessionErrorHandler;
 import eu.arrowhead.core.choreographer.executor.ExecutorPrioritizationStrategy;
 import eu.arrowhead.core.choreographer.executor.RandomExecutorPrioritizationStrategy;
@@ -43,12 +46,23 @@ import eu.arrowhead.core.choreographer.graph.EdgeDestroyerStepGraphNormalizer;
 import eu.arrowhead.core.choreographer.graph.KahnAlgorithmStepGraphCircleDetector;
 import eu.arrowhead.core.choreographer.graph.StepGraphCircleDetector;
 import eu.arrowhead.core.choreographer.graph.StepGraphNormalizer;
+import eu.arrowhead.core.choreographer.service.ChoreographerDriver;
+import eu.arrowhead.core.choreographer.service.ChoreographerExecutorService;
 
 @Component
 public class ChoreographerApplicationInitListener extends ApplicationInitListener {
 	
 	//=================================================================================================
 	// members
+	
+	@Autowired
+	private NetworkAddressVerifier networkAddressVerifier;
+	
+	@Autowired
+	private ChoreographerExecutorService choreographerExecutorService;
+	
+	@Autowired
+	private ChoreographerDriver driver;
 	
 	private static final String TYPE_ID_PROPERTY_NAME = "_type";
 	
@@ -109,10 +123,13 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
         final Map<String,Object> context = appContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
 
         final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
+        context.put(CoreCommonConstants.SR_PULL_CONFIG_URI, createPullSRConfigUri(scheme));
         context.put(CoreCommonConstants.SR_MULTI_QUERY_URI, createMultiQueryRegistryUri(scheme));
         context.put(CoreCommonConstants.SR_QUERY_BY_SYSTEM_DTO_URI, createQueryRegistryBySystemUri(scheme));
         context.put(CoreCommonConstants.SR_REGISTER_SYSTEM_URI, createRegisterSystemUri(scheme));
         context.put(CoreCommonConstants.SR_UNREGISTER_SYSTEM_URI, createUnregisterSystemUri(scheme));
+        
+        configureServiceRegistryDependentVerifiers();
     }
     
     //-------------------------------------------------------------------------------------------------
@@ -123,6 +140,14 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
 
     //=================================================================================================
     // assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
+    private UriComponents createPullSRConfigUri(final String scheme) {
+        logger.debug("createPullSRConfigUri started...");
+
+        final String uriStr = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_PULL_CONFIG_URI;
+        return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), uriStr);
+    }
     
     //-------------------------------------------------------------------------------------------------
     private UriComponents createMultiQueryRegistryUri(final String scheme) {
@@ -154,5 +179,22 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
 
         final String uriStr = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI;
         return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), uriStr);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    private void configureServiceRegistryDependentVerifiers() {
+    	logger.debug("configureNetworkAddressVerifier started...");
+    	
+    	try {
+    		final Map<String,String> srConfig = driver.pullServiceRegistryConfig().getMap();
+    		networkAddressVerifier.configure(Boolean.valueOf(srConfig.get(CoreCommonConstants.ALLOW_SELF_ADDRESSING)),
+    										 Boolean.valueOf(srConfig.get(CoreCommonConstants.ALLOW_NON_ROUTABLE_ADDRESSING)));
+    		
+    		choreographerExecutorService.configure(Boolean.valueOf(srConfig.get(CoreCommonConstants.USE_STRICT_SERVICE_DEFINITION_VERIFIER)));
+    	} catch (final Exception ex) {
+    		logger.error(ex.getMessage());
+    		logger.debug(ex);
+			throw new ServiceConfigurationError("ServiceRegistry dependent verifiers configuration failure");
+		}
     }
 }
