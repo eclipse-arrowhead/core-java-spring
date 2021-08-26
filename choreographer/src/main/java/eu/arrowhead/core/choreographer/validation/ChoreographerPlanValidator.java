@@ -135,7 +135,7 @@ public class ChoreographerPlanValidator {
 		}
 
 		handleActionNameDuplications(result, origin);
-		handleNextActionNames(result, origin);
+		handleNextActionNames(result, firstActionName, origin);
 		
 		return result;
 	}
@@ -151,8 +151,8 @@ public class ChoreographerPlanValidator {
 		final ChoreographerActionRequestDTO result = new ChoreographerActionRequestDTO();
 		result.setName(handleName(action.getName(), "Action name is null or blank.", origin, normalizeNames));
 		
-		if (action.getNextActionName() != null) {
-			result.setNextActionName(normalizeNames ? action.getNextActionName().trim().toLowerCase() : action.getNextActionName());
+		if (action.getNextActionName() != null && normalizeNames) {
+			result.setNextActionName(action.getNextActionName().trim().toLowerCase());
 		}
 		
 		if (result.getName().equals(result.getNextActionName())) {
@@ -193,7 +193,7 @@ public class ChoreographerPlanValidator {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void handleNextActionNames(final List<ChoreographerActionRequestDTO> actions, final String origin) {
+	private void handleNextActionNames(final List<ChoreographerActionRequestDTO> actions, final String firstActionName, final String origin) {
 		logger.debug("handleNextActionNames started...");
 		
 		final Set<String> actionNames = actions.stream()
@@ -211,9 +211,11 @@ public class ChoreographerPlanValidator {
 			}
 		}
 		
-		// check if every action is reachable
-		if (nextActionNames.size() != actionNames.size() -1) { // actionNames contains first action's name too
-			throw new InvalidParameterException("Unreachable action detected.", HttpStatus.SC_BAD_REQUEST, origin);
+		// check if every action is reachable (appears as first or next action)
+		for (final String name : actionNames) {
+			if (!(firstActionName.equals(name) || nextActionNames.contains(name))) {
+				throw new InvalidParameterException("Unreachable action detected: " + name, HttpStatus.SC_BAD_REQUEST, origin);
+			}
 		}
 	}
 	
@@ -246,7 +248,7 @@ public class ChoreographerPlanValidator {
 		}
 		
 		final Set<String> stepNames = result.stream()
-					 					   	.map(a -> a.getName())
+					 					   	.map(sn -> sn.getName())
 					 					   	.collect(Collectors.toSet());
 		for (final String firstStepName : firstStepNames) {
 			if (!stepNames.contains(firstStepName)) {
@@ -298,7 +300,7 @@ public class ChoreographerPlanValidator {
 		result.setServiceDefinitionRequirement(handleName(serviceRequirement.getServiceDefinitionRequirement(), "Service definition is null or blank.", origin, true));
 		
 		if (serviceRequirement.getMinVersionRequirement() != null && serviceRequirement.getMaxVersionRequirement() != null && serviceRequirement.getMinVersionRequirement() > serviceRequirement.getMaxVersionRequirement()) {
-			throw new InvalidParameterException("Minimum version cannot be higher than maximum version", HttpStatus.SC_BAD_REQUEST, origin);
+			throw new InvalidParameterException("Minimum version cannot be greater than maximum version.", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		result.setVersionRequirement(serviceRequirement.getVersionRequirement());

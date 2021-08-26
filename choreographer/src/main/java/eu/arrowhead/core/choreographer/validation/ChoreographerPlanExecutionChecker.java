@@ -50,7 +50,7 @@ public class ChoreographerPlanExecutionChecker {
 	// members
 	
 	private static final String EXECUTOR_NOT_FOUND_FOR_MSG_PREFIX = "Executor not found for step: ";
-	private static final String PROVIDERS_NOT_FOUND_FOR_MSG_PREFIX = "Providers not found for step: ";
+	private static final String PROVIDER_NOT_FOUND_FOR_MSG_PREFIX = "Provider not found for step: ";
 	private static final String SR_CONNECTION_PROBLEM_MSG_PREFIX = "Something happened when connecting to the Service Registry: ";
 	
 	@Autowired
@@ -200,7 +200,7 @@ public class ChoreographerPlanExecutionChecker {
 			for (int i = 0; i < response.getResults().size(); ++i) {
 				final ServiceQueryResultDTO result = response.getResults().get(i);
 				if (result.getServiceQueryData().isEmpty()) {
-					errors.add(PROVIDERS_NOT_FOUND_FOR_MSG_PREFIX + createFullyQualifiedStepName(steps.get(i)));
+					errors.add(PROVIDER_NOT_FOUND_FOR_MSG_PREFIX + createFullyQualifiedStepName(steps.get(i)));
 				}
 			}
 		} catch (final Exception ex) {
