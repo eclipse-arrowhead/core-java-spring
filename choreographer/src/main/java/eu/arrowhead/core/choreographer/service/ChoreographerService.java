@@ -18,11 +18,9 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -97,9 +95,6 @@ public class ChoreographerService {
     @Autowired
     protected CoreSystemRegistrationProperties registrationProperties;
     
-    @Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
-    private Map<String,Object> arrowheadContext;
-
     private SystemRequestDTO requesterSystem;
     
     private final Logger logger = LogManager.getLogger(ChoreographerService.class);
@@ -107,7 +102,8 @@ public class ChoreographerService {
     //=================================================================================================
     // methods
 
-    @PostConstruct
+    //-------------------------------------------------------------------------------------------------
+	@PostConstruct
     public void init() {
         requesterSystem = new SystemRequestDTO();
         requesterSystem.setSystemName(registrationProperties.getCoreSystemName().toLowerCase());
