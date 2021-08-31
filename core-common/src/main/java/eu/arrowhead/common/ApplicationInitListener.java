@@ -119,23 +119,33 @@ public abstract class ApplicationInitListener {
 			return;
 		}
 		
-		final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
-		checkServiceRegistryConnection(scheme, 0, 1);
-		
-		int count = coreSystem.getServices().size();
-		for (final CoreSystemService coreService : coreSystem.getServices()) {
-			final UriComponents unregisterUri = createUnregisterUri(scheme, coreService, coreSystemRegistrationProperties.getCoreSystemDomainName(), coreSystemRegistrationProperties.getCoreSystemDomainPort());
-			try {
-				httpService.sendRequest(unregisterUri, HttpMethod.DELETE, Void.class);
-			} catch (final InvalidParameterException ex) {
-				// core service not found
-				count--;
+		try {
+			final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
+			checkServiceRegistryConnection(scheme, 0, 1);
+			
+			int count = coreSystem.getServices().size();
+			for (final CoreSystemService coreService : coreSystem.getServices()) {
+				final UriComponents unregisterUri = createUnregisterUri(scheme, coreService, coreSystemRegistrationProperties.getCoreSystemDomainName(), coreSystemRegistrationProperties.getCoreSystemDomainPort());
+				try {
+					httpService.sendRequest(unregisterUri, HttpMethod.DELETE, Void.class);
+				} catch (final InvalidParameterException ex) {
+					// core service not found
+					count--;
+				}
 			}
+			
+			logger.info("Core system {} revoked {} service(s).", coreSystem.name(), count);
+		} catch (final Throwable t) {
+			logger.error(t.getMessage());
+			logger.debug(t);
 		}
 		
-		logger.info("Core system {} revoked {} service(s).", coreSystem.name(), count);
-		
-		customDestroy();
+		try {
+			customDestroy();
+		} catch (final Throwable t) {
+			logger.error(t.getMessage());
+			logger.debug(t);
+		}
 	}
 
 	//=================================================================================================
@@ -258,7 +268,7 @@ public abstract class ApplicationInitListener {
 			} catch (final AuthException ex) {
 				throw ex;
 			} catch (final ArrowheadException ex) {
-				if (i == MAX_NUMBER_OF_SERVICEREGISTRY_CONNECTION_RETRIES) {
+				if (i >= retries) {
 					throw ex;
 				} else {
 					logger.info("Service Registry is unavailable at the moment, retrying in {} seconds...", period);

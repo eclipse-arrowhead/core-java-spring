@@ -253,8 +253,10 @@ public class ChoreographerService {
 		try {
 			mainOrchestrationResponseDTO = driver.queryOrchestrator(createOrchestrationFormRequestFromServiceQueryForm(Utilities.fromJson(step.getSrTemplate(), ServiceQueryFormDTO.class)));
 			if (mainOrchestrationResponseDTO.getResponse().isEmpty()) { // no providers for the step
-				throw new ChoreographerSessionException(sessionId, sessionStep.getId(), "No providers found for step " + fullStepName);
+				throw new ChoreographerSessionException(sessionId, sessionStep.getId(), "No providers found for step: " + fullStepName);
 			}
+		} catch (final ChoreographerSessionException ex) {
+			throw ex;
 		} catch (final Exception ex) { // problem during orchestration
 			throw new ChoreographerSessionException(sessionId, sessionStep.getId(), "Problem occured while orchestration for step " + fullStepName, ex);
 		}		
