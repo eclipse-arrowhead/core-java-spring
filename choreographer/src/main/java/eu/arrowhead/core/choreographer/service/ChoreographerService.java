@@ -18,6 +18,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -262,14 +263,18 @@ public class ChoreographerService {
 		}		
 
 		final SessionExecutorCache cache = sessionDataStorage.get(sessionId);
-		final ExecutorData executorData = cache.get(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion());
-		final ChoreographerExecutor executor = executorData.getExecutor();	
+		ExecutorData executorData = cache.get(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion());
+		ChoreographerExecutor executor = executorData.getExecutor();	
 		
 		if (sessionStep.getExecutor().getId() != executor.getId()) {
 			sessionDBService.changeSessionStepExecutor(sessionStep.getId(), executor.getId());
 		}
 		
 		final List<OrchestrationResultDTO> executorPreconditions = getOrchestrationResultsForExecutorPreconditions(step, sessionStep);
+		
+		// executor can change during the precondition orchestrations => refreshing from the cache
+		executorData = cache.get(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion());
+		executor = executorData.getExecutor();	
 		
 		final List<OrchestrationResultDTO> managedTokenList = new ArrayList<>(mainOrchestrationResponseDTO.getResponse());
 		managedTokenList.addAll(executorPreconditions);
@@ -324,8 +329,10 @@ public class ChoreographerService {
     		}
     		
     		executorData = executorSelector.selectAndInit(sessionStep.getSession().getId(), step, cache.getExclusions(), false);
-    		cache.put(serviceDefinition, minVersion, maxVersion, executorData);
-    		sessionDBService.changeSessionStepExecutor(sessionStep.getSession().getId(), executorData.getExecutor().getId());
+    		if (executorData != null) {
+    			cache.put(serviceDefinition, minVersion, maxVersion, executorData);
+    			sessionDBService.changeSessionStepExecutor(sessionStep.getId(), executorData.getExecutor().getId());
+    		}
     	}
 		
     	throw new ChoreographerSessionException(sessionStep.getSession().getId(), sessionStep.getId(), "Can't find properly working executor for step: " + createFullyQualifiedStepName(step));
@@ -352,24 +359,41 @@ public class ChoreographerService {
 									   final List<OrchestrationResultDTO> orchResults) {
 		logger.debug("regenerateTokensIfAny started...");
 		
+		final List<OrchestrationResultDTO> toBeUpdated = collectOrchestrationResultsWithTokenChangeRequirement(orchResults);
+		
+		if (toBeUpdated.isEmpty()) {
+			return;
+		}
+		
 		// Query ServiceRegistry in order to have the authInfo of the executor
 		final SystemRequestDTO consumer = DTOConverter.convertSystemResponseDTOToSystemRequestDTO(driver.queryServiceRegistryBySystem(executor.getName(),
 																																	  executor.getAddress(),
 																																	  executor.getPort()));			
-		final List<OrchestrationResultDTO> toBeUpdated = new ArrayList<>();
-		final List<TokenGenerationRequestDTO> tokenGenerationRequests = new ArrayList<>();
-		for (final OrchestrationResultDTO orchResult : orchResults) {
-			if (!orchResult.getAuthorizationTokens().isEmpty()) {
-				toBeUpdated.add(orchResult);
-				final TokenGenerationProviderDTO tokenProviderDTO = createTokenGenerationProviderDTOFromOrchResult(orchResult);
-				tokenGenerationRequests.add(new TokenGenerationRequestDTO(consumer, null, List.of(tokenProviderDTO), orchResult.getService().getServiceDefinition()));
-			}
+		final List<TokenGenerationRequestDTO> tokenGenerationRequests = new ArrayList<>(toBeUpdated.size());
+		for (final OrchestrationResultDTO orchResult : toBeUpdated) {
+			final TokenGenerationProviderDTO tokenProviderDTO = createTokenGenerationProviderDTOFromOrchResult(orchResult);
+			tokenGenerationRequests.add(new TokenGenerationRequestDTO(consumer, null, List.of(tokenProviderDTO), orchResult.getService().getServiceDefinition()));
 		}
 		
 		final List<TokenGenerationDetailedResponseDTO> tokenData = driver.generateMultiServiceAuthorizationTokens(tokenGenerationRequests).getData();
 		updateTokensInOrchestrationResultDTO(sessionId, sessionStepId, fullStepName, toBeUpdated, tokenData);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	private List<OrchestrationResultDTO> collectOrchestrationResultsWithTokenChangeRequirement(List<OrchestrationResultDTO> orchResults) {
+		logger.debug("collectOrchestrationResultWithTokenChangeRequirement started...");
+		
+		final List<OrchestrationResultDTO> result = new ArrayList<>();
+		for (final OrchestrationResultDTO orchResult : orchResults) {
+			final Map<String,String> tokens = orchResult.getAuthorizationTokens();
+			if (tokens != null && !tokens.isEmpty()) {
+				result.add(orchResult);
+			}
+		}
+		
+		return result;
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	private TokenGenerationProviderDTO createTokenGenerationProviderDTOFromOrchResult(final OrchestrationResultDTO orchResult) {
 		logger.debug("createTokenGenerationProviderDTOFromOrchResult started...");
@@ -415,8 +439,8 @@ public class ChoreographerService {
 		logger.debug("validatePayload started...");
 		
 		Assert.notNull(payload, "Payload is null.");
-		Assert.isTrue(payload.getSessionId() != null && payload.getSessionId() < 0, "Invalid session id.");
-		Assert.isTrue(payload.getSessionStepId() != null && payload.getSessionStepId() < 0, "Invalid session step id.");
+		Assert.isTrue(payload.getSessionId() != null && payload.getSessionId() > 0, "Invalid session id.");
+		Assert.isTrue(payload.getSessionStepId() != null && payload.getSessionStepId() > 0, "Invalid session step id.");
 		Assert.notNull(payload.getStatus(), "Status is null.");
 		
 		if (payload.getStatus().isError()) {
