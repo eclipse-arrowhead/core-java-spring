@@ -22,9 +22,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 /**
- * Transfer object, encapsulating THING_CREATED requests, sent by the HawkBit client.
+ * Transfer object, encapsulating THING_CREATED requests, sent by the HawkBit
+ * client.
  */
 @AllArgsConstructor
 @NoArgsConstructor
@@ -65,10 +65,18 @@ public class ThingCreatedOutboundMessage {
 
         public Map<String, Object> asMap() {
             HashMap<String, Object> headers = new HashMap<>();
-            if (this.type != null) headers.put(MessageHeader.TYPE.toString(), this.type);
-            if (this.thingId != null) headers.put(MessageHeader.THING_ID.toString(), this.thingId);
-            if (this.sender != null) headers.put(MessageHeader.SENDER.toString(), this.sender);
-            if (this.tenant != null) headers.put(MessageHeader.TENANT.toString(), this.tenant);
+            if (this.type != null) {
+                headers.put(MessageHeader.TYPE.toString(), this.type);
+            }
+            if (this.thingId != null) {
+                headers.put(MessageHeader.THING_ID.toString(), this.thingId);
+            }
+            if (this.sender != null) {
+                headers.put(MessageHeader.SENDER.toString(), this.sender);
+            }
+            if (this.tenant != null) {
+                headers.put(MessageHeader.TENANT.toString(), this.tenant);
+            }
             return headers;
         }
     }
