@@ -21,10 +21,10 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SystemResponseDTO {
 
-    private Long id;
+    private long id;
     private String systemName;
     private String address;
-    private Integer port;
+    private int port;
     private String authenticationInfo;
     private String createdAt;
     private String updatedAt;

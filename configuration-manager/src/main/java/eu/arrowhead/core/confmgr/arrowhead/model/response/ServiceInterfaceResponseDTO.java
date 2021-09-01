@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ServiceInterfaceResponseDTO {
 
-    private Long id;
+    private long id;
     private String interfaceName;
     private String createdAt;
     private String updatedAt;

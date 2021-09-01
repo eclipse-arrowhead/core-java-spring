@@ -29,14 +29,14 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ServiceRegistryResponseDTO {
 
-    private Long id;
+    private long id;
     private ServiceDefinitionResponseDTO serviceDefinition;
     private SystemResponseDTO provider;
     private String serviceUri;
     private String endOfValidity;
     private String secure;
     private Map<String, String> metadata;
-    private Integer version;
+    private int version;
     private List<ServiceInterfaceResponseDTO> interfaces;
     private String createdAt;
     private String updatedAt;
