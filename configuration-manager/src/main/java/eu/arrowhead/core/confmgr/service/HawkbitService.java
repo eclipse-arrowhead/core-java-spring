@@ -104,7 +104,7 @@ public class HawkbitService {
                         .softwareModuleId(actionUpdateStatus.getSoftwareModuleId())
                         .message(actionUpdateStatus.getMessage()).build())
                 .headers(UpdateActionStatusOutboundMessage.UpdateActionStatusOutboundMessageHeaders.builder()
-                        .tenant("DEFAULT").build())
+                        .tenant(hawkbitTenant).build())
                 .build();
         this.hawkbitDmfClient.updateActionStatus(message);
     }
