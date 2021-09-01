@@ -34,9 +34,10 @@ public class WebsocketSender {
     }
 
     public void sendMessage(String thingId, DeviceMessage message) throws IOException, DeviceNotConnectedException {
-        String body = this.objectMapper.writeValueAsString(message);
-        TextMessage wsMessage = new TextMessage(body);
         if(this.webSocketSessionMap.containsKey(thingId)){
+            String body = this.objectMapper.writeValueAsString(message);
+            TextMessage wsMessage = new TextMessage(body);
+            
             WebSocketSession session = this.webSocketSessionMap.get(thingId);
             
             session.sendMessage(wsMessage);
