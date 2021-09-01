@@ -22,15 +22,15 @@ import lombok.Data;
 public class SystemProperties {
 
     /**
-     * This is the address of the configuration system itself, e.g. "https://192.168.1.1" or
-     * "https://subdomain.domain.tld".
+     * This is the address of the configuration system itself, e.g. "192.168.1.1" or
+     * "subdomain.domain.tld".
      * <p>It must be not blank (validated with {@link NotBlank @NotBlank}).
      */
     @NotBlank
     private String address;
 
     /**
-     * This is the port of the configuration system itself, e.g. 8445.
+     * This is the port of the configuration system itself, e.g. 8447.
      * <p>It must be not null (validated with {@link NotNull @NotNull}).
      */
     @NotNull
