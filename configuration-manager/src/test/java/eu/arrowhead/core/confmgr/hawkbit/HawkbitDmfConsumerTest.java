@@ -24,6 +24,7 @@ import com.rabbitmq.client.Envelope;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
 
 import eu.arrowhead.core.confmgr.hawkbit.model.inbound.CancelDownloadInboundMessage;
 import eu.arrowhead.core.confmgr.hawkbit.model.inbound.DownloadRequestInboundMessage;
@@ -46,7 +47,7 @@ public class HawkbitDmfConsumerTest {
 
     @Test
     public void testDownloadRequestInboundGeneration() throws IOException, DeviceNotConnectedException {
-        AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder().contentType("application/json")
+        AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .headers(Map.ofEntries(Map.entry("type", "EVENT"), Map.entry("thingId", "device7"),
                         Map.entry("topic", "DOWNLOAD_AND_INSTALL"), Map.entry("tenant", "tenant1")))
                 .build();
@@ -97,7 +98,7 @@ public class HawkbitDmfConsumerTest {
 
     @Test
     public void testCancelDownload() throws IOException, DeviceNotConnectedException {
-        AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder().contentType("application/json")
+        AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .headers(Map.ofEntries(Map.entry("type", "EVENT"), Map.entry("thingId", "device7"),
                         Map.entry("topic", "CANCEL_DOWNLOAD"), Map.entry("tenant", "tenant1")))
                 .build();
@@ -129,7 +130,7 @@ public class HawkbitDmfConsumerTest {
 
     @Test
     public void testThingDeleted() throws IOException, DeviceNotConnectedException {
-        AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder().contentType("application/json")
+        AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .headers(Map.ofEntries(Map.entry("type", "THING_DELETED"), Map.entry("thingId", "device7"),
                         Map.entry("topic", "THING_DELETED"), Map.entry("tenant", "tenant1")))
                 .build();

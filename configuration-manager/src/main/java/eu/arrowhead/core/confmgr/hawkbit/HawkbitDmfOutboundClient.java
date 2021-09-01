@@ -23,6 +23,7 @@ import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 import eu.arrowhead.core.confmgr.hawkbit.model.outbound.ThingCreatedOutboundMessage;
@@ -75,7 +76,7 @@ public class HawkbitDmfOutboundClient {
 
         byte[] byteBody = this.objectMapper.writeValueAsBytes(message.getBody());
         AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder()
-                .contentType("application/json")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .headers(message.getHeaders().asMap())
                 .replyTo(HawkbitDmfConstants.RECEIVING_EXCHANGE)
                 .build();
@@ -102,7 +103,7 @@ public class HawkbitDmfOutboundClient {
 
         byte[] byteBody = this.objectMapper.writeValueAsBytes(message.getBody());
         AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder()
-                .contentType("application/json")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .headers(message.getHeaders().asMap())
                 .build();
         log.debug("Sending UpdateActionStatusOutboundMessage to exchange {}", HawkbitDmfConstants.SENDING_EXCHANGE);
@@ -125,7 +126,7 @@ public class HawkbitDmfOutboundClient {
 
         byte[] byteBody = "".getBytes();
         AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder()
-                .contentType("application/json")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .headers(message.getHeaders().asMap())
                 .build();
 

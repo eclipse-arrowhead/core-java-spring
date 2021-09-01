@@ -12,7 +12,6 @@ package eu.arrowhead.core.confmgr.hawkbit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -26,6 +25,7 @@ import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import org.springframework.http.MediaType;
 
 import eu.arrowhead.core.confmgr.hawkbit.model.ActionStatus;
 import eu.arrowhead.core.confmgr.hawkbit.model.outbound.ThingCreatedOutboundMessage;
@@ -63,7 +63,7 @@ public class HawkbitDmfOutboundClientTest {
                         Map.entry("thingId", "device3"),
                         Map.entry("sender", "testSender"),
                         Map.entry("tenant", "tenant1")))
-                .contentType("application/json")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .replyTo("configuration_system.direct.exchange")
                 .build());
         JSONAssert.assertEquals("{\n" +
@@ -99,7 +99,7 @@ public class HawkbitDmfOutboundClientTest {
                         Map.entry("type", "EVENT"),
                         Map.entry("topic", "UPDATE_ACTION_STATUS"),
                         Map.entry("tenant", "tenant1")))
-                .contentType("application/json")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .build());
         JSONAssert.assertEquals("{\n" +
                 "    \"actionId\": 7,\n" +

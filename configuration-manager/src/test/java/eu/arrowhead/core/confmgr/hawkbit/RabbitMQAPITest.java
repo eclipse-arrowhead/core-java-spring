@@ -24,6 +24,7 @@ import com.rabbitmq.client.Connection;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
 
 import eu.arrowhead.core.confmgr.hawkbit.model.inbound.DownloadRequestInboundMessage;
 import eu.arrowhead.core.confmgr.hawkbit.util.HawkbitDmfMockServer;
@@ -55,7 +56,7 @@ public class RabbitMQAPITest {
         consumer.subscribeToDownloadEvents();
 
         AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder()
-            .contentType("application/json")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
             .headers(Map.ofEntries(
                 Map.entry("type", "EVENT"),
                 Map.entry("thingId", "device7"),

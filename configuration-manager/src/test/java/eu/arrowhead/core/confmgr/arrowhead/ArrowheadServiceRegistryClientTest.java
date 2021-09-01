@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import eu.arrowhead.core.confmgr.arrowhead.model.request.ServiceRegistryRequestDTO;
@@ -57,7 +58,7 @@ public class ArrowheadServiceRegistryClientTest {
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.enqueue(new MockResponse()
                 .setResponseCode(201)
-                .addHeader("Content-Type", "application/json")
+                .addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .setBody("{\n" +
                         "    \"id\": 22,\n" +
                         "    \"serviceDefinition\": {\n" +
@@ -164,7 +165,7 @@ public class ArrowheadServiceRegistryClientTest {
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.enqueue(new MockResponse()
                 .setResponseCode(400)
-                .addHeader("Content-Type", "application/json")
+                .addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .setBody("{\n" +
                         "    \"errorMessage\": \"Service Registry entry with provider: (conf-system, 192.168.1.1:1234) and service definition: definition3 already exists.\",\n" +
                         "    \"errorCode\": 400,\n" +
