@@ -1,0 +1,140 @@
+version: "3"
+
+services:
+  mysql:
+    container_name: mysql
+    image: mariadb:10
+    environment:
+      - MYSQL_ROOT_PASSWORD=THIS_WILL_BE_YOUR_CONTAINERS_ROOT_PW
+    volumes:
+      - mysql:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d/
+    ports:
+      - 3306:3306
+
+  serviceregistry:
+    platform: linux/amd64
+    container_name: serviceregistry
+    image: svetlint/serviceregistry:4.2.0
+    depends_on:
+      - mysql
+    volumes:
+      # dont forget to change the route of the locally available config file
+      # format is <file on your local machine, (change this!!!)>:<file location inside the container (don't change this part!!!)>
+      - ./core_system_config/serviceregistry.properties:/serviceregistry/application.properties
+    ports:
+      - 8443:8443
+  
+  authorization:
+    platform: linux/amd64
+    container_name: authorization
+    image: svetlint/authorization:4.2.0
+    depends_on:
+      - mysql
+    volumes:
+      - ./core_system_config/authorization.properties:/authorization/application.properties
+    ports:
+      - 8445:8445
+      
+  orchestrator:
+    platform: linux/amd64
+    container_name: orchestrator
+    image: svetlint/orchestrator:4.2.0
+    depends_on:
+      - mysql
+    volumes:
+      - ./core_system_config/orchestrator.properties:/orchestrator/application.properties
+    ports:
+      - 8441:8441
+
+#  eventhandler:
+#    platform: linux/amd64
+#    container_name: eventhandler
+#    image: svetlint/eventhandler:4.2.0
+#    depends_on:
+#      - mysql
+#    volumes:
+#      - ./core_system_config/eventhandler.properties:/eventhandler/application.properties
+#    ports:
+#      - 8455:8455
+#  
+#  gatekeeper:
+#    platform: linux/amd64
+#    container_name: gatekeeper
+#    image: svetlint/gatekeeper:4.2.0
+#    depends_on:
+#      - mysql
+#    volumes:
+#      - ./core_system_config/gatekeeper.properties:/gatekeeper/application.properties
+#    ports:
+#      - 8449:8449
+#
+#  gateway:
+#    platform: linux/amd64
+#    container_name: gateway
+#    image: svetlint/gateway:4.2.0
+#    depends_on:
+#      - mysql
+#    volumes:
+#      - ./core_system_config/gateway.properties:/gateway/application.properties
+#    ports:
+#      - 8453:8453
+#
+#  certificate-authority:
+#    platform: linux/amd64
+#    container_name: certificate-authority
+#    image: svetlint/certificate-authority:4.2.0
+#    depends_on:
+#      - mysql
+#    volumes:
+#      - ./core_system_config/certificateauthority.properties:/certificateauthority/application.properties
+#    ports:
+#      - 8448:8448
+#   
+#  onboarding-controller:
+#    platform: linux/amd64
+#    container_name: onboarding-controller
+#    image: svetlint/onboarding-controller:4.2.0
+#    depends_on:
+#      - mysql
+#    volumes:
+#      - ./core_system_config/onboardingcontroller.properties:/onboardingcontroller/application.properties
+#    ports:
+#      - 8435:8435 
+#      
+#  deviceregistry:
+#    platform: linux/amd64
+#    container_name: deviceregistry
+#    image: svetlint/deviceregistry:4.2.0
+#    depends_on:
+#      - mysql
+#    volumes:
+#      - ./core_system_config/deviceregistry.properties:/deviceregistry/application.properties
+#    ports:
+#      - 8439:8439 
+#      
+#  systemregistry:
+#    platform: linux/amd64
+#    container_name: systemregistry
+#    image: svetlint/systemregistry:4.2.0
+#    depends_on:
+#      - mysql
+#    volumes:
+#      - ./core_system_config/systemregistry.properties:/systemregistry/application.properties
+#    ports:
+#      - 8437:8437
+#      
+#  choreographer:
+#    platform: linux/amd64
+#    container_name: choreographer
+#    image: svetlint/choreographer:4.2.0
+#    depends_on:
+#      - mysql
+#    volumes:
+#      - ./core_system_config/choreographer.properties:/choreographer/application.properties
+#    ports:
+#      - 8457:8457       
+
+volumes:
+  mysql:
+    external: true  
