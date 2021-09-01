@@ -15,10 +15,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 import java.util.Collections;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import javax.validation.ConstraintViolationException;
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -36,6 +39,18 @@ import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 
 public class ArrowheadServiceRegistryClientTest {
+    private static Locale defaultLocale;
+
+    @BeforeAll
+	public static void setUp()  {
+		defaultLocale = Locale.getDefault();
+		Locale.setDefault(Locale.UK);
+	}
+	
+	@AfterAll
+	public static void tearDown() {
+		Locale.setDefault(defaultLocale);
+	}
 
     @Test
     public void givenServiceIsNotRegistered_whenRegisterService_thenServiceIsRegistered() throws Exception {
@@ -48,8 +63,8 @@ public class ArrowheadServiceRegistryClientTest {
                         "    \"serviceDefinition\": {\n" +
                         "        \"id\": 7,\n" +
                         "        \"serviceDefinition\": \"definition3\",\n" +
-                        "        \"createdAt\": \"2020-04-21 11:27:39\",\n" +
-                        "        \"updatedAt\": \"2020-04-21 11:27:39\"\n" +
+                        "        \"createdAt\": \"2020-04-21T11:27:39.143Z\",\n" +
+                        "        \"updatedAt\": \"2020-04-21T11:27:39.143Z\"\n" +
                         "    },\n" +
                         "    \"provider\": {\n" +
                         "        \"id\": 9,\n" +
@@ -57,8 +72,8 @@ public class ArrowheadServiceRegistryClientTest {
                         "        \"address\": \"192.168.1.1\",\n" +
                         "        \"port\": 1234,\n" +
                         "        \"authenticationInfo\": \"test\",\n" +
-                        "        \"createdAt\": \"2020-05-05 06:37:19\",\n" +
-                        "        \"updatedAt\": \"2020-05-05 06:37:19\"\n" +
+                        "        \"createdAt\": \"2020-05-05T06:37:19.143Z\",\n" +
+                        "        \"updatedAt\": \"2020-05-05T06:37:19.143Z\"\n" +
                         "    },\n" +
                         "    \"serviceUri\": \"/\",\n" +
                         "    \"secure\": \"TOKEN\",\n" +
@@ -66,12 +81,12 @@ public class ArrowheadServiceRegistryClientTest {
                         "    \"interfaces\": [{\n" +
                         "            \"id\": 3,\n" +
                         "            \"interfaceName\": \"HTTPS-SECURE-JSON\",\n" +
-                        "            \"createdAt\": \"2020-04-21 11:27:39\",\n" +
-                        "            \"updatedAt\": \"2020-04-21 11:27:39\"\n" +
+                        "            \"createdAt\": \"2020-04-21T11:27:39.143Z\",\n" +
+                        "            \"updatedAt\": \"2020-04-21T11:27:39.143Z\"\n" +
                         "        }\n" +
                         "    ],\n" +
-                        "    \"createdAt\": \"2020-05-05 06:37:19\",\n" +
-                        "    \"updatedAt\": \"2020-05-05 06:37:19\"\n" +
+                        "    \"createdAt\": \"2020-05-05T06:37:19.143Z\",\n" +
+                        "    \"updatedAt\": \"2020-05-05T06:37:19.143Z\"\n" +
                         "}"));
         mockWebServer.start();
 
@@ -117,8 +132,8 @@ public class ArrowheadServiceRegistryClientTest {
                 .serviceDefinition(ServiceDefinitionResponseDTO.builder()
                         .id(7L)
                         .serviceDefinition("definition3")
-                        .createdAt("2020-04-21 11:27:39")
-                        .updatedAt("2020-04-21 11:27:39")
+                        .createdAt("2020-04-21T11:27:39.143Z")
+                        .updatedAt("2020-04-21T11:27:39.143Z")
                         .build())
                 .provider(SystemResponseDTO.builder()
                         .id(9L)
@@ -126,8 +141,8 @@ public class ArrowheadServiceRegistryClientTest {
                         .address("192.168.1.1")
                         .port(1234)
                         .authenticationInfo("test")
-                        .createdAt("2020-05-05 06:37:19")
-                        .updatedAt("2020-05-05 06:37:19")
+                        .createdAt("2020-05-05T06:37:19.143Z")
+                        .updatedAt("2020-05-05T06:37:19.143Z")
                         .build())
                 .serviceUri("/")
                 .secure("TOKEN")
@@ -135,11 +150,11 @@ public class ArrowheadServiceRegistryClientTest {
                 .interfaces(Collections.singletonList(ServiceInterfaceResponseDTO.builder()
                         .id(3L)
                         .interfaceName("HTTPS-SECURE-JSON")
-                        .createdAt("2020-04-21 11:27:39")
-                        .updatedAt("2020-04-21 11:27:39")
+                        .createdAt("2020-04-21T11:27:39.143Z")
+                        .updatedAt("2020-04-21T11:27:39.143Z")
                         .build()))
-                .createdAt("2020-05-05 06:37:19")
-                .updatedAt("2020-05-05 06:37:19")
+                .createdAt("2020-05-05T06:37:19.143Z")
+                .updatedAt("2020-05-05T06:37:19.143Z")
                 .build());
         mockWebServer.close();
     }
