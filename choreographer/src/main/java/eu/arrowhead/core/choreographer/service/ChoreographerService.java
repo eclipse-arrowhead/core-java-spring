@@ -142,7 +142,7 @@ public class ChoreographerService {
     public void receiveSessionStepDoneMessage(final ChoreographerExecutedStepResultDTO payload) {
     	logger.debug("receiveSessionStepDoneMessage started...");
     	
-    	validatePayload(payload);
+    	validateNotifyPayload(payload);
     	
     	switch (payload.getStatus()) {
     	case SUCCESS: handleSessionStepSuccess(payload); 
@@ -162,7 +162,7 @@ public class ChoreographerService {
 		logger.debug("abortSession started...");
 		
 		final ChoreographerSession session = sessionDBService.getSessionById(sessionId);
-		final List<ChoreographerSessionStep> activeSteps = sessionDBService.abortSession(sessionId, message);
+		final List<ChoreographerSessionStep> activeSteps = sessionDBService.abortSession(sessionId, message.trim());
 
 		for (final ChoreographerSessionStep sessionStep : activeSteps) {
 			if (sessionStepId != null && sessionStepId.longValue() == sessionStep.getId()) {
@@ -184,7 +184,7 @@ public class ChoreographerService {
 		
 		sessionDataStorage.remove(sessionId);
 		sessionDBService.worklog(session.getPlan().getName(), sessionId, "Session is aborted", null);
-		sendNotification(session, ABORT_SESSION_MSG, message);
+		sendNotification(session, ABORT_SESSION_MSG, message.trim());
 	}
 
 	//=================================================================================================
@@ -435,7 +435,7 @@ public class ChoreographerService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void validatePayload(final ChoreographerExecutedStepResultDTO payload) {
+	private void validateNotifyPayload(final ChoreographerExecutedStepResultDTO payload) {
 		logger.debug("validatePayload started...");
 		
 		Assert.notNull(payload, "Payload is null.");
@@ -452,8 +452,9 @@ public class ChoreographerService {
 	private void handleSessionStepError(final ChoreographerExecutedStepResultDTO payload) {
 		logger.debug("handleSessionStepError started...");
 		
+		final String exception = payload.getException() == null ? "" : payload.getException();
 		if (payload.getStatus().isFatal()) {
-			abortSession(payload.getSessionId(), payload.getSessionStepId(), payload.getMessage() + " " + payload.getException());
+			abortSession(payload.getSessionId(), payload.getSessionStepId(), payload.getMessage() + " " + exception);
 		} else {
 			// error is not fatal, maybe an other executor can able to do the step
 			final ChoreographerSessionStep sessionStep = sessionDBService.getSessionStepById(payload.getSessionStepId());
@@ -470,7 +471,7 @@ public class ChoreographerService {
 				executeStep(step, payload.getSessionId());
 			} else {
 				// no replacement executor so we have to abort
-				abortSession(payload.getSessionId(), payload.getSessionStepId(), payload.getMessage() + " " + payload.getException());
+				abortSession(payload.getSessionId(), payload.getSessionStepId(), payload.getMessage() + " " + exception);
 			}
 		}
 	}
