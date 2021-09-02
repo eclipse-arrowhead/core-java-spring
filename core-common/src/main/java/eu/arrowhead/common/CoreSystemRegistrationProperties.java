@@ -78,7 +78,7 @@ public class CoreSystemRegistrationProperties {
 	//-------------------------------------------------------------------------------------------------
 	public String getCoreSystemName() { return coreSystemName; }
 	public CoreSystem getCoreSystem() { return coreSystem; }
-	public String getServiceRegistryAddress() { return serviceRegistryAddress; }
+	public String getServiceRegistryAddress() { return serviceRegistryAddress.trim(); }
 	public int getServiceRegistryPort() { return serviceRegistryPort; }
 	
 	//-------------------------------------------------------------------------------------------------
