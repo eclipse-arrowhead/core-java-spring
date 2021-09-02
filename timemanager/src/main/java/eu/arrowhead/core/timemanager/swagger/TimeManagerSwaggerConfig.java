@@ -23,13 +23,13 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableSwagger2
 @Configuration
-public class TimemanagerSwaggerConfig extends DefaultSwaggerConfig {
+public class TimeManagerSwaggerConfig extends DefaultSwaggerConfig {
 	
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public TimemanagerSwaggerConfig() {
+	public TimeManagerSwaggerConfig() {
 		super(CommonConstants.CORE_SYSTEM_TIMEMANAGER);
 	}
 	
