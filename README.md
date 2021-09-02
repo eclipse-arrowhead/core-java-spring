@@ -8358,8 +8358,8 @@ Signs the CSR, registers the device and eventually returns a device certificate 
 Additionally all fields from [SystemRegistryEntry](#datastructures_systemregistryentry) are returned.
 
 
-# Configuration Manager
+# HawkBit Configuration Manager
 <a name="configuration_manager" />
 
-The configuration manager is responsible for managing software rollouts and configuration updates to the actual hardware devices.
+The HawkBit configuration manager is responsible for managing software rollouts and configuration updates to the actual hardware devices.
 This implementation is based on [Eclipse HawkBit](https://www.eclipse.org/hawkbit/) and is explained in more detail [here](./configuration-manager/README.md).

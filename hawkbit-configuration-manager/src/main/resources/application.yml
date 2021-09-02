@@ -1,0 +1,65 @@
+---
+spring:
+    profiles:
+        active: develop
+
+# Configuration of the WebSocket endpoint
+# Listens on port 8447 and loads its certificate from the truststore
+server:
+    port: 8447
+    ssl:
+        key-store: path/to/key-store.p12
+        key-store-password: password
+        keyStoreType: PKCS12
+
+
+# These are the properties of the HawkBit Configuration Manager itself
+# The properties are loaded into the class eu.arrowhead.core.confsys.properties.SystemProperties
+system:
+    # This is the address of the HawkBit Configuration Manager itself, e.g. "192.168.1.1" or "subdomain.domain.tld"
+    address:
+    # This is the port of the HawkBit Configuration Manager itself, e.g. 8447
+    port:
+    # This is the name of the HawkBit Configuration Manager itself, e.g. "conf-system". In the context of Arrowhead the system
+    # (provider) name and certificate common name must match
+    name: configuration
+    # This is the protocol of the provided service from the HawkBit Configuration Manager itself, e.g. "HTTPS-SECURE-JSON"
+    providedServiceInterface: HTTPS-SECURE-JSON
+    # This is the definition of the provided service from the HawkBit Configuration Manager itself, e.g. "definition5"
+    providedServiceDefinition: 
+    # This is the uri of the provided service from the HawkBit Configuration Manager itself, e.g "/"
+    providedServiceUri: /
+    # This is the version of the provided service from the HawkBit Configuration Manager itself, e.g. 2
+    providedServiceVersion: 1
+
+# This is the truststore the HawkBit Configuration Manager uses for verifying the identity of clients in the Arrowhead system
+trustStore:
+    path: certificates/testcloud2.p12
+    password: "123456"
+
+# This is the keystore the HawkBit Configuration Manager uses for mutual authentication against the Arrowhead system
+keyStore:
+    path: certificates/hawkbitconfiguration.p12
+    password: "123456"
+    alias: "hawkbitconfiguration.testcloud2.aitia.arrowhead.eu"
+
+# These are the connection parameters for the Arrowhead authorization system
+arrowheadAuthorizationSystem:
+    protocol: https://
+    address: 127.0.0.1
+    port: 8080
+
+# These are the connection parameters for the Arrowhead service registry
+arrowheadServiceRegistry:
+    protocol: https://
+    address: 127.0.0.1
+    port: 8443
+
+# These are the connection parameters for the hawkBit DMF API
+hawkbit:
+    host: hawkbit.address
+    port: 8080
+    username: username
+    password: password
+    # This is the tenant in hawkBit itself
+    tenant: DEFAULT
