@@ -34,6 +34,7 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_CHOREOGRAPHER = "Choreographer";
 	public static final String CORE_SYSTEM_EVENTHANDLER = "Event Handler";
 	public static final String CORE_SYSTEM_DATAMANAGER  = "DataManager";
+	public static final String CORE_SYSTEM_TIMEMANAGER  = "TimeManager";
 	public static final String CORE_SYSTEM_GATEKEEPER = "Gatekeeper";
 	public static final String CORE_SYSTEM_GATEWAY = "Gateway";
 	public static final String CORE_SYSTEM_ORCHESTRATOR = "Orchestrator";
@@ -79,6 +80,8 @@ public class CommonConstants {
 
 	public static final String CORE_SERVICE_DATAMANAGER_PROXY = "proxy";
 	public static final String CORE_SERVICE_DATAMANAGER_HISTORIAN = "historian";
+
+	public static final String CORE_SERVICE_TIMEMANAGER_TIME = "time";
 
 	public static final String CORE_SERVICE_CONFIGURATION_CONF = "conf";
 	public static final String CORE_SERVICE_CONFIGURATION_RAWCONF = "confraw";
@@ -134,7 +137,7 @@ public class CommonConstants {
 	public static final String SERVER_PUBLIC_KEY = "server.public.key";
 	public static final String SERVER_PRIVATE_KEY = "server.private.key";
 	public static final String SERVER_CERTIFICATE = "server.certificate";
-	
+
 	public static final String SECURE_INTF = "-SECURE-";
 	public static final String INSECURE_INTF = "-INSECURE-";
 
@@ -142,14 +145,19 @@ public class CommonConstants {
 	public static final String HTTP = "http";
 	public static final String WSS = "wss";
 	public static final String WS = "ws";
+	public static final String MQTTS = "mqtts";
+	public static final String MQTT = "mqtt";
 	public static final String JSON = "JSON";
 	public static final String XML = "XML";
 	public static final String CBOR = "CBOR";
+	public static final String EXI = "EXI";
 	public static final String BINARY = "BINARY";
-	public static final String HTTP_SECURE_JSON = HTTP.toUpperCase() + SECURE_INTF + JSON; 
+	public static final String HTTP_SECURE_JSON = HTTP.toUpperCase() + SECURE_INTF + JSON;
 	public static final String HTTP_INSECURE_JSON = HTTP.toUpperCase() + INSECURE_INTF + JSON;
 	public static final String WS_SECURE_JSON = WS.toUpperCase() + SECURE_INTF + JSON;
 	public static final String WS_INSECURE_JSON = WS.toUpperCase() + INSECURE_INTF + JSON;
+	public static final String MQTT_SECURE_JSON = MQTT.toUpperCase() + SECURE_INTF + JSON;
+	public static final String MQTT_INSECURE_JSON = MQTT.toUpperCase() + INSECURE_INTF + JSON;
 	public static final String UNKNOWN_ORIGIN = "<unknown>";
 	
 	public static final String SERVICEREGISTRY_ADDRESS = "sr_address";
@@ -173,7 +181,7 @@ public class CommonConstants {
 	public static final String OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI = "/register-system";
 	public static final String OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI = "/unregister-system";
 	public static final String OP_SERVICEREGISTRY_PULL_SYSTEMS_URI = "/pull-systems";
-	public static final String OP_SERVICEREGISTRY_QUERY_URI = "/query";	
+	public static final String OP_SERVICEREGISTRY_QUERY_URI = "/query";
 	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME = "system_name";
 	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS = "address";
 	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT = "port";
@@ -277,9 +285,12 @@ public class CommonConstants {
 	public static final String OP_DATAMANAGER_PROXY = "/proxy";
 	public static final String OP_DATAMANAGER_HISTORIAN = "/historian";
 
-	public static final String TRANSLATOR_URI = "/translator";
-	public static final String OP_TRANSLATOR_FIWARE_URI = "/v2";
-	public static final String OP_TRANSLATOR_PLUGIN_URI = "/plugin";
+	public static final String TIMEMANAGER_URI = "/timemanager";
+	public static final String OP_TIMEMANAGER_TIME = "/time";
+
+    public static final String TRANSLATOR_URI = "/translator";
+    public static final String OP_TRANSLATOR_FIWARE_URI = "/v2";
+    public static final String OP_TRANSLATOR_PLUGIN_URI = "/plugin";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
@@ -292,11 +303,12 @@ public class CommonConstants {
 	public static final String REQUEST_PARAM_TOKEN = "token";
 	
 	public static final String ECHO_URI = "/echo";
-	
+
 	public static final List<CoreSystemService> PUBLIC_CORE_SYSTEM_SERVICES = List.of(CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.AUTH_PUBLIC_KEY_SERVICE,
-  			  																		  CoreSystemService.EVENT_PUBLISH_SERVICE, CoreSystemService.EVENT_SUBSCRIBE_SERVICE, CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE, 
+  			  																		  CoreSystemService.EVENT_PUBLISH_SERVICE, CoreSystemService.EVENT_SUBSCRIBE_SERVICE, CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE,
 																					  CoreSystemService.PROXY_SERVICE, CoreSystemService.HISTORIAN_SERVICE, CoreSystemService.CHOREOGRAPHER_SERVICE, CoreSystemService.TRANSLATOR_SERVICE,
-	       																			  CoreSystemService.CONFIGURATION_SERVICE, CoreSystemService.CONFIGURATION_RAW_SERVICE);
+	       																			  CoreSystemService.CONFIGURATION_SERVICE, CoreSystemService.CONFIGURATION_RAW_SERVICE, CoreSystemService.TIME_SERVICE);
+
 	
 	public static final String HTTP_CLIENT_CONNECTION_TIMEOUT = "http.client.connection.timeout";
 	public static final String $HTTP_CLIENT_CONNECTION_TIMEOUT_WD = "${" + HTTP_CLIENT_CONNECTION_TIMEOUT + ":" + Defaults.DEFAULT_CONNECTION_TIMEOUT + "}";
@@ -310,6 +322,8 @@ public class CommonConstants {
 	
 	public static final String SERVER_SSL_ENABLED = "server.ssl.enabled";
 	public static final String $SERVER_SSL_ENABLED_WD = "${" + SERVER_SSL_ENABLED + ":" + Defaults.DEFAULT_SSL_SERVER_ENABLED + "}";
+	public static final String WEBSOCKETS_ENABLED = "websockets.enabled";
+	public static final String $WEBSOCKETS_ENABLED_WD = "${" + WEBSOCKETS_ENABLED + ":" + Defaults.DEFAULT_WEBSOCKETS_ENABLED + "}";
 	public static final String KEYSTORE_TYPE = "server.ssl.key-store-type";
 	public static final String $KEYSTORE_TYPE_WD = "${" + KEYSTORE_TYPE + ":" + Defaults.DEFAULT_KEYSTORE_TYPE + "}";
 	public static final String KEYSTORE_PATH = "server.ssl.key-store";

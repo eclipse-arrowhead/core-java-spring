@@ -20,6 +20,7 @@ public class Defaults {
 	// members
 	
 	public static final boolean DEFAULT_SSL_SERVER_ENABLED = true;
+	public static final boolean DEFAULT_WEBSOCKETS_ENABLED = false;
 	public static final String DEFAULT_KEYSTORE_TYPE = "PKCS12";
 	public static final String DEFAULT_KEYSTORE_PATH = "";
 	public static final String DEFAULT_KEYSTORE_PASSWORD = "";
@@ -43,6 +44,7 @@ public class Defaults {
 	public static final int DEFAULT_GATEWAY_PORT = 8453;
 	public static final int DEFAULT_EVENTHANDLER_PORT = 8455;
 	public static final int DEFAULT_DATAMANAGER_PORT = 8461;
+	public static final int DEFAULT_TIMEMANAGER_PORT = 8463;
 	public static final int DEFAULT_CHOREOGRAPHER_PORT = 8457;
 	public static final int DEFAULT_CERTIFICATEAUTHORITY_PORT = 8448;
     public static final int DEFAULT_CONFIGURATION_PORT = 8459;
