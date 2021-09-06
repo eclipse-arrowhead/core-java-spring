@@ -39,13 +39,15 @@
 	    <module>systemregistry</module>
 	    <module>deviceregistry</module>
 	    <module>onboarding</module>
+	    <module>qos-monitor</module>
+	    <module>translator</module>
+		<module>plantdescriptionengine</module>
 	    <module>deb-installer</module>
 	    <module>docker-all</module>
-	    <module>translator</module>
   	</modules>
   	
 	<properties>
-		<base.version>4.3.0</base.version>
+		<base.version>4.4.0</base.version>
 		<revision>${base.version}</revision>
 		<java.version>11</java.version>
 		<mvn.clean.version>3.1.0</mvn.clean.version>
@@ -64,9 +66,10 @@
   		<apache.commons.lang3.version>3.9</apache.commons.lang3.version>
   		<jms.api.version>2.0.1</jms.api.version>
   		<activemq.client.version>5.15.9</activemq.client.version>
-		<bouncy.castle.version>1.64</bouncy.castle.version>
+		<bouncy.castle.version>1.69</bouncy.castle.version>
   		<jna.version>5.5.0</jna.version>
-		<paho.version>1.2.0</paho.version>
+		<spring.jms.version>5.1.7.RELEASE</spring.jms.version>
+		<google.gson.version>2.8.6</google.gson.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -118,9 +121,9 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
-        		<groupId>org.springframework.boot</groupId>
-        		<artifactId>spring-boot-starter-websocket</artifactId>
-        	</dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
 		<dependency>
 		    <groupId>org.springframework.boot</groupId>
     		<artifactId>spring-boot-configuration-processor</artifactId>
@@ -159,13 +162,12 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jms</artifactId>
-			<version>5.1.7.RELEASE</version>
+			<version>${spring.jms.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-activemq</artifactId>
 		</dependency>
-	    
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger2</artifactId>
@@ -206,10 +208,11 @@
 		</dependency>
 -->
 		
+		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
 		<dependency>
-      		<groupId>com.google.code.gson</groupId>
-      		<artifactId>gson</artifactId>
-      		<version>2.8.6</version>
+				<groupId>com.google.code.gson</groupId>
+				<artifactId>gson</artifactId>
+				<version>${google.gson.version}</version>
 		</dependency>
 
 		<dependency>
@@ -233,6 +236,11 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
 			<scope>test</scope>
 		</dependency>
 

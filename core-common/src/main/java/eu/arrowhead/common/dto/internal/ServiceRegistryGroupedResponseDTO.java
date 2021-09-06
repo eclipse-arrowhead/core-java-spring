@@ -30,7 +30,7 @@ public class ServiceRegistryGroupedResponseDTO implements Serializable {
 	
 	private List<ServicesGroupedBySystemsResponseDTO> servicesGroupedBySystems;
 	private List<ServicesGroupedByServiceDefinitionResponseDTO> servicesGroupedByServiceDefinition;
-	private AutoCompleteDataResponseDTO  autoCompleteData;
+	private AutoCompleteDataResponseDTO autoCompleteData;
 	
 	//=================================================================================================
 	// methods

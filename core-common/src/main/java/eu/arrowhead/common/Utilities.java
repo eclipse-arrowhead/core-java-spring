@@ -31,8 +31,8 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -104,8 +104,7 @@ public class Utilities {
 
 	private static final Logger logger = LogManager.getLogger(Utilities.class);
 	private static final ObjectMapper mapper = new ObjectMapper();
-	private static final String dateTimePattern = "yyyy-MM-dd HH:mm:ss";
-	static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(dateTimePattern);
+	static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_INSTANT;
 
 	static {
 	    mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
@@ -123,6 +122,11 @@ public class Utilities {
 	//-------------------------------------------------------------------------------------------------
 	public static boolean isEmpty(final String str) {
 		return str == null || str.isBlank();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static boolean isEmpty(final Map<?,?> map) {
+		return map == null || map.isEmpty();
 	}
 
     //-------------------------------------------------------------------------------------------------
@@ -146,8 +150,7 @@ public class Utilities {
 			return null;
 		}
 
-		final LocalDateTime localDateTime = LocalDateTime.ofInstant(time.toInstant(), ZoneOffset.UTC);
-		return dateTimeFormatter.format(localDateTime);
+		return dateTimeFormatter.format(time.toInstant());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -158,27 +161,19 @@ public class Utilities {
 		}
 
 		final TemporalAccessor tempAcc = dateTimeFormatter.parse(timeStr);
-		final ZonedDateTime parsedDateTime = ZonedDateTime.of(tempAcc.get(ChronoField.YEAR),
-															  tempAcc.get(ChronoField.MONTH_OF_YEAR),
-															  tempAcc.get(ChronoField.DAY_OF_MONTH),
-															  tempAcc.get(ChronoField.HOUR_OF_DAY),
-															  tempAcc.get(ChronoField.MINUTE_OF_HOUR),
-															  tempAcc.get(ChronoField.SECOND_OF_MINUTE),
-															  0,
-															  ZoneOffset.UTC);
 
-		final ZoneOffset offset = OffsetDateTime.now().getOffset();
-		return ZonedDateTime.ofInstant(parsedDateTime.toInstant(), offset);
+		return ZonedDateTime.ofInstant(Instant.from(tempAcc), ZoneId.systemDefault());
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:RedundantThrowsDeclarationCheck")
-	public static ZonedDateTime parseLocalStringToUTCZonedDateTime(final String timeStr) throws DateTimeParseException {
+	public static ZonedDateTime parseDBLocalStringToUTCZonedDateTime(final String timeStr) throws DateTimeParseException {
 		if (isEmpty(timeStr)) {
 			return null;
 		}
-
-		final TemporalAccessor tempAcc = dateTimeFormatter.parse(timeStr);
+		
+		final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		final TemporalAccessor tempAcc = formatter.parse(timeStr);
 		final ZonedDateTime parsedDateTime = ZonedDateTime.of(tempAcc.get(ChronoField.YEAR),
 															  tempAcc.get(ChronoField.MONTH_OF_YEAR),
 															  tempAcc.get(ChronoField.DAY_OF_MONTH),
@@ -186,9 +181,9 @@ public class Utilities {
 															  tempAcc.get(ChronoField.MINUTE_OF_HOUR),
 															  tempAcc.get(ChronoField.SECOND_OF_MINUTE),
 															  0,
-															  OffsetDateTime.now().getOffset());
-
-			return ZonedDateTime.ofInstant(parsedDateTime.toInstant(), ZoneOffset.UTC);
+															  ZoneId.systemDefault());
+		
+		return ZonedDateTime.ofInstant(parsedDateTime.toInstant(), ZoneOffset.UTC);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -288,8 +283,8 @@ public class Utilities {
 	 */
 	public static UriComponents createURI(final String scheme, final String host, final int port, final MultiValueMap<String, String> queryParams, final String path, final String... pathSegments) {
 		final UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
-		builder.scheme(scheme == null ? CommonConstants.HTTP : scheme)
-			   .host(host == null ? CommonConstants.LOCALHOST : host)
+		builder.scheme(Utilities.isEmpty(scheme) ? CommonConstants.HTTP : scheme.trim())
+			   .host(Utilities.isEmpty(host) ? CommonConstants.LOCALHOST : host.trim())
 			   .port(port <= 0 ? CommonConstants.HTTP_PORT : port);
 
 		if (queryParams != null) {
@@ -435,7 +430,7 @@ public class Utilities {
             while (enumeration.hasMoreElements()) {
                 final Certificate[] chain = keystore.getCertificateChain(enumeration.nextElement());
 
-                if(Objects.nonNull(chain) && chain.length >= 3) {
+                if (Objects.nonNull(chain) && chain.length >= 3) {
                     return (X509Certificate) chain[0];
                 }
             }
@@ -446,7 +441,7 @@ public class Utilities {
         }
     }
 
-//-------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	public static X509Certificate getCloudCertFromKeyStore(final KeyStore keystore) {
 		Assert.notNull(keystore, "Key store is not defined.");
 
@@ -458,8 +453,7 @@ public class Utilities {
 				final String alias = enumeration.nextElement();
                 final X509Certificate certificate = (X509Certificate) keystore.getCertificate(alias);
 
-                if(isCloudCertificate(certificate))
-                {
+                if (isCloudCertificate(certificate)) {
                     return certificate;
                 }
 			}
@@ -480,7 +474,7 @@ public class Utilities {
 
 		try {
             // debian installation with new certificates have a different alias
-			Enumeration<String> enumeration = keystore.aliases();
+			final Enumeration<String> enumeration = keystore.aliases();
 			while (enumeration.hasMoreElements()) {
 				final String alias = enumeration.nextElement();
                 final X509Certificate certificate = (X509Certificate) keystore.getCertificate(alias);
@@ -493,7 +487,7 @@ public class Utilities {
 			}
 
 			final String errorMsg = "Getting the root cert from keystore failed. " +
-					"Cannot find alias in the following format: " + AH_MASTER_NAME + "." + AH_MASTER_SUFFIX;
+					"Cannot find CN in the following format: " + AH_MASTER_NAME + "." + AH_MASTER_SUFFIX;
 			logger.error(errorMsg);
 			throw new ServiceConfigurationError(errorMsg);
 		} catch (final KeyStoreException | NoSuchElementException ex) {
@@ -501,6 +495,7 @@ public class Utilities {
 			throw new ServiceConfigurationError("Getting the root cert from keystore failed...", ex);
 		}
 	}
+	
     //-------------------------------------------------------------------------------------------------
     public static PrivateKey getPrivateKey(final KeyStore keystore, final String keyPass) {
         Assert.notNull(keystore, "Key store is not defined.");
@@ -529,6 +524,7 @@ public class Utilities {
 
         return privateKey;
     }
+    
     //-------------------------------------------------------------------------------------------------
     public static PrivateKey getCloudPrivateKey(final KeyStore keystore, final String keyPass) {
         Assert.notNull(keystore, "Key store is not defined.");
@@ -541,9 +537,9 @@ public class Utilities {
 				final X509Certificate certificate = (X509Certificate) keystore.getCertificate(alias);
 				if (isCloudCertificate(certificate)) {
 					final PrivateKey privateKey = (PrivateKey) keystore.getKey(alias, keyPass.toCharArray());
-            if (privateKey != null) {
+					if (privateKey != null) {
 						logger.debug("Found cloud private key with alias: " + alias);
-                return privateKey;
+						return privateKey;
 					}
 				}
             }
@@ -653,9 +649,6 @@ public class Utilities {
 		return isCloudCommonName(commonName);
 	}
 
-	//-------------------------------------------------------------------------------------------------
-	public static String getDatetimePattern() { return dateTimePattern; }
-	
 	//-------------------------------------------------------------------------------------------------
 	public static void createExceptionFromErrorMessageDTO(final ErrorMessageDTO dto) {
 		Assert.notNull(dto, "Error message object is null.");

@@ -34,6 +34,7 @@ public class CoreCommonConstants {
 	
 	public static final String SERVER_STANDALONE_MODE = "server.standalone.mode";
 	public static final String SR_QUERY_URI = "service.registry.query.uri";
+	public static final String SR_MULTI_QUERY_URI = "service.registry.multi.query.uri";
 	public static final String SR_QUERY_BY_SYSTEM_ID_URI = "service.registry.query.by.system.id.uri";
 	public static final String SR_QUERY_BY_SYSTEM_DTO_URI = "service.registry.query.by.system.dto.uri";
 	public static final String SR_QUERY_ALL = "service.registry.query.all.uri";
@@ -53,17 +54,20 @@ public class CoreCommonConstants {
 	public static final String SERVER_ERROR_URI = "/error";
 	public static final String MGMT_URI = "/mgmt";
 
-	public static final String OP_DEVICE_REGISTRY_QUERY_BY_DEVICE_ID_URI = "/query/device/{" + COMMON_FIELD_NAME_ID + "}";
-	public static final String OP_DEVICE_REGISTRY_QUERY_BY_DEVICE_DTO_URI = "/query/device";
+	public static final String OP_DEVICEREGISTRY_QUERY_BY_DEVICE_ID_URI = "/query/device/{" + COMMON_FIELD_NAME_ID + "}";
+	public static final String OP_DEVICEREGISTRY_QUERY_BY_DEVICE_DTO_URI = "/query/device";
 
-	public static final String OP_SYSTEM_REGISTRY_QUERY_BY_SYSTEM_ID_URI = "/query/system/{" + COMMON_FIELD_NAME_ID + "}";
-	public static final String OP_SYSTEM_REGISTRY_QUERY_BY_SYSTEM_DTO_URI = "/query/system";
+	public static final String OP_SYSTEMREGISTRY_QUERY_BY_SYSTEM_ID_URI = "/query/system/{" + COMMON_FIELD_NAME_ID + "}";
+	public static final String OP_SYSTEMREGISTRY_QUERY_BY_SYSTEM_DTO_URI = "/query/system";
 
-	public static final String OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI = "/query/system/{" + COMMON_FIELD_NAME_ID + "}";
-	public static final String OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI = "/query/system";
-	public static final String OP_SERVICE_REGISTRY_QUERY_ALL_SERVICE_URI = "/query/all";
+	public static final String OP_SERVICEREGISTRY_QUERY_BY_SYSTEM_ID_URI = "/query/system/{" + COMMON_FIELD_NAME_ID + "}";
+	public static final String OP_SERVICEREGISTRY_QUERY_BY_SYSTEM_DTO_URI = "/query/system";
+	public static final String OP_SERVICEREGISTRY_QUERY_ALL_SERVICE_URI = "/query/all";
+	public static final String OP_SERVICEREGISTRY_MULTI_QUERY_URI = CommonConstants.OP_SERVICEREGISTRY_QUERY_URI + "/multi";	
 		
 	public static final String ORCHESTRATOR_STORE_MGMT_URI = "/mgmt/store";
+	public static final String ORCHESTRATOR_STORE_FLEXIBLE_MGMT_URI = "/mgmt/store/flexible";
+	public static final String ORCHESTRATOR_STORE_FLEXIBLE_BY_ID_MGMT_URI = ORCHESTRATOR_STORE_FLEXIBLE_MGMT_URI + "/{" + COMMON_FIELD_NAME_ID + "}";
 	
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
@@ -96,6 +100,16 @@ public class CoreCommonConstants {
 	public static final String $LOG_ALL_REQUEST_AND_RESPONSE_WD = "${" + LOG_ALL_REQUEST_AND_RESPONSE + ":" + CoreDefaults.DEFAULT_LOG_ALL_REQUEST_AND_RESPONSE + "}";
 	public static final String USE_STRICT_SERVICE_INTF_NAME_VERIFIER = "use_strict_service_intf_name_verifier";
 	public static final String $USE_STRICT_SERVICE_INTF_NAME_VERIFIER_WD = "${" + USE_STRICT_SERVICE_INTF_NAME_VERIFIER + ":" + CoreDefaults.DEFAULT_USE_STRICT_SERVICE_INTF_NAME_VERIFIER + "}";
+	public static final String USE_STRICT_SERVICE_DEFINITION_VERIFIER = "use_strict_service_definition_verifier";
+	public static final String $USE_STRICT_SERVICE_DEFINITION_VERIFIER_WD = "${" + USE_STRICT_SERVICE_DEFINITION_VERIFIER + ":" + CoreDefaults.DEFAULT_USE_STRICT_SERVICE_DEFINITION_VERIFIER + "}";
+	public static final String USE_NETWORK_ADDRRESS_DETECTOR = "use_network_address_detector";
+	public static final String $USE_NETWORK_ADDRESS_DETECTOR_WD = "${" + USE_NETWORK_ADDRRESS_DETECTOR + ":" + CoreDefaults.DEFAULT_USE_NETWORK_ADDRESS_DETECTOR + "}";
+	public static final String FILTER_PROXY_ADDRESSES = "filter_proxy_addresses";
+	public static final String $FILTER_PROXY_ADDRESSES_WD = "${" + "filter_proxy_addresses" + ":" + CoreDefaults.DEFAULT_FILTER_PROXY_ADDRESSES + "}";
+	public static final String ALLOW_SELF_ADDRESSING = "allow_self_addressing";
+	public static final String $ALLOW_SELF_ADDRESSING_WD = "${" + ALLOW_SELF_ADDRESSING + ":" + CoreDefaults.DEFAULT_ALLOW_SELF_ADDRESSING + "}";
+	public static final String ALLOW_NON_ROUTABLE_ADDRESSING = "allow_non_routable_addressing";
+	public static final String $ALLOW_NON_ROUTABLE_ADDRESSING_WD = "${" + ALLOW_NON_ROUTABLE_ADDRESSING + ":" + CoreDefaults.DEFAULT_ALLOW_NON_ROUTABLE_ADDRESSING + "}";
 	public static final String URI_CRAWLER_INTERVAL = "uri_crawler_interval"; // in seconds
 	public static final String $URI_CRAWLER_INTERVAL_WD = "${" + URI_CRAWLER_INTERVAL + ":" + CoreDefaults.DEFAULT_URI_CRAWLER_INTERVAL + "}";
 	public static final String AUTH_TOKEN_TTL_IN_MINUTES = "auth_token_ttl_in_minutes";
@@ -115,24 +129,26 @@ public class CoreCommonConstants {
 	
 	public static final String SORT_FIELD_PRIORITY = "priority";
 
-	public static final String SERVICE_REGISTRY_PING_SCHEDULED = "ping_scheduled";
-	public static final String $SERVICE_REGISTRY_PING_SCHEDULED_WD = "${" + SERVICE_REGISTRY_PING_SCHEDULED + ":" + CoreDefaults.DEFAULT_SERVICE_REGISTRY_PING_SCHEDULED + "}";
-	public static final String SERVICE_REGISTRY_PING_INTERVAL = "ping_interval";
-	public static final String $SERVICE_REGISTRY_PING_INTERVAL_WD = "${" + SERVICE_REGISTRY_PING_INTERVAL + ":" + CoreDefaults.DEFAULT_SERVICE_REGISTRY_PING_INTERVAL_MINUTES + "}";
-	public static final String SERVICE_REGISTRY_PING_TIMEOUT = "ping_timeout";
-	public static final String $SERVICE_REGISTRY_PING_TIMEOUT_WD = "${" + SERVICE_REGISTRY_PING_TIMEOUT + ":" + CoreDefaults.DEFAULT_SERVICE_REGISTRY_PING_TIMEOUT_MILLISECONDS + "}";
-	public static final String SERVICE_REGISTRY_TTL_SCHEDULED = "ttl_scheduled";
-	public static final String $SERVICE_REGISTRY_TTL_SCHEDULED_WD = "${" + SERVICE_REGISTRY_TTL_SCHEDULED + ":" + CoreDefaults.DEFAULT_SERVICE_REGISTRY_TTL_SCHEDULED + "}";
-	public static final String SERVICE_REGISTRY_TTL_INTERVAL = "ttl_interval";
-	public static final String $SERVICE_REGISTRY_TTL_INTERVAL_WD = "${" + SERVICE_REGISTRY_TTL_INTERVAL + ":" + CoreDefaults.DEFAULT_SERVICE_REGISTRY_TTL_INTERVAL_MINUTES + "}";
+	public static final String SERVICEREGISTRY_PING_SCHEDULED = "ping_scheduled";
+	public static final String $SERVICEREGISTRY_PING_SCHEDULED_WD = "${" + SERVICEREGISTRY_PING_SCHEDULED + ":" + CoreDefaults.DEFAULT_SERVICEREGISTRY_PING_SCHEDULED + "}";
+	public static final String SERVICEREGISTRY_PING_INTERVAL = "ping_interval";
+	public static final String $SERVICEREGISTRY_PING_INTERVAL_WD = "${" + SERVICEREGISTRY_PING_INTERVAL + ":" + CoreDefaults.DEFAULT_SERVICEREGISTRY_PING_INTERVAL_MINUTES + "}";
+	public static final String SERVICEREGISTRY_PING_TIMEOUT = "ping_timeout";
+	public static final String $SERVICEREGISTRY_PING_TIMEOUT_WD = "${" + SERVICEREGISTRY_PING_TIMEOUT + ":" + CoreDefaults.DEFAULT_SERVICEREGISTRY_PING_TIMEOUT_MILLISECONDS + "}";
+	public static final String SERVICEREGISTRY_TTL_SCHEDULED = "ttl_scheduled";
+	public static final String $SERVICEREGISTRY_TTL_SCHEDULED_WD = "${" + SERVICEREGISTRY_TTL_SCHEDULED + ":" + CoreDefaults.DEFAULT_SERVICEREGISTRY_TTL_SCHEDULED + "}";
+	public static final String SERVICEREGISTRY_TTL_INTERVAL = "ttl_interval";
+	public static final String $SERVICEREGISTRY_TTL_INTERVAL_WD = "${" + SERVICEREGISTRY_TTL_INTERVAL + ":" + CoreDefaults.DEFAULT_SERVICEREGISTRY_TTL_INTERVAL_MINUTES + "}";
 
-	public static final String SYSTEM_REGISTRY_PING_TIMEOUT = "ping_timeout";
-	public static final String $SYSTEM_REGISTRY_PING_TIMEOUT_WD =
-			"${" + SYSTEM_REGISTRY_PING_TIMEOUT + ":" + CoreDefaults.DEFAULT_SYSTEM_REGISTRY_PING_TIMEOUT_MILLISECONDS + "}";
+	public static final String SYSTEMREGISTRY_PING_TIMEOUT = "ping_timeout";
+	public static final String $SYSTEMREGISTRY_PING_TIMEOUT_WD =
+			"${" + SYSTEMREGISTRY_PING_TIMEOUT + ":" + CoreDefaults.DEFAULT_SYSTEMREGISTRY_PING_TIMEOUT_MILLISECONDS + "}";
 
 	public static final String AUTHORIZATION_IS_EVENTHANDLER_PRESENT = "eventhandler_is_present";
 	public static final String $AUTHORIZATION_IS_EVENTHANDLER_PRESENT_WD = "${" + AUTHORIZATION_IS_EVENTHANDLER_PRESENT + ":" + CoreDefaults.DEFAULT_AUTHORIZATION_IS_EVENTHANDLER_PRESENT + "}";
 	
+    public static final String ORCHESTRATOR_USE_FLEXIBLE_STORE = "use_flexible_store";
+    public static final String $ORCHESTRATOR_USE_FLEXIBLE_STORE_WD = "${" + ORCHESTRATOR_USE_FLEXIBLE_STORE + ":" + CoreDefaults.DEFAULT_ORCHESTRATOR_USE_FLEXIBLE_STORE + "}";
 	public static final String ORCHESTRATOR_IS_GATEKEEPER_PRESENT = "gatekeeper_is_present";
 	public static final String $ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD = "${" + ORCHESTRATOR_IS_GATEKEEPER_PRESENT + ":" + CoreDefaults.DEFAULT_ORCHESTRATOR_IS_GATEKEEPER_PRESENT + "}";
 
@@ -150,9 +166,11 @@ public class CoreCommonConstants {
 	public static final String GATEWAY_MATCHMAKER = "gatewayMatchmaker";
 	public static final String CLOUD_MATCHMAKER = "cloudMatchmaker";
 	
+	public static final String PING_MONITOR = "pingMonitor";
+	
 	public static final int TOP_PRIORITY = 1;
 	
-	public static final String QOS_MANAGER = "qosManager";
+	public static final String QOSMANAGER = "qosManager";
 	public static final String QOS_ENABLED = "enable_qos";
 	public static final String $QOS_ENABLED_WD = "${" + QOS_ENABLED + ":" + CoreDefaults.DEFAULT_QOS_ENABLED + "}";
 	public static final String QOS_RESERVATION_CHECK_INTERVAL = "qos_reservation_check_interval"; // in seconds
@@ -176,7 +194,19 @@ public class CoreCommonConstants {
 	public static final String $QOS_ENABLED_RELAY_TASK_WD =  "${" + QOS_ENABLED_RELAY_TASK + ":" + CoreDefaults.DEFAULT_QOS_ENABLED_RELAY_TASK + "}";
 	public static final String QOS_IS_GATEKEEPER_PRESENT = "gatekeeper_is_present";
 	public static final String $QOS_IS_GATEKEEPER_PRESENT_WD = "${" + QOS_IS_GATEKEEPER_PRESENT + ":" + CoreDefaults.DEFAULT_QOS_IS_GATEKEEPER_PRESENT + "}";
-	
+	public static final String QOS_MONITOR_PROVIDER_TYPE = "monitor_provider_type";
+	public static final String $QOS_MONITOR_PROVIDER_TYPE_WD = "${" + QOS_MONITOR_PROVIDER_TYPE + ":" + CoreDefaults.DEFAULT_QOS_MONITOR_PROVIDER_TYPE + "}";
+	public static final String QOS_MONITOR_PROVIDER_NAME = "monitor_provider_name";
+	public static final String $QOS_MONITOR_PROVIDER_NAME_WD = "${" + QOS_MONITOR_PROVIDER_NAME + ":" + CoreDefaults.DEFAULT_QOS_MONITOR_PROVIDER_NAME + "}";
+	public static final String QOS_MONITOR_PROVIDER_ADDRESS = "monitor_provider_address";
+	public static final String $QOS_MONITOR_PROVIDER_ADDRESS_WD = "${" + QOS_MONITOR_PROVIDER_ADDRESS + ":" + CoreDefaults.DEFAULT_QOS_MONITOR_PROVIDER_ADDRESS + "}";
+	public static final String QOS_MONITOR_PROVIDER_PORT = "monitor_provider_port";
+	public static final String $QOS_MONITOR_PROVIDER_PORT_WD = "${" + QOS_MONITOR_PROVIDER_PORT + ":" + CoreDefaults.DEFAULT_QOS_MONITOR_PROVIDER_PORT + "}";
+	public static final String QOS_MONITOR_PROVIDER_PATH = "monitor_provider_path";
+	public static final String $QOS_MONITOR_PROVIDER_PATH_WD = "${" + QOS_MONITOR_PROVIDER_PATH + ":" + CoreDefaults.DEFAULT_QOS_MONITOR_PROVIDER_PATH + "}";
+	public static final String QOS_MONITOR_PROVIDER_SECURE = "monitor_provider_secure";
+	public static final String $QOS_MONITOR_PROVIDER_SECURE_WD = "${" + QOS_MONITOR_PROVIDER_SECURE + ":" + CoreDefaults.DEFAULT_QOS_MONITOR_PROVIDER_SECURE + "}";
+
 	public static final String NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS = "no_gatekeeper_relay_request_handler_workers";
 	public static final String $NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS_WD = "${" + NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + ":" + 
 																				 CoreDefaults.DEFAULT_NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + "}";
@@ -193,14 +223,14 @@ public class CoreCommonConstants {
 	public static final String GATEWAY_ACTIVE_SESSION_MAP = "activeSessions";
 	public static final String GATEWAY_AVAILABLE_PORTS_QUEUE = "availableQueue";
 	
-	public static final String EVENT_HANDLER_TTL_SCHEDULED = "event_handler_ttl_scheduled";
-	public static final String $EVENT_HANDLER_TTL_SCHEDULED_WD = "${" + EVENT_HANDLER_TTL_SCHEDULED + ":" + CoreDefaults.DEFAULT_EVENT_HANDLER_TTL_SCHEDULED + "}";
-	public static final String EVENT_HANDLER_TTL_INTERVAL = "event_handler_ttl_interval";
-	public static final String $EVENT_HANDLER_TTL_INTERVAL_WD = "${" + EVENT_HANDLER_TTL_INTERVAL + ":" + CoreDefaults.DEFAULT_EVENT_HANDLER_TTL_INTERVAL_MINUTES + "}";
-	public static final String EVENT_HANDLER_MAX_RETRY_CONNECT_AUTH = "event_handler_max_retry_connect_auth";
-	public static final String $EVENT_HANDLER_MAX_RETRY_CONNECT_AUTH_WD = "${" + EVENT_HANDLER_MAX_RETRY_CONNECT_AUTH + ":" + CoreDefaults.DEFAULT_EVENT_HANDLER_MAX_RETRY_CONNECT_AUTH + "}";
-	public static final String EVENT_HANDLER_RETRY_CONNECT_AUTH_INTERVAL_SEC = "event_handler_retry_connect_auth_interval_sec";
-	public static final String $EVENT_HANDLER_RETRY_CONNECT_AUTH_INTERVAL_SEC_WD = "${" + EVENT_HANDLER_RETRY_CONNECT_AUTH_INTERVAL_SEC + ":" + CoreDefaults.DEFAULT_EVENT_HANDLER_RETRY_CONNECT_AUTH_INTERVAL_SEC + "}";
+	public static final String EVENTHANDLER_TTL_SCHEDULED = "event_handler_ttl_scheduled";
+	public static final String $EVENTHANDLER_TTL_SCHEDULED_WD = "${" + EVENTHANDLER_TTL_SCHEDULED + ":" + CoreDefaults.DEFAULT_EVENTHANDLER_TTL_SCHEDULED + "}";
+	public static final String EVENTHANDLER_TTL_INTERVAL = "event_handler_ttl_interval";
+	public static final String $EVENTHANDLER_TTL_INTERVAL_WD = "${" + EVENTHANDLER_TTL_INTERVAL + ":" + CoreDefaults.DEFAULT_EVENTHANDLER_TTL_INTERVAL_MINUTES + "}";
+	public static final String EVENTHANDLER_MAX_RETRY_CONNECT_AUTH = "event_handler_max_retry_connect_auth";
+	public static final String $EVENTHANDLER_MAX_RETRY_CONNECT_AUTH_WD = "${" + EVENTHANDLER_MAX_RETRY_CONNECT_AUTH + ":" + CoreDefaults.DEFAULT_EVENTHANDLER_MAX_RETRY_CONNECT_AUTH + "}";
+	public static final String EVENTHANDLER_RETRY_CONNECT_AUTH_INTERVAL_SEC = "event_handler_retry_connect_auth_interval_sec";
+	public static final String $EVENTHANDLER_RETRY_CONNECT_AUTH_INTERVAL_SEC_WD = "${" + EVENTHANDLER_RETRY_CONNECT_AUTH_INTERVAL_SEC + ":" + CoreDefaults.DEFAULT_EVENTHANDLER_RETRY_CONNECT_AUTH_INTERVAL_SEC + "}";
 
 	
 	public static final String TIME_STAMP_TOLERANCE_SECONDS = "time_stamp_tolerance_seconds";
@@ -209,8 +239,8 @@ public class CoreCommonConstants {
 	public static final String EVENT_TYPE_SUBSCRIBER_AUTH_UPDATE = "SUBSCRIBER_AUTH_UPDATE";	
 	public static final String EVENT_PUBLISHING_QUEUE = "eventPublishingQueue";
 	public static final String EVENT_PUBLISHING_QUEUE_WATCHER_TASK = "eventPublishingQueueWatcherTask";
-	public static final String EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS = "event_handler_max_express_subscribers";
-	public static final String $EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS_WD = "${" + EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS + ":" + CoreDefaults.DEFAULT_EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS + "}";
+	public static final String EVENTHANDLER_MAX_EXPRESS_SUBSCRIBERS = "event_handler_max_express_subscribers";
+	public static final String $EVENTHANDLER_MAX_EXPRESS_SUBSCRIBERS_WD = "${" + EVENTHANDLER_MAX_EXPRESS_SUBSCRIBERS + ":" + CoreDefaults.DEFAULT_EVENTHANDLER_MAX_EXPRESS_SUBSCRIBERS + "}";
 	public static final String EVENT_PUBLISHING_EXPRESS_EXECUTOR = "eventPublishingExpressExecutor";
 
 	public static final String PING_TTL_INTERVAL = "ping_ttl_interval_minutes";

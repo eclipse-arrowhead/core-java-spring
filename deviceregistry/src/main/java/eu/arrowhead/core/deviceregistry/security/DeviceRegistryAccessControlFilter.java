@@ -28,13 +28,23 @@ import org.springframework.stereotype.Component;
 @Component
 @ConditionalOnProperty(name = CommonConstants.SERVER_SSL_ENABLED, matchIfMissing = true)
 public class DeviceRegistryAccessControlFilter extends CoreSystemAccessControlFilter {
+	
+	//=================================================================================================
+	// members
 
+	private final SecurityUtilities securityUtilities;
+	
+	//=================================================================================================
+	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	@Autowired
+	public DeviceRegistryAccessControlFilter(final SecurityUtilities securityUtilities) {
+		this.securityUtilities = securityUtilities;
+	}
+	
     //=================================================================================================
     // assistant methods
-    private final SecurityUtilities securityUtilities;
-
-    @Autowired
-    public DeviceRegistryAccessControlFilter(final SecurityUtilities securityUtilities) {this.securityUtilities = securityUtilities;}
 
     //-------------------------------------------------------------------------------------------------
     @Override
@@ -43,7 +53,7 @@ public class DeviceRegistryAccessControlFilter extends CoreSystemAccessControlFi
 
         if (requestTarget.endsWith(CommonConstants.ECHO_URI)
                 || requestTarget.contains(CommonConstants.ONBOARDING_URI)
-                || requestTarget.contains(CommonConstants.OP_DEVICE_REGISTRY_UNREGISTER_URI)) {
+                || requestTarget.contains(CommonConstants.OP_DEVICEREGISTRY_UNREGISTER_URI)) {
             securityUtilities.authenticateCertificate(clientCN, requestTarget, CertificateType.AH_ONBOARDING);
             return;
         }

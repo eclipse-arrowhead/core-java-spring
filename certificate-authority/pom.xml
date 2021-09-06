@@ -88,15 +88,15 @@
 									<src>${project.build.directory}/${project.build.finalName}.jar</src>
 									<mapper>
 										<type>perm</type>
-										<prefix>/usr/share/arrowhead/certificate_authority</prefix>
+										<prefix>/usr/share/arrowhead/certificateauthority</prefix>
 										<filemode>755</filemode>
 									</mapper>
 								</data>
 
 								<data>
 									<type>link</type>
-									<linkName>/usr/share/arrowhead/certificate_authority/${project.artifactId}.jar</linkName>
-									<linkTarget>/usr/share/arrowhead/certificate_authority/${project.build.finalName}.jar</linkTarget>
+									<linkName>/usr/share/arrowhead/certificateauthority/${project.artifactId}.jar</linkName>
+									<linkTarget>/usr/share/arrowhead/certificateauthority/${project.build.finalName}.jar</linkTarget>
 								</data>
 
 								<data>
@@ -104,7 +104,7 @@
 									<src>${project.build.directory}/log4j2.xml</src>
 									<mapper>
 										<type>perm</type>
-										<prefix>/etc/arrowhead/systems/certificate_authority</prefix>
+										<prefix>/etc/arrowhead/systems/certificateauthority</prefix>
 										<filemode>644</filemode>
 									</mapper>
 								</data>
@@ -114,15 +114,15 @@
 									<src>${project.build.directory}/application.properties</src>
 									<mapper>
 										<type>perm</type>
-										<prefix>/etc/arrowhead/systems/certificate_authority</prefix>
+										<prefix>/etc/arrowhead/systems/certificateauthority</prefix>
 										<filemode>644</filemode>
 									</mapper>
 								</data>
 
 								<data>
 									<type>link</type>
-									<linkName>/usr/share/arrowhead/certificate_authority/application.properties</linkName>
-									<linkTarget>/etc/arrowhead/systems/certificate_authority/application.properties</linkTarget>
+									<linkName>/usr/share/arrowhead/certificateauthority/application.properties</linkName>
+									<linkTarget>/etc/arrowhead/systems/certificateauthority/application.properties</linkTarget>
 								</data>
 
 								<data>

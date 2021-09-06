@@ -27,20 +27,25 @@ public enum CoreSystem {
 	//=================================================================================================
 	// elements
 	
-	SERVICE_REGISTRY(Defaults.DEFAULT_SERVICE_REGISTRY_PORT, List.of(CoreSystemService.SERVICE_REGISTRY_REGISTER_SERVICE,
-																	 CoreSystemService.SERVICE_REGISTRY_UNREGISTER_SERVICE)),
+	// Please create enum values here without underscore, because these values has a direct connection with the certificate's CN which does not support underscores!
 	
-    SYSTEM_REGISTRY(Defaults.DEFAULT_SYSTEM_REGISTRY_PORT, List.of(CoreSystemService.SYSTEM_REGISTRY_REGISTER_SERVICE,
-    															   CoreSystemService.SYSTEM_REGISTRY_UNREGISTER_SERVICE,
-    															   CoreSystemService.SYSTEM_REGISTRY_ONBOARDING_WITH_NAME_SERVICE,
-    															   CoreSystemService.SYSTEM_REGISTRY_ONBOARDING_WITH_CSR_SERVICE)),
+	SERVICEREGISTRY(Defaults.DEFAULT_SERVICEREGISTRY_PORT, List.of(CoreSystemService.SERVICEREGISTRY_REGISTER_SERVICE,
+																	 CoreSystemService.SERVICEREGISTRY_UNREGISTER_SERVICE,
+																	 CoreSystemService.SERVICEREGISTRY_REGISTER_SYSTEM,
+																	 CoreSystemService.SERVICEREGISTRY_UNREGISTER_SYSTEM,
+																	 CoreSystemService.SERVICEREGISTRY_PULL_SYSTEMS)),
+	
+    SYSTEMREGISTRY(Defaults.DEFAULT_SYSTEMREGISTRY_PORT, List.of(CoreSystemService.SYSTEMREGISTRY_REGISTER_SERVICE,
+    															   CoreSystemService.SYSTEMREGISTRY_UNREGISTER_SERVICE,
+    															   CoreSystemService.SYSTEMREGISTRY_ONBOARDING_WITH_NAME_SERVICE,
+    															   CoreSystemService.SYSTEMREGISTRY_ONBOARDING_WITH_CSR_SERVICE)),
     
-    DEVICE_REGISTRY(Defaults.DEFAULT_DEVICE_REGISTRY_PORT, List.of(CoreSystemService.DEVICE_REGISTRY_REGISTER_SERVICE,
-    															   CoreSystemService.DEVICE_REGISTRY_UNREGISTER_SERVICE,
-    															   CoreSystemService.DEVICE_REGISTRY_ONBOARDING_WITH_NAME_SERVICE,
-    															   CoreSystemService.DEVICE_REGISTRY_ONBOARDING_WITH_CSR_SERVICE)),
+    DEVICEREGISTRY(Defaults.DEFAULT_DEVICEREGISTRY_PORT, List.of(CoreSystemService.DEVICEREGISTRY_REGISTER_SERVICE,
+    															   CoreSystemService.DEVICEREGISTRY_UNREGISTER_SERVICE,
+    															   CoreSystemService.DEVICEREGISTRY_ONBOARDING_WITH_NAME_SERVICE,
+    															   CoreSystemService.DEVICEREGISTRY_ONBOARDING_WITH_CSR_SERVICE)),
     
-    ONBOARDING_CONTROLLER(Defaults.DEFAULT_ONBOARDING_PORT, List.of(CoreSystemService.ONBOARDING_WITH_CERTIFICATE_AND_NAME_SERVICE,
+    ONBOARDINGCONTROLLER(Defaults.DEFAULT_ONBOARDING_PORT, List.of(CoreSystemService.ONBOARDING_WITH_CERTIFICATE_AND_NAME_SERVICE,
 														    		CoreSystemService.ONBOARDING_WITH_SHARED_SECRET_AND_NAME_SERVICE,
 														    		CoreSystemService.ONBOARDING_WITH_CERTIFICATE_AND_CSR_SERVICE,
 														    		CoreSystemService.ONBOARDING_WITH_SHARED_SECRET_AND_CSR_SERVICE)),
@@ -52,6 +57,9 @@ public enum CoreSystem {
 															   CoreSystemService.AUTH_CONTROL_SUBSCRIPTION_SERVICE)),
 	
 	ORCHESTRATOR(Defaults.DEFAULT_ORCHESTRATOR_PORT, List.of(CoreSystemService.ORCHESTRATION_SERVICE,
+															 CoreSystemService.ORCHESTRATION_CREATE_FLEXIBLE_STORE_RULES_SERVICE,
+															 CoreSystemService.ORCHESTRATION_REMOVE_FLEXIBLE_STORE_RULE_SERVICE,
+															 CoreSystemService.ORCHESTRATION_CLEAN_FLEXIBLE_STORE_SERVICE,
 															 CoreSystemService.ORCHESTRATION_QOS_ENABLED_SERVICE,
 															 CoreSystemService.ORCHESTRATION_QOS_RESERVATIONS_SERVICE,
 															 CoreSystemService.ORCHESTRATION_QOS_TEMPORARY_LOCK_SERVICE,
@@ -65,7 +73,7 @@ public enum CoreSystem {
 														 CoreSystemService.GATEKEEPER_RELAY_TEST_SERVICE,
 														 CoreSystemService.GATEKEEPER_GET_CLOUD_SERVICE)),
 	
-	EVENT_HANDLER(Defaults.DEFAULT_EVENT_HANDLER_PORT, List.of(CoreSystemService.EVENT_PUBLISH_SERVICE,
+	EVENTHANDLER(Defaults.DEFAULT_EVENTHANDLER_PORT, List.of(CoreSystemService.EVENT_PUBLISH_SERVICE,
 															   CoreSystemService.EVENT_SUBSCRIBE_SERVICE,
 															   CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE,
 															   CoreSystemService.EVENT_PUBLISH_AUTH_UPDATE_SERVICE)),
@@ -83,26 +91,28 @@ public enum CoreSystem {
     CONFIGURATION(Defaults.DEFAULT_CONFIGURATION_PORT, List.of(CoreSystemService.CONFIGURATION_SERVICE,
                                                                CoreSystemService.CONFIGURATION_RAW_SERVICE)),
 	
-	QOS_MONITOR(Defaults.DEFAULT_QOS_MONITOR_PORT, List.of(CoreSystemService.QOS_MONITOR_INTRA_PING_MEASUREMENT_SERVICE,
-														   CoreSystemService.QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT_SERVICE,
-														   CoreSystemService.QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_SERVICE,
-														   CoreSystemService.QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_SERVICE,
-														   CoreSystemService.QOS_MONITOR_PUBLIC_KEY_SERVICE,
-														   CoreSystemService.QOS_MONITOR_JOIN_RELAY_TEST_SERVICE,
-														   CoreSystemService.QOS_MONITOR_INIT_RELAY_TEST_SERVICE)),
+	QOSMONITOR(Defaults.DEFAULT_QOSMONITOR_PORT, List.of(CoreSystemService.QOSMONITOR_INTRA_PING_MEASUREMENT_SERVICE,
+														   CoreSystemService.QOSMONITOR_INTRA_PING_MEDIAN_MEASUREMENT_SERVICE,
+														   CoreSystemService.QOSMONITOR_INTER_DIRECT_PING_MEASUREMENT_SERVICE,
+														   CoreSystemService.QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENT_SERVICE,
+														   CoreSystemService.QOSMONITOR_PUBLIC_KEY_SERVICE,
+														   CoreSystemService.QOSMONITOR_JOIN_RELAY_TEST_SERVICE,
+														   CoreSystemService.QOSMONITOR_INIT_RELAY_TEST_SERVICE)),
 	
-	CERTIFICATE_AUTHORITY(Defaults.DEFAULT_CERTIFICATE_AUTHORITY_PORT, List.of(CoreSystemService.CERTIFICATE_AUTHORITY_SIGN_SERVICE,
-																				CoreSystemService.CERTIFICATE_AUTHORITY_LIST_CERTIFICATES_SERVICE,
-																				CoreSystemService.CERTIFICATE_AUTHORITY_CHECK_CERTIFICATE_SERVICE,
-																				CoreSystemService.CERTIFICATE_AUTHORITY_REVOKE_CERTIFICATE_SERVICE,
-																				CoreSystemService.CERTIFICATE_AUTHORITY_LIST_TRUSTED_KEYS_SERVICE,
-																				CoreSystemService.CERTIFICATE_AUTHORITY_CHECK_TRUSTED_KEY_SERVICE,
-																				CoreSystemService.CERTIFICATE_AUTHORITY_ADD_TRUSTED_KEY_SERVICE,
-																				CoreSystemService.CERTIFICATE_AUTHORITY_DELETE_TRUSTED_KEY_SERVICE)),
+	CERTIFICATEAUTHORITY(Defaults.DEFAULT_CERTIFICATEAUTHORITY_PORT, List.of(CoreSystemService.CERTIFICATEAUTHORITY_SIGN_SERVICE,
+																				CoreSystemService.CERTIFICATEAUTHORITY_LIST_CERTIFICATES_SERVICE,
+																				CoreSystemService.CERTIFICATEAUTHORITY_CHECK_CERTIFICATE_SERVICE,
+																				CoreSystemService.CERTIFICATEAUTHORITY_REVOKE_CERTIFICATE_SERVICE,
+																				CoreSystemService.CERTIFICATEAUTHORITY_LIST_TRUSTED_KEYS_SERVICE,
+																				CoreSystemService.CERTIFICATEAUTHORITY_CHECK_TRUSTED_KEY_SERVICE,
+																				CoreSystemService.CERTIFICATEAUTHORITY_ADD_TRUSTED_KEY_SERVICE,
+																				CoreSystemService.CERTIFICATEAUTHORITY_DELETE_TRUSTED_KEY_SERVICE)),
 																				
 	TRANSLATOR(Defaults.DEFAULT_TRANSLATOR_PORT, List.of(CoreSystemService.TRANSLATOR_SERVICE,
 												   CoreSystemService.TRANSLATOR_FIWARE_SERVICE,
-												   CoreSystemService.TRANSLATOR_PLUGIN_SERVICE));
+												   CoreSystemService.TRANSLATOR_PLUGIN_SERVICE)),
+	
+	PLANTDESCRIPTIONENGINE(Defaults.DEFAULT_PLANT_DESCRIPTION_ENGINE_PORT, List.of()); //TODO add PDE services
 	
 	//=================================================================================================
 	// members

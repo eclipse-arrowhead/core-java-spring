@@ -23,5 +23,20 @@
     "name": "domain.port",
     "type": "java.lang.Integer",
     "description": "A description for 'domain.port'"
+  },
+  {
+    "name": "sr_address",
+    "type": "java.lang.String",
+    "description": "A description for 'sr_address'"
+  },
+  {
+    "name": "sr_port",
+    "type": "java.lang.Integer",
+    "description": "A description for 'sr_port'"
+  },
+  {
+    "name": "sharedSecret",
+    "type": "java.lang.String",
+    "description": "A description for 'sharedSecret'"
   }
 ]}

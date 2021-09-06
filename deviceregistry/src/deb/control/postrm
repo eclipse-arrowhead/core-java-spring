@@ -7,7 +7,7 @@ set -e
 
 . /usr/share/debconf/confmodule
 
-SYSTEM_NAME="device_registry"
+SYSTEM_NAME="deviceregistry"
 
 # summary of how this script can be called:
 #        * <postrm> `remove'

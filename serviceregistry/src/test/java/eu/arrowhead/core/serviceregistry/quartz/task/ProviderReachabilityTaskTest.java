@@ -55,7 +55,7 @@ public class ProviderReachabilityTaskTest {
 	private ServiceRegistryDBService serviceRegistryDBService;
 	
 	private final ServiceDefinition serviceDefinition = new ServiceDefinition("testService");
-	private final System testSystem = new System("testSystem", "testAddress*/$", 1, "testAuthenticationInfo");
+	private final System testSystem = new System("testSystem", "testAddress*/$", 1, "testAuthenticationInfo", null);
 
 	//=================================================================================================
 	// methods

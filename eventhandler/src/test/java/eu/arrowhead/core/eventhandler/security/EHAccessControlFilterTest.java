@@ -61,11 +61,11 @@ public class EHAccessControlFilterTest {
 	//=================================================================================================
 	// members
 	
-	private static final String EVENT_HANDLER_ECHO_URI = CommonConstants.EVENT_HANDLER_URI + CommonConstants.ECHO_URI;
-	private static final String EVENT_HANDLER_MGMT_URI = CommonConstants.EVENT_HANDLER_URI + CoreCommonConstants.MGMT_URI + "/subscriptions";
-	private static final String EVENT_HANDLER_PUBLISH_AUTH_UPDATE_URI = CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE;
-	private static final String EVENT_HANDLER_SUBSCRIBE_URI = CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE;
-	private static final String EVENT_HANDLER_PUBLISH_URI = CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH;
+	private static final String EVENT_HANDLER_ECHO_URI = CommonConstants.EVENTHANDLER_URI + CommonConstants.ECHO_URI;
+	private static final String EVENT_HANDLER_MGMT_URI = CommonConstants.EVENTHANDLER_URI + CoreCommonConstants.MGMT_URI + "/subscriptions";
+	private static final String EVENT_HANDLER_PUBLISH_AUTH_UPDATE_URI = CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_PUBLISH_AUTH_UPDATE;
+	private static final String EVENT_HANDLER_SUBSCRIBE_URI = CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIBE;
+	private static final String EVENT_HANDLER_PUBLISH_URI = CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_PUBLISH;
 	
 	@Autowired
 	private ApplicationContext appContext;

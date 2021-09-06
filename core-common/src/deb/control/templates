@@ -33,7 +33,7 @@ Description: Enter the path for the externally issued master certificate (crt fi
 Template: arrowhead-core-common/relay_master_cert
 Type: string
 Default:
-Description: Enter the path for the extarnally issued relay master certificate (crt file, leave empty if you don't want to use secured relays)
+Description: Enter the path for the externally issued relay master certificate (crt file, leave empty if you don't want to use secured relays)
 
 Template: arrowhead-core-common/cloud_password
 Type: password
@@ -47,7 +47,7 @@ Description: Enter the alias for the externally issued cloud certificate
 
 Template: arrowhead-core-common/cloud_warning
 Type: note
-Description: The name and operator of a cloud should not contain . (dot) or any whitespaces.
+Description: The name and operator of a cloud should not contain . (dot), _ (underscore) or any whitespaces.
 
 Template: arrowhead-core-common/cloudname
 Type: string
@@ -128,6 +128,11 @@ Type: password
 Default:
 Description: MySQL password for Service Registry system (leave empty for random). 
 
+Template: arrowhead-core-common/mysql_password_pde
+Type: password
+Default:
+Description: MySQL password for Plant Description Engine system (leave empty for random).
+
 Template: arrowhead-core-common/mysql_password_sysr
 Type: password
 Default:
@@ -160,7 +165,7 @@ Description: MySQL password for TimeManager system (leave empty for random).
 
 Template: arrowhead-core-common/sr_host
 Type: string
-Description: Enter the hostname or IP address of the Service Registry (leave empty if the SR on the same computer than the system)
+Description: Enter the hostname or IP address of the Service Registry (leave empty if the SR is on the same computer as the system)
 
 Template: arrowhead-core-common/domain_name
 Type: string

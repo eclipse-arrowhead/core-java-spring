@@ -93,33 +93,34 @@ Please be aware, that versions starting from 4.1.3 are __NOT__ backwards compati
 	       * [Client](#ca_endpoints_client)
            * [Private](#ca_endpoints_private)
            * [Management](#ca_endpoints_mgmt)
-    10. [Onboarding Controller](#onboardingcontroller)
+    9. [Onboarding Controller](#onboardingcontroller)
         * [System Design Description Overview](#onboardingcontroller_sdd)
         * [Services and Use Cases](#onboardingcontroller_usecases)
         * [Security](#onboardingcontroller_security)
         * [Endpoints](#onboardingcontroller_endpoints)
            * [Onboarding](#onboardingcontroller_endpoints_onboarding)
-    11. [Device Registry](#deviceregistry)
+    10. [Device Registry](#deviceregistry)
         * [System Design Description Overview](#deviceregistry_sdd)
         * [Services and Use Cases](#deviceregistry_usecases)
         * [Security](#deviceregistry_security)
         * [Endpoints](#deviceregistry_endpoints)
            * [Onboarding](#deviceregistry_endpoints_onboarding)
            * [Client](#deviceregistry_endpoints_client)
-    12. [System Registry](#systemregistry)
+    11. [System Registry](#systemregistry)
         * [System Design Description Overview](#systemregistry_sdd)
         * [Services and Use Cases](#systemregistry_usecases)
         * [Security](#systemregistry_security)
         * [Endpoints](#systemregistry_endpoints)
            * [Onboarding](#systemregistry_endpoints_onboarding)
            * [Client](#systemregistry_endpoints_client)
-	13. [Choreographer](#choreographer)
+    12. [Choreographer](#choreographer)
         * [System Design Description Overview](#choreographer_sdd)
-        * [Services and Use Cases](#choreographer_usecases)  
+        * [Services and Use Cases](#choreographer_usecases)
         * [Endpoints](#choreographer_endpoints)
-	       * [Client](#choreographer_endpoints_client)
+           * [Client](#choreographer_endpoints_client)
            * [Management](#choreographer_endpoints_mgmt)
-
+    13. [Plant Description Engine](#plant-description-engine)
+		
 <a name="quickstart" />
 
 ## Quick Start Guide
@@ -462,10 +463,11 @@ New payload - you can easily map the old fields to the new ones.
 
 Arrowhead Framework's security is relying on SSL Certificate Trust Chains. The Arrowhead trust chain consists of three level:
 1) Master certificate: `arrowhead.eu`
-2) Cloud certificate: `my_cloud.my_company.arrowhead.eu`
-3) Client certificate: `my_client.my_cloud.my_company.arrowhead.eu`
+2) Cloud certificate: `my-cloud.my-company.arrowhead.eu`
+3) Client certificate: `my-client.my-cloud.my-company.arrowhead.eu`
 The certificate naming convention have strict rules:
 * The different parts are delimited by dots, therefore parts are not allowed to contain any of them.
+* A single part is allowed to contain maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).
 * A cloud certificate name has to consist of four part and the last two part have to be 'arrowhead' and 'eu'.
 * A client certificate name has to consist of five part and the last two part have to be 'arrowhead' and 'eu'. 
 
@@ -508,7 +510,7 @@ You can also use the arrowhead script. For this barely any scripting knowledge i
 
 ### System Operator Certificate
 
-The System Operator Certificate is a special client certificate with the naming convention of `sysop.my_cloud.my_company.arrowhead.eu`.
+The System Operator Certificate is a special client certificate with the naming convention of `sysop.my-cloud.my-company.arrowhead.eu`.
 SysOp certificate allows the client to use the management endpoints of the Arrowhead Core Systems. Typical usage of SysOp certificate is by front end applications running in a web browser (for example if you want to access the Swagger or use the Management Tool in secure mode.
 * [Import SysOp Certificate (Windows 10)](documentation/certificates/import_sysop_certificate_win10.pdf)
 * [Import SysOp Certificate (macOS)](documentation/certificates/import_sysop_certificate_macos.pdf)
@@ -753,7 +755,7 @@ __ServiceQueryForm__ is the input
 | `minVersionRequirement` | Minimum version requirement | no |
 | `pingProviders` | Return only available providers | no |
 
-> **Note:** Valid `interfaceRequirements` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTPS-SECURE-JSON)
+> **Note:** Valid `interfaceRequirements` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTP-SECURE-JSON)
 
 > **Note:** Possible values for `securityRequirements` are:
 > * `NOT_SECURE`
@@ -879,7 +881,7 @@ __ServiceRegistryEntry__ is the input
 | `version` | Version of the Service | no |
 | `interfaces` | List of the interfaces the Service supports | yes |
 
-> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTPS-SECURE-JSON)
+> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTP-SECURE-JSON)
 
 > **Note:** `authenticationInfo` is the public key of the system. In Insecure mode you can omit sending this key.
 
@@ -1136,7 +1138,7 @@ __ServiceRegistryEntry__ is the input
 | `version` | Version of the Service | no |
 | `interfaces` | List of the interfaces the Service supports | yes |
 
-> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTPS-SECURE-JSON)
+> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTP-SECURE-JSON)
 
 > **Note:** Possible values for `secure` are:
 > * `NOT_SECURE` (default value if field is not defined)
@@ -1321,7 +1323,7 @@ __ServiceRegistryEntry__ is the input
 | `version` | Version of the Service | no |
 | `interfaces` | List of the interfaces the Service supports | yes |
 
-> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTPS-SECURE-JSON)
+> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTP-SECURE-JSON)
 
 > **Note:** Possible values for `secure` are:
 > * `NOT_SECURE` (default value if field is not defined)
@@ -1435,7 +1437,7 @@ __ServiceRegistryEntry__ is the input
 | `version` | Version of the Service | no |
 | `interfaces` | List of the interfaces the Service supports | no |
 
-> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTPS-SECURE-JSON)
+> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTP-SECURE-JSON)
 
 > **Note:** Possible values for `secure` are:
 > * `NOT_SECURE` (default value if field is not defined)
@@ -3591,7 +3593,7 @@ Returns an __Orchestration Response__
 
 ### Start store Orchestration by ID
 ```
-GET /orchestrator/rchestration/{id}
+GET /orchestrator/orchestration/{id}
 ```
 
 If the consumer knows its' ID, it can used this service as shortcut for store-based orchestration when
@@ -8355,3 +8357,51 @@ Signs the CSR, registers the device and eventually returns a device certificate 
 | `publicKey` | Base64 encoded public key |
 
 Additionally all fields from [SystemRegistryEntry](#datastructures_systemregistryentry) are returned.
+
+
+
+
+
+# Plant Description Engine
+ 
+This supporting core system has the purpose of choreographing the consumers and producers in the plant (System of Systems / Local cloud).
+An abstract view, on which systems the plant contains and how they are connected as consumers and producers, is used to populate the [Orchestrator](#orchestrator) with store rules for each of the consumers. The abstract view does not contain any instance specific information, instead meta-data about each system is used to identify the service producers.
+
+The plant description engine (PDE) can be configured with several variants of the plant description of which at most one can be active. The active plant description is used to populate the orchestrator and if no plant description is active the orchestrator does not contain any store rules populated by the PDE. This can be used to establish alternativ plants (plan A, plan B, etc).
+
+The PDE gathers information about the presence of all specified systems in the active plant description. If a system is not present it raises an alarm. If it detects that an unknown system has registered a service in the service registry it also raises an alarm. For a consumer system to be monitored the system must produce the [Monitorable] service and hence also register in the service registry.
+
+Please see the [Plant Description Engine - System of systems Description (SosD)] and [Plant Description Engine HTTP(S)/JSON - System Description (SysD)] for further details.
+
+## Services
+
+The PDE produces two different services:
+ + the [Plant Description Management] service - [Plant Description Management JSON]
+ + the [Plant Description Monitor] service - [Plant Description Monitor JSON]
+ 
+The PDE consumes the following services:
+ + the [Service Discovery] service produced by the [Service Registry] core system
+ + the [Orchestration Store Management] service produced by the [Orchestrator] core system
+ + the [Orchestration] service produced by the [Orchestrator] core system
+ + the [Inventory] service produced by an Inventory system - [Inventory JSON]
+ + the [Monitorable] service produced by the systems in the plant - [Monitorable JSON]
+    
+  
+[Authorization]:README.md#authorization
+[AuthorizationControl]:README.md#authorization
+[Inventory]:documentation/plant-description-engine/inventory-sd.md
+[Inventory JSON]:documentation/plant-description-engine/inventory-idd-http-json.md
+[Monitorable]:documentation/plant-description-engine/monitorable-sd.md
+[Monitorable JSON]:documentation/plant-description-engine/monitorable-idd-http-json.md
+[Orchestrator]:README.md#orchestrator
+[Orchestration]:README.md#orchestrator
+[Orchestration Store Management]:README.md#orchestrator
+[Plant Description Monitor]:documentation/plant-description-engine/plant-description-monitor-sd.md
+[Plant Description Monitor JSON]:documentation/plant-description-engine/plant-description-monitor-idd-http-json.md
+[Plant Description Management]:documentation/plant-description-engine/plant-description-management-sd.md
+[Plant Description Management JSON]:documentation/plant-description-engine/plant-description-management-idd-http-json.md
+[Plant Description Engine HTTP(S)/JSON - System Description (SysD)]:documentation/plant-description-engine/plant-description-engine-sysd.md
+[Plant Description Engine - System of systems Description (SosD)]:documentation/plant-description-engine/plant-description-engine-sosd.md
+[Service Discovery]:README.md#serviceregistry_usecases
+[Service Registry]:README.md#serviceregistry
+  

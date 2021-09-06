@@ -14,22 +14,31 @@
 
 package eu.arrowhead.core.serviceregistry.database.service;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 
 @RunWith (SpringRunner.class)
 public class ServiceRegistryDBServiceServiceDefinitionTest {
@@ -43,8 +52,24 @@ public class ServiceRegistryDBServiceServiceDefinitionTest {
 	@Mock
 	private ServiceDefinitionRepository serviceDefinitionRepository;
 	
+	@Mock
+	private CommonNamePartVerifier cnVerifier;
+	
+	private CommonNamePartVerifier realVerifier = new CommonNamePartVerifier();
+	
 	//=================================================================================================
 	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	@Before
+	public void setUp() {
+		when(cnVerifier.isValid(any(String.class))).thenAnswer(new Answer<Boolean>() {
+			@Override
+			public Boolean answer(final InvocationOnMock invocation) throws Throwable {
+				return realVerifier.isValid(invocation.getArgument(0));
+			}
+		});
+	}
 	
 	//=================================================================================================
 	// Tests of getServiceDefinitionById
@@ -78,6 +103,31 @@ public class ServiceRegistryDBServiceServiceDefinitionTest {
 	@Test(expected = InvalidParameterException.class)
 	public void createServiceDefinitionTestWithBlankStringInput() {
 		serviceRegistryDBService.createServiceDefinition("       ");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createServiceDefinitionTestWithWrongInputFlagTrue() {
+		ReflectionTestUtils.setField(serviceRegistryDBService, "useStrictServiceDefinitionVerifier", true);
+		try {
+			serviceRegistryDBService.createServiceDefinition("invalid_service_definition");
+		} catch (final InvalidParameterException ex) {
+			Assert.assertEquals("Service definition has invalid format. Name must match with the following regular expression: " + CommonNamePartVerifier.COMMON_NAME_PART_PATTERN_STRING, ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void createServiceDefinitionTestWithWrongInputFlagFalse() {
+		when(serviceDefinitionRepository.findByServiceDefinition(any(String.class))).thenReturn(Optional.empty());
+		when(serviceDefinitionRepository.saveAndFlush(any(ServiceDefinition.class))).thenReturn(new ServiceDefinition("invalid_service_definition"));
+		
+		serviceRegistryDBService.createServiceDefinition("invalid_service_definition");
+		
+		verify(serviceDefinitionRepository, times(1)).findByServiceDefinition(any(String.class));
+		verify(serviceDefinitionRepository, times(1)).saveAndFlush(any(ServiceDefinition.class));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -126,6 +176,33 @@ public class ServiceRegistryDBServiceServiceDefinitionTest {
 	@Test(expected = InvalidParameterException.class)
 	public void updateServiceDefinitionByIdTestWithBlankStringInput() {
 		serviceRegistryDBService.updateServiceDefinitionById(1, "   ");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void updateServiceDefinitionTestWithWrongInputFlagTrue() {
+		ReflectionTestUtils.setField(serviceRegistryDBService, "useStrictServiceDefinitionVerifier", true);
+		try {
+			serviceRegistryDBService.updateServiceDefinitionById(1, "invalid_service_definition");
+		} catch (final InvalidParameterException ex) {
+			Assert.assertEquals("Service definition has invalid format. Name must match with the following regular expression: " + CommonNamePartVerifier.COMMON_NAME_PART_PATTERN_STRING, ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateServiceDefinitionTestWithWrongInputFlagFalse() {
+		when(serviceDefinitionRepository.findById(1L)).thenReturn(Optional.of(new ServiceDefinition("other name")));
+		when(serviceDefinitionRepository.findByServiceDefinition(any(String.class))).thenReturn(Optional.empty());
+		when(serviceDefinitionRepository.saveAndFlush(any(ServiceDefinition.class))).thenReturn(new ServiceDefinition("invalid_service_definition"));
+		
+		serviceRegistryDBService.updateServiceDefinitionById(1, "invalid_service_definition");
+		
+		verify(serviceDefinitionRepository, times(1)).findById(1L);
+		verify(serviceDefinitionRepository, times(1)).findByServiceDefinition(any(String.class));
+		verify(serviceDefinitionRepository, times(1)).saveAndFlush(any(ServiceDefinition.class));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
