@@ -193,7 +193,7 @@ public class AuthorizationDBServiceIntraCloudTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCreateBulkAuthorizationIntraCloudWithDBConstraintViolation() {
-		final System system = new System("test", "0.0.0.0", 1000, null);
+		final System system = new System("test", "0.0.0.0", 1000, null, null);
 		final ServiceDefinition serviceDefinition = new ServiceDefinition("testService");
 		final ServiceInterface serviceInterface = new ServiceInterface("HTTP-SECURE-JSON");
 		when(authorizationIntraCloudRepository.findByConsumerSystemAndProviderSystemAndServiceDefinition(any(), any(), any())).thenReturn(Optional.of(new AuthorizationIntraCloud()));
@@ -209,7 +209,7 @@ public class AuthorizationDBServiceIntraCloudTest {
 	@Test 
 	public void testCreateBulkAuthorizationIntraCloudDBCall() {
 		final int numOfEntriesToBeSaved = 1;
-		final System system = new System("test", "0.0.0.0", 1000, null);
+		final System system = new System("test", "0.0.0.0", 1000, null, null);
 		final ServiceDefinition serviceDefinition = new ServiceDefinition("testService");
 		final ServiceInterface serviceInterface = new ServiceInterface("HTTP-SECURE-JSON");
 		when(authorizationIntraCloudRepository.saveAll(any())).thenReturn(List.of(new AuthorizationIntraCloud(system, system, serviceDefinition)));
@@ -306,12 +306,12 @@ public class AuthorizationDBServiceIntraCloudTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCheckAuthorizationIntraCloudRequestDBCall() {
-		final System provider = new System("testProvider", "address", 2000, null);
+		final System provider = new System("testProvider", "address", 2000, null, null);
 		final long providerId = 6;
 		provider.setId(providerId);		
 		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
 		final long consumerId = 8;
-		final System consumer = new System("consumer", "127.0.0.1", 4200, null);
+		final System consumer = new System("consumer", "127.0.0.1", 4200, null, null);
 		consumer.setId(consumerId);
 		when(systemRepository.findBySystemNameAndAddressAndPort(any(String.class), any(String.class), anyInt())).thenReturn(Optional.of(consumer));
 		when(authorizationIntraCloudRepository.findByConsumerIdAndProviderIdAndServiceDefinitionId(anyLong(), anyLong(), anyLong())).
@@ -330,9 +330,9 @@ public class AuthorizationDBServiceIntraCloudTest {
 		final ServiceDefinition serviceDefinition = new ServiceDefinition("testService");
 		final List<AuthorizationIntraCloud> entries = new ArrayList<>(numberOfRequestedEntry);
 		for (int i = 1; i <= numberOfRequestedEntry; ++i) {
-			final System consumer = new System("Consumer" + i, i + "." + i + "." + i + "." + i, i * 1000, null);
+			final System consumer = new System("Consumer" + i, i + "." + i + "." + i + "." + i, i * 1000, null, null);
 			consumer.setId(i);
-			final System provider = new System("Provider" + i, i + "." + i + "." + i + "." + i, i * 1000, null);
+			final System provider = new System("Provider" + i, i + "." + i + "." + i + "." + i, i * 1000, null, null);
 			provider.setId(i);
 			final AuthorizationIntraCloud entry = new AuthorizationIntraCloud(consumer, provider, serviceDefinition);
 			entry.setId(i);

@@ -17,7 +17,7 @@ package eu.arrowhead.core.qos.dto;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 
-public class PingMeasurementCalculationsDTO implements Serializable{
+public class PingMeasurementCalculationsDTO implements Serializable {
 
 	//=================================================================================================
 	// members

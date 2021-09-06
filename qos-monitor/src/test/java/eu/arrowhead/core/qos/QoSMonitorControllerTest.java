@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,6 +37,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.annotation.Resource;
 
@@ -83,14 +85,17 @@ import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
+import eu.arrowhead.common.dto.shared.EventDTO;
 import eu.arrowhead.common.dto.shared.QoSMeasurementStatus;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
+import eu.arrowhead.common.dto.shared.QosMonitorEventType;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.service.PingService;
 import eu.arrowhead.core.qos.service.RelayTestService;
+import eu.arrowhead.core.qos.service.event.EventWatcherService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = QoSMonitorMain.class)
@@ -101,21 +106,20 @@ public class QoSMonitorControllerTest {
 	// members
 	
 	private static final String PATH_VARIABLE_ID = "id";
-	private static final String QOS_MONITOR_INTRA_PING_MEASUREMENTS_MGMT_URI =  CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT;
-	private static final String GET_QOS_MONITOR_INTRA_PING_MEASUREMENTS_BY_SYSTEM_ID_MGMT_URI = QOS_MONITOR_INTRA_PING_MEASUREMENTS_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
-	private static final String GET_QOS_MONITOR_INTRA_PING_MEASUREMENTS_BY_SYSTEM_ID_URI = CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT + "/{" + PATH_VARIABLE_ID + "}";
-	private static final String QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_MGMT_URI = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT;
-	private static final String QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_BY_CLOUD_AND_SYSTEM_MGMT_URI = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT + "/pair_results";
-	private static final String QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_URI = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT;
-	private static final String QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT + "/pair_results";
-	private static final String QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT + "/best_relay";
-	private static final String QOS_MONITOR_PUBLIC_KEY_URI = CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_KEY_URI;
-	private static final String QOS_MONITOR_INIT_RELAY_TEST_URI = CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INIT_RELAY_TEST_URI;
-	private static final String QOS_MONITOR_JOIN_RELAY_TEST_URI = CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_JOIN_RELAY_TEST_URI;
+	private static final String QOSMONITOR_INTRA_PING_MEASUREMENTS_MGMT_URI =  CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOSMONITOR_INTRA_PING_MEASUREMENT;
+	private static final String GET_QOSMONITOR_INTRA_PING_MEASUREMENTS_BY_SYSTEM_ID_MGMT_URI = QOSMONITOR_INTRA_PING_MEASUREMENTS_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
+	private static final String GET_QOSMONITOR_INTRA_PING_MEASUREMENTS_BY_SYSTEM_ID_URI = CommonConstants.OP_QOSMONITOR_INTRA_PING_MEASUREMENT + "/{" + PATH_VARIABLE_ID + "}";
+	private static final String QOSMONITOR_INTER_DIRECT_PING_MEASUREMENTS_MGMT_URI = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOSMONITOR_INTER_DIRECT_PING_MEASUREMENT;
+	private static final String QOSMONITOR_INTER_DIRECT_PING_MEASUREMENTS_BY_CLOUD_AND_SYSTEM_MGMT_URI = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOSMONITOR_INTER_DIRECT_PING_MEASUREMENT + "/pair_results";
+	private static final String QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_URI = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENT;
+	private static final String QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENT + "/pair_results";
+	private static final String QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENT + "/best_relay";
+	private static final String QOSMONITOR_PUBLIC_KEY_URI = CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_KEY_URI;
+	private static final String QOSMONITOR_INIT_RELAY_TEST_URI = CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INIT_RELAY_TEST_URI;
+	private static final String QOSMONITOR_JOIN_RELAY_TEST_URI = CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_JOIN_RELAY_TEST_URI;
 
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = " Id must be greater than 0. ";
 	private static final String PAGE_OR_SIZE_ERROR_MESSAGE = "Defined page or size could not be with undefined size or page.";
-
 
 	@Autowired
 	private WebApplicationContext wac;
@@ -133,7 +137,10 @@ public class QoSMonitorControllerTest {
 	
 	@MockBean(name = "mockRelayTestService")
 	private RelayTestService relayTestService;
-	
+
+	@MockBean(name = "mockEventWatcherService")
+	private EventWatcherService eventWatcherService;
+
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
 	
@@ -152,7 +159,7 @@ public class QoSMonitorControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void echoTest() throws Exception {
-		this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + CommonConstants.ECHO_URI)
+		this.mockMvc.perform(get(CommonConstants.QOSMONITOR_URI + CommonConstants.ECHO_URI)
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isOk());
 	}
@@ -167,7 +174,7 @@ public class QoSMonitorControllerTest {
 
 		when(qoSDBService.getIntraPingMeasurementResponse( anyInt(), anyInt(), any(), anyString())).thenReturn(pingMeasurementListResponseDTO);
 
-		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTRA_PING_MEASUREMENTS_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTRA_PING_MEASUREMENTS_MGMT_URI)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andReturn();
@@ -184,7 +191,7 @@ public class QoSMonitorControllerTest {
 
 		when(qoSDBService.getIntraPingMeasurementResponse( anyInt(), anyInt(), any(), anyString())).thenReturn(pingMeasurementListResponseDTO);
 
-		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTRA_PING_MEASUREMENTS_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTRA_PING_MEASUREMENTS_MGMT_URI)
 				.param("page", "0")
 				.param("item_per_page", String.valueOf(responseSize))
 				.accept(MediaType.APPLICATION_JSON))
@@ -203,7 +210,7 @@ public class QoSMonitorControllerTest {
 
 		when(qoSDBService.getIntraPingMeasurementResponse( anyInt(), anyInt(), any(), anyString())).thenReturn(pingMeasurementListResponseDTO);
 
-		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTRA_PING_MEASUREMENTS_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTRA_PING_MEASUREMENTS_MGMT_URI)
 				.param("item_per_page", String.valueOf(responseSize))
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest())
@@ -212,7 +219,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
 		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
 		assertTrue(responseBody.getErrorMessage().contains(PAGE_OR_SIZE_ERROR_MESSAGE));
-		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTRA_PING_MEASUREMENTS_MGMT_URI, responseBody.getOrigin());
+		assertEquals(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTRA_PING_MEASUREMENTS_MGMT_URI, responseBody.getOrigin());
 	}
 
 	//=================================================================================================
@@ -226,7 +233,7 @@ public class QoSMonitorControllerTest {
 
 		when(qoSDBService.getIntraPingMeasurementBySystemIdResponse(anyLong())).thenReturn(pingMeasurementResponseDTO);
 
-		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTRA_PING_MEASUREMENTS_MGMT_URI + "/" + requestedId)
+		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTRA_PING_MEASUREMENTS_MGMT_URI + "/" + requestedId)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andReturn();
@@ -243,7 +250,7 @@ public class QoSMonitorControllerTest {
 
 		when(qoSDBService.getIntraPingMeasurementBySystemIdResponse(anyLong())).thenReturn(pingMeasurementResponseDTO);
 
-		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTRA_PING_MEASUREMENTS_MGMT_URI + "/" + requestedId)
+		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTRA_PING_MEASUREMENTS_MGMT_URI + "/" + requestedId)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest())
 				.andReturn();
@@ -251,7 +258,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
 		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
 		assertEquals(ID_NOT_VALID_ERROR_MESSAGE, responseBody.getErrorMessage());
-		assertEquals(CommonConstants.QOS_MONITOR_URI + GET_QOS_MONITOR_INTRA_PING_MEASUREMENTS_BY_SYSTEM_ID_MGMT_URI, responseBody.getOrigin());
+		assertEquals(CommonConstants.QOSMONITOR_URI + GET_QOSMONITOR_INTRA_PING_MEASUREMENTS_BY_SYSTEM_ID_MGMT_URI, responseBody.getOrigin());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -261,7 +268,7 @@ public class QoSMonitorControllerTest {
 
 		when(qoSDBService.getIntraPingMeasurementBySystemIdResponse(anyLong())).thenThrow(new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG));
 
-		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTRA_PING_MEASUREMENTS_MGMT_URI + "/" + requestedId)
+		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTRA_PING_MEASUREMENTS_MGMT_URI + "/" + requestedId)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isInternalServerError())
 				.andReturn();
@@ -280,7 +287,7 @@ public class QoSMonitorControllerTest {
 
 		when(qoSDBService.getIntraPingMeasurementBySystemIdResponse(anyLong())).thenReturn(pingMeasurementResponseDTO);
 
-		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTRA_PING_MEASUREMENTS_MGMT_URI + "/" + requestedId)
+		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTRA_PING_MEASUREMENTS_MGMT_URI + "/" + requestedId)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andReturn();
@@ -300,7 +307,7 @@ public class QoSMonitorControllerTest {
 
 		when(qoSDBService.getIntraPingMeasurementBySystemIdResponse(anyLong())).thenReturn(pingMeasurementResponseDTO);
 
-		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT + "/" + requestedId)
+		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTRA_PING_MEASUREMENT + "/" + requestedId)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andReturn();
@@ -317,7 +324,7 @@ public class QoSMonitorControllerTest {
 
 		when(qoSDBService.getIntraPingMeasurementBySystemIdResponse(anyLong())).thenReturn(pingMeasurementResponseDTO);
 
-		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT + "/" + requestedId)
+		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTRA_PING_MEASUREMENT + "/" + requestedId)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest())
 				.andReturn();
@@ -325,7 +332,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
 		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
 		assertEquals(ID_NOT_VALID_ERROR_MESSAGE, responseBody.getErrorMessage());
-		assertEquals(CommonConstants.QOS_MONITOR_URI + GET_QOS_MONITOR_INTRA_PING_MEASUREMENTS_BY_SYSTEM_ID_URI, responseBody.getOrigin());
+		assertEquals(CommonConstants.QOSMONITOR_URI + GET_QOSMONITOR_INTRA_PING_MEASUREMENTS_BY_SYSTEM_ID_URI, responseBody.getOrigin());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -335,7 +342,7 @@ public class QoSMonitorControllerTest {
 
 		when(qoSDBService.getIntraPingMeasurementBySystemIdResponse(anyLong())).thenThrow(new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG));
 
-		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT + "/" + requestedId)
+		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTRA_PING_MEASUREMENT + "/" + requestedId)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isInternalServerError())
 				.andReturn();
@@ -354,7 +361,7 @@ public class QoSMonitorControllerTest {
 
 		when(qoSDBService.getIntraPingMeasurementBySystemIdResponse(anyLong())).thenReturn(pingMeasurementResponseDTO);
 
-		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT + "/" + requestedId)
+		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTRA_PING_MEASUREMENT + "/" + requestedId)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andReturn();
@@ -372,7 +379,7 @@ public class QoSMonitorControllerTest {
 		final QoSIntraPingMeasurementResponseDTO responseDTO = getIntraPingMeasurementResponseDTOForTest();		
 		when(pingService.getMedianIntraPingMeasurement(eq(QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT))).thenReturn(responseDTO);
 
-		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT.replace("{attribute}", QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT.name()))
+		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTRA_PING_MEDIAN_MEASUREMENT.replace("{attribute}", QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT.name()))
 											   .accept(MediaType.APPLICATION_JSON))
 											   .andExpect(status().isOk())
 											   .andReturn();
@@ -391,7 +398,7 @@ public class QoSMonitorControllerTest {
 
 		when(qoSDBService.getInterDirectPingMeasurementsPageResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(pingMeasurementListResponseDTO);
 
-		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_DIRECT_PING_MEASUREMENTS_MGMT_URI)
 											   .accept(MediaType.APPLICATION_JSON))
 											   .andExpect(status().isOk())
 											   .andReturn();
@@ -408,7 +415,7 @@ public class QoSMonitorControllerTest {
 
 		when(qoSDBService.getInterDirectPingMeasurementsPageResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(pingMeasurementListResponseDTO);
 
-		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_DIRECT_PING_MEASUREMENTS_MGMT_URI)
 											   .param("page", "0")
 											   .param("item_per_page", String.valueOf(responseSize))
 											   .accept(MediaType.APPLICATION_JSON))
@@ -427,7 +434,7 @@ public class QoSMonitorControllerTest {
 
 		when(qoSDBService.getInterDirectPingMeasurementsPageResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(pingMeasurementListResponseDTO);
 
-		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_DIRECT_PING_MEASUREMENTS_MGMT_URI)
 									   .param("item_per_page", String.valueOf(responseSize))
 									   .accept(MediaType.APPLICATION_JSON))
 									   .andExpect(status().isBadRequest())
@@ -436,7 +443,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
 		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
 		assertTrue(responseBody.getErrorMessage().contains(PAGE_OR_SIZE_ERROR_MESSAGE));
-		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_MGMT_URI, responseBody.getOrigin());
+		assertEquals(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_DIRECT_PING_MEASUREMENTS_MGMT_URI, responseBody.getOrigin());
 	}
 	
 	//=================================================================================================
@@ -446,13 +453,13 @@ public class QoSMonitorControllerTest {
 	@Test
 	public void getMgmtInterDirectPingMeasurementByCloudAndSystemTest() throws Exception {
 		final CloudResponseDTO cloud = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "fddddbvf", null, null);
-		final SystemResponseDTO system = new SystemResponseDTO(1L, "test-sys", "1.1.1.1", 10000, "dlaswefg", null, null);
+		final SystemResponseDTO system = new SystemResponseDTO(1L, "test-sys", "1.1.1.1", 10000, "dlaswefg", null, null, null);
 		final CloudSystemFormDTO requestDTO = new CloudSystemFormDTO(cloud, system);
 		
 		final QoSInterDirectPingMeasurementResponseDTO responseDTO = getInterDirectPingMeasurementResponseDTOForTest();
 		when(qoSDBService.getInterDirectPingMeasurementByCloudAndSystemAddressResponse(any(), any())).thenReturn(responseDTO);
 		
-		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_BY_CLOUD_AND_SYSTEM_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_DIRECT_PING_MEASUREMENTS_BY_CLOUD_AND_SYSTEM_MGMT_URI)
 									     	   .contentType(MediaType.APPLICATION_JSON)
 									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
 									     	   .accept(MediaType.APPLICATION_JSON))
@@ -467,13 +474,13 @@ public class QoSMonitorControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getMgmtInterDirectPingMeasurementByCloudAndSystemWithNullCloudTest() throws Exception {
-		final SystemResponseDTO system = new SystemResponseDTO(1L, "test-sys", "1.1.1.1", 10000, "dlaswefg", null, null);
+		final SystemResponseDTO system = new SystemResponseDTO(1L, "test-sys", "1.1.1.1", 10000, "dlaswefg", null, null, null);
 		final CloudSystemFormDTO requestDTO = new CloudSystemFormDTO(null, system);
 		
 		final QoSInterDirectPingMeasurementResponseDTO responseDTO = getInterDirectPingMeasurementResponseDTOForTest();
 		when(qoSDBService.getInterDirectPingMeasurementByCloudAndSystemAddressResponse(any(), any())).thenReturn(responseDTO);
 		
-		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_BY_CLOUD_AND_SYSTEM_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_DIRECT_PING_MEASUREMENTS_BY_CLOUD_AND_SYSTEM_MGMT_URI)
 									     	   .contentType(MediaType.APPLICATION_JSON)
 									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
 									     	   .accept(MediaType.APPLICATION_JSON))
@@ -482,7 +489,7 @@ public class QoSMonitorControllerTest {
 		
 		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
 		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
-		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_BY_CLOUD_AND_SYSTEM_MGMT_URI, responseBody.getOrigin());		
+		assertEquals(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_DIRECT_PING_MEASUREMENTS_BY_CLOUD_AND_SYSTEM_MGMT_URI, responseBody.getOrigin());		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -494,7 +501,7 @@ public class QoSMonitorControllerTest {
 		final QoSInterDirectPingMeasurementResponseDTO responseDTO = getInterDirectPingMeasurementResponseDTOForTest();
 		when(qoSDBService.getInterDirectPingMeasurementByCloudAndSystemAddressResponse(any(), any())).thenReturn(responseDTO);
 		
-		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_BY_CLOUD_AND_SYSTEM_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_DIRECT_PING_MEASUREMENTS_BY_CLOUD_AND_SYSTEM_MGMT_URI)
 									     	   .contentType(MediaType.APPLICATION_JSON)
 									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
 									     	   .accept(MediaType.APPLICATION_JSON))
@@ -503,20 +510,20 @@ public class QoSMonitorControllerTest {
 		
 		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
 		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
-		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_BY_CLOUD_AND_SYSTEM_MGMT_URI, responseBody.getOrigin());		
+		assertEquals(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_DIRECT_PING_MEASUREMENTS_BY_CLOUD_AND_SYSTEM_MGMT_URI, responseBody.getOrigin());		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getMgmtInterDirectPingMeasurementByCloudAndSystemWithNullCloudOperatorTest() throws Exception {
 		final CloudResponseDTO cloud = new CloudResponseDTO(1L, null, "test-n", true, true, false, "fddddbvf", null, null);
-		final SystemResponseDTO system = new SystemResponseDTO(1L, "test-sys", "1.1.1.1", 10000, "dlaswefg", null, null);
+		final SystemResponseDTO system = new SystemResponseDTO(1L, "test-sys", "1.1.1.1", 10000, "dlaswefg", null, null, null);
 		final CloudSystemFormDTO requestDTO = new CloudSystemFormDTO(cloud, system);
 		
 		final QoSInterDirectPingMeasurementResponseDTO responseDTO = getInterDirectPingMeasurementResponseDTOForTest();
 		when(qoSDBService.getInterDirectPingMeasurementByCloudAndSystemAddressResponse(any(), any())).thenReturn(responseDTO);
 		
-		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_BY_CLOUD_AND_SYSTEM_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_DIRECT_PING_MEASUREMENTS_BY_CLOUD_AND_SYSTEM_MGMT_URI)
 									     	   .contentType(MediaType.APPLICATION_JSON)
 									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
 									     	   .accept(MediaType.APPLICATION_JSON))
@@ -525,20 +532,20 @@ public class QoSMonitorControllerTest {
 		
 		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
 		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
-		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_BY_CLOUD_AND_SYSTEM_MGMT_URI, responseBody.getOrigin());		
+		assertEquals(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_DIRECT_PING_MEASUREMENTS_BY_CLOUD_AND_SYSTEM_MGMT_URI, responseBody.getOrigin());		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getMgmtInterDirectPingMeasurementByCloudAndSystemWithNullCloudNameTest() throws Exception {
 		final CloudResponseDTO cloud = new CloudResponseDTO(1L, "test-op", null, true, true, false, "fddddbvf", null, null);
-		final SystemResponseDTO system = new SystemResponseDTO(1L, "test-sys", "1.1.1.1", 10000, "dlaswefg", null, null);
+		final SystemResponseDTO system = new SystemResponseDTO(1L, "test-sys", "1.1.1.1", 10000, "dlaswefg", null, null, null);
 		final CloudSystemFormDTO requestDTO = new CloudSystemFormDTO(cloud, system);
 		
 		final QoSInterDirectPingMeasurementResponseDTO responseDTO = getInterDirectPingMeasurementResponseDTOForTest();
 		when(qoSDBService.getInterDirectPingMeasurementByCloudAndSystemAddressResponse(any(), any())).thenReturn(responseDTO);
 		
-		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_BY_CLOUD_AND_SYSTEM_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_DIRECT_PING_MEASUREMENTS_BY_CLOUD_AND_SYSTEM_MGMT_URI)
 									     	   .contentType(MediaType.APPLICATION_JSON)
 									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
 									     	   .accept(MediaType.APPLICATION_JSON))
@@ -547,20 +554,20 @@ public class QoSMonitorControllerTest {
 		
 		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
 		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
-		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_BY_CLOUD_AND_SYSTEM_MGMT_URI, responseBody.getOrigin());		
+		assertEquals(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_DIRECT_PING_MEASUREMENTS_BY_CLOUD_AND_SYSTEM_MGMT_URI, responseBody.getOrigin());		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getMgmtInterDirectPingMeasurementByCloudAndSystemWithNullSystemAddressTest() throws Exception {
 		final CloudResponseDTO cloud = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "fddddbvf", null, null);
-		final SystemResponseDTO system = new SystemResponseDTO(1L, "test-sys", null, 10000, "dlaswefg", null, null);
+		final SystemResponseDTO system = new SystemResponseDTO(1L, "test-sys", null, 10000, "dlaswefg", null, null, null);
 		final CloudSystemFormDTO requestDTO = new CloudSystemFormDTO(cloud, system);
 		
 		final QoSInterDirectPingMeasurementResponseDTO responseDTO = getInterDirectPingMeasurementResponseDTOForTest();
 		when(qoSDBService.getInterDirectPingMeasurementByCloudAndSystemAddressResponse(any(), any())).thenReturn(responseDTO);
 		
-		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_BY_CLOUD_AND_SYSTEM_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_DIRECT_PING_MEASUREMENTS_BY_CLOUD_AND_SYSTEM_MGMT_URI)
 									     	   .contentType(MediaType.APPLICATION_JSON)
 									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
 									     	   .accept(MediaType.APPLICATION_JSON))
@@ -569,7 +576,7 @@ public class QoSMonitorControllerTest {
 		
 		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
 		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
-		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENTS_BY_CLOUD_AND_SYSTEM_MGMT_URI, responseBody.getOrigin());		
+		assertEquals(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_DIRECT_PING_MEASUREMENTS_BY_CLOUD_AND_SYSTEM_MGMT_URI, responseBody.getOrigin());		
 	}
 	
 	// getInterDirectPingMeasurementByCloudAndSystem use the same methods as getMgmtInterDirectPingMeasurementByCloudAndSystem so we skip it
@@ -584,7 +591,7 @@ public class QoSMonitorControllerTest {
 
 		when(qoSDBService.getInterRelayEchoMeasurementsResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(responseDTO);
 
-		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_URI)
 											   .accept(MediaType.APPLICATION_JSON))
 											   .andExpect(status().isOk())
 											   .andReturn();
@@ -601,7 +608,7 @@ public class QoSMonitorControllerTest {
 
 		when(qoSDBService.getInterRelayEchoMeasurementsResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(responseDTO);
 
-		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_URI)
 											   .param("page", "0")
 											   .param("item_per_page", String.valueOf(responseSize))
 											   .accept(MediaType.APPLICATION_JSON))
@@ -620,7 +627,7 @@ public class QoSMonitorControllerTest {
 
 		when(qoSDBService.getInterRelayEchoMeasurementsResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(responseDTO);
 
-		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_URI)
 									   .param("item_per_page", String.valueOf(responseSize))
 									   .accept(MediaType.APPLICATION_JSON))
 									   .andExpect(status().isBadRequest())
@@ -629,7 +636,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
 		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
 		assertTrue(responseBody.getErrorMessage().contains(PAGE_OR_SIZE_ERROR_MESSAGE));
-		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_URI, responseBody.getOrigin());
+		assertEquals(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_URI, responseBody.getOrigin());
 	}
 	
 	//=================================================================================================
@@ -645,7 +652,7 @@ public class QoSMonitorControllerTest {
 		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
 		when(qoSDBService.getInterRelayEchoMeasurementByCloudAndRealyResponse(any(), any())).thenReturn(responseDTO);
 		
-		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI)
 									     	   .contentType(MediaType.APPLICATION_JSON)
 									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
 									     	   .accept(MediaType.APPLICATION_JSON))
@@ -666,7 +673,7 @@ public class QoSMonitorControllerTest {
 		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
 		when(qoSDBService.getInterRelayEchoMeasurementByCloudAndRealyResponse(any(), any())).thenReturn(responseDTO);
 		
-		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI)
 									     	   .contentType(MediaType.APPLICATION_JSON)
 									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
 									     	   .accept(MediaType.APPLICATION_JSON))
@@ -675,7 +682,7 @@ public class QoSMonitorControllerTest {
 		
 		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
 		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
-		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI, responseBody.getOrigin());		
+		assertEquals(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI, responseBody.getOrigin());		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -687,7 +694,7 @@ public class QoSMonitorControllerTest {
 		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
 		when(qoSDBService.getInterRelayEchoMeasurementByCloudAndRealyResponse(any(), any())).thenReturn(responseDTO);
 		
-		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI)
 									     	   .contentType(MediaType.APPLICATION_JSON)
 									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
 									     	   .accept(MediaType.APPLICATION_JSON))
@@ -696,7 +703,7 @@ public class QoSMonitorControllerTest {
 		
 		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
 		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
-		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI, responseBody.getOrigin());		
+		assertEquals(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI, responseBody.getOrigin());		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -709,7 +716,7 @@ public class QoSMonitorControllerTest {
 		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
 		when(qoSDBService.getInterRelayEchoMeasurementByCloudAndRealyResponse(any(), any())).thenReturn(responseDTO);
 		
-		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI)
 									     	   .contentType(MediaType.APPLICATION_JSON)
 									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
 									     	   .accept(MediaType.APPLICATION_JSON))
@@ -718,7 +725,7 @@ public class QoSMonitorControllerTest {
 		
 		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
 		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
-		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI, responseBody.getOrigin());		
+		assertEquals(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI, responseBody.getOrigin());		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -731,7 +738,7 @@ public class QoSMonitorControllerTest {
 		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
 		when(qoSDBService.getInterRelayEchoMeasurementByCloudAndRealyResponse(any(), any())).thenReturn(responseDTO);
 		
-		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI)
 									     	   .contentType(MediaType.APPLICATION_JSON)
 									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
 									     	   .accept(MediaType.APPLICATION_JSON))
@@ -740,7 +747,7 @@ public class QoSMonitorControllerTest {
 		
 		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
 		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
-		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI, responseBody.getOrigin());		
+		assertEquals(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI, responseBody.getOrigin());		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -753,7 +760,7 @@ public class QoSMonitorControllerTest {
 		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
 		when(qoSDBService.getInterRelayEchoMeasurementByCloudAndRealyResponse(any(), any())).thenReturn(responseDTO);
 		
-		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI)
 									     	   .contentType(MediaType.APPLICATION_JSON)
 									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
 									     	   .accept(MediaType.APPLICATION_JSON))
@@ -762,7 +769,7 @@ public class QoSMonitorControllerTest {
 		
 		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
 		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
-		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI, responseBody.getOrigin());		
+		assertEquals(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_URI, responseBody.getOrigin());		
 	}
 	
 	//=================================================================================================
@@ -777,7 +784,7 @@ public class QoSMonitorControllerTest {
 		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
 		when(qoSDBService.getBestInterRelayEchoMeasurementByCloudAndAttributeResponse(any(), any())).thenReturn(responseDTO);
 		
-		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI)
 									     	   .contentType(MediaType.APPLICATION_JSON)
 									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
 									     	   .accept(MediaType.APPLICATION_JSON))
@@ -797,7 +804,7 @@ public class QoSMonitorControllerTest {
 		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
 		when(qoSDBService.getBestInterRelayEchoMeasurementByCloudAndAttributeResponse(any(), any())).thenReturn(responseDTO);
 		
-		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI)
 									     	   .contentType(MediaType.APPLICATION_JSON)
 									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
 									     	   .accept(MediaType.APPLICATION_JSON))
@@ -806,7 +813,7 @@ public class QoSMonitorControllerTest {
 		
 		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
 		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
-		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI, responseBody.getOrigin());
+		assertEquals(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI, responseBody.getOrigin());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -818,7 +825,7 @@ public class QoSMonitorControllerTest {
 		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
 		when(qoSDBService.getBestInterRelayEchoMeasurementByCloudAndAttributeResponse(any(), any())).thenReturn(responseDTO);
 		
-		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI)
 									     	   .contentType(MediaType.APPLICATION_JSON)
 									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
 									     	   .accept(MediaType.APPLICATION_JSON))
@@ -827,7 +834,7 @@ public class QoSMonitorControllerTest {
 		
 		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
 		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
-		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI, responseBody.getOrigin());
+		assertEquals(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI, responseBody.getOrigin());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -839,7 +846,7 @@ public class QoSMonitorControllerTest {
 		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
 		when(qoSDBService.getBestInterRelayEchoMeasurementByCloudAndAttributeResponse(any(), any())).thenReturn(responseDTO);
 		
-		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI)
 									     	   .contentType(MediaType.APPLICATION_JSON)
 									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
 									     	   .accept(MediaType.APPLICATION_JSON))
@@ -848,7 +855,7 @@ public class QoSMonitorControllerTest {
 		
 		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
 		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
-		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI, responseBody.getOrigin());
+		assertEquals(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI, responseBody.getOrigin());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -860,7 +867,7 @@ public class QoSMonitorControllerTest {
 		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
 		when(qoSDBService.getBestInterRelayEchoMeasurementByCloudAndAttributeResponse(any(), any())).thenReturn(responseDTO);
 		
-		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI)
 									     	   .contentType(MediaType.APPLICATION_JSON)
 									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
 									     	   .accept(MediaType.APPLICATION_JSON))
@@ -869,7 +876,7 @@ public class QoSMonitorControllerTest {
 		
 		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
 		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
-		assertEquals(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI, responseBody.getOrigin());
+		assertEquals(CommonConstants.QOSMONITOR_URI + QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_URI, responseBody.getOrigin());
 	}
 	
 	//=================================================================================================
@@ -885,7 +892,7 @@ public class QoSMonitorControllerTest {
 		final QoSInterRelayEchoMeasurementListResponseDTO responseDTO = getInterRelayEchoMeasurementListResponseDTOForTest(3);
 		when(relayTestService.getInterRelayEchoMeasurements(any())).thenReturn(responseDTO);
 		
-		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT)
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENT)
 									     	   .contentType(MediaType.APPLICATION_JSON)
 									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
 									     	   .accept(MediaType.APPLICATION_JSON))
@@ -906,7 +913,7 @@ public class QoSMonitorControllerTest {
 		final QoSInterRelayEchoMeasurementListResponseDTO responseDTO = getInterRelayEchoMeasurementListResponseDTOForTest(3);
 		when(relayTestService.getInterRelayEchoMeasurements(any())).thenReturn(responseDTO);
 		
-		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT)
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENT)
 									     	   .contentType(MediaType.APPLICATION_JSON)
 									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
 									     	   .accept(MediaType.APPLICATION_JSON))
@@ -915,7 +922,7 @@ public class QoSMonitorControllerTest {
 		
 		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
 		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
-		assertEquals(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT, responseBody.getOrigin());
+		assertEquals(CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENT, responseBody.getOrigin());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -928,7 +935,7 @@ public class QoSMonitorControllerTest {
 		final QoSInterRelayEchoMeasurementListResponseDTO responseDTO = getInterRelayEchoMeasurementListResponseDTOForTest(3);
 		when(relayTestService.getInterRelayEchoMeasurements(any())).thenReturn(responseDTO);
 		
-		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT)
+		final MvcResult response = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENT)
 									     	   .contentType(MediaType.APPLICATION_JSON)
 									     	   .content(objectMapper.writeValueAsBytes(requestDTO))
 									     	   .accept(MediaType.APPLICATION_JSON))
@@ -937,7 +944,7 @@ public class QoSMonitorControllerTest {
 		
 		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorMessageDTO.class);
 		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
-		assertEquals(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT, responseBody.getOrigin());
+		assertEquals(CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENT, responseBody.getOrigin());
 	}
 	
 	//=================================================================================================
@@ -952,7 +959,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.ARROWHEAD, error.getExceptionType());
-		Assert.assertEquals(QOS_MONITOR_PUBLIC_KEY_URI, error.getOrigin());
+		Assert.assertEquals(QOSMONITOR_PUBLIC_KEY_URI, error.getOrigin());
 		Assert.assertEquals("QoS Monitor core service runs in insecure mode.", error.getErrorMessage());
 	}
 	
@@ -968,7 +975,7 @@ public class QoSMonitorControllerTest {
 			final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 			
 			Assert.assertEquals(ExceptionType.ARROWHEAD, error.getExceptionType());
-			Assert.assertEquals(QOS_MONITOR_PUBLIC_KEY_URI, error.getOrigin());
+			Assert.assertEquals(QOSMONITOR_PUBLIC_KEY_URI, error.getOrigin());
 			Assert.assertEquals("Public key is not available.", error.getErrorMessage());
 		} finally {
 			arrowheadContext.put(CommonConstants.SERVER_PUBLIC_KEY, publicKey);
@@ -993,7 +1000,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals(QOSMONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
 		Assert.assertEquals("Cloud is null", error.getErrorMessage());
 	}
 	
@@ -1009,7 +1016,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals(QOSMONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
 		Assert.assertEquals("Cloud operator is null or blank", error.getErrorMessage());
 	}
 	
@@ -1026,7 +1033,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals(QOSMONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
 		Assert.assertEquals("Cloud operator is null or blank", error.getErrorMessage());
 	}
 	
@@ -1043,7 +1050,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals(QOSMONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
 		Assert.assertEquals("Cloud name is null or empty", error.getErrorMessage());
 	}
 	
@@ -1061,7 +1068,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals(QOSMONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
 		Assert.assertEquals("Cloud name is null or empty", error.getErrorMessage());
 	}
 	
@@ -1079,7 +1086,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals(QOSMONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
 		Assert.assertEquals("Relay is null", error.getErrorMessage());
 	}
 	
@@ -1100,7 +1107,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals(QOSMONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
 		Assert.assertEquals("Relay address is null or blank", error.getErrorMessage());
 	}
 	
@@ -1122,7 +1129,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals(QOSMONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
 		Assert.assertEquals("Relay address is null or blank", error.getErrorMessage());
 	}
 	
@@ -1144,7 +1151,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals(QOSMONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
 		Assert.assertEquals("Relay port is null", error.getErrorMessage());
 	}
 	
@@ -1167,7 +1174,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals(QOSMONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
 		Assert.assertTrue(error.getErrorMessage().contains("Relay port must be between"));
 	}
 	
@@ -1190,7 +1197,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals(QOSMONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
 		Assert.assertTrue(error.getErrorMessage().contains("Relay port must be between"));
 	}
 	
@@ -1213,7 +1220,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals(QOSMONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
 		Assert.assertEquals("Relay type is null or blank", error.getErrorMessage());
 	}
 	
@@ -1237,7 +1244,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals(QOSMONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
 		Assert.assertEquals("Relay type is null or blank", error.getErrorMessage());
 	}
 	
@@ -1261,7 +1268,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals(QOSMONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
 		Assert.assertEquals("Relay type is invalid", error.getErrorMessage());
 	}
 	
@@ -1285,7 +1292,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals(QOSMONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
 		Assert.assertEquals("Relay type is invalid", error.getErrorMessage());
 	}
 	
@@ -1309,7 +1316,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals(QOSMONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
 		Assert.assertEquals("Queue id is null or blank.", error.getErrorMessage());
 	}
 	
@@ -1334,7 +1341,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals(QOSMONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
 		Assert.assertEquals("Queue id is null or blank.", error.getErrorMessage());
 	}
 	
@@ -1359,7 +1366,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals(QOSMONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
 		Assert.assertEquals("Peer name is null or blank.", error.getErrorMessage());
 	}
 	
@@ -1385,7 +1392,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals(QOSMONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
 		Assert.assertEquals("Peer name is null or blank.", error.getErrorMessage());
 	}
 	
@@ -1411,7 +1418,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals(QOSMONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
 		Assert.assertEquals("Receiver QoS Monitor's public key is null or blank.", error.getErrorMessage());
 	}
 	
@@ -1438,7 +1445,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals(QOSMONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
 		Assert.assertEquals("Receiver QoS Monitor's public key is null or blank.", error.getErrorMessage());
 	}
 	
@@ -1491,7 +1498,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(QOS_MONITOR_JOIN_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals(QOSMONITOR_JOIN_RELAY_TEST_URI, error.getOrigin());
 		Assert.assertEquals("Sender QoS Monitor's public key is null or blank.", error.getErrorMessage());
 	}
 	
@@ -1516,7 +1523,7 @@ public class QoSMonitorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(QOS_MONITOR_JOIN_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals(QOSMONITOR_JOIN_RELAY_TEST_URI, error.getOrigin());
 		Assert.assertEquals("Sender QoS Monitor's public key is null or blank.", error.getErrorMessage());
 	}
 	
@@ -1547,10 +1554,318 @@ public class QoSMonitorControllerTest {
 		Assert.assertEquals("peerName", response.getPeerName());
 		Assert.assertEquals("receiverKey", response.getReceiverQoSMonitorPublicKey());
 	}
-	
+
+
+	//=================================================================================================
+	// Test of pingMonitorNotification
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void pingMonitorNotificationTestOk() throws Exception {
+
+		doNothing().when(eventWatcherService).putEventToQueue(any());
+
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(getValidEventDTOForTest()))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isAccepted())
+				.andReturn();
+
+		verify(eventWatcherService, times(1)).putEventToQueue(any());
+		Assert.assertNotNull("pingMonitorNotificationTest result is null.", result);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void pingMonitorNotificationNullEventTypeTest() throws Exception {
+
+		doNothing().when(eventWatcherService).putEventToQueue(any());
+
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(getNullEventTypeEventDTOForTest()))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+
+		verify(eventWatcherService, never()).putEventToQueue(any());
+
+		final ErrorMessageDTO responseBody = objectMapper.readValue(result.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void pingMonitorNotificationEmptyEventTypeTest() throws Exception {
+
+		doNothing().when(eventWatcherService).putEventToQueue(any());
+
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(getEmptyEventTypeEventDTOForTest()))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+
+		verify(eventWatcherService, never()).putEventToQueue(any());
+
+		final ErrorMessageDTO responseBody = objectMapper.readValue(result.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void pingMonitorNotificationInvalidEventTypeTest() throws Exception {
+
+		doNothing().when(eventWatcherService).putEventToQueue(any());
+
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(getInValidEventTypeEventDTOForTest()))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+
+		verify(eventWatcherService, never()).putEventToQueue(any());
+
+		final ErrorMessageDTO responseBody = objectMapper.readValue(result.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void pingMonitorNotificationNullPayloadTest() throws Exception {
+
+		doNothing().when(eventWatcherService).putEventToQueue(any());
+
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(getNullPayloadEventDTOForTest()))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+
+		verify(eventWatcherService, never()).putEventToQueue(any());
+
+		final ErrorMessageDTO responseBody = objectMapper.readValue(result.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void pingMonitorNotificationEmptyPayloadTest() throws Exception {
+
+		doNothing().when(eventWatcherService).putEventToQueue(any());
+
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(getEmptyPayloadEventDTOForTest()))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+
+		verify(eventWatcherService, never()).putEventToQueue(any());
+
+		final ErrorMessageDTO responseBody = objectMapper.readValue(result.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void pingMonitorNotificationNullTimeStampTest() throws Exception {
+
+		doNothing().when(eventWatcherService).putEventToQueue(any());
+
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(getNullTimeStampEventDTOForTest()))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+
+		verify(eventWatcherService, never()).putEventToQueue(any());
+
+		final ErrorMessageDTO responseBody = objectMapper.readValue(result.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void pingMonitorNotificationEmptyTimeStampTest() throws Exception {
+
+		doNothing().when(eventWatcherService).putEventToQueue(any());
+
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(getEmptyTimeStampEventDTOForTest()))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+
+		verify(eventWatcherService, never()).putEventToQueue(any());
+
+		final ErrorMessageDTO responseBody = objectMapper.readValue(result.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void pingMonitorNotificationInvalidTimeStampTest() throws Exception {
+
+		doNothing().when(eventWatcherService).putEventToQueue(any());
+
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.QOSMONITOR_URI + QosMonitorConstants.EXTERNAL_PING_MONITOR_EVENT_NOTIFICATION_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(getInvalidTimeStampEventDTOForTest()))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+
+		verify(eventWatcherService, never()).putEventToQueue(any());
+
+		final ErrorMessageDTO responseBody = objectMapper.readValue(result.getResponse().getContentAsString(), ErrorMessageDTO.class);
+		assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+
+	}
+
 	//=================================================================================================
 	// assistant methods
 
+	//-------------------------------------------------------------------------------------------------
+	private EventDTO getValidEventDTOForTest() {
+
+		return getValidReceivedMeasurementRequestEventDTOForTest();
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private EventDTO getInvalidTimeStampEventDTOForTest() {
+
+		final EventDTO event = new EventDTO();
+		event.setEventType(QosMonitorEventType.RECEIVED_MONITORING_REQUEST.name());
+		event.setMetaData(getValidMeasuermentEventDTOMetadtaProcessIdForTest());
+		event.setPayload(getValidMeasuermentEventDTOEmptyPayloadForTest());
+		event.setTimeStamp("12:22:34-12:12:12");
+
+		return event;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private EventDTO getEmptyTimeStampEventDTOForTest() {
+
+		final EventDTO event = new EventDTO();
+		event.setEventType(QosMonitorEventType.RECEIVED_MONITORING_REQUEST.name());
+		event.setMetaData(getValidMeasuermentEventDTOMetadtaProcessIdForTest());
+		event.setPayload(getValidMeasuermentEventDTOEmptyPayloadForTest());
+		event.setTimeStamp("");
+
+		return event;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private EventDTO getNullTimeStampEventDTOForTest() {
+
+		final EventDTO event = new EventDTO();
+		event.setEventType(QosMonitorEventType.RECEIVED_MONITORING_REQUEST.name());
+		event.setMetaData(getValidMeasuermentEventDTOMetadtaProcessIdForTest());
+		event.setPayload(getValidMeasuermentEventDTOEmptyPayloadForTest());
+		event.setTimeStamp(null);
+
+		return event;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private EventDTO getNullPayloadEventDTOForTest() {
+
+		final EventDTO event = new EventDTO();
+		event.setEventType(QosMonitorEventType.RECEIVED_MONITORING_REQUEST.name());
+		event.setMetaData(getValidMeasuermentEventDTOMetadtaProcessIdForTest());
+		event.setPayload(null);
+		event.setTimeStamp(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
+
+		return event;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private EventDTO getEmptyPayloadEventDTOForTest() {
+
+		final EventDTO event = new EventDTO();
+		event.setEventType(QosMonitorEventType.RECEIVED_MONITORING_REQUEST.name());
+		event.setMetaData(getValidMeasuermentEventDTOMetadtaProcessIdForTest());
+		event.setPayload("");
+		event.setTimeStamp(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
+
+		return event;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private EventDTO getNullEventTypeEventDTOForTest() {
+
+		final EventDTO event = new EventDTO();
+		event.setEventType(null);
+		event.setMetaData(getValidMeasuermentEventDTOMetadtaProcessIdForTest());
+		event.setPayload(getValidMeasuermentEventDTOEmptyPayloadForTest());
+		event.setTimeStamp(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
+
+		return event;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private EventDTO getEmptyEventTypeEventDTOForTest() {
+
+		final EventDTO event = new EventDTO();
+		event.setEventType("");
+		event.setMetaData(getValidMeasuermentEventDTOMetadtaProcessIdForTest());
+		event.setPayload(getValidMeasuermentEventDTOEmptyPayloadForTest());
+		event.setTimeStamp(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
+
+		return event;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private EventDTO getInValidEventTypeEventDTOForTest() {
+
+		final EventDTO event = new EventDTO();
+		event.setEventType("UNKNOWN_MEAUSREMENT_EVENT");
+		event.setMetaData(getValidMeasuermentEventDTOMetadtaProcessIdForTest());
+		event.setPayload(getValidMeasuermentEventDTOEmptyPayloadForTest());
+		event.setTimeStamp(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
+
+		return event;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private EventDTO getValidReceivedMeasurementRequestEventDTOForTest() {
+
+		final EventDTO event = new EventDTO();
+		event.setEventType(QosMonitorEventType.RECEIVED_MONITORING_REQUEST.name());
+		event.setMetaData(getValidMeasuermentEventDTOMetadtaProcessIdForTest());
+		event.setPayload(getValidMeasuermentEventDTOEmptyPayloadForTest());
+		event.setTimeStamp(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
+
+		return event;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private Map<String, String> getValidMeasuermentEventDTOMetadtaProcessIdForTest() {
+
+		return Map.of(QosMonitorConstants.PROCESS_ID_KEY, UUID.randomUUID().toString());
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private String getValidMeasuermentEventDTOEmptyPayloadForTest() {
+
+		return "[]";
+
+	}
 	//-------------------------------------------------------------------------------------------------
 	private QoSIntraPingMeasurementListResponseDTO getIntraPingMeasurementListResponseDTOForTest() {
 
@@ -1725,6 +2040,7 @@ public class QoSMonitorControllerTest {
 				"localhost",//system.getAddress(), 
 				12345,//system.getPort(), 
 				"authinfo",//system.getAuthenticationInfo(),
+				Map.of(),
 				Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()),
 				Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 
@@ -1732,7 +2048,7 @@ public class QoSMonitorControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------	
 	private MvcResult getPublicKey(final ResultMatcher matcher) throws Exception {
-		return this.mockMvc.perform(get(QOS_MONITOR_PUBLIC_KEY_URI)
+		return this.mockMvc.perform(get(QOSMONITOR_PUBLIC_KEY_URI)
 						   .accept(MediaType.TEXT_PLAIN))
 						   .andExpect(matcher)
 						   .andReturn();
@@ -1740,7 +2056,7 @@ public class QoSMonitorControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private MvcResult postInitTestRelayTest(final QoSMonitorSenderConnectionRequestDTO request, final ResultMatcher matcher) throws Exception {
-		return this.mockMvc.perform(post(QOS_MONITOR_INIT_RELAY_TEST_URI)
+		return this.mockMvc.perform(post(QOSMONITOR_INIT_RELAY_TEST_URI)
 						   .contentType(MediaType.APPLICATION_JSON)
 						   .content(objectMapper.writeValueAsBytes(request)))
 						   .andExpect(matcher)
@@ -1749,7 +2065,7 @@ public class QoSMonitorControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private MvcResult postJoinTestRelayTest(final QoSRelayTestProposalRequestDTO request, final ResultMatcher matcher) throws Exception {
-		return this.mockMvc.perform(post(QOS_MONITOR_JOIN_RELAY_TEST_URI)
+		return this.mockMvc.perform(post(QOSMONITOR_JOIN_RELAY_TEST_URI)
 						   .accept(MediaType.APPLICATION_JSON)
 						   .contentType(MediaType.APPLICATION_JSON)
 						   .content(objectMapper.writeValueAsBytes(request)))

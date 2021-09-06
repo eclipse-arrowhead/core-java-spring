@@ -1,0 +1,10 @@
+Package: arrowhead-datamanager
+Version: [[version]]
+Section: contrib/java
+Priority: optional
+Architecture: all
+Maintainer: Jens Eliasson <jens.eliasson@thingwave.eu>
+Homepage: http://www.arrowhead.eu
+Description: Arrowhead Datamanager System
+Distribution: development
+Depends: java-runtime-headless, virtual-mysql-server, arrowhead-core-common

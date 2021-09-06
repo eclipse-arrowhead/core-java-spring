@@ -67,6 +67,9 @@ public class System {
 	@Column(nullable = true, length = CoreDefaults.VARCHAR_EXTENDED)
 	private String authenticationInfo;
 	
+	@Column(nullable = true, columnDefinition = "MEDIUMTEXT")
+	private String metadata;
+	
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
 	
@@ -96,11 +99,12 @@ public class System {
 	public System() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public System(final String systemName, final String address, final int port, final String authenticationInfo) {
+	public System(final String systemName, final String address, final int port, final String authenticationInfo, final String metadata) {
 		this.systemName = systemName;
 		this.address = address;
 		this.port = port;
 		this.authenticationInfo = authenticationInfo;
+		this.metadata = metadata;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -122,6 +126,7 @@ public class System {
 	public String getAddress() { return address; }
 	public int getPort() { return port; }
 	public String getAuthenticationInfo() { return authenticationInfo; }
+	public String getMetadata() { return metadata; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 	public Set<ServiceRegistry> getServiceRegistryEntries() { return serviceRegistryEntries; }
@@ -135,6 +140,7 @@ public class System {
 	public void setAddress(final String address) { this.address = address; }
 	public void setPort(final int port) { this.port = port; }
 	public void setAuthenticationInfo(final String authenticationInfo) { this.authenticationInfo = authenticationInfo; }
+	public void setMetadata(final String metadata) { this.metadata = metadata; }
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 	public void setServiceRegistryEntries(final Set<ServiceRegistry> serviceRegistryEntries) { this.serviceRegistryEntries = serviceRegistryEntries; }

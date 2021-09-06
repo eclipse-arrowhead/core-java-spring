@@ -1,5 +1,5 @@
 
-# Arrowhead Framework 4.2.0
+# Arrowhead Framework 4.3.0
 
 [Arrowhead](http://www.arrowhead.eu/) (and its continuation, [Productive4.0](https://productive40.eu/)) is an ambitious holistic innovation project,
  meant to open the doors to the potentials of Digital Industry and to maintain a leadership position of the industries in Europe. All partners involved will work on creating the capability to efficiently design and integrate hardware and software of Internet of Things (IoT) devices. Linking the real with the digital world takes more than just adding software to the hardware.
@@ -74,27 +74,30 @@ Please be aware, that versions starting from 4.1.3 are __NOT__ backwards compati
 	       * [Client](#gateway_endpoints_client)
            * [Private](#gateway_endpoints_private)
            * [Management](#gateway_endpoints_mgmt)
-    7. [Certificate Authority](#ca)
+    7. [DataManager](#datamanager)
+       * [System Design Description Overview](#datamanager_sdd)
+       * [Services and Use Cases](#datamanager_usecases)  
+       * [Service Description Overview](#datamanager_provided_services)
+       * [Endpoints](#datamanager_endpoints)
+	       * [Client](#datamanager_endpoints_client)
+    8. [TimeManager](#timemanager)
+       * [System Design Description Overview](#timemanager_sdd)
+       * [Services and Use Cases](#timemanager_usecases)  
+       * [Service Description Overview](#timemanager_provided_services)
+       * [Endpoints](#timemanager_endpoints)
+	       * [Client](#timemanager_endpoints_client)
+    9. [Certificate Authority](#ca)
        * [System Design Description Overview](#ca_sdd)
        * [Services and Use Cases](#ca_usecases)  
        * [Endpoints](#ca_endpoints)
 	       * [Client](#ca_endpoints_client)
            * [Private](#ca_endpoints_private)
            * [Management](#ca_endpoints_mgmt)
-    8. **QoS Monitor (Quality of Service Monitor)**
-       * [System Design Description Overview](qos-monitor/documentation/QualityOfServiceMonitor-SysDD.md)
-           * [Services and Use Cases](qos-monitor/documentation/QualityOfServiceMonitor-SysDD.md#services-and-use-cases)  
-       * [Interface Design Description](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md)
-           * [Security](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#security)
-           * [Communication Profile](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#communication-profile)
-               * [Client](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#client-endpoint-description)
-               * [Private](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#private-endpoint-description)
-               * [Management](qos-monitor/documentation/QualityOfServiceMonitor-IDD.md#management-endpoint-description)	 
     9. [Onboarding Controller](#onboardingcontroller)
-       * [System Design Description Overview](#onboardingcontroller_sdd)
-       * [Services and Use Cases](#onboardingcontroller_usecases)
-       * [Security](#onboardingcontroller_security)
-       * [Endpoints](#onboardingcontroller_endpoints)
+        * [System Design Description Overview](#onboardingcontroller_sdd)
+        * [Services and Use Cases](#onboardingcontroller_usecases)
+        * [Security](#onboardingcontroller_security)
+        * [Endpoints](#onboardingcontroller_endpoints)
            * [Onboarding](#onboardingcontroller_endpoints_onboarding)
     10. [Device Registry](#deviceregistry)
         * [System Design Description Overview](#deviceregistry_sdd)
@@ -110,13 +113,14 @@ Please be aware, that versions starting from 4.1.3 are __NOT__ backwards compati
         * [Endpoints](#systemregistry_endpoints)
            * [Onboarding](#systemregistry_endpoints_onboarding)
            * [Client](#systemregistry_endpoints_client)
-	12. [Choreographer](#choreographer)
+    12. [Choreographer](#choreographer)
         * [System Design Description Overview](#choreographer_sdd)
-        * [Services and Use Cases](#choreographer_usecases)  
+        * [Services and Use Cases](#choreographer_usecases)
         * [Endpoints](#choreographer_endpoints)
-	       * [Client](#choreographer_endpoints_client)
+           * [Client](#choreographer_endpoints_client)
            * [Management](#choreographer_endpoints_mgmt)
-
+    13. [Plant Description Engine](#plant-description-engine)
+		
 <a name="quickstart" />
 
 ## Quick Start Guide
@@ -221,6 +225,7 @@ Please follow this guide to install them: [Debian Installer Guide](documentation
 <a name="quickstart_compile" />
 
 ### Compile source code and manually install MySQL and Maven.
+
 #### Requirements
 
 > **Note:** A system with 2GB of RAM is advised. 
@@ -236,7 +241,7 @@ Verify that you have Java (```java -version```), Maven (```mvn -version```), MyS
 Pull this code and enter the directory. 
 ```git clone https://github.com/arrowhead-f/core-java-spring.git```
 
-Got to the ```scripts``` folder, execute ```mysql -u root -p < create_empty_arrowhead_db.sql``` MySQL script. If you won't run this script first, the project won't build. 
+Go to the ```scripts``` folder, execute ```mysql -u root -p < create_empty_arrowhead_db.sql``` and ```mysql -u root -p < create_arrowhead_tables.sql``` MySQL script. If you won't run these scripts first, the project won't build. 
 
 ```cd core-java-spring```
 
@@ -269,6 +274,8 @@ Service Registry will be available on ```https://localhost:8443``` <br />
 Authorization will be available on ```https://localhost:8445``` <br />
 Orchestrator will be available on ```https://localhost:8441``` <br />
 Event Handler will be available on ```https://localhost:8455``` <br />
+DataManager will be available on ```https://localhost:8461``` <br />
+TimeManager will be available on ```https://localhost:8463``` <br />
 Gatekeeper will be available on ```https://localhost:8449``` <br />
 Gateway will be available on ```https://localhost:8453``` <br />
 
@@ -456,10 +463,11 @@ New payload - you can easily map the old fields to the new ones.
 
 Arrowhead Framework's security is relying on SSL Certificate Trust Chains. The Arrowhead trust chain consists of three level:
 1) Master certificate: `arrowhead.eu`
-2) Cloud certificate: `my_cloud.my_company.arrowhead.eu`
-3) Client certificate: `my_client.my_cloud.my_company.arrowhead.eu`
+2) Cloud certificate: `my-cloud.my-company.arrowhead.eu`
+3) Client certificate: `my-client.my-cloud.my-company.arrowhead.eu`
 The certificate naming convention have strict rules:
 * The different parts are delimited by dots, therefore parts are not allowed to contain any of them.
+* A single part is allowed to contain maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).
 * A cloud certificate name has to consist of four part and the last two part have to be 'arrowhead' and 'eu'.
 * A client certificate name has to consist of five part and the last two part have to be 'arrowhead' and 'eu'. 
 
@@ -476,10 +484,15 @@ The Key-Store is intended to store the certificates and/or key-pair certificates
 The Trust-Store is containing those certificates, what the web-server considers as trusted ones. Arrowhead Framework is designed for handling the `p12` type of Trust-Stores. Typically your Trust-Store should contain only the cloud certificate, which ensures that only those incoming HTTPS requests are authorized to access, which are having this certificate within their certificate chain.
 
 ### How to create my own certificates?
+
+#### Method A
+
 Currently Arrowhead community have the possibility to create only "self signed" certifications. See the tutorials:
 * [Create Arrowhead Cloud Self Signed Certificate](documentation/certificates/create_cloud_certificate.pdf)
 * [Create Arrowhead Client Self Signed Certificate](documentation/certificates/create_client_certificate.pdf)
 * [Create Trust Store](documentation/certificates/create_trust_store.pdf)
+
+#### Method B
 
 If you wish to generate all Certificates by a script, you can use the scripts in the [scripts/certificate_generation](scripts/certificate_generation) folder.
 
@@ -489,9 +502,15 @@ If you wish to generate all Certificates by a script, you can use the scripts in
 * mk_certs.sh - Usage example
 * rm_certs.sh - Delete generated certs 
 
+#### Method C
+
+You can also use the arrowhead script. For this barely any scripting knowledge is needed, just follow the instructions.
+
+[Arrowhead scripts](documentation/deb-installer/DEBIAN-INSTALL.md#arrowhead-management-script).
+
 ### System Operator Certificate
 
-The System Operator Certificate is a special client certificate with the naming convention of `sysop.my_cloud.my_company.arrowhead.eu`.
+The System Operator Certificate is a special client certificate with the naming convention of `sysop.my-cloud.my-company.arrowhead.eu`.
 SysOp certificate allows the client to use the management endpoints of the Arrowhead Core Systems. Typical usage of SysOp certificate is by front end applications running in a web browser (for example if you want to access the Swagger or use the Management Tool in secure mode.
 * [Import SysOp Certificate (Windows 10)](documentation/certificates/import_sysop_certificate_win10.pdf)
 * [Import SysOp Certificate (macOS)](documentation/certificates/import_sysop_certificate_macos.pdf)
@@ -529,6 +548,13 @@ All work on Arrowhead repositories happens directly on GitHub. Both core team me
 ### Branch Organization
 
 The latest version of the core systems are available in the ```master``` branch. The code for the next release is merged in the ```development``` branch. If you would like to contribute, please check out the ```development``` branch. Create a new branch from ```development```. Don't forget do write documentation, unit and integration tests. When finished, create a pull request back into ```development```. If accepted, your contribution will be in the next release. :)
+
+### Useful Guides about Java Coding Practices
+
+Before you make a pull request, please make sure you clean your code as best as you can. The following resources can help to understand what **clean code** means:
+
+* [Clean Coding in Java](https://www.baeldung.com/java-clean-code)
+* [A short summary of Java Coding best practices](https://medium.com/@rhamedy/a-short-summary-of-java-coding-best-practices-31283d0167d3)
 
 ### Bugs
 
@@ -729,7 +755,7 @@ __ServiceQueryForm__ is the input
 | `minVersionRequirement` | Minimum version requirement | no |
 | `pingProviders` | Return only available providers | no |
 
-> **Note:** Valid `interfaceRequirements` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTPS-SECURE-JSON)
+> **Note:** Valid `interfaceRequirements` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTP-SECURE-JSON)
 
 > **Note:** Possible values for `securityRequirements` are:
 > * `NOT_SECURE`
@@ -855,7 +881,7 @@ __ServiceRegistryEntry__ is the input
 | `version` | Version of the Service | no |
 | `interfaces` | List of the interfaces the Service supports | yes |
 
-> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTPS-SECURE-JSON)
+> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTP-SECURE-JSON)
 
 > **Note:** `authenticationInfo` is the public key of the system. In Insecure mode you can omit sending this key.
 
@@ -1112,7 +1138,7 @@ __ServiceRegistryEntry__ is the input
 | `version` | Version of the Service | no |
 | `interfaces` | List of the interfaces the Service supports | yes |
 
-> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTPS-SECURE-JSON)
+> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTP-SECURE-JSON)
 
 > **Note:** Possible values for `secure` are:
 > * `NOT_SECURE` (default value if field is not defined)
@@ -1297,7 +1323,7 @@ __ServiceRegistryEntry__ is the input
 | `version` | Version of the Service | no |
 | `interfaces` | List of the interfaces the Service supports | yes |
 
-> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTPS-SECURE-JSON)
+> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTP-SECURE-JSON)
 
 > **Note:** Possible values for `secure` are:
 > * `NOT_SECURE` (default value if field is not defined)
@@ -1411,7 +1437,7 @@ __ServiceRegistryEntry__ is the input
 | `version` | Version of the Service | no |
 | `interfaces` | List of the interfaces the Service supports | no |
 
-> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTPS-SECURE-JSON)
+> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTP-SECURE-JSON)
 
 > **Note:** Possible values for `secure` are:
 > * `NOT_SECURE` (default value if field is not defined)
@@ -3567,7 +3593,7 @@ Returns an __Orchestration Response__
 
 ### Start store Orchestration by ID
 ```
-GET /orchestrator/rchestration/{id}
+GET /orchestrator/orchestration/{id}
 ```
 
 If the consumer knows its' ID, it can used this service as shortcut for store-based orchestration when
@@ -4780,6 +4806,395 @@ __Delete subscription parameters__  the input :
 ### Publish Auth Update <br />
 
 This service can only be used by other core services, therefore this is not part of the public API.    
+
+<a name="datamanager" />
+
+# DataManager
+
+<a name="datamanager_sdd" />
+
+## System Design Description Overview
+
+The purpose of DataManager supporting core system is to provide storage of sensor data.
+
+
+The DataManager provides features for producers and consumers to:
+* Store SenML sensor and actuator data,
+* Fetch cached data,
+* and perform database queries.
+
+Type support data model is SenML https://tools.ietf.org/html/rfc8428
+
+<a name="datamanager_sysd" />
+
+## System Design Overview
+
+<a name="datamanager_provided_services" />
+
+## Provided services
+
+The DataManager provides the following services:
+* [Echo](#datamanager_endpoints_get_echo)
+* [Historian](#datamanager_endpoints_historian)
+* [Proxy](#datamanager_endpoints_proxy)
+
+<a name="datamanager_consumed_services" />
+
+## Consumed services
+
+The DataManager consumes the following services:
+
+None currently, but will consume Orchestration later on.
+
+<a name="datamanager_usecases" />
+
+## Use cases
+
+The DataManager has the following use cases:
+* [Update cache message](documentation/datamanager/use_cases/DM_use_case_1.md)
+* [Fetch cache message](documentation/datamanager/use_cases/DM_use_case_2.md)
+* [Update stored message](documentation/datamanager/use_cases/DM_use_case_3.md)
+* [Fetch stored message](documentation/datamanager/use_cases/DM_use_case_4.md)
+
+<a name="datamanager_endpoints_historian" />
+
+## Endpoints
+
+Swagger API documentation is available on: `https://<host>:<port>` <br />
+The base URL for the requests: `http://<host>:<port>/datamanager`
+
+<a name="datamanager_endpoints_client" />
+
+### Client endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#datamanager_endpoints_get_echo) | /echo | GET    | -    | OK     |
+| [Get system list](#datamanager_histendpoints_getsys) | /historian | GET    | -    | SystemList     |
+| [Get service list](#datamanager_histendpoints_getsrv_from_sys) | /historian/{systemName} | GET    | -    | ServiceList |
+| [Fetch data from db](#datamanager_histendpoints_getdb) | /historian/{systemName}/{serviceName} | GET    | -   | SenML |
+| [Store data in db](#datamanager_histendpoints_storedb) | /historian/{systemName}/{serviceName} | PUT    | SenML   | - |
+| [Get system list](#datamanager_proxyendpoints_getsys) | /proxy | GET    | -    | SystemList     |
+| [Get service list](#datamanager_proxyendpoints_getsrv_from_sys) | /proxy/{systemName} | GET    | -    | ServiceList |
+| [Fetch data from cache](#datamanager_proxyendpoints_fetchdata) | /proxy/{systemName}/{serviceName} | GET    | -   | SenML |
+| [Store data in cache](#datamanager_proxyendpoints_storedata) | /proxy/{systemName}/{serviceName} | PUT    | SenML   | - |
+
+<a name="datamanager_endpoints_get_echo" />
+
+### Echo
+```
+GET /datamanager/echo
+```
+
+Returns a "Got it!" message with the purpose of testing the system availability.
+
+<a name="datamanager_proxyendpoints_getsys" />
+
+### Get system list
+```
+GET /datamanager/proxy/
+```
+
+Returns a list of all systems that have at least one active service endpoint.
+
+<a name="datamanager_getsyslist_response" />
+
+__GetSystemListResponse__ output:
+
+```json
+
+{
+  "systems": ["systemName1", "systemNameX"]
+}
+
+```
+
+<a name="datamanager_proxyendpoints_getsrv_from_sys" />
+
+### Get service list
+```
+GET /datamanager/proxy/{systemName}
+```
+
+Returns a list of all service endpoints that are active.
+
+<a name="datamanager_proxygetsrvlist_response" />
+
+__GetServicesResponse__ output:
+
+```json
+
+{
+  "services": ["serviceDefinition1", "serviceDefinitionX"]
+}
+
+```
+
+<a name="datamanager_proxyendpoints_fetchdata" />
+
+### Fetch data from cache
+```
+GET /datamanager/proxy/{systemName}/{serviceName}
+```
+
+Returns sensor data from a service endpoint from the cache.
+
+<a name="datamanager_proxygetsrvdata_response" />
+
+__GetServiceDataResponse__ output:
+
+```json
+
+[
+  {
+    "bn": "string",
+    "bt": 0.0,
+    "bu": "string",
+    "bver": 0
+  }, {
+    "n": "string",
+    "t": 0.0,
+    "u": "string",
+    "v": 0.0,
+    "vs": "string",
+    "vb": false,
+    "vd": "string"
+  }
+]
+```
+
+<a name="datamanager_proxyendpoints_storedata" />
+
+### Store data in cache
+```
+PUT /datamanager/proxy/{systemName}/{serviceName}
+```
+
+Stores sensor data in a service endpoint in the proxy cache.
+
+<a name="datamanager_putsrvdata_request" />
+
+__PutServiceDataRequest__ input:
+
+```json
+
+[
+  {
+    "bn": "string",
+    "bt": 0.0,
+    "bu": "string",
+    "bver": 0
+  }, {
+    "n": "string",
+    "t": 0.0,
+    "u": "string",
+    "v": 0.0,
+    "vs": "string",
+    "vb": false,
+    "vd": "string"
+  }
+]
+```
+
+
+<a name="datamanager_histendpoints_getsys" />
+
+### Get system list
+```
+GET /datamanager/historian
+```
+
+Returns a list of all systems that have at least one service endpoint in the database.
+
+<a name="datamanager_getsyslist_response" />
+
+__GetSystemListResponse__ output:
+
+```json
+
+{
+  "systems": ["systemName1", "systemNameX"]
+}
+
+```
+
+<a name="datamanager_histendpoints_getsrv_from_sys" />
+
+### Get service list
+```
+GET /datamanager/historian/{systemName}
+```
+
+Returns a list of all service endpoints that have data stored in the database.
+
+<a name="datamanager_histgetsrvlist_response" />
+
+__GetServicesResponse__ output:
+
+```json
+
+{
+  "services": ["serviceDefinition1", "serviceDefinitionX"]
+}
+
+```
+
+<a name="datamanager_histendpoints_getdb" />
+
+### Fetch data from db
+```
+GET /datamanager/historian/{systemName}/{serviceName}
+```
+
+Returns sensor data from a service endpoint from the database.
+
+<a name="datamanager_histgetsrvdata_response" />
+
+__GetServiceDataResponse__ output:
+
+```json
+
+[
+  {
+    "bn": "string",
+    "bt": 0.0,
+    "bu": "string",
+    "bver": 0
+  }, {
+    "n": "string",
+    "t": 0.0,
+    "u": "string",
+    "v": 0.0,
+    "vs": "string",
+    "vb": false,
+    "vd": "string"
+  }
+]
+```
+
+<a name="datamanager_histendpoints_storedb" />
+
+### Store data in db
+```
+PUT /datamanager/historian/{systemName}/{serviceName}
+```
+
+Stores sensor data in a service endpoint in the database.
+
+<a name="datamanager_putsrvdata_request" />
+
+__PutServiceDataRequest__ input:
+
+```json
+
+[
+  {
+    "bn": "string",
+    "bt": 0.0,
+    "bu": "string",
+    "bver": 0
+  }, {
+    "n": "string",
+    "t": 0.0,
+    "u": "string",
+    "v": 0.0,
+    "vs": "string",
+    "vb": false,
+    "vd": "string"
+  }
+]
+```
+
+<a name="timemanager" />
+
+# TimeManager
+
+<a name="timemanager_sdd" />
+
+## System Design Description Overview
+
+The purpose of TimeManager supporting core system is to provide time and location based services.
+
+The TimeManager provides features for a local cloud systems to :
+* Fetch accurate and trusted time and location information,
+
+
+<a name="timemanager_sysd" />
+
+## System Design Overview
+
+<a name="timemanager_provided_services" />
+
+## Provided services
+
+The TimeManager provides the following services:
+* [Echo](#timemanager_endpoints_get_echo)
+* [Time](#timemanager_endpoints_time)
+
+<a name="timemanager_consumed_services" />
+
+## Consumed services
+
+The TimeManager consumes the following services:
+
+None currently, but will consume Orchestration later on.
+
+<a name="timemanager_usecases" />
+
+## Use cases
+
+The TimeManager has the following use cases:
+* [Fetch trusted time](documentation/timemanager/use_cases/TM_use_case_1.md)
+
+<a name="timemanager_endpoints" />
+
+## Endpoints
+
+Swagger API documentation is available on: `https://<host>:<port>` <br />
+The base URL for the requests: `http://<host>:<port>/timemanager`
+
+<a name="timemanager_endpoints_client" />
+
+### Client endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#timemanager_endpoints_get_echo) | /echo | GET    | -    | OK     |
+| [Time](#timemanager_endpoints_get_time) | /time | GET    | -    | TimeResponse  |
+
+<a name="timemanager_endpoints_get_echo" />
+
+### Echo
+```
+GET /timemanager/echo
+```
+
+Returns a "Got it!" message with the purpose of testing the system availability.
+
+<a name="timemanager_endpoints_get_time" />
+
+### Get trusted time and location
+```
+GET /timemanager/time
+```
+
+Returns time stamps (UNIX in seconds and millseconds), time zone ("Europe/Budapest"), Daylist savings active (true/false) and if the time is trusted (true/false).
+
+<a name="timemanager_gettime_response" />
+
+__TimeResponse__ output:
+
+```json
+
+{
+  "epoch": 1627844812,
+  "epochMs": 1627844812102,
+  "tz": "string",
+  "dst": true,
+  "trusted": true
+}
+
+```
 
 # Gatekeeper 
 
@@ -7942,3 +8357,51 @@ Signs the CSR, registers the device and eventually returns a device certificate 
 | `publicKey` | Base64 encoded public key |
 
 Additionally all fields from [SystemRegistryEntry](#datastructures_systemregistryentry) are returned.
+
+
+
+
+
+# Plant Description Engine
+ 
+This supporting core system has the purpose of choreographing the consumers and producers in the plant (System of Systems / Local cloud).
+An abstract view, on which systems the plant contains and how they are connected as consumers and producers, is used to populate the [Orchestrator](#orchestrator) with store rules for each of the consumers. The abstract view does not contain any instance specific information, instead meta-data about each system is used to identify the service producers.
+
+The plant description engine (PDE) can be configured with several variants of the plant description of which at most one can be active. The active plant description is used to populate the orchestrator and if no plant description is active the orchestrator does not contain any store rules populated by the PDE. This can be used to establish alternativ plants (plan A, plan B, etc).
+
+The PDE gathers information about the presence of all specified systems in the active plant description. If a system is not present it raises an alarm. If it detects that an unknown system has registered a service in the service registry it also raises an alarm. For a consumer system to be monitored the system must produce the [Monitorable] service and hence also register in the service registry.
+
+Please see the [Plant Description Engine - System of systems Description (SosD)] and [Plant Description Engine HTTP(S)/JSON - System Description (SysD)] for further details.
+
+## Services
+
+The PDE produces two different services:
+ + the [Plant Description Management] service - [Plant Description Management JSON]
+ + the [Plant Description Monitor] service - [Plant Description Monitor JSON]
+ 
+The PDE consumes the following services:
+ + the [Service Discovery] service produced by the [Service Registry] core system
+ + the [Orchestration Store Management] service produced by the [Orchestrator] core system
+ + the [Orchestration] service produced by the [Orchestrator] core system
+ + the [Inventory] service produced by an Inventory system - [Inventory JSON]
+ + the [Monitorable] service produced by the systems in the plant - [Monitorable JSON]
+    
+  
+[Authorization]:README.md#authorization
+[AuthorizationControl]:README.md#authorization
+[Inventory]:documentation/plant-description-engine/inventory-sd.md
+[Inventory JSON]:documentation/plant-description-engine/inventory-idd-http-json.md
+[Monitorable]:documentation/plant-description-engine/monitorable-sd.md
+[Monitorable JSON]:documentation/plant-description-engine/monitorable-idd-http-json.md
+[Orchestrator]:README.md#orchestrator
+[Orchestration]:README.md#orchestrator
+[Orchestration Store Management]:README.md#orchestrator
+[Plant Description Monitor]:documentation/plant-description-engine/plant-description-monitor-sd.md
+[Plant Description Monitor JSON]:documentation/plant-description-engine/plant-description-monitor-idd-http-json.md
+[Plant Description Management]:documentation/plant-description-engine/plant-description-management-sd.md
+[Plant Description Management JSON]:documentation/plant-description-engine/plant-description-management-idd-http-json.md
+[Plant Description Engine HTTP(S)/JSON - System Description (SysD)]:documentation/plant-description-engine/plant-description-engine-sysd.md
+[Plant Description Engine - System of systems Description (SosD)]:documentation/plant-description-engine/plant-description-engine-sosd.md
+[Service Discovery]:README.md#serviceregistry_usecases
+[Service Registry]:README.md#serviceregistry
+  

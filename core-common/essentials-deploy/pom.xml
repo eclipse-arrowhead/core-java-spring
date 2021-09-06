@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+  
+	<groupId>ai.aitia</groupId>
+	<artifactId>arrowhead-core-common-essentials-java-spring</artifactId>
+	<version>VERSION</version>
+  
+	<name>Arrowhead Core Common Essentials for Java Spring</name>
+	<description>Extracted components from Arrowhead Core Common for application systems</description>
+	<url>https://github.com/eclipse-arrowhead/core-java-spring</url>
+  
+	<licenses>
+    	<license>
+	     	<name>Eclipse Public License - v 2.0</name>
+			<url>https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt</url>
+		</license>
+	</licenses>
+  
+	<developers>
+		<developer>
+			<name>Tamas Bordi</name>
+			<email>tbordi@aitia.ai</email>
+			<organization>AITIA International Inc.</organization>
+			<organizationUrl>http://www.aitia.ai/</organizationUrl>
+		</developer>
+		<developer>
+			<name>Gabor Majoros</name>
+			<email>gmajoros@aitia.ai</email>
+			<organization>AITIA International Inc.</organization>
+			<organizationUrl>http://www.aitia.ai/</organizationUrl>
+		</developer>
+		<developer>
+			<name>Rajmund Bocsi</name>
+			<email>rbocsi@aitia.ai</email>
+			<organization>AITIA International Inc.</organization>
+			<organizationUrl>http://www.aitia.ai/</organizationUrl>
+		</developer>
+		<developer>
+			<name>Szvetlin Tanyi</name>
+			<email>szvetlin@aitia.ai</email>
+			<organization>AITIA International Inc.</organization>
+			<organizationUrl>http://www.aitia.ai/</organizationUrl>
+		</developer>
+	</developers>
+	
+	<scm>
+		<connection>scm:git:git://github.com/eclipse-arrowhead/core-java-spring.git</connection>
+		<developerConnection>scm:git:ssh://github.com:eclipse-arrowhead/core-java-spring.git</developerConnection>
+		<url>http://github.com/eclipse-arrowhead/core-java-spring/tree/master</url>
+	</scm>
+</project>

@@ -79,7 +79,7 @@ public class DefaultSwaggerConfig implements WebMvcConfigurer {
 						   "This page shows the REST interfaces offered by the " + coreSystemName + " Core System.",
 						   "",
 						   "",
-						   new Contact("Arrowhead Consortia", "https://github.com/arrowhead-f", ""),
+						   new Contact("Arrowhead Consortia", "https://github.com/eclipse-arrowhead", ""),
 						   "",
 						   "",
 						   Collections.emptyList());

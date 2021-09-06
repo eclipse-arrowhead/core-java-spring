@@ -27,7 +27,6 @@ import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.icmp4j.IcmpPingResponse;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -55,6 +54,7 @@ import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
+import eu.arrowhead.core.qos.dto.IcmpPingResponse;
 import eu.arrowhead.core.qos.dto.PingMeasurementCalculationsDTO;
 import eu.arrowhead.core.qos.measurement.properties.InterPingMeasurementProperties;
 import eu.arrowhead.core.qos.service.PingService;
@@ -154,7 +154,6 @@ public class CloudPingTask implements Job {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@SuppressWarnings("unchecked")
 	private boolean checkRequiredCoreSystemServiceUrisAvailable() {
 		logger.debug("checkRequiredCoreSystemServiceUrisAvailable started...");
 		for (final CoreSystemService coreSystemService : REQUIRED_CORE_SERVICES) {
@@ -193,10 +192,8 @@ public class CloudPingTask implements Job {
 
 		final Set<CloudResponseDTO> clouds = new HashSet<>();
 		for (final CloudWithRelaysAndPublicRelaysResponseDTO cloudWithRelay : responseDTO.getData()) {
-
 			if (cloudWithRelay != null && !cloudWithRelay.getOwnCloud()) {
-				if( cloudIsDirectlyAccessable(cloudWithRelay, cloudAccessResponseDTOList)) {
-
+				if (cloudIsDirectlyAccessable(cloudWithRelay, cloudAccessResponseDTOList)) {
 					clouds.add(cloudWithRelay);
 				}
 			}
@@ -206,16 +203,13 @@ public class CloudPingTask implements Job {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private boolean cloudIsDirectlyAccessable(final CloudWithRelaysAndPublicRelaysResponseDTO cloudWithRelay,
-			final List<CloudAccessResponseDTO> cloudAccessResponseDTOList) {
+	private boolean cloudIsDirectlyAccessable(final CloudWithRelaysAndPublicRelaysResponseDTO cloudWithRelay, final List<CloudAccessResponseDTO> cloudAccessResponseDTOList) {
 		logger.debug("cloudIsDirectlyAccessable started...");
 
 		for (final CloudAccessResponseDTO cloudAccessResponseDTO : cloudAccessResponseDTOList) {
-
 			if (cloudAccessResponseDTO != null && cloudAccessResponseDTO.isDirectAccess()) {
-				if ( (cloudWithRelay.getName().equalsIgnoreCase(cloudAccessResponseDTO.getCloudName())) && 
-						(cloudWithRelay.getOperator().equalsIgnoreCase(cloudAccessResponseDTO.getCloudOperator())) ) {
-
+				if ((cloudWithRelay.getName().equalsIgnoreCase(cloudAccessResponseDTO.getCloudName())) && 
+						(cloudWithRelay.getOperator().equalsIgnoreCase(cloudAccessResponseDTO.getCloudOperator()))) {
 					return true;
 				}
 			}
@@ -241,9 +235,7 @@ public class CloudPingTask implements Job {
 				cloudToMeasure = cloudResponseDTO;
 				cloudToMeasureFound = true;
 				break;
-
-			}else {
-
+			} else {
 				ZonedDateTime min = ZonedDateTime.now();
 				for (final QoSInterDirectMeasurement qoSInterMeasurement : measurementList) {
 					if (qoSInterMeasurement.getUpdatedAt().isBefore(min)) {
@@ -273,6 +265,8 @@ public class CloudPingTask implements Job {
 	private PingMeasurementCalculationsDTO calculatePingMeasurementValues(final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
 		logger.debug("calculatePingMeasurementValues started...");
 
+		Assert.notNull(responseList, "ResponseList is null");
+		Assert.notNull(aroundNow, "AroundNow is null");
 		final int sentInThisPing = responseList.size();
 		Assert.isTrue(sentInThisPing > 0, "Sent in this Ping value must be greater than zero");
 
@@ -286,8 +280,7 @@ public class CloudPingTask implements Job {
 		int meanResponseTimeWithoutTimeoutMembersCount = 0;
 
 		for (final IcmpPingResponse icmpPingResponse : responseList) {
-
-			final boolean successFlag = icmpPingResponse.getSuccessFlag();
+			final boolean successFlag = icmpPingResponse.isSuccessFlag();
 
 			if (successFlag) {
 				++receivedInThisPing;
@@ -304,7 +297,6 @@ public class CloudPingTask implements Job {
 				sumOfDurationForMeanResponseTimeWithoutTimeout += duration;
 				sumOfDurationForMeanResponseTimeWithTimeout += duration;
 				++meanResponseTimeWithoutTimeoutMembersCount;
-
 			} else {
 				sumOfDurationForMeanResponseTimeWithTimeout += timeout;
 			}
@@ -319,8 +311,7 @@ public class CloudPingTask implements Job {
 		double sumOfDiffsForJitterWithTimeout = 0;
 		double sumOfDiffsForJitterWithoutTimeout = 0;
 		for (final IcmpPingResponse icmpPingResponse : responseList) {
-
-			final boolean successFlag = icmpPingResponse.getSuccessFlag();
+			final boolean successFlag = icmpPingResponse.isSuccessFlag();
 			final double duration;
 			if (successFlag) {
 				 duration = icmpPingResponse.getDuration();
@@ -331,6 +322,7 @@ public class CloudPingTask implements Job {
 
 			sumOfDiffsForJitterWithTimeout += Math.pow( (duration - meanResponseTimeWithTimeout), 2);
 		}
+		
 		final double jitterWithTimeout = responseList.size() < 1 ? INVALID_CALCULATION_VALUE : Math.sqrt(sumOfDiffsForJitterWithTimeout / responseList.size());
 		final double jitterWithoutTimeout =  meanResponseTimeWithoutTimeoutMembersCount < 1 ? INVALID_CALCULATION_VALUE : Math.sqrt(sumOfDiffsForJitterWithoutTimeout / meanResponseTimeWithoutTimeoutMembersCount );
 
@@ -357,6 +349,9 @@ public class CloudPingTask implements Job {
 		final ZonedDateTime aroundNow = ZonedDateTime.now();
 
 		final List<IcmpPingResponse> responseList = pingService.getPingResponseList(address);
+		if(responseList == null) {
+			throw new ArrowheadException("Ping Service response is null");
+		}
 
 		final QoSInterDirectMeasurement measurement = qoSDBService.getOrCreateDirectInterMeasurement(address, cloud, QoSMeasurementType.PING);
 		final PingMeasurementCalculationsDTO calculationsDTO = handleInterPingMeasurement(measurement, responseList, aroundNow);
@@ -368,8 +363,7 @@ public class CloudPingTask implements Job {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private PingMeasurementCalculationsDTO handleInterPingMeasurement(final QoSInterDirectMeasurement measurement,
-			final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
+	private PingMeasurementCalculationsDTO handleInterPingMeasurement(final QoSInterDirectMeasurement measurement, final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
 		logger.debug("handelPingMeasurement started...");
 
 		final PingMeasurementCalculationsDTO calculationsDTO = calculatePingMeasurementValues(responseList, aroundNow);
@@ -380,25 +374,19 @@ public class CloudPingTask implements Job {
 			qoSDBService.createInterDirectPingMeasurement(measurement, calculationsDTO, aroundNow);
 
 			if (pingMeasurementProperties.getLogMeasurementsToDB()) {
-
 				final QoSInterDirectPingMeasurementLog measurementLogSaved = qoSDBService.logInterDirectMeasurementToDB(measurement.getAddress(), calculationsDTO, aroundNow);
 
 				if (pingMeasurementProperties.getLogMeasurementsDetailsToDB() && measurementLogSaved != null) {
-
 					qoSDBService.logInterDirectMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
 				}
 			}
-
 		} else {
-
 			qoSDBService.updateInterDirectPingMeasurement(measurement, calculationsDTO, pingMeasurementOptional.get(), aroundNow);
 
-			if(pingMeasurementProperties.getLogMeasurementsToDB()) {
-
+			if (pingMeasurementProperties.getLogMeasurementsToDB()) {
 				final QoSInterDirectPingMeasurementLog measurementLogSaved = qoSDBService.logInterDirectMeasurementToDB(measurement.getAddress(), calculationsDTO, aroundNow);
 
-				if(pingMeasurementProperties.getLogMeasurementsDetailsToDB() && measurementLogSaved != null) {
-
+				if (pingMeasurementProperties.getLogMeasurementsDetailsToDB() && measurementLogSaved != null) {
 					qoSDBService.logInterDirectMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
 				}
 			}
@@ -416,5 +404,4 @@ public class CloudPingTask implements Job {
 
 		return availableFromSuccessPercent <= Math.round(availablePercent);
 	}
-
 }

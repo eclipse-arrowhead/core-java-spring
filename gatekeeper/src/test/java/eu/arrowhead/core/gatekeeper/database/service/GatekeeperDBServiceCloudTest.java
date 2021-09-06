@@ -22,10 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -38,6 +40,7 @@ import eu.arrowhead.common.database.repository.RelayRepository;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 
 @RunWith(SpringRunner.class)
 public class GatekeeperDBServiceCloudTest {
@@ -59,6 +62,9 @@ public class GatekeeperDBServiceCloudTest {
 	
 	@Mock
 	private CloudGatewayRelayRepository cloudGatewayRelayRepository;
+	
+	@Spy
+	private CommonNamePartVerifier cnVerifier;
 	
 	//=================================================================================================
 	// methods
@@ -181,17 +187,23 @@ public class GatekeeperDBServiceCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testRegisterBulkCloudsWithRelaysWithOperatorContainsDot() {
+	public void testRegisterBulkCloudsWithRelaysWithWrongOperator() {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
-		cloudRequestDTO.setOperator("operator.");
+		cloudRequestDTO.setOperator("wrong.operator");
 		cloudRequestDTO.setName("name");
 		cloudRequestDTO.setSecure(true);
 		cloudRequestDTO.setNeighbor(true);
 		cloudRequestDTO.setAuthenticationInfo("yfbgfbngfs");
 		cloudRequestDTO.setGatewayRelayIds(new ArrayList<>());
 		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
-				
-		gatekeeperDBService.registerBulkCloudsWithRelays(dtoList);
+		
+		try {
+			gatekeeperDBService.registerBulkCloudsWithRelays(dtoList);
+		} catch (final InvalidParameterException ex) {
+			Assert.assertEquals("Operator has invalid format. Name must match with the following regular expression: " + CommonNamePartVerifier.COMMON_NAME_PART_PATTERN_STRING, ex.getMessage());
+			
+			throw ex;
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -226,17 +238,23 @@ public class GatekeeperDBServiceCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testRegisterBulkCloudsWithRelaysWithNameContainsDot() {
+	public void testRegisterBulkCloudsWithRelaysWithWrongName() {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("operator");
-		cloudRequestDTO.setName("name.");
+		cloudRequestDTO.setName("wrong name");
 		cloudRequestDTO.setSecure(true);
 		cloudRequestDTO.setNeighbor(true);
 		cloudRequestDTO.setAuthenticationInfo("yfbgfbngfs");
 		cloudRequestDTO.setGatewayRelayIds(new ArrayList<>());
 		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
-				
-		gatekeeperDBService.registerBulkCloudsWithRelays(dtoList);
+		
+		try {
+			gatekeeperDBService.registerBulkCloudsWithRelays(dtoList);
+		} catch (final InvalidParameterException ex) {
+			Assert.assertEquals("Name has invalid format. Name must match with the following regular expression: " + CommonNamePartVerifier.COMMON_NAME_PART_PATTERN_STRING, ex.getMessage());
+			
+			throw ex;
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -568,20 +586,26 @@ public class GatekeeperDBServiceCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testUpdateCloudByIdWithRelaysWithOperatorContainsDot() {
+	public void testUpdateCloudByIdWithRelaysWithWrongOperator() {
 		final Cloud cloud = new Cloud("originalOperator", "originalName", true, true, false, "originalAuthInfo");
 		cloud.setId(1);
 		
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
-		cloudRequestDTO.setOperator("updatedOperator.");
-		cloudRequestDTO.setName("updatedName");
+		cloudRequestDTO.setOperator("wrong.operator");
+		cloudRequestDTO.setName("name");
 		cloudRequestDTO.setSecure(true);
 		cloudRequestDTO.setNeighbor(true);
 		cloudRequestDTO.setAuthenticationInfo("yfbgfbngfs");
-				
+		
 		when(cloudRepository.findById(anyLong())).thenReturn(Optional.of(cloud));
 		
-		gatekeeperDBService.updateCloudByIdWithRelays(1, cloudRequestDTO);
+		try {
+			gatekeeperDBService.updateCloudByIdWithRelays(1, cloudRequestDTO);
+		} catch (final InvalidParameterException ex) {
+			Assert.assertEquals("Operator has invalid format. Name must match with the following regular expression: " + CommonNamePartVerifier.COMMON_NAME_PART_PATTERN_STRING, ex.getMessage());
+			
+			throw ex;
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -622,22 +646,28 @@ public class GatekeeperDBServiceCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testUpdateCloudByIdWithRelaysWithNameContainsDot() {
+	public void testUpdateCloudByIdWithRelaysWithWrongName() {
 		final Cloud cloud = new Cloud("originalOperator", "originalName", true, true, false, "originalAuthInfo");
 		cloud.setId(1);
 		
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("updatedOperator");
-		cloudRequestDTO.setName("updatedName.");
+		cloudRequestDTO.setName("1name-");
 		cloudRequestDTO.setSecure(true);
 		cloudRequestDTO.setNeighbor(true);
 		cloudRequestDTO.setAuthenticationInfo("yfbgfbngfs");
-				
+		
 		when(cloudRepository.findById(anyLong())).thenReturn(Optional.of(cloud));
 		
-		gatekeeperDBService.updateCloudByIdWithRelays(1, cloudRequestDTO);
+		try {
+			gatekeeperDBService.updateCloudByIdWithRelays(1, cloudRequestDTO);
+		} catch (final InvalidParameterException ex) {
+			Assert.assertEquals("Name has invalid format. Name must match with the following regular expression: " + CommonNamePartVerifier.COMMON_NAME_PART_PATTERN_STRING, ex.getMessage());
+			
+			throw ex;
+		}
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testUpdateCloudByIdWithRelaysWithSecureCloudButWithNullAuthInfo() {

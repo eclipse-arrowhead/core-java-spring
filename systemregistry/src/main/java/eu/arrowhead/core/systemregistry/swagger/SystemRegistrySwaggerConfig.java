@@ -30,7 +30,7 @@ public class SystemRegistrySwaggerConfig extends DefaultSwaggerConfig {
 
 	//-------------------------------------------------------------------------------------------------
 	public SystemRegistrySwaggerConfig() {
-		super(CommonConstants.CORE_SYSTEM_SYSTEM_REGISTRY);
+		super(CommonConstants.CORE_SYSTEM_SYSTEMREGISTRY);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

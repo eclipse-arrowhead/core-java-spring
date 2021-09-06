@@ -36,8 +36,9 @@ public class DeviceRegistryApplicationInitListener extends ApplicationInitListen
         }
     }
 
-    @Override
+    //-------------------------------------------------------------------------------------------------
+	@Override
     protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
-        return List.of(CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.CERTIFICATE_AUTHORITY_SIGN_SERVICE);
+        return List.of(CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.CERTIFICATEAUTHORITY_SIGN_SERVICE);
     }
 }
