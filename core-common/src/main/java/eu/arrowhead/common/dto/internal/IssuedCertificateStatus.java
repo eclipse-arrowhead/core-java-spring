@@ -19,14 +19,20 @@ public enum IssuedCertificateStatus {
     GOOD("good"),
     REVOKED("revoked"),
     EXPIRED("expired");
+	
+	//=================================================================================================
+	// methods
 
-    IssuedCertificateStatus(String name) {
+    //-------------------------------------------------------------------------------------------------
+	IssuedCertificateStatus(final String name) {
         this.name = name;
     }
 
-    public String toString() {
-        return name;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public String toString() { return name; }
+	
+	//=================================================================================================
+	// members
 
     private final String name;
 }

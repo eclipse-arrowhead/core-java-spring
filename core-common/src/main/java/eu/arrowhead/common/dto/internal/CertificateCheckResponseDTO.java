@@ -17,22 +17,32 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.math.BigInteger;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class CertificateCheckResponseDTO implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-
-    private int version;
+	//=================================================================================================
+	// members
+	
+	private static final long serialVersionUID = 1474805207746099331L;
+	
+	private int version;
     private String producedAt;
     private String endOfValidity;
     private String commonName;
     private BigInteger serialNumber;
     private IssuedCertificateStatus status;
 
-    public CertificateCheckResponseDTO() {
-    }
+    //=================================================================================================
+	// methods
+    
+    //-------------------------------------------------------------------------------------------------
+	public CertificateCheckResponseDTO() {}
 
-    public CertificateCheckResponseDTO(int version, String producedAt, String endOfValidity, String commonName,
-                                       BigInteger serialNumber, IssuedCertificateStatus status) {
+    //-------------------------------------------------------------------------------------------------
+	public CertificateCheckResponseDTO(final int version, final String producedAt, final String endOfValidity, final String commonName,
+                                       final BigInteger serialNumber, final IssuedCertificateStatus status) {
         this.version = version;
         this.producedAt = producedAt;
         this.endOfValidity = endOfValidity;
@@ -41,51 +51,29 @@ public class CertificateCheckResponseDTO implements Serializable {
         this.status = status;
     }
 
-    public int getVersion() {
-        return version;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public int getVersion() { return version; }
+	public String getProducedAt() { return producedAt; }
+	public String getEndOfValidity() { return endOfValidity; }
+	public String getCommonName() { return commonName; }
+	public BigInteger getSerialNumber() { return serialNumber; }
+	public IssuedCertificateStatus getStatus() { return status; }
 
-    public void setVersion(int version) {
-        this.version = version;
-    }
-
-    public String getProducedAt() {
-        return producedAt;
-    }
-
-    public void setProducedAt(String producedAt) {
-        this.producedAt = producedAt;
-    }
-
-    public String getEndOfValidity() {
-        return endOfValidity;
-    }
-
-    public void setEndOfValidity(String endOfValidity) {
-        this.endOfValidity = endOfValidity;
-    }
-
-    public String getCommonName() {
-        return commonName;
-    }
-
-    public void setCommonName(String commonName) {
-        this.commonName = commonName;
-    }
-
-    public BigInteger getSerialNumber() {
-        return serialNumber;
-    }
-
-    public void setSerialNumber(BigInteger serialNumber) {
-        this.serialNumber = serialNumber;
-    }
-
-    public IssuedCertificateStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(IssuedCertificateStatus status) {
-        this.status = status;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public void setVersion(final int version) { this.version = version; }
+    public void setProducedAt(final String producedAt) { this.producedAt = producedAt; }
+    public void setEndOfValidity(final String endOfValidity) { this.endOfValidity = endOfValidity; }
+    public void setCommonName(final String commonName) { this.commonName = commonName; }
+    public void setSerialNumber(final BigInteger serialNumber) { this.serialNumber = serialNumber; }
+    public void setStatus(final IssuedCertificateStatus status) { this.status = status; }
+    
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

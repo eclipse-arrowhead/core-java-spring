@@ -16,6 +16,9 @@ package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 
 public class CloudSystemFormDTO implements Serializable {
@@ -43,5 +46,15 @@ public class CloudSystemFormDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	public void setCloud(final CloudResponseDTO cloud) { this.cloud = cloud; }
-	public void setSystem(final SystemResponseDTO system) { this.system = system; }	
+	public void setSystem(final SystemResponseDTO system) { this.system = system; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

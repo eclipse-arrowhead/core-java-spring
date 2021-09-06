@@ -19,6 +19,8 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 
@@ -40,6 +42,7 @@ public class AutoCompleteDataResponseDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public AutoCompleteDataResponseDTO() {}
 	
+	//-------------------------------------------------------------------------------------------------
 	public AutoCompleteDataResponseDTO(final List<IdValueDTO> serviceList, final List<SystemResponseDTO> systemList, final List<IdValueDTO> interfaceList) {
 		this.serviceList = serviceList;
 		this.systemList = systemList;
@@ -55,4 +58,14 @@ public class AutoCompleteDataResponseDTO implements Serializable {
 	public void setServiceList(final List<IdValueDTO> serviceList) { this.serviceList = serviceList; }
 	public void setSystemList(final List<SystemResponseDTO> systemList) { this.systemList = systemList; }
 	public void setInterfaceList(final List<IdValueDTO> interfaceList) { this.interfaceList = interfaceList; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

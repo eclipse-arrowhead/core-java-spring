@@ -17,6 +17,9 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.util.Set;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import eu.arrowhead.common.database.entity.Subscription;
 import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
 
@@ -49,4 +52,14 @@ public class EventPublishStartDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public void setRequest(final EventPublishRequestDTO request) { this.request = request; }
 	public void setInvolvedSubscriptions(final Set<Subscription> involvedSubscriptions) { this.involvedSubscriptions = involvedSubscriptions; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }
