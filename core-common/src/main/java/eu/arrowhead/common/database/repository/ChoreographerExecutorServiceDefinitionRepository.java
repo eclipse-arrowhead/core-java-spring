@@ -20,7 +20,7 @@ import eu.arrowhead.common.database.entity.ChoreographerExecutorServiceDefinitio
 import java.util.List;
 import java.util.Optional;
 
-public interface ChoreographerExecutorServiceDefinitionRepository extends RefreshableRepository<ChoreographerExecutorServiceDefinition, Long>{
+public interface ChoreographerExecutorServiceDefinitionRepository extends RefreshableRepository<ChoreographerExecutorServiceDefinition,Long> {
 
     //=================================================================================================
     // methods

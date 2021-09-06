@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -50,12 +51,14 @@ import eu.arrowhead.common.database.entity.ChoreographerPlan;
 import eu.arrowhead.common.database.entity.ChoreographerSession;
 import eu.arrowhead.common.database.entity.ChoreographerSessionStep;
 import eu.arrowhead.common.database.entity.ChoreographerStep;
+import eu.arrowhead.common.database.entity.ChoreographerStepNextStepConnection;
 import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
 import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStatus;
 import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
 import eu.arrowhead.common.dto.internal.TokenDataDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationDetailedResponseDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationMultiServiceResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerAbortStepRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecuteStepRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutedStepResultDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutedStepStatus;
@@ -1331,8 +1334,6 @@ public class ChoreographerServiceTest {
 		final ChoreographerSessionStep sessionStep = new ChoreographerSessionStep();
 		sessionStep.setId(1);
 		sessionStep.setStep(step);
-		final ChoreographerSessionStep prevStep = new ChoreographerSessionStep();
-		prevStep.setStatus(ChoreographerSessionStepStatus.DONE);
 		
 		when(sessionDBService.changeSessionStepStatus(1, ChoreographerSessionStepStatus.DONE, "Step finished successfully.")).thenReturn(sessionStep);
 		when(planDBService.getFirstSteps(any(ChoreographerAction.class))).thenThrow(new ArrowheadException("early end")); // to finish the test earlier
@@ -1349,5 +1350,201 @@ public class ChoreographerServiceTest {
 		}
 	}
 	
-	//TODO test next step
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testReceiveSessionStepDoneCannotStartNextStep() {  
+		final ChoreographerExecutedStepResultDTO payload = new ChoreographerExecutedStepResultDTO();
+		payload.setSessionId(1L);
+		payload.setSessionStepId(1L);
+		payload.setStatus(ChoreographerExecutedStepStatus.SUCCESS);
+		
+		final ChoreographerAction action = new ChoreographerAction();
+		action.setId(11);
+		final ChoreographerStep nextStep = new ChoreographerStep();
+		final ChoreographerStep otherPrevStep = new ChoreographerStep();
+		final ChoreographerStep step = new ChoreographerStep();
+		step.setAction(action);
+		step.setNextStepConnections(Set.of(new ChoreographerStepNextStepConnection(step, nextStep)));
+		
+		nextStep.setPreviousStepConnections(Set.of(new ChoreographerStepNextStepConnection(step, nextStep),
+												   new ChoreographerStepNextStepConnection(otherPrevStep, nextStep)));
+		final ChoreographerSessionStep sessionStep = new ChoreographerSessionStep();
+		sessionStep.setId(1);
+		sessionStep.setStep(step);
+		sessionStep.setStatus(ChoreographerSessionStepStatus.DONE);
+		
+		final ChoreographerSessionStep otherPrevSessionStep = new ChoreographerSessionStep();
+		otherPrevSessionStep.setStatus(ChoreographerSessionStepStatus.RUNNING);
+		
+		when(sessionDBService.changeSessionStepStatus(1, ChoreographerSessionStepStatus.DONE, "Step finished successfully.")).thenReturn(sessionStep);
+		when(sessionDBService.getSessionStepBySessionIdAndSteps(eq(1L), anySet())).thenReturn(List.of(sessionStep, otherPrevSessionStep));
+		
+		testObject.receiveSessionStepDoneMessage(payload);
+
+		verify(sessionDBService, times(1)).changeSessionStepStatus(1, ChoreographerSessionStepStatus.DONE, "Step finished successfully.");
+		verify(sessionDBService, times(1)).getSessionStepBySessionIdAndSteps(eq(1L), anySet());
+		verify(sessionDBService, never()).changeSessionStepStatus(eq(1), any(ChoreographerStep.class), eq(ChoreographerSessionStepStatus.RUNNING), anyString());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ChoreographerSessionException.class)
+	public void testReceiveSessionStepDoneStartNextStep() { // executeStep is already tested with receiveStartSessionMessage, so we just make sure it is called  
+		final ChoreographerExecutedStepResultDTO payload = new ChoreographerExecutedStepResultDTO();
+		payload.setSessionId(1L);
+		payload.setSessionStepId(1L);
+		payload.setStatus(ChoreographerExecutedStepStatus.SUCCESS);
+		
+		final ChoreographerPlan plan = new ChoreographerPlan();
+		plan.setName("plan");
+		final ChoreographerAction action = new ChoreographerAction();
+		action.setId(11);
+		action.setName("action");
+		action.setPlan(plan);
+		final ChoreographerStep nextStep = new ChoreographerStep();
+		nextStep.setName("nextStep");
+		nextStep.setAction(action);
+		final ChoreographerStep otherPrevStep = new ChoreographerStep();
+		final ChoreographerStep step = new ChoreographerStep();
+		step.setAction(action);
+		step.setNextStepConnections(Set.of(new ChoreographerStepNextStepConnection(step, nextStep)));
+		
+		nextStep.setPreviousStepConnections(Set.of(new ChoreographerStepNextStepConnection(step, nextStep),
+												   new ChoreographerStepNextStepConnection(otherPrevStep, nextStep)));
+		final ChoreographerSessionStep sessionStep = new ChoreographerSessionStep();
+		sessionStep.setId(1);
+		sessionStep.setStep(step);
+		sessionStep.setStatus(ChoreographerSessionStepStatus.DONE);
+		
+		final ChoreographerSessionStep otherPrevSessionStep = new ChoreographerSessionStep();
+		otherPrevSessionStep.setStatus(ChoreographerSessionStepStatus.DONE);
+		
+		when(sessionDBService.changeSessionStepStatus(1, ChoreographerSessionStepStatus.DONE, "Step finished successfully.")).thenReturn(sessionStep);
+		when(sessionDBService.getSessionStepBySessionIdAndSteps(eq(1L), anySet())).thenReturn(List.of(sessionStep, otherPrevSessionStep));
+		when(sessionDBService.changeSessionStepStatus(eq(1L), any(ChoreographerStep.class), eq(ChoreographerSessionStepStatus.RUNNING), anyString())).thenThrow(new ArrowheadException("early end")); // to finish the test earlier
+		
+		try {
+			testObject.receiveSessionStepDoneMessage(payload);
+		} catch (final Exception ex) {
+			verify(sessionDBService, times(1)).changeSessionStepStatus(1, ChoreographerSessionStepStatus.DONE, "Step finished successfully.");
+			verify(sessionDBService, times(1)).getSessionStepBySessionIdAndSteps(eq(1L), anySet());
+			verify(sessionDBService, times(1)).changeSessionStepStatus(eq(1L), any(ChoreographerStep.class), eq(ChoreographerSessionStepStatus.RUNNING), anyString());
+			
+			Assert.assertEquals(1, ((ChoreographerSessionException)ex).getSessionId());
+			Assert.assertEquals("early end", ex.getCause().getMessage());
+			
+			throw ex;
+		}
+	}
+	
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testAbortSessionNoNeedToSendAbortMessageToExecutor() {
+		final ChoreographerPlan plan = new ChoreographerPlan();
+		plan.setId(123);
+		plan.setName("plan");
+		final ChoreographerSession session = new ChoreographerSession();
+		session.setId(1);
+		session.setPlan(plan);
+		session.setNotifyUri("https://localhost:11111/notify");
+		session.setStatus(ChoreographerSessionStatus.ABORTED);
+		final ChoreographerSessionStep sessionStep = new ChoreographerSessionStep();
+		sessionStep.setId(2);
+		sessionStep.setSession(session);
+		
+		when(sessionDBService.getSessionById(1L)).thenReturn(session);
+		when(sessionDBService.abortSession(1L, "message")).thenReturn(List.of(sessionStep));
+		when(sessionDataStorage.remove(eq(1L))).thenReturn(new SessionExecutorCache());
+		doNothing().when(sessionDBService).worklog(eq("plan"), eq(1L), eq("Session is aborted"), isNull());
+		doNothing().when(driver).sendSessionNotification(anyString(), any(ChoreographerNotificationDTO.class));
+		
+		testObject.abortSession(1L, 2L, "message");
+		
+		verify(sessionDBService, times(1)).getSessionById(1L);
+		verify(sessionDBService, times(1)).abortSession(1L, "message");
+		verify(driver, never()).abortExecutor(anyString(), anyInt(), anyString(), any(ChoreographerAbortStepRequestDTO.class));
+		verify(sessionDataStorage, times(1)).remove(eq(1L));
+		verify(sessionDBService, times(1)).worklog(eq("plan"), eq(1L), eq("Session is aborted"), isNull());
+		verify(driver, times(1)).sendSessionNotification(anyString(), any(ChoreographerNotificationDTO.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testAbortSessionSendAbortMessageToExecutor() {
+		final ChoreographerPlan plan = new ChoreographerPlan();
+		plan.setId(123);
+		plan.setName("plan");
+		final ChoreographerSession session = new ChoreographerSession();
+		session.setId(1);
+		session.setPlan(plan);
+		session.setStatus(ChoreographerSessionStatus.ABORTED);
+		final ChoreographerSessionStep sessionStep = new ChoreographerSessionStep();
+		sessionStep.setId(2);
+		sessionStep.setSession(session);
+		final ChoreographerExecutor executor = new ChoreographerExecutor();
+		executor.setAddress("localhost");
+		executor.setPort(3333);
+		executor.setBaseUri("/exe");
+		final ChoreographerSessionStep otherSessionStep = new ChoreographerSessionStep();
+		otherSessionStep.setId(22);
+		otherSessionStep.setExecutor(executor);
+		
+		when(sessionDBService.getSessionById(1L)).thenReturn(session);
+		when(sessionDBService.abortSession(1L, "message")).thenReturn(List.of(sessionStep, otherSessionStep));
+		doNothing().when(driver).abortExecutor(eq("localhost"), eq(3333), eq("/exe"), any(ChoreographerAbortStepRequestDTO.class));
+		when(sessionDataStorage.remove(eq(1L))).thenReturn(new SessionExecutorCache());
+		doNothing().when(sessionDBService).worklog(eq("plan"), eq(1L), eq("Session is aborted"), isNull());
+		
+		testObject.abortSession(1L, 2L, "message");
+		
+		verify(sessionDBService, times(1)).getSessionById(1L);
+		verify(sessionDBService, times(1)).abortSession(1L, "message");
+		verify(driver, times(1)).abortExecutor(eq("localhost"), eq(3333), eq("/exe"), any(ChoreographerAbortStepRequestDTO.class));
+		verify(sessionDataStorage, times(1)).remove(eq(1L));
+		verify(sessionDBService, times(1)).worklog(eq("plan"), eq(1L), eq("Session is aborted"), isNull());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testAbortSessionSendAbortMessageToExecutorWhichFailed() {
+		final ChoreographerPlan plan = new ChoreographerPlan();
+		plan.setId(123);
+		plan.setName("plan");
+		final ChoreographerSession session = new ChoreographerSession();
+		session.setId(1);
+		session.setPlan(plan);
+		session.setStatus(ChoreographerSessionStatus.ABORTED);
+		final ChoreographerSessionStep sessionStep = new ChoreographerSessionStep();
+		sessionStep.setId(2);
+		sessionStep.setSession(session);
+		final ChoreographerAction action = new ChoreographerAction();
+		action.setName("action");
+		final ChoreographerStep step = new ChoreographerStep();
+		step.setName("step");
+		step.setAction(action);
+		final ChoreographerExecutor executor = new ChoreographerExecutor();
+		executor.setAddress("localhost");
+		executor.setPort(3333);
+		executor.setBaseUri("/exe");
+		final ChoreographerSessionStep otherSessionStep = new ChoreographerSessionStep();
+		otherSessionStep.setId(22);
+		otherSessionStep.setStep(step);
+		otherSessionStep.setExecutor(executor);
+		
+		when(sessionDBService.getSessionById(1L)).thenReturn(session);
+		when(sessionDBService.abortSession(1L, "message")).thenReturn(List.of(sessionStep, otherSessionStep));
+		doThrow(new ArrowheadException("failed")).when(driver).abortExecutor(eq("localhost"), eq(3333), eq("/exe"), any(ChoreographerAbortStepRequestDTO.class));
+		doNothing().when(sessionDBService).worklog(eq("plan"), eq("action"), eq("step"), eq(1L), eq("Unable to send abort message to the executor"), eq("failed"));
+		when(sessionDataStorage.remove(eq(1L))).thenReturn(new SessionExecutorCache());
+		doNothing().when(sessionDBService).worklog(eq("plan"), eq(1L), eq("Session is aborted"), isNull());
+		
+		testObject.abortSession(1L, 2L, "message");
+		
+		verify(sessionDBService, times(1)).getSessionById(1L);
+		verify(sessionDBService, times(1)).abortSession(1L, "message");
+		verify(driver, times(1)).abortExecutor(eq("localhost"), eq(3333), eq("/exe"), any(ChoreographerAbortStepRequestDTO.class));
+		verify(sessionDBService, times(1)).worklog(eq("plan"), eq("action"), eq("step"), eq(1L), eq("Unable to send abort message to the executor"), eq("failed"));
+		verify(sessionDataStorage, times(1)).remove(eq(1L));
+		verify(sessionDBService, times(1)).worklog(eq("plan"), eq(1L), eq("Session is aborted"), isNull());
+	}
 }

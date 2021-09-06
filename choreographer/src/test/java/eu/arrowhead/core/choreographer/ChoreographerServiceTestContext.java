@@ -15,13 +15,16 @@
 package eu.arrowhead.core.choreographer;
 
 import eu.arrowhead.core.choreographer.database.service.ChoreographerPlanDBService;
+import eu.arrowhead.core.choreographer.database.service.ChoreographerSessionDBService;
+import eu.arrowhead.core.choreographer.service.ChoreographerExecutorService;
+
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 @Configuration
-public class ChoreographerDBServiceTestContext {
+public class ChoreographerServiceTestContext {
 	
 	//=================================================================================================
 	// methods
@@ -31,5 +34,19 @@ public class ChoreographerDBServiceTestContext {
     @Primary // This bean is primary only in test context
     public ChoreographerPlanDBService mockChoreographerPlanDBService() {
         return Mockito.mock(ChoreographerPlanDBService.class);
+    }
+    
+	//-------------------------------------------------------------------------------------------------
+    @Bean
+    @Primary // This bean is primary only in test context
+    public ChoreographerSessionDBService mockChoreographerSessionDBService() {
+        return Mockito.mock(ChoreographerSessionDBService.class);
+    }
+    
+	//-------------------------------------------------------------------------------------------------
+    @Bean
+    @Primary // This bean is primary only in test context
+    public ChoreographerExecutorService mockChoreographerExecutorService() {
+        return Mockito.mock(ChoreographerExecutorService.class);
     }
 }

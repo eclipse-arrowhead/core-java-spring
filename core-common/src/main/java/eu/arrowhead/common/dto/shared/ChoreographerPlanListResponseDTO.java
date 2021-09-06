@@ -11,6 +11,7 @@
  *   AITIA - implementation
  *   Arrowhead Consortia - conceptualization
  ********************************************************************************/
+
 package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
