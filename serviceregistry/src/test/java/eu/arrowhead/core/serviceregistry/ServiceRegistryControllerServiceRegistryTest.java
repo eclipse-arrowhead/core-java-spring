@@ -74,6 +74,7 @@ import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.dto.internal.AutoCompleteDataResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.IdValueDTO;
+import eu.arrowhead.common.dto.internal.KeyValuesDTO;
 import eu.arrowhead.common.dto.internal.ServiceRegistryGroupedResponseDTO;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.internal.ServicesGroupedByServiceDefinitionResponseDTO;
@@ -95,6 +96,7 @@ import eu.arrowhead.common.processor.NetworkAddressPreProcessor;
 import eu.arrowhead.common.processor.model.AddressDetectionResult;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
+import eu.arrowhead.core.serviceregistry.service.ServiceRegistryService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ServiceRegistryMain.class)
@@ -104,6 +106,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//=================================================================================================
 	// members
 	
+	private static final String SERVICEREGISTRY_PULL_CONFIG_URI = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_PULL_CONFIG_URI;
 	private static final String SERVICEREGISTRY_REGISTER_URI = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_REGISTER_URI;
 	private static final String SERVICEREGISTRY_UNREGISTER_URI = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_URI;
 	private static final String SERVICEREGISTRY_QUERY_URI = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_QUERY_URI;
@@ -138,6 +141,9 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@MockBean
 	private NetworkAddressDetector networkAddressDetector;
 	
+	@MockBean
+	private ServiceRegistryService serviceRegistryService;
+	
 	//=================================================================================================
 	// methods
 	
@@ -147,6 +153,24 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 		ReflectionTestUtils.setField(networkAddressVerifier, "allowSelfAddressing", true);
 		ReflectionTestUtils.setField(networkAddressVerifier, "allowNonRoutableAddressing", true);
+	}
+	
+	//=================================================================================================
+	// Test of getServiceRegistryEntries
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void pullConfigTest() throws Exception {
+		when(serviceRegistryService.getPublicConfig()).thenReturn(new KeyValuesDTO(Map.of("testKey", "testValue")));
+		
+		final MvcResult response = this.mockMvc.perform(get(SERVICEREGISTRY_PULL_CONFIG_URI)
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
+		
+		final KeyValuesDTO result = objectMapper.readValue(response.getResponse().getContentAsByteArray(), KeyValuesDTO.class);
+		assertEquals(1, result.getMap().entrySet().size());
+		assertEquals("testValue", result.getMap().get("testKey"));
 	}
 
 	//=================================================================================================
