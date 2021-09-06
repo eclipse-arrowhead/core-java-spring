@@ -118,7 +118,7 @@ public abstract class ApplicationInitListener {
 		if (skipSROperations(coreSystem)) {
 			return;
 		}
-		
+
 		try {
 			final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
 			checkServiceRegistryConnection(scheme, 0, 1);
