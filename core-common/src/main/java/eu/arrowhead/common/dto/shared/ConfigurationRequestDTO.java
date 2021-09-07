@@ -15,10 +15,11 @@
 package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
-import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @JsonInclude(Include.NON_NULL)
 public class ConfigurationRequestDTO implements Serializable {
@@ -38,8 +39,7 @@ public class ConfigurationRequestDTO implements Serializable {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------	
-    public ConfigurationRequestDTO() {
-    }
+    public ConfigurationRequestDTO() {}
 
     //-------------------------------------------------------------------------------------------------
 	public ConfigurationRequestDTO(final String systemName, final String fileName, final String contentType, final String data) {
@@ -61,14 +61,13 @@ public class ConfigurationRequestDTO implements Serializable {
     public void setContentType(final String contentType) { this.contentType = contentType; }
     public void setData(final String data) { this.data = data; }
     
-    //-------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", ConfigurationResponseDTO.class.getSimpleName() + "[", "]")
-                .add("systemName=" + systemName)
-                .add("fileName=" + fileName)
-                .add("contentType=" + contentType)
-                .add("data=" +data)
-				.toString();
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
 	}
 }

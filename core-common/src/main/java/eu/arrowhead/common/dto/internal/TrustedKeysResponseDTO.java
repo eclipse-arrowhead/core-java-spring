@@ -18,35 +18,48 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class TrustedKeysResponseDTO implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-
-    private long count;
+	//=================================================================================================
+	// members
+	
+	private static final long serialVersionUID = -460285598669355060L;
+	
+	private long count;
     private List<TrustedKeyDTO> trustedKeys;
 
-    public TrustedKeysResponseDTO(List<TrustedKeyDTO> trustedKeyDTOs, int count) {
+    //=================================================================================================
+	// methods
+    
+    //-------------------------------------------------------------------------------------------------
+	public TrustedKeysResponseDTO(final List<TrustedKeyDTO> trustedKeyDTOs, final int count) {
         this.count = count;
         setTrustedKeys(trustedKeyDTOs);
     }
 
-    public TrustedKeysResponseDTO() {
+    //-------------------------------------------------------------------------------------------------
+	public TrustedKeysResponseDTO() {
         setTrustedKeys(new ArrayList<>());
     }
 
-    public List<TrustedKeyDTO> getTrustedKeys() {
-        return trustedKeys;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public List<TrustedKeyDTO> getTrustedKeys() { return trustedKeys; }
+	public long getCount() { return count; }
 
-    public void setTrustedKeys(List<TrustedKeyDTO> trustedKeys) {
-        this.trustedKeys = trustedKeys;
-    }
-
-    public long getCount() {
-        return count;
-    }
-
-    public void setCount(long count) {
-        this.count = count;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public void setTrustedKeys(final List<TrustedKeyDTO> trustedKeys) { this.trustedKeys = trustedKeys; }
+    public void setCount(final long count) { this.count = count; }
+    
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

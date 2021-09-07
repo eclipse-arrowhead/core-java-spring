@@ -14,13 +14,15 @@
 
 package eu.arrowhead.common.dto.shared;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import org.springframework.util.Assert;
-
 import java.io.Serializable;
 import java.util.Map;
-import java.util.StringJoiner;
+
+import org.springframework.util.Assert;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @JsonInclude(Include.NON_NULL)
 public abstract class DeviceRegistryOnboardingResponseDTO extends DeviceRegistryResponseDTO implements Serializable {
@@ -29,22 +31,25 @@ public abstract class DeviceRegistryOnboardingResponseDTO extends DeviceRegistry
     // members
 
     private static final long serialVersionUID = -635438605292398404L;
+    
     private CertificateCreationResponseDTO certificateResponse;
 
     //=================================================================================================
     // methods
 
-    public DeviceRegistryOnboardingResponseDTO() {
-    }
+    //-------------------------------------------------------------------------------------------------
+	public DeviceRegistryOnboardingResponseDTO() {}
 
-    public DeviceRegistryOnboardingResponseDTO(final long id, final DeviceResponseDTO device, final String endOfValidity,
+    //-------------------------------------------------------------------------------------------------
+	public DeviceRegistryOnboardingResponseDTO(final long id, final DeviceResponseDTO device, final String endOfValidity,
                                                final Map<String, String> metadata, final int version, final String createdAt, final String updatedAt,
                                                final CertificateCreationResponseDTO certificateResponse) {
         super(id, device, endOfValidity, metadata, version, createdAt, updatedAt);
         this.certificateResponse = certificateResponse;
     }
 
-    public void load(final DeviceRegistryResponseDTO dto) {
+    //-------------------------------------------------------------------------------------------------
+	public void load(final DeviceRegistryResponseDTO dto) {
         Assert.notNull(dto, "DeviceRegistryResponseDTO must not be null");
 
         setId(dto.getId());
@@ -57,19 +62,18 @@ public abstract class DeviceRegistryOnboardingResponseDTO extends DeviceRegistry
     }
 
     //-------------------------------------------------------------------------------------------------
-    public CertificateCreationResponseDTO getCertificateResponse() {
-        return certificateResponse;
-    }
+    public CertificateCreationResponseDTO getCertificateResponse() { return certificateResponse; }
 
-    public void setCertificateResponse(final CertificateCreationResponseDTO certificateResponse) {
-        this.certificateResponse = certificateResponse;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public void setCertificateResponse(final CertificateCreationResponseDTO certificateResponse) { this.certificateResponse = certificateResponse; }
 
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", DeviceRegistryOnboardingResponseDTO.class.getSimpleName() + "[", "]")
-                .add("certificateResponse=" + certificateResponse)
-                .add("parent=" + super.toString())
-                .toString();
-    }
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

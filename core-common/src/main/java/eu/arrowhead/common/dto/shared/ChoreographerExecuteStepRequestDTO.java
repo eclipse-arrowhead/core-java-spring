@@ -18,6 +18,9 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class ChoreographerExecuteStepRequestDTO implements Serializable {
 
 	//=================================================================================================
@@ -64,4 +67,14 @@ public class ChoreographerExecuteStepRequestDTO implements Serializable {
 	public void setMainOrchestrationResult(final OrchestrationResultDTO mainOrchestrationResult) { this.mainOrchestrationResult = mainOrchestrationResult; }
 	public void setQuantity(final int quantity) { this.quantity = quantity; }
 	public void setStaticParameters(final Map<String,String> staticParameters) { this.staticParameters = staticParameters; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

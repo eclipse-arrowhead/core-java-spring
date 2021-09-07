@@ -14,26 +14,28 @@
 
 package eu.arrowhead.common.dto.shared;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.StringJoiner;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @JsonInclude(Include.NON_NULL)
 public class OnboardingWithCsrRequestDTO implements Serializable {
 
-    //=================================================================================================
+	//=================================================================================================
     // members
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -2753603721068210444L;
 
-    private String certificateSigningRequest;
+	private String certificateSigningRequest;
 
     //=================================================================================================
     // methods
-    //-------------------------------------------------------------------------------------------------
+    
+	//-------------------------------------------------------------------------------------------------
     public String getCertificateSigningRequest() { return certificateSigningRequest; }
 
     //-------------------------------------------------------------------------------------------------
@@ -41,25 +43,20 @@ public class OnboardingWithCsrRequestDTO implements Serializable {
 
     //-------------------------------------------------------------------------------------------------
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return Objects.hash(certificateSigningRequest);
     }
 
     //-------------------------------------------------------------------------------------------------
     @Override
-    public boolean equals(final Object obj)
-    {
-        if (this == obj)
-        {
+    public boolean equals(final Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (obj == null)
-        {
+        if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass())
-        {
+        if (getClass() != obj.getClass()) {
             return false;
         }
         final OnboardingWithCsrRequestDTO other = (OnboardingWithCsrRequestDTO) obj;
@@ -67,11 +64,13 @@ public class OnboardingWithCsrRequestDTO implements Serializable {
         return Objects.equals(certificateSigningRequest, other.certificateSigningRequest);
     }
 
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", OnboardingWithCsrRequestDTO.class.getSimpleName() + "[", "]")
-                .add("certificateSigningRequest='" + certificateSigningRequest + "'")
-                .add("parent=" + super.toString())
-                .toString();
-    }
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }
