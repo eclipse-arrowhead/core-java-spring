@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2020 AITIA
+ * Copyright (c) 2021 AITIA
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -14,192 +14,637 @@
 
 package eu.arrowhead.core.choreographer.database.service;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerAction;
 import eu.arrowhead.common.database.entity.ChoreographerPlan;
+import eu.arrowhead.common.database.entity.ChoreographerSession;
+import eu.arrowhead.common.database.entity.ChoreographerStep;
+import eu.arrowhead.common.database.entity.ChoreographerStepNextStepConnection;
+import eu.arrowhead.common.database.repository.ChoreographerActionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerPlanRepository;
+import eu.arrowhead.common.database.repository.ChoreographerSessionRepository;
+import eu.arrowhead.common.database.repository.ChoreographerStepNextStepConnectionRepository;
+import eu.arrowhead.common.database.repository.ChoreographerStepRepository;
 import eu.arrowhead.common.dto.shared.ChoreographerActionRequestDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerPlanListResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerPlanRequestDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerStepRequestDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.core.choreographer.validation.ChoreographerPlanValidator;
 
 @RunWith(SpringRunner.class)
 public class ChoreographerPlanDBServiceTest {
-
 	
 	//=================================================================================================
 	// members
 
     @InjectMocks
-    private ChoreographerPlanDBService choreographerDBService;
+    private ChoreographerPlanDBService testObject;
 
-    @Mock
-    ChoreographerPlanRepository choreographerPlanRepository;
+	@Mock
+	private ChoreographerPlanRepository choreographerPlanRepository;
+
+	@Mock
+	private ChoreographerActionRepository choreographerActionRepository;
+
+	@Mock
+	private ChoreographerStepRepository choreographerStepRepository;
+
+	@Mock
+	private ChoreographerStepNextStepConnectionRepository choreographerStepNextStepConnectionRepository;
+
+	@Mock
+	private ChoreographerSessionRepository choreographerSessionRepository;
+
+	@Mock
+	private ChoreographerPlanValidator planValidator;
     
     //=================================================================================================
 	// methods
 
     //-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetPlanEntriesWrongSortField() {
+		try {
+			testObject.getPlanEntries(0, 10, Direction.ASC, "firstAction");
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().startsWith("Sortable field with reference "));
+			
+			verify(choreographerPlanRepository, never()).findAll(any(Pageable.class));
+			
+			throw ex;
+		}
+	}
+	
+    //-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetPlanEntriesDBException() {
+		when(choreographerPlanRepository.findAll(any(Pageable.class))).thenThrow(new RuntimeException("db error"));
+		
+		try {
+			testObject.getPlanEntries(0, 10, Direction.ASC, "id");
+		} catch (final Exception ex) {
+			Assert.assertEquals("Database operation exception", ex.getMessage());
+			
+			verify(choreographerPlanRepository, times(1)).findAll(any(Pageable.class));
+			
+			throw ex;
+		}
+	}
+	
+    //-------------------------------------------------------------------------------------------------
 	@Test
-    public void getPlanByIdTest() {
-        final Optional<ChoreographerPlan> choreographerPlanOptional = Optional.of(getPlan());
-        when(choreographerPlanRepository.findById(anyLong())).thenReturn(choreographerPlanOptional);
+	public void testGetPlanEntriesOk() {
+		when(choreographerPlanRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of()));
+		
+		final Page<ChoreographerPlan> page = testObject.getPlanEntries(0, 10, Direction.ASC, "id");
 
-        choreographerDBService.getPlanById(1);
-    }
-
-
+		Assert.assertEquals(0, page.getContent().size());
+		verify(choreographerPlanRepository, times(1)).findAll(any(Pageable.class));
+	}
+	
     //-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-    public void getPlanByIdTestWithNotExistingId() {
-        when(choreographerPlanRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
-        choreographerDBService.getPlanById(1);
-    }
-
+	@Test(expected = ArrowheadException.class)
+	public void testGetPlanEntriesResponseDBException1() {
+		final ChoreographerPlan plan = new ChoreographerPlan();
+		
+		when(choreographerPlanRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(plan)));
+		when(choreographerActionRepository.findByPlan(plan)).thenThrow(new RuntimeException("db error"));
+		
+		try {
+			testObject.getPlanEntriesResponse(0, 10, Direction.ASC, "id");
+		} catch (final Exception ex) {
+			Assert.assertEquals("Database operation exception", ex.getMessage());
+			
+			verify(choreographerPlanRepository, times(1)).findAll(any(Pageable.class));
+			verify(choreographerActionRepository, times(1)).findByPlan(plan);
+			verify(choreographerStepRepository, never()).findByAction(any(ChoreographerAction.class));
+			
+			throw ex;
+		}
+	}
+	
     //-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-    public void getPlanByIdWithInvalidId() {
-        choreographerDBService.getPlanById(-1);
-    }
-
+	@Test(expected = ArrowheadException.class)
+	public void testGetPlanEntriesResponseDBException2() {
+		final ChoreographerPlan plan = new ChoreographerPlan();
+		final ChoreographerAction action = new ChoreographerAction();
+		
+		when(choreographerPlanRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(plan)));
+		when(choreographerActionRepository.findByPlan(plan)).thenReturn(List.of(action));
+		when(choreographerStepRepository.findByAction(action)).thenThrow(new RuntimeException("db error"));
+		
+		try {
+			testObject.getPlanEntriesResponse(0, 10, Direction.ASC, "id");
+		} catch (final Exception ex) {
+			Assert.assertEquals("Database operation exception", ex.getMessage());
+			
+			verify(choreographerPlanRepository, times(1)).findAll(any(Pageable.class));
+			verify(choreographerActionRepository, times(1)).findByPlan(plan);
+			verify(choreographerStepRepository, times(1)).findByAction(action);
+			
+			throw ex;
+		}
+	}
+	
     //-------------------------------------------------------------------------------------------------
 	@Test
-    public void getPlanEntriesResponseOKTest() {
-        when(choreographerPlanRepository.findAll(any(PageRequest.class))).thenReturn(getPageOfChoreographerPlanList());
+	public void testGetPlanEntriesResponseOk() {
+		final ChoreographerPlan plan = new ChoreographerPlan();
+		plan.setId(1);
+		plan.setName("plan");
+		plan.setCreatedAt(ZonedDateTime.now());
+		plan.setUpdatedAt(ZonedDateTime.now());
+		final ChoreographerAction action = new ChoreographerAction();
+		action.setId(2);
+		action.setName("action");
+		action.setPlan(plan);
+		action.setFirstAction(true);
+		action.setCreatedAt(ZonedDateTime.now());
+		action.setUpdatedAt(ZonedDateTime.now());
+		final ChoreographerStep step = new ChoreographerStep();
+		step.setId(11);
+		step.setName("step");
+		step.setFirstStep(true);
+		step.setAction(action);
+		step.setServiceDefinition("service");
+		step.setMinVersion(1);
+		step.setMaxVersion(1);
+		step.setCreatedAt(ZonedDateTime.now());
+		step.setUpdatedAt(ZonedDateTime.now());
+		plan.setFirstAction(action);
+		
+		when(choreographerPlanRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(plan)));
+		when(choreographerActionRepository.findByPlan(plan)).thenReturn(List.of(action));
+		when(choreographerStepRepository.findByAction(action)).thenReturn(List.of(step));
 
-        choreographerDBService.getPlanEntriesResponse(0, 10, Direction.ASC, "id");
-    }
+		final ChoreographerPlanListResponseDTO result = testObject.getPlanEntriesResponse(0, 10, Direction.ASC, "id");
+		
+		Assert.assertEquals(1, result.getCount());
+		Assert.assertEquals("plan", result.getData().get(0).getName());
+		Assert.assertEquals("action", result.getData().get(0).getActions().get(0).getName());
+		Assert.assertEquals("step", result.getData().get(0).getActions().get(0).getSteps().get(0).getName());
 
+		verify(choreographerPlanRepository, times(1)).findAll(any(Pageable.class));
+		verify(choreographerActionRepository, times(1)).findByPlan(plan);
+		verify(choreographerStepRepository, times(1)).findByAction(action);
+	}
+	
     //-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-    public void getPlanEntriesTestWithInvalidSortField() {
-        when(choreographerPlanRepository.findAll(any(PageRequest.class))).thenReturn(getPageOfChoreographerPlanList());
+	public void testGetPlanByIdNotFound() {
+		when(choreographerPlanRepository.findById(1L)).thenReturn(Optional.empty());
+		
+		try {
+			testObject.getPlanById(1);
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().startsWith("Choreographer Plan with id of "));
+			
+			verify(choreographerPlanRepository, times(1)).findById(1L);
+			
+			throw ex;
+		}
+	}
+	
+    //-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetPlanByIdDBException() {
+		when(choreographerPlanRepository.findById(1L)).thenThrow(new RuntimeException("db error"));
+		
+		try {
+			testObject.getPlanById(1);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Database operation exception", ex.getMessage());
+			
+			verify(choreographerPlanRepository, times(1)).findById(1L);
+			
+			throw ex;
+		}
+	}
+	
+    //-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetPlanByIdOk() {
+		when(choreographerPlanRepository.findById(1L)).thenReturn(Optional.of(new ChoreographerPlan("plan")));
+		
+		final ChoreographerPlan plan = testObject.getPlanById(1);
+		
+		Assert.assertEquals("plan", plan.getName());
+			
+		verify(choreographerPlanRepository, times(1)).findById(1L);
+	}
+	
+    //-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetPlanByIdResponseDBException1() {
+		final ChoreographerPlan plan = new ChoreographerPlan();
+		
+		when(choreographerPlanRepository.findById(1L)).thenReturn(Optional.of(plan));
+		when(choreographerActionRepository.findByPlan(plan)).thenThrow(new RuntimeException("db error"));
+		
+		try {
+			testObject.getPlanByIdResponse(1L);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Database operation exception", ex.getMessage());
+			
+			verify(choreographerPlanRepository, times(1)).findById(1L);
+			verify(choreographerActionRepository, times(1)).findByPlan(plan);
+			verify(choreographerStepRepository, never()).findByAction(any(ChoreographerAction.class));
+			
+			throw ex;
+		}
+	}
+	
+    //-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetPlanByIdResponseDBException2() {
+		final ChoreographerPlan plan = new ChoreographerPlan();
+		final ChoreographerAction action = new ChoreographerAction();
+		
+		when(choreographerPlanRepository.findById(1L)).thenReturn(Optional.of(plan));
+		when(choreographerActionRepository.findByPlan(plan)).thenReturn(List.of(action));
+		when(choreographerStepRepository.findByAction(action)).thenThrow(new RuntimeException("db error"));
+		
+		try {
+			testObject.getPlanByIdResponse(1L);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Database operation exception", ex.getMessage());
+			
+			verify(choreographerPlanRepository, times(1)).findById(1L);
+			verify(choreographerActionRepository, times(1)).findByPlan(plan);
+			verify(choreographerStepRepository, times(1)).findByAction(action);
+			
+			throw ex;
+		}
+	}
+	
+    //-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetPlanByIdResponseOk() {
+		final ChoreographerPlan plan = new ChoreographerPlan();
+		plan.setId(1);
+		plan.setName("plan");
+		plan.setCreatedAt(ZonedDateTime.now());
+		plan.setUpdatedAt(ZonedDateTime.now());
+		final ChoreographerAction action = new ChoreographerAction();
+		action.setId(2);
+		action.setName("action");
+		action.setPlan(plan);
+		action.setFirstAction(true);
+		action.setCreatedAt(ZonedDateTime.now());
+		action.setUpdatedAt(ZonedDateTime.now());
+		final ChoreographerStep step = new ChoreographerStep();
+		step.setId(11);
+		step.setName("step");
+		step.setFirstStep(true);
+		step.setAction(action);
+		step.setServiceDefinition("service");
+		step.setMinVersion(1);
+		step.setMaxVersion(1);
+		step.setCreatedAt(ZonedDateTime.now());
+		step.setUpdatedAt(ZonedDateTime.now());
+		plan.setFirstAction(action);
+		
+		when(choreographerPlanRepository.findById(1L)).thenReturn(Optional.of(plan));
+		when(choreographerActionRepository.findByPlan(plan)).thenReturn(List.of(action));
+		when(choreographerStepRepository.findByAction(action)).thenReturn(List.of(step));
 
-        choreographerDBService.getPlanEntriesResponse(0, 10, Direction.ASC, "notValid");
-    }
+		final ChoreographerPlanResponseDTO planDTO = testObject.getPlanByIdResponse(1L);
+		
+		Assert.assertEquals("plan", planDTO.getName());
+		Assert.assertEquals("action", planDTO.getFirstActionName());
+		Assert.assertEquals("step", planDTO.getActions().get(0).getSteps().get(0).getName());
 
+		verify(choreographerPlanRepository, times(1)).findById(1L);
+		verify(choreographerActionRepository, times(1)).findByPlan(plan);
+		verify(choreographerStepRepository, times(1)).findByAction(action);
+	}
+	
     //-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-    public void createPlanTestWithNullInput() {
-		choreographerDBService.createPlan(null, null, null);
+	public void testRemovePlanByIdNotFound() {
+		when(choreographerPlanRepository.findById(1L)).thenReturn(Optional.empty());
+		
+		try {
+			testObject.removePlanEntryById(1);
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().startsWith("Choreographer Plan with id of "));
+			
+			verify(choreographerPlanRepository, times(1)).findById(1L);
+			
+			throw ex;
+		}
+	}
+	
+    //-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testRemovePlanByIdPlanIsCurrentlyExecuted() {
+		final ChoreographerPlan plan = new ChoreographerPlan();
+		
+		when(choreographerPlanRepository.findById(1L)).thenReturn(Optional.of(plan));
+		when(choreographerSessionRepository.findByPlanAndStatusIn(eq(plan), anyList())).thenReturn(List.of(new ChoreographerSession()));
+		
+		try {
+			testObject.removePlanEntryById(1);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Choreographer Plan cannot be deleted, because it is currently executed.", ex.getMessage());
+			
+			verify(choreographerPlanRepository, times(1)).findById(1L);
+			verify(choreographerSessionRepository, times(1)).findByPlanAndStatusIn(eq(plan), anyList());
+			
+			throw ex;
+		}
+	}
+	
+    //-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testRemovePlanByIdDBException() {
+		final ChoreographerPlan plan = new ChoreographerPlan();
+		
+		when(choreographerPlanRepository.findById(1L)).thenReturn(Optional.of(plan));
+		when(choreographerSessionRepository.findByPlanAndStatusIn(eq(plan), anyList())).thenReturn(List.of());
+		doThrow(new RuntimeException("db error")).when(choreographerPlanRepository).deleteById(1L);
+		
+		try {
+			testObject.removePlanEntryById(1);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Database operation exception", ex.getMessage());
+			
+			verify(choreographerPlanRepository, times(1)).findById(1L);
+			verify(choreographerSessionRepository, times(1)).findByPlanAndStatusIn(eq(plan), anyList());
+			verify(choreographerPlanRepository, times(1)).deleteById(1L);
+			verify(choreographerPlanRepository, never()).flush();
+			
+			throw ex;
+		}
+	}
+	
+    //-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRemovePlanByIdOk() {
+		final ChoreographerPlan plan = new ChoreographerPlan();
+		
+		when(choreographerPlanRepository.findById(1L)).thenReturn(Optional.of(plan));
+		when(choreographerSessionRepository.findByPlanAndStatusIn(eq(plan), anyList())).thenReturn(List.of());
+		doNothing().when(choreographerPlanRepository).deleteById(1L);
+		doNothing().when(choreographerPlanRepository).flush();
+		
+		testObject.removePlanEntryById(1);
+		
+		verify(choreographerPlanRepository, times(1)).findById(1L);
+		verify(choreographerSessionRepository, times(1)).findByPlanAndStatusIn(eq(plan), anyList());
+		verify(choreographerPlanRepository, times(1)).deleteById(1L);
+		verify(choreographerPlanRepository, times(1)).flush();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCreatePlanRequestNull() {
+		try {
+			testObject.createPlan(null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Request is null!", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCreatePlanNameNull() {
+		try {
+			testObject.createPlan(new ChoreographerPlanRequestDTO());
+		} catch (final Exception ex) {
+			Assert.assertEquals("Plan name is null or blank!", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCreatePlanNameEmpty() {
+		final ChoreographerPlanRequestDTO request = new ChoreographerPlanRequestDTO();
+		request.setName(" ");
+		
+		try {
+			testObject.createPlan(request);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Plan name is null or blank!", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testCreatePlanDBException() {
+		final ChoreographerPlanRequestDTO request = new ChoreographerPlanRequestDTO();
+		request.setName("plan");
+		
+		when(choreographerPlanRepository.findByName("plan")).thenThrow(new RuntimeException("db error"));
+		
+		try {
+			testObject.createPlan(request);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Database operation exception", ex.getMessage());
+			
+			verify(choreographerPlanRepository, times(1)).findByName("plan");
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCreatePlanNameIsTaken() {
+		final ChoreographerPlanRequestDTO request = new ChoreographerPlanRequestDTO();
+		request.setName("plan");
+		
+		when(choreographerPlanRepository.findByName("plan")).thenReturn(Optional.of(new ChoreographerPlan()));
+		
+		try {
+			testObject.createPlan(request);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Plan with specified name already exists.", ex.getMessage());
+			
+			verify(choreographerPlanRepository, times(1)).findByName("plan");
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCreatePlanValidationFailed() {
+		final ChoreographerPlanRequestDTO request = new ChoreographerPlanRequestDTO();
+		request.setName("plan");
+		
+		when(choreographerPlanRepository.findByName("plan")).thenReturn(Optional.empty());
+		when(planValidator.validateAndNormalizePlan(request)).thenThrow(new InvalidParameterException("First action is not specified."));
+		
+		try {
+			testObject.createPlan(request);
+		} catch (final Exception ex) {
+			Assert.assertEquals("First action is not specified.", ex.getMessage());
+			
+			verify(choreographerPlanRepository, times(1)).findByName("plan");
+			verify(planValidator, times(1)).validateAndNormalizePlan(request);
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCreatePlanOk() {
+		final ChoreographerPlanRequestDTO request = getPlanRequest();
+		
+		final ChoreographerPlan plan = new ChoreographerPlan("plan");
+		final ChoreographerAction action1 = new ChoreographerAction();
+		action1.setPlan(plan);
+		action1.setName("action1");
+		final ChoreographerAction action2 = new ChoreographerAction();
+		action2.setPlan(plan);
+		action2.setName("action2");
+		final ChoreographerStep step1 = new ChoreographerStep("step1",
+															  action1,
+															  "service1",
+															  1,
+															  2,
+															  "{}", // omit for simplicity
+															  "key=value",
+															  2);
+		final ChoreographerStep step2 = new ChoreographerStep("step2",
+															  action1,
+															  "service2",
+															  3,
+															  3,
+															  "{}", // omit for simplicity
+															  "key2=value2",
+															  1);
+		final ChoreographerStep step3 = new ChoreographerStep("step3",
+															  action2,
+															  "service3",
+															  1,
+															  10,
+															  "{}", // omit for simplicity
+															  "key3=value3",
+															  1);
+		final ChoreographerStepNextStepConnection stepConnection = new ChoreographerStepNextStepConnection(step1, step2);
+		
+		when(choreographerPlanRepository.findByName("plan")).thenReturn(Optional.empty());
+		when(planValidator.validateAndNormalizePlan(request)).thenReturn(request);
+		when(choreographerPlanRepository.save(any(ChoreographerPlan.class))).thenReturn(plan);
+		when(choreographerActionRepository.save(any(ChoreographerAction.class))).thenReturn(action1, action2);
+		when(choreographerStepRepository.saveAndFlush(any(ChoreographerStep.class))).thenReturn(step1, step2, step3, step1, step1);
+		when(choreographerStepRepository.findByNameAndAction("step1", action1)).thenReturn(Optional.of(step1));
+		when(choreographerStepRepository.findByNameAndAction("step2", action1)).thenReturn(Optional.of(step2));
+		when(choreographerStepNextStepConnectionRepository.saveAll(anyList())).thenReturn(List.of(stepConnection));
+		doNothing().when(choreographerStepNextStepConnectionRepository).flush();
+		when(choreographerStepRepository.saveAll(anyList())).thenReturn(List.of(step2));
+		when(choreographerStepRepository.findByNameAndAction("step3", action2)).thenReturn(Optional.of(step3));
+		when(choreographerActionRepository.saveAndFlush(any(ChoreographerAction.class))).thenReturn(action1, action2, action1, action1);
+		when(choreographerActionRepository.findByNameAndPlan("action1", plan)).thenReturn(Optional.of(action1));
+		when(choreographerActionRepository.findByNameAndPlan("action2", plan)).thenReturn(Optional.of(action2));
+		when(choreographerPlanRepository.saveAndFlush(plan)).thenReturn(plan);
+		
+		final ChoreographerPlan savedPlan = testObject.createPlan(request);
+		
+		//TODO: verify numbers are wrong, rechecks
+		//TODO: make asserts about savedPlan
+			
+		verify(choreographerPlanRepository, times(1)).findByName("plan");
+		verify(planValidator, times(1)).validateAndNormalizePlan(request);
+		verify(choreographerPlanRepository, times(1)).save(any(ChoreographerPlan.class));
+		verify(choreographerActionRepository, times(2)).save(any(ChoreographerAction.class));
+		verify(choreographerStepRepository, times(5)).saveAndFlush(any(ChoreographerStep.class));
+		verify(choreographerStepRepository, times(2)).findByNameAndAction("step1", action1);
+		verify(choreographerStepRepository, times(1)).findByNameAndAction("step2", action1);
+		verify(choreographerStepNextStepConnectionRepository, times(1)).saveAll(anyList());
+		verify(choreographerStepNextStepConnectionRepository, times(1)).flush();
+		verify(choreographerStepRepository, times(1)).saveAll(anyList());
+		verify(choreographerStepRepository, times(1)).findByNameAndAction("step3", action2);
+		verify(choreographerActionRepository, times(4)).saveAndFlush(any(ChoreographerAction.class));
+		verify(choreographerActionRepository, times(2)).findByNameAndPlan("action1", plan);
+		verify(choreographerActionRepository, times(1)).findByNameAndPlan("action2", plan);
+		verify(choreographerPlanRepository, times(1)).saveAndFlush(plan);
 	}
 
-    //-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-    public void createPlanTestWithEmptyActionRequestList() {
-        choreographerDBService.createPlan("actionPlan", null, getActionRequestDTOEmptyListForTest());
-    }
 
-    //-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-    public void createPlanWithBlankName() {
-        List<ChoreographerActionRequestDTO> actions = new ArrayList<>();
-        actions.add(getActionRequestDTOWithNextActionForTest(3, "testaction0", "testaction1"));
-        actions.add(getActionRequestDTOWithNextActionForTest(4, "testaction1", null));
-        choreographerDBService.createPlan("    ", "testaction0", actions);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-    public void removePlanEntryByIdWithInvalidIdTest() {
-        choreographerDBService.removePlanEntryById(getInvalidIdForTest());
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    @Test(expected = InvalidParameterException.class)
-    public void removePlanEntryByIdWithIdNotInDBTest() {
-        when(choreographerPlanRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
-
-        choreographerDBService.removePlanEntryById(getIdForTest());
-    }
-    
-    //=================================================================================================
+	//TODO: testCreatePlanResponse
+	
+	//=================================================================================================
 	// assistant methods
-    
-    //-------------------------------------------------------------------------------------------------
-    private List<ChoreographerActionRequestDTO> getActionRequestDTOEmptyListForTest() {
-        return List.of();
-    }
+	
+	//-------------------------------------------------------------------------------------------------
+	private ChoreographerPlanRequestDTO getPlanRequest() {
+		final ChoreographerStepRequestDTO step1 = new ChoreographerStepRequestDTO();
+		step1.setName("step1");
+		step1.setQuantity(2);
+		step1.setStaticParameters(Map.of("key", "value"));
+		step1.setNextStepNames(List.of("step2"));
+		step1.setServiceRequirement(new ServiceQueryFormDTO.Builder("service1").version(1, 2).build());
+		
+		final ChoreographerStepRequestDTO step2 = new ChoreographerStepRequestDTO();
+		step2.setName("step2");
+		step2.setQuantity(1);
+		step2.setStaticParameters(Map.of("key2", "value2"));
+		step2.setNextStepNames(List.of());
+		step2.setServiceRequirement(new ServiceQueryFormDTO.Builder("service2").version(3).build());
+		
+		final ChoreographerStepRequestDTO step3 = new ChoreographerStepRequestDTO();
+		step3.setName("step3");
+		step3.setQuantity(1);
+		step3.setStaticParameters(Map.of("key3", "value3"));
+		step3.setNextStepNames(List.of());
+		step3.setServiceRequirement(new ServiceQueryFormDTO.Builder("service3").version(1, 10).build());
 
-    //-------------------------------------------------------------------------------------------------
-	private ChoreographerActionRequestDTO getActionRequestDTOWithNextActionForTest(final int stepListSize, final String actionName, final String nextActionName) {
-        List<ChoreographerStepRequestDTO> steps = new ArrayList<>(stepListSize);
-        for (int i = 0; i < stepListSize; ++i) {
-            steps.add(getChoreographerStepDTOForTest(ThreadLocalRandom.current().nextInt(0, 5)));
-        }
+		final ChoreographerActionRequestDTO action1 = new ChoreographerActionRequestDTO();
+		action1.setName("action1");
+		action1.setNextActionName("action2");
+		action1.setFirstStepNames(List.of("step1"));
+		action1.setSteps(List.of(step1, step2));
+		
+		final ChoreographerActionRequestDTO action2 = new ChoreographerActionRequestDTO();
+		action2.setName("action2");
+		action2.setFirstStepNames(List.of("step3"));
+		action2.setSteps(List.of(step3));
+		
+		final ChoreographerPlanRequestDTO request = new ChoreographerPlanRequestDTO();
+		request.setName("plan");
+		request.setFirstActionName("action1");
+		request.setActions(List.of(action1, action2));
 
-        List<String> firstStepNames = new ArrayList<>();
-        firstStepNames.add("testactionstep0");
-
-        return new ChoreographerActionRequestDTO(actionName, nextActionName, firstStepNames, steps);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-	private ChoreographerStepRequestDTO getChoreographerStepDTOForTest(final int nextStepListSize) {
-        String stepName = "testactionstep0";
-        String serviceName = "testservice0";
-
-        List<String> nextStepNames = new ArrayList<>(nextStepListSize);
-        for (int i = 1; i <= nextStepListSize; ++i) {
-            nextStepNames.add("testplanstep" + i);
-        }
-
-        return new ChoreographerStepRequestDTO(stepName, serviceName, nextStepNames, 1);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-	private ChoreographerPlan getPlan() {
-        final ChoreographerPlan plan = new ChoreographerPlan("testplan0");
-        plan.setCreatedAt(getCreatedAtForTest());
-        plan.setUpdatedAt(getUpdatedAtForTest());
-        plan.setId(getIdForTest());
-        plan.setFirstAction(new ChoreographerAction("testaction0", null));
-
-        return plan;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-	private PageImpl<ChoreographerPlan> getPageOfChoreographerPlanList() {
-        final List<ChoreographerPlan> choreographerPlanList = List.of(getPlan());
-
-        return new PageImpl<>(choreographerPlanList);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-	private long getIdForTest() {
-        return 1L;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-	private long getInvalidIdForTest() {
-        return -1L;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-	private ZonedDateTime getUpdatedAtForTest() {
-        return Utilities.parseUTCStringToLocalZonedDateTime("2019-08-13T12:49:30Z");
-    }
-
-    //-------------------------------------------------------------------------------------------------
-	private ZonedDateTime getCreatedAtForTest() {
-        return Utilities.parseUTCStringToLocalZonedDateTime("2019-08-13T14:43:19Z");
-    }
+		return request;
+	}
 }

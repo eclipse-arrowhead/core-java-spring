@@ -101,7 +101,7 @@ public class ChoreographerPlanDBService {
 			return choreographerPlanRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG, ex);
 		}
 	}
 
@@ -118,7 +118,7 @@ public class ChoreographerPlanDBService {
 			}
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG, ex);
 		}
 
 		return new ChoreographerPlanListResponseDTO(planDTOs, planEntries.getTotalElements());
@@ -140,7 +140,7 @@ public class ChoreographerPlanDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG, ex);
 		}
 	}
 
@@ -153,7 +153,7 @@ public class ChoreographerPlanDBService {
 			return DTOConverter.convertPlanToPlanResponseDTO(plan, getPlanDetails(plan));
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG, ex);
 		}
 	}
 
@@ -165,13 +165,13 @@ public class ChoreographerPlanDBService {
 		try {
 			final Optional<ChoreographerPlan> planOpt = choreographerPlanRepository.findById(id);
 			if (planOpt.isEmpty()) {
-				throw new InvalidParameterException("Plan with id of '" + id
+				throw new InvalidParameterException("Choreographer Plan with id of '" + id
 						+ "' doesn't exist!");
 			}
 
 			final List<ChoreographerSession> sessions = choreographerSessionRepository.findByPlanAndStatusIn(planOpt.get(), List.of(ChoreographerSessionStatus.INITIATED, ChoreographerSessionStatus.RUNNING));
 			if (!sessions.isEmpty()) {
-				throw new ArrowheadException("Plan cannot be deleted, because it is currently executed.");
+				throw new ArrowheadException("Choreographer Plan cannot be deleted, because it is currently executed.");
 			}
 
 			choreographerPlanRepository.deleteById(id);
@@ -180,7 +180,7 @@ public class ChoreographerPlanDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG, ex);
 		}
 	}
 
@@ -196,7 +196,7 @@ public class ChoreographerPlanDBService {
 			return DTOConverter.convertPlanToPlanResponseDTO(planEntry, planDetails);
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG, ex);
 		}
 	}
 
@@ -204,12 +204,16 @@ public class ChoreographerPlanDBService {
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public ChoreographerPlan createPlan(final ChoreographerPlanRequestDTO request) {
 		logger.debug("createPlan started...");
+		
+		if (request == null) {
+			throw new InvalidParameterException("Request is null!");
+		}
 
+		if (Utilities.isEmpty(request.getName())) {
+			throw new InvalidParameterException("Plan name is null or blank!");
+		}
+		
 		try {
-			if (Utilities.isEmpty(request.getName())) {
-				throw new InvalidParameterException("Plan name is null or blank!");
-			}
-
 			final Optional<ChoreographerPlan> planOptional = choreographerPlanRepository.findByName(request.getName().trim().toLowerCase());
 			planOptional.ifPresent(choreographerActionPlan -> {
 				throw new InvalidParameterException("Plan with specified name already exists.");
@@ -241,7 +245,7 @@ public class ChoreographerPlanDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG, ex);
 		}
 	}
 
@@ -315,110 +319,100 @@ public class ChoreographerPlanDBService {
 	private ChoreographerAction createAction(final ChoreographerPlan plan, final String name, final List<ChoreographerStepRequestDTO> steps, final List<String> firstStepNames) {
 		logger.debug("createAction started...");
 
-		try {
-			ChoreographerAction action = new ChoreographerAction();
-			action.setPlan(plan);
-			action.setName(name);
+		ChoreographerAction action = new ChoreographerAction();
+		action.setPlan(plan);
+		action.setName(name);
 
-			action = choreographerActionRepository.save(action);
+		action = choreographerActionRepository.save(action);
 
-			for (final ChoreographerStepRequestDTO step : steps) {
-				createStep(action, step);
-			}
-
-			for (final ChoreographerStepRequestDTO step : steps) {
-				final List<String> nextStepNames = step.getNextStepNames();
-				if (nextStepNames != null && !nextStepNames.isEmpty()) {
-					addNextStepsToStep(action, step.getName(), nextStepNames);
-				}
-			}
-
-			for (final String stepName : firstStepNames) {
-				final Optional<ChoreographerStep> stepOpt = choreographerStepRepository.findByNameAndAction(stepName, action);
-				final ChoreographerStep step = stepOpt.get();
-				step.setFirstStep(true);
-				choreographerStepRepository.saveAndFlush(step);
-			}
-
-			return choreographerActionRepository.saveAndFlush(action);
-		} catch (final Exception ex) {
-			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		for (final ChoreographerStepRequestDTO step : steps) {
+			createStep(action, step);
 		}
+
+		for (final ChoreographerStepRequestDTO step : steps) {
+			final List<String> nextStepNames = step.getNextStepNames();
+			if (nextStepNames != null && !nextStepNames.isEmpty()) {
+				addNextStepsToStep(action, step.getName(), nextStepNames);
+			}
+		}
+
+		for (final String stepName : firstStepNames) {
+			final Optional<ChoreographerStep> stepOpt = choreographerStepRepository.findByNameAndAction(stepName, action);
+			final ChoreographerStep step = stepOpt.get();
+			step.setFirstStep(true);
+			choreographerStepRepository.saveAndFlush(step);
+		}
+
+		return choreographerActionRepository.saveAndFlush(action);
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	private ChoreographerStep createStep(final ChoreographerAction action, final ChoreographerStepRequestDTO stepRequest) {
 		logger.debug("createStep started...");
 
-		try {
-			final ServiceQueryFormDTO serviceRequirement = stepRequest.getServiceRequirement();
-			Integer minVersion;
-			Integer maxVersion;
+		final ServiceQueryFormDTO serviceRequirement = stepRequest.getServiceRequirement();
+		Integer minVersion;
+		Integer maxVersion;
 
-			if (serviceRequirement.getVersionRequirement() != null) {
-				minVersion = maxVersion = serviceRequirement.getVersionRequirement();
-			} else {
-				minVersion = serviceRequirement.getMinVersionRequirement();
-				maxVersion = serviceRequirement.getMaxVersionRequirement();
-			}
-
-			final ChoreographerStep step = new ChoreographerStep(stepRequest.getName(), action, serviceRequirement.getServiceDefinitionRequirement(), minVersion, maxVersion, Utilities.toJson(serviceRequirement), Utilities.map2Text(stepRequest.getStaticParameters()), stepRequest.getQuantity());
-
-			return choreographerStepRepository.saveAndFlush(step);
-		} catch (final Exception ex) {
-			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		if (serviceRequirement.getVersionRequirement() != null) {
+			minVersion = maxVersion = serviceRequirement.getVersionRequirement();
+		} else {
+			minVersion = serviceRequirement.getMinVersionRequirement();
+			maxVersion = serviceRequirement.getMaxVersionRequirement();
 		}
+
+		final ChoreographerStep step = new ChoreographerStep(stepRequest.getName(), 
+															 action,
+															 serviceRequirement.getServiceDefinitionRequirement(),
+															 minVersion,
+															 maxVersion,
+															 Utilities.toJson(serviceRequirement),
+															 Utilities.map2Text(stepRequest.getStaticParameters()),
+															 stepRequest.getQuantity());
+
+		return choreographerStepRepository.saveAndFlush(step);
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	private ChoreographerStep addNextStepsToStep(final ChoreographerAction action, final String stepName, final List<String> nextStepNames) {
 		logger.debug("addNextStepsToStep started...");
 
-		try {
-			final Optional<ChoreographerStep> stepOpt = choreographerStepRepository.findByNameAndAction(stepName, action);
-			ChoreographerStep step = stepOpt.get();
+		final Optional<ChoreographerStep> stepOpt = choreographerStepRepository.findByNameAndAction(stepName, action);
+		ChoreographerStep step = stepOpt.get();
 
-			final List<ChoreographerStep> nextSteps = new ArrayList<>(nextStepNames.size());
-			for (final String nextStepName : nextStepNames) {
-				final Optional<ChoreographerStep> nextStepOpt = choreographerStepRepository.findByNameAndAction(nextStepName, action);
-				nextSteps.add(nextStepOpt.get());
-			}
-
-			final List<ChoreographerStepNextStepConnection> nextStepConnections = new ArrayList<>();
-			for (final ChoreographerStep nextStep : nextSteps) {
-				final ChoreographerStepNextStepConnection stepNextStepConnection = new ChoreographerStepNextStepConnection(step, nextStep);
-				step.getNextStepConnections().add(stepNextStepConnection);
-				nextStep.getPreviousStepConnections().add(stepNextStepConnection);
-				nextStepConnections.add(stepNextStepConnection);
-			}
-			choreographerStepNextStepConnectionRepository.saveAll(nextStepConnections);
-			choreographerStepNextStepConnectionRepository.flush();
-			choreographerStepRepository.saveAll(nextSteps);
-
-			return choreographerStepRepository.saveAndFlush(step);
-		} catch (final Exception ex) {
-			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		final List<ChoreographerStep> nextSteps = new ArrayList<>(nextStepNames.size());
+		for (final String nextStepName : nextStepNames) {
+			final Optional<ChoreographerStep> nextStepOpt = choreographerStepRepository.findByNameAndAction(nextStepName, action);
+			nextSteps.add(nextStepOpt.get());
 		}
+
+		final List<ChoreographerStepNextStepConnection> nextStepConnections = new ArrayList<>(nextSteps.size());
+		for (final ChoreographerStep nextStep : nextSteps) {
+			final ChoreographerStepNextStepConnection stepNextStepConnection = new ChoreographerStepNextStepConnection(step, nextStep);
+			step.getNextStepConnections().add(stepNextStepConnection);
+			nextStep.getPreviousStepConnections().add(stepNextStepConnection);
+			nextStepConnections.add(stepNextStepConnection);
+		}
+		choreographerStepNextStepConnectionRepository.saveAll(nextStepConnections);
+		choreographerStepNextStepConnectionRepository.flush();
+		choreographerStepRepository.saveAll(nextSteps);
+
+		return choreographerStepRepository.saveAndFlush(step);
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private ChoreographerAction addNextActionToAction(final ChoreographerPlan plan, final String name, final String nextActionName) {
+	private void addNextActionToAction(final ChoreographerPlan plan, final String name, final String nextActionName) {
 		logger.debug("addNextActionToAction started...");
-
-		try {
+		
+		if (!Utilities.isEmpty(nextActionName)) {
 			final Optional<ChoreographerAction> actionOpt = choreographerActionRepository.findByNameAndPlan(name, plan);
 			final ChoreographerAction action = actionOpt.get();
-
+			
 			final Optional<ChoreographerAction> nextActionOpt = choreographerActionRepository.findByNameAndPlan(nextActionName, plan);
 			action.setNextAction(nextActionOpt.get());
-
-			return choreographerActionRepository.saveAndFlush(action);
-		} catch (final Exception ex) {
-			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			
+			choreographerActionRepository.saveAndFlush(action);
 		}
+
 	}
 }
