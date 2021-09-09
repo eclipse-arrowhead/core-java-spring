@@ -14,10 +14,9 @@
 
 package eu.arrowhead.core.choreographer.database.service;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -566,42 +565,199 @@ public class ChoreographerPlanDBServiceTest {
 		when(planValidator.validateAndNormalizePlan(request)).thenReturn(request);
 		when(choreographerPlanRepository.save(any(ChoreographerPlan.class))).thenReturn(plan);
 		when(choreographerActionRepository.save(any(ChoreographerAction.class))).thenReturn(action1, action2);
-		when(choreographerStepRepository.saveAndFlush(any(ChoreographerStep.class))).thenReturn(step1, step2, step3, step1, step1);
+		when(choreographerStepRepository.saveAndFlush(any(ChoreographerStep.class))).thenReturn(step1, step2, step1, step1, step3, step3);
 		when(choreographerStepRepository.findByNameAndAction("step1", action1)).thenReturn(Optional.of(step1));
 		when(choreographerStepRepository.findByNameAndAction("step2", action1)).thenReturn(Optional.of(step2));
 		when(choreographerStepNextStepConnectionRepository.saveAll(anyList())).thenReturn(List.of(stepConnection));
 		doNothing().when(choreographerStepNextStepConnectionRepository).flush();
 		when(choreographerStepRepository.saveAll(anyList())).thenReturn(List.of(step2));
-		when(choreographerStepRepository.findByNameAndAction("step3", action2)).thenReturn(Optional.of(step3));
 		when(choreographerActionRepository.saveAndFlush(any(ChoreographerAction.class))).thenReturn(action1, action2, action1, action1);
+		when(choreographerStepRepository.findByNameAndAction("step3", action2)).thenReturn(Optional.of(step3));
 		when(choreographerActionRepository.findByNameAndPlan("action1", plan)).thenReturn(Optional.of(action1));
 		when(choreographerActionRepository.findByNameAndPlan("action2", plan)).thenReturn(Optional.of(action2));
 		when(choreographerPlanRepository.saveAndFlush(plan)).thenReturn(plan);
 		
 		final ChoreographerPlan savedPlan = testObject.createPlan(request);
 		
-		//TODO: verify numbers are wrong, rechecks
-		//TODO: make asserts about savedPlan
+		Assert.assertEquals("plan", savedPlan.getName());
+		Assert.assertEquals("action1", savedPlan.getFirstAction().getName());
+		Assert.assertEquals("action2", savedPlan.getFirstAction().getNextAction().getName());
+		Assert.assertNull(savedPlan.getFirstAction().getNextAction().getNextAction());
 			
 		verify(choreographerPlanRepository, times(1)).findByName("plan");
 		verify(planValidator, times(1)).validateAndNormalizePlan(request);
 		verify(choreographerPlanRepository, times(1)).save(any(ChoreographerPlan.class));
 		verify(choreographerActionRepository, times(2)).save(any(ChoreographerAction.class));
-		verify(choreographerStepRepository, times(5)).saveAndFlush(any(ChoreographerStep.class));
+		verify(choreographerStepRepository, times(6)).saveAndFlush(any(ChoreographerStep.class));
 		verify(choreographerStepRepository, times(2)).findByNameAndAction("step1", action1);
 		verify(choreographerStepRepository, times(1)).findByNameAndAction("step2", action1);
 		verify(choreographerStepNextStepConnectionRepository, times(1)).saveAll(anyList());
 		verify(choreographerStepNextStepConnectionRepository, times(1)).flush();
 		verify(choreographerStepRepository, times(1)).saveAll(anyList());
-		verify(choreographerStepRepository, times(1)).findByNameAndAction("step3", action2);
 		verify(choreographerActionRepository, times(4)).saveAndFlush(any(ChoreographerAction.class));
+		verify(choreographerStepRepository, times(1)).findByNameAndAction("step3", action2);
 		verify(choreographerActionRepository, times(2)).findByNameAndPlan("action1", plan);
 		verify(choreographerActionRepository, times(1)).findByNameAndPlan("action2", plan);
 		verify(choreographerPlanRepository, times(1)).saveAndFlush(plan);
 	}
 
+	// testCreatePlanResponse is basically just createPlan() and getPlanDetails() method callings, both are tested previously
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetStepByIdNotFound() {
+		when(choreographerStepRepository.findById(1L)).thenReturn(Optional.empty());
+		
+		try {
+			testObject.getStepById(1);
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().startsWith("Step with id of "));
+			
+			verify(choreographerStepRepository, times(1)).findById(1L);
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetStepByIdDBException() {
+		when(choreographerStepRepository.findById(1L)).thenThrow(new RuntimeException("db error"));
+		
+		try {
+			testObject.getStepById(1);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Database operation exception", ex.getMessage());
+			
+			verify(choreographerStepRepository, times(1)).findById(1L);
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetStepByIdOk() {
+		final ChoreographerStep step = new ChoreographerStep();
+		step.setName("step");
+		
+		when(choreographerStepRepository.findById(1L)).thenReturn(Optional.of(step));
+		
+		final ChoreographerStep result = testObject.getStepById(1);
 
-	//TODO: testCreatePlanResponse
+		Assert.assertEquals("step", result.getName());
+			
+		verify(choreographerStepRepository, times(1)).findById(1L);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testCollectStepsFromPlanInputNull() {
+		try {
+			testObject.collectStepsFromPlan(null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Plan is null.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testCollectStepsFromPlanDBException() {
+		doThrow(new IllegalArgumentException("Entity not managed")).when(choreographerPlanRepository).refresh(any(ChoreographerPlan.class));
+		
+		try {
+			testObject.collectStepsFromPlan(new ChoreographerPlan());
+		} catch (final Exception ex) {
+			Assert.assertEquals("Database operation exception", ex.getMessage());
+			
+			verify(choreographerPlanRepository, times(1)).refresh(any(ChoreographerPlan.class));
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCollectStepsFromPlanNoActions() {
+		final ChoreographerPlan plan = new ChoreographerPlan();
+
+		doNothing().when(choreographerPlanRepository).refresh(plan);
+		when(choreographerActionRepository.findByPlan(plan)).thenReturn(List.of());
+		
+		final List<ChoreographerStep> result = testObject.collectStepsFromPlan(plan);
+
+		Assert.assertEquals(0, result.size());
+			
+		verify(choreographerPlanRepository, times(1)).refresh(plan);
+		verify(choreographerActionRepository, times(1)).findByPlan(plan);
+		verify(choreographerStepRepository, never()).findByActionIn(anyList());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCollectStepsFromPlanOk() {
+		final ChoreographerPlan plan = new ChoreographerPlan();
+		final ChoreographerAction action = new ChoreographerAction();
+		final List<ChoreographerAction> actionList = List.of(action);
+
+		doNothing().when(choreographerPlanRepository).refresh(plan);
+		when(choreographerActionRepository.findByPlan(plan)).thenReturn(actionList);
+		when(choreographerStepRepository.findByActionIn(actionList)).thenReturn(List.of(new ChoreographerStep()));
+		
+		final List<ChoreographerStep> result = testObject.collectStepsFromPlan(plan);
+
+		Assert.assertEquals(1, result.size());
+			
+		verify(choreographerPlanRepository, times(1)).refresh(plan);
+		verify(choreographerActionRepository, times(1)).findByPlan(plan);
+		verify(choreographerStepRepository, times(1)).findByActionIn(anyList());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testgetFirstStepsInputNull() {
+		try {
+			testObject.getFirstSteps(null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Action is null.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetFirstStepsDBException() {
+		doThrow(new IllegalArgumentException("Entity not managed")).when(choreographerActionRepository).refresh(any(ChoreographerAction.class));
+		
+		try {
+			testObject.getFirstSteps(new ChoreographerAction());
+		} catch (final Exception ex) {
+			Assert.assertEquals("Database operation exception", ex.getMessage());
+			
+			verify(choreographerActionRepository, times(1)).refresh(any(ChoreographerAction.class));
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetFirstStepsOk() {
+		final ChoreographerAction action = new ChoreographerAction();
+
+		doNothing().when(choreographerActionRepository).refresh(action);
+		when(choreographerStepRepository.findByActionAndFirstStep(action, true)).thenReturn(List.of(new ChoreographerStep()));
+		
+		final List<ChoreographerStep> result = testObject.getFirstSteps(action);
+
+		Assert.assertEquals(1, result.size());
+			
+		verify(choreographerActionRepository, times(1)).refresh(action);
+		verify(choreographerStepRepository, times(1)).findByActionAndFirstStep(action, true);
+	}
 	
 	//=================================================================================================
 	// assistant methods

@@ -147,9 +147,9 @@ public class ChoreographerPlanController {
 
         final ValidatedPageParams validatedPageParams = CoreUtilities.validatePageParameters(page, size, direction, sortField);
         final ChoreographerPlanListResponseDTO planEntriesResponse = planDBService.getPlanEntriesResponse(validatedPageParams.getValidatedPage(),
-        																										   validatedPageParams.getValidatedSize(),
-        																										   validatedPageParams.getValidatedDirection(),
-        																										   sortField);
+        																								  validatedPageParams.getValidatedSize(),
+        																								  validatedPageParams.getValidatedDirection(),
+        																								  sortField);
         logger.debug("Plan with page: {} and item_per_page: {} retrieved successfully", page, size);
 
         return planEntriesResponse;

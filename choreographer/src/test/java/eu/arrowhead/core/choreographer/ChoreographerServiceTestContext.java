@@ -17,11 +17,14 @@ package eu.arrowhead.core.choreographer;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerPlanDBService;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerSessionDBService;
 import eu.arrowhead.core.choreographer.service.ChoreographerExecutorService;
+import eu.arrowhead.core.choreographer.validation.ChoreographerPlanExecutionChecker;
+import eu.arrowhead.core.choreographer.validation.ChoreographerPlanValidator;
 
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.jms.core.JmsTemplate;
 
 @Configuration
 public class ChoreographerServiceTestContext {
@@ -49,4 +52,25 @@ public class ChoreographerServiceTestContext {
     public ChoreographerExecutorService mockChoreographerExecutorService() {
         return Mockito.mock(ChoreographerExecutorService.class);
     }
+    
+    //-------------------------------------------------------------------------------------------------
+	@Bean
+	@Primary // This bean is primary only in test context
+	public JmsTemplate mockJmsService() {
+		return Mockito.mock(JmsTemplate.class);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Bean
+	@Primary // This bean is primary only in test context
+	public ChoreographerPlanValidator mockPlanValidator() {
+		return Mockito.mock(ChoreographerPlanValidator.class);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Bean
+	@Primary // This bean is primary only in test context
+	public ChoreographerPlanExecutionChecker mockPlanChecker() {
+		return Mockito.mock(ChoreographerPlanExecutionChecker.class);
+	}
 }

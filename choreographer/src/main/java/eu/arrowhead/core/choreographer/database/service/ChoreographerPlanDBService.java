@@ -265,7 +265,7 @@ public class ChoreographerPlanDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG, ex);
 		}
 	}
 	
@@ -277,10 +277,11 @@ public class ChoreographerPlanDBService {
 		try {
 			choreographerPlanRepository.refresh(plan);
 			final List<ChoreographerAction> actions = choreographerActionRepository.findByPlan(plan);
-			return choreographerStepRepository.findByActionIn(actions);
+			
+			return actions.isEmpty() ? List.of() : choreographerStepRepository.findByActionIn(actions);
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG, ex);
 		}
 	}
 	
@@ -295,7 +296,7 @@ public class ChoreographerPlanDBService {
 			return choreographerStepRepository.findByActionAndFirstStep(action, true);
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG, ex);
 		}
 	}
 
@@ -413,6 +414,5 @@ public class ChoreographerPlanDBService {
 			
 			choreographerActionRepository.saveAndFlush(action);
 		}
-
 	}
 }
