@@ -42,6 +42,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.service.CommonDBService;
+import eu.arrowhead.common.dto.internal.TokenGenerationDetailedResponseDTO;
+import eu.arrowhead.common.dto.internal.TokenGenerationMultiServiceResponseDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationProviderDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
@@ -395,6 +397,78 @@ public class TokenGenerationServiceTest {
 		Assert.assertTrue(!result.isEmpty());
 		Assert.assertTrue(result.containsKey(provider));
 		final Map<String,String> tokens = result.get(provider);
+		Assert.assertNotNull(tokens);
+		Assert.assertTrue(!tokens.isEmpty());
+		final String encryptedToken = tokens.get("HTTP-SECURE-JSON");
+		Assert.assertTrue(!Utilities.isEmpty(encryptedToken));
+		
+		final AlgorithmConstraints jwsAlgConstraints = new AlgorithmConstraints(ConstraintType.WHITELIST, CommonConstants.JWS_SIGN_ALG);
+		final AlgorithmConstraints jweAlgConstraints = new AlgorithmConstraints(ConstraintType.WHITELIST, CommonConstants.JWE_KEY_MANAGEMENT_ALG);
+		final AlgorithmConstraints jweEncConstraints = new AlgorithmConstraints(ConstraintType.WHITELIST, CommonConstants.JWE_ENCRYPTION_ALG);
+
+		final InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("certificates/authorization.pub");
+		final PublicKey authPublicKey = Utilities.getPublicKeyFromPEMFile(is);
+		
+		final KeyStore keystore = KeyStore.getInstance("PKCS12");
+		keystore.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("certificates/provider.p12"), "123456".toCharArray());
+		final PrivateKey providerPrivateKey = Utilities.getPrivateKey(keystore, "123456");
+		
+		final JwtConsumer jwtConsumer = new JwtConsumerBuilder().setRequireJwtId()
+																.setRequireNotBefore()
+																.setEnableRequireEncryption()
+																.setEnableRequireIntegrity()
+																.setExpectedIssuer(CommonConstants.CORE_SYSTEM_AUTHORIZATION)
+																.setDecryptionKey(providerPrivateKey)
+																.setVerificationKey(authPublicKey)
+																.setJwsAlgorithmConstraints(jwsAlgConstraints)
+																.setJweAlgorithmConstraints(jweAlgConstraints)
+																.setJweContentEncryptionAlgorithmConstraints(jweEncConstraints)
+																.build();
+		
+		final JwtClaims claims = jwtConsumer.processToClaims(encryptedToken);
+		Assert.assertTrue(claims.isClaimValueString(CommonConstants.JWT_CLAIM_CONSUMER_ID));
+		Assert.assertEquals("consumer.testcloud2.aitia", claims.getStringClaimValue(CommonConstants.JWT_CLAIM_CONSUMER_ID));
+		Assert.assertTrue(claims.isClaimValueString(CommonConstants.JWT_CLAIM_SERVICE_ID));
+		Assert.assertEquals("testservice", claims.getStringClaimValue(CommonConstants.JWT_CLAIM_SERVICE_ID));
+		Assert.assertTrue(System.currentTimeMillis() < claims.getExpirationTime().getValueInMillis());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMultiTokenGenerationOk() throws Exception {
+		final KeyStore authKeystore = KeyStore.getInstance("PKCS12");
+		authKeystore.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("certificates/authorization.p12"), "123456".toCharArray());
+		final PrivateKey authPrivateKey = Utilities.getPrivateKey(authKeystore, "123456");
+		when(arrowheadContext.containsKey(CommonConstants.SERVER_PRIVATE_KEY)).thenReturn(true);
+		when(arrowheadContext.get(CommonConstants.SERVER_PRIVATE_KEY)).thenReturn(authPrivateKey);
+		
+		final SystemRequestDTO consumer = new SystemRequestDTO();
+		consumer.setSystemName("consumer");
+		consumer.setPort(1000);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("aitia");
+		cloud.setName("testcloud2");
+		final SystemRequestDTO provider = new SystemRequestDTO();
+		provider.setSystemName("provider");
+		provider.setPort(2000);
+		provider.setAuthenticationInfo(authInfo);
+		final TokenGenerationProviderDTO providerDTO = new TokenGenerationProviderDTO();
+		providerDTO.setProvider(provider);
+		providerDTO.setServiceInterfaces(List.of("HTTP-SECURE-JSON"));
+		providerDTO.setTokenDuration(600);
+		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, cloud, List.of(providerDTO), "testservice");
+		final TokenGenerationMultiServiceResponseDTO result = tokenGenerationService.generateMultiServiceTokensResponse(List.of(request));
+		
+		final TokenGenerationDetailedResponseDTO resultItem = result.getData().get(0);
+		Assert.assertEquals(request.getService(), resultItem.getService());
+		Assert.assertEquals(request.getConsumer().getSystemName(), resultItem.getConsumerName());
+		Assert.assertEquals(request.getConsumer().getAddress(), resultItem.getConsumerAdress());
+		Assert.assertEquals(request.getConsumer().getPort().intValue(), resultItem.getConsumerPort());
+		Assert.assertEquals(request.getProviders().get(0).getProvider().getSystemName(), resultItem.getTokenData().get(0).getProviderName());
+		Assert.assertEquals(request.getProviders().get(0).getProvider().getAddress(), resultItem.getTokenData().get(0).getProviderAddress());
+		Assert.assertEquals(request.getProviders().get(0).getProvider().getPort().intValue(), resultItem.getTokenData().get(0).getProviderPort());
+		
+		final Map<String,String> tokens = resultItem.getTokenData().get(0).getTokens();
 		Assert.assertNotNull(tokens);
 		Assert.assertTrue(!tokens.isEmpty());
 		final String encryptedToken = tokens.get("HTTP-SECURE-JSON");
