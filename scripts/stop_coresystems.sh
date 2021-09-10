@@ -8,6 +8,7 @@ pkill -f gatekeeper
 pkill -f authorization
 pkill -f eventhandler
 pkill -f datamanager
+pkill -f timemanager
 pkill -f gateway
 pkill -f certificate-authority
 pkill -f plantdescriptionengine
@@ -27,6 +28,7 @@ then
   kill -KILL $(ps aux | grep 'authorization' | awk '{print $2}')
   kill -KILL $(ps aux | grep 'eventhandler' | awk '{print $2}')
   kill -KILL $(ps aux | grep 'datamanager' | awk '{print $2}')
+  kill -KILL $(ps aux | grep 'timemanager' | awk '{print $2}')
   kill -KILL $(ps aux | grep 'gateway' | awk '{print $2}')
   kill -KILL $(ps aux | grep 'certificate-authority' | awk '{print $2}')
   kill -KILL $(ps aux | grep 'plantdescriptionengine' | awk '{print $2}')
