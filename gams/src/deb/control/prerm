@@ -5,7 +5,7 @@
 
 set -e
 
-PKG_NAME="arrowhead-onboarding"
+PKG_NAME="arrowhead-gams"
 
 # summary of how this script can be called:
 #        * <prerm> `remove'

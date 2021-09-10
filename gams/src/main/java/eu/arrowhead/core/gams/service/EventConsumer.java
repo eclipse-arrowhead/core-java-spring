@@ -1,6 +1,5 @@
 package eu.arrowhead.core.gams.service;
 
-import java.util.Iterator;
 import java.util.Objects;
 import java.util.Stack;
 import java.util.concurrent.ScheduledExecutorService;
@@ -10,6 +9,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.annotation.PostConstruct;
+import javax.transaction.Transactional;
 
 import eu.arrowhead.common.database.entity.Event;
 import eu.arrowhead.common.database.repository.EventRepository;
@@ -22,12 +22,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class EventConsumer {
 
-    private final static Long ADD_WORKERS_START_DELAY = 30L;
-    private final static Long ADD_WORKERS_INTERVAL_DELAY = 300L;
+    private final static long ADD_WORKERS_START_DELAY = 30L;
+    private final static long ADD_WORKERS_INTERVAL_DELAY = 300L;
     private final static TimeUnit ADD_WORKERS_TIME_UNIT = TimeUnit.SECONDS;
 
-    private final static Long REMOVE_WORKERS_START_DELAY = 60L;
-    private final static Long REMOVE_WORKERS_INTERVAL_DELAY = 60L;
+    private final static long REMOVE_WORKERS_START_DELAY = 60L;
+    private final static long REMOVE_WORKERS_INTERVAL_DELAY = 60L;
     private final static TimeUnit REMOVE_WORKERS_TIME_UNIT = TimeUnit.SECONDS;
 
 
@@ -71,7 +71,7 @@ public class EventConsumer {
 
             while (this.workers.size() < workerProperties.getMinimum()) {
                 this.workers.push(
-                        executorService.scheduleAtFixedRate(handleEventsWorker(),
+                        executorService.scheduleAtFixedRate(createEventsWorker(),
                                                             workerProperties.getDelay(), workerProperties.getLoopWait(),
                                                             TimeUnit.MILLISECONDS)
                 );
@@ -81,39 +81,18 @@ public class EventConsumer {
         }
     }
 
+    private Runnable createEventsWorker() {
+        return new EventWorker(properties,eventService,this);
+    }
+
     private void verifyLoad() {
         if (eventService.hasLoad()) {
             requestNewWorker();
         }
     }
 
-    private Runnable handleEventsWorker() {
-        return () -> {
-            logger.debug("Loading up to {} events", properties.getBatchSize());
-            final Iterable<Event> events = eventService.loadEvent(properties.getBatchSize());
-            final Iterator<Event> iterator = events.iterator();
-
-            try {
-                /*
-                if (iterator.hasNext()) {
-                    requestNewWorker();
-                } else {
-                    requestRemoveWorker();
-                }
-                */
-
-                while (iterator.hasNext()) {
-                    processEvent(iterator.next());
-                }
-            } catch (final Exception e) {
-                logger.fatal("Unknown exception during events worker run: {}: {}", e.getClass().getSimpleName(), e.getMessage());
-            } finally {
-                iterator.forEachRemaining(eventService::persisted);
-            }
-        };
-    }
-
-    private void processEvent(final Event event) {
+    @Transactional
+    protected void processEvent(final Event event) {
         try {
             // make sure that only events for different sensors run mapek concurrently to prevent concurrent processing of sensor data
             synchronized (event.getSensor().getUidAsString().intern()) {
@@ -163,7 +142,7 @@ public class EventConsumer {
             logger.debug("Adding new EventWorker");
             if ((mTime.get() + workerProperties.getThreadWait()) <= curTime) {
                 workers.push(
-                        executorService.scheduleAtFixedRate(handleEventsWorker(),
+                        executorService.scheduleAtFixedRate(createEventsWorker(),
                                                             0, workerProperties.getLoopWait(),
                                                             TimeUnit.MILLISECONDS)
                 );

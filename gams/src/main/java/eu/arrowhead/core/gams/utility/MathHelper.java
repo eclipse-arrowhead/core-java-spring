@@ -55,11 +55,11 @@ public class MathHelper {
         if (Objects.isNull(number)) {
             throw new IllegalArgumentException("input number is null");
         } else if (number instanceof Double) {
-            long l = (long) ((((Double) number)) * PRECISION);
-            return l / PRECISION;
+            long value = (long) (((Double) number) * PRECISION);
+            return value / PRECISION;
         } else if (number instanceof Float) {
-            long l = (long) ((((Float) number)) * PRECISION);
-            return l / PRECISION;
+            long value = (long) (((Float) number) * PRECISION);
+            return value / PRECISION;
         } else if (number instanceof Byte) {
             return ((Byte) number).doubleValue();
         } else if (number instanceof Short) {

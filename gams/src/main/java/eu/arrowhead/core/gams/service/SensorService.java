@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+import javax.transaction.Transactional;
+
 import eu.arrowhead.common.database.entity.AbstractSensorData;
 import eu.arrowhead.common.database.entity.ConfigurationEntity;
 import eu.arrowhead.common.database.entity.DoubleSensorData;
@@ -16,6 +18,7 @@ import eu.arrowhead.common.database.entity.Sensor;
 import eu.arrowhead.common.database.entity.StringSensorData;
 import eu.arrowhead.common.database.repository.SensorDataRepository;
 import eu.arrowhead.common.database.repository.SensorRepository;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.core.gams.DataValidation;
 import eu.arrowhead.core.gams.dto.ProcessingState;
@@ -47,6 +50,7 @@ public class SensorService {
         this.sensorDataRepository = sensorDataRepository;
     }
 
+    @Transactional
     public Sensor create(final GamsInstance instance, final CreateSensorRequest request) {
         logger.info("create({})", request);
         validation.verify(instance);
@@ -54,14 +58,19 @@ public class SensorService {
         Assert.notNull(request.getName(), "Sensor name must not be null");
         Assert.notNull(request.getType(), "Sensor type must not be null");
 
-        final Sensor sensor = new Sensor(instance, request.getName(), request.getType());
-        sensor.setAddress(request.getAddress());
-        sensor.setRetentionTime(request.getRetentionTime());
-        sensor.setTimeUnit(request.getTimeUnit());
+        try {
+            final Sensor sensor = new Sensor(instance, request.getName(), request.getType());
+            sensor.setAddress(request.getAddress());
+            sensor.setRetentionTime(request.getRetentionTime());
+            sensor.setTimeUnit(request.getTimeUnit());
 
-        return sensorRepository.saveAndFlush(sensor);
+            return sensorRepository.saveAndFlush(sensor);
+        } catch (Exception e) {
+            throw new ArrowheadException(e.getMessage());
+        }
     }
 
+    @Transactional
     public AbstractSensorData<?> store(final Sensor sensor, final ZonedDateTime timestamp, final Object data, final String address) {
         logger.trace("store({},{},{})", sensor.shortToString(), timestamp, data);
         validation.verify(sensor);
@@ -86,6 +95,7 @@ public class SensorService {
         return sensorDataRepository.saveAndFlush(sensorData);
     }
 
+    @Transactional
     public void store(final AbstractSensorData datum) {
         sensorDataRepository.saveAndFlush(datum);
     }
@@ -99,11 +109,12 @@ public class SensorService {
     public List<AbstractSensorData> load(final Sensor sensor, final int count) {
         logger.debug("load({},{})", sensor, count);
         validation.verify(sensor);
-        final Page<AbstractSensorData> page = sensorDataRepository.findBySensorAndStateOrderByValidTillDesc(sensor, ProcessingState.PERSISTED, PageRequest.of(0, count));
+        final Page<AbstractSensorData> page = sensorDataRepository
+                .findBySensorAndStateOrderByValidTillDesc(sensor, ProcessingState.PERSISTED, PageRequest.of(0, count));
         return page.getContent();
     }
 
-    public List<AbstractSensorData>  load(final Sensor sensor, final int count, final int validity, final ChronoUnit validityTimeUnit) {
+    public List<AbstractSensorData> load(final Sensor sensor, final int count, final int validity, final ChronoUnit validityTimeUnit) {
         logger.debug("load({},{},{},{})", sensor, count, validity, validityTimeUnit);
         validation.verify(sensor);
         final ZonedDateTime loadFrom = ZonedDateTime.now().minus(validity, validityTimeUnit);
@@ -131,15 +142,25 @@ public class SensorService {
         logger.debug("findByUid({})", uid);
         Assert.hasText(uid, "Sensor uid must not be empty");
 
-        final Optional<Sensor> instanceByUid = sensorRepository.findByUid(UUID.fromString(uid));
-        return instanceByUid.orElseThrow(() -> new DataNotFoundException("Unable to find sensor with given uid"));
+        try {
+            final Optional<Sensor> instanceByUid = sensorRepository.findByUid(UUID.fromString(uid));
+            return instanceByUid.orElseThrow(() -> new DataNotFoundException("Unable to find sensor with given uid"));
+        } catch (DataNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ArrowheadException(e.getMessage());
+        }
     }
 
-    public List<Sensor> findAllSensorByInstance(final GamsInstance instance) {
+    public Page<Sensor> findAllSensorByInstance(final GamsInstance instance, final Pageable pageRequest) {
         logger.debug("findAllByInstance({})", instance);
         validation.verify(instance);
 
-        return sensorRepository.findAllByInstance(instance);
+        try {
+            return sensorRepository.findAllByInstance(instance, pageRequest);
+        } catch (Exception e) {
+            throw new ArrowheadException(e.getMessage());
+        }
     }
 
     public Sensor findSensorByName(final GamsInstance instance, final String sensorName) {
@@ -147,8 +168,14 @@ public class SensorService {
         validation.verify(instance);
         Assert.hasText(sensorName, "Sensor name must not be empty");
 
-        final Optional<Sensor> instanceByName = sensorRepository.findByInstanceAndName(instance, sensorName);
-        return instanceByName.orElseThrow(() -> new DataNotFoundException("Unable to find sensor with given name"));
+        try {
+            final Optional<Sensor> instanceByName = sensorRepository.findByInstanceAndName(instance, sensorName);
+            return instanceByName.orElseThrow(() -> new DataNotFoundException("Unable to find sensor with given name"));
+        } catch (DataNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ArrowheadException(e.getMessage());
+        }
     }
 
     public Sensor findSensorByAddress(final GamsInstance instance, final String address) {
@@ -156,29 +183,41 @@ public class SensorService {
         validation.verify(instance);
         Assert.hasText(address, "Sensor address must not be empty");
 
-
-        final Optional<Sensor> instanceByAddress = sensorRepository.findByInstanceAndAddress(instance, address);
-        return instanceByAddress.orElseThrow(() -> new DataNotFoundException("Unable to find sensor with given address"));
+        try {
+            final Optional<Sensor> instanceByAddress = sensorRepository.findByInstanceAndAddress(instance, address);
+            return instanceByAddress.orElseThrow(() -> new DataNotFoundException("Unable to find sensor with given address"));
+        } catch (DataNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ArrowheadException(e.getMessage());
+        }
     }
 
+    @Transactional
     public void deleteAllSensor(final GamsInstance instance) {
         logger.info("deleteAll({})", instance);
         validation.verify(instance);
 
-        final List<Sensor> sensorList = sensorRepository.findAllByInstance(instance);
-        sensorRepository.deleteAll(sensorList);
+        try {
+            final List<Sensor> sensorList = sensorRepository.findAllByInstance(instance);
+            sensorRepository.deleteAll(sensorList);
+        } catch (Exception e) {
+            throw new ArrowheadException(e.getMessage());
+        }
     }
 
+    @Transactional
+    public Sensor createEventSensor(final GamsInstance instance, final ConfigurationEntity entity, final SensorType type) {
+        Assert.notNull(entity, "Entity must not be null");
+        return createEventSensor(instance, entity.getUidString(), type);
+    }
+
+    @Transactional
     protected Sensor createEventSensor(final GamsInstance instance, final String name, final SensorType type) {
         validation.verify(instance);
         Assert.hasText(name, "Name must not be empty");
         Assert.notNull(type, "Sensor Type must not be null");
         return sensorRepository.saveAndFlush(new Sensor(instance, name, type));
-    }
-
-    public Sensor createEventSensor(final GamsInstance instance, final ConfigurationEntity entity, final SensorType type) {
-        Assert.notNull(entity, "Entity must not be null");
-        return createEventSensor(instance, entity.getUidString(), type);
     }
 
     protected Sensor getEventSensor(final GamsInstance instance, final String name) {
@@ -188,26 +227,29 @@ public class SensorService {
                                .orElseThrow(exceptionSupplier(instance, name));
     }
 
-    private Supplier<IllegalStateException> exceptionSupplier(final GamsInstance instance, final String name) {
-        return () -> new IllegalStateException("Unable to find event sensor '" + name + "' for supplied gams instance '" + instance.getUidAsString() + "'");
-    }
-
+    @Transactional
     protected void persisted(final AbstractSensorData data) {
         data.setState(ProcessingState.PERSISTED);
         sensorDataRepository.saveAndFlush(data);
         logger.trace("persisted {}", data);
     }
 
+    @Transactional
     protected void processing(final AbstractSensorData data) {
         data.setState(ProcessingState.PROCESSING);
         sensorDataRepository.saveAndFlush(data);
         logger.trace("processing {}", data);
     }
 
+    @Transactional
     protected void processed(final AbstractSensorData data) {
         data.setState(ProcessingState.PROCESSED);
         sensorDataRepository.saveAndFlush(data);
         logger.trace("processed {}", data);
+    }
+
+    private Supplier<IllegalStateException> exceptionSupplier(final GamsInstance instance, final String name) {
+        return () -> new IllegalStateException("Unable to find event sensor '" + name + "' for supplied gams instance '" + instance.getUidAsString() + "'");
     }
 
 }

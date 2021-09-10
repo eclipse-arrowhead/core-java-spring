@@ -47,7 +47,6 @@ public class SensorControllerTest {
     private static final UUID VALID_EVENT_SENSOR_ID = UUID.randomUUID();
     private static final UUID VALID_FLOATING_SENSOR_ID = UUID.randomUUID();
     private static final UUID VALID_INTEGER_SENSOR_ID = UUID.randomUUID();
-    private static final UUID TEST_UID = UUID.randomUUID();
     private static final Sensor VALID_EVENT_SENSOR = new Sensor(VALID_GAMS_INSTANCE, "sensor", VALID_EVENT_SENSOR_ID, SensorType.EVENT);
     private static final Sensor VALID_FLOATING_SENSOR = new Sensor(VALID_GAMS_INSTANCE, "sensor", VALID_FLOATING_SENSOR_ID, SensorType.FLOATING_POINT_NUMBER);
     private static final Sensor VALID_INTEGER_SENSOR = new Sensor(VALID_GAMS_INSTANCE, "sensor", VALID_INTEGER_SENSOR_ID, SensorType.INTEGER_NUMBER);

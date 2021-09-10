@@ -3,40 +3,6 @@ create schema if not exists arrowhead;
 
 use arrowhead;
 
-/*
--- AbstractEntity
-CREATE TABLE IF NOT EXISTS `gams_`
-(
-    `id`   bigint(20) PRIMARY KEY AUTO_INCREMENT,
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
-
--- ConfigurationEntity
-CREATE TABLE IF NOT EXISTS `gams_`
-(
-    `id`   bigint(20) PRIMARY KEY AUTO_INCREMENT,
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP,
-    `uid`  BINARY(16) NOT NULL,
-
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
-
--- ProcessableEntity
-CREATE TABLE IF NOT EXISTS `gams_`
-(
-    `id`   bigint(20) PRIMARY KEY AUTO_INCREMENT,
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `valid_till` TIMESTAMP NOT NULL,
-    `state` varchar(16) NOT NULL,
-
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
-
-*/
-
 CREATE TABLE IF NOT EXISTS `gams_instance`
 (
     `id`              bigint(20) PRIMARY KEY AUTO_INCREMENT,

@@ -12,28 +12,53 @@ public class GamsInstanceListDto implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private List<GamsInstanceDto> data = new ArrayList<>();
-    private long count;
+    private int count;
+    private int currentPage;
+    private int totalPages;
 
     public GamsInstanceListDto() { super(); }
 
-    public GamsInstanceListDto(final List<GamsInstanceDto> data, final long count) {
+    public GamsInstanceListDto(final List<GamsInstanceDto> data, final int count) {
+        this(data, count, 1, 1);
+    }
+
+    public GamsInstanceListDto(final List<GamsInstanceDto> data, final int count, final int currentPage, final int totalPages) {
+        super();
         this.data = data;
         this.count = count;
+        this.currentPage = currentPage;
+        this.totalPages = totalPages;
     }
 
     public List<GamsInstanceDto> getData() {
         return data;
     }
 
-    public long getCount() {
-        return count;
-    }
-
     public void setData(final List<GamsInstanceDto> data) {
         this.data = data;
     }
 
-    public void setCount(final long count) {
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(final int count) {
         this.count = count;
+    }
+
+    public int getCurrentPage() {
+        return currentPage;
+    }
+
+    public void setCurrentPage(final int currentPage) {
+        this.currentPage = currentPage;
+    }
+
+    public int getTotalPages() {
+        return totalPages;
+    }
+
+    public void setTotalPages(final int totalPages) {
+        this.totalPages = totalPages;
     }
 }

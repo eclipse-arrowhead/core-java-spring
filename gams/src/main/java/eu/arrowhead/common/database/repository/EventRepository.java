@@ -22,7 +22,7 @@ public interface EventRepository extends RefreshableRepository<Event, Long>, Jpa
 
     void expireEvents();
 
-    Long countValid();
+    long countValid();
 
     boolean hasValidEvent(final Sensor sensor, final ProcessingState persisted, final GamsPhase monitor,
                           final EventType sensorData);

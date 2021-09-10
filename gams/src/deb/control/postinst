@@ -30,8 +30,8 @@ case "$1" in
 
     SYSTEM_DIR="${AH_SYSTEMS_DIR}/${SYSTEM_NAME}"
 
-		db_get arrowhead-core-common/mysql_password_onboarding; system_passwd=$RET || true
-		db_unregister arrowhead-core-common/mysql_password_onboarding
+		db_get arrowhead-core-common/mysql_password_gams; system_passwd=$RET || true
+		db_unregister arrowhead-core-common/mysql_password_gams
 
 		# Generate password (if required)
 		if [ -z "${system_passwd}" ]; then

@@ -49,7 +49,7 @@ public class SensorDataController {
     private static final String PUBLISH_SENSOR_ADDRESS_URI = Constants.PATH_ADDRESS;
     private static final String PUBLISH_SENSOR_DESCRIPTION = "Publish sensor data to an instance";
     private static final String PUBLISH_SENSOR_SUCCESS = "Sensor data published";
-    private static final String PUBLISH_SENSOR_BAD_REQUEST = "Unable to publish sensor";
+    private static final String PUBLISH_SENSOR_BAD_REQUEST = "Unable to publish sensor data";
     private static final String PUBLISH_SENSOR_NOT_FOUND = "Sensor or instance not found";
 
     private final Logger logger = LogManager.getLogger(SensorDataController.class);

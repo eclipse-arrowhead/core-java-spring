@@ -15,7 +15,7 @@ public abstract class ConfigurationEntity extends AbstractEntity {
     @Column(nullable = false, unique = true, columnDefinition = "BINARY(16)")
     protected UUID uid;
 
-    @Column(name = "updated_at", nullable = false, updatable = true, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+    @Column(name = "updated_at", nullable = false, updatable = true)
     protected ZonedDateTime updatedAt;
 
     public ConfigurationEntity() { super(); }

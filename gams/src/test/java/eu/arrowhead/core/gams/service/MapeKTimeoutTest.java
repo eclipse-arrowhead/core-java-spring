@@ -4,6 +4,8 @@ import java.time.temporal.ChronoUnit;
 
 import eu.arrowhead.common.database.entity.GamsInstance;
 import eu.arrowhead.common.database.entity.Sensor;
+import eu.arrowhead.common.database.entity.TimeoutGuard;
+import eu.arrowhead.common.database.repository.EventRepository;
 import eu.arrowhead.core.gams.DatabaseTestContext;
 import eu.arrowhead.core.gams.rest.dto.CreateInstanceRequest;
 import eu.arrowhead.core.gams.rest.dto.CreateSensorRequest;
@@ -14,7 +16,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -25,11 +26,12 @@ public class MapeKTimeoutTest {
 
     private final Logger logger = LogManager.getLogger();
 
-    @InjectMocks
-    private MapeKService mapeKService;
 
     @Autowired
     private InstanceService instanceService;
+
+    @Autowired
+    private EventRepository eventRepository;
 
     @Autowired
     private SensorService sensorService;
@@ -39,6 +41,7 @@ public class MapeKTimeoutTest {
 
     private GamsInstance instance;
     private Sensor sensor;
+    private TimeoutGuard timeoutGuard;
 
     @Before
     public void setUp() {
@@ -48,13 +51,15 @@ public class MapeKTimeoutTest {
 
     @After
     public void tearDown() {
+        timeoutService.deleteTimeoutGuard(timeoutGuard);
+        eventRepository.deleteAll();
         sensorService.deleteAllSensor(instance);
         instanceService.delete(instance);
     }
 
     @Test
     public void createTimeout() throws InterruptedException {
-        timeoutService.createTimeoutGuard(sensor, 1L, ChronoUnit.SECONDS);
+        timeoutGuard = timeoutService.createTimeoutGuard(sensor, 1L, ChronoUnit.SECONDS);
         logger.debug("Test sleep for timeout");
         Thread.sleep(1_500L);
     }

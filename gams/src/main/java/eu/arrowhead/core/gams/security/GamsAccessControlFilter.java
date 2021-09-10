@@ -1,7 +1,7 @@
 package eu.arrowhead.core.gams.security;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.Objects;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -13,6 +13,7 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SecurityUtilities;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.filter.thirdparty.MultiReadRequestWrapper;
 import eu.arrowhead.common.security.CoreSystemAccessControlFilter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -34,11 +35,15 @@ public class GamsAccessControlFilter extends CoreSystemAccessControlFilter {
                 final MultiReadRequestWrapper requestWrapper = new MultiReadRequestWrapper((HttpServletRequest) request);
                 final String requestTarget = Utilities.stripEndSlash(requestWrapper.getRequestURL().toString());
 
-                if (requestTarget.contains(CoreCommonConstants.MGMT_URI)) {
+                if (Objects.requireNonNull(requestTarget).contains(CoreCommonConstants.MGMT_URI)) {
                     // Only the local System Operator can use these methods
                     final String cloudCN = getServerCloudCN();
                     final String clientCN = SecurityUtilities.getCertificateCNFromRequest(requestWrapper);
 
+                    if (clientCN == null) {
+                        log.error("Unauthorized access: {}", requestTarget);
+                        throw new AuthException("Unauthorized access: " + requestTarget);
+                    }
                     checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
                 }
 
@@ -49,19 +54,6 @@ public class GamsAccessControlFilter extends CoreSystemAccessControlFilter {
             }
         } else {
             chain.doFilter(request, response);
-        }
-    }
-
-    //=================================================================================================
-    // assistant methods
-
-    //-------------------------------------------------------------------------------------------------
-    @Override
-    protected void checkClientAuthorized(final String clientCN, final String method, final String requestTarget, final String requestJSON, final Map<String, String[]> queryParams) {
-        final String cloudCN = getServerCloudCN();
-        if (requestTarget.contains(CoreCommonConstants.MGMT_URI)) {
-            // Only the local System Operator can use these methods
-            checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
         }
     }
 }

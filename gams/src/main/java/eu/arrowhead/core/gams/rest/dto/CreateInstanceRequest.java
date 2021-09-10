@@ -16,7 +16,7 @@ public class CreateInstanceRequest implements Serializable {
     private Long delayInSeconds;
     @ApiModelProperty(required = false, value = "The name of maintainer", dataType = "string")
     private String owner;
-    @ApiModelProperty(required = false, value = "Contact information (e-mail) of the mainainer", dataType = "string")
+    @ApiModelProperty(required = false, value = "Contact information (e-mail) of the maintainer", dataType = "string")
     private String email;
 
     public CreateInstanceRequest() {

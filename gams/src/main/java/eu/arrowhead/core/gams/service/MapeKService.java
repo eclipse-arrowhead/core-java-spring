@@ -28,6 +28,7 @@ import eu.arrowhead.common.database.entity.ProcessableAction;
 import eu.arrowhead.common.database.entity.Sensor;
 import eu.arrowhead.common.database.entity.SetPointEvaluation;
 import eu.arrowhead.common.database.entity.TransformPolicy;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.gams.DataValidation;
 import eu.arrowhead.core.gams.controller.SetPointController;
 import eu.arrowhead.core.gams.dto.AbstractActionWrapper;
@@ -39,6 +40,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import parser.MathExpression;
 
 @Service
@@ -71,14 +73,20 @@ public class MapeKService {
         this.executorService = executorService;
     }
 
+    @Transactional
     public void publish(final Sensor sensor, final ZonedDateTime timestamp, final Object data, final String address) {
         validation.verify(sensor);
 
-        final AbstractSensorData sensorData = sensorService.store(sensor, timestamp, data, address);
-        logger.debug(GamsPhase.MONITOR.getMarker(), "Stored new sensor data: {}", sensorData);
-        eventService.createMonitorEventWithDelay(sensor, sensorData);
+        try {
+            final AbstractSensorData sensorData = sensorService.store(sensor, timestamp, data, address);
+            logger.debug(GamsPhase.MONITOR.getMarker(), "Stored new sensor data: {}", sensorData);
+            eventService.createMonitorEventWithDelay(sensor, sensorData);
+        } catch (Exception e) {
+            throw new ArrowheadException(e.getMessage());
+        }
     }
 
+    @Transactional
     public void monitor(final Event source) {
         validation.verify(source);
         logger.debug(source.getMarker(), "Received monitor event: {}", source::shortToString);
@@ -95,6 +103,7 @@ public class MapeKService {
         }
     }
 
+    @Transactional
     public void analyze(final Event source) {
         validation.verify(source);
         logger.info(source.getMarker(), "Received analyze event: {}", source::shortToString);
@@ -139,6 +148,7 @@ public class MapeKService {
         }
     }
 
+    @Transactional
     public void plan(final Event source) {
         validation.verify(source);
         logger.info(source.getMarker(), "Received plan event: {}", source::shortToString);
@@ -156,7 +166,7 @@ public class MapeKService {
 
             switch (policy.getType()) {
                 case MATCH:
-                    final MatchPolicy matchPolicy = ((MatchPolicy) policy);
+                    final MatchPolicy matchPolicy = (MatchPolicy) policy;
                     logger.info("Performing MATCH: {}", matchPolicy::shortToString);
 
                     final Optional<Knowledge> optionalKnowledge = knowledgeService.get(eventSensor.getInstance(), policy.getSourceKnowledge());
@@ -199,6 +209,7 @@ public class MapeKService {
         }
     }
 
+    @Transactional
     public void execute(final Event event) {
         validation.verify(event);
         logger.info(event.getMarker(), "Received execute event: {}", event::shortToString);

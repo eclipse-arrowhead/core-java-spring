@@ -22,7 +22,7 @@ public abstract class ProcessableEntity extends AbstractEntity {
     @Enumerated(EnumType.STRING)
     protected ProcessingState state;
 
-    @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP")
+    @Column(nullable = false, updatable = false)
     protected ZonedDateTime validTill;
 
     public ProcessableEntity() {

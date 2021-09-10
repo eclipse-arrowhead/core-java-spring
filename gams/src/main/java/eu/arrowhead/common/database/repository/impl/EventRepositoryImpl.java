@@ -128,7 +128,7 @@ public class EventRepositoryImpl extends ProcessableEntitySpecification<Event> i
 
     @Transactional
     @Override
-    public Long countValid() {
+    public long countValid() {
         final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Long> query = builder.createQuery(Long.class);
         final Root<Event> root = query.from(Event.class);

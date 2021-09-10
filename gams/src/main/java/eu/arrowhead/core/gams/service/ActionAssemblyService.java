@@ -3,6 +3,7 @@ package eu.arrowhead.core.gams.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import javax.transaction.Transactional;
 
 import eu.arrowhead.common.database.entity.AbstractAction;
 import eu.arrowhead.common.database.entity.ActionPlan;
@@ -24,6 +25,7 @@ import eu.arrowhead.core.gams.dto.IndependentActionWrapper;
 import eu.arrowhead.core.gams.dto.LoggingActionWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -37,6 +39,7 @@ public class ActionAssemblyService {
     private final KnowledgeService knowledgeService;
     private final DataValidation validation;
 
+    @Autowired
     public ActionAssemblyService(final HttpService httpService, final EventService eventService,
                                  final ActionPlanRepository actionPlanRepository,
                                  final KnowledgeService knowledgeService) {
@@ -48,18 +51,18 @@ public class ActionAssemblyService {
         this.validation = new DataValidation();
     }
 
-
+    @Transactional
     public Runnable assembleActionPlan(final GamsInstance instance, final Event source) {
         validation.verify(instance);
         validation.verify(source);
 
-        final Optional<ActionPlan> optionalActionPlan = actionPlanRepository.findByInstanceAndName(instance, source.getData());
-        final ActionPlan actionPlan = optionalActionPlan
-                .orElseThrow(() -> new DataNotFoundException("No suitable action plan available"));
+            final Optional<ActionPlan> optionalActionPlan = actionPlanRepository.findByInstanceAndName(instance, source.getData());
+            final ActionPlan actionPlan = optionalActionPlan
+                    .orElseThrow(() -> new DataNotFoundException("No suitable action plan available"));
 
-        logger.info(source.getMarker(), "Assembling action plan {} for event {}", actionPlan::shortToString, source::shortToString);
+            logger.info(source.getMarker(), "Assembling action plan {} for event {}", actionPlan::shortToString, source::shortToString);
 
-        return assembleRunnable(source, actionPlan.getAction());
+            return assembleRunnable(source, actionPlan.getAction());
     }
 
     protected AbstractActionWrapper assembleRunnable(final Event source,

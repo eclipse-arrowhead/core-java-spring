@@ -25,7 +25,7 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`gams_aggregation` TO 'gams'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`gams_counting_aggregation` TO 'gams'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`gams_timeout_guard` TO 'gams'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`gams_analysis` TO 'gams'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead`.`gams_setpoint_analysis` TO 'gams@localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`gams_setpoint_analysis` TO 'gams'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`gams_counting_analysis` TO 'gams'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`gams_timeout_guard` TO 'gams'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`gams_policy` TO 'gams'@'localhost';

@@ -39,7 +39,6 @@
 	    <module>deviceregistry</module>
 	    <module>onboarding</module>
 		<module>gams</module>
-	    <module>qos-monitor</module>
 	    <module>deb-installer</module>
 	    <module>docker-all</module>
 	    <module>translator</module>

@@ -9,11 +9,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
+import javax.transaction.Transactional;
 
 import eu.arrowhead.common.database.entity.Event;
 import eu.arrowhead.common.database.entity.Sensor;
 import eu.arrowhead.common.database.entity.TimeoutGuard;
-import eu.arrowhead.common.database.repository.TimeoutRepository;
+import eu.arrowhead.common.database.repository.TimeoutGuardRepository;
 import eu.arrowhead.core.gams.DataValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,12 +26,12 @@ public class TimeoutService {
     private final Map<Sensor, ScheduledFuture<?>> map = new HashMap<>();
 
     private final EventService eventService;
-    private final TimeoutRepository timeoutRepository;
+    private final TimeoutGuardRepository timeoutRepository;
     private final ScheduledExecutorService executorService;
 
     @Autowired
     public TimeoutService(final EventService eventService,
-                          final TimeoutRepository timeoutRepository,
+                          final TimeoutGuardRepository timeoutRepository,
                           final ScheduledExecutorService executorService) {
         super();
         this.eventService = eventService;
@@ -45,17 +46,21 @@ public class TimeoutService {
         }
     }
 
-    public void createTimeoutGuard(final Sensor sensor, final Long timeValue, final ChronoUnit timeUnit) {
+    @Transactional
+    public TimeoutGuard createTimeoutGuard(final Sensor sensor, final Long timeValue, final ChronoUnit timeUnit) {
         validation.verify(sensor);
 
         final TimeoutGuard guard = new TimeoutGuard(sensor, timeValue, timeUnit);
         validation.verify(guard);
 
-        timeoutRepository.saveAndFlush(guard);
+        final TimeoutGuard timeoutGuard = timeoutRepository.saveAndFlush(guard);
         scheduleTimeoutEvent(guard);
+
+        return timeoutGuard;
     }
 
-    public void deleteTimeoutAnalysis(final TimeoutGuard guard) {
+    @Transactional
+    public void deleteTimeoutGuard(final TimeoutGuard guard) {
         validation.verify(guard);
         final ScheduledFuture<?> future = map.get(guard.getSensor());
 
@@ -66,6 +71,7 @@ public class TimeoutService {
         timeoutRepository.delete(guard);
     }
 
+    @Transactional
     public void rescheduleTimeoutEvent(final Event event) {
         validation.verify(event);
 

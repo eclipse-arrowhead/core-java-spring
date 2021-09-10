@@ -5,6 +5,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
+import javax.transaction.Transactional;
 
 import eu.arrowhead.common.database.entity.AbstractSensorData;
 import eu.arrowhead.common.database.entity.Event;
@@ -12,6 +13,7 @@ import eu.arrowhead.common.database.entity.GamsInstance;
 import eu.arrowhead.common.database.entity.Sensor;
 import eu.arrowhead.common.database.entity.TimeoutGuard;
 import eu.arrowhead.common.database.repository.EventRepository;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.gams.DataValidation;
 import eu.arrowhead.core.gams.GamsProperties;
 import eu.arrowhead.core.gams.dto.AbstractActionWrapper;
@@ -27,9 +29,8 @@ import org.springframework.util.Assert;
 @Service
 public class EventService {
 
-    private final Logger logger = LogManager.getLogger();
     private static final String DELIMITER = "-";
-
+    private final Logger logger = LogManager.getLogger();
     private final EventRepository repository;
     private final ScheduledExecutorService executorService;
     private final GamsProperties properties;
@@ -57,34 +58,40 @@ public class EventService {
         return repository.countValid();
     }
 
+    @Transactional
     public void createMonitorEventWithDelay(final Sensor sensor, final AbstractSensorData<?> data) {
         validation.verify(sensor);
         final GamsInstance instance = sensor.getInstance();
 
         // only create the event if there is no event ready for processing
-        if(!(instance.getDelay() > 0 && repository.hasValidEvent(sensor, ProcessingState.PERSISTED, GamsPhase.MONITOR, EventType.SENSOR_DATA))) {
+        if (!(instance.getDelay() > 0 && repository.hasValidEvent(sensor, ProcessingState.PERSISTED, GamsPhase.MONITOR, EventType.SENSOR_DATA))) {
             createEvent(sensor, data, GamsPhase.MONITOR, EventType.SENSOR_DATA, instance.getDelay(), instance.getDelayTimeUnit());
         } else {
             logger.debug("A Monitor event is already scheduled to examine new sensor data... skipping");
         }
     }
 
+    @Transactional
     public void createMonitorEvent(final Sensor sensor, final AbstractSensorData<?> data) {
-        createEvent(sensor, data, GamsPhase.ANALYZE, EventType.ANALYSIS, 0L, ChronoUnit.SECONDS);
+        createEvent(sensor, data, GamsPhase.MONITOR, EventType.SENSOR_DATA, 0L, ChronoUnit.SECONDS);
     }
 
+    @Transactional
     public void createAnalyseEvent(final Sensor sensor, final AbstractSensorData<?> data) {
         createEvent(sensor, data, GamsPhase.ANALYZE, EventType.ANALYSIS, 0L, ChronoUnit.SECONDS);
     }
 
+    @Transactional
     public void createPlanEvent(final Sensor sensor, final AbstractSensorData<?> data) {
         createEvent(sensor, data, GamsPhase.PLAN, EventType.METRIC, 0L, ChronoUnit.SECONDS);
     }
 
+    @Transactional
     public void createExecuteEvent(final Sensor sensor, final AbstractSensorData data) {
         createEvent(sensor, data, GamsPhase.EXECUTE, EventType.PLAN, 0L, ChronoUnit.SECONDS);
     }
 
+    @Transactional
     public void createTimeoutEvent(final TimeoutGuard analysis) {
         validation.verify(analysis);
 
@@ -98,6 +105,7 @@ public class EventService {
         repository.saveAndFlush(event);
     }
 
+    @Transactional
     public void createFailureEvent(final Event source, final String message) {
         logger.warn(source.getMarker(), "Creating new Failure Event for {}", source);
         validation.verify(source);
@@ -114,6 +122,7 @@ public class EventService {
         repository.saveAndFlush(event);
     }
 
+    @Transactional
     public void createFailureEvent(final Event source, final Exception ex) {
         validation.verify(source);
         Assert.notNull(ex, "Exception " + DataValidation.NOT_NULL);
@@ -121,11 +130,46 @@ public class EventService {
         createFailureEvent(source, ex.getClass().getSimpleName() + DELIMITER + ex.getMessage());
     }
 
+    @Transactional
     public void createFailureEvent(final AbstractActionWrapper wrapper, final Exception ex) {
-        Assert.notNull(wrapper,"AbstractActionWrapper " + DataValidation.NOT_NULL);
+        Assert.notNull(wrapper, "AbstractActionWrapper " + DataValidation.NOT_NULL);
         Assert.notNull(ex, "Exception " + DataValidation.NOT_NULL);
         final String message = "ActionExecution Failed: " + ex.getMessage();
         createFailureEvent(wrapper.getSourceEvent(), message.substring(0, 64));
+    }
+
+    protected boolean hasLoad() {
+        return repository.countValid() >= properties.getQueueSize();
+    }
+
+    protected Iterable<Event> loadEvent(final int limit) {
+        return repository.findValidEvent(ProcessingState.PERSISTED, ProcessingState.IN_QUEUE, limit);
+    }
+
+    @Transactional
+    protected void persisted(final Event event) {
+        event.setState(ProcessingState.PERSISTED);
+        repository.saveAndFlush(event);
+        logger.debug("Persisted {}", event::shortToString);
+    }
+
+    @Transactional
+    protected void processing(final Event event) {
+        event.setState(ProcessingState.PROCESSING);
+        repository.saveAndFlush(event);
+        logger.debug("Processing {}", event::shortToString);
+    }
+
+    @Transactional
+    protected void processed(final Event event) {
+        event.setState(ProcessingState.PROCESSED);
+        repository.saveAndFlush(event);
+        logger.debug("Processed {}", event::shortToString);
+    }
+
+    @Transactional
+    protected void expireEvents() {
+        repository.expireEvents();
     }
 
     private void createEvent(final Sensor sensor,
@@ -138,42 +182,16 @@ public class EventService {
 
         validation.verify(sensor);
         validation.verify(data);
-        final Event event = new Event(sensor, phase, type, delay, unit);
-        event.setCreatedAt(data.getCreatedAt());
-        event.setSource(data.getClass().getSimpleName() + DELIMITER + data.getId());
-        event.setData(String.valueOf(data.getData()));
+        try {
+            final Event event = new Event(sensor, phase, type, delay, unit);
+            event.setCreatedAt(data.getCreatedAt());
+            event.setSource(data.getClass().getSimpleName() + DELIMITER + data.getId());
+            event.setData(String.valueOf(data.getData()));
 
-        repository.saveAndFlush(event);
-        logger.info("Persisted new {} which will be valid from '{}'", event.shortToString(), event.getValidFrom());
-    }
-
-    protected boolean hasLoad() {
-        return repository.countValid() >= properties.getQueueSize();
-    }
-
-    protected Iterable<Event> loadEvent(final int limit) {
-        return repository.findValidEvent(ProcessingState.PERSISTED, ProcessingState.IN_QUEUE, limit);
-    }
-
-    protected void persisted(final Event event) {
-        event.setState(ProcessingState.PERSISTED);
-        repository.saveAndFlush(event);
-        logger.debug("Persisted {}", event::shortToString);
-    }
-
-    protected void processing(final Event event) {
-        event.setState(ProcessingState.PROCESSING);
-        repository.saveAndFlush(event);
-        logger.debug("Processing {}", event::shortToString);
-    }
-
-    protected void processed(final Event event) {
-        event.setState(ProcessingState.PROCESSED);
-        repository.saveAndFlush(event);
-        logger.debug("Processed {}", event::shortToString);
-    }
-
-    protected void expireEvents() {
-        repository.expireEvents();
+            repository.saveAndFlush(event);
+            logger.info("Persisted new {} which will be valid from '{}'", event.shortToString(), event.getValidFrom());
+        } catch (Exception e) {
+            throw new ArrowheadException(e.getMessage());
+        }
     }
 }

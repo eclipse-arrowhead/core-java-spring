@@ -143,6 +143,11 @@ Type: password
 Default:
 Description: MySQL password for Onboarding Controller system (leave empty for random).
 
+Template: arrowhead-core-common/mysql_password_gams
+Type: password
+Default:
+Description: MySQL password for Generic Autonomic Management System (leave empty for random).
+
 Template: arrowhead-core-common/mysql_password_ca
 Type: password
 Default:

@@ -17,7 +17,7 @@ public abstract class AbstractEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected long id;
 
-    @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(nullable = false, updatable = false)
     protected ZonedDateTime createdAt;
 
     public AbstractEntity() {
@@ -30,7 +30,9 @@ public abstract class AbstractEntity {
 
     @PrePersist
     public void onCreate() {
-        if(Objects.isNull(createdAt)) this.createdAt = ZonedDateTime.now().withNano(0);
+        if(Objects.isNull(createdAt)) {
+            this.createdAt = ZonedDateTime.now().withNano(0);
+        }
     }
 
     public long getId() {

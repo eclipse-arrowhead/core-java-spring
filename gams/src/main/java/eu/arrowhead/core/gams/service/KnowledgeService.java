@@ -4,6 +4,8 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import eu.arrowhead.common.database.entity.AbstractEvaluation;
 import eu.arrowhead.common.database.entity.AbstractPolicy;
 import eu.arrowhead.common.database.entity.AbstractSensorData;
@@ -52,6 +54,7 @@ public class KnowledgeService {
         return knowledgeRepository.findByInstanceAndKey(instance, key);
     }
 
+    @Transactional
     public void put(final GamsInstance instance, final String key, final String value) {
         validation.verify(instance);
         Assert.hasText(key, "Knowledge key must not be empty");
@@ -88,10 +91,12 @@ public class KnowledgeService {
         return policyRepository.findBySensor(sensor);
     }
 
+    @Transactional
     public void storeSensorData(final AbstractSensorData<?> data) {
         sensorService.store(data);
     }
 
+    @Transactional
     public AbstractSensorData<?> storeSensorData(final Sensor eventSensor, final String value) {
         return sensorService.store(eventSensor, ZonedDateTime.now(), value, eventSensor.getAddress());
     }

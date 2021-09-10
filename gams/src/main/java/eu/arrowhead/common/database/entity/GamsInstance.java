@@ -1,6 +1,7 @@
 package eu.arrowhead.common.database.entity;
 
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.UUID;
@@ -14,13 +15,15 @@ import javax.persistence.Table;
 @Table(name = "gams_instance")
 public class GamsInstance extends ConfigurationEntity {
 
+    public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt", "name", "owner", "email"); //NOSONAR
+
     @Column(nullable = false, unique = true, length = 32)
     private String name;
 
-    @Column(nullable = false, unique = false, columnDefinition = "DEFAULT 0")
+    @Column(nullable = false, unique = false)
     private Long delay = 0L;
 
-    @Column(nullable = false, unique = false, columnDefinition = "DEFAULT SECONDS")
+    @Column(nullable = false, unique = false)
     @Enumerated(EnumType.STRING)
     private ChronoUnit delayTimeUnit = ChronoUnit.SECONDS;
 

@@ -5,15 +5,19 @@ import java.util.Objects;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.database.entity.AbstractEntity;
 import eu.arrowhead.common.database.repository.ActionPlanRepository;
+import eu.arrowhead.common.database.repository.AggregationRepository;
+import eu.arrowhead.common.database.repository.AnalysisRepository;
 import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.database.repository.DoubleSensorDataRepository;
 import eu.arrowhead.common.database.repository.EventRepository;
 import eu.arrowhead.common.database.repository.GamsInstanceRepository;
 import eu.arrowhead.common.database.repository.KnowledgeRepository;
 import eu.arrowhead.common.database.repository.LongSensorDataRepository;
+import eu.arrowhead.common.database.repository.PolicyRepository;
 import eu.arrowhead.common.database.repository.SensorDataRepository;
 import eu.arrowhead.common.database.repository.SensorRepository;
 import eu.arrowhead.common.database.repository.StringSensorDataRepository;
+import eu.arrowhead.common.database.repository.TimeoutGuardRepository;
 import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.core.gams.GamsApplicationInitListener;
 import eu.arrowhead.core.gams.GamsMain;
@@ -111,6 +115,30 @@ public class GamsTestContext {
     @Primary // This bean is primary only in test context
     public StringSensorDataRepository stringSensorDataRepository() {
         return mock(StringSensorDataRepository.class);
+    }
+    //-------------------------------------------------------------------------------------------------
+    @Bean
+    @Primary // This bean is primary only in test context
+    public AggregationRepository aggregationRepository() {
+        return mock(AggregationRepository.class);
+    }
+    //-------------------------------------------------------------------------------------------------
+    @Bean
+    @Primary // This bean is primary only in test context
+    public AnalysisRepository analysisRepository() {
+        return mock(AnalysisRepository.class);
+    }
+    //-------------------------------------------------------------------------------------------------
+    @Bean
+    @Primary // This bean is primary only in test context
+    public PolicyRepository policyRepository() {
+        return mock(PolicyRepository.class);
+    }
+    //-------------------------------------------------------------------------------------------------
+    @Bean
+    @Primary // This bean is primary only in test context
+    public TimeoutGuardRepository timeoutGuardRepository() {
+        return mock(TimeoutGuardRepository.class);
     }
 
 

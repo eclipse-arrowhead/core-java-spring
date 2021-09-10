@@ -23,7 +23,7 @@ import org.springframework.util.Assert;
 @Table(name = "gams_event")
 public class Event extends ProcessableEntity {
 
-    @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP")
+    @Column(nullable = false, updatable = false)
     protected ZonedDateTime validFrom;
 
     @ManyToOne(fetch = FetchType.EAGER)

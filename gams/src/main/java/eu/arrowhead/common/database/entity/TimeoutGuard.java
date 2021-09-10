@@ -20,10 +20,10 @@ public class TimeoutGuard extends ConfigurationEntity {
     @JoinColumn(name = "sensorId", referencedColumnName = "id", nullable = false)
     protected Sensor sensor;
 
-    @Column(nullable = false, unique = false, columnDefinition = "DEFAULT 24")
+    @Column(nullable = false, unique = false)
     private Long timeValue = 24L;
 
-    @Column(nullable = false, unique = false, columnDefinition = "DEFAULT HOURS")
+    @Column(nullable = false, unique = false)
     @Enumerated(EnumType.STRING)
     private ChronoUnit timeUnit = ChronoUnit.HOURS;
 

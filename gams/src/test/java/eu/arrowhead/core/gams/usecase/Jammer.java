@@ -26,9 +26,13 @@ import eu.arrowhead.core.gams.service.MapeKService;
 import eu.arrowhead.core.gams.service.SensorService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -66,7 +70,7 @@ public class Jammer {
     private PolicyRepository policyRepository;
 
 
-    //@Before
+    @Before
     public void setupUseCase() {
         tearDown();
 
@@ -109,19 +113,19 @@ public class Jammer {
         actionPlanRepository.saveAndFlush(actionPlan2);
     }
 
-    //@After
+    @After
     public void tearDown() {
         policyRepository.deleteAll();
         analysisRepository.deleteAll();
         aggregationRepository.deleteAll();
-        for(final GamsInstance instance : instanceService.getAll()) {
+        for(final GamsInstance instance : instanceService.getAll(Pageable.unpaged())) {
             sensorService.deleteAllSensor(instance);
             instanceService.delete(instance);
         }
     }
 
     @Test
-    //@Ignore
+    @Ignore
     public void lowSetPoint() throws InterruptedException {
         final GamsInstance instance = instanceService.findByName("jammer");
         final Sensor temperature = sensorService.findSensorByName(instance, "temperature");

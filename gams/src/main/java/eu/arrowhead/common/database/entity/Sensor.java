@@ -2,6 +2,7 @@ package eu.arrowhead.common.database.entity;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.UUID;
@@ -19,6 +20,8 @@ import eu.arrowhead.core.gams.rest.dto.SensorType;
         uniqueConstraints = @UniqueConstraint(name = "u_sensor_name", columnNames = {"instanceId", "name"}))
 public class Sensor extends NamedEntity {
 
+    public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt", "name", "address", "type"); //NOSONAR
+
     @Column(nullable = true, unique = false, length = 16)
     private String address;
 
@@ -26,10 +29,10 @@ public class Sensor extends NamedEntity {
     @Enumerated(EnumType.STRING)
     private SensorType type;
 
-    @Column(nullable = false, unique = false, columnDefinition = "DEFAULT 24")
+    @Column(nullable = false, unique = false)
     private Long retentionTime = 24L;
 
-    @Column(nullable = false, unique = false, length = 16, columnDefinition = "DEFAULT HOURS")
+    @Column(nullable = false, unique = false, length = 16)
     @Enumerated(EnumType.STRING)
     private ChronoUnit timeUnit = ChronoUnit.HOURS;
 
@@ -52,8 +55,12 @@ public class Sensor extends NamedEntity {
         this.instance = instance;
         this.name = name;
         this.type = type;
-        if(Objects.nonNull(retentionTime)) this.retentionTime = retentionTime;
-        if(Objects.nonNull(timeUnit)) this.timeUnit = timeUnit;
+        if(Objects.nonNull(retentionTime)) {
+            this.retentionTime = retentionTime;
+        }
+        if(Objects.nonNull(timeUnit)) {
+            this.timeUnit = timeUnit;
+        }
     }
 
     public String getAddress() {
