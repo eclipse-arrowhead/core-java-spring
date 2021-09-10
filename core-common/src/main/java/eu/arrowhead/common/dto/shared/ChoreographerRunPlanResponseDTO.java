@@ -47,7 +47,9 @@ public class ChoreographerRunPlanResponseDTO implements Serializable {
 		this.planId = planId;
 		this.sessionId = sessionId;
 		this.status = status;
-		this.errorMessages.addAll(errorMessages);
+		if (errorMessages != null) {
+			this.errorMessages.addAll(errorMessages);
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------

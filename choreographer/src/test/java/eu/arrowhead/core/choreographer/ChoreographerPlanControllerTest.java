@@ -16,7 +16,10 @@ package eu.arrowhead.core.choreographer;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -46,13 +49,20 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.database.entity.ChoreographerSession;
+import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
+import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerCheckPlanResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanListResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerRunPlanRequestDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerRunPlanResponseDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -70,6 +80,8 @@ public class ChoreographerPlanControllerTest {
 	// members
 	
     private static final String PLAN_MGMT_URI = CommonConstants.CHOREOGRAPHER_URI + CoreCommonConstants.MGMT_URI + "/plan";
+    private static final String START_SESSION_MGMT_URI = CommonConstants.CHOREOGRAPHER_URI + CoreCommonConstants.MGMT_URI + "/session/start";
+    private static final String CHECK_PLAN_MGMT_URI = CommonConstants.CHOREOGRAPHER_URI + CoreCommonConstants.MGMT_URI + "/check-plan";
 	
 	@Autowired
 	private WebApplicationContext wac;
@@ -311,6 +323,138 @@ public class ChoreographerPlanControllerTest {
 		
 		verify(planValidator, times(1)).validatePlan(any(ChoreographerPlanRequestDTO.class), anyString());
 		verify(planDBService, times(1)).createPlanResponse(any(ChoreographerPlanRequestDTO.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testStartPlansEmptyList() throws Exception {
+		final MvcResult response = this.mockMvc.perform(post(START_SESSION_MGMT_URI)
+											   .contentType(MediaType.APPLICATION_JSON)
+											   .content(objectMapper.writeValueAsBytes(List.of()))
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isBadRequest())
+											   .andReturn();
+		
+		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+		Assert.assertEquals(400, responseBody.getErrorCode());
+		Assert.assertEquals("No plan specified to start.", responseBody.getErrorMessage());
+		
+		verify(planChecker, never()).checkPlanForExecution(any(ChoreographerRunPlanRequestDTO.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testStartPlansProblemWithPlan() throws Exception {
+		when(planChecker.checkPlanForExecution(any(ChoreographerRunPlanRequestDTO.class))).thenReturn(new ChoreographerRunPlanResponseDTO(null, List.of("Plan id is not valid.")));
+		
+		final MvcResult response = this.mockMvc.perform(post(START_SESSION_MGMT_URI)
+											   .contentType(MediaType.APPLICATION_JSON)
+											   .content(objectMapper.writeValueAsBytes(List.of(new ChoreographerRunPlanRequestDTO())))
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
+		
+		final TypeReference<List<ChoreographerRunPlanResponseDTO>> typeReference = new TypeReference<>() {};
+		final List<ChoreographerRunPlanResponseDTO> responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), typeReference);
+		
+		Assert.assertEquals(1, responseBody.size());
+		Assert.assertEquals(ChoreographerSessionStatus.ABORTED, responseBody.get(0).getStatus());
+		Assert.assertEquals("Plan id is not valid.", responseBody.get(0).getErrorMessages().get(0));
+		
+		verify(planChecker, times(1)).checkPlanForExecution(any(ChoreographerRunPlanRequestDTO.class));
+		verify(sessionDBService, never()).initiateSession(anyLong(), anyString());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testStartPlansOk() throws Exception {
+		final ChoreographerRunPlanRequestDTO runRequest = new ChoreographerRunPlanRequestDTO();
+		runRequest.setPlanId(1L);
+		
+		final ChoreographerSession session = new ChoreographerSession();
+		session.setId(1212);
+		
+		when(planChecker.checkPlanForExecution(any(ChoreographerRunPlanRequestDTO.class))).thenReturn(null);
+		when(sessionDBService.initiateSession(1, null)).thenReturn(session);
+		doNothing().when(jms).convertAndSend(eq("start-session"), any(ChoreographerStartSessionDTO.class));
+		
+		final MvcResult response = this.mockMvc.perform(post(START_SESSION_MGMT_URI)
+											   .contentType(MediaType.APPLICATION_JSON)
+											   .content(objectMapper.writeValueAsBytes(List.of(runRequest)))
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
+		
+		final TypeReference<List<ChoreographerRunPlanResponseDTO>> typeReference = new TypeReference<>() {};
+		final List<ChoreographerRunPlanResponseDTO> responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), typeReference);
+		
+		Assert.assertEquals(1, responseBody.size());
+		Assert.assertEquals(ChoreographerSessionStatus.INITIATED, responseBody.get(0).getStatus());
+		Assert.assertEquals(1, responseBody.get(0).getPlanId().longValue());
+		Assert.assertEquals(1212, responseBody.get(0).getSessionId().longValue());
+		
+		verify(planChecker, times(1)).checkPlanForExecution(any(ChoreographerRunPlanRequestDTO.class));
+		verify(sessionDBService, times(1)).initiateSession(eq(1L), isNull());
+		verify(jms, times(1)).convertAndSend(eq("start-session"), any(ChoreographerStartSessionDTO.class));
+	}
+	
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCheckPlanWithInvalidId() throws Exception {
+		final MvcResult response = this.mockMvc.perform(get(CHECK_PLAN_MGMT_URI + "/-1")
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isBadRequest())
+											   .andReturn();
+		
+		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+		Assert.assertEquals(400, responseBody.getErrorCode());
+		Assert.assertEquals("ID must be greater than 0.", responseBody.getErrorMessage());
+		
+		verify(planChecker, never()).checkPlanForExecution(anyLong());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCheckPlanWithValidId1() throws Exception {
+		
+		when(planChecker.checkPlanForExecution(1)).thenReturn(new ChoreographerRunPlanResponseDTO(1L, List.of("something wrong")));
+		
+		final MvcResult response = this.mockMvc.perform(get(CHECK_PLAN_MGMT_URI + "/1")
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
+		
+		final ChoreographerCheckPlanResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), ChoreographerCheckPlanResponseDTO.class);
+		
+		Assert.assertEquals(1, responseBody.getPlanId());
+		Assert.assertEquals(1, responseBody.getErrorMessages().size());
+		Assert.assertEquals("something wrong", responseBody.getErrorMessages().get(0));
+		
+		verify(planChecker, times(1)).checkPlanForExecution(1);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCheckPlanWithValidId2() throws Exception {
+		
+		when(planChecker.checkPlanForExecution(1)).thenReturn(null);
+		
+		final MvcResult response = this.mockMvc.perform(get(CHECK_PLAN_MGMT_URI + "/1")
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
+		
+		final ChoreographerCheckPlanResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), ChoreographerCheckPlanResponseDTO.class);
+		
+		Assert.assertEquals(1, responseBody.getPlanId());
+		Assert.assertEquals(0, responseBody.getErrorMessages().size());
+		
+		verify(planChecker, times(1)).checkPlanForExecution(1);
 	}
 
 	//=================================================================================================

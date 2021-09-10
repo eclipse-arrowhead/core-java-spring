@@ -40,7 +40,9 @@ public class ChoreographerCheckPlanResponseDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public ChoreographerCheckPlanResponseDTO(final long planId, final List<String> errorMessages) {
 		this.planId = planId;
-		this.errorMessages.addAll(errorMessages);
+		if (errorMessages != null) {
+			this.errorMessages.addAll(errorMessages);
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
