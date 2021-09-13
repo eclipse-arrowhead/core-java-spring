@@ -57,6 +57,7 @@ import eu.arrowhead.common.dto.shared.OrchestrationFlags;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.OrchestratorWarnings;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerPlanDBService;
@@ -386,7 +387,7 @@ public class ChoreographerService {
 		final List<OrchestrationResultDTO> result = new ArrayList<>();
 		for (final OrchestrationResultDTO orchResult : orchResults) {
 			final Map<String,String> tokens = orchResult.getAuthorizationTokens();
-			if (tokens != null && !tokens.isEmpty()) {
+			if (tokens != null && !tokens.isEmpty() && !orchResult.getWarnings().contains(OrchestratorWarnings.FROM_OTHER_CLOUD)) {
 				result.add(orchResult);
 			}
 		}
