@@ -38,6 +38,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.dto.internal.OrchestratorStoreFlexibleListResponseDTO;
 import eu.arrowhead.common.dto.internal.OrchestratorStoreFlexibleRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSReservationListResponseDTO;
@@ -154,7 +155,7 @@ public class OrchestratorController {
 		checkOrchestratorFormRequestDTO(request, origin);
 		
 	    if (request.getOrchestrationFlags().getOrDefault(Flag.EXTERNAL_SERVICE_REQUEST, false)) {
-	    	if (!gatekeeperIsPresent) {
+	    	if (!CoreSystem.CHOREOGRAPHER.name().equalsIgnoreCase(request.getRequesterSystem().getSystemName()) && !gatekeeperIsPresent) {
 	    		throw new BadPayloadException("External service request" + GATEKEEPER_IS_NOT_PRESENT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 	    	
