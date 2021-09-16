@@ -231,6 +231,7 @@ public class CommonConstants {
 
 	public static final String ORCHESTRATOR_URI = "/orchestrator";
 	public static final String OP_ORCH_PROCESS_URI = "/orchestration";
+	public static final String OP_ORCH_PROCESS_BY_PROXY_URI = "/orchestration-by-proxy";
 	public static final String OP_ORCH_CREATE_FLEXIBLE_STORE_RULES_URI = "/store/flexible";
 	public static final String OP_ORCH_REMOVE_FLEXIBLE_STORE_RULE_URI = "/store/flexible" + "/{" + COMMON_FIELD_NAME_ID + "}";
 	public static final String OP_ORCH_CLEAN_FLEXIBLE_STORE_URI = "/store/flexible/all";

@@ -20,7 +20,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -39,8 +38,6 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.internal.KeyValuesDTO;
-import eu.arrowhead.common.dto.internal.TokenGenerationMultiServiceResponseDTO;
-import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerAbortStepRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecuteStepRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoRequestDTO;
@@ -62,7 +59,6 @@ public class ChoreographerDriverTest {
     //  members
 	
     private static final String ORCHESTRATION_PROCESS_URI_KEY = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
-    private static final String AUTH_TOKEN_GENERATION_MULTI_SERVICE_URI_KEY = CoreSystemService.AUTH_TOKEN_GENERATION_MULTI_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 
     @InjectMocks
     private ChoreographerDriver testObject;
@@ -679,78 +675,7 @@ public class ChoreographerDriverTest {
 		verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(OrchestrationResponseDTO.class), any(OrchestrationFormRequestDTO.class));
 		Assert.assertNotNull(result);
 	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = IllegalArgumentException.class)
-	public void testGenerateMultiServiceAuthorizationTokensInputNull() {
-		try {
-			testObject.generateMultiServiceAuthorizationTokens(null);
-		} catch (final Exception ex) {
-			Assert.assertEquals("tokenGenerationRequests list is null.", ex.getMessage());
-			
-			throw ex;
-		}
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = IllegalArgumentException.class)
-	public void testGenerateMultiServiceAuthorizationTokensInputListEmpty() {
-		try {
-			testObject.generateMultiServiceAuthorizationTokens(List.of());
-		} catch (final Exception ex) {
-			Assert.assertEquals("tokenGenerationRequests list is empty.", ex.getMessage());
-			
-			throw ex;
-		}
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = ArrowheadException.class)
-	public void testGenerateMultiServiceAuthorizationTokensUriNotFound() {
-		when(arrowheadContext.containsKey(AUTH_TOKEN_GENERATION_MULTI_SERVICE_URI_KEY)).thenReturn(false);
-		
-		try {
-			testObject.generateMultiServiceAuthorizationTokens(List.of(new TokenGenerationRequestDTO()));
-		} catch (final Exception ex) {
-			verify(arrowheadContext, times(1)).containsKey(AUTH_TOKEN_GENERATION_MULTI_SERVICE_URI_KEY);
-			Assert.assertEquals("Choreographer can't find authorization generate multi service token URI.", ex.getMessage());
-			
-			throw ex;
-		}
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = ArrowheadException.class)
-	public void testGenerateMultiServiceAuthorizationTokensUriWrongType() {
-		when(arrowheadContext.containsKey(AUTH_TOKEN_GENERATION_MULTI_SERVICE_URI_KEY)).thenReturn(true);
-		when(arrowheadContext.get(AUTH_TOKEN_GENERATION_MULTI_SERVICE_URI_KEY)).thenReturn("invalid");
-		
-		try {
-			testObject.generateMultiServiceAuthorizationTokens(List.of(new TokenGenerationRequestDTO()));
-		} catch (final Exception ex) {
-			verify(arrowheadContext, times(1)).containsKey(AUTH_TOKEN_GENERATION_MULTI_SERVICE_URI_KEY);
-			verify(arrowheadContext, times(1)).get(AUTH_TOKEN_GENERATION_MULTI_SERVICE_URI_KEY);
-			Assert.assertEquals("Choreographer can't find authorization generate multi service token URI.", ex.getMessage());
-			
-			throw ex;
-		}
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testGenerateMultiServiceAuthorizationTokensOk() {
-		when(arrowheadContext.containsKey(AUTH_TOKEN_GENERATION_MULTI_SERVICE_URI_KEY)).thenReturn(true);
-		when(arrowheadContext.get(AUTH_TOKEN_GENERATION_MULTI_SERVICE_URI_KEY)).thenReturn(UriComponentsBuilder.fromHttpUrl("http://localhost/abc").build());
-		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(TokenGenerationMultiServiceResponseDTO.class), any(List.class))).thenReturn(new ResponseEntity<>(new TokenGenerationMultiServiceResponseDTO(), HttpStatus.OK));
-		
-		final TokenGenerationMultiServiceResponseDTO result = testObject.generateMultiServiceAuthorizationTokens(List.of(new TokenGenerationRequestDTO()));
 
-		verify(arrowheadContext, times(1)).containsKey(AUTH_TOKEN_GENERATION_MULTI_SERVICE_URI_KEY);
-		verify(arrowheadContext, times(1)).get(AUTH_TOKEN_GENERATION_MULTI_SERVICE_URI_KEY);
-		verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(TokenGenerationMultiServiceResponseDTO.class), any(List.class));
-		Assert.assertNotNull(result);
-	}
-	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testSendSessionNotificationNotifyUriNull() {

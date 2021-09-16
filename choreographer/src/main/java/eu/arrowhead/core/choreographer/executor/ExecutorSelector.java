@@ -32,10 +32,12 @@ import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
 import eu.arrowhead.common.database.entity.ChoreographerStep;
+import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultListDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerExecutorDBService;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerSessionDBService;
 import eu.arrowhead.core.choreographer.service.ChoreographerDriver;
@@ -74,7 +76,7 @@ public class ExecutorSelector {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public ExecutorData selectAndInit(final Long sessionId, final Long stepId, final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final Set<Long> exclusions, final boolean init) {
+	public ExecutorData selectAndInit(final Long sessionId, final Long stepId, final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final Set<Long> exclusions, final boolean init) { //TODO test this (ExecutorData changed)
 		//exclusions: when a ChoreographerSessionStep failed due to executor issue, then selection can be repeated but without that executor(s)
 		logger.debug("selectAndInit started...");
 		Assert.isTrue(!Utilities.isEmpty(serviceDefinition), "serviceDefinition is empty");
@@ -166,12 +168,16 @@ public class ExecutorSelector {
 			}
 			final ChoreographerExecutor executor = optional.get();
 			if (!executor.isLocked()) {
+				final SystemRequestDTO executorSystem = DTOConverter.convertSystemResponseDTOToSystemRequestDTO(driver.queryServiceRegistryBySystem(executor.getName(),
+						  																															executor.getAddress(),
+						  																															executor.getPort()));			
+				
 				if (verifyReliedServices(executorServiceInfos.get(executor.getId()))) {
 					if (init) {
 						sessionDBService.registerSessionStep(sessionId, stepId, executor.getId());					
 					}
 					
-					return new ExecutorData(executor, executorServiceInfos.get(executor.getId()).getDependencies());
+					return new ExecutorData(executor, executorSystem, executorServiceInfos.get(executor.getId()).getDependencies());
 				}
 			}
 		}

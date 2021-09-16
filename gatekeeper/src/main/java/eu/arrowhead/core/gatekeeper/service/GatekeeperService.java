@@ -356,8 +356,9 @@ public class GatekeeperService {
 																							 .preferredProviders(preferredProviders)
 																							 .build();
 		if (gatewayIsMandatory) {
-			// changing the requesterSystem for the sake of proper token generation
+			// changing the requesterSystem and requesterCloud for the sake of proper token generation
 			orchestrationForm.getRequesterSystem().setSystemName(CoreSystem.GATEWAY.name().toLowerCase());
+			orchestrationForm.setRequesterCloud(null); // means own cloud
 		}
 		
 		OrchestrationResponseDTO orchestrationResponse = gatekeeperDriver.queryOrchestrator(orchestrationForm);

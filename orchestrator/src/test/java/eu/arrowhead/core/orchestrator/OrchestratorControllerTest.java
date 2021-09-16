@@ -18,6 +18,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
@@ -490,9 +491,9 @@ public class OrchestratorControllerTest {
 		when(orchestratorService.triggerInterCloud(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO())));
 		when(orchestratorService.orchestrationFromOriginalStore(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO(),
 																																				 new OrchestrationResultDTO())));
-		when(orchestratorService.dynamicOrchestration(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO(),
-																																				new OrchestrationResultDTO(),
-																																				new OrchestrationResultDTO())));
+		when(orchestratorService.dynamicOrchestration(any(OrchestrationFormRequestDTO.class), eq(false))).thenReturn(new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO(),
+																																						  new OrchestrationResultDTO(),
+																																						  new OrchestrationResultDTO())));
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isOk());
 		final OrchestrationResponseDTO response = objectMapper.readValue(result.getResponse().getContentAsByteArray(), OrchestrationResponseDTO.class);
@@ -520,9 +521,9 @@ public class OrchestratorControllerTest {
 		when(orchestratorService.triggerInterCloud(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO())));
 		when(orchestratorService.orchestrationFromOriginalStore(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO(),
 																																				 new OrchestrationResultDTO())));
-		when(orchestratorService.dynamicOrchestration(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO(),
-																																				new OrchestrationResultDTO(),
-																																				new OrchestrationResultDTO())));
+		when(orchestratorService.dynamicOrchestration(any(OrchestrationFormRequestDTO.class), eq(false))).thenReturn(new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO(),
+																																						  new OrchestrationResultDTO(),
+																																						  new OrchestrationResultDTO())));
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isOk());
 		final OrchestrationResponseDTO response = objectMapper.readValue(result.getResponse().getContentAsByteArray(), OrchestrationResponseDTO.class);
@@ -547,9 +548,9 @@ public class OrchestratorControllerTest {
 		when(orchestratorService.triggerInterCloud(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO())));
 		when(orchestratorService.orchestrationFromStore(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO(),
 																																				 new OrchestrationResultDTO())));
-		when(orchestratorService.dynamicOrchestration(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO(),
-																																				new OrchestrationResultDTO(),
-																																				new OrchestrationResultDTO())));
+		when(orchestratorService.dynamicOrchestration(any(OrchestrationFormRequestDTO.class), eq(false))).thenReturn(new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO(),
+																																						  new OrchestrationResultDTO(),
+																																						  new OrchestrationResultDTO())));
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isOk());
 		final OrchestrationResponseDTO response = objectMapper.readValue(result.getResponse().getContentAsByteArray(), OrchestrationResponseDTO.class);
@@ -575,9 +576,9 @@ public class OrchestratorControllerTest {
 		when(orchestratorService.triggerInterCloud(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO())));
 		when(orchestratorService.orchestrationFromOriginalStore(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO(),
 																																				 new OrchestrationResultDTO())));
-		when(orchestratorService.dynamicOrchestration(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO(),
-																																			   new OrchestrationResultDTO(),
-																																			   new OrchestrationResultDTO())));
+		when(orchestratorService.dynamicOrchestration(any(OrchestrationFormRequestDTO.class), eq(false))).thenReturn(new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO(),
+																																			   			  new OrchestrationResultDTO(),
+																																			   			  new OrchestrationResultDTO())));
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isOk());
 		final OrchestrationResponseDTO response = objectMapper.readValue(result.getResponse().getContentAsByteArray(), OrchestrationResponseDTO.class);

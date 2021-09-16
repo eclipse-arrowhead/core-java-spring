@@ -279,7 +279,6 @@ public class ChoreographerSessionDBService {
         	
         } catch (final InvalidParameterException ex) {
         	throw ex;
-        	
         } catch (final Exception ex) {
         	logger.debug(ex.getMessage(), ex);
         	throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -305,7 +304,6 @@ public class ChoreographerSessionDBService {
 			return changeSessionStepStatus(sessionStepOpt.get().getId(), status, message);
         } catch (final InvalidParameterException ex) {
         	throw ex;
-        	
         } catch (final Exception ex) {
         	logger.debug(ex.getMessage(), ex);
         	throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -340,7 +338,6 @@ public class ChoreographerSessionDBService {
 			return sessionStep;
         } catch (final InvalidParameterException ex) {
         	throw ex;
-        	
         } catch (final Exception ex) {
         	logger.debug(ex.getMessage(), ex);
         	throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -397,11 +394,10 @@ public class ChoreographerSessionDBService {
 			if (sessionStepOpt.isEmpty()) {
 				throw new InvalidParameterException("Session step with session id " + sessionId + " and step id " + stepId + " not exists");
 			}
+
 			return sessionStepOpt.get();
-			
 	    } catch (final InvalidParameterException ex) {
 	    	throw ex;
-	      
 	    } catch (final Exception ex) {
 	    	logger.debug(ex.getMessage(), ex);
 	    	throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -437,11 +433,10 @@ public class ChoreographerSessionDBService {
 			if (optional.isEmpty()) {
 				throw new InvalidParameterException("Session step with id " + id + " not exists");
 			}
+
 			return optional.get();
-			
 	    } catch (final InvalidParameterException ex) {
 	    	throw ex;
-	      
 	    } catch (final Exception ex) {
 	    	logger.debug(ex.getMessage(), ex);
 	    	throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -457,11 +452,10 @@ public class ChoreographerSessionDBService {
 			if (optional.isEmpty()) {
 				throw new InvalidParameterException("Session with id " + sessionId + " not exists");
 			}
-			return sessionStepRepository.findAllBySession(optional.get());
 			
+			return sessionStepRepository.findAllBySession(optional.get());
 	    } catch (final InvalidParameterException ex) {
 	    	throw ex;
-	      
 	    } catch (final Exception ex) {
 	    	logger.debug(ex.getMessage(), ex);
 	    	throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -532,13 +526,13 @@ public class ChoreographerSessionDBService {
 		
 		final ChoreographerSessionStepStatus _status = Utilities.isEmpty(status) ? null : Utilities.convertStringToChoreographerSessionStepStatus(status);
 		final Page<ChoreographerSessionStep> data = getSessionSteps(page, size, direction, sortField, sessionId, _status);
+		
 		return DTOConverter.convertSessionStepListToSessionStepListResponseDTO(data, data.getTotalElements());
 	}
   
 	//-------------------------------------------------------------------------------------------------
 	public Page<ChoreographerWorklog> getWorklogs(final int page, final int size, final Direction direction, final String sortField,
 												  final Long sessionId, final String planName, final String actionName, final String stepName) {
-		
 		logger.debug("getWorklogs started...");
 		
 		final int validatedPage = page < 0 ? 0 : page;
@@ -572,6 +566,7 @@ public class ChoreographerSessionDBService {
 		logger.debug("getWorklogsResponse started...");
 		
 		final Page<ChoreographerWorklog> data = getWorklogs(page, size, direction, sortField, sessionId, planName, actionName, stepName);
+		
 		return DTOConverter.convertWorklogListToWorklogListResponseDTO(data, data.getTotalElements());
 	}
 	

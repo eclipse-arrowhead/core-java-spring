@@ -30,7 +30,7 @@ public class ChoreographerExecutorServiceInfoResponseDTO implements Serializable
 	private String serviceDefinition;
 	private int minVersion;
 	private int maxVersion;
-	private List<ServiceQueryFormDTO> dependencies;
+	private List<ChoreographerServiceQueryFormDTO> dependencies;
 	
 	//=================================================================================================
 	// methods
@@ -39,7 +39,7 @@ public class ChoreographerExecutorServiceInfoResponseDTO implements Serializable
 	public ChoreographerExecutorServiceInfoResponseDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------	
-	public ChoreographerExecutorServiceInfoResponseDTO(final String serviceDefinition, final int minVersion, final int maxVersion, final List<ServiceQueryFormDTO> dependencies) {
+	public ChoreographerExecutorServiceInfoResponseDTO(final String serviceDefinition, final int minVersion, final int maxVersion, final List<ChoreographerServiceQueryFormDTO> dependencies) {
 		this.serviceDefinition = serviceDefinition;
 		this.minVersion = minVersion;
 		this.maxVersion = maxVersion;
@@ -50,13 +50,13 @@ public class ChoreographerExecutorServiceInfoResponseDTO implements Serializable
 	public String getServiceDefinition() { return serviceDefinition; }
 	public int getMinVersion() { return minVersion; }
 	public int getMaxVersion() { return maxVersion; }
-	public List<ServiceQueryFormDTO> getDependencies() { return dependencies; }
+	public List<ChoreographerServiceQueryFormDTO> getDependencies() { return dependencies; }
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setServiceDefinition(final String serviceDefinition) { this.serviceDefinition = serviceDefinition; }
 	public void setMinVersion(final int minVersion) { this.minVersion = minVersion; }
 	public void setMaxVersion(final int maxVersion) { this.maxVersion = maxVersion; }
-	public void setDependencies(final List<ServiceQueryFormDTO> dependencies) { this.dependencies = dependencies; }
+	public void setDependencies(final List<ChoreographerServiceQueryFormDTO> dependencies) { this.dependencies = dependencies; }
 	
 	//-------------------------------------------------------------------------------------------------
     @Override

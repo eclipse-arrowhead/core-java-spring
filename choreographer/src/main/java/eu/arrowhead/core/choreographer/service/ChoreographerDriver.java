@@ -1,6 +1,5 @@
 package eu.arrowhead.core.choreographer.service;
 
-import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -21,8 +20,6 @@ import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.internal.KeyValuesDTO;
-import eu.arrowhead.common.dto.internal.TokenGenerationMultiServiceResponseDTO;
-import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerAbortStepRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecuteStepRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoRequestDTO;
@@ -43,9 +40,7 @@ public class ChoreographerDriver {
     //=================================================================================================
     // members
 	
-    private static final String ORCHESTRATION_PROCESS_URI_KEY = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
-    private static final String AUTH_TOKEN_GENERATION_MULTI_SERVICE_URI_KEY = CoreSystemService.AUTH_TOKEN_GENERATION_MULTI_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
-
+    private static final String ORCHESTRATION_PROCESS_BY_PROXY_URI_KEY = CoreSystemService.ORCHESTRATION_BY_PROXY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
     @Autowired
     private HttpService httpService;
     
@@ -145,7 +140,7 @@ public class ChoreographerDriver {
     }
     
     //-------------------------------------------------------------------------------------------------
-    public OrchestrationResponseDTO queryOrchestrator(final OrchestrationFormRequestDTO form) {
+    public OrchestrationResponseDTO queryOrchestrator(final OrchestrationFormRequestDTO form) { //TODO test this
         logger.debug("queryOrchestrator started...");
 
         Assert.notNull(form, "form is null.");
@@ -154,16 +149,6 @@ public class ChoreographerDriver {
         final ResponseEntity<OrchestrationResponseDTO> response = httpService.sendRequest(orchestrationProcessUri, HttpMethod.POST, OrchestrationResponseDTO.class, form);
 
         return response.getBody();
-    }
-    
-    //-------------------------------------------------------------------------------------------------
-    public TokenGenerationMultiServiceResponseDTO generateMultiServiceAuthorizationTokens(final List<TokenGenerationRequestDTO> tokenGenerationRequests) {
-    	logger.debug("generateMultiServiceAuthorizationTokens started...");
-        Assert.notNull(tokenGenerationRequests, "tokenGenerationRequests list is null.");
-        Assert.isTrue(!tokenGenerationRequests.isEmpty(), "tokenGenerationRequests list is empty.");
-        
-    	final UriComponents uri = getAuthorizationGernerateTokenMultiServiceUri();
-    	return httpService.sendRequest(uri, HttpMethod.POST, TokenGenerationMultiServiceResponseDTO.class, tokenGenerationRequests).getBody();
     }
     
 	//-------------------------------------------------------------------------------------------------
@@ -285,27 +270,13 @@ public class ChoreographerDriver {
     private UriComponents getOrchestrationProcessUri() {
         logger.debug("getOrchestrationProcessUri started...");
 
-        if (arrowheadContext.containsKey(ORCHESTRATION_PROCESS_URI_KEY)) {
+        if (arrowheadContext.containsKey(ORCHESTRATION_PROCESS_BY_PROXY_URI_KEY)) {
             try {
-                return (UriComponents) arrowheadContext.get(ORCHESTRATION_PROCESS_URI_KEY);
+                return (UriComponents) arrowheadContext.get(ORCHESTRATION_PROCESS_BY_PROXY_URI_KEY);
             } catch (final ClassCastException ex) {
                 throw new ArrowheadException("Choreographer can't find orchestration process URI.");
             }
         }
         throw new ArrowheadException("Choreographer can't find orchestration process URI.");
-    }
-    
-    //-------------------------------------------------------------------------------------------------
-    private UriComponents getAuthorizationGernerateTokenMultiServiceUri() {
-        logger.debug("getAuthorizationGernerateTokenMultiServiceUri started...");
-
-        if (arrowheadContext.containsKey(AUTH_TOKEN_GENERATION_MULTI_SERVICE_URI_KEY)) {
-            try {
-                return (UriComponents) arrowheadContext.get(AUTH_TOKEN_GENERATION_MULTI_SERVICE_URI_KEY);
-            } catch (final ClassCastException ex) {
-                throw new ArrowheadException("Choreographer can't find authorization generate multi service token URI.");
-            }
-        }
-        throw new ArrowheadException("Choreographer can't find authorization generate multi service token URI.");
     }
 }

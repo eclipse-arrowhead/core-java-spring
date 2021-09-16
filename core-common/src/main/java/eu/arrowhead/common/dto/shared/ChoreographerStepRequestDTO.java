@@ -26,12 +26,12 @@ public class ChoreographerStepRequestDTO implements Serializable {
 	//=================================================================================================
 	// members
 
-	private static final long serialVersionUID = -1321988472650332839L;
+	private static final long serialVersionUID = 3848344337979806809L;
 	
 	private String name;
     private Map<String,String> staticParameters;
     private Integer quantity;
-    private ServiceQueryFormDTO serviceRequirement;
+    private ChoreographerServiceQueryFormDTO serviceRequirement;
     private List<String> nextStepNames;
 
     //=================================================================================================
@@ -41,14 +41,14 @@ public class ChoreographerStepRequestDTO implements Serializable {
 	public String getName() { return name; }
 	public Map<String,String> getStaticParameters() { return staticParameters; }
 	public Integer getQuantity() { return quantity; }
-	public ServiceQueryFormDTO getServiceRequirement() { return serviceRequirement; }
+	public ChoreographerServiceQueryFormDTO getServiceRequirement() { return serviceRequirement; }
 	public List<String> getNextStepNames() { return nextStepNames; }
 
     //-------------------------------------------------------------------------------------------------
 	public void setName(final String name) { this.name = name; }
 	public void setStaticParameters(final Map<String,String> staticParameters) { this.staticParameters = staticParameters; }
 	public void setQuantity(final Integer quantity) { this.quantity = quantity; }
-	public void setServiceRequirement(final ServiceQueryFormDTO serviceRequirement) { this.serviceRequirement = serviceRequirement; }
+	public void setServiceRequirement(final ChoreographerServiceQueryFormDTO serviceRequirement) { this.serviceRequirement = serviceRequirement; }
     public void setNextStepNames(final List<String> nextStepNames) { this.nextStepNames = nextStepNames; }
     
 	//-------------------------------------------------------------------------------------------------

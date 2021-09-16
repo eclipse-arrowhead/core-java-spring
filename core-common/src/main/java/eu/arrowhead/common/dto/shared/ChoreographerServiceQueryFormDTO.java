@@ -15,51 +15,42 @@
 package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-public class ServiceQueryFormListDTO implements Serializable {
+public class ChoreographerServiceQueryFormDTO extends ServiceQueryFormDTO implements Serializable {
 	
 	//=================================================================================================
 	// members
 	
-	private static final long serialVersionUID = 8818224363564234620L;
+	private static final long serialVersionUID = 4310676705715417602L;
 	
-	private List<? extends ServiceQueryFormDTO> forms = new ArrayList<>();
+	private boolean localCloudOnly = false;
 	
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public ServiceQueryFormListDTO() {}
-	
-	//-------------------------------------------------------------------------------------------------
-	public ServiceQueryFormListDTO(final List<? extends ServiceQueryFormDTO> forms) {
-		if (forms != null) {
-			this.forms = forms;
-		}
+	public ChoreographerServiceQueryFormDTO() {
+		super();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public List<? extends ServiceQueryFormDTO> getForms() { return forms; }
+	public ChoreographerServiceQueryFormDTO(final ServiceQueryFormDTO queryForm, final boolean localCloudOnly) {
+		super();
+		
+		this.setServiceDefinitionRequirement(queryForm.getServiceDefinitionRequirement());
+		this.setInterfaceRequirements(queryForm.getInterfaceRequirements());
+		this.setSecurityRequirements(queryForm.getSecurityRequirements());
+		this.setMetadataRequirements(queryForm.getMetadataRequirements());
+		this.setVersionRequirement(queryForm.getVersionRequirement());
+		this.setMinVersionRequirement(queryForm.getMinVersionRequirement());
+		this.setMaxVersionRequirement(queryForm.getMaxVersionRequirement());
+		this.setPingProviders(queryForm.getPingProviders());
+		this.localCloudOnly = localCloudOnly;
+	}
 
 	//-------------------------------------------------------------------------------------------------
-	public void setForms(final List<? extends ServiceQueryFormDTO> forms) {
-		if (forms != null) {
-			this.forms = forms;
-		}
-	}
-	
+	public boolean isLocalCloudOnly() { return localCloudOnly; }
+
 	//-------------------------------------------------------------------------------------------------
-	@Override
-	public String toString() {
-		try {
-			return new ObjectMapper().writeValueAsString(this);
-		} catch (final JsonProcessingException ex) {
-			return "toString failure";
-		}
-	}
+	public void setLocalCloudOnly(boolean localCloudOnly) { this.localCloudOnly = localCloudOnly; }
 }

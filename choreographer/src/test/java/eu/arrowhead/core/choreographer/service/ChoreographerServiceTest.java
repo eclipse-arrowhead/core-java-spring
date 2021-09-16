@@ -101,26 +101,8 @@ public class ChoreographerServiceTest {
 	@Mock
     private ExecutorSelector executorSelector;
 
-	@Mock
-    protected CoreSystemRegistrationProperties registrationProperties;
-    
 	//=================================================================================================
 	// methods
-	
-	//-------------------------------------------------------------------------------------------------
-	@Before
-	public void setUp() {
-		when(registrationProperties.getCoreSystemName()).thenReturn(CoreSystem.CHOREOGRAPHER.name());
-		
-		testObject.init();
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testInit() {
-		final SystemRequestDTO requesterSystem = (SystemRequestDTO) ReflectionTestUtils.getField(testObject, "requesterSystem");
-		Assert.assertNotNull(requesterSystem);
-	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)

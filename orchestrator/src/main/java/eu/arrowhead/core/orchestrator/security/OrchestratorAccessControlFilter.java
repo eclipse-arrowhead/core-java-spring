@@ -55,6 +55,10 @@ public class OrchestratorAccessControlFilter extends CoreSystemAccessControlFilt
 			// Only the local PlantDescriptionEngine can use these methods
 			final CoreSystem[] allowedCoreSystems = { CoreSystem.PLANTDESCRIPTIONENGINE };
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystems, requestTarget);
+		} else if (requestTarget.contains(CommonConstants.OP_ORCH_PROCESS_BY_PROXY_URI)) { //TODO: test this
+			// Only the local Choreographer can use this method
+			final CoreSystem[] allowedCoreSystems = { CoreSystem.CHOREOGRAPHER };
+			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystems, requestTarget);
 		} else if (Utilities.isEmpty(requestJSON)) {
 			// If request body is empty (example: GET..../orchestrator/{systemId}), than everybody in the local cloud can use these methods => no further check is necessary
 		} else {
@@ -62,8 +66,8 @@ public class OrchestratorAccessControlFilter extends CoreSystemAccessControlFilt
 			final OrchestrationFlags orchestrationFlags = orchestrationFormRequestDTO.getOrchestrationFlags();
 			
 			if (orchestrationFlags.getOrDefault(CommonConstants.ORCHESTRATION_FLAG_EXTERNAL_SERVICE_REQUEST, false)) {
-				// If this is an external service request, only the local Gatekeeper and the Choreographer can use these methods
-				final CoreSystem[] allowedCoreSystems = { CoreSystem.GATEKEEPER, CoreSystem.CHOREOGRAPHER };
+				// If this is an external service request, only the local Gatekeeper can use these methods
+				final CoreSystem[] allowedCoreSystems = { CoreSystem.GATEKEEPER };
 				checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystems, requestTarget);				
 			} else {
 				// Otherwise all request from the local cloud are allowed, but requester system has to be match with the certificate
