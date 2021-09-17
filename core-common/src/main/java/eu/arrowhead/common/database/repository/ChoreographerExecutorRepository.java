@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
 
 @Repository
-public interface ChoreographerExecutorRepository extends RefreshableRepository<ChoreographerExecutor, Long> {
+public interface ChoreographerExecutorRepository extends RefreshableRepository<ChoreographerExecutor,Long> {
 
     //=================================================================================================
     // methods

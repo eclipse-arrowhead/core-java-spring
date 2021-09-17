@@ -18,6 +18,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 
 public class QoSTemporaryLockResponseDTO implements Serializable {
@@ -49,5 +52,14 @@ public class QoSTemporaryLockResponseDTO implements Serializable {
 			this.response = response;
 		}
 	}
-
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

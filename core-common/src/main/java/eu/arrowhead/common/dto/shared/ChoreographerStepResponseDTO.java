@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ChoreographerStepResponseDTO implements Serializable {
@@ -75,12 +77,22 @@ public class ChoreographerStepResponseDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
     public void setName(final String name) { this.name = name; }
-    public void setServiceDefinition(String serviceDefinition) { this.serviceDefinition = serviceDefinition; }
-    public void setMinVersion(Integer minVersion) { this.minVersion = minVersion; }
-    public void setMaxVersion(Integer maxVersion) { this.maxVersion = maxVersion; }
-    public void setNextStepNames(List<String> nextStepNames) { this.nextStepNames = nextStepNames; }
-    public void setStaticParameters(Map<String,String> staticParameters) { this.staticParameters = staticParameters; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
+    public void setServiceDefinition(final String serviceDefinition) { this.serviceDefinition = serviceDefinition; }
+    public void setMinVersion(final Integer minVersion) { this.minVersion = minVersion; }
+    public void setMaxVersion(final Integer maxVersion) { this.maxVersion = maxVersion; }
+    public void setNextStepNames(final List<String> nextStepNames) { this.nextStepNames = nextStepNames; }
+    public void setStaticParameters(final Map<String,String> staticParameters) { this.staticParameters = staticParameters; }
+    public void setQuantity(final int quantity) { this.quantity = quantity; }
     public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
     public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
+    
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

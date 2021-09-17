@@ -18,6 +18,9 @@ import java.io.Serializable;
 
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 
@@ -69,4 +72,14 @@ public class QoSMonitorSenderConnectionRequestDTO implements Serializable {
 	public void setQueueId(final String queueId) { this.queueId = queueId; }
 	public void setPeerName(final String peerName) { this.peerName = peerName; }
 	public void setReceiverQoSMonitorPublicKey(final String receiverQoSMonitorPublicKey) { this.receiverQoSMonitorPublicKey = receiverQoSMonitorPublicKey; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

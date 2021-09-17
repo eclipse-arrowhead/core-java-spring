@@ -18,6 +18,9 @@ import java.io.Serializable;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class RelayResponseDTO implements Serializable {
 
 	private static final long serialVersionUID = -8159263313404856979L;
@@ -104,5 +107,13 @@ public class RelayResponseDTO implements Serializable {
 		return true;
 	}
 	
-	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

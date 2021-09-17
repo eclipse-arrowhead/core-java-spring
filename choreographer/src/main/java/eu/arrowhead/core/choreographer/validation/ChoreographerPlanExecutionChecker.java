@@ -50,7 +50,7 @@ public class ChoreographerPlanExecutionChecker {
 	// members
 	
 	private static final String EXECUTOR_NOT_FOUND_FOR_MSG_PREFIX = "Executor not found for step: ";
-	private static final String PROVIDERS_NOT_FOUND_FOR_MSG_PREFIX = "Providers not found for step: ";
+	private static final String PROVIDER_NOT_FOUND_FOR_MSG_PREFIX = "Provider not found for step: ";
 	private static final String SR_CONNECTION_PROBLEM_MSG_PREFIX = "Something happened when connecting to the Service Registry: ";
 	
 	@Autowired
@@ -106,14 +106,14 @@ public class ChoreographerPlanExecutionChecker {
 		final List<ChoreographerStep> steps = planDBService.collectStepsFromPlan(plan);
 			
 		// executor check
-		checkAvailableExecutorsInDB(steps, errors);
+		final List<ChoreographerStep> stepsWithExecutors = checkAvailableExecutorsInDB(steps, errors);
 			
 		// provider check for steps
 		checkAvailableProviders(steps, errors);
 			
 		if (dependencyCheck) {
-			// check executors dependency too
-			checkExecutorDependencies(steps, errors);
+			// check executors dependency too (only for steps with executors)
+			checkExecutorDependencies(stepsWithExecutors, errors);
 		}
 		
 		return errors.isEmpty() ? null : new ChoreographerRunPlanResponseDTO(planId, errors);
@@ -130,6 +130,7 @@ public class ChoreographerPlanExecutionChecker {
 		
 		if (request == null) {
 			errors.add("Request is null.");
+			return errors; // can't check anything else
 		}
 		
 		if (request.getPlanId() == null || request.getPlanId() <= 0) {
@@ -137,7 +138,7 @@ public class ChoreographerPlanExecutionChecker {
 		}
 		
 		if (!Utilities.isEmpty(request.getNotifyAddress())) { // means we have a notify URI
-			if (!CommonConstants.HTTP.equalsIgnoreCase(request.getNotifyProtocol()) || !CommonConstants.HTTPS.equalsIgnoreCase(request.getNotifyProtocol())) {
+			if (!CommonConstants.HTTP.equalsIgnoreCase(request.getNotifyProtocol()) && !CommonConstants.HTTPS.equalsIgnoreCase(request.getNotifyProtocol())) {
 				errors.add("Invalid notify protocol.");
 			}
 			
@@ -161,8 +162,10 @@ public class ChoreographerPlanExecutionChecker {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkAvailableExecutorsInDB(final List<ChoreographerStep> steps, final List<String> errors) {
+	private List<ChoreographerStep> checkAvailableExecutorsInDB(final List<ChoreographerStep> steps, final List<String> errors) {
 		logger.debug("checkAvailableExecutorsInDB started...");
+		
+		final List<ChoreographerStep> result = new ArrayList<>(steps.size());
 		
 		for (final ChoreographerStep step : steps) {
 			final int minVersion = step.getMinVersion() == null ? Defaults.DEFAULT_VERSION :  step.getMinVersion(); 
@@ -171,8 +174,12 @@ public class ChoreographerPlanExecutionChecker {
 			final List<ChoreographerExecutor> executors = executorDBService.getExecutorsByServiceDefinitionAndVersion(step.getServiceDefinition(), minVersion, maxVersion);
 			if (executors.isEmpty()) {
 				errors.add(EXECUTOR_NOT_FOUND_FOR_MSG_PREFIX + createFullyQualifiedStepName(step));
+			} else {
+				result.add(step);
 			}
 		}
+		
+		return result;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -193,7 +200,7 @@ public class ChoreographerPlanExecutionChecker {
 			for (int i = 0; i < response.getResults().size(); ++i) {
 				final ServiceQueryResultDTO result = response.getResults().get(i);
 				if (result.getServiceQueryData().isEmpty()) {
-					errors.add(PROVIDERS_NOT_FOUND_FOR_MSG_PREFIX + createFullyQualifiedStepName(steps.get(i)));
+					errors.add(PROVIDER_NOT_FOUND_FOR_MSG_PREFIX + createFullyQualifiedStepName(steps.get(i)));
 				}
 			}
 		} catch (final Exception ex) {

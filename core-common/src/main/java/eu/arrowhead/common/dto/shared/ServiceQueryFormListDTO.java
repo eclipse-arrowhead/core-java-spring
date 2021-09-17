@@ -18,6 +18,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class ServiceQueryFormListDTO implements Serializable {
 	
 	//=================================================================================================
@@ -47,6 +50,16 @@ public class ServiceQueryFormListDTO implements Serializable {
 	public void setForms(final List<ServiceQueryFormDTO> forms) {
 		if (forms != null) {
 			this.forms = forms;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
 		}
 	}
 }

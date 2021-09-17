@@ -42,6 +42,7 @@ import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerSession;
 import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerCheckPlanResponseDTO;
@@ -147,9 +148,9 @@ public class ChoreographerPlanController {
 
         final ValidatedPageParams validatedPageParams = CoreUtilities.validatePageParameters(page, size, direction, sortField);
         final ChoreographerPlanListResponseDTO planEntriesResponse = planDBService.getPlanEntriesResponse(validatedPageParams.getValidatedPage(),
-        																										   validatedPageParams.getValidatedSize(),
-        																										   validatedPageParams.getValidatedDirection(),
-        																										   sortField);
+        																								  validatedPageParams.getValidatedSize(),
+        																								  validatedPageParams.getValidatedDirection(),
+        																								  sortField);
         logger.debug("Plan with page: {} and item_per_page: {} retrieved successfully", page, size);
 
         return planEntriesResponse;
@@ -233,8 +234,8 @@ public class ChoreographerPlanController {
     	
     	final List<ChoreographerRunPlanResponseDTO> results = new ArrayList<>(requests.size());
         for (final ChoreographerRunPlanRequestDTO request : requests) {
-
            final ChoreographerRunPlanResponseDTO errorResponse = planChecker.checkPlanForExecution(request);
+           
            if (errorResponse != null) {
         	   results.add(errorResponse);
            } else {
@@ -268,7 +269,7 @@ public class ChoreographerPlanController {
         final ChoreographerRunPlanResponseDTO result = planChecker.checkPlanForExecution(id);
         logger.debug("Check report for plan with id: " + id + " successfully retrieved!");
 
-        return new ChoreographerCheckPlanResponseDTO(id, result.getErrorMessages());
+        return new ChoreographerCheckPlanResponseDTO(id, result == null ? null : result.getErrorMessages());
     }
 
     //=================================================================================================
@@ -276,6 +277,7 @@ public class ChoreographerPlanController {
     
     //-------------------------------------------------------------------------------------------------
 	private String createNotifyUri(final ChoreographerRunPlanRequestDTO request) {
-		return request.getNotifyProtocol() + "://" + request.getNotifyAddress() + ":" + request.getNotifyPort() + "/" + request.getNotifyPath();
+		return Utilities.isEmpty(request.getNotifyAddress()) ? null
+															 : request.getNotifyProtocol() + "://" + request.getNotifyAddress() + ":" + request.getNotifyPort() + "/" + request.getNotifyPath();
 	}
 }
