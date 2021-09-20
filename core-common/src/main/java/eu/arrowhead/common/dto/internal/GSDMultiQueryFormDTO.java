@@ -12,50 +12,46 @@
  *   Arrowhead Consortia - conceptualization
  ********************************************************************************/
 
-package eu.arrowhead.common.dto.shared;
+package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class ChoreographerCheckPlanResponseDTO implements Serializable {
-	
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+
+public class GSDMultiQueryFormDTO implements Serializable {
+
 	//=================================================================================================
 	// members
+
+	private static final long serialVersionUID = -3718839388044509453L;
 	
-	private static final long serialVersionUID = -6599506456874073377L;
-	
-	private long planId;
-	private List<String> errorMessages = new ArrayList<>();
-	private boolean needInterCloud;
+	private List<? extends ServiceQueryFormDTO> requestedServices;
+	private List<CloudRequestDTO> preferredClouds;
 	
 	//=================================================================================================
 	// methods
 	
-	//-------------------------------------------------------------------------------------------------
-	public ChoreographerCheckPlanResponseDTO() {}
+	//-------------------------------------------------------------------------------------------------	
+	public GSDMultiQueryFormDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerCheckPlanResponseDTO(final long planId, final List<String> errorMessages, final boolean needInterCloud) {
-		this.planId = planId;
-		this.needInterCloud = needInterCloud;
-		if (errorMessages != null) {
-			this.errorMessages.addAll(errorMessages);
-		}
+	public GSDMultiQueryFormDTO(final List<? extends ServiceQueryFormDTO> requestedServices, final List<CloudRequestDTO> preferredClouds) {
+		this.requestedServices = requestedServices;
+		this.preferredClouds = preferredClouds;
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
-	public long getPlanId() { return planId; }
-	public List<String> getErrorMessages() { return errorMessages; }
-	public boolean getNeedInterCloud() { return needInterCloud; }
-	
+	public List<? extends ServiceQueryFormDTO> getRequestedServices() { return requestedServices; }
+	public List<CloudRequestDTO> getPreferredClouds() { return preferredClouds; }
+
 	//-------------------------------------------------------------------------------------------------
-	public void setPlanId(final long planId) { this.planId = planId; }
-	public void setErrorMessages(final List<String> errorMessages) { this.errorMessages = errorMessages; }
-	public void setNeedInterCloud(final boolean needInterCloud) { this.needInterCloud = needInterCloud; }
+	public void setRequestedServices(final List<? extends ServiceQueryFormDTO> requestedServices) { this.requestedServices = requestedServices; }
+	public void setPreferredClouds(final List<CloudRequestDTO> preferredClouds) { this.preferredClouds = preferredClouds; }
 	
 	//-------------------------------------------------------------------------------------------------
 	@Override

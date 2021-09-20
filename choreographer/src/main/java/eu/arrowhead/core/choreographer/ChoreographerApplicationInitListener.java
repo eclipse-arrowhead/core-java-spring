@@ -135,7 +135,7 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
     //-------------------------------------------------------------------------------------------------
 	@Override
     protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
-        return List.of(CoreSystemService.ORCHESTRATION_BY_PROXY_SERVICE); //TODO: add gatekeeper GSD
+        return List.of(CoreSystemService.ORCHESTRATION_BY_PROXY_SERVICE, CoreSystemService.GATEKEEPER_MULTI_GLOBAL_SERVICE_DISCOVERY); //TODO: only add MGSD if gatekeeper is present
     }
 
     //=================================================================================================

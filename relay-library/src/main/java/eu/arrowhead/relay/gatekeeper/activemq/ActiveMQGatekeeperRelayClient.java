@@ -48,6 +48,8 @@ import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.AccessTypeRelayResponseDTO;
 import eu.arrowhead.common.dto.internal.DecryptedMessageDTO;
+import eu.arrowhead.common.dto.internal.GSDMultiPollRequestDTO;
+import eu.arrowhead.common.dto.internal.GSDMultiPollResponseDTO;
 import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.internal.GeneralAdvertisementMessageDTO;
@@ -80,9 +82,9 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	private static final String RESPONSE_QUEUE_PREFIX = "RESP-";
 	private static final String ERROR_CODE = "\"errorCode\"";
 	
-	private static final List<String> supportedRequestTypes = List.of(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL,
-																	  CoreCommonConstants.RELAY_MESSAGE_TYPE_ACCESS_TYPE, CoreCommonConstants.RELAY_MESSAGE_TYPE_SYSTEM_ADDRESS_LIST,
-																	  CoreCommonConstants.RELAY_MESSAGE_TYPE_QOS_RELAY_TEST);	
+	private static final List<String> supportedRequestTypes = List.of(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, CoreCommonConstants.RELAY_MESSAGE_TYPE_MULTI_GSD_POLL,
+																	  CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL, CoreCommonConstants.RELAY_MESSAGE_TYPE_ACCESS_TYPE,
+																	  CoreCommonConstants.RELAY_MESSAGE_TYPE_SYSTEM_ADDRESS_LIST, CoreCommonConstants.RELAY_MESSAGE_TYPE_QOS_RELAY_TEST);	
 	
 	private static final int CLIENT_ID_LENGTH = 16;
 	private static final int SESSION_ID_LENGTH = 48;
@@ -468,6 +470,8 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		switch (messageType) {
 		case CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL: 
 			return request ? GSDPollRequestDTO.class : GSDPollResponseDTO.class;
+		case CoreCommonConstants.RELAY_MESSAGE_TYPE_MULTI_GSD_POLL:
+			return request ? GSDMultiPollRequestDTO.class : GSDMultiPollResponseDTO.class; 
 		case CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL:
 			return request ? ICNProposalRequestDTO.class : ICNProposalResponseDTO.class;
 		case CoreCommonConstants.RELAY_MESSAGE_TYPE_ACCESS_TYPE:
@@ -487,6 +491,10 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		
 		if (requestPayload instanceof GSDPollRequestDTO) {
 			return CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL;
+		}
+		
+		if (requestPayload instanceof GSDMultiPollRequestDTO) {
+			return CoreCommonConstants.RELAY_MESSAGE_TYPE_MULTI_GSD_POLL;
 		}
 		
 		if (requestPayload instanceof ICNProposalRequestDTO) {

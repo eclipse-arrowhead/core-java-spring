@@ -67,6 +67,7 @@ public enum CoreSystem {
 															 CoreSystemService.ORCHESTRATION_QOS_CONFIRM_RESERVATION_SERVICE)),
 	
 	GATEKEEPER(Defaults.DEFAULT_GATEKEEPER_PORT, List.of(CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY,
+														 CoreSystemService.GATEKEEPER_MULTI_GLOBAL_SERVICE_DISCOVERY,
 														 CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATION,
 														 CoreSystemService.GATEKEEPER_PULL_CLOUDS,
 														 CoreSystemService.GATEKEEPER_COLLECT_SYSTEM_ADDRESSES,

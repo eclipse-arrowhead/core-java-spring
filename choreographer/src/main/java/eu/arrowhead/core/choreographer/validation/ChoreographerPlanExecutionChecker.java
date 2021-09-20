@@ -16,6 +16,7 @@ package eu.arrowhead.core.choreographer.validation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -31,6 +32,7 @@ import eu.arrowhead.common.database.entity.ChoreographerPlan;
 import eu.arrowhead.common.database.entity.ChoreographerStep;
 import eu.arrowhead.common.dto.shared.ChoreographerRunPlanRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerRunPlanResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
@@ -51,7 +53,7 @@ public class ChoreographerPlanExecutionChecker {
 	
 	private static final String EXECUTOR_NOT_FOUND_FOR_MSG_PREFIX = "Executor not found for step: ";
 	private static final String PROVIDER_NOT_FOUND_FOR_MSG_PREFIX = "Provider not found for step: ";
-	private static final String SR_CONNECTION_PROBLEM_MSG_PREFIX = "Something happened when connecting to the Service Registry: ";
+	private static final String CONNECTION_PROBLEM_MSG_PREFIX = "Something happened when connecting to other core services: ";
 	
 	@Autowired
 	private NetworkAddressVerifier networkAddressVerifier;
@@ -74,23 +76,23 @@ public class ChoreographerPlanExecutionChecker {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerRunPlanResponseDTO checkPlanForExecution(final ChoreographerRunPlanRequestDTO request) {
+	public ChoreographerRunPlanResponseDTO checkPlanForExecution(final ChoreographerRunPlanRequestDTO request) { 
 		logger.debug("checkPlanForExecution started...");
 		
 		final List<String> errors = basicChecks(request);
 		final Long planId = request == null ? null : request.getPlanId();
 		
-		return errors.isEmpty() ? checkPlanForExecution(request.getPlanId(), false) : new ChoreographerRunPlanResponseDTO(planId, errors);
+		return errors.isEmpty() ? checkPlanForExecution(request.isAllowInterCloud(), request.getPlanId(), false) : new ChoreographerRunPlanResponseDTO(planId, errors, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerRunPlanResponseDTO checkPlanForExecution(final long planId) {
+	public ChoreographerRunPlanResponseDTO checkPlanForExecution(final boolean allowInterCloud, final long planId) {
 		logger.debug("checkPlanForExecution started...");
-		return checkPlanForExecution(planId, true);
+		return checkPlanForExecution(allowInterCloud, planId, true);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerRunPlanResponseDTO checkPlanForExecution(final long planId, final boolean dependencyCheck) {
+	public ChoreographerRunPlanResponseDTO checkPlanForExecution(final boolean allowInterCloud, final long planId, final boolean dependencyCheck) { //TODO: test this
 		logger.debug("checkPlanForExecution started...");
 		
 		ChoreographerPlan plan = null;
@@ -100,7 +102,7 @@ public class ChoreographerPlanExecutionChecker {
 		try {
 			plan = planDBService.getPlanById(planId);
 		} catch (final InvalidParameterException ex) {
-			return new ChoreographerRunPlanResponseDTO(planId, List.of(ex.getMessage()));
+			return new ChoreographerRunPlanResponseDTO(planId, List.of(ex.getMessage()), false);
 		}
 		
 		final List<ChoreographerStep> steps = planDBService.collectStepsFromPlan(plan);
@@ -109,14 +111,16 @@ public class ChoreographerPlanExecutionChecker {
 		final List<ChoreographerStep> stepsWithExecutors = checkAvailableExecutorsInDB(steps, errors);
 			
 		// provider check for steps
-		checkAvailableProviders(steps, errors);
-			
+		boolean needInterCloudForSteps = false;
+		needInterCloudForSteps = checkAvailableProviders(steps, allowInterCloud, errors);
+		
+		boolean needInterCloudForExecutors = false;
 		if (dependencyCheck) {
 			// check executors dependency too (only for steps with executors)
-			checkExecutorDependencies(stepsWithExecutors, errors);
+			needInterCloudForExecutors = checkExecutorDependencies(stepsWithExecutors, allowInterCloud, errors);
 		}
 		
-		return errors.isEmpty() ? null : new ChoreographerRunPlanResponseDTO(planId, errors);
+		return new ChoreographerRunPlanResponseDTO(planId, errors, needInterCloudForSteps || needInterCloudForExecutors);
 	}
 
 	//=================================================================================================
@@ -190,26 +194,35 @@ public class ChoreographerPlanExecutionChecker {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkAvailableProviders(final List<ChoreographerStep> steps, final List<String> errors) {
+	private boolean checkAvailableProviders(final List<ChoreographerStep> steps, final boolean allowInterCloud, final List<String> errors) {
 		logger.debug("checkAvailableProviders started...");
 		
-		final List<ServiceQueryFormDTO> forms = steps.stream().map(s -> Utilities.fromJson(s.getSrTemplate(), ServiceQueryFormDTO.class)).collect(Collectors.toList());
+		final List<ChoreographerServiceQueryFormDTO> forms = steps.stream().map(s -> Utilities.fromJson(s.getSrTemplate(), ChoreographerServiceQueryFormDTO.class)).collect(Collectors.toList());
+		boolean needInterCloud = false;
 		
 		try {
-			final ServiceQueryResultListDTO response = driver.multiQueryServiceRegistry(new ServiceQueryFormListDTO(forms));
-			for (int i = 0; i < response.getResults().size(); ++i) {
-				final ServiceQueryResultDTO result = response.getResults().get(i);
-				if (result.getServiceQueryData().isEmpty()) {
-					errors.add(PROVIDER_NOT_FOUND_FOR_MSG_PREFIX + createFullyQualifiedStepName(steps.get(i)));
+			final Map<Integer,List<String>> resultMap = driver.searchForServices(new ServiceQueryFormListDTO(forms), allowInterCloud);
+			
+			for (final Map.Entry<Integer,List<String>> entry : resultMap.entrySet()) {
+				final int idx = entry.getKey();
+				final List<String> clouds = entry.getValue();
+				if (clouds.isEmpty()) {
+					errors.add(PROVIDER_NOT_FOUND_FOR_MSG_PREFIX + createFullyQualifiedStepName(steps.get(idx)));
+				} else if (!ChoreographerDriver.OWN_CLOUD_MARKER.equals(clouds.get(0))) {
+					needInterCloud = true;
 				}
 			}
+			
 		} catch (final Exception ex) {
-			errors.add(SR_CONNECTION_PROBLEM_MSG_PREFIX + ex.getMessage());
+			errors.add(CONNECTION_PROBLEM_MSG_PREFIX + ex.getMessage());
 		}
+		
+		return needInterCloud;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkExecutorDependencies(final List<ChoreographerStep> steps, final List<String> errors) {
+	// TODO: continue (somehow we have to know if any of the selected executor is local only or not)
+	private boolean checkExecutorDependencies(final List<ChoreographerStep> steps, final boolean allowInterCloud, final List<String> errors) {
 		logger.debug("checkExecutorDependencies started...");
 		
 		for (final ChoreographerStep step : steps) {

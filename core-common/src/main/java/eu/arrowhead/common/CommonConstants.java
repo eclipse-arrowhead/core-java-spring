@@ -251,6 +251,7 @@ public class CommonConstants {
 	
 	public static final String GATEKEEPER_URI = "/gatekeeper";
 	public static final String OP_GATEKEEPER_GSD_SERVICE = "/init_gsd";
+	public static final String OP_GATEKEEPER_MULTI_GSD_SERVICE = "/init_multi_gsd";
 	public static final String OP_GATEKEEPER_ICN_SERVICE = "/init_icn";
 	public static final String OP_GATEKEEPER_PULL_CLOUDS_SERVICE = "/pull_clouds";
 	public static final String OP_GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_SERVICE = "/collect_system_addresses";

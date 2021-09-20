@@ -21,6 +21,7 @@ import javax.jms.MessageProducer;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.internal.GSDMultiPollRequestDTO;
 import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.internal.GeneralRelayRequestDTO;
 import eu.arrowhead.common.dto.internal.ICNProposalRequestDTO;
@@ -71,6 +72,15 @@ public class GatekeeperRelayRequest {
 		}
 		
 		throw new DataNotFoundException("The request is not a GSD poll.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public GSDMultiPollRequestDTO getGSDMultiPollRequest() {
+		if (payload instanceof GSDMultiPollRequestDTO) {
+			return (GSDMultiPollRequestDTO) payload;
+		}
+		
+		throw new DataNotFoundException("The request is not a multi GSD poll.");
 	}
 	
 	//-------------------------------------------------------------------------------------------------
