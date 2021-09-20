@@ -16,6 +16,9 @@ package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
 
 public class ChoreographerNotificationDTO implements Serializable {
@@ -69,4 +72,14 @@ public class ChoreographerNotificationDTO implements Serializable {
 	public void setStatus(final ChoreographerSessionStatus status) { this.status = status; }
 	public void setMessage(final String message) { this.message = message; }
 	public void setDetails(final String details) { this.details = details; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

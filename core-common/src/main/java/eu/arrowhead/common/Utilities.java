@@ -285,8 +285,8 @@ public class Utilities {
 	 */
 	public static UriComponents createURI(final String scheme, final String host, final int port, final MultiValueMap<String, String> queryParams, final String path, final String... pathSegments) {
 		final UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
-		builder.scheme(scheme == null ? CommonConstants.HTTP : scheme)
-			   .host(host == null ? CommonConstants.LOCALHOST : host)
+		builder.scheme(Utilities.isEmpty(scheme) ? CommonConstants.HTTP : scheme.trim())
+			   .host(Utilities.isEmpty(host) ? CommonConstants.LOCALHOST : host.trim())
 			   .port(port <= 0 ? CommonConstants.HTTP_PORT : port);
 
 		if (queryParams != null) {

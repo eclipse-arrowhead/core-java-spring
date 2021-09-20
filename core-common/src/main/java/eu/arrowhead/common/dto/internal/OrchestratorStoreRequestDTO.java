@@ -17,6 +17,9 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 
@@ -70,4 +73,14 @@ public class OrchestratorStoreRequestDTO implements Serializable {
 	public void setServiceInterfaceName(final String serviceInterfaceName) {this.serviceInterfaceName = serviceInterfaceName; }
 	public void setPriority(final Integer priority) {this.priority = priority;}
 	public void setAttribute(final Map<String,String> attribute) {this.attribute = attribute;}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

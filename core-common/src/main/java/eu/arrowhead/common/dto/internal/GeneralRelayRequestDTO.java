@@ -20,6 +20,8 @@ import java.util.List;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CoreCommonConstants;
 
@@ -57,4 +59,14 @@ public class GeneralRelayRequestDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	public void setMessageType(final String messageType) { this.messageType = messageType; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

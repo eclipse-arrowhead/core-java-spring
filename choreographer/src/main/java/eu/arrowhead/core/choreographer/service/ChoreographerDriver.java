@@ -71,7 +71,7 @@ public class ChoreographerDriver {
     //-------------------------------------------------------------------------------------------------
     public ServiceQueryResultListDTO multiQueryServiceRegistry(final ServiceQueryFormListDTO forms) {
         logger.debug("multiQueryServiceRegistry started...");
-        Assert.notNull(forms, "ServiceQueryFormListDTOt is null.");
+        Assert.notNull(forms, "ServiceQueryFormListDTO is null.");
 
         final UriComponents uri = getMultiQueryServiceRegistryUri();
         return httpService.sendRequest(uri, HttpMethod.POST, ServiceQueryResultListDTO.class, forms).getBody();
@@ -114,7 +114,7 @@ public class ChoreographerDriver {
     public ChoreographerExecutorServiceInfoResponseDTO queryExecutorServiceInfo(final String address, final int port, final String baseUri, final String serviceDefinition, final int minVersion, final int maxVersion) {
     	logger.debug("getExecutorServiceInfo started...");
     	Assert.isTrue(!Utilities.isEmpty(address), "address is empty");
-    	Assert.isTrue(!Utilities.isEmpty(baseUri), "baseUri is empty");
+    	Assert.notNull(baseUri, "baseUri is null");
     	Assert.isTrue(!Utilities.isEmpty(serviceDefinition), "serviceDefinition is empty");
     	
     	final ChoreographerExecutorServiceInfoRequestDTO dto = new ChoreographerExecutorServiceInfoRequestDTO(serviceDefinition, minVersion, maxVersion);
@@ -126,7 +126,7 @@ public class ChoreographerDriver {
     public void startExecutor(final String address, final int port, final String baseUri, final ChoreographerExecuteStepRequestDTO payload) {
     	logger.debug("startExecutor started...");
     	Assert.isTrue(!Utilities.isEmpty(address), "address is empty");
-    	Assert.isTrue(!Utilities.isEmpty(baseUri), "baseUri is empty");
+    	Assert.notNull(baseUri, "baseUri is null");
     	Assert.notNull(payload, "payload is null");
     	
     	final UriComponents uri = getStartExecutorUri(address, port, baseUri);
@@ -137,7 +137,7 @@ public class ChoreographerDriver {
     public void abortExecutor(final String address, final int port, final String baseUri, final ChoreographerAbortStepRequestDTO payload) {
     	logger.debug("getExecutorServiceInfo started...");
     	Assert.isTrue(!Utilities.isEmpty(address), "address is empty");
-    	Assert.isTrue(!Utilities.isEmpty(baseUri), "baseUri is empty");
+    	Assert.notNull(baseUri, "baseUri is null");
     	Assert.notNull(payload, "payload is null");
     	
     	final UriComponents uri = getAbortExecutorUri(address, port, baseUri);
@@ -160,6 +160,7 @@ public class ChoreographerDriver {
     public TokenGenerationMultiServiceResponseDTO generateMultiServiceAuthorizationTokens(final List<TokenGenerationRequestDTO> tokenGenerationRequests) {
     	logger.debug("generateMultiServiceAuthorizationTokens started...");
         Assert.notNull(tokenGenerationRequests, "tokenGenerationRequests list is null.");
+        Assert.isTrue(!tokenGenerationRequests.isEmpty(), "tokenGenerationRequests list is empty.");
         
     	final UriComponents uri = getAuthorizationGernerateTokenMultiServiceUri();
     	return httpService.sendRequest(uri, HttpMethod.POST, TokenGenerationMultiServiceResponseDTO.class, tokenGenerationRequests).getBody();
@@ -169,7 +170,7 @@ public class ChoreographerDriver {
 	public void sendSessionNotification(final String notifyUri, final ChoreographerNotificationDTO payload) {
 		logger.debug("sendSessionNotification started...");
 		Assert.isTrue(!Utilities.isEmpty(notifyUri), "Notification URI is not specified.");
-		Assert.notNull(payload, "Payload is not specified");
+		Assert.notNull(payload, "Payload is not specified.");
 		
 		final UriComponents uri = UriComponentsBuilder.fromUriString(notifyUri).build();
 		httpService.sendRequest(uri, HttpMethod.POST, Void.class, payload);
@@ -302,9 +303,9 @@ public class ChoreographerDriver {
             try {
                 return (UriComponents) arrowheadContext.get(AUTH_TOKEN_GENERATION_MULTI_SERVICE_URI_KEY);
             } catch (final ClassCastException ex) {
-                throw new ArrowheadException("Choreographer can't authorization generate multi service token URI.");
+                throw new ArrowheadException("Choreographer can't find authorization generate multi service token URI.");
             }
         }
-        throw new ArrowheadException("Choreographer can't authorization generate multi service token URI.");
+        throw new ArrowheadException("Choreographer can't find authorization generate multi service token URI.");
     }
 }

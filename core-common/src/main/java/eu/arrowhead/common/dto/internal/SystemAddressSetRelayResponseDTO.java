@@ -20,6 +20,9 @@ import java.util.Set;
 
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class SystemAddressSetRelayResponseDTO implements Serializable {
 	
 	//=================================================================================================
@@ -47,4 +50,14 @@ public class SystemAddressSetRelayResponseDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	public void setAddresses(final Set<String> addresses) { this.addresses = addresses; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

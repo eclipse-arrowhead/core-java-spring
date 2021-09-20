@@ -14,13 +14,14 @@
 
 package eu.arrowhead.common.dto.shared;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Objects;
-import java.util.StringJoiner;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @JsonInclude(Include.NON_NULL)
 public class DeviceRegistryOnboardingWithNameRequestDTO extends DeviceRegistryRequestDTO implements Serializable {
@@ -29,13 +30,14 @@ public class DeviceRegistryOnboardingWithNameRequestDTO extends DeviceRegistryRe
     // members
 
     private static final long serialVersionUID = -635438605292398404L;
+    
     private CertificateCreationRequestDTO certificateCreationRequest;
 
     //=================================================================================================
     // methods
 
-    public DeviceRegistryOnboardingWithNameRequestDTO() {
-    }
+    //-------------------------------------------------------------------------------------------------
+	public DeviceRegistryOnboardingWithNameRequestDTO() {}
 
     //-------------------------------------------------------------------------------------------------
     public DeviceRegistryOnboardingWithNameRequestDTO(final DeviceRequestDTO device, final String endOfValidity) {
@@ -58,19 +60,18 @@ public class DeviceRegistryOnboardingWithNameRequestDTO extends DeviceRegistryRe
     }
 
     //-------------------------------------------------------------------------------------------------
-    public CertificateCreationRequestDTO getCertificateCreationRequest() {
-        return certificateCreationRequest;
-    }
+    public CertificateCreationRequestDTO getCertificateCreationRequest() { return certificateCreationRequest; }
 
-    public void setCertificateCreationRequest(final CertificateCreationRequestDTO certificateCreationRequest) {
-        this.certificateCreationRequest = certificateCreationRequest;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public void setCertificateCreationRequest(final CertificateCreationRequestDTO certificateCreationRequest) { this.certificateCreationRequest = certificateCreationRequest; }
 
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", DeviceRegistryOnboardingWithNameRequestDTO.class.getSimpleName() + "[", "]")
-                .add("certificateCreationRequest=" + certificateCreationRequest)
-                .add("parent=" + super.toString())
-                .toString();
-    }
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

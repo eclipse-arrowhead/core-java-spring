@@ -16,6 +16,9 @@ package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class ServiceDefinitionRequestDTO implements Serializable {
 
 	//=================================================================================================
@@ -41,4 +44,14 @@ public class ServiceDefinitionRequestDTO implements Serializable {
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setServiceDefinition(final String serviceDefinition) { this.serviceDefinition = serviceDefinition; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

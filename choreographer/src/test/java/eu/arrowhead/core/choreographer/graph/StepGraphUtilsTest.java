@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.core.choreographer.ChoreographerMain;
 
@@ -24,6 +25,20 @@ public class StepGraphUtilsTest {
 	
 	//=================================================================================================
 	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testHasCircleNullDetector() {
+		StepGraphCircleDetector detector = (StepGraphCircleDetector) ReflectionTestUtils.getField(graphUtils, "circleDetector");		
+		ReflectionTestUtils.setField(graphUtils, "circleDetector", null);
+		try {
+			graphUtils.hasCircle(null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Circle detector is not implemented.", ex.getMessage());
+			ReflectionTestUtils.setField(graphUtils, "circleDetector", detector);
+			throw ex;
+		}
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -44,6 +59,20 @@ public class StepGraphUtilsTest {
 		for (int i = 0; i < circulars.size(); ++i) { 
 			final boolean result = graphUtils.hasCircle(circulars.get(i));
 			Assert.assertTrue("Circle not detected in graph[" + i + "]", result);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testNormaiizeStepGraphNormalizerNull() {
+		final StepGraphNormalizer normalizer = (StepGraphNormalizer) ReflectionTestUtils.getField(graphUtils, "normalizer");		
+		ReflectionTestUtils.setField(graphUtils, "normalizer", null);
+		try {
+			graphUtils.normalizeStepGraph(null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Normalizer is not implemented.", ex.getMessage());
+			ReflectionTestUtils.setField(graphUtils, "normalizer", normalizer);
+			throw ex;
 		}
 	}
 	

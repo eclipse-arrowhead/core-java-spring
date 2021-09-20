@@ -18,6 +18,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class ChoreographerCheckPlanResponseDTO implements Serializable {
 	
 	//=================================================================================================
@@ -37,7 +40,9 @@ public class ChoreographerCheckPlanResponseDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public ChoreographerCheckPlanResponseDTO(final long planId, final List<String> errorMessages) {
 		this.planId = planId;
-		this.errorMessages.addAll(errorMessages);
+		if (errorMessages != null) {
+			this.errorMessages.addAll(errorMessages);
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -46,5 +51,15 @@ public class ChoreographerCheckPlanResponseDTO implements Serializable {
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setPlanId(final long planId) { this.planId = planId; }
-	public void setErrorMessages(List<String> errorMessages) { this.errorMessages = errorMessages; }
+	public void setErrorMessages(final List<String> errorMessages) { this.errorMessages = errorMessages; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

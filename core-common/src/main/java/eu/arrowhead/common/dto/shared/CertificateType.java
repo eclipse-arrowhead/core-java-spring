@@ -25,16 +25,24 @@ public enum CertificateType {
     AH_DEVICE("device", 1),
     AH_SYSTEM("", 2),
     UNKNOWN("", 0);
+	
+	//=================================================================================================
+	// members
 
     private final String commonNamePart;
     private final int strength;
+    
+    //=================================================================================================
+	// methods
 
-    CertificateType(final String commonNamePart, final int strength) {
+    //-------------------------------------------------------------------------------------------------
+	CertificateType(final String commonNamePart, final int strength) {
         this.commonNamePart = commonNamePart;
         this.strength = strength;
     }
 
-    public static CertificateType getTypeFromCN(final String commonName) {
+	//-------------------------------------------------------------------------------------------------
+	public static CertificateType getTypeFromCN(final String commonName) {
         if (Objects.isNull(commonName)) { return CertificateType.UNKNOWN; }
 
         final String[] split = commonName.split("\\.");
@@ -47,25 +55,31 @@ public enum CertificateType {
             return CertificateType.getTypeFromCNPart(split[0]);
         }
     }
+	
+	//-------------------------------------------------------------------------------------------------
+	public boolean hasMinimumStrength(final CertificateType minimumStrengthType) {
+		Assert.notNull(minimumStrengthType, "CertificateType must not be null");
+		return this.strength >= minimumStrengthType.strength;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public String appendTypeToCN(final String commonName) {
+		/* if (Utilities.notEmpty(commonNamePart)) {
+            return commonName + '.' + commonNamePart;
+        } else { return commonName; } */
+		return commonName;
+	}
+	
+	//=================================================================================================
+	// assistant methods
 
-    private static CertificateType getTypeFromCNPart(final String commonNamePart) {
-        for (CertificateType type : values()) {
+    //-------------------------------------------------------------------------------------------------
+	private static CertificateType getTypeFromCNPart(final String commonNamePart) {
+        for (final CertificateType type : values()) {
             if (type.commonNamePart.equalsIgnoreCase(commonNamePart)) {
                 return type;
             }
         }
         return UNKNOWN;
-    }
-
-    public boolean hasMinimumStrength(final CertificateType minimumStrengthType) {
-        Assert.notNull(minimumStrengthType, "CertificateType must not be null");
-        return this.strength >= minimumStrengthType.strength;
-    }
-
-    public String appendTypeToCN(final String commonName) {
-        /* if (Utilities.notEmpty(commonNamePart)) {
-            return commonName + '.' + commonNamePart;
-        } else { return commonName; } */
-        return commonName;
     }
 }

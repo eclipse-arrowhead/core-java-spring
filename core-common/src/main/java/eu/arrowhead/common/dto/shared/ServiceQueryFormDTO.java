@@ -22,6 +22,9 @@ import java.util.Map;
 
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class ServiceQueryFormDTO implements Serializable {
 	
 	//=================================================================================================
@@ -64,6 +67,16 @@ public class ServiceQueryFormDTO implements Serializable {
 	public void setMinVersionRequirement(final Integer minVersionRequirement) { this.minVersionRequirement = minVersionRequirement; }
 	public void setMaxVersionRequirement(final Integer maxVersionRequirement) { this.maxVersionRequirement = maxVersionRequirement; }
 	public void setPingProviders(final boolean pingProviders) { this.pingProviders = pingProviders; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 	
 	//=================================================================================================
 	// assistant methods

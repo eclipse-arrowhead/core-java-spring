@@ -26,6 +26,7 @@ public class StepGraphUtils {
 		return circleDetector.hasCircle(graph);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	public StepGraph normalizeStepGraph(final StepGraph graph) {
 		Assert.notNull(normalizer, "Normalizer is not implemented.");
 		

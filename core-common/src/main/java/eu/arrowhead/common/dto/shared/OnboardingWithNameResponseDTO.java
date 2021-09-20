@@ -16,14 +16,20 @@ package eu.arrowhead.common.dto.shared;
 
 public class OnboardingWithNameResponseDTO extends OnboardingResponseDTO {
 
-    //=================================================================================================
+
+	//=================================================================================================
     // members
-    private static final long serialVersionUID = 1L;
+	
+	private static final long serialVersionUID = 6552636286038615996L;
 
-    public OnboardingWithNameResponseDTO() {
-    }
+    //=================================================================================================
+	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	public OnboardingWithNameResponseDTO() {}
 
-    public OnboardingWithNameResponseDTO(final ServiceEndpoint deviceRegistry, final ServiceEndpoint systemRegistry,
+    //-------------------------------------------------------------------------------------------------
+	public OnboardingWithNameResponseDTO(final ServiceEndpoint deviceRegistry, final ServiceEndpoint systemRegistry,
                                          final ServiceEndpoint serviceRegistry, final ServiceEndpoint orchestrationService,
                                          final CertificateCreationResponseDTO onboardingCertificate, final String intermediateCertificate,
                                          final String rootCertificate) {

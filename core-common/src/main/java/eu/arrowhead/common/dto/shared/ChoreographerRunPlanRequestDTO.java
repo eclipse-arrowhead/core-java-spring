@@ -16,6 +16,9 @@ package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import eu.arrowhead.common.CommonConstants;
 
 public class ChoreographerRunPlanRequestDTO implements Serializable {
@@ -44,9 +47,19 @@ public class ChoreographerRunPlanRequestDTO implements Serializable {
 	public String getNotifyPath() { return notifyPath; }
 
 	//-------------------------------------------------------------------------------------------------
-    public void setPlanId(Long planId) { this.planId = planId; }
-    public void setNotifyProtocol(String notifyProtocol) { this.notifyProtocol = notifyProtocol; }
-    public void setNotifyAddress(String notifyAddress) { this.notifyAddress = notifyAddress; }
-    public void setNotifyPort(int notifyPort) { this.notifyPort = notifyPort; }
-    public void setNotifyPath(String notifyPath) { this.notifyPath = notifyPath; }
+    public void setPlanId(final Long planId) { this.planId = planId; }
+    public void setNotifyProtocol(final String notifyProtocol) { this.notifyProtocol = notifyProtocol; }
+    public void setNotifyAddress(final String notifyAddress) { this.notifyAddress = notifyAddress; }
+    public void setNotifyPort(final int notifyPort) { this.notifyPort = notifyPort; }
+    public void setNotifyPath(final String notifyPath) { this.notifyPath = notifyPath; }
+    
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

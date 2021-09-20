@@ -20,6 +20,8 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 
@@ -55,18 +57,28 @@ public class ServicesGroupedBySystemsResponseDTO implements Serializable {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public long getSystemId() {return systemId;}
-	public String getSystemName() {return systemName;}
-	public String getAddress() {return address;}
-	public int getPort() {return port;}
+	public long getSystemId() { return systemId; }
+	public String getSystemName() { return systemName; }
+	public String getAddress() { return address; }
+	public int getPort() { return port; }
 	public Map<String,String> getMetadata() { return metadata; }
-	public List<ServiceRegistryResponseDTO> getServices() {return services;}
+	public List<ServiceRegistryResponseDTO> getServices() { return services; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setSystemId(final long id) {this.systemId = id;}
-	public void setSystemName(final String systemName) {this.systemName = systemName;}
-	public void setAddress(final String address) {this.address = address;}
-	public void setPort(final int port) {this.port = port;}
-	public void setMetadata(Map<String,String> metadata) { this.metadata = metadata; }	
-	public void setServices(final List<ServiceRegistryResponseDTO> services) {this.services = services;}
+	public void setSystemId(final long id) { this.systemId = id; }
+	public void setSystemName(final String systemName) { this.systemName = systemName; }
+	public void setAddress(final String address) { this.address = address; }
+	public void setPort(final int port) { this.port = port; }
+	public void setMetadata(final Map<String,String> metadata) { this.metadata = metadata; }	
+	public void setServices(final List<ServiceRegistryResponseDTO> services) { this.services = services; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

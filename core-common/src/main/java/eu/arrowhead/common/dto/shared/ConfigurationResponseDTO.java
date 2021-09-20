@@ -15,10 +15,11 @@
 package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
-import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @JsonInclude(Include.NON_NULL)
 public class ConfigurationResponseDTO implements Serializable {
@@ -40,18 +41,17 @@ public class ConfigurationResponseDTO implements Serializable {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------	
-    public ConfigurationResponseDTO() {
-    }
+    public ConfigurationResponseDTO() {}
 
     //-------------------------------------------------------------------------------------------------
-    public ConfigurationResponseDTO(final long id, final String systemName, final String fileName, final String contentType, final String data, final String createdAt, final String upDatedAt) {
+    public ConfigurationResponseDTO(final long id, final String systemName, final String fileName, final String contentType, final String data, final String createdAt, final String updatedAt) {
         this.id = id;
         this.systemName = systemName;
         this.fileName = fileName;
         this.contentType = contentType;
         this.data = data;
-	this.createdAt = createdAt;
-	this.updatedAt = upDatedAt;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
     
     //-------------------------------------------------------------------------------------------------
@@ -72,17 +72,13 @@ public class ConfigurationResponseDTO implements Serializable {
     public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
     public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
     
-    //-------------------------------------------------------------------------------------------------
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", ConfigurationResponseDTO.class.getSimpleName() + "[", "]")
-            .add("id=" + id)
-            .add("systemName=" + systemName)
-            .add("fileName=" + fileName)
-            .add("contentType=" + contentType)
-            .add("data=" + data)
-            .add("createdAt='" + createdAt + "'")
-            .add("updatedAt='" + updatedAt + "'")
-            .toString();
-    }
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

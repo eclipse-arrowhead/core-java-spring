@@ -17,6 +17,9 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class IdIdListDTO implements Serializable {
 	
 	//=================================================================================================
@@ -45,5 +48,15 @@ public class IdIdListDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final Long id) { this.id = id; }
-	public void setIdList(final List<Long> idList) { this.idList = idList; }	
+	public void setIdList(final List<Long> idList) { this.idList = idList; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

@@ -17,6 +17,9 @@ package eu.arrowhead.common.dto.shared;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class ChoreographerPlanRequestDTO implements Serializable {
 	
 	//=================================================================================================
@@ -35,7 +38,7 @@ public class ChoreographerPlanRequestDTO implements Serializable {
 	public ChoreographerPlanRequestDTO() {}
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerPlanRequestDTO(String name, String firstActionName, List<ChoreographerActionRequestDTO> actions) {
+    public ChoreographerPlanRequestDTO(final String name, final String firstActionName, final List<ChoreographerActionRequestDTO> actions) {
         this.name = name;
         this.firstActionName = firstActionName;
         this.actions = actions;
@@ -49,5 +52,15 @@ public class ChoreographerPlanRequestDTO implements Serializable {
     //-------------------------------------------------------------------------------------------------
 	public void setName(final String name) { this.name = name; }
     public void setActions(final List<ChoreographerActionRequestDTO> actions) { this.actions = actions; }
-    public void setFirstActionName(String firstActionName) { this.firstActionName = firstActionName; }
+    public void setFirstActionName(final String firstActionName) { this.firstActionName = firstActionName; }
+    
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

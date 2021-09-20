@@ -41,7 +41,6 @@ public class ChoreographerSessionErrorHandler implements ErrorHandler {
 	public void handleError(final Throwable t) {
 		logger.debug("handleError started...");
 		
-		//TODO: log cause message too
 		logger.warn("Exception occurs during executing a plan - " + t.getClass().getSimpleName() + ": " + getMessage(t));
 		logger.debug(t);
 		

@@ -1,6 +1,23 @@
+/********************************************************************************
+ * Copyright (c) 2021 AITIA
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   AITIA - implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.common.dto.internal;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorResponseDTO;
 
 import java.io.Serializable;
@@ -21,11 +38,10 @@ public class ChoreographerExecutorListResponseDTO implements Serializable {
     // methods
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerExecutorListResponseDTO() {
-    }
+    public ChoreographerExecutorListResponseDTO() {}
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerExecutorListResponseDTO(List<ChoreographerExecutorResponseDTO> data, long count) {
+    public ChoreographerExecutorListResponseDTO(final List<ChoreographerExecutorResponseDTO> data, final long count) {
         this.data = data;
         this.count = count;
     }
@@ -35,6 +51,16 @@ public class ChoreographerExecutorListResponseDTO implements Serializable {
     public long getCount() { return count; }
 
     //-------------------------------------------------------------------------------------------------
-    public void setData(List<ChoreographerExecutorResponseDTO> data) { this.data = data; }
-    public void setCount(long count) { this.count = count; }
+    public void setData(final List<ChoreographerExecutorResponseDTO> data) { this.data = data; }
+    public void setCount(final long count) { this.count = count; }
+    
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

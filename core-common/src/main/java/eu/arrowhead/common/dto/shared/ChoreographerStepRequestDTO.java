@@ -18,6 +18,9 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class ChoreographerStepRequestDTO implements Serializable {
 	
 	//=================================================================================================
@@ -43,8 +46,18 @@ public class ChoreographerStepRequestDTO implements Serializable {
 
     //-------------------------------------------------------------------------------------------------
 	public void setName(final String name) { this.name = name; }
-	public void setStaticParameters(Map<String,String> staticParameters) { this.staticParameters = staticParameters; }
-	public void setQuantity(Integer quantity) { this.quantity = quantity; }
-	public void setServiceRequirement(ServiceQueryFormDTO serviceRequirement) { this.serviceRequirement = serviceRequirement; }
+	public void setStaticParameters(final Map<String,String> staticParameters) { this.staticParameters = staticParameters; }
+	public void setQuantity(final Integer quantity) { this.quantity = quantity; }
+	public void setServiceRequirement(final ServiceQueryFormDTO serviceRequirement) { this.serviceRequirement = serviceRequirement; }
     public void setNextStepNames(final List<String> nextStepNames) { this.nextStepNames = nextStepNames; }
+    
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

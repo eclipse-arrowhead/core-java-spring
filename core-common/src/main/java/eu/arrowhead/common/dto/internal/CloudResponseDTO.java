@@ -17,6 +17,9 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.util.Objects;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class CloudResponseDTO implements Serializable {
 
 	//=================================================================================================
@@ -100,5 +103,15 @@ public class CloudResponseDTO implements Serializable {
 		final CloudResponseDTO other = (CloudResponseDTO) obj;
 		
 		return id == other.id;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
 	}
 }
