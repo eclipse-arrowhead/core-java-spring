@@ -3,6 +3,7 @@ package eu.arrowhead.core.choreographer.database.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -467,7 +468,7 @@ public class ChoreographerExecutorDBServiceTest {
 		
 		try {
 			dbService.getExecutorOptionalByIdResponse(1L);			
-		} catch (ArrowheadException ex) {
+		} catch (final ArrowheadException ex) {
 			verify(executorServiceDefinitionRepository, never()).findAllByExecutor(any());
 			throw ex;
 		}	
@@ -558,5 +559,230 @@ public class ChoreographerExecutorDBServiceTest {
 		final ChoreographerExecutor executor = new ChoreographerExecutor();
 		executor.setId(1L);
 		when(executorRepository.findById(eq(executor.getId()))).thenReturn(Optional.of(executor));
+		when(sessionStepRepository.existsByExecutorAndStatusIn(any(), any())).thenReturn(false);
+		
+		dbService.deleteExecutorById(executor.getId());
+		
+		verify(executorRepository, times(1)).findById(executor.getId());
+		verify(sessionStepRepository, times(1)).existsByExecutorAndStatusIn(eq(executor), any());
+		verify(executorRepository, times(1)).deleteById(executor.getId());
+		verify(executorRepository, times(1)).flush();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDeleteExecutorById_WorkingExecutor() {
+		final ChoreographerExecutor executor = new ChoreographerExecutor();
+		executor.setId(1L);
+		when(executorRepository.findById(eq(executor.getId()))).thenReturn(Optional.of(executor));
+		when(sessionStepRepository.existsByExecutorAndStatusIn(any(), any())).thenReturn(true);
+		
+		try {
+			dbService.deleteExecutorById(executor.getId());			
+		} catch (final InvalidParameterException ex) {
+			verify(executorRepository, times(1)).findById(executor.getId());
+			verify(sessionStepRepository, times(1)).existsByExecutorAndStatusIn(eq(executor), any());
+			verify(executorRepository, never()).deleteById(anyLong());
+			verify(executorRepository, never()).flush();
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testDeleteExecutorById_DatabaseException() {
+		final ChoreographerExecutor executor = new ChoreographerExecutor();
+		executor.setId(1L);
+		when(executorRepository.findById(eq(executor.getId()))).thenThrow(new HibernateException("test"));
+		
+		try {
+			dbService.deleteExecutorById(executor.getId());			
+		} catch (final ArrowheadException ex) {
+			verify(executorRepository, times(1)).findById(executor.getId());
+			verify(sessionStepRepository, never()).existsByExecutorAndStatusIn(any(), any());
+			verify(executorRepository, never()).deleteById(anyLong());
+			verify(executorRepository, never()).flush();
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDeleteExecutorByAddressAndPortAndBaseUri() {
+		final ChoreographerExecutor executor = new ChoreographerExecutor();
+		executor.setId(1L);
+		executor.setAddress("address");
+		executor.setPort(1000);
+		executor.setBaseUri("baseUri");
+		when(executorRepository.findByAddressAndPortAndBaseUri(anyString(), anyInt(), anyString())).thenReturn(Optional.of(executor));
+		when(executorRepository.findById(any())).thenReturn(Optional.of(executor));
+		when(sessionStepRepository.existsByExecutorAndStatusIn(any(), any())).thenReturn(false);
+		
+		dbService.deleteExecutorByAddressAndPortAndBaseUri(executor.getAddress(), executor.getPort(), executor.getBaseUri());
+		
+		verify(executorRepository, times(1)).findByAddressAndPortAndBaseUri(eq(executor.getAddress()), eq(executor.getPort()), eq(executor.getBaseUri()));
+		verify(executorRepository, times(1)).findById(executor.getId());
+		verify(sessionStepRepository, times(1)).existsByExecutorAndStatusIn(eq(executor), any());
+		verify(executorRepository, times(1)).deleteById(executor.getId());
+		verify(executorRepository, times(1)).flush();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDeleteExecutorByAddressAndPortAndBaseUri_WorkingExecutor() {
+		final ChoreographerExecutor executor = new ChoreographerExecutor();
+		executor.setId(1L);
+		executor.setAddress("address");
+		executor.setPort(1000);
+		executor.setBaseUri("baseUri");
+		when(executorRepository.findByAddressAndPortAndBaseUri(anyString(), anyInt(), anyString())).thenReturn(Optional.of(executor));
+		when(executorRepository.findById(any())).thenReturn(Optional.of(executor));
+		when(sessionStepRepository.existsByExecutorAndStatusIn(any(), any())).thenReturn(true);
+		
+		try {
+			dbService.deleteExecutorByAddressAndPortAndBaseUri(executor.getAddress(), executor.getPort(), executor.getBaseUri());	
+			
+		} catch (final InvalidParameterException ex) {
+			verify(executorRepository, times(1)).findByAddressAndPortAndBaseUri(eq(executor.getAddress()), eq(executor.getPort()), eq(executor.getBaseUri()));
+			verify(executorRepository, times(1)).findById(eq(executor.getId()));
+			verify(sessionStepRepository, times(1)).existsByExecutorAndStatusIn(eq(executor), any());
+			verify(executorRepository, never()).deleteById(anyLong());
+			verify(executorRepository, never()).flush();
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testDeleteExecutorByAddressAndPortAndBaseUri_DatabaseException() {
+		final ChoreographerExecutor executor = new ChoreographerExecutor();
+		executor.setId(1L);
+		executor.setAddress("address");
+		executor.setPort(1000);
+		executor.setBaseUri("baseUri");
+		when(executorRepository.findByAddressAndPortAndBaseUri(anyString(), anyInt(), anyString())).thenThrow(new HibernateException("test"));
+		
+		try {
+			dbService.deleteExecutorByAddressAndPortAndBaseUri(executor.getAddress(), executor.getPort(), executor.getBaseUri());	
+			
+		} catch (final ArrowheadException ex) {
+			verify(executorRepository, times(1)).findByAddressAndPortAndBaseUri(eq(executor.getAddress()), eq(executor.getPort()), eq(executor.getBaseUri()));
+			verify(executorRepository, never()).findById(anyLong());
+			verify(sessionStepRepository, never()).existsByExecutorAndStatusIn(any(), any());
+			verify(executorRepository, never()).deleteById(anyLong());
+			verify(executorRepository, never()).flush();
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testLockExecutorById() {
+		final ChoreographerExecutor executor = new ChoreographerExecutor();
+		executor.setId(1L);
+		when(executorRepository.findById(any())).thenReturn(Optional.of(executor));
+		final ArgumentCaptor<ChoreographerExecutor> captor = ArgumentCaptor.forClass(ChoreographerExecutor.class);
+		when(executorRepository.saveAndFlush(captor.capture())).thenReturn(executor);
+		
+		final boolean result = dbService.lockExecutorById(executor.getId());
+		
+		verify(executorRepository, times(1)).findById(eq(executor.getId()));
+		verify(executorRepository, times(1)).saveAndFlush(eq(executor));
+		
+		assertTrue(captor.getValue().isLocked());
+		assertTrue(result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testLockExecutorById_ExecutorNotFound() {
+		final ChoreographerExecutor executor = new ChoreographerExecutor();
+		executor.setId(1L);
+		when(executorRepository.findById(any())).thenReturn(Optional.empty());
+		
+		final boolean result = dbService.lockExecutorById(executor.getId());
+		
+		verify(executorRepository, times(1)).findById(eq(executor.getId()));
+		verify(executorRepository, never()).saveAndFlush(any());
+		
+		assertFalse(result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testLockExecutorById_DatabaseException() {
+		final ChoreographerExecutor executor = new ChoreographerExecutor();
+		executor.setId(1L);
+		when(executorRepository.findById(any())).thenThrow(new HibernateException("test"));
+		
+		try {
+			dbService.lockExecutorById(executor.getId());		
+			
+		} catch (final ArrowheadException ex) {
+			verify(executorRepository, times(1)).findById(eq(executor.getId()));
+			verify(executorRepository, never()).saveAndFlush(any());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testIsExecutorActiveById_True() {
+		final ChoreographerExecutor executor = new ChoreographerExecutor();
+		executor.setId(1L);
+		when(executorRepository.findById(any())).thenReturn(Optional.of(executor));
+		when(sessionStepRepository.existsByExecutorAndStatusIn(any(), any())).thenReturn(true);
+		
+		final boolean result = dbService.isExecutorActiveById(executor.getId());
+		
+		verify(executorRepository, times(1)).findById(eq(executor.getId()));
+		verify(sessionStepRepository, times(1)).existsByExecutorAndStatusIn(eq(executor), any());
+		assertTrue(result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testIsExecutorActiveById_False1() {
+		final ChoreographerExecutor executor = new ChoreographerExecutor();
+		executor.setId(1L);
+		when(executorRepository.findById(any())).thenReturn(Optional.of(executor));
+		when(sessionStepRepository.existsByExecutorAndStatusIn(any(), any())).thenReturn(false);
+		
+		final boolean result = dbService.isExecutorActiveById(executor.getId());
+		
+		verify(executorRepository, times(1)).findById(eq(executor.getId()));
+		verify(sessionStepRepository, times(1)).existsByExecutorAndStatusIn(eq(executor), any());
+		assertFalse(result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testIsExecutorActiveById_False2() {
+		final ChoreographerExecutor executor = new ChoreographerExecutor();
+		executor.setId(1L);
+		when(executorRepository.findById(any())).thenReturn(Optional.empty());
+		
+		final boolean result = dbService.isExecutorActiveById(executor.getId());
+		
+		verify(executorRepository, times(1)).findById(eq(executor.getId()));
+		verify(sessionStepRepository, never()).existsByExecutorAndStatusIn(any(), any());
+		assertFalse(result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testIsExecutorActiveById_DatabaseException() {
+		final ChoreographerExecutor executor = new ChoreographerExecutor();
+		executor.setId(1L);
+		when(executorRepository.findById(any())).thenThrow(new HibernateException("test"));
+		
+		try {
+			dbService.isExecutorActiveById(executor.getId());
+			
+		} catch (final ArrowheadException ex) {
+			verify(executorRepository, times(1)).findById(eq(executor.getId()));
+			verify(sessionStepRepository, never()).existsByExecutorAndStatusIn(any(), any());
+			throw ex;
+		}
 	}
 }

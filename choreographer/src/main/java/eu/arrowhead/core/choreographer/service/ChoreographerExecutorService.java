@@ -168,7 +168,7 @@ public class ChoreographerExecutorService {
 
 	//-------------------------------------------------------------------------------------------------
 	private void checkAndNormalizeExecutorRequestDTO(final ChoreographerExecutorRequestDTO dto, final String origin, final HttpServletRequest servletRequest) {
-		logger.debug("checkExecutorRequestDTO started...");
+		logger.debug("checkAndNormalizeExecutorRequestDTO started...");
 
 		if (dto == null) {
 			throw new BadPayloadException("Request is null.", HttpStatus.SC_BAD_REQUEST, origin);

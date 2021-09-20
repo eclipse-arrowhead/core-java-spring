@@ -245,7 +245,7 @@ public class ChoreographerExecutorDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-    public void deleteExecutorById(final long id) { //TODO junit
+    public void deleteExecutorById(final long id) {
 		logger.debug("deleteExecutorById started...");
 		
 		try {
@@ -257,7 +257,10 @@ public class ChoreographerExecutorDBService {
 					executorRepository.deleteById(id);
 					executorRepository.flush();					
 				}
-			}			
+			}
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+			
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -266,7 +269,7 @@ public class ChoreographerExecutorDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-    public void deleteExecutorByAddressAndPortAndBaseUri(final String address, final int port, final String baseUri) { //TODO junit
+    public void deleteExecutorByAddressAndPortAndBaseUri(final String address, final int port, final String baseUri) {
 		logger.debug("deleteExecutorByAddressAndPortAndBaseUri started...");
 		Assert.isTrue(!Utilities.isEmpty(address), "address is empty");
 		
@@ -275,6 +278,10 @@ public class ChoreographerExecutorDBService {
 			if (opt.isPresent()) {
 				deleteExecutorById(opt.get().getId());
 			}
+			
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+			
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -283,7 +290,7 @@ public class ChoreographerExecutorDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-    public boolean lockExecutorById(final long id) { //TODO junit
+    public boolean lockExecutorById(final long id) {
 		logger.debug("lockExecutorById started...");
 		
 		try {
@@ -305,7 +312,7 @@ public class ChoreographerExecutorDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	public boolean isExecutorActiveById(final long id) {		
-		logger.debug("lockExecutorById started...");		
+		logger.debug("isExecutorActiveById started...");		
 		
 		try {
 			final Optional<ChoreographerExecutor> optional = executorRepository.findById(id);

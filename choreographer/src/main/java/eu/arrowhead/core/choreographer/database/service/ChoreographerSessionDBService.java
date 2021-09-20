@@ -450,7 +450,7 @@ public class ChoreographerSessionDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	public List<ChoreographerSessionStep> getAllSessionStepBySessionId(final long sessionId) {
-		logger.debug("getSessionStepById started...");
+		logger.debug("getAllSessionStepBySessionId started...");
 	
 		try {
 			final Optional<ChoreographerSession> optional = sessionRepository.findById(sessionId);
