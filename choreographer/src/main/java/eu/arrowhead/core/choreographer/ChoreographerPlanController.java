@@ -227,7 +227,7 @@ public class ChoreographerPlanController {
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response= ErrorMessageDTO.class)
     })
     @PostMapping(path = START_SESSION_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody public List<ChoreographerRunPlanResponseDTO> startPlans(@RequestBody final List<ChoreographerRunPlanRequestDTO> requests) {
+    @ResponseBody public List<ChoreographerRunPlanResponseDTO> startPlans(@RequestBody final List<ChoreographerRunPlanRequestDTO> requests) { //TODO: test this
     	logger.debug("startPlans started...");
     	
     	if (requests == null || requests.isEmpty()) {
@@ -245,7 +245,7 @@ public class ChoreographerPlanController {
         	   results.add(new ChoreographerRunPlanResponseDTO(request.getPlanId(), session.getId(), response.getNeedInterCloud()));
         	   
         	   logger.debug("Sending a message to {}.", ChoreographerService.START_SESSION_DESTINATION);
-        	   jms.convertAndSend(ChoreographerService.START_SESSION_DESTINATION, new ChoreographerStartSessionDTO(session.getId(), request.getPlanId()));
+        	   jms.convertAndSend(ChoreographerService.START_SESSION_DESTINATION, new ChoreographerStartSessionDTO(session.getId(), request.getPlanId(), request.isAllowInterCloud(), request.getChooseOptimalExecutor()));
            }
         }
            

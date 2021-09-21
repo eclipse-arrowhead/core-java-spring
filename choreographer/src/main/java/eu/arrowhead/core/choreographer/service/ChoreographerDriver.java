@@ -22,6 +22,8 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.common.dto.internal.CloudResponseDTO;
+import eu.arrowhead.common.dto.internal.GSDMultiPollResponseDTO;
 import eu.arrowhead.common.dto.internal.GSDMultiQueryFormDTO;
 import eu.arrowhead.common.dto.internal.GSDMultiQueryResultDTO;
 import eu.arrowhead.common.dto.internal.KeyValuesDTO;
@@ -93,7 +95,7 @@ public class ChoreographerDriver {
 			if (resultDTO.getServiceQueryData().isEmpty()) {
 				interCloudCandidates.add(form);
 				interCloudCandidatesOriginalIdx.add(i);
-				result.put(i, List.of());
+				result.put(i, new ArrayList<>());
 			} else {
 				result.put(i, List.of(OWN_CLOUD_MARKER));
 			}
@@ -105,7 +107,23 @@ public class ChoreographerDriver {
 				return result;
 			}
 			
-			//TODO: continue with GSD
+			final GSDMultiQueryResultDTO gsdResult = multiGlobalServiceDiscovery(new GSDMultiQueryFormDTO(interCloudCandidates, null));
+			for (final GSDMultiPollResponseDTO pollResponse : gsdResult.getResults()) {
+				final String cloudIdentifier = getCloudIdentifier(pollResponse.getProviderCloud());
+				if (!pollResponse.getProvidedServiceDefinitions().isEmpty()) {
+					for (final String serviceDef : pollResponse.getProvidedServiceDefinitions()) {
+						final int idx = findServiceDefinitionIn(interCloudCandidates, serviceDef);
+						if (idx < 0) {
+							// should never happens
+							logger.warn("Global Service Discovery returns an unwanted service: {}", serviceDef);
+							continue;
+						}
+						
+						final int originalIdx = interCloudCandidatesOriginalIdx.get(idx);
+						result.get(originalIdx).add(cloudIdentifier);
+					}
+				}
+			}
 		}
 		
 		return result;
@@ -367,4 +385,26 @@ public class ChoreographerDriver {
 		
 		return false;
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private String getCloudIdentifier(final CloudResponseDTO cloud) {
+		logger.debug("getCloudIdentifier started...");
+		
+		return cloud.getOperator() + SEPARATOR + cloud.getName();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private int findServiceDefinitionIn(final List<ServiceQueryFormDTO> forms, final String serviceDef) {
+		logger.debug("findServiceDefinitionIn started...");
+
+		for (int i = 0; i < forms.size(); ++i) {
+			final ServiceQueryFormDTO form = forms.get(i);
+			if (serviceDef.equals(form.getServiceDefinitionRequirement())) {
+				return i;
+			}
+		}
+		
+		return -1;
+	}
+
 }

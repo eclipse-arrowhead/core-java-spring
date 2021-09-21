@@ -33,14 +33,12 @@ import eu.arrowhead.common.database.entity.ChoreographerStep;
 import eu.arrowhead.common.dto.shared.ChoreographerRunPlanRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerRunPlanResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerServiceQueryFormDTO;
-import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
-import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
-import eu.arrowhead.common.dto.shared.ServiceQueryResultListDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerExecutorDBService;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerPlanDBService;
+import eu.arrowhead.core.choreographer.executor.ExecutorData;
 import eu.arrowhead.core.choreographer.executor.ExecutorSelector;
 import eu.arrowhead.core.choreographer.service.ChoreographerDriver;
 
@@ -212,7 +210,6 @@ public class ChoreographerPlanExecutionChecker {
 					needInterCloud = true;
 				}
 			}
-			
 		} catch (final Exception ex) {
 			errors.add(CONNECTION_PROBLEM_MSG_PREFIX + ex.getMessage());
 		}
@@ -221,15 +218,20 @@ public class ChoreographerPlanExecutionChecker {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	// TODO: continue (somehow we have to know if any of the selected executor is local only or not)
 	private boolean checkExecutorDependencies(final List<ChoreographerStep> steps, final boolean allowInterCloud, final List<String> errors) {
 		logger.debug("checkExecutorDependencies started...");
 		
+		boolean needIntercloud = false;
+		
 		for (final ChoreographerStep step : steps) {
-			final ChoreographerExecutor selectedExecutor = executorSelector.select(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion(), null);
+			final ExecutorData selectedExecutor = executorSelector.select(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion(), null, allowInterCloud);
 			if (selectedExecutor == null) {
 				errors.add(EXECUTOR_NOT_FOUND_FOR_MSG_PREFIX + createFullyQualifiedStepName(step));
+			} else if (selectedExecutor.getUseOtherClouds()) {
+				needIntercloud = true;
 			}
 		}
+		
+		return needIntercloud;
 	}
 }

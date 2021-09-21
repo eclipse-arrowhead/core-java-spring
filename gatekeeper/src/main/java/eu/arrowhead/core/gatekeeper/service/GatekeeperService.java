@@ -225,11 +225,9 @@ public class GatekeeperService {
 		final List<ErrorWrapperDTO> gsdPollAnswers = gatekeeperDriver.sendMultiGSDPollRequest(cloudsToContact, gsdPollRequestDTO);
 		
 		final List<GSDMultiPollResponseDTO> successfulResponses = new ArrayList<>();
-		final List<ErrorMessageDTO> errorMessageResponses = new ArrayList<>();
 		int unsuccessfulRequests = 0;
 		for (final ErrorWrapperDTO gsdAnswer : gsdPollAnswers) {
 			if (gsdAnswer.isError()) {		
-				errorMessageResponses.add((ErrorMessageDTO) gsdAnswer);
 				unsuccessfulRequests++;
 			} else {
 				final GSDMultiPollResponseDTO gsdResponse = (GSDMultiPollResponseDTO) gsdAnswer;
@@ -243,10 +241,6 @@ public class GatekeeperService {
 					successfulResponses.add(gsdResponse);		
 				}
 			}						
-		}
-		
-		if (successfulResponses.isEmpty() && !errorMessageResponses.isEmpty()) {
-			Utilities.createExceptionFromErrorMessageDTO(errorMessageResponses.get(0));
 		}
 		
 		return new GSDMultiQueryResultDTO(successfulResponses, unsuccessfulRequests);

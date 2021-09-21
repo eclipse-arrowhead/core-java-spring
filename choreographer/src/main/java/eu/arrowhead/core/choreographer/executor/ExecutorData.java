@@ -29,16 +29,19 @@ public class ExecutorData {
 	private final ChoreographerExecutor executor;
 	private final SystemRequestDTO executorSystem;
 	private final List<ChoreographerServiceQueryFormDTO> dependencyForms = new ArrayList<>();
+	private final boolean useOtherClouds;
 	
 	//-------------------------------------------------------------------------------------------------
-	public ExecutorData(final ChoreographerExecutor executor, final SystemRequestDTO executorSystem, final List<ChoreographerServiceQueryFormDTO> dependencyForms) {
+	public ExecutorData(final ChoreographerExecutor executor, final SystemRequestDTO executorSystem, final List<ChoreographerServiceQueryFormDTO> dependencyForms, final boolean useOtherClouds) {
 		this.executor = executor;
 		this.executorSystem = executorSystem;
 		this.dependencyForms.addAll(dependencyForms);
+		this.useOtherClouds = useOtherClouds;
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	public ChoreographerExecutor getExecutor() { return executor; }
 	public SystemRequestDTO getExecutorSystem() { return executorSystem; }
 	public List<ChoreographerServiceQueryFormDTO> getDependencyForms() { return dependencyForms; }
+	public boolean getUseOtherClouds() { return useOtherClouds; }
 }

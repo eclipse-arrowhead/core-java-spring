@@ -90,9 +90,11 @@ public class ChoreographerService {
 
     //-------------------------------------------------------------------------------------------------
     @JmsListener(destination = START_SESSION_DESTINATION)
-    public void receiveStartSessionMessage(final ChoreographerStartSessionDTO startSessionDTO) {
+    public void receiveStartSessionMessage(final ChoreographerStartSessionDTO startSessionDTO) {  //TODO: test this
     	logger.debug("receiveStartSessionMessage started...");
     	Assert.notNull(startSessionDTO, "Payload is null.");
+    	
+    	//TODO: continue
 
         final long sessionId = startSessionDTO.getSessionId();
 
