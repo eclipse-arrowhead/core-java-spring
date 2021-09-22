@@ -93,8 +93,6 @@ public class ChoreographerService {
     public void receiveStartSessionMessage(final ChoreographerStartSessionDTO startSessionDTO) {  //TODO: test this
     	logger.debug("receiveStartSessionMessage started...");
     	Assert.notNull(startSessionDTO, "Payload is null.");
-    	
-    	//TODO: continue
 
         final long sessionId = startSessionDTO.getSessionId();
 
@@ -104,7 +102,7 @@ public class ChoreographerService {
 	        final ChoreographerSession session = sessionDBService.changeSessionStatus(sessionId, ChoreographerSessionStatus.RUNNING, null);
 	        sendNotification(session, START_SESSION_MSG, null);
 	        
-	        selectExecutorsForPlan(sessionId, plan);
+	        selectExecutorsForPlan(sessionId, plan, startSessionDTO.isAllowInterCloud(), startSessionDTO.getChooseOptimalExecutor());
 	        
 	        final ChoreographerAction firstAction = plan.getFirstAction();
 	        executeAction(sessionId, firstAction);
@@ -191,17 +189,17 @@ public class ChoreographerService {
 	}
     
 	//-------------------------------------------------------------------------------------------------
-	private void selectExecutorsForPlan(final long sessionId, final ChoreographerPlan plan) {
+	private void selectExecutorsForPlan(final long sessionId, final ChoreographerPlan plan, final boolean allowInterCloud, final boolean chooseOptimalExecutor) {
 		logger.debug("selectExecutorsForPlan started...");
 		
 		final List<ChoreographerStep> steps = planDBService.collectStepsFromPlan(plan);
-		final SessionExecutorCache cache = new SessionExecutorCache();
+		final SessionExecutorCache cache = new SessionExecutorCache(allowInterCloud, chooseOptimalExecutor);
 		sessionDataStorage.put(sessionId, cache);
 		
 		for (final ChoreographerStep step : steps) {
 			ExecutorData executorData = cache.get(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion());
 			if (executorData == null) {
-				executorData = executorSelector.selectAndInit(sessionId, step, cache.getExclusions(), true);
+				executorData = executorSelector.selectAndInit(sessionId, step, cache.getExclusions(), allowInterCloud, chooseOptimalExecutor, true);
 				if (executorData == null) { // means we can't execute at least one of the steps currently 
 					throw new ChoreographerSessionException(sessionId, "Can't find properly working executor for step: " + createFullyQualifiedStepName(step));
 				}
@@ -245,13 +243,17 @@ public class ChoreographerService {
 		
 		OrchestrationResponseDTO mainOrchestrationResponseDTO = null;
 		try {
-			mainOrchestrationResponseDTO = driver.queryOrchestrator(createOrchestrationFormRequestFromServiceQueryForm(executorData.getExecutorSystem(), Utilities.fromJson(step.getSrTemplate(), ChoreographerServiceQueryFormDTO.class)));
+			final ChoreographerServiceQueryFormDTO form = Utilities.fromJson(step.getSrTemplate(), ChoreographerServiceQueryFormDTO.class);
+			mainOrchestrationResponseDTO = driver.queryOrchestrator(createOrchestrationFormRequestFromServiceQueryForm(executorData.getExecutorSystem(), form, cache.isAllowInterCloud() && !form.isLocalCloudOnly()));
 			if (mainOrchestrationResponseDTO.getResponse().isEmpty()) { // no providers for the step
+				//TODO: is there a way to cancel orchestration (gateway tunnel)?
 				throw new ChoreographerSessionException(sessionId, sessionStep.getId(), "No providers found for step: " + fullStepName);
 			}
 		} catch (final ChoreographerSessionException ex) {
 			throw ex;
 		} catch (final Exception ex) { // problem during orchestration
+			//TODO: is there a way to cancel orchestration (gateway tunnel)?
+
 			throw new ChoreographerSessionException(sessionId, sessionStep.getId(), "Problem occured while orchestration for step " + fullStepName, ex);
 		}		
 		
@@ -263,6 +265,7 @@ public class ChoreographerService {
 																								  Utilities.text2Map(step.getStaticParameters()));
 		
 		driver.startExecutor(executor.getAddress(), executor.getPort(), executor.getBaseUri(), payload);
+		//TODO: is there a way to cancel orchestration (gateway tunnel)? if start executor failed
     }
     
     //-------------------------------------------------------------------------------------------------
@@ -280,13 +283,14 @@ public class ChoreographerService {
     		result.clear();
     		try {
     			for (final ChoreographerServiceQueryFormDTO form : executorData.getDependencyForms()) {
-					final OrchestrationFormRequestDTO orchestrationForm = createOrchestrationFormRequestFromServiceQueryForm(executorData.getExecutorSystem(), form);
+					final OrchestrationFormRequestDTO orchestrationForm = createOrchestrationFormRequestFromServiceQueryForm(executorData.getExecutorSystem(), form, cache.isAllowInterCloud() && !form.isLocalCloudOnly());
 					final OrchestrationResponseDTO response = driver.queryOrchestrator(orchestrationForm);
 					if (response.getResponse().isEmpty()) {
 						// no provider for a dependency
 						
 		        		cache.remove(serviceDefinition, minVersion, maxVersion);
 		        		cache.getExclusions().add(executorData.getExecutor().getId());
+		        		//TODO: is there a way to cancel orchestration (gateway tunnel)?
 		        		break;
 					}
 					result.add(response.getResponse().get(0));
@@ -301,9 +305,10 @@ public class ChoreographerService {
         		
         		cache.remove(serviceDefinition, minVersion, maxVersion);
         		cache.getExclusions().add(executorData.getExecutor().getId());
+        		//TODO: is there a way to cancel orchestration (gateway tunnel)?
     		}
     		
-    		executorData = executorSelector.selectAndInit(sessionStep.getSession().getId(), step, cache.getExclusions(), false);
+    		executorData = executorSelector.selectAndInit(sessionStep.getSession().getId(), step, cache.getExclusions(), cache.isAllowInterCloud(), cache.getChooseOptimalExecutor(), false);
     		if (executorData != null) {
     			cache.put(serviceDefinition, minVersion, maxVersion, executorData);
     			sessionDBService.changeSessionStepExecutor(sessionStep.getId(), executorData.getExecutor().getId());
@@ -314,7 +319,7 @@ public class ChoreographerService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private OrchestrationFormRequestDTO createOrchestrationFormRequestFromServiceQueryForm(final SystemRequestDTO executorSystem, final ChoreographerServiceQueryFormDTO form) {
+	private OrchestrationFormRequestDTO createOrchestrationFormRequestFromServiceQueryForm(final SystemRequestDTO executorSystem, final ChoreographerServiceQueryFormDTO form, final boolean allowInterCloud) {
     	logger.debug("createOrchestrationFormRequestFromServiceQueryForm started...");
 
 	    final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO();
@@ -324,6 +329,7 @@ public class ChoreographerService {
 	    final OrchestrationFlags orchestrationFlags = orchestrationForm.getOrchestrationFlags();
 	    orchestrationFlags.put(OrchestrationFlags.Flag.MATCHMAKING, true);
 	    orchestrationFlags.put(OrchestrationFlags.Flag.OVERRIDE_STORE, true);
+    	orchestrationFlags.put(OrchestrationFlags.Flag.ENABLE_INTER_CLOUD, allowInterCloud);
 	
 	    return orchestrationForm;
 	}
@@ -358,7 +364,7 @@ public class ChoreographerService {
 			cache.remove(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion());
 			cache.getExclusions().add(sessionStep.getExecutor().getId());
 			
-			final ExecutorData executorData = executorSelector.selectAndInit(payload.getSessionId(), step, cache.getExclusions(), false);
+			final ExecutorData executorData = executorSelector.selectAndInit(payload.getSessionId(), step, cache.getExclusions(), cache.isAllowInterCloud(), cache.getChooseOptimalExecutor(), false);
 			if (executorData != null) {
 				cache.put(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion(), executorData);
 				sessionDBService.changeSessionStepExecutor(sessionStep.getId(), executorData.getExecutor().getId());

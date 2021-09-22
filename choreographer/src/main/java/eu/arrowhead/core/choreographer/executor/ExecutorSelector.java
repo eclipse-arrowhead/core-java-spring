@@ -64,17 +64,17 @@ public class ExecutorSelector { //TODO: test this class
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public ExecutorData select(final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final Set<Long> exclusions, final boolean allowIntercloud) {
-		return selectAndInit(null, null, serviceDefinition, minVersion, maxVersion, exclusions, allowIntercloud, false, false);
+	public ExecutorData select(final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final Set<Long> exclusions, final boolean allowInterCloud) {
+		return selectAndInit(null, null, serviceDefinition, minVersion, maxVersion, exclusions, allowInterCloud, false, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ExecutorData selectAndInit(final long sessionId, final ChoreographerStep step, final Set<Long> exclusions, final boolean allowIntercloud, final boolean chooseOptimal, final boolean init) {
-		return selectAndInit(sessionId, step.getId(), step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion(), exclusions, allowIntercloud, chooseOptimal, init);
+	public ExecutorData selectAndInit(final long sessionId, final ChoreographerStep step, final Set<Long> exclusions, final boolean allowInterCloud, final boolean chooseOptimal, final boolean init) {
+		return selectAndInit(sessionId, step.getId(), step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion(), exclusions, allowInterCloud, chooseOptimal, init);
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public ExecutorData selectAndInit(final Long sessionId, final Long stepId, final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final Set<Long> exclusions, final boolean allowIntercloud, final boolean chooseOptimal,
+	public ExecutorData selectAndInit(final Long sessionId, final Long stepId, final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final Set<Long> exclusions, final boolean allowInterCloud, final boolean chooseOptimal,
 									  final boolean init) { 
 		// exclusions: when a ChoreographerSessionStep failed due to executor issue, then selection can be repeated but without that executor(s)
 		logger.debug("selectAndInit started...");
@@ -97,7 +97,7 @@ public class ExecutorSelector { //TODO: test this class
 		potentials = filterOutExecutorsWithoutServiceInfos(potentials, executorServiceInfos);
 		potentials = prioritizationStrategy.prioritize(potentials, executorServiceInfos);
 		
-		return selectVerifyAndInitFirstAvailable(sessionId, stepId, potentials, executorServiceInfos, allowIntercloud, chooseOptimal, init);
+		return selectVerifyAndInitFirstAvailable(sessionId, stepId, potentials, executorServiceInfos, allowInterCloud, chooseOptimal, init);
 	}
 	
 	//=================================================================================================
@@ -134,6 +134,7 @@ public class ExecutorSelector { //TODO: test this class
 				logger.debug(ex.getMessage());
 			}
 		}
+		
 		return collected;
 	}
 	
@@ -153,7 +154,7 @@ public class ExecutorSelector { //TODO: test this class
 	
 	//-------------------------------------------------------------------------------------------------
 	private ExecutorData selectVerifyAndInitFirstAvailable(final Long sessionId, final Long stepId, final List<ChoreographerExecutor> potentials, final Map<Long,ChoreographerExecutorServiceInfoResponseDTO> executorServiceInfos,
-														   final boolean allowIntercloud, final boolean chooseOptimal, final boolean init) {
+														   final boolean allowInterCloud, final boolean chooseOptimal, final boolean init) {
 		logger.debug("selectVerifyAndInitFirstAvailable started...");
 		
 		if (potentials.isEmpty()) {
@@ -174,7 +175,7 @@ public class ExecutorSelector { //TODO: test this class
 						  																															executor.getAddress(),
 						  																															executor.getPort()));			
 				
-				final Map<Integer,List<String>> reliedServicesResponse = verifyReliedServices(executorServiceInfos.get(executor.getId()), allowIntercloud);
+				final Map<Integer,List<String>> reliedServicesResponse = verifyReliedServices(executorServiceInfos.get(executor.getId()), allowInterCloud);
 				if (reliedServicesResponse != null) { // means executor is verified
 					final boolean useOtherClouds = isExecutorUseOtherClouds(reliedServicesResponse);
 					final ExecutorData executorData = new ExecutorData(executor, executorSystem, executorServiceInfos.get(executor.getId()).getDependencies(), useOtherClouds);
@@ -204,12 +205,18 @@ public class ExecutorSelector { //TODO: test this class
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Map<Integer,List<String>> verifyReliedServices(final ChoreographerExecutorServiceInfoResponseDTO serviceInfo, final boolean allowIntercloud) {
+	private Map<Integer,List<String>> verifyReliedServices(final ChoreographerExecutorServiceInfoResponseDTO serviceInfo, final boolean allowInterCloud) {
 		logger.debug("verifyReliedServices started...");
 		
-		final Map<Integer,List<String>> response = driver.searchForServices(new ServiceQueryFormListDTO(serviceInfo.getDependencies()), allowIntercloud);
+		final Map<Integer,List<String>> response = driver.searchForServices(new ServiceQueryFormListDTO(serviceInfo.getDependencies()), allowInterCloud);
 		
-		return response.size() == serviceInfo.getDependencies().size() ? response : null;
+		for (final List<String> cloudList : response.values()) {
+			if (cloudList.isEmpty()) {
+				return null;
+			}
+		}
+		
+		return response;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
