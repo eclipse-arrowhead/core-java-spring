@@ -63,6 +63,7 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_ORCH_QOS_CONFIRM_RESERVATION = "orchestration-qos-confirm-reservation";
 	
 	public static final String CORE_SERVICE_GATEKEEPER_GSD = "global-service-discovery";
+	public static final String CORE_SERVICE_GATEKEEPER_MULTI_GSD = "multi-global-service-discovery";
 	public static final String CORE_SERVICE_GATEKEEPER_ICN = "inter-cloud-negotiations";
 	public static final String CORE_SERVICE_GATEKEEPER_PULL_CLOUDS = "pull-clouds";
 	public static final String CORE_SERVICE_GATEKEEPER_COLLECT_SYSTEM_ADDRESSES = "collect-system-addresses";

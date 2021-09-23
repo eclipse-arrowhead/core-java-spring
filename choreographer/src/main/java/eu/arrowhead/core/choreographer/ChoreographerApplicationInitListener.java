@@ -21,6 +21,7 @@ import java.util.ServiceConfigurationError;
 import javax.jms.ConnectionFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -55,6 +56,8 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
 	//=================================================================================================
 	// members
 	
+	private static final String TYPE_ID_PROPERTY_NAME = "_type";
+	
 	@Autowired
 	private NetworkAddressVerifier networkAddressVerifier;
 	
@@ -64,7 +67,8 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
 	@Autowired
 	private ChoreographerDriver driver;
 	
-	private static final String TYPE_ID_PROPERTY_NAME = "_type";
+	@Value(CoreCommonConstants.$CHOREOGRAPHER_IS_GATEKEEPER_PRESENT_WD)
+	private boolean gateKeeperIsPresent;
 	
 	//=================================================================================================
 	// methods
@@ -135,7 +139,11 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
     //-------------------------------------------------------------------------------------------------
 	@Override
     protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
-        return List.of(CoreSystemService.ORCHESTRATION_BY_PROXY_SERVICE, CoreSystemService.GATEKEEPER_MULTI_GLOBAL_SERVICE_DISCOVERY); //TODO: only add MGSD if gatekeeper is present
+		if (gateKeeperIsPresent) {
+			return List.of(CoreSystemService.ORCHESTRATION_BY_PROXY_SERVICE, CoreSystemService.GATEKEEPER_MULTI_GLOBAL_SERVICE_DISCOVERY); //TODO: add gateway tunnel close
+		}
+		
+		return List.of(CoreSystemService.ORCHESTRATION_BY_PROXY_SERVICE);
     }
 
     //=================================================================================================

@@ -21,6 +21,7 @@ import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.jms.core.JmsTemplate;
@@ -116,6 +117,9 @@ public class ChoreographerPlanController {
 
     @Autowired
     private JmsTemplate jms;
+    
+	@Value(CoreCommonConstants.$CHOREOGRAPHER_IS_GATEKEEPER_PRESENT_WD)
+	private boolean gateKeeperIsPresent;
     
     //=================================================================================================
 	// methods
@@ -236,17 +240,19 @@ public class ChoreographerPlanController {
     	
     	final List<ChoreographerRunPlanResponseDTO> results = new ArrayList<>(requests.size());
         for (final ChoreographerRunPlanRequestDTO request : requests) {
-           final ChoreographerRunPlanResponseDTO response = planChecker.checkPlanForExecution(request);
+        	
+        	request.setAllowInterCloud(gateKeeperIsPresent && request.isAllowInterCloud()); // change inter-cloud flag based on gatekeeper presence in the cloud 
+        	final ChoreographerRunPlanResponseDTO response = planChecker.checkPlanForExecution(request);
            
-           if (!Utilities.isEmpty(response.getErrorMessages())) {
-        	   results.add(response);
-           } else {
-        	   final ChoreographerSession session = sessionDBService.initiateSession(request.getPlanId(), createNotifyUri(request));
-        	   results.add(new ChoreographerRunPlanResponseDTO(request.getPlanId(), session.getId(), response.getNeedInterCloud()));
-        	   
-        	   logger.debug("Sending a message to {}.", ChoreographerService.START_SESSION_DESTINATION);
-        	   jms.convertAndSend(ChoreographerService.START_SESSION_DESTINATION, new ChoreographerStartSessionDTO(session.getId(), request.getPlanId(), request.isAllowInterCloud(), request.getChooseOptimalExecutor()));
-           }
+        	if (!Utilities.isEmpty(response.getErrorMessages())) {
+        		results.add(response);
+        	} else {
+        		final ChoreographerSession session = sessionDBService.initiateSession(request.getPlanId(), createNotifyUri(request));
+        		results.add(new ChoreographerRunPlanResponseDTO(request.getPlanId(), session.getId(), response.getNeedInterCloud()));
+			   
+        		logger.debug("Sending a message to {}.", ChoreographerService.START_SESSION_DESTINATION);
+        		jms.convertAndSend(ChoreographerService.START_SESSION_DESTINATION, new ChoreographerStartSessionDTO(session.getId(), request.getPlanId(), request.isAllowInterCloud(), request.getChooseOptimalExecutor()));
+        	}
         }
            
         return results;
@@ -269,7 +275,7 @@ public class ChoreographerPlanController {
             throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + CHECK_PLAN_MGMT_BY_ID_URI);
         }
 
-        final ChoreographerRunPlanResponseDTO result = planChecker.checkPlanForExecution(allowIntercloud, id);
+        final ChoreographerRunPlanResponseDTO result = planChecker.checkPlanForExecution(gateKeeperIsPresent && allowIntercloud, id);
         logger.debug("Check report for plan with id: {} successfully retrieved!", id);
 
         return new ChoreographerCheckPlanResponseDTO(id, result.getErrorMessages(), result.getNeedInterCloud());
