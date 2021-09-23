@@ -217,6 +217,24 @@ public class GatewayService {
 		}
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public String closeSession(final int port) { // TODO: test this
+		logger.debug("closeSession started...");
+		
+		final ActiveSessionDTO session = findSessionForPort(port);
+		if (session == null) {
+			return "Active session not found.";
+		}
+
+		try {
+			closeSession(session);
+			
+			return null;
+		} catch (final ArrowheadException ex) {
+			return ex.getMessage();
+		}
+	}
+
 	//=================================================================================================
 	// assistant methods
 
@@ -369,6 +387,8 @@ public class GatewayService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private Session getRelaySession(final RelayRequestDTO relay) {
+		logger.debug("getRelaySession started...");
+		
 		try {
 			return relayClient.createConnection(relay.getAddress(), relay.getPort(), relay.isSecure());
 		} catch (final JMSException ex) {
@@ -378,5 +398,18 @@ public class GatewayService {
 			
 			throw new ArrowheadException("Error while trying to connect relay at " + relay.getAddress() + ":" + relay.getPort(), ex);
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private ActiveSessionDTO findSessionForPort(int port) {
+		logger.debug("findSessionForPort started...");
+		
+		for (final ActiveSessionDTO session : activeSessions.values()) {
+			if (port == session.getConsumerServerSocketPort().intValue()) {
+				return session;
+			}
+		}
+		
+		return null;
 	}
 }

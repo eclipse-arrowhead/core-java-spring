@@ -32,6 +32,7 @@ public class GatewayAccessControlFilter extends CoreSystemAccessControlFilter {
 	// members
 	
 	private static final CoreSystem[] allowedCoreSystemsForChecks = { CoreSystem.GATEKEEPER };
+	private static final CoreSystem[] allowedCoreSystemsForCloseActiveSessions = { CoreSystem.CHOREOGRAPHER };
 	
 	//=================================================================================================
 	// assistant methods
@@ -50,6 +51,8 @@ public class GatewayAccessControlFilter extends CoreSystemAccessControlFilter {
 		} else if (requestTarget.endsWith(CommonConstants.OP_GATEWAY_KEY_URI) || requestTarget.endsWith(CommonConstants.OP_GATEWAY_CONNECT_PROVIDER_URI) ||
 				   requestTarget.endsWith(CommonConstants.OP_GATEWAY_CONNECT_CONSUMER_URI)) {
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForChecks, requestTarget);
+		} else if (requestTarget.endsWith(CommonConstants.OP_GATEWAY_CLOSE_SESSIONS)) {
+			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForCloseActiveSessions, requestTarget);
 		}
 	}
 }

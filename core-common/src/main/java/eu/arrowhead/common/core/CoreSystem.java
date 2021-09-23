@@ -86,7 +86,8 @@ public enum CoreSystem {
 	
 	GATEWAY(Defaults.DEFAULT_GATEWAY_PORT, List.of(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE,
 												   CoreSystemService.GATEWAY_PROVIDER_SERVICE,
-												   CoreSystemService.GATEWAY_CONSUMER_SERVICE)),
+												   CoreSystemService.GATEWAY_CONSUMER_SERVICE,
+												   CoreSystemService.GATEWAY_CLOSE_SESSIONS_SERVICE)),
 	
 	CHOREOGRAPHER(Defaults.DEFAULT_CHOREOGRAPHER_PORT, List.of(CoreSystemService.CHOREOGRAPHER_SERVICE,
 			                                                   CoreSystemService.CHOREOGRAPHER_REGISTER_EXECUTOR_SERVICE,
