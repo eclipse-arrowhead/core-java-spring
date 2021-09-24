@@ -140,7 +140,7 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
 	@Override
     protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
 		if (gateKeeperIsPresent) {
-			return List.of(CoreSystemService.ORCHESTRATION_BY_PROXY_SERVICE, CoreSystemService.GATEKEEPER_MULTI_GLOBAL_SERVICE_DISCOVERY); //TODO: add gateway tunnel close
+			return List.of(CoreSystemService.ORCHESTRATION_BY_PROXY_SERVICE, CoreSystemService.GATEKEEPER_MULTI_GLOBAL_SERVICE_DISCOVERY, CoreSystemService.GATEWAY_CLOSE_SESSIONS_SERVICE); 
 		}
 		
 		return List.of(CoreSystemService.ORCHESTRATION_BY_PROXY_SERVICE);
