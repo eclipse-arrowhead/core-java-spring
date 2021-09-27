@@ -21,8 +21,14 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.database.entity.ChoreographerAction;
 import eu.arrowhead.common.database.entity.ChoreographerPlan;
 import eu.arrowhead.common.database.entity.ChoreographerSession;
@@ -243,7 +249,7 @@ public class ChoreographerSessionDBServiceTest {
 		final ChoreographerSession session = new ChoreographerSession();
 		session.setId(sessionId);
 		session.setPlan(new ChoreographerPlan("test-plan"));
-		session.setStatus(ChoreographerSessionStatus.INITIATED);
+		session.setStatus(ChoreographerSessionStatus.RUNNING);
 		session.setNotifyUri("/notify");
 		
 		final ChoreographerAction action = new ChoreographerAction();
@@ -333,7 +339,7 @@ public class ChoreographerSessionDBServiceTest {
 		final ChoreographerSession session = new ChoreographerSession();
 		session.setId(sessionId);
 		session.setPlan(new ChoreographerPlan("test-plan"));
-		session.setStatus(ChoreographerSessionStatus.INITIATED);
+		session.setStatus(ChoreographerSessionStatus.RUNNING);
 		session.setNotifyUri("/notify");
 		
 		when(sessionRepository.findById(anyLong())).thenReturn(Optional.of(session));
@@ -379,5 +385,170 @@ public class ChoreographerSessionDBServiceTest {
 			verify(worklogRepository, never()).saveAndFlush(any(ChoreographerWorklog.class));
 			throw ex;
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetSessionById() {
+		final ChoreographerSession session = new ChoreographerSession();
+		session.setId(1);
+		
+		when(sessionRepository.findById(anyLong())).thenReturn(Optional.of(session));
+		
+		ChoreographerSession result = dbService.getSessionById(1);
+		
+		assertEquals(session.getId(), result.getId());
+		verify(sessionRepository, times(1)).findById(eq(session.getId()));		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetSessionById_SessionNotExists() {
+		when(sessionRepository.findById(anyLong())).thenReturn(Optional.empty());
+		
+		try {
+			dbService.getSessionById(1);
+			
+		} catch (final InvalidParameterException ex) {
+			verify(sessionRepository, times(1)).findById(eq(1L));		
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetSessionById_DatabaseException() {
+		when(sessionRepository.findById(anyLong())).thenThrow(new HibernateException("test"));
+		
+		try {
+			dbService.getSessionById(1);
+			
+		} catch (final ArrowheadException ex) {
+			verify(sessionRepository, times(1)).findById(eq(1L));		
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testGetSessions() {
+		final int page = 6;
+		final int size = 50;
+		final Direction direction = Direction.ASC;
+		final String sortField = "test";
+		final Long planId = 1L;
+		final ChoreographerSessionStatus status = ChoreographerSessionStatus.DONE;
+		
+		final ChoreographerPlan plan = new ChoreographerPlan("test-plan");
+		final ChoreographerSession session = new ChoreographerSession();
+		session.setId(17);
+		
+		when(planRepository.findById(anyLong())).thenReturn(Optional.of(plan));
+		final ArgumentCaptor<Example<ChoreographerSession>> exampleCaptor = ArgumentCaptor.forClass(Example.class);	
+		final ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
+		when(sessionRepository.findAll(exampleCaptor.capture(), pageRequestCaptor.capture())).thenReturn(new PageImpl<ChoreographerSession>(List.of(session)));
+		
+		final Page<ChoreographerSession> result = dbService.getSessions(page, size, direction, sortField, planId, status);
+		
+		final Example<ChoreographerSession> exampleCaptured = exampleCaptor.getValue();
+		assertEquals(status, exampleCaptured.getProbe().getStatus());
+		assertEquals(plan.getName(), exampleCaptured.getProbe().getPlan().getName());
+		
+		final PageRequest pageRequestCaptured = pageRequestCaptor.getValue();
+		assertEquals(page, pageRequestCaptured.getPageNumber());
+		assertEquals(size, pageRequestCaptured.getPageSize());
+		assertEquals(direction, pageRequestCaptured.getSort().getOrderFor(sortField).getDirection());
+		
+		assertTrue(result.getContent().size() == 1);
+		assertEquals(session.getId(), result.getContent().get(0).getId());
+		
+		verify(planRepository, times(1)).findById(eq(planId.longValue()));
+		verify(sessionRepository, times(1)).findAll(any(Example.class), any(PageRequest.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testGetSessions_UndefinedParameters() {
+		final int page = -1;
+		final int size = -1;
+		final Direction direction = null;
+		final String sortField = null;
+		final Long planId = null;
+		final ChoreographerSessionStatus status = null;
+		
+		
+		final ChoreographerSession session = new ChoreographerSession();
+		session.setId(17);
+		
+		
+		final ArgumentCaptor<Example<ChoreographerSession>> exampleCaptor = ArgumentCaptor.forClass(Example.class);	
+		final ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
+		when(sessionRepository.findAll(exampleCaptor.capture(), pageRequestCaptor.capture())).thenReturn(new PageImpl<ChoreographerSession>(List.of(session)));
+		
+		final Page<ChoreographerSession> result = dbService.getSessions(page, size, direction, sortField, planId, status);
+		
+		final Example<ChoreographerSession> exampleCaptured = exampleCaptor.getValue();
+		assertNull(exampleCaptured.getProbe().getStatus());
+		assertNull(exampleCaptured.getProbe().getPlan());
+		
+		final PageRequest pageRequestCaptured = pageRequestCaptor.getValue();
+		assertEquals(0, pageRequestCaptured.getPageNumber());
+		assertEquals(Integer.MAX_VALUE, pageRequestCaptured.getPageSize());
+		assertEquals(Direction.ASC, pageRequestCaptured.getSort().getOrderFor(CoreCommonConstants.COMMON_FIELD_NAME_ID).getDirection());
+		
+		assertTrue(result.getContent().size() == 1);
+		assertEquals(session.getId(), result.getContent().get(0).getId());
+		
+		verify(planRepository, never()).findById(anyLong());
+		verify(sessionRepository, times(1)).findAll(any(Example.class), any(PageRequest.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("unchecked")
+	@Test(expected = InvalidParameterException.class)
+	public void testGetSessions_PlanNotExists() {
+		final int page = 6;
+		final int size = 50;
+		final Direction direction = Direction.ASC;
+		final String sortField = "test";
+		final Long planId = 1L;
+		final ChoreographerSessionStatus status = ChoreographerSessionStatus.DONE;
+		
+		when(planRepository.findById(anyLong())).thenReturn(Optional.empty());		
+		
+		try {
+			dbService.getSessions(page, size, direction, sortField, planId, status);
+			
+		} catch (final InvalidParameterException ex) {
+			verify(planRepository, times(1)).findById(eq(planId.longValue()));
+			verify(sessionRepository, never()).findAll(any(Example.class), any(PageRequest.class));
+			throw ex;
+		}				
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("unchecked")
+	@Test(expected = ArrowheadException.class)
+	public void testGetSessions_DatabaseException() {
+		final int page = 6;
+		final int size = 50;
+		final Direction direction = Direction.ASC;
+		final String sortField = "test";
+		final Long planId = 1L;
+		final ChoreographerSessionStatus status = ChoreographerSessionStatus.DONE;
+		
+		when(planRepository.findById(anyLong())).thenReturn(Optional.empty());		
+		
+		try {
+			dbService.getSessions(page, size, direction, sortField, planId, status);
+			
+		} catch (final ArrowheadException ex) {
+			verify(planRepository, times(1)).findById(eq(planId.longValue()));
+			verify(sessionRepository, never()).findAll(any(Example.class), any(PageRequest.class));
+			throw ex;
+		}				
 	}
 }
