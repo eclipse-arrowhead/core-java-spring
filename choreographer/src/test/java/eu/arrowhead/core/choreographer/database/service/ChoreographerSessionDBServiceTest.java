@@ -698,4 +698,203 @@ public class ChoreographerSessionDBServiceTest {
 			throw ex;
 		}		
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testChangeSessionStepStatus_1() {
+		final long sessionId = 5;
+		final ChoreographerStep step = new ChoreographerStep();
+		step.setName("test-step");
+		step.setAction(new ChoreographerAction("test-action", null));		
+		final ChoreographerSessionStepStatus newStatus = ChoreographerSessionStepStatus.DONE;
+		final String message = "message";
+		
+		final ChoreographerSession session = new ChoreographerSession();
+		session.setId(sessionId);
+		
+		final ChoreographerSessionStep sessionStep = new ChoreographerSessionStep();
+		sessionStep.setId(54);
+		sessionStep.setSession(session);
+		sessionStep.setStep(step);
+		session.setPlan(new ChoreographerPlan("test-plan"));
+		sessionStep.setStatus(ChoreographerSessionStepStatus.RUNNING);
+		
+		when(sessionRepository.findById(anyLong())).thenReturn(Optional.of(session));
+		when(sessionStepRepository.findBySessionAndStep(any(), any())).thenReturn(Optional.of(sessionStep));
+		when(sessionStepRepository.findById(anyLong())).thenReturn(Optional.of(sessionStep));
+		final ArgumentCaptor<ChoreographerSessionStep> sessionStepCaptor = ArgumentCaptor.forClass(ChoreographerSessionStep.class);
+		when(sessionStepRepository.saveAndFlush(sessionStepCaptor.capture())).thenReturn(sessionStep);
+		
+		final ChoreographerSessionStep result = dbService.changeSessionStepStatus(sessionId, step, newStatus, message);
+		
+		final ChoreographerSessionStep sessionStepCaptured = sessionStepCaptor.getValue();
+		assertEquals(sessionStep.getId(), sessionStepCaptured.getId());
+		assertEquals(newStatus, sessionStepCaptured.getStatus());
+		assertEquals(message, sessionStepCaptured.getMessage());
+		assertEquals(sessionStep.getId(), result.getId());
+		assertEquals(newStatus, result.getStatus());
+		assertEquals(message, result.getMessage());
+		
+		verify(sessionRepository, times(1)).findById(eq(sessionId));
+		verify(sessionStepRepository, times(1)).findBySessionAndStep(eq(session), eq(step));
+		verify(sessionStepRepository, times(1)).findById(eq(sessionStep.getId()));
+		verify(sessionStepRepository, times(1)).saveAndFlush(eq(sessionStep));
+		verify(worklogRepository, times(1)).saveAndFlush(any(ChoreographerWorklog.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testChangeSessionStepStatus_1_SessionNotExists() {
+		final long sessionId = 5;
+		final ChoreographerStep step = new ChoreographerStep();
+		step.setName("test-step");
+		step.setAction(new ChoreographerAction("test-action", null));		
+		final ChoreographerSessionStepStatus newStatus = ChoreographerSessionStepStatus.DONE;
+		final String message = "message";
+		
+		when(sessionRepository.findById(anyLong())).thenReturn(Optional.empty());
+		
+		try {
+			dbService.changeSessionStepStatus(sessionId, step, newStatus, message);
+			
+		} catch (final InvalidParameterException ex) {
+			verify(sessionRepository, times(1)).findById(eq(sessionId));
+			verify(sessionStepRepository, never()).findBySessionAndStep(any(), any());
+			verify(sessionStepRepository, never()).findById(any());
+			verify(sessionStepRepository, never()).saveAndFlush(any());
+			verify(worklogRepository, times(1)).saveAndFlush(any(ChoreographerWorklog.class));
+			throw ex;
+		}				
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testChangeSessionStepStatus_1_SessionStepNotExists() {
+		final long sessionId = 5;
+		final ChoreographerStep step = new ChoreographerStep();
+		step.setName("test-step");
+		step.setAction(new ChoreographerAction("test-action", null));		
+		final ChoreographerSessionStepStatus newStatus = ChoreographerSessionStepStatus.DONE;
+		final String message = "message";
+		
+		final ChoreographerSession session = new ChoreographerSession();
+		session.setId(sessionId);
+		
+		when(sessionRepository.findById(anyLong())).thenReturn(Optional.of(session));
+		when(sessionStepRepository.findBySessionAndStep(any(), any())).thenReturn(Optional.empty());
+		
+		try {
+			dbService.changeSessionStepStatus(sessionId, step, newStatus, message);
+			
+		} catch (final InvalidParameterException ex) {
+			verify(sessionRepository, times(1)).findById(eq(sessionId));
+			verify(sessionStepRepository, times(1)).findBySessionAndStep(eq(session), eq(step));
+			verify(sessionStepRepository, never()).findById(any());
+			verify(sessionStepRepository, never()).saveAndFlush(any());
+			verify(worklogRepository, times(1)).saveAndFlush(any(ChoreographerWorklog.class));
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testChangeSessionStepStatus_1_DatabaseException() {
+		final long sessionId = 5;
+		final ChoreographerStep step = new ChoreographerStep();
+		step.setName("test-step");
+		step.setAction(new ChoreographerAction("test-action", null));		
+		final ChoreographerSessionStepStatus newStatus = ChoreographerSessionStepStatus.DONE;
+		final String message = "message";
+		
+		when(sessionRepository.findById(anyLong())).thenThrow(new HibernateException("test"));
+		
+		try {
+			dbService.changeSessionStepStatus(sessionId, step, newStatus, message);
+			
+		} catch (final ArrowheadException ex) {
+			verify(sessionRepository, times(1)).findById(eq(sessionId));
+			verify(sessionStepRepository, never()).findBySessionAndStep(any(), any());
+			verify(sessionStepRepository, never()).findById(any());
+			verify(sessionStepRepository, never()).saveAndFlush(any());
+			verify(worklogRepository, never()).saveAndFlush(any(ChoreographerWorklog.class));
+			throw ex;
+		}				
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testChangeSessionStepStatus_2() {
+		final long sessionStepId = 2;
+		final ChoreographerSessionStepStatus newStatus = ChoreographerSessionStepStatus.DONE;
+		final String message = "message";
+		
+		final ChoreographerStep step = new ChoreographerStep();
+		step.setName("test-step");
+		step.setAction(new ChoreographerAction("test-action", null));
+		final ChoreographerSession session = new ChoreographerSession();
+		final ChoreographerSessionStep sessionStep = new ChoreographerSessionStep();
+		sessionStep.setId(sessionStepId);
+		sessionStep.setSession(session);
+		sessionStep.setStep(step);
+		session.setPlan(new ChoreographerPlan("test-plan"));
+		sessionStep.setStatus(ChoreographerSessionStepStatus.RUNNING);
+		
+		when(sessionStepRepository.findById(anyLong())).thenReturn(Optional.of(sessionStep));
+		final ArgumentCaptor<ChoreographerSessionStep> sessionStepCaptor = ArgumentCaptor.forClass(ChoreographerSessionStep.class);
+		when(sessionStepRepository.saveAndFlush(sessionStepCaptor.capture())).thenReturn(sessionStep);
+		
+		final ChoreographerSessionStep result = dbService.changeSessionStepStatus(sessionStepId, newStatus, message);
+		
+		final ChoreographerSessionStep sessionStepCaptured = sessionStepCaptor.getValue();
+		assertEquals(sessionStep.getId(), sessionStepCaptured.getId());
+		assertEquals(newStatus, sessionStepCaptured.getStatus());
+		assertEquals(message, sessionStepCaptured.getMessage());
+		assertEquals(sessionStep.getId(), result.getId());
+		assertEquals(newStatus, result.getStatus());
+		assertEquals(message, result.getMessage());
+		
+		verify(sessionStepRepository, times(1)).findById(eq(sessionStep.getId()));
+		verify(sessionStepRepository, times(1)).saveAndFlush(eq(sessionStep));
+		verify(worklogRepository, times(1)).saveAndFlush(any(ChoreographerWorklog.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testChangeSessionStepStatus_2_SessionStep_NotExists() {
+		final long sessionStepId = 2;
+		final ChoreographerSessionStepStatus newStatus = ChoreographerSessionStepStatus.DONE;
+		final String message = "message";
+		
+		when(sessionStepRepository.findById(anyLong())).thenReturn(Optional.empty());
+		
+		try {
+			dbService.changeSessionStepStatus(sessionStepId, newStatus, message);
+			
+		} catch (final InvalidParameterException ex) {
+			verify(sessionStepRepository, times(1)).findById(eq(sessionStepId));
+			verify(sessionStepRepository, never()).saveAndFlush(any());
+			verify(worklogRepository, times(1)).saveAndFlush(any(ChoreographerWorklog.class));
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testChangeSessionStepStatus_2_DatabaseException() {
+		final long sessionStepId = 2;
+		final ChoreographerSessionStepStatus newStatus = ChoreographerSessionStepStatus.DONE;
+		final String message = "message";
+		
+		when(sessionStepRepository.findById(anyLong())).thenThrow(new HibernateException("test"));
+		
+		try {
+			dbService.changeSessionStepStatus(sessionStepId, newStatus, message);
+			
+		} catch (final ArrowheadException ex) {
+			verify(sessionStepRepository, times(1)).findById(eq(sessionStepId));
+			verify(sessionStepRepository, never()).saveAndFlush(any());
+			verify(worklogRepository, never()).saveAndFlush(any());
+			throw ex;
+		}		
+	}
 }
