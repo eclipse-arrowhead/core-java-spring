@@ -15,11 +15,14 @@
 package eu.arrowhead.core.choreographer.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -37,16 +40,24 @@ import org.springframework.web.util.UriComponentsBuilder;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.common.dto.internal.CloudResponseDTO;
+import eu.arrowhead.common.dto.internal.GSDMultiPollResponseDTO;
+import eu.arrowhead.common.dto.internal.GSDMultiQueryFormDTO;
+import eu.arrowhead.common.dto.internal.GSDMultiQueryResultDTO;
 import eu.arrowhead.common.dto.internal.KeyValuesDTO;
+import eu.arrowhead.common.dto.shared.ActiveSessionCloseErrorDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerAbortStepRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecuteStepRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerNotificationDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultListDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -58,7 +69,9 @@ public class ChoreographerDriverTest {
     //=================================================================================================
     //  members
 	
-    private static final String ORCHESTRATION_PROCESS_URI_KEY = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+    private static final String ORCHESTRATION_PROCESS_URI_KEY = CoreSystemService.ORCHESTRATION_BY_PROXY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+    private static final String GATEWAY_CLOSE_SESSIONS_URI_KEY = CoreSystemService.GATEWAY_CLOSE_SESSIONS_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+    private static final String GATEKEEPER_MULTI_GSD_URI_KEY = CoreSystemService.GATEKEEPER_MULTI_GLOBAL_SERVICE_DISCOVERY.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 
     @InjectMocks
     private ChoreographerDriver testObject;
@@ -120,65 +133,6 @@ public class ChoreographerDriverTest {
    		verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_PULL_CONFIG_URI);
    		verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.GET), eq(KeyValuesDTO.class));
     	Assert.assertEquals(1, result.getMap().size());
-    }
-    
-    //-------------------------------------------------------------------------------------------------
-    @Test(expected = IllegalArgumentException.class)
-	public void testMultiQueryServiceRegistryInputNull() {
-    	try {
-    		testObject.multiQueryServiceRegistry(null);
-    	} catch (final Exception ex) {
-    		Assert.assertEquals("ServiceQueryFormListDTO is null.", ex.getMessage());
-    		
-    		throw ex;
-    	}
- 	}
-    
-    //-------------------------------------------------------------------------------------------------
-    @Test(expected = ArrowheadException.class)
-	public void testMultiQueryServiceRegistryUriNotFound() {
-    	when(arrowheadContext.containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI)).thenReturn(false);
-    	
-    	try {
-    		testObject.multiQueryServiceRegistry(new ServiceQueryFormListDTO());
-    	} catch (final Exception ex) {
-    		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI);
-    		Assert.assertEquals("Choreographer can't find Service Registry multi-query URI.", ex.getMessage());
-    		
-    		throw ex;
-    	}
-    }
-    
-    //-------------------------------------------------------------------------------------------------
-    @Test(expected = ArrowheadException.class)
-	public void testMultiQueryServiceRegistryUriWrongType() {
-    	when(arrowheadContext.containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI)).thenReturn(true);
-    	when(arrowheadContext.get(CoreCommonConstants.SR_MULTI_QUERY_URI)).thenReturn("invalid");
-    	
-    	try {
-    		testObject.multiQueryServiceRegistry(new ServiceQueryFormListDTO());
-    	} catch (final Exception ex) {
-    		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI);
-    		verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_MULTI_QUERY_URI);
-    		Assert.assertEquals("Choreographer can't find Service Registry multi-query URI.", ex.getMessage());
-    		
-    		throw ex;
-    	}
-    }
-    
-    //-------------------------------------------------------------------------------------------------
-    @Test
-	public void testMultiQueryServiceRegistryOk() {
-    	when(arrowheadContext.containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI)).thenReturn(true);
-    	when(arrowheadContext.get(CoreCommonConstants.SR_MULTI_QUERY_URI)).thenReturn(UriComponentsBuilder.fromHttpUrl("http://localhost/abc").build());
-       	when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(ServiceQueryResultListDTO.class), any(ServiceQueryFormListDTO.class))).thenReturn(new ResponseEntity<>(new ServiceQueryResultListDTO(), HttpStatus.OK));
-        
-    	final ServiceQueryResultListDTO result = testObject.multiQueryServiceRegistry(new ServiceQueryFormListDTO());
-    	
-		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI);
-		verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_MULTI_QUERY_URI);
-		verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(ServiceQueryResultListDTO.class), any(ServiceQueryFormListDTO.class));
-		Assert.assertNotNull(result);
     }
     
     //-------------------------------------------------------------------------------------------------
@@ -721,4 +675,366 @@ public class ChoreographerDriverTest {
 		
 		verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(Void.class), any(ChoreographerNotificationDTO.class));
 	}
- }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testCloseGatewayTunnelsNullInput() {
+		try {
+			testObject.closeGatewayTunnels(null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Port list is null or empty.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testCloseGatewayTunnelsEmptyInput() {
+		try {
+			testObject.closeGatewayTunnels(List.of());
+		} catch (final Exception ex) {
+			Assert.assertEquals("Port list is null or empty.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testCloseGatewayTunnelsUriNotFound() {
+		when(arrowheadContext.containsKey(GATEWAY_CLOSE_SESSIONS_URI_KEY)).thenReturn(false);
+    	
+    	try {
+    		testObject.closeGatewayTunnels(List.of(5555));
+    	} catch (final Exception ex) {
+    		verify(arrowheadContext, times(1)).containsKey(GATEWAY_CLOSE_SESSIONS_URI_KEY);
+    		Assert.assertEquals("Choreographer can't find gateway close sessions URI.", ex.getMessage());
+    		
+    		throw ex;
+    	}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testCloseGatewayTunnelsUriWrongType() {
+		when(arrowheadContext.containsKey(GATEWAY_CLOSE_SESSIONS_URI_KEY)).thenReturn(true);
+		when(arrowheadContext.get(GATEWAY_CLOSE_SESSIONS_URI_KEY)).thenReturn("invalid");
+    	
+    	try {
+    		testObject.closeGatewayTunnels(List.of(5555));
+    	} catch (final Exception ex) {
+    		verify(arrowheadContext, times(1)).containsKey(GATEWAY_CLOSE_SESSIONS_URI_KEY);
+    		verify(arrowheadContext, times(1)).get(GATEWAY_CLOSE_SESSIONS_URI_KEY);
+    		Assert.assertEquals("Choreographer can't find gateway close sessions URI.", ex.getMessage());
+    		
+    		throw ex;
+    	}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("rawtypes")
+	@Test
+	public void testCloseGatewayTunnelsOk() {
+		when(arrowheadContext.containsKey(GATEWAY_CLOSE_SESSIONS_URI_KEY)).thenReturn(true);
+		when(arrowheadContext.get(GATEWAY_CLOSE_SESSIONS_URI_KEY)).thenReturn(UriComponentsBuilder.fromHttpUrl("http://localhost/abc").build());
+		final List<ActiveSessionCloseErrorDTO> result = List.of();
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(List.class), anyList())).thenReturn(new ResponseEntity<List>(result, HttpStatus.OK));
+    	
+   		testObject.closeGatewayTunnels(List.of(5555));
+
+   		verify(arrowheadContext, times(1)).containsKey(GATEWAY_CLOSE_SESSIONS_URI_KEY);
+    	verify(arrowheadContext, times(1)).get(GATEWAY_CLOSE_SESSIONS_URI_KEY);
+    	verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(List.class), anyList());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("rawtypes")
+	@Test
+	public void testCloseGatewayTunnelsOnlyLogErrorResponse() {
+		when(arrowheadContext.containsKey(GATEWAY_CLOSE_SESSIONS_URI_KEY)).thenReturn(true);
+		when(arrowheadContext.get(GATEWAY_CLOSE_SESSIONS_URI_KEY)).thenReturn(UriComponentsBuilder.fromHttpUrl("http://localhost/abc").build());
+		final List<ActiveSessionCloseErrorDTO> result = List.of(new ActiveSessionCloseErrorDTO(5555, "Not found"));
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(List.class), anyList())).thenReturn(new ResponseEntity<List>(result, HttpStatus.OK));
+    	
+   		testObject.closeGatewayTunnels(List.of(5555));
+
+   		verify(arrowheadContext, times(1)).containsKey(GATEWAY_CLOSE_SESSIONS_URI_KEY);
+    	verify(arrowheadContext, times(1)).get(GATEWAY_CLOSE_SESSIONS_URI_KEY);
+    	verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(List.class), anyList());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCloseGatewayTunnelsOnlyLogExceptions() {
+		when(arrowheadContext.containsKey(GATEWAY_CLOSE_SESSIONS_URI_KEY)).thenReturn(true);
+		when(arrowheadContext.get(GATEWAY_CLOSE_SESSIONS_URI_KEY)).thenReturn(UriComponentsBuilder.fromHttpUrl("http://localhost/abc").build());
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(List.class), anyList())).thenThrow(new RuntimeException("connection error"));
+    	
+   		testObject.closeGatewayTunnels(List.of(5555));
+
+   		verify(arrowheadContext, times(1)).containsKey(GATEWAY_CLOSE_SESSIONS_URI_KEY);
+    	verify(arrowheadContext, times(1)).get(GATEWAY_CLOSE_SESSIONS_URI_KEY);
+    	verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(List.class), anyList());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testSearchForServicesFormsNull() {
+		try {
+			testObject.searchForServices(null, false);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Forms is null.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testSearchForServicesFormListEmpty() {
+		try {
+			testObject.searchForServices(new ServiceQueryFormListDTO(), false);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Form list is empty.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testSearchForServicesMultiQueryServiceRegistryUriNotFound() {
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI)).thenReturn(false);
+		
+		final ServiceQueryFormListDTO forms = new ServiceQueryFormListDTO(List.of(new ChoreographerServiceQueryFormDTO()));
+		try {
+			testObject.searchForServices(forms, false);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Choreographer can't find Service Registry multi-query URI.", ex.getMessage());
+			
+			verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI);
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testSearchForServicesMultiQueryServiceRegistryUriWrongType() {
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI)).thenReturn(true);
+		when(arrowheadContext.get(CoreCommonConstants.SR_MULTI_QUERY_URI)).thenReturn("invalid");
+		
+		final ServiceQueryFormListDTO forms = new ServiceQueryFormListDTO(List.of(new ChoreographerServiceQueryFormDTO()));
+		try {
+			testObject.searchForServices(forms, false);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Choreographer can't find Service Registry multi-query URI.", ex.getMessage());
+			
+			verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI);
+			verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_MULTI_QUERY_URI);
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testSearchForServicesOkLocalOnly() {
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI)).thenReturn(true);
+		when(arrowheadContext.get(CoreCommonConstants.SR_MULTI_QUERY_URI)).thenReturn(UriComponentsBuilder.fromHttpUrl("http://localhost/abc").build());
+		final ServiceQueryResultDTO resultDTO = new ServiceQueryResultDTO();
+		resultDTO.setServiceQueryData(List.of(new ServiceRegistryResponseDTO()));
+		final ServiceQueryResultListDTO result = new ServiceQueryResultListDTO(List.of(resultDTO));
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(ServiceQueryResultListDTO.class), any(ServiceQueryFormListDTO.class))).thenReturn(new ResponseEntity<>(result, HttpStatus.OK));
+		
+		final ServiceQueryFormListDTO forms = new ServiceQueryFormListDTO(List.of(new ChoreographerServiceQueryFormDTO()));
+		final Map<Integer,List<String>> resultMap = testObject.searchForServices(forms, false);
+		
+		Assert.assertEquals(1, resultMap.size());
+		Assert.assertTrue(resultMap.containsKey(0));
+		Assert.assertEquals("#OWN_CLOUD#", resultMap.get(0).get(0));
+			
+		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI);
+		verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_MULTI_QUERY_URI);
+		verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(ServiceQueryResultListDTO.class), any(ServiceQueryFormListDTO.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testSearchForServicesEmptyResultLocalOnly() {
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI)).thenReturn(true);
+		when(arrowheadContext.get(CoreCommonConstants.SR_MULTI_QUERY_URI)).thenReturn(UriComponentsBuilder.fromHttpUrl("http://localhost/abc").build());
+		final ServiceQueryResultDTO resultDTO = new ServiceQueryResultDTO();
+		resultDTO.setServiceQueryData(List.of());
+		final ServiceQueryResultListDTO result = new ServiceQueryResultListDTO(List.of(resultDTO));
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(ServiceQueryResultListDTO.class), any(ServiceQueryFormListDTO.class))).thenReturn(new ResponseEntity<>(result, HttpStatus.OK));
+		
+		final ServiceQueryFormListDTO forms = new ServiceQueryFormListDTO(List.of(new ChoreographerServiceQueryFormDTO()));
+		final Map<Integer,List<String>> resultMap = testObject.searchForServices(forms, false);
+		
+		Assert.assertEquals(1, resultMap.size());
+		Assert.assertTrue(resultMap.containsKey(0));
+		Assert.assertEquals(0, resultMap.get(0).size());
+			
+		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI);
+		verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_MULTI_QUERY_URI);
+		verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(ServiceQueryResultListDTO.class), any(ServiceQueryFormListDTO.class));
+		verify(httpService, never()).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(GSDMultiQueryResultDTO.class), any(GSDMultiQueryFormDTO.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testSearchForServicesAllowInterCloudButLocalCloudOnly() {
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI)).thenReturn(true);
+		when(arrowheadContext.get(CoreCommonConstants.SR_MULTI_QUERY_URI)).thenReturn(UriComponentsBuilder.fromHttpUrl("http://localhost/abc").build());
+		final ServiceQueryResultDTO resultDTO = new ServiceQueryResultDTO();
+		resultDTO.setServiceQueryData(List.of());
+		final ServiceQueryResultListDTO result = new ServiceQueryResultListDTO(List.of(resultDTO));
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(ServiceQueryResultListDTO.class), any(ServiceQueryFormListDTO.class))).thenReturn(new ResponseEntity<>(result, HttpStatus.OK));
+		
+		final ChoreographerServiceQueryFormDTO form = new ChoreographerServiceQueryFormDTO();
+		form.setLocalCloudOnly(true);
+		final ServiceQueryFormListDTO forms = new ServiceQueryFormListDTO(List.of(form));
+		final Map<Integer,List<String>> resultMap = testObject.searchForServices(forms, true);
+		
+		Assert.assertEquals(1, resultMap.size());
+		Assert.assertTrue(resultMap.containsKey(0));
+		Assert.assertEquals(0, resultMap.get(0).size());
+			
+		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI);
+		verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_MULTI_QUERY_URI);
+		verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(ServiceQueryResultListDTO.class), any(ServiceQueryFormListDTO.class));
+		verify(httpService, never()).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(GSDMultiQueryResultDTO.class), any(GSDMultiQueryFormDTO.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testSearchForServicesMultiGlobalServiceDiscoveryUriNotFound() {
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI)).thenReturn(true);
+		when(arrowheadContext.get(CoreCommonConstants.SR_MULTI_QUERY_URI)).thenReturn(UriComponentsBuilder.fromHttpUrl("http://localhost/abc").build());
+		final ServiceQueryResultDTO resultDTO = new ServiceQueryResultDTO();
+		resultDTO.setServiceQueryData(List.of());
+		final ServiceQueryResultListDTO result = new ServiceQueryResultListDTO(List.of(resultDTO));
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(ServiceQueryResultListDTO.class), any(ServiceQueryFormListDTO.class))).thenReturn(new ResponseEntity<>(result, HttpStatus.OK));
+		when(arrowheadContext.containsKey(GATEKEEPER_MULTI_GSD_URI_KEY)).thenReturn(false);
+		
+		final ServiceQueryFormListDTO forms = new ServiceQueryFormListDTO(List.of(new ChoreographerServiceQueryFormDTO()));
+		
+		try {
+			testObject.searchForServices(forms, true);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Choreographer can't find Gatekeeper Multi Global Service Discovery URI.", ex.getMessage());
+			
+			verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI);
+			verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_MULTI_QUERY_URI);
+			verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(ServiceQueryResultListDTO.class), any(ServiceQueryFormListDTO.class));
+			verify(arrowheadContext, times(1)).containsKey(GATEKEEPER_MULTI_GSD_URI_KEY);
+			verify(httpService, never()).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(GSDMultiQueryResultDTO.class), any(GSDMultiQueryFormDTO.class));
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testSearchForServicesMultiGlobalServiceDiscoveryWrongType() {
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI)).thenReturn(true);
+		when(arrowheadContext.get(CoreCommonConstants.SR_MULTI_QUERY_URI)).thenReturn(UriComponentsBuilder.fromHttpUrl("http://localhost/abc").build());
+		final ServiceQueryResultDTO resultDTO = new ServiceQueryResultDTO();
+		resultDTO.setServiceQueryData(List.of());
+		final ServiceQueryResultListDTO result = new ServiceQueryResultListDTO(List.of(resultDTO));
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(ServiceQueryResultListDTO.class), any(ServiceQueryFormListDTO.class))).thenReturn(new ResponseEntity<>(result, HttpStatus.OK));
+		when(arrowheadContext.containsKey(GATEKEEPER_MULTI_GSD_URI_KEY)).thenReturn(true);
+		when(arrowheadContext.get(GATEKEEPER_MULTI_GSD_URI_KEY)).thenReturn("invalid");
+		
+		final ServiceQueryFormListDTO forms = new ServiceQueryFormListDTO(List.of(new ChoreographerServiceQueryFormDTO()));
+		
+		try {
+			testObject.searchForServices(forms, true);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Choreographer can't find Gatekeeper Multi Global Service Discovery URI.", ex.getMessage());
+			
+			verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI);
+			verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_MULTI_QUERY_URI);
+			verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(ServiceQueryResultListDTO.class), any(ServiceQueryFormListDTO.class));
+			verify(arrowheadContext, times(1)).containsKey(GATEKEEPER_MULTI_GSD_URI_KEY);
+			verify(arrowheadContext, times(1)).get(GATEKEEPER_MULTI_GSD_URI_KEY);
+			verify(httpService, never()).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(GSDMultiQueryResultDTO.class), any(GSDMultiQueryFormDTO.class));
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testSearchForServicesOkAllowIntercloud() {
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI)).thenReturn(true);
+		when(arrowheadContext.get(CoreCommonConstants.SR_MULTI_QUERY_URI)).thenReturn(UriComponentsBuilder.fromHttpUrl("http://localhost/abc").build());
+		final ServiceQueryResultDTO resultDTO = new ServiceQueryResultDTO();
+		resultDTO.setServiceQueryData(List.of());
+		final ServiceQueryResultListDTO result = new ServiceQueryResultListDTO(List.of(resultDTO));
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(ServiceQueryResultListDTO.class), any(ServiceQueryFormListDTO.class))).thenReturn(new ResponseEntity<>(result, HttpStatus.OK));
+		when(arrowheadContext.containsKey(GATEKEEPER_MULTI_GSD_URI_KEY)).thenReturn(true);
+		when(arrowheadContext.get(GATEKEEPER_MULTI_GSD_URI_KEY)).thenReturn(UriComponentsBuilder.fromHttpUrl("http://localhost/def").build());
+		final CloudResponseDTO providerCloud = new CloudResponseDTO();
+		providerCloud.setOperator("operator");
+		providerCloud.setName("name");
+		GSDMultiPollResponseDTO pollResponse = new GSDMultiPollResponseDTO();
+		pollResponse.setProvidedServiceDefinitions(List.of("service"));
+		pollResponse.setProviderCloud(providerCloud);
+		final GSDMultiQueryResultDTO result2 = new GSDMultiQueryResultDTO(List.of(pollResponse), 0);
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(GSDMultiQueryResultDTO.class), any(GSDMultiQueryFormDTO.class))).thenReturn(new ResponseEntity<>(result2, HttpStatus.OK));
+		
+		ChoreographerServiceQueryFormDTO form = new ChoreographerServiceQueryFormDTO();
+		form.setServiceDefinitionRequirement("service");
+		final ServiceQueryFormListDTO forms = new ServiceQueryFormListDTO(List.of(form));
+		
+		final Map<Integer,List<String>> resultMap = testObject.searchForServices(forms, true);
+		
+		Assert.assertEquals(1, resultMap.size());
+		Assert.assertTrue(resultMap.containsKey(0));
+		Assert.assertEquals("operator/name", resultMap.get(0).get(0));
+
+			
+		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI);
+		verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_MULTI_QUERY_URI);
+		verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(ServiceQueryResultListDTO.class), any(ServiceQueryFormListDTO.class));
+		verify(arrowheadContext, times(1)).containsKey(GATEKEEPER_MULTI_GSD_URI_KEY);
+		verify(arrowheadContext, times(1)).get(GATEKEEPER_MULTI_GSD_URI_KEY);
+		verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(GSDMultiQueryResultDTO.class), any(GSDMultiQueryFormDTO.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testSearchForServicesEmptyResponseAllowIntercloud() {
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI)).thenReturn(true);
+		when(arrowheadContext.get(CoreCommonConstants.SR_MULTI_QUERY_URI)).thenReturn(UriComponentsBuilder.fromHttpUrl("http://localhost/abc").build());
+		final ServiceQueryResultDTO resultDTO = new ServiceQueryResultDTO();
+		resultDTO.setServiceQueryData(List.of());
+		final ServiceQueryResultListDTO result = new ServiceQueryResultListDTO(List.of(resultDTO));
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(ServiceQueryResultListDTO.class), any(ServiceQueryFormListDTO.class))).thenReturn(new ResponseEntity<>(result, HttpStatus.OK));
+		when(arrowheadContext.containsKey(GATEKEEPER_MULTI_GSD_URI_KEY)).thenReturn(true);
+		when(arrowheadContext.get(GATEKEEPER_MULTI_GSD_URI_KEY)).thenReturn(UriComponentsBuilder.fromHttpUrl("http://localhost/def").build());
+		final GSDMultiQueryResultDTO result2 = new GSDMultiQueryResultDTO(List.of(), 0);
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(GSDMultiQueryResultDTO.class), any(GSDMultiQueryFormDTO.class))).thenReturn(new ResponseEntity<>(result2, HttpStatus.OK));
+		
+		ChoreographerServiceQueryFormDTO form = new ChoreographerServiceQueryFormDTO();
+		form.setServiceDefinitionRequirement("service");
+		final ServiceQueryFormListDTO forms = new ServiceQueryFormListDTO(List.of(form));
+		
+		final Map<Integer,List<String>> resultMap = testObject.searchForServices(forms, true);
+		
+		Assert.assertEquals(1, resultMap.size());
+		Assert.assertTrue(resultMap.containsKey(0));
+		Assert.assertEquals(0, resultMap.get(0).size());
+
+			
+		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI);
+		verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_MULTI_QUERY_URI);
+		verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(ServiceQueryResultListDTO.class), any(ServiceQueryFormListDTO.class));
+		verify(arrowheadContext, times(1)).containsKey(GATEKEEPER_MULTI_GSD_URI_KEY);
+		verify(arrowheadContext, times(1)).get(GATEKEEPER_MULTI_GSD_URI_KEY);
+		verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(GSDMultiQueryResultDTO.class), any(GSDMultiQueryFormDTO.class));
+	}
+}

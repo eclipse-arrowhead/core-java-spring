@@ -15,6 +15,7 @@
 package eu.arrowhead.core.choreographer;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -347,7 +348,7 @@ public class ChoreographerPlanControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testStartPlansProblemWithPlan() throws Exception {
-		when(planChecker.checkPlanForExecution(any(ChoreographerRunPlanRequestDTO.class))).thenReturn(new ChoreographerRunPlanResponseDTO(null, List.of("Plan id is not valid.")));
+		when(planChecker.checkPlanForExecution(any(ChoreographerRunPlanRequestDTO.class))).thenReturn(new ChoreographerRunPlanResponseDTO(null, List.of("Plan id is not valid."), false));
 		
 		final MvcResult response = this.mockMvc.perform(post(START_SESSION_MGMT_URI)
 											   .contentType(MediaType.APPLICATION_JSON)
@@ -415,14 +416,14 @@ public class ChoreographerPlanControllerTest {
 		Assert.assertEquals(400, responseBody.getErrorCode());
 		Assert.assertEquals("ID must be greater than 0.", responseBody.getErrorMessage());
 		
-		verify(planChecker, never()).checkPlanForExecution(anyLong());
+		verify(planChecker, never()).checkPlanForExecution(anyBoolean(), anyLong());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCheckPlanWithValidId1() throws Exception {
 		
-		when(planChecker.checkPlanForExecution(1)).thenReturn(new ChoreographerRunPlanResponseDTO(1L, List.of("something wrong")));
+		when(planChecker.checkPlanForExecution(false, 1)).thenReturn(new ChoreographerRunPlanResponseDTO(1L, List.of("something wrong"), false));
 		
 		final MvcResult response = this.mockMvc.perform(get(CHECK_PLAN_MGMT_URI + "/1")
 											   .accept(MediaType.APPLICATION_JSON))
@@ -435,14 +436,14 @@ public class ChoreographerPlanControllerTest {
 		Assert.assertEquals(1, responseBody.getErrorMessages().size());
 		Assert.assertEquals("something wrong", responseBody.getErrorMessages().get(0));
 		
-		verify(planChecker, times(1)).checkPlanForExecution(1);
+		verify(planChecker, times(1)).checkPlanForExecution(false, 1);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCheckPlanWithValidId2() throws Exception {
 		
-		when(planChecker.checkPlanForExecution(1)).thenReturn(null);
+		when(planChecker.checkPlanForExecution(false, 1)).thenReturn(null);
 		
 		final MvcResult response = this.mockMvc.perform(get(CHECK_PLAN_MGMT_URI + "/1")
 											   .accept(MediaType.APPLICATION_JSON))
@@ -454,7 +455,7 @@ public class ChoreographerPlanControllerTest {
 		Assert.assertEquals(1, responseBody.getPlanId());
 		Assert.assertEquals(0, responseBody.getErrorMessages().size());
 		
-		verify(planChecker, times(1)).checkPlanForExecution(1);
+		verify(planChecker, times(1)).checkPlanForExecution(false, 1);
 	}
 
 	//=================================================================================================

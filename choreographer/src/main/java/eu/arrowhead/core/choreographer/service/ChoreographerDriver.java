@@ -81,8 +81,10 @@ public class ChoreographerDriver {
     }
     
     //-------------------------------------------------------------------------------------------------
-	public Map<Integer,List<String>> searchForServices(final ServiceQueryFormListDTO forms, final boolean allowInterCloud) { //TODO: test this
+	public Map<Integer,List<String>> searchForServices(final ServiceQueryFormListDTO forms, final boolean allowInterCloud) { 
 		logger.debug("searchForServices started...");
+		Assert.notNull(forms, "Forms is null.");
+		Assert.isTrue(!Utilities.isEmpty(forms.getForms()), "Form list is empty.");
 		
 		final List<ServiceQueryFormDTO> interCloudCandidates = new ArrayList<>();
 		final List<Integer> interCloudCandidatesOriginalIdx = new ArrayList<>();
@@ -199,7 +201,7 @@ public class ChoreographerDriver {
     }
     
     //-------------------------------------------------------------------------------------------------
-    public OrchestrationResponseDTO queryOrchestrator(final OrchestrationFormRequestDTO form) { //TODO test this
+    public OrchestrationResponseDTO queryOrchestrator(final OrchestrationFormRequestDTO form) { 
         logger.debug("queryOrchestrator started...");
 
         Assert.notNull(form, "form is null.");
@@ -221,7 +223,7 @@ public class ChoreographerDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public void closeGatewayTunnels(final List<Integer> ports) { //TODO: test this
+	public void closeGatewayTunnels(final List<Integer> ports) { 
 		logger.debug("closeGatewayTunnels started...");
 		Assert.isTrue(!Utilities.isEmpty(ports), "Port list is null or empty.");
 		
@@ -389,18 +391,16 @@ public class ChoreographerDriver {
     }
     
     //-------------------------------------------------------------------------------------------------
-    private ServiceQueryResultListDTO multiQueryServiceRegistry(final ServiceQueryFormListDTO forms) { //TODO: test this through a public method
+    private ServiceQueryResultListDTO multiQueryServiceRegistry(final ServiceQueryFormListDTO forms) {
         logger.debug("multiQueryServiceRegistry started...");
-        Assert.notNull(forms, "ServiceQueryFormListDTO is null.");
 
         final UriComponents uri = getMultiQueryServiceRegistryUri();
         return httpService.sendRequest(uri, HttpMethod.POST, ServiceQueryResultListDTO.class, forms).getBody();
     }
     
     //-------------------------------------------------------------------------------------------------
-	private GSDMultiQueryResultDTO multiGlobalServiceDiscovery(final GSDMultiQueryFormDTO form) { //TODO: test this through a public method
+	private GSDMultiQueryResultDTO multiGlobalServiceDiscovery(final GSDMultiQueryFormDTO form) { 
 		logger.debug("multiGlobalServiceDiscovery started...");
-		Assert.notNull(form, "GSDMultiQueryFormDTO is null.");
 		
 		final UriComponents uri = getMultiGlobalServiceDiscoveryUri();
 		return httpService.sendRequest(uri, HttpMethod.POST, GSDMultiQueryResultDTO.class, form).getBody();
