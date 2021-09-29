@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.hibernate.HibernateException;
 import org.junit.Test;
@@ -894,6 +895,212 @@ public class ChoreographerSessionDBServiceTest {
 			verify(sessionStepRepository, times(1)).findById(eq(sessionStepId));
 			verify(sessionStepRepository, never()).saveAndFlush(any());
 			verify(worklogRepository, never()).saveAndFlush(any());
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetSessionStepBySessionIdAndStepId() {
+		final long sessionId = 5;
+		final long stepId = 7;
+		
+		final ChoreographerSession session = new ChoreographerSession();
+		session.setId(sessionId);
+		final ChoreographerStep step = new ChoreographerStep();
+		step.setId(stepId);
+		final ChoreographerSessionStep returnValue = new ChoreographerSessionStep();
+		returnValue.setSession(session);
+		returnValue.setStep(step);
+		
+		when(sessionRepository.findById(anyLong())).thenReturn(Optional.of(session));
+		when(stepRepository.findById(anyLong())).thenReturn(Optional.of(step));
+		when(sessionStepRepository.findBySessionAndStep(any(), any())).thenReturn(Optional.of(returnValue));
+		
+		final ChoreographerSessionStep result = dbService.getSessionStepBySessionIdAndStepId(sessionId, stepId);
+		
+		assertEquals(returnValue.getSession().getId(), result.getSession().getId());
+		assertEquals(returnValue.getStep().getId(), result.getStep().getId());
+		
+		verify(sessionRepository, times(1)).findById(eq(sessionId));
+		verify(stepRepository, times(1)).findById(eq(stepId));
+		verify(sessionStepRepository, times(1)).findBySessionAndStep(eq(session), eq(step));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetSessionStepBySessionIdAndStepId_SessionNotExists() {
+		final long sessionId = 5;
+		final long stepId = 7;
+		
+		when(sessionRepository.findById(anyLong())).thenReturn(Optional.empty());
+		
+		try {
+			dbService.getSessionStepBySessionIdAndStepId(sessionId, stepId);
+			
+		} catch (final InvalidParameterException ex) {
+			verify(sessionRepository, times(1)).findById(eq(sessionId));
+			verify(stepRepository, never()).findById(anyLong());
+			verify(sessionStepRepository, never()).findBySessionAndStep(any(), any());
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetSessionStepBySessionIdAndStepId_StepNotExists() {
+		final long sessionId = 5;
+		final long stepId = 7;
+		
+		final ChoreographerSession session = new ChoreographerSession();
+		session.setId(sessionId);
+		
+		when(sessionRepository.findById(anyLong())).thenReturn(Optional.of(session));
+		when(stepRepository.findById(anyLong())).thenReturn(Optional.empty());
+		
+		try {
+			dbService.getSessionStepBySessionIdAndStepId(sessionId, stepId);
+			
+		} catch (final InvalidParameterException ex) {
+			verify(sessionRepository, times(1)).findById(eq(sessionId));
+			verify(stepRepository, times(1)).findById(eq(stepId));
+			verify(sessionStepRepository, never()).findBySessionAndStep(any(), any());
+			throw ex;
+		}				
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetSessionStepBySessionIdAndStepId_SessionStepNotExists() {
+		final long sessionId = 5;
+		final long stepId = 7;
+		
+		final ChoreographerSession session = new ChoreographerSession();
+		session.setId(sessionId);
+		final ChoreographerStep step = new ChoreographerStep();
+		step.setId(stepId);
+		
+		when(sessionRepository.findById(anyLong())).thenReturn(Optional.of(session));
+		when(stepRepository.findById(anyLong())).thenReturn(Optional.of(step));
+		when(sessionStepRepository.findBySessionAndStep(any(), any())).thenReturn(Optional.empty());
+		
+		try {
+			dbService.getSessionStepBySessionIdAndStepId(sessionId, stepId);
+			
+		} catch (final InvalidParameterException ex) {
+			verify(sessionRepository, times(1)).findById(eq(sessionId));
+			verify(stepRepository, times(1)).findById(eq(stepId));
+			verify(sessionStepRepository, times(1)).findBySessionAndStep(eq(session), eq(step));
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetSessionStepBySessionIdAndStepId_DatabaseException() {
+		final long sessionId = 5;
+		final long stepId = 7;
+		
+		when(sessionRepository.findById(anyLong())).thenThrow(new HibernateException("test"));
+		
+		try {
+			dbService.getSessionStepBySessionIdAndStepId(sessionId, stepId);
+			
+		} catch (final ArrowheadException ex) {
+			verify(sessionRepository, times(1)).findById(eq(sessionId));
+			verify(stepRepository, never()).findById(anyLong());
+			verify(sessionStepRepository, never()).findBySessionAndStep(any(), any());
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetSessionStepBySessionIdAndSteps() {
+		final long sessionId = 6;
+		final ChoreographerSession session = new ChoreographerSession();
+		session.setId(sessionId);
+		final ChoreographerStep step = new ChoreographerStep();
+		step.setId(3);
+		final Set<ChoreographerStep> steps = Set.of(step);
+		final ChoreographerSessionStep returnValue = new ChoreographerSessionStep();
+		returnValue.setSession(session);
+		returnValue.setStep(step);
+		
+		when(sessionRepository.findById(anyLong())).thenReturn(Optional.of(session));
+		when(sessionStepRepository.findBySessionAndStepIn(any(), any())).thenReturn(List.of(returnValue));
+		
+		final List<ChoreographerSessionStep> result = dbService.getSessionStepBySessionIdAndSteps(sessionId, steps);
+		
+		assertEquals(returnValue.getSession().getId(), result.get(0).getSession().getId());
+		assertEquals(returnValue.getStep().getId(), result.get(0).getStep().getId());
+		
+		verify(sessionRepository, times(1)).findById(eq(sessionId));
+		verify(sessionStepRepository, times(1)).findBySessionAndStepIn(eq(session), eq(steps));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetSessionStepBySessionIdAndSteps_NullSteps() {
+		try {
+			dbService.getSessionStepBySessionIdAndSteps(7, null);
+			
+		} catch (final IllegalArgumentException ex) {
+			verify(sessionRepository, never()).findById(anyLong());
+			verify(sessionStepRepository, never()).findBySessionAndStepIn(any(), any());
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetSessionStepBySessionIdAndSteps_EmptySteps() {
+		try {
+			dbService.getSessionStepBySessionIdAndSteps(7, Set.of());
+			
+		} catch (final IllegalArgumentException ex) {
+			verify(sessionRepository, never()).findById(anyLong());
+			verify(sessionStepRepository, never()).findBySessionAndStepIn(any(), any());
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetSessionStepBySessionIdAndSteps_SessionNotExists() {
+		final long sessionId = 6;
+		final ChoreographerStep step = new ChoreographerStep();
+		step.setId(3);
+		final Set<ChoreographerStep> steps = Set.of(step);
+
+		when(sessionRepository.findById(anyLong())).thenReturn(Optional.empty());
+		
+		try {
+			dbService.getSessionStepBySessionIdAndSteps(sessionId, steps);
+			
+		} catch (final InvalidParameterException ex) {
+			verify(sessionRepository, times(1)).findById(eq(sessionId));
+			verify(sessionStepRepository, never()).findBySessionAndStepIn(any(), any());
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetSessionStepBySessionIdAndSteps_DatabaseException() {
+		final long sessionId = 6;
+		final ChoreographerStep step = new ChoreographerStep();
+		step.setId(3);
+		final Set<ChoreographerStep> steps = Set.of(step);
+
+		when(sessionRepository.findById(anyLong())).thenThrow(new HibernateException("test"));
+		
+		try {
+			dbService.getSessionStepBySessionIdAndSteps(sessionId, steps);
+			
+		} catch (final ArrowheadException ex) {
+			verify(sessionRepository, times(1)).findById(eq(sessionId));
+			verify(sessionStepRepository, never()).findBySessionAndStepIn(any(), any());
 			throw ex;
 		}		
 	}
