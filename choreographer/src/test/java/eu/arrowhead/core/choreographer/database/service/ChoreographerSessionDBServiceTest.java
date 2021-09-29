@@ -29,6 +29,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.database.entity.ChoreographerAction;
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
@@ -1362,7 +1363,7 @@ public class ChoreographerSessionDBServiceTest {
 		final PageRequest pageRequestCaptured = pageRequestCaptor.getValue();
 		assertEquals(0, pageRequestCaptured.getPageNumber());
 		assertEquals(Integer.MAX_VALUE, pageRequestCaptured.getPageSize());
-		assertEquals(Direction.ASC, pageRequestCaptured.getSort().getOrderFor("id").getDirection());
+		assertEquals(Direction.ASC, pageRequestCaptured.getSort().getOrderFor(CommonConstants.COMMON_FIELD_NAME_ID).getDirection());
 		
 		assertTrue(result.getContent().size() == 1);
 		assertEquals(sessionStep.getId(), result.getContent().get(0).getId());
@@ -1415,5 +1416,160 @@ public class ChoreographerSessionDBServiceTest {
 			verify(sessionStepRepository, never()).findAll(any(Example.class), any(PageRequest.class));
 			throw ex;
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testGetWorklogs() {
+		final int page = 6;
+		final int size = 50;
+		final Direction direction = Direction.ASC;
+		final String sortField = "test";
+		final Long sessionId = 1L;
+		final String planName = "test-plan";
+		final String actionName = "test-action";
+		final String stepName = "test-step";
+		
+		final ChoreographerWorklog worklog = new ChoreographerWorklog();
+		worklog.setId(66);
+		
+		final ArgumentCaptor<Example<ChoreographerWorklog>> exampleCaptor = ArgumentCaptor.forClass(Example.class);	
+		final ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
+		when(worklogRepository.findAll(exampleCaptor.capture(), pageRequestCaptor.capture())).thenReturn(new PageImpl<ChoreographerWorklog>(List.of(worklog)));
+		
+		final Page<ChoreographerWorklog> result = dbService.getWorklogs(page, size, direction, sortField, sessionId, planName, actionName, stepName);
+		
+		final Example<ChoreographerWorklog> exampleCaptured = exampleCaptor.getValue();
+		assertEquals(sessionId, exampleCaptured.getProbe().getSessionId());
+		assertEquals(planName, exampleCaptured.getProbe().getPlanName());
+		assertEquals(actionName, exampleCaptured.getProbe().getActionName());
+		assertEquals(stepName, exampleCaptured.getProbe().getStepName());
+		
+		final PageRequest pageRequestCaptured = pageRequestCaptor.getValue();
+		assertEquals(page, pageRequestCaptured.getPageNumber());
+		assertEquals(size, pageRequestCaptured.getPageSize());
+		assertEquals(direction, pageRequestCaptured.getSort().getOrderFor(sortField).getDirection());
+		
+		assertTrue(result.getContent().size() == 1);
+		assertEquals(worklog.getId(), result.getContent().get(0).getId());
+		
+		verify(worklogRepository, times(1)).findAll(any(Example.class), any(PageRequest.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testGetWorklogs_UndefinedParameters() {
+		final int page = -1;
+		final int size = -1;
+		final Direction direction = null;
+		final String sortField = null;
+		final Long sessionId = null;
+		final String planName = null;
+		final String actionName = null;
+		final String stepName = null;
+		
+		final ChoreographerWorklog worklog = new ChoreographerWorklog();
+		worklog.setId(66);
+		
+		final ArgumentCaptor<Example<ChoreographerWorklog>> exampleCaptor = ArgumentCaptor.forClass(Example.class);	
+		final ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
+		when(worklogRepository.findAll(exampleCaptor.capture(), pageRequestCaptor.capture())).thenReturn(new PageImpl<ChoreographerWorklog>(List.of(worklog)));
+		
+		final Page<ChoreographerWorklog> result = dbService.getWorklogs(page, size, direction, sortField, sessionId, planName, actionName, stepName);
+		
+		final Example<ChoreographerWorklog> exampleCaptured = exampleCaptor.getValue();
+		assertNull(exampleCaptured.getProbe().getSessionId());
+		assertNull(exampleCaptured.getProbe().getPlanName());
+		assertNull(exampleCaptured.getProbe().getActionName());
+		assertNull(exampleCaptured.getProbe().getStepName());
+		
+		final PageRequest pageRequestCaptured = pageRequestCaptor.getValue();
+		assertEquals(0, pageRequestCaptured.getPageNumber());
+		assertEquals(Integer.MAX_VALUE, pageRequestCaptured.getPageSize());
+		assertEquals(Direction.ASC, pageRequestCaptured.getSort().getOrderFor(CommonConstants.COMMON_FIELD_NAME_ID).getDirection());
+		
+		assertTrue(result.getContent().size() == 1);
+		assertEquals(worklog.getId(), result.getContent().get(0).getId());
+		
+		verify(worklogRepository, times(1)).findAll(any(Example.class), any(PageRequest.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("unchecked")
+	@Test(expected = ArrowheadException.class)
+	public void testGetWorklogs_DatabaseException() {
+		final int page = 6;
+		final int size = 50;
+		final Direction direction = Direction.ASC;
+		final String sortField = "test";
+		final Long sessionId = 1L;
+		final String planName = "test-plan";
+		final String actionName = "test-action";
+		final String stepName = "test-step";
+		
+		when(worklogRepository.findAll(any(Example.class), any(PageRequest.class))).thenThrow(new HibernateException("test"));
+		
+		try {
+			dbService.getWorklogs(page, size, direction, sortField, sessionId, planName, actionName, stepName);		
+			
+		} catch (final ArrowheadException ex) {
+			verify(worklogRepository, times(1)).findAll(any(Example.class), any(PageRequest.class));
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testWorklog() {
+		final String planName = "test-plan";
+		final String actionName = "test-action";
+		final String stepName = "test-step";
+		final Long sessionId = 5L;
+		final String message = "message";
+		final String exception = "exception";
+		
+		final ArgumentCaptor<ChoreographerWorklog> captor = ArgumentCaptor.forClass(ChoreographerWorklog.class);
+		when(worklogRepository.saveAndFlush(captor.capture())).thenReturn(new ChoreographerWorklog());
+		
+		dbService.worklog(planName, actionName, stepName, sessionId, message, exception);
+		
+		final ChoreographerWorklog captured = captor.getValue();
+		assertEquals(sessionId, captured.getSessionId());
+		assertEquals(planName, captured.getPlanName());
+		assertEquals(actionName, captured.getActionName());
+		assertEquals(stepName, captured.getStepName());
+		assertEquals(sessionId, captured.getSessionId());
+		assertEquals(exception, captured.getException());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testWorklogException() {
+		final String planName = "test-plan";
+		final String actionName = "test-action";
+		final String stepName = "test-step";
+		final Long sessionId = 5L;
+		final String message = "message";
+		final InvalidParameterException exception = new InvalidParameterException("exception");
+		
+		final ArgumentCaptor<ChoreographerWorklog> captor = ArgumentCaptor.forClass(ChoreographerWorklog.class);
+		when(worklogRepository.saveAndFlush(captor.capture())).thenReturn(new ChoreographerWorklog());
+		
+		try {
+			dbService.worklogException(planName, actionName, stepName, sessionId, message, exception);
+			
+		} catch (final Exception ex) {
+			final ChoreographerWorklog captured = captor.getValue();
+			assertEquals(sessionId, captured.getSessionId());
+			assertEquals(planName, captured.getPlanName());
+			assertEquals(actionName, captured.getActionName());
+			assertEquals(stepName, captured.getStepName());
+			assertEquals(sessionId, captured.getSessionId());
+			assertTrue(captured.getException().contains(exception.getClass().getSimpleName()));
+			assertTrue(captured.getException().contains(ex.getMessage()));
+			assertTrue(ex instanceof InvalidParameterException);
+		}	
 	}
 }
