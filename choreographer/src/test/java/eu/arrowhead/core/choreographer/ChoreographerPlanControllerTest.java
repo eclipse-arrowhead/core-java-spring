@@ -38,13 +38,16 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -91,6 +94,9 @@ public class ChoreographerPlanControllerTest {
 	
 	@Autowired
 	private ObjectMapper objectMapper;
+	
+	@Autowired
+	private ApplicationContext appContext;
 	
 	@MockBean(name = "mockChoreographerPlanDBService")
     private ChoreographerPlanDBService planDBService;
@@ -377,7 +383,7 @@ public class ChoreographerPlanControllerTest {
 		final ChoreographerSession session = new ChoreographerSession();
 		session.setId(1212);
 		
-		when(planChecker.checkPlanForExecution(any(ChoreographerRunPlanRequestDTO.class))).thenReturn(null);
+		when(planChecker.checkPlanForExecution(any(ChoreographerRunPlanRequestDTO.class))).thenReturn(new ChoreographerRunPlanResponseDTO());
 		when(sessionDBService.initiateSession(1, null)).thenReturn(session);
 		doNothing().when(jms).convertAndSend(eq("start-session"), any(ChoreographerStartSessionDTO.class));
 		
@@ -401,6 +407,94 @@ public class ChoreographerPlanControllerTest {
 		verify(jms, times(1)).convertAndSend(eq("start-session"), any(ChoreographerStartSessionDTO.class));
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testStartPlansOkAllowIntercloud() throws Exception {
+		final ChoreographerRunPlanRequestDTO runRequest = new ChoreographerRunPlanRequestDTO();
+		runRequest.setPlanId(1L);
+		runRequest.setAllowInterCloud(true);
+		runRequest.setChooseOptimalExecutor(true);
+		
+		final ChoreographerSession session = new ChoreographerSession();
+		session.setId(1212);
+		
+		when(planChecker.checkPlanForExecution(any(ChoreographerRunPlanRequestDTO.class))).thenReturn(new ChoreographerRunPlanResponseDTO());
+		when(sessionDBService.initiateSession(1, null)).thenReturn(session);
+		doNothing().when(jms).convertAndSend(eq("start-session"), any(ChoreographerStartSessionDTO.class));
+		
+		final MvcResult response = this.mockMvc.perform(post(START_SESSION_MGMT_URI)
+											   .contentType(MediaType.APPLICATION_JSON)
+											   .content(objectMapper.writeValueAsBytes(List.of(runRequest)))
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
+		
+		final TypeReference<List<ChoreographerRunPlanResponseDTO>> typeReference = new TypeReference<>() {};
+		final List<ChoreographerRunPlanResponseDTO> responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), typeReference);
+		
+		Assert.assertEquals(1, responseBody.size());
+		Assert.assertEquals(ChoreographerSessionStatus.INITIATED, responseBody.get(0).getStatus());
+		Assert.assertEquals(1, responseBody.get(0).getPlanId().longValue());
+		Assert.assertEquals(1212, responseBody.get(0).getSessionId().longValue());
+		
+		verify(planChecker, times(1)).checkPlanForExecution(any(ChoreographerRunPlanRequestDTO.class));
+		verify(sessionDBService, times(1)).initiateSession(eq(1L), isNull());
+		final ArgumentCaptor<ChoreographerStartSessionDTO> captor = ArgumentCaptor.forClass(ChoreographerStartSessionDTO.class);
+		verify(jms, times(1)).convertAndSend(eq("start-session"), captor.capture());
+		
+		final ChoreographerStartSessionDTO sessionDTO = captor.getValue();
+		Assert.assertEquals(1212, sessionDTO.getSessionId());
+		Assert.assertEquals(1, sessionDTO.getPlanId());
+		Assert.assertTrue(sessionDTO.isAllowInterCloud());
+		Assert.assertTrue(sessionDTO.getChooseOptimalExecutor());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testStartPlansOkAllowIntercloudGatekeeperIsNotPresent() throws Exception {
+		final ChoreographerPlanController controller = appContext.getBean(ChoreographerPlanController.class);
+		ReflectionTestUtils.setField(controller, "gatekeeperIsPresent", false);
+		
+		final ChoreographerRunPlanRequestDTO runRequest = new ChoreographerRunPlanRequestDTO();
+		runRequest.setPlanId(1L);
+		runRequest.setAllowInterCloud(true);
+		runRequest.setChooseOptimalExecutor(true);
+		
+		final ChoreographerSession session = new ChoreographerSession();
+		session.setId(1212);
+		
+		when(planChecker.checkPlanForExecution(any(ChoreographerRunPlanRequestDTO.class))).thenReturn(new ChoreographerRunPlanResponseDTO());
+		when(sessionDBService.initiateSession(1, null)).thenReturn(session);
+		doNothing().when(jms).convertAndSend(eq("start-session"), any(ChoreographerStartSessionDTO.class));
+		
+		final MvcResult response = this.mockMvc.perform(post(START_SESSION_MGMT_URI)
+											   .contentType(MediaType.APPLICATION_JSON)
+											   .content(objectMapper.writeValueAsBytes(List.of(runRequest)))
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
+		
+		final TypeReference<List<ChoreographerRunPlanResponseDTO>> typeReference = new TypeReference<>() {};
+		final List<ChoreographerRunPlanResponseDTO> responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), typeReference);
+		
+		Assert.assertEquals(1, responseBody.size());
+		Assert.assertEquals(ChoreographerSessionStatus.INITIATED, responseBody.get(0).getStatus());
+		Assert.assertEquals(1, responseBody.get(0).getPlanId().longValue());
+		Assert.assertEquals(1212, responseBody.get(0).getSessionId().longValue());
+		
+		verify(planChecker, times(1)).checkPlanForExecution(any(ChoreographerRunPlanRequestDTO.class));
+		verify(sessionDBService, times(1)).initiateSession(eq(1L), isNull());
+		final ArgumentCaptor<ChoreographerStartSessionDTO> captor = ArgumentCaptor.forClass(ChoreographerStartSessionDTO.class);
+		verify(jms, times(1)).convertAndSend(eq("start-session"), captor.capture());
+		
+		final ChoreographerStartSessionDTO sessionDTO = captor.getValue();
+		Assert.assertEquals(1212, sessionDTO.getSessionId());
+		Assert.assertEquals(1, sessionDTO.getPlanId());
+		Assert.assertFalse(sessionDTO.isAllowInterCloud());
+		Assert.assertTrue(sessionDTO.getChooseOptimalExecutor());
+
+		ReflectionTestUtils.setField(controller, "gatekeeperIsPresent", true);
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -422,7 +516,6 @@ public class ChoreographerPlanControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCheckPlanWithValidId1() throws Exception {
-		
 		when(planChecker.checkPlanForExecution(false, 1)).thenReturn(new ChoreographerRunPlanResponseDTO(1L, List.of("something wrong"), false));
 		
 		final MvcResult response = this.mockMvc.perform(get(CHECK_PLAN_MGMT_URI + "/1")
@@ -442,8 +535,7 @@ public class ChoreographerPlanControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCheckPlanWithValidId2() throws Exception {
-		
-		when(planChecker.checkPlanForExecution(false, 1)).thenReturn(null);
+		when(planChecker.checkPlanForExecution(false, 1)).thenReturn(new ChoreographerRunPlanResponseDTO());
 		
 		final MvcResult response = this.mockMvc.perform(get(CHECK_PLAN_MGMT_URI + "/1")
 											   .accept(MediaType.APPLICATION_JSON))
@@ -456,6 +548,47 @@ public class ChoreographerPlanControllerTest {
 		Assert.assertEquals(0, responseBody.getErrorMessages().size());
 		
 		verify(planChecker, times(1)).checkPlanForExecution(false, 1);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCheckPlanWithValidId3() throws Exception {
+		when(planChecker.checkPlanForExecution(true, 1)).thenReturn(new ChoreographerRunPlanResponseDTO());
+		
+		final MvcResult response = this.mockMvc.perform(get(CHECK_PLAN_MGMT_URI + "/1?allowInterCloud=true")
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
+		
+		final ChoreographerCheckPlanResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), ChoreographerCheckPlanResponseDTO.class);
+		
+		Assert.assertEquals(1, responseBody.getPlanId());
+		Assert.assertEquals(0, responseBody.getErrorMessages().size());
+		
+		verify(planChecker, times(1)).checkPlanForExecution(true, 1);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCheckPlanWithValidId4() throws Exception {
+		final ChoreographerPlanController controller = appContext.getBean(ChoreographerPlanController.class);
+		ReflectionTestUtils.setField(controller, "gatekeeperIsPresent", false);
+
+		when(planChecker.checkPlanForExecution(false, 1)).thenReturn(new ChoreographerRunPlanResponseDTO());
+		
+		final MvcResult response = this.mockMvc.perform(get(CHECK_PLAN_MGMT_URI + "/1?allowInterCloud=true")
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
+		
+		final ChoreographerCheckPlanResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), ChoreographerCheckPlanResponseDTO.class);
+		
+		Assert.assertEquals(1, responseBody.getPlanId());
+		Assert.assertEquals(0, responseBody.getErrorMessages().size());
+		
+		verify(planChecker, times(1)).checkPlanForExecution(false, 1);
+		
+		ReflectionTestUtils.setField(controller, "gatekeeperIsPresent", true);
 	}
 
 	//=================================================================================================
