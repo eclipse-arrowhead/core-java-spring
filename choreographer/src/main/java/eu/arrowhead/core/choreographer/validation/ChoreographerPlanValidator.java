@@ -55,7 +55,7 @@ public class ChoreographerPlanValidator {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerPlanRequestDTO validatePlan(final ChoreographerPlanRequestDTO request, final String origin, final boolean normalizeNames) { //TODO: test this (serviceRequirement handle changed)
+	public ChoreographerPlanRequestDTO validatePlan(final ChoreographerPlanRequestDTO request, final String origin, final boolean normalizeNames) { 
 		logger.debug("validatePlan started...");
 		
 		return validatePlanImpl(request, origin, normalizeNames);
