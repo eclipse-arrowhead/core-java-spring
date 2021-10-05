@@ -214,23 +214,27 @@ public class ChoreographerSessionDBService {
 		final String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 		final PageRequest pageRequest = PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField);
 		
-		final ChoreographerSession schema = new ChoreographerSession();
-		schema.setStatus(status);
-		if (planId != null) {
-			final Optional<ChoreographerPlan> optional = planRepository.findById(planId);
-			if (optional.isEmpty()) {
-				throw new InvalidParameterException("Plan with id " + planId + " not exists"); 
-			}
-			schema.setPlan(optional.get());
-		}
-		
-		final ExampleMatcher matcher = ExampleMatcher.matching()
-													 .withIgnorePaths(CommonConstants.COMMON_FIELD_NAME_ID)
-													 .withStringMatcher(StringMatcher.EXACT)
-													 .withIgnoreNullValues();
-		
 		try {
-			return sessionRepository.findAll(Example.of(schema, matcher), pageRequest);			
+			final ChoreographerSession schema = new ChoreographerSession();
+			schema.setStatus(status);
+			if (planId != null) {
+				final Optional<ChoreographerPlan> optional = planRepository.findById(planId);
+				if (optional.isEmpty()) {
+					throw new InvalidParameterException("Plan with id " + planId + " not exists"); 
+				}
+				schema.setPlan(optional.get());
+			}
+			
+			final ExampleMatcher matcher = ExampleMatcher.matching()
+														 .withIgnorePaths(CommonConstants.COMMON_FIELD_NAME_ID)
+														 .withStringMatcher(StringMatcher.EXACT)
+														 .withIgnoreNullValues();
+		
+			return sessionRepository.findAll(Example.of(schema, matcher), pageRequest);	
+			
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+			
 		} catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -450,7 +454,7 @@ public class ChoreographerSessionDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	public List<ChoreographerSessionStep> getAllSessionStepBySessionId(final long sessionId) {
-		logger.debug("getSessionStepById started...");
+		logger.debug("getAllSessionStepBySessionId started...");
 	
 		try {
 			final Optional<ChoreographerSession> optional = sessionRepository.findById(sessionId);
@@ -503,22 +507,27 @@ public class ChoreographerSessionDBService {
 		final String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 		final PageRequest pageRequest = PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField);
 		
-		final ChoreographerSessionStep schema = new ChoreographerSessionStep();
-		schema.setStatus(status);
-		if (sessionId != null) {
-			final Optional<ChoreographerSession> optional = sessionRepository.findById(sessionId);
-			if (optional.isEmpty()) {
-				throw new InvalidParameterException("Session with id " + sessionId + " not exists"); 
-			}
-			schema.setSession(optional.get());
-		}
-		
-		final ExampleMatcher matcher = ExampleMatcher.matching()
-													 .withIgnorePaths(CommonConstants.COMMON_FIELD_NAME_ID)
-													 .withStringMatcher(StringMatcher.EXACT)
-													 .withIgnoreNullValues();
 		try {
+			final ChoreographerSessionStep schema = new ChoreographerSessionStep();
+			schema.setStatus(status);
+			if (sessionId != null) {
+				final Optional<ChoreographerSession> optional = sessionRepository.findById(sessionId);
+				if (optional.isEmpty()) {
+					throw new InvalidParameterException("Session with id " + sessionId + " not exists"); 
+				}
+				schema.setSession(optional.get());
+			}
+			
+			final ExampleMatcher matcher = ExampleMatcher.matching()
+														 .withIgnorePaths(CommonConstants.COMMON_FIELD_NAME_ID)
+														 .withStringMatcher(StringMatcher.EXACT)
+														 .withIgnoreNullValues();
+			
 			return sessionStepRepository.findAll(Example.of(schema, matcher), pageRequest);
+		
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+			
 		} catch (final Exception ex) {
 	    	logger.debug(ex.getMessage(), ex);
 	    	throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);

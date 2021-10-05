@@ -228,7 +228,7 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path = CoreCommonConstants.OP_SERVICEREGISTRY_PULL_CONFIG_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public KeyValuesDTO pullConfig() { //TODO junit
+	@ResponseBody public KeyValuesDTO pullConfig() {
 		logger.debug("pullConfig started ...");
 		return serviceRegistryService.getPublicConfig();
 	}

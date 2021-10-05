@@ -83,7 +83,7 @@ public class ChoreographerExecutorController {
     })
     @PostMapping(path = CommonConstants.CHOREOGRAPHER_EXECUTOR_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
-    @ResponseBody public ChoreographerExecutorResponseDTO addExecutor(@RequestBody final ChoreographerExecutorRequestDTO request) { //TODO junit
+    @ResponseBody public ChoreographerExecutorResponseDTO addExecutor(@RequestBody final ChoreographerExecutorRequestDTO request) {
     	logger.debug("addExecutor started...");
     	return executorService.addExecutorSystem(request, CommonConstants.CHOREOGRAPHER_URI + CommonConstants.CHOREOGRAPHER_EXECUTOR_MGMT_URI);
     }
@@ -97,7 +97,7 @@ public class ChoreographerExecutorController {
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @DeleteMapping(path = CommonConstants.CHOREOGRAPHER_EXECUTOR_MGMT_BY_ID_URI)
-    public void removeExecutor(@PathVariable final long id) { //TODO junit
+    public void removeExecutor(@PathVariable final long id) {
         logger.debug("New Executor delete request received with id: {}", id);
         executorService.removeExecutorSystem(id, CommonConstants.CHOREOGRAPHER_URI + CommonConstants.CHOREOGRAPHER_EXECUTOR_MGMT_BY_ID_URI);
         logger.debug("Executor with id: '{}' successfully deleted", id);
@@ -116,7 +116,7 @@ public class ChoreographerExecutorController {
     @ResponseBody public ChoreographerExecutorListResponseDTO getExecutorEntries(@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
 																	             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
 																	             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
-																	             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) { //TODO junit
+																	             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
         logger.debug("New Executor get request received with page: {} and item_per page: {}", page, size);
         return executorService.getExecutors(page, size, direction, sortField, CommonConstants.CHOREOGRAPHER_URI + CommonConstants.CHOREOGRAPHER_EXECUTOR_MGMT_URI);
     }
@@ -130,7 +130,7 @@ public class ChoreographerExecutorController {
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @GetMapping(path = CommonConstants.CHOREOGRAPHER_EXECUTOR_MGMT_BY_ID_URI)
-    @ResponseBody public ChoreographerExecutorResponseDTO getExecutorEntryById(@PathVariable final long id) { //TODO junit
+    @ResponseBody public ChoreographerExecutorResponseDTO getExecutorEntryById(@PathVariable final long id) {
         logger.debug("New Executor get request received with id: {}", id);
         return executorService.getExecutorById(id, CommonConstants.CHOREOGRAPHER_URI + CommonConstants.CHOREOGRAPHER_EXECUTOR_MGMT_BY_ID_URI);
     }
@@ -161,7 +161,7 @@ public class ChoreographerExecutorController {
     @DeleteMapping(CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER)
     public void unregisterExecutor(@RequestParam(name = CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_NAME, required = true) final String executorName) { //TODO junit
         logger.debug("New Executor delete request received with name={}", executorName);        
-        executorService.unregisterExecutorSystem(executorName,  CommonConstants.CHOREOGRAPHER_URI + CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER);
+        executorService.unregisterExecutorSystem(executorName, CommonConstants.CHOREOGRAPHER_URI + CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER);
         logger.debug("Executor successfully deleted");
     }
 }
