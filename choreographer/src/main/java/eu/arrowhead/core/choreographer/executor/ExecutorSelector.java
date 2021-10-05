@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -57,6 +56,9 @@ public class ExecutorSelector { //TODO: test this class
 	
 	@Autowired
 	private ExecutorPrioritizationStrategy prioritizationStrategy;
+	
+	@Autowired
+	private ExecutorMeasurementStrategy measurementStrategy;
 	
 	private static final Logger logger = LogManager.getLogger(ExecutorSelector.class);
 	
@@ -114,7 +116,8 @@ public class ExecutorSelector { //TODO: test this class
 			if (!executor.isLocked() && !excudedIds.contains(executor.getId())) {
 				filtered.add(executor);
 			}
-		}			
+		}
+		
 		return filtered;		
 	}
 	
@@ -131,6 +134,7 @@ public class ExecutorSelector { //TODO: test this class
 				collected.put(executor.getId(), info);
 				
 			} catch (final Exception ex) {
+				logger.warn("Problem while querying service info for executor {}", executor.getName());
 				logger.debug(ex.getMessage());
 			}
 		}
@@ -148,7 +152,8 @@ public class ExecutorSelector { //TODO: test this class
 			if (executorServiceInfos.containsKey(executor.getId())) {
 				filtered.add(executor);
 			}
-		}			
+		}
+		
 		return filtered;
 	}
 	
@@ -162,9 +167,9 @@ public class ExecutorSelector { //TODO: test this class
 		}
 		
 		ExecutorData bestCandidate = null;
-		int bestCloudNumber = Integer.MAX_VALUE;
+		int bestCloudMeasurement = Integer.MAX_VALUE;
 		for (final ChoreographerExecutor potential : potentials) {
-			final Optional<ChoreographerExecutor> optional = executorDBService.getExecutorOptionalById(potential.getId()); //refreshing from DB
+			final Optional<ChoreographerExecutor> optional = executorDBService.getExecutorOptionalById(potential.getId()); // refreshing from DB
 			if (optional.isEmpty()) {
 				continue;
 			}
@@ -175,7 +180,7 @@ public class ExecutorSelector { //TODO: test this class
 						  																															executor.getAddress(),
 						  																															executor.getPort()));			
 				
-				final Map<Integer,List<String>> reliedServicesResponse = verifyReliedServices(executorServiceInfos.get(executor.getId()), allowInterCloud);
+				final Map<Integer,List<String>> reliedServicesResponse = verifyReliedServices(executor.getName(), executorServiceInfos.get(executor.getId()), allowInterCloud);
 				if (reliedServicesResponse != null) { // means executor is verified
 					final boolean useOtherClouds = isExecutorUseOtherClouds(reliedServicesResponse);
 					final ExecutorData executorData = new ExecutorData(executor, executorSystem, executorServiceInfos.get(executor.getId()).getDependencies(), useOtherClouds);
@@ -188,10 +193,10 @@ public class ExecutorSelector { //TODO: test this class
 						return executorData;
 					}
 					
-					final int cloudNo = calculateNumberOfClouds(reliedServicesResponse);
-					if (cloudNo < bestCloudNumber) {
+					final int cloudMeasurement = measurementStrategy.getMeasurement(reliedServicesResponse);
+					if (cloudMeasurement < bestCloudMeasurement) {
 						bestCandidate = executorData;
-						bestCloudNumber = cloudNo;
+						bestCloudMeasurement = cloudMeasurement;
 					}
 				}
 			}
@@ -205,18 +210,29 @@ public class ExecutorSelector { //TODO: test this class
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Map<Integer,List<String>> verifyReliedServices(final ChoreographerExecutorServiceInfoResponseDTO serviceInfo, final boolean allowInterCloud) {
+	private Map<Integer,List<String>> verifyReliedServices(final String executorName, final ChoreographerExecutorServiceInfoResponseDTO serviceInfo, final boolean allowInterCloud) {
 		logger.debug("verifyReliedServices started...");
 		
-		final Map<Integer,List<String>> response = driver.searchForServices(new ServiceQueryFormListDTO(serviceInfo.getDependencies()), allowInterCloud);
-		
-		for (final List<String> cloudList : response.values()) {
-			if (cloudList.isEmpty()) {
-				return null;
-			}
+		if (Utilities.isEmpty(serviceInfo.getDependencies())) { // no dependencies
+			return Map.of();
 		}
 		
-		return response;
+		try {
+			final Map<Integer,List<String>> response = driver.searchForServices(new ServiceQueryFormListDTO(serviceInfo.getDependencies()), allowInterCloud);
+			
+			for (final List<String> cloudList : response.values()) {
+				if (cloudList.isEmpty()) {
+					return null;
+				}
+			}
+			
+			return response;
+		} catch (final Exception ex) {
+			logger.warn("Problem while verifying service info for executor {}", executorName);
+			logger.debug(ex.getMessage());
+			
+			return null;
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -230,15 +246,5 @@ public class ExecutorSelector { //TODO: test this class
 		}
 		
 		return false;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private int calculateNumberOfClouds(final Map<Integer,List<String>> serviceData) {
-		logger.debug("calculateNumberOfClouds started...");
-		
-		return serviceData.values()
-						  .stream()
-						  .flatMap(List::stream)
-						  .collect(Collectors.toSet()).size();
 	}
 }

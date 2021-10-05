@@ -41,8 +41,10 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.core.choreographer.exception.ChoreographerSessionErrorHandler;
+import eu.arrowhead.core.choreographer.executor.ExecutorMeasurementStrategy;
 import eu.arrowhead.core.choreographer.executor.ExecutorPrioritizationStrategy;
-import eu.arrowhead.core.choreographer.executor.RandomExecutorPrioritizationStrategy;
+import eu.arrowhead.core.choreographer.executor.MinimalDependencyExecutorPrioritizationStrategy;
+import eu.arrowhead.core.choreographer.executor.WeightedExecutorMeasurementStrategy;
 import eu.arrowhead.core.choreographer.graph.EdgeDestroyerStepGraphNormalizer;
 import eu.arrowhead.core.choreographer.graph.KahnAlgorithmStepGraphCircleDetector;
 import eu.arrowhead.core.choreographer.graph.StepGraphCircleDetector;
@@ -107,8 +109,14 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
     //-------------------------------------------------------------------------------------------------
     @Bean
     public ExecutorPrioritizationStrategy getExecutorPrioritizationStrategy() {
-    	return new RandomExecutorPrioritizationStrategy();
+    	return new MinimalDependencyExecutorPrioritizationStrategy();
     }
+    
+    //-------------------------------------------------------------------------------------------------
+	@Bean
+	public ExecutorMeasurementStrategy getExecutorMeasurementStrategy() {
+		return new WeightedExecutorMeasurementStrategy();
+	}
 	
 	//=================================================================================================
 	// assistant methods
