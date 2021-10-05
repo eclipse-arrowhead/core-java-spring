@@ -40,7 +40,7 @@ import eu.arrowhead.core.choreographer.database.service.ChoreographerSessionDBSe
 import eu.arrowhead.core.choreographer.service.ChoreographerDriver;
 
 @Component
-public class ExecutorSelector { //TODO: test this class
+public class ExecutorSelector { 
 	
 	//=================================================================================================
 	// methods
