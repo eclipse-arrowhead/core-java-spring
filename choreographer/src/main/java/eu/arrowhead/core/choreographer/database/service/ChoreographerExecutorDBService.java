@@ -71,7 +71,7 @@ public class ChoreographerExecutorDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	public ChoreographerExecutorResponseDTO createExecutorResponse(final String systemName, final String address, final int port, final String baseUri, final String serviceDefinitionName,
-																   final int minVersion, final int maxVersion) { //TODO junit
+																   final int minVersion, final int maxVersion) {
 		logger.debug("createExecutorResponse started...");
 		
 		final ChoreographerExecutor executor = createExecutorWithoutSystemNameAndAddressValidation(systemName, address, port, baseUri, serviceDefinitionName, minVersion, maxVersion);		
@@ -83,7 +83,7 @@ public class ChoreographerExecutorDBService {
     //-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
     public ChoreographerExecutor createExecutorWithoutSystemNameAndAddressValidation(final String systemName, final String address, final int port, final String baseUri, final String serviceDefinitionName,
-    																				 final int minVersion, final int maxVersion) { //TODO junit
+    																				 final int minVersion, final int maxVersion) {
 		logger.debug("createExecutor started...");
 		Assert.isTrue(!Utilities.isEmpty(systemName), "systemName is empty");
 		Assert.isTrue(!Utilities.isEmpty(address), "address is empty");
@@ -138,7 +138,7 @@ public class ChoreographerExecutorDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerExecutorListResponseDTO getExecutorsResponse(final int page, final int size, final Direction direction, final String sortField) { //TODO junit
+	public ChoreographerExecutorListResponseDTO getExecutorsResponse(final int page, final int size, final Direction direction, final String sortField) {
 		logger.debug("getExecutorsResponse started...");
 		
 		final Page<ChoreographerExecutor> executors = getExecutors(page, size, direction, sortField);
@@ -152,7 +152,7 @@ public class ChoreographerExecutorDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public Page<ChoreographerExecutor> getExecutors(final int page, final int size, final Direction direction, final String sortField) { //TODO junit
+	public Page<ChoreographerExecutor> getExecutors(final int page, final int size, final Direction direction, final String sortField) {
 		logger.debug("getExecutors started...");
 		
 		final int validatedPage = page < 0 ? 0 : page;
@@ -173,7 +173,7 @@ public class ChoreographerExecutorDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public Optional<ChoreographerExecutorResponseDTO> getExecutorOptionalByIdResponse(final long id) { //TODO junit
+	public Optional<ChoreographerExecutorResponseDTO> getExecutorOptionalByIdResponse(final long id) {
 		logger.debug("getExecutorOptionalByIdResponse started...");
 		
 		final Optional<ChoreographerExecutor> optional = getExecutorOptionalById(id);
@@ -186,7 +186,7 @@ public class ChoreographerExecutorDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public Optional<ChoreographerExecutor> getExecutorOptionalById(final long id) { //TODO junit
+	public Optional<ChoreographerExecutor> getExecutorOptionalById(final long id) {
 		logger.debug("getExecutorById started...");
 		
 		try {
@@ -198,7 +198,7 @@ public class ChoreographerExecutorDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public Optional<ChoreographerExecutor> getExecutorOptionalByAddressAndPortAndBaseUri(final String address, final int port, final String baseUri) { //TODO junit
+	public Optional<ChoreographerExecutor> getExecutorOptionalByAddressAndPortAndBaseUri(final String address, final int port, final String baseUri) {
 		logger.debug("getExecutorById started...");
 		Assert.isTrue(!Utilities.isEmpty(address), "address is empty");
 		
@@ -211,7 +211,7 @@ public class ChoreographerExecutorDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public Optional<ChoreographerExecutor> getExecutorOptionalByName(final String name) { //TODO junit
+	public Optional<ChoreographerExecutor> getExecutorOptionalByName(final String name) {
 		logger.debug("getExecutorOptionalByName started...");
 		Assert.isTrue(!Utilities.isEmpty(name), "name is empty");
 		
@@ -224,7 +224,7 @@ public class ChoreographerExecutorDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public List<ChoreographerExecutor> getExecutorsByServiceDefinitionAndVersion(final String serviceDefinition, final int minVersion, final int maxVersion) { //TODO junit
+	public List<ChoreographerExecutor> getExecutorsByServiceDefinitionAndVersion(final String serviceDefinition, final int minVersion, final int maxVersion) {
 		logger.debug("getExecutorsByServiceDefinitionAndVersion started...");
 		Assert.isTrue(!Utilities.isEmpty(serviceDefinition), "serviceDefinition is empty");
 		
@@ -245,7 +245,7 @@ public class ChoreographerExecutorDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-    public void deleteExecutorById(final long id) { //TODO junit
+    public void deleteExecutorById(final long id) {
 		logger.debug("deleteExecutorById started...");
 		
 		try {
@@ -257,7 +257,10 @@ public class ChoreographerExecutorDBService {
 					executorRepository.deleteById(id);
 					executorRepository.flush();					
 				}
-			}			
+			}
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+			
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -266,7 +269,7 @@ public class ChoreographerExecutorDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-    public void deleteExecutorByAddressAndPortAndBaseUri(final String address, final int port, final String baseUri) { //TODO junit
+    public void deleteExecutorByAddressAndPortAndBaseUri(final String address, final int port, final String baseUri) {
 		logger.debug("deleteExecutorByAddressAndPortAndBaseUri started...");
 		Assert.isTrue(!Utilities.isEmpty(address), "address is empty");
 		
@@ -275,6 +278,10 @@ public class ChoreographerExecutorDBService {
 			if (opt.isPresent()) {
 				deleteExecutorById(opt.get().getId());
 			}
+			
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+			
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -283,7 +290,7 @@ public class ChoreographerExecutorDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-    public boolean lockExecutorById(final long id) { //TODO junit
+    public boolean lockExecutorById(final long id) {
 		logger.debug("lockExecutorById started...");
 		
 		try {
@@ -305,7 +312,7 @@ public class ChoreographerExecutorDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	public boolean isExecutorActiveById(final long id) {		
-		logger.debug("lockExecutorById started...");		
+		logger.debug("isExecutorActiveById started...");		
 		
 		try {
 			final Optional<ChoreographerExecutor> optional = executorRepository.findById(id);
