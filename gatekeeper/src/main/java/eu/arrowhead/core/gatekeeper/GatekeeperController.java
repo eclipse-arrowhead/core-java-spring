@@ -509,7 +509,7 @@ public class GatekeeperController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PostMapping(path = CommonConstants.OP_GATEKEEPER_MULTI_GSD_SERVICE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public GSDMultiQueryResultDTO initiateMultiGlobalServiceDiscovery(@RequestBody final GSDMultiQueryFormDTO gsdForm) throws InterruptedException { // TODO: test this
+	@ResponseBody public GSDMultiQueryResultDTO initiateMultiGlobalServiceDiscovery(@RequestBody final GSDMultiQueryFormDTO gsdForm) throws InterruptedException { 
 		logger.debug("New initiateMultiGlobalServiceDiscovery post request received");
 		
 		validateMultiGSDQueryFormDTO(gsdForm, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_MULTI_GSD_SERVICE);
@@ -700,10 +700,10 @@ public class GatekeeperController {
 		
 		if (isOperatorInvalid || isNameInvalid || isOperatorIllFormed || isNameIllFormed) {
 			String exceptionMsg = "CloudRequestDTO is invalid due to the following reasons:";
-			exceptionMsg = isOperatorInvalid ? exceptionMsg + " operator is empty, " : exceptionMsg;
-			exceptionMsg = isOperatorIllFormed ? exceptionMsg + " operator is in wrong format, " : exceptionMsg;
-			exceptionMsg = isNameInvalid ? exceptionMsg + " name is empty, " : exceptionMsg;
-			exceptionMsg = isNameIllFormed ? exceptionMsg + " name is in wrong format, " : exceptionMsg;
+			exceptionMsg = isOperatorInvalid ? exceptionMsg + " operator is empty," : exceptionMsg;
+			exceptionMsg = isOperatorIllFormed ? exceptionMsg + " operator is in wrong format," : exceptionMsg;
+			exceptionMsg = isNameInvalid ? exceptionMsg + " name is empty," : exceptionMsg;
+			exceptionMsg = isNameIllFormed ? exceptionMsg + " name is in wrong format," : exceptionMsg;
 			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() - 1);
 			
 			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, origin);
@@ -738,7 +738,7 @@ public class GatekeeperController {
 		logger.debug("validateMultiGSDQueryFormDTO started...");
 		
 		if (gsdForm == null) {
-			throw new BadPayloadException("GSDQueryFormDTO is null", HttpStatus.SC_BAD_REQUEST, origin);
+			throw new BadPayloadException("GSDMultiQueryFormDTO is null", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		if (Utilities.isEmpty(gsdForm.getRequestedServices())) {

@@ -24,7 +24,7 @@ public class MinimalDependencyExecutorPrioritizationStrategyTest {
 	private MinimalDependencyExecutorPrioritizationStrategy strategy = new MinimalDependencyExecutorPrioritizationStrategy();
 	
 	//=================================================================================================
-	// members
+	// methods
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
