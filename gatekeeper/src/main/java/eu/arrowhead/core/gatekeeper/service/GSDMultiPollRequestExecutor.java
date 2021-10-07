@@ -38,7 +38,7 @@ import eu.arrowhead.common.dto.internal.GSDMultiPollResponseDTO;
 import eu.arrowhead.common.dto.shared.ErrorWrapperDTO;
 import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClient;
 
-public class GSDMultiPollRequestExecutor { //TODO: test this class
+public class GSDMultiPollRequestExecutor { 
 	
 	//=================================================================================================
 	// members
@@ -48,7 +48,7 @@ public class GSDMultiPollRequestExecutor { //TODO: test this class
 	private final BlockingQueue<ErrorWrapperDTO> queue;
 	private final ThreadPoolExecutor threadPool;
 	private final GatekeeperRelayClient relayClient;
-	private final GSDMultiPollRequestDTO gsdPollRequestDTO;
+	private final GSDMultiPollRequestDTO requestDTO;
 	private final Map<Cloud,Relay> gatekeeperRelayPerCloud;
 	
 	private final Logger logger = LogManager.getLogger(GSDMultiPollRequestExecutor.class);
@@ -57,25 +57,25 @@ public class GSDMultiPollRequestExecutor { //TODO: test this class
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------	
-	public GSDMultiPollRequestExecutor(final BlockingQueue<ErrorWrapperDTO> queue, final GatekeeperRelayClient relayClient, final GSDMultiPollRequestDTO gsdPollRequestDTO, 
+	public GSDMultiPollRequestExecutor(final BlockingQueue<ErrorWrapperDTO> queue, final GatekeeperRelayClient relayClient, final GSDMultiPollRequestDTO requestDTO, 
 								  final Map<Cloud,Relay> gatekeeperRelayPerCloud) {
 		this.queue = queue;
 		this.relayClient = relayClient;
-		this.gsdPollRequestDTO = gsdPollRequestDTO;
+		this.requestDTO = requestDTO;
 		this.gatekeeperRelayPerCloud = gatekeeperRelayPerCloud;
 		this.threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(this.gatekeeperRelayPerCloud.size() > MAX_THREAD_POOL_SIZE ? MAX_THREAD_POOL_SIZE : this.gatekeeperRelayPerCloud.size());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public void execute() {
-		logger.debug("GSDPollRequestExecutor.execute started...");
+		logger.debug("GSDMultiPollRequestExecutor.execute started...");
 		validateMembers();
 		
 		final Map<String,Session> sessionsToClouds = createSessionsToClouds();
 		for (final Entry<Cloud,Relay> cloudRelay : gatekeeperRelayPerCloud.entrySet()) {			
 			try {
 				final String cloudCN = getRecipientCommonName(cloudRelay.getKey());				
-				threadPool.execute(new GSDMultiPollTask(relayClient, sessionsToClouds.get(cloudCN), cloudCN, cloudRelay.getKey().getAuthenticationInfo(), gsdPollRequestDTO, queue));
+				threadPool.execute(new GSDMultiPollTask(relayClient, sessionsToClouds.get(cloudCN), cloudCN, cloudRelay.getKey().getAuthenticationInfo(), requestDTO, queue));
 			} catch (final RejectedExecutionException ex) {
 				logger.error("GSDMultiPollTask execution rejected at {}", ZonedDateTime.now());
 				
@@ -126,7 +126,7 @@ public class GSDMultiPollRequestExecutor { //TODO: test this class
 		Assert.notNull(this.queue, "queue is null");
 		Assert.notNull(this.threadPool, "threadPool is null");
 		Assert.notNull(this.relayClient, "relayClient is null");
-		Assert.notNull(this.gsdPollRequestDTO, "gsdPollRequestDTO is null");
+		Assert.notNull(this.requestDTO, "requestDTO is null");
 		Assert.notNull(this.gatekeeperRelayPerCloud, "gatekeeperRelayPerCloud is null");
 	}
 }
