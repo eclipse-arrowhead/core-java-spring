@@ -212,7 +212,7 @@ public class GatewayController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PostMapping(path = CommonConstants.OP_GATEWAY_CLOSE_SESSIONS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<ActiveSessionCloseErrorDTO> closeActiveSessions(@RequestBody final List<Integer> ports) { //TODO: test this
+	public List<ActiveSessionCloseErrorDTO> closeActiveSessions(@RequestBody final List<Integer> ports) { 
 		logger.debug("closeActiveSessions started...");
 		
 		if (Utilities.isEmpty(ports)) {

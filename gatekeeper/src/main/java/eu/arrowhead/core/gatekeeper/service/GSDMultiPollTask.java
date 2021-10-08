@@ -25,7 +25,6 @@ import org.springframework.util.Assert;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.GSDMultiPollRequestDTO;
 import eu.arrowhead.common.dto.internal.GSDMultiPollResponseDTO;
-import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.ErrorWrapperDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
@@ -46,27 +45,27 @@ public class GSDMultiPollTask implements Runnable {
 	private final Session session;
 	private final String recipientCloudCN;
 	private final String recipientCloudPublicKey;
-	private final GSDMultiPollRequestDTO gsdPollRequestDTO;
+	private final GSDMultiPollRequestDTO requestDTO;
 	private final BlockingQueue<ErrorWrapperDTO> queue;
 
 	//=================================================================================================
 	// methods
 		
 	//-------------------------------------------------------------------------------------------------
-	public GSDMultiPollTask(final GatekeeperRelayClient relayClient, final Session session, final String recipientCloudCN, final String recipientCloudPublicKey, final GSDMultiPollRequestDTO gsdPollRequestDTO,
+	public GSDMultiPollTask(final GatekeeperRelayClient relayClient, final Session session, final String recipientCloudCN, final String recipientCloudPublicKey, final GSDMultiPollRequestDTO requestDTO,
 					   final BlockingQueue<ErrorWrapperDTO> queue) {
 		Assert.notNull(relayClient, "relayClient is null");
 		Assert.notNull(session, "session is null");
 		Assert.isTrue(!Utilities.isEmpty(recipientCloudCN), "recipientCloudCN is empty");
 		Assert.isTrue(!Utilities.isEmpty(recipientCloudPublicKey), "recipientCloudPublicKey is empty");
-		Assert.notNull(gsdPollRequestDTO, "gsdPollRequestDTO is null");
+		Assert.notNull(requestDTO, "requestDTO is null");
 		Assert.notNull(queue, "queue is null");
 		
 		this.relayClient = relayClient;
 		this.session = session;
 		this.recipientCloudCN = recipientCloudCN;
 		this.recipientCloudPublicKey = recipientCloudPublicKey;
-		this.gsdPollRequestDTO = gsdPollRequestDTO;
+		this.requestDTO = requestDTO;
 		this.queue = queue;		
 	}
 
@@ -74,11 +73,11 @@ public class GSDMultiPollTask implements Runnable {
 	@Override
 	public void run() {
 		try {
-			logger.debug("GDSPollTask.run started...");
+			logger.debug("GDSMultiPollTask.run started...");
 			
 			if (Thread.currentThread().isInterrupted()) {
 				logger.trace("Thread {} is interrupted...", Thread.currentThread().getName());
-				queue.add(new GSDPollResponseDTO());
+				queue.add(new GSDMultiPollResponseDTO());
 				return;
 			}
 										
@@ -87,7 +86,7 @@ public class GSDMultiPollTask implements Runnable {
 				throw new TimeoutException(recipientCloudCN + " cloud: GeneralAdvertisementResult timeout");
 			}
 			
-			final GatekeeperRelayResponse response = relayClient.sendRequestAndReturnResponse(session, result , gsdPollRequestDTO);
+			final GatekeeperRelayResponse response = relayClient.sendRequestAndReturnResponse(session, result , requestDTO);
 			if (response == null) {
 				throw new TimeoutException(recipientCloudCN + " cloud: GatekeeperRelayResponse timeout");
 			}

@@ -218,7 +218,7 @@ public class GatewayService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public String closeSession(final int port) { // TODO: test this
+	public String closeSession(final int port) { 
 		logger.debug("closeSession started...");
 		
 		final ActiveSessionDTO session = findSessionForPort(port);
