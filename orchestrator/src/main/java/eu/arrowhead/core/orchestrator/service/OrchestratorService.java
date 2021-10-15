@@ -307,7 +307,7 @@ public class OrchestratorService {
      * <i>Orchestrator Store</i> is ignored, and the Orchestrator first tries to find a provider for the requested service in the local Cloud.
      * If that fails but the <i>enableInterCloud</i> flag is set to true, the Orchestrator tries to find a provider in other Clouds.
 	 */
-	public OrchestrationResponseDTO dynamicOrchestration(final OrchestrationFormRequestDTO request, final boolean skipAuthorization) { //TODO: test this (skipping part)
+	public OrchestrationResponseDTO dynamicOrchestration(final OrchestrationFormRequestDTO request, final boolean skipAuthorization) { 
 		logger.debug("dynamicOrchestration started ...");
 
 		// necessary, because we want to use a flag value when we call the check method

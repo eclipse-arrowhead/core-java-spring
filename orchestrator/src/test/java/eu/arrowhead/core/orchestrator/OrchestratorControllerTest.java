@@ -88,6 +88,7 @@ public class OrchestratorControllerTest {
 	// members
 	
 	private static final String ORCHESTRATION_PROCESS_URI = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS_URI; 
+	private static final String ORCHESTRATION_PROCESS_BY_PROXY_URI = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS_BY_PROXY_URI; 
 	
 	@Autowired
 	private WebApplicationContext wac;
@@ -1207,12 +1208,445 @@ public class OrchestratorControllerTest {
 				   	.andExpect(status().isBadRequest());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationProcessByProxyCrossValidationConstraint1() throws Exception {
+		final OrchestrationFlags flags = new OrchestrationFlags();
+		flags.put(Flag.OVERRIDE_STORE, true);
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setOrchestrationFlags(flags);
+		
+		final MvcResult result = postOrchestrationProcessByProxy(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals("Requested service can not be null when \"" + Flag.OVERRIDE_STORE + "\" is TRUE", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationProcessByProxyCrossValidationConstraint2() throws Exception {
+		final OrchestrationFlags flags = new OrchestrationFlags();
+		flags.put(Flag.TRIGGER_INTER_CLOUD, true);
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setOrchestrationFlags(flags);
+		
+		final MvcResult result = postOrchestrationProcessByProxy(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals("Requested service can not be null when \"" + Flag.TRIGGER_INTER_CLOUD + "\" is TRUE", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationProcessByProxyCrossValidationConstraint3() throws Exception {
+		final OrchestrationFlags flags = new OrchestrationFlags();
+		flags.put(Flag.ONLY_PREFERRED, true);
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setOrchestrationFlags(flags);
+		
+		final MvcResult result = postOrchestrationProcessByProxy(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals("There is no valid preferred provider, but \"" + Flag.ONLY_PREFERRED + "\" is set to true", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationProcessByProxyCrossValidationConstraint4() throws Exception {
+		final OrchestrationFlags flags = new OrchestrationFlags();
+		flags.put(Flag.ENABLE_QOS, true);
+		flags.put(Flag.MATCHMAKING, false);
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setOrchestrationFlags(flags);
+		request.setCommands(Map.of(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY, "1"));
+		
+		final MvcResult result = postOrchestrationProcessByProxy(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals("Exclusive service orchestration is only possible when \"" + Flag.MATCHMAKING + "\" is set to true", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationProcessByProxyRequesterSystemNull() throws Exception {
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		
+		final MvcResult result = postOrchestrationProcessByProxy(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(ORCHESTRATION_PROCESS_BY_PROXY_URI, error.getOrigin());
+		Assert.assertEquals("System is null.", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationProcessByProxyRequesterSystemNameNull() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(requesterSystem)
+																				   .build();
+		
+		final MvcResult result = postOrchestrationProcessByProxy(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(ORCHESTRATION_PROCESS_BY_PROXY_URI, error.getOrigin());
+		Assert.assertEquals("System name is null or blank.", error.getErrorMessage());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationProcessByProxyRequesterSystemNameEmpty() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName(" ");
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(requesterSystem)
+																				   .build();
+		
+		final MvcResult result = postOrchestrationProcessByProxy(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(ORCHESTRATION_PROCESS_BY_PROXY_URI, error.getOrigin());
+		Assert.assertEquals("System name is null or blank.", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationProcessByProxyRequesterSystemAddressNull() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester");
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(requesterSystem)
+																				   .build();
+		
+		final MvcResult result = postOrchestrationProcessByProxy(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(ORCHESTRATION_PROCESS_BY_PROXY_URI, error.getOrigin());
+		Assert.assertEquals("System address is null or blank.", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationProcessByProxyRequesterSystemAddressEmpty() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester");
+		requesterSystem.setAddress("\t");
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(requesterSystem)
+																				   .build();
+		
+		final MvcResult result = postOrchestrationProcessByProxy(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(ORCHESTRATION_PROCESS_BY_PROXY_URI, error.getOrigin());
+		Assert.assertEquals("System address is null or blank.", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationProcessByProxyRequesterSystemPortNull() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester");
+		requesterSystem.setAddress("address.hu");
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(requesterSystem)
+																				   .build();
+		
+		final MvcResult result = postOrchestrationProcessByProxy(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(ORCHESTRATION_PROCESS_BY_PROXY_URI, error.getOrigin());
+		Assert.assertEquals("System port is null.", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationProcessByProxyRequesterSystemPortTooLow() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester");
+		requesterSystem.setAddress("address.hu");
+		requesterSystem.setPort(-1);
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(requesterSystem)
+																				   .build();
+		
+		final MvcResult result = postOrchestrationProcessByProxy(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(ORCHESTRATION_PROCESS_BY_PROXY_URI, error.getOrigin());
+		Assert.assertEquals("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationProcessByProxyRequesterSystemPortTooHigh() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester");
+		requesterSystem.setAddress("address.hu");
+		requesterSystem.setPort(66000);
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(requesterSystem)
+																				   .build();
+		
+		final MvcResult result = postOrchestrationProcessByProxy(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(ORCHESTRATION_PROCESS_BY_PROXY_URI, error.getOrigin());
+		Assert.assertEquals("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationProcessByProxyRequesterCloudOperatorNull() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester");
+		requesterSystem.setAddress("address.hu");
+		requesterSystem.setPort(1234);
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(requesterSystem)
+																				   .requesterCloud(new CloudRequestDTO())
+																				   .build();
+		
+		final MvcResult result = postOrchestrationProcessByProxy(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(ORCHESTRATION_PROCESS_BY_PROXY_URI, error.getOrigin());
+		Assert.assertEquals("Cloud operator is null or blank.", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationProcessByProxyRequesterCloudOperatorEmpty() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester");
+		requesterSystem.setAddress("address.hu");
+		requesterSystem.setPort(1234);
+		final CloudRequestDTO requesterCloud = new CloudRequestDTO();
+		requesterCloud.setOperator("\r");
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(requesterSystem)
+																				   .requesterCloud(requesterCloud)
+																				   .build();
+		
+		final MvcResult result = postOrchestrationProcessByProxy(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(ORCHESTRATION_PROCESS_BY_PROXY_URI, error.getOrigin());
+		Assert.assertEquals("Cloud operator is null or blank.", error.getErrorMessage());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationProcessByProxyRequesterCloudNameNull() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester");
+		requesterSystem.setAddress("address.hu");
+		requesterSystem.setPort(1234);
+		final CloudRequestDTO requesterCloud = new CloudRequestDTO();
+		requesterCloud.setOperator("aitia");
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(requesterSystem)
+																				   .requesterCloud(requesterCloud)
+																				   .build();
+		
+		final MvcResult result = postOrchestrationProcessByProxy(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(ORCHESTRATION_PROCESS_BY_PROXY_URI, error.getOrigin());
+		Assert.assertEquals("Cloud name is null or blank.", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationProcessByProxyRequesterCloudNameEmpty() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester");
+		requesterSystem.setAddress("address.hu");
+		requesterSystem.setPort(1234);
+		final CloudRequestDTO requesterCloud = new CloudRequestDTO();
+		requesterCloud.setOperator("aitia");
+		requesterCloud.setName(" ");
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(requesterSystem)
+																				   .requesterCloud(requesterCloud)
+																				   .build();
+		
+		final MvcResult result = postOrchestrationProcessByProxy(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(ORCHESTRATION_PROCESS_BY_PROXY_URI, error.getOrigin());
+		Assert.assertEquals("Cloud name is null or blank.", error.getErrorMessage());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationProcessByProxyServiceDefinitionNull() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester");
+		requesterSystem.setAddress("address.hu");
+		requesterSystem.setPort(1234);
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(requesterSystem)
+																				   .requestedService(new ServiceQueryFormDTO())
+																				   .build();
+		
+		final MvcResult result = postOrchestrationProcessByProxy(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(ORCHESTRATION_PROCESS_BY_PROXY_URI, error.getOrigin());
+		Assert.assertEquals("Requested service definition requirement is null or blank.", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationProcessByProxyServiceDefinitionEmpty() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester");
+		requesterSystem.setAddress("address.hu");
+		requesterSystem.setPort(1234);
+		final ServiceQueryFormDTO service = new ServiceQueryFormDTO();
+		service.setServiceDefinitionRequirement(" ");
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(requesterSystem)
+																				   .requestedService(service)
+																				   .build();
+		
+		final MvcResult result = postOrchestrationProcessByProxy(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(ORCHESTRATION_PROCESS_BY_PROXY_URI, error.getOrigin());
+		Assert.assertEquals("Requested service definition requirement is null or blank.", error.getErrorMessage());
+	}
+	
+	// Controller uses the same checking on the content of the preferred providers than on the requester system (and cloud) before, so we skip the related tests
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationProcessByProxyTriggerInterCloudWithoutGatekeeper() throws Exception {
+		ReflectionTestUtils.setField(controller, "gatekeeperIsPresent", false);
+
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester");
+		requesterSystem.setAddress("address.hu");
+		requesterSystem.setPort(1234);
+		final ServiceQueryFormDTO service = new ServiceQueryFormDTO();
+		service.setServiceDefinitionRequirement("service");
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(requesterSystem)
+																				   .requestedService(service)
+																				   .flag(Flag.TRIGGER_INTER_CLOUD, true)
+																				   .build();
+		
+		final MvcResult result = postOrchestrationProcessByProxy(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(ORCHESTRATION_PROCESS_BY_PROXY_URI, error.getOrigin());
+		Assert.assertEquals("Forced inter cloud service request can not be served. Orchestrator runs in NO GATEKEEPER mode.", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationProcessByProxyTriggerInterCloudWasCalled() throws Exception {
+		ReflectionTestUtils.setField(controller, "gatekeeperIsPresent", true);
+		
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester");
+		requesterSystem.setAddress("address.hu");
+		requesterSystem.setPort(1234);
+		final ServiceQueryFormDTO service = new ServiceQueryFormDTO();
+		service.setServiceDefinitionRequirement("service");
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(requesterSystem)
+																				   .requestedService(service)
+																				   .flag(Flag.TRIGGER_INTER_CLOUD, true)
+																				   .build();
+		
+		when(orchestratorService.triggerInterCloud(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO())));
+		
+		final MvcResult result = postOrchestrationProcessByProxy(request, status().isOk());
+		final OrchestrationResponseDTO response = objectMapper.readValue(result.getResponse().getContentAsByteArray(), OrchestrationResponseDTO.class);
+		
+		Assert.assertEquals(1, response.getResponse().size());
+		
+		verify(orchestratorService, times(1)).triggerInterCloud(any(OrchestrationFormRequestDTO.class));
+		verify(orchestratorService, never()).orchestrationFromStore(any(OrchestrationFormRequestDTO.class));
+		verify(orchestratorService, never()).dynamicOrchestration(any(OrchestrationFormRequestDTO.class), eq(true));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationProcessByProxyOrchestrationFromStoreWasCalled() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester");
+		requesterSystem.setAddress("address.hu");
+		requesterSystem.setPort(1234);
+		final ServiceQueryFormDTO service = new ServiceQueryFormDTO();
+		service.setServiceDefinitionRequirement("service");
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(requesterSystem)
+																				   .requestedService(service)
+																				   .build();
+		
+		when(orchestratorService.orchestrationFromStore(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO(),
+																																				 new OrchestrationResultDTO())));
+		
+		final MvcResult result = postOrchestrationProcessByProxy(request, status().isOk());
+		final OrchestrationResponseDTO response = objectMapper.readValue(result.getResponse().getContentAsByteArray(), OrchestrationResponseDTO.class);
+		
+		Assert.assertEquals(2, response.getResponse().size());
+
+		verify(orchestratorService, never()).triggerInterCloud(any(OrchestrationFormRequestDTO.class));
+		verify(orchestratorService, times(1)).orchestrationFromStore(any(OrchestrationFormRequestDTO.class));
+		verify(orchestratorService, never()).dynamicOrchestration(any(OrchestrationFormRequestDTO.class), eq(true));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationProcessByProxyDynamicOrchestrationWasCalled() throws Exception {
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName("requester");
+		requesterSystem.setAddress("address.hu");
+		requesterSystem.setPort(1234);
+		final ServiceQueryFormDTO service = new ServiceQueryFormDTO();
+		service.setServiceDefinitionRequirement("service");
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(requesterSystem)
+																				   .requestedService(service)
+																				   .flag(Flag.OVERRIDE_STORE, true)
+																				   .build();
+		
+		when(orchestratorService.dynamicOrchestration(any(OrchestrationFormRequestDTO.class), eq(true))).thenReturn(new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO(),
+																																			   			  new OrchestrationResultDTO(),
+																																			   			  new OrchestrationResultDTO())));
+		
+		final MvcResult result = postOrchestrationProcessByProxy(request, status().isOk());
+		final OrchestrationResponseDTO response = objectMapper.readValue(result.getResponse().getContentAsByteArray(), OrchestrationResponseDTO.class);
+		
+		Assert.assertEquals(3, response.getResponse().size());
+		
+		verify(orchestratorService, never()).triggerInterCloud(any(OrchestrationFormRequestDTO.class));
+		verify(orchestratorService, never()).orchestrationFromStore(any(OrchestrationFormRequestDTO.class));
+		verify(orchestratorService, times(1)).dynamicOrchestration(any(OrchestrationFormRequestDTO.class), eq(true));
+	}
+
 	//=================================================================================================
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
 	private MvcResult postOrchestrationProcess(final OrchestrationFormRequestDTO form, final ResultMatcher matcher) throws Exception {
 		return this.mockMvc.perform(post(ORCHESTRATION_PROCESS_URI)
+						   .contentType(MediaType.APPLICATION_JSON)
+						   .content(objectMapper.writeValueAsBytes(form))
+						   .accept(MediaType.APPLICATION_JSON))
+						   .andExpect(matcher)
+						   .andReturn();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MvcResult postOrchestrationProcessByProxy(final OrchestrationFormRequestDTO form, final ResultMatcher matcher) throws Exception {
+		return this.mockMvc.perform(post(ORCHESTRATION_PROCESS_BY_PROXY_URI)
 						   .contentType(MediaType.APPLICATION_JSON)
 						   .content(objectMapper.writeValueAsBytes(form))
 						   .accept(MediaType.APPLICATION_JSON))
