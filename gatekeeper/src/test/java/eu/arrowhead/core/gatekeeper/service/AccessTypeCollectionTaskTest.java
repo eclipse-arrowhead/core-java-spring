@@ -215,7 +215,7 @@ public class AccessTypeCollectionTaskTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public MessageConsumer getTestMessageConsumer() {
+	private MessageConsumer getTestMessageConsumer() {
 		return new MessageConsumer() {
 			public Message receive(final long timeout) throws JMSException { return null; }
 			public void close() throws JMSException {}

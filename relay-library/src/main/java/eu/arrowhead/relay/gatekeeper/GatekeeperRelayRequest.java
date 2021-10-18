@@ -47,7 +47,7 @@ public class GatekeeperRelayRequest {
 	//-------------------------------------------------------------------------------------------------
 	public GatekeeperRelayRequest(final MessageProducer answerSender, final PublicKey peerPublicKey, final String sessionId, final String messageType, final Object payload) {
 		Assert.notNull(answerSender, "Sender is null.");
-		Assert.notNull(peerPublicKey, "Peer publc key is null.");
+		Assert.notNull(peerPublicKey, "Peer public key is null.");
 		Assert.isTrue(!Utilities.isEmpty(sessionId), "Session id is null or blank.");
 		Assert.isTrue(!Utilities.isEmpty(messageType), "Message type is null or blank.");
 		Assert.notNull(payload, "Payload is null.");
