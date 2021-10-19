@@ -31,14 +31,11 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 
-import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.ActiveMQSession;
-import org.apache.activemq.ActiveMQSslConnectionFactory;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
-import org.springframework.web.util.UriComponents;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -64,6 +61,7 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.relay.RelayCryptographer;
+import eu.arrowhead.relay.activemq.RelayActiveMQConnectionFactory;
 import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClient;
 import eu.arrowhead.relay.gatekeeper.GatekeeperRelayRequest;
 import eu.arrowhead.relay.gatekeeper.GatekeeperRelayResponse;
@@ -74,8 +72,6 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	//=================================================================================================
 	// members
 	
-	private static final String TCP = "tcp";
-	private static final String SSL = "ssl";
 	private static final String GENERATED_TOPIC_SUFFIX = "M5QTZXM9G9AnpPHWT6WennWu";
 	private static final String GENERAL_TOPIC_NAME = "General-" + GENERATED_TOPIC_SUFFIX;
 	private static final String REQUEST_QUEUE_PREFIX = "REQ-";
@@ -86,7 +82,6 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 																	  CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL, CoreCommonConstants.RELAY_MESSAGE_TYPE_ACCESS_TYPE,
 																	  CoreCommonConstants.RELAY_MESSAGE_TYPE_SYSTEM_ADDRESS_LIST, CoreCommonConstants.RELAY_MESSAGE_TYPE_QOS_RELAY_TEST);	
 	
-	private static final int CLIENT_ID_LENGTH = 16;
 	private static final int SESSION_ID_LENGTH = 48;
 
 	private static final Logger logger = LogManager.getLogger(ActiveMQGatekeeperRelayClient.class);
@@ -94,8 +89,8 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	
 	private final String serverCommonName;
 	private final PublicKey publicKey;
-	private final SSLProperties sslProps;
 	private final RelayCryptographer cryptographer;
+	private final RelayActiveMQConnectionFactory connectionFactory;
 	private final long timeout;
 	
 	//=================================================================================================
@@ -110,8 +105,8 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		
 		this.serverCommonName = serverCommonName;
 		this.cryptographer = new RelayCryptographer(privateKey);
+		this.connectionFactory = new RelayActiveMQConnectionFactory(null, -1, sslProps);
 		this.publicKey = publicKey;
-		this.sslProps = sslProps;
 		this.timeout = timeout;
 	}
 
@@ -124,7 +119,9 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		Assert.isTrue(!Utilities.isEmpty(host), "Host is null or blank.");
 		Assert.isTrue(port > CommonConstants.SYSTEM_PORT_RANGE_MIN && port < CommonConstants.SYSTEM_PORT_RANGE_MAX, "Port is invalid.");
 		
-		final Connection connection = secure ? createSSLConnection(host, port) : createTCPConnection(host, port);
+		connectionFactory.setHost(host);
+		connectionFactory.setPort(port);
+		final Connection connection = connectionFactory.createConnection(secure);
 		
 		try {
 			connection.start();
@@ -384,44 +381,6 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	//=================================================================================================
 	// assistant methods
 	
-	//-------------------------------------------------------------------------------------------------
-	private Connection createTCPConnection(final String host, final int port) throws JMSException {
-		final UriComponents uri = Utilities.createURI(TCP, host, port, null);
-		final ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(uri.toUri());
-		connectionFactory.setClientID(RandomStringUtils.randomAlphanumeric(CLIENT_ID_LENGTH));
-		final Connection connection = connectionFactory.createConnection();
-		connectionFactory.setClientID(null);
-
-		return connection;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private Connection createSSLConnection(final String host, final int port) throws JMSException {
-		final UriComponents uri = Utilities.createURI(SSL, host, port, null);
-		final ActiveMQSslConnectionFactory connectionFactory = new ActiveMQSslConnectionFactory(uri.toUri());
-		try {
-			connectionFactory.setClientID(RandomStringUtils.randomAlphanumeric(CLIENT_ID_LENGTH));
-			connectionFactory.setKeyStoreType(sslProps.getKeyStoreType());
-			connectionFactory.setKeyStore(sslProps.getKeyStore().getURI().toString());
-			connectionFactory.setKeyStorePassword(sslProps.getKeyStorePassword());
-			connectionFactory.setKeyStoreKeyPassword(sslProps.getKeyPassword());
-			connectionFactory.setTrustStoreType(sslProps.getKeyStoreType());
-			connectionFactory.setTrustStore(sslProps.getTrustStore().getURI().toString());
-			connectionFactory.setTrustStorePassword(sslProps.getTrustStorePassword());
-			
-			final Connection connection = connectionFactory.createConnection();
-			connectionFactory.setClientID(null);
-			
-			return connection;
-		} catch (final JMSException ex) {
-			throw ex;
-		} catch (final Exception ex) {
-			logger.debug(ex.getMessage());
-			logger.debug("Stacktrace: ", ex);
-			throw new JMSException("Error while creating SSL connection: " + ex.getMessage());
-		}
-	}
-
 	//-------------------------------------------------------------------------------------------------
 	private String createSessionId() {
 		return RandomStringUtils.randomAlphanumeric(SESSION_ID_LENGTH);

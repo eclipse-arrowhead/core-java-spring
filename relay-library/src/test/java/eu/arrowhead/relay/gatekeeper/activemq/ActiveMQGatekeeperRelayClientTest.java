@@ -25,6 +25,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.relay.RelayCryptographer;
+import eu.arrowhead.relay.activemq.RelayActiveMQConnectionFactory;
 
 public class ActiveMQGatekeeperRelayClientTest {
 
@@ -34,8 +35,8 @@ public class ActiveMQGatekeeperRelayClientTest {
 	private ActiveMQGatekeeperRelayClient testingObject;
 	
 	private PublicKey publicKey;
-	private SSLProperties sslProps;
 	private RelayCryptographer cryptographer;
+	private RelayActiveMQConnectionFactory connectionFactory;
 	
 	//=================================================================================================
 	// methods
@@ -44,11 +45,12 @@ public class ActiveMQGatekeeperRelayClientTest {
 	@Before
 	public void setUp() {
 		publicKey = Mockito.mock(PublicKey.class);
-		sslProps = Mockito.mock(SSLProperties.class);
 		cryptographer = Mockito.mock(RelayCryptographer.class);
+		connectionFactory = Mockito.mock(RelayActiveMQConnectionFactory.class);
 		
-		testingObject = new ActiveMQGatekeeperRelayClient("serverCN", publicKey, getTestPrivateKey(), sslProps, 60000);
+		testingObject = new ActiveMQGatekeeperRelayClient("serverCN", publicKey, getTestPrivateKey(), new SSLProperties(), 60000);
 		ReflectionTestUtils.setField(testingObject, "cryptographer", cryptographer);
+		ReflectionTestUtils.setField(testingObject, "connectionFactory", connectionFactory);
 	}
 
 	//-------------------------------------------------------------------------------------------------
