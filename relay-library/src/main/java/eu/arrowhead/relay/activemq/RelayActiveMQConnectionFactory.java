@@ -43,6 +43,9 @@ public class RelayActiveMQConnectionFactory {
 	protected int port;
 	protected SSLProperties sslProps;
 	
+	protected ActiveMQConnectionFactory tcpConnectionFactory = new ActiveMQConnectionFactory();
+	protected ActiveMQSslConnectionFactory sslConnectionFactory = new ActiveMQSslConnectionFactory(); 
+	
 	private static final Logger logger = LogManager.getLogger(RelayActiveMQConnectionFactory.class);
 	
 	//=================================================================================================
@@ -76,10 +79,10 @@ public class RelayActiveMQConnectionFactory {
 		Assert.isTrue(port > CommonConstants.SYSTEM_PORT_RANGE_MIN && port < CommonConstants.SYSTEM_PORT_RANGE_MAX, "Port is invalid.");
 
 		final UriComponents uri = Utilities.createURI(TCP, host, port, null);
-		final ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(uri.toUri());
-		connectionFactory.setClientID(RandomStringUtils.randomAlphanumeric(CLIENT_ID_LENGTH));
-		final Connection connection = connectionFactory.createConnection();
-		connectionFactory.setClientID(null);
+		tcpConnectionFactory.setBrokerURL(uri.toUriString());
+		tcpConnectionFactory.setClientID(RandomStringUtils.randomAlphanumeric(CLIENT_ID_LENGTH));
+		final Connection connection = tcpConnectionFactory.createConnection();
+		tcpConnectionFactory.setClientID(null);
 
 		return connection;
 	}
@@ -93,19 +96,19 @@ public class RelayActiveMQConnectionFactory {
 		Assert.notNull(sslProps, "SSL properties object is null.");
 		
 		final UriComponents uri = Utilities.createURI(SSL, host, port, null);
-		final ActiveMQSslConnectionFactory connectionFactory = new ActiveMQSslConnectionFactory(uri.toUri());
+		sslConnectionFactory.setBrokerURL(uri.toUriString());
 		try {
-			connectionFactory.setClientID(RandomStringUtils.randomAlphanumeric(CLIENT_ID_LENGTH));
-			connectionFactory.setKeyStoreType(sslProps.getKeyStoreType());
-			connectionFactory.setKeyStore(sslProps.getKeyStore().getURI().toString());
-			connectionFactory.setKeyStorePassword(sslProps.getKeyStorePassword());
-			connectionFactory.setKeyStoreKeyPassword(sslProps.getKeyPassword());
-			connectionFactory.setTrustStoreType(sslProps.getKeyStoreType());
-			connectionFactory.setTrustStore(sslProps.getTrustStore().getURI().toString());
-			connectionFactory.setTrustStorePassword(sslProps.getTrustStorePassword());
+			sslConnectionFactory.setClientID(RandomStringUtils.randomAlphanumeric(CLIENT_ID_LENGTH));
+			sslConnectionFactory.setKeyStoreType(sslProps.getKeyStoreType());
+			sslConnectionFactory.setKeyStore(sslProps.getKeyStore().getURI().toString());
+			sslConnectionFactory.setKeyStorePassword(sslProps.getKeyStorePassword());
+			sslConnectionFactory.setKeyStoreKeyPassword(sslProps.getKeyPassword());
+			sslConnectionFactory.setTrustStoreType(sslProps.getKeyStoreType());
+			sslConnectionFactory.setTrustStore(sslProps.getTrustStore().getURI().toString());
+			sslConnectionFactory.setTrustStorePassword(sslProps.getTrustStorePassword());
 			
-			final Connection connection = connectionFactory.createConnection();
-			connectionFactory.setClientID(null);
+			final Connection connection = sslConnectionFactory.createConnection();
+			sslConnectionFactory.setClientID(null);
 			
 			return connection;
 		} catch (final JMSException ex) {
