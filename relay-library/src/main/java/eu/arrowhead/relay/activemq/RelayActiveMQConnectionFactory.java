@@ -94,10 +94,12 @@ public class RelayActiveMQConnectionFactory {
 		Assert.isTrue(!Utilities.isEmpty(host), "Host is null or blank.");
 		Assert.isTrue(port > CommonConstants.SYSTEM_PORT_RANGE_MIN && port < CommonConstants.SYSTEM_PORT_RANGE_MAX, "Port is invalid.");
 		Assert.notNull(sslProps, "SSL properties object is null.");
+		Assert.notNull(sslProps.getKeyStore(), "Key store is null.");
+		Assert.notNull(sslProps.getTrustStore(), "Trust store is null.");
 		
 		final UriComponents uri = Utilities.createURI(SSL, host, port, null);
-		sslConnectionFactory.setBrokerURL(uri.toUriString());
 		try {
+			sslConnectionFactory.setBrokerURL(uri.toUriString());
 			sslConnectionFactory.setClientID(RandomStringUtils.randomAlphanumeric(CLIENT_ID_LENGTH));
 			sslConnectionFactory.setKeyStoreType(sslProps.getKeyStoreType());
 			sslConnectionFactory.setKeyStore(sslProps.getKeyStore().getURI().toString());
