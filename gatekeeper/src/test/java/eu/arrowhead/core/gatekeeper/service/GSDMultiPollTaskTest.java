@@ -335,7 +335,7 @@ public class GSDMultiPollTaskTest {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public Session getTestSession() {
+	private Session getTestSession() {
 		return new Session() {
 			public void close() throws JMSException {}
 			public Queue createQueue(final String queueName) throws JMSException { return null;	}

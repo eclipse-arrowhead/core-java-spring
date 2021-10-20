@@ -250,11 +250,11 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	public void sendResponse(final Session session, final GatekeeperRelayRequest request, final Object responsePayload) throws JMSException {
 		logger.debug("sendResponse started...");
 		
-		Assert.notNull(session, "session is null.");
-		Assert.notNull(request, "request is null.");
+		Assert.notNull(request, "Request is null.");
 		Assert.notNull(request.getAnswerSender(), "Sender is null.");
 		
 		try {
+			Assert.notNull(session, "Session is null.");
 			Assert.notNull(request.getPeerPublicKey(), "Peer public key is null.");
 			Assert.isTrue(!Utilities.isEmpty(request.getSessionId()), "Session id is null or blank.");
 			Assert.isTrue(!Utilities.isEmpty(request.getMessageType()), "Message type is null or blank.");
