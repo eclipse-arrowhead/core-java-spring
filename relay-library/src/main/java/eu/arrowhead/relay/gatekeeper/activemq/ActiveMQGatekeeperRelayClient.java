@@ -284,16 +284,16 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		Assert.isTrue(!Utilities.isEmpty(recipientPublicKey), "recipientPublicKey is null or blank.");
 		final PublicKey peerPublicKey = Utilities.getPublicKeyFromBase64EncodedString(recipientPublicKey);
 
-		final String sessionId = createSessionId();
-		final String encryptedSessionId = encryptSessionId(sessionId, peerPublicKey);
-		final String senderPublicKey = Base64.getEncoder().encodeToString(publicKey.getEncoded());
-		final GeneralAdvertisementMessageDTO messageDTO = new GeneralAdvertisementMessageDTO(serverCommonName, senderPublicKey, recipientCN, encryptedSessionId);
-		final TextMessage textMessage = session.createTextMessage(Utilities.toJson(messageDTO));
-
 		MessageProducer producer = null;
 		MessageConsumer messageConsumer = null;
 		
 		try {
+			final String sessionId = createSessionId();
+			final String encryptedSessionId = encryptSessionId(sessionId, peerPublicKey);
+			final String senderPublicKey = Base64.getEncoder().encodeToString(publicKey.getEncoded());
+			final GeneralAdvertisementMessageDTO messageDTO = new GeneralAdvertisementMessageDTO(serverCommonName, senderPublicKey, recipientCN, encryptedSessionId);
+			final TextMessage textMessage = session.createTextMessage(Utilities.toJson(messageDTO));
+			
 			final Topic topic = session.createTopic(GENERAL_TOPIC_NAME);
 			producer = session.createProducer(topic);
 			
@@ -331,13 +331,13 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	public GatekeeperRelayResponse sendRequestAndReturnResponse(final Session session, final GeneralAdvertisementResult advResponse, final Object requestPayload) throws JMSException {
 		logger.debug("sendRequestAndReturnResponse started...");
 
-		Assert.notNull(session, "session is null.");
 		Assert.notNull(advResponse, "advResponse is null.");
 		Assert.notNull(advResponse.getAnswerReceiver(), "Receiver is null.");
 		
 		MessageProducer messageProducer = null;
 		try {
-			Assert.isTrue(!Utilities.isEmpty(REQUEST_QUEUE_PREFIX), "Peer common name is null or blank.");
+			Assert.notNull(session, "Session is null.");
+			Assert.isTrue(!Utilities.isEmpty(advResponse.getPeerCN()), "Peer common name is null or blank.");
 			Assert.notNull(advResponse.getPeerPublicKey(), "Peer public key is null.");
 			Assert.isTrue(!Utilities.isEmpty(advResponse.getSessionId()), "Session id is null or blank.");
 			Assert.notNull(requestPayload, "Payload is null.");

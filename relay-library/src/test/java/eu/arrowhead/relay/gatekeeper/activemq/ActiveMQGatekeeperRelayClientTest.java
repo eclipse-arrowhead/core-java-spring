@@ -57,12 +57,16 @@ import org.apache.activemq.ActiveMQSession;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.dto.internal.DecryptedMessageDTO;
+import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.internal.GeneralAdvertisementMessageDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -71,13 +75,16 @@ import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.relay.RelayCryptographer;
 import eu.arrowhead.relay.activemq.RelayActiveMQConnectionFactory;
 import eu.arrowhead.relay.gatekeeper.GatekeeperRelayRequest;
+import eu.arrowhead.relay.gatekeeper.GatekeeperRelayResponse;
+import eu.arrowhead.relay.gatekeeper.GeneralAdvertisementResult;
 
 public class ActiveMQGatekeeperRelayClientTest {
 
 	//=================================================================================================
 	// members
 
-	private static final String senderPublicKeyStr = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1aaeuv1I4bF5dxMIvUvLMxjRn309kdJewIIH08DfL17/LSssD70ZaLz0yxNfbPPQpFK8LMK+HQHDiGZH5yp4qJDuEgfmUrqWibnBIBc/K3Ob45lQy0zdFVtFsVJYBFVymQwgxJT6th0hI3RGLbCJMzbmpDzT7g0IDsN+64tMyi08ZCPrqk99uzYgioSSWNb9bhG2Z9646b3oiY5utQWRhP/2z/t6vVJHtRYeyaXPl6Z2M/5KnjpSvpSeZQhNrw+Is1DEE5DHiEjfQFWrLwDOqPKDrvmFyIlJ7P7OCMax6dIlSB7GEQSSP+j4eIxDWgjm+Pv/c02UVDc0x3xX/UGtNwIDAQAB";
+	private static final String aPublicKeyStr = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1aaeuv1I4bF5dxMIvUvLMxjRn309kdJewIIH08DfL17/LSssD70ZaLz0yxNfbPPQpFK8LMK+HQHDiGZH5yp4qJDuEgfmUrqWibnBIBc/K3Ob45lQy0zdFVtFsVJYBFVymQwgxJT6th0hI3RGLbCJMzbmpDzT7g0IDsN+64tMyi08ZCPrqk99uzYgioSSWNb9bhG2Z9646b3oiY5utQWRhP/2z/t6vVJHtRYeyaXPl6Z2M/5KnjpSvpSeZQhNrw+Is1DEE5DHiEjfQFWrLwDOqPKDrvmFyIlJ7P7OCMax6dIlSB7GEQSSP+j4eIxDWgjm+Pv/c02UVDc0x3xX/UGtNwIDAQAB";
+	private static final String topicName ="General-M5QTZXM9G9AnpPHWT6WennWu";
 
 	private ActiveMQGatekeeperRelayClient testingObject;
 	
@@ -327,8 +334,6 @@ public class ActiveMQGatekeeperRelayClientTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testSubscribeGeneralAdvertisementTopicOk() throws JMSException {
-		final String topicName ="General-M5QTZXM9G9AnpPHWT6WennWu";
-		
 		final Topic topic = Mockito.mock(Topic.class);
 		final Session session = Mockito.mock(Session.class);
 		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
@@ -493,7 +498,7 @@ public class ActiveMQGatekeeperRelayClientTest {
 	@Test(expected = JMSException.class)
 	public void testSendAcknowledgementAndReturnRequestException1() throws Exception {
 		final GeneralAdvertisementMessageDTO msg = new GeneralAdvertisementMessageDTO();
-		msg.setSenderPublicKey(senderPublicKeyStr);
+		msg.setSenderPublicKey(aPublicKeyStr);
 		msg.setSessionId("1234");
 		
 		final Session session = Mockito.mock(Session.class);
@@ -521,7 +526,7 @@ public class ActiveMQGatekeeperRelayClientTest {
 	@Test(expected = ArrowheadException.class)
 	public void testSendAcknowledgementAndReturnRequestException2() throws Exception {
 		final GeneralAdvertisementMessageDTO msg = new GeneralAdvertisementMessageDTO();
-		msg.setSenderPublicKey(senderPublicKeyStr);
+		msg.setSenderPublicKey(aPublicKeyStr);
 		msg.setSessionId("1234");
 		
 		final Session session = Mockito.mock(Session.class);
@@ -558,7 +563,7 @@ public class ActiveMQGatekeeperRelayClientTest {
 	@Test
 	public void testSendAcknowledgementAndReturnRequestNoRequestInTime() throws Exception {
 		final GeneralAdvertisementMessageDTO msg = new GeneralAdvertisementMessageDTO();
-		msg.setSenderPublicKey(senderPublicKeyStr);
+		msg.setSenderPublicKey(aPublicKeyStr);
 		msg.setSessionId("1234");
 		
 		final Session session = Mockito.mock(Session.class);
@@ -597,7 +602,7 @@ public class ActiveMQGatekeeperRelayClientTest {
 	@Test(expected = JMSException.class)
 	public void testSendAcknowledgementAndReturnRequestInvalidMessageType() throws Exception {
 		final GeneralAdvertisementMessageDTO msg = new GeneralAdvertisementMessageDTO();
-		msg.setSenderPublicKey(senderPublicKeyStr);
+		msg.setSenderPublicKey(aPublicKeyStr);
 		msg.setSessionId("1234");
 		
 		final Session session = Mockito.mock(Session.class);
@@ -641,7 +646,7 @@ public class ActiveMQGatekeeperRelayClientTest {
 	@Test(expected = AuthException.class)
 	public void testSendAcknowledgementAndReturnRequestInvalidRequestType() throws Exception {
 		final GeneralAdvertisementMessageDTO msg = new GeneralAdvertisementMessageDTO();
-		msg.setSenderPublicKey(senderPublicKeyStr);
+		msg.setSenderPublicKey(aPublicKeyStr);
 		msg.setSessionId("1234");
 		
 		final Session session = Mockito.mock(Session.class);
@@ -692,7 +697,7 @@ public class ActiveMQGatekeeperRelayClientTest {
 	@Test(expected = AuthException.class)
 	public void testSendAcknowledgementAndReturnRequestInvalidSessionId() throws Exception {
 		final GeneralAdvertisementMessageDTO msg = new GeneralAdvertisementMessageDTO();
-		msg.setSenderPublicKey(senderPublicKeyStr);
+		msg.setSenderPublicKey(aPublicKeyStr);
 		msg.setSessionId("1234");
 		
 		final Session session = Mockito.mock(Session.class);
@@ -744,7 +749,7 @@ public class ActiveMQGatekeeperRelayClientTest {
 	@Test(expected = ArrowheadException.class)
 	public void testSendAcknowledgementAndReturnRequestInvalidPayload() throws Exception {
 		final GeneralAdvertisementMessageDTO msg = new GeneralAdvertisementMessageDTO();
-		msg.setSenderPublicKey(senderPublicKeyStr);
+		msg.setSenderPublicKey(aPublicKeyStr);
 		msg.setSessionId("1234");
 		
 		final Session session = Mockito.mock(Session.class);
@@ -797,7 +802,7 @@ public class ActiveMQGatekeeperRelayClientTest {
 	@Test
 	public void testSendAcknowledgementAndReturnRequestOk() throws Exception {
 		final GeneralAdvertisementMessageDTO msg = new GeneralAdvertisementMessageDTO();
-		msg.setSenderPublicKey(senderPublicKeyStr);
+		msg.setSenderPublicKey(aPublicKeyStr);
 		msg.setSessionId("1234");
 		
 		final Session session = Mockito.mock(Session.class);
@@ -1077,8 +1082,626 @@ public class ActiveMQGatekeeperRelayClientTest {
 		verify(producer, times(1)).close();
 	}
 	
-	//TODO: continue with publishGeneralAdvertisement
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testPublishGeneralAdvertisementSessionNull() throws Exception {
+		try {
+			testingObject.publishGeneralAdvertisement(null, null, null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("session is null.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testPublishGeneralAdvertisementRecipientCNNull() throws Exception {
+		try {
+			testingObject.publishGeneralAdvertisement(getTestSession(), null, null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("recipientCN is null or blank.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testPublishGeneralAdvertisementRecipientCNEmpty() throws Exception {
+		try {
+			testingObject.publishGeneralAdvertisement(getTestSession(), "", null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("recipientCN is null or blank.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testPublishGeneralAdvertisementRecipientPublicKeyNull() throws Exception {
+		try {
+			testingObject.publishGeneralAdvertisement(getTestSession(), "recipient-cn", null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("recipientPublicKey is null or blank.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testPublishGeneralAdvertisementRecipientPublicKeyEmpty() throws Exception {
+		try {
+			testingObject.publishGeneralAdvertisement(getTestSession(), "recipient-cn", "");
+		} catch (final Exception ex) {
+			Assert.assertEquals("recipientPublicKey is null or blank.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testPublishGeneralAdvertisementException1() throws Exception {
+		when(cryptographer.encodeSessionId(anyString(), any(PublicKey.class))).thenThrow(new ArrowheadException("test"));
+		
+		try {
+			testingObject.publishGeneralAdvertisement(getTestSession(), "recipient-cn", aPublicKeyStr);
+		} catch (final Exception ex) {
+			Assert.assertEquals("test", ex.getMessage());
+			
+			verify(cryptographer, times(1)).encodeSessionId(anyString(), any(PublicKey.class));
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = JMSException.class)
+	public void testPublishGeneralAdvertisementException2() throws Exception {
+		final Session session = Mockito.mock(Session.class);
+		final TextMessage advertisement = Mockito.mock(TextMessage.class);
+		final Topic topic = Mockito.mock(Topic.class);
+		final MessageProducer producer = Mockito.mock(MessageProducer.class);
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		
+		when(cryptographer.encodeSessionId(anyString(), any(PublicKey.class))).thenReturn("encodedSessionId");
+		when(publicKey.getEncoded()).thenReturn(new byte[] { 1, 2, 3, 4 });
+		when(session.createTextMessage(anyString())).thenReturn(advertisement);
+		when(session.createTopic(topicName)).thenReturn(topic);
+		when(session.createProducer(topic)).thenReturn(producer);
+		when(session.createQueue(anyString())).thenThrow(new JMSException("test"));
+		doNothing().when(producer).close();
+		
+		try {
+			testingObject.publishGeneralAdvertisement(session, "recipient-cn", aPublicKeyStr);
+		} catch (final Exception ex) {
+			Assert.assertEquals("test", ex.getMessage());
+			
+			verify(cryptographer, times(1)).encodeSessionId(anyString(), any(PublicKey.class));
+			verify(publicKey, times(1)).getEncoded();
+			verify(session, times(1)).createTextMessage(anyString());
+			verify(session, times(1)).createTopic(topicName);
+			verify(session, times(1)).createProducer(topic);
+			verify(session, times(1)).createQueue(anyString());
+			verify(producer, times(1)).close();
+			verify(consumer, never()).close();
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testPublishGeneralAdvertisementNoAcknowledgement() throws Exception {
+		final Session session = Mockito.mock(Session.class);
+		final TextMessage advertisement = Mockito.mock(TextMessage.class);
+		final Topic topic = Mockito.mock(Topic.class);
+		final Queue respQueue = Mockito.mock(Queue.class);
+		final MessageProducer producer = Mockito.mock(MessageProducer.class);
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		
+		when(cryptographer.encodeSessionId(anyString(), any(PublicKey.class))).thenReturn("encodedSessionId");
+		when(publicKey.getEncoded()).thenReturn(new byte[] { 1, 2, 3, 4 });
+		when(session.createTextMessage(anyString())).thenReturn(advertisement);
+		when(session.createTopic(topicName)).thenReturn(topic);
+		when(session.createProducer(topic)).thenReturn(producer);
+		when(session.createQueue(anyString())).thenReturn(respQueue);
+		when(session.createConsumer(respQueue)).thenReturn(consumer);
+		doNothing().when(producer).send(advertisement);
+		when(consumer.receive(anyLong())).thenReturn(null);
+		doNothing().when(producer).close();
+		doNothing().when(consumer).close();
+		
+		final GeneralAdvertisementResult result = testingObject.publishGeneralAdvertisement(session, "recipient-cn", aPublicKeyStr);
+		
+		Assert.assertNull(result);
+
+		verify(cryptographer, times(1)).encodeSessionId(anyString(), any(PublicKey.class));
+		verify(publicKey, times(1)).getEncoded();
+		verify(session, times(1)).createTextMessage(anyString());
+		verify(session, times(1)).createTopic(topicName);
+		verify(session, times(1)).createProducer(topic);
+		verify(session, times(1)).createQueue(anyString());
+		verify(session, times(1)).createConsumer(respQueue);
+		verify(producer, times(1)).send(advertisement);
+		verify(consumer, times(1)).receive(anyLong());
+		verify(producer, times(1)).close();
+		verify(consumer, times(1)).close();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = JMSException.class)
+	public void testPublishGeneralAdvertisementInvalidMessageClass() throws Exception {
+		final Session session = Mockito.mock(Session.class);
+		final TextMessage advertisement = Mockito.mock(TextMessage.class);
+		final Topic topic = Mockito.mock(Topic.class);
+		final Queue respQueue = Mockito.mock(Queue.class);
+		final MessageProducer producer = Mockito.mock(MessageProducer.class);
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		final Message ackMsg = Mockito.mock(Message.class);
+		
+		when(cryptographer.encodeSessionId(anyString(), any(PublicKey.class))).thenReturn("encodedSessionId");
+		when(publicKey.getEncoded()).thenReturn(new byte[] { 1, 2, 3, 4 });
+		when(session.createTextMessage(anyString())).thenReturn(advertisement);
+		when(session.createTopic(topicName)).thenReturn(topic);
+		when(session.createProducer(topic)).thenReturn(producer);
+		when(session.createQueue(anyString())).thenReturn(respQueue);
+		when(session.createConsumer(respQueue)).thenReturn(consumer);
+		doNothing().when(producer).send(advertisement);
+		when(consumer.receive(anyLong())).thenReturn(ackMsg);
+		doNothing().when(producer).close();
+		doNothing().when(consumer).close();
+		
+		try {
+			testingObject.publishGeneralAdvertisement(session, "recipient-cn", aPublicKeyStr);
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().startsWith("Invalid message class: "));
+			
+			verify(cryptographer, times(1)).encodeSessionId(anyString(), any(PublicKey.class));
+			verify(publicKey, times(1)).getEncoded();
+			verify(session, times(1)).createTextMessage(anyString());
+			verify(session, times(1)).createTopic(topicName);
+			verify(session, times(1)).createProducer(topic);
+			verify(session, times(1)).createQueue(anyString());
+			verify(session, times(1)).createConsumer(respQueue);
+			verify(producer, times(1)).send(advertisement);
+			verify(consumer, times(1)).receive(anyLong());
+			verify(producer, times(1)).close();
+			verify(consumer, times(1)).close();
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = AuthException.class)
+	public void testPublishGeneralAdvertisementInvalidMessageType() throws Exception {
+		final Session session = Mockito.mock(Session.class);
+		final TextMessage advertisement = Mockito.mock(TextMessage.class);
+		final Topic topic = Mockito.mock(Topic.class);
+		final Queue respQueue = Mockito.mock(Queue.class);
+		final MessageProducer producer = Mockito.mock(MessageProducer.class);
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		final TextMessage ackMsg = Mockito.mock(TextMessage.class);
+		final DecryptedMessageDTO decoded = new DecryptedMessageDTO();
+		decoded.setMessageType("not ack");
+		
+		when(cryptographer.encodeSessionId(anyString(), any(PublicKey.class))).thenReturn("encodedSessionId");
+		when(publicKey.getEncoded()).thenReturn(new byte[] { 1, 2, 3, 4 });
+		when(session.createTextMessage(anyString())).thenReturn(advertisement);
+		when(session.createTopic(topicName)).thenReturn(topic);
+		when(session.createProducer(topic)).thenReturn(producer);
+		when(session.createQueue(anyString())).thenReturn(respQueue);
+		when(session.createConsumer(respQueue)).thenReturn(consumer);
+		doNothing().when(producer).send(advertisement);
+		when(consumer.receive(anyLong())).thenReturn(ackMsg);
+		when(ackMsg.getText()).thenReturn("encoded");
+		when(cryptographer.decodeMessage(eq("encoded"), any(PublicKey.class))).thenReturn(decoded);
+		doNothing().when(producer).close();
+		doNothing().when(consumer).close();
+		
+		try {
+			testingObject.publishGeneralAdvertisement(session, "recipient-cn", aPublicKeyStr);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Unauthorized message on queue.", ex.getMessage());
+			
+			verify(cryptographer, times(1)).encodeSessionId(anyString(), any(PublicKey.class));
+			verify(publicKey, times(1)).getEncoded();
+			verify(session, times(1)).createTextMessage(anyString());
+			verify(session, times(1)).createTopic(topicName);
+			verify(session, times(1)).createProducer(topic);
+			verify(session, times(1)).createQueue(anyString());
+			verify(session, times(1)).createConsumer(respQueue);
+			verify(producer, times(1)).send(advertisement);
+			verify(consumer, times(1)).receive(anyLong());
+			verify(cryptographer, times(1)).decodeMessage(eq("encoded"), any(PublicKey.class));
+			verify(ackMsg, times(1)).getText();
+			verify(producer, times(1)).close();
+			verify(consumer, times(1)).close();
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = AuthException.class)
+	public void testPublishGeneralAdvertisementInvalidSessionId() throws Exception {
+		final Session session = Mockito.mock(Session.class);
+		final TextMessage advertisement = Mockito.mock(TextMessage.class);
+		final Topic topic = Mockito.mock(Topic.class);
+		final Queue respQueue = Mockito.mock(Queue.class);
+		final MessageProducer producer = Mockito.mock(MessageProducer.class);
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		final TextMessage ackMsg = Mockito.mock(TextMessage.class);
+		final DecryptedMessageDTO decoded = new DecryptedMessageDTO();
+		decoded.setMessageType(CoreCommonConstants.RELAY_MESSAGE_TYPE_ACK);
+		decoded.setSessionId("invalid");
+		
+		when(cryptographer.encodeSessionId(anyString(), any(PublicKey.class))).thenReturn("encodedSessionId");
+		when(publicKey.getEncoded()).thenReturn(new byte[] { 1, 2, 3, 4 });
+		when(session.createTextMessage(anyString())).thenReturn(advertisement);
+		when(session.createTopic(topicName)).thenReturn(topic);
+		when(session.createProducer(topic)).thenReturn(producer);
+		when(session.createQueue(anyString())).thenReturn(respQueue);
+		when(session.createConsumer(respQueue)).thenReturn(consumer);
+		doNothing().when(producer).send(advertisement);
+		when(consumer.receive(anyLong())).thenReturn(ackMsg);
+		when(ackMsg.getText()).thenReturn("encoded");
+		when(cryptographer.decodeMessage(eq("encoded"), any(PublicKey.class))).thenReturn(decoded);
+		doNothing().when(producer).close();
+		doNothing().when(consumer).close();
+		
+		try {
+			testingObject.publishGeneralAdvertisement(session, "recipient-cn", aPublicKeyStr);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Unauthorized message on queue.", ex.getMessage());
+			
+			verify(cryptographer, times(1)).encodeSessionId(anyString(), any(PublicKey.class));
+			verify(publicKey, times(1)).getEncoded();
+			verify(session, times(1)).createTextMessage(anyString());
+			verify(session, times(1)).createTopic(topicName);
+			verify(session, times(1)).createProducer(topic);
+			verify(session, times(1)).createQueue(anyString());
+			verify(session, times(1)).createConsumer(respQueue);
+			verify(producer, times(1)).send(advertisement);
+			verify(consumer, times(1)).receive(anyLong());
+			verify(cryptographer, times(1)).decodeMessage(eq("encoded"), any(PublicKey.class));
+			verify(ackMsg, times(1)).getText();
+			verify(producer, times(1)).close();
+			verify(consumer, times(1)).close();
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testPublishGeneralAdvertisementOk() throws Exception {
+		final Session session = Mockito.mock(Session.class);
+		final TextMessage advertisement = Mockito.mock(TextMessage.class);
+		final Topic topic = Mockito.mock(Topic.class);
+		final Queue respQueue = Mockito.mock(Queue.class);
+		final MessageProducer producer = Mockito.mock(MessageProducer.class);
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		final TextMessage ackMsg = Mockito.mock(TextMessage.class);
+		final DecryptedMessageDTO decoded = Mockito.mock(DecryptedMessageDTO.class);
+		final ArgumentCaptor<String> sessionIdCaptor = ArgumentCaptor.forClass(String.class);
+		
+		when(cryptographer.encodeSessionId(sessionIdCaptor.capture(), any(PublicKey.class))).thenReturn("encodedSessionId");
+		when(publicKey.getEncoded()).thenReturn(new byte[] { 1, 2, 3, 4 });
+		when(session.createTextMessage(anyString())).thenReturn(advertisement);
+		when(session.createTopic(topicName)).thenReturn(topic);
+		when(session.createProducer(topic)).thenReturn(producer);
+		when(session.createQueue(anyString())).thenReturn(respQueue);
+		when(session.createConsumer(respQueue)).thenReturn(consumer);
+		doNothing().when(producer).send(advertisement);
+		when(consumer.receive(anyLong())).thenReturn(ackMsg);
+		when(ackMsg.getText()).thenReturn("encoded");
+		when(cryptographer.decodeMessage(eq("encoded"), any(PublicKey.class))).thenReturn(decoded);
+		when(decoded.getMessageType()).thenReturn(CoreCommonConstants.RELAY_MESSAGE_TYPE_ACK);
+		when(decoded.getSessionId()).thenAnswer(new Answer<String>() {
+			public String answer(final InvocationOnMock invocation) throws Throwable {
+				return sessionIdCaptor.getValue();
+			}
+		});
+		doNothing().when(producer).close();
+		
+		final GeneralAdvertisementResult result = testingObject.publishGeneralAdvertisement(session, "recipient-cn", aPublicKeyStr);
+
+		Assert.assertEquals(consumer, result.getAnswerReceiver());
+		Assert.assertEquals(sessionIdCaptor.getValue(), result.getSessionId());
+		
+		verify(cryptographer, times(1)).encodeSessionId(anyString(), any(PublicKey.class));
+		verify(publicKey, times(1)).getEncoded();
+		verify(session, times(1)).createTextMessage(anyString());
+		verify(session, times(1)).createTopic(topicName);
+		verify(session, times(1)).createProducer(topic);
+		verify(session, times(1)).createQueue(anyString());
+		verify(session, times(1)).createConsumer(respQueue);
+		verify(producer, times(1)).send(advertisement);
+		verify(consumer, times(1)).receive(anyLong());
+		verify(cryptographer, times(1)).decodeMessage(eq("encoded"), any(PublicKey.class));
+		verify(decoded, times(1)).getMessageType();
+		verify(decoded, times(1)).getSessionId();
+		verify(ackMsg, times(1)).getText();
+		verify(producer, times(1)).close();
+		verify(consumer, never()).close();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testSendRequestAndReturnResponseAdvertisementResponseNull() throws Exception {
+		try {
+			testingObject.sendRequestAndReturnResponse(null, null, null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("advResponse is null.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testSendRequestAndReturnResponseReceiverNull() throws Exception {
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		final GeneralAdvertisementResult advResponse = new GeneralAdvertisementResult(consumer, "peer-cn", getTestPublicKey(), "1234");
+		ReflectionTestUtils.setField(advResponse, "anwserReceiver", null);
+		
+		try {
+			testingObject.sendRequestAndReturnResponse(null, advResponse, null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Receiver is null.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testSendRequestAndReturnResponseSessionNull() throws Exception {
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		final GeneralAdvertisementResult advResponse = new GeneralAdvertisementResult(consumer, "peer-cn", getTestPublicKey(), "1234");
+
+		doNothing().when(consumer).close();
+		
+		try {
+			testingObject.sendRequestAndReturnResponse(null, advResponse, null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Session is null.", ex.getMessage());
+			
+			verify(consumer, times(1)).close();
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testSendRequestAndReturnResponsePeerCommonNameNull() throws Exception {
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		final GeneralAdvertisementResult advResponse = new GeneralAdvertisementResult(consumer, "peer-cn", getTestPublicKey(), "1234");
+		ReflectionTestUtils.setField(advResponse, "peerCN", null);
+
+		doNothing().when(consumer).close();
+		
+		try {
+			testingObject.sendRequestAndReturnResponse(getTestSession(), advResponse, null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Peer common name is null or blank.", ex.getMessage());
+			
+			verify(consumer, times(1)).close();
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testSendRequestAndReturnResponsePeerCommonNameEmpty() throws Exception {
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		final GeneralAdvertisementResult advResponse = new GeneralAdvertisementResult(consumer, "peer-cn", getTestPublicKey(), "1234");
+		ReflectionTestUtils.setField(advResponse, "peerCN", "");
+
+		doNothing().when(consumer).close();
+		
+		try {
+			testingObject.sendRequestAndReturnResponse(getTestSession(), advResponse, null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Peer common name is null or blank.", ex.getMessage());
+			
+			verify(consumer, times(1)).close();
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testSendRequestAndReturnResponsePeerPublicKeyNull() throws Exception {
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		final GeneralAdvertisementResult advResponse = new GeneralAdvertisementResult(consumer, "peer-cn", getTestPublicKey(), "1234");
+		ReflectionTestUtils.setField(advResponse, "peerPublicKey", null);
+
+		doNothing().when(consumer).close();
+		
+		try {
+			testingObject.sendRequestAndReturnResponse(getTestSession(), advResponse, null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Peer public key is null.", ex.getMessage());
+			
+			verify(consumer, times(1)).close();
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testSendRequestAndReturnResponseSessionIdNull() throws Exception {
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		final GeneralAdvertisementResult advResponse = new GeneralAdvertisementResult(consumer, "peer-cn", getTestPublicKey(), "1234");
+		ReflectionTestUtils.setField(advResponse, "sessionId", null);
+
+		doNothing().when(consumer).close();
+		
+		try {
+			testingObject.sendRequestAndReturnResponse(getTestSession(), advResponse, null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Session id is null or blank.", ex.getMessage());
+			
+			verify(consumer, times(1)).close();
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testSendRequestAndReturnResponseSessionIdEmpty() throws Exception {
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		final GeneralAdvertisementResult advResponse = new GeneralAdvertisementResult(consumer, "peer-cn", getTestPublicKey(), "1234");
+		ReflectionTestUtils.setField(advResponse, "sessionId", "");
+
+		doNothing().when(consumer).close();
+		
+		try {
+			testingObject.sendRequestAndReturnResponse(getTestSession(), advResponse, null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Session id is null or blank.", ex.getMessage());
+			
+			verify(consumer, times(1)).close();
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testSendRequestAndReturnResponsePayloadNull() throws Exception {
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		final GeneralAdvertisementResult advResponse = new GeneralAdvertisementResult(consumer, "peer-cn", getTestPublicKey(), "1234");
+
+		doNothing().when(consumer).close();
+		
+		try {
+			testingObject.sendRequestAndReturnResponse(getTestSession(), advResponse, null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Payload is null.", ex.getMessage());
+			
+			verify(consumer, times(1)).close();
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testSendRequestAndReturnResponseInvalidMessageType() throws Exception {
+		final Session session = Mockito.mock(Session.class);
+		final Queue requestQueue = Mockito.mock(Queue.class);
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		final MessageProducer producer = Mockito.mock(MessageProducer.class);
+		final GeneralAdvertisementResult advResponse = new GeneralAdvertisementResult(consumer, "peer-cn", getTestPublicKey(), "1234");
+
+		when(session.createQueue(anyString())).thenReturn(requestQueue);
+		when(session.createProducer(requestQueue)).thenReturn(producer);
+		doNothing().when(consumer).close();
+		doNothing().when(producer).close();
+		
+		try {
+			testingObject.sendRequestAndReturnResponse(session, advResponse, "invalid");
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().startsWith("Invalid message DTO: "));
+			
+			verify(session, times(1)).createQueue(anyString());
+			verify(session, times(1)).createProducer(requestQueue);
+			verify(consumer, times(1)).close();
+			verify(producer, times(1)).close();
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testSendRequestAndReturnResponseNoResponseInTime() throws Exception {
+		final Session session = Mockito.mock(Session.class);
+		final Queue requestQueue = Mockito.mock(Queue.class);
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		final MessageProducer producer = Mockito.mock(MessageProducer.class);
+		final PublicKey peerPublicKey = getTestPublicKey();
+		final GeneralAdvertisementResult advResponse = new GeneralAdvertisementResult(consumer, "peer-cn", peerPublicKey, "1234");
+		final GSDPollRequestDTO pollRequest = new GSDPollRequestDTO();
+		final TextMessage requestMsg = Mockito.mock(TextMessage.class);
+
+		when(session.createQueue(anyString())).thenReturn(requestQueue);
+		when(session.createProducer(requestQueue)).thenReturn(producer);
+		when(cryptographer.encodeRelayMessage(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, "1234", pollRequest, peerPublicKey)).thenReturn("encoded");
+		when(session.createTextMessage("encoded")).thenReturn(requestMsg);
+		doNothing().when(producer).send(requestMsg);
+		when(consumer.receive(anyLong())).thenReturn(null);
+		doNothing().when(consumer).close();
+		doNothing().when(producer).close();
+		
+		final GatekeeperRelayResponse result = testingObject.sendRequestAndReturnResponse(session, advResponse, pollRequest);
+		
+		Assert.assertNull(result);
+		
+		verify(session, times(1)).createQueue(anyString());
+		verify(session, times(1)).createProducer(requestQueue);
+		verify(cryptographer, times(1)).encodeRelayMessage(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, "1234", pollRequest, peerPublicKey);
+		verify(session, times(1)).createTextMessage("encoded");
+		verify(producer, times(1)).send(requestMsg);
+		verify(consumer, times(1)).receive(anyLong());
+		verify(consumer, times(1)).close();
+		verify(producer, times(1)).close();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = JMSException.class)
+	public void testSendRequestAndReturnResponseInvalidMessageClass() throws Exception {
+		final Session session = Mockito.mock(Session.class);
+		final Queue requestQueue = Mockito.mock(Queue.class);
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		final MessageProducer producer = Mockito.mock(MessageProducer.class);
+		final PublicKey peerPublicKey = getTestPublicKey();
+		final GeneralAdvertisementResult advResponse = new GeneralAdvertisementResult(consumer, "peer-cn", peerPublicKey, "1234");
+		final GSDPollRequestDTO pollRequest = new GSDPollRequestDTO();
+		final TextMessage requestMsg = Mockito.mock(TextMessage.class);
+		final Message responseMsg = Mockito.mock(Message.class);
+
+		when(session.createQueue(anyString())).thenReturn(requestQueue);
+		when(session.createProducer(requestQueue)).thenReturn(producer);
+		when(cryptographer.encodeRelayMessage(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, "1234", pollRequest, peerPublicKey)).thenReturn("encoded");
+		when(session.createTextMessage("encoded")).thenReturn(requestMsg);
+		doNothing().when(producer).send(requestMsg);
+		when(consumer.receive(anyLong())).thenReturn(responseMsg);
+		doNothing().when(consumer).close();
+		doNothing().when(producer).close();
+		
+		try {
+			testingObject.sendRequestAndReturnResponse(session, advResponse, pollRequest);
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().startsWith("Invalid message class: "));
+			
+			verify(session, times(1)).createQueue(anyString());
+			verify(session, times(1)).createProducer(requestQueue);
+			verify(cryptographer, times(1)).encodeRelayMessage(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, "1234", pollRequest, peerPublicKey);
+			verify(session, times(1)).createTextMessage("encoded");
+			verify(producer, times(1)).send(requestMsg);
+			verify(consumer, times(1)).receive(anyLong());
+			verify(consumer, times(1)).close();
+			verify(producer, times(1)).close();
+			
+			throw ex;
+		}
+	}
+	
+	//TODO: next test from line 361
+		
 	//=================================================================================================
 	// assistant methods
 	
