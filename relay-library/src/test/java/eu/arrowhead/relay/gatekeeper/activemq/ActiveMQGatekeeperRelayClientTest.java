@@ -71,6 +71,7 @@ import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.internal.GeneralAdvertisementMessageDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.relay.RelayCryptographer;
 import eu.arrowhead.relay.activemq.RelayActiveMQConnectionFactory;
@@ -1700,8 +1701,337 @@ public class ActiveMQGatekeeperRelayClientTest {
 		}
 	}
 	
-	//TODO: next test from line 361
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = AuthException.class)
+	public void testSendRequestAndReturnResponseInvalidResponseMessageType() throws Exception {
+		final Session session = Mockito.mock(Session.class);
+		final Queue requestQueue = Mockito.mock(Queue.class);
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		final MessageProducer producer = Mockito.mock(MessageProducer.class);
+		final PublicKey peerPublicKey = getTestPublicKey();
+		final GeneralAdvertisementResult advResponse = new GeneralAdvertisementResult(consumer, "peer-cn", peerPublicKey, "1234");
+		final GSDPollRequestDTO pollRequest = new GSDPollRequestDTO();
+		final TextMessage requestMsg = Mockito.mock(TextMessage.class);
+		final TextMessage responseMsg = Mockito.mock(TextMessage.class);
+		final DecryptedMessageDTO decoded = new DecryptedMessageDTO();
+		decoded.setMessageType("invalid");
+
+		when(session.createQueue(anyString())).thenReturn(requestQueue);
+		when(session.createProducer(requestQueue)).thenReturn(producer);
+		when(cryptographer.encodeRelayMessage(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, "1234", pollRequest, peerPublicKey)).thenReturn("encoded");
+		when(session.createTextMessage("encoded")).thenReturn(requestMsg);
+		doNothing().when(producer).send(requestMsg);
+		when(consumer.receive(anyLong())).thenReturn(responseMsg);
+		when(responseMsg.getText()).thenReturn("encodedResponse");
+		when(cryptographer.decodeMessage("encodedResponse", peerPublicKey)).thenReturn(decoded);
+		doNothing().when(consumer).close();
+		doNothing().when(producer).close();
 		
+		try {
+			testingObject.sendRequestAndReturnResponse(session, advResponse, pollRequest);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Unauthorized message on queue.", ex.getMessage());
+			
+			verify(session, times(1)).createQueue(anyString());
+			verify(session, times(1)).createProducer(requestQueue);
+			verify(cryptographer, times(1)).encodeRelayMessage(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, "1234", pollRequest, peerPublicKey);
+			verify(session, times(1)).createTextMessage("encoded");
+			verify(producer, times(1)).send(requestMsg);
+			verify(consumer, times(1)).receive(anyLong());
+			verify(responseMsg, times(1)).getText();
+			verify(cryptographer, times(1)).decodeMessage("encodedResponse", peerPublicKey);
+			verify(consumer, times(1)).close();
+			verify(producer, times(1)).close();
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = AuthException.class)
+	public void testSendRequestAndReturnResponseInvalidResponseSessionId() throws Exception {
+		final Session session = Mockito.mock(Session.class);
+		final Queue requestQueue = Mockito.mock(Queue.class);
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		final MessageProducer producer = Mockito.mock(MessageProducer.class);
+		final PublicKey peerPublicKey = getTestPublicKey();
+		final GeneralAdvertisementResult advResponse = new GeneralAdvertisementResult(consumer, "peer-cn", peerPublicKey, "1234");
+		final GSDPollRequestDTO pollRequest = new GSDPollRequestDTO();
+		final TextMessage requestMsg = Mockito.mock(TextMessage.class);
+		final TextMessage responseMsg = Mockito.mock(TextMessage.class);
+		final DecryptedMessageDTO decoded = new DecryptedMessageDTO();
+		decoded.setMessageType(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL);
+		decoded.setSessionId("5678");
+
+		when(session.createQueue(anyString())).thenReturn(requestQueue);
+		when(session.createProducer(requestQueue)).thenReturn(producer);
+		when(cryptographer.encodeRelayMessage(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, "1234", pollRequest, peerPublicKey)).thenReturn("encoded");
+		when(session.createTextMessage("encoded")).thenReturn(requestMsg);
+		doNothing().when(producer).send(requestMsg);
+		when(consumer.receive(anyLong())).thenReturn(responseMsg);
+		when(responseMsg.getText()).thenReturn("encodedResponse");
+		when(cryptographer.decodeMessage("encodedResponse", peerPublicKey)).thenReturn(decoded);
+		doNothing().when(consumer).close();
+		doNothing().when(producer).close();
+		
+		try {
+			testingObject.sendRequestAndReturnResponse(session, advResponse, pollRequest);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Unauthorized message on queue.", ex.getMessage());
+			
+			verify(session, times(1)).createQueue(anyString());
+			verify(session, times(1)).createProducer(requestQueue);
+			verify(cryptographer, times(1)).encodeRelayMessage(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, "1234", pollRequest, peerPublicKey);
+			verify(session, times(1)).createTextMessage("encoded");
+			verify(producer, times(1)).send(requestMsg);
+			verify(consumer, times(1)).receive(anyLong());
+			verify(responseMsg, times(1)).getText();
+			verify(cryptographer, times(1)).decodeMessage("encodedResponse", peerPublicKey);
+			verify(consumer, times(1)).close();
+			verify(producer, times(1)).close();
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testSendRequestAndReturnResponseErrorInErrorPayload() throws Exception {
+		final Session session = Mockito.mock(Session.class);
+		final Queue requestQueue = Mockito.mock(Queue.class);
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		final MessageProducer producer = Mockito.mock(MessageProducer.class);
+		final PublicKey peerPublicKey = getTestPublicKey();
+		final GeneralAdvertisementResult advResponse = new GeneralAdvertisementResult(consumer, "peer-cn", peerPublicKey, "1234");
+		final GSDPollRequestDTO pollRequest = new GSDPollRequestDTO();
+		final TextMessage requestMsg = Mockito.mock(TextMessage.class);
+		final TextMessage responseMsg = Mockito.mock(TextMessage.class);
+		final DecryptedMessageDTO decoded = new DecryptedMessageDTO();
+		decoded.setMessageType(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL);
+		decoded.setSessionId("1234");
+		decoded.setPayload("\"errorCode\"");
+
+		when(session.createQueue(anyString())).thenReturn(requestQueue);
+		when(session.createProducer(requestQueue)).thenReturn(producer);
+		when(cryptographer.encodeRelayMessage(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, "1234", pollRequest, peerPublicKey)).thenReturn("encoded");
+		when(session.createTextMessage("encoded")).thenReturn(requestMsg);
+		doNothing().when(producer).send(requestMsg);
+		when(consumer.receive(anyLong())).thenReturn(responseMsg);
+		when(responseMsg.getText()).thenReturn("encodedResponse");
+		when(cryptographer.decodeMessage("encodedResponse", peerPublicKey)).thenReturn(decoded);
+		doNothing().when(consumer).close();
+		doNothing().when(producer).close();
+		
+		try {
+			testingObject.sendRequestAndReturnResponse(session, advResponse, pollRequest);
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().startsWith("Can't convert payload with type "));
+			
+			verify(session, times(1)).createQueue(anyString());
+			verify(session, times(1)).createProducer(requestQueue);
+			verify(cryptographer, times(1)).encodeRelayMessage(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, "1234", pollRequest, peerPublicKey);
+			verify(session, times(1)).createTextMessage("encoded");
+			verify(producer, times(1)).send(requestMsg);
+			verify(consumer, times(1)).receive(anyLong());
+			verify(responseMsg, times(1)).getText();
+			verify(cryptographer, times(1)).decodeMessage("encodedResponse", peerPublicKey);
+			verify(consumer, times(1)).close();
+			verify(producer, times(1)).close();
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testSendRequestAndReturnResponseUnknownError() throws Exception {
+		final Session session = Mockito.mock(Session.class);
+		final Queue requestQueue = Mockito.mock(Queue.class);
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		final MessageProducer producer = Mockito.mock(MessageProducer.class);
+		final PublicKey peerPublicKey = getTestPublicKey();
+		final GeneralAdvertisementResult advResponse = new GeneralAdvertisementResult(consumer, "peer-cn", peerPublicKey, "1234");
+		final GSDPollRequestDTO pollRequest = new GSDPollRequestDTO();
+		final TextMessage requestMsg = Mockito.mock(TextMessage.class);
+		final TextMessage responseMsg = Mockito.mock(TextMessage.class);
+		final DecryptedMessageDTO decoded = new DecryptedMessageDTO();
+		decoded.setMessageType(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL);
+		decoded.setSessionId("1234");
+		decoded.setPayload("{\"errorCode\": 500}");
+
+		when(session.createQueue(anyString())).thenReturn(requestQueue);
+		when(session.createProducer(requestQueue)).thenReturn(producer);
+		when(cryptographer.encodeRelayMessage(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, "1234", pollRequest, peerPublicKey)).thenReturn("encoded");
+		when(session.createTextMessage("encoded")).thenReturn(requestMsg);
+		doNothing().when(producer).send(requestMsg);
+		when(consumer.receive(anyLong())).thenReturn(responseMsg);
+		when(responseMsg.getText()).thenReturn("encodedResponse");
+		when(cryptographer.decodeMessage("encodedResponse", peerPublicKey)).thenReturn(decoded);
+		doNothing().when(consumer).close();
+		doNothing().when(producer).close();
+		
+		try {
+			testingObject.sendRequestAndReturnResponse(session, advResponse, pollRequest);
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().startsWith("Unknown error occurred at "));
+			
+			verify(session, times(1)).createQueue(anyString());
+			verify(session, times(1)).createProducer(requestQueue);
+			verify(cryptographer, times(1)).encodeRelayMessage(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, "1234", pollRequest, peerPublicKey);
+			verify(session, times(1)).createTextMessage("encoded");
+			verify(producer, times(1)).send(requestMsg);
+			verify(consumer, times(1)).receive(anyLong());
+			verify(responseMsg, times(1)).getText();
+			verify(cryptographer, times(1)).decodeMessage("encodedResponse", peerPublicKey);
+			verify(consumer, times(1)).close();
+			verify(producer, times(1)).close();
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = BadPayloadException.class)
+	public void testSendRequestAndReturnResponseHandleErrorResponseOk() throws Exception {
+		final Session session = Mockito.mock(Session.class);
+		final Queue requestQueue = Mockito.mock(Queue.class);
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		final MessageProducer producer = Mockito.mock(MessageProducer.class);
+		final PublicKey peerPublicKey = getTestPublicKey();
+		final GeneralAdvertisementResult advResponse = new GeneralAdvertisementResult(consumer, "peer-cn", peerPublicKey, "1234");
+		final GSDPollRequestDTO pollRequest = new GSDPollRequestDTO();
+		final TextMessage requestMsg = Mockito.mock(TextMessage.class);
+		final TextMessage responseMsg = Mockito.mock(TextMessage.class);
+		final DecryptedMessageDTO decoded = new DecryptedMessageDTO();
+		decoded.setMessageType(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL);
+		decoded.setSessionId("1234");
+		decoded.setPayload("{\"errorCode\": 400, \"exceptionType\": \"BAD_PAYLOAD\", \"errorMessage\": \"test\"}");
+
+		when(session.createQueue(anyString())).thenReturn(requestQueue);
+		when(session.createProducer(requestQueue)).thenReturn(producer);
+		when(cryptographer.encodeRelayMessage(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, "1234", pollRequest, peerPublicKey)).thenReturn("encoded");
+		when(session.createTextMessage("encoded")).thenReturn(requestMsg);
+		doNothing().when(producer).send(requestMsg);
+		when(consumer.receive(anyLong())).thenReturn(responseMsg);
+		when(responseMsg.getText()).thenReturn("encodedResponse");
+		when(cryptographer.decodeMessage("encodedResponse", peerPublicKey)).thenReturn(decoded);
+		doNothing().when(consumer).close();
+		doNothing().when(producer).close();
+		
+		try {
+			testingObject.sendRequestAndReturnResponse(session, advResponse, pollRequest);
+		} catch (final Exception ex) {
+			Assert.assertEquals("test", ex.getMessage());
+			
+			verify(session, times(1)).createQueue(anyString());
+			verify(session, times(1)).createProducer(requestQueue);
+			verify(cryptographer, times(1)).encodeRelayMessage(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, "1234", pollRequest, peerPublicKey);
+			verify(session, times(1)).createTextMessage("encoded");
+			verify(producer, times(1)).send(requestMsg);
+			verify(consumer, times(1)).receive(anyLong());
+			verify(responseMsg, times(1)).getText();
+			verify(cryptographer, times(1)).decodeMessage("encodedResponse", peerPublicKey);
+			verify(consumer, times(1)).close();
+			verify(producer, times(1)).close();
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testSendRequestAndReturnResponseInvalidResponsePayload() throws Exception {
+		final Session session = Mockito.mock(Session.class);
+		final Queue requestQueue = Mockito.mock(Queue.class);
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		final MessageProducer producer = Mockito.mock(MessageProducer.class);
+		final PublicKey peerPublicKey = getTestPublicKey();
+		final GeneralAdvertisementResult advResponse = new GeneralAdvertisementResult(consumer, "peer-cn", peerPublicKey, "1234");
+		final GSDPollRequestDTO pollRequest = new GSDPollRequestDTO();
+		final TextMessage requestMsg = Mockito.mock(TextMessage.class);
+		final TextMessage responseMsg = Mockito.mock(TextMessage.class);
+		final DecryptedMessageDTO decoded = new DecryptedMessageDTO();
+		decoded.setMessageType(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL);
+		decoded.setSessionId("1234");
+		decoded.setPayload("invalid");
+
+		when(session.createQueue(anyString())).thenReturn(requestQueue);
+		when(session.createProducer(requestQueue)).thenReturn(producer);
+		when(cryptographer.encodeRelayMessage(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, "1234", pollRequest, peerPublicKey)).thenReturn("encoded");
+		when(session.createTextMessage("encoded")).thenReturn(requestMsg);
+		doNothing().when(producer).send(requestMsg);
+		when(consumer.receive(anyLong())).thenReturn(responseMsg);
+		when(responseMsg.getText()).thenReturn("encodedResponse");
+		when(cryptographer.decodeMessage("encodedResponse", peerPublicKey)).thenReturn(decoded);
+		doNothing().when(consumer).close();
+		doNothing().when(producer).close();
+		
+		try {
+			testingObject.sendRequestAndReturnResponse(session, advResponse, pollRequest);
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().startsWith("Can't convert payload with type "));
+			
+			verify(session, times(1)).createQueue(anyString());
+			verify(session, times(1)).createProducer(requestQueue);
+			verify(cryptographer, times(1)).encodeRelayMessage(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, "1234", pollRequest, peerPublicKey);
+			verify(session, times(1)).createTextMessage("encoded");
+			verify(producer, times(1)).send(requestMsg);
+			verify(consumer, times(1)).receive(anyLong());
+			verify(responseMsg, times(1)).getText();
+			verify(cryptographer, times(1)).decodeMessage("encodedResponse", peerPublicKey);
+			verify(consumer, times(1)).close();
+			verify(producer, times(1)).close();
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testSendRequestAndReturnResponseOk() throws Exception {
+		final Session session = Mockito.mock(Session.class);
+		final Queue requestQueue = Mockito.mock(Queue.class);
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		final MessageProducer producer = Mockito.mock(MessageProducer.class);
+		final PublicKey peerPublicKey = getTestPublicKey();
+		final GeneralAdvertisementResult advResponse = new GeneralAdvertisementResult(consumer, "peer-cn", peerPublicKey, "1234");
+		final GSDPollRequestDTO pollRequest = new GSDPollRequestDTO();
+		final TextMessage requestMsg = Mockito.mock(TextMessage.class);
+		final TextMessage responseMsg = Mockito.mock(TextMessage.class);
+		final DecryptedMessageDTO decoded = new DecryptedMessageDTO();
+		decoded.setMessageType(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL);
+		decoded.setSessionId("1234");
+		decoded.setPayload("{\"requiredServiceDefinition\": \"service\"}");
+
+		when(session.createQueue(anyString())).thenReturn(requestQueue);
+		when(session.createProducer(requestQueue)).thenReturn(producer);
+		when(cryptographer.encodeRelayMessage(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, "1234", pollRequest, peerPublicKey)).thenReturn("encoded");
+		when(session.createTextMessage("encoded")).thenReturn(requestMsg);
+		doNothing().when(producer).send(requestMsg);
+		when(consumer.receive(anyLong())).thenReturn(responseMsg);
+		when(responseMsg.getText()).thenReturn("encodedResponse");
+		when(cryptographer.decodeMessage("encodedResponse", peerPublicKey)).thenReturn(decoded);
+		doNothing().when(consumer).close();
+		doNothing().when(producer).close();
+		
+		final GatekeeperRelayResponse result = testingObject.sendRequestAndReturnResponse(session, advResponse, pollRequest);
+		
+		Assert.assertEquals("1234", result.getSessionId());
+		Assert.assertEquals(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, result.getMessageType());
+		Assert.assertEquals("service", result.getGSDPollResponse().getRequiredServiceDefinition());
+		
+		verify(session, times(1)).createQueue(anyString());
+		verify(session, times(1)).createProducer(requestQueue);
+		verify(cryptographer, times(1)).encodeRelayMessage(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, "1234", pollRequest, peerPublicKey);
+		verify(session, times(1)).createTextMessage("encoded");
+		verify(producer, times(1)).send(requestMsg);
+		verify(consumer, times(1)).receive(anyLong());
+		verify(responseMsg, times(1)).getText();
+		verify(cryptographer, times(1)).decodeMessage("encodedResponse", peerPublicKey);
+		verify(consumer, times(1)).close();
+		verify(producer, times(1)).close();
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	

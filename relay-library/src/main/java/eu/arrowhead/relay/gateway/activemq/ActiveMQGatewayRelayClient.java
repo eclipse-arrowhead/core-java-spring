@@ -53,8 +53,8 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 	//=================================================================================================
 	// members
 	
-	private static final String CLOSE_COMMAND = "CLOSE ";
-	private static final String SWITCH_COMMAND = "SWITCH ";
+	private static final String CLOSE_COMMAND = "CLOSE";
+	private static final String SWITCH_COMMAND = "SWITCH";
 	
 	private static final int QUEUE_ID_LENGTH = 48;
 
@@ -271,7 +271,7 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 				throw new AuthException("Sender can't send control messages.");
 			}
 			
-			final TextMessage msg = session.createTextMessage(CLOSE_COMMAND + queueId);
+			final TextMessage msg = session.createTextMessage(CLOSE_COMMAND + " " + queueId);
 			
 			sender.send(msg);
 		} else {
@@ -285,7 +285,7 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 		logger.debug("handleCloseControlMessage started...");
 		
 		Assert.notNull(msg, "Message is null.");
-		Assert.notNull(session, "session is null.");
+		Assert.notNull(session, "Session is null.");
 		
 		if (msg instanceof TextMessage) {
 			final TextMessage tmsg = (TextMessage) msg;
@@ -297,7 +297,7 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 					throw new AuthException("Unauthorized close command: " + tmsg.getText());
 				}
 				
-				session.close();
+				closeConnection(session);
 			} else {
 				throw new JMSException("Invalid destination class: " + tmsg.getJMSDestination().getClass().getSimpleName());
 			}
@@ -322,7 +322,7 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 				throw new AuthException("Sender can't send control messages.");
 			}
 			
-			final TextMessage msg = session.createTextMessage(SWITCH_COMMAND + queueId);
+			final TextMessage msg = session.createTextMessage(SWITCH_COMMAND + " " + queueId);
 			
 			sender.send(msg);
 		} else {

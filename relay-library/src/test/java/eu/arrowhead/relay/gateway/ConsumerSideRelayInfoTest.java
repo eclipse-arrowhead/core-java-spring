@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2019 AITIA
+ * Copyright (c) 2021 AITIA
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -16,29 +16,38 @@ package eu.arrowhead.relay.gateway;
 
 import javax.jms.MessageProducer;
 
-import org.springframework.util.Assert;
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Mockito;
 
-public class ConsumerSideRelayInfo {
+public class ConsumerSideRelayInfoTest {
 
-	//=================================================================================================
-	// members
-	
-	private final MessageProducer messageSender;
-	private final MessageProducer controlMessageSender;
-	
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public ConsumerSideRelayInfo(final MessageProducer messageSender, final MessageProducer controlMessageSender) {
-		Assert.notNull(messageSender, "messageSender is null.");
-		Assert.notNull(controlMessageSender, "controlMessageSender is null.");
-		
-		this.messageSender = messageSender;
-		this.controlMessageSender = controlMessageSender;
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructorMessageSenderNull() {
+		try {
+			new ConsumerSideRelayInfo(null, null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("messageSender is null.", ex.getMessage());
+			
+			throw ex;
+		}
 	}
-
+	
 	//-------------------------------------------------------------------------------------------------
-	public MessageProducer getMessageSender() { return messageSender; }
-	public MessageProducer getControlMessageSender() { return controlMessageSender; }
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructorControlMessageSenderNull() {
+		final MessageProducer producer = Mockito.mock(MessageProducer.class);
+		
+		try {
+			new ConsumerSideRelayInfo(producer, null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("controlMessageSender is null.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
 }
