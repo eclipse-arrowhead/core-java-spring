@@ -973,7 +973,241 @@ public class ActiveMQGatewayRelayClientTest {
 		verify(session, times(1)).close();
 	}
 	
-	//TODO: continue with tests of sendSwitchControlMessage
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testSendSwitchControlMessageSessionNull() throws Exception {
+		try {
+			testingObject.sendSwitchControlMessage(null, null, null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("session is null.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testSendSwitchControlMessageSenderNull() throws Exception {
+		try {
+			testingObject.sendSwitchControlMessage(getTestSession(), null, null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("sender is null.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testSendSwitchControlMessageQueueIdNull() throws Exception {
+		final MessageProducer sender = Mockito.mock(MessageProducer.class);
+		
+		try {
+			testingObject.sendSwitchControlMessage(getTestSession(), sender, null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("queueId is null or blank.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testSendSwitchControlMessageQueueIdEmpty() throws Exception {
+		final MessageProducer sender = Mockito.mock(MessageProducer.class);
+		
+		try {
+			testingObject.sendSwitchControlMessage(getTestSession(), sender, "");
+		} catch (final Exception ex) {
+			Assert.assertEquals("queueId is null or blank.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = JMSException.class)
+	public void testSendSwitchControlMessageInvalidDestination() throws Exception {
+		final MessageProducer sender = Mockito.mock(MessageProducer.class);
+		final Topic topic = Mockito.mock(Topic.class);
+		
+		when(sender.getDestination()).thenReturn(topic);
+		
+		try {
+			testingObject.sendSwitchControlMessage(getTestSession(), sender, "1234");
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().startsWith("Invalid destination class: "));
+			
+			verify(sender, times(2)).getDestination();
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = AuthException.class)
+	public void testSendSwitchControlMessageWrongDestination() throws Exception {
+		final MessageProducer sender = Mockito.mock(MessageProducer.class);
+		final Queue queue = Mockito.mock(Queue.class);
+		
+		when(sender.getDestination()).thenReturn(queue);
+		when(queue.getQueueName()).thenReturn("wrong");
+		
+		try {
+			testingObject.sendSwitchControlMessage(getTestSession(), sender, "1234");
+		} catch (final Exception ex) {
+			Assert.assertEquals("Sender can't send control messages.", ex.getMessage());
+			
+			verify(sender, times(2)).getDestination();
+			verify(queue, times(1)).getQueueName();
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testSendSwitchControlMessageOk() throws Exception {
+		final Session session = Mockito.mock(Session.class);
+		final MessageProducer sender = Mockito.mock(MessageProducer.class);
+		final Queue queue = Mockito.mock(Queue.class);
+		final TextMessage msg = Mockito.mock(TextMessage.class);
+		
+		when(sender.getDestination()).thenReturn(queue);
+		when(queue.getQueueName()).thenReturn("something-1234-CONTROL");
+		when(session.createTextMessage("SWITCH 1234")).thenReturn(msg);
+		doNothing().when(sender).send(msg);
+		
+		testingObject.sendSwitchControlMessage(session, sender, "1234");
+
+		verify(sender, times(2)).getDestination();
+		verify(queue, times(1)).getQueueName();
+		verify(session, times(1)).createTextMessage("SWITCH 1234");
+		verify(sender, times(1)).send(msg);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testValidateSwitchControlMessageMessageNull() throws Exception {
+		try {
+			testingObject.validateSwitchControlMessage(null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Message is null.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = JMSException.class)
+	public void testValidateSwitchControlMessageInvalidMessageClass() throws Exception {
+		final Message msg = Mockito.mock(Message.class);
+		
+		try {
+			testingObject.validateSwitchControlMessage(msg);
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().startsWith("Invalid message class: "));
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testValidateSwitchControlMessageInvalidCommand() throws Exception {
+		final TextMessage msg = Mockito.mock(TextMessage.class);
+		
+		when(msg.getText()).thenReturn("WRONG");
+		
+		try {
+			testingObject.validateSwitchControlMessage(msg);
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().startsWith("Invalid command: "));
+			
+			verify(msg, times(1)).getText();
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testValidateSwitchControlMessageMissingQueueId() throws Exception {
+		final TextMessage msg = Mockito.mock(TextMessage.class);
+		
+		when(msg.getText()).thenReturn("SWITCH ");
+		
+		try {
+			testingObject.validateSwitchControlMessage(msg);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Missing queue id", ex.getMessage());
+			
+			verify(msg, times(1)).getText();
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = JMSException.class)
+	public void testValidateSwitchControlMessageInvalidDestination() throws Exception {
+		final TextMessage msg = Mockito.mock(TextMessage.class);
+		final Topic topic = Mockito.mock(Topic.class);
+		
+		when(msg.getText()).thenReturn("SWITCH 1234");
+		when(msg.getJMSDestination()).thenReturn(topic);
+		
+		try {
+			testingObject.validateSwitchControlMessage(msg);
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().startsWith("Invalid destination class: "));
+			
+			verify(msg, times(1)).getText();
+			verify(msg, times(2)).getJMSDestination();
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = AuthException.class)
+	public void testValidateSwitchControlMessageWrongDestination() throws Exception {
+		final TextMessage msg = Mockito.mock(TextMessage.class);
+		final Queue queue = Mockito.mock(Queue.class);
+		
+		when(msg.getText()).thenReturn("SWITCH 1234");
+		when(msg.getJMSDestination()).thenReturn(queue);
+		when(queue.getQueueName()).thenReturn("something");
+		
+		try {
+			testingObject.validateSwitchControlMessage(msg);
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().startsWith("Unauthorized switch command: "));
+			
+			verify(msg, times(2)).getText();
+			verify(msg, times(2)).getJMSDestination();
+			verify(queue, times(1)).getQueueName();
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testValidateSwitchControlMessageOk() throws Exception {
+		final TextMessage msg = Mockito.mock(TextMessage.class);
+		final Queue queue = Mockito.mock(Queue.class);
+		
+		when(msg.getText()).thenReturn("SWITCH 1234");
+		when(msg.getJMSDestination()).thenReturn(queue);
+		when(queue.getQueueName()).thenReturn("something-1234-CONTROL");
+		
+		testingObject.validateSwitchControlMessage(msg);
+			
+		verify(msg, times(1)).getText();
+		verify(msg, times(2)).getJMSDestination();
+		verify(queue, times(1)).getQueueName();
+	}
 	
 	//=================================================================================================
 	// assistant methods
