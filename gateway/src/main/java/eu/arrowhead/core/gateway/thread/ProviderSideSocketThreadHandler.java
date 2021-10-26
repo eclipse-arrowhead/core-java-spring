@@ -17,6 +17,8 @@ package eu.arrowhead.core.gateway.thread;
 import java.io.IOException;
 import java.security.PublicKey;
 import java.time.ZonedDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -30,6 +32,9 @@ import javax.jms.Session;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 
+import org.apache.activemq.ActiveMQSession;
+import org.apache.activemq.command.ActiveMQQueue;
+import org.apache.activemq.management.JMSProducerStatsImpl;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -187,11 +192,25 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 			currentThread.closeAndInterrupt();
 		}
 		
-		relayClient.closeConnection(relaySession);
-		if (relayClient.isConnectionClosed(relaySession) && activeProviderSideSocketThreadHandlers != null && queueId != null) {
-			activeProviderSideSocketThreadHandlers.remove(queueId);
-			System.out.println("PROVIDER: relay connection closed"); //TODO: remove
+		boolean canCloseRelayConnection = false;
+		try {
+			canCloseRelayConnection = closeRelayDestinations(relaySession);
+		} catch (JMSException ex) {
+			logger.debug("Error while closing relay destination: {}", ex.getMessage());
+			logger.debug("Stacktrace:", ex);
 		}
+		
+		if (!canCloseRelayConnection) {
+			logger.debug("Relay connection is not closeable yet");
+			System.out.println("Relay connection is not closeable yet"); //TODO: remove
+			
+		} else {
+			relayClient.closeConnection(relaySession);
+			if (relayClient.isConnectionClosed(relaySession) && activeProviderSideSocketThreadHandlers != null && queueId != null) {
+				activeProviderSideSocketThreadHandlers.remove(queueId);
+				System.out.println("PROVIDER: relay connection closed"); //TODO: remove
+			}			
+		}			
 	}
 
 	//=================================================================================================
@@ -294,5 +313,50 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 			logger.debug("Request counter is off");
 			countRequests = false; // not HTTP
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private boolean closeRelayDestinations(final Session session) throws JMSException {
+		logger.debug("closeRelayDestinations started...");
+		
+		if (session == null && !(session instanceof ActiveMQSession)) {
+			return false; // should not happen
+		}
+		
+		ActiveMQSession amqs = (ActiveMQSession) session;
+		
+		final Set<String> destinationsFromSession = new HashSet<>();
+		final JMSProducerStatsImpl[] producers = amqs.getSessionStats().getProducers();
+		for (final JMSProducerStatsImpl producer : producers) {
+			String destination = producer.getDestination();
+			
+			int fromIdx = -1;
+			fromIdx = destination.indexOf(GatewayRelayClient.REQUEST_QUEUE_PREFIX);
+			if (fromIdx == -1) {
+				fromIdx = destination.indexOf(GatewayRelayClient.RESPONSE_QUEUE_PREFIX);
+			}
+			
+			if (fromIdx == -1) {
+				logger.debug("Unknown queue name: " + destination);
+				System.out.println("Unknown queue name: " + destination);				
+			} else {
+				destinationsFromSession.add(destination.substring(fromIdx));
+			}
+			
+		}
+		
+		final Set<ActiveMQQueue> allDestinationFromConnection = amqs.getConnection().getDestinationSource().getQueues();
+		for (final ActiveMQQueue destination : allDestinationFromConnection) {
+			if (destinationsFromSession.contains(destination.getQueueName())) {
+				try {
+					amqs.getConnection().destroyDestination(destination);	// throws JMSException if destination still has an active subscription
+				} catch (final JMSException ex) {
+					System.out.println(ex.getMessage()); //TODO remove
+					return false;
+				}	
+				System.out.println("queue destroyed: " + destination.getQueueName()); //TODO remove
+			}
+		}
+		return true;
 	}
 }
