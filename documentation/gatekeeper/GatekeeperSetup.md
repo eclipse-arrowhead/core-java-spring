@@ -21,7 +21,7 @@ Some help for the installation:
 
 [ActiveMQ Classic Documentation](https://activemq.apache.org/using-activemq)
 
-[A Guide to installing ActiveMQ on Ubuntu 18.04](https://www.osradar.com/install-apachemq-ubuntu-18-04/)
+[A Guide to installing ActiveMQ on Ubuntu 18.04](https://websiteforstudents.com/how-to-install-apache-activemq-on-ubuntu-18-04-16-04/)
 
 Before starting the ActiveMQ server you have to modify the configuration. The `activemq.xml` file contains all settings of the server which is located in the `conf` subfolder of the ActiveMQ installation folder.
 
