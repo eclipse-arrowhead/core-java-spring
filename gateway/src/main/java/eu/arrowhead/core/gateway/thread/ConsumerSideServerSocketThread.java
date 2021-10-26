@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceConfigurationError;
@@ -34,6 +35,7 @@ import javax.jms.MessageProducer;
 import javax.jms.Queue;
 import javax.jms.Session;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLProtocolException;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
@@ -69,6 +71,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 	private final String queueId;
 	private final int timeout;
 	private final ConcurrentMap<String,ActiveSessionDTO> activeSessions;
+	private ConcurrentMap<String,ConsumerSideServerSocketThread> activeConsumerSideSocketThreads;
 	private final ConcurrentLinkedQueue<Integer> availablePorts;
 	private final SSLProperties sslProperties;
 
@@ -76,6 +79,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 	private SSLServerSocket sslServerSocket;
 	private SSLSocket sslConsumerSocket;
 	private OutputStream outConsumer;
+	private ZonedDateTime lastInteraction;
 	private boolean interrupted = false;
 	private boolean initialized = false;
 	
@@ -103,6 +107,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 		this.timeout = timeout;
 		this.providerGatewayPublicKey = Utilities.getPublicKeyFromBase64EncodedString(providerGatewayPublicKey);
 		this.activeSessions = appContext.getBean(CoreCommonConstants.GATEWAY_ACTIVE_SESSION_MAP, ConcurrentHashMap.class);
+		this.activeConsumerSideSocketThreads = appContext.getBean(CoreCommonConstants.GATEWAY_ACTIVE_CONSUMER_SIDE_SOCKET_THREAD_MAP, ConcurrentHashMap.class);
 		this.availablePorts = appContext.getBean(CoreCommonConstants.GATEWAY_AVAILABLE_PORTS_QUEUE, ConcurrentLinkedQueue.class);
 		this.sslProperties = appContext.getBean(SSLProperties.class);
 		
@@ -120,10 +125,12 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 		try {
 			final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(sslProperties);
 			final SSLServerSocketFactory serverSocketFactory = sslContext.getServerSocketFactory();
-			sslServerSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(port);
-			sslServerSocket.setNeedClientAuth(true);
-			sslServerSocket.setSoTimeout(timeout);
+			this.sslServerSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(port);
+			this.sslServerSocket.setNeedClientAuth(true);
+			this.sslServerSocket.setSoTimeout(timeout);
 			this.initialized = true;
+			this.lastInteraction = ZonedDateTime.now();
+			
 		} catch (final Throwable ex) {
 			logger.debug("Problem occurs in initializing gateway communication: {}", ex.getMessage());
 			logger.debug("Stacktrace:", ex);
@@ -136,6 +143,11 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 	//-------------------------------------------------------------------------------------------------
 	public boolean isInitialized() {
 		return initialized;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ZonedDateTime getLastInteractionTime() {
+		return this.lastInteraction;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -198,11 +210,20 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 				}
 				
 				final byte[] buffer = new byte[BUFFER_SIZE];
-				final int size = inConsumer.read(buffer);
+				int size = -1;
+				try {
+					size = inConsumer.read(buffer);
+				} catch (final SSLProtocolException ex) {
+					if (!ex.getMessage().equalsIgnoreCase("Connection reset")) {
+						throw ex;
+					}
+				}
 				
 				if (size < 0) { // end of stream
 					logger.debug("End of stream");
-					closeAndInterrupt();
+					System.out.println("CONSUMER: end of stream"); //TODO: remove
+					//TODO should block or sleep
+					
 				} else {
 					final byte[] data = new byte[size];
 					System.arraycopy(buffer, 0, data, 0, size);
@@ -228,7 +249,8 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 						case NO:
 							// send the whole cache content here
 							logger.debug("Sending {} byte array(s) via relay as one message...", byteArrayCache.size());
-							relayClient.sendBytes(relaySession, sender, providerGatewayPublicKey, concatenateByteArrays(byteArrayCache)); 
+							relayClient.sendBytes(relaySession, sender, providerGatewayPublicKey, concatenateByteArrays(byteArrayCache));
+							lastInteraction = ZonedDateTime.now();
 							break;
 						case CAN_BE: 
 							// no further action is necessary
@@ -243,6 +265,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 								// requestBytes contains a whole HTTP request
 								logger.debug("Sending HTTP request via relay");
 								relayClient.sendBytes(relaySession, sender, providerGatewayPublicKey, requestBytes);
+								lastInteraction = ZonedDateTime.now();
 							} else {
 								// else waiting for more bytes
 								logger.debug("Waiting for more bytes");
@@ -255,6 +278,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 							} else {
 								logger.debug("Sending byte array via relay...");
 								relayClient.sendBytes(relaySession, sender, providerGatewayPublicKey, data);
+								lastInteraction = ZonedDateTime.now();
 							}
 						}
 					}
@@ -262,7 +286,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 			}
 		} catch (final IOException | JMSException | ArrowheadException | ServiceConfigurationError | IllegalArgumentException ex) {
 			logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
-			logger.debug("Stacktrace:", ex);
+			logger.info("Stacktrace:", ex);
 			closeAndInterrupt();
 		}		
 	}
@@ -283,9 +307,10 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 	//-------------------------------------------------------------------------------------------------
 	private void close() {
 		logger.debug("close started...");
+		System.out.println("CONSUMER: close started.."); //TODO: remove
 		
 		if (activeSessions != null && queueId != null) {
-			activeSessions.remove(queueId);
+			activeSessions.remove(queueId);			
 		}
 		
 		if (sslConsumerSocket != null) {
@@ -311,6 +336,10 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 		}
 		
 		relayClient.closeConnection(relaySession);
+		if (relayClient.isConnectionClosed(relaySession) && activeConsumerSideSocketThreads != null && queueId != null) {
+			activeConsumerSideSocketThreads.remove(queueId);
+			System.out.println("CONSUMER: relay connection closed"); //TODO: remove
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------

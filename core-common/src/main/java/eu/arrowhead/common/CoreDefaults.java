@@ -59,6 +59,7 @@ public class CoreDefaults {
 	public static final boolean DEFAULT_GATEKEEPER_IS_GATEWAY_PRESENT = false;
 	public static final boolean DEFAULT_GATEKEEPER_IS_GATEWAY_MANDATORY = false;
 	
+	public static final int DEFAULT_GATEWAY_INACTIVE_BRIDGE_TIMEOUT = 60; // in seconds
 	public static final int DEFAULT_GATEWAY_SOCKET_TIMEOUT = 30000;
 	public static final int DEFAULT_GATEWAY_MIN_PORT = 8000;
 	public static final int DEFAULT_GATEWAY_MAX_PORT = 8100;

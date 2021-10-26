@@ -88,6 +88,7 @@ public class GatekeeperTask implements Runnable {
 		} catch (final JMSException | ArrowheadException ex) {
 			logger.debug("Error while extracting message from General Advertisement topic: {}", ex.getMessage());
 			logger.debug("Exception:", ex);
+			
 		}
 	}
 	
@@ -97,14 +98,18 @@ public class GatekeeperTask implements Runnable {
 	//-------------------------------------------------------------------------------------------------
 	private void handleMessage(final GeneralAdvertisementMessageDTO gaMsg) {
 		logger.debug("handleMessage started...");
+		
+		Session session = null;
 		try {
-			final Session session = relayClient.createConnection(relayHost, relayPort, securedRelay);
+			session = relayClient.createConnection(relayHost, relayPort, securedRelay);
 			final GatekeeperRelayRequest request = relayClient.sendAcknowledgementAndReturnRequest(session, gaMsg);
 			final Object response = handleRequest(request);
 			relayClient.sendResponse(session, request, response);
 		} catch (final JMSException | ArrowheadException ex) {
 			logger.debug("Error while communicating with an other gatekeeper: {}", ex.getMessage());
 			logger.debug("Exception:", ex);
+		} finally {
+			relayClient.closeConnection(session);
 		}
 	}
 

@@ -16,6 +16,7 @@ package eu.arrowhead.core.gateway.thread;
 
 import java.io.IOException;
 import java.security.PublicKey;
+import java.time.ZonedDateTime;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -59,6 +60,7 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 	private final int timeout;
 	private final int maxRequestPerSocket;
 	private final ConcurrentMap<String,ActiveSessionDTO> activeSessions;
+	private ConcurrentMap<String,ProviderSideSocketThreadHandler> activeProviderSideSocketThreadHandlers;
 	private final SSLProperties sslProperties;
 	
 	private String queueId;
@@ -95,6 +97,7 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 		this.maxRequestPerSocket = maxRequestPerSocket;
 		this.consumerGatewayPublicKey = Utilities.getPublicKeyFromBase64EncodedString(this.connectionRequest.getConsumerGWPublicKey());
 		this.activeSessions = appContext.getBean(CoreCommonConstants.GATEWAY_ACTIVE_SESSION_MAP, ConcurrentHashMap.class);
+		this.activeProviderSideSocketThreadHandlers = appContext.getBean(CoreCommonConstants.GATEWAY_ACTIVE_PROVIDER_SIDE_SOCKET_THREAD_HANDLER_MAP, ConcurrentHashMap.class);
 		this.sslProperties = appContext.getBean(SSLProperties.class);
 	}
 	
@@ -127,6 +130,11 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 	//-------------------------------------------------------------------------------------------------
 	public boolean isInitialized() {
 		return initialized;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ZonedDateTime getLastInteractionTime() {
+		return this.currentThread.getLastInteractionTime();
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -165,6 +173,7 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 	//-------------------------------------------------------------------------------------------------
 	public void close() {
 		logger.debug("Provider handler close started...");
+		System.out.println("PROVIDER: close started"); //TODO: remove
 		
 		if (activeSessions != null && queueId != null) {
 			activeSessions.remove(queueId);
@@ -179,6 +188,10 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 		}
 		
 		relayClient.closeConnection(relaySession);
+		if (relayClient.isConnectionClosed(relaySession) && activeProviderSideSocketThreadHandlers != null && queueId != null) {
+			activeProviderSideSocketThreadHandlers.remove(queueId);
+			System.out.println("PROVIDER: relay connection closed"); //TODO: remove
+		}
 	}
 
 	//=================================================================================================

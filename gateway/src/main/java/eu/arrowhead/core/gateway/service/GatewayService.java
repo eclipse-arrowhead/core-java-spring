@@ -77,6 +77,12 @@ public class GatewayService {
 	@Resource(name = CoreCommonConstants.GATEWAY_ACTIVE_SESSION_MAP)
 	private ConcurrentMap<String,ActiveSessionDTO> activeSessions;
 	
+	@Resource(name = CoreCommonConstants.GATEWAY_ACTIVE_CONSUMER_SIDE_SOCKET_THREAD_MAP)
+	private ConcurrentMap<String,ConsumerSideServerSocketThread> activeConsumerSideSocketThreads;
+	
+	@Resource(name = CoreCommonConstants.GATEWAY_ACTIVE_PROVIDER_SIDE_SOCKET_THREAD_HANDLER_MAP)
+	private ConcurrentMap<String,ProviderSideSocketThreadHandler> activeProviderSideSocketThreadHandlers;
+	
 	@Resource(name = CoreCommonConstants.GATEWAY_AVAILABLE_PORTS_QUEUE)
 	private ConcurrentLinkedQueue<Integer> availablePorts;
 	
@@ -133,6 +139,7 @@ public class GatewayService {
 			handler = new ProviderSideSocketThreadHandler(appContext, relayClient, session, request, gatewaySocketTimeout, gatewayProviderSideMaxRequestPerSocket);
 			final ProviderSideRelayInfo info = relayClient.initializeProviderSideRelay(session, handler);
 			handler.init(info.getQueueId(), info.getMessageSender());
+			activeProviderSideSocketThreadHandlers.put(info.getQueueId(), handler);
 			final ActiveSessionDTO activeSession = new ActiveSessionDTO(info.getQueueId(), info.getPeerName(), request.getConsumer(), request.getConsumerCloud(), request.getProvider(),
 																		request.getProviderCloud(), request.getServiceDefinition(), request.getRelay(), Utilities.convertZonedDateTimeToUTCString(now),
 																		null);
@@ -182,11 +189,16 @@ public class GatewayService {
 			thread.init(info.getMessageSender());
 			thread.start();
 			
+			activeConsumerSideSocketThreads.put(request.getQueueId(), thread);			
 			return serverPort;
+			
 		} catch (final JMSException ex) {
+			activeSessions.remove(request.getQueueId());
 			relayClient.closeConnection(session);
 			throw new ArrowheadException("Error occured when initialize relay communication.", HttpStatus.SC_BAD_GATEWAY, ex);
+			
 		} catch (final ArrowheadException ex) {
+			activeSessions.remove(request.getQueueId());
 			relayClient.closeConnection(session);
 			
 			if (thread != null && thread.isInitialized()) {

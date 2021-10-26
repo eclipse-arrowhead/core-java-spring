@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -32,12 +33,18 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.gateway.service.ActiveSessionDTO;
 import eu.arrowhead.core.gateway.service.GatewayService;
+import eu.arrowhead.core.gateway.thread.ConsumerSideServerSocketThread;
+import eu.arrowhead.core.gateway.thread.ProviderSideSocketThreadHandler;
+import eu.arrowhead.core.gateway.thread.RelayConnectionRemovalThread;
 
 @Component
 public class GatewayApplicationInitListener extends ApplicationInitListener {
 	
 	//=================================================================================================
 	// members
+	
+	@Autowired
+	private RelayConnectionRemovalThread relayConnectionRemoval;
 	
 	@Value(CoreCommonConstants.$GATEWAY_MIN_PORT_WD)
 	private int minPort;
@@ -51,6 +58,18 @@ public class GatewayApplicationInitListener extends ApplicationInitListener {
 	//-------------------------------------------------------------------------------------------------
 	@Bean(name = CoreCommonConstants.GATEWAY_ACTIVE_SESSION_MAP)
 	public ConcurrentMap<String,ActiveSessionDTO> getActiveSessions() {
+		return new ConcurrentHashMap<>();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Bean(name = CoreCommonConstants.GATEWAY_ACTIVE_CONSUMER_SIDE_SOCKET_THREAD_MAP)
+	public ConcurrentMap<String,ConsumerSideServerSocketThread> getConsumerSideSocketThreads() {
+		return new ConcurrentHashMap<>();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Bean(name = CoreCommonConstants.GATEWAY_ACTIVE_PROVIDER_SIDE_SOCKET_THREAD_HANDLER_MAP)
+	public ConcurrentMap<String,ProviderSideSocketThreadHandler> getProviderSideSocketThreadHandlers() {
 		return new ConcurrentHashMap<>();
 	}
 	
@@ -82,6 +101,8 @@ public class GatewayApplicationInitListener extends ApplicationInitListener {
 		if (minPort > maxPort) {
 			throw new ServiceConfigurationError("Available port interval is invalid: [" + minPort + " - " + maxPort + "]");
 		}
+		
+		relayConnectionRemoval.start();
 	}
 	
 	//-------------------------------------------------------------------------------------------------

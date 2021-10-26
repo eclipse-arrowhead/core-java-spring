@@ -211,6 +211,8 @@ public class CoreCommonConstants {
 	public static final String $NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS_WD = "${" + NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + ":" + 
 																				 CoreDefaults.DEFAULT_NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + "}";
 	
+	public static final String GATEWAY_INACTIVE_BRIDGE_TIMEOUT = "inactive_gateway_bridge_timeout";
+	public static final String $GATEWAY_INACTIVE_BRIDGE_TIMEOUT_WD = "${" + GATEWAY_INACTIVE_BRIDGE_TIMEOUT + ":" + CoreDefaults.DEFAULT_GATEWAY_INACTIVE_BRIDGE_TIMEOUT + "}";
 	public static final String GATEWAY_SOCKET_TIMEOUT = "gateway_socket_timeout";
 	public static final String $GATEWAY_SOCKET_TIMEOUT_WD = "${" + GATEWAY_SOCKET_TIMEOUT + ":" + CoreDefaults.DEFAULT_GATEWAY_SOCKET_TIMEOUT + "}";
 	public static final String GATEWAY_MIN_PORT = "min_port";
@@ -222,6 +224,8 @@ public class CoreCommonConstants {
 	
 	public static final String GATEWAY_ACTIVE_SESSION_MAP = "activeSessions";
 	public static final String GATEWAY_AVAILABLE_PORTS_QUEUE = "availableQueue";
+	public static final String GATEWAY_ACTIVE_CONSUMER_SIDE_SOCKET_THREAD_MAP = "activeConsumerSideSocketThreads";
+	public static final String GATEWAY_ACTIVE_PROVIDER_SIDE_SOCKET_THREAD_HANDLER_MAP = "activeProviderSideSocketThreadHandlers";
 	
 	public static final String EVENTHANDLER_TTL_SCHEDULED = "event_handler_ttl_scheduled";
 	public static final String $EVENTHANDLER_TTL_SCHEDULED_WD = "${" + EVENTHANDLER_TTL_SCHEDULED + ":" + CoreDefaults.DEFAULT_EVENTHANDLER_TTL_SCHEDULED + "}";
