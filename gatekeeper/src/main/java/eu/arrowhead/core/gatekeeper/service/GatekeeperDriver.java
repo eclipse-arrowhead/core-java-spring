@@ -241,8 +241,9 @@ public class GatekeeperDriver {
 		Assert.notNull(request, "Request is null.");
 		
 		final Relay relay = gatekeeperMatchmaker.doMatchmaking(new RelayMatchmakingParameters(targetCloud));
+		Session session = null;
 		try {
-			final Session session = relayClient.createConnection(relay.getAddress(), relay.getPort(), relay.getSecure());
+			session = relayClient.createConnection(relay.getAddress(), relay.getPort(), relay.getSecure());
 			final String recipientCommonName = getRecipientCommonName(targetCloud);
 			final GeneralAdvertisementResult advResult = relayClient.publishGeneralAdvertisement(session, recipientCommonName, targetCloud.getAuthenticationInfo());
 			if (advResult == null) {
@@ -257,9 +258,11 @@ public class GatekeeperDriver {
 			return relayResponse.getICNProposalResponse();
 		} catch (final JMSException ex) {
 			logger.debug("Error while sending ICN proposal via relay: {}", ex.getMessage());
-			logger.debug("Exception:", ex);
-			
+			logger.debug("Exception:", ex);			
 			throw new ArrowheadException("Error while sending ICN proposal via relay.", ex);
+			
+		} finally {
+			relayClient.closeConnection(session);
 		}
 	}
 	

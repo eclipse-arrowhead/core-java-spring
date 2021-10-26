@@ -104,7 +104,7 @@ public class GSDPollTask implements Runnable {
 			queue.add(new GSDPollResponseDTO()); 			
 		}
 		finally {
-			relayClient.closeConnection(session); //TODO: not closing the connection! why?
+			relayClient.closeConnection(session);
 		}
 	}
 }
