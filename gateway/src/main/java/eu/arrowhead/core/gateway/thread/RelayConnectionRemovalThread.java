@@ -18,7 +18,7 @@ public class RelayConnectionRemovalThread extends Thread {
 	//=================================================================================================
 	// member
 	
-	private static final long PERIOD = 10000; //milisec
+	public static final long PERIOD = 10000; //milisec
 	
 	@Value(CoreCommonConstants.$GATEWAY_INACTIVE_BRIDGE_TIMEOUT_WD)
 	private long consumerSideThreshold;

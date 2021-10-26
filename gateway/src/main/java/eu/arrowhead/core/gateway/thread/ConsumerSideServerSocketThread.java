@@ -59,7 +59,6 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.gateway.service.ActiveSessionDTO;
 import eu.arrowhead.core.gateway.thread.GatewayHTTPUtils.Answer;
 import eu.arrowhead.relay.gateway.GatewayRelayClient;
-import javassist.bytecode.stackmap.BasicBlock.Catch;
 
 public class ConsumerSideServerSocketThread extends Thread implements MessageListener {
 	
@@ -90,6 +89,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 	private ZonedDateTime lastInteraction;
 	private boolean interrupted = false;
 	private boolean initialized = false;
+	private boolean relayConnectionIsClosed = false;
 	
 	//=================================================================================================
 	// methods
@@ -353,6 +353,10 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 			availablePorts.offer(port);
 		}
 		
+		if (relayConnectionIsClosed) {
+			return true;
+		}
+		
 		boolean canCloseRelayConnection = false;
 		try {
 			canCloseRelayConnection = closeRelayDestinations(relaySession);
@@ -369,6 +373,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 			relayClient.closeConnection(relaySession);
 			if (relayClient.isConnectionClosed(relaySession) && activeConsumerSideSocketThreads != null && queueId != null) {
 				activeConsumerSideSocketThreads.remove(queueId);
+				relayConnectionIsClosed = true;
 				System.out.println("CONSUMER: relay connection closed"); //TODO: remove
 				return true;
 			}			
@@ -486,7 +491,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 	//-------------------------------------------------------------------------------------------------
 	private void sleep() {
 		try {
-			Thread.sleep(5000);
+			Thread.sleep(RelayConnectionRemovalThread.PERIOD / 2);
 		} catch (final InterruptedException ex) {
 			interrupt();
 		}
