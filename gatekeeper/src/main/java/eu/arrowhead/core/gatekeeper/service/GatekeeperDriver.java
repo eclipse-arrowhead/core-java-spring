@@ -261,8 +261,6 @@ public class GatekeeperDriver {
 			logger.debug("Exception:", ex);			
 			throw new ArrowheadException("Error while sending ICN proposal via relay.", ex);
 			
-		} finally {
-			relayClient.closeConnection(session);
 		}
 	}
 	

@@ -101,10 +101,8 @@ public class GSDPollTask implements Runnable {
 			logger.debug("Exception: {}", ex.getMessage());
 			
 			// adding empty responseDTO into the blocking queue in order to having exactly as many response as request was sent
-			queue.add(new GSDPollResponseDTO()); 			
-		}
-		finally {
-			relayClient.closeConnection(session);
+			queue.add(new GSDPollResponseDTO());
+			
 		}
 	}
 }

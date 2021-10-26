@@ -34,6 +34,7 @@ import javax.jms.Topic;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.ActiveMQSession;
 import org.apache.activemq.ActiveMQSslConnectionFactory;
+import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -151,7 +152,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 			}
 		}
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public boolean isConnectionClosed(final Session session) {
@@ -223,7 +224,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 			final Message reqMsg = messageConsumer.receive(timeout);
 			
 			if (reqMsg == null) { // timeout
-				closeThese(messageProducer, messageConsumer);
+				closeMessageActors(session, messageProducer, messageConsumer);
 				
 				return null; // no request arrived
 			}
@@ -241,7 +242,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 			
 			throw new JMSException("Invalid message class: " + reqMsg.getClass().getSimpleName());
 		} catch (final JMSException | ArrowheadException ex) {
-			closeThese(messageProducer, messageConsumer);
+			closeMessageActors(session, messageProducer, messageConsumer);
 			throw ex;
 		}
 	}
@@ -270,7 +271,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 			final TextMessage respMsg = session.createTextMessage(encryptedResponse);
 			request.getAnswerSender().send(respMsg);
 		} finally {
-			request.getAnswerSender().close();
+			closeMessageActors(session, request.getAnswerSender());			
 		}
 	}
 
@@ -307,7 +308,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 			final Message ackMsg = messageConsumer.receive(timeout);
 			
 			if (ackMsg == null) {
-				closeThese(producer, messageConsumer);
+				closeMessageActors(session, producer, messageConsumer);
 				
 				return null;
 			}
@@ -316,14 +317,14 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 				final TextMessage tmsg = (TextMessage) ackMsg;
 				final DecryptedMessageDTO decryptedMessageDTO = cryptographer.decodeMessage(tmsg.getText(), peerPublicKey);
 				validateAcknowledgement(sessionId, decryptedMessageDTO);
-				producer.close();
+				closeMessageActors(session, producer);
 				
 				return new GeneralAdvertisementResult(messageConsumer, recipientCN, peerPublicKey, sessionId);
 			}
 			
 			throw new JMSException("Invalid message class: " + ackMsg.getClass().getSimpleName());
 		} catch (final JMSException | ArrowheadException ex) {
-			closeThese(producer, messageConsumer);
+			closeMessageActors(session, producer, messageConsumer);
 			throw ex;
 		}
 	}
@@ -375,7 +376,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 
 			throw new JMSException("Invalid message class: " + ansMsg.getClass().getSimpleName());
 		} finally {
-			closeThese(messageProducer, advResponse.getAnswerReceiver());
+			closeMessageActors(session, messageProducer, advResponse.getAnswerReceiver());
 		}
 	}
 	
@@ -572,12 +573,21 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void closeThese(final AutoCloseable... closeables) {
-		logger.debug("closeThese started...");
+	private void closeMessageActors(final Session session, final AutoCloseable... closeables) {
+		logger.debug("closeMessageActors started...");
 		
 		for (final AutoCloseable closeable : closeables) {
 			try {
 				if (closeable != null) {
+
+					if (session instanceof ActiveMQSession && closeable instanceof MessageProducer) {
+						final ActiveMQSession amqs = (ActiveMQSession) session;
+						final MessageProducer producer = (MessageProducer) closeable;
+						if (producer.getDestination() instanceof ActiveMQDestination) {
+							final ActiveMQDestination dest = (ActiveMQDestination) producer.getDestination();
+							amqs.getConnection().destroyDestination(dest);
+						}
+					}
 					closeable.close();
 				}
 			} catch (final Exception ex) {

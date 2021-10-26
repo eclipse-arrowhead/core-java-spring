@@ -117,6 +117,7 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 					amqs.getConnection().close();
 				}
 			} catch (final JMSException ex) {
+				System.out.println("JMSException: " + ex.getMessage()); //TODO remove
 				logger.debug(ex.getMessage());
 				logger.trace("Stacktrace:", ex);
 			}
@@ -300,7 +301,7 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 					throw new AuthException("Unauthorized close command: " + tmsg.getText());
 				}
 				
-				session.close();
+				this.closeConnection(session);
 			} else {
 				throw new JMSException("Invalid destination class: " + tmsg.getJMSDestination().getClass().getSimpleName());
 			}
@@ -397,7 +398,6 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 			throw new JMSException("Error while creating SSL connection: " + ex.getMessage());
 		}
 	}
-
 	
 	//-------------------------------------------------------------------------------------------------
 	private String parseCloseCommand(final String command) {

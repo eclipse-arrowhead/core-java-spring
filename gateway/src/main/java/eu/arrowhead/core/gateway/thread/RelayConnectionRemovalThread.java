@@ -68,6 +68,7 @@ public class RelayConnectionRemovalThread extends Thread {
 		}
 	}
 	
+	
 	//-------------------------------------------------------------------------------------------------
 	private void handleProviderSideConnections(final ZonedDateTime now) {
 		for (final ProviderSideSocketThreadHandler threadHandler : activeProviderSideSocketThreadHandlers.values()) {

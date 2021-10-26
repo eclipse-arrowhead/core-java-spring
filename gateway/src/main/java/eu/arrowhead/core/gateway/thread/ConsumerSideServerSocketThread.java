@@ -21,8 +21,10 @@ import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ServiceConfigurationError;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
@@ -40,6 +42,9 @@ import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 
+import org.apache.activemq.ActiveMQSession;
+import org.apache.activemq.command.ActiveMQQueue;
+import org.apache.activemq.management.JMSProducerStatsImpl;
 import org.apache.http.HttpStatus;
 import org.apache.http.util.ByteArrayBuffer;
 import org.apache.logging.log4j.LogManager;
@@ -54,13 +59,16 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.gateway.service.ActiveSessionDTO;
 import eu.arrowhead.core.gateway.thread.GatewayHTTPUtils.Answer;
 import eu.arrowhead.relay.gateway.GatewayRelayClient;
+import javassist.bytecode.stackmap.BasicBlock.Catch;
 
 public class ConsumerSideServerSocketThread extends Thread implements MessageListener {
 	
 	//=================================================================================================
 	// members
 
+
 	private static final int BUFFER_SIZE = 1024;
+	private static final String CONNECTION_RESET_MSG = "Connection reset";
 	
 	private static final Logger logger = LogManager.getLogger(ConsumerSideServerSocketThread.class);
 
@@ -193,20 +201,32 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 			throw new IllegalStateException("Thread is not initialized.");
 		}
 
+		InputStream inConsumer = null;
 		try {
 			sslConsumerSocket = (SSLSocket) sslServerSocket.accept();
-			final InputStream inConsumer = sslConsumerSocket.getInputStream();
+			inConsumer = sslConsumerSocket.getInputStream();
 			outConsumer = sslConsumerSocket.getOutputStream();
+		} catch (IOException ex) {
+			logger.debug("Problem occurs while establishing gateway communication: {}", ex.getMessage());
+			logger.debug("Stacktrace:", ex);
+			this.interrupted = true;
+		}	
 			
-			final GatewayHTTPRequestCache requestCache = new GatewayHTTPRequestCache(BUFFER_SIZE);
-			final List<byte[]> byteArrayCache = new ArrayList<>();
-			boolean contentDetected = false;
-			boolean useHttpCache = false;
-			
-			while (true) {
+		final GatewayHTTPRequestCache requestCache = new GatewayHTTPRequestCache(BUFFER_SIZE);
+		final List<byte[]> byteArrayCache = new ArrayList<>();
+		boolean contentDetected = false;
+		boolean useHttpCache = false;
+		
+		while (true) {
+			try {
 				if (interrupted) {
-					close();
-					return;
+					if (close()) {
+						interrupt(); // make sure Thread.interrupt() is called
+						return;						
+					} else {
+						sleep();
+						continue;
+					}
 				}
 				
 				final byte[] buffer = new byte[BUFFER_SIZE];
@@ -214,7 +234,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 				try {
 					size = inConsumer.read(buffer);
 				} catch (final SSLProtocolException ex) {
-					if (!ex.getMessage().equalsIgnoreCase("Connection reset")) {
+					if (!ex.getMessage().equalsIgnoreCase(CONNECTION_RESET_MSG)) {
 						throw ex;
 					}
 				}
@@ -222,9 +242,10 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 				if (size < 0) { // end of stream
 					logger.debug("End of stream");
 					System.out.println("CONSUMER: end of stream"); //TODO: remove
-					//TODO should block or sleep
+					closeAndInterrupt();
 					
 				} else {
+					lastInteraction = ZonedDateTime.now();
 					final byte[] data = new byte[size];
 					System.arraycopy(buffer, 0, data, 0, size);
 					logger.debug("FROM CONSUMER:" + new String(data, StandardCharsets.ISO_8859_1));
@@ -250,7 +271,6 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 							// send the whole cache content here
 							logger.debug("Sending {} byte array(s) via relay as one message...", byteArrayCache.size());
 							relayClient.sendBytes(relaySession, sender, providerGatewayPublicKey, concatenateByteArrays(byteArrayCache));
-							lastInteraction = ZonedDateTime.now();
 							break;
 						case CAN_BE: 
 							// no further action is necessary
@@ -265,7 +285,6 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 								// requestBytes contains a whole HTTP request
 								logger.debug("Sending HTTP request via relay");
 								relayClient.sendBytes(relaySession, sender, providerGatewayPublicKey, requestBytes);
-								lastInteraction = ZonedDateTime.now();
 							} else {
 								// else waiting for more bytes
 								logger.debug("Waiting for more bytes");
@@ -278,17 +297,16 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 							} else {
 								logger.debug("Sending byte array via relay...");
 								relayClient.sendBytes(relaySession, sender, providerGatewayPublicKey, data);
-								lastInteraction = ZonedDateTime.now();
 							}
 						}
 					}
 				}
-			}
-		} catch (final IOException | JMSException | ArrowheadException | ServiceConfigurationError | IllegalArgumentException ex) {
-			logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
-			logger.info("Stacktrace:", ex);
-			closeAndInterrupt();
-		}		
+			} catch (final IOException | JMSException | ArrowheadException | ServiceConfigurationError | IllegalArgumentException ex) {
+				logger.debug("Problem occurs in gateway communication stream: {}", ex.getMessage());
+				logger.debug("Stacktrace:", ex);
+				closeAndInterrupt();
+			}		
+		}
 	}
 	
 	//=================================================================================================
@@ -305,7 +323,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void close() {
+	private boolean close() {
 		logger.debug("close started...");
 		System.out.println("CONSUMER: close started.."); //TODO: remove
 		
@@ -335,17 +353,81 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 			availablePorts.offer(port);
 		}
 		
-		relayClient.closeConnection(relaySession);
-		if (relayClient.isConnectionClosed(relaySession) && activeConsumerSideSocketThreads != null && queueId != null) {
-			activeConsumerSideSocketThreads.remove(queueId);
-			System.out.println("CONSUMER: relay connection closed"); //TODO: remove
+		boolean canCloseRelayConnection = false;
+		try {
+			canCloseRelayConnection = closeRelayDestinations(relaySession);
+		} catch (JMSException ex) {
+			logger.debug("Error while closing relay destination: {}", ex.getMessage());
+			logger.debug("Stacktrace:", ex);
 		}
+		
+		if (!canCloseRelayConnection) {
+			logger.debug("Relay connection is not closeable yet");
+			System.out.println("Relay connection is not closeable yet"); //TODO: remove
+			
+		} else {
+			relayClient.closeConnection(relaySession);
+			if (relayClient.isConnectionClosed(relaySession) && activeConsumerSideSocketThreads != null && queueId != null) {
+				activeConsumerSideSocketThreads.remove(queueId);
+				System.out.println("CONSUMER: relay connection closed"); //TODO: remove
+				return true;
+			}			
+		}
+		return false;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private void closeAndInterrupt() {
-		close();
-		interrupt();
+		if (close()) {
+			interrupt();
+		} else {
+			this.interrupted = true;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private boolean closeRelayDestinations(final Session session) throws JMSException {
+		logger.debug("closeRelayDestinations started...");
+		
+		if (session == null && !(session instanceof ActiveMQSession)) {
+			return false; // should not happen
+		}
+		
+		ActiveMQSession amqs = (ActiveMQSession) session;
+		
+		final Set<String> destinationsFromSession = new HashSet<>();
+		final JMSProducerStatsImpl[] producers = amqs.getSessionStats().getProducers();
+		for (final JMSProducerStatsImpl producer : producers) {
+			String destination = producer.getDestination();
+			
+			int fromIdx = -1;
+			fromIdx = destination.indexOf(GatewayRelayClient.REQUEST_QUEUE_PREFIX);
+			if (fromIdx == -1) {
+				fromIdx = destination.indexOf(GatewayRelayClient.RESPONSE_QUEUE_PREFIX);
+			}
+			
+			if (fromIdx == -1) {
+				logger.debug("Unknown queue name: " + destination);
+				System.out.println("Unknown queue name: " + destination);				
+			} else {
+				destinationsFromSession.add(destination.substring(fromIdx));
+			}
+			
+		}
+		
+		final Set<ActiveMQQueue> allDestinationFromConnection = amqs.getConnection().getDestinationSource().getQueues();
+		for (final ActiveMQQueue destination : allDestinationFromConnection) {
+			if (destinationsFromSession.contains(destination.getQueueName())) {
+				try {
+					amqs.getConnection().destroyDestination(destination);	// throws JMSException if destination still has an active subscription
+				} catch (final JMSException ex) {
+					System.out.println(ex.getMessage()); //TODO remove
+					return false;
+				}	
+				System.out.println("queue destroyed: " + destination.getQueueName()); //TODO remove
+			}
+		}
+		return true;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -399,5 +481,14 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 		}
 		
 		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void sleep() {
+		try {
+			Thread.sleep(5000);
+		} catch (final InterruptedException ex) {
+			interrupt();
+		}
 	}
 }

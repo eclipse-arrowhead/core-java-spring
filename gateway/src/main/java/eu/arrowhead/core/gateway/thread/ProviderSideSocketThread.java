@@ -138,10 +138,10 @@ class ProviderSideSocketThread extends Thread {
 				if (size < 0) { // end of stream
 					closeAndInterrupt();
 				} else {
+					lastInteraction = ZonedDateTime.now();
 					final byte[] data = new byte[size];
 					System.arraycopy(buffer, 0, data, 0, size);
 					relayClient.sendBytes(relaySession, sender, consumerGatewayPublicKey, data);
-					lastInteraction = ZonedDateTime.now();
 				}
 			}
 		} catch (final IOException | JMSException | ArrowheadException | ServiceConfigurationError | IllegalArgumentException ex) {
