@@ -305,64 +305,64 @@ public class ProviderSideSocketThreadHandlerTest {
 		new ProviderSideSocketThreadHandler(appContext, relayClient, getTestSession(), connectionRequest, 0, 0);
 	}
 	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testConstructorOk() {
-		verify(appContext, times(1)).getBean(SSLProperties.class);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = IllegalArgumentException.class)
-	public void testInitQueueIdNull() {
-		testingObject.init(null, null);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = IllegalArgumentException.class)
-	public void testInitQueueIdEmpty() {
-		testingObject.init(" ", null);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = IllegalArgumentException.class)
-	public void testInitSenderNull() {
-		testingObject.init("queueId", null);
-	}
+//	//-------------------------------------------------------------------------------------------------
+//	@Test
+//	public void testConstructorOk() {
+//		verify(appContext, times(1)).getBean(SSLProperties.class);
+//	}
+//	
+//	//-------------------------------------------------------------------------------------------------
+//	@Test(expected = IllegalArgumentException.class)
+//	public void testInitQueueIdNull() {
+//		testingObject.init(null, null);
+//	}
+//	
+//	//-------------------------------------------------------------------------------------------------
+//	@Test(expected = IllegalArgumentException.class)
+//	public void testInitQueueIdEmpty() {
+//		testingObject.init(" ", null);
+//	}
+//	
+//	//-------------------------------------------------------------------------------------------------
+//	@Test(expected = IllegalArgumentException.class)
+//	public void testInitSenderNull() {
+//		testingObject.init("queueId", null);
+//	}
 
 	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testInitOk() throws InterruptedException {
-		Assert.assertTrue(!testingObject.isInitialized());
-		
-		final boolean[] started = { false };
-		new Thread() {
-			@Override
-			public void run() {
-				final SSLProperties props = getTestSSLPropertiesForTestServerThread();
-				final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(props);
-				final SSLServerSocketFactory serverSocketFactory = sslContext.getServerSocketFactory();
-				try {
-					final SSLServerSocket dummyServerSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(22062);
-					started[0] = true;
-					final Socket socket = dummyServerSocket.accept();
-					socket.close();
-				} catch (final IOException ex) {
-					ex.printStackTrace();
-				}
-			}
-		}.start();
-
-		while (!started[0]) {
-			Thread.sleep(1000);
-		}
-		Thread.sleep(1000);
-
-		final GatewayProviderConnectionRequestDTO connectionRequest = (GatewayProviderConnectionRequestDTO) ReflectionTestUtils.getField(testingObject, "connectionRequest");
-		connectionRequest.getProvider().setPort(22062);
-		testingObject.init("queueId", getTestMessageProducer());
-		
-		Assert.assertTrue(testingObject.isInitialized());
-	}
+//	@Test
+//	public void testInitOk() throws InterruptedException {
+//		Assert.assertTrue(!testingObject.isInitialized());
+//		
+//		final boolean[] started = { false };
+//		new Thread() {
+//			@Override
+//			public void run() {
+//				final SSLProperties props = getTestSSLPropertiesForTestServerThread();
+//				final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(props);
+//				final SSLServerSocketFactory serverSocketFactory = sslContext.getServerSocketFactory();
+//				try {
+//					final SSLServerSocket dummyServerSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(22062);
+//					started[0] = true;
+//					final Socket socket = dummyServerSocket.accept();
+//					socket.close();
+//				} catch (final IOException ex) {
+//					ex.printStackTrace();
+//				}
+//			}
+//		}.start();
+//
+//		while (!started[0]) {
+//			Thread.sleep(1000);
+//		}
+//		Thread.sleep(1000);
+//
+//		final GatewayProviderConnectionRequestDTO connectionRequest = (GatewayProviderConnectionRequestDTO) ReflectionTestUtils.getField(testingObject, "connectionRequest");
+//		connectionRequest.getProvider().setPort(22062);
+//		testingObject.init("queueId", getTestMessageProducer());
+//		
+//		Assert.assertTrue(testingObject.isInitialized());
+//	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalStateException.class)

@@ -164,7 +164,7 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 		final MessageProducer messageSender = session.createProducer(responseQueue);
 		final MessageProducer controlMessageSender = session.createProducer(responseControlQueue);
 
-		return new ProviderSideRelayInfo(serverCommonName, queueId, messageSender, controlMessageSender);
+		return new ProviderSideRelayInfo(serverCommonName, queueId, messageSender, controlMessageSender, consumer, controlConsumer);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -198,7 +198,7 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 		final MessageProducer messageSender = session.createProducer(requestQueue);
 		final MessageProducer controlMessageSender = session.createProducer(requestControlQueue);
 
-		return new ConsumerSideRelayInfo(messageSender, controlMessageSender);
+		return new ConsumerSideRelayInfo(messageSender, controlMessageSender, consumer, controlConsumer);
 	}
 	
 	

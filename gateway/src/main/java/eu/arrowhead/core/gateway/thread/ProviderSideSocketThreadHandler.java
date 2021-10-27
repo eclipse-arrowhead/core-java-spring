@@ -17,14 +17,13 @@ package eu.arrowhead.core.gateway.thread;
 import java.io.IOException;
 import java.security.PublicKey;
 import java.time.ZonedDateTime;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
@@ -32,9 +31,10 @@ import javax.jms.Session;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 
+import org.apache.activemq.ActiveMQMessageConsumer;
+import org.apache.activemq.ActiveMQMessageProducer;
 import org.apache.activemq.ActiveMQSession;
-import org.apache.activemq.command.ActiveMQQueue;
-import org.apache.activemq.management.JMSProducerStatsImpl;
+import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -65,11 +65,14 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 	private final int timeout;
 	private final int maxRequestPerSocket;
 	private final ConcurrentMap<String,ActiveSessionDTO> activeSessions;
-	private ConcurrentMap<String,ProviderSideSocketThreadHandler> activeProviderSideSocketThreadHandlers;
+	private final ConcurrentMap<String,ProviderSideSocketThreadHandler> activeProviderSideSocketThreadHandlers;
 	private final SSLProperties sslProperties;
 	
 	private String queueId;
 	private MessageProducer sender;
+	private MessageProducer senderControl;
+	private MessageConsumer consumer;
+	private MessageConsumer consumerControl;
 	
 	private SSLSocketFactory socketFactory;
 	private ProviderSideSocketThread oldThread;
@@ -107,14 +110,21 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public void init(final String queueId, final MessageProducer sender) {
+	public void init(final String queueId, final MessageProducer sender, final MessageProducer senderControl,
+					 final MessageConsumer consumer, final MessageConsumer consumerControl) {
 		logger.debug("Provider handler init started...");
 		
 		Assert.isTrue(!Utilities.isEmpty(queueId), "Queue id is null or blank.");
 		Assert.notNull(sender, "sender is null.");
+		Assert.notNull(senderControl, "senderControl is null.");
+		Assert.notNull(consumer, "consumer is null.");
+		Assert.notNull(consumerControl, "consumerControl is null.");
 		
 		this.queueId = queueId;
 		this.sender = sender;
+		this.senderControl = senderControl;
+		this.consumer = consumer;
+		this.consumerControl = consumerControl;
 		
 		final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(sslProperties);
 		socketFactory = sslContext.getSocketFactory();
@@ -190,12 +200,16 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 		
 		if (currentThread != null) {
 			currentThread.closeAndInterrupt();
-		}
+		}		
 		
+		//Unsubscribe from the request (REQ-...) queue
+		unsubscribeFromRequestQueues();
+		
+		//Attempt to destroy destinations (RESP-... queues) which this provider side gateway writes on and the connection after
 		boolean canCloseRelayConnection = false;
 		try {
-			canCloseRelayConnection = closeRelayDestinations(relaySession);
-		} catch (JMSException ex) {
+			canCloseRelayConnection = destroyResponseQueues();
+		} catch (final JMSException ex) {
 			logger.debug("Error while closing relay destination: {}", ex.getMessage());
 			logger.debug("Stacktrace:", ex);
 		}
@@ -316,47 +330,40 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private boolean closeRelayDestinations(final Session session) throws JMSException {
+	private void unsubscribeFromRequestQueues() {
+		if (relaySession != null && relaySession instanceof ActiveMQSession) {
+			final ActiveMQMessageConsumer amqConsumer = (ActiveMQMessageConsumer) consumer;	
+			final ActiveMQMessageConsumer amqConsumerControl = (ActiveMQMessageConsumer) consumerControl;	
+			amqConsumer.stop();
+			amqConsumerControl.stop();
+			System.out.println("ActiveMQMessageConsumers stop");
+		}
+		
+		//Other relay implementations here... or move behind to the interface
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private boolean destroyResponseQueues() throws JMSException {
 		logger.debug("closeRelayDestinations started...");
 		
-		if (session == null && !(session instanceof ActiveMQSession)) {
-			return false; // should not happen
-		}
-		
-		ActiveMQSession amqs = (ActiveMQSession) session;
-		
-		final Set<String> destinationsFromSession = new HashSet<>();
-		final JMSProducerStatsImpl[] producers = amqs.getSessionStats().getProducers();
-		for (final JMSProducerStatsImpl producer : producers) {
-			String destination = producer.getDestination();
+		if (relaySession != null && relaySession instanceof ActiveMQSession) {
+			final ActiveMQSession amqs = (ActiveMQSession) relaySession;
 			
-			int fromIdx = -1;
-			fromIdx = destination.indexOf(GatewayRelayClient.REQUEST_QUEUE_PREFIX);
-			if (fromIdx == -1) {
-				fromIdx = destination.indexOf(GatewayRelayClient.RESPONSE_QUEUE_PREFIX);
+			final ActiveMQMessageProducer amqSender = (ActiveMQMessageProducer) sender;
+			final ActiveMQMessageProducer amqSenderControl = (ActiveMQMessageProducer) senderControl;
+			try {
+				amqs.getConnection().destroyDestination((ActiveMQDestination) amqSender.getDestination());	// throws JMSException if destination still has an active subscription
+				amqs.getConnection().destroyDestination((ActiveMQDestination) amqSenderControl.getDestination());	// throws JMSException if destination still has an active subscription
+				
+			} catch (final JMSException ex) {
+				System.out.println(ex.getMessage()); //TODO remove
+				return false;
 			}
-			
-			if (fromIdx == -1) {
-				logger.debug("Unknown queue name: " + destination);
-				System.out.println("Unknown queue name: " + destination);				
-			} else {
-				destinationsFromSession.add(destination.substring(fromIdx));
-			}
-			
+			return true;
 		}
+	
+		//Other relay implementations here... or move behind to the interface
 		
-		final Set<ActiveMQQueue> allDestinationFromConnection = amqs.getConnection().getDestinationSource().getQueues();
-		for (final ActiveMQQueue destination : allDestinationFromConnection) {
-			if (destinationsFromSession.contains(destination.getQueueName())) {
-				try {
-					amqs.getConnection().destroyDestination(destination);	// throws JMSException if destination still has an active subscription
-				} catch (final JMSException ex) {
-					System.out.println(ex.getMessage()); //TODO remove
-					return false;
-				}	
-				System.out.println("queue destroyed: " + destination.getQueueName()); //TODO remove
-			}
-		}
-		return true;
+		return false;
 	}
 }

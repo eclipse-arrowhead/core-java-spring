@@ -138,7 +138,7 @@ public class GatewayService {
 		try {
 			handler = new ProviderSideSocketThreadHandler(appContext, relayClient, session, request, gatewaySocketTimeout, gatewayProviderSideMaxRequestPerSocket);
 			final ProviderSideRelayInfo info = relayClient.initializeProviderSideRelay(session, handler);
-			handler.init(info.getQueueId(), info.getMessageSender());
+			handler.init(info.getQueueId(), info.getMessageSender(), info.getControlMessageSender(), info.getMessageConsumer(), info.getControlMessageConsumer());
 			activeProviderSideSocketThreadHandlers.put(info.getQueueId(), handler);
 			final ActiveSessionDTO activeSession = new ActiveSessionDTO(info.getQueueId(), info.getPeerName(), request.getConsumer(), request.getConsumerCloud(), request.getProvider(),
 																		request.getProviderCloud(), request.getServiceDefinition(), request.getRelay(), Utilities.convertZonedDateTimeToUTCString(now),
@@ -186,7 +186,7 @@ public class GatewayService {
 			thread = new ConsumerSideServerSocketThread(appContext, serverPort, relayClient, session, request.getProviderGWPublicKey(), request.getQueueId(), gatewaySocketTimeout, 
 														request.getConsumer().getSystemName(), request.getServiceDefinition());
 			final ConsumerSideRelayInfo info = relayClient.initializeConsumerSideRelay(session, thread, request.getPeerName(), request.getQueueId());
-			thread.init(info.getMessageSender());
+			thread.init(info.getMessageSender(), info.getControlResponseMessageSender(), info.getMessageConsumer(), info.getControlRequestMessageConsumer());
 			thread.start();
 			
 			activeConsumerSideSocketThreads.put(request.getQueueId(), thread);			

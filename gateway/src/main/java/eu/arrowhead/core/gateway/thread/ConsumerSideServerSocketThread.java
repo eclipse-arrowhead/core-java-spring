@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentMap;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
@@ -42,7 +43,10 @@ import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 
+import org.apache.activemq.ActiveMQMessageConsumer;
+import org.apache.activemq.ActiveMQMessageProducer;
 import org.apache.activemq.ActiveMQSession;
+import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.activemq.management.JMSProducerStatsImpl;
 import org.apache.http.HttpStatus;
@@ -83,6 +87,11 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 	private final SSLProperties sslProperties;
 
 	private MessageProducer sender;
+	private MessageProducer senderControl;
+	private MessageConsumer consumer;
+	private MessageConsumer consumerControl;
+	
+	
 	private SSLServerSocket sslServerSocket;
 	private SSLSocket sslConsumerSocket;
 	private OutputStream outConsumer;
@@ -123,12 +132,18 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public void init(final MessageProducer sender) {
+	public void init(final MessageProducer sender, final MessageProducer senderControl, final MessageConsumer consumer, final MessageConsumer consumerControl) {
 		logger.debug("init started...");
 		
 		Assert.notNull(sender, "sender is null.");
+		Assert.notNull(senderControl, "senderControl is null.");
+		Assert.notNull(consumer, "consumer is null.");
+		Assert.notNull(consumerControl, "consumerControl is null.");
 		
 		this.sender = sender;
+		this.senderControl = senderControl;
+		this.consumer = consumer;
+		this.consumerControl = consumerControl;
 		
 		try {
 			final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(sslProperties);
@@ -357,9 +372,13 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 			return true;
 		}
 		
+		//Unsubscribe from the response (RESP-...) queue
+		unsubscribeFromRequestQueues();
+		
+		//Attempt to destroy destinations (REQ-... queues) which this consumer side gateway writes on and the connection after		
 		boolean canCloseRelayConnection = false;
 		try {
-			canCloseRelayConnection = closeRelayDestinations(relaySession);
+			canCloseRelayConnection = destroyRequestQueues();
 		} catch (JMSException ex) {
 			logger.debug("Error while closing relay destination: {}", ex.getMessage());
 			logger.debug("Stacktrace:", ex);
@@ -391,48 +410,47 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private boolean closeRelayDestinations(final Session session) throws JMSException {
+	private void unsubscribeFromRequestQueues() {
+		if (relaySession != null && relaySession instanceof ActiveMQSession) {
+			final ActiveMQSession amqs = (ActiveMQSession) relaySession;
+			final ActiveMQMessageConsumer amqConsumer = (ActiveMQMessageConsumer) consumer;	
+			final ActiveMQMessageConsumer amqConsumerControl = (ActiveMQMessageConsumer) consumerControl;	
+			
+			try {
+				amqConsumer.close();
+				amqConsumerControl.close();
+			} catch (JMSException e) {
+				System.out.println(e.getMessage()); //TODO remove
+			}
+			System.out.println("ActiveMQMessageConsumers stop"); //TODO remove
+		}
+		
+		//Other relay implementations here... or move behind to the interface
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private boolean destroyRequestQueues() throws JMSException {
 		logger.debug("closeRelayDestinations started...");
 		
-		if (session == null && !(session instanceof ActiveMQSession)) {
-			return false; // should not happen
-		}
-		
-		ActiveMQSession amqs = (ActiveMQSession) session;
-		
-		final Set<String> destinationsFromSession = new HashSet<>();
-		final JMSProducerStatsImpl[] producers = amqs.getSessionStats().getProducers();
-		for (final JMSProducerStatsImpl producer : producers) {
-			String destination = producer.getDestination();
+		if (relaySession != null && relaySession instanceof ActiveMQSession) {
+			final ActiveMQSession amqs = (ActiveMQSession) relaySession;
 			
-			int fromIdx = -1;
-			fromIdx = destination.indexOf(GatewayRelayClient.REQUEST_QUEUE_PREFIX);
-			if (fromIdx == -1) {
-				fromIdx = destination.indexOf(GatewayRelayClient.RESPONSE_QUEUE_PREFIX);
+			final ActiveMQMessageProducer amqSender = (ActiveMQMessageProducer) sender;
+			final ActiveMQMessageProducer amqSenderControl = (ActiveMQMessageProducer) senderControl;
+			try {
+				amqs.getConnection().destroyDestination((ActiveMQDestination) amqSender.getDestination());	// throws JMSException if destination still has an active subscription
+				amqs.getConnection().destroyDestination((ActiveMQDestination) amqSenderControl.getDestination());	// throws JMSException if destination still has an active subscription
+				
+			} catch (final JMSException ex) {
+				System.out.println(ex.getMessage()); //TODO remove
+				return false;
 			}
-			
-			if (fromIdx == -1) {
-				logger.debug("Unknown queue name: " + destination);
-				System.out.println("Unknown queue name: " + destination);				
-			} else {
-				destinationsFromSession.add(destination.substring(fromIdx));
-			}
-			
+			return true;
 		}
+	
+		//Other relay implementations here... or move behind to the interface
 		
-		final Set<ActiveMQQueue> allDestinationFromConnection = amqs.getConnection().getDestinationSource().getQueues();
-		for (final ActiveMQQueue destination : allDestinationFromConnection) {
-			if (destinationsFromSession.contains(destination.getQueueName())) {
-				try {
-					amqs.getConnection().destroyDestination(destination);	// throws JMSException if destination still has an active subscription
-				} catch (final JMSException ex) {
-					System.out.println(ex.getMessage()); //TODO remove
-					return false;
-				}	
-				System.out.println("queue destroyed: " + destination.getQueueName()); //TODO remove
-			}
-		}
-		return true;
+		return false;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
