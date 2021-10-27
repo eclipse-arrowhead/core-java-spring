@@ -31,10 +31,6 @@ import javax.jms.Session;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 
-import org.apache.activemq.ActiveMQMessageConsumer;
-import org.apache.activemq.ActiveMQMessageProducer;
-import org.apache.activemq.ActiveMQSession;
-import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -203,7 +199,12 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 		}		
 		
 		//Unsubscribe from the request (REQ-...) queue
-		unsubscribeFromRequestQueues();
+		try {
+			unsubscribeFromRequestQueues();
+		} catch (final JMSException ex) {
+			logger.debug("Error while unsubscribing from request queues: {}", ex.getMessage());
+			logger.debug("Stacktrace:", ex);
+		}
 		
 		//Attempt to destroy destinations (RESP-... queues) which this provider side gateway writes on and the connection after
 		boolean canCloseRelayConnection = false;
@@ -330,40 +331,19 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void unsubscribeFromRequestQueues() {
-		if (relaySession != null && relaySession instanceof ActiveMQSession) {
-			final ActiveMQMessageConsumer amqConsumer = (ActiveMQMessageConsumer) consumer;	
-			final ActiveMQMessageConsumer amqConsumerControl = (ActiveMQMessageConsumer) consumerControl;	
-			amqConsumer.stop();
-			amqConsumerControl.stop();
-			System.out.println("ActiveMQMessageConsumers stop");
+	private void unsubscribeFromRequestQueues() throws JMSException {
+		if (relaySession != null) {
+			relayClient.unsubscribeFromQueues(consumer, consumerControl);
 		}
-		
-		//Other relay implementations here... or move behind to the interface
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private boolean destroyResponseQueues() throws JMSException {
-		logger.debug("closeRelayDestinations started...");
+		logger.debug("destroyResponseQueues started...");
 		
-		if (relaySession != null && relaySession instanceof ActiveMQSession) {
-			final ActiveMQSession amqs = (ActiveMQSession) relaySession;
-			
-			final ActiveMQMessageProducer amqSender = (ActiveMQMessageProducer) sender;
-			final ActiveMQMessageProducer amqSenderControl = (ActiveMQMessageProducer) senderControl;
-			try {
-				amqs.getConnection().destroyDestination((ActiveMQDestination) amqSender.getDestination());	// throws JMSException if destination still has an active subscription
-				amqs.getConnection().destroyDestination((ActiveMQDestination) amqSenderControl.getDestination());	// throws JMSException if destination still has an active subscription
-				
-			} catch (final JMSException ex) {
-				System.out.println(ex.getMessage()); //TODO remove
-				return false;
-			}
-			return true;
-		}
-	
-		//Other relay implementations here... or move behind to the interface
-		
+		if (relaySession != null) {
+			return relayClient.destroyQueues(relaySession, sender, senderControl);
+		}		
 		return false;
 	}
 }

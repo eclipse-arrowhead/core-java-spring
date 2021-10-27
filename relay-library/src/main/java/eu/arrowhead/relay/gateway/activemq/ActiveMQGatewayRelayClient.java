@@ -29,8 +29,11 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.ActiveMQMessageConsumer;
+import org.apache.activemq.ActiveMQMessageProducer;
 import org.apache.activemq.ActiveMQSession;
 import org.apache.activemq.ActiveMQSslConnectionFactory;
+import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -356,6 +359,63 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 		} else {
 			throw new JMSException("Invalid message class: " + msg.getClass().getSimpleName());
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public void unsubscribeFromQueues(final MessageConsumer consumer, final MessageConsumer consumerControl) throws JMSException {
+		logger.debug("unsubscribeFromRequestQueues started...");
+		
+		Assert.notNull(consumer, "consumer is null.");
+		Assert.notNull(consumerControl, "consumerControl is null.");
+		
+		if (!(consumer instanceof ActiveMQMessageConsumer)) {
+			throw new JMSException("Invalid MessageConsumer class: " + consumer.getClass().getSimpleName());
+			
+		} else if (!(consumerControl instanceof ActiveMQMessageConsumer)) {
+			throw new JMSException("Invalid MessageConsumer class: " + consumerControl.getClass().getSimpleName());
+			
+	    } else {
+			final ActiveMQMessageConsumer amqConsumer = (ActiveMQMessageConsumer) consumer;	
+			final ActiveMQMessageConsumer amqConsumerControl = (ActiveMQMessageConsumer) consumerControl;	
+			amqConsumer.close();
+			amqConsumerControl.close();
+			System.out.println("ActiveMQMessageConsumers stop"); //TODO remove			
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public boolean destroyQueues(final Session session, final MessageProducer producer, final MessageProducer producerControl) throws JMSException {
+		logger.debug("destroyRequestQueues started...");
+		
+		Assert.notNull(session, "session is null.");
+		Assert.notNull(producer, "producer is null.");
+		Assert.notNull(producerControl, "producerControl is null.");
+		
+		if (!(session instanceof ActiveMQSession)) {
+			throw new JMSException("Invalid Session class: " + producer.getClass().getSimpleName());
+			
+		} else if (!(producer instanceof ActiveMQMessageProducer)) {
+			throw new JMSException("Invalid MessageProducer class: " + producer.getClass().getSimpleName());
+			
+		} else if (!(producerControl instanceof ActiveMQMessageProducer)) {
+			throw new JMSException("Invalid MessageProducer class: " + producerControl.getClass().getSimpleName());
+			
+	    } else {
+	    	final ActiveMQSession amqs = (ActiveMQSession) session;
+	    	final ActiveMQMessageProducer amqSender = (ActiveMQMessageProducer) producer;
+			final ActiveMQMessageProducer amqSenderControl = (ActiveMQMessageProducer) producerControl;
+			try {
+				amqs.getConnection().destroyDestination((ActiveMQDestination) amqSender.getDestination());	// throws JMSException if destination still has an active subscription
+				amqs.getConnection().destroyDestination((ActiveMQDestination) amqSenderControl.getDestination());	// throws JMSException if destination still has an active subscription				
+			} catch (final JMSException ex) {
+				logger.debug(ex.getMessage());
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	//=================================================================================================
