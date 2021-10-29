@@ -52,7 +52,7 @@ public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelay
 		Assert.notNull(privateKey, "Private key is null.");
 		Assert.notNull(sslProps, "SSL properties object is null.");
 		
-		this.client = GatekeeperRelayClientFactory.createGatekeeperRelayClient(serverCommonName, publicKey, privateKey, sslProps, timeout, false);
+		this.client = GatekeeperRelayClientFactory.createGatekeeperRelayClient(serverCommonName, publicKey, privateKey, sslProps, timeout, false, null);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -125,6 +125,12 @@ public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelay
 		return client.sendRequestAndReturnResponse(session, advResponse, requestPayload);
 	}
 	
+	@Override
+	//-------------------------------------------------------------------------------------------------
+	public void destroyStaleQueuesAndConnections() {
+		client.destroyStaleQueuesAndConnections();
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	public List<Session> getCachedSessions() {
 		return new ArrayList<>(sessionCache.values());
@@ -144,4 +150,5 @@ public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelay
 		
 		return session;
 	}
+
 }

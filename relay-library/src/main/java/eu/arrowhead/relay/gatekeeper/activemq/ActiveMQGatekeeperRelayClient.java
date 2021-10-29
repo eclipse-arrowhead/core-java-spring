@@ -17,9 +17,15 @@ package eu.arrowhead.relay.gatekeeper.activemq;
 import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;
@@ -34,7 +40,7 @@ import javax.jms.Topic;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.ActiveMQSession;
 import org.apache.activemq.ActiveMQSslConnectionFactory;
-import org.apache.activemq.command.ActiveMQDestination;
+import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -80,6 +86,9 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	private static final String REQUEST_QUEUE_PREFIX = "REQ-";
 	private static final String RESPONSE_QUEUE_PREFIX = "RESP-";
 	private static final String ERROR_CODE = "\"errorCode\"";
+
+	private static final Map<ActiveMQSession,List<ActiveMQQueue>> STALE_QUEUES = new HashMap<>();
+	private static final Set<Connection> STALE_CONNECTIONS = new HashSet<>();
 	
 	private static final List<String> supportedRequestTypes = List.of(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL,
 																	  CoreCommonConstants.RELAY_MESSAGE_TYPE_ACCESS_TYPE, CoreCommonConstants.RELAY_MESSAGE_TYPE_SYSTEM_ADDRESS_LIST,
@@ -96,6 +105,8 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	private final SSLProperties sslProps;
 	private final RelayCryptographer cryptographer;
 	private final long timeout;
+	
+	private final Object lock = new Object();
 	
 	//=================================================================================================
 	// methods
@@ -139,17 +150,25 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	@Override
 	public void closeConnection(final Session session) {
 		logger.debug("closeConnection started...");
-		if (session != null) {
-			try {
-				session.close();
-				if (session instanceof ActiveMQSession) {
-					final ActiveMQSession amqs = (ActiveMQSession) session;
-					amqs.getConnection().close();
-				}
-			} catch (final JMSException ex) {
-				logger.debug(ex.getMessage());
-				logger.trace("Stacktrace:", ex);
-			}
+		synchronized (lock) {
+			if (session != null && session instanceof ActiveMQSession) {
+				final ActiveMQSession amqs = (ActiveMQSession) session;
+				
+				if (STALE_QUEUES.containsKey(session)) {
+					STALE_CONNECTIONS.add(amqs.getConnection());
+					
+				} else {
+					try {
+						session.close();
+						amqs.getConnection().close();
+						
+					} catch (final JMSException ex) {
+						STALE_CONNECTIONS.add(amqs.getConnection());
+						logger.debug(ex.getMessage());
+						logger.trace("Stacktrace:", ex);
+					}				
+				}				
+			}			
 		}
 	}
 
@@ -380,6 +399,55 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		}
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public void destroyStaleQueuesAndConnections() {
+		logger.debug("destroyStaleQueues started...");
+		System.out.println("destroyStaleQueues started..."); //TODO remove
+		
+		final List<ActiveMQSession> removableSessions = new ArrayList<>();
+		for (final Entry<ActiveMQSession, List<ActiveMQQueue>> sessionWithQueues : STALE_QUEUES.entrySet()) {
+			final ActiveMQSession amqs = sessionWithQueues.getKey();
+			final List<ActiveMQQueue> queueList = sessionWithQueues.getValue();
+			System.out.println("Connection is closing: " + amqs.getConnection().isClosing());
+			System.out.println("Connection is closed: " + amqs.getConnection().isClosed());
+			
+			if (amqs.isClosed()) {
+				System.out.println("Session is closed");
+				removableSessions.add(amqs);
+				
+			} else {
+				final List<ActiveMQQueue> undestroyed = new ArrayList<>(); 
+				for (final ActiveMQQueue queue : queueList) {
+					try {
+						amqs.getConnection().destroyDestination(queue); // throws JMSException if destination still has an active subscription
+						if (!isQueueActive(amqs, queue)) {
+							logger.debug("Destroyed: " + queue.getPhysicalName());							
+							System.out.println("Destroyed: " + queue.getPhysicalName()); //TODO remove
+						} else {
+							undestroyed.add(queue);
+						}
+					} catch (final JMSException ex) {
+						logger.debug(ex.getMessage());
+						System.out.println(ex.getMessage()); //TODO remove
+						undestroyed.add(queue);
+					}
+				}
+				if (undestroyed.isEmpty()) {
+					removableSessions.add(amqs);
+				} else {
+					sessionWithQueues.setValue(undestroyed);
+				}
+			}
+			
+		}
+		
+		for (final ActiveMQSession amqs : removableSessions) {
+			STALE_QUEUES.remove(amqs);
+			closeConnection(amqs);
+		}
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -583,9 +651,24 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 					if (session instanceof ActiveMQSession && closeable instanceof MessageProducer) {
 						final ActiveMQSession amqs = (ActiveMQSession) session;
 						final MessageProducer producer = (MessageProducer) closeable;
-						if (producer.getDestination() instanceof ActiveMQDestination) {
-							final ActiveMQDestination dest = (ActiveMQDestination) producer.getDestination();
-							amqs.getConnection().destroyDestination(dest);
+						if (producer.getDestination() instanceof ActiveMQQueue) {
+							final ActiveMQQueue queue = (ActiveMQQueue) producer.getDestination();
+							try {
+								amqs.getConnection().destroyDestination(queue); // throws JMSException if destination still has an active subscription	
+								if (!isQueueActive(amqs, queue)) {
+									System.out.println("Destroyed: " + queue.getPhysicalName()); //TODO remove									
+								} else {
+									STALE_QUEUES.putIfAbsent(amqs, new ArrayList<>());
+									STALE_QUEUES.get(amqs).add((ActiveMQQueue)queue);
+									System.out.println("Adding to satle queues: " + queue.getPhysicalName()); //TODO remove
+								}
+							} catch (final JMSException ex) {
+								logger.debug(ex.getMessage());
+								logger.debug("Adding to satle queues: " + queue.getPhysicalName());
+								System.out.println("Adding to satle queues: " + queue.getPhysicalName()); //TODO remove
+								STALE_QUEUES.putIfAbsent(amqs, new ArrayList<>());
+								STALE_QUEUES.get(amqs).add((ActiveMQQueue)queue);
+							}
 						}
 					}
 					closeable.close();
@@ -595,5 +678,11 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 				logger.trace(ex);
 			}
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private boolean isQueueActive(final ActiveMQSession amqs, final ActiveMQQueue queue) throws JMSException {
+		logger.debug("isQueueActive started...");
+		return amqs.getConnection().getDestinationSource().getQueues().contains(queue);
 	}
 }

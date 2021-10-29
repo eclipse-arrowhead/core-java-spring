@@ -48,4 +48,7 @@ public interface GatekeeperRelayClient extends RelayClient {
 	//-------------------------------------------------------------------------------------------------
 	// returns null if no response arrived in time
 	public GatekeeperRelayResponse sendRequestAndReturnResponse(final Session session, final GeneralAdvertisementResult advResponse, final Object requestPayload) throws JMSException;
+	
+	//-------------------------------------------------------------------------------------------------
+	public void destroyStaleQueuesAndConnections();
 }

@@ -36,6 +36,8 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.core.gatekeeper.quartz.RelayQueueRemovalTask;
+import eu.arrowhead.core.gatekeeper.quartz.RelaySuprvisor;
 import eu.arrowhead.core.gatekeeper.quartz.subscriber.RelaySubscriberDataContainer;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.GetRandomAndDedicatedIfAnyGatekeeperMatchmaker;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.GetRandomCommonPreferredIfAnyOrRandomCommonPublicGatewayMatchmaker;
@@ -62,6 +64,9 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	
 	@Autowired
 	private SSLProperties sslProps;
+	
+	@Autowired
+	private RelayQueueRemovalTask relayQueueRemovalThread;
 	
 	private GatekeeperRelayClientUsingCachedSessions gatekeeperRelayClientWithCache;
 	
@@ -152,7 +157,7 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 		final PrivateKey privateKey = (PrivateKey) context.get(CommonConstants.SERVER_PRIVATE_KEY);
 
 		this.gatekeeperRelayClientWithCache = (GatekeeperRelayClientUsingCachedSessions) GatekeeperRelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, sslProps, timeout,
-																																				  true);
+																																				  true, RelaySuprvisor.getRegistry());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
