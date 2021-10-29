@@ -1,24 +1,29 @@
-package eu.arrowhead.core.gateway.thread;
+package eu.arrowhead.core.gateway.quartz;
 
 import java.time.ZonedDateTime;
 import java.util.concurrent.ConcurrentMap;
 
 import javax.annotation.Resource;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.core.gateway.thread.ConsumerSideServerSocketThread;
+import eu.arrowhead.core.gateway.thread.ProviderSideSocketThreadHandler;
 
 @Component
-public class RelayConnectionRemovalThread extends Thread {
+@DisallowConcurrentExecution
+public class RelayConnectionRemovalTask implements Job {
 	
 	//=================================================================================================
 	// member
 	
-	public static final long PERIOD = 10000; //milisec
+	public static final long PERIOD = RelayConnectionRemovalTaskConfig.SCHEDULER_INTERVAL;
 	
 	@Value(CoreCommonConstants.$GATEWAY_INACTIVE_BRIDGE_TIMEOUT_WD)
 	private long consumerSideThreshold;
@@ -29,30 +34,18 @@ public class RelayConnectionRemovalThread extends Thread {
 	private ConcurrentMap<String,ConsumerSideServerSocketThread> activeConsumerSideSocketThreads;
 	
 	@Resource(name = CoreCommonConstants.GATEWAY_ACTIVE_PROVIDER_SIDE_SOCKET_THREAD_HANDLER_MAP)
-	private ConcurrentMap<String,ProviderSideSocketThreadHandler> activeProviderSideSocketThreadHandlers;	
-	
-	private static final Logger logger = LogManager.getLogger(RelayConnectionRemovalThread.class);
+	private ConcurrentMap<String,ProviderSideSocketThreadHandler> activeProviderSideSocketThreadHandlers;
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
-	public void run() {
-		logger.info("RelayConnectionRemovalThread started...");
-		
-		this.providerSideThreshold = consumerSideThreshold + PERIOD / CoreCommonConstants.CONVERSION_MILLISECOND_TO_SECOND;
+	public void execute(final JobExecutionContext context) throws JobExecutionException {
+		this.providerSideThreshold = consumerSideThreshold + PERIOD;
 		
 		while (true) {
 			final ZonedDateTime now = ZonedDateTime.now();
 			handleConsumerSideConnections(now);
 			handleProviderSideConnections(now);
-			sleep();
 		}
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	public void interrupt() {
-		logger.error("RelayConnectionRemovalThread has been terminated");
-		super.interrupt();
 	}
 	
 	//=================================================================================================
@@ -62,7 +55,6 @@ public class RelayConnectionRemovalThread extends Thread {
 	private void handleConsumerSideConnections(final ZonedDateTime now) {
 		for (ConsumerSideServerSocketThread thread : activeConsumerSideSocketThreads.values()) {
 			if (now.isAfter(thread.getLastInteractionTime().plusSeconds(consumerSideThreshold))) {
-				System.out.println("CONSUMER: removal task interrupt thread");
 				thread.setInterrupted(true);
 			}
 		}
@@ -75,15 +67,6 @@ public class RelayConnectionRemovalThread extends Thread {
 			if (now.isAfter(threadHandler.getLastInteractionTime().plusSeconds(providerSideThreshold))) {
 				threadHandler.close();
 			}
-		}
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private void sleep() {
-		try {
-			Thread.sleep(PERIOD);
-		} catch (final InterruptedException ex) {
-			interrupt();
 		}
 	}
 }

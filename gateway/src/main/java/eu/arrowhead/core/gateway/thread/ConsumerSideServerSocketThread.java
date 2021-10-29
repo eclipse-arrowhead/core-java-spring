@@ -52,6 +52,7 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.core.gateway.quartz.RelayConnectionRemovalTask;
 import eu.arrowhead.core.gateway.service.ActiveSessionDTO;
 import eu.arrowhead.core.gateway.thread.GatewayHTTPUtils.Answer;
 import eu.arrowhead.relay.gateway.GatewayRelayClient;
@@ -481,7 +482,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 	//-------------------------------------------------------------------------------------------------
 	private void sleep() {
 		try {
-			Thread.sleep(RelayConnectionRemovalThread.PERIOD / 2);
+			Thread.sleep(RelayConnectionRemovalTask.PERIOD * CoreCommonConstants.CONVERSION_MILLISECOND_TO_SECOND / 2);
 		} catch (final InterruptedException ex) {
 			interrupt();
 		}

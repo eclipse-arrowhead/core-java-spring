@@ -10,7 +10,7 @@ import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClient;
 
 @Component
 @DisallowConcurrentExecution
-public class RelayQueueRemovalTask implements Job {
+public class RelaySupervisingTask implements Job {
 
 	//=================================================================================================
 	// methods

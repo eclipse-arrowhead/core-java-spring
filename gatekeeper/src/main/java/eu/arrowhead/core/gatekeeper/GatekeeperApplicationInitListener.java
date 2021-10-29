@@ -36,7 +36,7 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
-import eu.arrowhead.core.gatekeeper.quartz.RelayQueueRemovalTask;
+import eu.arrowhead.core.gatekeeper.quartz.RelaySupervisingTask;
 import eu.arrowhead.core.gatekeeper.quartz.RelaySuprvisor;
 import eu.arrowhead.core.gatekeeper.quartz.subscriber.RelaySubscriberDataContainer;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.GetRandomAndDedicatedIfAnyGatekeeperMatchmaker;
@@ -66,7 +66,7 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	private SSLProperties sslProps;
 	
 	@Autowired
-	private RelayQueueRemovalTask relayQueueRemovalThread;
+	private RelaySupervisingTask relayQueueRemovalThread;
 	
 	private GatekeeperRelayClientUsingCachedSessions gatekeeperRelayClientWithCache;
 	

@@ -17,12 +17,12 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.quartz.AutoWiringSpringBeanQuartzTaskFactory;
 
 @Configuration
-public class RelayQueueRemovalTaskConfig {
+public class RelaySupervisingTaskConfig {
 
 	//=================================================================================================
 	// members
 	
-	private Logger logger = LogManager.getLogger(RelayQueueRemovalTaskConfig.class);
+	private Logger logger = LogManager.getLogger(RelaySupervisingTaskConfig.class);
 	
 	@Autowired
 	private ApplicationContext applicationContext;
@@ -32,15 +32,15 @@ public class RelayQueueRemovalTaskConfig {
 	private static final int SCHEDULER_DELAY = 2;
 	private static final String NUM_OF_THREADS = "1";
 	
-	static final String NAME_OF_TRIGGER = "Relay_Queue_Removal_Task_Trigger";
-	private static final String NAME_OF_TASK = "Relay_Queue_Removal_Task";
+	static final String NAME_OF_TRIGGER = "Relay_Supervising_Task_Trigger";
+	private static final String NAME_OF_TASK = "Relay_Supervising_Task";
 	
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
 	@Bean
-    public SchedulerFactoryBean relayQueueRemovalTaskScheduler() {
+    public SchedulerFactoryBean relaySupervisingTaskScheduler() {
 		final AutoWiringSpringBeanQuartzTaskFactory jobFactory = new AutoWiringSpringBeanQuartzTaskFactory();
 		jobFactory.setApplicationContext(applicationContext);
 		
@@ -50,19 +50,19 @@ public class RelayQueueRemovalTaskConfig {
 	    schedulerFactory.setQuartzProperties(schedulerProperties);
 		
 		schedulerFactory.setJobFactory(jobFactory);
-		schedulerFactory.setJobDetails(relayQueueRemovalTaskDetail().getObject());
-		schedulerFactory.setTriggers(relayQueueRemovalTaskTrigger().getObject());
+		schedulerFactory.setJobDetails(relaySupervisingTaskDetail().getObject());
+		schedulerFactory.setTriggers(relaySupervisingTaskTrigger().getObject());
 		schedulerFactory.setStartupDelay(SCHEDULER_DELAY);
-		logger.info("Relay Queue removal task scheduled.");
+		logger.info("Relay Supervising task scheduled.");
         
 		return schedulerFactory;        
     }
 	
 	//-------------------------------------------------------------------------------------------------
 	@Bean
-    public SimpleTriggerFactoryBean relayQueueRemovalTaskTrigger() {
+    public SimpleTriggerFactoryBean relaySupervisingTaskTrigger() {
 		final SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
-		trigger.setJobDetail(relayQueueRemovalTaskDetail().getObject());
+		trigger.setJobDetail(relaySupervisingTaskDetail().getObject());
         trigger.setRepeatInterval(SCHEDULER_INTERVAL * CoreCommonConstants.CONVERSION_MILLISECOND_TO_SECOND);
         trigger.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
         trigger.setName(NAME_OF_TRIGGER);
@@ -72,9 +72,9 @@ public class RelayQueueRemovalTaskConfig {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Bean
-    public JobDetailFactoryBean relayQueueRemovalTaskDetail() {
+    public JobDetailFactoryBean relaySupervisingTaskDetail() {
         final JobDetailFactoryBean jobDetailFactory = new JobDetailFactoryBean();
-        jobDetailFactory.setJobClass(RelayQueueRemovalTask.class);
+        jobDetailFactory.setJobClass(RelaySupervisingTask.class);
         jobDetailFactory.setName(NAME_OF_TASK);
         jobDetailFactory.setDurability(true);
         
