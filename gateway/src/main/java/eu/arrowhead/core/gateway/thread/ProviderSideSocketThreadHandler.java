@@ -170,6 +170,7 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 				close();
 			} else {
 				Assert.notNull(currentThread.getOutputStream(), "Output stream is null.");
+				currentThread.setNowAsLastInteractionTime();
 				final byte[] bytes = relayClient.getBytesFromMessage(message, consumerGatewayPublicKey);
 				communicationStarted = true;
 				

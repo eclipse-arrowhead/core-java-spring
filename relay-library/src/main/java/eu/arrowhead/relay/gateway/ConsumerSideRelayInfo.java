@@ -37,6 +37,8 @@ public class ConsumerSideRelayInfo {
 								 final MessageConsumer messageConsumer, final MessageConsumer controlMessageConsumer) {
 		Assert.notNull(messageSender, "messageSender is null.");
 		Assert.notNull(controlMessageSender, "controlMessageSender is null.");
+		Assert.notNull(messageConsumer, "messageConsumer is null.");
+		Assert.notNull(controlMessageConsumer, "controlMessageConsumer is null.");
 		
 		this.messageSender = messageSender;
 		this.controlMessageSender = controlMessageSender;

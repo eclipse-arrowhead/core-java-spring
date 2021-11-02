@@ -183,6 +183,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 				relayClient.handleCloseControlMessage(message, relaySession);
 				closeAndInterrupt();
 			} else {
+				lastInteraction = ZonedDateTime.now();
 				final byte[] bytes = relayClient.getBytesFromMessage(message, providerGatewayPublicKey);
 				logger.debug("FROM PROVIDER:" + new String(bytes, StandardCharsets.ISO_8859_1));
 				outConsumer.write(bytes);

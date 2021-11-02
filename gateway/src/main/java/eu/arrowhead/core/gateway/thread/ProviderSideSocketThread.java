@@ -113,6 +113,11 @@ class ProviderSideSocketThread extends Thread {
 	public ZonedDateTime getLastInteractionTime() {
 		return this.lastInteraction;
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public void setNowAsLastInteractionTime() {
+		this.lastInteraction = ZonedDateTime.now();
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Override

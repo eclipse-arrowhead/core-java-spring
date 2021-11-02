@@ -46,7 +46,7 @@ public class RelayConnectionRemovalTaskConfig {
 	private static final int SCHEDULER_DELAY = 2;
 	private static final String NUM_OF_THREADS = "1";
 	
-	static final String NAME_OF_TRIGGER = "Relay_Connection_Removal_Task_Trigger";
+	private static final String NAME_OF_TRIGGER = "Relay_Connection_Removal_Task_Trigger";
 	private static final String NAME_OF_TASK = "Relay_Connection_Removal_Task";
 	
 	//=================================================================================================

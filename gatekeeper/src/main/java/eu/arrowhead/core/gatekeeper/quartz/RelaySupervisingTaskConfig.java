@@ -46,7 +46,7 @@ public class RelaySupervisingTaskConfig {
 	private static final int SCHEDULER_DELAY = 2;
 	private static final String NUM_OF_THREADS = "1";
 	
-	static final String NAME_OF_TRIGGER = "Relay_Supervising_Task_Trigger";
+	private static final String NAME_OF_TRIGGER = "Relay_Supervising_Task_Trigger";
 	private static final String NAME_OF_TASK = "Relay_Supervising_Task";
 	
 	//=================================================================================================

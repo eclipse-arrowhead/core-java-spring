@@ -67,7 +67,7 @@ public class RelayConnectionRemovalTask implements Job {
 	
 	//-------------------------------------------------------------------------------------------------
 	private void handleConsumerSideConnections(final ZonedDateTime now) {
-		for (ConsumerSideServerSocketThread thread : activeConsumerSideSocketThreads.values()) {			
+		for (final ConsumerSideServerSocketThread thread : activeConsumerSideSocketThreads.values()) {			
 			final long threshold = thread.isCommunicationStarted() ? consumerSideThreshold : consumerSideThreshold * CONSUMER_SIDE_THRESHOLD_MULTIPLIER;
 			if (now.isAfter(thread.getLastInteractionTime().plusSeconds(threshold))) {
 				thread.setInterrupted(true);

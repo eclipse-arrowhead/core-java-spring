@@ -403,17 +403,14 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	@Override
 	public void destroyStaleQueuesAndConnections() {
 		logger.debug("destroyStaleQueues started...");
-		System.out.println("destroyStaleQueues started..."); //TODO remove
 		
 		final List<ActiveMQSession> removableSessions = new ArrayList<>();
 		for (final Entry<ActiveMQSession, List<ActiveMQQueue>> sessionWithQueues : STALE_QUEUES.entrySet()) {
 			final ActiveMQSession amqs = sessionWithQueues.getKey();
 			final List<ActiveMQQueue> queueList = sessionWithQueues.getValue();
-			System.out.println("Connection is closing: " + amqs.getConnection().isClosing());
-			System.out.println("Connection is closed: " + amqs.getConnection().isClosed());
 			
 			if (amqs.isClosed()) {
-				System.out.println("Session is closed");
+				logger.debug("Session is closed!");
 				removableSessions.add(amqs);
 				
 			} else {
@@ -422,14 +419,12 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 					try {
 						amqs.getConnection().destroyDestination(queue); // throws JMSException if destination still has an active subscription
 						if (!isQueueActive(amqs, queue)) {
-							logger.debug("Destroyed: " + queue.getPhysicalName());							
-							System.out.println("Destroyed: " + queue.getPhysicalName()); //TODO remove
+							logger.debug("Destroyed: " + queue.getPhysicalName());
 						} else {
 							undestroyed.add(queue);
 						}
 					} catch (final JMSException ex) {
 						logger.debug(ex.getMessage());
-						System.out.println(ex.getMessage()); //TODO remove
 						undestroyed.add(queue);
 					}
 				}
@@ -656,18 +651,17 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 							try {
 								amqs.getConnection().destroyDestination(queue); // throws JMSException if destination still has an active subscription	
 								if (!isQueueActive(amqs, queue)) {
-									System.out.println("Destroyed: " + queue.getPhysicalName()); //TODO remove									
+									logger.debug("Destroyed: " + queue.getPhysicalName());
 								} else {
 									STALE_QUEUES.putIfAbsent(amqs, new ArrayList<>());
 									STALE_QUEUES.get(amqs).add((ActiveMQQueue)queue);
-									System.out.println("Adding to satle queues: " + queue.getPhysicalName()); //TODO remove
+									logger.debug("Adding to stale queues: " + queue.getPhysicalName());
 								}
 							} catch (final JMSException ex) {
-								logger.debug(ex.getMessage());
-								logger.debug("Adding to satle queues: " + queue.getPhysicalName());
-								System.out.println("Adding to satle queues: " + queue.getPhysicalName()); //TODO remove
 								STALE_QUEUES.putIfAbsent(amqs, new ArrayList<>());
 								STALE_QUEUES.get(amqs).add((ActiveMQQueue)queue);
+								logger.debug(ex.getMessage());
+								logger.debug("Adding to stale queues: " + queue.getPhysicalName());
 							}
 						}
 					}

@@ -120,7 +120,6 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 					amqs.getConnection().close();
 				}
 			} catch (final JMSException ex) {
-				System.out.println("JMSException: " + ex.getMessage()); //TODO remove
 				logger.debug(ex.getMessage());
 				logger.trace("Stacktrace:", ex);
 			}
@@ -379,8 +378,7 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 			final ActiveMQMessageConsumer amqConsumer = (ActiveMQMessageConsumer) consumer;	
 			final ActiveMQMessageConsumer amqConsumerControl = (ActiveMQMessageConsumer) consumerControl;	
 			amqConsumer.close();
-			amqConsumerControl.close();
-			System.out.println("ActiveMQMessageConsumers stop"); //TODO remove			
+			amqConsumerControl.close();			
 		}
 		
 	}

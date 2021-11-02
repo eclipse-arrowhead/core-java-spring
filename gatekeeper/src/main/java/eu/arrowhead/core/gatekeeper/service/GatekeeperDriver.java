@@ -87,7 +87,7 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.exception.TimeoutException;
 import eu.arrowhead.common.http.HttpService;
-import eu.arrowhead.core.gatekeeper.quartz.RelaySuprvisor;
+import eu.arrowhead.core.gatekeeper.quartz.RelaySupervisor;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingAlgorithm;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingParameters;
 import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClient;
@@ -157,7 +157,7 @@ public class GatekeeperDriver {
 		}
 		final PrivateKey privateKey = (PrivateKey) arrowheadContext.get(CommonConstants.SERVER_PRIVATE_KEY);
 	
-		relayClient = GatekeeperRelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, sslProps, timeout, RelaySuprvisor.getRegistry());
+		relayClient = GatekeeperRelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, sslProps, timeout, RelaySupervisor.getRegistry());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -242,9 +242,9 @@ public class GatekeeperDriver {
 		Assert.notNull(request, "Request is null.");
 		
 		final Relay relay = gatekeeperMatchmaker.doMatchmaking(new RelayMatchmakingParameters(targetCloud));
-		Session session = null;
+		
 		try {
-			session = relayClient.createConnection(relay.getAddress(), relay.getPort(), relay.getSecure());
+			final Session session = relayClient.createConnection(relay.getAddress(), relay.getPort(), relay.getSecure());
 			final String recipientCommonName = getRecipientCommonName(targetCloud);
 			final GeneralAdvertisementResult advResult = relayClient.publishGeneralAdvertisement(session, recipientCommonName, targetCloud.getAuthenticationInfo());
 			if (advResult == null) {
