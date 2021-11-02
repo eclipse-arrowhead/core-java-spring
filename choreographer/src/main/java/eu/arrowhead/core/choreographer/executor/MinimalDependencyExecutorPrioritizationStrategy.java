@@ -45,7 +45,7 @@ public class MinimalDependencyExecutorPrioritizationStrategy implements Executor
 		
 		//Ascending sort by num of dependencies
 		executors.sort((final ChoreographerExecutor e1, final ChoreographerExecutor e2) ->
-						executorServiceInfos.get(e2.getId()).getDependencies().size() - executorServiceInfos.get(e1.getId()).getDependencies().size());
+						executorServiceInfos.get(e1.getId()).getDependencies().size() - executorServiceInfos.get(e2.getId()).getDependencies().size());
 		return executors;
 	}
 }

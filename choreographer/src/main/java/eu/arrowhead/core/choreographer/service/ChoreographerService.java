@@ -30,6 +30,7 @@ import org.springframework.util.Assert;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.database.entity.ChoreographerAction;
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
 import eu.arrowhead.common.database.entity.ChoreographerPlan;
@@ -48,6 +49,7 @@ import eu.arrowhead.common.dto.shared.OrchestrationFlags;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.OrchestratorWarnings;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerPlanDBService;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerSessionDBService;
@@ -90,7 +92,7 @@ public class ChoreographerService {
 
     //-------------------------------------------------------------------------------------------------
     @JmsListener(destination = START_SESSION_DESTINATION)
-    public void receiveStartSessionMessage(final ChoreographerStartSessionDTO startSessionDTO) {  //TODO: test this
+    public void receiveStartSessionMessage(final ChoreographerStartSessionDTO startSessionDTO) {  
     	logger.debug("receiveStartSessionMessage started...");
     	Assert.notNull(startSessionDTO, "Payload is null.");
 
@@ -139,6 +141,9 @@ public class ChoreographerService {
 		
 		final ChoreographerSession session = sessionDBService.getSessionById(sessionId);
 		final List<ChoreographerSessionStep> activeSteps = sessionDBService.abortSession(sessionId, message.trim());
+		if (sessionStepId != null) {
+			releaseGatewayTunnels(session.getId(), sessionStepId);
+		}
 
 		for (final ChoreographerSessionStep sessionStep : activeSteps) {
 			if (sessionStepId != null && sessionStepId.longValue() == sessionStep.getId()) {
@@ -220,7 +225,7 @@ public class ChoreographerService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-    private void executeStep(final ChoreographerStep step, final long sessionId) { //TODO: test this (one of the public method), because we change the orch order, remove token regeneration etc
+    private void executeStep(final ChoreographerStep step, final long sessionId) { 
     	logger.debug("executeStep started...");
     	logger.debug("Execution of step with the id of " + step.getId() + " and sessionId of " + sessionId + " started.");
 	
@@ -229,8 +234,17 @@ public class ChoreographerService {
 
 		final SessionExecutorCache cache = sessionDataStorage.get(sessionId);
 		ExecutorData executorData = cache.get(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion());
-		ChoreographerExecutor executor = executorData.getExecutor();	
 		
+		if (executorData == null) { // no cached executor at this point means there was a problem of any previously selected executor
+			executorData = executorSelector.selectAndInit(sessionId, step, cache.getExclusions(), cache.isAllowInterCloud(), cache.getChooseOptimalExecutor(), false);
+			if (executorData == null) { // no candidates left
+				throw new ChoreographerSessionException(sessionId, sessionStep.getId(), "Can't find properly working executor for step: " + createFullyQualifiedStepName(step));
+			} else {
+				cache.put(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion(), executorData);
+			}
+		}
+		
+		ChoreographerExecutor executor = executorData.getExecutor();	
 		if (sessionStep.getExecutor().getId() != executor.getId()) {
 			sessionDBService.changeSessionStepExecutor(sessionStep.getId(), executor.getId());
 		}
@@ -246,16 +260,22 @@ public class ChoreographerService {
 			final ChoreographerServiceQueryFormDTO form = Utilities.fromJson(step.getSrTemplate(), ChoreographerServiceQueryFormDTO.class);
 			mainOrchestrationResponseDTO = driver.queryOrchestrator(createOrchestrationFormRequestFromServiceQueryForm(executorData.getExecutorSystem(), form, cache.isAllowInterCloud() && !form.isLocalCloudOnly()));
 			if (mainOrchestrationResponseDTO.getResponse().isEmpty()) { // no providers for the step
-				//TODO: is there a way to cancel orchestration (gateway tunnel)?
+        		closeGatewayTunnelsIfNecessary(executorPreconditions);
+
 				throw new ChoreographerSessionException(sessionId, sessionStep.getId(), "No providers found for step: " + fullStepName);
 			}
 		} catch (final ChoreographerSessionException ex) {
 			throw ex;
 		} catch (final Exception ex) { // problem during orchestration
-			//TODO: is there a way to cancel orchestration (gateway tunnel)?
+			closeGatewayTunnelsIfNecessary(executorPreconditions);
 
 			throw new ChoreographerSessionException(sessionId, sessionStep.getId(), "Problem occured while orchestration for step " + fullStepName, ex);
 		}		
+		
+		final List<OrchestrationResultDTO> allOrchestration = new ArrayList<>(executorPreconditions);
+		allOrchestration.add(mainOrchestrationResponseDTO.getResponse().get(0));
+		final List<Integer> gatewayTunnelPorts = collectGatewayTunnelPorts(allOrchestration);
+		cache.getGatewayTunnels().put(sessionStep.getId(), gatewayTunnelPorts == null ? List.of() : gatewayTunnelPorts);
 		
 		final ChoreographerExecuteStepRequestDTO payload = new ChoreographerExecuteStepRequestDTO(sessionId,
 																								  sessionStep.getId(),
@@ -263,9 +283,19 @@ public class ChoreographerService {
 																								  mainOrchestrationResponseDTO.getResponse().get(0),
 																								  step.getQuantity(),
 																								  Utilities.text2Map(step.getStaticParameters()));
-		
-		driver.startExecutor(executor.getAddress(), executor.getPort(), executor.getBaseUri(), payload);
-		//TODO: is there a way to cancel orchestration (gateway tunnel)? if start executor failed
+		try {
+			driver.startExecutor(executor.getAddress(), executor.getPort(), executor.getBaseUri(), payload);
+		} catch (final Exception ex) {
+	   		logger.warn("Unable to start executor - " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+    		logger.debug(ex);
+			
+			cache.remove(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion());
+    		cache.getExclusions().add(executorData.getExecutor().getId());
+			closeGatewayTunnelsIfNecessary(allOrchestration);
+			cache.getGatewayTunnels().remove(sessionStep.getId());
+			
+			executeStep(step, sessionId); // try again
+		}
     }
     
     //-------------------------------------------------------------------------------------------------
@@ -287,12 +317,12 @@ public class ChoreographerService {
 					final OrchestrationResponseDTO response = driver.queryOrchestrator(orchestrationForm);
 					if (response.getResponse().isEmpty()) {
 						// no provider for a dependency
-						
 		        		cache.remove(serviceDefinition, minVersion, maxVersion);
 		        		cache.getExclusions().add(executorData.getExecutor().getId());
-		        		//TODO: is there a way to cancel orchestration (gateway tunnel)?
+		        		closeGatewayTunnelsIfNecessary(result);
 		        		break;
 					}
+					
 					result.add(response.getResponse().get(0));
 				}
     			
@@ -305,7 +335,7 @@ public class ChoreographerService {
         		
         		cache.remove(serviceDefinition, minVersion, maxVersion);
         		cache.getExclusions().add(executorData.getExecutor().getId());
-        		//TODO: is there a way to cancel orchestration (gateway tunnel)?
+        		closeGatewayTunnelsIfNecessary(result);
     		}
     		
     		executorData = executorSelector.selectAndInit(sessionStep.getSession().getId(), step, cache.getExclusions(), cache.isAllowInterCloud(), cache.getChooseOptimalExecutor(), false);
@@ -360,6 +390,8 @@ public class ChoreographerService {
 			final ChoreographerSessionStep sessionStep = sessionDBService.getSessionStepById(payload.getSessionStepId());
 			final ChoreographerStep step = sessionStep.getStep();
 			sessionDBService.worklog(sessionStep.getSession().getPlan().getName(), step.getAction().getName(), step.getName(), payload.getSessionId(), payload.getMessage(), payload.getException());
+			releaseGatewayTunnels(sessionStep.getSession().getId(), sessionStep.getId());
+			
 			final SessionExecutorCache cache = sessionDataStorage.get(payload.getSessionId());
 			cache.remove(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion());
 			cache.getExclusions().add(sessionStep.getExecutor().getId());
@@ -381,6 +413,7 @@ public class ChoreographerService {
 		logger.debug("handleSessionStepAborted started...");
 		
 		final ChoreographerSessionStep sessionStep = sessionDBService.getSessionStepById(payload.getSessionStepId());
+		releaseGatewayTunnels(sessionStep.getSession().getId(), sessionStep.getId());
 		final ChoreographerPlan plan = sessionStep.getSession().getPlan();
 		final ChoreographerStep step = sessionStep.getStep();
 		sessionDBService.worklog(plan.getName(), step.getAction().getName(), step.getName(), payload.getSessionId(), "The executor of this step has aborted successfully." , null);
@@ -392,6 +425,9 @@ public class ChoreographerService {
 		
 		final long sessionId = payload.getSessionId();
 		final ChoreographerSessionStep finishedSessionStep = sessionDBService.changeSessionStepStatus(payload.getSessionStepId(), ChoreographerSessionStepStatus.DONE, "Step finished successfully.");
+		
+		releaseGatewayTunnels(sessionId, finishedSessionStep.getId());
+		
 		final ChoreographerStep finishedStep = finishedSessionStep.getStep();
 		final Set<ChoreographerStep> nextSteps = finishedStep.getNextSteps();
 		
@@ -482,5 +518,43 @@ public class ChoreographerService {
 		
 		final ChoreographerSession session = sessionDBService.changeSessionStatus(sessionId, ChoreographerSessionStatus.DONE, null);
 		sendNotification(session, FINISH_SESSION_MSG, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<Integer> collectGatewayTunnelPorts(final List<OrchestrationResultDTO> orchResults) {
+		logger.debug("collectGatewayTunnelPorts started...");
+		
+		final List<Integer> ports = new ArrayList<>();
+		for (final OrchestrationResultDTO result : orchResults) {
+			if (result.getWarnings().contains(OrchestratorWarnings.VIA_GATEWAY) && result.getProvider().getSystemName().equalsIgnoreCase(CoreSystem.GATEWAY.name())) {
+				ports.add(result.getProvider().getPort());
+			}
+		}
+		
+		return ports.isEmpty() ? null : ports;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void closeGatewayTunnelsIfNecessary(final List<OrchestrationResultDTO> orchResults) {
+		logger.debug("closeTunnelsIfNecessary started...");
+		
+		final List<Integer> ports = collectGatewayTunnelPorts(orchResults);
+		if (ports != null) {
+			driver.closeGatewayTunnels(ports);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void releaseGatewayTunnels(final long sessionId, final long sessionStepId) {
+		logger.debug("releaseGatewayTunnels started...");
+		
+		final SessionExecutorCache cache = sessionDataStorage.get(sessionId);
+		final List<Integer> ports = cache.getGatewayTunnels().get(sessionStepId);
+		
+		if (!Utilities.isEmpty(ports)) {
+			driver.closeGatewayTunnels(ports);
+		}
+		
+		cache.getGatewayTunnels().remove(sessionStepId);
 	}
 }

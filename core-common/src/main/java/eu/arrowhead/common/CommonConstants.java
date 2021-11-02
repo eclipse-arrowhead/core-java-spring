@@ -63,6 +63,7 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_ORCH_QOS_CONFIRM_RESERVATION = "orchestration-qos-confirm-reservation";
 	
 	public static final String CORE_SERVICE_GATEKEEPER_GSD = "global-service-discovery";
+	public static final String CORE_SERVICE_GATEKEEPER_MULTI_GSD = "multi-global-service-discovery";
 	public static final String CORE_SERVICE_GATEKEEPER_ICN = "inter-cloud-negotiations";
 	public static final String CORE_SERVICE_GATEKEEPER_PULL_CLOUDS = "pull-clouds";
 	public static final String CORE_SERVICE_GATEKEEPER_COLLECT_SYSTEM_ADDRESSES = "collect-system-addresses";
@@ -73,6 +74,7 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_GATEWAY_PUBLIC_KEY = "gw-public-key";
 	public static final String CORE_SERVICE_GATEWAY_CONNECT_CONSUMER = "gw-connect-consumer";
 	public static final String CORE_SERVICE_GATEWAY_CONNECT_PROVIDER = "gw-connect-provider";
+	public static final String CORE_SERVICE_GATEWAY_CLOSE_SESSIONS = "gw-close-sessions";
 
 	public static final String CORE_SERVICE_EVENTHANDLER_PUBLISH = "event-publish";
 	public static final String CORE_SERVICE_EVENTHANDLER_SUBSCRIBE = "event-subscribe";
@@ -283,6 +285,7 @@ public class CommonConstants {
 	public static final String OP_GATEWAY_KEY_URI = "/publickey";
 	public static final String OP_GATEWAY_CONNECT_PROVIDER_URI = "/connect_provider";
 	public static final String OP_GATEWAY_CONNECT_CONSUMER_URI = "/connect_consumer";
+	public static final String OP_GATEWAY_CLOSE_SESSIONS = "/close_sessions";
 	
 	public static final String EVENTHANDLER_URI = "/eventhandler";
 	public static final String OP_EVENTHANDLER_PUBLISH = "/publish";

@@ -231,6 +231,9 @@ public class CoreCommonConstants {
 	public static final String GATEWAY_ACTIVE_SESSION_MAP = "activeSessions";
 	public static final String GATEWAY_AVAILABLE_PORTS_QUEUE = "availableQueue";
 	
+	public static final String CHOREOGRAPHER_IS_GATEKEEPER_PRESENT = "gatekeeper_is_present";
+	public static final String $CHOREOGRAPHER_IS_GATEKEEPER_PRESENT_WD = "${" + CHOREOGRAPHER_IS_GATEKEEPER_PRESENT + ":" + CoreDefaults.DEFAULT_CHOREOGRAPHER_IS_GATEKEEPER_PRESENT + "}";
+	
 	public static final String EVENTHANDLER_TTL_SCHEDULED = "event_handler_ttl_scheduled";
 	public static final String $EVENTHANDLER_TTL_SCHEDULED_WD = "${" + EVENTHANDLER_TTL_SCHEDULED + ":" + CoreDefaults.DEFAULT_EVENTHANDLER_TTL_SCHEDULED + "}";
 	public static final String EVENTHANDLER_TTL_INTERVAL = "event_handler_ttl_interval";

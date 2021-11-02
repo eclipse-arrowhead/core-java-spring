@@ -1,6 +1,7 @@
 package eu.arrowhead.core.choreographer.service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,6 +18,7 @@ public class SessionExecutorCache {
 	
 	private final Map<String,ExecutorData> executorCache = new ConcurrentHashMap<>();
 	private final Set<Long> exclusions = new HashSet<>();
+	private final Map<Long,List<Integer>> gatewayTunnels = new ConcurrentHashMap<>();
 	private final boolean allowInterCloud;
 	private final boolean chooseOptimalExecutor;
 	
@@ -32,6 +34,7 @@ public class SessionExecutorCache {
 	//-------------------------------------------------------------------------------------------------
 	public Map<String,ExecutorData> getExecutorCache() { return executorCache; }
 	public Set<Long> getExclusions() { return exclusions; }
+	public Map<Long,List<Integer>> getGatewayTunnels() { return gatewayTunnels; }
 	public boolean isAllowInterCloud() { return allowInterCloud; }
 	public boolean getChooseOptimalExecutor() { return chooseOptimalExecutor; }
 	

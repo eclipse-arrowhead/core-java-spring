@@ -43,5 +43,10 @@
     "name": "allow_non_routable_addressing",
     "type": "java.lang.Boolean",
     "description": "A description for 'allow_non_routable_addressing'"
+  },
+  {
+    "name": "gatekeeper_is_present",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'gatekeeper_is_present'"
   }
 ]}

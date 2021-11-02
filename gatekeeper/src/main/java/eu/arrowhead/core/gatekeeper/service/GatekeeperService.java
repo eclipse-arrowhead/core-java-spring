@@ -192,7 +192,7 @@ public class GatekeeperService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public GSDMultiQueryResultDTO initMultiGSDPoll(final GSDMultiQueryFormDTO gsdForm) throws InterruptedException { //TODO: test this
+	public GSDMultiQueryResultDTO initMultiGSDPoll(final GSDMultiQueryFormDTO gsdForm) throws InterruptedException {
 		logger.debug("initMultiGSDPoll started...");
 		
 		Assert.notNull(gsdForm, "GSDMultiQueryFormDTO is null.");
@@ -206,7 +206,7 @@ public class GatekeeperService {
 			// If no preferred clouds were given, then send GSD poll requests to the neighbor Clouds
 			final List<Cloud> neighborClouds = gatekeeperDBService.getNeighborClouds();
 			if (neighborClouds.isEmpty()) {
-				throw new InvalidParameterException("initMultiGSDPoll failed: Neither preferred clouds were given, nor neighbor clouds registered");
+				throw new InvalidParameterException("initMultiGSDPoll failed: Neither preferred clouds were given, nor neighbor clouds registered.");
 			} else {
 				cloudsToContact = neighborClouds;
 			}			
@@ -215,7 +215,7 @@ public class GatekeeperService {
 			final List<Cloud> preferredClouds = getCloudsByCloudRequestDTOs(gsdForm.getPreferredClouds());
 			
 			if (preferredClouds.isEmpty()) {
-				throw new InvalidParameterException("initMultiGSDPoll failed: Given preferred clouds are not exists");
+				throw new InvalidParameterException("initMultiGSDPoll failed: Given preferred clouds are not exists.");
 			} else {
 				cloudsToContact = preferredClouds;
 			}
@@ -332,7 +332,7 @@ public class GatekeeperService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public GSDMultiPollResponseDTO doMultiGSDPoll(final GSDMultiPollRequestDTO request) { //TODO: test this
+	public GSDMultiPollResponseDTO doMultiGSDPoll(final GSDMultiPollRequestDTO request) { 
 		logger.debug("doMultiGSDPoll started...");
 		
 		validateMultiGSDPollRequestDTO(request);
@@ -722,8 +722,8 @@ public class GatekeeperService {
 		
 		if (operatorIsEmpty || nameIsEmpty) {
 			String exceptionMsg = "GSDMultiPollRequestDTO.CloudRequestDTO is invalid due to the following reasons:";
-			exceptionMsg = operatorIsEmpty ? exceptionMsg + " operator is empty, " : exceptionMsg;
-			exceptionMsg = nameIsEmpty ? exceptionMsg + " name is empty, " : exceptionMsg;
+			exceptionMsg = operatorIsEmpty ? exceptionMsg + " operator is empty," : exceptionMsg;
+			exceptionMsg = nameIsEmpty ? exceptionMsg + " name is empty," : exceptionMsg;
 			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() - 1);
 			
 			throw new InvalidParameterException(exceptionMsg);
@@ -736,8 +736,12 @@ public class GatekeeperService {
 		
 		final List<Cloud> clouds = new ArrayList<>();
 		for (final CloudRequestDTO dto : cloudDTOs) {
-			final Cloud cloud = gatekeeperDBService.getCloudByOperatorAndName(dto.getOperator(), dto.getName());
-			clouds.add(cloud);
+			try {
+				final Cloud cloud = gatekeeperDBService.getCloudByOperatorAndName(dto.getOperator(), dto.getName());
+				clouds.add(cloud);
+			} catch (final InvalidParameterException ex) { // ignore non existent clouds
+				logger.debug(ex.getMessage(), ex);
+			}
 		}
 		
 		return clouds;

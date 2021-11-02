@@ -21,6 +21,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,6 +65,7 @@ public class GatewayAccessControlFilterTest {
 	private static final String GATEWAY_ACTIVE_SESSIONS_MGMT_URI = CommonConstants.GATEWAY_URI + CoreCommonConstants.MGMT_URI + "/sessions";
 	private static final String GATEWAY_CONNECT_PROVIDER_URI = CommonConstants.GATEWAY_URI + "/connect_provider";
 	private static final String GATEWAY_CONNECT_CONSUMER_URI = CommonConstants.GATEWAY_URI + "/connect_consumer";
+	private static final String GATEWAY_CLOSE_SESSIONS_URI = CommonConstants.GATEWAY_URI + CommonConstants.OP_GATEWAY_CLOSE_SESSIONS;
 	
 	@Autowired
 	private ApplicationContext appContext;
@@ -142,7 +145,7 @@ public class GatewayAccessControlFilterTest {
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(createGatewayProviderConnectionRequestDTO()))
 					.accept(MediaType.APPLICATION_JSON))
-					.andExpect(status().isBadRequest()); //Bad request result means that the request gone through the filter
+					.andExpect(status().isBadRequest()); // Bad request result means that the request gone through the filter
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -166,7 +169,7 @@ public class GatewayAccessControlFilterTest {
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(createGatewayConsumerConnectionRequestDTO()))
 					.accept(MediaType.APPLICATION_JSON))
-					.andExpect(status().isBadRequest()); //Bad request result means that the request gone through the filter
+					.andExpect(status().isBadRequest()); // Bad request result means that the request gone through the filter
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -177,6 +180,30 @@ public class GatewayAccessControlFilterTest {
 					.with(x509("certificates/provider.pem"))
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(createGatewayConsumerConnectionRequestDTO()))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCloseSessionsChoreographer() throws Exception {
+		this.mockMvc.perform(post(GATEWAY_CLOSE_SESSIONS_URI)
+					.secure(true)
+					.with(x509("certificates/choreographer.pem"))
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(List.of()))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest()); // Bad request result means that the request gone through the filter
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCloseSessionsNotChoreographer() throws Exception {
+		this.mockMvc.perform(post(GATEWAY_CLOSE_SESSIONS_URI)
+					.secure(true)
+					.with(x509("certificates/provider.pem"))
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(List.of()))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isUnauthorized());
 	}

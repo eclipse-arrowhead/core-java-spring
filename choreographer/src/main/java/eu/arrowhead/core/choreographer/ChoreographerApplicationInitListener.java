@@ -21,6 +21,7 @@ import java.util.ServiceConfigurationError;
 import javax.jms.ConnectionFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -40,8 +41,10 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.core.choreographer.exception.ChoreographerSessionErrorHandler;
+import eu.arrowhead.core.choreographer.executor.ExecutorMeasurementStrategy;
 import eu.arrowhead.core.choreographer.executor.ExecutorPrioritizationStrategy;
-import eu.arrowhead.core.choreographer.executor.RandomExecutorPrioritizationStrategy;
+import eu.arrowhead.core.choreographer.executor.MinimalDependencyExecutorPrioritizationStrategy;
+import eu.arrowhead.core.choreographer.executor.WeightedExecutorMeasurementStrategy;
 import eu.arrowhead.core.choreographer.graph.EdgeDestroyerStepGraphNormalizer;
 import eu.arrowhead.core.choreographer.graph.KahnAlgorithmStepGraphCircleDetector;
 import eu.arrowhead.core.choreographer.graph.StepGraphCircleDetector;
@@ -55,6 +58,8 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
 	//=================================================================================================
 	// members
 	
+	private static final String TYPE_ID_PROPERTY_NAME = "_type";
+	
 	@Autowired
 	private NetworkAddressVerifier networkAddressVerifier;
 	
@@ -64,7 +69,8 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
 	@Autowired
 	private ChoreographerDriver driver;
 	
-	private static final String TYPE_ID_PROPERTY_NAME = "_type";
+	@Value(CoreCommonConstants.$CHOREOGRAPHER_IS_GATEKEEPER_PRESENT_WD)
+	private boolean gateKeeperIsPresent;
 	
 	//=================================================================================================
 	// methods
@@ -103,8 +109,14 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
     //-------------------------------------------------------------------------------------------------
     @Bean
     public ExecutorPrioritizationStrategy getExecutorPrioritizationStrategy() {
-    	return new RandomExecutorPrioritizationStrategy();
+    	return new MinimalDependencyExecutorPrioritizationStrategy();
     }
+    
+    //-------------------------------------------------------------------------------------------------
+	@Bean
+	public ExecutorMeasurementStrategy getExecutorMeasurementStrategy() {
+		return new WeightedExecutorMeasurementStrategy();
+	}
 	
 	//=================================================================================================
 	// assistant methods
@@ -135,7 +147,11 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
     //-------------------------------------------------------------------------------------------------
 	@Override
     protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
-        return List.of(CoreSystemService.ORCHESTRATION_BY_PROXY_SERVICE, CoreSystemService.GATEKEEPER_MULTI_GLOBAL_SERVICE_DISCOVERY); //TODO: only add MGSD if gatekeeper is present
+		if (gateKeeperIsPresent) {
+			return List.of(CoreSystemService.ORCHESTRATION_BY_PROXY_SERVICE, CoreSystemService.GATEKEEPER_MULTI_GLOBAL_SERVICE_DISCOVERY, CoreSystemService.GATEWAY_CLOSE_SESSIONS_SERVICE); 
+		}
+		
+		return List.of(CoreSystemService.ORCHESTRATION_BY_PROXY_SERVICE);
     }
 
     //=================================================================================================

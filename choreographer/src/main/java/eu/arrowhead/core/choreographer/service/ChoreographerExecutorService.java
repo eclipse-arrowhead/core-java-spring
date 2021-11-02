@@ -68,7 +68,7 @@ public class ChoreographerExecutorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	public ChoreographerExecutorResponseDTO addExecutorSystem(final ChoreographerExecutorRequestDTO request, final String origin) { //TODO junit
+	public ChoreographerExecutorResponseDTO addExecutorSystem(final ChoreographerExecutorRequestDTO request, final String origin) {
 		logger.debug("addExecutorSystem started...");
 		Assert.notNull(request, "ChoreographerExecutorRequestDTO is null");
 		Assert.isTrue(!Utilities.isEmpty(origin), "origin is empty");
@@ -80,7 +80,7 @@ public class ChoreographerExecutorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	public ChoreographerExecutorResponseDTO registerExecutorSystem(final ChoreographerExecutorRequestDTO request, final String origin, final HttpServletRequest servletRequest) { //TODO junit
+	public ChoreographerExecutorResponseDTO registerExecutorSystem(final ChoreographerExecutorRequestDTO request, final String origin, final HttpServletRequest servletRequest) {
 		logger.debug("registerExecutorSystem started...");
 		Assert.notNull(request, "ChoreographerExecutorRequestDTO is null");
 		Assert.isTrue(!Utilities.isEmpty(origin), "origin is empty");
@@ -108,7 +108,7 @@ public class ChoreographerExecutorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	public ChoreographerExecutorListResponseDTO getExecutors(final Integer page, final Integer size, final String direction, final String sortField, final String origin) { //TODO junit
+	public ChoreographerExecutorListResponseDTO getExecutors(final Integer page, final Integer size, final String direction, final String sortField, final String origin) {
 		logger.debug("getExecutors started...");
 		Assert.isTrue(!Utilities.isEmpty(origin), "origin is empty");
 		
@@ -134,7 +134,7 @@ public class ChoreographerExecutorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	public void removeExecutorSystem(final long id, final String origin) { //TODO junit
+	public void removeExecutorSystem(final long id, final String origin) {
 		logger.debug("removeExecutorSystem started...");
 		Assert.isTrue(!Utilities.isEmpty(origin), "origin is empty");
 
@@ -149,7 +149,7 @@ public class ChoreographerExecutorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	public void unregisterExecutorSystem(final String name, final String origin) { //TODO junit
+	public void unregisterExecutorSystem(final String name, final String origin) {
 		logger.debug("unregisterExecutorSystem started...");
 		Assert.isTrue(!Utilities.isEmpty(origin), "origin is empty");
 		
@@ -168,7 +168,7 @@ public class ChoreographerExecutorService {
 
 	//-------------------------------------------------------------------------------------------------
 	private void checkAndNormalizeExecutorRequestDTO(final ChoreographerExecutorRequestDTO dto, final String origin, final HttpServletRequest servletRequest) {
-		logger.debug("checkExecutorRequestDTO started...");
+		logger.debug("checkAndNormalizeExecutorRequestDTO started...");
 
 		if (dto == null) {
 			throw new BadPayloadException("Request is null.", HttpStatus.SC_BAD_REQUEST, origin);

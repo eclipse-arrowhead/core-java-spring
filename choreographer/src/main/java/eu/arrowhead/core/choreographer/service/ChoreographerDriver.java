@@ -27,6 +27,7 @@ import eu.arrowhead.common.dto.internal.GSDMultiPollResponseDTO;
 import eu.arrowhead.common.dto.internal.GSDMultiQueryFormDTO;
 import eu.arrowhead.common.dto.internal.GSDMultiQueryResultDTO;
 import eu.arrowhead.common.dto.internal.KeyValuesDTO;
+import eu.arrowhead.common.dto.shared.ActiveSessionCloseErrorDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerAbortStepRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecuteStepRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoRequestDTO;
@@ -54,6 +55,7 @@ public class ChoreographerDriver {
 
     private static final String ORCHESTRATION_PROCESS_BY_PROXY_URI_KEY = CoreSystemService.ORCHESTRATION_BY_PROXY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
     private static final String GATEKEEPER_MULTI_GSD_URI_KEY = CoreSystemService.GATEKEEPER_MULTI_GLOBAL_SERVICE_DISCOVERY.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+    private static final String GATEWAY_CLOSE_SESSIONS_URI_KEY = CoreSystemService.GATEWAY_CLOSE_SESSIONS_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
     
     public static final String OWN_CLOUD_MARKER = "#OWN_CLOUD#";
     
@@ -79,8 +81,10 @@ public class ChoreographerDriver {
     }
     
     //-------------------------------------------------------------------------------------------------
-	public Map<Integer,List<String>> searchForServices(final ServiceQueryFormListDTO forms, final boolean allowInterCloud) { //TODO: test this
+	public Map<Integer,List<String>> searchForServices(final ServiceQueryFormListDTO forms, final boolean allowInterCloud) { 
 		logger.debug("searchForServices started...");
+		Assert.notNull(forms, "Forms is null.");
+		Assert.isTrue(!Utilities.isEmpty(forms.getForms()), "Form list is empty.");
 		
 		final List<ServiceQueryFormDTO> interCloudCandidates = new ArrayList<>();
 		final List<Integer> interCloudCandidatesOriginalIdx = new ArrayList<>();
@@ -197,7 +201,7 @@ public class ChoreographerDriver {
     }
     
     //-------------------------------------------------------------------------------------------------
-    public OrchestrationResponseDTO queryOrchestrator(final OrchestrationFormRequestDTO form) { //TODO test this
+    public OrchestrationResponseDTO queryOrchestrator(final OrchestrationFormRequestDTO form) { 
         logger.debug("queryOrchestrator started...");
 
         Assert.notNull(form, "form is null.");
@@ -216,6 +220,26 @@ public class ChoreographerDriver {
 		
 		final UriComponents uri = UriComponentsBuilder.fromUriString(notifyUri).build();
 		httpService.sendRequest(uri, HttpMethod.POST, Void.class, payload);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public void closeGatewayTunnels(final List<Integer> ports) { 
+		logger.debug("closeGatewayTunnels started...");
+		Assert.isTrue(!Utilities.isEmpty(ports), "Port list is null or empty.");
+		
+		final UriComponents uri = getGatewayCloseSessionsUri();
+		try {
+			@SuppressWarnings("rawtypes")
+			final ResponseEntity<List> response = httpService.sendRequest(uri, HttpMethod.POST, List.class, ports);
+			@SuppressWarnings("unchecked")
+			final List<ActiveSessionCloseErrorDTO> body = response.getBody();
+			for (final ActiveSessionCloseErrorDTO errorDTO : body) {
+				logger.warn("Problem occurs while trying to close gateway tunnel for port {}: {}", errorDTO.getPort(), errorDTO.getError());
+			}
+		} catch (final Exception ex) {
+			logger.warn(ex.getMessage());
+			logger.debug("Stacktrace: ", ex);
+		}
 	}
 	
     //=================================================================================================
@@ -353,18 +377,30 @@ public class ChoreographerDriver {
     }
     
     //-------------------------------------------------------------------------------------------------
-    private ServiceQueryResultListDTO multiQueryServiceRegistry(final ServiceQueryFormListDTO forms) { //TODO: test this through a public method
+    private UriComponents getGatewayCloseSessionsUri() {
+        logger.debug("getGatewayCloseSessionsUri started...");
+
+        if (arrowheadContext.containsKey(GATEWAY_CLOSE_SESSIONS_URI_KEY)) {
+            try {
+                return (UriComponents) arrowheadContext.get(GATEWAY_CLOSE_SESSIONS_URI_KEY);
+            } catch (final ClassCastException ex) {
+                throw new ArrowheadException("Choreographer can't find gateway close sessions URI.");
+            }
+        }
+        throw new ArrowheadException("Choreographer can't find gateway close sessions URI.");
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    private ServiceQueryResultListDTO multiQueryServiceRegistry(final ServiceQueryFormListDTO forms) {
         logger.debug("multiQueryServiceRegistry started...");
-        Assert.notNull(forms, "ServiceQueryFormListDTO is null.");
 
         final UriComponents uri = getMultiQueryServiceRegistryUri();
         return httpService.sendRequest(uri, HttpMethod.POST, ServiceQueryResultListDTO.class, forms).getBody();
     }
     
     //-------------------------------------------------------------------------------------------------
-	private GSDMultiQueryResultDTO multiGlobalServiceDiscovery(final GSDMultiQueryFormDTO form) { //TODO: test this through a public method
+	private GSDMultiQueryResultDTO multiGlobalServiceDiscovery(final GSDMultiQueryFormDTO form) { 
 		logger.debug("multiGlobalServiceDiscovery started...");
-		Assert.notNull(form, "GSDMultiQueryFormDTO is null.");
 		
 		final UriComponents uri = getMultiGlobalServiceDiscoveryUri();
 		return httpService.sendRequest(uri, HttpMethod.POST, GSDMultiQueryResultDTO.class, form).getBody();

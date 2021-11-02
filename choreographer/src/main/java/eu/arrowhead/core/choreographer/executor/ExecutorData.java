@@ -35,7 +35,9 @@ public class ExecutorData {
 	public ExecutorData(final ChoreographerExecutor executor, final SystemRequestDTO executorSystem, final List<ChoreographerServiceQueryFormDTO> dependencyForms, final boolean useOtherClouds) {
 		this.executor = executor;
 		this.executorSystem = executorSystem;
-		this.dependencyForms.addAll(dependencyForms);
+		if (dependencyForms != null) {
+			this.dependencyForms.addAll(dependencyForms);
+		}
 		this.useOtherClouds = useOtherClouds;
 	}
 
