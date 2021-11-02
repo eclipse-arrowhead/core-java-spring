@@ -79,6 +79,8 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 	private boolean countRequests = false;
 	
 	private boolean initialized = false;
+	private boolean communicationStarted = false;
+	
 	
 	//=================================================================================================
 	// methods
@@ -144,6 +146,11 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public boolean isCommunicationStarted() {
+		return communicationStarted;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public ZonedDateTime getLastInteractionTime() {
 		return this.currentThread.getLastInteractionTime();
 	}
@@ -164,6 +171,7 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 			} else {
 				Assert.notNull(currentThread.getOutputStream(), "Output stream is null.");
 				final byte[] bytes = relayClient.getBytesFromMessage(message, consumerGatewayPublicKey);
+				communicationStarted = true;
 				
 				if (firstMessage) { // need to decide whether use request counter or not
 					initCountRequestsFlag(bytes);
@@ -184,7 +192,6 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 	//-------------------------------------------------------------------------------------------------
 	public void close() {
 		logger.debug("Provider handler close started...");
-		System.out.println("PROVIDER: close started"); //TODO: remove
 		
 		if (activeSessions != null && queueId != null) {
 			activeSessions.remove(queueId);
@@ -217,13 +224,12 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 		
 		if (!canCloseRelayConnection) {
 			logger.debug("Relay connection is not closeable yet");
-			System.out.println("Relay connection is not closeable yet"); //TODO: remove
 			
 		} else {
 			relayClient.closeConnection(relaySession);
 			if (relayClient.isConnectionClosed(relaySession) && activeProviderSideSocketThreadHandlers != null && queueId != null) {
 				activeProviderSideSocketThreadHandlers.remove(queueId);
-				System.out.println("PROVIDER: relay connection closed"); //TODO: remove
+				logger.debug("Relay connection has been closed");
 			}			
 		}			
 	}

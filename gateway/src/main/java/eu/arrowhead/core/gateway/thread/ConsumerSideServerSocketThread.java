@@ -89,6 +89,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 	private SSLSocket sslConsumerSocket;
 	private OutputStream outConsumer;
 	private ZonedDateTime lastInteraction;
+	private boolean communicationStarted = false;
 	private boolean interrupted = false;
 	private boolean initialized = false;
 	private boolean relayConnectionIsClosed = false;
@@ -159,6 +160,11 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 	//-------------------------------------------------------------------------------------------------
 	public boolean isInitialized() {
 		return initialized;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public boolean isCommunicationStarted() {
+		return communicationStarted;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -249,10 +255,10 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 				
 				if (size < 0) { // end of stream
 					logger.debug("End of stream");
-					System.out.println("CONSUMER: end of stream"); //TODO: remove
 					closeAndInterrupt();
 					
 				} else {
+					communicationStarted = true;
 					lastInteraction = ZonedDateTime.now();
 					final byte[] data = new byte[size];
 					System.arraycopy(buffer, 0, data, 0, size);
@@ -333,7 +339,6 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 	//-------------------------------------------------------------------------------------------------
 	private boolean close() {
 		logger.debug("close started...");
-		System.out.println("CONSUMER: close started.."); //TODO: remove
 		
 		if (activeSessions != null && queueId != null) {
 			activeSessions.remove(queueId);			
@@ -384,14 +389,13 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 		
 		if (!canCloseRelayConnection) {
 			logger.debug("Relay connection is not closeable yet");
-			System.out.println("Relay connection is not closeable yet"); //TODO: remove
 			
 		} else {
 			relayClient.closeConnection(relaySession);
 			if (relayClient.isConnectionClosed(relaySession) && activeConsumerSideSocketThreads != null && queueId != null) {
 				activeConsumerSideSocketThreads.remove(queueId);
 				relayConnectionIsClosed = true;
-				System.out.println("CONSUMER: relay connection closed"); //TODO: remove
+				logger.debug("Relay connection has been closed");
 				return true;
 			}			
 		}

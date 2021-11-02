@@ -38,6 +38,8 @@ public class RelayConnectionRemovalTask implements Job {
 	// member
 	
 	public static final long PERIOD = RelayConnectionRemovalTaskConfig.SCHEDULER_INTERVAL;
+	private static final int CONSUMER_SIDE_THRESHOLD_MULTIPLIER = 2;
+	private static final int PROVIDER_SIDE_THRESHOLD_MULTIPLIER = 4; 
 	
 	@Value(CoreCommonConstants.$GATEWAY_INACTIVE_BRIDGE_TIMEOUT_WD)
 	private long consumerSideThreshold;
@@ -55,11 +57,9 @@ public class RelayConnectionRemovalTask implements Job {
 	public void execute(final JobExecutionContext context) throws JobExecutionException {
 		this.providerSideThreshold = consumerSideThreshold + PERIOD;
 		
-		while (true) {
-			final ZonedDateTime now = ZonedDateTime.now();
-			handleConsumerSideConnections(now);
-			handleProviderSideConnections(now);
-		}
+		final ZonedDateTime now = ZonedDateTime.now();
+		handleConsumerSideConnections(now);
+		handleProviderSideConnections(now);
 	}
 	
 	//=================================================================================================
@@ -67,18 +67,19 @@ public class RelayConnectionRemovalTask implements Job {
 	
 	//-------------------------------------------------------------------------------------------------
 	private void handleConsumerSideConnections(final ZonedDateTime now) {
-		for (ConsumerSideServerSocketThread thread : activeConsumerSideSocketThreads.values()) {
-			if (now.isAfter(thread.getLastInteractionTime().plusSeconds(consumerSideThreshold))) {
+		for (ConsumerSideServerSocketThread thread : activeConsumerSideSocketThreads.values()) {			
+			final long threshold = thread.isCommunicationStarted() ? consumerSideThreshold : consumerSideThreshold * CONSUMER_SIDE_THRESHOLD_MULTIPLIER;
+			if (now.isAfter(thread.getLastInteractionTime().plusSeconds(threshold))) {
 				thread.setInterrupted(true);
 			}
 		}
-	}
-	
+	}	
 	
 	//-------------------------------------------------------------------------------------------------
 	private void handleProviderSideConnections(final ZonedDateTime now) {
 		for (final ProviderSideSocketThreadHandler threadHandler : activeProviderSideSocketThreadHandlers.values()) {
-			if (now.isAfter(threadHandler.getLastInteractionTime().plusSeconds(providerSideThreshold))) {
+			final long threshold = threadHandler.isCommunicationStarted() ? providerSideThreshold : providerSideThreshold * PROVIDER_SIDE_THRESHOLD_MULTIPLIER;
+			if (now.isAfter(threadHandler.getLastInteractionTime().plusSeconds(threshold))) {
 				threadHandler.close();
 			}
 		}
