@@ -48,6 +48,7 @@ public class CoreCommonConstants {
 	public static final String RELAY_MESSAGE_TYPE_RAW = "raw";
 	public static final String RELAY_MESSAGE_TYPE_ACK = "ack";
 	public static final String RELAY_MESSAGE_TYPE_GSD_POLL = "gsd_poll";
+	public static final String RELAY_MESSAGE_TYPE_MULTI_GSD_POLL = "multi_gsd_poll";
 	public static final String RELAY_MESSAGE_TYPE_ICN_PROPOSAL = "icn_proposal";
 	public static final String RELAY_MESSAGE_TYPE_ACCESS_TYPE = "access_type";
 	public static final String RELAY_MESSAGE_TYPE_SYSTEM_ADDRESS_LIST = "system_address_list";
@@ -229,6 +230,9 @@ public class CoreCommonConstants {
 	
 	public static final String GATEWAY_ACTIVE_SESSION_MAP = "activeSessions";
 	public static final String GATEWAY_AVAILABLE_PORTS_QUEUE = "availableQueue";
+	
+	public static final String CHOREOGRAPHER_IS_GATEKEEPER_PRESENT = "gatekeeper_is_present";
+	public static final String $CHOREOGRAPHER_IS_GATEKEEPER_PRESENT_WD = "${" + CHOREOGRAPHER_IS_GATEKEEPER_PRESENT + ":" + CoreDefaults.DEFAULT_CHOREOGRAPHER_IS_GATEKEEPER_PRESENT + "}";
 	
 	public static final String EVENTHANDLER_TTL_SCHEDULED = "event_handler_ttl_scheduled";
 	public static final String $EVENTHANDLER_TTL_SCHEDULED_WD = "${" + EVENTHANDLER_TTL_SCHEDULED + ":" + CoreDefaults.DEFAULT_EVENTHANDLER_TTL_SCHEDULED + "}";

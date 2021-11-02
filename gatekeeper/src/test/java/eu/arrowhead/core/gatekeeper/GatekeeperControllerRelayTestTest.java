@@ -14,7 +14,9 @@
 
 package eu.arrowhead.core.gatekeeper;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -44,6 +46,7 @@ import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.exception.ExceptionType;
+import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 import eu.arrowhead.core.gatekeeper.service.GatekeeperService;
 import eu.arrowhead.core.gatekeeper.service.GatekeeperServiceTestContext;
 
@@ -67,6 +70,9 @@ public class GatekeeperControllerRelayTestTest {
 
 	@MockBean(name = "mockGatekeeperService") 
 	private GatekeeperService gatekeeperService;
+	
+	@MockBean(name = "mockCnVerifier")
+	private CommonNamePartVerifier cnVerifier;
 
 	//=================================================================================================
 	// methods
@@ -75,6 +81,7 @@ public class GatekeeperControllerRelayTestTest {
 	@Before
 	public void setup() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+		when(cnVerifier.isValid(anyString())).thenReturn(true);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -244,7 +251,7 @@ public class GatekeeperControllerRelayTestTest {
 		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
 		request.setTargetCloud(targetCloud);
 		request.setRelay(relay);
-		
+
 		final MvcResult result = postInitICN(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -357,7 +364,6 @@ public class GatekeeperControllerRelayTestTest {
 		relay.setPort(1234);
 		relay.setType("GATEWAY_RELAY");
 		relay.setExclusive(false);
-		
 		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
 		request.setTargetCloud(targetCloud);
 		request.setRelay(relay);

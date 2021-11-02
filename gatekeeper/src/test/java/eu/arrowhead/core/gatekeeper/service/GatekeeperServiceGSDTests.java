@@ -18,7 +18,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.ZonedDateTime;
@@ -37,7 +42,12 @@ import org.springframework.test.util.ReflectionTestUtils;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.service.CommonDBService;
+import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.GSDMultiPollRequestDTO;
+import eu.arrowhead.common.dto.internal.GSDMultiPollResponseDTO;
+import eu.arrowhead.common.dto.internal.GSDMultiQueryFormDTO;
+import eu.arrowhead.common.dto.internal.GSDMultiQueryResultDTO;
 import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.internal.GSDQueryFormDTO;
@@ -49,7 +59,9 @@ import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultListDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -602,5 +614,408 @@ public class GatekeeperServiceGSDTests {
 		assertEquals(1, doGSDPollResponse.getQosMeasurements().size());
 		assertEquals(serviceRegistryResponseDTO2.getProvider().getSystemName(), doGSDPollResponse.getQosMeasurements().get(0).getServiceRegistryEntry().getProvider().getSystemName());
 		assertTrue(doGSDPollResponse.getQosMeasurements().get(0).isProviderAvailable());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitMultiGSDPollInputNull() throws InterruptedException {
+		try {
+			gatekeeperService.initMultiGSDPoll(null);
+		} catch (final Exception ex) {
+			assertEquals("GSDMultiQueryFormDTO is null.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitMultiGSDPollRequestedServicesNull() throws InterruptedException {
+		try {
+			gatekeeperService.initMultiGSDPoll(new GSDMultiQueryFormDTO());
+		} catch (final Exception ex) {
+			assertEquals("requestedServices list is null or empty.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitMultiGSDPollRequestedServicesEmpty() throws InterruptedException {
+		final GSDMultiQueryFormDTO form = new GSDMultiQueryFormDTO();
+		form.setRequestedServices(List.of());
+		
+		try {
+			gatekeeperService.initMultiGSDPoll(form);
+		} catch (final Exception ex) {
+			assertEquals("requestedServices list is null or empty.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitMultiGSDPollServiceDefinitionRequirementNull() throws InterruptedException {
+		final GSDMultiQueryFormDTO form = new GSDMultiQueryFormDTO();
+		form.setRequestedServices(List.of(new ServiceQueryFormDTO()));
+		
+		try {
+			gatekeeperService.initMultiGSDPoll(form);
+		} catch (final Exception ex) {
+			assertEquals("serviceDefinitionRequirement is null or empty.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitMultiGSDPollServiceDefinitionRequirementEmpty() throws InterruptedException {
+		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
+		serviceQueryFormDTO.setServiceDefinitionRequirement(" ");
+		final GSDMultiQueryFormDTO form = new GSDMultiQueryFormDTO();
+		form.setRequestedServices(List.of(serviceQueryFormDTO));
+		
+		try {
+			gatekeeperService.initMultiGSDPoll(form);
+		} catch (final Exception ex) {
+			assertEquals("serviceDefinitionRequirement is null or empty.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitMultiGSDPollNoClouds() throws InterruptedException {
+		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
+		serviceQueryFormDTO.setServiceDefinitionRequirement("service");
+		final GSDMultiQueryFormDTO form = new GSDMultiQueryFormDTO();
+		form.setRequestedServices(List.of(serviceQueryFormDTO));
+		
+		when(gatekeeperDBService.getNeighborClouds()).thenReturn(List.of());
+		
+		try {
+			gatekeeperService.initMultiGSDPoll(form);
+		} catch (final Exception ex) {
+			assertEquals("initMultiGSDPoll failed: Neither preferred clouds were given, nor neighbor clouds registered.", ex.getMessage());
+			
+			verify(gatekeeperDBService, times(1)).getNeighborClouds();
+			verify(gatekeeperDBService, never()).getCloudByOperatorAndName(anyString(), anyString());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitMultiGSDPollPreferredCloudsNotExists() throws InterruptedException {
+		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
+		serviceQueryFormDTO.setServiceDefinitionRequirement("service");
+		final CloudRequestDTO preferredCloud = new CloudRequestDTO();
+		preferredCloud.setName("name");
+		preferredCloud.setOperator("operator");
+		final GSDMultiQueryFormDTO form = new GSDMultiQueryFormDTO();
+		form.setRequestedServices(List.of(serviceQueryFormDTO));
+		form.setPreferredClouds(List.of(preferredCloud));
+		
+		when(gatekeeperDBService.getCloudByOperatorAndName("operator", "name")).thenThrow(new InvalidParameterException("not exists"));
+		
+		try {
+			gatekeeperService.initMultiGSDPoll(form);
+		} catch (final Exception ex) {
+			assertEquals("initMultiGSDPoll failed: Given preferred clouds are not exists.", ex.getMessage());
+			
+			verify(gatekeeperDBService, never()).getNeighborClouds();
+			verify(gatekeeperDBService, times(1)).getCloudByOperatorAndName("operator", "name");
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitMultiGSDPollOk() throws InterruptedException {
+		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
+		serviceQueryFormDTO.setServiceDefinitionRequirement("service");
+		final GSDMultiQueryFormDTO form = new GSDMultiQueryFormDTO();
+		form.setRequestedServices(List.of(serviceQueryFormDTO));
+		form.setPreferredClouds(List.of());
+		
+		final Cloud cloud1 = new Cloud();
+		cloud1.setName("name1");
+		cloud1.setOperator("operator1");
+		final Cloud cloud2 = new Cloud();
+		cloud2.setName("name2");
+		cloud2.setOperator("operator2");
+		final Cloud cloud3 = new Cloud();
+		cloud3.setName("name3");
+		cloud3.setOperator("operator3");
+				
+		final Cloud cloudInLocalDB = new Cloud("operator3", "name3", true, true, false, null);
+		cloudInLocalDB.setCreatedAt(ZonedDateTime.now());
+		cloudInLocalDB.setUpdatedAt(ZonedDateTime.now());
+		
+		final GSDMultiPollResponseDTO validResponse = new GSDMultiPollResponseDTO();
+		validResponse.setProvidedServiceDefinitions(List.of("service"));
+		validResponse.setProviderCloud(new CloudResponseDTO(123, "operator3", "name3", true, false, true, null, null, null));
+		
+		when(gatekeeperDBService.getNeighborClouds()).thenReturn(List.of(cloud1, cloud2, cloud3));
+		when(commonDBService.getOwnCloud(true)).thenReturn(new Cloud());
+		when(gatekeeperDriver.sendMultiGSDPollRequest(anyList(), any(GSDMultiPollRequestDTO.class))).thenReturn(List.of(new ErrorMessageDTO("error", 500, null, null), new GSDMultiPollResponseDTO(), validResponse));
+		when(gatekeeperDBService.getCloudByOperatorAndName("operator3", "name3")).thenReturn(cloudInLocalDB);
+		
+		final GSDMultiQueryResultDTO result = gatekeeperService.initMultiGSDPoll(form);
+		
+		assertEquals(2, result.getUnsuccessfulRequests());
+		assertEquals(1, result.getResults().size());
+		assertEquals("operator3", result.getResults().get(0).getProviderCloud().getOperator());
+		assertEquals("name3", result.getResults().get(0).getProviderCloud().getName());
+
+		verify(gatekeeperDBService, times(1)).getNeighborClouds();
+		verify(commonDBService, times(1)).getOwnCloud(true);
+		verify(gatekeeperDriver, times(1)).sendMultiGSDPollRequest(anyList(), any(GSDMultiPollRequestDTO.class));
+		verify(gatekeeperDBService, times(1)).getCloudByOperatorAndName("operator3", "name3");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoMultiGSDPollRequestNull() {
+		try {
+			gatekeeperService.doMultiGSDPoll(null);
+		} catch (final Exception ex) {
+			assertEquals("GSDMultiPollRequestDTO is null", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoMultiGSDPollGatewayProblem() {
+		final boolean oldValue = (Boolean) ReflectionTestUtils.getField(gatekeeperService, "gatewayIsMandatory");
+		ReflectionTestUtils.setField(gatekeeperService, "gatewayIsMandatory", true);
+		final GSDMultiPollRequestDTO request = new GSDMultiPollRequestDTO();
+		request.setGatewayIsPresent(false);
+		
+		try {
+			gatekeeperService.doMultiGSDPoll(request);
+		} catch (final Exception ex) {
+			assertEquals("Requester cloud must have gateway available", ex.getMessage());
+			
+			throw ex;
+		} finally {
+			ReflectionTestUtils.setField(gatekeeperService, "gatewayIsMandatory", oldValue);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoMultiGSDPollRequestedServicesNull() {
+		final GSDMultiPollRequestDTO request = new GSDMultiPollRequestDTO();
+		request.setGatewayIsPresent(true);
+		
+		try {
+			gatekeeperService.doMultiGSDPoll(request);
+		} catch (final Exception ex) {
+			assertEquals("RequestedServices list is null or empty", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoMultiGSDPollRequestedServicesEmpty() {
+		final GSDMultiPollRequestDTO request = new GSDMultiPollRequestDTO();
+		request.setGatewayIsPresent(true);
+		request.setRequestedServices(List.of());
+		
+		try {
+			gatekeeperService.doMultiGSDPoll(request);
+		} catch (final Exception ex) {
+			assertEquals("RequestedServices list is null or empty", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoMultiGSDPollServiceDefinitionRequirementNull() {
+		final ServiceQueryFormDTO formDTO = new ServiceQueryFormDTO();
+		final GSDMultiPollRequestDTO request = new GSDMultiPollRequestDTO();
+		request.setGatewayIsPresent(true);
+		request.setRequestedServices(List.of(formDTO));
+		
+		try {
+			gatekeeperService.doMultiGSDPoll(request);
+		} catch (final Exception ex) {
+			assertEquals("serviceDefinitionRequirement is empty", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoMultiGSDPollServiceDefinitionRequirementEmpty() {
+		final ServiceQueryFormDTO formDTO = new ServiceQueryFormDTO();
+		formDTO.setServiceDefinitionRequirement(" ");
+		final GSDMultiPollRequestDTO request = new GSDMultiPollRequestDTO();
+		request.setGatewayIsPresent(true);
+		request.setRequestedServices(List.of(formDTO));
+		
+		try {
+			gatekeeperService.doMultiGSDPoll(request);
+		} catch (final Exception ex) {
+			assertEquals("serviceDefinitionRequirement is empty", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoMultiGSDPollRequesterCloudNull() {
+		final ServiceQueryFormDTO formDTO = new ServiceQueryFormDTO();
+		formDTO.setServiceDefinitionRequirement("service");
+		final GSDMultiPollRequestDTO request = new GSDMultiPollRequestDTO();
+		request.setGatewayIsPresent(true);
+		request.setRequestedServices(List.of(formDTO));
+		
+		try {
+			gatekeeperService.doMultiGSDPoll(request);
+		} catch (final Exception ex) {
+			assertEquals("RequesterCloud is empty", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoMultiGSDPollRequesterCloudOperatorNull() {
+		final ServiceQueryFormDTO formDTO = new ServiceQueryFormDTO();
+		formDTO.setServiceDefinitionRequirement("service");
+		final CloudRequestDTO requesterCloud = new CloudRequestDTO();
+		requesterCloud.setName("name");
+		final GSDMultiPollRequestDTO request = new GSDMultiPollRequestDTO();
+		request.setGatewayIsPresent(true);
+		request.setRequestedServices(List.of(formDTO));
+		request.setRequesterCloud(requesterCloud);
+		
+		try {
+			gatekeeperService.doMultiGSDPoll(request);
+		} catch (final Exception ex) {
+			assertEquals("GSDMultiPollRequestDTO.CloudRequestDTO is invalid due to the following reasons: operator is empty", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoMultiGSDPollRequesterCloudOperatorEmpty() {
+		final ServiceQueryFormDTO formDTO = new ServiceQueryFormDTO();
+		formDTO.setServiceDefinitionRequirement("service");
+		final CloudRequestDTO requesterCloud = new CloudRequestDTO();
+		requesterCloud.setOperator(" ");
+		requesterCloud.setName("name");
+		final GSDMultiPollRequestDTO request = new GSDMultiPollRequestDTO();
+		request.setGatewayIsPresent(true);
+		request.setRequestedServices(List.of(formDTO));
+		request.setRequesterCloud(requesterCloud);
+		
+		try {
+			gatekeeperService.doMultiGSDPoll(request);
+		} catch (final Exception ex) {
+			assertEquals("GSDMultiPollRequestDTO.CloudRequestDTO is invalid due to the following reasons: operator is empty", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoMultiGSDPollRequesterCloudNameNull() {
+		final ServiceQueryFormDTO formDTO = new ServiceQueryFormDTO();
+		formDTO.setServiceDefinitionRequirement("service");
+		final CloudRequestDTO requesterCloud = new CloudRequestDTO();
+		requesterCloud.setOperator("operator");
+		final GSDMultiPollRequestDTO request = new GSDMultiPollRequestDTO();
+		request.setGatewayIsPresent(true);
+		request.setRequestedServices(List.of(formDTO));
+		request.setRequesterCloud(requesterCloud);
+		
+		try {
+			gatekeeperService.doMultiGSDPoll(request);
+		} catch (final Exception ex) {
+			assertEquals("GSDMultiPollRequestDTO.CloudRequestDTO is invalid due to the following reasons: name is empty", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoMultiGSDPollRequesterCloudNameEmpty() {
+		final ServiceQueryFormDTO formDTO = new ServiceQueryFormDTO();
+		formDTO.setServiceDefinitionRequirement("service");
+		final CloudRequestDTO requesterCloud = new CloudRequestDTO();
+		requesterCloud.setOperator("operator");
+		requesterCloud.setName(" ");
+		final GSDMultiPollRequestDTO request = new GSDMultiPollRequestDTO();
+		request.setGatewayIsPresent(true);
+		request.setRequestedServices(List.of(formDTO));
+		request.setRequesterCloud(requesterCloud);
+		
+		try {
+			gatekeeperService.doMultiGSDPoll(request);
+		} catch (final Exception ex) {
+			assertEquals("GSDMultiPollRequestDTO.CloudRequestDTO is invalid due to the following reasons: name is empty", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDoMultiGSDPollOk() {
+		final ServiceQueryFormDTO formDTO = new ServiceQueryFormDTO();
+		formDTO.setServiceDefinitionRequirement("service");
+		final CloudRequestDTO requesterCloud = new CloudRequestDTO();
+		requesterCloud.setOperator("operator");
+		requesterCloud.setName("name");
+		final GSDMultiPollRequestDTO request = new GSDMultiPollRequestDTO();
+		request.setGatewayIsPresent(true);
+		request.setRequestedServices(List.of(formDTO));
+		request.setRequesterCloud(requesterCloud);
+		
+		final ServiceQueryResultDTO queryResult = new ServiceQueryResultDTO();
+		queryResult.setServiceQueryData(List.of(new ServiceRegistryResponseDTO()));
+		final ServiceQueryResultListDTO queryList = new ServiceQueryResultListDTO();
+		queryList.setResults(List.of(queryResult));
+		
+		final Cloud ownCloud = new Cloud("operator2", "name2", true, false, true, null);
+		ownCloud.setId(111);
+		ownCloud.setCreatedAt(ZonedDateTime.now());
+		ownCloud.setUpdatedAt(ZonedDateTime.now());
+		
+		when(gatekeeperDriver.sendServiceRegistryMultiQuery(any(ServiceQueryFormListDTO.class))).thenReturn(queryList);
+		when(gatekeeperDriver.sendInterCloudAuthorizationCheckQuery(anyList(), any(CloudRequestDTO.class), eq("service"))).thenReturn(Map.of(1L, List.of()));
+		when(commonDBService.getOwnCloud(true)).thenReturn(ownCloud);
+		
+		final GSDMultiPollResponseDTO result = gatekeeperService.doMultiGSDPoll(request);
+		
+		assertEquals("operator2", result.getProviderCloud().getOperator());
+		assertEquals("name2", result.getProviderCloud().getName());
+		assertEquals("service", result.getProvidedServiceDefinitions().get(0));
+		
+		verify(gatekeeperDriver, times(1)).sendServiceRegistryMultiQuery(any(ServiceQueryFormListDTO.class));
+		verify(gatekeeperDriver, times(1)).sendInterCloudAuthorizationCheckQuery(anyList(), any(CloudRequestDTO.class), eq("service"));
+		verify(commonDBService, times(1)).getOwnCloud(true);
 	}
 }

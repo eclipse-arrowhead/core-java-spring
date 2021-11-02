@@ -21,6 +21,7 @@ import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.jms.core.JmsTemplate;
@@ -74,6 +75,8 @@ public class ChoreographerPlanController {
 	//=================================================================================================
 	// members
 
+	private static final String FALSE = "false";
+    private static final String REQUEST_PARRAM_ALLOW_INTER_CLOUD = "allowInterCloud";
     private static final String PATH_VARIABLE_ID = "id";
     private static final String ID_NOT_VALID_ERROR_MESSAGE = "ID must be greater than 0.";
 
@@ -114,6 +117,9 @@ public class ChoreographerPlanController {
 
     @Autowired
     private JmsTemplate jms;
+    
+	@Value(CoreCommonConstants.$CHOREOGRAPHER_IS_GATEKEEPER_PRESENT_WD)
+	private boolean gatekeeperIsPresent;
     
     //=================================================================================================
 	// methods
@@ -166,14 +172,14 @@ public class ChoreographerPlanController {
     })
     @GetMapping(path = PLAN_MGMT_BY_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody public ChoreographerPlanResponseDTO getPlanById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
-        logger.debug("New Plan GET request received with id: " + id + ".");
+        logger.debug("New Plan GET request received with id: {}.", id);
 
         if (id < 1) {
             throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + PLAN_MGMT_BY_ID_URI);
         }
 
         final ChoreographerPlanResponseDTO planEntryResponse = planDBService.getPlanByIdResponse(id);
-        logger.debug("Plan entry with id: " + id + " successfully retrieved!");
+        logger.debug("Plan entry with id: {} successfully retrieved!", id);
 
         return planEntryResponse;
     }
@@ -188,14 +194,14 @@ public class ChoreographerPlanController {
     })
     @DeleteMapping(path = PLAN_MGMT_BY_ID_URI)
     public void removePlanById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
-        logger.debug("New Plan delete request received with id of " + id + ".");
+        logger.debug("New Plan delete request received with id of {}.", id);
 
         if (id < 1) {
             throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + PLAN_MGMT_BY_ID_URI);
         }
 
         planDBService.removePlanEntryById(id);
-        logger.debug("Plan with id: " + id + " successfully deleted!");
+        logger.debug("Plan with id: {} successfully deleted!", id);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -225,7 +231,7 @@ public class ChoreographerPlanController {
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response= ErrorMessageDTO.class)
     })
     @PostMapping(path = START_SESSION_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody public List<ChoreographerRunPlanResponseDTO> startPlans(@RequestBody final List<ChoreographerRunPlanRequestDTO> requests) {
+    @ResponseBody public List<ChoreographerRunPlanResponseDTO> startPlans(@RequestBody final List<ChoreographerRunPlanRequestDTO> requests) { 
     	logger.debug("startPlans started...");
     	
     	if (requests == null || requests.isEmpty()) {
@@ -234,17 +240,18 @@ public class ChoreographerPlanController {
     	
     	final List<ChoreographerRunPlanResponseDTO> results = new ArrayList<>(requests.size());
         for (final ChoreographerRunPlanRequestDTO request : requests) {
-           final ChoreographerRunPlanResponseDTO errorResponse = planChecker.checkPlanForExecution(request);
+        	request.setAllowInterCloud(gatekeeperIsPresent && request.isAllowInterCloud()); // change inter-cloud flag based on gatekeeper presence in the cloud 
+        	final ChoreographerRunPlanResponseDTO response = planChecker.checkPlanForExecution(request);
            
-           if (errorResponse != null) {
-        	   results.add(errorResponse);
-           } else {
-        	   final ChoreographerSession session = sessionDBService.initiateSession(request.getPlanId(), createNotifyUri(request));
-        	   results.add(new ChoreographerRunPlanResponseDTO(request.getPlanId(), session.getId()));
-        	   
-        	   logger.debug("Sending a message to {}.", ChoreographerService.START_SESSION_DESTINATION);
-        	   jms.convertAndSend(ChoreographerService.START_SESSION_DESTINATION, new ChoreographerStartSessionDTO(session.getId(), request.getPlanId()));
-           }
+        	if (!Utilities.isEmpty(response.getErrorMessages())) {
+        		results.add(response);
+        	} else {
+        		final ChoreographerSession session = sessionDBService.initiateSession(request.getPlanId(), createNotifyUri(request));
+        		results.add(new ChoreographerRunPlanResponseDTO(request.getPlanId(), session.getId(), response.getNeedInterCloud()));
+			   
+        		logger.debug("Sending a message to {}.", ChoreographerService.START_SESSION_DESTINATION);
+        		jms.convertAndSend(ChoreographerService.START_SESSION_DESTINATION, new ChoreographerStartSessionDTO(session.getId(), request.getPlanId(), request.isAllowInterCloud(), request.getChooseOptimalExecutor()));
+        	}
         }
            
         return results;
@@ -259,17 +266,18 @@ public class ChoreographerPlanController {
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @GetMapping(path = CHECK_PLAN_MGMT_BY_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody public ChoreographerCheckPlanResponseDTO checkPlan(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
-        logger.debug("New check plan GET request received with id: " + id + ".");
+    @ResponseBody public ChoreographerCheckPlanResponseDTO checkPlan(@PathVariable(value = PATH_VARIABLE_ID) final long id,
+            														 @RequestParam(name = REQUEST_PARRAM_ALLOW_INTER_CLOUD, defaultValue = FALSE) final boolean allowIntercloud) { 
+        logger.debug("New check plan GET request received with id: {}.", id);
 
         if (id < 1) {
             throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + CHECK_PLAN_MGMT_BY_ID_URI);
         }
 
-        final ChoreographerRunPlanResponseDTO result = planChecker.checkPlanForExecution(id);
-        logger.debug("Check report for plan with id: " + id + " successfully retrieved!");
+        final ChoreographerRunPlanResponseDTO result = planChecker.checkPlanForExecution(gatekeeperIsPresent && allowIntercloud, id);
+        logger.debug("Check report for plan with id: {} successfully retrieved!", id);
 
-        return new ChoreographerCheckPlanResponseDTO(id, result == null ? null : result.getErrorMessages());
+        return new ChoreographerCheckPlanResponseDTO(id, result.getErrorMessages(), result.getNeedInterCloud());
     }
 
     //=================================================================================================

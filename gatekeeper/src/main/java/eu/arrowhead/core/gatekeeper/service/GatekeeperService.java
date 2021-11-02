@@ -42,6 +42,10 @@ import eu.arrowhead.common.dto.internal.AccessTypeRelayResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudAccessListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudAccessResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.GSDMultiPollRequestDTO;
+import eu.arrowhead.common.dto.internal.GSDMultiPollResponseDTO;
+import eu.arrowhead.common.dto.internal.GSDMultiQueryFormDTO;
+import eu.arrowhead.common.dto.internal.GSDMultiQueryResultDTO;
 import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.internal.GSDQueryFormDTO;
@@ -76,7 +80,10 @@ import eu.arrowhead.common.dto.shared.OrchestratorWarnings;
 import eu.arrowhead.common.dto.shared.PreferredProviderDataDTO;
 import eu.arrowhead.common.dto.shared.QoSMeasurementAttributesFormDTO;
 import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultListDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -131,8 +138,8 @@ public class GatekeeperService {
 		
 		Assert.notNull(gsdForm, "GSDQueryFormDTO is null.");
 		Assert.notNull(gsdForm.getRequestedService(), "requestedService is null.");
-		Assert.notNull(gsdForm.getRequestedService().getServiceDefinitionRequirement(), "serviceDefinitionRequirement is null.");
-		
+		Assert.isTrue(!Utilities.isEmpty(gsdForm.getRequestedService().getServiceDefinitionRequirement()), "serviceDefinitionRequirement is empty");
+
 		List<Cloud> cloudsToContact;
 		if (gsdForm.getPreferredClouds() == null || gsdForm.getPreferredClouds().isEmpty()) {
 			// If no preferred clouds were given, then send GSD poll requests to the neighbor Clouds
@@ -182,6 +189,61 @@ public class GatekeeperService {
 		}
 		
 		return new GSDQueryResultDTO(successfulResponses, unsuccessfulRequests);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public GSDMultiQueryResultDTO initMultiGSDPoll(final GSDMultiQueryFormDTO gsdForm) throws InterruptedException {
+		logger.debug("initMultiGSDPoll started...");
+		
+		Assert.notNull(gsdForm, "GSDMultiQueryFormDTO is null.");
+		Assert.isTrue(!Utilities.isEmpty(gsdForm.getRequestedServices()), "requestedServices list is null or empty.");
+		for (final ServiceQueryFormDTO serviceReq : gsdForm.getRequestedServices()) {
+			Assert.isTrue(!Utilities.isEmpty(serviceReq.getServiceDefinitionRequirement()), "serviceDefinitionRequirement is null or empty.");
+		}
+		
+		List<Cloud> cloudsToContact;
+		if (gsdForm.getPreferredClouds() == null || gsdForm.getPreferredClouds().isEmpty()) {
+			// If no preferred clouds were given, then send GSD poll requests to the neighbor Clouds
+			final List<Cloud> neighborClouds = gatekeeperDBService.getNeighborClouds();
+			if (neighborClouds.isEmpty()) {
+				throw new InvalidParameterException("initMultiGSDPoll failed: Neither preferred clouds were given, nor neighbor clouds registered.");
+			} else {
+				cloudsToContact = neighborClouds;
+			}			
+		} else {
+			// If preferred clouds were given, then send GSD poll requests only to those Clouds
+			final List<Cloud> preferredClouds = getCloudsByCloudRequestDTOs(gsdForm.getPreferredClouds());
+			
+			if (preferredClouds.isEmpty()) {
+				throw new InvalidParameterException("initMultiGSDPoll failed: Given preferred clouds are not exists.");
+			} else {
+				cloudsToContact = preferredClouds;
+			}
+		}
+		
+		final GSDMultiPollRequestDTO gsdPollRequestDTO = new GSDMultiPollRequestDTO(gsdForm.getRequestedServices(), getOwnCloud(), gatewayIsPresent);
+		final List<ErrorWrapperDTO> gsdPollAnswers = gatekeeperDriver.sendMultiGSDPollRequest(cloudsToContact, gsdPollRequestDTO);
+		
+		final List<GSDMultiPollResponseDTO> successfulResponses = new ArrayList<>();
+		int unsuccessfulRequests = 0;
+		for (final ErrorWrapperDTO gsdAnswer : gsdPollAnswers) {
+			if (gsdAnswer.isError()) {		
+				unsuccessfulRequests++;
+			} else {
+				final GSDMultiPollResponseDTO gsdResponse = (GSDMultiPollResponseDTO) gsdAnswer;
+				if (gsdResponse.getProviderCloud() == null) {
+					unsuccessfulRequests++;
+				} else {
+					// Changing the cloud details to the local informations based on operator and name
+					final Cloud providerCloudWithLocalDetails = gatekeeperDBService.getCloudByOperatorAndName(gsdResponse.getProviderCloud().getOperator(), gsdResponse.getProviderCloud().getName());
+					gsdResponse.setProviderCloud(DTOConverter.convertCloudToCloudResponseDTO(providerCloudWithLocalDetails));
+					
+					successfulResponses.add(gsdResponse);		
+				}
+			}						
+		}
+		
+		return new GSDMultiQueryResultDTO(successfulResponses, unsuccessfulRequests);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -267,6 +329,41 @@ public class GatekeeperService {
 		
 		return new GSDPollResponseDTO(DTOConverter.convertCloudToCloudResponseDTO(ownCloud), request.getRequestedService().getServiceDefinitionRequirement(), List.copyOf(availableInterfaces), 
 									  numOfProviders, qosMeasurements, request.getRequestedService().getMetadataRequirements(), gatewayIsMandatory);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public GSDMultiPollResponseDTO doMultiGSDPoll(final GSDMultiPollRequestDTO request) { 
+		logger.debug("doMultiGSDPoll started...");
+		
+		validateMultiGSDPollRequestDTO(request);
+		
+		final List<String> providedServiceDefinitions = new ArrayList<>();
+		
+		// Querying Service Registry core system
+		final ServiceQueryResultListDTO srQueryResult = gatekeeperDriver.sendServiceRegistryMultiQuery(new ServiceQueryFormListDTO(request.getRequestedServices()));
+		
+		//TODO: maybe make specific auth endpoint for this
+		for (int i = 0; i < srQueryResult.getResults().size(); ++i) {
+			final ServiceQueryResultDTO resultDTO = srQueryResult.getResults().get(i);
+			
+			if (resultDTO.getServiceQueryData().isEmpty()) {
+				// no providers => skip
+				continue;
+			}
+			
+			final ServiceQueryFormDTO queryFormDTO = request.getRequestedServices().get(i);
+			
+			// Querying Authorization core system
+			final Map<Long,List<Long>> authorizedProviderIdsWithInterfaceIdList = gatekeeperDriver.sendInterCloudAuthorizationCheckQuery(resultDTO.getServiceQueryData(), request.getRequesterCloud(), queryFormDTO.getServiceDefinitionRequirement());
+
+			if (!authorizedProviderIdsWithInterfaceIdList.isEmpty()) {
+				providedServiceDefinitions.add(queryFormDTO.getServiceDefinitionRequirement());
+			}
+		}
+		
+		final Cloud ownCloud = commonDBService.getOwnCloud(true); // gatekeeper works only secure mode
+		
+		return new GSDMultiPollResponseDTO(DTOConverter.convertCloudToCloudResponseDTO(ownCloud), providedServiceDefinitions);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -356,8 +453,9 @@ public class GatekeeperService {
 																							 .preferredProviders(preferredProviders)
 																							 .build();
 		if (gatewayIsMandatory) {
-			// changing the requesterSystem for the sake of proper token generation
+			// changing the requesterSystem and requesterCloud for the sake of proper token generation
 			orchestrationForm.getRequesterSystem().setSystemName(CoreSystem.GATEWAY.name().toLowerCase());
+			orchestrationForm.setRequesterCloud(null); // means own cloud
 		}
 		
 		OrchestrationResponseDTO orchestrationResponse = gatekeeperDriver.queryOrchestrator(orchestrationForm);
@@ -594,13 +692,56 @@ public class GatekeeperService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	private void validateMultiGSDPollRequestDTO(final GSDMultiPollRequestDTO gsdPollRequest) {
+		logger.debug("validateMultiGSDPollRequestDTO started...");
+		
+		if (gsdPollRequest == null) {
+			throw new InvalidParameterException("GSDMultiPollRequestDTO is null");
+		}
+		
+		if (gatewayIsMandatory && !gsdPollRequest.isGatewayIsPresent()) {
+			throw new InvalidParameterException("Requester cloud must have gateway available");
+		}
+		
+		if (Utilities.isEmpty(gsdPollRequest.getRequestedServices())) {
+			throw new InvalidParameterException("RequestedServices list is null or empty");
+		}
+		
+		for (final ServiceQueryFormDTO reqService : gsdPollRequest.getRequestedServices()) {
+			if (Utilities.isEmpty(reqService.getServiceDefinitionRequirement())) {
+				throw new InvalidParameterException("serviceDefinitionRequirement is empty");
+			}
+		}
+		
+		if (gsdPollRequest.getRequesterCloud() == null) {
+			throw new InvalidParameterException("RequesterCloud is empty");
+		}
+		
+		final boolean operatorIsEmpty = Utilities.isEmpty(gsdPollRequest.getRequesterCloud().getOperator());
+		final boolean nameIsEmpty = Utilities.isEmpty(gsdPollRequest.getRequesterCloud().getName());
+		
+		if (operatorIsEmpty || nameIsEmpty) {
+			String exceptionMsg = "GSDMultiPollRequestDTO.CloudRequestDTO is invalid due to the following reasons:";
+			exceptionMsg = operatorIsEmpty ? exceptionMsg + " operator is empty," : exceptionMsg;
+			exceptionMsg = nameIsEmpty ? exceptionMsg + " name is empty," : exceptionMsg;
+			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() - 1);
+			
+			throw new InvalidParameterException(exceptionMsg);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	private List<Cloud> getCloudsByCloudRequestDTOs(final List<CloudRequestDTO> cloudDTOs) {
 		logger.debug("getCloudsByCloudRequestDTOs started...");
 		
 		final List<Cloud> clouds = new ArrayList<>();
 		for (final CloudRequestDTO dto : cloudDTOs) {
-			final Cloud cloud = gatekeeperDBService.getCloudByOperatorAndName(dto.getOperator(), dto.getName());
-			clouds.add(cloud);
+			try {
+				final Cloud cloud = gatekeeperDBService.getCloudByOperatorAndName(dto.getOperator(), dto.getName());
+				clouds.add(cloud);
+			} catch (final InvalidParameterException ex) { // ignore non existent clouds
+				logger.debug(ex.getMessage(), ex);
+			}
 		}
 		
 		return clouds;

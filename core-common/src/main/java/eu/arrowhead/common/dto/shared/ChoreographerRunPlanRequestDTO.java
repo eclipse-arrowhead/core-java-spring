@@ -23,12 +23,16 @@ import eu.arrowhead.common.CommonConstants;
 
 public class ChoreographerRunPlanRequestDTO implements Serializable {
 
+
 	//=================================================================================================
     // members
 
-	private static final long serialVersionUID = -5518857166418082795L;
+	private static final long serialVersionUID = -6719675498560986076L;
 	
     private Long planId;
+    
+    private boolean allowInterCloud = false; // if true, then providers (for steps and for executor's dependencies) can come from other clouds, too
+    private boolean chooseOptimalExecutor = false; // if true, executor selection tries to minimalize inter-cloud connections (but executor selection takes longer)
     
     // notify URI parts
     private String notifyProtocol = CommonConstants.HTTP; // http or https
@@ -41,6 +45,8 @@ public class ChoreographerRunPlanRequestDTO implements Serializable {
 
     //-------------------------------------------------------------------------------------------------
     public Long getPlanId() { return planId; }
+    public boolean isAllowInterCloud() { return allowInterCloud; }
+    public boolean getChooseOptimalExecutor() { return chooseOptimalExecutor; }
     public String getNotifyProtocol() { return notifyProtocol; }
 	public String getNotifyAddress() { return notifyAddress; }
 	public int getNotifyPort() { return notifyPort; }
@@ -48,6 +54,8 @@ public class ChoreographerRunPlanRequestDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
     public void setPlanId(final Long planId) { this.planId = planId; }
+    public void setAllowInterCloud(final boolean allowInterCloud) { this.allowInterCloud = allowInterCloud; }
+    public void setChooseOptimalExecutor(final boolean chooseOptimalExecutor) { this.chooseOptimalExecutor = chooseOptimalExecutor; }
     public void setNotifyProtocol(final String notifyProtocol) { this.notifyProtocol = notifyProtocol; }
     public void setNotifyAddress(final String notifyAddress) { this.notifyAddress = notifyAddress; }
     public void setNotifyPort(final int notifyPort) { this.notifyPort = notifyPort; }

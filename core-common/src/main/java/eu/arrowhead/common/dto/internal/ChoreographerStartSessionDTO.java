@@ -24,11 +24,13 @@ public class ChoreographerStartSessionDTO implements Serializable {
     //=================================================================================================
     // members
 
-    private static final long serialVersionUID = 205131759149025379L;
-    
-    private long sessionId;
+	private static final long serialVersionUID = 4044368668529290739L;
+	
+	private long sessionId;
     private long planId;
-
+    private boolean allowInterCloud;
+    private boolean chooseOptimalExecutor;
+ 
     //=================================================================================================
     // methods
 
@@ -36,18 +38,24 @@ public class ChoreographerStartSessionDTO implements Serializable {
     public ChoreographerStartSessionDTO() {}
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerStartSessionDTO(final long sessionId, final long planId) {
+    public ChoreographerStartSessionDTO(final long sessionId, final long planId, final boolean allowIntercloud, final boolean chooseOptimalExecutor) {
         this.sessionId = sessionId;
         this.planId = planId;
+        this.allowInterCloud = allowIntercloud;
+        this.chooseOptimalExecutor = chooseOptimalExecutor;
     }
 
     //-------------------------------------------------------------------------------------------------
     public long getSessionId() { return sessionId; }
     public long getPlanId() { return planId; }
+    public boolean isAllowInterCloud() { return allowInterCloud; }
+    public boolean getChooseOptimalExecutor() { return chooseOptimalExecutor; }
 
     //-------------------------------------------------------------------------------------------------
     public void setSessionId(final long sessionId) { this.sessionId = sessionId; }
     public void setPlanId(final long planId) { this.planId = planId; }
+    public void setAllowInterCloud(final boolean allowInterCloud) { this.allowInterCloud = allowInterCloud; }
+    public void setChooseOptimalExecutor(final boolean chooseOptimalExecutor) { this.chooseOptimalExecutor = chooseOptimalExecutor; }
     
 	//-------------------------------------------------------------------------------------------------
 	@Override

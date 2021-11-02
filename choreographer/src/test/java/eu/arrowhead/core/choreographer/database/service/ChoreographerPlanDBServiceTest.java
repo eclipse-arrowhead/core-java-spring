@@ -54,6 +54,7 @@ import eu.arrowhead.common.dto.shared.ChoreographerActionRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanListResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerStepRequestDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -769,21 +770,21 @@ public class ChoreographerPlanDBServiceTest {
 		step1.setQuantity(2);
 		step1.setStaticParameters(Map.of("key", "value"));
 		step1.setNextStepNames(List.of("step2"));
-		step1.setServiceRequirement(new ServiceQueryFormDTO.Builder("service1").version(1, 2).build());
+		step1.setServiceRequirement(new ChoreographerServiceQueryFormDTO(new ServiceQueryFormDTO.Builder("service1").version(1, 2).build(), false));
 		
 		final ChoreographerStepRequestDTO step2 = new ChoreographerStepRequestDTO();
 		step2.setName("step2");
 		step2.setQuantity(1);
 		step2.setStaticParameters(Map.of("key2", "value2"));
 		step2.setNextStepNames(List.of());
-		step2.setServiceRequirement(new ServiceQueryFormDTO.Builder("service2").version(3).build());
+		step2.setServiceRequirement(new ChoreographerServiceQueryFormDTO(new ServiceQueryFormDTO.Builder("service2").version(3).build(), false));
 		
 		final ChoreographerStepRequestDTO step3 = new ChoreographerStepRequestDTO();
 		step3.setName("step3");
 		step3.setQuantity(1);
 		step3.setStaticParameters(Map.of("key3", "value3"));
 		step3.setNextStepNames(List.of());
-		step3.setServiceRequirement(new ServiceQueryFormDTO.Builder("service3").version(1, 10).build());
+		step3.setServiceRequirement(new ChoreographerServiceQueryFormDTO(new ServiceQueryFormDTO.Builder("service3").version(1, 10).build(), false));
 
 		final ChoreographerActionRequestDTO action1 = new ChoreographerActionRequestDTO();
 		action1.setName("action1");

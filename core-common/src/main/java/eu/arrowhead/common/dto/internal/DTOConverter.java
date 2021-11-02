@@ -74,6 +74,7 @@ import eu.arrowhead.common.dto.shared.ChoreographerActionResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerSessionListResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerSessionResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerSessionStepListResponseDTO;
@@ -1012,6 +1013,7 @@ public class DTOConverter {
                                                 step.getMaxVersion(),
                                                 Utilities.text2Map(step.getStaticParameters()),
                                                 step.getQuantity(),
+                                                Utilities.fromJson(step.getSrTemplate(), ChoreographerServiceQueryFormDTO.class),
                                                 collectNextStepNamesFromStep(step.getNextStepConnections()),
                                                 Utilities.convertZonedDateTimeToUTCString(step.getCreatedAt()),
                                                 Utilities.convertZonedDateTimeToUTCString(step.getUpdatedAt()));

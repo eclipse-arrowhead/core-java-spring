@@ -27,7 +27,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoResponseDTO;
-import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerServiceQueryFormDTO;
 
 @RunWith(SpringRunner.class)
 public class MinimalDependencyExecutorPrioritizationStrategyTest {
@@ -38,7 +38,7 @@ public class MinimalDependencyExecutorPrioritizationStrategyTest {
 	private MinimalDependencyExecutorPrioritizationStrategy strategy = new MinimalDependencyExecutorPrioritizationStrategy();
 	
 	//=================================================================================================
-	// members
+	// methods
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -74,7 +74,7 @@ public class MinimalDependencyExecutorPrioritizationStrategyTest {
 		final ChoreographerExecutorServiceInfoResponseDTO serviceInfo = new ChoreographerExecutorServiceInfoResponseDTO();
 		serviceInfo.setDependencies(new ArrayList<>(numOfDependency));
 		for (int i = 0; i < numOfDependency; i++) {
-			serviceInfo.getDependencies().add(new ServiceQueryFormDTO());
+			serviceInfo.getDependencies().add(new ChoreographerServiceQueryFormDTO());
 		}
 		return serviceInfo;
 	}

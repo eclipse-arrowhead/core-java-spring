@@ -16,7 +16,6 @@ package eu.arrowhead.core.choreographer.executor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -32,16 +31,16 @@ import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
 import eu.arrowhead.common.database.entity.ChoreographerStep;
+import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.shared.ChoreographerExecutorServiceInfoResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
-import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
-import eu.arrowhead.common.dto.shared.ServiceQueryResultListDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerExecutorDBService;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerSessionDBService;
 import eu.arrowhead.core.choreographer.service.ChoreographerDriver;
 
 @Component
-public class ExecutorSelector {
+public class ExecutorSelector { 
 	
 	//=================================================================================================
 	// methods
@@ -58,24 +57,28 @@ public class ExecutorSelector {
 	@Autowired
 	private ExecutorPrioritizationStrategy prioritizationStrategy;
 	
+	@Autowired
+	private ExecutorMeasurementStrategy measurementStrategy;
+	
 	private static final Logger logger = LogManager.getLogger(ExecutorSelector.class);
 	
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerExecutor select(final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final Set<Long> exclusions) {
-		return selectAndInit(null, null, serviceDefinition, minVersion, maxVersion, exclusions, false).getExecutor();
+	public ExecutorData select(final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final Set<Long> exclusions, final boolean allowInterCloud) {
+		return selectAndInit(null, null, serviceDefinition, minVersion, maxVersion, exclusions, allowInterCloud, false, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ExecutorData selectAndInit(final long sessionId, final ChoreographerStep step, final Set<Long> exclusions, boolean init) {
-		return selectAndInit(sessionId, step.getId(), step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion(), exclusions, init);
+	public ExecutorData selectAndInit(final long sessionId, final ChoreographerStep step, final Set<Long> exclusions, final boolean allowInterCloud, final boolean chooseOptimal, final boolean init) {
+		return selectAndInit(sessionId, step.getId(), step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion(), exclusions, allowInterCloud, chooseOptimal, init);
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public ExecutorData selectAndInit(final Long sessionId, final Long stepId, final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final Set<Long> exclusions, final boolean init) {
-		//exclusions: when a ChoreographerSessionStep failed due to executor issue, then selection can be repeated but without that executor(s)
+	public ExecutorData selectAndInit(final Long sessionId, final Long stepId, final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final Set<Long> exclusions, final boolean allowInterCloud, final boolean chooseOptimal,
+									  final boolean init) { 
+		// exclusions: when a ChoreographerSessionStep failed due to executor issue, then selection can be repeated but without that executor(s)
 		logger.debug("selectAndInit started...");
 		Assert.isTrue(!Utilities.isEmpty(serviceDefinition), "serviceDefinition is empty");
 		if (init) {
@@ -96,7 +99,7 @@ public class ExecutorSelector {
 		potentials = filterOutExecutorsWithoutServiceInfos(potentials, executorServiceInfos);
 		potentials = prioritizationStrategy.prioritize(potentials, executorServiceInfos);
 		
-		return selectVerifyAndInitFirstAvailable(sessionId, stepId, potentials, executorServiceInfos, init);
+		return selectVerifyAndInitFirstAvailable(sessionId, stepId, potentials, executorServiceInfos, allowInterCloud, chooseOptimal, init);
 	}
 	
 	//=================================================================================================
@@ -113,7 +116,8 @@ public class ExecutorSelector {
 			if (!executor.isLocked() && !excudedIds.contains(executor.getId())) {
 				filtered.add(executor);
 			}
-		}			
+		}
+		
 		return filtered;		
 	}
 	
@@ -130,9 +134,11 @@ public class ExecutorSelector {
 				collected.put(executor.getId(), info);
 				
 			} catch (final Exception ex) {
+				logger.warn("Problem while querying service info for executor {}", executor.getName());
 				logger.debug(ex.getMessage());
 			}
 		}
+		
 		return collected;
 	}
 	
@@ -146,52 +152,99 @@ public class ExecutorSelector {
 			if (executorServiceInfos.containsKey(executor.getId())) {
 				filtered.add(executor);
 			}
-		}			
+		}
+		
 		return filtered;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private ExecutorData selectVerifyAndInitFirstAvailable(final Long sessionId, final Long stepId, final List<ChoreographerExecutor> potentials, final Map<Long,ChoreographerExecutorServiceInfoResponseDTO> executorServiceInfos,
-														   final boolean init) {
+														   final boolean allowInterCloud, final boolean chooseOptimal, final boolean init) {
 		logger.debug("selectVerifyAndInitFirstAvailable started...");
 		
 		if (potentials.isEmpty()) {
 			return null;
 		}
 		
+		ExecutorData bestCandidate = null;
+		int bestCloudMeasurement = Integer.MAX_VALUE;
 		for (final ChoreographerExecutor potential : potentials) {
-			final Optional<ChoreographerExecutor> optional = executorDBService.getExecutorOptionalById(potential.getId()); //refreshing from DB
+			final Optional<ChoreographerExecutor> optional = executorDBService.getExecutorOptionalById(potential.getId()); // refreshing from DB
 			if (optional.isEmpty()) {
 				continue;
 			}
+			
 			final ChoreographerExecutor executor = optional.get();
 			if (!executor.isLocked()) {
-				if (verifyReliedServices(executorServiceInfos.get(executor.getId()))) {
-					if (init) {
-						sessionDBService.registerSessionStep(sessionId, stepId, executor.getId());					
+				final SystemRequestDTO executorSystem = DTOConverter.convertSystemResponseDTOToSystemRequestDTO(driver.queryServiceRegistryBySystem(executor.getName(),
+						  																															executor.getAddress(),
+						  																															executor.getPort()));			
+				
+				final Map<Integer,List<String>> reliedServicesResponse = verifyReliedServices(executor.getName(), executorServiceInfos.get(executor.getId()), allowInterCloud);
+				if (reliedServicesResponse != null) { // means executor is verified
+					final boolean useOtherClouds = isExecutorUseOtherClouds(reliedServicesResponse);
+					final ExecutorData executorData = new ExecutorData(executor, executorSystem, executorServiceInfos.get(executor.getId()).getDependencies(), useOtherClouds);
+					
+					if (!chooseOptimal || !useOtherClouds) { // local executor is always the most optimal
+						if (init) {
+							sessionDBService.registerSessionStep(sessionId, stepId, executor.getId());					
+						}
+						
+						return executorData;
 					}
 					
-					return new ExecutorData(executor, executorServiceInfos.get(executor.getId()).getDependencies());
+					final int cloudMeasurement = measurementStrategy.getMeasurement(reliedServicesResponse);
+					if (cloudMeasurement < bestCloudMeasurement) {
+						bestCandidate = executorData;
+						bestCloudMeasurement = cloudMeasurement;
+					}
 				}
 			}
 		}
 		
-		return null;
+		if (chooseOptimal && bestCandidate != null && init) {
+			sessionDBService.registerSessionStep(sessionId, stepId, bestCandidate.getExecutor().getId());					
+		}
+		
+		return bestCandidate;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private boolean verifyReliedServices(final ChoreographerExecutorServiceInfoResponseDTO serviceInfo) {
-		logger.debug("verifyExecutorSR started...");
+	private Map<Integer,List<String>> verifyReliedServices(final String executorName, final ChoreographerExecutorServiceInfoResponseDTO serviceInfo, final boolean allowInterCloud) {
+		logger.debug("verifyReliedServices started...");
 		
-		final Set<String> availableReliedServices = new HashSet<>(serviceInfo.getDependencies().size());
-		final ServiceQueryResultListDTO response = driver.multiQueryServiceRegistry(new ServiceQueryFormListDTO(serviceInfo.getDependencies()));
-		for (final ServiceQueryResultDTO result : response.getResults()) {
-			if (!result.getServiceQueryData().isEmpty()) {
-				final String serviceDefinition = result.getServiceQueryData().get(0).getServiceDefinition().getServiceDefinition();
-				availableReliedServices.add(serviceDefinition);
+		if (Utilities.isEmpty(serviceInfo.getDependencies())) { // no dependencies
+			return Map.of();
+		}
+		
+		try {
+			final Map<Integer,List<String>> response = driver.searchForServices(new ServiceQueryFormListDTO(serviceInfo.getDependencies()), allowInterCloud);
+			
+			for (final List<String> cloudList : response.values()) {
+				if (cloudList.isEmpty()) {
+					return null;
+				}
+			}
+			
+			return response;
+		} catch (final Exception ex) {
+			logger.warn("Problem while verifying service info for executor {}", executorName);
+			logger.debug(ex.getMessage());
+			
+			return null;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private boolean isExecutorUseOtherClouds(final Map<Integer,List<String>> serviceData) {
+		logger.debug("isExecutorUseOtherClouds started...");
+	
+		for (final List<String> cloudList : serviceData.values()) {
+			if (!ChoreographerDriver.OWN_CLOUD_MARKER.equals(cloudList.get(0))) {
+				return true;
 			}
 		}
 		
-		return availableReliedServices.size() == serviceInfo.getDependencies().size();
+		return false;
 	}
 }
