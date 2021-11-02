@@ -28,7 +28,7 @@ public class ChoreographerStepResponseDTO implements Serializable {
 	//=================================================================================================
 	// members
 	
-	private static final long serialVersionUID = -3759791369622905848L;
+	private static final long serialVersionUID = 1643826656433118530L;
 	
 	private long id;
     private String name;
@@ -37,6 +37,7 @@ public class ChoreographerStepResponseDTO implements Serializable {
     private Integer maxVersion;
     private Map<String,String> staticParameters;
     private int quantity;
+    private ChoreographerServiceQueryFormDTO srTemplate;
     private List<String> nextStepNames;
     private String createdAt;
     private String updatedAt;
@@ -49,7 +50,7 @@ public class ChoreographerStepResponseDTO implements Serializable {
 
     //-------------------------------------------------------------------------------------------------
     public ChoreographerStepResponseDTO(final long id, final String name, final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final Map<String, String> staticParameters, final int quantity,
-    									final List<String> nextStepNames, final String createdAt, final String updatedAt) {
+    									final ChoreographerServiceQueryFormDTO srTemplate, final List<String> nextStepNames, final String createdAt, final String updatedAt) {
         this.id = id;
         this.name = name;
         this.serviceDefinition = serviceDefinition;
@@ -57,6 +58,7 @@ public class ChoreographerStepResponseDTO implements Serializable {
         this.maxVersion = maxVersion;
         this.staticParameters = staticParameters;
         this.quantity = quantity;
+        this.srTemplate = srTemplate;
         this.nextStepNames = nextStepNames;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -70,6 +72,7 @@ public class ChoreographerStepResponseDTO implements Serializable {
 	public Integer getMaxVersion() { return maxVersion; }
 	public Map<String,String> getStaticParameters() { return staticParameters; }
     public int getQuantity() { return quantity; }
+    public ChoreographerServiceQueryFormDTO getSrTemplate() { return srTemplate; }
     public List<String> getNextStepNames() { return nextStepNames; }
     public String getCreatedAt() { return createdAt; }
 	public String getUpdatedAt() { return updatedAt; }
@@ -80,6 +83,7 @@ public class ChoreographerStepResponseDTO implements Serializable {
     public void setServiceDefinition(final String serviceDefinition) { this.serviceDefinition = serviceDefinition; }
     public void setMinVersion(final Integer minVersion) { this.minVersion = minVersion; }
     public void setMaxVersion(final Integer maxVersion) { this.maxVersion = maxVersion; }
+    public void setSrTemplate(final ChoreographerServiceQueryFormDTO srTemplate) { this.srTemplate = srTemplate; }
     public void setNextStepNames(final List<String> nextStepNames) { this.nextStepNames = nextStepNames; }
     public void setStaticParameters(final Map<String,String> staticParameters) { this.staticParameters = staticParameters; }
     public void setQuantity(final int quantity) { this.quantity = quantity; }

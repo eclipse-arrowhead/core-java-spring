@@ -28,13 +28,14 @@ public class ChoreographerRunPlanResponseDTO implements Serializable {
 	//=================================================================================================
 	// members
 	
-	private static final long serialVersionUID = -9033278230529407150L;
-	
+	private static final long serialVersionUID = -5620316935687475776L;
+
 	private Long planId;
 	private Long sessionId;
 	
 	private ChoreographerSessionStatus status;
 	private List<String> errorMessages = new ArrayList<>();
+	private boolean needInterCloud = false; 
 	
 	//=================================================================================================
 	// methods
@@ -43,23 +44,24 @@ public class ChoreographerRunPlanResponseDTO implements Serializable {
 	public ChoreographerRunPlanResponseDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerRunPlanResponseDTO(final Long planId, final Long sessionId, final ChoreographerSessionStatus status, final List<String> errorMessages) {
+	public ChoreographerRunPlanResponseDTO(final Long planId, final Long sessionId, final ChoreographerSessionStatus status, final List<String> errorMessages, final boolean needInterCloud) {
 		this.planId = planId;
 		this.sessionId = sessionId;
 		this.status = status;
+		this.needInterCloud = needInterCloud;
 		if (errorMessages != null) {
 			this.errorMessages.addAll(errorMessages);
 		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerRunPlanResponseDTO(final long planId, final long sessionId) {
-		this(planId, sessionId, ChoreographerSessionStatus.INITIATED, null);
+	public ChoreographerRunPlanResponseDTO(final long planId, final long sessionId, final boolean needInterCloud) {
+		this(planId, sessionId, ChoreographerSessionStatus.INITIATED, null, needInterCloud);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerRunPlanResponseDTO(final Long planId, final List<String> errorMessages) {
-		this(planId, null, ChoreographerSessionStatus.ABORTED, errorMessages);
+	public ChoreographerRunPlanResponseDTO(final Long planId, final List<String> errorMessages, final boolean needInterCloud) {
+		this(planId, null, ChoreographerSessionStatus.ABORTED, errorMessages, needInterCloud);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -67,12 +69,14 @@ public class ChoreographerRunPlanResponseDTO implements Serializable {
 	public Long getSessionId() { return sessionId; }
 	public ChoreographerSessionStatus getStatus() { return status; }
 	public List<String> getErrorMessages() { return errorMessages; }
+	public boolean getNeedInterCloud() { return needInterCloud; }
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setPlanId(final Long planId) { this.planId = planId; }
 	public void setSessionId(final Long sessionId) { this.sessionId = sessionId; }
 	public void setStatus(final ChoreographerSessionStatus status) { this.status = status; }
 	public void setErrorMessages(final List<String> errorMessages) { this.errorMessages = errorMessages; }
+	public void setNeedInterCloud(final boolean needInterCloud) { this.needInterCloud = needInterCloud; }
 	
 	//-------------------------------------------------------------------------------------------------
 	@Override

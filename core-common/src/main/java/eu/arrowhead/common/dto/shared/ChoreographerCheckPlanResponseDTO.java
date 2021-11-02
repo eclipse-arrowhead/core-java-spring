@@ -26,10 +26,11 @@ public class ChoreographerCheckPlanResponseDTO implements Serializable {
 	//=================================================================================================
 	// members
 	
-	private static final long serialVersionUID = -8042373287915374470L;
+	private static final long serialVersionUID = -6599506456874073377L;
 	
 	private long planId;
 	private List<String> errorMessages = new ArrayList<>();
+	private boolean needInterCloud;
 	
 	//=================================================================================================
 	// methods
@@ -38,8 +39,9 @@ public class ChoreographerCheckPlanResponseDTO implements Serializable {
 	public ChoreographerCheckPlanResponseDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerCheckPlanResponseDTO(final long planId, final List<String> errorMessages) {
+	public ChoreographerCheckPlanResponseDTO(final long planId, final List<String> errorMessages, final boolean needInterCloud) {
 		this.planId = planId;
+		this.needInterCloud = needInterCloud;
 		if (errorMessages != null) {
 			this.errorMessages.addAll(errorMessages);
 		}
@@ -48,10 +50,12 @@ public class ChoreographerCheckPlanResponseDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public long getPlanId() { return planId; }
 	public List<String> getErrorMessages() { return errorMessages; }
+	public boolean getNeedInterCloud() { return needInterCloud; }
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setPlanId(final long planId) { this.planId = planId; }
 	public void setErrorMessages(final List<String> errorMessages) { this.errorMessages = errorMessages; }
+	public void setNeedInterCloud(final boolean needInterCloud) { this.needInterCloud = needInterCloud; }
 	
 	//-------------------------------------------------------------------------------------------------
 	@Override

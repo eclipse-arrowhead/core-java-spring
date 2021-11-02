@@ -18,7 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
-import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 
 public class ExecutorData {
 	
@@ -26,15 +27,23 @@ public class ExecutorData {
 	// members
 	
 	private final ChoreographerExecutor executor;
-	private final List<ServiceQueryFormDTO> dependencyForms = new ArrayList<>();
+	private final SystemRequestDTO executorSystem;
+	private final List<ChoreographerServiceQueryFormDTO> dependencyForms = new ArrayList<>();
+	private final boolean useOtherClouds;
 	
 	//-------------------------------------------------------------------------------------------------
-	public ExecutorData(final ChoreographerExecutor executor, final List<ServiceQueryFormDTO> dependencyForms) {
+	public ExecutorData(final ChoreographerExecutor executor, final SystemRequestDTO executorSystem, final List<ChoreographerServiceQueryFormDTO> dependencyForms, final boolean useOtherClouds) {
 		this.executor = executor;
-		this.dependencyForms.addAll(dependencyForms);
+		this.executorSystem = executorSystem;
+		if (dependencyForms != null) {
+			this.dependencyForms.addAll(dependencyForms);
+		}
+		this.useOtherClouds = useOtherClouds;
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	public ChoreographerExecutor getExecutor() { return executor; }
-	public List<ServiceQueryFormDTO> getDependencyForms() { return dependencyForms; }
+	public SystemRequestDTO getExecutorSystem() { return executorSystem; }
+	public List<ChoreographerServiceQueryFormDTO> getDependencyForms() { return dependencyForms; }
+	public boolean getUseOtherClouds() { return useOtherClouds; }
 }

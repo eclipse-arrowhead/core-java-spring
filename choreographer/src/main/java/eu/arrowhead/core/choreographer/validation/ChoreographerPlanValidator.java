@@ -28,8 +28,8 @@ import org.springframework.stereotype.Service;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.ChoreographerActionRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanRequestDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerStepRequestDTO;
-import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.choreographer.graph.StepGraph;
 import eu.arrowhead.core.choreographer.graph.StepGraphUtils;
@@ -55,7 +55,7 @@ public class ChoreographerPlanValidator {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerPlanRequestDTO validatePlan(final ChoreographerPlanRequestDTO request, final String origin, final boolean normalizeNames) {
+	public ChoreographerPlanRequestDTO validatePlan(final ChoreographerPlanRequestDTO request, final String origin, final boolean normalizeNames) { 
 		logger.debug("validatePlan started...");
 		
 		return validatePlanImpl(request, origin, normalizeNames);
@@ -289,27 +289,19 @@ public class ChoreographerPlanValidator {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private ServiceQueryFormDTO handleServiceRequirement(final ServiceQueryFormDTO serviceRequirement, final String origin) {
+	private ChoreographerServiceQueryFormDTO handleServiceRequirement(final ChoreographerServiceQueryFormDTO serviceRequirement, final String origin) {
 		logger.debug("handleServiceRequirement started...");
 		
 		if (serviceRequirement == null) {
 			throw new InvalidParameterException("Service requirement is null.", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		final ServiceQueryFormDTO result = new ServiceQueryFormDTO();
+		final ChoreographerServiceQueryFormDTO result = new ChoreographerServiceQueryFormDTO(serviceRequirement, serviceRequirement.isLocalCloudOnly());
 		result.setServiceDefinitionRequirement(handleName(serviceRequirement.getServiceDefinitionRequirement(), "Service definition is null or blank.", origin, true));
 		
 		if (serviceRequirement.getMinVersionRequirement() != null && serviceRequirement.getMaxVersionRequirement() != null && serviceRequirement.getMinVersionRequirement() > serviceRequirement.getMaxVersionRequirement()) {
 			throw new InvalidParameterException("Minimum version cannot be greater than maximum version.", HttpStatus.SC_BAD_REQUEST, origin);
 		}
-		
-		result.setVersionRequirement(serviceRequirement.getVersionRequirement());
-		result.setMinVersionRequirement(serviceRequirement.getMinVersionRequirement());
-		result.setMaxVersionRequirement(serviceRequirement.getMaxVersionRequirement());
-		result.setInterfaceRequirements(serviceRequirement.getInterfaceRequirements());
-		result.setSecurityRequirements(serviceRequirement.getSecurityRequirements());
-		result.setMetadataRequirements(serviceRequirement.getMetadataRequirements());
-		result.setPingProviders(serviceRequirement.getPingProviders());
 		
 		return result;
 	}

@@ -28,7 +28,7 @@ public class ServiceQueryFormListDTO implements Serializable {
 	
 	private static final long serialVersionUID = 8818224363564234620L;
 	
-	private List<ServiceQueryFormDTO> forms = new ArrayList<>();
+	private List<? extends ServiceQueryFormDTO> forms = new ArrayList<>();
 	
 	//=================================================================================================
 	// methods
@@ -37,17 +37,17 @@ public class ServiceQueryFormListDTO implements Serializable {
 	public ServiceQueryFormListDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ServiceQueryFormListDTO(final List<ServiceQueryFormDTO> forms) {
+	public ServiceQueryFormListDTO(final List<? extends ServiceQueryFormDTO> forms) {
 		if (forms != null) {
 			this.forms = forms;
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<? extends ServiceQueryFormDTO> getForms() { return forms; }
 
 	//-------------------------------------------------------------------------------------------------
-	public List<ServiceQueryFormDTO> getForms() { return forms; }
-
-	//-------------------------------------------------------------------------------------------------
-	public void setForms(final List<ServiceQueryFormDTO> forms) {
+	public void setForms(final List<? extends ServiceQueryFormDTO> forms) {
 		if (forms != null) {
 			this.forms = forms;
 		}

@@ -447,7 +447,7 @@ public class OrchestratorServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testDynamicOrchestrationRequestNull() {
-		testingObject.dynamicOrchestration(null);
+		testingObject.dynamicOrchestration(null, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -458,7 +458,7 @@ public class OrchestratorServiceTest {
 		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
 		request.setOrchestrationFlags(flags);
 		
-		testingObject.dynamicOrchestration(request);
+		testingObject.dynamicOrchestration(request, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -469,7 +469,7 @@ public class OrchestratorServiceTest {
 		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
 		request.setOrchestrationFlags(flags);
 		
-		testingObject.dynamicOrchestration(request);
+		testingObject.dynamicOrchestration(request, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -480,7 +480,7 @@ public class OrchestratorServiceTest {
 		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
 		request.setOrchestrationFlags(flags);
 		
-		testingObject.dynamicOrchestration(request);
+		testingObject.dynamicOrchestration(request, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -489,7 +489,7 @@ public class OrchestratorServiceTest {
 		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
 																					build();
 		
-		testingObject.dynamicOrchestration(request);
+		testingObject.dynamicOrchestration(request, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -499,7 +499,7 @@ public class OrchestratorServiceTest {
 																				    requestedService(new ServiceQueryFormDTO()).
 																					build();
 		
-		testingObject.dynamicOrchestration(request);
+		testingObject.dynamicOrchestration(request, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -511,7 +511,7 @@ public class OrchestratorServiceTest {
 																				    requestedService(serviceForm).
 																					build();
 		
-		testingObject.dynamicOrchestration(request);
+		testingObject.dynamicOrchestration(request, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -524,7 +524,7 @@ public class OrchestratorServiceTest {
 																				    preferredProviders(new PreferredProviderDataDTO()).
 																					build();
 		
-		testingObject.dynamicOrchestration(request);
+		testingObject.dynamicOrchestration(request, false);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -539,7 +539,7 @@ public class OrchestratorServiceTest {
 																				    preferredProviders(ppData).
 																					build();
 		
-		testingObject.dynamicOrchestration(request);
+		testingObject.dynamicOrchestration(request, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -556,7 +556,7 @@ public class OrchestratorServiceTest {
 																				    preferredProviders(ppData).
 																					build();
 		
-		testingObject.dynamicOrchestration(request);
+		testingObject.dynamicOrchestration(request, false);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -573,7 +573,7 @@ public class OrchestratorServiceTest {
 																				    preferredProviders(ppData).
 																					build();
 		
-		testingObject.dynamicOrchestration(request);
+		testingObject.dynamicOrchestration(request, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -591,7 +591,7 @@ public class OrchestratorServiceTest {
 																				    preferredProviders(ppData).
 																					build();
 		
-		testingObject.dynamicOrchestration(request);
+		testingObject.dynamicOrchestration(request, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -609,7 +609,7 @@ public class OrchestratorServiceTest {
 																				    preferredProviders(ppData).
 																					build();
 		
-		testingObject.dynamicOrchestration(request);
+		testingObject.dynamicOrchestration(request, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -632,7 +632,7 @@ public class OrchestratorServiceTest {
 																				    flag(Flag.ENABLE_INTER_CLOUD, true).
 																					build();
 		
-		testingObject.dynamicOrchestration(request);
+		testingObject.dynamicOrchestration(request, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -657,7 +657,7 @@ public class OrchestratorServiceTest {
 																				    flag(Flag.ENABLE_INTER_CLOUD, true).
 																					build();
 		
-		testingObject.dynamicOrchestration(request);
+		testingObject.dynamicOrchestration(request, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -682,7 +682,7 @@ public class OrchestratorServiceTest {
 																				    flag(Flag.ENABLE_INTER_CLOUD, true).
 																					build();
 		
-		testingObject.dynamicOrchestration(request);
+		testingObject.dynamicOrchestration(request, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -708,7 +708,7 @@ public class OrchestratorServiceTest {
 																				    flag(Flag.ENABLE_INTER_CLOUD, true).
 																					build();
 		
-		testingObject.dynamicOrchestration(request);
+		testingObject.dynamicOrchestration(request, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -729,7 +729,7 @@ public class OrchestratorServiceTest {
 		
 		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(new ServiceQueryResultDTO());
 		
-		final OrchestrationResponseDTO result = testingObject.dynamicOrchestration(request);
+		final OrchestrationResponseDTO result = testingObject.dynamicOrchestration(request, false);
 		
 		Assert.assertEquals(0, result.getResponse().size());
 	}
@@ -755,9 +755,45 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(List.of());
 		
-		final OrchestrationResponseDTO result = testingObject.dynamicOrchestration(request);
+		final OrchestrationResponseDTO result = testingObject.dynamicOrchestration(request, false);
 		
 		Assert.assertEquals(0, result.getResponse().size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDynamicOrchestrationAuthorizationSkipped() {
+		final ServiceQueryFormDTO serviceForm = new ServiceQueryFormDTO.Builder("service").
+																  		build();
+		final SystemRequestDTO provider = new SystemRequestDTO();
+		provider.setSystemName("provider");
+		provider.setAddress("localhost");
+		provider.setPort(1234);
+		final PreferredProviderDataDTO ppData = new PreferredProviderDataDTO();
+		ppData.setProviderSystem(provider);
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
+																				    requestedService(serviceForm).
+																				    preferredProviders(ppData).
+																					build();
+		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
+		final ServiceInterfaceResponseDTO serviceInterfaceResponseDTO = new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null);
+		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null, null));
+		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
+		srEntry.setInterfaces(List.of(serviceInterfaceResponseDTO));
+		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
+		srResult.getServiceQueryData().add(srEntry);
+		
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(qosManager.filterReservedProviders(anyList(), any(SystemRequestDTO.class))).thenReturn(List.of());
+		
+		final OrchestrationResponseDTO result = testingObject.dynamicOrchestration(request, true);
+		
+		Assert.assertEquals(0, result.getResponse().size());
+		
+		verify(orchestratorDriver, times(1)).queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean());
+		verify(orchestratorDriver, never()).queryAuthorization(any(SystemRequestDTO.class), anyList());
+		verify(qosManager, times(1)).filterReservedProviders(anyList(), any(SystemRequestDTO.class));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -784,7 +820,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		
-		final OrchestrationResponseDTO result = testingObject.dynamicOrchestration(request);
+		final OrchestrationResponseDTO result = testingObject.dynamicOrchestration(request, false);
 		
 		Assert.assertEquals(0, result.getResponse().size());
 	}
@@ -824,7 +860,7 @@ public class OrchestratorServiceTest {
 		when(intraCloudProviderMatchmaker.doMatchmaking(any(), any(IntraCloudProviderMatchmakingParameters.class))).thenReturn(convertedSrEntry2);
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
-		final OrchestrationResponseDTO result = testingObject.dynamicOrchestration(request);
+		final OrchestrationResponseDTO result = testingObject.dynamicOrchestration(request, false);
 		
 		Assert.assertEquals(1, result.getResponse().size());
 		Assert.assertEquals(2, result.getResponse().get(0).getProvider().getId());
@@ -860,7 +896,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
-		final OrchestrationResponseDTO result = testingObject.dynamicOrchestration(request);
+		final OrchestrationResponseDTO result = testingObject.dynamicOrchestration(request, false);
 		
 		Assert.assertEquals(2, result.getResponse().size());
 		Assert.assertEquals(1, result.getResponse().get(0).getProvider().getId());
@@ -893,7 +929,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
-		final OrchestrationResponseDTO result = testingObject.dynamicOrchestration(request);
+		final OrchestrationResponseDTO result = testingObject.dynamicOrchestration(request, false);
 		
 		Assert.assertEquals(1, result.getResponse().size());
 		Assert.assertEquals(1, result.getResponse().get(0).getProvider().getId());

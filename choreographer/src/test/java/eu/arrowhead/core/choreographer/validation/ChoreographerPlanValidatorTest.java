@@ -14,6 +14,13 @@
 
 package eu.arrowhead.core.choreographer.validation;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,18 +33,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.dto.shared.ChoreographerActionRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanRequestDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerStepRequestDTO;
-import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.choreographer.graph.StepGraph;
 import eu.arrowhead.core.choreographer.graph.StepGraphUtils;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class ChoreographerPlanValidatorTest {
@@ -397,7 +397,7 @@ public class ChoreographerPlanValidatorTest {
 			firstStepNames.add("step");
 			final ChoreographerStepRequestDTO step = new ChoreographerStepRequestDTO();
 			step.setName("step");
-			step.setServiceRequirement(new ServiceQueryFormDTO());
+			step.setServiceRequirement(new ChoreographerServiceQueryFormDTO());
 			final List<ChoreographerStepRequestDTO> steps = new ArrayList<>(1);
 			steps.add(step);
 			actions.add(new ChoreographerActionRequestDTO(" action", null, firstStepNames , steps));
@@ -417,7 +417,7 @@ public class ChoreographerPlanValidatorTest {
 			final List<ChoreographerActionRequestDTO> actions = new ArrayList<>(1);
 			final List<String> firstStepNames = new ArrayList<>(1);
 			firstStepNames.add("step");
-			final ServiceQueryFormDTO serviceRequirement = new ServiceQueryFormDTO();
+			final ChoreographerServiceQueryFormDTO serviceRequirement = new ChoreographerServiceQueryFormDTO();
 			serviceRequirement.setServiceDefinitionRequirement(" ");
 			final ChoreographerStepRequestDTO step = new ChoreographerStepRequestDTO();
 			step.setName("step");
@@ -441,7 +441,7 @@ public class ChoreographerPlanValidatorTest {
 			final List<ChoreographerActionRequestDTO> actions = new ArrayList<>(1);
 			final List<String> firstStepNames = new ArrayList<>(1);
 			firstStepNames.add("step");
-			final ServiceQueryFormDTO serviceRequirement = new ServiceQueryFormDTO();
+			final ChoreographerServiceQueryFormDTO serviceRequirement = new ChoreographerServiceQueryFormDTO();
 			serviceRequirement.setServiceDefinitionRequirement("service");
 			serviceRequirement.setMinVersionRequirement(10);
 			serviceRequirement.setMaxVersionRequirement(8);
@@ -467,7 +467,7 @@ public class ChoreographerPlanValidatorTest {
 			final List<ChoreographerActionRequestDTO> actions = new ArrayList<>(1);
 			final List<String> firstStepNames = new ArrayList<>(1);
 			firstStepNames.add("firstStep");
-			final ServiceQueryFormDTO serviceRequirement = new ServiceQueryFormDTO();
+			final ChoreographerServiceQueryFormDTO serviceRequirement = new ChoreographerServiceQueryFormDTO();
 			serviceRequirement.setServiceDefinitionRequirement("service");
 			final ChoreographerStepRequestDTO step = new ChoreographerStepRequestDTO();
 			step.setName("step");
@@ -491,7 +491,7 @@ public class ChoreographerPlanValidatorTest {
 			final List<ChoreographerActionRequestDTO> actions = new ArrayList<>(1);
 			final List<String> firstStepNames = new ArrayList<>(1);
 			firstStepNames.add("step");
-			final ServiceQueryFormDTO serviceRequirement = new ServiceQueryFormDTO();
+			final ChoreographerServiceQueryFormDTO serviceRequirement = new ChoreographerServiceQueryFormDTO();
 			serviceRequirement.setServiceDefinitionRequirement("service");
 			final ChoreographerStepRequestDTO step = new ChoreographerStepRequestDTO();
 			step.setName("step");
@@ -519,7 +519,7 @@ public class ChoreographerPlanValidatorTest {
 			final List<ChoreographerActionRequestDTO> actions = new ArrayList<>(1);
 			final List<String> firstStepNames = new ArrayList<>(1);
 			firstStepNames.add("step");
-			final ServiceQueryFormDTO serviceRequirement = new ServiceQueryFormDTO();
+			final ChoreographerServiceQueryFormDTO serviceRequirement = new ChoreographerServiceQueryFormDTO();
 			serviceRequirement.setServiceDefinitionRequirement("service");
 			final ChoreographerStepRequestDTO step = new ChoreographerStepRequestDTO();
 			step.setName("step");
@@ -544,7 +544,7 @@ public class ChoreographerPlanValidatorTest {
 			final List<ChoreographerActionRequestDTO> actions = new ArrayList<>(1);
 			final List<String> firstStepNames = new ArrayList<>(1);
 			firstStepNames.add("step");
-			final ServiceQueryFormDTO serviceRequirement = new ServiceQueryFormDTO();
+			final ChoreographerServiceQueryFormDTO serviceRequirement = new ChoreographerServiceQueryFormDTO();
 			serviceRequirement.setServiceDefinitionRequirement("service");
 			final ChoreographerStepRequestDTO step = new ChoreographerStepRequestDTO();
 			step.setName("step");
@@ -572,7 +572,7 @@ public class ChoreographerPlanValidatorTest {
 			final List<ChoreographerActionRequestDTO> actions = new ArrayList<>(1);
 			final List<String> firstStepNames = new ArrayList<>(1);
 			firstStepNames.add("step");
-			final ServiceQueryFormDTO serviceRequirement = new ServiceQueryFormDTO();
+			final ChoreographerServiceQueryFormDTO serviceRequirement = new ChoreographerServiceQueryFormDTO();
 			serviceRequirement.setServiceDefinitionRequirement("service");
 			final ChoreographerStepRequestDTO step = new ChoreographerStepRequestDTO();
 			step.setName("step");
@@ -596,7 +596,7 @@ public class ChoreographerPlanValidatorTest {
 			final List<ChoreographerActionRequestDTO> actions = new ArrayList<>(2);
 			final List<String> firstStepNames = new ArrayList<>(1);
 			firstStepNames.add("step");
-			final ServiceQueryFormDTO serviceRequirement = new ServiceQueryFormDTO();
+			final ChoreographerServiceQueryFormDTO serviceRequirement = new ChoreographerServiceQueryFormDTO();
 			serviceRequirement.setServiceDefinitionRequirement("service");
 			final ChoreographerStepRequestDTO step = new ChoreographerStepRequestDTO();
 			step.setName("step");
@@ -605,7 +605,7 @@ public class ChoreographerPlanValidatorTest {
 			steps.add(step);
 			final List<String> firstStepNames2 = new ArrayList<>(1);
 			firstStepNames2.add("step2");
-			final ServiceQueryFormDTO serviceRequirement2 = new ServiceQueryFormDTO();
+			final ChoreographerServiceQueryFormDTO serviceRequirement2 = new ChoreographerServiceQueryFormDTO();
 			serviceRequirement2.setServiceDefinitionRequirement("service");
 			final ChoreographerStepRequestDTO step2 = new ChoreographerStepRequestDTO();
 			step2.setName("step2");
@@ -630,7 +630,7 @@ public class ChoreographerPlanValidatorTest {
 			final List<ChoreographerActionRequestDTO> actions = new ArrayList<>(1);
 			final List<String> firstStepNames = new ArrayList<>(1);
 			firstStepNames.add("step");
-			final ServiceQueryFormDTO serviceRequirement = new ServiceQueryFormDTO();
+			final ChoreographerServiceQueryFormDTO serviceRequirement = new ChoreographerServiceQueryFormDTO();
 			serviceRequirement.setServiceDefinitionRequirement("service");
 			final ChoreographerStepRequestDTO step = new ChoreographerStepRequestDTO();
 			step.setName("step");
@@ -654,7 +654,7 @@ public class ChoreographerPlanValidatorTest {
 			final List<ChoreographerActionRequestDTO> actions = new ArrayList<>(2);
 			final List<String> firstStepNames = new ArrayList<>(1);
 			firstStepNames.add("step");
-			final ServiceQueryFormDTO serviceRequirement = new ServiceQueryFormDTO();
+			final ChoreographerServiceQueryFormDTO serviceRequirement = new ChoreographerServiceQueryFormDTO();
 			serviceRequirement.setServiceDefinitionRequirement("service");
 			final ChoreographerStepRequestDTO step = new ChoreographerStepRequestDTO();
 			step.setName("step");
@@ -663,7 +663,7 @@ public class ChoreographerPlanValidatorTest {
 			steps.add(step);
 			final List<String> firstStepNames2 = new ArrayList<>(1);
 			firstStepNames2.add("step2");
-			final ServiceQueryFormDTO serviceRequirement2 = new ServiceQueryFormDTO();
+			final ChoreographerServiceQueryFormDTO serviceRequirement2 = new ChoreographerServiceQueryFormDTO();
 			serviceRequirement2.setServiceDefinitionRequirement("service");
 			final ChoreographerStepRequestDTO step2 = new ChoreographerStepRequestDTO();
 			step2.setName("step2");
@@ -690,7 +690,7 @@ public class ChoreographerPlanValidatorTest {
 			final List<ChoreographerActionRequestDTO> actions = new ArrayList<>(2);
 			final List<String> firstStepNames = new ArrayList<>(1);
 			firstStepNames.add("step");
-			final ServiceQueryFormDTO serviceRequirement = new ServiceQueryFormDTO();
+			final ChoreographerServiceQueryFormDTO serviceRequirement = new ChoreographerServiceQueryFormDTO();
 			serviceRequirement.setServiceDefinitionRequirement("service");
 			final ChoreographerStepRequestDTO step = new ChoreographerStepRequestDTO();
 			step.setName("step");
@@ -699,7 +699,7 @@ public class ChoreographerPlanValidatorTest {
 			steps.add(step);
 			final List<String> firstStepNames2 = new ArrayList<>(1);
 			firstStepNames2.add("step2");
-			final ServiceQueryFormDTO serviceRequirement2 = new ServiceQueryFormDTO();
+			final ChoreographerServiceQueryFormDTO serviceRequirement2 = new ChoreographerServiceQueryFormDTO();
 			serviceRequirement2.setServiceDefinitionRequirement("service");
 			final ChoreographerStepRequestDTO step2 = new ChoreographerStepRequestDTO();
 			step2.setName("step2");
@@ -731,7 +731,7 @@ public class ChoreographerPlanValidatorTest {
 			final List<ChoreographerActionRequestDTO> actions = new ArrayList<>(1);
 			final List<String> firstStepNames = new ArrayList<>(1);
 			firstStepNames.add("step");
-			final ServiceQueryFormDTO serviceRequirement = new ServiceQueryFormDTO();
+			final ChoreographerServiceQueryFormDTO serviceRequirement = new ChoreographerServiceQueryFormDTO();
 			serviceRequirement.setServiceDefinitionRequirement("service");
 			final ChoreographerStepRequestDTO step = new ChoreographerStepRequestDTO();
 			step.setName("step");
@@ -772,7 +772,7 @@ public class ChoreographerPlanValidatorTest {
 		final List<ChoreographerActionRequestDTO> actions = new ArrayList<>(1);
 		final List<String> firstStepNames = new ArrayList<>(1);
 		firstStepNames.add("step");
-		final ServiceQueryFormDTO serviceRequirement = new ServiceQueryFormDTO();
+		final ChoreographerServiceQueryFormDTO serviceRequirement = new ChoreographerServiceQueryFormDTO();
 		serviceRequirement.setServiceDefinitionRequirement("service");
 		final ChoreographerStepRequestDTO step = new ChoreographerStepRequestDTO();
 		step.setName("step");

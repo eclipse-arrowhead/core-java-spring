@@ -307,7 +307,7 @@ public class OrchestratorService {
      * <i>Orchestrator Store</i> is ignored, and the Orchestrator first tries to find a provider for the requested service in the local Cloud.
      * If that fails but the <i>enableInterCloud</i> flag is set to true, the Orchestrator tries to find a provider in other Clouds.
 	 */
-	public OrchestrationResponseDTO dynamicOrchestration(final OrchestrationFormRequestDTO request) {
+	public OrchestrationResponseDTO dynamicOrchestration(final OrchestrationFormRequestDTO request, final boolean skipAuthorization) { 
 		logger.debug("dynamicOrchestration started ...");
 
 		// necessary, because we want to use a flag value when we call the check method
@@ -331,15 +331,17 @@ public class OrchestratorService {
 			}
 		}
 		
-	    // Cross-checking the SR response with the Authorization
-		queryData = orchestratorDriver.queryAuthorization(request.getRequesterSystem(), queryData);
-		if (queryData.isEmpty()) {
-			if (isInterCloudOrchestrationPossible(flags)) {
-				// no result after authorization => we try with other clouds
-				logger.debug("dynamicOrchestration: no provider give access to requester system => moving to Inter-Cloud orchestration.");
-				return triggerInterCloud(request);
-			} else {
-				return new OrchestrationResponseDTO(); // empty response
+		if (!skipAuthorization) {
+			// Cross-checking the SR response with the Authorization
+			queryData = orchestratorDriver.queryAuthorization(request.getRequesterSystem(), queryData);
+			if (queryData.isEmpty()) {
+				if (isInterCloudOrchestrationPossible(flags)) {
+					// no result after authorization => we try with other clouds
+					logger.debug("dynamicOrchestration: no provider give access to requester system => moving to Inter-Cloud orchestration.");
+					return triggerInterCloud(request);
+				} else {
+					return new OrchestrationResponseDTO(); // empty response
+				}
 			}
 		}
 		

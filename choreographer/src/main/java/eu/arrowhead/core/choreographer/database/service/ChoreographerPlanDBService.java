@@ -48,8 +48,8 @@ import eu.arrowhead.common.dto.shared.ChoreographerActionRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanListResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerStepRequestDTO;
-import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.choreographer.validation.ChoreographerPlanValidator;
@@ -165,8 +165,7 @@ public class ChoreographerPlanDBService {
 		try {
 			final Optional<ChoreographerPlan> planOpt = choreographerPlanRepository.findById(id);
 			if (planOpt.isEmpty()) {
-				throw new InvalidParameterException("Choreographer Plan with id of '" + id
-						+ "' doesn't exist!");
+				throw new InvalidParameterException("Choreographer Plan with id of '" + id + "' doesn't exist!");
 			}
 
 			final List<ChoreographerSession> sessions = choreographerSessionRepository.findByPlanAndStatusIn(planOpt.get(), List.of(ChoreographerSessionStatus.INITIATED, ChoreographerSessionStatus.RUNNING));
@@ -258,8 +257,7 @@ public class ChoreographerPlanDBService {
 			if (stepOpt.isPresent()) {
 				return stepOpt.get();
 			} else {
-				throw new InvalidParameterException("Step with id of '" + id
-						+ "' doesn't exist!");
+				throw new InvalidParameterException("Step with id of '" + id + "' doesn't exist!");
 			}
 		} catch (final InvalidParameterException ex) {
 			throw ex;
@@ -351,7 +349,7 @@ public class ChoreographerPlanDBService {
 	private ChoreographerStep createStep(final ChoreographerAction action, final ChoreographerStepRequestDTO stepRequest) {
 		logger.debug("createStep started...");
 
-		final ServiceQueryFormDTO serviceRequirement = stepRequest.getServiceRequirement();
+		final ChoreographerServiceQueryFormDTO serviceRequirement = stepRequest.getServiceRequirement();
 		Integer minVersion;
 		Integer maxVersion;
 

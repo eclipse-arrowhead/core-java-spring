@@ -63,6 +63,7 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_ORCH_QOS_CONFIRM_RESERVATION = "orchestration-qos-confirm-reservation";
 	
 	public static final String CORE_SERVICE_GATEKEEPER_GSD = "global-service-discovery";
+	public static final String CORE_SERVICE_GATEKEEPER_MULTI_GSD = "multi-global-service-discovery";
 	public static final String CORE_SERVICE_GATEKEEPER_ICN = "inter-cloud-negotiations";
 	public static final String CORE_SERVICE_GATEKEEPER_PULL_CLOUDS = "pull-clouds";
 	public static final String CORE_SERVICE_GATEKEEPER_COLLECT_SYSTEM_ADDRESSES = "collect-system-addresses";
@@ -73,6 +74,7 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_GATEWAY_PUBLIC_KEY = "gw-public-key";
 	public static final String CORE_SERVICE_GATEWAY_CONNECT_CONSUMER = "gw-connect-consumer";
 	public static final String CORE_SERVICE_GATEWAY_CONNECT_PROVIDER = "gw-connect-provider";
+	public static final String CORE_SERVICE_GATEWAY_CLOSE_SESSIONS = "gw-close-sessions";
 
 	public static final String CORE_SERVICE_EVENTHANDLER_PUBLISH = "event-publish";
 	public static final String CORE_SERVICE_EVENTHANDLER_SUBSCRIBE = "event-subscribe";
@@ -231,6 +233,7 @@ public class CommonConstants {
 
 	public static final String ORCHESTRATOR_URI = "/orchestrator";
 	public static final String OP_ORCH_PROCESS_URI = "/orchestration";
+	public static final String OP_ORCH_PROCESS_BY_PROXY_URI = "/orchestration-by-proxy";
 	public static final String OP_ORCH_CREATE_FLEXIBLE_STORE_RULES_URI = "/store/flexible";
 	public static final String OP_ORCH_REMOVE_FLEXIBLE_STORE_RULE_URI = "/store/flexible" + "/{" + COMMON_FIELD_NAME_ID + "}";
 	public static final String OP_ORCH_CLEAN_FLEXIBLE_STORE_URI = "/store/flexible/all";
@@ -250,6 +253,7 @@ public class CommonConstants {
 	
 	public static final String GATEKEEPER_URI = "/gatekeeper";
 	public static final String OP_GATEKEEPER_GSD_SERVICE = "/init_gsd";
+	public static final String OP_GATEKEEPER_MULTI_GSD_SERVICE = "/init_multi_gsd";
 	public static final String OP_GATEKEEPER_ICN_SERVICE = "/init_icn";
 	public static final String OP_GATEKEEPER_PULL_CLOUDS_SERVICE = "/pull_clouds";
 	public static final String OP_GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_SERVICE = "/collect_system_addresses";
@@ -281,6 +285,7 @@ public class CommonConstants {
 	public static final String OP_GATEWAY_KEY_URI = "/publickey";
 	public static final String OP_GATEWAY_CONNECT_PROVIDER_URI = "/connect_provider";
 	public static final String OP_GATEWAY_CONNECT_CONSUMER_URI = "/connect_consumer";
+	public static final String OP_GATEWAY_CLOSE_SESSIONS = "/close_sessions";
 	
 	public static final String EVENTHANDLER_URI = "/eventhandler";
 	public static final String OP_EVENTHANDLER_PUBLISH = "/publish";
