@@ -50,6 +50,8 @@ import eu.arrowhead.common.dto.internal.CloudWithRelaysAndPublicRelaysListRespon
 import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.GSDMultiQueryFormDTO;
+import eu.arrowhead.common.dto.internal.GSDMultiQueryResultDTO;
 import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.internal.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.internal.GSDQueryResultDTO;
@@ -62,6 +64,7 @@ import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.internal.SystemAddressSetRelayResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
@@ -97,9 +100,6 @@ public class GatekeeperController {
 	private static final String RELAYS_MGMT_URI =  CoreCommonConstants.MGMT_URI + "/relays";
 	private static final String RELAYS_BY_ID_MGMT_URI = RELAYS_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";	
 	private static final String RELAYS_BY_ADDRESS_AND_PORT_MGMT_URI = RELAYS_MGMT_URI + "/{" + PATH_VARIABLE_ADDRESS + "}" + "/{" + PATH_VARIABLE_PORT + "}";
-	
-	private static final String INIT_GLOBAL_SERVICE_DISCOVERY_URI = "/init_gsd";
-	private static final String INIT_INTER_CLOUD_NEGOTIATION_URI = "/init_icn";
 	
 	private static final String GET_CLOUDS_HTTP_200_MESSAGE = "Cloud entries returned";
 	private static final String GET_CLOUDS_HTTP_400_MESSAGE = "Could not retrieve Cloud entries";
@@ -489,14 +489,33 @@ public class GatekeeperController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(path = INIT_GLOBAL_SERVICE_DISCOVERY_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = CommonConstants.OP_GATEKEEPER_GSD_SERVICE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public GSDQueryResultDTO initiateGlobalServiceDiscovery(@RequestBody final GSDQueryFormDTO gsdForm) throws InterruptedException {
 		logger.debug("New initiateGlobalServiceDiscovery post request received");
 		
-		validateGSDQueryFormDTO(gsdForm, CommonConstants.GATEKEEPER_URI + INIT_GLOBAL_SERVICE_DISCOVERY_URI);
+		validateGSDQueryFormDTO(gsdForm, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_GSD_SERVICE);
 		final GSDQueryResultDTO gsdQueryResultDTO = gatekeeperService.initGSDPoll(gsdForm);
 		
 		logger.debug("initiateGlobalServiceDiscovery has been finished");
+		return gsdQueryResultDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return the results of a  Multi Global Service Discovery request", response = GSDMultiQueryResultDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_INIT_GSD_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_INIT_GSD_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = CommonConstants.OP_GATEKEEPER_MULTI_GSD_SERVICE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public GSDMultiQueryResultDTO initiateMultiGlobalServiceDiscovery(@RequestBody final GSDMultiQueryFormDTO gsdForm) throws InterruptedException { 
+		logger.debug("New initiateMultiGlobalServiceDiscovery post request received");
+		
+		validateMultiGSDQueryFormDTO(gsdForm, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_MULTI_GSD_SERVICE);
+		final GSDMultiQueryResultDTO gsdQueryResultDTO = gatekeeperService.initMultiGSDPoll(gsdForm);
+		
+		logger.debug("initiateMultiGlobalServiceDiscovery has been finished");
 		return gsdQueryResultDTO;
 	}
 	
@@ -509,11 +528,11 @@ public class GatekeeperController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_GATEWAY_TIMEOUT, message = POST_INIT_ICN_HTTP_504_MESSAGE)
 	})
-	@PostMapping(path = INIT_INTER_CLOUD_NEGOTIATION_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = CommonConstants.OP_GATEKEEPER_ICN_SERVICE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public ICNResultDTO initiateInterCloudNegotiation(@RequestBody final ICNRequestFormDTO icnForm) {
 		logger.debug("New initiateInterCloudNegotiation request received");
 		
-		validateICNRequestFormDTO(icnForm, CommonConstants.GATEKEEPER_URI + INIT_INTER_CLOUD_NEGOTIATION_URI);
+		validateICNRequestFormDTO(icnForm, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_ICN_SERVICE);
 		final ICNResultDTO result = gatekeeperService.initICN(icnForm);
 		
 		logger.debug("Inter cloud negotiation has been finished.");
@@ -681,10 +700,10 @@ public class GatekeeperController {
 		
 		if (isOperatorInvalid || isNameInvalid || isOperatorIllFormed || isNameIllFormed) {
 			String exceptionMsg = "CloudRequestDTO is invalid due to the following reasons:";
-			exceptionMsg = isOperatorInvalid ? exceptionMsg + " operator is empty, " : exceptionMsg;
-			exceptionMsg = isOperatorIllFormed ? exceptionMsg + " operator is in wrong format, " : exceptionMsg;
-			exceptionMsg = isNameInvalid ? exceptionMsg + " name is empty, " : exceptionMsg;
-			exceptionMsg = isNameIllFormed ? exceptionMsg + " name is in wrong format, " : exceptionMsg;
+			exceptionMsg = isOperatorInvalid ? exceptionMsg + " operator is empty," : exceptionMsg;
+			exceptionMsg = isOperatorIllFormed ? exceptionMsg + " operator is in wrong format," : exceptionMsg;
+			exceptionMsg = isNameInvalid ? exceptionMsg + " name is empty," : exceptionMsg;
+			exceptionMsg = isNameIllFormed ? exceptionMsg + " name is in wrong format," : exceptionMsg;
 			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() - 1);
 			
 			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, origin);
@@ -705,6 +724,31 @@ public class GatekeeperController {
 		
 		if (Utilities.isEmpty(gsdForm.getRequestedService().getServiceDefinitionRequirement())) {
 			throw new BadPayloadException("serviceDefinitionRequirement is empty", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (gsdForm.getPreferredClouds() != null && !gsdForm.getPreferredClouds().isEmpty()) {
+			for (final CloudRequestDTO cloudDTO : gsdForm.getPreferredClouds()) {
+				validateCloudRequestDTO(cloudDTO, origin);
+			}
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateMultiGSDQueryFormDTO(final GSDMultiQueryFormDTO gsdForm, final String origin) {
+		logger.debug("validateMultiGSDQueryFormDTO started...");
+		
+		if (gsdForm == null) {
+			throw new BadPayloadException("GSDMultiQueryFormDTO is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (Utilities.isEmpty(gsdForm.getRequestedServices())) {
+			throw new BadPayloadException("RequestedServices list is null or empty", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		for (final ServiceQueryFormDTO serviceReq : gsdForm.getRequestedServices()) {
+			if (Utilities.isEmpty(serviceReq.getServiceDefinitionRequirement())) {
+				throw new BadPayloadException("serviceDefinitionRequirement is empty", HttpStatus.SC_BAD_REQUEST, origin);
+			}
 		}
 		
 		if (gsdForm.getPreferredClouds() != null && !gsdForm.getPreferredClouds().isEmpty()) {

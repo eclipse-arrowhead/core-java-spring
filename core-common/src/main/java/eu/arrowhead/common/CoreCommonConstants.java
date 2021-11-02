@@ -38,12 +38,17 @@ public class CoreCommonConstants {
 	public static final String SR_QUERY_BY_SYSTEM_ID_URI = "service.registry.query.by.system.id.uri";
 	public static final String SR_QUERY_BY_SYSTEM_DTO_URI = "service.registry.query.by.system.dto.uri";
 	public static final String SR_QUERY_ALL = "service.registry.query.all.uri";
+	public static final String SR_QUERY_BY_SERVICE_DEFINITION_LIST_URI = "service.registry.query.services.by.service.definition.list.uri";
+	public static final String SR_REGISTER_SYSTEM_URI = "service.registry.register.system.uri";
+	public static final String SR_UNREGISTER_SYSTEM_URI = "service.registry.register.system.uri";
+	public static final String SR_PULL_CONFIG_URI = "service.registry.pull.config.uri";
 	public static final String REQUIRED_URI_LIST = "required.uri.list";
 	public static final String URI_SUFFIX = "-uri";
 	
 	public static final String RELAY_MESSAGE_TYPE_RAW = "raw";
 	public static final String RELAY_MESSAGE_TYPE_ACK = "ack";
 	public static final String RELAY_MESSAGE_TYPE_GSD_POLL = "gsd_poll";
+	public static final String RELAY_MESSAGE_TYPE_MULTI_GSD_POLL = "multi_gsd_poll";
 	public static final String RELAY_MESSAGE_TYPE_ICN_PROPOSAL = "icn_proposal";
 	public static final String RELAY_MESSAGE_TYPE_ACCESS_TYPE = "access_type";
 	public static final String RELAY_MESSAGE_TYPE_SYSTEM_ADDRESS_LIST = "system_address_list";
@@ -63,7 +68,10 @@ public class CoreCommonConstants {
 	public static final String OP_SERVICEREGISTRY_QUERY_BY_SYSTEM_ID_URI = "/query/system/{" + COMMON_FIELD_NAME_ID + "}";
 	public static final String OP_SERVICEREGISTRY_QUERY_BY_SYSTEM_DTO_URI = "/query/system";
 	public static final String OP_SERVICEREGISTRY_QUERY_ALL_SERVICE_URI = "/query/all";
+	public static final String OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SYSTEM_ID_URI = "/query/provider/{" + COMMON_FIELD_NAME_ID + "}";
 	public static final String OP_SERVICEREGISTRY_MULTI_QUERY_URI = CommonConstants.OP_SERVICEREGISTRY_QUERY_URI + "/multi";	
+	public static final String OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SERVICE_DEFINITION_LIST_URI = "/query/definition";
+	public static final String OP_SERVICEREGISTRY_PULL_CONFIG_URI = "/pull-config";
 		
 	public static final String ORCHESTRATOR_STORE_MGMT_URI = "/mgmt/store";
 	public static final String ORCHESTRATOR_STORE_FLEXIBLE_MGMT_URI = "/mgmt/store/flexible";
@@ -226,6 +234,9 @@ public class CoreCommonConstants {
 	public static final String GATEWAY_AVAILABLE_PORTS_QUEUE = "availableQueue";
 	public static final String GATEWAY_ACTIVE_CONSUMER_SIDE_SOCKET_THREAD_MAP = "activeConsumerSideSocketThreads";
 	public static final String GATEWAY_ACTIVE_PROVIDER_SIDE_SOCKET_THREAD_HANDLER_MAP = "activeProviderSideSocketThreadHandlers";
+	
+	public static final String CHOREOGRAPHER_IS_GATEKEEPER_PRESENT = "gatekeeper_is_present";
+	public static final String $CHOREOGRAPHER_IS_GATEKEEPER_PRESENT_WD = "${" + CHOREOGRAPHER_IS_GATEKEEPER_PRESENT + ":" + CoreDefaults.DEFAULT_CHOREOGRAPHER_IS_GATEKEEPER_PRESENT + "}";
 	
 	public static final String EVENTHANDLER_TTL_SCHEDULED = "event_handler_ttl_scheduled";
 	public static final String $EVENTHANDLER_TTL_SCHEDULED_WD = "${" + EVENTHANDLER_TTL_SCHEDULED + ":" + CoreDefaults.DEFAULT_EVENTHANDLER_TTL_SCHEDULED + "}";

@@ -65,6 +65,8 @@ public class CoreDefaults {
 	public static final int DEFAULT_GATEWAY_MAX_PORT = 8100;
 	public static final int DEFAULT_GATEWAY_PROVIDER_SIDE_MAX_REQUEST_PER_SOCKET = 50;
 	
+	public static final boolean DEFAULT_CHOREOGRAPHER_IS_GATEKEEPER_PRESENT = false;
+	
 	public static final boolean DEFAULT_EVENTHANDLER_TTL_SCHEDULED = false;
 	public static final int DEFAULT_EVENTHANDLER_TTL_INTERVAL_MINUTES = 17;
 	public static final int DEFAULT_EVENTHANDLER_MAX_RETRY_CONNECT_AUTH = 3;

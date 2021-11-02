@@ -378,12 +378,14 @@ CREATE TABLE IF NOT EXISTS `choreographer_plan` (
   `first_action_id` bigint(20),
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `plan_name_unique_key` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `choreographer_action` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
+  `first_action` int(1) NOT NULL DEFAULT 0,
   `plan_id` bigint(20) NOT NULL,
   `next_action_id` bigint(20) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -399,59 +401,95 @@ ALTER TABLE `choreographer_plan` ADD FOREIGN KEY (`first_action_id`) references 
 CREATE TABLE IF NOT EXISTS `choreographer_step` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
-  `action_first_step_id` bigint(20),
+  `first_step` int(1) NOT NULL DEFAULT 0,
   `action_id` bigint(20) NOT NULL,
-  `service_name` varchar(255) NOT NULL,
-  `metadata` text,
-  `parameters` text,
+  `service_definition` varchar(255) NOT NULL,
+  `min_version` int(11),
+  `max_version` int(11),
+  `sr_template` mediumtext NOT NULL,
+  `static_parameters` mediumtext,
   `quantity` int(20) NOT NULL DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name_action_id_unique_key` (`name`, `action_id`),
-  CONSTRAINT `action_first_step` FOREIGN KEY (`action_first_step_id`) REFERENCES `choreographer_action` (`id`) ON DELETE CASCADE,
   CONSTRAINT `action` FOREIGN KEY (`action_id`) REFERENCES `choreographer_action` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `choreographer_step_next_step_connection` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `step_id` bigint(20) NOT NULL,
-  `next_step_id` bigint(20) NOT NULL,
+  `from_id` bigint(20) NOT NULL,
+  `to_id` bigint(20) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  CONSTRAINT `current_step` FOREIGN KEY (`step_id`) REFERENCES choreographer_step (`id`) ON DELETE CASCADE,
-  CONSTRAINT `next_step` FOREIGN KEY (`step_id`) REFERENCES choreographer_step (`id`) ON DELETE CASCADE
+  CONSTRAINT `current_step` FOREIGN KEY (`from_id`) REFERENCES choreographer_step (`id`) ON DELETE CASCADE,
+  CONSTRAINT `next_step` FOREIGN KEY (`to_id`) REFERENCES choreographer_step (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `choreographer_executor` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `name` varchar(255) NOT NULL,
+    `address` varchar(255) NOT NULL,
+    `port` int(11) NOT NULL,
+    `base_uri` varchar(255) DEFAULT NULL,
+	`locked` int(1) NOT NULL DEFAULT 0,
+    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+	UNIQUE KEY `executor_name_unique` (`name`),
+	UNIQUE KEY `executor_address_port_uri_unique` (`address`, `port`, `base_uri`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `choreographer_executor_service_definition` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `executor_id` bigint(20) NOT NULL,
+    `service_definition` varchar(255) NOT NULL,
+	`min_version` int(11) NOT NULL,
+	`max_version` int(11) NOT NULL,
+    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY  KEY (`id`),
+    CONSTRAINT `fk_executor_id` FOREIGN KEY (`executor_id`) REFERENCES `choreographer_executor` (`id`) ON DELETE CASCADE,
+    UNIQUE KEY `unique_executor_service_definition` ( `executor_id`, `service_definition`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `choreographer_session` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `plan_id` bigint(20) NOT NULL,
+  `status` varchar(255) NOT NULL,
+  `notify_uri` text,
   `started_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `status` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `session_plan` FOREIGN KEY (`plan_id`) REFERENCES `choreographer_plan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `choreographer_running_step` (
+CREATE TABLE IF NOT EXISTS `choreographer_session_step` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `step_id` bigint(20) NOT NULL,
   `session_id` bigint(20) NOT NULL,
+  `step_id` bigint(20) NOT NULL,
+  `executor_id` bigint(20) NOT NULL,
   `status` varchar(255) NOT NULL,
-  `message` text,
+  `message` mediumtext,
   `started_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  CONSTRAINT `running_step` FOREIGN KEY (`step_id`) REFERENCES `choreographer_step` (`id`),
-  CONSTRAINT `running_step_session` FOREIGN KEY (`session_id`) REFERENCES `choreographer_session`(`id`)
+  CONSTRAINT `session_step` FOREIGN KEY (`step_id`) REFERENCES `choreographer_step` (`id`),
+  CONSTRAINT `session_step_session` FOREIGN KEY (`session_id`) REFERENCES `choreographer_session`(`id`),
+  CONSTRAINT `session_step_executor` FOREIGN KEY (`executor_id`) REFERENCES `choreographer_executor` (`id`),
+  UNIQUE KEY `session_step_unique` (`session_id`, `step_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `choreographer_worklog` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `entry_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `message` text,
-  `exception` text,
+  `plan_name` varchar(255),
+  `action_name` varchar(255),
+  `step_name` varchar(255),
+  `session_id` bigint(20),
+  `message` mediumtext,
+  `exception` mediumtext,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -476,7 +514,7 @@ CREATE TABLE IF NOT EXISTS `qos_intra_measurement` (
 	`measurement_type` varchar(255) NOT NULL,
 	`last_measurement_at` timestamp NOT NULL,
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT `fk_system` FOREIGN KEY (`system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE,
 	UNIQUE KEY `unique_system_id_measurement_type` (`system_id`, `measurement_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

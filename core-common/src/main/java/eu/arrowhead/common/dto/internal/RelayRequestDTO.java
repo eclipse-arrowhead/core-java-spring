@@ -16,6 +16,9 @@ package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class RelayRequestDTO implements Serializable {
 
 	//=================================================================================================
@@ -73,7 +76,7 @@ public class RelayRequestDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (this == obj) {
 			return true;
 		}
@@ -83,7 +86,7 @@ public class RelayRequestDTO implements Serializable {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		RelayRequestDTO other = (RelayRequestDTO) obj;
+		final RelayRequestDTO other = (RelayRequestDTO) obj;
 		if (address == null) {
 			if (other.address != null) {
 				return false;
@@ -112,5 +115,15 @@ public class RelayRequestDTO implements Serializable {
 			return false;
 		}
 		return true;
-	}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

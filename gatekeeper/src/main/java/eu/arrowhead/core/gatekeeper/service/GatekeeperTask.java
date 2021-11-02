@@ -98,7 +98,7 @@ public class GatekeeperTask implements Runnable {
 	//-------------------------------------------------------------------------------------------------
 	private void handleMessage(final GeneralAdvertisementMessageDTO gaMsg) {
 		logger.debug("handleMessage started...");
-		
+
 		Session session = null;
 		try {
 			session = relayClient.createConnection(relayHost, relayPort, securedRelay);
@@ -120,6 +120,8 @@ public class GatekeeperTask implements Runnable {
 			switch (request.getMessageType()) {
 			case CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL: 
 				return gatekeeperService.doGSDPoll(request.getGSDPollRequest());
+			case CoreCommonConstants.RELAY_MESSAGE_TYPE_MULTI_GSD_POLL:
+				return gatekeeperService.doMultiGSDPoll(request.getGSDMultiPollRequest());
 			case CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL:
 				return gatekeeperService.doICN(request.getICNProposalRequest());
 			case CoreCommonConstants.RELAY_MESSAGE_TYPE_ACCESS_TYPE:

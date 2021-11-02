@@ -742,6 +742,77 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//=================================================================================================
+	// Tests of getServiceRegistryEntriesBySystemId
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetServiceRegistryEntriesBySystemIdOk() {
+		final System system = new System();
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(system));
+		when(serviceRegistryRepository.findBySystem(eq(system))).thenReturn(new ArrayList<>());
+		serviceRegistryDBService.getServiceRegistryEntriesBySystemId(1L);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetServiceRegistryEntriesBySystemIdInvalidId() {
+		serviceRegistryDBService.getServiceRegistryEntriesBySystemId(0L);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetServiceRegistryEntriesBySystemIdSysNotExists() {
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.empty());
+		serviceRegistryDBService.getServiceRegistryEntriesBySystemId(1L);
+	}
+	
+	//=================================================================================================
+	// Tests of getServiceRegistryEntriesByServiceDefinitonList
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetServiceRegistryEntriesByServiceDefinitonListOk() {
+		final List<String> definitions = new ArrayList<>(1);
+		definitions.add("service-def");
+		final ServiceDefinition serviceDefinition = new ServiceDefinition("service-def");
+		when(serviceDefinitionRepository.findByServiceDefinition(anyString())).thenReturn(Optional.of(serviceDefinition));
+		when(serviceRegistryRepository.findByServiceDefinition(eq(serviceDefinition))).thenReturn(new ArrayList<>());
+		serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinitonList(definitions);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetServiceRegistryEntriesByServiceDefinitonListWithNull() {
+		serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinitonList(null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetServiceRegistryEntriesByServiceDefinitonListOkWithNullDefinition() {
+		final List<String> definitions = new ArrayList<>(1);
+		definitions.add(null);
+		serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinitonList(definitions);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetServiceRegistryEntriesByServiceDefinitonListOkWithBlankDefinition() {
+		final List<String> definitions = new ArrayList<>(1);
+		definitions.add(" ");
+		serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinitonList(definitions);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetServiceRegistryEntriesByServiceDefinitonListServiceDefNotExists() {
+		final List<String> definitions = new ArrayList<>(1);
+		definitions.add("service-def");
+		when(serviceDefinitionRepository.findByServiceDefinition(anyString())).thenReturn(Optional.empty());
+		final List<ServiceRegistry> result = serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinitonList(definitions);
+		Assert.assertEquals(0, result.size());
+	}
+	
+	//=================================================================================================
 	// Tests of updateServiceRegistry		
 	
 	//-------------------------------------------------------------------------------------------------

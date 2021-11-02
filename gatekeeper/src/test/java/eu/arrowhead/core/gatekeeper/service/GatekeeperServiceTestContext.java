@@ -19,6 +19,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
+import eu.arrowhead.common.verifier.CommonNamePartVerifier;
+
 @Configuration
 public class GatekeeperServiceTestContext {
 
@@ -37,5 +39,12 @@ public class GatekeeperServiceTestContext {
 	@Primary // This bean is primary only in test context
 	public GatekeeperDriver mockGatekeeperDriver() {
 		return Mockito.mock(GatekeeperDriver.class);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Bean
+	@Primary // This bean is primary only in test context
+	public CommonNamePartVerifier mockCnVerifier() {
+		return Mockito.mock(CommonNamePartVerifier.class);
 	}
 }

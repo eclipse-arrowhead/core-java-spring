@@ -28,17 +28,14 @@ import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.ActiveMQMessageConsumer;
 import org.apache.activemq.ActiveMQMessageProducer;
 import org.apache.activemq.ActiveMQSession;
-import org.apache.activemq.ActiveMQSslConnectionFactory;
 import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
-import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
@@ -48,6 +45,7 @@ import eu.arrowhead.common.dto.internal.DecryptedMessageDTO;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.relay.RelayCryptographer;
+import eu.arrowhead.relay.activemq.RelayActiveMQConnectionFactory;
 import eu.arrowhead.relay.gateway.ConsumerSideRelayInfo;
 import eu.arrowhead.relay.gateway.ControlRelayInfo;
 import eu.arrowhead.relay.gateway.GatewayRelayClient;
@@ -58,19 +56,16 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 	//=================================================================================================
 	// members
 	
-	private static final String TCP = "tcp";
-	private static final String SSL = "ssl";
-	private static final String CLOSE_COMMAND = "CLOSE ";
-	private static final String SWITCH_COMMAND = "SWITCH ";
+	private static final String CLOSE_COMMAND = "CLOSE";
+	private static final String SWITCH_COMMAND = "SWITCH";
 	
-	private static final int CLIENT_ID_LENGTH = 16;
 	private static final int QUEUE_ID_LENGTH = 48;
 
 	private static final Logger logger = LogManager.getLogger(ActiveMQGatewayRelayClient.class);
 	
 	private final String serverCommonName;
-	private final SSLProperties sslProps;
 	private final RelayCryptographer cryptographer;
+	private final RelayActiveMQConnectionFactory connectionFactory;
 	
 	//=================================================================================================
 	// methods
@@ -83,7 +78,7 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 		
 		this.serverCommonName = serverCommonName;
 		this.cryptographer = new RelayCryptographer(privateKey);
-		this.sslProps = sslProps;
+		this.connectionFactory = new RelayActiveMQConnectionFactory(null, -1, sslProps);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -95,7 +90,9 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 		Assert.isTrue(!Utilities.isEmpty(host), "Host is null or blank.");
 		Assert.isTrue(port > CommonConstants.SYSTEM_PORT_RANGE_MIN && port < CommonConstants.SYSTEM_PORT_RANGE_MAX, "Port is invalid.");
 		
-		final Connection connection = secure ? createSSLConnection(host, port) : createTCPConnection(host, port);
+		connectionFactory.setHost(host);
+		connectionFactory.setPort(port);
+		final Connection connection = connectionFactory.createConnection(secure);
 		
 		try {
 			connection.start();
@@ -277,7 +274,7 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 				throw new AuthException("Sender can't send control messages.");
 			}
 			
-			final TextMessage msg = session.createTextMessage(CLOSE_COMMAND + queueId);
+			final TextMessage msg = session.createTextMessage(CLOSE_COMMAND + " " + queueId);
 			
 			sender.send(msg);
 		} else {
@@ -291,7 +288,7 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 		logger.debug("handleCloseControlMessage started...");
 		
 		Assert.notNull(msg, "Message is null.");
-		Assert.notNull(session, "session is null.");
+		Assert.notNull(session, "Session is null.");
 		
 		if (msg instanceof TextMessage) {
 			final TextMessage tmsg = (TextMessage) msg;
@@ -302,8 +299,8 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 				if (!controlQueue.getQueueName().endsWith(suffix)) {
 					throw new AuthException("Unauthorized close command: " + tmsg.getText());
 				}
-				
-				this.closeConnection(session);
+
+				closeConnection(session);
 			} else {
 				throw new JMSException("Invalid destination class: " + tmsg.getJMSDestination().getClass().getSimpleName());
 			}
@@ -328,7 +325,7 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 				throw new AuthException("Sender can't send control messages.");
 			}
 			
-			final TextMessage msg = session.createTextMessage(SWITCH_COMMAND + queueId);
+			final TextMessage msg = session.createTextMessage(SWITCH_COMMAND + " " + queueId);
 			
 			sender.send(msg);
 		} else {
@@ -418,44 +415,6 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 	
 	//=================================================================================================
 	// assistant methods
-	
-	//-------------------------------------------------------------------------------------------------
-	private Connection createTCPConnection(final String host, final int port) throws JMSException {
-		final UriComponents uri = Utilities.createURI(TCP, host, port, null);
-		final ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(uri.toUri());
-		connectionFactory.setClientID(RandomStringUtils.randomAlphanumeric(CLIENT_ID_LENGTH));
-		final Connection connection = connectionFactory.createConnection();
-		connectionFactory.setClientID(null);
-
-		return connection;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private Connection createSSLConnection(final String host, final int port) throws JMSException {
-		final UriComponents uri = Utilities.createURI(SSL, host, port, null);
-		final ActiveMQSslConnectionFactory connectionFactory = new ActiveMQSslConnectionFactory(uri.toUri());
-		try {
-			connectionFactory.setClientID(RandomStringUtils.randomAlphanumeric(CLIENT_ID_LENGTH));
-			connectionFactory.setKeyStoreType(sslProps.getKeyStoreType());
-			connectionFactory.setKeyStore(sslProps.getKeyStore().getURI().toString());
-			connectionFactory.setKeyStorePassword(sslProps.getKeyStorePassword());
-			connectionFactory.setKeyStoreKeyPassword(sslProps.getKeyPassword());
-			connectionFactory.setTrustStoreType(sslProps.getKeyStoreType());
-			connectionFactory.setTrustStore(sslProps.getTrustStore().getURI().toString());
-			connectionFactory.setTrustStorePassword(sslProps.getTrustStorePassword());
-			
-			final Connection connection = connectionFactory.createConnection();
-			connectionFactory.setClientID(null);
-			
-			return connection;
-		} catch (final JMSException ex) {
-			throw ex;
-		} catch (final Exception ex) {
-			logger.debug(ex.getMessage());
-			logger.debug("Stacktrace: ", ex);
-			throw new JMSException("Error while creating SSL connection: " + ex.getMessage());
-		}
-	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private String parseCloseCommand(final String command) {

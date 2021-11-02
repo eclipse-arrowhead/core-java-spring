@@ -17,7 +17,12 @@ package eu.arrowhead.core.gateway.service;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -26,6 +31,7 @@ import java.io.Serializable;
 import java.net.Socket;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -80,6 +86,7 @@ import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.core.gateway.thread.SSLContextFactory;
 import eu.arrowhead.relay.gateway.ConsumerSideRelayInfo;
+import eu.arrowhead.relay.gateway.ControlRelayInfo;
 import eu.arrowhead.relay.gateway.GatewayRelayClient;
 import eu.arrowhead.relay.gateway.ProviderSideRelayInfo;
 
@@ -843,6 +850,69 @@ public class GatewayServiceTest {
 		testingObject.closeSession(request);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCloseSessionByPortActiveSessionNotFound() {
+		final ActiveSessionDTO activeSessionDTO = new ActiveSessionDTO();
+		activeSessionDTO.setConsumerServerSocketPort(1234);
+		
+		when(activeSessions.values()).thenReturn(List.of(activeSessionDTO));
+		
+		final String error = testingObject.closeSession(5678);
+		
+		Assert.assertEquals("Active session not found.", error);
+		
+		verify(activeSessions, times(1)).values();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCloseSessionByPortProblemDuringClosing() throws JMSException {
+		final ActiveSessionDTO activeSessionDTO = new ActiveSessionDTO();
+		activeSessionDTO.setPeerName("peer");
+		activeSessionDTO.setQueueId("queueId");
+		activeSessionDTO.setConsumerServerSocketPort(1234);
+		activeSessionDTO.setRelay(new RelayRequestDTO("localhost", 12345, true, false, RelayType.GATEWAY_RELAY.name()));
+		
+		when(activeSessions.values()).thenReturn(List.of(activeSessionDTO));
+		when(relayClient.createConnection("localhost", 12345, true)).thenThrow(JMSException.class);
+		
+		final String error = testingObject.closeSession(1234);
+		
+		Assert.assertEquals("Error while trying to connect relay at localhost:12345", error);
+		
+		verify(activeSessions, times(1)).values();
+		verify(relayClient, times(1)).createConnection("localhost", 12345, true);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCloseSessionByPortOk() throws JMSException {
+		final ActiveSessionDTO activeSessionDTO = new ActiveSessionDTO();
+		activeSessionDTO.setPeerName("peer");
+		activeSessionDTO.setQueueId("queueId");
+		activeSessionDTO.setConsumerServerSocketPort(1234);
+		activeSessionDTO.setRelay(new RelayRequestDTO("localhost", 12345, true, false, RelayType.GATEWAY_RELAY.name()));
+		
+		when(activeSessions.values()).thenReturn(List.of(activeSessionDTO));
+		when(relayClient.createConnection("localhost", 12345, true)).thenReturn(getTestSession());
+		when(relayClient.initializeControlRelay(any(Session.class), eq("peer"), eq("queueId"))).thenReturn(new ControlRelayInfo(getTestMessageProducer(), getTestMessageProducer()));
+		doNothing().when(relayClient).sendCloseControlMessage(any(Session.class), any(MessageProducer.class), eq("queueId"));
+		when(activeSessions.remove(anyString())).thenReturn(activeSessionDTO);
+		doNothing().when(relayClient).closeConnection(any(Session.class));
+		
+		final String error = testingObject.closeSession(1234);
+		
+		Assert.assertNull(error);
+		
+		verify(activeSessions, times(1)).values();
+		verify(relayClient, times(1)).createConnection("localhost", 12345, true);
+		verify(relayClient, times(1)).initializeControlRelay(any(Session.class), eq("peer"), eq("queueId"));
+		verify(relayClient, times(2)).sendCloseControlMessage(any(Session.class), any(MessageProducer.class), eq("queueId"));
+		verify(activeSessions, times(1)).remove(anyString());
+		verify(relayClient, times(1)).closeConnection(any(Session.class));
+	}
+		
 	//=================================================================================================
 	// assistant methods
 	

@@ -16,6 +16,9 @@ package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class AccessTypeRelayResponseDTO implements Serializable {
 	
 	//=================================================================================================
@@ -41,4 +44,14 @@ public class AccessTypeRelayResponseDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	public void setDirectAccess(final boolean directAccess) { this.directAccess = directAccess; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

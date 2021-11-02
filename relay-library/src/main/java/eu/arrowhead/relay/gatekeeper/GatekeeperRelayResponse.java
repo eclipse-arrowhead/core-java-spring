@@ -18,6 +18,7 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.AccessTypeRelayResponseDTO;
+import eu.arrowhead.common.dto.internal.GSDMultiPollResponseDTO;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.internal.ICNProposalResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalResponseDTO;
@@ -59,6 +60,15 @@ public class GatekeeperRelayResponse {
 		}
 		
 		throw new DataNotFoundException("The response is not a result of a GSD poll.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public GSDMultiPollResponseDTO getGSDMultiPollResponse() {
+		if (payload instanceof GSDMultiPollResponseDTO) {
+			return (GSDMultiPollResponseDTO) payload;
+		}
+		
+		throw new DataNotFoundException("The response is not a result of a multi GSD poll.");
 	}
 	
 	//-------------------------------------------------------------------------------------------------

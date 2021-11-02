@@ -14,10 +14,7 @@
 
 package eu.arrowhead.common.database.entity;
 
-import eu.arrowhead.common.CoreDefaults;
-import eu.arrowhead.common.dto.internal.ChoreographerStatusType;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import java.time.ZonedDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -29,13 +26,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 
-import java.time.ZonedDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import eu.arrowhead.common.CoreDefaults;
+import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
 
 @Entity
 public class ChoreographerSession {
@@ -53,7 +48,9 @@ public class ChoreographerSession {
 
     @Column(nullable = false, columnDefinition = "varchar(" + CoreDefaults.VARCHAR_BASIC + ")")
     @Enumerated(EnumType.STRING)
-    private ChoreographerStatusType status;
+    private ChoreographerSessionStatus status;
+    
+    private String notifyUri;
 
     @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private ZonedDateTime startedAt;
@@ -61,46 +58,45 @@ public class ChoreographerSession {
     @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private ZonedDateTime updatedAt;
 
-    @OneToMany(mappedBy = "session", fetch = FetchType.LAZY, orphanRemoval = true)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Set<ChoreographerRunningStep> runningSteps = new HashSet<>();
-
     //=================================================================================================
     // methods
 
-    //=================================================================================================
+    //-------------------------------------------------------------------------------------------------
     public ChoreographerSession() {}
 
-    //=================================================================================================
-    public ChoreographerSession(ChoreographerPlan plan, ChoreographerStatusType status) {
+    //-------------------------------------------------------------------------------------------------
+    public ChoreographerSession(final ChoreographerPlan plan, final ChoreographerSessionStatus status, final String notifyUri) {
         this.plan = plan;
         this.status = status;
+        this.notifyUri = notifyUri;
     }
 
-    //=================================================================================================
+    //-------------------------------------------------------------------------------------------------
     public long getId() { return id; }
     public ChoreographerPlan getPlan() { return plan; }
-    public ChoreographerStatusType getStatus() { return status; }
+    public ChoreographerSessionStatus getStatus() { return status; }
+    public String getNotifyUri() { return notifyUri; }
     public ZonedDateTime getStartedAt() { return startedAt; }
-    public Set<ChoreographerRunningStep> getRunningSteps() { return runningSteps; }
+    public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
-    //=================================================================================================
-    public void setId(long id) { this.id = id; }
-    public void setPlan(ChoreographerPlan plan) { this.plan = plan; }
-    public void setStatus(ChoreographerStatusType status) { this.status = status; }
-    public void setStartedAt(ZonedDateTime startedAt) { this.startedAt = startedAt; }
-    public void setRunningSteps(Set<ChoreographerRunningStep> runningSteps) { this.runningSteps = runningSteps; }
-
+    //-------------------------------------------------------------------------------------------------
+    public void setId(final long id) { this.id = id; }
+    public void setPlan(final ChoreographerPlan plan) { this.plan = plan; }
+    public void setStatus(final ChoreographerSessionStatus status) { this.status = status; }
+    public void setNotifyUri(String notifyUri) { this.notifyUri = notifyUri; }
+    public void setStartedAt(final ZonedDateTime startedAt) { this.startedAt = startedAt; }
+    public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
+ 
     //-------------------------------------------------------------------------------------------------
     @PrePersist
     public void onCreate() {
         this.startedAt = ZonedDateTime.now();
-        this.updatedAt = this.startedAt;
+        this.setUpdatedAt(this.startedAt);
     }
 
     //-------------------------------------------------------------------------------------------------
     @PreUpdate
     public void onUpdate() {
-        this.updatedAt = ZonedDateTime.now();
+        this.setUpdatedAt(ZonedDateTime.now());
     }
 }

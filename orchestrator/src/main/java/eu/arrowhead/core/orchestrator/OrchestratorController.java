@@ -168,7 +168,35 @@ public class OrchestratorController {
 	    } else if (!request.getOrchestrationFlags().getOrDefault(Flag.OVERRIDE_STORE, false)) { // overrideStore == false
 	    	return orchestratorService.orchestrationFromStore(request);
 	    } else {
-	    	return orchestratorService.dynamicOrchestration(request);
+	    	return orchestratorService.dynamicOrchestration(request, false);
+	    }
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = POST_ORCHESTRATIOR_DESCRIPTION, response = OrchestrationResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_ORCHESTRATOR_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_ORCHESTRATOR_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = CommonConstants.OP_ORCH_PROCESS_BY_PROXY_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public OrchestrationResponseDTO orchestrationProcessByProxy(@RequestBody final OrchestrationFormRequestDTO request) { 
+		logger.debug("orchestrationProcess started ...");
+		
+		final String origin = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS_BY_PROXY_URI;
+		checkOrchestratorFormRequestDTO(request, origin);
+		
+	    if (request.getOrchestrationFlags().getOrDefault(Flag.TRIGGER_INTER_CLOUD, false)) {
+	    	if (!gatekeeperIsPresent) {
+	    		throw new BadPayloadException("Forced inter cloud service request" + GATEKEEPER_IS_NOT_PRESENT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			}
+	    	
+	    	return orchestratorService.triggerInterCloud(request);
+	    } else if (!request.getOrchestrationFlags().getOrDefault(Flag.OVERRIDE_STORE, false)) { // overrideStore == false
+	    	return orchestratorService.orchestrationFromStore(request);
+	    } else {
+	    	return orchestratorService.dynamicOrchestration(request, true);
 	    }
 	}
 	

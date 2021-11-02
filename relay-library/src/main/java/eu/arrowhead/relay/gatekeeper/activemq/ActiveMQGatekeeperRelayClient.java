@@ -37,15 +37,12 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 
-import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.ActiveMQSession;
-import org.apache.activemq.ActiveMQSslConnectionFactory;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
-import org.springframework.web.util.UriComponents;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -55,6 +52,8 @@ import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.AccessTypeRelayResponseDTO;
 import eu.arrowhead.common.dto.internal.DecryptedMessageDTO;
+import eu.arrowhead.common.dto.internal.GSDMultiPollRequestDTO;
+import eu.arrowhead.common.dto.internal.GSDMultiPollResponseDTO;
 import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.internal.GeneralAdvertisementMessageDTO;
@@ -69,6 +68,7 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.relay.RelayCryptographer;
+import eu.arrowhead.relay.activemq.RelayActiveMQConnectionFactory;
 import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClient;
 import eu.arrowhead.relay.gatekeeper.GatekeeperRelayRequest;
 import eu.arrowhead.relay.gatekeeper.GatekeeperRelayResponse;
@@ -79,8 +79,6 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	//=================================================================================================
 	// members
 	
-	private static final String TCP = "tcp";
-	private static final String SSL = "ssl";
 	private static final String GENERATED_TOPIC_SUFFIX = "M5QTZXM9G9AnpPHWT6WennWu";
 	private static final String GENERAL_TOPIC_NAME = "General-" + GENERATED_TOPIC_SUFFIX;
 	private static final String REQUEST_QUEUE_PREFIX = "REQ-";
@@ -90,11 +88,10 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	private static final Map<ActiveMQSession,List<ActiveMQQueue>> STALE_QUEUES = new HashMap<>();
 	private static final Set<Connection> STALE_CONNECTIONS = new HashSet<>();
 	
-	private static final List<String> supportedRequestTypes = List.of(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL,
-																	  CoreCommonConstants.RELAY_MESSAGE_TYPE_ACCESS_TYPE, CoreCommonConstants.RELAY_MESSAGE_TYPE_SYSTEM_ADDRESS_LIST,
-																	  CoreCommonConstants.RELAY_MESSAGE_TYPE_QOS_RELAY_TEST);	
+	private static final List<String> supportedRequestTypes = List.of(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, CoreCommonConstants.RELAY_MESSAGE_TYPE_MULTI_GSD_POLL,
+																	  CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL, CoreCommonConstants.RELAY_MESSAGE_TYPE_ACCESS_TYPE,
+																	  CoreCommonConstants.RELAY_MESSAGE_TYPE_SYSTEM_ADDRESS_LIST, CoreCommonConstants.RELAY_MESSAGE_TYPE_QOS_RELAY_TEST);	
 	
-	private static final int CLIENT_ID_LENGTH = 16;
 	private static final int SESSION_ID_LENGTH = 48;
 
 	private static final Logger logger = LogManager.getLogger(ActiveMQGatekeeperRelayClient.class);
@@ -102,8 +99,8 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	
 	private final String serverCommonName;
 	private final PublicKey publicKey;
-	private final SSLProperties sslProps;
 	private final RelayCryptographer cryptographer;
+	private final RelayActiveMQConnectionFactory connectionFactory;
 	private final long timeout;
 	
 	private final Object lock = new Object();
@@ -120,8 +117,8 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		
 		this.serverCommonName = serverCommonName;
 		this.cryptographer = new RelayCryptographer(privateKey);
+		this.connectionFactory = new RelayActiveMQConnectionFactory(null, -1, sslProps);
 		this.publicKey = publicKey;
-		this.sslProps = sslProps;
 		this.timeout = timeout;
 	}
 
@@ -134,7 +131,9 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		Assert.isTrue(!Utilities.isEmpty(host), "Host is null or blank.");
 		Assert.isTrue(port > CommonConstants.SYSTEM_PORT_RANGE_MIN && port < CommonConstants.SYSTEM_PORT_RANGE_MAX, "Port is invalid.");
 		
-		final Connection connection = secure ? createSSLConnection(host, port) : createTCPConnection(host, port);
+		connectionFactory.setHost(host);
+		connectionFactory.setPort(port);
+		final Connection connection = connectionFactory.createConnection(secure);
 		
 		try {
 			connection.start();
@@ -271,11 +270,11 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	public void sendResponse(final Session session, final GatekeeperRelayRequest request, final Object responsePayload) throws JMSException {
 		logger.debug("sendResponse started...");
 		
-		Assert.notNull(session, "session is null.");
-		Assert.notNull(request, "request is null.");
+		Assert.notNull(request, "Request is null.");
 		Assert.notNull(request.getAnswerSender(), "Sender is null.");
 		
 		try {
+			Assert.notNull(session, "Session is null.");
 			Assert.notNull(request.getPeerPublicKey(), "Peer public key is null.");
 			Assert.isTrue(!Utilities.isEmpty(request.getSessionId()), "Session id is null or blank.");
 			Assert.isTrue(!Utilities.isEmpty(request.getMessageType()), "Message type is null or blank.");
@@ -305,16 +304,16 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		Assert.isTrue(!Utilities.isEmpty(recipientPublicKey), "recipientPublicKey is null or blank.");
 		final PublicKey peerPublicKey = Utilities.getPublicKeyFromBase64EncodedString(recipientPublicKey);
 
-		final String sessionId = createSessionId();
-		final String encryptedSessionId = encryptSessionId(sessionId, peerPublicKey);
-		final String senderPublicKey = Base64.getEncoder().encodeToString(publicKey.getEncoded());
-		final GeneralAdvertisementMessageDTO messageDTO = new GeneralAdvertisementMessageDTO(serverCommonName, senderPublicKey, recipientCN, encryptedSessionId);
-		final TextMessage textMessage = session.createTextMessage(Utilities.toJson(messageDTO));
-
 		MessageProducer producer = null;
 		MessageConsumer messageConsumer = null;
 		
 		try {
+			final String sessionId = createSessionId();
+			final String encryptedSessionId = encryptSessionId(sessionId, peerPublicKey);
+			final String senderPublicKey = Base64.getEncoder().encodeToString(publicKey.getEncoded());
+			final GeneralAdvertisementMessageDTO messageDTO = new GeneralAdvertisementMessageDTO(serverCommonName, senderPublicKey, recipientCN, encryptedSessionId);
+			final TextMessage textMessage = session.createTextMessage(Utilities.toJson(messageDTO));
+			
 			final Topic topic = session.createTopic(GENERAL_TOPIC_NAME);
 			producer = session.createProducer(topic);
 			
@@ -352,13 +351,13 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	public GatekeeperRelayResponse sendRequestAndReturnResponse(final Session session, final GeneralAdvertisementResult advResponse, final Object requestPayload) throws JMSException {
 		logger.debug("sendRequestAndReturnResponse started...");
 
-		Assert.notNull(session, "session is null.");
 		Assert.notNull(advResponse, "advResponse is null.");
 		Assert.notNull(advResponse.getAnswerReceiver(), "Receiver is null.");
 		
 		MessageProducer messageProducer = null;
 		try {
-			Assert.isTrue(!Utilities.isEmpty(REQUEST_QUEUE_PREFIX), "Peer common name is null or blank.");
+			Assert.notNull(session, "Session is null.");
+			Assert.isTrue(!Utilities.isEmpty(advResponse.getPeerCN()), "Peer common name is null or blank.");
 			Assert.notNull(advResponse.getPeerPublicKey(), "Peer public key is null.");
 			Assert.isTrue(!Utilities.isEmpty(advResponse.getSessionId()), "Session id is null or blank.");
 			Assert.notNull(requestPayload, "Payload is null.");
@@ -447,44 +446,6 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private Connection createTCPConnection(final String host, final int port) throws JMSException {
-		final UriComponents uri = Utilities.createURI(TCP, host, port, null);
-		final ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(uri.toUri());
-		connectionFactory.setClientID(RandomStringUtils.randomAlphanumeric(CLIENT_ID_LENGTH));
-		final Connection connection = connectionFactory.createConnection();
-		connectionFactory.setClientID(null);
-
-		return connection;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private Connection createSSLConnection(final String host, final int port) throws JMSException {
-		final UriComponents uri = Utilities.createURI(SSL, host, port, null);
-		final ActiveMQSslConnectionFactory connectionFactory = new ActiveMQSslConnectionFactory(uri.toUri());
-		try {
-			connectionFactory.setClientID(RandomStringUtils.randomAlphanumeric(CLIENT_ID_LENGTH));
-			connectionFactory.setKeyStoreType(sslProps.getKeyStoreType());
-			connectionFactory.setKeyStore(sslProps.getKeyStore().getURI().toString());
-			connectionFactory.setKeyStorePassword(sslProps.getKeyStorePassword());
-			connectionFactory.setKeyStoreKeyPassword(sslProps.getKeyPassword());
-			connectionFactory.setTrustStoreType(sslProps.getKeyStoreType());
-			connectionFactory.setTrustStore(sslProps.getTrustStore().getURI().toString());
-			connectionFactory.setTrustStorePassword(sslProps.getTrustStorePassword());
-			
-			final Connection connection = connectionFactory.createConnection();
-			connectionFactory.setClientID(null);
-			
-			return connection;
-		} catch (final JMSException ex) {
-			throw ex;
-		} catch (final Exception ex) {
-			logger.debug(ex.getMessage());
-			logger.debug("Stacktrace: ", ex);
-			throw new JMSException("Error while creating SSL connection: " + ex.getMessage());
-		}
-	}
-
-	//-------------------------------------------------------------------------------------------------
 	private String createSessionId() {
 		return RandomStringUtils.randomAlphanumeric(SESSION_ID_LENGTH);
 	}
@@ -532,6 +493,8 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		switch (messageType) {
 		case CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL: 
 			return request ? GSDPollRequestDTO.class : GSDPollResponseDTO.class;
+		case CoreCommonConstants.RELAY_MESSAGE_TYPE_MULTI_GSD_POLL:
+			return request ? GSDMultiPollRequestDTO.class : GSDMultiPollResponseDTO.class; 
 		case CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL:
 			return request ? ICNProposalRequestDTO.class : ICNProposalResponseDTO.class;
 		case CoreCommonConstants.RELAY_MESSAGE_TYPE_ACCESS_TYPE:
@@ -551,6 +514,10 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		
 		if (requestPayload instanceof GSDPollRequestDTO) {
 			return CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL;
+		}
+		
+		if (requestPayload instanceof GSDMultiPollRequestDTO) {
+			return CoreCommonConstants.RELAY_MESSAGE_TYPE_MULTI_GSD_POLL;
 		}
 		
 		if (requestPayload instanceof ICNProposalRequestDTO) {

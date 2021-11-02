@@ -57,6 +57,7 @@ public enum CoreSystem {
 															   CoreSystemService.AUTH_CONTROL_SUBSCRIPTION_SERVICE)),
 	
 	ORCHESTRATOR(Defaults.DEFAULT_ORCHESTRATOR_PORT, List.of(CoreSystemService.ORCHESTRATION_SERVICE,
+															 CoreSystemService.ORCHESTRATION_BY_PROXY_SERVICE,
 															 CoreSystemService.ORCHESTRATION_CREATE_FLEXIBLE_STORE_RULES_SERVICE,
 															 CoreSystemService.ORCHESTRATION_REMOVE_FLEXIBLE_STORE_RULE_SERVICE,
 															 CoreSystemService.ORCHESTRATION_CLEAN_FLEXIBLE_STORE_SERVICE,
@@ -66,6 +67,7 @@ public enum CoreSystem {
 															 CoreSystemService.ORCHESTRATION_QOS_CONFIRM_RESERVATION_SERVICE)),
 	
 	GATEKEEPER(Defaults.DEFAULT_GATEKEEPER_PORT, List.of(CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY,
+														 CoreSystemService.GATEKEEPER_MULTI_GLOBAL_SERVICE_DISCOVERY,
 														 CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATION,
 														 CoreSystemService.GATEKEEPER_PULL_CLOUDS,
 														 CoreSystemService.GATEKEEPER_COLLECT_SYSTEM_ADDRESSES,
@@ -84,9 +86,12 @@ public enum CoreSystem {
 	
 	GATEWAY(Defaults.DEFAULT_GATEWAY_PORT, List.of(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE,
 												   CoreSystemService.GATEWAY_PROVIDER_SERVICE,
-												   CoreSystemService.GATEWAY_CONSUMER_SERVICE)),
+												   CoreSystemService.GATEWAY_CONSUMER_SERVICE,
+												   CoreSystemService.GATEWAY_CLOSE_SESSIONS_SERVICE)),
 	
-	CHOREOGRAPHER(Defaults.DEFAULT_CHOREOGRAPHER_PORT, List.of(CoreSystemService.CHOREOGRAPHER_SERVICE)),
+	CHOREOGRAPHER(Defaults.DEFAULT_CHOREOGRAPHER_PORT, List.of(CoreSystemService.CHOREOGRAPHER_SERVICE,
+			                                                   CoreSystemService.CHOREOGRAPHER_REGISTER_EXECUTOR_SERVICE,
+			                                                   CoreSystemService.CHOREOGRAPHER_UNREGISTER_EXECUTOR_SERVICE)),
 
     CONFIGURATION(Defaults.DEFAULT_CONFIGURATION_PORT, List.of(CoreSystemService.CONFIGURATION_SERVICE,
                                                                CoreSystemService.CONFIGURATION_RAW_SERVICE)),
