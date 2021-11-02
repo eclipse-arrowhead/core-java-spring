@@ -90,7 +90,7 @@ public class ChoreographerPlanExecutionChecker {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerRunPlanResponseDTO checkPlanForExecution(final boolean allowInterCloud, final long planId, final boolean dependencyCheck) { //TODO: test this
+	public ChoreographerRunPlanResponseDTO checkPlanForExecution(final boolean allowInterCloud, final long planId, final boolean dependencyCheck) { 
 		logger.debug("checkPlanForExecution started...");
 		
 		ChoreographerPlan plan = null;

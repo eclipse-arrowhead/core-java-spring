@@ -133,6 +133,9 @@ public class GatekeeperDriver {
 
 	private GatekeeperRelayClient relayClient;
 	
+	@Autowired
+	private GSDMultiPollRequestExecutorFactory multiGSDExecutorFactory;
+	
 	private final Logger logger = LogManager.getLogger(GatekeeperDriver.class);
 	
 	//=================================================================================================
@@ -192,20 +195,20 @@ public class GatekeeperDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public List<ErrorWrapperDTO> sendMultiGSDPollRequest(final List<Cloud> cloudsToContact, final GSDMultiPollRequestDTO gsdPollRequestDTO) throws InterruptedException { //TODO: test this
+	public List<ErrorWrapperDTO> sendMultiGSDPollRequest(final List<Cloud> cloudsToContact, final GSDMultiPollRequestDTO gsdPollRequestDTO) throws InterruptedException { 
 		logger.debug("sendMultiGSDPollRequest started...");		
-		Assert.isTrue(cloudsToContact != null && !cloudsToContact.isEmpty(), "cloudsToContact list is null or empty");
+		Assert.isTrue(!Utilities.isEmpty(cloudsToContact), "cloudsToContact list is null or empty");
 		Assert.notNull(gsdPollRequestDTO, "gsdPollRequestDTO is null");
-		Assert.isTrue(!Utilities.isEmpty(gsdPollRequestDTO.getRequestedServices()), "requestedServices list is null or empty.");
+		Assert.isTrue(!Utilities.isEmpty(gsdPollRequestDTO.getRequestedServices()), "requestedServices list is null or empty");
 		for (final ServiceQueryFormDTO serviceReq : gsdPollRequestDTO.getRequestedServices()) {
-			Assert.isTrue(!Utilities.isEmpty(serviceReq.getServiceDefinitionRequirement()), "serviceDefinitionRequirement is null or empty.");
+			Assert.isTrue(!Utilities.isEmpty(serviceReq.getServiceDefinitionRequirement()), "serviceDefinitionRequirement is null or empty");
 		}
 		Assert.notNull(gsdPollRequestDTO.getRequesterCloud(), "requesterCloud is null");
 		
 		final int numOfCloudsToContact = cloudsToContact.size();
 		final BlockingQueue<ErrorWrapperDTO> queue = new LinkedBlockingQueue<>(numOfCloudsToContact);		
 
-		final GSDMultiPollRequestExecutor gsdPollRequestExecutor = new GSDMultiPollRequestExecutor(queue, relayClient, gsdPollRequestDTO, getOneGatekeeperRelayPerCloud(cloudsToContact));
+		final GSDMultiPollRequestExecutor gsdPollRequestExecutor = multiGSDExecutorFactory.newExecutor(queue, relayClient, gsdPollRequestDTO, getOneGatekeeperRelayPerCloud(cloudsToContact));
 		gsdPollRequestExecutor.execute();
 		
 		final List<ErrorWrapperDTO> gsdPollAnswers = new ArrayList<>(numOfCloudsToContact);
@@ -234,8 +237,8 @@ public class GatekeeperDriver {
 	}
 	
     //-------------------------------------------------------------------------------------------------
-    public ServiceQueryResultListDTO sendServiceRegistryMultiQuery(final ServiceQueryFormListDTO forms) { //TODO: test this
-        logger.debug("multiQueryServiceRegistry started...");
+    public ServiceQueryResultListDTO sendServiceRegistryMultiQuery(final ServiceQueryFormListDTO forms) { 
+        logger.debug("sendServiceRegistryMultiQuery started...");
         Assert.notNull(forms, "ServiceQueryFormListDTO is null.");
 
         final UriComponents uri = getMultiQueryServiceRegistryUri();
@@ -602,11 +605,11 @@ public class GatekeeperDriver {
             try {
                 return (UriComponents) arrowheadContext.get(CoreCommonConstants.SR_MULTI_QUERY_URI);
             } catch (final ClassCastException ex) {
-                throw new ArrowheadException("Choreographer can't find Service Registry multi-query URI.");
+                throw new ArrowheadException("Gatekeeper can't find Service Registry multi-query URI.");
             }
         }
 
-        throw new ArrowheadException("Choreographer can't find Service Registry multi-query URI.");
+        throw new ArrowheadException("Gatekeeper can't find Service Registry multi-query URI.");
     }
 	
 	//-------------------------------------------------------------------------------------------------
@@ -989,6 +992,22 @@ public class GatekeeperDriver {
 			if (req.getSelected().getService() == null) {
 				throw new InvalidParameterException("Selected service is null");
 			}
+		}
+	}
+	
+	//=================================================================================================
+	// nested classes
+	
+	//-------------------------------------------------------------------------------------------------
+	@Component
+	static class GSDMultiPollRequestExecutorFactory {
+		
+		//=================================================================================================
+		// methods
+		
+		//-------------------------------------------------------------------------------------------------
+		public GSDMultiPollRequestExecutor newExecutor(final BlockingQueue<ErrorWrapperDTO> queue, final GatekeeperRelayClient relayClient, final GSDMultiPollRequestDTO gsdPollRequestDTO, final Map<Cloud,Relay> gatekeeperRelayPerCloud) {
+			return new GSDMultiPollRequestExecutor(queue, relayClient, gsdPollRequestDTO, gatekeeperRelayPerCloud);
 		}
 	}
 }

@@ -32,7 +32,7 @@ public class ServiceRegistryService {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public KeyValuesDTO getPublicConfig() { //TODO juint
+	public KeyValuesDTO getPublicConfig() {
 		logger.debug("getPublicConfig started...");
 		
 		final Map<String,String> map = new HashMap<>();

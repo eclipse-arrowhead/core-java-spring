@@ -137,6 +137,7 @@ public class TokenGenerationService {
 			tokenDetails.setConsumerAdress(request.getConsumer().getAddress());
 			tokenDetails.setConsumerPort(request.getConsumer().getPort());
 			tokenDetails.setTokenData(generateTokensResponse(request).getTokenData());
+			data.add(tokenDetails);
 		}
 		
 		return new TokenGenerationMultiServiceResponseDTO(data);

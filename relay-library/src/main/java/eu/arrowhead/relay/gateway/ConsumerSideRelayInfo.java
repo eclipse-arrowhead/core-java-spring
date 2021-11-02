@@ -40,5 +40,5 @@ public class ConsumerSideRelayInfo {
 
 	//-------------------------------------------------------------------------------------------------
 	public MessageProducer getMessageSender() { return messageSender; }
-	public MessageProducer getControlResponseMessageSender() { return controlMessageSender; }
+	public MessageProducer getControlMessageSender() { return controlMessageSender; }
 }

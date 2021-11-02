@@ -119,7 +119,7 @@ public class ChoreographerPlanController {
     private JmsTemplate jms;
     
 	@Value(CoreCommonConstants.$CHOREOGRAPHER_IS_GATEKEEPER_PRESENT_WD)
-	private boolean gateKeeperIsPresent;
+	private boolean gatekeeperIsPresent;
     
     //=================================================================================================
 	// methods
@@ -231,7 +231,7 @@ public class ChoreographerPlanController {
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response= ErrorMessageDTO.class)
     })
     @PostMapping(path = START_SESSION_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody public List<ChoreographerRunPlanResponseDTO> startPlans(@RequestBody final List<ChoreographerRunPlanRequestDTO> requests) { //TODO: test this
+    @ResponseBody public List<ChoreographerRunPlanResponseDTO> startPlans(@RequestBody final List<ChoreographerRunPlanRequestDTO> requests) { 
     	logger.debug("startPlans started...");
     	
     	if (requests == null || requests.isEmpty()) {
@@ -240,8 +240,7 @@ public class ChoreographerPlanController {
     	
     	final List<ChoreographerRunPlanResponseDTO> results = new ArrayList<>(requests.size());
         for (final ChoreographerRunPlanRequestDTO request : requests) {
-        	
-        	request.setAllowInterCloud(gateKeeperIsPresent && request.isAllowInterCloud()); // change inter-cloud flag based on gatekeeper presence in the cloud 
+        	request.setAllowInterCloud(gatekeeperIsPresent && request.isAllowInterCloud()); // change inter-cloud flag based on gatekeeper presence in the cloud 
         	final ChoreographerRunPlanResponseDTO response = planChecker.checkPlanForExecution(request);
            
         	if (!Utilities.isEmpty(response.getErrorMessages())) {
@@ -268,14 +267,14 @@ public class ChoreographerPlanController {
     })
     @GetMapping(path = CHECK_PLAN_MGMT_BY_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody public ChoreographerCheckPlanResponseDTO checkPlan(@PathVariable(value = PATH_VARIABLE_ID) final long id,
-            														 @RequestParam(name = REQUEST_PARRAM_ALLOW_INTER_CLOUD, defaultValue = FALSE) final boolean allowIntercloud) { //TODO test this (new query param)
+            														 @RequestParam(name = REQUEST_PARRAM_ALLOW_INTER_CLOUD, defaultValue = FALSE) final boolean allowIntercloud) { 
         logger.debug("New check plan GET request received with id: {}.", id);
 
         if (id < 1) {
             throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + CHECK_PLAN_MGMT_BY_ID_URI);
         }
 
-        final ChoreographerRunPlanResponseDTO result = planChecker.checkPlanForExecution(gateKeeperIsPresent && allowIntercloud, id);
+        final ChoreographerRunPlanResponseDTO result = planChecker.checkPlanForExecution(gatekeeperIsPresent && allowIntercloud, id);
         logger.debug("Check report for plan with id: {} successfully retrieved!", id);
 
         return new ChoreographerCheckPlanResponseDTO(id, result.getErrorMessages(), result.getNeedInterCloud());

@@ -168,7 +168,7 @@ public class RelayTestService {
 		try {
 			thread = threadFactory.createSenderSideThread(session, targetCloud, relay, request.getReceiverQoSMonitorPublicKey(), request.getQueueId()); 
 			final ConsumerSideRelayInfo info = relayClient.initializeConsumerSideRelay(session, thread, request.getPeerName(), request.getQueueId());
-			thread.init(info.getMessageSender(), info.getControlResponseMessageSender());
+			thread.init(info.getMessageSender(), info.getControlMessageSender());
 			thread.start();
 		} catch (final JMSException ex) {
 			relayClient.closeConnection(session);
