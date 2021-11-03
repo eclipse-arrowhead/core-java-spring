@@ -54,6 +54,7 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_AUTH_CONTROL_SUBSCRIPTION = "authorization-control-subscription";
 	
 	public static final String CORE_SERVICE_ORCH_PROCESS = "orchestration-service";
+	public static final String CORE_SERVICE_ORCH_PROCESS_BY_PROXY = "orchestration-service-by-proxy";
 	public static final String CORE_SERVICE_ORCH_CREATE_FLEXIBLE_STORE_RULES = "orchestration-create-flexible-store-rules";
 	public static final String CORE_SERVICE_ORCH_REMOVE_FLEXIBLE_STORE_RULE = "orchestration-remove-flexible-store-rule";
 	public static final String CORE_SERVICE_ORCH_CLEAN_FLEXIBLE_STORE = "orchestration-clean-flexible-store";
