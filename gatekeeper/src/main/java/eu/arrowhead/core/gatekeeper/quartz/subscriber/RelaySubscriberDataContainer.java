@@ -98,9 +98,9 @@ public class RelaySubscriberDataContainer {
 			for (final RelayResource resource : relayResources.values()) {
 				resource.close(gatekeeperRelayClient);
 			}
+
+			relayResources.clear();
 		}
-		
-		relayResources.clear();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
