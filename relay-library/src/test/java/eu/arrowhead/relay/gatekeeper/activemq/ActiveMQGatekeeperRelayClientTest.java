@@ -378,6 +378,34 @@ public class ActiveMQGatekeeperRelayClientTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void testGetGeneralAdvertisementMessageNullText() throws Exception {
+		final TextMessage msg = Mockito.mock(TextMessage.class);
+		
+		when(msg.getText()).thenReturn(null);
+		
+		final GeneralAdvertisementMessageDTO result = testingObject.getGeneralAdvertisementMessage(msg);
+		
+		Assert.assertNull(result);
+		
+		verify(msg, times(1)).getText();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetGeneralAdvertisementMessageEmptyText() throws Exception {
+		final TextMessage msg = Mockito.mock(TextMessage.class);
+		
+		when(msg.getText()).thenReturn("");
+		
+		final GeneralAdvertisementMessageDTO result = testingObject.getGeneralAdvertisementMessage(msg);
+		
+		Assert.assertNull(result);
+		
+		verify(msg, times(1)).getText();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void testGetGeneralAdvertisementMessageForSomeoneElse() throws Exception {
 		final String text = "{ \"recipientCN\": \"other\" }";
 		final TextMessage msg = Mockito.mock(TextMessage.class);
