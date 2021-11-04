@@ -53,22 +53,38 @@ public class OrchestrationFlags extends HashMap<String,Boolean> {
 	
 	//-------------------------------------------------------------------------------------------------
 	public Boolean put(final Flag flag, final Boolean value) {
+		if (flag == null) {
+			throw new IllegalArgumentException("Flag is null.");
+		}
+		
 		final boolean validValue = (value == null ? false : value); 
 		return super.put(flag.getFlag(), validValue);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public boolean get(final Flag flag) {
+		if (flag == null) {
+			throw new IllegalArgumentException("Flag is null.");
+		}
+		
 		return super.get(flag.getFlag());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public boolean getOrDefault(final Flag flag, final boolean defaultValue) {
+		if (flag == null) {
+			throw new IllegalArgumentException("Flag is null.");
+		}
+		
 		return super.getOrDefault(flag.getFlag(), defaultValue);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public boolean containsKey(final Flag flag) {
+		if (flag == null) {
+			return false;
+		}
+		
 		return super.containsKey(flag.getFlag());
 	}
 	
