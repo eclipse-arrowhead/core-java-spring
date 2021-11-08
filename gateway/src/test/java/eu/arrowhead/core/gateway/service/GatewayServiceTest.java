@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.jms.BytesMessage;
 import javax.jms.CompletionListener;
@@ -84,6 +85,8 @@ import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.exception.UnavailableServerException;
+import eu.arrowhead.core.gateway.thread.ConsumerSideServerSocketThread;
+import eu.arrowhead.core.gateway.thread.ProviderSideSocketThreadHandler;
 import eu.arrowhead.core.gateway.thread.SSLContextFactory;
 import eu.arrowhead.relay.gateway.ConsumerSideRelayInfo;
 import eu.arrowhead.relay.gateway.ControlRelayInfo;
@@ -107,6 +110,12 @@ public class GatewayServiceTest {
 	
 	@Mock
 	private ConcurrentHashMap<String,ActiveSessionDTO> activeSessions;
+	
+	@Mock
+	private ConcurrentMap<String,ConsumerSideServerSocketThread> activeConsumerSideSocketThreads;
+	
+	@Mock
+	private ConcurrentMap<String,ProviderSideSocketThreadHandler> activeProviderSideSocketThreadHandlers;
 	
 	@Mock
 	private ConcurrentLinkedQueue<Integer> availablePorts;
@@ -502,49 +511,52 @@ public class GatewayServiceTest {
 		testingObject.connectProvider(request);
 	}
 	
-//	//-------------------------------------------------------------------------------------------------
-//	@Test
-//	public void testConnectProviderEverythingOK() throws JMSException, InterruptedException {
-//		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
-//		final MessageProducer producer = getTestMessageProducer();
-//		
-//		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenReturn(getTestSession());
-//		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
-//		when(relayClient.initializeProviderSideRelay(any(Session.class), any(MessageListener.class))).thenReturn(new ProviderSideRelayInfo("peerName", "queueId", producer, producer));
-//		when(activeSessions.put(any(String.class), any(ActiveSessionDTO.class))).thenReturn(null);
-//		when(appContext.getBean(SSLProperties.class)).thenReturn(getTestSSLPropertiesForThread());
-//		
-//		final boolean[] started = { false };
-//		new Thread() {
-//			@Override
-//			public void run() {
-//				final SSLProperties props = getTestSSLPropertiesForDummyProvider();
-//				final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(props);
-//				final SSLServerSocketFactory serverSocketFactory = sslContext.getServerSocketFactory();
-//				try {
-//					final SSLServerSocket dummyServerSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(22032);
-//					started[0] = true;
-//					final Socket socket = dummyServerSocket.accept();
-//					socket.close();
-//				} catch (final IOException ex) {
-//					ex.printStackTrace();
-//				}
-//			}
-//		}.start();
-//		
-//		while (!started[0]) {
-//			Thread.sleep(1000);
-//		}
-//		Thread.sleep(1000);
-//		
-//		final GatewayProviderConnectionResponseDTO response = testingObject.connectProvider(request);
-//		
-//		Assert.assertEquals("queueId", response.getQueueId());
-//		Assert.assertEquals("peerName", response.getPeerName());
-//		final String key = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA5r6P+DeDvSwMe5qWGlCoX94oNedSu7fdRpueJ9mNKfTgKwRHE8eOwVOf9By/LecfgRnlT+sf8qZbW3GG9jc+3xOPB+Q+NKJcVvLiU+nay6XZD/IbKaOcZz/pKWlQ+J6OoMQuoLSIA+IaVLuuP8Dlj8GJjKZyAxv643B16US2d6QxrkadQ/oKcnCVyBC/SnRAGALt0MHMTrY+MCU1dGqXb0i+aFmhcbMjBDYApni9bIUdOWy7+BlhnUdDATOenFBni94xZ8Or6cupYmKZLtv6rkvV/YkXM7N4m9avmTHGMU1BUVEbSjJ/6aqiTdBPaenHd6WNeFpgIoreG1vHTWpGeQIDAQAB"; 
-//		
-//		Assert.assertEquals(key, response.getProviderGWPublicKey());
-//	}
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectProviderEverythingOK() throws JMSException, InterruptedException {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		final MessageProducer producer = getTestMessageProducer();
+		final MessageConsumer consumer = getTestMessageConsumer();
+		
+		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenReturn(getTestSession());
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		final ProviderSideRelayInfo info = new ProviderSideRelayInfo("peerName", "queueId", producer, producer, consumer, consumer);
+		when(relayClient.initializeProviderSideRelay(any(Session.class), any(MessageListener.class))).thenReturn(info);
+		when(activeSessions.put(any(String.class), any(ActiveSessionDTO.class))).thenReturn(null);
+		when(appContext.getBean(SSLProperties.class)).thenReturn(getTestSSLPropertiesForThread());
+		
+		final boolean[] started = { false };
+		new Thread() {
+			@Override
+			public void run() {
+				final SSLProperties props = getTestSSLPropertiesForDummyProvider();
+				final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(props);
+				final SSLServerSocketFactory serverSocketFactory = sslContext.getServerSocketFactory();
+				try {
+					final SSLServerSocket dummyServerSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(22032);
+					started[0] = true;
+					final Socket socket = dummyServerSocket.accept();
+					socket.close();
+				} catch (final IOException ex) {
+					ex.printStackTrace();
+				}
+			}
+		}.start();
+		
+		while (!started[0]) {
+			Thread.sleep(1000);
+		}
+		Thread.sleep(1000);
+		
+		final GatewayProviderConnectionResponseDTO response = testingObject.connectProvider(request);
+		
+		Assert.assertEquals("queueId", response.getQueueId());
+		Assert.assertEquals("peerName", response.getPeerName());
+		final String key = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA5r6P+DeDvSwMe5qWGlCoX94oNedSu7fdRpueJ9mNKfTgKwRHE8eOwVOf9By/LecfgRnlT+sf8qZbW3GG9jc+3xOPB+Q+NKJcVvLiU+nay6XZD/IbKaOcZz/pKWlQ+J6OoMQuoLSIA+IaVLuuP8Dlj8GJjKZyAxv643B16US2d6QxrkadQ/oKcnCVyBC/SnRAGALt0MHMTrY+MCU1dGqXb0i+aFmhcbMjBDYApni9bIUdOWy7+BlhnUdDATOenFBni94xZ8Or6cupYmKZLtv6rkvV/YkXM7N4m9avmTHGMU1BUVEbSjJ/6aqiTdBPaenHd6WNeFpgIoreG1vHTWpGeQIDAQAB"; 
+		
+		Assert.assertEquals(key, response.getProviderGWPublicKey());
+		verify(activeProviderSideSocketThreadHandlers, times(1)).put(eq(info.getQueueId()), any(ProviderSideSocketThreadHandler.class));
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
@@ -666,23 +678,25 @@ public class GatewayServiceTest {
 		testingObject.connectConsumer(request);
 	}
 	
-//	//-------------------------------------------------------------------------------------------------
-//	@Test
-//	public void testConnectConsumerEverythingOK() throws JMSException {
-//		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
-//		final MessageProducer producer = getTestMessageProducer();
-//		
-//		when(availablePorts.poll()).thenReturn(54321);
-//		when(activeSessions.put(any(String.class), any(ActiveSessionDTO.class))).thenReturn(null);
-//		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenReturn(getTestSession());
-//		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
-//		when(relayClient.initializeConsumerSideRelay(any(Session.class), any(MessageListener.class), any(String.class), any(String.class))).thenReturn(new ConsumerSideRelayInfo(producer, producer));
-//		when(appContext.getBean(SSLProperties.class)).thenReturn(getTestSSLPropertiesForThread());
-//		
-//		final int serverPort = testingObject.connectConsumer(request);
-//		
-//		Assert.assertEquals(54321, serverPort);
-//	}
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerEverythingOK() throws JMSException {
+		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		final MessageProducer producer = getTestMessageProducer();
+		final MessageConsumer consumer = getTestMessageConsumer();
+		
+		when(availablePorts.poll()).thenReturn(54321);
+		when(activeSessions.put(any(String.class), any(ActiveSessionDTO.class))).thenReturn(null);
+		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenReturn(getTestSession());
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		when(relayClient.initializeConsumerSideRelay(any(Session.class), any(MessageListener.class), any(String.class), any(String.class))).thenReturn(new ConsumerSideRelayInfo(producer, producer, consumer, consumer));
+		when(appContext.getBean(SSLProperties.class)).thenReturn(getTestSSLPropertiesForThread());
+		
+		final int serverPort = testingObject.connectConsumer(request);
+		
+		Assert.assertEquals(54321, serverPort);
+		verify(activeConsumerSideSocketThreads, times(1)).put(eq(request.getQueueId()), any(ConsumerSideServerSocketThread.class));
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
@@ -990,20 +1004,20 @@ public class GatewayServiceTest {
 		return new MessageProducer() {
 			
 			//-------------------------------------------------------------------------------------------------
-			public void setTimeToLive(long timeToLive) throws JMSException {}
-			public void setPriority(int defaultPriority) throws JMSException {}
-			public void setDisableMessageTimestamp(boolean value) throws JMSException {}
-			public void setDisableMessageID(boolean value) throws JMSException {}
-			public void setDeliveryMode(int deliveryMode) throws JMSException {	}
-			public void setDeliveryDelay(long deliveryDelay) throws JMSException {}
-			public void send(Destination destination, Message message, int deliveryMode, int priority, long timeToLive, CompletionListener completionListener) throws JMSException {}
-			public void send(Message message, int deliveryMode, int priority, long timeToLive, CompletionListener completionListener) throws JMSException {}
-			public void send(Destination destination, Message message, int deliveryMode, int priority, long timeToLive) throws JMSException {}
-			public void send(Message message, int deliveryMode, int priority, long timeToLive) throws JMSException {}
-			public void send(Destination destination, Message message, CompletionListener completionListener) throws JMSException {}
-			public void send(Message message, CompletionListener completionListener) throws JMSException {}
-			public void send(Destination destination, Message message) throws JMSException {}
-			public void send(Message message) throws JMSException {}
+			public void setTimeToLive(final long timeToLive) throws JMSException {}
+			public void setPriority(final int defaultPriority) throws JMSException {}
+			public void setDisableMessageTimestamp(final boolean value) throws JMSException {}
+			public void setDisableMessageID(final boolean value) throws JMSException {}
+			public void setDeliveryMode(final int deliveryMode) throws JMSException {	}
+			public void setDeliveryDelay(final long deliveryDelay) throws JMSException {}
+			public void send(final Destination destination, final Message message, final int deliveryMode, final int priority, final long timeToLive, final CompletionListener completionListener) throws JMSException {}
+			public void send(final Message message, final int deliveryMode, final int priority, final long timeToLive, final CompletionListener completionListener) throws JMSException {}
+			public void send(final Destination destination, final Message message, final int deliveryMode, final int priority, final long timeToLive) throws JMSException {}
+			public void send(final Message message, final int deliveryMode, final int priority, final long timeToLive) throws JMSException {}
+			public void send(final Destination destination, final Message message, final CompletionListener completionListener) throws JMSException {}
+			public void send(final Message message, final CompletionListener completionListener) throws JMSException {}
+			public void send(final Destination destination, final Message message) throws JMSException {}
+			public void send(final Message message) throws JMSException {}
 			public long getTimeToLive() throws JMSException { return 0; }
 			public int getPriority() throws JMSException { return 0; }
 			public boolean getDisableMessageTimestamp() throws JMSException { return false;	}
@@ -1011,6 +1025,19 @@ public class GatewayServiceTest {
 			public Destination getDestination() throws JMSException { return null; }
 			public int getDeliveryMode() throws JMSException { return 0; }
 			public long getDeliveryDelay() throws JMSException { return 0; }
+			public void close() throws JMSException {}
+		};
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MessageConsumer getTestMessageConsumer() {
+		return new MessageConsumer() {
+			public void setMessageListener(final MessageListener listener) throws JMSException {}
+			public Message receiveNoWait() throws JMSException { return null; }
+			public Message receive(final long timeout) throws JMSException { return null; }
+			public Message receive() throws JMSException { return null; }
+			public String getMessageSelector() throws JMSException {return null; }
+			public MessageListener getMessageListener() throws JMSException { return null; }
 			public void close() throws JMSException {}
 		};
 	}
