@@ -14,6 +14,8 @@
 
 package eu.arrowhead.relay.gatekeeper.activemq;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -31,6 +33,12 @@ import static org.mockito.Mockito.when;
 import java.io.Serializable;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.jms.BytesMessage;
 import javax.jms.Connection;
@@ -54,6 +62,8 @@ import javax.jms.TopicSubscriber;
 
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQSession;
+import org.apache.activemq.advisory.DestinationSource;
+import org.apache.activemq.command.ActiveMQQueue;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -92,6 +102,8 @@ public class ActiveMQGatekeeperRelayClientTest {
 	private PublicKey publicKey;
 	private RelayCryptographer cryptographer;
 	private RelayActiveMQConnectionFactory connectionFactory;
+	final Map<ActiveMQSession,List<ActiveMQQueue>> staleQueues = new HashMap<>();
+	private final Set<Connection> staleConnections = new HashSet<>();
 	
 	//=================================================================================================
 	// methods
@@ -106,6 +118,8 @@ public class ActiveMQGatekeeperRelayClientTest {
 		testingObject = new ActiveMQGatekeeperRelayClient("serverCN", publicKey, getTestPrivateKey(), new SSLProperties(), 60000);
 		ReflectionTestUtils.setField(testingObject, "cryptographer", cryptographer);
 		ReflectionTestUtils.setField(testingObject, "connectionFactory", connectionFactory);
+		ReflectionTestUtils.setField(testingObject, "staleQueues", staleQueues);
+		ReflectionTestUtils.setField(testingObject, "staleConnections", staleConnections);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -268,7 +282,7 @@ public class ActiveMQGatekeeperRelayClientTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testCloseConnectionOk() throws JMSException {
+	public void testCloseConnectionOk1() throws JMSException {
 		final ActiveMQConnection conn = Mockito.mock(ActiveMQConnection.class);
 		final ActiveMQSession session = Mockito.mock(ActiveMQSession.class);
 		
@@ -278,6 +292,7 @@ public class ActiveMQGatekeeperRelayClientTest {
 		
 		testingObject.closeConnection(session);
 		
+		assertFalse(staleConnections.contains(conn));
 		verify(session, times(1)).close();
 		verify(session, times(1)).getConnection();
 		verify(conn, times(1)).close();
@@ -285,20 +300,24 @@ public class ActiveMQGatekeeperRelayClientTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testCloseConnectionException() throws JMSException {
+	public void testCloseConnectionOk2() throws JMSException {
 		final ActiveMQConnection conn = Mockito.mock(ActiveMQConnection.class);
 		final ActiveMQSession session = Mockito.mock(ActiveMQSession.class);
 		
+		staleQueues.put(session, new ArrayList<>());
+		
 		doNothing().when(session).close();
 		when(session.getConnection()).thenReturn(conn);
-		doThrow(JMSException.class).when(conn).close();
+		doNothing().when(conn).close();
 		
 		testingObject.closeConnection(session);
 		
-		verify(session, times(1)).close();
+		assertTrue(staleConnections.contains(conn));
+		verify(session, never()).close();
 		verify(session, times(1)).getConnection();
-		verify(conn, times(1)).close();
+		verify(conn, never()).close();
 	}
+	
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -2030,6 +2049,43 @@ public class ActiveMQGatekeeperRelayClientTest {
 		verify(cryptographer, times(1)).decodeMessage("encodedResponse", peerPublicKey);
 		verify(consumer, times(1)).close();
 		verify(producer, times(1)).close();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDestroyStaleQueuesAndConnectionsOk() throws JMSException {
+		final ActiveMQSession sessionA = Mockito.mock(ActiveMQSession.class);
+		final ActiveMQConnection connectionA = Mockito.mock(ActiveMQConnection.class);
+		final DestinationSource destinationSourceA = new DestinationSource(connectionA);
+		final ActiveMQQueue queueA = Mockito.mock(ActiveMQQueue.class);
+		final ActiveMQSession sessionB = Mockito.mock(ActiveMQSession.class);
+		final ActiveMQConnection connectionB = Mockito.mock(ActiveMQConnection.class);
+		final DestinationSource destinationSourceB = new DestinationSource(connectionB);
+		final ActiveMQQueue queueB1 = Mockito.mock(ActiveMQQueue.class);
+		final ActiveMQQueue queueB2 = Mockito.mock(ActiveMQQueue.class);
+		destinationSourceB.getQueues().add(queueB2);
+		final Connection connectionC = Mockito.mock(Connection.class);
+		
+		
+		staleQueues.put(sessionA, List.of(queueA));
+		staleQueues.put(sessionB, List.of(queueB1, queueB2));
+		staleConnections.add(connectionC);
+		
+		when(sessionA.getConnection()).thenReturn(connectionA);
+		when(connectionA.getDestinationSource()).thenReturn(destinationSourceA);
+		when(sessionB.getConnection()).thenReturn(connectionB);
+		when(connectionB.getDestinationSource()).thenReturn(destinationSourceB);
+		doThrow(new JMSException("test")).when(connectionB).destroyDestination(eq(queueB2));
+		
+		testingObject.destroyStaleQueuesAndConnections();
+		
+		assertFalse(staleQueues.containsKey(sessionA));
+		assertTrue(staleQueues.containsKey(sessionB));
+		assertFalse(staleQueues.get(sessionB).contains(queueB1));
+		assertTrue(staleQueues.get(sessionB).contains(queueB2));
+		assertFalse(staleConnections.contains(connectionA));
+		assertFalse(staleConnections.contains(connectionB));
+		assertFalse(staleConnections.contains(connectionC));
 	}
 	
 	//=================================================================================================

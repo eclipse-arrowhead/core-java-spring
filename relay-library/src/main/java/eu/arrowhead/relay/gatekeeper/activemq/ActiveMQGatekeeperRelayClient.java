@@ -404,6 +404,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	public void destroyStaleQueuesAndConnections() {
 		logger.debug("destroyStaleQueues started...");
 		
+		// Stale Queues
 		final List<ActiveMQSession> removableSessions = new ArrayList<>();
 		for (final Entry<ActiveMQSession, List<ActiveMQQueue>> sessionWithQueues : staleQueues.entrySet()) {
 			final ActiveMQSession amqs = sessionWithQueues.getKey();
@@ -439,6 +440,29 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		for (final ActiveMQSession amqs : removableSessions) {
 			staleQueues.remove(amqs);
 			closeConnection(amqs);
+		}
+		
+		// Stale Connections
+		final List<Connection> removableConnections = new ArrayList<>();
+		for (final Connection connection : staleConnections) {
+			boolean connHasSessionWithQueues = false;
+			for (final ActiveMQSession amqs : staleQueues.keySet()) {
+				if (connection.equals(amqs.getConnection())) {
+					connHasSessionWithQueues = true;
+					break;
+				}
+			}
+			if (!connHasSessionWithQueues) {
+				try {
+					connection.close();
+					removableConnections.add(connection);
+				} catch (final JMSException ex) {
+					logger.debug(ex.getMessage());
+				}
+			}
+		}
+		for (final Connection connection : removableConnections) {
+			staleConnections.remove(connection);
 		}
 	}
 	
