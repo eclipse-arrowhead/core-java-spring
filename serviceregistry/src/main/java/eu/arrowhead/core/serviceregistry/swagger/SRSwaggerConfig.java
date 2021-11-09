@@ -31,7 +31,7 @@ public class SRSwaggerConfig extends DefaultSwaggerConfig {
 	
 	//-------------------------------------------------------------------------------------------------
 	public SRSwaggerConfig() {
-		super(CommonConstants.CORE_SYSTEM_SERVICE_REGISTRY);
+		super(CommonConstants.CORE_SYSTEM_SERVICEREGISTRY);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

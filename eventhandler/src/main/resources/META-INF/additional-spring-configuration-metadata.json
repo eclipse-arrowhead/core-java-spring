@@ -53,5 +53,15 @@
     "name": "domain.port",
     "type": "java.lang.Integer",
     "description": "A description for 'domain.port'"
+  },
+  {
+    "name": "event_handler_max_retry_connect_auth",
+    "type": "java.lang.Integer",
+    "description": "A description for 'event_handler_max_retry_connect_auth'"
+  },
+  {
+    "name": "event_handler_retry_connect_auth_interval_sec",
+    "type": "java.lang.Integer",
+    "description": "A description for 'event_handler_retry_connect_auth_interval_sec'"
   }
 ]}

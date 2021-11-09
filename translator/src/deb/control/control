@@ -3,7 +3,7 @@ Version: [[version]]
 Section: contrib/java
 Priority: optional
 Architecture: all
-Maintainer: 
+Maintainer: Pablo Puñal Pereira <pablo.punal@thingwave.eu>
 Homepage: http://www.arrowhead.eu
 Description: Arrowhead Translator System
 Distribution: development

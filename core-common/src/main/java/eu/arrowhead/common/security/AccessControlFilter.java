@@ -15,7 +15,6 @@
 package eu.arrowhead.common.security;
 
 import java.io.IOException;
-import java.security.cert.X509Certificate;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -25,12 +24,12 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
-import eu.arrowhead.common.SecurityUtilities;
 import org.apache.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.SecurityUtilities;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;

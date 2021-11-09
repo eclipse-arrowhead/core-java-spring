@@ -507,13 +507,13 @@ public class AuthorizationControllerIntraCloudTest {
 	//-------------------------------------------------------------------------------------------------
 	private Page<AuthorizationIntraCloud> createPageForMockingAuthorizationDBService(final int numberOfRequestedEntry) {
 		final List<AuthorizationIntraCloud> entries = new ArrayList<>(numberOfRequestedEntry);
-		final System consumer = new System("Consumer", "0.0.0.0.", 1000, null);
+		final System consumer = new System("Consumer", "0.0.0.0.", 1000, null, null);
 		consumer.setId(1);
 		
 		for (int i = 1; i <= numberOfRequestedEntry; ++i) {
 			final ServiceDefinition serviceDefinition = new ServiceDefinition("testService" + i);
 			serviceDefinition.setId(i);
-			final System provider = new System("Provider" + i, i + "." + i + "." + i + "." + i, i * 1000, null);
+			final System provider = new System("Provider" + i, i + "." + i + "." + i + "." + i, i * 1000, null, null);
 			provider.setId(i);
 			final AuthorizationIntraCloud entry = new AuthorizationIntraCloud(consumer, provider, serviceDefinition);
 			entry.setId(i);

@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
+import eu.arrowhead.common.database.entity.OrchestratorStoreFlexible;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
@@ -98,6 +100,9 @@ public class OrchestratorService {
 	private OrchestratorDriver orchestratorDriver;
 	
 	@Autowired
+	private OrchestratorFlexibleDriver orchestratorFlexibleDriver;
+	
+	@Autowired
 	private OrchestratorStoreDBService orchestratorStoreDBService;
 	
 	@Resource(name = CoreCommonConstants.INTRA_CLOUD_PROVIDER_MATCHMAKER)
@@ -109,8 +114,11 @@ public class OrchestratorService {
 	@Resource(name = CoreCommonConstants.CLOUD_MATCHMAKER)
 	private CloudMatchmakingAlgorithm cloudMatchmaker;
 	
-	@Resource(name = CoreCommonConstants.QOS_MANAGER)
+	@Resource(name = CoreCommonConstants.QOSMANAGER)
 	private QoSManager qosManager;
+	
+	@Value(CoreCommonConstants.$ORCHESTRATOR_USE_FLEXIBLE_STORE_WD)
+	private boolean useFlexibleStore;
 	
 	@Value(CoreCommonConstants.$ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD)
 	private boolean gateKeeperIsPresent;
@@ -148,7 +156,7 @@ public class OrchestratorService {
 		}
 
 		
-		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(queryData, request);
+		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(queryData);
 		orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem()); // to reduce the number of results before token generation
 		
 		if (qosEnabled && flags.get(Flag.ENABLE_QOS)) {
@@ -243,7 +251,7 @@ public class OrchestratorService {
 			return new OrchestrationResponseDTO(); // empty response
 		}
 		
-		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(crossCheckedEntryList, orchestrationFormRequestDTO);
+		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(crossCheckedEntryList);
 		orList = qosManager.filterReservedProviders(orList, orchestrationFormRequestDTO.getRequesterSystem()); // to reduce the number of results before token generation
 
 	    // Generate the authorization tokens if it is requested based on the service security (modifies the orList)
@@ -254,8 +262,19 @@ public class OrchestratorService {
 	    return new OrchestrationResponseDTO(orList);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public OrchestrationResponseDTO orchestrationFromStore(final OrchestrationFormRequestDTO orchestrationFormRequestDTO) { 
+		logger.debug("orchestrationFromStore started ...");		
+		
+		if (useFlexibleStore) {
+			return orchestrationFromFlexibleStore(orchestrationFormRequestDTO);
+		} else {
+			return orchestrationFromOriginalStore(orchestrationFormRequestDTO);
+		}
+	}
+
 	//-------------------------------------------------------------------------------------------------	
-	public OrchestrationResponseDTO orchestrationFromStore(final OrchestrationFormRequestDTO orchestrationFormRequestDTO) {
+	public OrchestrationResponseDTO orchestrationFromOriginalStore(final OrchestrationFormRequestDTO orchestrationFormRequestDTO) {
 		logger.debug("orchestrationFromStore started ...");		
 		
 		if (orchestrationFormRequestDTO == null) {
@@ -346,7 +365,7 @@ public class OrchestratorService {
 			}
 		}
 
-		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(queryData, request);
+		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(queryData);
 		orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem());
 		if (orList.isEmpty()) {
 			if (isInterCloudOrchestrationPossible(flags)) {
@@ -666,7 +685,7 @@ public class OrchestratorService {
 	
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<OrchestrationResultDTO> compileOrchestrationResponse(final List<ServiceRegistryResponseDTO> srList, final OrchestrationFormRequestDTO request) {
+	private List<OrchestrationResultDTO> compileOrchestrationResponse(final List<ServiceRegistryResponseDTO> srList) {
 		logger.debug("compileOrchestrationResponse started...");
 		
 		final List<OrchestrationResultDTO> orList = new ArrayList<>(srList.size());
@@ -674,8 +693,8 @@ public class OrchestratorService {
 			final OrchestrationResultDTO result = new OrchestrationResultDTO(entry.getProvider(), entry.getServiceDefinition(), entry.getServiceUri(), entry.getSecure(), entry.getMetadata(), 
 																			 entry.getInterfaces(), entry.getVersion());
 
-			if(result.getMetadata() == null ) {
-				result.setMetadata( new HashMap<>());
+			if (result.getMetadata() == null) {
+				result.setMetadata(new HashMap<>());
 			}
 			result.setWarnings(calculateOrchestratorWarnings(entry));
 			
@@ -988,7 +1007,7 @@ public class OrchestratorService {
 		final Long providerSystemId = orchestratorStore.getProviderSystemId();
 		for (final ServiceRegistryResponseDTO serviceRegistryResponseDTO : authorizedLocalServiceRegistryEntries) {
 			if (serviceRegistryResponseDTO.getProvider().getId() == providerSystemId) {
-				List<OrchestrationResultDTO> orList = compileOrchestrationResponse(List.of(serviceRegistryResponseDTO), request);
+				List<OrchestrationResultDTO> orList = compileOrchestrationResponse(List.of(serviceRegistryResponseDTO));
 			    // Generate the authorization tokens if it is requested based on the service security (modifies the orList)
 			    orList = orchestratorDriver.generateAuthTokens(request, orList);
 
@@ -1079,5 +1098,93 @@ public class OrchestratorService {
 		}	
 
         return new OrchestrationResponseDTO(icnResultDTO.getResponse());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	// Please note that the current implementation does not support intercloud orchestration, QoS requirements and provider reservation 
+	private OrchestrationResponseDTO orchestrationFromFlexibleStore(final OrchestrationFormRequestDTO request) {
+		logger.debug("orchestrationFromFlexibleStore started ...");
+		
+		validateFlexibleStoreRequest(request);
+		
+		final OrchestrationFlags flags = request.getOrchestrationFlags();
+		final List<PreferredProviderDataDTO> localProviders = request.getPreferredProviders().stream().filter(p -> p.isLocal()).collect(Collectors.toList());
+		
+		List<PreferredProviderDataDTO> onlyPreferredProviders = null;
+		if (flags.getOrDefault(Flag.ONLY_PREFERRED, false)) {
+			onlyPreferredProviders = localProviders; 
+			if (onlyPreferredProviders.isEmpty()) { // never happened while intercloud is unsupported
+				throw new InvalidParameterException("There is no valid (local) preferred provider, but \"" + Flag.ONLY_PREFERRED + "\" is set to true");
+			}
+		}
+		
+		// query system from Service Registry 
+		final SystemResponseDTO consumerSystem = orchestratorFlexibleDriver.queryConsumerSystem(request.getRequesterSystem());
+
+		// collect matching rules
+		final List<OrchestratorStoreFlexible> rules = orchestratorFlexibleDriver.collectAndSortMatchingRules(request, consumerSystem);
+		if (rules.isEmpty()) {
+			return new OrchestrationResponseDTO();
+		}
+		
+		// querying Service Registry
+		final List<Pair<OrchestratorStoreFlexible,ServiceQueryResultDTO>> queryDataWithRules = orchestratorFlexibleDriver.queryServiceRegistry(request, rules);
+		
+		// filter Service Registry results by provider requirements (coming from the rules)
+		final List<ServiceRegistryResponseDTO> queryData = orchestratorFlexibleDriver.filterSRResultsByProviderRequirements(queryDataWithRules, onlyPreferredProviders);
+		if (queryData.isEmpty()) {
+			return new OrchestrationResponseDTO();
+		}
+		
+		// WE SKIP the authorization (for now, it is the responsibility of the PDE to make sure consumers have right to use the providers that the rules offer them)
+		
+		// convert Service Registry results to orchestration responses
+		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(queryData);
+
+		// If matchmaking is requested, we pick out 1 ServiceRegistryEntry entity from the list.
+		if (flags.get(Flag.MATCHMAKING)) {
+			final IntraCloudProviderMatchmakingParameters params = new IntraCloudProviderMatchmakingParameters(localProviders);
+			// set additional parameters here if you use a different matchmaking algorithm
+			final OrchestrationResultDTO selected = intraCloudProviderMatchmaker.doMatchmaking(orList, params);
+			orList.clear();
+			orList.add(selected);
+		}
+		
+		// all the filtering is done
+		logger.debug("flexible store ochestration finished with {} service providers.", queryData.size());
+		
+		// Generate the authorization tokens if it is requested based on the service security (modifies the orList)
+		orList = orchestratorDriver.generateAuthTokens(request, orList);
+
+	    return new OrchestrationResponseDTO(orList);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void validateFlexibleStoreRequest(final OrchestrationFormRequestDTO request) {
+		logger.debug("orchestrationFormRequestDTO started ...");
+		
+		if (request == null) {
+			throw new InvalidParameterException("Request" + NULL_PARAMETER_ERROR_MESSAGE);
+		}
+		
+		// in this version of Flexible Store Orchestration some flags are not supported
+		checkUnsupportedFlags(request.getOrchestrationFlags());
+		
+		checkSystemRequestDTO(request.getRequesterSystem(), false); // consumer
+		checkServiceRequestForm(request, false);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void checkUnsupportedFlags(final OrchestrationFlags flags) {
+		logger.debug("checkUnsupportedFlags started ...");
+		Assert.notNull(flags, "Flags map" + NULL_PARAMETER_ERROR_MESSAGE);
+		
+		if (flags.getOrDefault(Flag.ENABLE_INTER_CLOUD, false) || flags.getOrDefault(Flag.TRIGGER_INTER_CLOUD, false)) {
+			throw new InvalidParameterException("Intercloud mode is not supported yet.");
+		}
+		
+		if (flags.getOrDefault(Flag.ENABLE_QOS, false)) {
+			throw new InvalidParameterException("Quality of Service requirements is not supported yet.");
+		}
 	}
 }

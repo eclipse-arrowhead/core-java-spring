@@ -48,7 +48,7 @@ public class ProvidersReachabilityTask implements Job {
 	@Autowired
 	private ServiceRegistryDBService serviceRegistryDBService;
 	
-	@Value(CoreCommonConstants.$SERVICE_REGISTRY_PING_TIMEOUT_WD)
+	@Value(CoreCommonConstants.$SERVICEREGISTRY_PING_TIMEOUT_WD)
 	private int timeout;
 	
 	//=================================================================================================
@@ -71,7 +71,7 @@ public class ProvidersReachabilityTask implements Job {
 		try {
 			Page<ServiceRegistry> pageOfServiceEntries = serviceRegistryDBService.getServiceRegistryEntries(pageIndexCounter, PAGE_SIZE, Direction.ASC, CoreCommonConstants.COMMON_FIELD_NAME_ID);
 			if (pageOfServiceEntries.isEmpty()) {
-				logger.debug("Servise Registry database is empty");
+				logger.debug("Service Registry database is empty");
 			} else {
 				final int totalPages = pageOfServiceEntries.getTotalPages();
 				removedServiceRegistryEntries.addAll(pingAndRemoveRegisteredServices(pageOfServiceEntries));

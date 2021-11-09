@@ -348,7 +348,8 @@ public class CertificateAuthorityControllerTrustedKeysTest {
                                                                 .content(asJsonString(request)))
                             .andExpect(status().isOk())
                             .andReturn();
-        final TrustedKeyCheckResponseDTO responseBody =
+        @SuppressWarnings("unused")
+		final TrustedKeyCheckResponseDTO responseBody =
                 objectMapper.readValue(response.getResponse()
                                                .getContentAsString(), TrustedKeyCheckResponseDTO.class);
     }
@@ -378,7 +379,8 @@ public class CertificateAuthorityControllerTrustedKeysTest {
     }
 
     // -------------------------------------------------------------------------------------------------
-    private CaTrustedKey createTrustedKeyForDBMocking() {
+    @SuppressWarnings("unused")
+	private CaTrustedKey createTrustedKeyForDBMocking() {
         final ZonedDateTime timeStamp = ZonedDateTime.now();
         final CaTrustedKey key = new CaTrustedKey();
         key.setId(1);

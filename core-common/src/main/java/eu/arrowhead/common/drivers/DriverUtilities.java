@@ -52,6 +52,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 public class DriverUtilities {
+	
+	//=================================================================================================
+	// members
 
     private final Logger logger = LogManager.getLogger(DriverUtilities.class);
     private final CoreSystemRegistrationProperties coreSystemProps;
@@ -60,8 +63,12 @@ public class DriverUtilities {
 
     @Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
     private Map<String, Object> arrowheadContext;
+    
+    //=================================================================================================
+	// methods
 
-    @Autowired
+    //-------------------------------------------------------------------------------------------------
+	@Autowired
     public DriverUtilities(final CoreSystemRegistrationProperties coreSystemProps,
                            final HttpService httpService,
                            final SSLProperties sslProperties) {
@@ -72,12 +79,14 @@ public class DriverUtilities {
     }
 
     //-------------------------------------------------------------------------------------------------
-    public <T> T getContext(final String key) {
+    @SuppressWarnings("unchecked")
+	public <T> T getContext(final String key) {
         return (T) arrowheadContext.get(key);
     }
 
     //-------------------------------------------------------------------------------------------------
-    public <T> T getContext(final String key, final T defaultValue) {
+    @SuppressWarnings("unchecked")
+	public <T> T getContext(final String key, final T defaultValue) {
         return (T) arrowheadContext.getOrDefault(key, defaultValue);
     }
 
@@ -104,7 +113,8 @@ public class DriverUtilities {
         return pingService(echoUri);
     }
 
-    public UriComponents findUri(final CoreSystemService service) throws DriverException {
+    //-------------------------------------------------------------------------------------------------
+	public UriComponents findUri(final CoreSystemService service) throws DriverException {
         try {
             return findUriByOrchestrator(service);
         } catch (final DriverException e) {
@@ -133,7 +143,8 @@ public class DriverUtilities {
         throw DriverException.notFoundByArrowheadContext(service);
     }
 
-    public ServiceRegistryResponseDTO findByServiceRegistry(final CoreSystemService service, final boolean pingTarget) throws DriverException {
+    //-------------------------------------------------------------------------------------------------
+	public ServiceRegistryResponseDTO findByServiceRegistry(final CoreSystemService service, final boolean pingTarget) throws DriverException {
         Assert.notNull(service, "CoreSystemService must not be null");
         logger.debug("findByServiceRegistry started...");
         final UriComponents queryUri = getServiceRegistryQueryUri();
@@ -164,7 +175,8 @@ public class DriverUtilities {
         throw DriverException.notFoundByServiceRegistry(service);
     }
 
-    public UriComponents findUriByServiceRegistry(final CoreSystemService service) throws DriverException {
+    //-------------------------------------------------------------------------------------------------
+	public UriComponents findUriByServiceRegistry(final CoreSystemService service) throws DriverException {
 
         try {
             return findUriByContext(service);
@@ -177,7 +189,8 @@ public class DriverUtilities {
         return createUri(entry);
     }
 
-    public UriComponents findUriByOrchestrator(final CoreSystemService service) throws DriverException {
+    //-------------------------------------------------------------------------------------------------
+	public UriComponents findUriByOrchestrator(final CoreSystemService service) throws DriverException {
         Assert.notNull(service, "CoreSystemService must not be null");
 
         try {
@@ -223,17 +236,20 @@ public class DriverUtilities {
         throw DriverException.notFoundByOrchestrator(service);
     }
 
-    public UriComponents createUri(final ServiceRegistryResponseDTO entry) {
+    //-------------------------------------------------------------------------------------------------
+	public UriComponents createUri(final ServiceRegistryResponseDTO entry) {
         Assert.notNull(entry, "ServiceRegistryResponseDTO must not be null");
         return createUri(entry.getSecure(), entry.getProvider(), entry.getServiceUri());
     }
 
-    public UriComponents createUri(final OrchestrationResultDTO entry) {
+    //-------------------------------------------------------------------------------------------------
+	public UriComponents createUri(final OrchestrationResultDTO entry) {
         Assert.notNull(entry, "OrchestrationResultDTO must not be null");
         return createUri(entry.getSecure(), entry.getProvider(), entry.getServiceUri());
     }
 
-    public UriComponents createUri(final ServiceSecurityType securityType, final SystemResponseDTO system, final String serviceUri) {
+    //-------------------------------------------------------------------------------------------------
+	public UriComponents createUri(final ServiceSecurityType securityType, final SystemResponseDTO system, final String serviceUri) {
         Assert.notNull(system, "SystemResponseDTO must not be null");
         return Utilities.createURI(getScheme(securityType),
                                    system.getAddress(),
@@ -241,7 +257,8 @@ public class DriverUtilities {
                                    serviceUri);
     }
 
-    public UriComponents createEchoUri(final UriComponents serviceUri) {
+    //-------------------------------------------------------------------------------------------------
+	public UriComponents createEchoUri(final UriComponents serviceUri) {
         Assert.notNull(serviceUri, "UriComponents must not be null");
         return UriComponentsBuilder.newInstance()
                                    .scheme(serviceUri.getScheme())
@@ -294,6 +311,9 @@ public class DriverUtilities {
 
         return result;
     }
+    
+    //=================================================================================================
+	// assistant methods
 
     //-------------------------------------------------------------------------------------------------
     protected UriComponents getServiceRegistryQueryUri() {
@@ -303,7 +323,7 @@ public class DriverUtilities {
             return (UriComponents) arrowheadContext.get(CoreCommonConstants.SR_QUERY_URI);
         } else {
             final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
-            final String registerUriStr = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI;
+            final String registerUriStr = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_QUERY_URI;
             final UriComponents uri = Utilities.createURI(scheme, coreSystemProps.getServiceRegistryAddress(),
                                                           coreSystemProps.getServiceRegistryPort(), registerUriStr);
             arrowheadContext.putIfAbsent(CoreCommonConstants.SR_QUERY_URI, uri);
@@ -332,8 +352,13 @@ public class DriverUtilities {
         final List<String> pathSegments = components.getPathSegments();
         return pathSegments.isEmpty() ? components.getPath() : pathSegments.get(0);
     }
+    
+    //=================================================================================================
+	// nested classes
 
-    public static class DriverException extends UnavailableServerException {
+    //-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("serial")
+	public static class DriverException extends UnavailableServerException {
 
         protected DriverException(final String message, final HttpStatus httpStatus) {
             super(message, httpStatus.value());

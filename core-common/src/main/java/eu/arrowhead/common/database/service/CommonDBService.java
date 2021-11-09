@@ -31,6 +31,7 @@ import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 
 @Service
 public class CommonDBService {
@@ -40,6 +41,9 @@ public class CommonDBService {
 	
 	@Autowired
 	private CloudRepository cloudRepository;
+	
+	@Autowired
+	private CommonNamePartVerifier cnVerifier;
 
 	private final Logger logger = LogManager.getLogger(CommonDBService.class);
 	
@@ -72,6 +76,14 @@ public class CommonDBService {
 		logger.debug("insertOwnCloudWithoutGatekeeper started...");
 		Assert.isTrue(!Utilities.isEmpty(operator), "Operator is null or empty.");
 		Assert.isTrue(!Utilities.isEmpty(name), "Name is null or empty.");
+		
+		if (!cnVerifier.isValid(operator)) {
+			throw new InvalidParameterException("Operator has invalid format. Operator must match with the following regular expression: " + CommonNamePartVerifier.COMMON_NAME_PART_PATTERN_STRING);
+		}
+		
+		if (!cnVerifier.isValid(name)) {
+			throw new InvalidParameterException("Name has invalid format. Name must match with the following regular expression: " + CommonNamePartVerifier.COMMON_NAME_PART_PATTERN_STRING);
+		}
 		
 		final String validOperator = operator.toLowerCase().trim();
 		final String validName = name.toLowerCase().trim();

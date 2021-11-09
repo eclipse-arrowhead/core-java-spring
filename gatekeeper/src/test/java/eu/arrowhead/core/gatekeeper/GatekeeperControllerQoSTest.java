@@ -293,6 +293,7 @@ public class GatekeeperControllerQoSTest {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("unused")
 	private CloudWithRelaysListResponseDTO createCloudWithRelaysListResponseDTOForDBMocking(final int amountOfClouds, final RelayType gatekeeperRelayType, final RelayType gatewayRelayType, 
 																							final boolean gatewayRelayExclusive) {
 		final List<CloudWithRelaysResponseDTO> cloudDTOList = new ArrayList<>();

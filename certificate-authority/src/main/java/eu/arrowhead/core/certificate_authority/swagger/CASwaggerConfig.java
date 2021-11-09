@@ -31,7 +31,7 @@ public class CASwaggerConfig extends DefaultSwaggerConfig {
 
 	//-------------------------------------------------------------------------------------------------
 	public CASwaggerConfig() {
-		super(CommonConstants.CORE_SYSTEM_CERTIFICATE_AUTHORITY);
+		super(CommonConstants.CORE_SYSTEM_CERTIFICATEAUTHORITY);
 	}
 
 	//-------------------------------------------------------------------------------------------------

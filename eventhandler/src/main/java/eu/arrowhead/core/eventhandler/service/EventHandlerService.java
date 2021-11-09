@@ -83,7 +83,7 @@ public class EventHandlerService {
 		final SystemRequestDTO subscriber = request.getSubscriberSystem();
 		final Set<SystemResponseDTO> authorizedPublishers = eventHandlerDriver.getAuthorizedPublishers(subscriber);
 		
-		eventHandlerDBService.registerSubscription(request, authorizedPublishers);
+		eventHandlerDBService.forceRegisterSubscription(request, authorizedPublishers);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -259,7 +259,7 @@ public class EventHandlerService {
 	}	
 	
 	//-------------------------------------------------------------------------------------------------
-	private void validateDateLimits( SubscriptionRequestDTO request ) {
+	private void validateDateLimits(final SubscriptionRequestDTO request) {
 		logger.debug("validateDateLimits started...");
 		
 		final ZonedDateTime now  = ZonedDateTime.now();

@@ -58,7 +58,7 @@ import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
+import eu.arrowhead.common.verifier.ServiceInterfaceNameVerifier;
 
 @Service
 public class OrchestratorStoreDBService {
@@ -920,7 +920,7 @@ public class OrchestratorStoreDBService {
 		
 		final Optional<ForeignSystem> foreignSystemOptional = foreignSystemRepository.findBySystemNameAndAddressAndPortAndProviderCloud(systemName, address, validPort, providerCloud);
 		if (foreignSystemOptional.isEmpty()) {
-			return foreignSystemRepository.saveAndFlush(new ForeignSystem(providerCloud, systemName, address, validPort, providerSystemRequestDTO.getAuthenticationInfo())).getId();
+			return foreignSystemRepository.saveAndFlush(new ForeignSystem(providerCloud, systemName, address, validPort, providerSystemRequestDTO.getAuthenticationInfo(), Utilities.map2Text(providerSystemRequestDTO.getMetadata()))).getId();
 		}
 		
 		return foreignSystemOptional.get().getId();

@@ -17,11 +17,13 @@ package eu.arrowhead.core.orchestrator.security;
 import static org.junit.Assume.assumeTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.x509;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
@@ -42,6 +44,7 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.dto.internal.OrchestratorStoreFlexibleRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSReservationRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSTemporaryLockRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
@@ -65,7 +68,9 @@ public class OrchestratorAccessControlFilterTest {
 	private static final String ORCH_QOS_ENABLED = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_ENABLED_URI;
 	private static final String ORCH_QOS_TEMPORARY_LOCK = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_TEMPORARY_LOCK_URI;
 	private static final String ORCH_QOS_RESERVATION = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_QOS_RESERVATIONS_URI;
-	
+	private static final String ORCH_FLEX_STORE_CREATE = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_CREATE_FLEXIBLE_STORE_RULES_URI;
+	private static final String ORCH_FLEX_STORE_REMOVE = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_REMOVE_FLEXIBLE_STORE_RULE_URI.replace("{id}", "5");
+	private static final String ORCH_FLEX_STORE_CLEAN = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_CLEAN_FLEXIBLE_STORE_URI;
 	
 	@Autowired
 	private ApplicationContext appContext;
@@ -262,6 +267,66 @@ public class OrchestratorAccessControlFilterTest {
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(new QoSReservationRequestDTO(null, null, null)))
 					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCreateFlexibleStoreRulesWithPlantDescriptionEngine() throws Exception {
+		this.mockMvc.perform(post(ORCH_FLEX_STORE_CREATE)
+				    .secure(true)
+					.with(x509("certificates/plantdescriptionengine.pem"))
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(List.of(new OrchestratorStoreFlexibleRequestDTO())))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest()); //Bad request result means that the request gone through the filter
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCreateFlexibleStoreRulesWithNotPlantDescriptionEngine() throws Exception {
+		this.mockMvc.perform(post(ORCH_FLEX_STORE_CREATE)
+				    .secure(true)
+					.with(x509("certificates/provider.pem"))
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(List.of(new OrchestratorStoreFlexibleRequestDTO())))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRemoveFlexibleStoreRuleWithPlantDescriptionEngine() throws Exception {
+		this.mockMvc.perform(delete(ORCH_FLEX_STORE_REMOVE)
+				    .secure(true)
+					.with(x509("certificates/plantdescriptionengine.pem")))
+					.andExpect(status().isBadRequest()); //Bad request result means that the request gone through the filter
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRemoveFlexibleStoreRuleWithNotPlantDescriptionEngine() throws Exception {
+		this.mockMvc.perform(delete(ORCH_FLEX_STORE_REMOVE)
+				    .secure(true)
+					.with(x509("certificates/provider.pem")))
+					.andExpect(status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCleanFlexibleStoreWithPlantDescriptionEngine() throws Exception {
+		this.mockMvc.perform(delete(ORCH_FLEX_STORE_CLEAN)
+				    .secure(true)
+					.with(x509("certificates/plantdescriptionengine.pem")))
+					.andExpect(status().isBadRequest()); //Bad request result means that the request gone through the filter
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCleanFlexibleStoreWithNotPlantDescriptionEngine() throws Exception {
+		this.mockMvc.perform(delete(ORCH_FLEX_STORE_CLEAN)
+				    .secure(true)
+					.with(x509("certificates/provider.pem")))
 					.andExpect(status().isUnauthorized());
 	}
 	

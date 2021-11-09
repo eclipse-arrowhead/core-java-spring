@@ -52,16 +52,16 @@ public class CAAccessControlFilterTest {
     // =================================================================================================
     // members
 
-    private static final String CA_ECHO = CommonConstants.CERTIFICATE_AUTHRORITY_URI + CommonConstants.ECHO_URI;
-    private static final String CA_MGMT_CERTIFICATES = CommonConstants.CERTIFICATE_AUTHRORITY_URI
+    private static final String CA_ECHO = CommonConstants.CERTIFICATEAUTHRORITY_URI + CommonConstants.ECHO_URI;
+    private static final String CA_MGMT_CERTIFICATES = CommonConstants.CERTIFICATEAUTHRORITY_URI
             + CommonConstants.OP_CA_MGMT_CERTIFICATES_URI;
-    private static final String CA_MGMT_TRUSTED_KEYS = CommonConstants.CERTIFICATE_AUTHRORITY_URI
+    private static final String CA_MGMT_TRUSTED_KEYS = CommonConstants.CERTIFICATEAUTHRORITY_URI
             + CommonConstants.OP_CA_MGMT_TRUSTED_KEYS_URI;
-    private static final String CA_CHECK_CERTIFICATE = CommonConstants.CERTIFICATE_AUTHRORITY_URI
+    private static final String CA_CHECK_CERTIFICATE = CommonConstants.CERTIFICATEAUTHRORITY_URI
             + CommonConstants.OP_CA_CHECK_CERTIFICATE_URI;
-    private static final String CA_CHECK_TRUSTED_KEY = CommonConstants.CERTIFICATE_AUTHRORITY_URI
+    private static final String CA_CHECK_TRUSTED_KEY = CommonConstants.CERTIFICATEAUTHRORITY_URI
             + CommonConstants.OP_CA_CHECK_TRUSTED_KEY_URI;
-    private static final String CA_SIGN = CommonConstants.CERTIFICATE_AUTHRORITY_URI
+    private static final String CA_SIGN = CommonConstants.CERTIFICATEAUTHRORITY_URI
             + CommonConstants.OP_CA_SIGN_CERTIFICATE_URI;
 
     @Autowired

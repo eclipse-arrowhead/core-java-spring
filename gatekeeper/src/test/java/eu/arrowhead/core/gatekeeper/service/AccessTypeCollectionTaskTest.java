@@ -14,7 +14,6 @@
 
 package eu.arrowhead.core.gatekeeper.service;
 
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -48,7 +47,6 @@ import javax.jms.TopicSubscriber;
 import org.junit.Before;
 import org.junit.Test;
 
-import eu.arrowhead.common.dto.internal.CloudAccessResponseDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.ErrorWrapperDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
