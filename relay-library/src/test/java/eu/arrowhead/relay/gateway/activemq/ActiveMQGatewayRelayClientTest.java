@@ -14,6 +14,9 @@
 
 package eu.arrowhead.relay.gateway.activemq;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -49,7 +52,10 @@ import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
 
 import org.apache.activemq.ActiveMQConnection;
+import org.apache.activemq.ActiveMQMessageConsumer;
+import org.apache.activemq.ActiveMQMessageProducer;
 import org.apache.activemq.ActiveMQSession;
+import org.apache.activemq.command.ActiveMQDestination;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -1209,6 +1215,130 @@ public class ActiveMQGatewayRelayClientTest {
 		verify(queue, times(1)).getQueueName();
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnsubsrcibeFromQueuesOk() throws JMSException {
+		final MessageConsumer consumer = Mockito.mock(ActiveMQMessageConsumer.class);
+		final MessageConsumer consumerControl  = Mockito.mock(ActiveMQMessageConsumer.class);
+		
+		testingObject.unsubscribeFromQueues(consumer, consumerControl);
+		
+		verify(consumer, times(1)).close();
+		verify(consumerControl, times(1)).close();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = JMSException.class)
+	public void testUnsubsrcibeFromQueuesInvalidClass1() throws JMSException {
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		final MessageConsumer consumerControl  = Mockito.mock(ActiveMQMessageConsumer.class);
+		
+		try {
+			testingObject.unsubscribeFromQueues(consumer, consumerControl);			
+		} catch (final JMSException ex) {
+			verify(consumer, never()).close();
+			verify(consumerControl, never()).close();
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = JMSException.class)
+	public void testUnsubsrcibeFromQueuesInvalidClass2() throws JMSException {
+		final MessageConsumer consumer = Mockito.mock(ActiveMQMessageConsumer.class);
+		final MessageConsumer consumerControl  = Mockito.mock(MessageConsumer.class);
+		
+		try {
+			testingObject.unsubscribeFromQueues(consumer, consumerControl);			
+		} catch (final JMSException ex) {
+			verify(consumer, never()).close();
+			verify(consumerControl, never()).close();
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDestroyQueuesOk() throws JMSException {
+		final ActiveMQSession session = Mockito.mock(ActiveMQSession.class);
+		final ActiveMQMessageProducer producer = Mockito.mock(ActiveMQMessageProducer.class);
+		final ActiveMQMessageProducer producerControl = Mockito.mock(ActiveMQMessageProducer.class);
+		
+		final ActiveMQConnection connection = Mockito.mock(ActiveMQConnection.class);
+		when(session.getConnection()).thenReturn(connection);
+		when(producer.getDestination()).thenReturn(getDestination());
+		when(producerControl.getDestination()).thenReturn(getDestination());
+		
+		final boolean result = testingObject.destroyQueues(session, producer, producerControl);
+		
+		assertTrue(result);
+		verify(connection, times(2)).destroyDestination(any(ActiveMQDestination.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDestroyQueuesUnsuccessful1() throws JMSException {
+		final ActiveMQSession session = Mockito.mock(ActiveMQSession.class);
+		final ActiveMQMessageProducer producer = Mockito.mock(ActiveMQMessageProducer.class);
+		final ActiveMQMessageProducer producerControl = Mockito.mock(ActiveMQMessageProducer.class);
+		
+		final ActiveMQConnection connection = Mockito.mock(ActiveMQConnection.class);
+		when(session.getConnection()).thenReturn(connection);
+		when(producer.getDestination()).thenReturn(getDestination());
+		doThrow(new JMSException("test")).when(connection).destroyDestination(any(ActiveMQDestination.class));
+		
+		final boolean result = testingObject.destroyQueues(session, producer, producerControl);
+		
+		assertFalse(result);
+		verify(connection, times(1)).destroyDestination(any(ActiveMQDestination.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDestroyQueuesUnsuccessful2() throws JMSException {
+		final ActiveMQSession session = Mockito.mock(ActiveMQSession.class);
+		final ActiveMQMessageProducer producer = Mockito.mock(ActiveMQMessageProducer.class);
+		final ActiveMQMessageProducer producerControl = Mockito.mock(ActiveMQMessageProducer.class);
+		
+		final ActiveMQConnection connection = Mockito.mock(ActiveMQConnection.class);
+		when(session.getConnection()).thenReturn(connection);
+		when(producer.getDestination()).thenReturn(getDestination());
+		when(producerControl.getDestination()).thenReturn(getDestination());
+		doNothing().doThrow(new JMSException("test")).when(connection).destroyDestination(any(ActiveMQDestination.class));
+		
+		final boolean result = testingObject.destroyQueues(session, producer, producerControl);
+		
+		assertFalse(result);
+		verify(connection, times(2)).destroyDestination(any(ActiveMQDestination.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = JMSException.class)
+	public void testDestroyQueuesInvalidClass1() throws JMSException {
+		final Session session = Mockito.mock(Session.class);
+		final MessageProducer producer = Mockito.mock(ActiveMQMessageProducer.class);
+		final MessageProducer producerControl = Mockito.mock(ActiveMQMessageProducer.class);
+		testingObject.destroyQueues(session, producer, producerControl);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = JMSException.class)
+	public void testDestroyQueuesInvalidClass2() throws JMSException {
+		final Session session = Mockito.mock(ActiveMQSession.class);
+		final MessageProducer producer = Mockito.mock(MessageProducer.class);
+		final MessageProducer producerControl = Mockito.mock(ActiveMQMessageProducer.class);
+		testingObject.destroyQueues(session, producer, producerControl);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = JMSException.class)
+	public void testDestroyQueuesInvalidClass3() throws JMSException {
+		final Session session = Mockito.mock(ActiveMQSession.class);
+		final MessageProducer producer = Mockito.mock(ActiveMQMessageProducer.class);
+		final MessageProducer producerControl = Mockito.mock(MessageProducer.class);
+		testingObject.destroyQueues(session, producer, producerControl);
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -1272,5 +1402,14 @@ public class ActiveMQGatewayRelayClientTest {
 			public byte[] getEncoded() { return null; }
 			public String getAlgorithm() { return null;	}
 		};
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private ActiveMQDestination getDestination() {
+		return new ActiveMQDestination() {
+			public byte getDataStructureType() { return 0; }
+			protected String getQualifiedPrefix() { return null; }
+			public byte getDestinationType() { return 0; }
+		}; 
 	}
 }

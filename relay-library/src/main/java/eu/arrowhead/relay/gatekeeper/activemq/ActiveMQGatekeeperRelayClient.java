@@ -19,13 +19,14 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;
@@ -85,8 +86,8 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	private static final String RESPONSE_QUEUE_PREFIX = "RESP-";
 	private static final String ERROR_CODE = "\"errorCode\"";
 
-	private static final Map<ActiveMQSession,List<ActiveMQQueue>> STALE_QUEUES = new HashMap<>();
-	private static final Set<Connection> STALE_CONNECTIONS = new HashSet<>();
+	private final Map<ActiveMQSession,List<ActiveMQQueue>> staleQueues = new ConcurrentHashMap<>();
+	private final Set<Connection> staleConnections = Collections.synchronizedSet(new HashSet<>());
 	
 	private static final List<String> supportedRequestTypes = List.of(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, CoreCommonConstants.RELAY_MESSAGE_TYPE_MULTI_GSD_POLL,
 																	  CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL, CoreCommonConstants.RELAY_MESSAGE_TYPE_ACCESS_TYPE,
@@ -153,8 +154,8 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 			if (session != null && session instanceof ActiveMQSession) {
 				final ActiveMQSession amqs = (ActiveMQSession) session;
 				
-				if (STALE_QUEUES.containsKey(session)) {
-					STALE_CONNECTIONS.add(amqs.getConnection());
+				if (staleQueues.containsKey(session)) {
+					staleConnections.add(amqs.getConnection());
 					
 				} else {
 					try {
@@ -162,7 +163,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 						amqs.getConnection().close();
 						
 					} catch (final JMSException ex) {
-						STALE_CONNECTIONS.add(amqs.getConnection());
+						staleConnections.add(amqs.getConnection());
 						logger.debug(ex.getMessage());
 						logger.trace("Stacktrace:", ex);
 					}				
@@ -408,8 +409,9 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	public void destroyStaleQueuesAndConnections() {
 		logger.debug("destroyStaleQueues started...");
 		
+		// Stale Queues
 		final List<ActiveMQSession> removableSessions = new ArrayList<>();
-		for (final Entry<ActiveMQSession, List<ActiveMQQueue>> sessionWithQueues : STALE_QUEUES.entrySet()) {
+		for (final Entry<ActiveMQSession, List<ActiveMQQueue>> sessionWithQueues : staleQueues.entrySet()) {
 			final ActiveMQSession amqs = sessionWithQueues.getKey();
 			final List<ActiveMQQueue> queueList = sessionWithQueues.getValue();
 			
@@ -437,13 +439,35 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 				} else {
 					sessionWithQueues.setValue(undestroyed);
 				}
-			}
-			
+			}			
 		}
 		
 		for (final ActiveMQSession amqs : removableSessions) {
-			STALE_QUEUES.remove(amqs);
+			staleQueues.remove(amqs);
 			closeConnection(amqs);
+		}
+		
+		// Stale Connections
+		final List<Connection> removableConnections = new ArrayList<>();
+		for (final Connection connection : staleConnections) {
+			boolean connHasSessionWithQueues = false;
+			for (final ActiveMQSession amqs : staleQueues.keySet()) {
+				if (connection.equals(amqs.getConnection())) {
+					connHasSessionWithQueues = true;
+					break;
+				}
+			}
+			if (!connHasSessionWithQueues) {
+				try {
+					connection.close();
+					removableConnections.add(connection);
+				} catch (final JMSException ex) {
+					logger.debug(ex.getMessage());
+				}
+			}
+		}
+		for (final Connection connection : removableConnections) {
+			staleConnections.remove(connection);
 		}
 	}
 	
@@ -625,13 +649,13 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 								if (!isQueueActive(amqs, queue)) {
 									logger.debug("Destroyed: " + queue.getPhysicalName());
 								} else {
-									STALE_QUEUES.putIfAbsent(amqs, new ArrayList<>());
-									STALE_QUEUES.get(amqs).add((ActiveMQQueue)queue);
+									staleQueues.putIfAbsent(amqs, new ArrayList<>());
+									staleQueues.get(amqs).add((ActiveMQQueue)queue);
 									logger.debug("Adding to stale queues: " + queue.getPhysicalName());
 								}
 							} catch (final JMSException ex) {
-								STALE_QUEUES.putIfAbsent(amqs, new ArrayList<>());
-								STALE_QUEUES.get(amqs).add((ActiveMQQueue)queue);
+								staleQueues.putIfAbsent(amqs, new ArrayList<>());
+								staleQueues.get(amqs).add((ActiveMQQueue)queue);
 								logger.debug(ex.getMessage());
 								logger.debug("Adding to stale queues: " + queue.getPhysicalName());
 							}
