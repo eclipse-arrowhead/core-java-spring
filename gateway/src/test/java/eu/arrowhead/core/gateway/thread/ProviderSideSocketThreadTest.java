@@ -424,7 +424,7 @@ public class ProviderSideSocketThreadTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private GatewayProviderConnectionRequestDTO getTestGatewayProviderConnectionRequestDTO() {
-		final RelayRequestDTO relay = new RelayRequestDTO("localhost", 1234, false, false, RelayType.GATEWAY_RELAY.name());
+		final RelayRequestDTO relay = new RelayRequestDTO("localhost", 1234, null, false, false, RelayType.GATEWAY_RELAY.name());
 		final SystemRequestDTO consumer = new SystemRequestDTO();
 		consumer.setSystemName("consumer");
 		consumer.setAddress("abc.de");

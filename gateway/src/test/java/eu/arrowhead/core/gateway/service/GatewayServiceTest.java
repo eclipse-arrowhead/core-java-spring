@@ -710,7 +710,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName(null);
 		request.setQueueId("test-queue-id");
-		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
+		request.setRelay(new RelayRequestDTO("test-address", 1000, null, true, true, "GATEWAY_RELAY"));
 		
 		testingObject.closeSession(request);
 	}
@@ -721,7 +721,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("  ");
 		request.setQueueId("test-queue-id");
-		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
+		request.setRelay(new RelayRequestDTO("test-address", 1000, null, true, true, "GATEWAY_RELAY"));
 		
 		testingObject.closeSession(request);
 	}
@@ -732,7 +732,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("test.peer.name");
 		request.setQueueId(null);
-		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
+		request.setRelay(new RelayRequestDTO("test-address", 1000, null, true, true, "GATEWAY_RELAY"));
 		
 		testingObject.closeSession(request);
 	}
@@ -743,7 +743,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("test.peer.name");
 		request.setQueueId("  ");
-		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
+		request.setRelay(new RelayRequestDTO("test-address", 1000, null, true, true, "GATEWAY_RELAY"));
 		
 		testingObject.closeSession(request);
 	}
@@ -765,7 +765,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
-		request.setRelay(new RelayRequestDTO(null, 1000, true, true, "GATEWAY_RELAY"));
+		request.setRelay(new RelayRequestDTO(null, 1000, null, true, true, "GATEWAY_RELAY"));
 		
 		testingObject.closeSession(request);
 	}
@@ -776,7 +776,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
-		request.setRelay(new RelayRequestDTO("  ", 1000, true, true, "GATEWAY_RELAY"));
+		request.setRelay(new RelayRequestDTO("  ", 1000, null, true, true, "GATEWAY_RELAY"));
 		
 		testingObject.closeSession(request);
 	}
@@ -787,7 +787,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
-		request.setRelay(new RelayRequestDTO("test-address", null, true, true, "GATEWAY_RELAY"));
+		request.setRelay(new RelayRequestDTO("test-address", null, null, true, true, "GATEWAY_RELAY"));
 		
 		testingObject.closeSession(request);
 	}
@@ -798,7 +798,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
-		request.setRelay(new RelayRequestDTO("test-address", CommonConstants.SYSTEM_PORT_RANGE_MIN - 1, true, true, "GATEWAY_RELAY"));
+		request.setRelay(new RelayRequestDTO("test-address", CommonConstants.SYSTEM_PORT_RANGE_MIN - 1, null, true, true, "GATEWAY_RELAY"));
 		
 		testingObject.closeSession(request);
 	}
@@ -809,7 +809,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
-		request.setRelay(new RelayRequestDTO("test-address", CommonConstants.SYSTEM_PORT_RANGE_MAX + 1, true, true, "GATEWAY_RELAY"));
+		request.setRelay(new RelayRequestDTO("test-address", CommonConstants.SYSTEM_PORT_RANGE_MAX + 1, null, true, true, "GATEWAY_RELAY"));
 		
 		testingObject.closeSession(request);
 	}
@@ -820,7 +820,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
-		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, null));
+		request.setRelay(new RelayRequestDTO("test-address", 1000, null, true, true, null));
 		
 		testingObject.closeSession(request);
 	}
@@ -831,7 +831,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
-		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "invalid"));
+		request.setRelay(new RelayRequestDTO("test-address", 1000, null, true, true, "invalid"));
 		
 		testingObject.closeSession(request);
 	}
@@ -842,7 +842,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
-		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
+		request.setRelay(new RelayRequestDTO("test-address", 1000, null, true, true, "GATEWAY_RELAY"));
 		
 		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenThrow(new JMSException("test"));
 		
@@ -855,7 +855,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
-		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
+		request.setRelay(new RelayRequestDTO("test-address", 1000, null, true, true, "GATEWAY_RELAY"));
 		
 		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenReturn(getTestSession());
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
@@ -886,7 +886,7 @@ public class GatewayServiceTest {
 		activeSessionDTO.setPeerName("peer");
 		activeSessionDTO.setQueueId("queueId");
 		activeSessionDTO.setConsumerServerSocketPort(1234);
-		activeSessionDTO.setRelay(new RelayRequestDTO("localhost", 12345, true, false, RelayType.GATEWAY_RELAY.name()));
+		activeSessionDTO.setRelay(new RelayRequestDTO("localhost", 12345, null, true, false, RelayType.GATEWAY_RELAY.name()));
 		
 		when(activeSessions.values()).thenReturn(List.of(activeSessionDTO));
 		when(relayClient.createConnection("localhost", 12345, true)).thenThrow(JMSException.class);
@@ -906,7 +906,7 @@ public class GatewayServiceTest {
 		activeSessionDTO.setPeerName("peer");
 		activeSessionDTO.setQueueId("queueId");
 		activeSessionDTO.setConsumerServerSocketPort(1234);
-		activeSessionDTO.setRelay(new RelayRequestDTO("localhost", 12345, true, false, RelayType.GATEWAY_RELAY.name()));
+		activeSessionDTO.setRelay(new RelayRequestDTO("localhost", 12345, null, true, false, RelayType.GATEWAY_RELAY.name()));
 		
 		when(activeSessions.values()).thenReturn(List.of(activeSessionDTO));
 		when(relayClient.createConnection("localhost", 12345, true)).thenReturn(getTestSession());
@@ -932,7 +932,7 @@ public class GatewayServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private GatewayProviderConnectionRequestDTO getTestGatewayProviderConnectionRequestDTO() {
-		final RelayRequestDTO relay = new RelayRequestDTO("localhost", 1234, false, false, RelayType.GATEWAY_RELAY.name());
+		final RelayRequestDTO relay = new RelayRequestDTO("localhost", 1234, null, false, false, RelayType.GATEWAY_RELAY.name());
 		final SystemRequestDTO consumer = new SystemRequestDTO();
 		consumer.setSystemName("consumer");
 		consumer.setAddress("abc.de");
@@ -1044,7 +1044,7 @@ public class GatewayServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private GatewayConsumerConnectionRequestDTO getTestGatewayConsumerConnectionRequestDTO() {
-		final RelayRequestDTO relay = new RelayRequestDTO("localhost", 1234, false, false, RelayType.GATEWAY_RELAY.name());
+		final RelayRequestDTO relay = new RelayRequestDTO("localhost", 1234, null, false, false, RelayType.GATEWAY_RELAY.name());
 		final SystemRequestDTO consumer = new SystemRequestDTO();
 		consumer.setSystemName("consumer");
 		consumer.setAddress("abc.de");

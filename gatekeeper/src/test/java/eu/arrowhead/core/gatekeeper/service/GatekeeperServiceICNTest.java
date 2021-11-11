@@ -1217,6 +1217,6 @@ public class GatekeeperServiceICNTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private RelayRequestDTO getTestRelayDTO() {
-		return new RelayRequestDTO("localhost", 1234, true, true, RelayType.GATEWAY_RELAY.name());
+		return new RelayRequestDTO("localhost", 1234, null, true, true, RelayType.GATEWAY_RELAY.name());
 	}
 }

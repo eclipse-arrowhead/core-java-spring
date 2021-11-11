@@ -923,7 +923,7 @@ public class GatekeeperService {
 		
 		for (final CloudGatewayRelay relayConn : gatewayRelays) {
 			final Relay relay = relayConn.getRelay();
-			result.add(new RelayRequestDTO(relay.getAddress(), relay.getPort(), relay.getSecure(), relay.getExclusive(), relay.getType().name()));
+			result.add(new RelayRequestDTO(relay.getAddress(), relay.getPort(), relay.getAuthenticationInfo(), relay.getSecure(), relay.getExclusive(), relay.getType().name()));
 		}
 		
 		return result;

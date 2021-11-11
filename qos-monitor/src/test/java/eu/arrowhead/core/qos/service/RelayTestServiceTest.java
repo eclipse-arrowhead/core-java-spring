@@ -642,7 +642,7 @@ public class RelayTestServiceTest {
 		request.setReceiverQoSMonitorPublicKey("valid key");
 		
 		final CloudWithRelaysResponseDTO cloudResponse = new CloudWithRelaysResponseDTO();
-		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4201, true, false, RelayType.GATEWAY_RELAY, null, null)));
+		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4201, null, true, false, RelayType.GATEWAY_RELAY, null, null)));
 		when(qosMonitorDriver.queryGatekeeperCloudInfo(anyString(), anyString())).thenReturn(cloudResponse);
 		
 		relayTestService.initRelayTest(request);
@@ -670,7 +670,7 @@ public class RelayTestServiceTest {
 		request.setReceiverQoSMonitorPublicKey("valid key");
 		
 		final CloudWithRelaysResponseDTO cloudResponse = new CloudWithRelaysResponseDTO();
-		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, true, false, RelayType.GATEWAY_RELAY, null, null)));
+		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, null, true, false, RelayType.GATEWAY_RELAY, null, null)));
 
 		when(qosMonitorDriver.queryGatekeeperCloudInfo(anyString(), anyString())).thenReturn(cloudResponse);
 		when(relayClient.createConnection(anyString(), anyInt(), anyBoolean())).thenThrow(JMSException.class);
@@ -705,7 +705,7 @@ public class RelayTestServiceTest {
 		request.setReceiverQoSMonitorPublicKey("valid key");
 		
 		final CloudWithRelaysResponseDTO cloudResponse = new CloudWithRelaysResponseDTO();
-		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, true, false, RelayType.GATEWAY_RELAY, null, null)));
+		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, null, true, false, RelayType.GATEWAY_RELAY, null, null)));
 
 		when(qosMonitorDriver.queryGatekeeperCloudInfo(anyString(), anyString())).thenReturn(cloudResponse);
 		when(relayClient.createConnection(anyString(), anyInt(), anyBoolean())).thenReturn(getTestSession());
@@ -746,7 +746,7 @@ public class RelayTestServiceTest {
 		request.setReceiverQoSMonitorPublicKey("valid key");
 		
 		final CloudWithRelaysResponseDTO cloudResponse = new CloudWithRelaysResponseDTO();
-		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, true, false, RelayType.GATEWAY_RELAY, null, null)));
+		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, null, true, false, RelayType.GATEWAY_RELAY, null, null)));
 
 		when(qosMonitorDriver.queryGatekeeperCloudInfo(anyString(), anyString())).thenReturn(cloudResponse);
 		when(relayClient.createConnection(anyString(), anyInt(), anyBoolean())).thenReturn(getTestSession());
@@ -910,7 +910,7 @@ public class RelayTestServiceTest {
 		request.setSenderQoSMonitorPublicKey("valid key");
 		
 		final CloudWithRelaysResponseDTO cloudResponse = new CloudWithRelaysResponseDTO();
-		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4201, true, false, RelayType.GATEWAY_RELAY, null, null)));
+		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4201, null, true, false, RelayType.GATEWAY_RELAY, null, null)));
 		when(qosMonitorDriver.queryGatekeeperCloudInfo(anyString(), anyString())).thenReturn(cloudResponse);
 		
 		relayTestService.joinRelayTest(request);
@@ -936,7 +936,7 @@ public class RelayTestServiceTest {
 		request.setSenderQoSMonitorPublicKey("valid key");
 		
 		final CloudWithRelaysResponseDTO cloudResponse = new CloudWithRelaysResponseDTO();
-		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, true, false, RelayType.GATEWAY_RELAY, null, null)));
+		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, null, true, false, RelayType.GATEWAY_RELAY, null, null)));
 
 		when(qosMonitorDriver.queryGatekeeperCloudInfo(anyString(), anyString())).thenReturn(cloudResponse);
 		when(qosDBService.getOrCreateInterRelayMeasurement(any(CloudResponseDTO.class), any(RelayResponseDTO.class), any(QoSMeasurementType.class))).thenReturn(new QoSInterRelayMeasurement());
@@ -971,7 +971,7 @@ public class RelayTestServiceTest {
 		request.setSenderQoSMonitorPublicKey("valid key");
 		
 		final CloudWithRelaysResponseDTO cloudResponse = new CloudWithRelaysResponseDTO();
-		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, true, false, RelayType.GATEWAY_RELAY, null, null)));
+		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, null, true, false, RelayType.GATEWAY_RELAY, null, null)));
 
 		when(qosMonitorDriver.queryGatekeeperCloudInfo(anyString(), anyString())).thenReturn(cloudResponse);
 		when(qosDBService.getOrCreateInterRelayMeasurement(any(CloudResponseDTO.class), any(RelayResponseDTO.class), any(QoSMeasurementType.class))).thenReturn(new QoSInterRelayMeasurement());
@@ -1012,7 +1012,7 @@ public class RelayTestServiceTest {
 		request.setSenderQoSMonitorPublicKey("valid key");
 		
 		final CloudWithRelaysResponseDTO cloudResponse = new CloudWithRelaysResponseDTO();
-		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, true, false, RelayType.GATEWAY_RELAY, null, null)));
+		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, null, true, false, RelayType.GATEWAY_RELAY, null, null)));
 
 		when(qosMonitorDriver.queryGatekeeperCloudInfo(anyString(), anyString())).thenReturn(cloudResponse);
 		when(qosDBService.getOrCreateInterRelayMeasurement(any(CloudResponseDTO.class), any(RelayResponseDTO.class), any(QoSMeasurementType.class))).thenReturn(new QoSInterRelayMeasurement());

@@ -23,11 +23,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class RelayResponseDTO implements Serializable {
 
-	private static final long serialVersionUID = -8159263313404856979L;
-
+	private static final long serialVersionUID = 2230272524199062694L;
+	
 	private long id;
 	private String address;
 	private int port;
+	private String authenticationInfo;
 	private boolean secure = false;
 	private boolean exclusive = false;
 	private RelayType type;
@@ -41,10 +42,11 @@ public class RelayResponseDTO implements Serializable {
 	public RelayResponseDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public RelayResponseDTO(final long id, final String address, final int port, final boolean secure, final boolean exclusive, final RelayType type, final String createdAt, final String updatedAt) {
+	public RelayResponseDTO(final long id, final String address, final int port, final String authenticationInfo, final boolean secure, final boolean exclusive, final RelayType type, final String createdAt, final String updatedAt) {
 		this.id = id;
 		this.address = address;
 		this.port = port;
+		this.authenticationInfo = authenticationInfo;
 		this.secure = secure;
 		this.exclusive = exclusive;
 		this.type = type;
@@ -56,6 +58,7 @@ public class RelayResponseDTO implements Serializable {
 	public long getId() { return id; }
 	public String getAddress() { return address; }
 	public int getPort() { return port; }
+	public String getAuthenticationInfo() { return authenticationInfo; }
 	public boolean isSecure() { return secure; }
 	public boolean isExclusive() { return exclusive; }
 	public RelayType getType() { return type; }
@@ -66,6 +69,7 @@ public class RelayResponseDTO implements Serializable {
 	public void setId(final long id) { this.id = id; }
 	public void setAddress(final String address) { this.address = address; }
 	public void setPort(final int port) { this.port = port; }
+	public void setAuthenticationInfo(final String authenticationInfo) { this.authenticationInfo = authenticationInfo; }
 	public void setSecure(final boolean secure) { this.secure = secure; }
 	public void setExclusive(final boolean exclusive) { this.exclusive = exclusive; }
 	public void setType(final RelayType type) { this.type = type; }
@@ -75,38 +79,32 @@ public class RelayResponseDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, address, port);
+		return Objects.hash(address, authenticationInfo, id, port);
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
-	public boolean equals(final Object obj) {
+	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
 		}
+		
 		if (obj == null) {
 			return false;
 		}
+		
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		final RelayResponseDTO other = (RelayResponseDTO) obj;
-		if (address == null) {
-			if (other.address != null) {
-				return false;
-			}
-		} else if (!address.equals(other.address)) {
-			return false;
-		}
-		if (id != other.id) {
-			return false;
-		}
-		if (port != other.port) {
-			return false;
-		}
-		return true;
+		
+		RelayResponseDTO other = (RelayResponseDTO) obj;
+		
+		return Objects.equals(address, other.address) &&
+			   Objects.equals(authenticationInfo, other.authenticationInfo) &&
+			   id == other.id &&
+			   port == other.port;
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
