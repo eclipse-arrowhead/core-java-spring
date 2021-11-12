@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS `relay` (
   `address` varchar(255) NOT NULL,
   `port` int(11) NOT NULL,
   `secure` int(1) NOT NULL DEFAULT 0,
+  `authentication_info` varchar(2047) DEFAULT NULL,
   `exclusive` int(1) NOT NULL DEFAULT 0,
   `type` varchar(255) NOT NULL DEFAULT 'GENERAL_RELAY',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,

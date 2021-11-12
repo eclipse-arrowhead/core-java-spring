@@ -66,6 +66,7 @@ import eu.arrowhead.common.dto.internal.QoSReservationResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSTemporaryLockRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSTemporaryLockResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
+import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.internal.SystemAddressSetRelayResponseDTO;
@@ -367,7 +368,7 @@ public class GatekeeperService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ICNResultDTO initICN(final ICNRequestFormDTO form) {
+	public ICNResultDTO initICN(final ICNRequestFormDTO form) { //TODO: relay authInfo test
 		logger.debug("initICN started...");
 		
 		validateICNForm(form);
@@ -403,7 +404,8 @@ public class GatekeeperService {
 		
 		// initializing gateway connection
 		final OrchestrationResultDTO result = icnResponse.getResponse().get(0); // in gateway mode there is only one result in the response object
-		final GatewayConsumerConnectionRequestDTO connectionRequest = new GatewayConsumerConnectionRequestDTO(DTOConverter.convertRelayResponseDTOToRelayRequestDTO(icnResponse.getRelay()),
+		final Relay commonRelay = findCorrespondingRelay(icnResponse.getRelay());
+		final GatewayConsumerConnectionRequestDTO connectionRequest = new GatewayConsumerConnectionRequestDTO(DTOConverter.convertRelayToRelayRequestDTO(commonRelay),
 																											  icnResponse.getConnectionInfo().getQueueId(), 
 																											  icnResponse.getConnectionInfo().getPeerName(),
 																											  icnResponse.getConnectionInfo().getProviderGWPublicKey(), form.getRequesterSystem(),
@@ -1057,5 +1059,16 @@ public class GatekeeperService {
 			}
 		}
 		return new OrchestrationResponseDTO(updatedResults);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private Relay findCorrespondingRelay(final RelayResponseDTO relayDTO) {
+		logger.debug("findCorrespondingRelay started...");
+		
+		if (Utilities.isEmpty(relayDTO.getAuthenticationInfo())) {
+			return gatekeeperDBService.getRelayByAddressAndPort(relayDTO.getAddress(), relayDTO.getPort());
+		}
+		
+		return gatekeeperDBService.getRelayByAuthenticationInfo(relayDTO.getAuthenticationInfo());
 	}
 }

@@ -34,6 +34,7 @@ public interface RelayRepository extends RefreshableRepository<Relay,Long> {
 	//-------------------------------------------------------------------------------------------------
 	public boolean existsByAddressAndPort(final String address, final int port);
 	public Optional<Relay> findByAddressAndPort(final String address, final int port);
+	public Optional<Relay> findByAuthenticationInfo(final String authenticationInfo);
 	public List<Relay> findAllByExclusiveAndTypeIn(final boolean exclusive, final List<RelayType> type);
 	
 	//-------------------------------------------------------------------------------------------------

@@ -516,6 +516,29 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public Relay getRelayByAuthenticationInfo(final String authenticationInfo) { //TODO: relay authInfo test
+		logger.debug("getRelayByAuthenticationInfo started...");
+		
+		try {
+			if (Utilities.isEmpty(authenticationInfo)) {
+				throw new InvalidParameterException("Authentication info is empty");
+			}
+				
+			final Optional<Relay> relayOpt = relayRepository.findByAuthenticationInfo(authenticationInfo);
+			if (relayOpt.isEmpty()) {
+				throw new InvalidParameterException("Relay with the following authentication info not exists: " + authenticationInfo);
+			}
+			
+			return relayOpt.get();			
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public Set<Relay> getAllLiveGatekeeperRelays() {
 		final Set<Relay> result = new HashSet<>();
 		final List<Cloud> clouds = cloudRepository.findAll();
