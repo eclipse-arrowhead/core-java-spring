@@ -571,6 +571,7 @@ public class GatekeeperDBService {
 		
 		try {
 			final Map<String, Relay> relaysToSave = new HashMap<>();
+			final Set<String> authenticationInfos = new HashSet<>();
 			
 			if (dtoList == null || dtoList.isEmpty()) {
 				throw new InvalidParameterException("List of RelayRequestDTO is null or empty");
@@ -581,7 +582,15 @@ public class GatekeeperDBService {
 					throw new InvalidParameterException("List of RelayRequestDTO contains null element");
 				}
 				
-				validateRelayParameters(true, dto.getAddress(), dto.getPort(), dto.isExclusive(), dto.getType());
+				validateRelayParameters(true, dto.getAddress(), dto.getPort(), dto.getAuthenticationInfo(), dto.isExclusive(), dto.getType());
+				
+				if (!Utilities.isEmpty(dto.getAuthenticationInfo())) {
+					if (authenticationInfos.contains(dto.getAuthenticationInfo())) {
+						throw new InvalidParameterException("List of RelayRequestDTO contains the following authentication info multiple times: " + dto.getAuthenticationInfo());
+					}
+					
+					authenticationInfos.add(dto.getAuthenticationInfo());
+				}
 				
 				final String address = dto.getAddress().toLowerCase().trim();
 				final String uniqueConstraint = address  + ":" + dto.getPort();
@@ -640,10 +649,14 @@ public class GatekeeperDBService {
 				throw new InvalidParameterException("Type of relay couldn't be updated");
 			}
 			
-			validateRelayParameters(false, address, port, isExclusive, type.toString());
+			validateRelayParameters(false, address, port, authenticationInfo, isExclusive, type.toString());
+			
+			if (!Utilities.isEmpty(authenticationInfo) && !authenticationInfo.equals(relay.getAuthenticationInfo())) {
+				checkAuthenticationInfoUniqueConstraintOfRelayTable(authenticationInfo);
+			}
 			
 			if (!relay.getAddress().equalsIgnoreCase(address) || relay.getPort() != port) {
-				checkUniqueConstraintOfRelayTable(address, port);
+				checkAddressPortUniqueConstraintOfRelayTable(address, port);
 			}
 			
 			relay.setAddress(address);
@@ -756,7 +769,7 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	private void validateRelayParameters(final boolean withUniqueConstraintCheck, String address, final Integer port, Boolean exclusive, final String type) {
+	private void validateRelayParameters(final boolean withUniqueConstraintCheck, String address, final Integer port, final String authenticationInfo, Boolean exclusive, final String type) {
 		logger.debug("validateRelayParameters started...");
 		
 		if (Utilities.isEmpty(address)) {
@@ -786,16 +799,29 @@ public class GatekeeperDBService {
 		}
 		
 		if (withUniqueConstraintCheck) {
-			checkUniqueConstraintOfRelayTable(address, port);
+			checkAddressPortUniqueConstraintOfRelayTable(address, port);
+			
+			if (!Utilities.isEmpty(authenticationInfo)) {
+				checkAuthenticationInfoUniqueConstraintOfRelayTable(authenticationInfo);
+			}
 		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	private void checkUniqueConstraintOfRelayTable(final String address, final int port) {
-		logger.debug("checkUniqueConstraintOfRelayTable started...");
+	private void checkAddressPortUniqueConstraintOfRelayTable(final String address, final int port) {
+		logger.debug("checkAddressPortUniqueConstraintOfRelayTable started...");
 		
 		if (relayRepository.existsByAddressAndPort(address, port)) {
 			throw new InvalidParameterException("Relay with the following address and port already exists: " + address + ", " + port);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	private void checkAuthenticationInfoUniqueConstraintOfRelayTable(final String authenticationInfo) {
+		logger.debug("checkAuthenticationInfoUniqueConstraintOfRelayTable started...");
+		
+		if (relayRepository.existsByAuthenticationInfo(authenticationInfo)) {
+			throw new InvalidParameterException("Relay with the following authentication info already exists: " + authenticationInfo);
 		}
 	}
 	

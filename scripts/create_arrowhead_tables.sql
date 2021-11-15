@@ -28,7 +28,8 @@ CREATE TABLE IF NOT EXISTS `relay` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `pair` (`address`, `port`)
+  UNIQUE KEY `pair` (`address`, `port`),
+  UNIQUE KEY `relay_auth_info` (`authentication_info`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `cloud_gatekeeper_relay` (
