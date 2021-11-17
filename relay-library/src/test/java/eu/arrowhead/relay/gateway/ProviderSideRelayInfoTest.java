@@ -14,6 +14,7 @@
 
 package eu.arrowhead.relay.gateway;
 
+import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 
 import org.junit.Assert;
@@ -94,6 +95,35 @@ public class ProviderSideRelayInfoTest {
 			new ProviderSideRelayInfo("peerName", "queueId", producer, null, null, null);
 		} catch (final Exception ex) {
 			Assert.assertEquals("controlMessageSender is null.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructorMessageConsumerNull() {
+		final MessageProducer producer = Mockito.mock(MessageProducer.class);
+		
+		try {
+			new ProviderSideRelayInfo("peerName", "queueId", producer, producer, null, null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("messageConsumer is null.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructorConstrolMessageConsumerNull() {
+		final MessageProducer producer = Mockito.mock(MessageProducer.class);
+		final MessageConsumer consumer = Mockito.mock(MessageConsumer.class);
+		
+		try {
+			new ProviderSideRelayInfo("peerName", "queueId", producer, producer, consumer, null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("controlMessageConsumer is null.", ex.getMessage());
 			
 			throw ex;
 		}
