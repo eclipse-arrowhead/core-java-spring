@@ -368,7 +368,7 @@ public class GatekeeperService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ICNResultDTO initICN(final ICNRequestFormDTO form) { //TODO: relay authInfo test
+	public ICNResultDTO initICN(final ICNRequestFormDTO form) { 
 		logger.debug("initICN started...");
 		
 		validateICNForm(form);

@@ -418,7 +418,7 @@ public class GatekeeperController {
 	})
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
 	@PostMapping(path = RELAYS_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public RelayListResponseDTO registerRelays(@RequestBody final List<RelayRequestDTO> dtoList) { //TODO: relay authInfo test
+	@ResponseBody public RelayListResponseDTO registerRelays(@RequestBody final List<RelayRequestDTO> dtoList) { 
 		logger.debug("New registerRelays post request recieved");
 		final String origin = CommonConstants.GATEKEEPER_URI + RELAYS_MGMT_URI;
 		
@@ -445,7 +445,7 @@ public class GatekeeperController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PutMapping(path = RELAYS_BY_ID_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public RelayResponseDTO updateRelayById(@PathVariable(value = PATH_VARIABLE_ID) final long id, @RequestBody final RelayRequestDTO dto) { //TODO: relay authInfo test
+	@ResponseBody public RelayResponseDTO updateRelayById(@PathVariable(value = PATH_VARIABLE_ID) final long id, @RequestBody final RelayRequestDTO dto) { 
 		logger.debug("New updateRelayById put request recieved with id: {}", id);
 		final String origin = CommonConstants.GATEKEEPER_URI + RELAYS_BY_ID_MGMT_URI;
 		

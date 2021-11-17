@@ -28,7 +28,7 @@ import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 
-public class GetFirstCommonPreferredIfAnyOrFirstCommonPublicGatewayMatchmaker implements RelayMatchmakingAlgorithm { //TODO: relay authInfo test
+public class GetFirstCommonPreferredIfAnyOrFirstCommonPublicGatewayMatchmaker implements RelayMatchmakingAlgorithm { 
 	
 	//=================================================================================================
 	// members

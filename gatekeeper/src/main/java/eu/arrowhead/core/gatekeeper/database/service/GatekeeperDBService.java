@@ -516,7 +516,7 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public Relay getRelayByAuthenticationInfo(final String authenticationInfo) { //TODO: relay authInfo test
+	public Relay getRelayByAuthenticationInfo(final String authenticationInfo) { 
 		logger.debug("getRelayByAuthenticationInfo started...");
 		
 		try {
@@ -566,7 +566,7 @@ public class GatekeeperDBService {
 	
 	//-------------------------------------------------------------------------------------------------	
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public List<Relay> registerBulkRelays(final List<RelayRequestDTO> dtoList) { //TODO: relay authInfo test
+	public List<Relay> registerBulkRelays(final List<RelayRequestDTO> dtoList) { 
 		logger.debug("registerBulkRelays started...");
 		
 		try {
@@ -616,7 +616,7 @@ public class GatekeeperDBService {
 	
 	//-------------------------------------------------------------------------------------------------	
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public RelayResponseDTO updateRelayByIdResponse(final long id, final String address, final int port, final String authenticationInfo, final boolean isSecure, final boolean isExclusive, final RelayType type) { //TODO: relay authInfo test
+	public RelayResponseDTO updateRelayByIdResponse(final long id, final String address, final int port, final String authenticationInfo, final boolean isSecure, final boolean isExclusive, final RelayType type) { 
 		logger.debug("updateRelayByIdResponse started...");
 		
 		final Relay entry = updateRelayById(id, address, port, authenticationInfo, isSecure, isExclusive, type);
@@ -627,7 +627,7 @@ public class GatekeeperDBService {
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S3655")
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public Relay updateRelayById(final long id, final String address, final int port, final String authenticationInfo, final boolean isSecure, final boolean isExclusive, RelayType type) { //TODO: relay authInfo test
+	public Relay updateRelayById(final long id, final String address, final int port, final String authenticationInfo, final boolean isSecure, final boolean isExclusive, RelayType type) { 
 		logger.debug("updateRelayById started...");
 		
 		try {
@@ -651,8 +651,10 @@ public class GatekeeperDBService {
 			
 			validateRelayParameters(false, address, port, authenticationInfo, isExclusive, type.toString());
 			
-			if (!Utilities.isEmpty(authenticationInfo) && !authenticationInfo.equals(relay.getAuthenticationInfo())) {
-				checkAuthenticationInfoUniqueConstraintOfRelayTable(authenticationInfo);
+			final String _authenticationInfo = Utilities.isEmpty(authenticationInfo) ? null : authenticationInfo;
+			
+			if (_authenticationInfo != null && !_authenticationInfo.equals(relay.getAuthenticationInfo())) {
+				checkAuthenticationInfoUniqueConstraintOfRelayTable(_authenticationInfo);
 			}
 			
 			if (!relay.getAddress().equalsIgnoreCase(address) || relay.getPort() != port) {
@@ -661,7 +663,7 @@ public class GatekeeperDBService {
 			
 			relay.setAddress(address);
 			relay.setPort(port);
-			relay.setAuthenticationInfo(authenticationInfo);
+			relay.setAuthenticationInfo(_authenticationInfo);
 			relay.setSecure(isSecure);
 			relay.setExclusive(isExclusive);
 			relay.setType(type);
