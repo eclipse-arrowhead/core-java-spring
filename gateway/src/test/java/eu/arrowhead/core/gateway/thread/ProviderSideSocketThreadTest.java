@@ -32,6 +32,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.UnknownHostException;
 import java.security.PublicKey;
+import java.time.ZonedDateTime;
 
 import javax.jms.BytesMessage;
 import javax.jms.CompletionListener;
@@ -319,10 +320,12 @@ public class ProviderSideSocketThreadTest {
 		
 		when(socketFactory.createSocket(anyString(), anyInt())).thenReturn(getDummySSLSocket(new byte[0]));
 		
+		Assert.assertNull(testingObject.getLastInteractionTime());
 		testingObject.init();
 		
 		initialized = (Boolean) ReflectionTestUtils.getField(testingObject, "initialized");
 		Assert.assertTrue(initialized);
+		Assert.assertNotNull(testingObject.getLastInteractionTime());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -362,16 +365,19 @@ public class ProviderSideSocketThreadTest {
 		when(socketFactory.createSocket(anyString(), anyInt())).thenReturn(getDummySSLSocket(bytes));
 		
 		testingObject.init();
+		final ZonedDateTime afterIntit = testingObject.getLastInteractionTime();
 		boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertFalse(interrupted);
 		
 		testingObject.run();
+		final ZonedDateTime afterRun = testingObject.getLastInteractionTime();
 		
 		verify(relayClient, times(2)).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
 
 		// because of input stream is empty
 		interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertTrue(interrupted);
+		Assert.assertTrue(afterRun.isAfter(afterIntit));
 	}
 
 	
