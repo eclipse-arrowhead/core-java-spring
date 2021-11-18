@@ -283,6 +283,7 @@ CREATE TABLE IF NOT EXISTS `logs` (
   `entry_date` timestamp NULL DEFAULT NULL,
   `logger` varchar(100) DEFAULT NULL,
   `log_level` varchar(100) DEFAULT NULL,
+  `system_name` varchar(255) DEFAULT NULL,
   `message` text,
   `exception` text,
   PRIMARY KEY (`log_id`)
