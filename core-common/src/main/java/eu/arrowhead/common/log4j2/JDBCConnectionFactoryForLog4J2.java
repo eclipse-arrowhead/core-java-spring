@@ -71,17 +71,24 @@ public class JDBCConnectionFactoryForLog4J2 {
 	//-------------------------------------------------------------------------------------------------
 	private static void init() throws IOException {
 		InputStream propStream = null;
-		final File propertiesFile = new File(CoreCommonConstants.APPLICATION_PROPERTIES);
-		if (!propertiesFile.exists()) {
-			propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(CoreCommonConstants.APPLICATION_PROPERTIES);
-		} else {
-			propStream = new FileInputStream(propertiesFile);
-		}
 		
-		final Properties temp = new Properties();
-		temp.load(propStream);
-
-		props = temp;
+		try {
+			final File propertiesFile = new File(CoreCommonConstants.APPLICATION_PROPERTIES);
+			if (!propertiesFile.exists()) {
+				propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(CoreCommonConstants.APPLICATION_PROPERTIES);
+			} else {
+				propStream = new FileInputStream(propertiesFile);
+			}
+			
+			final Properties temp = new Properties();
+			temp.load(propStream);
+	
+			props = temp;
+		} finally {
+			if (propStream != null) {
+				propStream.close();
+			}
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------

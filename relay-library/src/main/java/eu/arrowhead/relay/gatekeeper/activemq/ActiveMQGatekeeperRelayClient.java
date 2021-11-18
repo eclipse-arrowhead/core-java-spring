@@ -202,7 +202,12 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		
 		if (msg instanceof TextMessage) {
 			final TextMessage tmsg = (TextMessage) msg;
-			final GeneralAdvertisementMessageDTO originalDTO = Utilities.fromJson(tmsg.getText(), GeneralAdvertisementMessageDTO.class);
+			final String text = tmsg.getText();
+			if (Utilities.isEmpty(text)) { // invalid advertisement
+				return null;
+			}
+			
+			final GeneralAdvertisementMessageDTO originalDTO = Utilities.fromJson(text, GeneralAdvertisementMessageDTO.class);
 			if (isForMe(originalDTO.getRecipientCN())) {
 				return decryptGeneralAdvertisementMessage(originalDTO);
 			}

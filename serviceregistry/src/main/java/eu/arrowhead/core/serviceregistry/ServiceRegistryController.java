@@ -1205,8 +1205,8 @@ public class ServiceRegistryController {
 
 		if (!Utilities.isEmpty(request.getSystemName())) {
 			needChange = true;
-			for (final CoreSystem coreSysteam : CoreSystem.values()) {
-				if (coreSysteam.name().equalsIgnoreCase(request.getSystemName().trim())) {
+			for (final CoreSystem coreSystem : CoreSystem.values()) {
+				if (coreSystem.name().equalsIgnoreCase(request.getSystemName().trim())) {
 					throw new BadPayloadException("System name '" + request.getSystemName() + "' is a reserved arrowhead core system name.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
 				}
 			}
@@ -1263,8 +1263,8 @@ public class ServiceRegistryController {
 		}
 
 		if (checkReservedCoreSystemNames) {
-			for (final CoreSystem coreSysteam : CoreSystem.values()) {
-				if (coreSysteam.name().equalsIgnoreCase(dto.getSystemName().trim())) {
+			for (final CoreSystem coreSystem : CoreSystem.values()) {
+				if (coreSystem.name().equalsIgnoreCase(dto.getSystemName().trim())) {
 					throw new BadPayloadException("System name '" + dto.getSystemName() + "' is a reserved arrowhead core system name.", HttpStatus.SC_BAD_REQUEST, origin);
 				}
 			}
