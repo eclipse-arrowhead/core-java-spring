@@ -28,10 +28,12 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceConfigurationError;
+import java.util.TimeZone;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -488,9 +490,10 @@ public class UtilitiesTest {
 	@Test
 	public void testParseUTCStringToLocalZonedDateTimeWellFormed() {
 		final String timeStr = "2019-06-18T12:45:31Z";
-		LocalDateTime ldt = LocalDateTime.ofInstant(Instant.parse(timeStr), ZoneOffset.UTC);
-		final ZoneOffset offset = OffsetDateTime.now().getOffset();
-		ldt = ldt.plusSeconds(offset.getTotalSeconds());
+		final Instant instant = Instant.parse(timeStr);
+		LocalDateTime ldt = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+		int offset = TimeZone.getDefault().getOffset(instant.toEpochMilli());
+		ldt = ldt.plus(offset, ChronoUnit.MILLIS);
 		
 		final ZonedDateTime result = Utilities.parseUTCStringToLocalZonedDateTime(timeStr);
 		Assert.assertEquals(ldt.getDayOfMonth(), result.getDayOfMonth());

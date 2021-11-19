@@ -355,7 +355,7 @@ public class ProviderSideSocketThreadTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testRunWhenInputStreamIsClosed() throws JMSException, UnknownHostException, IOException {
+	public void testRunWhenInputStreamIsClosed() throws JMSException, UnknownHostException, IOException, InterruptedException {
 		final byte[] bytes = new byte[2000];
 		for (int i = 0; i < bytes.length; ++i) {
 			bytes[i] = (byte) (i % 127);
@@ -365,7 +365,8 @@ public class ProviderSideSocketThreadTest {
 		when(socketFactory.createSocket(anyString(), anyInt())).thenReturn(getDummySSLSocket(bytes));
 		
 		testingObject.init();
-		final ZonedDateTime afterIntit = testingObject.getLastInteractionTime();
+		Thread.sleep(0, 1);
+		final ZonedDateTime afterInit = testingObject.getLastInteractionTime();
 		boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertFalse(interrupted);
 		
@@ -377,7 +378,7 @@ public class ProviderSideSocketThreadTest {
 		// because of input stream is empty
 		interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertTrue(interrupted);
-		Assert.assertTrue(afterRun.isAfter(afterIntit));
+		Assert.assertTrue(afterRun.isAfter(afterInit));
 	}
 
 	
