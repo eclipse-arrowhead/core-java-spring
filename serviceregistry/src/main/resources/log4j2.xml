@@ -6,7 +6,7 @@
         </Property>
 		<Property name="SYSTEM_NAME">SERVICEREGISTRY</Property>
 		<Property name="JDBC_LEVEL">INFO</Property>
-		<Property name="CONSOLE_FILE_LEVEL">DEBUG</Property>
+		<Property name="CONSOLE_FILE_LEVEL">INFO</Property>
 		<Property name="LOG_DIR">.</Property>
     </Properties>
 	<Appenders>
@@ -32,7 +32,7 @@
          	<Column name="system_name" literal="'${SYSTEM_NAME}'" />
          	<Column name="log_level" pattern="%level" />
          	<Column name="message" pattern="%m" />
-         	<Column name="exception" pattern="%throwable " />
+         	<Column name="exception" pattern="%throwable" />
  			<ThresholdFilter level="${JDBC_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
  		</JDBC>
     </Appenders>

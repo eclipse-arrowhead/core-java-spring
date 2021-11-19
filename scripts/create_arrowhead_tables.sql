@@ -284,8 +284,8 @@ CREATE TABLE IF NOT EXISTS `logs` (
   `logger` varchar(100) DEFAULT NULL,
   `log_level` varchar(100) DEFAULT NULL,
   `system_name` varchar(255) DEFAULT NULL,
-  `message` text,
-  `exception` text,
+  `message` mediumtext,
+  `exception` mediumtext,
   PRIMARY KEY (`log_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
