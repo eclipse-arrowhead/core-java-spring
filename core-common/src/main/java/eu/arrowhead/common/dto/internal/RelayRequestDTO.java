@@ -15,6 +15,7 @@
 package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,10 +25,11 @@ public class RelayRequestDTO implements Serializable {
 	//=================================================================================================
 	// members
 	
-	private static final long serialVersionUID = -3457288931415932626L;
-
+	private static final long serialVersionUID = 386079402099860014L;
+	
 	private String address;
 	private Integer port;
+	private String authenticationInfo;
 	private boolean secure = false;
 	private boolean exclusive = false;
 	private String type;
@@ -39,9 +41,10 @@ public class RelayRequestDTO implements Serializable {
 	public RelayRequestDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public RelayRequestDTO(final String address, final Integer port, final boolean secure, final boolean exclusive, final String type) {
+	public RelayRequestDTO(final String address, final Integer port, final String authenticationInfo, final boolean secure, final boolean exclusive, final String type) {
 		this.address = address;
 		this.port = port;
+		this.authenticationInfo = authenticationInfo;
 		this.secure = secure;
 		this.exclusive = exclusive;
 		this.type = type;
@@ -50,6 +53,7 @@ public class RelayRequestDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public String getAddress() { return address; }
 	public Integer getPort() { return port; }
+	public String getAuthenticationInfo() { return authenticationInfo; }
 	public boolean isSecure() { return secure; }
 	public boolean isExclusive() { return exclusive; }
 	public String getType() { return type; }
@@ -57,6 +61,7 @@ public class RelayRequestDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public void setAddress(final String address) { this.address = address; }
 	public void setPort(final Integer port) { this.port = port; }
+	public void setAuthenticationInfo(final String authenticationInfo) { this.authenticationInfo = authenticationInfo; }
 	public void setSecure(final boolean secure) { this.secure = secure; }
 	public void setExclusive(final boolean exclusive) { this.exclusive = exclusive; }
 	public void setType(final String type) { this.type = type; }
@@ -64,14 +69,7 @@ public class RelayRequestDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((address == null) ? 0 : address.hashCode());
-		result = prime * result + (exclusive ? 1231 : 1237);
-		result = prime * result + ((port == null) ? 0 : port.hashCode());
-		result = prime * result + (secure ? 1231 : 1237);
-		result = prime * result + ((type == null) ? 0 : type.hashCode());
-		return result;
+		return Objects.hash(address, authenticationInfo, exclusive, port, secure, type);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -80,43 +78,25 @@ public class RelayRequestDTO implements Serializable {
 		if (this == obj) {
 			return true;
 		}
+		
 		if (obj == null) {
 			return false;
 		}
+		
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
+		
 		final RelayRequestDTO other = (RelayRequestDTO) obj;
-		if (address == null) {
-			if (other.address != null) {
-				return false;
-			}
-		} else if (!address.equals(other.address)) {
-			return false;
-		}
-		if (exclusive != other.exclusive) {
-			return false;
-		}
-		if (port == null) {
-			if (other.port != null) {
-				return false;
-			}
-		} else if (!port.equals(other.port)) {
-			return false;
-		}
-		if (secure != other.secure) {
-			return false;
-		}
-		if (type == null) {
-			if (other.type != null) {
-				return false;
-			}
-		} else if (!type.equals(other.type)) {
-			return false;
-		}
-		return true;
+		
+		return Objects.equals(address, other.address) &&
+			   Objects.equals(authenticationInfo, other.authenticationInfo) &&
+			   exclusive == other.exclusive &&
+			   Objects.equals(port, other.port) &&
+			   secure == other.secure &&
+			   Objects.equals(type, other.type);
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {

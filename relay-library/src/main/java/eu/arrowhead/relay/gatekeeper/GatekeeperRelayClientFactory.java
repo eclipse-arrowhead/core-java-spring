@@ -16,7 +16,6 @@ package eu.arrowhead.relay.gatekeeper;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.HashSet;
 import java.util.Set;
 
 import eu.arrowhead.common.SSLProperties;

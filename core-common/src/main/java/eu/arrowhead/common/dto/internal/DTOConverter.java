@@ -367,7 +367,7 @@ public class DTOConverter {
 		Assert.notNull(entry.getCreatedAt(), "Relay.createdAt is null");
 		Assert.notNull(entry.getCreatedAt(), "Relay.updatedAt is null");
 		
-		return new RelayResponseDTO(entry.getId(), entry.getAddress(), entry.getPort(), entry.getSecure(), entry.getExclusive(), entry.getType(),
+		return new RelayResponseDTO(entry.getId(), entry.getAddress(), entry.getPort(), entry.getAuthenticationInfo(), entry.getSecure(), entry.getExclusive(), entry.getType(),
 									Utilities.convertZonedDateTimeToUTCString(entry.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));		
 	}
 	
@@ -387,7 +387,7 @@ public class DTOConverter {
 	public static RelayRequestDTO convertRelayToRelayRequestDTO(final Relay relay) {
 		Assert.notNull(relay, "relay is null.");
 		
-		return new RelayRequestDTO(relay.getAddress(), relay.getPort(), relay.getSecure(), relay.getExclusive(), relay.getType().name());
+		return new RelayRequestDTO(relay.getAddress(), relay.getPort(), relay.getAuthenticationInfo(), relay.getSecure(), relay.getExclusive(), relay.getType().name());
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
@@ -751,7 +751,7 @@ public class DTOConverter {
 	public static RelayRequestDTO convertRelayResponseDTOToRelayRequestDTO(final RelayResponseDTO response) {
 		Assert.notNull(response, "Relay response is null.");
 		
-		return new RelayRequestDTO(response.getAddress(), response.getPort(), response.isSecure(), response.isExclusive(), response.getType().name());
+		return new RelayRequestDTO(response.getAddress(), response.getPort(), response.getAuthenticationInfo(), response.isSecure(), response.isExclusive(), response.getType().name());
 	}
 	
 	//-------------------------------------------------------------------------------------------------

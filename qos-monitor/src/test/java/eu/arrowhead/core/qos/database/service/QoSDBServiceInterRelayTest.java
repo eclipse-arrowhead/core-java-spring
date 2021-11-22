@@ -374,7 +374,7 @@ public class QoSDBServiceInterRelayTest {
 		final QoSInterRelayMeasurement measurement = getQoSInterRelayMeasurementForTest(QoSMeasurementType.RELAY_ECHO, QoSMeasurementStatus.FINISHED);
 		final CloudResponseDTO cloudResp = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "dvgdafvgadsg", nowStr, nowStr);
 		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResp);
-		final RelayResponseDTO relayResp = new RelayResponseDTO(6L, "1.1.1.1", 10000, true, false, RelayType.GATEWAY_RELAY, nowStr, nowStr);
+		final RelayResponseDTO relayResp = new RelayResponseDTO(6L, "1.1.1.1", 10000, null, true, false, RelayType.GATEWAY_RELAY, nowStr, nowStr);
 		final Relay relay = DTOConverter.convertRelayResponseDTOToRelay(relayResp);
 		measurement.setCloud(cloud);
 		measurement.setRelay(relay);
@@ -394,7 +394,7 @@ public class QoSDBServiceInterRelayTest {
 		final QoSInterRelayMeasurement measurement = getQoSInterRelayMeasurementForTest(QoSMeasurementType.RELAY_ECHO, QoSMeasurementStatus.FINISHED);
 		final CloudResponseDTO cloudResp = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "dvgdafvgadsg", nowStr, nowStr);
 		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResp);
-		final RelayResponseDTO relayResp = new RelayResponseDTO(6L, "1.1.1.1", 10000, true, false, RelayType.GATEWAY_RELAY, nowStr, nowStr);
+		final RelayResponseDTO relayResp = new RelayResponseDTO(6L, "1.1.1.1", 10000, null, true, false, RelayType.GATEWAY_RELAY, nowStr, nowStr);
 		final Relay relay = DTOConverter.convertRelayResponseDTOToRelay(relayResp);
 		measurement.setCloud(cloud);
 		measurement.setRelay(relay);
@@ -415,7 +415,7 @@ public class QoSDBServiceInterRelayTest {
 		final QoSInterRelayMeasurement measurement = getQoSInterRelayMeasurementForTest(QoSMeasurementType.RELAY_ECHO, QoSMeasurementStatus.FINISHED);
 		final CloudResponseDTO cloudResp = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "dvgdafvgadsg", nowStr, nowStr);
 		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResp);
-		final RelayResponseDTO relayResp = new RelayResponseDTO(6L, "1.1.1.1", 10000, true, false, RelayType.GATEWAY_RELAY, nowStr, nowStr);
+		final RelayResponseDTO relayResp = new RelayResponseDTO(6L, "1.1.1.1", 10000, null, true, false, RelayType.GATEWAY_RELAY, nowStr, nowStr);
 		final Relay relay = DTOConverter.convertRelayResponseDTOToRelay(relayResp);
 		measurement.setCloud(cloud);
 		measurement.setRelay(relay);
@@ -439,7 +439,7 @@ public class QoSDBServiceInterRelayTest {
 		final QoSInterRelayMeasurement measurement = getQoSInterRelayMeasurementForTest(QoSMeasurementType.RELAY_ECHO, QoSMeasurementStatus.FINISHED);
 		final CloudResponseDTO cloudResp = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "dvgdafvgadsg", nowStr, nowStr);
 		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResp);
-		final RelayResponseDTO relayResp = new RelayResponseDTO(6L, "1.1.1.1", 10000, true, false, RelayType.GATEWAY_RELAY, nowStr, nowStr);
+		final RelayResponseDTO relayResp = new RelayResponseDTO(6L, "1.1.1.1", 10000, null, true, false, RelayType.GATEWAY_RELAY, nowStr, nowStr);
 		final Relay relay = DTOConverter.convertRelayResponseDTOToRelay(relayResp);
 		measurement.setCloud(cloud);
 		measurement.setRelay(relay);
@@ -460,7 +460,7 @@ public class QoSDBServiceInterRelayTest {
 		final QoSInterRelayMeasurement measurement = getQoSInterRelayMeasurementForTest(QoSMeasurementType.RELAY_ECHO, QoSMeasurementStatus.FINISHED);
 		final CloudResponseDTO cloudResp = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "dvgdafvgadsg", nowStr, nowStr);
 		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResp);
-		final RelayResponseDTO relayResp = new RelayResponseDTO(6L, "1.1.1.1", 10000, true, false, RelayType.GATEWAY_RELAY, nowStr, nowStr);
+		final RelayResponseDTO relayResp = new RelayResponseDTO(6L, "1.1.1.1", 10000, null, true, false, RelayType.GATEWAY_RELAY, nowStr, nowStr);
 		final Relay relay = DTOConverter.convertRelayResponseDTOToRelay(relayResp);
 		measurement.setCloud(cloud);
 		measurement.setRelay(relay);
@@ -481,7 +481,7 @@ public class QoSDBServiceInterRelayTest {
 		final QoSInterRelayMeasurement measurement = getQoSInterRelayMeasurementForTest(QoSMeasurementType.RELAY_ECHO, QoSMeasurementStatus.FINISHED);
 		final CloudResponseDTO cloudResp = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "dvgdafvgadsg", nowStr, nowStr);
 		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResp);
-		final RelayResponseDTO relayResp = new RelayResponseDTO(6L, "1.1.1.1", 10000, true, false, RelayType.GATEWAY_RELAY, nowStr, nowStr);
+		final RelayResponseDTO relayResp = new RelayResponseDTO(6L, "1.1.1.1", 10000, null, true, false, RelayType.GATEWAY_RELAY, nowStr, nowStr);
 		final Relay relay = DTOConverter.convertRelayResponseDTOToRelay(relayResp);
 		measurement.setCloud(cloud);
 		measurement.setRelay(relay);
@@ -502,7 +502,7 @@ public class QoSDBServiceInterRelayTest {
 		final QoSInterRelayMeasurement measurement = getQoSInterRelayMeasurementForTest(QoSMeasurementType.RELAY_ECHO, QoSMeasurementStatus.FINISHED);
 		final CloudResponseDTO cloudResp = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "dvgdafvgadsg", nowStr, nowStr);
 		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResp);
-		final RelayResponseDTO relayResp = new RelayResponseDTO(6L, "1.1.1.1", 10000, true, false, RelayType.GATEKEEPER_RELAY, nowStr, nowStr);
+		final RelayResponseDTO relayResp = new RelayResponseDTO(6L, "1.1.1.1", 10000, null, true, false, RelayType.GATEKEEPER_RELAY, nowStr, nowStr);
 		final Relay relay = DTOConverter.convertRelayResponseDTOToRelay(relayResp);
 		measurement.setCloud(cloud);
 		measurement.setRelay(relay);

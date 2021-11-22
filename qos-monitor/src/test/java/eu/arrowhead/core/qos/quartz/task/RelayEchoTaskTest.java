@@ -694,18 +694,18 @@ public class RelayEchoTaskTest {
 		final List<RelayResponseDTO> gatekeeperRelays = new ArrayList<>(numOfGKRelays);
 		for (int i = 0; i < numOfGKRelays; i++) {
 			relayIdCounter++;
-			gatekeeperRelays.add(new RelayResponseDTO(relayIdCounter, relayIdCounter + ".1.1.1", relayIdCounter * 1000, true, false, RelayType.GATEKEEPER_RELAY, nowStr, nowStr));
+			gatekeeperRelays.add(new RelayResponseDTO(relayIdCounter, relayIdCounter + ".1.1.1", relayIdCounter * 1000, null, true, false, RelayType.GATEKEEPER_RELAY, nowStr, nowStr));
 		}
 		
 		final List<RelayResponseDTO> gatewayRelays = new ArrayList<>(numOfGWRelays);
 		for (int i = 0; i < numOfGWRelays; i++) {
 			relayIdCounter++;
-			gatewayRelays.add(new RelayResponseDTO(relayIdCounter, relayIdCounter + ".1.1.1", relayIdCounter * 1000, true, true, RelayType.GATEWAY_RELAY, nowStr, nowStr));
+			gatewayRelays.add(new RelayResponseDTO(relayIdCounter, relayIdCounter + ".1.1.1", relayIdCounter * 1000, null, true, true, RelayType.GATEWAY_RELAY, nowStr, nowStr));
 		}
 		final List<RelayResponseDTO> publicRelays = new ArrayList<>(numOfPublicRelays);
 		for (int i = 0; i < numOfPublicRelays; i++) {
 			relayIdCounter++;
-			publicRelays.add(new RelayResponseDTO(relayIdCounter, relayIdCounter + ".1.1.1", relayIdCounter * 1000, true, false, RelayType.GENERAL_RELAY, nowStr, nowStr));
+			publicRelays.add(new RelayResponseDTO(relayIdCounter, relayIdCounter + ".1.1.1", relayIdCounter * 1000, null, true, false, RelayType.GENERAL_RELAY, nowStr, nowStr));
 		}
 		
 		return new CloudWithRelaysAndPublicRelaysResponseDTO(cloudIdCounter, "test-op-" + cloudIdCounter, "test-n-" + cloudIdCounter, true, true, false, "dsgsdfg" + cloudIdCounter,

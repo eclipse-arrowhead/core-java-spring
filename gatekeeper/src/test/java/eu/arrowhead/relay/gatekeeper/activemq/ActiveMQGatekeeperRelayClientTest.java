@@ -70,7 +70,6 @@ import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.gatekeeper.GatekeeperMain;
 import eu.arrowhead.relay.RelayCryptographer;
-import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClientFactory;
 import eu.arrowhead.relay.gatekeeper.GatekeeperRelayRequest;
 import eu.arrowhead.relay.gatekeeper.GatekeeperRelayResponse;
 import eu.arrowhead.relay.gatekeeper.GeneralAdvertisementResult;

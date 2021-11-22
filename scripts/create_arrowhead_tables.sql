@@ -22,12 +22,14 @@ CREATE TABLE IF NOT EXISTS `relay` (
   `address` varchar(255) NOT NULL,
   `port` int(11) NOT NULL,
   `secure` int(1) NOT NULL DEFAULT 0,
+  `authentication_info` varchar(2047) DEFAULT NULL,
   `exclusive` int(1) NOT NULL DEFAULT 0,
   `type` varchar(255) NOT NULL DEFAULT 'GENERAL_RELAY',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `pair` (`address`, `port`)
+  UNIQUE KEY `pair` (`address`, `port`),
+  UNIQUE KEY `relay_auth_info` (`authentication_info`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `cloud_gatekeeper_relay` (

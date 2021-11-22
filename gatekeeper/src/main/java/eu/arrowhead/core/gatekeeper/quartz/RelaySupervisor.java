@@ -34,4 +34,12 @@ public class RelaySupervisor {
 	public static Set<GatekeeperRelayClient> getRegistry() {
 		return RELAY_CLIENTS;
 	}
+	
+	//=================================================================================================
+	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
+	private RelaySupervisor() {
+		throw new UnsupportedOperationException();
+	}
 }
