@@ -54,6 +54,14 @@ public class CoreCommonConstants {
 	public static final String SERVER_ERROR_URI = "/error";
 	public static final String MGMT_URI = "/mgmt";
 
+	public static final String OP_QUERY_LOG_ENTRIES = MGMT_URI + "/logs";
+	public static final String QUERY_LOG_ENTRIES_HTTP_200_MESSAGE = "Log entries returned.";
+	public static final String QUERY_LOG_ENTRIES_HTTP_400_MESSAGE = "Invalid parameters.";
+	public static final String REQUEST_PARAM_LOG_LEVEL = "level";
+	public static final String REQUEST_PARAM_FROM = "from";
+	public static final String REQUEST_PARAM_TO = "to";
+	public static final String REQUEST_PARAM_LOGGER = "logger";
+
 	public static final String OP_DEVICEREGISTRY_QUERY_BY_DEVICE_ID_URI = "/query/device/{" + COMMON_FIELD_NAME_ID + "}";
 	public static final String OP_DEVICEREGISTRY_QUERY_BY_DEVICE_DTO_URI = "/query/device";
 

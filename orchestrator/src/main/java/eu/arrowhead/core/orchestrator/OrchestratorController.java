@@ -14,6 +14,8 @@
 
 package eu.arrowhead.core.orchestrator;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.apache.http.HttpStatus;
@@ -21,6 +23,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.logging.LogLevel;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -30,14 +33,21 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.CoreDefaults;
+import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
+import eu.arrowhead.common.core.CoreSystem;
+import eu.arrowhead.common.database.service.CommonDBService;
+import eu.arrowhead.common.dto.internal.LogEntryListResponseDTO;
 import eu.arrowhead.common.dto.internal.OrchestratorStoreFlexibleListResponseDTO;
 import eu.arrowhead.common.dto.internal.OrchestratorStoreFlexibleRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSReservationListResponseDTO;
@@ -118,6 +128,9 @@ public class OrchestratorController {
 	private OrchestratorStoreFlexibleDBService orchestratorStoreFlexibleDBService;
 	
 	@Autowired
+	private CommonDBService commonDBService;
+	
+	@Autowired
 	private CommonNamePartVerifier cnVerifier;
 	
 	@Autowired
@@ -136,6 +149,44 @@ public class OrchestratorController {
 	@GetMapping(path = CommonConstants.ECHO_URI)
 	public String echoService() {
 		return "Got it!";
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return requested log entries by the given parameters", response = LogEntryListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.QUERY_LOG_ENTRIES_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CoreCommonConstants.QUERY_LOG_ENTRIES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = CoreCommonConstants.OP_QUERY_LOG_ENTRIES, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public LogEntryListResponseDTO getLogEntries(
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_LOG_LEVEL, required = false) final String logLevel,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_FROM, required = false) final String from,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_TO, required = false) final String to,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_LOGGER, required = false) final String loggerStr) { //TODO: unit test
+		logger.debug("New getLogEntries GET request recieved with page: {} and item_per page: {}", page, size);
+				
+		final String origin = CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.OP_QUERY_LOG_ENTRIES;
+		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, origin);
+		final List<LogLevel> logLevels = CoreUtilities.getLogLevels(logLevel, origin);
+		
+		try {
+			final ZonedDateTime _from = Utilities.parseUTCStringToLocalZonedDateTime(from);
+			final ZonedDateTime _to = Utilities.parseUTCStringToLocalZonedDateTime(to);
+			
+			final LogEntryListResponseDTO response = commonDBService.getLogEntriesResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), validParameters.getValidatedDirection(), sortField, CoreSystem.ORCHESTRATOR, 
+																						   logLevels, _from, _to, loggerStr);
+			
+			logger.debug("Log entries  with page: {} and item_per page: {} retrieved successfully", page, size);
+			return response;
+		} catch (final DateTimeParseException ex) {
+			throw new BadPayloadException("Invalid time parameter", HttpStatus.SC_BAD_REQUEST, origin, ex);
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
