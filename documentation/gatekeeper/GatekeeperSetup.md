@@ -25,7 +25,7 @@ Some help for the installation:
 
 Before starting the ActiveMQ server you have to modify the configuration. The `activemq.xml` file contains all settings of the server which is located in the `conf` subfolder of the ActiveMQ installation folder.
 
-In the first step you have to make sure that ActiveMQ cleans up all the possibly stucked queues. Even though Arrowhead Gatekeeper and Gateway systems have full control on creating and removing queues, some of them could stuck when for example unexpected hard shutdown of Gatekeeper/Gateway have happend.
+In the first step you have to make sure that ActiveMQ cleans up all the possibly stucked queues. Even though Arrowhead Gatekeeper and Gateway systems have full control on creating and removing queues, some of them could stuck when for example unexpected hard shutdown of Gatekeeper/Gateway have happened.
 - Find the tag `<broker>` in the configuration file and add an attribute to it:
 ```schedulePeriodForDestinationPurge="60000"```
 - Then find the tag `<policyEntries>` under the `<broker>` tag and append a new entry. Set `inactiveTimeoutBeforeGC` at least five time bigger then the `inactive_gateway_bridge_timeout` in the Gateway Core system :

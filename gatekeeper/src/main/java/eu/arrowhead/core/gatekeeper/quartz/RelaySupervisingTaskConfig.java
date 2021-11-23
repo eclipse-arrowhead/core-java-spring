@@ -44,7 +44,7 @@ public class RelaySupervisingTaskConfig {
 	private static final int SCHEDULER_INTERVAL = 20;
 	
 	private static final int SCHEDULER_DELAY = 2;
-	private static final String NUM_OF_THREADS = "1";
+	private static final int NUM_OF_THREADS = 1;
 	
 	private static final String NAME_OF_TRIGGER = "Relay_Supervising_Task_Trigger";
 	private static final String NAME_OF_TASK = "Relay_Supervising_Task";
@@ -59,7 +59,7 @@ public class RelaySupervisingTaskConfig {
 		jobFactory.setApplicationContext(applicationContext);
 		
 		final SchedulerFactoryBean schedulerFactory = new SchedulerFactoryBean();
-		final Properties schedulerProperties = new Properties();     
+		final Properties schedulerProperties = new Properties();
 		schedulerProperties.put(CoreCommonConstants.QUARTZ_THREAD_PROPERTY, NUM_OF_THREADS);
 	    schedulerFactory.setQuartzProperties(schedulerProperties);
 		
