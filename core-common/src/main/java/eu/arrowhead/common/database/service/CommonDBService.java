@@ -122,7 +122,7 @@ public class CommonDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public Page<Logs> getLogEntries(final int page, final int size, final Direction direction, final String sortField, final CoreSystem system, final List<LogLevel> levels, final ZonedDateTime from, final ZonedDateTime to, final String loggerStr) {	//TODO: unit tests	
+	public Page<Logs> getLogEntries(final int page, final int size, final Direction direction, final String sortField, final CoreSystem system, final List<LogLevel> levels, final ZonedDateTime from, final ZonedDateTime to, final String loggerStr) { 	
 		logger.debug("getLogEntries started...");
 		
 		Assert.notNull(system, "System is null.");
@@ -139,6 +139,11 @@ public class CommonDBService {
 		final List<LogLevel> _levels = levels == null || levels.isEmpty() ? ALL_LOG_LEVELS : levels;
 		final ZonedDateTime _from = from == null ? START_OF_TIMES : from;
 		final ZonedDateTime _to = to == null ? ZonedDateTime.now() : to;
+		
+		if (_to.isBefore(_from)) {
+			throw new InvalidParameterException("Invalid time interval");
+		}
+		
 		final PageRequest pageRequest = PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField);
 		
 		try {
@@ -155,7 +160,7 @@ public class CommonDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	public LogEntryListResponseDTO getLogEntriesResponse(final int page, final int size, final Direction direction, final String sortField, final CoreSystem system, final List<LogLevel> levels, final ZonedDateTime from, final ZonedDateTime to,
-														 final String loggerStr) {	//TODO: unit tests	
+														 final String loggerStr) {	
 		logger.debug("getLogEntriesResponse started...");
 		
 		return DTOConverter.convertLogsPageToLogEntryListResponseDTO(getLogEntries(page, size, direction, sortField, system, levels, from, to, loggerStr));

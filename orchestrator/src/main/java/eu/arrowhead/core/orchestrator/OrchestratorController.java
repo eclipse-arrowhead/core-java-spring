@@ -169,7 +169,7 @@ public class OrchestratorController {
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_FROM, required = false) final String from,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_TO, required = false) final String to,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_LOGGER, required = false) final String loggerStr) { //TODO: unit test
-		logger.debug("New getLogEntries GET request recieved with page: {} and item_per page: {}", page, size);
+		logger.debug("New getLogEntries GET request recevied with page: {} and item_per page: {}", page, size);
 				
 		final String origin = CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.OP_QUERY_LOG_ENTRIES;
 		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, origin);
@@ -179,6 +179,10 @@ public class OrchestratorController {
 			final ZonedDateTime _from = Utilities.parseUTCStringToLocalZonedDateTime(from);
 			final ZonedDateTime _to = Utilities.parseUTCStringToLocalZonedDateTime(to);
 			
+			if (_from != null && _to != null && _to.isBefore(_from)) {
+				throw new BadPayloadException("Invalid time interval", HttpStatus.SC_BAD_REQUEST, origin);
+			}
+
 			final LogEntryListResponseDTO response = commonDBService.getLogEntriesResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), validParameters.getValidatedDirection(), sortField, CoreSystem.ORCHESTRATOR, 
 																						   logLevels, _from, _to, loggerStr);
 			

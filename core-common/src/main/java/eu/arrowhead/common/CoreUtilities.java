@@ -77,7 +77,7 @@ public class CoreUtilities {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static List<LogLevel> getLogLevels(final String maxLevel, final String origin) { //TODO: unit tests
+	public static List<LogLevel> getLogLevels(final String maxLevel, final String origin) { 
 		if (Utilities.isEmpty(maxLevel)) {
 			return null;
 		}
@@ -86,7 +86,7 @@ public class CoreUtilities {
 			final LogLevel maxLogLevel = LogLevel.valueOf(maxLevel.toUpperCase().trim());
 			final int index = logLevelsInOrder.indexOf(maxLogLevel); // can't be -1 at this point
 			
-			return logLevelsInOrder.subList(index, logLevelsInOrder.size() - 1); 
+			return logLevelsInOrder.subList(index, logLevelsInOrder.size()); 
 		} catch (final IllegalArgumentException ex) {
 			throw new BadPayloadException("Defined log level is not exists.", org.apache.http.HttpStatus.SC_BAD_REQUEST, origin);
 		}
