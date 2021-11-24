@@ -60,7 +60,7 @@ public class RelayConnectionRemovalTaskConfig {
 		
 		final SchedulerFactoryBean schedulerFactory = new SchedulerFactoryBean();
 		final Properties schedulerProperties = new Properties();     
-		schedulerProperties.put(CoreCommonConstants.QUARTZ_THREAD_PROPERTY, NUM_OF_THREADS);
+		schedulerProperties.put(CoreCommonConstants.QUARTZ_THREAD_PROPERTY, String.valueOf(NUM_OF_THREADS));
 	    schedulerFactory.setQuartzProperties(schedulerProperties);
 		
 		schedulerFactory.setJobFactory(jobFactory);
