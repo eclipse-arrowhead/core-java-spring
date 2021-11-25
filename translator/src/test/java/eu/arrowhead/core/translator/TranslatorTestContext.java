@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2019 AITIA
+ * Copyright (c) 2021 AITIA
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -12,7 +12,7 @@
  *   Arrowhead Consortia - conceptualization
  ********************************************************************************/
 
-package eu.arrowhead.core.gatekeeper.database.service;
+package eu.arrowhead.core.translator;
 
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
@@ -22,18 +22,12 @@ import org.springframework.context.annotation.Primary;
 import eu.arrowhead.common.database.service.CommonDBService;
 
 @Configuration
-public class GatekeeperDBServiceTestContext {
+public class TranslatorTestContext {
 	
 	//=================================================================================================
 	// methods
 
-	//-------------------------------------------------------------------------------------------------
-	@Bean
-	@Primary // This bean is primary only in test context
-	public GatekeeperDBService mockGatekeeperDBService() {
-		return Mockito.mock(GatekeeperDBService.class);
-	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Bean
 	@Primary // This bean is primary only in test context

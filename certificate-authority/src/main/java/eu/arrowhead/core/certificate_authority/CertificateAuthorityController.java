@@ -53,6 +53,7 @@ import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.core.CoreSystem;
+import eu.arrowhead.common.database.entity.Logs;
 import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.dto.internal.AddTrustedKeyRequestDTO;
 import eu.arrowhead.common.dto.internal.CertificateCheckRequestDTO;
@@ -136,11 +137,11 @@ public class CertificateAuthorityController {
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
-			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = Logs.FIELD_NAME_ID) final String sortField,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_LOG_LEVEL, required = false) final String logLevel,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_FROM, required = false) final String from,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_TO, required = false) final String to,
-			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_LOGGER, required = false) final String loggerStr) { //TODO: unit test
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_LOGGER, required = false) final String loggerStr) { 
 		logger.debug("New getLogEntries GET request received with page: {} and item_per page: {}", page, size);
 				
 		final String origin = CommonConstants.CERTIFICATEAUTHRORITY_URI + CoreCommonConstants.OP_QUERY_LOG_ENTRIES;

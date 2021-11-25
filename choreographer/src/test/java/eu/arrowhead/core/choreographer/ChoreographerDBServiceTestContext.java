@@ -14,6 +14,7 @@
 
 package eu.arrowhead.core.choreographer;
 
+import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
@@ -32,4 +33,11 @@ public class ChoreographerDBServiceTestContext {
     public ChoreographerDBService mockChoreographerDBService() {
         return Mockito.mock(ChoreographerDBService.class);
     }
+    
+	//-------------------------------------------------------------------------------------------------
+	@Bean
+	@Primary // This bean is primary only in test context
+	public CommonDBService mockCommonDBService() {
+		return Mockito.mock(CommonDBService.class);
+	}
 }
