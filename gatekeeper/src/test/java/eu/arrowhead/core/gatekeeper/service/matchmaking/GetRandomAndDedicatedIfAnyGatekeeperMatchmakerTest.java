@@ -28,9 +28,6 @@ import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.dto.internal.RelayType;
-import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingAlgorithm;
-import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingParameters;
-import eu.arrowhead.core.gatekeeper.service.matchmaking.GetRandomAndDedicatedIfAnyGatekeeperMatchmaker;
 
 @RunWith(SpringRunner.class)
 public class GetRandomAndDedicatedIfAnyGatekeeperMatchmakerTest {

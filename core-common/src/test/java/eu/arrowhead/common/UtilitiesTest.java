@@ -21,6 +21,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -460,9 +461,9 @@ public class UtilitiesTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testConvertZonedDateTimeToUTCStringNotNull() {
-		final ZonedDateTime time = ZonedDateTime.of(2019, 6, 18, 14, 31, 10, 800, ZoneId.of("+3"));
+		final ZonedDateTime time = ZonedDateTime.of(2019, 6, 18, 14, 31, 10, 0, ZoneId.of("+3"));
 		final String result = Utilities.convertZonedDateTimeToUTCString(time);
-		Assert.assertEquals("2019-06-18 11:31:10", result);
+		Assert.assertEquals("2019-06-18T11:31:10Z", result);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -486,8 +487,8 @@ public class UtilitiesTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testParseUTCStringToLocalZonedDateTimeWellFormed() {
-		final String timeStr = "2019-06-18 12:45:31";
-		LocalDateTime ldt = LocalDateTime.parse(timeStr, Utilities.dateTimeFormatter);
+		final String timeStr = "2019-06-18T12:45:31Z";
+		LocalDateTime ldt = LocalDateTime.ofInstant(Instant.parse(timeStr), ZoneOffset.UTC);
 		final ZoneOffset offset = OffsetDateTime.now().getOffset();
 		ldt = ldt.plusSeconds(offset.getTotalSeconds());
 		

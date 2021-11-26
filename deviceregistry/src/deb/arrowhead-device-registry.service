@@ -1,0 +1,17 @@
+[Unit]
+Description=arrowhead-deviceregistry
+After=network.target
+
+[Service]
+WorkingDirectory=/etc/arrowhead/systems/deviceregistry
+ExecStart=/usr/bin/java -Dlog4j.configurationFile=file:/etc/arrowhead/systems/deviceregistry/log4j2.xml -jar /usr/share/arrowhead/deviceregistry/arrowhead-deviceregistry.jar
+ExecStartPost=/bin/bash -c 'sleep 10'
+TimeoutStopSec=5
+Restart=on-failure
+RestartSec=20s
+Type=simple
+User=arrowhead
+Group=arrowhead
+
+[Install]
+WantedBy=default.target

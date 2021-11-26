@@ -1,0 +1,53 @@
+<diagram program="umletino" version="14.3.0"><zoom_level>10</zoom_level><help_text>SERVICE REGISTRY DTO</help_text><element><id>UMLSpecialState</id><coordinates><x>330</x><y>40</y><w>20</w><h>20</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>330</x><y>50</y><w>30</w><h>100</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;80;10;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>320</x><y>160</y><w>40</w><h>40</h></coordinates><panel_attributes>bg=orange
+type=decision</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>350</x><y>70</y><w>170</w><h>140</h></coordinates><panel_attributes>lt=&lt;-
+m2=[Ping Task Still running]</panel_attributes><additional_attributes>30;60;30;10;100;10;100;110;10;110</additional_attributes></element><element><id>UMLState</id><coordinates><x>270</x><y>240</y><w>190</w><h>200</h></coordinates><panel_attributes>getSystemsToMeasure
+valign=top
+bg=blue
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>320</x><y>540</y><w>40</w><h>40</h></coordinates><panel_attributes>bg=orange
+type=decision</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>330</x><y>430</y><w>30</w><h>80</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;60;10;10</additional_attributes></element><element><id>UMLState</id><coordinates><x>180</x><y>10</y><w>400</w><h>850</h></coordinates><panel_attributes>Ping Task
+valign=top</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>330</x><y>120</y><w>30</w><h>60</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;40;10;10</additional_attributes></element><element><id>UMLState</id><coordinates><x>280</x><y>290</y><w>170</w><h>40</h></coordinates><panel_attributes>call queryAll
+bg=yellow
+type=sender</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>440</x><y>120</y><w>350</w><h>210</h></coordinates><panel_attributes>lt=&lt;.
+
+</panel_attributes><additional_attributes>330;10;160;10;160;190;10;190</additional_attributes></element><element><id>Relation</id><coordinates><x>240</x><y>170</y><w>100</w><h>30</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>80;10;10;10</additional_attributes></element><element><id>UMLSyncBarHorizontal</id><coordinates><x>290</x><y>120</y><w>100</w><h>20</h></coordinates><panel_attributes>{joinSpec=
+date is on or 
+after July 1st
+and the exam 
+is passed}</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLTimer</id><coordinates><x>190</x><y>160</y><w>120</w><h>90</h></coordinates><panel_attributes>Ping Task 
+Config Sequence
+bg=black</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>650</x><y>10</y><w>420</w><h>330</h></coordinates><panel_attributes>ServiceRegistry
+valign=top</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>770</x><y>90</y><w>190</w><h>40</h></coordinates><panel_attributes>queryAll called
+bg=yellow
+type=receiver</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>770</x><y>260</y><w>190</w><h>40</h></coordinates><panel_attributes>queryAll answer produced
+bg=yellow
+type=sender</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>850</x><y>50</y><w>20</w><h>20</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>850</x><y>60</y><w>30</w><h>50</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;30;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>850</x><y>120</y><w>30</w><h>70</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;50;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>420</x><y>270</y><w>750</w><h>120</h></coordinates><panel_attributes>lt=&lt;.
+</panel_attributes><additional_attributes>10;100;10;80;730;80;730;10;540;10</additional_attributes></element><element><id>UMLState</id><coordinates><x>280</x><y>370</y><w>170</w><h>40</h></coordinates><panel_attributes>queryAll returned
+bg=yellow
+type=receiver</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>850</x><y>200</y><w>30</w><h>80</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;60;10;10</additional_attributes></element><element><id>UMLState</id><coordinates><x>770</x><y>170</y><w>190</w><h>40</h></coordinates><panel_attributes>getServiceRegistryEntries
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>330</x><y>190</y><w>150</w><h>70</h></coordinates><panel_attributes>lt=&lt;-
+m2=[Ping Task not running]</panel_attributes><additional_attributes>10;50;10;10</additional_attributes></element><element><id>UMLSyncBarHorizontal</id><coordinates><x>270</x><y>480</y><w>90</w><h>20</h></coordinates><panel_attributes>{joinSpec=
+date is on or 
+after July 1st
+and the exam 
+is passed}</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>330</x><y>480</y><w>30</w><h>80</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;60;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>350</x><y>540</y><w>110</w><h>50</h></coordinates><panel_attributes>lt=&lt;-
+has more
+system</panel_attributes><additional_attributes>90;20;10;20</additional_attributes></element><element><id>UMLState</id><coordinates><x>440</x><y>540</y><w>100</w><h>40</h></coordinates><panel_attributes>ping system
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>330</x><y>570</y><w>70</w><h>120</h></coordinates><panel_attributes>lt=&lt;-
+has 
+no more
+system</panel_attributes><additional_attributes>10;100;10;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>330</x><y>670</y><w>20</w><h>20</h></coordinates><panel_attributes>type=final</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>410</x><y>610</y><w>150</w><h>40</h></coordinates><panel_attributes>calculate measurement
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>480</x><y>570</y><w>30</w><h>60</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;40;10;10</additional_attributes></element><element><id>UMLState</id><coordinates><x>400</x><y>680</y><w>160</w><h>50</h></coordinates><panel_attributes>save 
+measurements and logs
+bg=yellow
+type=sender</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>400</x><y>740</y><w>160</w><h>50</h></coordinates><panel_attributes>measurements and logs
+saved
+bg=yellow
+type=receiver</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>460</x><y>640</y><w>30</w><h>60</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;40;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>220</x><y>450</y><w>260</w><h>390</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>80;40;80;10;10;10;10;370;240;370;240;340</additional_attributes></element><element><id>UMLState</id><coordinates><x>650</x><y>480</y><w>420</w><h>370</h></coordinates><panel_attributes>QoS DB Service
+valign=top</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>840</x><y>520</y><w>20</w><h>20</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>770</x><y>580</y><w>160</w><h>50</h></coordinates><panel_attributes>measurements and logs
+saved
+bg=yellow
+type=receiver</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>780</x><y>750</y><w>160</w><h>50</h></coordinates><panel_attributes>save 
+measurements and logs
+bg=yellow
+type=sender</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>780</x><y>670</y><w>150</w><h>40</h></coordinates><panel_attributes>save to DB
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>550</x><y>620</y><w>240</w><h>110</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>220;10;60;10;60;90;10;90</additional_attributes></element><element><id>Relation</id><coordinates><x>550</x><y>760</y><w>620</w><h>130</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;10;80;10;80;110;600;110;600;20;390;20</additional_attributes></element><element><id>Relation</id><coordinates><x>840</x><y>620</y><w>30</w><h>70</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;50;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>840</x><y>700</y><w>30</w><h>70</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;50;10;10</additional_attributes></element></diagram>

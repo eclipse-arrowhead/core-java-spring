@@ -12,14 +12,15 @@
   <description>Common resources for the Arrowhead core services</description>
 
   <properties>
-    <client.skeleton>core-client-skeleton</client.skeleton>
+    <core.common.essentials>arrowhead-core-common-essentials-java-spring</core.common.essentials>
+	<bouncy.castle.version>1.69</bouncy.castle.version>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcpkix-jdk15on</artifactId>
-      <version>1.65</version>
+      <version>${bouncy.castle.version}</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
@@ -40,6 +41,19 @@
         </configuration>
       </plugin>
 
+	 <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-source-plugin</artifactId>
+      <executions>
+        <execution>
+          <id>attach-sources</id>
+          <goals>
+            <goal>jar-no-fork</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
@@ -51,9 +65,11 @@
             </goals>
             <configuration>
               <shadedArtifactAttached>false</shadedArtifactAttached>
-              <finalName>${client.skeleton}</finalName>
+              <finalName>${core.common.essentials}</finalName>
               <createDependencyReducedPom>false</createDependencyReducedPom>
               <minimizeJar>false</minimizeJar>
+              <createSourcesJar>true</createSourcesJar>
+              <shadeSourcesContent>true</shadeSourcesContent>
               <artifactSet>
                 <includes>
                   <include>eu.arrowhead:arrowhead-core-common</include>

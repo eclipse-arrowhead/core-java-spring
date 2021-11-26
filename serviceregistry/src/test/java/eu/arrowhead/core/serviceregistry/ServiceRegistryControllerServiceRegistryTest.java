@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -30,6 +31,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,6 +45,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -50,6 +54,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -75,33 +80,41 @@ import eu.arrowhead.common.dto.internal.ServicesGroupedByServiceDefinitionRespon
 import eu.arrowhead.common.dto.internal.ServicesGroupedBySystemsResponseDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultListDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ExceptionType;
+import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.processor.NetworkAddressDetector;
+import eu.arrowhead.common.processor.NetworkAddressPreProcessor;
+import eu.arrowhead.common.processor.model.AddressDetectionResult;
+import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ServiceRegistryMain.class)
-@ContextConfiguration(classes = { ServiceRegistryDBServiceTestContext.class })
+@ContextConfiguration(classes = { ServiceRegistryDBServiceTestContext.class  })
 public class ServiceRegistryControllerServiceRegistryTest {
 	
 	//=================================================================================================
 	// members
 	
-	private static final String SERVICE_REGISTRY_REGISTER_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI;
-	private static final String SERVICE_REGISTRY_UNREGISTER_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI;
-	private static final String SERVICE_REGISTRY_QUERY_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI;
-	private static final String SERVICE_REGISTRY_QUERY_SYSTEM_BY_ID_URI = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI;
-	private static final String SERVICE_REGISTRY_QUERY_SYSTEM_BY_DTO_URI = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI;
-	private static final String SERVICE_REGISTRY_QUERY_ALL_URI = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_ALL_SERVICE_URI;
+	private static final String SERVICEREGISTRY_REGISTER_URI = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_REGISTER_URI;
+	private static final String SERVICEREGISTRY_UNREGISTER_URI = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_URI;
+	private static final String SERVICEREGISTRY_QUERY_URI = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_QUERY_URI;
+	private static final String SERVICEREGISTRY_QUERY_SYSTEM_BY_ID_URI = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_QUERY_BY_SYSTEM_ID_URI;
+	private static final String SERVICEREGISTRY_QUERY_SYSTEM_BY_DTO_URI = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_QUERY_BY_SYSTEM_DTO_URI;
+	private static final String SERVICEREGISTRY_QUERY_ALL_URI = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_QUERY_ALL_SERVICE_URI;
+	private static final String SERVICEREGISTRY_MULTI_QUERY_URI = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.OP_SERVICEREGISTRY_MULTI_QUERY_URI;
 
-	private static final String SERVICE_REGISTRY_MGMT_URI = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.MGMT_URI;
-	private static final String SERVICE_REGISTRY_MGMT_SERVICEDEF_URI = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.MGMT_URI + "/servicedef";
-	private static final String SERVICE_REGISTRY_MGMT_GROUPED_URI = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.MGMT_URI + "/grouped";
+	private static final String SERVICEREGISTRY_MGMT_URI = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.MGMT_URI;
+	private static final String SERVICEREGISTRY_MGMT_SERVICEDEF_URI = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.MGMT_URI + "/servicedef";
+	private static final String SERVICEREGISTRY_MGMT_GROUPED_URI = CommonConstants.SERVICEREGISTRY_URI + CoreCommonConstants.MGMT_URI + "/grouped";
 	
 	@Autowired
 	private WebApplicationContext wac;
@@ -114,6 +127,15 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@MockBean(name = "mockServiceRegistryDBService") 
 	private ServiceRegistryDBService serviceRegistryDBService;
 	
+	@MockBean
+	private NetworkAddressPreProcessor networkAddressPreProcessor;
+	
+	@MockBean
+	private NetworkAddressVerifier networkAddressVerifier;
+	
+	@MockBean
+	private NetworkAddressDetector networkAddressDetector;
+	
 	//=================================================================================================
 	// methods
 	
@@ -121,6 +143,8 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Before
 	public void setup() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+		ReflectionTestUtils.setField(networkAddressVerifier, "allowSelfAddressing", true);
+		ReflectionTestUtils.setField(networkAddressVerifier, "allowNonRoutableAddressing", true);
 	}
 
 	//=================================================================================================
@@ -136,7 +160,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 
 		when(serviceRegistryDBService.getServiceRegistryEntriesResponse(anyInt(), anyInt(), any(), any())).thenReturn(serviceRegistryEntriesDTO);
 		
-		final MvcResult response = this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(get(SERVICEREGISTRY_MGMT_URI)
 											   .accept(MediaType.APPLICATION_JSON))
 											   .andExpect(status().isOk())
 											   .andReturn();
@@ -155,7 +179,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		
 		when(serviceRegistryDBService.getServiceRegistryEntriesResponse(anyInt(), anyInt(), any(), any())).thenReturn(serviceRegistryEntriesDTO);
 		
-		final MvcResult response = this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform(get(SERVICEREGISTRY_MGMT_URI)
 											   .param("page", "0")
 											   .param("item_per_page", String.valueOf(numOfServices * numOfSystems))
 											   .accept(MediaType.APPLICATION_JSON))
@@ -169,7 +193,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetServiceRegistryEntriesWithNullPageButDefinedSizeParameter() throws Exception {
-		this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_URI)
+		this.mockMvc.perform(get(SERVICEREGISTRY_MGMT_URI)
 					.param("item_per_page", "1")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
@@ -178,7 +202,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test 
 	public void testGetServiceRegistryEntriesWithDefinedPageButNullSizeParameter() throws Exception {
-		this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_URI)
+		this.mockMvc.perform(get(SERVICEREGISTRY_MGMT_URI)
 					.param("page", "0")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
@@ -187,7 +211,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetServiceRegistryEntriesWithInvalidSortDirectionFlagParameter() throws Exception {
-		this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_URI)
+		this.mockMvc.perform(get(SERVICEREGISTRY_MGMT_URI)
 					.param("direction", "invalid")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
@@ -204,7 +228,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		
 		when(serviceRegistryDBService.getServiceRegistryEntryByIdResponse(anyLong())).thenReturn(dto);
 		
-		final MvcResult response = this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_URI + "/1")
+		final MvcResult response = this.mockMvc.perform(get(SERVICEREGISTRY_MGMT_URI + "/1")
 											   .accept(MediaType.APPLICATION_JSON))
 											   .andExpect(status().isOk())
 											   .andReturn();
@@ -216,7 +240,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetServiceRegistryEntriesByIdWithInvalidId() throws Exception {
-		this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_URI + "/0")
+		this.mockMvc.perform(get(SERVICEREGISTRY_MGMT_URI + "/0")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}
@@ -227,7 +251,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetServiceRegistryEntriesByServiceDefinitionWithOnlyServiceDefInput() throws Exception {
-		this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_SERVICEDEF_URI + "/testDef")
+		this.mockMvc.perform(get(SERVICEREGISTRY_MGMT_SERVICEDEF_URI + "/testDef")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isOk());
 	}
@@ -235,7 +259,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetServiceRegistryEntriesByServiceDefinitionWithEmptyServiceDefInput() throws Exception {
-		this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_SERVICEDEF_URI + "/ ")
+		this.mockMvc.perform(get(SERVICEREGISTRY_MGMT_SERVICEDEF_URI + "/ ")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}
@@ -243,7 +267,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetServiceRegistryEntriesByServiceDefinitionWithServiceDefInputAndNullPageButDefinedSizeParameter() throws Exception {
-		this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_SERVICEDEF_URI + "/testDef")
+		this.mockMvc.perform(get(SERVICEREGISTRY_MGMT_SERVICEDEF_URI + "/testDef")
 					.param("item_per_page", "1")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
@@ -252,7 +276,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetServiceRegistryEntriesByServiceDefinitionWithServiceDefInputAndDefinedPageButNullSizeParameter() throws Exception {
-		this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_SERVICEDEF_URI + "/testDef")
+		this.mockMvc.perform(get(SERVICEREGISTRY_MGMT_SERVICEDEF_URI + "/testDef")
 					.param("page", "1")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
@@ -261,7 +285,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetServiceRegistryEntriesByServiceDefinitionWithServiceDefInputAndInvalidSortDirectionFlagParameter() throws Exception {
-		this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_SERVICEDEF_URI + "/testDef")
+		this.mockMvc.perform(get(SERVICEREGISTRY_MGMT_SERVICEDEF_URI + "/testDef")
 					.param("direction", "invalid")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
@@ -294,7 +318,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		
 		when(serviceRegistryDBService.getServiceRegistryDataForServiceRegistryGroupedResponse()).thenReturn(dto);
 		
-		final MvcResult response = this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_GROUPED_URI)
+		final MvcResult response = this.mockMvc.perform(get(SERVICEREGISTRY_MGMT_GROUPED_URI)
 											   .accept(MediaType.APPLICATION_JSON))
 											   .andExpect(status().isOk())
 											   .andReturn();
@@ -330,7 +354,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRemoveServiceRegistryEntryByIdWithExistingId() throws Exception {
-		this.mockMvc.perform(delete(SERVICE_REGISTRY_MGMT_URI + "/4")
+		this.mockMvc.perform(delete(SERVICEREGISTRY_MGMT_URI + "/4")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isOk());
 	}
@@ -338,7 +362,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRemoveServiceRegistryEntryByIdWithNotExistingId() throws Exception {
-		this.mockMvc.perform(delete(SERVICE_REGISTRY_MGMT_URI + "/0")
+		this.mockMvc.perform(delete(SERVICEREGISTRY_MGMT_URI + "/0")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}
@@ -353,7 +377,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICE_REGISTRY_REGISTER_URI, error.getOrigin());
+		Assert.assertEquals(SERVICEREGISTRY_REGISTER_URI, error.getOrigin());
 		Assert.assertEquals("Service definition is null or blank", error.getErrorMessage());
 	}
 	
@@ -367,8 +391,22 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICE_REGISTRY_REGISTER_URI, error.getOrigin());
+		Assert.assertEquals(SERVICEREGISTRY_REGISTER_URI, error.getOrigin());
 		Assert.assertEquals("Service definition is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRegisterServiceServiceDefinitionWrongFlagTrue() throws Exception {
+		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
+		request.setServiceDefinition("service_definition");
+		
+		final MvcResult result = postRegisterService(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICEREGISTRY_REGISTER_URI, error.getOrigin());
+		Assert.assertEquals("Service definition has invalid format. Service definition only contains maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -378,7 +416,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testRegisterServiceEndOfValidityInvalid() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("invalid date");
 		
@@ -386,24 +424,24 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICE_REGISTRY_REGISTER_URI, error.getOrigin());
-		Assert.assertEquals("End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.", error.getErrorMessage());
+		Assert.assertEquals(SERVICEREGISTRY_REGISTER_URI, error.getOrigin());
+		Assert.assertEquals("End of validity is specified in the wrong format. Please provide UTC time using ISO-8601 format.", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRegisterServiceSecuredButWithoutAuthenticationInfo() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setSecure(ServiceSecurityType.CERTIFICATE.name());
 		
 		final MvcResult result = postRegisterService(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICE_REGISTRY_REGISTER_URI, error.getOrigin());
+		Assert.assertEquals(SERVICEREGISTRY_REGISTER_URI, error.getOrigin());
 		Assert.assertEquals("Security type is in conflict with the availability of the authentication info.", error.getErrorMessage());
 	}
 	
@@ -411,16 +449,16 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testRegisterServiceWithInvalidSecureValue() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setSecure("invalidSecurityTypeValue");
 		
 		final MvcResult result = postRegisterService(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICE_REGISTRY_REGISTER_URI, error.getOrigin());
+		Assert.assertEquals(SERVICEREGISTRY_REGISTER_URI, error.getOrigin());
 		Assert.assertEquals("Security type is not valid.", error.getErrorMessage());
 	}
 	
@@ -428,15 +466,15 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testRegisterServiceInterfaceListNull() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		
 		final MvcResult result = postRegisterService(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICE_REGISTRY_REGISTER_URI, error.getOrigin());
+		Assert.assertEquals(SERVICEREGISTRY_REGISTER_URI, error.getOrigin());
 		Assert.assertEquals("Interfaces list is null or empty.", error.getErrorMessage());
 	}
 	
@@ -444,16 +482,16 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testRegisterServiceInterfaceListEmpty() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(Collections.<String>emptyList());
 		
 		final MvcResult result = postRegisterService(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICE_REGISTRY_REGISTER_URI, error.getOrigin());
+		Assert.assertEquals(SERVICEREGISTRY_REGISTER_URI, error.getOrigin());
 		Assert.assertEquals("Interfaces list is null or empty.", error.getErrorMessage());
 	}
 	
@@ -463,16 +501,16 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final String intf = "XML";
 		
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(List.of(intf));
 		
 		final MvcResult result = postRegisterService(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICE_REGISTRY_REGISTER_URI, error.getOrigin());
+		Assert.assertEquals(SERVICEREGISTRY_REGISTER_URI, error.getOrigin());
 		Assert.assertEquals("Specified interface name is not valid: " + intf, error.getErrorMessage());
 	}
 	
@@ -480,9 +518,9 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testRegisterServiceEverythingIsOk() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(List.of("HTTP-SECURE-XML"));
 		
 		when(serviceRegistryDBService.registerServiceResponse(request)).thenReturn(new ServiceRegistryResponseDTO());
@@ -502,15 +540,15 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServiceNoServiceDefinitionParameter() throws Exception {
-		final String queryStr = createQueryStringForUnregister(null, "x", "a", 1);
+		final String queryStr = createQueryStringForUnregister(null, "pn", "a", 1, "/path");
 		
 		deleteUnregisterService(queryStr, status().isBadRequest());
 	}
-
+	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServiceNoSystemNameParameter() throws Exception {
-		final String queryStr = createQueryStringForUnregister("s", null, "a", 1);
+		final String queryStr = createQueryStringForUnregister("ss", null, "a", 1, "/path");
 		
 		deleteUnregisterService(queryStr, status().isBadRequest());
 	}
@@ -518,15 +556,46 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServiceNoAddressParameter() throws Exception {
-		final String queryStr = createQueryStringForUnregister("s", "x", null, 1);
+		final String queryStr = createQueryStringForUnregister("sd", "pn", null, 1, "/path");
+		when(networkAddressPreProcessor.normalize(any())).thenReturn("");
+		doThrow(new InvalidParameterException("test msg")).when(networkAddressVerifier).verify(anyString());
+		final AddressDetectionResult addressDetectionResult = new AddressDetectionResult();
+		addressDetectionResult.setSkipped(true);
+		addressDetectionResult.setDetectionMessage("detection skipped");
+		when(networkAddressDetector.detect(any())).thenReturn(addressDetectionResult);
 		
 		deleteUnregisterService(queryStr, status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void testUnregisterServiceNoAddressParameterDetectionEnabled() throws Exception {
+		final String queryStr = createQueryStringForUnregister("sd", "pn", null, 1, "/path");
+		when(networkAddressPreProcessor.normalize(any())).thenReturn("");
+		doThrow(new InvalidParameterException("test msg")).when(networkAddressVerifier).verify(anyString());
+		final AddressDetectionResult addressDetectionResult = new AddressDetectionResult();
+		addressDetectionResult.setDetectionSuccess(true);
+		addressDetectionResult.setDetectedAddress("address");
+		when(networkAddressDetector.detect(any())).thenReturn(addressDetectionResult);
+		final ArgumentCaptor<String> addrCaptor = ArgumentCaptor.forClass(String.class);
+		doNothing().when(serviceRegistryDBService).removeServiceRegistry(anyString(), anyString(), addrCaptor.capture(), anyInt(), anyString());
+		
+		deleteUnregisterService(queryStr, status().isOk());
+		assertEquals("address", addrCaptor.getValue());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void testUnregisterServiceNoPortParameter() throws Exception {
-		final String queryStr = createQueryStringForUnregister("s", "x", "a", null);
+		final String queryStr = createQueryStringForUnregister("sd", "pn", "a", null, "/path");
+		
+		deleteUnregisterService(queryStr, status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterServiceNoServiceUriParameter() throws Exception {
+		final String queryStr = createQueryStringForUnregister("sd", "pn", "a", 1, null);
 		
 		deleteUnregisterService(queryStr, status().isBadRequest());
 	}
@@ -534,74 +603,125 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServiceServiceDefinitionEmpty() throws Exception {
-		final String queryStr = createQueryStringForUnregister("", "x", "a", 1);
+		final String queryStr = createQueryStringForUnregister("", "pn", "a", 1, "/path");
 		
 		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICE_REGISTRY_UNREGISTER_URI, error.getOrigin());
+		Assert.assertEquals(SERVICEREGISTRY_UNREGISTER_URI, error.getOrigin());
 		Assert.assertEquals("Service definition is blank", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testUnregisterServiceSystemNameEmpty() throws Exception {
-		final String queryStr = createQueryStringForUnregister("s", "", "a", 1);
+	public void testUnregisterServiceServiceDefinitionWrongFlagTrue() throws Exception {
+		final String queryStr = createQueryStringForUnregister("test_service", "pn", "a", 1, "/path");
 		
 		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICE_REGISTRY_UNREGISTER_URI, error.getOrigin());
+		Assert.assertEquals(SERVICEREGISTRY_UNREGISTER_URI, error.getOrigin());
+		Assert.assertEquals("Service definition has invalid format. Service definition only contains maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).", error.getErrorMessage());
+	}
+
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterServiceSystemNameEmpty() throws Exception {
+		final String queryStr = createQueryStringForUnregister("sd", "", "a", 1, "/path");
+		
+		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICEREGISTRY_UNREGISTER_URI, error.getOrigin());
 		Assert.assertEquals("Name of the provider system is blank", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testUnregisterServiceAddressEmpty() throws Exception {
-		final String queryStr = createQueryStringForUnregister("s", "x", "", 1);
+	public void testUnregisterServiceSystemNameWrong() throws Exception {
+		final String queryStr = createQueryStringForUnregister("sd", "invalid_system", "a", 1, "/path");
 		
 		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICE_REGISTRY_UNREGISTER_URI, error.getOrigin());
-		Assert.assertEquals("Address of the provider system is blank", error.getErrorMessage());
+		Assert.assertEquals(SERVICEREGISTRY_UNREGISTER_URI, error.getOrigin());
+		Assert.assertEquals("System name has invalid format. System names only contain maximum 63 character of letters (english alphabet), numbers and dash (-), and have to start with a letter (also cannot end with dash).", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterServiceAddressEmpty() throws Exception {
+		final String queryStr = createQueryStringForUnregister("sd", "pn", "", 1, "/path");
+		when(networkAddressPreProcessor.normalize(anyString())).thenReturn("");
+		doThrow(new InvalidParameterException("test msg")).when(networkAddressVerifier).verify(anyString());
+		final AddressDetectionResult addressDetectionResult = new AddressDetectionResult();
+		addressDetectionResult.setSkipped(true);
+		addressDetectionResult.setDetectionMessage("detection skipped");
+		when(networkAddressDetector.detect(any())).thenReturn(addressDetectionResult);
+		
+		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICEREGISTRY_UNREGISTER_URI, error.getOrigin());
+		Assert.assertEquals("test msg detection skipped", error.getErrorMessage());
+	}
+	
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterServiceAddressEmptyDetectionEnabled() throws Exception {
+		final String queryStr = createQueryStringForUnregister("sd", "pn", "", 1, "/path");
+		when(networkAddressPreProcessor.normalize(anyString())).thenReturn("");
+		doThrow(new InvalidParameterException("test msg")).when(networkAddressVerifier).verify(anyString());
+		final AddressDetectionResult addressDetectionResult = new AddressDetectionResult();
+		addressDetectionResult.setDetectionSuccess(true);
+		addressDetectionResult.setDetectedAddress("address");
+		when(networkAddressDetector.detect(any())).thenReturn(addressDetectionResult);
+		final ArgumentCaptor<String> addrCaptor = ArgumentCaptor.forClass(String.class);
+		doNothing().when(serviceRegistryDBService).removeServiceRegistry(anyString(), anyString(), addrCaptor.capture(), anyInt(), anyString());
+		
+		deleteUnregisterService(queryStr, status().isOk());
+		Assert.assertEquals("address", addrCaptor.getValue());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServicePortNumberTooLow() throws Exception {
-		final String queryStr = createQueryStringForUnregister("s", "x", "a", -1);
+		final String queryStr = createQueryStringForUnregister("sd", "pn", "a", -1, "/path");
 		
 		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICE_REGISTRY_UNREGISTER_URI, error.getOrigin());
+		Assert.assertEquals(SERVICEREGISTRY_UNREGISTER_URI, error.getOrigin());
 		Assert.assertEquals("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServicePortNumberTooHigh() throws Exception {
-		final String queryStr = createQueryStringForUnregister("s", "x", "a", 66000);
+		final String queryStr = createQueryStringForUnregister("sd", "pn", "a", 66000, "/path");
 		
 		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICE_REGISTRY_UNREGISTER_URI, error.getOrigin());
+		Assert.assertEquals(SERVICEREGISTRY_UNREGISTER_URI, error.getOrigin());
 		Assert.assertEquals("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServiceEverythingIsOk() throws Exception {
-		final String queryStr = createQueryStringForUnregister("s", "x", "a", 1);
+		final String queryStr = createQueryStringForUnregister("sd", "pn", "a", 1, "/path");
 		
-		doNothing().when(serviceRegistryDBService).removeServiceRegistry(any(String.class), any(String.class), any(String.class), anyInt());
+		doNothing().when(serviceRegistryDBService).removeServiceRegistry(any(String.class), any(String.class), any(String.class), anyInt(), any(String.class));
 		
 		deleteUnregisterService(queryStr, status().isOk());
 	}
@@ -616,7 +736,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICE_REGISTRY_QUERY_URI, error.getOrigin());
+		Assert.assertEquals(SERVICEREGISTRY_QUERY_URI, error.getOrigin());
 		Assert.assertEquals("Service definition requirement is null or blank", error.getErrorMessage());
 	}
 	
@@ -630,8 +750,22 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICE_REGISTRY_QUERY_URI, error.getOrigin());
+		Assert.assertEquals(SERVICEREGISTRY_QUERY_URI, error.getOrigin());
 		Assert.assertEquals("Service definition requirement is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testQueryServiceServiceDefinitionRequirementWrongFlagTrue() throws Exception {
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		form.setServiceDefinitionRequirement("invalid_service_definition");
+		
+		final MvcResult result = postQueryService(form, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICEREGISTRY_QUERY_URI, error.getOrigin());
+		Assert.assertEquals("Service definition requirement has invalid format. Service definition only contains maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -666,7 +800,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICE_REGISTRY_QUERY_SYSTEM_BY_ID_URI, error.getOrigin());
+		Assert.assertEquals(SERVICEREGISTRY_QUERY_SYSTEM_BY_ID_URI, error.getOrigin());
 	}
 	
 	//=================================================================================================
@@ -677,7 +811,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testQueryRegistryBySystemDTOOk() throws Exception {
 		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
-		postQuerySystemsByDTO(new SystemRequestDTO("name", "0.0.0.0", 45000, null), status().isOk());
+		postQuerySystemsByDTO(new SystemRequestDTO("name", "0.0.0.0", 45000, null, null), status().isOk());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -685,23 +819,38 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testQueryRegistryBySystemDTONullSysName() throws Exception {
 		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
-		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO(null, "0.0.0.0", 45000, null), status().isBadRequest());
+		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO(null, "0.0.0.0", 45000, null, null), status().isBadRequest());
 		
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICE_REGISTRY_QUERY_SYSTEM_BY_DTO_URI, error.getOrigin());
+		Assert.assertEquals(SERVICEREGISTRY_QUERY_SYSTEM_BY_DTO_URI, error.getOrigin());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryRegistryBySystemDTOWrongSysName() throws Exception {
+		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
+		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO("invalid_system", "0.0.0.0", 45000, null, null), status().isBadRequest());
+		
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICEREGISTRY_QUERY_SYSTEM_BY_DTO_URI, error.getOrigin());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S2699") // because of false positive in sonar
 	@Test
 	public void testQueryRegistryBySystemDTONullAddress() throws Exception {
-		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
-		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO("name", null, 45000, null), status().isBadRequest());
+		doThrow(new InvalidParameterException("test msg")).when(networkAddressVerifier).verify(any());
+		final AddressDetectionResult addressDetectionResult = new AddressDetectionResult();
+		addressDetectionResult.setSkipped(true);
+		when(networkAddressDetector.detect(any())).thenReturn(addressDetectionResult);
+		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO("name", null, 45000, null, null), status().isBadRequest());
 		
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICE_REGISTRY_QUERY_SYSTEM_BY_DTO_URI, error.getOrigin());
+		Assert.assertEquals(SERVICEREGISTRY_QUERY_SYSTEM_BY_DTO_URI, error.getOrigin());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -709,11 +858,11 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testQueryRegistryBySystemDTONullPort() throws Exception {
 		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
-		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO("name", "0.0.0.0", null, null), status().isBadRequest());
+		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO("name", "0.0.0.0", null, null, null), status().isBadRequest());
 		
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICE_REGISTRY_QUERY_SYSTEM_BY_DTO_URI, error.getOrigin());
+		Assert.assertEquals(SERVICEREGISTRY_QUERY_SYSTEM_BY_DTO_URI, error.getOrigin());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -721,11 +870,11 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testQueryRegistryBySystemDTOInvalidPort() throws Exception {
 		when(serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(anyString(), anyString(), anyInt())).thenReturn(new SystemResponseDTO());
-		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO("name", "0.0.0.0", CommonConstants.SYSTEM_PORT_RANGE_MAX + 1, null), status().isBadRequest());
+		final MvcResult result = postQuerySystemsByDTO(new SystemRequestDTO("name", "0.0.0.0", CommonConstants.SYSTEM_PORT_RANGE_MAX + 1, null, null), status().isBadRequest());
 		
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICE_REGISTRY_QUERY_SYSTEM_BY_DTO_URI, error.getOrigin());
+		Assert.assertEquals(SERVICEREGISTRY_QUERY_SYSTEM_BY_DTO_URI, error.getOrigin());
 	}
 	
 	//=================================================================================================
@@ -768,13 +917,27 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testAddServiceServiceDefinitionWrongFlagTrue() throws Exception {
+		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
+		request.setServiceDefinition("service_definition");
+		
+		final MvcResult result = addServiceRegistry(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals("Service definition has invalid format. Service definition only contains maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	// System request DTO validation is tested by an other test class
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testAddServiceEndOfValidityInvalid() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("ser");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("invalid date");
 		
@@ -783,16 +946,16 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
-		Assert.assertEquals("End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.", error.getErrorMessage());
+		Assert.assertEquals("End of validity is specified in the wrong format. Please provide UTC time using ISO-8601 format.", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testAddServiceSecuredButWithoutAuthenticationInfo() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setSecure(ServiceSecurityType.CERTIFICATE.name());
 		
 		final MvcResult result = addServiceRegistry(request, status().isBadRequest());
@@ -807,9 +970,9 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testAddServiceInterfaceListNull() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		
 		final MvcResult result = addServiceRegistry(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -823,9 +986,9 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testAddServiceInterfaceListEmpty() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(Collections.<String>emptyList());
 		
 		final MvcResult result = addServiceRegistry(request, status().isBadRequest());
@@ -842,9 +1005,9 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final String intf = "XML";
 		
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(List.of(intf));
 		
 		final MvcResult result = addServiceRegistry(request, status().isBadRequest());
@@ -859,9 +1022,9 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testAddServiceEverythingIsOk() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(List.of("HTTP-SECURE-XML"));
 		
 		when(serviceRegistryDBService.registerServiceResponse(request)).thenReturn(new ServiceRegistryResponseDTO());
@@ -876,7 +1039,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testUpdateServiceInValidId() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12 13:51:30");
 		request.setInterfaces(List.of("HTTP-SECURE-XML"));
@@ -889,6 +1052,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		Assert.assertEquals("Id must be greater than 0. ", error.getErrorMessage());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUpdateServiceServiceDefinitionNull() throws Exception {
 		final MvcResult result = updateServiceRegistry(new ServiceRegistryRequestDTO(), status().isBadRequest());
@@ -914,13 +1078,27 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUpdateServiceServiceDefinitionWrongFlagTrue() throws Exception {
+		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
+		request.setServiceDefinition("service_definition");
+		
+		final MvcResult result = updateServiceRegistry(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals("Service definition has invalid format. Service definition only contains maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	// System request DTO validation is tested by an other test class
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUpdateServiceEndOfValidityInvalid() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("invalid date");
 		
@@ -929,16 +1107,16 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
-		Assert.assertEquals("End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.", error.getErrorMessage());
+		Assert.assertEquals("End of validity is specified in the wrong format. Please provide UTC time using ISO-8601 format.", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUpdateServiceSecuredButWithoutAuthenticationInfo() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setSecure(ServiceSecurityType.CERTIFICATE.name());
 		
 		final MvcResult result = updateServiceRegistry(request, status().isBadRequest());
@@ -953,9 +1131,9 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testUpdateServiceInterfaceListNull() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		
 		final MvcResult result = updateServiceRegistry(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -969,9 +1147,9 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testUpdateServiceInterfaceListEmpty() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(Collections.<String>emptyList());
 		
 		final MvcResult result = updateServiceRegistry(request, status().isBadRequest());
@@ -988,9 +1166,9 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final String intf = "XML";
 		
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(List.of(intf));
 		
 		final MvcResult result = updateServiceRegistry(request, status().isBadRequest());
@@ -1005,9 +1183,9 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testUpdateServiceEverythingIsOk() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(List.of("HTTP-SECURE-XML"));
 		
 		when(serviceRegistryDBService.updateServiceByIdResponse(anyLong(), any(ServiceRegistryRequestDTO.class))).thenReturn(new ServiceRegistryResponseDTO());
@@ -1022,9 +1200,9 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testMergeServiceInvalidId() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(List.of("HTTP-SECURE-XML"));
 		
 		final MvcResult result = mergeServiceRegistryWithInValidId(new ServiceRegistryRequestDTO(), status().isBadRequest());
@@ -1061,11 +1239,46 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void testMergeServiceWrongSystemName() throws Exception {
+		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
+		request.setServiceDefinition("sd");
+		request.setProviderSystem(getAValidSystemRequestDTO());
+		request.getProviderSystem().setSystemName("invalid_name");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
+		request.setInterfaces(List.of("HTTP-SECURE-XML"));
+		
+		final MvcResult result = mergeServiceRegistry(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals("System name has invalid format. System names only contain maximum 63 character of letters (english alphabet), numbers and dash (-), and have to start with a letter (also cannot end with dash).", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMergeServiceWrongServiceDefinitionFlagTrue() throws Exception {
+		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
+		request.setServiceDefinition("1s");
+		request.setProviderSystem(getAValidSystemRequestDTO());
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
+		request.setInterfaces(List.of("HTTP-SECURE-XML"));
+		
+		final MvcResult result = mergeServiceRegistry(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals("Service definition has invalid format. Service definition only contains maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void testMergeServiceEverythingIsOk() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
+		request.setServiceDefinition("sd");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setEndOfValidity("2019-06-12T13:51:30Z");
 		request.setInterfaces(List.of("HTTP-SECURE-XML"));
 		
 		final SystemResponseDTO provider = new SystemResponseDTO();
@@ -1079,11 +1292,102 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	}
 	
 	//=================================================================================================
+	// Tests of multiQueryRegistry
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMultiQueryServiceFormListNull() throws Exception {
+		ServiceQueryFormListDTO forms = new ServiceQueryFormListDTO();
+		ReflectionTestUtils.setField(forms, "forms", null);
+		final MvcResult result = postMultiQueryService(forms, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICEREGISTRY_MULTI_QUERY_URI, error.getOrigin());
+		Assert.assertEquals("Form list is null", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMultiQueryServiceFormListEmpty() throws Exception {
+		final MvcResult result = postMultiQueryService(new ServiceQueryFormListDTO(), status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICEREGISTRY_MULTI_QUERY_URI, error.getOrigin());
+		Assert.assertEquals("Form list is null", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMultiQueryServiceAFormIsNull() throws Exception {
+		final List<ServiceQueryFormDTO> forms = new ArrayList<>();
+		forms.add(null);
+		final MvcResult result = postMultiQueryService(new ServiceQueryFormListDTO(forms), status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICEREGISTRY_MULTI_QUERY_URI, error.getOrigin());
+		Assert.assertEquals("A form is null", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMultiQueryServiceServiceDefinitionRequirementNull() throws Exception {
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		final MvcResult result = postMultiQueryService(new ServiceQueryFormListDTO(List.of(form)), status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICEREGISTRY_MULTI_QUERY_URI, error.getOrigin());
+		Assert.assertEquals("Service definition requirement is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMultiQueryServiceServiceDefinitionRequirementEmpty() throws Exception {
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		form.setServiceDefinitionRequirement("");
+		final MvcResult result = postMultiQueryService(new ServiceQueryFormListDTO(List.of(form)), status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICEREGISTRY_MULTI_QUERY_URI, error.getOrigin());
+		Assert.assertEquals("Service definition requirement is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMultiQueryServiceServiceDefinitionRequirementWrong() throws Exception {
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		form.setServiceDefinitionRequirement("123-");
+		final MvcResult result = postMultiQueryService(new ServiceQueryFormListDTO(List.of(form)), status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICEREGISTRY_MULTI_QUERY_URI, error.getOrigin());
+		Assert.assertEquals("Service definition requirement has invalid format. Service definition only contains maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).",
+							error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testMultiQueryServiceEverythingIsOk() throws Exception {
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		form.setServiceDefinitionRequirement("testservice");
+		
+		when(serviceRegistryDBService.multiQueryRegistry(any(ServiceQueryFormListDTO.class))).thenReturn(new ServiceQueryResultListDTO());
+		
+		postMultiQueryService(new ServiceQueryFormListDTO(List.of(form)), status().isOk());
+	}
+	
+	//=================================================================================================
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
 	private MvcResult postRegisterService(final ServiceRegistryRequestDTO request, final ResultMatcher matcher) throws Exception {
-		return this.mockMvc.perform(post(SERVICE_REGISTRY_REGISTER_URI)
+		return this.mockMvc.perform(post(SERVICEREGISTRY_REGISTER_URI)
 						   .contentType(MediaType.APPLICATION_JSON)
 						   .content(objectMapper.writeValueAsBytes(request))
 						   .accept(MediaType.APPLICATION_JSON))
@@ -1093,7 +1397,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private MvcResult addServiceRegistry(final ServiceRegistryRequestDTO request, final ResultMatcher matcher) throws Exception {
-		return this.mockMvc.perform(post(SERVICE_REGISTRY_MGMT_URI)
+		return this.mockMvc.perform(post(SERVICEREGISTRY_MGMT_URI)
 						   .contentType(MediaType.APPLICATION_JSON)
 						   .content(objectMapper.writeValueAsBytes(request))
 						   .accept(MediaType.APPLICATION_JSON))
@@ -1105,7 +1409,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	private MvcResult updateServiceRegistry(final ServiceRegistryRequestDTO request, final ResultMatcher matcher) throws Exception {
 		final long validServiceRegistryId = 1;
 		
-		return this.mockMvc.perform(put(SERVICE_REGISTRY_MGMT_URI + "/" + validServiceRegistryId)
+		return this.mockMvc.perform(put(SERVICEREGISTRY_MGMT_URI + "/" + validServiceRegistryId)
 						   .contentType(MediaType.APPLICATION_JSON)
 						   .content(objectMapper.writeValueAsBytes(request))
 						   .accept(MediaType.APPLICATION_JSON))
@@ -1117,7 +1421,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	private MvcResult updateServiceRegistryWithInValidId(final ServiceRegistryRequestDTO request, final ResultMatcher matcher) throws Exception {
 		final long inValidServiceRegistryId = -1;
 		
-		return this.mockMvc.perform(put(SERVICE_REGISTRY_MGMT_URI + "/" + inValidServiceRegistryId)
+		return this.mockMvc.perform(put(SERVICEREGISTRY_MGMT_URI + "/" + inValidServiceRegistryId)
 						   .contentType(MediaType.APPLICATION_JSON)
 						   .content(objectMapper.writeValueAsBytes(request))
 						   .accept(MediaType.APPLICATION_JSON))
@@ -1129,7 +1433,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	private MvcResult mergeServiceRegistryWithInValidId(final ServiceRegistryRequestDTO request, final ResultMatcher matcher) throws Exception {
 		final long inValidServiceRegistryId = -1;
 		
-		return this.mockMvc.perform(patch(SERVICE_REGISTRY_MGMT_URI + "/" + inValidServiceRegistryId)
+		return this.mockMvc.perform(patch(SERVICEREGISTRY_MGMT_URI + "/" + inValidServiceRegistryId)
 						   .contentType(MediaType.APPLICATION_JSON)
 						   .content(objectMapper.writeValueAsBytes(request))
 						   .accept(MediaType.APPLICATION_JSON))
@@ -1141,7 +1445,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	private MvcResult mergeServiceRegistry(final ServiceRegistryRequestDTO request, final ResultMatcher matcher) throws Exception {
 		final long validServiceRegistryId = 1;
 		
-		return this.mockMvc.perform(patch(SERVICE_REGISTRY_MGMT_URI + "/" + validServiceRegistryId)
+		return this.mockMvc.perform(patch(SERVICEREGISTRY_MGMT_URI + "/" + validServiceRegistryId)
 						   .contentType(MediaType.APPLICATION_JSON)
 						   .content(objectMapper.writeValueAsBytes(request))
 						   .accept(MediaType.APPLICATION_JSON))
@@ -1152,7 +1456,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	private MvcResult deleteUnregisterService(final String queryStr, final ResultMatcher matcher) throws Exception {
 		final String validatedQueryStr = Utilities.isEmpty(queryStr) ? "" : "?" + queryStr.trim();
-		return this.mockMvc.perform(delete(SERVICE_REGISTRY_UNREGISTER_URI + validatedQueryStr)
+		return this.mockMvc.perform(delete(SERVICEREGISTRY_UNREGISTER_URI + validatedQueryStr)
 						   .accept(MediaType.APPLICATION_JSON))
 						   .andExpect(matcher)
 						   .andReturn();
@@ -1160,7 +1464,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private MvcResult postQueryService(final ServiceQueryFormDTO form, final ResultMatcher matcher) throws Exception {
-		return this.mockMvc.perform(post(SERVICE_REGISTRY_QUERY_URI)
+		return this.mockMvc.perform(post(SERVICEREGISTRY_QUERY_URI)
 						   .contentType(MediaType.APPLICATION_JSON)
 						   .content(objectMapper.writeValueAsBytes(form))
 						   .accept(MediaType.APPLICATION_JSON))
@@ -1169,8 +1473,18 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	private MvcResult postMultiQueryService(final ServiceQueryFormListDTO forms, final ResultMatcher matcher) throws Exception {
+		return this.mockMvc.perform(post(SERVICEREGISTRY_MULTI_QUERY_URI)
+						   .contentType(MediaType.APPLICATION_JSON)
+						   .content(objectMapper.writeValueAsBytes(forms))
+						   .accept(MediaType.APPLICATION_JSON))
+						   .andExpect(matcher)
+						   .andReturn();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	private MvcResult getQuerySystemsById(final long id, final ResultMatcher matcher) throws Exception {
-		return this.mockMvc.perform(get(SERVICE_REGISTRY_QUERY_SYSTEM_BY_ID_URI.replace("{id}", String.valueOf(id)))
+		return this.mockMvc.perform(get(SERVICEREGISTRY_QUERY_SYSTEM_BY_ID_URI.replace("{id}", String.valueOf(id)))
 						   .accept(MediaType.APPLICATION_JSON))
 						   .andExpect(matcher)
 						   .andReturn();
@@ -1178,7 +1492,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private MvcResult postQuerySystemsByDTO(final SystemRequestDTO request, final ResultMatcher matcher) throws Exception {
-		return this.mockMvc.perform(post(SERVICE_REGISTRY_QUERY_SYSTEM_BY_DTO_URI)
+		return this.mockMvc.perform(post(SERVICEREGISTRY_QUERY_SYSTEM_BY_DTO_URI)
 						   .contentType(MediaType.APPLICATION_JSON)
 						   .content(objectMapper.writeValueAsBytes(request))
 						   .accept(MediaType.APPLICATION_JSON))
@@ -1188,7 +1502,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private MvcResult getQueryAll(final ResultMatcher matcher) throws Exception {
-		return this.mockMvc.perform(get(SERVICE_REGISTRY_QUERY_ALL_URI)
+		return this.mockMvc.perform(get(SERVICEREGISTRY_QUERY_ALL_URI)
 						   .accept(MediaType.APPLICATION_JSON))
 						   .andExpect(matcher)
 						   .andReturn();
@@ -1197,7 +1511,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	private SystemRequestDTO getAValidSystemRequestDTO() {
 		final SystemRequestDTO result = new SystemRequestDTO();
-		result.setSystemName("x");
+		result.setSystemName("sys");
 		result.setAddress("localhost");
 		result.setPort(1234);
 		
@@ -1231,7 +1545,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		}
 		
 		for (int i = 1; i <= amountOfSystem; ++i) {										
-			final System system = new System("testSystem" + i, "testAddress" + i, i * 1000, null);
+			final System system = new System("testSystem" + i, "testAddress" + i, i * 1000, null, null);
 			system.setId(i);
 			system.setCreatedAt(timeStamp);
 			system.setUpdatedAt(timeStamp);			
@@ -1259,23 +1573,27 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private String createQueryStringForUnregister(final String serviceDefinition, final String providerName, final String providerAddress, final Integer providerPort) {
+	private String createQueryStringForUnregister(final String serviceDefinition, final String providerName, final String providerAddress, final Integer providerPort, final String serviceUri) {
 		final StringBuilder sb = new StringBuilder();
 		
 		if (serviceDefinition != null) {
-			sb.append(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION).append("=").append(serviceDefinition).append("&");
+			sb.append(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION).append("=").append(serviceDefinition).append("&");
 		}
 		
 		if (providerName != null) {
-			sb.append(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME).append("=").append(providerName).append("&");
+			sb.append(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SYSTEM_NAME).append("=").append(providerName).append("&");
 		}
 		
 		if (providerAddress != null) {
-			sb.append(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS).append("=").append(providerAddress).append("&");
+			sb.append(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_ADDRESS).append("=").append(providerAddress).append("&");
 		}
 		
 		if (providerPort != null) {
-			sb.append(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT).append("=").append(providerPort.intValue()).append("&");
+			sb.append(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PORT).append("=").append(providerPort.intValue()).append("&");
+		}
+		
+		if (serviceUri != null) {
+			sb.append(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_URI).append("=").append(URLEncoder.encode(serviceUri, StandardCharsets.UTF_8)).append("&");
 		}
 		
 		return sb.length() > 0 ? sb.substring(0, sb.length() - 1) : "";

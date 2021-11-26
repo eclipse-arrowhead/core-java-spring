@@ -14,7 +14,6 @@
 
 package eu.arrowhead.core.certificate_authority;
 
-import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.CaCertificate;
 import eu.arrowhead.common.dto.internal.AddTrustedKeyRequestDTO;
@@ -55,9 +54,6 @@ public class CertificateAuthorityService {
     private static final Logger logger = LogManager.getLogger(CertificateAuthorityService.class);
 
     @Autowired
-    private SSLProperties sslProperties;
-
-    @Autowired
     private CAProperties caProperties;
 
     @Autowired
@@ -67,7 +63,7 @@ public class CertificateAuthorityService {
     private CATrustedKeyDBService trustedKeyDbService;
 
     private SecureRandom random;
-    private KeyStore keyStore;
+    private KeyStore cloudKeyStore;
 
     private X509Certificate rootCertificate;
     private X509Certificate cloudCertificate;
@@ -76,10 +72,10 @@ public class CertificateAuthorityService {
     @PostConstruct
     protected void init() { // protected for testing
         random = new SecureRandom();
-        keyStore = CertificateAuthorityUtils.getKeyStore(sslProperties);
+        cloudKeyStore = CertificateAuthorityUtils.getCloudKeyStore(caProperties);
 
-        rootCertificate = Utilities.getRootCertFromKeyStore(keyStore);
-        cloudCertificate = Utilities.getCloudCertFromKeyStore(keyStore);
+        rootCertificate = Utilities.getRootCertFromKeyStore(cloudKeyStore);
+        cloudCertificate = Utilities.getCloudCertFromKeyStore(cloudKeyStore);
         cloudCommonName = CertificateAuthorityUtils.getCloudCommonName(cloudCertificate);
     }
 
@@ -124,8 +120,8 @@ public class CertificateAuthorityService {
 
         logger.info("Signing certificate for " + csr.getSubject().toString() + "...");
 
-        final PrivateKey cloudPrivateKey = Utilities.getCloudPrivateKey(keyStore, cloudCommonName,
-                sslProperties.getKeyPassword());
+        final PrivateKey cloudPrivateKey = Utilities.getCloudPrivateKey(cloudKeyStore, cloudCommonName,
+                                                                        caProperties.getCloudKeyPassword());
 
         final X509Certificate clientCertificate = CertificateAuthorityUtils.buildCertificate(csr, cloudPrivateKey,
                 cloudCertificate, caProperties, random);
